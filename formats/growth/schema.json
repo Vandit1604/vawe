@@ -1,0 +1,15 @@
+{
+  "title": "Growth ($X → today)",
+  "description": "$X invested in YEAR is worth $Y today. Hook flash → chart climbs → portfolio slam.",
+  "fields": {
+    "hook": { "type": "string", "label": "Hook" },
+    "ticker": { "type": "string", "label": "Ticker / label" },
+    "startCash": { "type": "number", "label": "Starting investment ($)" },
+    "startNote": { "type": "string", "label": "Sub-note (e.g. 'invested · Jan 2015')" },
+    "cta": { "type": "string", "label": "Outro CTA" },
+    "beats": { "type": "array", "label": "Callout beats", "item": {
+      "atDate": { "type": "string", "label": "Date" }, "label": { "type": "string", "label": "Label" } } },
+    "series": { "type": "array", "label": "Price series", "item": {
+      "date": { "type": "string", "label": "Date" }, "value": { "type": "number", "label": "Price" } } }
+  }
+}

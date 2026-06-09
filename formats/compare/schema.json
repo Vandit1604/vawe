@@ -1,0 +1,16 @@
+{
+  "title": "Compare (head-to-head)",
+  "description": "Two things across spec rows; per-row winner highlighted; overall winner slam.",
+  "fields": {
+    "hook": { "type": "string", "label": "Hook" },
+    "hookSub": { "type": "string", "label": "Hook subtitle" },
+    "cta": { "type": "string", "label": "Outro CTA" },
+    "a": { "type": "object", "label": "Side A", "item": { "name": { "type": "string", "label": "Name" } } },
+    "b": { "type": "object", "label": "Side B", "item": { "name": { "type": "string", "label": "Name" } } },
+    "overall": { "type": "string", "label": "Overall winner ('a' or 'b')" },
+    "fields": { "type": "array", "label": "Spec rows", "item": {
+      "label": { "type": "string", "label": "Row label" },
+      "valA": { "type": "number", "label": "A value" }, "valB": { "type": "number", "label": "B value" },
+      "unit": { "type": "string", "label": "Unit" }, "winner": { "type": "string", "label": "Row winner ('a'/'b')" } } }
+  }
+}

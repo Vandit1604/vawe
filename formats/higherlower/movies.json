@@ -1,0 +1,15 @@
+{
+  "module": "higherlower",
+  "hook": "Only 1% get all {n}",
+  "hookSub": "Which made more money?",
+  "question": "Which <b>MADE MORE?</b>",
+  "cta": "Subscribe for more",
+  "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
+  "rounds": [
+    { "a": "Titanic", "iconA": "assets/posters/titanic.svg", "b": "Endgame", "iconB": "assets/posters/endgame.svg", "valA": 2257000000, "valB": 2799000000, "unit": "$", "pct": 58, "fact": "Endgame dethroned Titanic after <b>22 years</b>" },
+    { "a": "Barbie", "iconA": "assets/posters/barbie.svg", "b": "Frozen 2", "iconB": "assets/posters/frozen2.svg", "valA": 1446000000, "valB": 1450000000, "unit": "$", "pct": 46, "fact": "Frozen 2 edges Barbie by <b>$4M</b>" },
+    { "a": "Jurassic World", "iconA": "assets/posters/jurassic.svg", "b": "Spider-Man", "iconB": "assets/posters/spiderman.svg", "valA": 1671000000, "valB": 1922000000, "unit": "$", "pct": 52, "fact": "No Way Home swung past Jurassic World" },
+    { "a": "Star Wars", "iconA": "assets/posters/starwars.svg", "b": "Avatar 2", "iconB": "assets/posters/avatar2.svg", "valA": 2068000000, "valB": 2320000000, "unit": "$", "pct": 47, "fact": "Avatar 2 beat the Force Awakens" },
+    { "a": "Endgame", "iconA": "assets/posters/endgame.svg", "b": "Avatar", "iconB": "assets/posters/avatar.svg", "valA": 2799000000, "valB": 2922000000, "unit": "$", "pct": 30, "fact": "Avatar (2009) is <b>still #1</b> ever made" }
+  ]
+}

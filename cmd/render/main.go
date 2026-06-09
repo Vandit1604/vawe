@@ -1,0 +1,164 @@
+// Command render — Go render service CLI (mirrors engine/render.js).
+//
+//	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out engine/out/q.mp4
+//	go run ./cmd/render --all
+//
+// flags: --fps 30  --workers N  --draft  --no-grain  --concurrency 1 (for --all)
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+
+	"yt-shorts/internal/queue"
+	"yt-shorts/internal/render"
+)
+
+func main() {
+	module := flag.String("module", "", "format name (optional — taken from the JSON's \"module\" field)")
+	data := flag.String("data", "", "data JSON file (also accepted as a positional arg)")
+	out := flag.String("out", "", "output mp4 (optional — defaults to engine/out/<json-name>.mp4)")
+	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
+	fps := flag.Int("fps", 30, "frames per second")
+	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 8)), "parallel capture browsers")
+	draft := flag.Bool("draft", false, "fast encode, no grain")
+	noGrain := flag.Bool("no-grain", false, "skip the film-grain pass")
+	all := flag.Bool("all", false, "render every format's sample.json")
+	concurrency := flag.Int("concurrency", 1, "formats rendered at once (--all)")
+	flag.Parse()
+
+	repoRoot := repoRoot()
+	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain}
+
+	if *list {
+		listFormats(repoRoot)
+		return
+	}
+
+	if *all {
+		formatsDir := filepath.Join(repoRoot, "formats")
+		entries, _ := os.ReadDir(formatsDir)
+		var jobs []func() error
+		var names []string
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			name := e.Name()
+			scenePath := filepath.Join(formatsDir, name, "scene.html")
+			sample := filepath.Join(formatsDir, name, "sample.json")
+			if !exists(scenePath) || !exists(sample) {
+				continue
+			}
+			outPath := filepath.Join(repoRoot, "engine", "out", name+".mp4")
+			names = append(names, name)
+			jobs = append(jobs, func() error { return render.Render(repoRoot, name, sample, outPath, opts) })
+		}
+		errs := queue.Run(jobs, *concurrency)
+		fail := 0
+		for i, e := range errs {
+			if e != nil {
+				fail++
+				fmt.Printf("✗ %s: %v\n", names[i], e)
+			}
+		}
+		fmt.Printf("\nrender --all: %d ok, %d failed\n", len(jobs)-fail, fail)
+		if fail > 0 {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// One self-describing JSON drives everything:
+	//   render path/to/video.json     → module from its "module" field, out = engine/out/<name>.mp4
+	dataPath := *data
+	if dataPath == "" && flag.NArg() > 0 {
+		dataPath = flag.Arg(0)
+		if flag.NArg() > 1 {
+			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: render foo.json --draft --out x.mp4
+		}
+	}
+	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain} // rebuild after any trailing flags
+	if dataPath == "" {
+		fmt.Fprintln(os.Stderr, "usage: render <video.json>  [--module N] [--out F] [--draft] | --all | --list")
+		os.Exit(1)
+	}
+
+	mod := *module
+	if mod == "" {
+		mod = moduleOf(dataPath)
+	}
+	if mod == "" {
+		fmt.Fprintf(os.Stderr, "✗ %s has no \"module\" field — add one (e.g. \"module\": \"higherlower\") or pass --module\n", dataPath)
+		os.Exit(1)
+	}
+
+	outPath := *out
+	if outPath == "" {
+		name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
+		outPath = filepath.Join(repoRoot, "engine", "out", name+".mp4")
+	}
+
+	if err := render.Render(repoRoot, mod, dataPath, outPath, opts); err != nil {
+		fmt.Fprintf(os.Stderr, "✗ render failed: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("✓ %s\n", outPath)
+}
+
+// moduleOf reads just the "module" field from a data JSON.
+func moduleOf(path string) string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	var d struct {
+		Module string `json:"module"`
+	}
+	_ = json.Unmarshal(b, &d)
+	return d.Module
+}
+
+// listFormats prints each format folder with its schema + sample paths (the authoring contract).
+func listFormats(repoRoot string) {
+	formatsDir := filepath.Join(repoRoot, "formats")
+	entries, _ := os.ReadDir(formatsDir)
+	fmt.Println("formats (write a JSON with \"module\": \"<name>\" + the fields in schema.json):")
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		if !exists(filepath.Join(formatsDir, name, "scene.html")) {
+			continue
+		}
+		fmt.Printf("  %-12s schema: formats/%s/schema.json   sample: formats/%s/sample.json\n", name, name, name)
+	}
+}
+
+// repoRoot finds the directory containing formats/ (walk up from cwd; REPO env overrides).
+func repoRoot() string {
+	if r := os.Getenv("REPO"); r != "" {
+		return r
+	}
+	dir, _ := os.Getwd()
+	for {
+		if exists(filepath.Join(dir, "formats")) && exists(filepath.Join(dir, "core")) {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	cwd, _ := os.Getwd()
+	return cwd
+}
+
+func exists(p string) bool { _, err := os.Stat(p); return err == nil }

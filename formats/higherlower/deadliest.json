@@ -1,0 +1,15 @@
+{
+  "module": "higherlower",
+  "hook": "Bet you fail #{n}",
+  "hookSub": "What kills more people?",
+  "question": "Which kills <b>MORE?</b>",
+  "cta": "Subscribe for more",
+  "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
+  "rounds": [
+    { "a": "Sharks", "iconA": "🦈", "b": "Wolves", "iconB": "🐺", "valA": 6, "valB": 10, "unit": "deaths/yr", "pct": 44, "fact": "Both kill <b>under 12</b> people a year" },
+    { "a": "Cows", "iconA": "🐄", "b": "Sharks", "iconB": "🦈", "valA": 22, "valB": 6, "unit": "deaths/yr", "pct": 38, "fact": "Cows kill <b>3×</b> more people than sharks" },
+    { "a": "Vending machine", "iconA": "🥤", "b": "Shark", "iconB": "🦈", "valA": 13, "valB": 6, "unit": "deaths/yr", "pct": 30, "fact": "A <b>vending machine</b> is deadlier than a shark" },
+    { "a": "Dogs", "iconA": "🐕", "b": "Snakes", "iconB": "🐍", "valA": 59000, "valB": 110000, "unit": "deaths/yr", "pct": 47, "fact": "Snakes kill <b>~110,000</b> a year, mostly by venom" },
+    { "a": "Humans", "iconA": "🧍", "b": "Mosquitoes", "iconB": "🦟", "valA": 400000, "valB": 725000, "unit": "deaths/yr", "pct": 19, "fact": "Mosquitoes kill <b>more people than humans do</b>" }
+  ]
+}

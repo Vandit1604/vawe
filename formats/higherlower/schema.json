@@ -1,0 +1,25 @@
+{
+  "title": "Higher or Lower (quiz)",
+  "description": "Guess which is bigger. Mix coin-flip pairs (within ~15%) with 1–2 shock-reversals as the peaks. 5–7 rounds (odd is best).",
+  "fields": {
+    "hook": { "type": "string", "label": "Hook (use {n} for round count)", "default": "Only 1% score {n}/{n}" },
+    "hookSub": { "type": "string", "label": "Hook subtitle", "default": "Which has more people?" },
+    "question": { "type": "string", "label": "Per-round question (e.g. MORE PEOPLE?)", "default": "MORE PEOPLE?" },
+    "cta": { "type": "string", "label": "Outro CTA", "default": "Comment your score 👇" },
+    "rounds": {
+      "type": "array",
+      "label": "Rounds",
+      "item": {
+        "a": { "type": "string", "label": "Left name" },
+        "iconA": { "type": "string", "label": "Left flag/emoji" },
+        "b": { "type": "string", "label": "Right name" },
+        "iconB": { "type": "string", "label": "Right flag/emoji" },
+        "valA": { "type": "number", "label": "Left value" },
+        "valB": { "type": "number", "label": "Right value" },
+        "unit": { "type": "string", "label": "Unit (people, $B, …)" },
+        "pct": { "type": "number", "label": "% who get it right (difficulty stake)" },
+        "fact": { "type": "string", "label": "Reveal fact (bold with <b>…</b>)" }
+      }
+    }
+  }
+}

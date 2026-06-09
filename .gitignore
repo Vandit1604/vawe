@@ -1,0 +1,15 @@
+node_modules/
+engine/out/*.mp4
+engine/out/.tmp_*
+engine/assets/*.mp3
+engine/assets/fonts/*.woff2
+.DS_Store
+
+# go
+bin/
+
+# verify + previews (generated output)
+verify/out/
+verify/*_contactsheet.png
+engine/out/*.meta.json
+verify/frames/

@@ -1,0 +1,15 @@
+{
+  "module": "higherlower",
+  "hook": "Bet you miss #{n}",
+  "hookSub": "Which brand is worth more?",
+  "question": "Which is <b>WORTH MORE?</b>",
+  "cta": "Subscribe for more",
+  "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
+  "rounds": [
+    { "a": "Apple", "iconA": "/engine/assets/icons/apple.svg", "b": "Samsung", "iconB": "/engine/assets/icons/samsung.svg", "valA": 880, "valB": 100, "unit": "$B", "pct": 72, "fact": "Apple is the world's <b>most valuable</b> brand" },
+    { "a": "Google", "iconA": "/engine/assets/icons/google.svg", "b": "Coca-Cola", "iconB": "/engine/assets/icons/cocacola.svg", "valA": 600, "valB": 98, "unit": "$B", "pct": 63, "fact": "Google's brand is worth <b>~6× Coke</b>" },
+    { "a": "McDonald's", "iconA": "/engine/assets/icons/mcdonalds.svg", "b": "Netflix", "iconB": "/engine/assets/icons/netflix.svg", "valA": 200, "valB": 105, "unit": "$B", "pct": 40, "fact": "The Golden Arches beat Netflix" },
+    { "a": "Samsung", "iconA": "/engine/assets/icons/samsung.svg", "b": "Coca-Cola", "iconB": "/engine/assets/icons/cocacola.svg", "valA": 100, "valB": 98, "unit": "$B", "pct": 48, "fact": "Samsung just edges Coca-Cola" },
+    { "a": "Coca-Cola", "iconA": "/engine/assets/icons/cocacola.svg", "b": "Netflix", "iconB": "/engine/assets/icons/netflix.svg", "valA": 98, "valB": 105, "unit": "$B", "pct": 27, "fact": "Netflix's brand now tops <b>138-year-old Coke</b> 🤯" }
+  ]
+}

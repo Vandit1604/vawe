@@ -1,0 +1,15 @@
+{
+  "module": "higherlower",
+  "hook": "Bet you miss #{n}",
+  "hookSub": "Which is there more of?",
+  "question": "Which is there <b>MORE</b> of?",
+  "cta": "Subscribe for more",
+  "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
+  "rounds": [
+    { "a": "LEGO minifigures", "iconA": "🧱", "b": "Real humans", "iconB": "🧍", "valA": 8000000000, "valB": 8100000000, "unit": "", "pct": 44, "fact": "There are almost as many <b>LEGO people</b> as real ones" },
+    { "a": "Chickens", "iconA": "🐔", "b": "Humans", "iconB": "🧍", "valA": 33000000000, "valB": 8100000000, "unit": "", "pct": 41, "fact": "Chickens outnumber humans <b>4 to 1</b>" },
+    { "a": "Trees on Earth", "iconA": "🌲", "b": "Stars in our galaxy", "iconB": "✨", "valA": 3000000000000, "valB": 200000000000, "unit": "", "pct": 33, "fact": "Earth has <b>more trees</b> than the Milky Way has stars" },
+    { "a": "Bacteria on you", "iconA": "🦠", "b": "Cells that are you", "iconB": "🧍", "valA": 38000000000000, "valB": 37000000000000, "unit": "", "pct": 26, "fact": "You're <b>more bacteria than human</b> 🤯" },
+    { "a": "Cells in your body", "iconA": "🧍", "b": "Galaxies in the universe", "iconB": "🌌", "valA": 37000000000000, "valB": 2000000000000, "unit": "", "pct": 19, "fact": "You have <b>more cells</b> than the universe has galaxies" }
+  ]
+}

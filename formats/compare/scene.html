@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>compare</title>
+    <link rel="stylesheet" href="/core/tokens.css" />
+    <style>
+      .cmp-body { justify-content: flex-start; padding-top: 34px; gap: 0; }
+      .cmp-head { width: 100%; display: flex; align-items: center; justify-content: space-between; position: relative; margin-bottom: 18px; }
+      .cmp-head .side { width: 360px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+      .cmp-head .ic { width: 116px; height: 116px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 26px;
+        font: 800 56px 'Inter', sans-serif; color: var(--text);
+        background: linear-gradient(180deg, var(--surface), var(--surface-2)); border: 1px solid var(--line-strong); box-shadow: var(--shadow-card); }
+      .cmp-head .h { font: 700 48px 'Space Grotesk', sans-serif; color: var(--text); text-align: center; }
+      .cmp-head .score { width: 116px; height: 116px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 50% 35%, #1b1d22, #0c0d10);
+        border: 2px solid var(--accent); box-shadow: 0 0 26px var(--accent-dim); display: flex; align-items: center; justify-content: center;
+        font: 700 44px 'Space Grotesk', sans-serif; font-feature-settings: 'tnum' 1; color: var(--text); }
+      .cmp-row { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 0; border-top: 1px solid var(--line); }
+      .cmp-row .lab { font: 600 34px 'Inter', sans-serif; letter-spacing: 0.06em; color: var(--dim); text-transform: uppercase; }
+      .cmp-row .vals { width: 100%; display: flex; align-items: baseline; justify-content: space-between; }
+      .cmp-row .v { font: 700 58px 'Space Grotesk', sans-serif; font-feature-settings: 'tnum' 1; color: var(--text-2); width: 360px; text-align: center; }
+      .cmp-row .v.win { color: var(--up); }
+      .cmp-row .v .u { font-size: 0.55em; color: var(--dim); font-weight: 500; }
+      /* end verdict — the payoff, slammed in only after every row */
+      .cmp-verdict { position: absolute; left: 0; right: 0; top: 150px; bottom: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 26px; opacity: 0; z-index: 5; pointer-events: none; text-align: center; }
+      .cmp-verdict .vd-ic { width: 220px; height: 220px; border-radius: 50%; padding: 48px; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(180deg, var(--surface), var(--surface-2)); border: 2px solid var(--up); box-shadow: var(--shadow-card), 0 0 80px rgba(63,208,122,0.45); }
+      .cmp-verdict .vd-name { font: 800 92px 'Space Grotesk', sans-serif; color: var(--up); letter-spacing: -0.01em; }
+      .cmp-verdict .vd-tag { font: 700 50px 'Inter', sans-serif; color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <div class="stage phase-hook" id="stage">
+      <div class="chrome"><div class="progress" id="prog"></div></div>
+      <div class="act act-body">
+        <div class="safe cmp-body">
+          <div class="cmp-head">
+            <div class="side"><div class="ic" id="icA">A</div><div class="h" id="hA" data-layer="critical">A</div></div>
+            <div class="score" id="score">VS</div>
+            <div class="side"><div class="ic" id="icB">B</div><div class="h" id="hB" data-layer="critical">B</div></div>
+          </div>
+          <div id="rows" style="width:100%"></div>
+          <div class="cmp-verdict" id="verdict"></div>
+        </div>
+      </div>
+      <div class="act act-hook">
+        <div class="safe hook-wrap"><div class="kicker" id="kick"></div><div class="hook-title" id="hook">Which is worth more?</div><div class="hook-sub" id="hsub"></div></div>
+      </div>
+      <div class="act act-cta"><div class="cta-screen"><div class="cta-bell">🔔</div><div class="cta-card" id="cta" data-layer="critical">Subscribe for more</div></div></div>
+      <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
+    </div>
+    <script type="module">
+      import { boot, clamp01, easeOutBack, punch, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      const $ = (id) => document.getElementById(id);
+
+      boot((data, fps) => {
+        const fields = data.fields, m = fields.length;
+        const COLD = 2.6, HDR = 0.8, SLAM = 0.6, HOLD = 3.0, CTA = 2.5;
+        const target = pickDuration(seedFrom(data.a.name + data.b.name + m), 18, 24);
+        const STEP = Math.max(1.4, (target - COLD - HDR - 0.7 - SLAM - HOLD - CTA) / (m - 1));
+        const rowT = (i) => COLD + HDR + i * STEP;
+        const slamT = rowT(m - 1) + 0.7, duration = slamT + SLAM + HOLD + CTA;
+        const stings = fields.map((_, i) => rowT(i) + 0.2).concat([slamT]);
+
+        const rowsEl = fields.map((fld) => {
+          const row = document.createElement('div'); row.className = 'cmp-row';
+          const fa = formatValue(fld.valA, fld.unit || data.unit || ''), fb = formatValue(fld.valB, fld.unit || data.unit || '');
+          row.innerHTML = `<div class="lab">${fld.label}</div><div class="vals">
+            <div class="v num ${fld.winner === 'a' ? 'win' : ''}" data-layer="critical">${fa.num}${fa.unit ? `<span class="u"> ${fa.unit}</span>` : ''}</div>
+            <div class="v num ${fld.winner === 'b' ? 'win' : ''}" data-layer="critical">${fb.num}${fb.unit ? `<span class="u"> ${fb.unit}</span>` : ''}</div></div>`;
+          $('rows').appendChild(row);
+          return row;
+        });
+        $('hA').textContent = data.a.name; $('hB').textContent = data.b.name;
+        $('icA').innerHTML = icon(data.a.icon, data.a.name.slice(0, 1).toUpperCase());
+        $('icB').innerHTML = icon(data.b.icon, data.b.name.slice(0, 1).toUpperCase());
+        const win = data[data.overall === 'a' ? 'a' : 'b'];
+        $('verdict').innerHTML = `<div class="vd-ic">${icon(win.icon, win.name.slice(0, 1).toUpperCase())}</div><div class="vd-name num">${win.name}</div><div class="vd-tag">wins — ${data.verdict || 'and it\'s not close'}</div>`;
+        const stage = $('stage'), total = Math.round(duration * fps);
+
+        function renderFrame(f) {
+          const tt = f / fps;
+          $('prog').style.width = (clamp01(f / (total - 1)) * 100).toFixed(3) + '%';
+          const inCta = tt >= duration - CTA;
+          stage.className = 'stage phase-' + (tt < COLD ? 'hook' : inCta ? 'cta' : 'body');
+          if (tt < COLD) {
+            // no spoiler — pose the question, tease the margin, never name the winner
+            $('kick').textContent = data.kicker || '';
+            $('hook').textContent = 'Which is worth more?';
+            $('hsub').textContent = data.hook || `${data.a.name}  vs  ${data.b.name}`;
+            return;
+          }
+          if (inCta) $('cta').textContent = data.cta || data.outro || '';
+
+          let sa = 0, sb = 0;
+          rowsEl.forEach((row, i) => {
+            const app = clamp01((tt - rowT(i)) / 0.35);
+            row.style.opacity = app.toFixed(2);
+            row.style.transform = `translateY(${((1 - easeOutBack(app)) * 26).toFixed(1)}px)`;
+            if (tt >= rowT(i) + 0.32) { if (fields[i].winner === 'a') sa++; else if (fields[i].winner === 'b') sb++; }
+          });
+          $('score').textContent = sa || sb ? `${sa}–${sb}` : 'VS';
+
+          // the verdict is the payoff — only now, slammed in, rows dimmed behind it
+          const vd = clamp01((tt - slamT) / 0.4);
+          $('verdict').style.opacity = vd.toFixed(2);
+          $('verdict').style.transform = `scale(${(0.78 + 0.22 * easeOutBack(vd)).toFixed(3)})`;
+          $('rows').style.opacity = (1 - 0.85 * vd).toFixed(2);
+          $('score').style.opacity = (1 - vd).toFixed(2);
+        }
+        return { fps, duration, stings, renderFrame };
+      });
+    </script>
+  </body>
+</html>

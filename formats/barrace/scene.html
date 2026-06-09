@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>barrace</title>
+    <link rel="stylesheet" href="/core/tokens.css" />
+    <style>
+      .br-year { position: absolute; left: 0; right: 0; top: 250px; text-align: center; font: 800 150px 'Space Grotesk', sans-serif;
+        font-feature-settings: 'tnum' 1; color: var(--accent); text-shadow: 0 0 50px var(--accent-dim); z-index: 3; }
+      .br-cols { position: absolute; left: var(--safe-left); right: var(--safe-right); top: 470px; height: 800px;
+        display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; z-index: 2; }
+      .br-col { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 12px; }
+      .br-val { font: 700 32px 'Space Grotesk', sans-serif; font-feature-settings: 'tnum' 1; color: var(--text); white-space: nowrap; }
+      .br-val .u { font-size: 0.62em; color: var(--dim); font-weight: 500; }
+      .br-bar { width: 100%; max-width: 118px; min-height: 6px; border-radius: 16px 16px 0 0; border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: inset 0 2px 0 rgba(255,255,255,0.18); transition: none; }
+      .br-bar.lead { box-shadow: inset 0 2px 0 rgba(255,255,255,0.22), 0 0 46px rgba(63,208,122,0.45); }
+      .br-ic { width: 70px; height: 70px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 12px;
+        font: 800 30px 'Inter', sans-serif; color: #0a0a0c; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 3px 10px rgba(0,0,0,0.45); }
+      .br-name { font: 600 24px 'Inter', sans-serif; color: var(--text-2); max-width: 150px; text-align: center; line-height: 1.1;
+        height: 54px; overflow: hidden; display: flex; align-items: flex-start; justify-content: center; }
+      .br-crown { position: absolute; top: -52px; left: 50%; transform: translateX(-50%); font-size: 44px; opacity: 0; transition: none; }
+    </style>
+  </head>
+  <body>
+    <div class="stage phase-hook" id="stage">
+      <div class="chrome"><div class="progress" id="prog"></div></div>
+      <div class="act act-body">
+        <div class="br-year num" id="year">1990</div>
+        <div class="br-cols" id="cols"></div>
+      </div>
+      <div class="act act-hook">
+        <div class="safe hook-wrap"><div class="kicker" id="kick"></div><div class="hook-title" id="hook">Most valuable company</div><div class="hook-sub" id="hsub">watch the handoff</div></div>
+      </div>
+      <div class="act act-cta"><div class="cta-screen"><div class="cta-bell">🔔</div><div class="cta-card" id="cta" data-layer="critical">Subscribe for more</div></div></div>
+      <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
+    </div>
+    <script type="module">
+      import { boot, clamp01, lerp, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      const $ = (id) => document.getElementById(id);
+      const BARMAX = 560; // px
+
+      boot((data, fps) => {
+        const items = data.items, k = items.length, frames = data.frames, F = frames.length;
+        const COLD = 2.4, HOLD = 3.4, CTA = 2.5;
+        const target = pickDuration(seedFrom(items.map((i) => i.name).join() + F), 22, 28);
+        const RACE = Math.max(10, target - COLD - HOLD - CTA);
+        const perYear = RACE / (F - 1);
+        const duration = COLD + RACE + HOLD + CTA;
+
+        const leadAt = (fi) => items.map((_, i) => i).sort((a, b) => frames[fi].values[b] - frames[fi].values[a])[0];
+        const stings = []; let prev = leadAt(0);
+        for (let fi = 1; fi < F; fi++) { const L = leadAt(fi); if (L !== prev) stings.push(COLD + fi * perYear); prev = L; }
+        stings.push(COLD + RACE);
+
+        const palette = ['#3fd07a', '#3da5ff', '#c2f23b', '#ff9f43', '#a779ff', '#ff5a6e'];
+        const cols = items.map((it, i) => {
+          const fill = it.color === 'up' ? '#3fd07a' : it.color === 'down' ? '#ff5a6e' : palette[i % palette.length];
+          const col = document.createElement('div'); col.className = 'br-col';
+          const badge = icon(it.icon, it.name.slice(0, 1).toUpperCase());
+          col.innerHTML = `<div class="br-val num"></div>
+            <div class="br-bar" style="background:linear-gradient(180deg,${fill},${fill} 60%,${fill}bb);position:relative"><div class="br-crown">👑</div></div>
+            <div class="br-ic" style="background:${fill}">${badge}</div>
+            <div class="br-name" data-layer="critical">${it.name}</div>`;
+          $('cols').appendChild(col);
+          return { col, bar: col.querySelector('.br-bar'), val: col.querySelector('.br-val'), crown: col.querySelector('.br-crown') };
+        });
+        const stage = $('stage'), total = Math.round(duration * fps);
+
+        function renderFrame(f) {
+          const tt = f / fps;
+          $('prog').style.width = (clamp01(f / (total - 1)) * 100).toFixed(3) + '%';
+          const inCta = tt >= duration - CTA;
+          stage.className = 'stage phase-' + (tt < COLD ? 'hook' : inCta ? 'cta' : 'body');
+          if (tt < COLD) {
+            // no spoiler — the hook teases the handoff without naming the winner
+            $('kick').textContent = data.kicker || '';
+            $('hook').textContent = data.hook || ''; $('hsub').textContent = data.hookSub || '';
+            return;
+          }
+          if (inCta) $('cta').textContent = data.cta || data.outro || '';
+
+          const yf = clamp01((tt - COLD) / RACE) * (F - 1);
+          const fi = Math.min(Math.floor(yf), F - 1), frac = yf - fi;
+          const cur = items.map((_, i) => lerp(frames[fi].values[i], frames[Math.min(fi + 1, F - 1)].values[i], frac));
+          const maxV = Math.max(...cur) || 1;
+          const lead = cur.indexOf(maxV);
+          $('year').textContent = frames[Math.round(yf)].label;
+
+          for (let i = 0; i < k; i++) {
+            cols[i].bar.style.height = Math.max(6, (cur[i] / maxV) * BARMAX).toFixed(1) + 'px';
+            cols[i].bar.classList.toggle('lead', i === lead);
+            cols[i].crown.style.opacity = i === lead ? 1 : 0;
+            const { num, unit } = formatValue(cur[i], data.unit || '');
+            cols[i].val.innerHTML = num + (unit ? `<span class="u">${unit}</span>` : '');
+          }
+        }
+        return { fps, duration, stings, renderFrame };
+      });
+    </script>
+  </body>
+</html>

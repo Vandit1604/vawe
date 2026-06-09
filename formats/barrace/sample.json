@@ -1,0 +1,103 @@
+{
+  "module": "barrace",
+  "kicker": "SINCE 1990",
+  "hook": "Big Oil ruled for 100 years",
+  "hookSub": "then this happened 👇",
+  "cta": "Subscribe for more",
+  "unit": "$B",
+  "insight": "Big Oil ruled for a century — then lost the lead in a single decade and never got it back.",
+  "sources": [
+    "Companies Market Cap",
+    "Bloomberg historical market cap"
+  ],
+  "items": [
+    {
+      "name": "ExxonMobil",
+      "color": "down"
+    },
+    {
+      "name": "GE"
+    },
+    {
+      "name": "Microsoft"
+    },
+    {
+      "name": "Apple",
+      "color": "up"
+    },
+    {
+      "name": "Amazon"
+    },
+    {
+      "name": "Saudi Aramco"
+    }
+  ],
+  "frames": [
+    {
+      "label": "1990",
+      "values": [
+        80,
+        50,
+        5,
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "1998",
+      "values": [
+        170,
+        280,
+        250,
+        6,
+        18,
+        0
+      ]
+    },
+    {
+      "label": "2006",
+      "values": [
+        450,
+        380,
+        290,
+        75,
+        18,
+        0
+      ]
+    },
+    {
+      "label": "2014",
+      "values": [
+        400,
+        260,
+        380,
+        640,
+        150,
+        0
+      ]
+    },
+    {
+      "label": "2020",
+      "values": [
+        180,
+        60,
+        1600,
+        2100,
+        1600,
+        1800
+      ]
+    },
+    {
+      "label": "2024",
+      "values": [
+        470,
+        180,
+        3100,
+        3400,
+        1900,
+        1800
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "module": "higherlower",
+  "hook": "Bet you get #{n} wrong",
+  "hookSub": "Which job pays more?",
+  "question": "Which pays <b>MORE?</b>",
+  "cta": "Subscribe for more",
+  "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
+  "rounds": [
+    { "a": "Garbage collector", "iconA": "🗑️", "b": "Fast food worker", "iconB": "🍔", "valA": 45000, "valB": 29000, "unit": "$/yr", "pct": 57, "fact": "Sanitation workers out-earn fast food by <b>50%+</b>" },
+    { "a": "Plumber", "iconA": "🔧", "b": "Teacher", "iconB": "🧑‍🏫", "valA": 61000, "valB": 66000, "unit": "$/yr", "pct": 47, "fact": "A teacher barely out-earns a plumber" },
+    { "a": "Dental hygienist", "iconA": "🦷", "b": "Electrician", "iconB": "⚡", "valA": 87000, "valB": 61000, "unit": "$/yr", "pct": 49, "fact": "Hygienists clear <b>$87k</b> — no four-year degree" },
+    { "a": "Elevator mechanic", "iconA": "🛗", "b": "Nurse", "iconB": "💉", "valA": 99000, "valB": 86000, "unit": "$/yr", "pct": 38, "fact": "Elevator mechanics out-earn nurses — <b>no degree</b>" },
+    { "a": "Air traffic ctrl", "iconA": "🛩️", "b": "Software dev", "iconB": "💻", "valA": 137000, "valB": 132000, "unit": "$/yr", "pct": 28, "fact": "Air traffic controllers out-earn most coders 🤯" }
+  ]
+}

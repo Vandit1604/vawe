@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#b3122e"/><stop offset="1" stop-color="#1a3a8f"/>
+    </linearGradient>
+    <radialGradient id="v" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.45"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#g)"/>
+  <rect width="600" height="400" fill="url(#v)"/>
+  <rect x="16" y="16" width="568" height="368" rx="16" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3"/>
+  <text x="300" y="221.1" text-anchor="middle" font-family='"Arial Black", "Helvetica Neue", Arial, sans-serif' font-weight="900" font-size="62" letter-spacing="2" fill="#fff">SPIDER-MAN</text>
+  <text x="300" y="348" text-anchor="middle" font-family='Georgia, serif' font-size="34" letter-spacing="6" fill="#ffffff">2021</text>
+</svg>
