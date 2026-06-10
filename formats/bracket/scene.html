@@ -30,9 +30,9 @@
       .m-q b { color: var(--accent); font-weight: 800; }
       .m-cards { width: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
       .m-card { width: 824px; height: 300px; display: flex; flex-direction: column; align-items: center;
-        justify-content: center; gap: 4px; position: relative; transform-origin: center; }
-      .m-card .ic { width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;
-        font-size: 120px; line-height: 1; }
+        justify-content: center; gap: var(--sp-1); position: relative; transform-origin: center; }
+      .m-card .ic { width: 128px; height: 128px; display: flex; align-items: center; justify-content: center;
+        font-size: 104px; line-height: 1; }
       .m-card .nm { font: 600 44px 'Inter', sans-serif; color: var(--text-2); }
       .m-card .vl { font: 700 92px 'Space Grotesk', sans-serif; font-feature-settings: 'tnum' 1; color: var(--text); line-height: 1.02; }
       .m-card .vl.guess { color: var(--accent); opacity: 0.4; font-weight: 800; }
@@ -98,15 +98,15 @@
       <div class="panel" id="pHook" style="justify-content:center">
         <div class="hook-wrap">
           <div class="kicker" id="hKick"></div>
-          <div class="hook-title" id="hTitle">16 enter. 1 wins.</div>
-          <div class="hook-sub" id="hSub"></div>
+          <div class="hook-title" id="hTitle" data-layer="critical">16 enter. 1 wins.</div>
+          <div class="hook-sub" id="hSub" data-layer="critical"></div>
         </div>
       </div>
 
       <!-- ROUND CARD -->
       <div class="panel" id="pRound">
         <div class="rc-kick" id="rcKick">THE BRACKET</div>
-        <div class="rc-name" id="rcName">ROUND OF 16</div>
+        <div class="rc-name" id="rcName" data-layer="critical">ROUND OF 16</div>
         <div class="rc-stat" id="rcStat"></div>
         <div class="rc-count" id="rcCount"></div>
       </div>
@@ -114,11 +114,11 @@
       <!-- MATCH -->
       <div class="panel" id="pMatch">
         <div class="m-head"><span class="r" id="mRound">ROUND OF 16</span><span class="s" id="mProg">1 / 8</span></div>
-        <div class="m-q" id="mQ">Higher <b>POWER</b> wins</div>
+        <div class="m-q" id="mQ" data-layer="critical">Higher <b>POWER</b> wins</div>
         <div class="m-cards" id="mCards">
-          <div class="m-card card" id="mCardA"><div class="ic" id="mIcA">🦁</div><div class="nm" id="mNameA">A</div><div class="vl num" id="mValA">?</div><div class="st" id="mStA">✓</div></div>
+          <div class="m-card card" id="mCardA"><div class="ic" id="mIcA">🦁</div><div class="nm" id="mNameA" data-layer="critical">A</div><div class="vl num" id="mValA" data-layer="critical">?</div><div class="st" id="mStA">✓</div></div>
           <div class="m-vs">VS</div>
-          <div class="m-card card" id="mCardB"><div class="ic" id="mIcB">🐻</div><div class="nm" id="mNameB">B</div><div class="vl num" id="mValB">?</div><div class="st" id="mStB">✗</div></div>
+          <div class="m-card card" id="mCardB"><div class="ic" id="mIcB">🐻</div><div class="nm" id="mNameB" data-layer="critical">B</div><div class="vl num" id="mValB" data-layer="critical">?</div><div class="st" id="mStB">✗</div></div>
         </div>
         <div class="m-bottom">
           <div class="m-timer" id="mTimer">
@@ -139,7 +139,7 @@
       <div class="panel" id="pCta" style="justify-content:center">
         <div class="cta-screen">
           <div class="cta-bell">🏆</div>
-          <div class="cta-card" id="ctaCard">Comment your winner 👇</div>
+          <div class="cta-card" id="ctaCard" data-layer="critical">Comment your winner 👇</div>
         </div>
       </div>
 

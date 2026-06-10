@@ -58,6 +58,7 @@
   --tr-label: 0.12em;    /* kicker/label tracking   */
 
   /* ---------- spacing scale (large — the canvas is 1080 wide). Use for gap/padding. ---------- */
+  --sp-0: 8px;    /* fine in-card gaps */
   --sp-1: 12px;
   --sp-2: 20px;
   --sp-3: 32px;

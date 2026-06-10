@@ -38,6 +38,11 @@ hooks:
 verify:
 	node verify/run.js
 
+# make audit [M=higherlower]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
+# [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
+audit:
+	node verify/audit.mjs $(M)
+
 # make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
 lib-test:
 	node scripts/lib-test.mjs
