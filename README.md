@@ -51,11 +51,19 @@ make render M=higherlower  render one format → engine/out/<name>.mp4
 make all                   render every format (queue)
 make look M=barrace        storyboard (key frames) for visual review
 make frame M=growth N=560  one exact frame
+make assets D=…[WRITE=1]   fill missing icons: country→flag, brand→logo, else a topic card
+make audit [M=…]           layout audit: overlap / clipped text / things too close
+make lib-test              motion-primitive asserts (core/lib.js)
+make probe [M=…]           render-order purity (protects sharded rendering)
 make verify                integrity + safe-zone + contact sheets
+make review                fast health snapshot (lib-test + audit + master sheet)
 node scripts/gen-audio.mjs regenerate procedural sfx/music   (npm run setup:audio)
 ```
 
 Render flags: `--fps 30 --workers N --draft --no-grain`.
+
+**Authoring scenes:** read the `shortwave-scene-authoring` skill (purity, tokens, motion
+primitives, image system, QA loop). Full system map: [`docs/CODEMAPS/ARCHITECTURE.md`](docs/CODEMAPS/ARCHITECTURE.md).
 
 ## Add or edit a format
 

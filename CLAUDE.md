@@ -126,7 +126,15 @@ Titles/descriptions/comments go to `engine/out/<name>.meta.json` (no publishing 
 
 ## After writing a JSON
 
-1. Render it: `make video D=formats/<format>/<topic>.json`.
-2. **Check frames** before declaring done: `node scripts/preview.mjs <format> <frame> formats/<format>/<topic>.json`
-   (or `make verify` for safe-zone + a contact sheet). Eyeball the hook, a reveal, and the end screen.
-3. Fix the data and re-render — never silently ship an unverified video.
+1. **Images:** `make assets D=formats/<format>/<topic>.json` fills any missing icons
+   (country→flag, brand→logo, else a generated topic card). Dry-run; add `WRITE=1` to apply.
+2. Render it: `make video D=formats/<format>/<topic>.json`.
+3. **Layout audit:** `make audit M=<format>` — catches overlap / clipped text / things too close
+   (overlays → `/tmp/audit/<format>.png`). Fix with the spacing tokens, re-run.
+4. **Check frames** before declaring done: `make look M=<format>` / `make frame M=<format> N=<n>`
+   (or `make verify`). Eyeball the hook, a reveal, and the end screen.
+5. Fix the data and re-render — never silently ship an unverified video.
+
+> **Editing a `scene.html`?** Read the `shortwave-scene-authoring` skill first (render-frame purity,
+> tokens, motion primitives, image system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.
+> Run `make probe` after scene-logic changes and `make review` for a fast health snapshot.

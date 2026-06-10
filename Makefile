@@ -52,6 +52,11 @@ audit:
 lib-test:
 	node scripts/lib-test.mjs
 
+# make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
+# (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
+review:
+	node verify/review.mjs
+
 # make probe [M=bracket]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe:
