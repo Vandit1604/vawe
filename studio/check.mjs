@@ -60,15 +60,20 @@ for (const { f, orient } of cases) {
       mw: w?.__engine?.meta.width, mh: w?.__engine?.meta.height,
       segMeta: (w?.__engine?.meta.segments || []).length,
       segDom: document.querySelectorAll('#track .tl-seg').length,
+      grips: document.querySelectorAll('#track .tl-seg.edit .tl-grip').length,
+      ticks: document.querySelectorAll('#ruler .tl-tick').length,
       head: !!document.querySelector('#track .tl-head') };
   });
   const wantW = orient === 'landscape' ? 1920 : 1080, wantH = orient === 'landscape' ? 1080 : 1920;
   const label = `${f}/${orient}`;
   if (!ok || !info.drew) problems.push(`${label}: did not render (${info.status})`);
   else if (info.mw !== wantW || info.mh !== wantH) problems.push(`${label}: dims ${info.mw}×${info.mh}, expected ${wantW}×${wantH}`);
-  // timeline must build: playhead always present; segment blocks must mirror the meta the scene exposed
+  // timeline must build: playhead + ruler always present; segment blocks mirror the meta the scene
+  // exposed; and every exposed segment is editable (carries a resize grip), so pacing is tunable.
   if (info.drew && !info.head) problems.push(`${label}: timeline playhead missing`);
+  if (info.drew && !info.ticks) problems.push(`${label}: timeline ruler has no ticks`);
   if (info.drew && info.segMeta !== info.segDom) problems.push(`${label}: timeline segments ${info.segDom} DOM vs ${info.segMeta} meta`);
+  if (info.drew && info.segMeta > 0 && info.grips !== info.segMeta) problems.push(`${label}: ${info.grips} resize grips for ${info.segMeta} segments`);
   if (issues.length) problems.push(`${label}: ${[...new Set(issues)].join(' ; ')}`);
 
   const tileDir = '/tmp/studio_check_tiles';
