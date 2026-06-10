@@ -13,7 +13,7 @@
         "id": { "type": "string", "label": "Stable id (referenced everywhere)" },
         "name": { "type": "string", "label": "Display name" },
         "short": { "type": "string", "label": "Short name for chips/cards (optional)" },
-        "icon": { "type": "string", "label": "Emoji or image path" },
+        "icon": { "type": "string", "label": "Emoji, local image path, or http(s) image URL (web links are preloaded before render)" },
         "stats": { "type": "object", "label": "Stat bag — any keys a round can decide on (e.g. power, speed, brain)" }
       }
     },

@@ -1,0 +1,11 @@
+{ "module": "bracket", "title": "BRAND BATTLE", "hook": "4 apps. 1 winner.", "hookSub": "Most users wins",
+  "competitors": [
+    { "id": "yt", "name": "YouTube",   "icon": "https://cdn.simpleicons.org/youtube/FF0000",   "stats": { "users": 2500 } },
+    { "id": "ig", "name": "Instagram", "icon": "https://cdn.simpleicons.org/instagram/E4405F", "stats": { "users": 2000 } },
+    { "id": "tt", "name": "TikTok",    "icon": "https://cdn.simpleicons.org/tiktok/00F2EA",    "stats": { "users": 1600 } },
+    { "id": "x",  "name": "X",         "icon": "https://cdn.simpleicons.org/x/FFFFFF",          "stats": { "users": 600 } }
+  ],
+  "rounds": [
+    { "name": "SEMIFINALS", "stat": "users", "unit": "M", "matchups": [ { "a": "yt", "b": "x" }, { "a": "ig", "b": "tt" } ] },
+    { "name": "FINAL", "stat": "users", "unit": "M" }
+  ] }

@@ -48,7 +48,14 @@
         background: radial-gradient(circle at 50% 35%, #1b1d22, #0c0d10); border: 2px solid var(--accent);
         box-shadow: 0 0 30px var(--accent-dim), inset 0 2px 6px rgba(0,0,0,0.6);
         display: flex; align-items: center; justify-content: center; font: 700 34px 'Space Grotesk', sans-serif; color: var(--text); }
-      .m-tag { font: 700 28px 'Inter', sans-serif; color: var(--accent); letter-spacing: 0.02em; margin-top: 6px;
+      /* bottom slot: 3-2-1 countdown ring during the guess, result tag on the reveal (fixed height = no jump) */
+      .m-bottom { position: relative; width: 100%; height: 176px; margin-top: 6px; display: flex; align-items: center; justify-content: center; }
+      .m-timer { position: absolute; width: 150px; height: 150px; opacity: 0; }
+      .m-ring { transform: rotate(-90deg); }
+      .m-ring .bg { fill: none; stroke: rgba(244,245,242,0.08); stroke-width: 12; }
+      .m-ring .fg { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; filter: drop-shadow(0 0 10px var(--accent-dim)); }
+      .m-secs { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font: 700 78px 'Space Grotesk', sans-serif; color: var(--accent); }
+      .m-tag { position: absolute; font: 700 28px 'Inter', sans-serif; color: var(--accent); letter-spacing: 0.02em;
         padding: 7px 22px; border: 1px solid var(--accent-dim); border-radius: 999px; background: rgba(194,242,59,0.07); opacity: 0; }
       .m-tag.upset { color: #ffd24d; border-color: rgba(255,210,77,0.4); background: rgba(255,210,77,0.08); }
 
@@ -62,7 +69,7 @@
       .bs-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
       .chip { display: flex; align-items: center; gap: 9px; padding: 9px 16px; border-radius: 14px;
         background: var(--surface-2); border: 1px solid var(--line-strong); }
-      .chip .e { font-size: 32px; line-height: 1; }
+      .chip .e { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; line-height: 1; }
       .chip .n { font: 600 28px 'Inter', sans-serif; color: var(--text-2); white-space: nowrap; }
       .chip.empty { color: var(--dim); }
       .chip.empty .e { opacity: 0.4; }
@@ -113,7 +120,13 @@
           <div class="m-vs">VS</div>
           <div class="m-card card" id="mCardB"><div class="ic" id="mIcB">🐻</div><div class="nm" id="mNameB">B</div><div class="vl num" id="mValB">?</div><div class="st" id="mStB">✗</div></div>
         </div>
-        <div class="m-tag" id="mTag"></div>
+        <div class="m-bottom">
+          <div class="m-timer" id="mTimer">
+            <svg class="m-ring" width="150" height="150" viewBox="0 0 150 150"><circle class="bg" cx="75" cy="75" r="64"/><circle class="fg" id="mRingfg" cx="75" cy="75" r="64"/></svg>
+            <div class="m-secs num" id="mSecs">3</div>
+          </div>
+          <div class="m-tag" id="mTag"></div>
+        </div>
       </div>
 
       <!-- BRACKET STATE -->
@@ -173,8 +186,10 @@
         // ---------- timeline: hook -> per round {roundcard -> matches -> bracketState} -> cta ----------
         const P = data.pacing || {};
         const HOOK = P.hook ?? 4.0, CTA = P.cta ?? 3.2, ROUNDCARD = P.roundCard ?? 2.2, BRACKET = P.bracket ?? 3.6;
-        const DEFAULT_MATCH = [3.4, 4.6, 6.2, 9.5]; // escalating R16 -> Final (read time -> slow payoff)
-        const matchDur = (r) => (P.match && P.match[r] != null ? P.match[r] : (DEFAULT_MATCH[r] != null ? DEFAULT_MATCH[r] : 3.0));
+        const ENTER = 0.5, COUNTDOWN = P.countdown ?? 3.0; // 3-2-1 tension window before every reveal
+        const RINGLEN = 2 * Math.PI * 64;
+        const DEFAULT_MATCH = [5.2, 6.0, 7.5, 10.5]; // enter + 3s countdown + escalating hold/payoff
+        const matchDur = (r) => (P.match && P.match[r] != null ? P.match[r] : (DEFAULT_MATCH[r] != null ? DEFAULT_MATCH[r] : 6.0));
 
         const seg = [];
         const sfx = [];
@@ -184,8 +199,10 @@
           seg.push({ type: 'roundcard', r, t0: t, t1: t + ROUNDCARD }); sfx.push({ t: t + 0.1, name: 'whoosh' }); t += ROUNDCARD;
           rd.matchups.forEach((m, i) => {
             const d = matchDur(r);
-            const reveal = t + d * 0.42;
-            seg.push({ type: 'match', r, i, t0: t, t1: t + d, reveal });
+            const reveal = t + ENTER + COUNTDOWN; // fixed countdown, then reveal
+            seg.push({ type: 'match', r, i, t0: t, t1: t + d, reveal, enter: ENTER, countdown: COUNTDOWN });
+            sfx.push({ t: t + ENTER * 0.3, name: 'whoosh' });
+            for (let s = Math.floor(COUNTDOWN); s >= 1; s--) sfx.push({ t: reveal - s, name: s === 1 ? 'beep3' : 'beep' });
             sfx.push({ t: reveal, name: 'reveal' });
             sfx.push({ t: reveal + 0.14, name: m.upset ? 'wrong' : 'correct' });
             t += d;
@@ -241,14 +258,14 @@
           $('rcName').style.opacity = clamp01(p / 0.3).toFixed(2);
         }
         function paintMatch(r, i, s, tt) {
-          const rd = rounds[r], m = rd.matchups[i], d = s.t1 - s.t0, local = tt - s.t0;
+          const rd = rounds[r], m = rd.matchups[i], local = tt - s.t0;
           const revealed = tt >= s.reveal;
           const ct = easeOutQuart(clamp01((tt - s.reveal) / 0.3));
           $('mRound').textContent = rd.name;
           $('mProg').textContent = `${i + 1} / ${rd.matchups.length}`;
           $('mQ').innerHTML = `Higher <b>${rd.stat.toUpperCase()}</b> wins`;
           // enter: cards rise+fade in
-          const enterT = easeOutCubic(clamp01(local / 0.45));
+          const enterT = easeOutCubic(clamp01(local / s.enter));
           $('mCards').style.opacity = enterT.toFixed(3);
           $('mCards').style.transform = `translateY(${((1 - enterT) * 46).toFixed(1)}px)`;
           // winner surges, loser drops
@@ -258,6 +275,21 @@
           $('mCardB').style.transform = `scale(${(revealed ? (!aWin ? surge : drop) : 1).toFixed(3)})`;
           setMatchCard('A', m, revealed, ct);
           setMatchCard('B', m, revealed, ct);
+          // 3-2-1 countdown ring during the guess window (after the cards land, before the reveal)
+          const counting = !revealed && local >= s.enter;
+          $('mTimer').style.opacity = counting ? '1' : '0';
+          const fg = $('mRingfg'); fg.style.strokeDasharray = RINGLEN;
+          if (counting) {
+            const remain = 1 - clamp01((local - s.enter) / s.countdown);
+            fg.style.strokeDashoffset = (RINGLEN * (1 - remain)).toFixed(1);
+            const urgent = remain < 0.34; // last second turns red
+            fg.style.stroke = urgent ? 'var(--down)' : 'var(--accent)';
+            const secs = $('mSecs');
+            secs.textContent = String(Math.max(1, Math.ceil(remain * s.countdown)));
+            secs.style.color = urgent ? 'var(--down)' : 'var(--accent)';
+            const frac = (remain * s.countdown) % 1; // pop right after each tick
+            secs.style.transform = `translate(-50%,-50%) scale(${(1 + 0.22 * clamp01(1 - frac * 5)).toFixed(3)})`;
+          }
           // tag: name the winner (or call out the upset)
           const tag = $('mTag');
           if (revealed) {
