@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify hooks list clean
+.PHONY: build video render all look frame verify probe hooks list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -37,6 +37,13 @@ hooks:
 # make verify  — integrity + safe-zone + contact sheets (all formats)
 verify:
 	node verify/run.js
+
+# make probe [M=bracket]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
+# render order). Guards sharded/parallel rendering. No M = every format.
+probe:
+	@if [ -n "$(M)" ]; then node scripts/probe-purity.mjs $(M); else \
+		for d in formats/*/scene.html; do f=$$(basename $$(dirname $$d)); \
+		node scripts/probe-purity.mjs $$f || exit 1; done; fi
 
 clean:
 	rm -rf bin engine/out/*.mp4
