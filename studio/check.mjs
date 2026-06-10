@@ -62,7 +62,8 @@ for (const { f, orient } of cases) {
       segDom: document.querySelectorAll('#track .tl-seg').length,
       grips: document.querySelectorAll('#track .tl-seg.edit .tl-grip').length,
       ticks: document.querySelectorAll('#ruler .tl-tick').length,
-      head: !!document.querySelector('#track .tl-head') };
+      audioLane: !!document.querySelector('#audio'),
+      head: !!document.querySelector('#tlHead') };
   });
   const wantW = orient === 'landscape' ? 1920 : 1080, wantH = orient === 'landscape' ? 1080 : 1920;
   const label = `${f}/${orient}`;
@@ -72,6 +73,7 @@ for (const { f, orient } of cases) {
   // exposed; and every exposed segment is editable (carries a resize grip), so pacing is tunable.
   if (info.drew && !info.head) problems.push(`${label}: timeline playhead missing`);
   if (info.drew && !info.ticks) problems.push(`${label}: timeline ruler has no ticks`);
+  if (info.drew && !info.audioLane) problems.push(`${label}: audio lane missing`);
   if (info.drew && info.segMeta !== info.segDom) problems.push(`${label}: timeline segments ${info.segDom} DOM vs ${info.segMeta} meta`);
   if (info.drew && info.segMeta > 0 && info.grips !== info.segMeta) problems.push(`${label}: ${info.grips} resize grips for ${info.segMeta} segments`);
   if (issues.length) problems.push(`${label}: ${[...new Set(issues)].join(' ; ')}`);

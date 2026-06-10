@@ -28,18 +28,22 @@
     </header>
 
     <main>
-      <section class="editor">
-        <div class="sec">
-          <h3>Quick edit</h3>
-          <div class="quick" id="quick"><span class="hint">Pick a format…</span></div>
+      <section class="editor" id="inspector">
+        <div class="sec" data-sec="quick">
+          <h3 class="sec-head">Quick edit<i class="chev"></i></h3>
+          <div class="sec-body"><div class="quick" id="quick"><span class="hint">Pick a format…</span></div></div>
         </div>
-        <div class="sec" id="pacingSec" style="display:none">
-          <h3>Pacing <span class="hint">(seconds · or drag a segment edge)</span></h3>
-          <div class="pacegrid" id="pacing"></div>
+        <div class="sec" data-sec="pacing" id="pacingSec" style="display:none">
+          <h3 class="sec-head">Pacing <span class="hint">(seconds · or drag a segment edge)</span><i class="chev"></i></h3>
+          <div class="sec-body"><div class="pacegrid" id="pacing"></div></div>
         </div>
-        <div class="sec jsonwrap">
-          <h3>Data JSON <span class="hint">(⌘/Ctrl+Enter to apply)</span></h3>
-          <textarea id="json" spellcheck="false"></textarea>
+        <div class="sec" data-sec="audio" id="audioSec" style="display:none">
+          <h3 class="sec-head">Audio<i class="chev"></i></h3>
+          <div class="sec-body"><div class="audiogrid" id="audioPanel"></div></div>
+        </div>
+        <div class="sec jsonwrap" data-sec="json">
+          <h3 class="sec-head">Data JSON <span class="hint">(⌘/Ctrl+Enter to apply)</span><i class="chev"></i></h3>
+          <div class="sec-body"><textarea id="json" spellcheck="false"></textarea></div>
         </div>
         <div class="status" id="status"></div>
       </section>
@@ -49,10 +53,25 @@
           <div class="frame-box" id="box"><iframe id="frame" title="preview"></iframe></div>
         </div>
         <div class="transport">
-          <button class="play" id="play" title="Play / pause (Space)">▶</button>
+          <div class="tl-resize" id="tlResize" title="Drag to resize the timeline"></div>
+          <div class="tl-controls">
+            <button class="play" id="play" title="Play / pause (Space)">▶</button>
+            <button class="icon" id="mute" title="Mute audio">🔊</button>
+            <span class="zoomctl">
+              <button id="zoomOut" title="Zoom out">−</button>
+              <button id="zoomFit" title="Fit to width">⤢</button>
+              <button id="zoomIn" title="Zoom in">+</button>
+            </span>
+          </div>
           <div class="timeline">
-            <div class="tl-ruler" id="ruler"></div>
-            <div class="tl-track" id="track" title="Drag to scrub · click a segment to jump · drag a segment edge to retime"></div>
+            <div class="tl-scroll" id="tlScroll">
+              <div class="tl-inner" id="tlInner">
+                <div class="tl-ruler" id="ruler"></div>
+                <div class="tl-track" id="track" title="Drag to scrub · click a segment to jump · drag a segment edge to retime"></div>
+                <div class="tl-audio" id="audio"></div>
+                <div class="tl-head" id="tlHead"></div>
+              </div>
+            </div>
           </div>
           <span class="time" id="time">0.0s · f0</span>
         </div>
