@@ -75,6 +75,28 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
   return +(min + ((seed >>> 0) % (steps + 1)) * 0.1).toFixed(2);
 }
 
+// preloadImages: walk the data JSON for image-like strings (local paths, /…, or http(s)
+// URLs — incl. user-supplied web image links) and fully load+decode them BEFORE the scene
+// reports ready. Without this the Go renderer can screenshot a frame mid-download → a missing
+// image on some frames. onerror also resolves so a dead link falls back (icon()) without hanging.
+async function preloadImages(data) {
+  const urls = new Set();
+  const isImg = (v) => typeof v === 'string' &&
+    (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\//.test(v) || /^(assets\/|\/)/.test(v));
+  const walk = (o) => {
+    if (Array.isArray(o)) o.forEach(walk);
+    else if (o && typeof o === 'object') Object.values(o).forEach(walk);
+    else if (isImg(o)) urls.add(o);
+  };
+  walk(data);
+  await Promise.all([...urls].map((src) => new Promise((res) => {
+    const im = new Image();
+    im.onload = () => (im.decode ? im.decode().then(res, res) : res());
+    im.onerror = () => res();
+    im.src = src;
+  })));
+}
+
 // boot a scene: load fonts, fetch the data param, build the scene, expose window.__engine.
 //   build(data, fps) -> { fps, duration, stings, sfx, renderFrame(n) }
 // Film grain is applied as a post-process at encode time (ffmpeg), not here — the CSS/canvas
@@ -97,6 +119,7 @@ export async function boot(build) {
     const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
     document.documentElement.dataset.orient = landscape ? 'landscape' : 'portrait';
     const [width, height] = landscape ? [1920, 1080] : [1080, 1920];
+    await preloadImages(data); // web/local images ready before any frame is captured
     const scene = build(data, fps);
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
