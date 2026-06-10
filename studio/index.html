@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shortwave Studio</title>
+    <style>
+      :root { --bg:#0a0a0c; --panel:#16181d; --panel-2:#101216; --line:rgba(244,245,242,0.10);
+        --text:#f4f5f2; --text-2:#b9bcc2; --dim:#6e7178; --accent:#c2f23b; --accent-dim:rgba(194,242,59,0.16);
+        --up:#3fd07a; --down:#ff5a6e; }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { background:var(--bg); color:var(--text); font:14px/1.45 'Inter',system-ui,sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+      a { color:var(--accent); }
+      header { display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--panel-2); flex-wrap:wrap; }
+      header .brand { font:700 18px 'Space Grotesk',system-ui,sans-serif; letter-spacing:0.02em; }
+      header .brand b { color:var(--accent); }
+      header .spacer { flex:1; }
+      label.f { display:flex; flex-direction:column; gap:3px; font:600 11px 'Inter'; color:var(--dim); letter-spacing:0.04em; text-transform:uppercase; }
+      select, input, textarea, button { font:inherit; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:7px 10px; outline:none; }
+      select:focus, input:focus, textarea:focus { border-color:var(--accent-dim); }
+      button { cursor:pointer; background:var(--panel); transition:none; }
+      button.primary { background:var(--accent); color:#0a0a0c; border-color:var(--accent); font-weight:700; }
+      button:hover { border-color:var(--accent-dim); }
+      main { flex:1; display:grid; grid-template-columns:380px 1fr; min-height:0; }
+      .editor { border-right:1px solid var(--line); display:flex; flex-direction:column; min-height:0; background:var(--panel-2); }
+      .editor .sec { padding:14px 16px; border-bottom:1px solid var(--line); }
+      .editor .sec h3 { font:700 11px 'Inter'; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin-bottom:10px; }
+      .quick { display:flex; flex-direction:column; gap:10px; }
+      .quick label.f input { width:100%; }
+      .jsonwrap { flex:1; display:flex; flex-direction:column; min-height:0; }
+      .jsonwrap textarea { flex:1; resize:none; border:0; border-radius:0; background:#0c0d11; font:12px/1.5 ui-monospace,'JetBrains Mono',monospace; color:#cfe; padding:14px 16px; }
+      .status { padding:8px 16px; font:12px 'Inter'; border-top:1px solid var(--line); min-height:34px; }
+      .status.ok { color:var(--up); } .status.err { color:var(--down); }
+      .preview { display:flex; flex-direction:column; min-height:0; }
+      .stage-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; min-height:0; background:radial-gradient(120% 80% at 50% 0%, #121319, #0a0a0c 70%); }
+      .frame-box { position:relative; box-shadow:0 30px 80px rgba(0,0,0,0.6); border:1px solid var(--line); overflow:hidden; }
+      .frame-box iframe { border:0; transform-origin:top left; display:block; background:#000; }
+      .transport { display:flex; align-items:center; gap:14px; padding:12px 18px; border-top:1px solid var(--line); background:var(--panel-2); }
+      .transport button.play { width:46px; height:46px; border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center; }
+      .transport input[type=range] { flex:1; accent-color:var(--accent); }
+      .transport .time { font:600 13px ui-monospace,monospace; color:var(--text-2); min-width:120px; text-align:right; }
+      .hint { color:var(--dim); font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="brand">◆ Shortwave <b>Studio</b></span>
+      <label class="f">Format<select id="fmt"></select></label>
+      <label class="f">Orientation<select id="orient"><option value="portrait">Portrait 9:16</option><option value="landscape">Landscape 16:9</option></select></label>
+      <label class="f">FPS<input id="fps" type="number" value="30" min="1" max="60" style="width:64px" /></label>
+      <span class="spacer"></span>
+      <button id="apply" class="primary">Apply ⏎</button>
+      <button id="save">Save…</button>
+    </header>
+
+    <main>
+      <section class="editor">
+        <div class="sec">
+          <h3>Quick edit</h3>
+          <div class="quick" id="quick"><span class="hint">Pick a format…</span></div>
+        </div>
+        <div class="sec jsonwrap">
+          <h3>Data JSON <span class="hint">(⌘/Ctrl+Enter to apply)</span></h3>
+          <textarea id="json" spellcheck="false"></textarea>
+        </div>
+        <div class="status" id="status"></div>
+      </section>
+
+      <section class="preview">
+        <div class="stage-wrap">
+          <div class="frame-box" id="box"><iframe id="frame" title="preview"></iframe></div>
+        </div>
+        <div class="transport">
+          <button class="play" id="play" title="Play / pause">▶</button>
+          <input id="scrub" type="range" min="0" max="100" value="0" step="1" />
+          <span class="time" id="time">0.0s · f0</span>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const frame = $('frame'), box = $('box');
+      let state = { format: null, data: {}, schema: null, meta: null };
+      let playing = false, rafId = 0, curFrame = 0, lastTs = 0;
+
+      const setStatus = (msg, kind = '') => { const s = $('status'); s.textContent = msg; s.className = 'status ' + kind; };
+
+      async function init() {
+        const formats = await (await fetch('/__formats')).json();
+        $('fmt').innerHTML = formats.map((f) => `<option>${f}</option>`).join('');
+        $('fmt').value = formats.includes('bracket') ? 'bracket' : formats[0];
+        await loadFormat($('fmt').value);
+      }
+
+      async function loadFormat(f) {
+        state.format = f;
+        state.data = await (await fetch(`/formats/${f}/sample.json?_=${Date.now()}`)).json();
+        try { state.schema = await (await fetch(`/formats/${f}/schema.json`)).json(); } catch { state.schema = null; }
+        $('orient').value = state.data.orientation === 'landscape' ? 'landscape' : 'portrait';
+        buildQuick();
+        syncJsonFromData();
+        await apply();
+      }
+
+      // schema-driven controls for top-level string/number fields (the common ones to tweak)
+      function buildQuick() {
+        const fields = state.schema?.fields || {};
+        const rows = Object.entries(fields)
+          .filter(([, def]) => def.type === 'string' || def.type === 'number')
+          .map(([key, def]) => {
+            const v = state.data[key] ?? '';
+            const type = def.type === 'number' ? 'number' : 'text';
+            return `<label class="f">${def.label || key}<input data-key="${key}" type="${type}" value="${String(v).replace(/"/g, '&quot;')}" /></label>`;
+          });
+        $('quick').innerHTML = rows.length ? rows.join('') : '<span class="hint">No top-level fields — edit JSON below.</span>';
+        $('quick').querySelectorAll('input[data-key]').forEach((inp) => {
+          inp.addEventListener('input', () => {
+            const def = fields[inp.dataset.key];
+            state.data[inp.dataset.key] = def.type === 'number' ? Number(inp.value) : inp.value;
+            syncJsonFromData();
+            debouncedApply();
+          });
+        });
+      }
+
+      const syncJsonFromData = () => { $('json').value = JSON.stringify(state.data, null, 2); };
+
+      let dT;
+      const debouncedApply = () => { clearTimeout(dT); dT = setTimeout(apply, 450); };
+
+      async function apply() {
+        let data;
+        try { data = JSON.parse($('json').value); }
+        catch (e) { return setStatus('JSON error: ' + e.message, 'err'); }
+        data.orientation = $('orient').value;            // orientation control wins
+        state.data = data;
+        const fps = Number($('fps').value) || 30;
+        await fetch('/__data', { method: 'POST', body: JSON.stringify(data) });
+        await new Promise((resolve) => {
+          frame.onload = resolve;
+          frame.src = `/formats/${state.format}/scene.html?data=${encodeURIComponent('/__live.json')}&fps=${fps}&_=${Date.now()}`;
+        });
+        await waitReady(fps);
+      }
+
+      async function waitReady(fps) {
+        const win = frame.contentWindow;
+        const t0 = performance.now();
+        while (performance.now() - t0 < 30000) {
+          if (win.__engineError) return setStatus('Scene error: ' + win.__engineError.split('\n')[0], 'err');
+          if (win.__engineReady) break;
+          await new Promise((r) => setTimeout(r, 30));
+        }
+        if (!win.__engine) return setStatus('Scene did not become ready', 'err');
+        state.meta = win.__engine.meta;
+        sizePreview();
+        const max = Math.max(0, state.meta.totalFrames - 1);
+        $('scrub').max = max;
+        curFrame = Math.min(curFrame, max);
+        $('scrub').value = curFrame;
+        draw(curFrame);
+        setStatus(`✓ ${state.format} · ${state.meta.width}×${state.meta.height} · ${state.meta.duration.toFixed(1)}s · ${state.meta.totalFrames} frames`, 'ok');
+      }
+
+      function sizePreview() {
+        const { width: W, height: H } = state.meta;
+        const wrap = document.querySelector('.stage-wrap').getBoundingClientRect();
+        const scale = Math.min((wrap.width - 40) / W, (wrap.height - 40) / H);
+        frame.style.width = W + 'px';
+        frame.style.height = H + 'px';
+        frame.style.transform = `scale(${scale})`;
+        box.style.width = W * scale + 'px';
+        box.style.height = H * scale + 'px';
+      }
+
+      function draw(n) {
+        const win = frame.contentWindow;
+        if (!win || !win.__engine) return;
+        win.__engine.renderFrame(n);
+        const fps = state.meta.fps || 30;
+        $('time').textContent = `${(n / fps).toFixed(1)}s · f${n}`;
+      }
+
+      // transport
+      function togglePlay() {
+        playing = !playing;
+        $('play').textContent = playing ? '⏸' : '▶';
+        if (playing) { lastTs = performance.now(); rafId = requestAnimationFrame(tick); }
+        else cancelAnimationFrame(rafId);
+      }
+      function tick(ts) {
+        if (!playing || !state.meta) return;
+        const fps = state.meta.fps || 30, max = state.meta.totalFrames - 1;
+        curFrame += ((ts - lastTs) / 1000) * fps;
+        lastTs = ts;
+        if (curFrame >= max) { curFrame = 0; }            // loop
+        const n = Math.floor(curFrame);
+        $('scrub').value = n; draw(n);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      $('fmt').addEventListener('change', (e) => loadFormat(e.target.value));
+      $('orient').addEventListener('change', apply);
+      $('fps').addEventListener('change', apply);
+      $('apply').addEventListener('click', apply);
+      $('scrub').addEventListener('input', (e) => { if (playing) togglePlay(); curFrame = +e.target.value; draw(+e.target.value); });
+      $('play').addEventListener('click', togglePlay);
+      $('json').addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); apply(); } });
+      window.addEventListener('resize', () => state.meta && sizePreview());
+
+      $('save').addEventListener('click', async () => {
+        const name = prompt('Save as formats/' + state.format + '/<name>.json', 'my-video');
+        if (!name) return;
+        let data; try { data = JSON.parse($('json').value); } catch (e) { return setStatus('JSON error: ' + e.message, 'err'); }
+        const r = await (await fetch('/__save', { method: 'POST', body: JSON.stringify({ path: `formats/${state.format}/${name.replace(/\.json$/, '')}.json`, data }) })).json();
+        setStatus(r.ok ? `✓ saved — render with:  ${r.cmd}` : 'Save failed: ' + r.error, r.ok ? 'ok' : 'err');
+      });
+
+      init();
+    </script>
+  </body>
+</html>

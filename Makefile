@@ -45,5 +45,9 @@ probe:
 		for d in formats/*/scene.html; do f=$$(basename $$(dirname $$d)); \
 		node scripts/probe-purity.mjs $$f || exit 1; done; fi
 
+# make studio  — live in-browser editor + preview (edit content, see it instantly; no render)
+studio:
+	node studio/server.mjs
+
 clean:
 	rm -rf bin engine/out/*.mp4
