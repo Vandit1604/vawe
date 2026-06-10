@@ -1,0 +1,47 @@
+{
+  "title": "Bracket (16→1 tournament)",
+  "description": "Longform-native tournament. 16 competitors, 4 rounds (R16/QF/SF/F). Each round decides on one stat from each competitor's stats bag. R16 authors explicit pairs; later rounds auto-pair the previous round's winners positionally. Per-matchup winnerRef overrides the numeric winner so you can hand-author upsets (the funniest winner ≠ the higher number). Macro-loop = 'who wins the whole thing'; micro-loop = each reveal.",
+  "fields": {
+    "title": { "type": "string", "label": "Tournament title (kicker)" },
+    "hook": { "type": "string", "label": "First-frame hook (don't name the champion)", "default": "16 enter. 1 wins." },
+    "hookSub": { "type": "string", "label": "Hook subtitle" },
+    "cta": { "type": "string", "label": "Outro CTA", "default": "Comment your winner 👇" },
+    "competitors": {
+      "type": "array",
+      "label": "Competitors (16). Stable id is referenced by matchups + advancement.",
+      "item": {
+        "id": { "type": "string", "label": "Stable id (referenced everywhere)" },
+        "name": { "type": "string", "label": "Display name" },
+        "short": { "type": "string", "label": "Short name for chips/cards (optional)" },
+        "icon": { "type": "string", "label": "Emoji or image path" },
+        "stats": { "type": "object", "label": "Stat bag — any keys a round can decide on (e.g. power, speed, brain)" }
+      }
+    },
+    "rounds": {
+      "type": "array",
+      "label": "Rounds in order (R16 first, Final last).",
+      "item": {
+        "name": { "type": "string", "label": "Round name (ROUND OF 16, QUARTERFINALS, …)" },
+        "stat": { "type": "string", "label": "Which stat key decides this round" },
+        "unit": { "type": "string", "label": "Unit shown on the value (PWR, MPH, …)" },
+        "matchups": { "type": "array", "label": "Explicit pairs (R16 only). Omit for auto rounds.", "item": {
+          "a": { "type": "string", "label": "Competitor id (top)" },
+          "b": { "type": "string", "label": "Competitor id (bottom)" },
+          "winnerRef": { "type": "string", "label": "OPTIONAL id override — hand-authored upset" }
+        } },
+        "winnerRefs": { "type": "array", "label": "OPTIONAL upset overrides for an AUTO round, positional by matchup (null = let the number decide)" }
+      }
+    },
+    "pacing": {
+      "type": "object",
+      "label": "OPTIONAL timeline tuning (seconds). Defaults give a ~70s v1 spine.",
+      "item": {
+        "hook": { "type": "number", "label": "Hook seconds (default 3.5)" },
+        "cta": { "type": "number", "label": "CTA seconds (default 3.0)" },
+        "roundCard": { "type": "number", "label": "Round-card seconds (default 1.6)" },
+        "bracket": { "type": "number", "label": "Bracket-state transition seconds (default 2.4)" },
+        "match": { "type": "array", "label": "Per-match seconds by round index, escalating (default [2.0, 3.4, 4.8, 7.5])" }
+      }
+    }
+  }
+}
