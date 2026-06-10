@@ -57,12 +57,18 @@ for (const { f, orient } of cases) {
   const info = await page.evaluate(() => {
     const w = document.querySelector('#frame').contentWindow;
     return { status: document.querySelector('#status').textContent, drew: !!(w && w.__engine),
-      mw: w?.__engine?.meta.width, mh: w?.__engine?.meta.height };
+      mw: w?.__engine?.meta.width, mh: w?.__engine?.meta.height,
+      segMeta: (w?.__engine?.meta.segments || []).length,
+      segDom: document.querySelectorAll('#track .tl-seg').length,
+      head: !!document.querySelector('#track .tl-head') };
   });
   const wantW = orient === 'landscape' ? 1920 : 1080, wantH = orient === 'landscape' ? 1080 : 1920;
   const label = `${f}/${orient}`;
   if (!ok || !info.drew) problems.push(`${label}: did not render (${info.status})`);
   else if (info.mw !== wantW || info.mh !== wantH) problems.push(`${label}: dims ${info.mw}×${info.mh}, expected ${wantW}×${wantH}`);
+  // timeline must build: playhead always present; segment blocks must mirror the meta the scene exposed
+  if (info.drew && !info.head) problems.push(`${label}: timeline playhead missing`);
+  if (info.drew && info.segMeta !== info.segDom) problems.push(`${label}: timeline segments ${info.segDom} DOM vs ${info.segMeta} meta`);
   if (issues.length) problems.push(`${label}: ${[...new Set(issues)].join(' ; ')}`);
 
   const tileDir = '/tmp/studio_check_tiles';

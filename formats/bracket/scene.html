@@ -194,24 +194,24 @@
         const seg = [];
         const sfx = [];
         let t = 0;
-        seg.push({ type: 'hook', t0: 0, t1: HOOK }); t = HOOK;
+        seg.push({ type: 'hook', label: 'Hook', t0: 0, t1: HOOK }); t = HOOK;
         rounds.forEach((rd, r) => {
-          seg.push({ type: 'roundcard', r, t0: t, t1: t + ROUNDCARD }); sfx.push({ t: t + 0.1, name: 'whoosh' }); t += ROUNDCARD;
+          seg.push({ type: 'roundcard', label: rd.name, r, t0: t, t1: t + ROUNDCARD }); sfx.push({ t: t + 0.1, name: 'whoosh' }); t += ROUNDCARD;
           rd.matchups.forEach((m, i) => {
             const d = matchDur(r);
             const reveal = t + ENTER + COUNTDOWN; // fixed countdown, then reveal
-            seg.push({ type: 'match', r, i, t0: t, t1: t + d, reveal, enter: ENTER, countdown: COUNTDOWN });
+            seg.push({ type: 'match', label: `${short(m.a)} v ${short(m.b)}`, r, i, t0: t, t1: t + d, reveal, enter: ENTER, countdown: COUNTDOWN });
             sfx.push({ t: t + ENTER * 0.3, name: 'whoosh' });
             for (let s = Math.floor(COUNTDOWN); s >= 1; s--) sfx.push({ t: reveal - s, name: s === 1 ? 'beep3' : 'beep' });
             sfx.push({ t: reveal, name: 'reveal' });
             sfx.push({ t: reveal + 0.14, name: m.upset ? 'wrong' : 'correct' });
             t += d;
           });
-          seg.push({ type: 'bracket', r, t0: t, t1: t + BRACKET }); t += BRACKET;
+          seg.push({ type: 'bracket', label: `${rd.name} bracket`, r, t0: t, t1: t + BRACKET }); t += BRACKET;
         });
         const finalRevealAt = seg.filter((s) => s.type === 'match' && s.r === rounds.length - 1).map((s) => s.reveal)[0];
         const stings = finalRevealAt != null ? [finalRevealAt] : [];
-        seg.push({ type: 'cta', t0: t, t1: t + CTA }); t += CTA;
+        seg.push({ type: 'cta', label: 'CTA', t0: t, t1: t + CTA }); t += CTA;
         const duration = t;
         const total = Math.round(duration * fps);
 
@@ -342,7 +342,7 @@
           // cta: static text set once in build(); showPanel handles visibility
         }
 
-        return { fps, duration, stings, sfx, renderFrame };
+        return { fps, duration, stings, sfx, segments: seg, renderFrame };
       });
     </script>
   </body>

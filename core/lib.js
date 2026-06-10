@@ -126,7 +126,7 @@ export async function boot(build) {
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
-      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [] },
+      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], segments: scene.segments || [] },
       renderFrame: (n) => scene.renderFrame(n),
     };
     window.__engine.renderFrame(0);
