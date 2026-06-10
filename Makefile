@@ -30,6 +30,11 @@ look:
 frame:
 	node scripts/preview.mjs $(M) $(N)
 
+# make assets D=formats/x/topic.json [WRITE=1]  — fill missing icons: country→flag, brand→logo,
+# else a generated topic card. Dry-run without WRITE.
+assets:
+	node scripts/assets.mjs $(D) $(if $(WRITE),--write)
+
 # make hooks D=formats/higherlower/apps.json [SLOT=hook] — print hook variants to pick
 hooks:
 	node scripts/hooks.mjs --data $(D) --slot $(or $(SLOT),hook)
