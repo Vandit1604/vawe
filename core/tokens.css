@@ -24,6 +24,11 @@
   --glass: rgba(21, 22, 26, 0.6);
   --highlight: rgba(244, 245, 242, 0.6);
 
+  /* canvas size — orientation-driven (portrait default; landscape overrides below) */
+  --vw: 1080px;
+  --vh: 1920px;
+
+  /* portrait safe zone: off-center (up + left) for mobile UI overlap */
   --safe-top: 240px;
   --safe-bottom: 580px;
   --safe-left: 60px;
@@ -34,11 +39,22 @@
   --shadow-card: 0 26px 70px rgba(0, 0, 0, 0.55);
 }
 
+/* ---------- landscape (16:9) — set data-orient="landscape" on <html> (boot does this
+   from data.orientation). Symmetric, near-centered safe zone for desktop/TV YouTube. ---------- */
+:root[data-orient="landscape"] {
+  --vw: 1920px;
+  --vh: 1080px;
+  --safe-top: 80px;
+  --safe-bottom: 90px;
+  --safe-left: 120px;
+  --safe-right: 120px;
+}
+
 /* determinism: every frame is set explicitly — kill all time-based motion */
 * { margin: 0; padding: 0; box-sizing: border-box; transition: none !important; animation: none !important; }
 
 html, body {
-  width: 1080px; height: 1920px; overflow: hidden;
+  width: var(--vw); height: var(--vh); overflow: hidden;
   background: var(--bg); color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
@@ -57,7 +73,7 @@ html, body {
 
 /* ---------- stage: premium graphite + grid + glow + grain ---------- */
 .stage {
-  position: relative; width: 1080px; height: 1920px; overflow: hidden;
+  position: relative; width: var(--vw); height: var(--vh); overflow: hidden;
   background:
     radial-gradient(120% 70% at 50% -8%, rgba(194, 242, 59, 0.07), transparent 46%),
     radial-gradient(100% 60% at 50% 120%, rgba(63, 208, 122, 0.04), transparent 55%),

@@ -24,6 +24,8 @@ type Meta struct {
 	FPS         float64     `json:"fps"`
 	Duration    float64     `json:"duration"`
 	TotalFrames int         `json:"totalFrames"`
+	Width       int         `json:"width"`  // capture size — 0 falls back to the portrait default
+	Height      int         `json:"height"` // (set by core/lib.js boot from data.orientation)
 	Stings      []float64   `json:"stings"`
 	SFX         []audio.Cue `json:"sfx"`
 }
@@ -98,6 +100,11 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		return meta, fmt.Errorf("meta eval: %w", err)
 	}
 	total := meta.TotalFrames
+	// capture size from the scene's meta (orientation-aware); fall back to portrait default.
+	cw, ch := int64(meta.Width), int64(meta.Height)
+	if cw == 0 || ch == 0 {
+		cw, ch = W, H
+	}
 	if workers < 1 {
 		workers = 1
 	}
@@ -112,6 +119,10 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	close(frames)
 
 	worker := func(ctx context.Context) error {
+		// size this tab's viewport to the capture dimensions (landscape support)
+		if err := chromedp.Run(ctx, chromedp.EmulateViewport(cw, ch)); err != nil {
+			return fmt.Errorf("emulate viewport: %w", err)
+		}
 		for f := range frames {
 			var buf []byte
 			if err := chromedp.Run(ctx,

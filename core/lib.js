@@ -92,11 +92,16 @@ export async function boot(build) {
       await document.fonts.ready;
     } catch (e) {}
     const data = await (await fetch(dataUrl)).json();
+    // orientation: portrait (1080×1920) default, or landscape (1920×1080). Drives CSS via
+    // [data-orient] AND the meta dims the Go renderer sizes its viewport + screenshot to.
+    const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
+    document.documentElement.dataset.orient = landscape ? 'landscape' : 'portrait';
+    const [width, height] = landscape ? [1920, 1080] : [1080, 1920];
     const scene = build(data, fps);
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
-      meta: { fps, duration: scene.duration, totalFrames, stings: scene.stings || [], sfx: scene.sfx || [] },
+      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [] },
       renderFrame: (n) => scene.renderFrame(n),
     };
     window.__engine.renderFrame(0);
