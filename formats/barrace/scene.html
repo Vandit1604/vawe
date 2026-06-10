@@ -36,7 +36,7 @@
       <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
     </div>
     <script type="module">
-      import { boot, clamp01, lerp, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      import { boot, clamp01, lerp, interpolate, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
       const $ = (id) => document.getElementById(id);
       const BARMAX = 560; // px
 
@@ -80,7 +80,7 @@
           }
           if (inCta) $('cta').textContent = data.cta || data.outro || '';
 
-          const yf = clamp01((tt - COLD) / RACE) * (F - 1);
+          const yf = interpolate(tt, [COLD, COLD + RACE], [0, F - 1]);
           const fi = Math.min(Math.floor(yf), F - 1), frac = yf - fi;
           const cur = items.map((_, i) => lerp(frames[fi].values[i], frames[Math.min(fi + 1, F - 1)].values[i], frac));
           const maxV = Math.max(...cur) || 1;

@@ -13,3 +13,6 @@ verify/out/
 verify/*_contactsheet.png
 engine/out/*.meta.json
 verify/frames/
+
+# transient DOM snapshot baselines (make snap)
+verify/snap/

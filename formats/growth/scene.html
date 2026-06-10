@@ -77,7 +77,7 @@
     </div>
 
     <script type="module">
-      import { boot, clamp01, lerp, rangeT, easeInOutCubic, easeOutBack, punch, icon, formatNumber, scrambleDigits, seedFrom, pickDuration } from '/core/lib.js';
+      import { boot, clamp01, lerp, rangeT, interpolate, easeInOutCubic, easeOutBack, punch, icon, formatNumber, scrambleDigits, seedFrom, pickDuration } from '/core/lib.js';
       const $ = (id) => document.getElementById(id);
       const VBW = 1080, VBH = 720, PADL = 70, PADR = 70, PADT = 40, PADB = 60;
 
@@ -149,7 +149,7 @@
 
           let seg = segs[segs.length - 1];
           for (const s of segs) if (tt >= s.s && tt < s.e) { seg = s; break; }
-          const headIdx = seg.type === 'rip' ? lerp(seg.from, seg.to, easeInOutCubic(rangeT(tt, seg.s, seg.e))) : seg.idx;
+          const headIdx = seg.type === 'rip' ? interpolate(tt, [seg.s, seg.e], [seg.from, seg.to], { easing: easeInOutCubic }) : seg.idx;
           const p01 = clamp01(headIdx / (n - 1));
           const fi = Math.min(Math.floor(headIdx), n - 1), frac = headIdx - fi;
           const price = fi >= n - 1 ? values[n - 1] : lerp(values[fi], values[fi + 1], frac);

@@ -40,7 +40,7 @@
       <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
     </div>
     <script type="module">
-      import { boot, clamp01, lerp, easeOutQuart, easeOutBack, punch, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      import { boot, clamp01, lerp, interpolate, easeOutQuart, easeOutBack, punch, formatValue, seedFrom, pickDuration } from '/core/lib.js';
       const $ = (id) => document.getElementById(id);
 
       boot((data, fps) => {
@@ -73,14 +73,14 @@
           if (inCta) $('cta').textContent = data.cta || data.outro || '';
 
           // "can you guess #1?" beat in the pause before the top reveal
-          $('guess').style.opacity = (tt < guessStart ? 0 : tt < slamT ? clamp01((tt - guessStart) / 0.3) : clamp01(1 - (tt - slamT) / 0.2)).toFixed(2);
+          $('guess').style.opacity = (tt < guessStart ? 0 : tt < slamT ? interpolate(tt, [guessStart, guessStart + 0.3], [0, 1]) : interpolate(tt, [slamT, slamT + 0.2], [1, 0])).toFixed(2);
 
           for (const r of rows) {
             const t0 = revealT(r.rank);
-            const app = clamp01((tt - t0) / 0.35);
+            const app = interpolate(tt, [t0, t0 + 0.35], [0, 1]);
             r.row.style.opacity = app.toFixed(2);
             r.row.style.transform = `translateX(${lerp(-22, 0, easeOutBack(app)).toFixed(1)}px)`;
-            const ct = easeOutQuart(clamp01((tt - t0) / 0.4));
+            const ct = interpolate(tt, [t0, t0 + 0.4], [0, 1], { easing: easeOutQuart });
             const { num, unit } = formatValue(r.value * ct, data.unit || '');
             r.vl.innerHTML = num + (unit ? `<span class="u"> ${unit}</span>` : '');
             if (r.rank === 1 && tt >= slamT) { const s = punch(clamp01((tt - slamT) / SLAM)); r.nm.style.transform = `scale(${s})`; r.vl.style.transform = `scale(${s})`; }

@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe lib-test review hooks install-hooks studio studio-check assets list clean
+.PHONY: build video render all look frame verify audit probe snap lib-test review hooks install-hooks studio studio-check assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -47,6 +47,11 @@ verify:
 # [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
 audit:
 	node verify/audit.mjs $(M)
+
+# make snap M=<format> [SAVE=1]  — check a scene WITHOUT rendering video: capture/diff the per-frame
+# DOM signature (bbox/transform/opacity/font/text). Baseline a refactor, then prove frames unchanged.
+snap:
+	node scripts/scene-snap.mjs $(M) $(if $(SAVE),--save)
 
 # make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
 lib-test:

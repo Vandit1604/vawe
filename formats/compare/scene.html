@@ -51,7 +51,7 @@
       <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
     </div>
     <script type="module">
-      import { boot, clamp01, easeOutBack, punch, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      import { boot, clamp01, interpolate, easeOutBack, punch, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
       const $ = (id) => document.getElementById(id);
 
       boot((data, fps) => {
@@ -95,7 +95,7 @@
 
           let sa = 0, sb = 0;
           rowsEl.forEach((row, i) => {
-            const app = clamp01((tt - rowT(i)) / 0.35);
+            const app = interpolate(tt, [rowT(i), rowT(i) + 0.35], [0, 1]);
             row.style.opacity = app.toFixed(2);
             row.style.transform = `translateY(${((1 - easeOutBack(app)) * 26).toFixed(1)}px)`;
             if (tt >= rowT(i) + 0.32) { if (fields[i].winner === 'a') sa++; else if (fields[i].winner === 'b') sb++; }
@@ -103,7 +103,7 @@
           $('score').textContent = sa || sb ? `${sa}–${sb}` : 'VS';
 
           // the verdict is the payoff — only now, slammed in, rows dimmed behind it
-          const vd = clamp01((tt - slamT) / 0.4);
+          const vd = interpolate(tt, [slamT, slamT + 0.4], [0, 1]);
           $('verdict').style.opacity = vd.toFixed(2);
           $('verdict').style.transform = `scale(${(0.78 + 0.22 * easeOutBack(vd)).toFixed(3)})`;
           $('rows').style.opacity = (1 - 0.85 * vd).toFixed(2);
