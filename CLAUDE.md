@@ -8,8 +8,8 @@ then render it. You do **not** edit the format HTML/CSS or the Go renderer unles
 
 ```bash
 make list                              # the 5 formats + where each schema/sample lives
-./bin/render path/to/video.json        # module read from JSON → engine/out/<name>.mp4
-make video D=path/to/video.json        # same, via make   (add --draft to bin/render for fast no-grain)
+./bin/shortwave path/to/video.json        # module read from JSON → engine/out/<name>.mp4
+make video D=path/to/video.json        # same, via make   (add --draft to bin/shortwave for fast no-grain)
 ```
 
 Every JSON **must** start with `"module": "<format>"` — that picks which format renders it.

@@ -1,26 +1,26 @@
-# yt-shorts — render engine
+# Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
 .PHONY: build video render all look frame verify hooks list clean
 
 build:
-	go build -o bin/render ./cmd/render
+	go build -o bin/shortwave ./cmd/render
 
 # make video D=path/to/video.json  — one self-describing JSON → engine/out/<name>.mp4
 video: build
-	./bin/render $(D)
+	./bin/shortwave $(D)
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build
-	./bin/render --list
+	./bin/shortwave --list
 
 # make render M=higherlower  — render a format's bundled sample.json
 render: build
-	./bin/render --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
+	./bin/shortwave --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
 
 # make all  — every format via the render queue
 all: build
-	./bin/render --all
+	./bin/shortwave --all
 
 # make look M=higherlower         — storyboard (key frames) for visual review
 look:

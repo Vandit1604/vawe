@@ -1,4 +1,4 @@
-module yt-shorts
+module shortwave
 
 go 1.26
 

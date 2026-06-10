@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"yt-shorts/internal/audio"
-	"yt-shorts/internal/encode"
-	"yt-shorts/internal/scene"
+	"shortwave/internal/audio"
+	"shortwave/internal/encode"
+	"shortwave/internal/scene"
 )
 
 type Options struct {

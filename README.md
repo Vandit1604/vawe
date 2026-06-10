@@ -1,4 +1,4 @@
-# yt-shorts
+# Shortwave
 
 Data-driven render engine for faceless YouTube Shorts / IG Reels. Output: **1080×1920, 30 fps,
 H.264 + AAC**, ~18–40s per format. Each **format is a self-contained folder** of HTML/CSS/JS;
@@ -18,7 +18,7 @@ A single self-describing JSON controls everything — it names the format and ca
 
 ```
 make list                          # formats + where each schema/sample lives
-./bin/render path/to/video.json    # module from the JSON, out → engine/out/<name>.mp4
+./bin/shortwave path/to/video.json    # module from the JSON, out → engine/out/<name>.mp4
 make video D=path/to/video.json    # same, via make
 ```
 
@@ -46,7 +46,7 @@ verify/                   integrity + safe-zone + contact-sheet checks
 ## Commands
 
 ```
-make build                 build the Go renderer (bin/render)
+make build                 build the Go renderer (bin/shortwave)
 make render M=higherlower  render one format → engine/out/<name>.mp4
 make all                   render every format (queue)
 make look M=barrace        storyboard (key frames) for visual review

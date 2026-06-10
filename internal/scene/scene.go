@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
-	"yt-shorts/internal/audio"
+	"shortwave/internal/audio"
 )
 
 const W, H = 1080, 1920
