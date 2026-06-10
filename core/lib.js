@@ -81,8 +81,10 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // image on some frames. onerror also resolves so a dead link falls back (icon()) without hanging.
 async function preloadImages(data) {
   const urls = new Set();
+  // an image extension (any source) OR an http(s) URL (web logos can be extensionless).
+  // NOT bare assets/ or / paths — those also match audio (assets/music.wav) and aren't images.
   const isImg = (v) => typeof v === 'string' &&
-    (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\//.test(v) || /^(assets\/|\/)/.test(v));
+    (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\/\S+$/.test(v));
   const walk = (o) => {
     if (Array.isArray(o)) o.forEach(walk);
     else if (o && typeof o === 'object') Object.values(o).forEach(walk);

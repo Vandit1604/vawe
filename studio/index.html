@@ -94,10 +94,12 @@
       }
 
       async function loadFormat(f) {
-        state.format = f;
-        state.data = await (await fetch(`/formats/${f}/sample.json?_=${Date.now()}`)).json();
-        try { state.schema = await (await fetch(`/formats/${f}/schema.json`)).json(); } catch { state.schema = null; }
-        $('orient').value = state.data.orientation === 'landscape' ? 'landscape' : 'portrait';
+        // fetch FIRST, commit to state only after — so an overlapping apply during the fetch gap
+        // never sees the new format paired with the old data (which crashes the scene build).
+        const data = await (await fetch(`/formats/${f}/sample.json?_=${Date.now()}`)).json();
+        let schema = null; try { schema = await (await fetch(`/formats/${f}/schema.json`)).json(); } catch {}
+        state.format = f; state.data = data; state.schema = schema;
+        $('orient').value = data.orientation === 'landscape' ? 'landscape' : 'portrait';
         buildQuick();
         syncJsonFromData();
         await apply();
@@ -129,29 +131,36 @@
       let dT;
       const debouncedApply = () => { clearTimeout(dT); dT = setTimeout(apply, 450); };
 
+      // each apply gets a generation token; data travels IN the iframe url as a data: URL, so
+      // there is no shared server state for overlapping applies (rapid format/orient/edit) to race on.
+      let applyGen = 0;
       async function apply() {
+        const gen = ++applyGen;
         let data;
         try { data = JSON.parse($('json').value); }
         catch (e) { return setStatus('JSON error: ' + e.message, 'err'); }
         data.orientation = $('orient').value;            // orientation control wins
         state.data = data;
         const fps = Number($('fps').value) || 30;
-        await fetch('/__data', { method: 'POST', body: JSON.stringify(data) });
+        const dataUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(data));
         await new Promise((resolve) => {
           frame.onload = resolve;
-          frame.src = `/formats/${state.format}/scene.html?data=${encodeURIComponent('/__live.json')}&fps=${fps}&_=${Date.now()}`;
+          frame.src = `/formats/${state.format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}&_=${Date.now()}`;
         });
-        await waitReady(fps);
+        if (gen !== applyGen) return;                    // superseded by a newer apply — drop this one
+        await waitReady(fps, gen);
       }
 
-      async function waitReady(fps) {
+      async function waitReady(fps, gen) {
         const win = frame.contentWindow;
         const t0 = performance.now();
         while (performance.now() - t0 < 30000) {
+          if (gen !== applyGen) return;                  // a newer apply took over
           if (win.__engineError) return setStatus('Scene error: ' + win.__engineError.split('\n')[0], 'err');
           if (win.__engineReady) break;
           await new Promise((r) => setTimeout(r, 30));
         }
+        if (gen !== applyGen) return;
         if (!win.__engine) return setStatus('Scene did not become ready', 'err');
         state.meta = win.__engine.meta;
         sizePreview();
@@ -160,6 +169,8 @@
         curFrame = Math.min(curFrame, max);
         $('scrub').value = curFrame;
         draw(curFrame);
+        // re-fit on the next frame in case layout hadn't settled when sizePreview first ran
+        requestAnimationFrame(() => { sizePreview(); draw(curFrame); });
         setStatus(`✓ ${state.format} · ${state.meta.width}×${state.meta.height} · ${state.meta.duration.toFixed(1)}s · ${state.meta.totalFrames} frames`, 'ok');
       }
 
