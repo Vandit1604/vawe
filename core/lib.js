@@ -25,6 +25,62 @@ export const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
 export const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 export const easeOutBack = (t) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
 export const punch = (t, amt = 0.14) => 1 + amt * Math.sin(clamp01(t) * Math.PI);
+export const easeInCubic = (t) => t * t * t;
+export const easeOutElastic = (t) => { if (t <= 0) return 0; if (t >= 1) return 1; const p = 0.3; return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1; };
+
+// ---------- motion primitives — all PURE in their input (no state); safe for the purity probe ----------
+
+// interpolate(t, inRange, outRange, {easing, clamp}) — multi-stop value mapping. Replaces the
+// repeated `lerp(a, b, clamp01((f - s) / (e - s)))` pattern. easing is applied within each segment.
+export function interpolate(t, inR, outR, { easing = (x) => x, clamp = true } = {}) {
+  const n = inR.length;
+  if (n < 2 || n !== outR.length) return outR[0];
+  if (clamp) { if (t <= inR[0]) return outR[0]; if (t >= inR[n - 1]) return outR[n - 1]; }
+  let i = 1; while (i < n - 1 && t > inR[i]) i++;
+  const a = inR[i - 1], b = inR[i];
+  return lerp(outR[i - 1], outR[i], easing(clamp01(b === a ? 0 : (t - a) / (b - a))));
+}
+
+// spring(t, {bounce, settle}) — analytic underdamped step response (closed-form, PURE in t-seconds).
+// Returns 0 → ~1 with natural overshoot. bounce∈[0,1): 0 = no overshoot, higher = bouncier.
+export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
+  if (t <= 0) return 0;
+  const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
+  if (zeta >= 1) return 1 - Math.exp(-omega * t) * (1 + omega * t);
+  const wd = omega * Math.sqrt(1 - zeta * zeta), env = Math.exp(-zeta * omega * t);
+  return 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
+}
+// springSettle(opts) — seconds for the spring's envelope to decay below eps (size your holds with this).
+export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {
+  const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
+  return -Math.log(eps) / (zeta * omega);
+}
+
+// track(n, fps, beats) — given [{name, dur(seconds)}], return the active beat + its progress.
+// Replaces hand-rolled PER/FLIP/ENTER/EXIT window math. t01 = normalized [0..1] within the beat.
+export function track(n, fps, beats) {
+  const t = n / fps; let acc = 0;
+  for (let i = 0; i < beats.length; i++) {
+    const d = beats[i].dur, end = acc + d;
+    if (t < end || i === beats.length - 1) {
+      return { name: beats[i].name, index: i, t01: d > 0 ? clamp01((t - acc) / d) : 1, localT: t - acc, elapsed: t, start: acc, dur: d };
+    }
+    acc = end;
+  }
+  return { name: null, index: -1, t01: 0, localT: 0, elapsed: t, start: 0, dur: 0 };
+}
+
+// transition helpers → {opacity, transform} (compositor-friendly only). Object.assign onto el.style.
+export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${(1 - easeOutCubic(clamp01(t))) * dist}px)` });
+export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
+export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
+export const slide = (t, dir = 'left', dist = 60) => {
+  const k = 1 - easeOutCubic(clamp01(t));
+  const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist;
+  const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist;
+  return { opacity: clamp01(t), transform: `translate(${x}px, ${y}px)` };
+};
+export const applyT = (el, styles) => { if (el) Object.assign(el.style, styles); };
 
 export function formatNumber(n, { currency = false, decimals = 0, compact = false } = {}) {
   let s;

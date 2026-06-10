@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify probe hooks install-hooks studio studio-check list clean
+.PHONY: build video render all look frame verify audit probe lib-test review hooks install-hooks studio studio-check assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -37,6 +37,10 @@ hooks:
 # make verify  — integrity + safe-zone + contact sheets (all formats)
 verify:
 	node verify/run.js
+
+# make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
+lib-test:
+	node scripts/lib-test.mjs
 
 # make probe [M=bracket]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.

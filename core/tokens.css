@@ -34,9 +34,43 @@
   --safe-left: 60px;
   --safe-right: 180px;
 
-  --r-lg: 44px;
+  --r-sm: 16px;
   --r-md: 28px;
+  --r-lg: 44px;
+  --r-xl: 64px;
   --shadow-card: 0 26px 70px rgba(0, 0, 0, 0.55);
+
+  /* ---------- type scale (fixed-canvas px, ~1.22 modular). Use these instead of hardcoding
+     font sizes so headings/labels stay in rhythm across formats. ---------- */
+  --fs-1: 28px;   /* fine print / units            */
+  --fs-2: 34px;   /* kicker / labels               */
+  --fs-3: 44px;   /* sub-labels, secondary copy    */
+  --fs-4: 56px;   /* body emphasis                 */
+  --fs-5: 68px;   /* sub-headline                  */
+  --fs-6: 84px;   /* headline                      */
+  --fs-7: 104px;  /* big headline                  */
+  --fs-8: 132px;  /* hero                          */
+  --fs-9: 168px;  /* mega hero / single-line slam  */
+  --lh-tight: 0.98;
+  --lh-snug: 1.08;
+  --lh-body: 1.28;
+  --tr-tight: -0.02em;   /* display tracking        */
+  --tr-label: 0.12em;    /* kicker/label tracking   */
+
+  /* ---------- spacing scale (large — the canvas is 1080 wide). Use for gap/padding. ---------- */
+  --sp-1: 12px;
+  --sp-2: 20px;
+  --sp-3: 32px;
+  --sp-4: 48px;
+  --sp-5: 72px;
+  --sp-6: 100px;
+  --sp-7: 140px;
+
+  /* ---------- depth scale + accent glow ---------- */
+  --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.4);
+  --shadow-2: var(--shadow-card);
+  --shadow-3: 0 40px 110px rgba(0, 0, 0, 0.62);
+  --glow-accent: 0 0 60px var(--accent-glow);
 }
 
 /* ---------- landscape (16:9) — set data-orient="landscape" on <html> (boot does this
@@ -158,6 +192,18 @@ html, body {
   box-shadow: var(--shadow-card), 0 0 70px var(--accent-dim);
   font: 800 72px 'Inter', sans-serif; color: var(--text);
 }
+
+/* ---------- layout utilities (stop re-coding flex per scene) ---------- */
+.stack { display: flex; flex-direction: column; align-items: center; }
+.cluster { display: flex; flex-direction: row; align-items: center; }
+.stack-1 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.stack-2 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.stack-3 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.stack-4 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); }
+.stack-5 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-5); }
+.cluster-1 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-1); }
+.cluster-2 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-2); }
+.cluster-3 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-3); }
 
 /* ---------- helpers ---------- */
 .muted { color: var(--dim); }

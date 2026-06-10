@@ -108,7 +108,7 @@
     </div>
 
     <script type="module">
-      import { boot, clamp01, lerp, easeOutCubic, easeInOutCubic, easeOutQuart, easeOutBack, punch, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
+      import { boot, clamp01, lerp, interpolate, easeOutCubic, easeInOutCubic, easeOutQuart, easeOutBack, punch, icon, formatValue, seedFrom, pickDuration } from '/core/lib.js';
       const $ = (id) => document.getElementById(id);
       const RING = 2 * Math.PI * 90;
 
@@ -174,22 +174,22 @@
             // animated teaser: a shocker matchup deals in (motion + format preview + curiosity)
             const tr = rounds[Math.min(3, n - 1)];
             $('tf1').innerHTML = icon(tr.iconA, (tr.a || '?').slice(0, 1).toUpperCase()); $('tf2').innerHTML = icon(tr.iconB, (tr.b || '?').slice(0, 1).toUpperCase());
-            $('tf1').style.transform = `scale(${(0.2 + 0.8 * easeOutBack(clamp01((tt - 0.25) / 0.55))).toFixed(3)})`;
-            $('tf2').style.transform = `scale(${(0.2 + 0.8 * easeOutBack(clamp01((tt - 0.55) / 0.55))).toFixed(3)})`;
-            $('tvs').style.opacity = clamp01((tt - 0.9) / 0.3).toFixed(2);
+            $('tf1').style.transform = `scale(${interpolate(tt, [0.25, 0.80], [0.2, 1.0], { easing: easeOutBack }).toFixed(3)})`;
+            $('tf2').style.transform = `scale(${interpolate(tt, [0.55, 1.10], [0.2, 1.0], { easing: easeOutBack }).toFixed(3)})`;
+            $('tvs').style.opacity = interpolate(tt, [0.9, 1.2], [0, 1]).toFixed(2);
             return;
           }
           const local = Math.max(0, tt - HOOK);
           let ri = Math.min(Math.floor(local / PER), n - 1);
           const rf = local - ri * PER, round = rounds[ri];
           const revealed = rf >= FLIP, aWins = round.valA >= round.valB;
-          const ct = easeOutQuart(clamp01((rf - FLIP) / 0.3)); // snappier count-up
+          const ct = interpolate(rf, [FLIP, FLIP + 0.3], [0, 1], { easing: easeOutQuart }); // snappier count-up
           $('round').textContent = `ROUND ${ri + 1}/${n}`;
           $('score').textContent = `SCORE ${ri + (revealed ? 1 : 0)}/${n}`;
           $('q').innerHTML = round.label ? `<b>${round.label}</b>` : (data.question || 'Who has <b>MORE?</b>');
 
           // calm transition: the round fades + rises in, then fades + recedes out
-          const enterT = easeOutCubic(clamp01(rf / ENTER));
+          const enterT = interpolate(rf, [0, ENTER], [0, 1], { easing: easeOutCubic });
           let cOp = enterT, cY = (1 - enterT) * 48, cSc = 1;
           const exitStart = PER - EXIT;
           if (ri < n - 1 && rf > exitStart) {
@@ -208,7 +208,7 @@
           const guessing = !revealed && rf >= ENTER;
           // difficulty stake during the guess (the lower the %, the more it provokes)
           $('diff').textContent = round.pct != null ? `${round.pct <= 35 ? '🔥 ' : ''}Only ${round.pct}% get this right` : '';
-          $('diff').style.opacity = (guessing && !inCta ? clamp01((rf - ENTER) / 0.4) : 0).toFixed(2);
+          $('diff').style.opacity = (guessing && !inCta ? interpolate(rf, [ENTER, ENTER + 0.4], [0, 1]) : 0).toFixed(2);
           // countdown timer during the guess
           $('timer').style.opacity = guessing ? '1' : '0';
           if (guessing) {
@@ -225,7 +225,7 @@
           // awe payoff fact on the reveal (fades in just after the values land)
           if (revealed && round.fact && !inCta) {
             $('fact').innerHTML = round.fact;
-            $('fact').style.opacity = clamp01((rf - FLIP - 0.3) / 0.4).toFixed(2);
+            $('fact').style.opacity = interpolate(rf, [FLIP + 0.3, FLIP + 0.7], [0, 1]).toFixed(2);
           } else { $('fact').style.opacity = '0'; }
 
           if (phase === 'cta') $('cta').textContent = data.cta || data.outro || '';
