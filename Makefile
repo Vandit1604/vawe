@@ -49,5 +49,10 @@ probe:
 studio:
 	node studio/server.mjs
 
+# make studio-check  — drive the studio headless across every format×orientation; fail on
+# scene errors, 4xx, or wrong dims. Writes a contact sheet to /tmp/studio_check.png.
+studio-check:
+	node studio/check.mjs
+
 clean:
 	rm -rf bin engine/out/*.mp4
