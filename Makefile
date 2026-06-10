@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify probe hooks list clean
+.PHONY: build video render all look frame verify probe hooks install-hooks studio studio-check list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -53,6 +53,11 @@ studio:
 # scene errors, 4xx, or wrong dims. Writes a contact sheet to /tmp/studio_check.png.
 studio-check:
 	node studio/check.mjs
+
+# make install-hooks  — activate the version-controlled git hooks (pre-push runs studio-check)
+install-hooks:
+	git config core.hooksPath .githooks
+	@echo "✓ git hooks active (.githooks) — pre-push runs studio-check"
 
 clean:
 	rm -rf bin engine/out/*.mp4

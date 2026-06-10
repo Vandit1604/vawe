@@ -1,0 +1,13 @@
+#!/bin/sh
+# Pre-push gate: block a push if the headless studio health check fails.
+# Catches studio regressions (scene errors, 4xx, wrong dims, broken timeline) before
+# they leave the machine. Bypass with `git push --no-verify` when you know better.
+#
+# Installed via `make install-hooks` (sets core.hooksPath to .githooks).
+
+echo "▶ pre-push: make studio-check …"
+if ! make studio-check; then
+  echo "✗ pre-push blocked: studio check failed. Fix it, or push with --no-verify to override." >&2
+  exit 1
+fi
+echo "✓ pre-push: studio healthy"
