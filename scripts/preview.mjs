@@ -37,7 +37,10 @@ const port = server.address().port;
 const t0 = Date.now();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
-await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+// landscape-aware: render at the data's real dims (a landscape scene in a portrait viewport crops)
+const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
+const VW = landscape ? 1920 : 1080, VH = landscape ? 1080 : 1920;
+await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
 const err = await page.evaluate(() => window.__engineError || null);
@@ -47,7 +50,7 @@ const { totalFrames: total, duration, stings, fps: F } = meta;
 
 const grab = async (frame, file) => {
   await page.evaluate((n) => window.__engine.renderFrame(n), frame);
-  await page.screenshot({ path: file, clip: { x: 0, y: 0, width: 1080, height: 1920 } });
+  await page.screenshot({ path: file, clip: { x: 0, y: 0, width: VW, height: VH } });
 };
 
 if (single != null) {

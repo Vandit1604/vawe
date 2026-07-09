@@ -134,11 +134,15 @@ export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, ma
 // = { name, dur, transition? }. Returns the active segment plus `enter` (0→1 over the leading
 // transition) and `exit` (0→1 over the trailing transition), so a scene can drive an in/out
 // transition on each segment. `active` = combined visibility (enter × (1 − exit)).
-export function sequence(n, fps, segments, { transition = 0.4 } = {}) {
+// holdLast (default true): the LAST segment never exits — there is no next scene to hand off to,
+// so the ending (usually the CTA) holds at full visibility through the final frame.
+// Pass { holdLast: false } for looping content that should fade back out.
+export function sequence(n, fps, segments, { transition = 0.4, holdLast = true } = {}) {
   const cur = track(n, fps, segments);
   const trans = segments[cur.index]?.transition ?? transition;
+  const isLast = cur.index === segments.length - 1;
   const enter = trans > 0 ? clamp01(cur.localT / trans) : 1;
-  const exit = trans > 0 ? clamp01((cur.localT - (cur.dur - trans)) / trans) : 0;
+  const exit = (trans > 0 && !(holdLast && isLast)) ? clamp01((cur.localT - (cur.dur - trans)) / trans) : 0;
   return { ...cur, enter, exit, active: enter * (1 - exit) };
 }
 

@@ -77,18 +77,18 @@
 
         <div class="pa-scene" id="s1">
           <div class="s-eyebrow" id="eyebrow"></div>
-          <div class="s-hero-title" id="heroTitle"></div>
+          <div class="s-hero-title" id="heroTitle" data-layer="critical"></div>
           <div class="s-hero-sub" id="heroSub"></div>
         </div>
         <div class="pa-scene" id="s2">
-          <div class="s-mech-title" id="mechTitle"></div>
+          <div class="s-mech-title" id="mechTitle" data-layer="critical"></div>
           <div class="s-flow" id="flow"></div>
         </div>
         <div class="pa-scene" id="s3"><div class="s-stats" id="stats"></div></div>
         <div class="pa-scene s-cta" id="s4">
           <div class="s-mark" id="mark"></div>
-          <div class="s-cta-h" id="ctaH"></div>
-          <div><span class="s-cta-url" id="ctaUrl"></span></div>
+          <div class="s-cta-h" id="ctaH" data-layer="critical"></div>
+          <div><span class="s-cta-url" id="ctaUrl" data-layer="critical"></span></div>
         </div>
 
         <div class="pa-dip" id="dip"></div>
@@ -204,7 +204,9 @@
             setT($('ctaUrl').parentElement, { opacity: u.toFixed(2), transform: `translateY(${lerp(20, 0, u).toFixed(1)}px)` });
           }
         }
-        return { fps, duration, stings: bounds.slice(0, -1), renderFrame };
+        // segments: studio-timeline + motion-audit contract — key = the top-level duration field to retime
+        const segments = SEGS.map((s, i) => ({ type: s.name, label: s.name, t0: bounds[i] - s.dur, t1: bounds[i], transition: s.transition, key: 't' + (i + 1) }));
+        return { fps, duration, stings: bounds.slice(0, -1), segments, renderFrame };
       });
     </script>
   </body>

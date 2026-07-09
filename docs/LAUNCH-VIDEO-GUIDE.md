@@ -20,9 +20,19 @@ Crawls the site's CSS and writes:
 
 Read `dna/<name>.json` — it tells you the dominant colour, the beats, and whether to go plain or busy.
 
-## Step 2 — Storyboard from the DNA
+## Step 2 — Compose a renderable draft from the DNA (deterministic)
 
-Pick a spine by the brand's voice (see `docs/DESIGN-DATABASE.md §15`):
+```bash
+make compose DNA=dna/<name>.json [FORMAT=brandfilm|demo|launch] [DUR=30] [WRITE=1]
+```
+The storyboard compiler (`scripts/compose.mjs`) turns the DNA into a **complete, schema-valid,
+renderable** scenes JSON — same DNA → byte-identical output. It classifies the site's headings
+(steps / features / CTA), budgets durations to the target, sets bg/value from the dominance
+strategy, and never invents numbers (stats only from an explicit `dna.stats`). Dry-run prints the
+beat table; `WRITE=1` saves `formats/<format>/<name>.json`. **Then polish the copy by hand** —
+the compiler gives you a correct draft, you give it taste.
+
+For a hand-authored storyboard instead, pick a spine by the brand's voice (see `docs/DESIGN-DATABASE.md §15`):
 mission→**Golden Circle** · performance→**PAS / Hook-Story-Offer** · transformation→**BAB** · launch→**AIDA**.
 
 Spine: **Hook (first 3s) → Build → Proof → Payoff (shocker at ~80–90%) → CTA (3–5s).**
@@ -66,8 +76,16 @@ It's real HTML (self-contained inline styles), so it renders faithfully and can 
 ```bash
 make video D=formats/demo/<name>-ad.json     # → engine/out/<name>-ad.mp4
 make probe M=demo                            # purity (must stay green)
+make motion M=demo                           # animation-over-time contract: final frame holds,
+                                             # payoffs settle before the exit, typing completes
+make audit M=demo                            # layout (landscape-aware, [data-layer=critical])
 # eyeball frames: ffmpeg -ss <t> -i out.mp4 -frames:v 1 f.png
 ```
+
+**The motion contract (enforced by `make motion`):** a scene is fully opaque from `TRANS → dur−TRANS`;
+every payoff must settle by `dur − TRANS − HOLD` (0.5 + 0.6s) and HOLD there; the last scene never
+exits (`sequence()` holdLast). Typewriters/count-ups derive their windows from content length, never
+fixed constants. Tag looping chrome (carets, spinners) `data-motion="loop"` to exempt it.
 
 ## The knowledge (consult before authoring)
 

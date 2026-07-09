@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap lib-test validate brandkit review hooks install-hooks studio studio-check assets list clean
+.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit review hooks install-hooks studio studio-check assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -53,6 +53,12 @@ audit:
 snap:
 	node scripts/scene-snap.mjs $(M) $(if $(SAVE),--save)
 
+# make motion [M=<format>] [STRIDE=2]  — animation-over-time audit: renders every frame headless (no
+# video) and asserts the motion contract (final frame holds, reveals monotonic, payoffs settle before
+# the exit, counters sane, typing completes). The check `make snap`/`make audit` can't do.
+motion:
+	node scripts/motion-audit.mjs $(M) $(if $(STRIDE),--stride $(STRIDE))
+
 # make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
 lib-test:
 	node scripts/lib-test.mjs
@@ -61,6 +67,12 @@ lib-test:
 # + download fonts + fetch favicon. One command to onboard any brand's video (see scripts/brandkit.mjs).
 brandkit:
 	node scripts/brandkit.mjs $(URL) $(NAME)
+
+# make compose DNA=dna/brand.json [FORMAT=brandfilm|demo|launch] [DUR=30] [WRITE=1]  — deterministic
+# storyboard compiler: Brand DNA → complete renderable scenes JSON (same input → byte-identical
+# output). Dry-run prints the beat table; WRITE=1 saves formats/<format>/<brand>.json.
+compose:
+	node scripts/compose.mjs $(DNA) --format $(or $(FORMAT),brandfilm) $(if $(DUR),--duration $(DUR)) $(if $(WRITE),--write)
 
 # make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
 # (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/capture-component.mjs.

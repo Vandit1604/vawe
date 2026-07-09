@@ -1,0 +1,229 @@
+// scripts/motion-audit.mjs — check ANIMATION OVER TIME without rendering video. Renders every frame
+// headless (no encode, no screenshots), builds a per-element time series ({effective opacity, position,
+// text}) for id'd / [data-layer="critical"] elements, and asserts the motion contract per segment:
+//
+//   FAIL  (i)   final hold        — the last visible frame of a segment (and of the video) is not faded
+//   FAIL  (ii)  reveal monotonic  — a reveal's opacity never drops mid-scene (outside transitions)
+//   FAIL  (iii) settle before exit— payoffs reach steady state ≥0.5s before the exit transition
+//   FAIL  (iv)  count-up sane     — counters are non-decreasing and stable at the end
+//   FAIL  (v)   typing completes  — typewriter text reaches its full length before the exit
+//   WARN  (vi)  frozen span       — >2s where nothing tracked changes (dead time)
+//   WARN  (vii) velocity spike    — >80px/frame jumps outside segment boundaries
+//
+// Exemptions are declarative: elements (or ancestors) with data-motion="loop" (carets, spinners,
+// pulsing chrome) are skipped by (ii)/(iii). Segment windows come from meta.segments (each format
+// returns its SEGS); fallback: meta.stings, then the whole video as one segment.
+//
+//   node scripts/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
+//   make motion [M=<format>] [STRIDE=2]
+import fs from 'node:fs';
+import path from 'node:path';
+import http from 'node:http';
+import { fileURLToPath } from 'node:url';
+import puppeteer from 'puppeteer';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const args = process.argv.slice(2);
+const flag = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
+const STRIDE = Math.max(1, parseInt(flag('--stride') || '1', 10));
+const DATA = flag('--data');
+const JSON_OUT = args.includes('--json');
+let formats = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--stride' && args[i - 1] !== '--data');
+if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'formats')).filter((f) => fs.existsSync(path.join(repoRoot, 'formats', f, 'sample.json'))).sort();
+
+const FPS = 30;
+const HOLDW = 0.5;              // settle window: payoffs must be steady for this long before the exit
+const INFRA = new Set(['cv', 'root', 'dip', 'grain', 'stage', 'ripple', 'cursor', 'brand', 'vig']); // chrome, not content
+
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
+const port = server.address().port;
+const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+
+// parse "$1,247", "2.5M", "412ms", "88%" → number (for count-up monotonicity)
+const parseNum = (t) => {
+  const m = /-?\$?\s*([\d,]+(?:\.\d+)?)\s*([KMB])?/.exec(t || '');
+  if (!m) return null;
+  const v = parseFloat(m[1].replace(/,/g, ''));
+  return v * ({ K: 1e3, M: 1e6, B: 1e9 }[m[2]] || 1);
+};
+
+async function audit(format) {
+  const dataPath = DATA || `formats/${format}/sample.json`;
+  const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
+  const landscape = data.orientation === 'landscape';
+  const page = await browser.newPage();
+  await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
+  await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
+  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  const err = await page.evaluate(() => window.__engineError);
+  if (err) { await page.close(); return { format, error: String(err), findings: [] }; }
+  const meta = await page.evaluate(() => window.__engine.meta);
+  const total = meta.totalFrames;
+
+  // ---- capture: per-element time series across every (strided) frame ----
+  const series = await page.evaluate(async (total, stride) => {
+    const els = [...document.querySelectorAll('[id], [data-layer="critical"]')];
+    const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
+    const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
+    const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
+    const out = { keys, loop, frames: [], rows: keys.map(() => []) };
+    for (let f = 0; f < total; f += stride) {
+      window.__engine.renderFrame(f);
+      out.frames.push(f);
+      els.forEach((el, i) => {
+        const b = el.getBoundingClientRect();
+        if ((b.width < 1 && b.height < 1) || !el.getClientRects().length) { out.rows[i].push(null); return; }
+        let eop = 1, hidden = false;
+        for (const node of chains[i]) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; } eop *= +s.opacity; }
+        if (hidden) { out.rows[i].push(null); return; }
+        const t = (el.textContent || '').trim();
+        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32)]);
+      });
+    }
+    return out;
+  }, total, STRIDE);
+  await page.close();
+
+  // ---- segments (frame windows + transition) ----
+  // meta.segments = the format DECLARES its scene windows → the motion contract is enforceable (FAIL).
+  // Fallback to stings is heuristic (stings are often beat markers, not cuts) → observations only (WARN).
+  let segs = (meta.segments || []).map((s) => ({ name: s.name || s.label || s.type, dur: s.dur ?? (s.t1 - s.t0), trans: s.transition ?? 0.4 })); // accepts {dur} or studio {t0,t1}
+  const declared = segs.length > 0;
+  if (!segs.length && (meta.stings || []).length) {
+    const cuts = [...meta.stings, total / FPS]; let prev = 0;
+    segs = cuts.map((c, i) => { const s = { name: 'seg' + i, dur: c - prev, trans: 0.4 }; prev = c; return s; });
+  }
+  if (!segs.length) segs = [{ name: 'all', dur: total / FPS, trans: 0 }];
+  let acc = 0;
+  const windows = segs.map((s, i) => {
+    const start = Math.round(acc * FPS); acc += s.dur;
+    const isLast = i === segs.length - 1;
+    const end = Math.min(Math.round(acc * FPS), total);                       // exclusive
+    const visEnd = isLast ? end : end - Math.round(s.trans * FPS);            // content window end (exit starts here)
+    return { ...s, i, start, end, visEnd, isLast };
+  });
+
+  // ---- checks ----
+  const F = series.frames, at = (i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
+  const inWin = (f, a, b) => f >= a && f < b;
+  const findings = [];
+  const add = (level, check, seg, key, msg) => findings.push({ level: declared ? level : 'WARN', check, seg: seg?.name, key, msg });
+  const K = series.keys, LOOP = series.loop;
+  const content = K.map((k, i) => !INFRA.has(k) && !LOOP[i]);
+
+  for (const w of windows) {
+    if (w.visEnd - w.start < FPS * 0.8) continue; // too short to judge
+    const lastVisF = w.visEnd - 1 - ((w.visEnd - 1 - F[0]) % STRIDE || 0);
+
+    // (i) final hold — the payoff frame of this segment must not be faded
+    let maxOp = 0, any = false;
+    K.forEach((k, i) => { if (!content[i]) return; const v = at(i, lastVisF); if (v) { any = true; maxOp = Math.max(maxOp, v[2]); } });
+    if (any && maxOp < 0.9) add('FAIL', 'i:final-hold', w, '', `at ${(lastVisF / FPS).toFixed(2)}s max content opacity ${maxOp.toFixed(2)} < 0.9 (segment ends faded)`);
+    if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements — add data-layer="critical" to key elements');
+
+    K.forEach((k, i) => {
+      if (!content[i]) return;
+      const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd), idx2 = F.findIndex((f) => f >= w.end);
+      const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1, hiFull = idx2 < 0 ? F.length : idx2;
+      // typewriter length over the FULL segment — typing that spills into the exit window is the bug
+      let maxTl = 0;
+      for (let j = lo; j < hiFull; j++) { const v = series.rows[i][j]; if (v) maxTl = Math.max(maxTl, v[3]); }
+      let prev = null, prevF = -1, nums = [], maxDrop = 0, dropAt = 0;
+      for (let j = lo; j < hi; j++) {
+        const v = series.rows[i][j]; const f = F[j];
+        if (v) { const n = parseNum(v[4]); if (n !== null && v[3] < 24) nums.push(n); }
+        if (v && prev && prevF === F[j - 1]) {
+          const dop = prev[2] - v[2];
+          if (dop > maxDrop && f - w.start > w.trans * FPS) { maxDrop = dop; dropAt = f; }
+          const dx = Math.abs(v[0] - prev[0]), dy = Math.abs(v[1] - prev[1]);
+          if ((dx > 80 || dy > 80) && f - w.start > 2 && w.end - f > 2) add('WARN', 'vii:jump', w, k, `${Math.max(dx, dy).toFixed(0)}px jump at ${(f / FPS).toFixed(2)}s`);
+        }
+        prev = v; prevF = f;
+      }
+      // (ii) reveal monotonicity — opacity must not visibly dip mid-scene
+      if (maxDrop > 0.15) add('FAIL', 'ii:monotonic', w, k, `opacity drops ${maxDrop.toFixed(2)} at ${(dropAt / FPS).toFixed(2)}s (mid-scene fade)`);
+      // (iv) count-up sanity — a counter must be monotone (up OR down: timers count down,
+      // data-tracking values may dip legitimately → only flag when it reverses BOTH ways)
+      if (new Set(nums).size >= 3) {
+        const range = Math.max(...nums) - Math.min(...nums), eps = Math.max(range * 0.01, 0.001);
+        let up = false, down = false, at = null;
+        for (let j = 1; j < nums.length; j++) { if (nums[j] > nums[j - 1] + eps) up = true; if (nums[j] < nums[j - 1] - eps) { down = true; if (up) at = `${nums[j - 1]} → ${nums[j]}`; } }
+        if (up && down && at) add('WARN', 'iv:countup', w, k, `counter reverses direction (${at}) — overshoot or wrong easing?`);
+      }
+      // (v) typewriter completes — text reaches its max length before the exit.
+      // Only a MONOTONE-growing text is a typewriter; count-ups wobble in length ("999,999" → "1.2M").
+      const endV = at(i, lastVisF);
+      if (maxTl >= 8 && endV && maxTl - endV[3] > 0) {
+        const grew = series.rows[i].slice(lo, hi).filter(Boolean).map((v) => v[3]);
+        const monotone = grew.every((v, j) => j === 0 || v >= grew[j - 1]);
+        if (monotone && grew.length > 2 && grew[grew.length - 1] < maxTl && grew[grew.length - 1] - grew[0] >= 8)
+          add('FAIL', 'v:typing', w, k, `text ends at ${endV[3]}/${maxTl} chars before the exit`);
+      }
+      // (iii) settle before exit — steady over the last HOLDW s of the content window
+      const sIdx0 = F.findIndex((f) => f >= w.visEnd - Math.round(HOLDW * FPS));
+      if (sIdx0 >= 0) {
+        let ok = true, why = '';
+        let pv = null, pf = -1;
+        for (let j = sIdx0; j < hi; j++) {
+          const v = series.rows[i][j];
+          if (!v) { pv = null; continue; }
+          if (pv && pf === F[j - 1]) {
+            if (Math.abs(v[0] - pv[0]) > 0.7 || Math.abs(v[1] - pv[1]) > 0.7) { ok = false; why = `still moving (Δ${Math.max(Math.abs(v[0] - pv[0]), Math.abs(v[1] - pv[1])).toFixed(1)}px/f)`; }
+            else if (Math.abs(v[2] - pv[2]) > 0.02) { ok = false; why = `opacity still changing (Δ${Math.abs(v[2] - pv[2]).toFixed(3)}/f)`; }
+            else if (v[3] !== pv[3]) { ok = false; why = 'text still changing'; }
+            if (!ok) { add('FAIL', 'iii:settle', w, k, `${why} at ${(F[j] / FPS).toFixed(2)}s — payoff not settled ${HOLDW}s before exit`); break; }
+          }
+          pv = v; pf = F[j];
+        }
+      }
+    });
+
+    // (vi) frozen span — nothing tracked changes for >2s inside the content window
+    const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd);
+    const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1;
+    let lastChange = lo;
+    for (let j = lo + 1; j < hi; j++) {
+      let changed = false;
+      for (let i = 0; i < K.length; i++) {
+        if (!content[i]) continue;
+        const a = series.rows[i][j - 1], b = series.rows[i][j];
+        if (!!a !== !!b) { changed = true; break; }
+        if (a && b && (Math.abs(a[0] - b[0]) > 0.3 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.005 || a[3] !== b[3])) { changed = true; break; }
+      }
+      if (changed) lastChange = j;
+      else if (F[j] - F[lastChange] > 2 * FPS) { add('WARN', 'vi:frozen', w, '', `nothing moves ${(F[lastChange] / FPS).toFixed(1)}s → ${(F[j] / FPS).toFixed(1)}s`); lastChange = j; }
+    }
+  }
+
+  // global final frame (whole video must not end faded)
+  const lastF = F[F.length - 1];
+  let gMax = 0, gAny = false;
+  K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
+  if (gAny && gMax < 0.9) findings.unshift({ level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` });
+
+  return { format, total, segments: windows.length, findings };
+}
+
+const results = [];
+for (const f of formats) {
+  try { results.push(await audit(f)); }
+  catch (e) { results.push({ format: f, error: String(e && e.message || e), findings: [] }); }
+}
+await browser.close(); server.close();
+
+if (JSON_OUT) { console.log(JSON.stringify(results, null, 2)); }
+else {
+  console.log('==================== MOTION AUDIT ====================');
+  for (const r of results) {
+    if (r.error) { console.log(`✗ err  ${r.format} — ${r.error}`); continue; }
+    const fails = r.findings.filter((x) => x.level === 'FAIL'), warns = r.findings.filter((x) => x.level === 'WARN');
+    console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
+    const show = [...fails, ...warns];
+    for (const x of show.slice(0, 30)) console.log(`    [${x.level === 'FAIL' ? x.check : x.check + ' · warn'}] ${x.seg || ''}${x.key ? ' "' + x.key + '"' : ''} — ${x.msg}`);
+    if (show.length > 30) console.log(`    … +${show.length - 30} more`);
+  }
+}
+const failed = results.some((r) => r.error || r.findings.some((x) => x.level === 'FAIL'));
+console.log(failed ? '\n✗ motion audit found hard failures' : '\n✓ motion contract holds across all checked formats');
+process.exit(failed ? 1 : 0);

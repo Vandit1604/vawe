@@ -3,17 +3,34 @@
 //   crawl CSS → extract colours + roles → detect DOMINANT bg (white-first vs dark) → download fonts →
 //   fetch favicon → write themes/<name>.json (palette + bg preset palette + type + format vars).
 //
-//   node scripts/brandkit.mjs https://threadcite.live threadcite
+//   node scripts/brandkit.mjs https://threadcite.live threadcite [--static] [--offline]
 //   make brandkit URL=https://threadcite.live NAME=threadcite
 //
 // After it runs: set "theme":"<name>" in a demo/brandfilm data JSON; the fonts @font-face lines it
 // prints go into core/tokens.css (once). Idempotent-ish; re-run to refresh.
+//
+// Determinism: every run caches its raw inputs (page HTML + collected CSS) to dna/cache/<name>/;
+// --offline re-derives theme + DNA purely from that cache — same input → same output, no network.
+// --static skips the puppeteer fallback used when server HTML looks client-rendered (SPA).
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const UA = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36' };
-const get = async (url) => { const r = await fetch(url, { headers: UA }); if (!r.ok) throw new Error(`${r.status} ${url}`); return r; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// fetch with a 15s timeout + 2 retries on network error / 5xx (4xx fails fast — retrying won't help)
+const get = async (url, tries = 3) => {
+  let last;
+  for (let i = 0; i < tries; i++) {
+    let r;
+    try { r = await fetch(url, { headers: UA, signal: AbortSignal.timeout(15000) }); }
+    catch (e) { last = e; await sleep(300 * (i + 1)); continue; }
+    if (r.ok) return r;
+    if (r.status < 500) throw new Error(`${r.status} ${url}`);
+    last = new Error(`${r.status} ${url}`); await sleep(300 * (i + 1));
+  }
+  throw last;
+};
 const getText = async (url) => (await get(url)).text();
 
 // ---- colour helpers ----
@@ -26,25 +43,67 @@ const mix = (a, b, t) => toHex(hex(a).map((x, i) => x + (hex(b)[i] - x) * t));
 const norm = (v) => { v = (v || '').trim().replace(/;$/, ''); const m = v.match(/#[0-9a-f]{3,8}/i); return m ? m[0].toLowerCase().slice(0, 7) : null; };
 
 async function main() {
-  const url = process.argv[2], name = process.argv[3];
-  if (!url || !name) { console.error('usage: node scripts/brandkit.mjs <url> <name>'); process.exit(1); }
+  const argv = process.argv.slice(2);
+  const [url, name] = argv.filter((a) => !a.startsWith('--'));
+  const STATIC = argv.includes('--static'), OFFLINE = argv.includes('--offline');
+  if (!url || !name) { console.error('usage: node scripts/brandkit.mjs <url> <name> [--static] [--offline]'); process.exit(1); }
   const origin = new URL(url).origin;
-  const html = await getText(url);
+  const cacheDir = path.join(ROOT, 'dna', 'cache', name);
 
-  // 1) gather CSS
-  const cssHrefs = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi)].map((m) => m[1])
-    .concat([...html.matchAll(/<link[^>]+href=["']([^"']+\.css[^"']*)["']/gi)].map((m) => m[1]));
-  let css = '';
-  for (const href of [...new Set(cssHrefs)].slice(0, 6)) { try { css += '\n' + await getText(href.startsWith('http') ? href : origin + href); } catch {} }
+  let html, css;
+  if (OFFLINE) {
+    // re-derive purely from the cached raw inputs — deterministic, no network
+    html = fs.readFileSync(path.join(cacheDir, 'page.html'), 'utf8');
+    css = fs.readFileSync(path.join(cacheDir, 'styles.css'), 'utf8');
+  } else {
+    html = await getText(url);
+
+    // 1) gather CSS: linked stylesheets (up to 12) + inline <style> blocks + one level of @import
+    const cssHrefs = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi)].map((m) => m[1])
+      .concat([...html.matchAll(/<link[^>]+href=["']([^"']+\.css[^"']*)["']/gi)].map((m) => m[1]));
+    css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
+    const abs = (href) => (href.startsWith('http') ? href : href.startsWith('//') ? 'https:' + href : origin + (href.startsWith('/') ? '' : '/') + href);
+    for (const href of [...new Set(cssHrefs)].slice(0, 12)) {
+      try {
+        let sheet = await getText(abs(href));
+        for (const im of [...sheet.matchAll(/@import\s+(?:url\()?["']?([^"')]+)["']?\)?/g)].slice(0, 4)) {
+          try { sheet += '\n' + await getText(im[1].startsWith('http') ? im[1] : abs(im[1])); } catch {}
+        }
+        css += '\n' + sheet;
+      } catch {}
+    }
+
+    // SPA fallback: server HTML with almost no headings is client-rendered — re-extract via headless Chrome
+    const staticHeadings = [...html.matchAll(/<h[1-3][^>]*>/gi)].length;
+    if (staticHeadings < 3 && !STATIC) {
+      try {
+        const { default: puppeteer } = await import('puppeteer');
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+        const page = await browser.newPage();
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }).catch(() => {});
+        html = await page.content();
+        await browser.close();
+        console.error(`  · static HTML looked client-rendered (${staticHeadings} headings) — used rendered DOM`);
+      } catch (e) { console.error('  · puppeteer fallback unavailable:', e.message); }
+    }
+
+    // cache the raw inputs so --offline re-runs are same-input → same-output
+    fs.mkdirSync(cacheDir, { recursive: true });
+    fs.writeFileSync(path.join(cacheDir, 'page.html'), html);
+    fs.writeFileSync(path.join(cacheDir, 'styles.css'), css);
+  }
 
   // 2) named role tokens (Tailwind/shadcn style) → the strongest signal for roles
   const tokens = {};
   for (const m of css.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{3,8})/gi)) tokens['--' + m[1].toLowerCase()] = m[2].toLowerCase();
   const pick = (...names) => { for (const n of names) if (tokens[n]) return norm(tokens[n]); return null; };
 
-  // 3) frequency of all hex (fallback + palette breadth)
+  // 3) frequency of all colours — hex AND rgb()/rgba() literals (CSS-in-JS sites emit rgb)
   const freq = {};
   for (const m of css.matchAll(/#[0-9a-f]{6}\b/gi)) { const c = m[0].toLowerCase(); freq[c] = (freq[c] || 0) + 1; }
+  for (const m of css.matchAll(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(?:1|0?\.9\d*)\s*)?\)/g)) {
+    const c = toHex([+m[1], +m[2], +m[3]]); freq[c] = (freq[c] || 0) + 1;
+  }
   const byFreq = Object.entries(freq).sort((a, b) => b[1] - a[1]).map((e) => e[0]);
   const lightest = byFreq.filter((c) => lum(c) > 0.9).sort((a, b) => lum(b) - lum(a));
   const darkest = byFreq.filter((c) => lum(c) < 0.2).sort((a, b) => lum(a) - lum(b));
@@ -74,24 +133,41 @@ async function main() {
   const mono = fams.find((f) => /mono|jetbrains|geist mono|fira|ibm plex mono/i.test(f)) || 'JetBrains Mono';
   const serif = fams.find((f) => /serif|caveat|instrument|playfair|lora|fraunces/i.test(f)) || null;
 
-  // 6) download fonts (Google Fonts, best-effort) + favicon
+  // 6) download fonts (Google Fonts first; else the site's own @font-face woff2) + favicon
   const fontDir = path.join(ROOT, 'engine/assets/fonts');
   const face = [];
-  for (const [fam, wght] of [[sans, '400;600;700;800'], [mono, '400;700'], serif ? [serif, '400;700'] : null].filter(Boolean)) {
+  const absUrl = (u) => (u.startsWith('http') ? u : u.startsWith('//') ? 'https:' + u : origin + (u.startsWith('/') ? '' : '/') + u);
+  if (!OFFLINE) for (const [fam, wght] of [[sans, '400;600;700;800'], [mono, '400;700'], serif ? [serif, '400;700'] : null].filter(Boolean)) {
+    const file = fam.replace(/[^A-Za-z0-9]/g, '') + '.woff2';
     try {
       const gcss = await getText(`https://fonts.googleapis.com/css2?family=${encodeURIComponent(fam)}:wght@${wght}&display=swap`);
       const woff = [...gcss.matchAll(/https:\/\/[^)]+\.woff2/g)].map((m) => m[0]).pop();
       if (!woff) throw 0;
-      const file = fam.replace(/[^A-Za-z0-9]/g, '') + '.woff2';
       fs.writeFileSync(path.join(fontDir, file), Buffer.from(await (await get(woff)).arrayBuffer()));
       face.push(`@font-face { font-family: '${fam}'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/${file}') format('woff2'); }`);
-    } catch { console.error(`  · font "${fam}" not on Google Fonts — add manually`); }
+    } catch {
+      // not on Google Fonts → self-hosted? scan the site's own @font-face for this family's woff2
+      try {
+        const ff = [...css.matchAll(/@font-face\s*{[^}]*}/gi)].map((m) => m[0])
+          .find((b) => new RegExp(`font-family:\\s*["']?${fam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i').test(b));
+        const src = ff && (ff.match(/url\((['"]?)([^'")]+\.woff2[^'")]*)\1\)/i) || [])[2];
+        if (!src) throw 0;
+        fs.writeFileSync(path.join(fontDir, file), Buffer.from(await (await get(absUrl(src))).arrayBuffer()));
+        face.push(`@font-face { font-family: '${fam}'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/${file}') format('woff2'); }`);
+        console.error(`  · font "${fam}" downloaded from the site's own @font-face`);
+      } catch { console.error(`  · font "${fam}" not on Google Fonts and no self-hosted woff2 found — add manually`); }
+    }
   }
   const brandDir = path.join(ROOT, 'engine/assets/brands', name); fs.mkdirSync(brandDir, { recursive: true });
   let favicon = '';
-  const icoHref = (html.match(/<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]*href=["']([^"']+)["']/i) || [])[1];
-  for (const cand of [icoHref, '/icon.png', '/favicon.png', '/favicon.ico', '/icon.svg'].filter(Boolean)) {
-    try { const r = await get(cand.startsWith('http') ? cand : origin + cand); const ext = (cand.split('?')[0].match(/\.(png|svg|ico)$/) || [, 'png'])[1];
+  // prefer the LARGEST declared icon (apple-touch first, then sized rel=icon), then the guess list
+  const iconLinks = [...html.matchAll(/<link[^>]+rel=["']([^"']*icon[^"']*)["'][^>]*>/gi)].map((m) => ({
+    rel: m[1], href: (m[0].match(/href=["']([^"']+)["']/) || [])[1],
+    size: parseInt((m[0].match(/sizes=["'](\d+)/) || [])[1] || (/apple-touch/i.test(m[1]) ? '180' : '0'), 10),
+  })).filter((l) => l.href).sort((a, b) => b.size - a.size);
+  if (OFFLINE) { const ex = ['png', 'svg', 'ico'].find((e) => fs.existsSync(path.join(brandDir, 'icon.' + e))); if (ex) favicon = `/engine/assets/brands/${name}/icon.${ex}`; }
+  else for (const cand of [...iconLinks.map((l) => l.href), '/icon.png', '/favicon.png', '/favicon.ico', '/icon.svg'].filter(Boolean)) {
+    try { const r = await get(absUrl(cand)); const ext = (cand.split('?')[0].match(/\.(png|svg|ico)$/) || [, 'png'])[1];
       const f = path.join(brandDir, 'icon.' + ext); fs.writeFileSync(f, Buffer.from(await r.arrayBuffer())); favicon = `/engine/assets/brands/${name}/icon.${ext}`; break; } catch {}
   }
 
@@ -139,6 +215,7 @@ async function main() {
   // 7.5) BRAND DNA — the full identity a generator uses to storyboard the video.
   const dna = {
     name, url, dominant,
+    source: { cache: path.relative(ROOT, cacheDir) }, // provenance: raw inputs cached for --offline re-derivation
     product: { name: productName, tagline: headings[0] || description.split(/[.·]/)[0] || '', description, headings, ctaText: buttons[0] || 'Get started' },
     colors: { bg, surface, ink, accent, accentSoft, muted, border, dominant },
     type: theme.type, favicon,

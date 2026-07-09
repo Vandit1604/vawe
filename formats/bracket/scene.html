@@ -103,8 +103,8 @@
         </div>
       </div>
 
-      <!-- ROUND CARD -->
-      <div class="panel" id="pRound">
+      <!-- ROUND CARD (panels swap content across matches — exempt from motion monotonicity) -->
+      <div class="panel" id="pRound" data-motion="swap">
         <div class="rc-kick" id="rcKick">THE BRACKET</div>
         <div class="rc-name" id="rcName" data-layer="critical">ROUND OF 16</div>
         <div class="rc-stat" id="rcStat"></div>
@@ -112,7 +112,7 @@
       </div>
 
       <!-- MATCH -->
-      <div class="panel" id="pMatch">
+      <div class="panel" id="pMatch" data-motion="swap">
         <div class="m-head"><span class="r" id="mRound">ROUND OF 16</span><span class="s" id="mProg">1 / 8</span></div>
         <div class="m-q" id="mQ" data-layer="critical">Higher <b>POWER</b> wins</div>
         <div class="m-cards" id="mCards">

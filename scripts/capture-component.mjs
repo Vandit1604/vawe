@@ -3,7 +3,7 @@
 // styles (so it renders identically without the site's CSS), absolutizes images, and writes a JSON
 // { html, w, h } the video engine can drop into a `component` scene and animate.
 //
-//   node scripts/capture-component.mjs <url> "<css-selector>" <brand> <label>
+//   node scripts/capture-component.mjs <url> "<css-selector>" <brand> <label> [--viewport 1512x950] [--settle 500]
 //   make capture URL=https://site.com SEL=".pricing-card" NAME=acme LABEL=pricing
 //
 // Output: engine/assets/brands/<brand>/components/<label>.json
@@ -13,17 +13,35 @@ import path from 'node:path';
 import puppeteer from 'puppeteer';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const [url, selector, brand, label] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
+const [url, selector, brand, label] = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--viewport' && argv[i - 1] !== '--settle');
 if (!url || !selector || !brand || !label) {
-  console.error('usage: node scripts/capture-component.mjs <url> "<selector>" <brand> <label>');
+  console.error('usage: node scripts/capture-component.mjs <url> "<selector>" <brand> <label> [--viewport WxH] [--settle ms]');
   process.exit(1);
 }
+const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
+const SETTLE = parseInt(flag('--settle', '0'), 10);
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
-await page.setViewport({ width: 1512, height: 950, deviceScaleFactor: 2 });
-await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }).catch(() => {});
-await new Promise((r) => setTimeout(r, 800)); // let fonts/animations settle
+await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
+try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
+catch (e) { // slow page: retry on domcontentloaded rather than silently capturing a half-loaded DOM
+  console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`);
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+}
+// settle DETERMINISTICALLY: fonts loaded + target in view + its images decoded + two frames painted
+await page.evaluate(async (selector) => {
+  await document.fonts.ready;
+  const el = document.querySelector(selector);
+  if (el) {
+    el.scrollIntoView({ block: 'center' });
+    await Promise.all([...el.querySelectorAll('img')].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
+  }
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+}, selector);
+if (SETTLE) await new Promise((r) => setTimeout(r, SETTLE)); // escape hatch for JS-animated sections
 
 const result = await page.evaluate((selector) => {
   const el = document.querySelector(selector);
@@ -38,7 +56,8 @@ const result = await page.evaluate((selector) => {
     'font-style', 'line-height', 'letter-spacing', 'text-align', 'text-transform', 'text-decoration', 'text-shadow',
     'white-space', 'opacity', 'transform', 'transform-origin', 'flex-grow', 'flex-shrink', 'flex-basis',
     'flex-direction', 'flex-wrap', 'align-items', 'justify-content', 'gap', 'grid-template-columns', 'grid-template-rows',
-    'object-fit', 'overflow', 'list-style', 'vertical-align', 'fill', 'stroke', 'stroke-width', 'backdrop-filter', 'filter'];
+    'object-fit', 'overflow', 'list-style', 'vertical-align', 'fill', 'stroke', 'stroke-width', 'backdrop-filter', 'filter',
+    'clip-path', 'mask', 'mask-image', 'aspect-ratio', 'mix-blend-mode', 'background-blend-mode', 'outline', 'column-gap', 'row-gap'];
   const DEFAULT = { 'z-index': 'auto', 'transform': 'none', 'background-image': 'none', 'box-shadow': 'none',
     'text-shadow': 'none', 'text-decoration': 'none solid rgb(0, 0, 0)', 'letter-spacing': 'normal', 'filter': 'none',
     'backdrop-filter': 'none', 'list-style': 'outside none none', 'opacity': '1' };
@@ -63,6 +82,11 @@ const result = await page.evaluate((selector) => {
     if (node.nodeType !== 1) return;
     node.setAttribute('style', node.__inline || '');
     node.removeAttribute('class'); node.removeAttribute('id');
+    // before stripping srcset, promote its LARGEST candidate into src (lazy loaders often leave a placeholder src)
+    if (node.tagName === 'IMG' && node.getAttribute('srcset')) {
+      const best = node.getAttribute('srcset').split(',').map((s) => { const [u, d] = s.trim().split(/\s+/); return { u, w: parseFloat(d) || 1 }; }).sort((a, b) => b.w - a.w)[0];
+      if (best?.u) node.setAttribute('src', best.u);
+    }
     for (const a of [...node.attributes]) if (/^on/i.test(a.name) || a.name === 'srcset' || a.name === 'loading') node.removeAttribute(a.name);
     if (node.tagName === 'IMG' && node.getAttribute('src')) node.setAttribute('src', abs(node.getAttribute('src')));
     for (const c of node.children) apply(c);
@@ -71,8 +95,10 @@ const result = await page.evaluate((selector) => {
   // walk clone + live in lockstep to copy the __inline we computed on the live tree
   (function copy(live, cl) { cl.__inline = live.__inline; for (let i = 0; i < live.children.length; i++) copy(live.children[i], cl.children[i]); })(el, clone);
   apply(clone);
+  // distinct font families the component actually uses — recorded so render-time misses are loud
+  const fonts = [...new Set([el, ...el.querySelectorAll('*')].map((n) => getComputedStyle(n).fontFamily.split(',')[0].replace(/['"]/g, '').trim()).filter(Boolean))];
   const r = el.getBoundingClientRect();
-  return { html: clone.outerHTML, w: Math.round(r.width), h: Math.round(r.height) };
+  return { html: clone.outerHTML, w: Math.round(r.width), h: Math.round(r.height), fonts };
 }, selector);
 
 await browser.close();
@@ -81,6 +107,15 @@ if (!result || result.error) { console.error('✗ capture failed:', result?.erro
 const dir = path.join(ROOT, 'engine/assets/brands', brand, 'components');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
-fs.writeFileSync(out, JSON.stringify({ url, selector, w: result.w, h: result.h, html: result.html }, null, 0) + '\n');
+fs.writeFileSync(out, JSON.stringify({ url, selector, w: result.w, h: result.h, fonts: result.fonts, html: result.html }, null, 0) + '\n');
 console.log(`✓ captured "${selector}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${(result.html.length / 1024).toFixed(1)}kb)`);
+// warn LOUDLY when a used font isn't installed — otherwise it silently substitutes at render time
+try {
+  const tokens = fs.readFileSync(path.join(ROOT, 'core/tokens.css'), 'utf8');
+  const generic = /^(system-ui|sans-serif|serif|monospace|-apple-system|ui-sans-serif|ui-monospace|arial|helvetica)/i;
+  for (const f of result.fonts || []) {
+    if (!generic.test(f) && !tokens.includes(`'${f}'`) && !tokens.includes(`"${f}"`))
+      console.warn(`  ⚠ font "${f}" is used by this component but has no @font-face in core/tokens.css — it will SUBSTITUTE at render. Run brandkit (downloads fonts) or add it manually.`);
+  }
+} catch {}
 console.log(`  use in a demo scene: { "type": "component", "use": "${label}", "src": "/engine/assets/brands/${brand}/components/${label}.json" }`);

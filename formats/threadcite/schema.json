@@ -1,1 +1,29 @@
-{ "title": "ThreadCite (bespoke editorial)", "description": "Bespoke landscape editorial format for ThreadCite: Reddit thread + AI-citation mockups, handwritten Caveat annotations, highlighter. Scenes[]: hook/thread/reply/cite/line/cta.", "fields": {} }
+{
+  "title": "ThreadCite (bespoke editorial)",
+  "description": "Bespoke landscape editorial format for ThreadCite: Reddit thread + AI-citation mockups, handwritten Caveat annotations, highlighter. Scenes[]: hook/thread/reply/cite/line/cta.",
+  "note": "data.theme optional — the format carries its own editorial palette.",
+  "fields": {
+    "orientation": { "type": "string", "label": "Orientation", "enum": ["portrait", "landscape"] },
+    "scenes": { "type": "array", "label": "Scenes", "required": true, "minItems": 2, "maxItems": 12, "item": {
+      "type": { "type": "string", "label": "Scene type", "required": true, "enum": ["hook", "thread", "reply", "cite", "line", "cta"] },
+      "dur": { "type": "number", "label": "Duration (s)", "min": 2, "max": 10 },
+      "title": { "type": "string", "label": "Headline" },
+      "eyebrow": { "type": "string", "label": "Eyebrow (hook)" },
+      "pre": { "type": "string", "label": "Text before the marked word (hook/line)" },
+      "mark": { "type": "string", "label": "Highlighted word (hook/line)" },
+      "post": { "type": "string", "label": "Text after the marked word (hook/line)" },
+      "note": { "type": "string", "label": "Handwritten note" },
+      "sub": { "type": "string", "label": "Subreddit (thread/reply)" },
+      "time": { "type": "string", "label": "Post age chip (thread)" },
+      "q": { "type": "string", "label": "Post question text (thread)" },
+      "up": { "type": "string", "label": "Upvote count (thread)" },
+      "comments": { "type": "string", "label": "Comment count (thread)" },
+      "reply": { "type": "string", "label": "Typed reply text (reply)" },
+      "query": { "type": "string", "label": "AI query header (cite)" },
+      "answer": { "type": "string", "label": "Typed AI answer (cite)" },
+      "brand": { "type": "string", "label": "Source pill label (cite)" },
+      "cta": { "type": "string", "label": "CTA headline (cta)" },
+      "url": { "type": "string", "label": "URL (cta)" }
+    } }
+  }
+}

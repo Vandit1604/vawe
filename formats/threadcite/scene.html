@@ -99,14 +99,14 @@
           const dur = sc.dur || 4; let el, animate = () => {};
           if (sc.type === 'hook') {
             el = mk(`<div class="eyebrow" style="opacity:0" data-eb>${sc.eyebrow || ''}</div>
-              <div class="head" style="margin-top:44px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>
+              <div class="head" data-layer="critical" style="margin-top:44px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>
               <div class="note" data-note style="left:150px;top:430px;opacity:0">${sc.note || ''}</div>`);
             animate = (lt) => { el.querySelector('[data-eb]').style.opacity = interpolate(lt, [0.1, 0.5], [0, 1]).toFixed(2);
               el.querySelector('[data-hl]').style.transform = `scaleX(${interpolate(lt, [0.5, 0.95], [0, 1], { easing: easeOutQuart }).toFixed(3)})`;
               const np = interpolate(lt, [1.0, 1.4], [0, 1]); el.querySelector('[data-note]').style.opacity = np.toFixed(2); };
           } else if (sc.type === 'thread') {
-            el = mk(`<div class="head" style="max-width:720px">${sc.title || ''}</div>
-              <div class="post" data-post style="right:20px;top:200px;opacity:0">
+            el = mk(`<div class="head" data-layer="critical" style="max-width:660px">${sc.title || ''}</div>
+              <div class="post" data-layer="critical" data-post style="right:20px;top:200px;opacity:0">
                 <div class="sub"><b></b><span class="r">${sc.sub || 'r/marketing'}</span><span class="t">· ${sc.time || '2h'}</span></div>
                 <div class="q">${sc.q || ''}</div>
                 <div class="meta"><span class="up"><span class="ar">▲</span> ${sc.up || '128'}</span><span>${sc.comments || '46'} comments</span></div>
@@ -119,36 +119,41 @@
               el.querySelector('[data-note]').style.opacity = interpolate(lt, [1.6, 2.0], [0, 1]).toFixed(2); };
           } else if (sc.type === 'reply') {
             const txt = sc.reply || '';
-            el = mk(`<div class="head" style="max-width:700px">${sc.title || ''}</div>
-              <div class="post" style="right:0;top:150px;width:980px">
+            el = mk(`<div class="head" data-layer="critical" style="max-width:620px">${sc.title || ''}</div>
+              <div class="post" data-layer="critical" style="right:0;top:150px;width:980px">
                 <div class="sub"><b></b><span class="r">${sc.sub || 'r/marketing'}</span><span class="t">· you</span></div>
-                <div class="reply"><span data-rep></span><span class="cur" data-cur></span><div class="ok" data-ok style="opacity:0">✓ reads human, not shill</div></div>
+                <div class="reply"><span data-rep data-layer="critical"></span><span class="cur" data-cur></span><div class="ok" data-ok style="opacity:0">✓ reads human, not shill</div></div>
               </div>`);
             const rep = el.querySelector('[data-rep]'), cur = el.querySelector('[data-cur]'), ok = el.querySelector('[data-ok]');
-            animate = (lt) => { const n = Math.floor(clamp01((lt - 0.4) / 2.0) * txt.length); rep.innerHTML = txt.slice(0, n);
-              cur.style.opacity = (n < txt.length && Math.floor(lt * 2) % 2 ? 1 : (n >= txt.length ? 0 : 1)); ok.style.opacity = interpolate(lt, [2.6, 3.0], [0, 1]).toFixed(2); };
+            // typing window derived from TEXT LENGTH + scene budget (fixed 2.0s over/undershot per data);
+            // the ✓ badge lands right after typing completes and holds before the cut
+            const typeDur = Math.min(Math.max(txt.length * 0.03, 1.2), dur - 1.4);
+            animate = (lt) => { const n = Math.floor(clamp01((lt - 0.4) / typeDur) * txt.length); rep.innerHTML = txt.slice(0, n);
+              cur.style.opacity = (n > 0 && n < txt.length) ? 1 : 0; ok.style.opacity = interpolate(lt, [0.4 + typeDur + 0.1, 0.4 + typeDur + 0.5], [0, 1]).toFixed(2); };
           } else if (sc.type === 'cite') {
             const ans = sc.answer || '';
-            el = mk(`<div class="head" style="max-width:620px">${sc.title || ''}</div>
-              <div class="ai" data-ai style="right:0;top:150px;opacity:0">
+            el = mk(`<div class="head" data-layer="critical" style="max-width:620px">${sc.title || ''}</div>
+              <div class="ai" data-layer="critical" data-ai style="right:0;top:150px;opacity:0">
                 <div class="qh">${sc.query || 'best tool for X?'}</div>
-                <div class="ans"><span data-ans></span><span class="cur" data-cur></span></div>
+                <div class="ans"><span data-ans data-layer="critical"></span><span class="cur" data-cur></span></div>
                 <div class="src"><span class="lbl">SOURCES</span><span class="pill">reddit.com</span><span class="pill you" data-you style="opacity:0;position:relative"><b></b>${sc.brand || 'you'}<span class="note" data-note style="position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 8px);white-space:nowrap;opacity:0;font-size:52px">↑ ${sc.note || "that's you"}</span></span></div>
               </div>`);
             const ai = el.querySelector('[data-ai]'), ansEl = el.querySelector('[data-ans]'), cur = el.querySelector('[data-cur]'), you = el.querySelector('[data-you]');
+            // typing derived from answer length; the "that's you" payoff chain follows completion
+            const typeDur = Math.min(Math.max(ans.length * 0.03, 1.0), dur - 2.2);
             animate = (lt) => { const ap = interpolate(lt, [0.2, 0.6], [0, 1], { easing: easeOutExpo }); ai.style.opacity = ap.toFixed(2); ai.style.transform = `translateY(${lerp(30, 0, ap).toFixed(0)}px)`;
-              const n = Math.floor(clamp01((lt - 0.7) / 1.6) * ans.length); ansEl.innerHTML = ans.slice(0, n); cur.style.opacity = n < ans.length && n > 0 ? 1 : 0;
-              const yp = interpolate(lt, [2.5, 2.9], [0, 1], { easing: easeOutQuart }); setT(you, { opacity: yp.toFixed(2), transform: `scale(${lerp(0.7, 1, yp).toFixed(2)})` });
-              el.querySelector('[data-note]').style.opacity = interpolate(lt, [3.0, 3.4], [0, 1]).toFixed(2); };
+              const n = Math.floor(clamp01((lt - 0.7) / typeDur) * ans.length); ansEl.innerHTML = ans.slice(0, n); cur.style.opacity = n < ans.length && n > 0 ? 1 : 0;
+              const yp = interpolate(lt, [0.7 + typeDur + 0.1, 0.7 + typeDur + 0.5], [0, 1], { easing: easeOutQuart }); setT(you, { opacity: yp.toFixed(2), transform: `scale(${lerp(0.7, 1, yp).toFixed(2)})` });
+              el.querySelector('[data-note]').style.opacity = interpolate(lt, [0.7 + typeDur + 0.6, 0.7 + typeDur + 1.0], [0, 1]).toFixed(2); };
           } else if (sc.type === 'line') {
-            el = mk(`<div class="head" style="position:absolute;top:50%;transform:translateY(-50%);font-size:132px;max-width:1500px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>`);
+            el = mk(`<div class="head" data-layer="critical" style="position:absolute;top:50%;transform:translateY(-50%);font-size:132px;max-width:1500px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>`);
             animate = (lt) => { el.querySelector('[data-hl]').style.transform = `scaleX(${interpolate(lt, [0.4, 0.9], [0, 1], { easing: easeOutQuart }).toFixed(3)})`; };
           } else if (sc.type === 'cta') {
-            el = mk(`<div style="position:absolute;top:50%;transform:translateY(-50%)"><div class="head" style="font-size:120px;max-width:1300px">${sc.cta || ''}</div>
-              <div style="position:relative;display:inline-block;margin-top:10px"><span class="cta-url" data-url style="opacity:0">${sc.url || ''}</span><span class="note" data-note style="position:absolute;left:calc(100% + 30px);top:50%;transform:translateY(-50%);white-space:nowrap;opacity:0">${sc.note || 'start free →'}</span></div></div>`);
+            el = mk(`<div style="position:absolute;top:50%;transform:translateY(-50%)"><div class="head" data-layer="critical" style="font-size:120px;max-width:1300px">${sc.cta || ''}</div>
+              <div style="position:relative;display:inline-block;margin-top:10px"><span class="cta-url" data-layer="critical" data-url style="opacity:0">${sc.url || ''}</span><span class="note" data-note style="position:absolute;left:calc(100% + 30px);top:50%;transform:translateY(-50%);white-space:nowrap;opacity:0">${sc.note || 'start free →'}</span></div></div>`);
             animate = (lt) => { const u = interpolate(lt, [0.5, 0.95], [0, 1], { easing: easeOutExpo }); setT(el.querySelector('[data-url]'), { opacity: u.toFixed(2), transform: `translateY(${lerp(18, 0, u).toFixed(0)}px)` });
               el.querySelector('[data-note]').style.opacity = interpolate(lt, [1.0, 1.4], [0, 1]).toFixed(2); };
-          } else { el = mk(`<div class="head">${sc.title || ''}</div>`); }
+          } else { el = mk(`<div class="head" data-layer="critical">${sc.title || ''}</div>`); }
           return { el, dur, animate };
         }
 
@@ -159,14 +164,17 @@
             if (i !== idx) { b.el.style.display = 'none'; return; }
             b.el.style.display = 'block';
             // editorial cut: quick fade + tiny upward drift (no flashy template transition)
-            const inP = interpolate(seq.localT, [0, 0.35], [0, 1], { easing: easeOutExpo }), outP = interpolate(seq.localT, [b.dur - 0.3, b.dur], [0, 1]);
+            // last scene holds — no next cut, so the CTA stays up through the final frame
+            const inP = interpolate(seq.localT, [0, 0.35], [0, 1], { easing: easeOutExpo }), outP = i === built.length - 1 ? 0 : interpolate(seq.localT, [b.dur - 0.3, b.dur], [0, 1]);
             b.el.style.opacity = (clamp01(inP) * (1 - outP)).toFixed(3);
             b.el.querySelector('.pad').style.transform = `translateY(${lerp(18, 0, inP).toFixed(1)}px)`;
           });
           $('brand').style.opacity = built[idx].el.querySelector('.cta-url') ? '0' : interpolate(t, [0.3, 0.8], [0, 0.95]).toFixed(2);
           built[idx].animate(seq.localT, seq);
         }
-        return { fps, duration, stings: bounds.slice(0, -1), renderFrame };
+        // segments: studio-timeline + motion-audit contract — {type,label,t0,t1,transition,scene}
+        const segments = (data.scenes || []).map((sc, i) => ({ type: sc.type, label: sc.type, t0: bounds[i] - built[i].dur, t1: bounds[i], transition: 0.4, scene: i }));
+        return { fps, duration, stings: bounds.slice(0, -1), segments, renderFrame };
       });
     </script>
   </body>

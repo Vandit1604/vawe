@@ -25,7 +25,9 @@ const port = server.address().port;
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
-await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+// landscape-aware: signatures must be captured at the format's real dims
+const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
+await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/formats/${m}/sample.json&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
 const meta = await page.evaluate(() => window.__engine.meta);

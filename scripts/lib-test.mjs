@@ -85,6 +85,11 @@ ok('sequence exit 0 mid-segment', sequence(30, 30, segs).exit === 0);          /
 ok('sequence exit ramps at end', sequence(59, 30, segs).exit > 0);             // ~1.97s into s1 (dur 2)
 ok('sequence active in [0,1]', (() => { for (let n = 0; n < 150; n += 3) { const a = sequence(n, 30, segs).active; if (a < 0 || a > 1) return false; } return true; })());
 ok('sequence deterministic', sequence(77, 30, segs).active === sequence(77, 30, segs).active);
+// holdLast (default): the LAST segment never exits — the ending holds through the final frame
+ok('sequence last segment holds (exit 0)', sequence(149, 30, segs).exit === 0);          // ~4.97s, end of s3
+ok('sequence last segment fully active', sequence(149, 30, segs).active === 1);          // no fade at the end
+ok('sequence holdLast:false restores exit', sequence(149, 30, segs, { holdLast: false }).exit > 0.9);
+ok('sequence holdLast leaves earlier exits alone', sequence(59, 30, segs).exit > 0);     // s1 still exits
 
 // transitions → clip-path strings, monotonic reveal
 ok('wipe hidden at 0', wipe(0, 'left').clipPath.includes('100%'));

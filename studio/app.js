@@ -177,11 +177,19 @@ function seekAtClientX(clientX) {
 const PACE_MIN = { hook: 0.4, roundcard: 0.4, bracket: 0.4, cta: 0.4, match: 4.0 };
 const PACE_MAX = { hook: 15, roundcard: 15, bracket: 15, cta: 15, match: 20 };
 const PACE_SCALAR = { hook: 'hook', roundcard: 'roundCard', bracket: 'bracket', cta: 'cta' };
-const isEditable = (s) => s.type === 'match' || s.type in PACE_SCALAR;
+// editable = bracket pacing types, OR a generic pointer the scene exposed: seg.scene (index into
+// data.scenes[i].dur — demo/brandfilm/threadcite) or seg.key (a top-level duration field — plinthad t1..t4)
+const isEditable = (s) => s.scene != null || s.key != null || s.type === 'match' || s.type in PACE_SCALAR;
 const paceNote = (type) => (type === 'roundcard' || type === 'bracket') ? ' · all rounds' : '';
 const clampDur = (type, v) => Math.round(Math.max(PACE_MIN[type] || 0.4, Math.min(PACE_MAX[type] || 15, v)) * 10) / 10;
 
 function setPace(data, seg, dur) {
+  if (seg.scene != null) { // scenes-array formats: the segment IS data.scenes[i]
+    const scenes = (data.scenes || []).map((s) => ({ ...s }));
+    if (scenes[seg.scene]) scenes[seg.scene].dur = dur;
+    return { ...data, scenes };
+  }
+  if (seg.key) return { ...data, [seg.key]: dur }; // top-level duration field (plinthad t1..t4)
   const pacing = { ...(data.pacing || {}) };
   if (seg.type === 'match') {
     const m = Array.isArray(pacing.match) ? pacing.match.slice() : [];

@@ -21,7 +21,10 @@
       .win { position: relative; width: 1180px; border-radius: 20px; overflow: hidden; background: #14161d; color: #e3e6f2;
         border: 1px solid rgba(180,190,255,0.14); box-shadow: 0 50px 130px rgba(20,20,30,0.28); }
       .code .v { color: #eef0f8 !important; }
-      .win-gloss { position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      /* gloss: the sweeping band lives in an inner <i> INSIDE an overflow:hidden wrapper, so its
+         translateX never inflates the window's scroll box (transformed children count in scrollWidth) */
+      .win-gloss { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+      .win-gloss i { position: absolute; inset: 0; display: block;
         background: linear-gradient(114deg, transparent 34%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.16) 50%, transparent 62%); transform: translateX(-120%); }
       .win-h { position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; padding: 20px 26px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(180,190,255,0.1); }
       .win-b { position: relative; z-index: 2; }
@@ -134,14 +137,21 @@
       const LIGHT_BGS = ['paper', 'paperShapes', 'paperDots', 'soft', 'dotmatrix'];
       boot((data, fps) => {
         const ctx = $('cv').getContext('2d'), root = $('root');
+        // shared timing contract (declared BEFORE buildScene runs — TDZ):
+        // a scene is fully opaque from TRANS → dur−TRANS; payoffs must settle by settleBy(dur)
+        // so they hold for HOLD seconds at full visibility before the exit begins.
+        const TRANS = 0.5;                                  // must match SEGS transition below
+        const HOLD = 0.6;                                   // steady-state hold before exit
+        const settleBy = (dur) => dur - TRANS - HOLD;
+        const IN0 = 0.28;                                   // content reveals start after the enter-fade
         const built = (data.scenes || []).map((sc, i) => buildScene(sc, i));
-        const SEGS = built.map((b, i) => ({ name: 's' + i, dur: b.dur, transition: 0.5 }));
+        const SEGS = built.map((b, i) => ({ name: 's' + i, dur: b.dur, transition: TRANS }));
         const duration = SEGS.reduce((a, s) => a + s.dur, 0);
         const bounds = []; let acc = 0; for (const s of SEGS) { bounds.push(acc + s.dur); acc += s.dur; }
 
         // ---------- scene builders ----------
-        function win(fn, bodyHtml) { return `<div class="win"><div class="win-gloss"></div><div class="win-h"><i></i><i></i><i></i><span class="fn">${fn}</span></div><div class="win-b">${bodyHtml}</div></div>`; }
-        const gloss = (cam, lt, t0) => { const g = cam.querySelector('.win-gloss'); if (g) g.style.transform = `translateX(${interpolate(lt, [t0, t0 + 0.7], [-120, 130], { easing: easeOutQuart }).toFixed(1)}%)`; };
+        function win(fn, bodyHtml) { return `<div class="win" data-layer="critical"><div class="win-gloss"><i></i></div><div class="win-h"><i></i><i></i><i></i><span class="fn">${fn}</span></div><div class="win-b">${bodyHtml}</div></div>`; }
+        const gloss = (cam, lt, t0) => { const g = cam.querySelector('.win-gloss i'); if (g) g.style.transform = `translateX(${interpolate(lt, [t0, t0 + 0.7], [-120, 130], { easing: easeOutQuart }).toFixed(1)}%)`; };
         function mkScene(inner, cls) { const el = document.createElement('div'); el.className = 'sc'; const cam = document.createElement('div'); cam.className = 'cam ' + (cls || ''); cam.innerHTML = inner; el.appendChild(cam); root.appendChild(el); return { el, cam }; }
 
         function buildScene(sc, i) {
@@ -151,60 +161,69 @@
           const b = { i, dur, type: sc.type, bg: bgPreset(bgName, value), value, cursor: null, camera: sc.camera, animate: () => {} };
 
           if (sc.type === 'title' || sc.type === 'statement') {
-            const { el, cam } = mkScene(`${sc.eyebrow ? `<div class="eyebrow">${sc.eyebrow}</div>` : ''}<div class="big">${sc.title || sc.text}</div>${sc.sub ? `<div class="sub2">${sc.sub}</div>` : ''}`);
+            const { el, cam } = mkScene(`${sc.eyebrow ? `<div class="eyebrow" data-layer="critical">${sc.eyebrow}</div>` : ''}<div class="big" data-layer="critical">${sc.title || sc.text}</div>${sc.sub ? `<div class="sub2" data-layer="critical">${sc.sub}</div>` : ''}`);
             const words = splitText(cam.querySelector('.big'), 'word'), sub = cam.querySelector('.sub2'), eb = cam.querySelector('.eyebrow');
             b.el = el; b.cam = cam;
-            b.animate = (lt) => { animateUnits(words, lt, { preset: 'up', stagger: 0.055, each: 0.4, dist: 52 });
-              if (eb) eb.style.opacity = interpolate(lt, [0.1, 0.5], [0, 1]).toFixed(2);
-              if (sub) { const s = interpolate(lt, [0.9, 1.5], [0, 1], { easing: easeOutCubic }); setT(sub, { opacity: s.toFixed(2), transform: `translateY(${lerp(22, 0, s).toFixed(1)}px)` }); } };
+            b.animate = (lt) => { animateUnits(words, Math.max(0, lt - IN0), { preset: 'up', stagger: 0.055, each: 0.4, dist: 52 }); // words start after the scene enter-fade — no double-stacked opacity/transform
+              if (eb) eb.style.opacity = interpolate(lt, [IN0, IN0 + 0.4], [0, 1]).toFixed(2);
+              if (sub) { const s = interpolate(lt, [0.9 + IN0, 1.5 + IN0], [0, 1], { easing: easeOutCubic }); setT(sub, { opacity: s.toFixed(2), transform: `translateY(${lerp(22, 0, s).toFixed(1)}px)` }); } };
 
           } else if (sc.type === 'code') {
             const lines = sc.lines || [];
             const html = win(sc.file || 'summarize.SKILL.md', `<div class="code" id="code_${i}"></div><div class="runbtn" id="run_${i}">${svgIcon('bolt', { size: 30, color: '#fff' })} Publish</div>`);
             const { el, cam } = mkScene(html); b.el = el; b.cam = cam;
             const codeEl = cam.querySelector('.code'), runEl = cam.querySelector('.runbtn');
-            const total = lines.reduce((a, l) => a + l.length + 1, 0);
-            const lineDelay = 0.34, charDur = 0.02;
-            // cursor travels in from the lower-right, arrives at Publish, dwells, then clicks
-            b.cursor = [{ t: dur - 2.5, x: 0.84, y: 0.88 }, { t: dur - 1.15, x: 0.31, y: 0.72 }, { t: dur - 0.85, x: 0.31, y: 0.72, click: true }];
-            b.camera = sc.camera || [{ t: 0, s: 1.0, y: 0 }, { t: dur - 1.8, s: 1.07, y: -18 }, { t: dur - 0.8, s: 1.0, y: 26 }];
+            // typing window derived from CONTENT + scene budget: typing must complete before the
+            // publish beat (cursor travel + click), never faster than 8ms/char.
+            const T0 = IN0 + 0.1;
+            const natEnd = lines.reduce((m, l, li) => Math.max(m, li * 0.34 + l.length * 0.02), 0);
+            const typeBudget = Math.max(0.8, (dur - 2.4) - T0);
+            const tk = Math.min(1, typeBudget / Math.max(natEnd, 0.01));
+            const lineDelay = 0.34 * tk, charDur = Math.max(0.008, 0.02 * tk);
+            // cursor travels in from the lower-right, arrives at Publish, dwells, then clicks —
+            // click + 0.5s ripple + camera settle all finish by settleBy(dur) (fully visible payoff)
+            b.cursor = [{ t: dur - 3.2, x: 0.84, y: 0.88 }, { t: dur - 1.9, x: 0.31, y: 0.72 }, { t: dur - 1.6, x: 0.31, y: 0.72, click: true }];
+            b.clickT = dur - 1.6;
+            b.camera = sc.camera || [{ t: 0, s: 1.0, y: 0 }, { t: dur - 2.4, s: 1.07, y: -18 }, { t: settleBy(dur), s: 1.0, y: 26 }];
             b.animate = (lt) => {
               gloss(cam, lt, 0.25);
               let html2 = '', done = 0;
               lines.forEach((l, li) => {
-                const st = 0.3 + li * lineDelay, shown = clamp01((lt - st) / (l.length * charDur));
+                const st = T0 + li * lineDelay, shown = clamp01((lt - st) / (l.length * charDur));
                 const n = Math.floor(shown * l.length);
                 html2 += `<span class="ln">${colorCode(l.slice(0, n))}${(shown > 0 && shown < 1) ? '<span class="cur-blink"></span>' : ''}</span>`;
                 if (shown >= 1) done++;
               });
               codeEl.innerHTML = html2;
-              const rp = interpolate(lt, [dur - 1.4, dur - 1.0], [0, 1], { easing: easeOutBack });
-              setT(runEl, { opacity: rp.toFixed(2), transform: `translateY(${lerp(16, 0, rp).toFixed(1)}px) scale(${(lt > dur - 0.85 && lt < dur - 0.7) ? 0.94 : 1})` });
+              const rp = interpolate(lt, [b.clickT - 0.6, b.clickT - 0.2], [0, 1], { easing: easeOutBack });
+              setT(runEl, { opacity: rp.toFixed(2), transform: `translateY(${lerp(16, 0, rp).toFixed(1)}px) scale(${(lt > b.clickT && lt < b.clickT + 0.15) ? 0.94 : 1})` });
             };
 
           } else if (sc.type === 'deploy') {
             const steps = sc.steps || [{ ic: 'braces', lb: 'Parse SKILL.md' }, { ic: 'layers', lb: 'Validate schema' }, { ic: 'shield', lb: 'Security scan' }, { ic: 'globe', lb: 'Publish to marketplace' }];
             const rows = steps.map((s, j) => `<div class="row"><span class="ic">${svgIcon(s.ic, { size: 46 })}</span><span class="lb">${s.lb}</span><span class="st" id="st_${i}_${j}"></span></div>`).join('');
-            const html = `<div class="sec-title">${sc.title || 'Live in seconds'}</div><div class="pipe">${rows}<div class="bar"><i id="bar_${i}"></i></div><div class="live" id="live_${i}" style="opacity:0">${svgIcon('check', { size: 40, color: '#8fe6b0' })} Live <span class="u">${sc.url || 'api.plinth.dev/summarize'}</span></div></div>`;
+            const html = `<div class="sec-title" data-layer="critical">${sc.title || 'Live in seconds'}</div><div class="pipe" data-layer="critical">${rows}<div class="bar"><i id="bar_${i}"></i></div><div class="live" id="live_${i}" style="opacity:0">${svgIcon('check', { size: 40, color: '#8fe6b0' })} Live <span class="u">${sc.url || 'api.plinth.dev/summarize'}</span></div></div>`;
             const { el, cam } = mkScene(html); b.el = el; b.cam = cam;
-            const stepEnd = 0.7; const each = (dur - 1.6) / steps.length;
+            // steps finish, then the "Live" payoff lands and HOLDS at full visibility (by settleBy)
+            const each = (settleBy(dur) - 1.2) / steps.length;
             b.animate = (lt) => {
               steps.forEach((s, j) => { const doneAt = 0.6 + (j + 1) * each; const el2 = $(`st_${i}_${j}`); if (!el2) return;
                 if (lt >= doneAt) el2.innerHTML = svgIcon('check', { size: 44, color: '#8fe6b0' });
                 else if (lt >= doneAt - each) el2.innerHTML = `<div class="spinner" style="transform:rotate(${(lt * 720).toFixed(0)}deg)"></div>`;
                 else el2.innerHTML = ''; });
               const bar = $(`bar_${i}`); if (bar) bar.style.width = (interpolate(lt, [0.6, 0.6 + steps.length * each], [0, 100], { easing: easeOutCubic })).toFixed(1) + '%';
-              const lv = $(`live_${i}`); if (lv) { const p = interpolate(lt, [dur - 1.0, dur - 0.5], [0, 1], { easing: easeOutBack }); lv.style.opacity = p.toFixed(2); lv.style.transform = `scale(${lerp(0.9, 1, p).toFixed(3)})`; } };
+              const lv = $(`live_${i}`); if (lv) { const p = interpolate(lt, [settleBy(dur) - 0.5, settleBy(dur)], [0, 1], { easing: easeOutBack }); lv.style.opacity = p.toFixed(2); lv.style.transform = `scale(${lerp(0.9, 1, p).toFixed(3)})`; } };
 
           } else if (sc.type === 'call') {
-            const html = `<div class="sec-title">${sc.title || 'Anyone calls it'}</div>` + win(sc.file || 'REST · MCP', `<div class="req"><span class="m">POST</span><span class="u">${sc.url || '/agents/summarize'}</span></div><div class="sendbtn" id="send_${i}">${svgIcon('bolt', { size: 26, color: '#fff' })} Send</div><div class="resp" id="resp_${i}" style="opacity:0"><span class="k">"summary"</span>: "${sc.resp || 'Plinth turns one file into a paid API.'}"</div><div class="badges"><span class="badge" id="b1_${i}" style="opacity:0">${svgIcon('clock', { size: 26, color: '#cfd6ff' })} ${sc.latency || '412ms'}</span><span class="badge" id="b2_${i}" style="opacity:0; background:rgba(60,180,110,0.16); border-color:rgba(80,200,130,0.42); color:#a6f0c6">${sc.cost || '$0.002'} / call</span></div>`);
+            const html = `<div class="sec-title" data-layer="critical">${sc.title || 'Anyone calls it'}</div>` + win(sc.file || 'REST · MCP', `<div class="req"><span class="m">POST</span><span class="u">${sc.url || '/agents/summarize'}</span></div><div class="sendbtn" id="send_${i}">${svgIcon('bolt', { size: 26, color: '#fff' })} Send</div><div class="resp" id="resp_${i}" style="opacity:0"><span class="k">"summary"</span>: "${sc.resp || 'Plinth turns one file into a paid API.'}"</div><div class="badges"><span class="badge" id="b1_${i}" style="opacity:0">${svgIcon('clock', { size: 26, color: '#cfd6ff' })} ${sc.latency || '412ms'}</span><span class="badge" id="b2_${i}" style="opacity:0; background:rgba(60,180,110,0.16); border-color:rgba(80,200,130,0.42); color:#a6f0c6">${sc.cost || '$0.002'} / call</span></div>`);
             const { el, cam } = mkScene(html); b.el = el; b.cam = cam;
             // cursor travels in from the right, arrives at Send, dwells, clicks
             b.cursor = [{ t: 0.35, x: 0.85, y: 0.74 }, { t: 1.45, x: 0.3, y: 0.5 }, { t: 1.72, x: 0.3, y: 0.5, click: true }];
-            b.camera = sc.camera || [{ t: 0, s: 1.02, y: -10 }, { t: 2.4, s: 1.0, y: 0 }, { t: dur - 0.4, s: 1.03, y: 26 }];
+            b.clickT = 1.72; // single source: cursor click keyframe + button press share this
+            b.camera = sc.camera || [{ t: 0, s: 1.02, y: -10 }, { t: 2.4, s: 1.0, y: 0 }, { t: settleBy(dur), s: 1.03, y: 26 }];
             b.animate = (lt) => {
               gloss(cam, lt, 0.15);
-              const send = $(`send_${i}`); if (send) send.style.transform = `scale(${(lt > 1.62 && lt < 1.8) ? 0.94 : 1})`;
+              const send = $(`send_${i}`); if (send) send.style.transform = `scale(${(lt > b.clickT && lt < b.clickT + 0.15) ? 0.94 : 1})`;
               const resp = $(`resp_${i}`); if (resp) { const p = interpolate(lt, [2.1, 2.7], [0, 1], { easing: easeOutExpo }); resp.style.opacity = p.toFixed(2); resp.style.transform = `translateY(${lerp(26, 0, p).toFixed(1)}px)`; }
               const b1 = $(`b1_${i}`), b2 = $(`b2_${i}`);
               if (b1) { const p = interpolate(lt, [2.9, 3.2], [0, 1], { easing: easeOutBack }); b1.style.opacity = p.toFixed(2); b1.style.transform = `scale(${lerp(0.6, 1, p).toFixed(3)})`; }
@@ -213,31 +232,31 @@
           } else if (sc.type === 'earn') {
             const calls = sc.calls || [{ nm: 'agent-scout', v: 0.002 }, { nm: 'inbox-app', v: 0.002 }, { nm: 'agent-atlas', v: 0.004 }, { nm: 'crm-sync', v: 0.002 }, { nm: 'agent-nova', v: 0.003 }];
             const feed = calls.map((c, j) => `<div class="fr" id="fr_${i}_${j}" style="opacity:0">${svgIcon('agent', { size: 34 })}<span class="nm">${c.nm} → summarize</span><span class="pl">+$${c.v.toFixed(3)}</span></div>`).join('');
-            const html = `<div class="sec-title">${sc.title || 'You earn on <em>every call.</em>'}</div><div class="earn"><div class="feed">${feed}</div><div class="total"><div class="v" id="tot_${i}">$0.00</div><div class="l">you keep 80%</div></div></div>`;
+            const html = `<div class="sec-title" data-layer="critical">${sc.title || 'You earn on <em>every call.</em>'}</div><div class="earn"><div class="feed">${feed}</div><div class="total" data-layer="critical"><div class="v" id="tot_${i}">$0.00</div><div class="l">you keep 80%</div></div></div>`;
             const { el, cam } = mkScene(html); b.el = el; b.cam = cam;
-            const step = (dur - 1.4) / calls.length;
+            const step = (settleBy(dur) - 0.8) / calls.length; // feed + count settle by settleBy(dur)
             const target = sc.total || 1247;
             b.animate = (lt) => {
               calls.forEach((c, j) => { const at = 0.4 + j * step; const fr = $(`fr_${i}_${j}`); if (!fr) return;
                 const p = interpolate(lt, [at, at + 0.4], [0, 1], { easing: easeOutBack }); fr.style.opacity = p.toFixed(2); fr.style.transform = `translateX(${lerp(-30, 0, p).toFixed(1)}px)`; });
-              const tot = $(`tot_${i}`); if (tot) tot.textContent = '$' + formatNumber(Math.round(target * interpolate(lt, [0.4, dur - 0.8], [0, 1], { easing: easeOutCubic })), {}); };
+              const tot = $(`tot_${i}`); if (tot) tot.textContent = '$' + formatNumber(Math.round(target * interpolate(lt, [0.4, settleBy(dur)], [0, 1], { easing: easeOutCubic })), {}); };
 
           } else if (sc.type === 'cta') {
-            const { el, cam } = mkScene(`<div class="cam" style="align-items:center">${sc.logo ? `<div style="width:130px;height:130px;margin:0 auto 28px">${icon(sc.logo, '')}</div>` : ''}<div class="big">${sc.cta}</div><div><span class="ctaUrl">${sc.url}</span></div></div>`);
+            const { el, cam } = mkScene(`<div class="cam" style="align-items:center">${sc.logo ? `<div style="width:130px;height:130px;margin:0 auto 28px">${icon(sc.logo, '')}</div>` : ''}<div class="big" data-layer="critical">${sc.cta}</div><div><span class="ctaUrl" data-layer="critical">${sc.url}</span></div></div>`);
             b.el = el; b.cam = cam;
             const words = splitText(cam.querySelector('.big'), 'word'), url = cam.querySelector('.ctaUrl').parentElement, logo = cam.querySelector('div');
-            b.animate = (lt) => { animateUnits(words, lt, { preset: 'up', stagger: 0.05, each: 0.4, dist: 40 });
-              const u = interpolate(lt, [0.8, 1.3], [0, 1], { easing: easeOutQuart }); setT(url, { opacity: u.toFixed(2), transform: `translateY(${lerp(18, 0, u).toFixed(1)}px)` }); };
+            b.animate = (lt) => { animateUnits(words, Math.max(0, lt - IN0), { preset: 'up', stagger: 0.05, each: 0.4, dist: 40 });
+              const u = interpolate(lt, [0.8 + IN0, 1.3 + IN0], [0, 1], { easing: easeOutQuart }); setT(url, { opacity: u.toFixed(2), transform: `translateY(${lerp(18, 0, u).toFixed(1)}px)` }); };
           } else if (sc.type === 'component') {
             // render a REAL UI component lifted off the site (scripts/capture-component.mjs), scaled to fit.
             const c = (window.__components && window.__components[sc.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
             const fit = (sc.scale || 1) * Math.min(1360 / Math.max(1, c.w), 780 / Math.max(1, c.h), 1.6);
-            const { el, cam } = mkScene(`${sc.title ? `<div class="sec-title">${sc.title}</div>` : ''}<div class="capwrap" style="position:relative;width:${c.w}px;height:${c.h}px;transform-origin:center;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(20,20,30,0.16)">${c.html}</div>`);
+            const { el, cam } = mkScene(`${sc.title ? `<div class="sec-title" data-layer="critical">${sc.title}</div>` : ''}<div class="capwrap" style="position:relative;width:${c.w}px;height:${c.h}px;transform-origin:center;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(20,20,30,0.16)">${c.html}</div>`);
             b.el = el; b.cam = cam;
             const wrap = cam.querySelector('.capwrap');
             b.camera = sc.camera; b.cursor = sc.cursor;
             b.animate = (lt) => { const p = interpolate(lt, [0.1, 0.55], [0, 1], { easing: easeOutExpo }); setT(wrap, { opacity: clamp01(p).toFixed(2), transform: `scale(${(fit * lerp(0.94, 1, p)).toFixed(3)})` }); };
-          } else { const { el, cam } = mkScene(`<div class="big">${sc.text || ''}</div>`); b.el = el; b.cam = cam; }
+          } else { const { el, cam } = mkScene(`<div class="big" data-layer="critical">${sc.text || ''}</div>`); b.el = el; b.cam = cam; }
           if (b.el) b.el.classList.add(value === 'light' ? 'light' : 'dark');
           return b;
         }
@@ -261,9 +280,10 @@
         function renderFrame(f) {
           const t = f / fps;
           const seq = sequence(f, fps, SEGS), idx = seq.index, cur = built[idx], lt = seq.localT;
-          // moving background: internal drift + a slow per-scene camera zoom on the canvas
+          // moving background: internal drift + a slow CONTINUOUS breathe in absolute t —
+          // per-scene lt/dur ramps reset at every cut (a visible 0.05 scale pop); sin(t) doesn't.
           renderBg(ctx, W, H, t, cur.bg);
-          $('cv').style.transform = `scale(${(1.04 + 0.05 * (lt / cur.dur)).toFixed(4)})`;
+          $('cv').style.transform = `scale(${(1.065 + 0.025 * Math.sin(t * 0.35)).toFixed(4)})`;
           $('brand').style.opacity = (cur.type === 'cta' ? 0 : interpolate(t, [0.3, 0.9], [0, 0.9])).toFixed(2);
 
           built.forEach((b, i) => {
@@ -273,7 +293,7 @@
             // varied transitions by scene index: push / scale / rise
             const mode = i % 3;
             const tf = mode === 0 ? `translateY(${((1 - easeOutExpo(enter)) * 48).toFixed(1)}px)` : mode === 1 ? `scale(${lerp(0.94, 1, easeOutExpo(enter)).toFixed(4)})` : `translateX(${((1 - easeOutExpo(enter)) * -300).toFixed(1)}px)`;
-            b.el.style.opacity = (clamp01(enter) * (1 - exit)).toFixed(3);
+            b.el.style.opacity = (easeOutCubic(clamp01(enter)) * (1 - exit)).toFixed(3); // eased: ~86% opaque by 0.2s so content reveals at IN0 don't stack on a half-faded scene
             b.el.style.transform = `${tf} scale(${lerp(1, 1.03, easeOutQuart(exit)).toFixed(4)})`;
             // camera zoom-in/out on the mockup
             const cam = cameraAt(b.camera, lt);
@@ -301,7 +321,10 @@
 
           cur.animate(lt, seq);
         }
-        return { fps, duration, stings: bounds.slice(0, -1), renderFrame };
+        // segments: studio-timeline + motion-audit contract — {type,label,t0,t1,transition,scene}
+        // (scene = index into data.scenes so the studio grip retimes data.scenes[i].dur)
+        const segments = built.map((b, i) => ({ type: b.type, label: b.type, t0: bounds[i] - b.dur, t1: bounds[i], transition: TRANS, scene: i }));
+        return { fps, duration, stings: bounds.slice(0, -1), segments, renderFrame };
       });
     </script>
   </body>

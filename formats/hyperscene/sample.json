@@ -4,14 +4,84 @@
   "duration": 7.6,
   "captionMode": "sentence",
   "layers": [
-    { "type": "text", "text": "Motion graphics", "x": 60, "y": 300, "w": 940, "size": 120, "weight": 800, "split": "word", "preset": "up", "stagger": 0.09, "each": 0.5, "start": 0.2, "duration": 3.3 },
-    { "type": "text", "text": "from pure <b>data.</b>", "x": 60, "y": 460, "w": 940, "size": 120, "weight": 800, "split": "word", "preset": "up", "stagger": 0.09, "each": 0.5, "start": 0.7, "duration": 2.8 },
-    { "type": "text", "text": "Every frame,", "font": "sans", "x": 60, "y": 320, "w": 960, "size": 128, "weight": 800, "split": "char", "preset": "blur", "each": 0.7, "stagger": 0.03, "start": 3.7, "duration": 3.5, "anim": "none" },
-    { "type": "text", "text": "deterministic.", "font": "serif", "x": 60, "y": 470, "w": 960, "size": 150, "split": "line", "preset": "up", "each": 0.7, "start": 4.2, "duration": 3.0, "anim": "none" }
+    {
+      "type": "text",
+      "text": "Motion graphics",
+      "x": 60,
+      "y": 300,
+      "w": 940,
+      "size": 120,
+      "weight": 800,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.09,
+      "each": 0.5,
+      "start": 0.2,
+      "duration": 3.3
+    },
+    {
+      "type": "text",
+      "text": "from pure <b>data.</b>",
+      "x": 60,
+      "y": 460,
+      "w": 940,
+      "size": 120,
+      "weight": 800,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.09,
+      "each": 0.5,
+      "start": 0.7,
+      "duration": 2.8
+    },
+    {
+      "type": "text",
+      "text": "Every frame,",
+      "font": "sans",
+      "x": 60,
+      "y": 320,
+      "w": 960,
+      "size": 128,
+      "weight": 800,
+      "split": "char",
+      "preset": "blur",
+      "each": 0.7,
+      "stagger": 0.03,
+      "start": 3.7,
+      "duration": 3.9,
+      "anim": "none",
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "deterministic.",
+      "font": "serif",
+      "x": 60,
+      "y": 470,
+      "w": 960,
+      "size": 150,
+      "split": "line",
+      "preset": "up",
+      "each": 0.7,
+      "start": 4.2,
+      "duration": 3.4,
+      "anim": "none",
+      "exitDur": 0
+    }
   ],
   "captions": [
-    { "t0": 0.4, "t1": 3.4, "text": "Motion graphics from pure data" },
-    { "t0": 3.8, "t1": 7.2, "text": "Every frame, deterministic" }
+    {
+      "t0": 0.4,
+      "t1": 3.4,
+      "text": "Motion graphics from pure data"
+    },
+    {
+      "t0": 3.8,
+      "t1": 7.2,
+      "text": "Every frame, deterministic"
+    }
   ],
-  "audio": { "silent": true }
+  "audio": {
+    "silent": true
+  }
 }

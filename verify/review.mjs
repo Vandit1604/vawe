@@ -17,6 +17,7 @@ const run = (label, cmd, args) => {
 const results = [];
 results.push(run('motion primitives (lib-test)', 'node', ['scripts/lib-test.mjs']));
 results.push(run('layout audit (overlap/spacing)', 'node', ['verify/audit.mjs']));
+results.push(run('motion audit (animation over time)', 'node', ['scripts/motion-audit.mjs', '--stride', '2']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)
 const tiles = fs.existsSync('/tmp/audit') ? fs.readdirSync('/tmp/audit').filter((f) => f.endsWith('.png')).sort() : [];

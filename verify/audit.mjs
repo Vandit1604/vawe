@@ -17,7 +17,8 @@ const formatsDir = path.join(repoRoot, 'formats');
 const OUT = '/tmp/audit';
 fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
 
-const SAFE = { x0: 60, y0: 240, x1: 900, y1: 1340 };  // portrait safe box (matches verify/run.js)
+const SAFE = { x0: 60, y0: 240, x1: 900, y1: 1340 };            // portrait safe box (matches verify/run.js)
+const SAFE_LAND = { x0: 90, y0: 60, x1: 1830, y1: 1020 };       // landscape safe box (formats pad ~150px)
 const MIN_GAP = 8;                                     // px; tighter than this between siblings = warn (cramped)
 const SAMPLES = 14;                                    // frames sampled across the timeline
 
@@ -72,11 +73,11 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
 }
 
 // re-render the worst frame and draw an overlay (safe box + offending element outlines), for the screenshot.
-function overlayFn(n) {
+function overlayFn(n, SAFE) {
   window.__engine.renderFrame(n);
   const o = document.createElement('div');
   o.style.cssText = 'position:absolute;inset:0;z-index:99999;pointer-events:none';
-  o.innerHTML = `<div style="position:absolute;left:60px;top:240px;width:840px;height:1100px;border:2px solid rgba(120,240,60,.6)"></div>`;
+  o.innerHTML = `<div style="position:absolute;left:${SAFE.x0}px;top:${SAFE.y0}px;width:${SAFE.x1 - SAFE.x0}px;height:${SAFE.y1 - SAFE.y0}px;border:2px solid rgba(120,240,60,.6)"></div>`;
   document.body.appendChild(o);
   const seen = new Set();
   for (const el of document.querySelectorAll('[data-layer="critical"]')) {
@@ -97,19 +98,30 @@ for (const m of modules) {
   const sample = `formats/${m}/sample.json`;
   if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m, hard: 1, warn: 0, crit: 0, note: 'no sample.json' }); continue; }
   const page = await browser.newPage();
-  await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+  // landscape-aware: read the sample's orientation so landscape formats are audited at their real dims
+  const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
+  const safe = landscape ? SAFE_LAND : SAFE;
+  await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames, fps = meta.fps || 30;
+  // skip frames inside scene transitions (enter/exit motion is intentionally off-position/faded);
+  // meta.segments = the format's declared scene windows (formats without it audit every sample)
+  let inTransition = () => false;
+  if ((meta.segments || []).length) {
+    const cuts = []; let acc = 0;
+    meta.segments.forEach((s, i) => { acc += s.dur ?? (s.t1 - s.t0); if (i < meta.segments.length - 1) cuts.push({ t: acc, trans: s.transition ?? 0.4 }); });
+    inTransition = (f) => cuts.some((c) => Math.abs(f / fps - c.t) < c.trans + 0.05);
+  }
   const frames = [...new Set([...(meta.stings || []).map((t) => Math.round(t * fps)),
     ...Array.from({ length: SAMPLES }, (_, i) => Math.round(((i + 0.5) / SAMPLES) * total))])]
-    .filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
+    .filter((f) => f >= 0 && f < total && !inTransition(f)).sort((a, b) => a - b);
 
   const all = [];
   let critMax = 0, worst = { f: frames[0] || 0, n: -1 };
   for (const f of frames) {
-    const { issues, count } = await page.evaluate(auditFrameFn, f, SAFE, MIN_GAP);
+    const { issues, count } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP);
     critMax = Math.max(critMax, count);
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
@@ -122,7 +134,7 @@ for (const m of modules) {
   const hu = uniq(hard), wu = uniq(warn);
   rows.push({ m, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
 
-  await page.evaluate(overlayFn, worst.f);
+  await page.evaluate(overlayFn, worst.f, safe);
   await page.screenshot({ path: path.join(OUT, `${m}.png`) });
   await page.close();
 }
