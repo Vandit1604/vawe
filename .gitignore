@@ -16,3 +16,9 @@ verify/frames/
 
 # transient DOM snapshot baselines (make snap)
 verify/snap/
+
+# kie.ai secret + generated assets
+.kie.key
+engine/assets/gen/
+dna/
+engine/assets/brands/

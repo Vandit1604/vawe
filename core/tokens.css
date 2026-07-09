@@ -24,6 +24,13 @@
   --glass: rgba(21, 22, 26, 0.6);
   --highlight: rgba(244, 245, 242, 0.6);
 
+  /* font families — themeable (applyTheme() overrides from data.theme.type). Scenes that opt
+     into these vars get per-theme fonts; the fallbacks keep the default look unchanged. */
+  --font-sans: 'Inter';
+  --font-num: 'Space Grotesk';
+  --font-serif: 'Instrument Serif';
+  --font-mono: 'Geist Mono';
+
   /* canvas size — orientation-driven (portrait default; landscape overrides below) */
   --vw: 1080px;
   --vh: 1920px;
@@ -85,13 +92,18 @@
   --safe-right: 120px;
 }
 
+/* alpha export (--alpha): drop every opaque backdrop so unpainted pixels render transparent.
+   The motion graphics (text/images/cards) still paint normally → a compositable overlay layer. */
+html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { background: transparent !important; }
+html.alpha .stage::before, html.alpha .stage::after { display: none !important; }
+
 /* determinism: every frame is set explicitly — kill all time-based motion */
 * { margin: 0; padding: 0; box-sizing: border-box; transition: none !important; animation: none !important; }
 
 html, body {
   width: var(--vw); height: var(--vh); overflow: hidden;
   background: var(--bg); color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans, 'Inter'), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
 }
 
@@ -102,9 +114,17 @@ html, body {
 @font-face { font-family: 'Inter'; font-weight: 800; font-display: block; src: url('/engine/assets/fonts/inter-800.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/engine/assets/fonts/space-500.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/engine/assets/fonts/space-700.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: normal; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: italic; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 600; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
+/* ThreadCite (and any warm-editorial brand) — Plus Jakarta Sans / JetBrains Mono / Caveat (variable) */
+@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
+@font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/Caveat.woff2') format('woff2'); }
 
 /* numbers everywhere: tabular figures so digits don't jitter on count-up */
-.num { font-family: 'Space Grotesk', sans-serif; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
+.num { font-family: var(--font-num, 'Space Grotesk'), sans-serif; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
 
 /* ---------- stage: premium graphite + grid + glow + grain ---------- */
 .stage {

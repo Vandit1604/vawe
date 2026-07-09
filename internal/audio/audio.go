@@ -32,6 +32,9 @@ type Config struct {
 	Sting     string   `json:"sting"`
 	VO        string   `json:"vo"`
 	MusicGain *float64 `json:"musicGain,omitempty"`
+	// Silent renders the video with no audio track at all — skips the default
+	// music.wav/sting.wav auto-discovery. Use for motion-graphics overlays.
+	Silent bool `json:"silent,omitempty"`
 }
 
 type wav struct {
@@ -41,6 +44,9 @@ type wav struct {
 
 // Render writes the mixed stereo WAV to outWav. Returns false if there was nothing to mix.
 func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir, engineRoot, outWav string) bool {
+	if cfg.Silent {
+		return false
+	}
 	bases := []string{}
 	if formatDir != "" {
 		bases = append(bases, formatDir)

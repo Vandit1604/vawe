@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>plinthad</title>
+    <link rel="stylesheet" href="/core/tokens.css" />
+    <style>
+      /* plinthad — bespoke LANDSCAPE brand ad. Applies the design research: 60-30-10 colour, a
+         derived #1F3BFF ramp, WCAG contrast (white only on L≤45% bg), Material-3 easing, 40–80ms
+         stagger, and the 6-axis scene-variety rule — each of the 4 scenes flips value / layout /
+         background engine / hue / motion character while holding the accent + type family constant.
+         Backgrounds are drawn to <canvas> (core/backgrounds.js), pure in n. */
+      .chrome, .brand { display: none; }
+      .pa { position: absolute; inset: 0; overflow: hidden; font-family: var(--font-sans, 'Inter'), sans-serif; }
+      #cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; }
+      .pa-vig { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+        box-shadow: inset 0 0 120px 0 rgba(20,24,64,0.06); }
+      .pa-vig.light { box-shadow: none; }
+
+      .pa-figure { position: absolute; right: -40px; bottom: -60px; height: 1150px; z-index: 3;
+        filter: grayscale(1) contrast(1.06); -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 96%);
+        mask-image: linear-gradient(to bottom, #000 64%, transparent 96%); will-change: transform, opacity; }
+      .pa-figure img { height: 100%; display: block; }
+
+      .pa-scene { position: absolute; inset: 0; z-index: 10; will-change: transform, opacity;
+        display: flex; flex-direction: column; justify-content: center; padding: 0 155px; color: #f4f5ff; }
+
+      /* scene 1 — hero (dark, left, macro) */
+      .s-eyebrow { font: 600 30px var(--font-mono, 'Geist Mono'), monospace; letter-spacing: 0.04em; color: #a9b4ff; margin-bottom: 34px; }
+      .s-hero-title { font: 800 134px var(--font-sans, 'Inter'), sans-serif; line-height: 0.97; letter-spacing: -0.038em;
+        max-width: 1180px; text-shadow: 0 6px 60px rgba(6,8,30,0.6); }
+      .s-hero-sub { margin-top: 28px; font: italic 400 90px var(--font-serif, 'Instrument Serif'), serif; color: #fff;
+        text-shadow: 0 3px 40px rgba(6,8,30,0.6); }
+      .kw { display: inline-block; white-space: pre; will-change: transform, opacity; }
+
+      /* scene 2 — mechanism (LIGHT, centered grid, dark text/cards) */
+      #s2 { color: #12162e; }
+      .s-mech-title { text-align: center; font: 800 72px var(--font-sans, 'Inter'), sans-serif; letter-spacing: -0.022em;
+        margin-bottom: 72px; color: #12162e; }
+      .s-mech-title em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: #1f3bff; }
+      .s-flow { display: flex; align-items: stretch; justify-content: center; }
+      .s-card { position: relative; width: 430px; padding: 46px 42px; background: rgba(255,255,255,0.74);
+        border: 1px solid rgba(20,22,60,0.12); backdrop-filter: blur(4px); will-change: transform, opacity;
+        box-shadow: 0 30px 70px rgba(40,46,110,0.18); }
+      .s-card .n { font: 600 26px var(--font-mono, 'Geist Mono'), monospace; color: #1f3bff; letter-spacing: 0.08em; }
+      .s-card .h { margin-top: 16px; font: 800 46px var(--font-sans, 'Inter'), sans-serif; letter-spacing: -0.02em; line-height: 1.02; color: #12162e; }
+      .s-card .d { margin-top: 15px; font: 500 30px var(--font-sans, 'Inter'), sans-serif; color: #444a6b; line-height: 1.25; }
+      .s-conn { align-self: center; width: 62px; height: 4px; background: #1f3bff; transform-origin: left center; box-shadow: 0 0 14px rgba(31,59,255,0.5); }
+
+      /* scene 3 — stats (dark, macro numbers, constellation) */
+      .s-stats { display: flex; justify-content: center; gap: 140px; }
+      .s-stat { text-align: center; will-change: transform, opacity; }
+      .s-stat .v { font: 800 182px var(--font-sans, 'Inter'), sans-serif; letter-spacing: -0.04em; line-height: 0.88;
+        font-feature-settings: 'tnum' 1; color: #fff; text-shadow: 0 6px 50px rgba(6,8,30,0.6); }
+      .s-stat .l { margin-top: 20px; font: 600 40px var(--font-sans, 'Inter'), sans-serif; color: #a9b4ff; }
+
+      /* scene 4 — cta (brand-forward, centered) */
+      .s-cta { align-items: center; text-align: center; }
+      .s-mark { width: 132px; height: 132px; margin: 0 auto 30px; will-change: transform; filter: drop-shadow(0 16px 50px rgba(10,14,60,0.6)); }
+      .s-mark img { width: 100%; height: 100%; object-fit: contain; }
+      .s-cta-h { font: 800 104px var(--font-sans, 'Inter'), sans-serif; letter-spacing: -0.03em; line-height: 0.98; max-width: 1320px; color: #fff;
+        text-shadow: 0 6px 50px rgba(6,8,30,0.6); }
+      .s-cta-h em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: #a9b4ff; }
+      .s-cta-url { margin-top: 40px; display: inline-block; padding: 20px 42px; background: #0a0c1e; color: #fff;
+        font: 600 44px var(--font-mono, 'Geist Mono'), monospace; border: 1px solid #1f3bff; box-shadow: 0 0 44px rgba(31,59,255,0.45); }
+
+      /* dip-to-colour transition overlay */
+      .pa-dip { position: absolute; inset: 0; z-index: 40; opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div class="pa">
+        <canvas id="cv" width="1920" height="1080"></canvas>
+        <div class="pa-figure" id="figure"></div>
+        <div class="pa-vig" id="vig"></div>
+
+        <div class="pa-scene" id="s1">
+          <div class="s-eyebrow" id="eyebrow"></div>
+          <div class="s-hero-title" id="heroTitle"></div>
+          <div class="s-hero-sub" id="heroSub"></div>
+        </div>
+        <div class="pa-scene" id="s2">
+          <div class="s-mech-title" id="mechTitle"></div>
+          <div class="s-flow" id="flow"></div>
+        </div>
+        <div class="pa-scene" id="s3"><div class="s-stats" id="stats"></div></div>
+        <div class="pa-scene s-cta" id="s4">
+          <div class="s-mark" id="mark"></div>
+          <div class="s-cta-h" id="ctaH"></div>
+          <div><span class="s-cta-url" id="ctaUrl"></span></div>
+        </div>
+
+        <div class="pa-dip" id="dip"></div>
+      </div>
+    </div>
+    <script type="module">
+      import { boot, clamp01, lerp, interpolate, spring, sequence, easeOutCubic, easeOutQuart, easeOutExpo, easeOutBack, formatNumber, icon } from '/core/lib.js';
+      import { splitText, animateUnits } from '/core/kinetic.js';
+      import { renderBg, bgPreset } from '/core/backgrounds.js';
+      const $ = (id) => document.getElementById(id);
+      const setT = (el, s) => Object.assign(el.style, s);
+      const W = 1920, H = 1080;
+
+      boot((data, fps) => {
+        const d = data, ctx = $('cv').getContext('2d');
+
+        // ---- content
+        $('eyebrow').textContent = d.eyebrow || 'NEW · MCP-NATIVE MARKETPLACE';
+        $('heroTitle').innerHTML = d.title || 'A marketplace of AI agents';
+        $('heroSub').textContent = d.sub || 'Pay per call.';
+        const heroWords = splitText($('heroTitle'), 'word');
+        if (d.figure) $('figure').innerHTML = icon(d.figure, ''); else $('figure').style.display = 'none';
+
+        $('mechTitle').innerHTML = d.mechTitle || 'One file in. <em>A paid agent out.</em>';
+        const steps = d.steps || [];
+        const cardEls = [], connEls = [];
+        steps.forEach((s, i) => {
+          if (i) { const c = document.createElement('div'); c.className = 's-conn'; $('flow').appendChild(c); connEls.push(c); }
+          const el = document.createElement('div'); el.className = 's-card';
+          el.innerHTML = `<div class="n">${s.n}</div><div class="h">${s.h}</div><div class="d">${s.d}</div>`;
+          $('flow').appendChild(el); cardEls.push(el);
+        });
+
+        const stats = d.stats || [];
+        const statEls = stats.map((s) => { const el = document.createElement('div'); el.className = 's-stat';
+          el.innerHTML = `<div class="v"></div><div class="l">${s.l}</div>`; $('stats').appendChild(el); return el.querySelector('.v'); });
+
+        if (d.logo) $('mark').innerHTML = icon(d.logo, ''); else $('mark').style.display = 'none';
+        $('ctaH').innerHTML = d.cta || 'Publish your first agent in <em>ten minutes.</em>';
+        $('ctaUrl').textContent = d.url || 'plinthai.xyz';
+
+        // ---- per-scene BACKGROUNDS (variety rule: distinct engine + value + hue each scene)
+        // distinct animated bg per scene — from the shared plinth-palette presets (core/backgrounds.js)
+        const BG = { hero: bgPreset('aurora', 'dark'), mech: bgPreset('dotmatrix', 'light'), stats: bgPreset('constellation', 'dark'), cta: bgPreset('brandglow', 'dark') };
+
+        const SEGS = [
+          { name: 'hero', dur: d.t1 || 3.6, transition: 0.55 },
+          { name: 'mech', dur: d.t2 || 4.6, transition: 0.55 },
+          { name: 'stats', dur: d.t3 || 3.4, transition: 0.55 },
+          { name: 'cta', dur: d.t4 || 3.6, transition: 0.55 },
+        ];
+        const duration = SEGS.reduce((a, s) => a + s.dur, 0);
+        const bounds = []; let acc = 0; for (const s of SEGS) { bounds.push(acc + s.dur); acc += s.dur; }
+        const scenes = { hero: $('s1'), mech: $('s2'), stats: $('s3'), cta: $('s4') };
+        // dip colours per boundary (chapter change = brand; into light scene = white)
+        const DIP = ['#1f3bff', '#eef0ff', '#1f3bff'];
+
+        function renderFrame(f) {
+          const t = f / fps;
+          const seq = sequence(f, fps, SEGS);
+          const active = seq.name;
+
+          renderBg(ctx, W, H, t, BG[active]);              // distinct animated bg per scene
+          $('vig').className = 'pa-vig' + (active === 'mech' ? ' light' : '');
+
+          // show only the active scene; per-scene distinct ENTER motion (variety of motion character)
+          for (const [k, el] of Object.entries(scenes)) {
+            if (k !== active) { el.style.display = 'none'; continue; }
+            el.style.display = 'flex';
+            const enter = seq.enter, exit = seq.exit, op = (clamp01(enter) * (1 - exit)).toFixed(3);
+            let tf;
+            if (k === 'hero') tf = `translateY(${((1 - easeOutCubic(enter)) * 40).toFixed(1)}px)`;
+            else if (k === 'mech') tf = `scale(${lerp(0.965, 1, easeOutExpo(enter)).toFixed(4)})`;     // scale-in
+            else if (k === 'stats') tf = `translateY(${((1 - easeOutExpo(enter)) * 70).toFixed(1)}px)`; // slide-up
+            else tf = `scale(${lerp(1.08, 1, easeOutExpo(enter)).toFixed(4)})`;                          // scale-punch
+            const exitScale = lerp(1, k === 'cta' ? 1 : 1.05, easeOutQuart(exit));
+            el.style.opacity = op; el.style.transform = `${tf} scale(${exitScale.toFixed(4)})`;
+          }
+
+          // dip-to-colour at each scene boundary (hides the swap, adds a brand beat)
+          let dipA = 0, dipC = '#1f3bff';
+          bounds.slice(0, -1).forEach((b, i) => { const dd = Math.abs(t - b); if (dd < 0.22) { const a = 0.9 * (1 - dd / 0.22); if (a > dipA) { dipA = a; dipC = DIP[i]; } } });
+          setT($('dip'), { opacity: dipA.toFixed(3), background: dipC });
+
+          // figure only in hero (fade+slide in) — small echo in cta
+          if (active === 'hero') { $('figure').style.opacity = interpolate(seq.localT, [0, 0.9], [0, 0.92], { easing: easeOutCubic }).toFixed(2);
+            $('figure').style.transform = `translateX(${lerp(150, 0, easeOutExpo(clamp01(seq.localT / 1.1))).toFixed(0)}px) scale(1.02)`; }
+          else $('figure').style.opacity = '0';
+
+          const lt = seq.localT;
+          if (active === 'hero') {
+            animateUnits(heroWords, lt, { preset: 'up', stagger: 0.06, each: 0.5, dist: 56 });
+            setT($('eyebrow'), { opacity: interpolate(lt, [0.1, 0.5], [0, 1]).toFixed(2) });
+            const su = interpolate(lt, [1.0, 1.55], [0, 1], { easing: easeOutCubic });
+            setT($('heroSub'), { opacity: su.toFixed(2), transform: `translateY(${lerp(24, 0, su).toFixed(1)}px)` });
+          } else if (active === 'mech') {
+            const tt = interpolate(lt, [0.1, 0.65], [0, 1], { easing: easeOutExpo });
+            setT($('mechTitle'), { opacity: tt.toFixed(2), transform: `translateY(${lerp(30, 0, tt).toFixed(1)}px)` });
+            cardEls.forEach((el, i) => { const s = spring(lt - 0.5 - i * 0.42, { bounce: 0.42, settle: 0.6 });   // overshoot
+              setT(el, { opacity: clamp01((lt - 0.5 - i * 0.42) * 3).toFixed(2), transform: `translateY(${lerp(48, 0, s).toFixed(1)}px) scale(${lerp(0.92, 1, s).toFixed(3)})` }); });
+            connEls.forEach((el, i) => { el.style.transform = `scaleX(${interpolate(lt, [1.1 + i * 0.42, 1.5 + i * 0.42], [0, 1], { easing: easeOutQuart }).toFixed(3)})`; });
+          } else if (active === 'stats') {
+            stats.forEach((s, i) => { const inn = interpolate(lt, [0.2 + i * 0.26, 1.1 + i * 0.26], [0, 1], { easing: easeOutExpo });
+              statEls[i].textContent = (s.compact ? formatNumber(s.v * inn, { compact: true }) : formatNumber(Math.round(s.v * inn), {})) + (s.suffix || '');
+              const rise = interpolate(lt, [0.1 + i * 0.26, 0.7 + i * 0.26], [0, 1], { easing: easeOutBack });
+              setT(statEls[i].parentElement, { opacity: clamp01(rise).toFixed(2), transform: `translateY(${lerp(46, 0, rise).toFixed(1)}px)` }); });
+          } else if (active === 'cta') {
+            const s = spring(lt - 0.12, { bounce: 0.46, settle: 0.58 });
+            setT($('mark'), { opacity: clamp01(lt / 0.25).toFixed(2), transform: `translateY(${lerp(30, 0, s).toFixed(1)}px) scale(${lerp(0.55, 1, s).toFixed(3)})` });
+            const h = interpolate(lt, [0.35, 0.95], [0, 1], { easing: easeOutExpo });
+            setT($('ctaH'), { opacity: h.toFixed(2), transform: `translateY(${lerp(26, 0, h).toFixed(1)}px)` });
+            const u = interpolate(lt, [0.8, 1.3], [0, 1], { easing: easeOutQuart });
+            setT($('ctaUrl').parentElement, { opacity: u.toFixed(2), transform: `translateY(${lerp(20, 0, u).toFixed(1)}px)` });
+          }
+        }
+        return { fps, duration, stings: bounds.slice(0, -1), renderFrame };
+      });
+    </script>
+  </body>
+</html>

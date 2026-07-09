@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>threadcite</title>
+    <link rel="stylesheet" href="/core/tokens.css" />
+    <style>
+      /* threadcite — BESPOKE editorial format (NOT a shared template). Visual language derived from the
+         product: Reddit threads + coached replies + AI citations. Warm paper, LEFT-aligned magazine
+         layout, real Reddit/AI-answer mockups, HANDWRITTEN Caveat annotations that draw on, and
+         highlighter marks. Motion = mark-up/annotate/cite (draw-on, highlight, type). Pure in n. */
+      .stage { background: none !important; } .stage::before, .stage::after { display: none !important; }
+      .chrome, .brand { display: none; }
+      * { font-family: 'Plus Jakarta Sans', sans-serif; }
+      .tc { position: absolute; inset: 0; overflow: hidden; background: #fbfaf8; color: #0f0e0d; }
+      .paper { position: absolute; inset: 0; z-index: 0; background:
+        radial-gradient(60% 80% at 78% 30%, #fff 0%, #fbfaf8 55%, #f4f2ec 100%); }
+      .grain { position: absolute; inset: 0; z-index: 1; opacity: 0.5; mix-blend-mode: multiply; pointer-events: none; }
+      .brandmk { position: absolute; top: 60px; left: 96px; width: 60px; height: 60px; z-index: 40; border-radius: 15px; box-shadow: 0 6px 20px rgba(80,50,20,0.14); }
+
+      .sc { position: absolute; inset: 0; z-index: 10; display: none; }
+      .pad { position: absolute; left: 150px; right: 150px; top: 150px; bottom: 150px; }
+
+      .eyebrow { font: 700 30px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: #e1500f; text-transform: uppercase; }
+      .head { font: 800 118px 'Plus Jakarta Sans'; line-height: 0.98; letter-spacing: -0.03em; color: #0f0e0d; max-width: 1250px; }
+      .head .wm { position: relative; white-space: nowrap; }         /* wrap for highlighter/underline */
+      .hl { position: absolute; left: -8px; right: -8px; top: 14%; bottom: 10%; background: rgba(225,80,15,0.22);
+        border-radius: 6px; transform-origin: left center; transform: scaleX(0); z-index: -1; }
+      .note { position: absolute; font: 400 62px 'Caveat', cursive; color: #e1500f; white-space: nowrap; }
+      .annot { position: absolute; overflow: visible; }
+      .annot path { fill: none; stroke: #e1500f; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+
+      /* Reddit post card mockup */
+      .post { position: absolute; width: 900px; background: #fff; border: 1px solid #ece9e2; border-radius: 22px;
+        box-shadow: 0 40px 90px rgba(60,40,20,0.12); padding: 40px 46px; }
+      .post .sub { display: flex; align-items: center; gap: 16px; font: 700 30px 'Plus Jakarta Sans'; color: #5f5e58; }
+      .post .sub b { width: 40px; height: 40px; border-radius: 50%; background: #e1500f; display: inline-block; }
+      .post .sub .r { color: #0f0e0d; } .post .sub .t { color: #8a887f; font-weight: 500; }
+      .post .q { margin-top: 24px; font: 800 56px 'Plus Jakarta Sans'; letter-spacing: -0.02em; line-height: 1.06; color: #0f0e0d; }
+      .post .meta { margin-top: 30px; display: flex; gap: 30px; align-items: center; font: 600 28px 'Plus Jakarta Sans'; color: #8a887f; }
+      .post .up { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 999px; background: #f4f2ec; color: #5f5e58; }
+      .post .up .ar { color: #e1500f; font-size: 32px; line-height: 1; }
+      .reply { margin-top: 28px; border-top: 1px dashed #e6e3db; padding-top: 26px; font: 500 34px 'Plus Jakarta Sans'; color: #0f0e0d; line-height: 1.34; min-height: 120px; }
+      .reply .cur { display: inline-block; width: 3px; height: 34px; background: #e1500f; vertical-align: -5px; }
+      .reply .ok { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; font: 700 26px 'Plus Jakarta Sans'; color: #1a8a46; }
+
+      /* AI answer card */
+      .ai { position: absolute; width: 980px; background: #fff; border: 1px solid #ece9e2; border-radius: 22px; box-shadow: 0 40px 90px rgba(60,40,20,0.12); padding: 42px 48px; }
+      .ai .qh { font: 700 30px 'JetBrains Mono', monospace; color: #8a887f; }
+      .ai .ans { margin-top: 22px; font: 500 40px 'Plus Jakarta Sans'; line-height: 1.35; color: #0f0e0d; }
+      .ai .cur { display: inline-block; width: 3px; height: 40px; background: #e1500f; vertical-align: -6px; }
+      .ai .src { margin-top: 34px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .ai .src .lbl { font: 700 26px 'JetBrains Mono', monospace; color: #8a887f; }
+      .ai .pill { display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; background: #f4f2ec; border: 1px solid #ece9e2; font: 700 28px 'Plus Jakarta Sans'; color: #5f5e58; }
+      .ai .pill.you { background: #ffe9dd; border-color: #e1500f; color: #e1500f; }
+      .ai .pill.you b { width: 26px; height: 26px; border-radius: 6px; background: #e1500f; display: inline-block; }
+
+      .cta-url { display: inline-block; margin-top: 40px; padding: 22px 44px; background: #0f0e0d; color: #fbfaf8;
+        font: 700 46px 'JetBrains Mono', monospace; border-radius: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div class="tc">
+        <div class="paper"></div>
+        <canvas class="grain" id="grain" width="1920" height="1080"></canvas>
+        <img class="brandmk" id="brand" src="/engine/assets/brands/threadcite/icon.svg" alt="" />
+        <div id="root"></div>
+      </div>
+    </div>
+    <script type="module">
+      import { boot, clamp01, lerp, interpolate, spring, sequence, easeOutCubic, easeOutQuart, easeOutExpo, formatNumber, random } from '/core/lib.js';
+      const $ = (id) => document.getElementById(id);
+      const setT = (el, s) => Object.assign(el.style, s);
+      const W = 1920, H = 1080;
+      // hand-drawn annotation paths (pathLength=100 so dashoffset animates cleanly), viewBox 0..100
+      const PATHS = {
+        underline: 'M2,8 C25,2 55,14 98,5',
+        circle: 'M78,12 C40,2 8,14 6,42 C4,70 40,84 68,80 C96,76 98,44 84,26',
+        arrow: 'M4,6 C30,10 55,28 78,60 M78,60 L62,52 M78,60 L82,42',
+      };
+
+      boot((data, fps) => {
+        const gctx = $('grain').getContext('2d'), root = $('root');
+        // paper grain (deterministic, warm)
+        function drawGrain(t) { const f = Math.round(t * 6); gctx.clearRect(0, 0, W, H); gctx.fillStyle = 'rgba(120,100,70,0.05)';
+          for (let i = 0; i < 1100; i++) { gctx.fillRect(random(`g${f}:${i}:x`) * W, random(`g${f}:${i}:y`) * H, 1.6, 1.6); } }
+
+        const mk = (html) => { const el = document.createElement('div'); el.className = 'sc'; el.innerHTML = `<div class="pad">${html}</div>`; root.appendChild(el); return el; };
+        const annot = (kind, x, y, w, rot = 0) => `<svg class="annot" style="left:${x}px;top:${y}px;width:${w}px;height:${w * 0.6}px;transform:rotate(${rot}deg)" viewBox="0 0 100 60" preserveAspectRatio="none"><path pathLength="100" d="${PATHS[kind]}"/></svg>`;
+        const drawAnnot = (el, p) => { const path = el.querySelector('path'); if (path) { path.style.strokeDasharray = '100'; path.style.strokeDashoffset = (100 * (1 - clamp01(p))).toFixed(1); } };
+
+        const built = (data.scenes || []).map((sc, i) => build(sc, i));
+        const SEGS = built.map((b, i) => ({ name: 's' + i, dur: b.dur }));
+        const duration = SEGS.reduce((a, s) => a + s.dur, 0);
+        const bounds = []; let acc = 0; for (const s of SEGS) { bounds.push(acc + s.dur); acc += s.dur; }
+
+        function build(sc, i) {
+          const dur = sc.dur || 4; let el, animate = () => {};
+          if (sc.type === 'hook') {
+            el = mk(`<div class="eyebrow" style="opacity:0" data-eb>${sc.eyebrow || ''}</div>
+              <div class="head" style="margin-top:44px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>
+              <div class="note" data-note style="left:150px;top:430px;opacity:0">${sc.note || ''}</div>`);
+            animate = (lt) => { el.querySelector('[data-eb]').style.opacity = interpolate(lt, [0.1, 0.5], [0, 1]).toFixed(2);
+              el.querySelector('[data-hl]').style.transform = `scaleX(${interpolate(lt, [0.5, 0.95], [0, 1], { easing: easeOutQuart }).toFixed(3)})`;
+              const np = interpolate(lt, [1.0, 1.4], [0, 1]); el.querySelector('[data-note]').style.opacity = np.toFixed(2); };
+          } else if (sc.type === 'thread') {
+            el = mk(`<div class="head" style="max-width:720px">${sc.title || ''}</div>
+              <div class="post" data-post style="right:20px;top:200px;opacity:0">
+                <div class="sub"><b></b><span class="r">${sc.sub || 'r/marketing'}</span><span class="t">· ${sc.time || '2h'}</span></div>
+                <div class="q">${sc.q || ''}</div>
+                <div class="meta"><span class="up"><span class="ar">▲</span> ${sc.up || '128'}</span><span>${sc.comments || '46'} comments</span></div>
+                <svg class="annot" data-circ style="position:absolute;left:-54px;top:-52px;width:calc(100% + 108px);height:calc(100% + 104px)" viewBox="0 0 100 62" preserveAspectRatio="none"><path pathLength="100" d="${PATHS.circle}"/></svg>
+                <span class="note" data-note style="position:absolute;right:20px;bottom:-96px;opacity:0">${sc.note || 'high-intent lead'} ↙</span>
+              </div>`);
+            const post = el.querySelector('[data-post]');
+            animate = (lt) => { const p = interpolate(lt, [0.2, 0.8], [0, 1], { easing: easeOutExpo }); setT(post, { opacity: clamp01(p * 1.5).toFixed(2), transform: `translateX(${lerp(70, 0, p).toFixed(0)}px)` });
+              drawAnnot(el.querySelector('[data-circ]'), interpolate(lt, [1.0, 1.9], [0, 1], { easing: easeOutCubic }));
+              el.querySelector('[data-note]').style.opacity = interpolate(lt, [1.6, 2.0], [0, 1]).toFixed(2); };
+          } else if (sc.type === 'reply') {
+            const txt = sc.reply || '';
+            el = mk(`<div class="head" style="max-width:700px">${sc.title || ''}</div>
+              <div class="post" style="right:0;top:150px;width:980px">
+                <div class="sub"><b></b><span class="r">${sc.sub || 'r/marketing'}</span><span class="t">· you</span></div>
+                <div class="reply"><span data-rep></span><span class="cur" data-cur></span><div class="ok" data-ok style="opacity:0">✓ reads human, not shill</div></div>
+              </div>`);
+            const rep = el.querySelector('[data-rep]'), cur = el.querySelector('[data-cur]'), ok = el.querySelector('[data-ok]');
+            animate = (lt) => { const n = Math.floor(clamp01((lt - 0.4) / 2.0) * txt.length); rep.innerHTML = txt.slice(0, n);
+              cur.style.opacity = (n < txt.length && Math.floor(lt * 2) % 2 ? 1 : (n >= txt.length ? 0 : 1)); ok.style.opacity = interpolate(lt, [2.6, 3.0], [0, 1]).toFixed(2); };
+          } else if (sc.type === 'cite') {
+            const ans = sc.answer || '';
+            el = mk(`<div class="head" style="max-width:620px">${sc.title || ''}</div>
+              <div class="ai" data-ai style="right:0;top:150px;opacity:0">
+                <div class="qh">${sc.query || 'best tool for X?'}</div>
+                <div class="ans"><span data-ans></span><span class="cur" data-cur></span></div>
+                <div class="src"><span class="lbl">SOURCES</span><span class="pill">reddit.com</span><span class="pill you" data-you style="opacity:0;position:relative"><b></b>${sc.brand || 'you'}<span class="note" data-note style="position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 8px);white-space:nowrap;opacity:0;font-size:52px">↑ ${sc.note || "that's you"}</span></span></div>
+              </div>`);
+            const ai = el.querySelector('[data-ai]'), ansEl = el.querySelector('[data-ans]'), cur = el.querySelector('[data-cur]'), you = el.querySelector('[data-you]');
+            animate = (lt) => { const ap = interpolate(lt, [0.2, 0.6], [0, 1], { easing: easeOutExpo }); ai.style.opacity = ap.toFixed(2); ai.style.transform = `translateY(${lerp(30, 0, ap).toFixed(0)}px)`;
+              const n = Math.floor(clamp01((lt - 0.7) / 1.6) * ans.length); ansEl.innerHTML = ans.slice(0, n); cur.style.opacity = n < ans.length && n > 0 ? 1 : 0;
+              const yp = interpolate(lt, [2.5, 2.9], [0, 1], { easing: easeOutQuart }); setT(you, { opacity: yp.toFixed(2), transform: `scale(${lerp(0.7, 1, yp).toFixed(2)})` });
+              el.querySelector('[data-note]').style.opacity = interpolate(lt, [3.0, 3.4], [0, 1]).toFixed(2); };
+          } else if (sc.type === 'line') {
+            el = mk(`<div class="head" style="position:absolute;top:50%;transform:translateY(-50%);font-size:132px;max-width:1500px">${sc.pre || ''}<span class="wm">${sc.mark || ''}<span class="hl" data-hl></span></span>${sc.post || ''}</div>`);
+            animate = (lt) => { el.querySelector('[data-hl]').style.transform = `scaleX(${interpolate(lt, [0.4, 0.9], [0, 1], { easing: easeOutQuart }).toFixed(3)})`; };
+          } else if (sc.type === 'cta') {
+            el = mk(`<div style="position:absolute;top:50%;transform:translateY(-50%)"><div class="head" style="font-size:120px;max-width:1300px">${sc.cta || ''}</div>
+              <div style="position:relative;display:inline-block;margin-top:10px"><span class="cta-url" data-url style="opacity:0">${sc.url || ''}</span><span class="note" data-note style="position:absolute;left:calc(100% + 30px);top:50%;transform:translateY(-50%);white-space:nowrap;opacity:0">${sc.note || 'start free →'}</span></div></div>`);
+            animate = (lt) => { const u = interpolate(lt, [0.5, 0.95], [0, 1], { easing: easeOutExpo }); setT(el.querySelector('[data-url]'), { opacity: u.toFixed(2), transform: `translateY(${lerp(18, 0, u).toFixed(0)}px)` });
+              el.querySelector('[data-note]').style.opacity = interpolate(lt, [1.0, 1.4], [0, 1]).toFixed(2); };
+          } else { el = mk(`<div class="head">${sc.title || ''}</div>`); }
+          return { el, dur, animate };
+        }
+
+        function renderFrame(f) {
+          const t = f / fps; drawGrain(t);
+          const seq = sequence(f, fps, SEGS), idx = seq.index;
+          built.forEach((b, i) => {
+            if (i !== idx) { b.el.style.display = 'none'; return; }
+            b.el.style.display = 'block';
+            // editorial cut: quick fade + tiny upward drift (no flashy template transition)
+            const inP = interpolate(seq.localT, [0, 0.35], [0, 1], { easing: easeOutExpo }), outP = interpolate(seq.localT, [b.dur - 0.3, b.dur], [0, 1]);
+            b.el.style.opacity = (clamp01(inP) * (1 - outP)).toFixed(3);
+            b.el.querySelector('.pad').style.transform = `translateY(${lerp(18, 0, inP).toFixed(1)}px)`;
+          });
+          $('brand').style.opacity = built[idx].el.querySelector('.cta-url') ? '0' : interpolate(t, [0.3, 0.8], [0, 0.95]).toFixed(2);
+          built[idx].animate(seq.localT, seq);
+        }
+        return { fps, duration, stings: bounds.slice(0, -1), renderFrame };
+      });
+    </script>
+  </body>
+</html>

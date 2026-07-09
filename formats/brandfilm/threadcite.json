@@ -1,0 +1,26 @@
+{
+  "module": "brandfilm",
+  "orientation": "landscape",
+  "theme": "threadcite",
+  "brand": "/engine/assets/brands/threadcite/icon.svg",
+  "audio": { "silent": true },
+  "scenes": [
+    { "type": "title", "bg": "paperShapes", "value": "light", "eyebrow": "REDDIT LEADS · AI CITATIONS", "title": "Find your Reddit leads. <em>Get cited by AI.</em>", "dur": 3.6 },
+    { "type": "statement", "bg": "paper", "value": "light", "text": "Your buyers ask on Reddit <em>every day.</em>", "dur": 3.0 },
+    { "type": "statement", "bg": "paper", "value": "light", "text": "You're just not in the thread — <em>yet.</em>", "dur": 3.0 },
+    { "type": "steps", "bg": "paper", "value": "light", "title": "How ThreadCite works", "dur": 5.0, "steps": [
+      { "n": "01", "h": "Tell us your site", "d": "We learn what you sell and who buys." },
+      { "n": "02", "h": "We find your threads", "d": "High-intent Reddit questions, daily." },
+      { "n": "03", "h": "Reply with coached drafts", "d": "Win the lead without getting flagged." }
+    ] },
+    { "type": "statement", "bg": "soft", "value": "light", "text": "Those threads keep ranking for <em>months.</em>", "dur": 3.0 },
+    { "type": "features", "bg": "paper", "value": "light", "title": "Everything to get <em>recommended</em>", "dur": 4.6, "items": [
+      { "h": "Daily rank tracking", "d": "Watch your threads climb search." },
+      { "h": "Every engine, one view", "d": "ChatGPT, Gemini, Google AI." },
+      { "h": "Cited across AI", "d": "Get recommended when buyers ask." },
+      { "h": "Coached drafts, fast", "d": "Reply that reads human, not shill." }
+    ] },
+    { "type": "statement", "bg": "paper", "value": "light", "text": "Reddit is the source. <em>You're the citation.</em>", "dur": 3.4 },
+    { "type": "cta", "bg": "soft", "value": "light", "logo": "/engine/assets/brands/threadcite/icon.svg", "cta": "Get found where buyers <em>ask.</em>", "url": "threadcite.live", "dur": 4.2 }
+  ]
+}

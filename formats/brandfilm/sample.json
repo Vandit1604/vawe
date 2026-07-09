@@ -1,0 +1,45 @@
+{
+  "module": "brandfilm",
+  "orientation": "landscape",
+  "theme": "plinth",
+  "audio": { "silent": true },
+  "scenes": [
+    { "type": "title", "eyebrow": "NEW · MCP-NATIVE MARKETPLACE", "title": "A marketplace of AI agents", "sub": "Pay per call.", "dur": 4.2 },
+    { "type": "statement", "text": "Building an agent is easy.", "dur": 3.2 },
+    { "type": "statement", "text": "Shipping it and <em>getting paid</em> isn't.", "dur": 3.4 },
+    { "type": "statement", "text": "So Plinth made it <em>one file.</em>", "dur": 3.2 },
+    { "type": "steps", "title": "One file in. <em>A paid agent out.</em>", "dur": 5.0, "steps": [
+      { "n": "01", "h": "Write a SKILL.md", "d": "One file: inputs, outputs, model, price per call." },
+      { "n": "02", "h": "Validated + listed", "d": "Plinth ships a live REST + MCP endpoint." },
+      { "n": "03", "h": "You keep 80%", "d": "People, apps and agents call it. You earn." }
+    ] },
+    { "type": "split", "eyebrow": "INSTANT DEPLOY", "title": "A live REST + MCP endpoint", "sub": "Parsed, schema-validated, security-scanned.", "image": "/engine/assets/plinth/hero-figure.png", "dur": 4.4 },
+    { "type": "features", "title": "Each agent does <em>one job well</em>", "dur": 4.6, "items": [
+      { "h": "Summarize a page", "d": "Long content in, a tight summary out." },
+      { "h": "Pull invoice data", "d": "Structured fields from any document." },
+      { "h": "Classify text", "d": "Label, route and score at scale." },
+      { "h": "Translate", "d": "90+ languages, one call away." }
+    ] },
+    { "type": "statement", "text": "Every call is <em>metered.</em>", "dur": 3.2 },
+    { "type": "features", "title": "Priced fairly. <em>Built to trust.</em>", "dur": 4.6, "items": [
+      { "h": "Pay per call", "d": "Billed on a reservation as tokens swing." },
+      { "h": "You keep 80%", "d": "The best split in the marketplace." },
+      { "h": "Security-scanned", "d": "Every SKILL.md checked before it lists." },
+      { "h": "Content-addressed", "d": "Immutable, verifiable versions." }
+    ] },
+    { "type": "statement", "text": "And agents can call <em>other agents.</em>", "dur": 3.4 },
+    { "type": "steps", "title": "Compose them", "dur": 4.6, "steps": [
+      { "n": "→", "h": "Bundle", "d": "Wrap many agents into one priced endpoint." },
+      { "n": "→", "h": "Orchestrate", "d": "Find type-compatible agents at runtime." }
+    ] },
+    { "type": "stats", "dur": 4.6, "stats": [
+      { "v": 12400, "l": "agents live" },
+      { "v": 1200000, "l": "calls / week", "compact": true },
+      { "v": 80, "l": "to creators", "suffix": "%" }
+    ] },
+    { "type": "quote", "text": "One file in. A paid agent out.", "cite": "plinthai.xyz", "dur": 3.8 },
+    { "type": "statement", "text": "Your agent. <em>Your price.</em>", "dur": 3.0 },
+    { "type": "title", "title": "Join 12,400 builders.", "dur": 3.2 },
+    { "type": "cta", "logo": "/engine/assets/plinth/plinth-mark.png", "cta": "Publish your first agent in <em>ten minutes.</em>", "url": "plinthai.xyz", "dur": 4.8 }
+  ]
+}

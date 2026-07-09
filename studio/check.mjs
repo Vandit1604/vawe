@@ -26,8 +26,15 @@ const formats = await (await fetch(BASE + '/__formats')).json();
 
 // landscape is opt-in per format (only those with a [data-orient="landscape"] layout); probe the source
 const supportsLandscape = (f) => fs.readFileSync(path.join(repoRoot, 'formats', f, 'scene.html'), 'utf8').includes('data-orient="landscape"');
+// landscape-ONLY brand-video formats declare orientation:landscape in their sample and have no portrait
+// layout — test those in landscape only (portrait would force wrong dims). Others keep the portrait gate.
+const landscapeOnly = (f) => { try { const s = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', f, 'sample.json'), 'utf8')); return (s.orientation || s.orient) === 'landscape' && !supportsLandscape(f); } catch { return false; } };
 const cases = [];
-for (const f of formats) { cases.push({ f, orient: 'portrait' }); if (supportsLandscape(f)) cases.push({ f, orient: 'landscape' }); }
+for (const f of formats) {
+  if (landscapeOnly(f)) { cases.push({ f, orient: 'landscape' }); continue; }
+  cases.push({ f, orient: 'portrait' });
+  if (supportsLandscape(f)) cases.push({ f, orient: 'landscape' });
+}
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const tiles = [];

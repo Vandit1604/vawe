@@ -1,0 +1,33 @@
+{
+  "title": "Hyperscene (generic composition)",
+  "description": "Data-driven layered motion graphics (another engine-style). layers[] declare text/image with position, timing (start/duration), a clip anim, and optional kinetic split+preset. No per-topic code — the JSON is the video.",
+  "note": "data.theme sets palette/fonts/motion. captions[] burn in word/sentence-synced text.",
+  "fields": {
+    "duration": { "type": "number", "label": "Total seconds (else inferred from last clip)", "min": 0.5, "max": 120 },
+    "captionMode": { "type": "string", "label": "Caption style", "enum": ["sentence", "word"] },
+    "layers": { "type": "array", "label": "Layers", "required": true, "minItems": 1, "item": {
+      "type": { "type": "string", "label": "Layer type", "required": true, "enum": ["text", "image"] },
+      "text": { "type": "string", "label": "Text (text layers; may use <b>/<em>)" },
+      "src": { "type": "string", "label": "Image path (image layers)" },
+      "x": { "type": "number", "label": "Left px" }, "y": { "type": "number", "label": "Top px" },
+      "w": { "type": "number", "label": "Width px" }, "h": { "type": "number", "label": "Image height px" },
+      "align": { "type": "string", "label": "Text align", "enum": ["left", "center", "right"] },
+      "font": { "type": "string", "label": "Face", "enum": ["sans", "serif", "mono"] },
+      "size": { "type": "number", "label": "Font px" }, "weight": { "type": "number", "label": "Font weight" },
+      "color": { "type": "string", "label": "Color override" },
+      "start": { "type": "number", "label": "Start s", "min": 0 },
+      "duration": { "type": "number", "label": "Duration s", "min": 0 },
+      "track": { "type": "number", "label": "z-order" },
+      "anim": { "type": "string", "label": "Clip enter anim", "enum": ["fade", "up", "rise", "pop", "scale", "slide-left", "slide-right", "slide-up", "slide-down", "wipe", "wipe-right", "iris", "clock", "none"] },
+      "out": { "type": "string", "label": "Clip exit anim (defaults to reverse of anim)" },
+      "split": { "type": "string", "label": "Kinetic split", "enum": ["char", "word", "line"] },
+      "preset": { "type": "string", "label": "Kinetic preset", "enum": ["up", "down", "type", "scale", "blur", "bounce", "slide", "wave"] },
+      "stagger": { "type": "number", "label": "Per-unit delay s" },
+      "each": { "type": "number", "label": "Per-unit anim s" }
+    } },
+    "captions": { "type": "array", "label": "Burn-in captions", "item": {
+      "t0": { "type": "number", "label": "Start s", "required": true },
+      "t1": { "type": "number", "label": "End s", "required": true },
+      "text": { "type": "string", "label": "Caption text", "required": true } } }
+  }
+}

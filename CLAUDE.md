@@ -4,6 +4,12 @@ This repo turns **one self-describing JSON → one rendered Short** (1080×1920,
 Your job when asked to "make a video about X" is to **write a data JSON** for the right format,
 then render it. You do **not** edit the format HTML/CSS or the Go renderer unless explicitly asked.
 
+> **Making a product-LAUNCH video for a brand/website?** Follow **`docs/LAUNCH-VIDEO-GUIDE.md`**:
+> `make brandkit URL=… NAME=…` auto-builds the colours pack + Brand DNA + fonts + favicon, then author
+> a `demo` (product walkthrough) or `brandfilm` (narrative) JSON with `"theme":"<name>"`. Design knowledge
+> lives in **`docs/DESIGN-DATABASE.md`** (backgrounds, motion, transitions, storyboard, plain-vs-busy).
+> **Use ONLY the site's colours** and respect dominance (white-first vs dark). Landscape 1920×1080.
+
 ## The loop
 
 ```bash

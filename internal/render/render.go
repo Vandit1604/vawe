@@ -15,10 +15,12 @@ import (
 )
 
 type Options struct {
-	FPS     int
-	Workers int
-	Draft   bool
-	Grain   bool
+	FPS         int
+	Workers     int
+	Draft       bool
+	Grain       bool
+	Transparent bool   // alpha export: transparent capture → VP9/yuva420p .webm (no audio, no grain)
+	BgVideo     string // composite the (alpha) graphics over this background video → out.mp4
 }
 
 type dataFile struct {
@@ -50,9 +52,39 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	os.MkdirAll(filepath.Dir(out), 0755)
 
 	fmt.Printf("▶ %s : capturing across %d workers…\n", module, o.Workers)
-	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir)
+	transparent := o.Transparent || o.BgVideo != "" // compositing needs a transparent graphics layer
+	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent)
 	if err != nil {
 		return err
+	}
+
+	// alpha export / video compositing: transparent frames → VP9 (yuva420p) webm.
+	if transparent {
+		w, h := meta.Width, meta.Height
+		if w == 0 || h == 0 {
+			w, h = 1080, 1920
+		}
+		if o.BgVideo != "" {
+			// composite the graphics over a background video → out (mp4).
+			overlay := filepath.Join(filepath.Dir(out), "."+filepath.Base(out)+".ov.webm")
+			defer os.Remove(overlay)
+			fmt.Println("▶ encoding (alpha overlay)…")
+			if err := encode.VideoAlpha(framesDir, o.FPS, overlay); err != nil {
+				return err
+			}
+			fmt.Println("▶ compositing over background video…")
+			if err := encode.Composite(o.BgVideo, overlay, w, h, o.FPS, out); err != nil {
+				return err
+			}
+			fmt.Printf("✓ done → %s  (%.1fs, %d frames · over video)\n", out, meta.Duration, meta.TotalFrames)
+			return nil
+		}
+		fmt.Println("▶ encoding (alpha / vp9)…")
+		if err := encode.VideoAlpha(framesDir, o.FPS, out); err != nil {
+			return err
+		}
+		fmt.Printf("✓ done → %s  (%.1fs, %d frames · alpha)\n", out, meta.Duration, meta.TotalFrames)
+		return nil
 	}
 
 	tmpVideo := filepath.Join(filepath.Dir(out), "."+filepath.Base(out)+".v.mp4")

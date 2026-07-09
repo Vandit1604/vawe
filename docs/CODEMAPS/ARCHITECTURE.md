@@ -26,13 +26,18 @@ which is what makes the sharded capture correct. Guarded by `make probe`.
 
 | Path | What | Notes |
 |---|---|---|
-| `core/lib.js` | shared scene runtime + pure helpers | `boot()`, `icon()`, `preloadImages()`, formatting, and the **motion primitives** (`interpolate`/`spring`/`track`/`rise`/`fade`/`pop`/`slide` + easings). All pure in `n`. |
-| `core/tokens.css` | design system | color, **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay. |
+| `core/lib.js` | shared scene runtime + pure helpers | `boot()`, `icon()`, `preloadImages()`, formatting, the **motion primitives** (`interpolate`/`spring`/`track`/`rise`/`fade`/`pop`/`slide`/`sequence`/`wipe`/`circleWipe`/`clockWipe` + easings + `EASINGS`), **seeded** `random`/`noise`/`hashSeed`/`stagger`, `measureText`/`fitText`, and the **theme system** (`resolveTheme`/`applyTheme`/`motionDefaults`/`DEFAULT_THEME`). All pure in `n`. |
+| `core/kinetic.js` | kinetic-typography kit | `splitText()` (char/word/line) + `PRESETS` (up/down/type/scale/blur/bounce/slide/wave) + `animateUnits()`. Pure per-unit staggered reveals. |
+| `core/compose.js` | declarative composition (another engine parity) | `driveClips(root,t)` reads `data-start/-duration/-track/-anim/-out` → timed multi-layer clips w/ enter/exit + z-order; `registerTimeline`/`seekAll(t)` = seekable **animation-adapter interface** (GSAP/WAAPI/custom). |
+| `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
+| `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
 | `core/visuals.css` | opt-in visual treatments | `.ic-ring/-duotone/-glow`, `.tex-grain`, `.badge/.chip`, `.frame-gradient`. |
 | `formats/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
 | `formats/<name>/schema.json` | field schema | drives the studio quick-edit panel (not a validator yet). |
 | `formats/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
-| `cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`. |
+| `formats/hyperscene/` | generic data-driven format | layered composition from `data.layers[]` (text/image + timing + anim + kinetic split/preset) + `data.captions[]`. No per-topic code — the JSON is the video. |
+| `scripts/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. |
+| `cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`, `--alpha` (transparent VP9 `.webm` overlay). |
 | `internal/scene` (Go) | frame capture | parallel tabs; relies on purity. |
 | `internal/encode` (Go) | ffmpeg wrapper | H.264 + grain; `Mux` adds audio. |
 | `internal/audio` (Go) | PCM mixer | music loop + named sfx at cue times + **VO ducking** + sting + limiter. |

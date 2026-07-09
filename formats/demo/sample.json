@@ -1,0 +1,33 @@
+{
+  "module": "demo",
+  "orientation": "landscape",
+  "theme": "plinth",
+  "audio": { "silent": true },
+  "scenes": [
+    { "type": "title", "bg": "aurora", "eyebrow": "PLINTH · MCP-NATIVE MARKETPLACE", "title": "Turn one file into a <em>paid API.</em>", "sub": "Watch how.", "dur": 3.6 },
+    { "type": "code", "bg": "mesh", "file": "summarize.SKILL.md", "dur": 6.4, "lines": [
+      "name: summarize",
+      "description: Summarize any web page",
+      "input:  { url: string }",
+      "output: { summary: string }",
+      "model:  claude-haiku",
+      "price:  $0.002 / call"
+    ] },
+    { "type": "deploy", "bg": "spotlight", "title": "Plinth validates + ships it", "url": "api.plinth.dev/summarize", "dur": 5.4, "steps": [
+      { "ic": "braces", "lb": "Parse SKILL.md" },
+      { "ic": "layers", "lb": "Schema-validate" },
+      { "ic": "shield", "lb": "Security scan" },
+      { "ic": "globe", "lb": "Publish · REST + MCP" }
+    ] },
+    { "type": "call", "bg": "aurora", "title": "Anyone calls it", "url": "/agents/summarize", "resp": "Plinth turns one file into a paid API.", "latency": "412ms", "cost": "$0.002", "dur": 6.0 },
+    { "type": "earn", "bg": "constellation", "title": "You earn on <em>every call.</em>", "total": 1247, "dur": 5.2, "calls": [
+      { "nm": "agent-scout", "v": 0.002 },
+      { "nm": "inbox-app", "v": 0.002 },
+      { "nm": "agent-atlas", "v": 0.004 },
+      { "nm": "crm-sync", "v": 0.002 },
+      { "nm": "agent-nova", "v": 0.003 }
+    ] },
+    { "type": "statement", "bg": "mesh", "text": "And agents can call <em>other agents.</em>", "dur": 3.2 },
+    { "type": "cta", "bg": "brandglow", "logo": "/engine/assets/plinth/plinth-mark.png", "cta": "Publish your first agent in <em>ten minutes.</em>", "url": "plinthai.xyz", "dur": 4.6 }
+  ]
+}

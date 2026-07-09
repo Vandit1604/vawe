@@ -30,10 +30,12 @@ func main() {
 	noGrain := flag.Bool("no-grain", false, "skip the film-grain pass")
 	all := flag.Bool("all", false, "render every format's sample.json")
 	concurrency := flag.Int("concurrency", 1, "formats rendered at once (--all)")
+	alpha := flag.Bool("alpha", false, "transparent overlay export → VP9/yuva420p .webm (video-only)")
+	bg := flag.String("bg", "", "composite the (alpha) graphics over this background video → out.mp4")
 	flag.Parse()
 
 	repoRoot := repoRoot()
-	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain}
+	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg}
 
 	if *list {
 		listFormats(repoRoot)
@@ -83,7 +85,7 @@ func main() {
 			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: shortwave foo.json --draft --out x.mp4
 		}
 	}
-	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain} // rebuild after any trailing flags
+	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg} // rebuild after any trailing flags
 	if dataPath == "" {
 		fmt.Fprintln(os.Stderr, "usage: shortwave <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)
@@ -101,7 +103,11 @@ func main() {
 	outPath := *out
 	if outPath == "" {
 		name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
-		outPath = filepath.Join(repoRoot, "engine", "out", name+".mp4")
+		ext := ".mp4"
+		if *alpha && *bg == "" {
+			ext = ".webm" // alpha overlay (no bg composite)
+		}
+		outPath = filepath.Join(repoRoot, "engine", "out", name+ext)
 	}
 
 	if err := render.Render(repoRoot, mod, dataPath, outPath, opts); err != nil {

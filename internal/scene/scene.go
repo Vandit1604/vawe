@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/chromedp"
 	"shortwave/internal/audio"
 )
@@ -81,7 +83,7 @@ func newTab(parent context.Context, url string) (context.Context, context.Cancel
 }
 
 // Capture renders module's scene (data at dataURL) and writes total PNGs to framesDir.
-func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string) (Meta, error) {
+func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool) (Meta, error) {
 	var meta Meta
 	srv, port, err := Serve(repoRoot)
 	if err != nil {
@@ -89,6 +91,9 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 	defer srv.Close()
 	url := fmt.Sprintf("http://127.0.0.1:%d/formats/%s/scene.html?data=%s&fps=%d", port, module, dataURL, fps)
+	if transparent {
+		url += "&alpha=1" // scene drops its opaque background so unpainted pixels stay transparent
+	}
 
 	// one tab for meta
 	ctx0, cancel0, err := newTab(context.Background(), url)
@@ -122,6 +127,13 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		// size this tab's viewport to the capture dimensions (landscape support)
 		if err := chromedp.Run(ctx, chromedp.EmulateViewport(cw, ch)); err != nil {
 			return fmt.Errorf("emulate viewport: %w", err)
+		}
+		// alpha export: override the default page backdrop to fully transparent so
+		// CaptureScreenshot emits PNGs with a real alpha channel (unpainted → transparent).
+		if transparent {
+			if err := chromedp.Run(ctx, emulation.SetDefaultBackgroundColorOverride().WithColor(&cdp.RGBA{R: 0, G: 0, B: 0, A: 0})); err != nil {
+				return fmt.Errorf("transparent bg: %w", err)
+			}
 		}
 		for f := range frames {
 			var buf []byte

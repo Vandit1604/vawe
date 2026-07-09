@@ -1,0 +1,68 @@
+{
+  "name": "plinth-auto",
+  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these.",
+  "palette": {
+    "bg": "#fff",
+    "text": "#181815",
+    "accent": "#1f3bff",
+    "accent2": "#6e6e68"
+  },
+  "type": {
+    "sans": "Inter",
+    "mono": "Geist Mono"
+  },
+  "bg": {
+    "accent": "31,59,255",
+    "tint": "110,110,104",
+    "tint2": "31,59,255",
+    "dotLight": "110,110,104",
+    "paperBase": [
+      "#fff",
+      "#f4f4f1"
+    ],
+    "softBase": [
+      "#ebedff",
+      "#dee0f1"
+    ],
+    "accentBase": [
+      "#1f3bff",
+      "#1930d1"
+    ],
+    "inkBase": [
+      "#343431",
+      "#181815"
+    ],
+    "border": "#e6e6e1",
+    "light": [
+      "#fff",
+      "#f4f4f1"
+    ],
+    "dark": [
+      "#191f44",
+      "#181815"
+    ],
+    "darkMesh": [
+      "#1a2150",
+      "#181815"
+    ],
+    "deep": [
+      "#3b3b38",
+      "#181815"
+    ],
+    "ink": [
+      "#1f3bff",
+      "#1930d1"
+    ],
+    "paper": "#fff"
+  },
+  "vars": {
+    "--ink": "#181815",
+    "--paper": "#fff",
+    "--muted": "#6e6e68",
+    "--em": "#1f3bff",
+    "--on-light": "#181815",
+    "--on-dark": "#fff",
+    "--border": "#e6e6e1",
+    "--accent-soft": "#ebedff"
+  }
+}

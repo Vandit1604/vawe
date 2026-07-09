@@ -1,6 +1,9 @@
 // scripts/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/lib.js.
 // No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
-import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic } from '../core/lib.js';
+import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
+  random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_THEME,
+  sequence, wipe, circleWipe, clockWipe } from '../core/lib.js';
+import { unitProgress, PRESETS } from '../core/kinetic.js';
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -46,6 +49,65 @@ ok('rise settled', (() => { const s = rise(1); return approx(s.opacity, 1) && s.
 ok('fade', fade(0.5).opacity === 0.5);
 ok('pop opacity clamped', pop(1).opacity === 1 && pop(1).transform.includes('scale'));
 ok('slide dir', slide(0, 'left', 60).transform.includes('-60') || slide(0, 'left', 60).transform.includes('-6'));
+
+// seeded randomness — deterministic, in-range, seed-sensitive
+ok('random in [0,1)', (() => { for (let i = 0; i < 200; i++) { const r = random(i); if (r < 0 || r >= 1) return false; } return true; })());
+ok('random deterministic', random(42) === random(42) && random('x') === random('x'));
+ok('random seed-sensitive', random(1) !== random(2) && random('a') !== random('b'));
+ok('hashSeed uint32', Number.isInteger(hashSeed(7)) && hashSeed(7) >= 0 && hashSeed(7) < 2 ** 32);
+ok('noise in [0,1)', (() => { for (let x = 0; x < 20; x += 0.3) { const v = noise(x, 5); if (v < 0 || v >= 1) return false; } return true; })());
+ok('noise continuous at lattice', approx(noise(3, 9), random('9:3'), 1e-9));
+ok('noise deterministic', noise(2.5, 1) === noise(2.5, 1));
+
+// stagger
+ok('stagger 0', stagger(0) === 0);
+ok('stagger step', approx(stagger(3, 0.1), 0.3));
+
+// easing registry
+ok('resolveEasing by name', resolveEasing('easeOutCubic') === EASINGS.easeOutCubic);
+ok('resolveEasing passthrough fn', (() => { const f = (t) => t; return resolveEasing(f) === f; })());
+ok('resolveEasing unknown → fallback', resolveEasing('nope') === easeOutCubic);
+ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
+
+// motionDefaults
+ok('motionDefaults resolves easing to fn', typeof motionDefaults({ motion: { easing: 'easeOutQuart' } }).easing === 'function');
+ok('motionDefaults falls back to DEFAULT', motionDefaults(undefined).bounce === DEFAULT_THEME.motion.bounce);
+ok('motionDefaults keeps overrides', motionDefaults({ motion: { enter: 99 } }).enter === 99);
+ok('motionDefaults durationScale default 1', motionDefaults({ motion: {} }).durationScale === 1);
+
+// sequencing — segments with transition windows (trans=0.4 default)
+const segs = [{ name: 's1', dur: 2 }, { name: 's2', dur: 2 }, { name: 's3', dur: 1 }];
+ok('sequence picks segment', sequence(30, 30, segs).name === 's1');            // 1s → s1
+ok('sequence second segment', sequence(90, 30, segs).name === 's2');           // 3s → s2
+ok('sequence enter ramps from 0', approx(sequence(0, 30, segs).enter, 0));     // start of s1
+ok('sequence enter completes', sequence(30, 30, segs).enter === 1);            // 1s in → past 0.4 trans
+ok('sequence exit 0 mid-segment', sequence(30, 30, segs).exit === 0);          // 1s in, not near end
+ok('sequence exit ramps at end', sequence(59, 30, segs).exit > 0);             // ~1.97s into s1 (dur 2)
+ok('sequence active in [0,1]', (() => { for (let n = 0; n < 150; n += 3) { const a = sequence(n, 30, segs).active; if (a < 0 || a > 1) return false; } return true; })());
+ok('sequence deterministic', sequence(77, 30, segs).active === sequence(77, 30, segs).active);
+
+// transitions → clip-path strings, monotonic reveal
+ok('wipe hidden at 0', wipe(0, 'left').clipPath.includes('100%'));
+ok('wipe revealed at 1', wipe(1, 'left').clipPath === 'inset(0 0% 0 0)');
+ok('wipe has webkit alias', wipe(0.5).WebkitClipPath === wipe(0.5).clipPath);
+ok('circleWipe grows', parseFloat(circleWipe(1).clipPath.match(/[\d.]+/)[0]) > parseFloat(circleWipe(0.2).clipPath.match(/[\d.]+/)[0]));
+ok('circleWipe at 0 is zero-radius', circleWipe(0).clipPath.startsWith('circle(0.0%'));
+ok('clockWipe is polygon', clockWipe(0.5).clipPath.startsWith('polygon('));
+ok('clockWipe full at 1 has all corners', (() => { const p = clockWipe(1).clipPath; return p.includes('100.0% 0.0%') && p.includes('100.0% 100.0%') && p.includes('0.0% 100.0%'); })());
+ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipPath);
+
+// kinetic typography — unitProgress staggering + presets (pure)
+ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));
+ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stagger: 0.06 }) === 0);
+ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
+ok('unitProgress clamped [0,1]', (() => { for (let t = -1; t < 3; t += 0.1) { const u = unitProgress(t, 1, 4); if (u < 0 || u > 1) return false; } return true; })());
+ok('preset up hidden at 0', PRESETS.up(0).opacity === 0 && PRESETS.up(0).transform.includes('translateY'));
+ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.0px)'));
+ok('preset type hard on/off', PRESETS.type(0).opacity === 0 && PRESETS.type(0.01).opacity === 1);
+ok('preset scale grows', PRESETS.scale(1).transform.includes('scale(1'));
+ok('preset blur clears', PRESETS.blur(1).filter.includes('blur(0.0px)'));
+ok('preset wave oscillates', PRESETS.wave(0).transform !== PRESETS.wave(0.25).transform);
+ok('presets deterministic', PRESETS.bounce(0.4).transform === PRESETS.bounce(0.4).transform);
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

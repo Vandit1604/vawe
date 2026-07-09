@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>hyperscene</title>
+    <link rel="stylesheet" href="/core/tokens.css" />
+    <style>
+      /* hyperscene — a GENERIC, data-driven layered composition (another engine-style template
+         instantiation). data.layers = [{type,text/src, x/y/w, timing, anim, split/preset}]; the
+         scene builds the DOM + drives it purely in n via compose.driveClips + kinetic.animateUnits.
+         No per-topic code — the JSON is the video. */
+      .chrome { display: none; }
+      /* stage background = the theme gradient (g0..g2) when present, else transparent (shows the
+         default dark .stage). Lets a themed hyperscene carry its brand backdrop for free. */
+      .hs-stage { position: absolute; inset: 0; overflow: hidden;
+        background: radial-gradient(82% 60% at 66% 42%, var(--g2, transparent) 0%, var(--g1, transparent) 46%, var(--g0, transparent) 100%); }
+      .hs-layer { position: absolute; will-change: transform, opacity, filter; }
+      .hs-text { color: var(--text); line-height: 1.04; }
+      .hs-text b { color: #fff; }
+      .hs-text em { font-style: italic; font-family: var(--font-serif, 'Instrument Serif'); }
+      .hs-img { display: block; object-fit: contain; }
+      /* caption bar */
+      .hs-cap { position: absolute; left: 60px; right: 180px; bottom: 300px; z-index: 90; text-align: center;
+        font: 700 46px var(--font-sans, 'Inter'), sans-serif; color: #fff; text-shadow: 0 3px 24px rgba(0,0,0,0.7);
+        opacity: 0; }
+      .hs-cap.word { font-weight: 800; }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div class="hs-stage" id="root"></div>
+      <div class="hs-cap" id="cap"></div>
+      <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
+    </div>
+    <script type="module">
+      import { boot, icon, clamp01 } from '/core/lib.js';
+      import { driveClips, seekAll } from '/core/compose.js';
+      import { splitText, animateUnits } from '/core/kinetic.js';
+      const $ = (id) => document.getElementById(id);
+
+      boot((data, fps) => {
+        const root = $('root');
+        const layers = (data.layers || []).map((L, idx) => {
+          const el = document.createElement('div');
+          el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : 'hs-text');
+          // positioning
+          el.style.left = (L.x ?? 60) + 'px';
+          el.style.top = (L.y ?? 240) + 'px';
+          if (L.w != null) el.style.width = L.w + 'px';
+          if (L.align) el.style.textAlign = L.align;
+          if (L.filter) el.style.filter = L.filter;               // e.g. "grayscale(1) contrast(1.05)"
+          if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; } // edge dissolve
+          // timing → data-attributes consumed by compose.driveClips
+          el.dataset.start = String(L.start ?? 0);
+          if (L.duration != null) el.dataset.duration = String(L.duration);
+          el.dataset.track = String(L.track ?? idx);
+          el.dataset.anim = L.split ? 'none' : (L.anim || 'fade');
+          if (L.split) el.dataset.enter = '0';
+          if (L.out) el.dataset.out = L.out;
+          if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
+
+          if (L.type === 'image') {
+            el.innerHTML = icon(L.src, '');
+            const im = el.querySelector('img'); if (im) { im.className = 'hs-img'; if (L.h) im.style.height = L.h + 'px'; if (L.w) im.style.width = L.w + 'px'; }
+          } else {
+            const serif = L.font === 'serif', mono = L.font === 'mono';
+            el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : 'sans'})`;
+            el.style.fontSize = (L.size ?? 96) + 'px';
+            el.style.fontStyle = serif ? 'italic' : 'normal';
+            el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
+            el.style.letterSpacing = L.tracking ?? (serif ? '0' : '-0.03em');
+            if (L.color) el.style.color = L.color;
+            el.innerHTML = L.text || '';
+          }
+          root.appendChild(el);
+          const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
+          return { L, el, units };
+        });
+
+        // duration: explicit, else the last clip's end (+0.4 tail)
+        const lastEnd = layers.reduce((m, { L }) => Math.max(m, (L.start ?? 0) + (L.duration ?? 2)), 0);
+        const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
+        const caps = data.captions || [];
+        const capMode = data.captionMode || 'sentence';
+
+        function renderFrame(f) {
+          const t = f / fps;
+          driveClips(root, t); // declarative clip timing + enter/exit + z-order
+          // kinetic split-text: animate units on their local clock (clip appears instantly, units reveal)
+          for (const { L, units } of layers) {
+            if (!units) continue;
+            const start = L.start ?? 0, end = start + (L.duration ?? 2);
+            if (t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || 'up', stagger: L.stagger ?? 0.06, each: L.each ?? 0.5, loop: L.loop, dist: L.dist });
+          }
+          // captions: show the caption whose window contains t
+          const cap = caps.find((c) => t >= c.t0 && t < c.t1);
+          const capEl = $('cap');
+          capEl.className = 'hs-cap ' + (capMode === 'word' ? 'word' : '');
+          if (cap) { capEl.innerHTML = cap.text; const in01 = clamp01((t - cap.t0) / 0.14), out01 = clamp01((cap.t1 - t) / 0.14); capEl.style.opacity = (in01 * out01).toFixed(2); }
+          else capEl.style.opacity = '0';
+          seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
+        }
+        return { fps, duration, renderFrame };
+      });
+    </script>
+  </body>
+</html>

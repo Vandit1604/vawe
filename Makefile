@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap lib-test review hooks install-hooks studio studio-check assets list clean
+.PHONY: build video render all look frame verify audit probe snap lib-test validate brandkit review hooks install-hooks studio studio-check assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -56,6 +56,16 @@ snap:
 # make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
 lib-test:
 	node scripts/lib-test.mjs
+
+# make brandkit URL=https://site.com NAME=brand  — crawl a site → colours pack (themes/brand.json)
+# + download fonts + fetch favicon. One command to onboard any brand's video (see scripts/brandkit.mjs).
+brandkit:
+	node scripts/brandkit.mjs $(URL) $(NAME)
+
+# make validate [D=formats/x/topic.json]  — check data + inline theme against the format schema.
+# No D = validate every formats/*/sample.json. Same validator boot() runs before rendering.
+validate:
+	node scripts/validate.mjs $(D)
 
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).

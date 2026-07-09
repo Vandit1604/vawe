@@ -1,0 +1,19 @@
+{
+  "title": "Launch (kinetic teaser)",
+  "description": "Product/feature launch teaser. Withhold the name: teaser lines build, then the name slams in (spring + sting), then a date/stat + CTA. Pure kinetic type — no charts.",
+  "note": "data.theme (string name or inline object) sets palette/fonts/motion — validated separately by validateTheme.",
+  "fields": {
+    "kicker": { "type": "string", "label": "Kicker (top eyebrow)" },
+    "figure": { "type": "string", "label": "Hero image bleeding off the right (optional path)" },
+    "lines": { "type": "array", "label": "Teaser lines (build suspense, no name)", "required": true, "minItems": 1, "maxItems": 5, "item": {
+      "text": { "type": "string", "label": "Line (may use <b>…</b>)", "required": true },
+      "serif": { "type": "boolean", "label": "Render this line in the serif face" } } },
+    "reveal": { "type": "object", "label": "The reveal", "required": true, "fields": {
+      "name": { "type": "string", "label": "Product name (the payoff)", "required": true },
+      "tagline": { "type": "string", "label": "Tagline" },
+      "logo": { "type": "string", "label": "Logo image path (optional)" } } },
+    "date": { "type": "string", "label": "Date / stat line (e.g. LIVE NOW)" },
+    "accent": { "type": "string", "label": "Brand hex override (e.g. #2ee6c9)", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" },
+    "cta": { "type": "string", "label": "Outro CTA (e.g. the URL)" }
+  }
+}

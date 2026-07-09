@@ -1,0 +1,11 @@
+{
+  "name": "plinth",
+  "note": "PlinthAI brand kit — periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy).",
+  "palette": {
+    "text": "#f5f5f2",
+    "accent": "#1f3bff"
+  },
+  "gradient": ["#454e92", "#757dbb", "#c7cbe8"],
+  "type": { "sans": "Inter", "serif": "Instrument Serif", "mono": "Geist Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.4, "settle": 0.62, "enter": 52, "durationScale": 1, "stagger": 0.08 }
+}

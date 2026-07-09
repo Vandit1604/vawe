@@ -1,0 +1,39 @@
+{
+  "module": "brandfilm",
+  "orientation": "landscape",
+  "theme": "plinth",
+  "audio": { "silent": true },
+  "scenes": [
+    { "type": "statement", "bg": "aurora", "value": "dark", "text": "Anyone can build an AI agent.", "dur": 3.2 },
+    { "type": "statement", "bg": "spotlight", "value": "dark", "text": "Almost no one gets <em>paid</em> for it.", "dur": 3.6 },
+    { "type": "title", "bg": "brandglow", "value": "dark", "eyebrow": "INTRODUCING", "title": "Plinth", "sub": "A marketplace of AI agents.", "dur": 3.8 },
+    { "type": "split", "bg": "mesh", "value": "dark", "eyebrow": "PAY PER CALL", "title": "One file in. <em>A paid agent out.</em>", "sub": "REST + MCP, live in minutes.", "image": "/engine/assets/plinth/hero-figure.png", "dur": 4.6 },
+    { "type": "steps", "bg": "dotmatrix", "value": "light", "title": "How it works", "dur": 5.0, "steps": [
+      { "n": "01", "h": "Write a SKILL.md", "d": "Inputs, outputs, model, price per call." },
+      { "n": "02", "h": "Validated + listed", "d": "A live REST + MCP endpoint." },
+      { "n": "03", "h": "You keep 80%", "d": "Callers pay. You earn." }
+    ] },
+    { "type": "features", "bg": "constellation", "value": "dark", "title": "Each agent, <em>one job</em>", "dur": 4.6, "items": [
+      { "h": "Summarize a page", "d": "Content in, a tight summary out." },
+      { "h": "Pull invoice data", "d": "Structured fields from any doc." },
+      { "h": "Classify text", "d": "Label, route and score at scale." },
+      { "h": "Translate", "d": "90+ languages, one call away." }
+    ] },
+    { "type": "statement", "bg": "dotmatrix", "value": "light", "text": "Every call is <em>metered.</em>", "dur": 3.0 },
+    { "type": "features", "bg": "mesh", "value": "dark", "title": "Priced fairly. <em>Built to trust.</em>", "dur": 4.6, "items": [
+      { "h": "Pay per call", "d": "Billed on a reservation." },
+      { "h": "You keep 80%", "d": "Best split in the market." },
+      { "h": "Security-scanned", "d": "Checked before it lists." },
+      { "h": "Content-addressed", "d": "Immutable, verifiable." }
+    ] },
+    { "type": "statement", "bg": "aurora", "value": "dark", "text": "And agents can call <em>other agents.</em>", "dur": 3.4 },
+    { "type": "stats", "bg": "constellation", "value": "dark", "dur": 4.6, "stats": [
+      { "v": 12400, "l": "agents live" },
+      { "v": 1200000, "l": "calls / week", "compact": true },
+      { "v": 80, "l": "to creators", "suffix": "%" }
+    ] },
+    { "type": "quote", "bg": "spotlight", "value": "dark", "text": "Your agent. Your price.", "cite": "plinthai.xyz", "dur": 3.6 },
+    { "type": "title", "bg": "mesh", "value": "dark", "title": "Join 12,400 builders.", "dur": 3.2 },
+    { "type": "cta", "bg": "brandglow", "value": "dark", "logo": "/engine/assets/plinth/plinth-mark.png", "cta": "Publish your first agent in <em>ten minutes.</em>", "url": "plinthai.xyz", "dur": 4.8 }
+  ]
+}
