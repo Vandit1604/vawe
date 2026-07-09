@@ -228,6 +228,15 @@
             const words = splitText(cam.querySelector('.big'), 'word'), url = cam.querySelector('.ctaUrl').parentElement, logo = cam.querySelector('div');
             b.animate = (lt) => { animateUnits(words, lt, { preset: 'up', stagger: 0.05, each: 0.4, dist: 40 });
               const u = interpolate(lt, [0.8, 1.3], [0, 1], { easing: easeOutQuart }); setT(url, { opacity: u.toFixed(2), transform: `translateY(${lerp(18, 0, u).toFixed(1)}px)` }); };
+          } else if (sc.type === 'component') {
+            // render a REAL UI component lifted off the site (scripts/capture-component.mjs), scaled to fit.
+            const c = (window.__components && window.__components[sc.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
+            const fit = (sc.scale || 1) * Math.min(1360 / Math.max(1, c.w), 780 / Math.max(1, c.h), 1.6);
+            const { el, cam } = mkScene(`${sc.title ? `<div class="sec-title">${sc.title}</div>` : ''}<div class="capwrap" style="position:relative;width:${c.w}px;height:${c.h}px;transform-origin:center;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(20,20,30,0.16)">${c.html}</div>`);
+            b.el = el; b.cam = cam;
+            const wrap = cam.querySelector('.capwrap');
+            b.camera = sc.camera; b.cursor = sc.cursor;
+            b.animate = (lt) => { const p = interpolate(lt, [0.1, 0.55], [0, 1], { easing: easeOutExpo }); setT(wrap, { opacity: clamp01(p).toFixed(2), transform: `scale(${(fit * lerp(0.94, 1, p)).toFixed(3)})` }); };
           } else { const { el, cam } = mkScene(`<div class="big">${sc.text || ''}</div>`); b.el = el; b.cam = cam; }
           if (b.el) b.el.classList.add(value === 'light' ? 'light' : 'dark');
           return b;

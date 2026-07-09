@@ -363,6 +363,12 @@ export async function boot(build) {
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
     await preloadImages(data); // web/local images ready before any frame is captured
+    // preload captured components (real UI lifted off a site by scripts/capture-component.mjs) so a
+    // `component` scene can inject real HTML synchronously. Any string like /…/components/x.json.
+    window.__components = {};
+    const compPaths = new Set();
+    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') Object.values(o).forEach(scan); else if (typeof o === 'string' && /\/components\/[^/]+\.json$/.test(o)) compPaths.add(o); })(data);
+    for (const p of compPaths) { try { window.__components[p] = await (await fetch(p)).json(); } catch (e) {} }
     const scene = build(data, fps, theme);
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');

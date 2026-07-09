@@ -45,6 +45,17 @@ Two formats, both theme-driven (they render in the brand's colours automatically
   ] }
 ```
 
+### Use the product's REAL UI (not a lookalike)
+Lift a genuine component off the live site (its HTML + computed CSS) into an animatable scene:
+```bash
+make capture URL=https://site.com SEL="#how-it-works" NAME=acme LABEL=howitworks
+```
+→ `engine/assets/brands/<name>/components/<label>.json`. Then a **`component`** scene renders it, scaled + animated:
+```jsonc
+{ "type": "component", "src": "/engine/assets/brands/acme/components/howitworks.json", "dur": 4 }
+```
+It's real HTML (self-contained inline styles), so it renders faithfully and can still be zoomed/cursor-driven. Best for "here's the actual product" beats. (Limitation: `::before/::after` pseudo-elements aren't captured.) Prefer *recreating* small components you need to type into/animate heavily; *capture* full sections you want pixel-faithful.
+
 ### Backgrounds — use them tastefully (`bgPreset` in `core/backgrounds.js`)
 - **Light brands (white-dominant):** `paper` (plain) · `paperShapes` · `paperDots` · `soft` (tint) · `accent` (brand-colour bg) · `ink` (dark contrast).
 - **Dark brands:** `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain`.

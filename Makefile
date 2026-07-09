@@ -62,6 +62,11 @@ lib-test:
 brandkit:
 	node scripts/brandkit.mjs $(URL) $(NAME)
 
+# make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
+# (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/capture-component.mjs.
+capture:
+	node scripts/capture-component.mjs $(URL) "$(SEL)" $(NAME) $(LABEL)
+
 # make validate [D=formats/x/topic.json]  — check data + inline theme against the format schema.
 # No D = validate every formats/*/sample.json. Same validator boot() runs before rendering.
 validate:
