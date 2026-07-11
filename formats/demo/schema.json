@@ -181,6 +181,11 @@
             "letterbox",
             "drop",
             "jitter",
+            "blinds",
+            "skewWhip",
+            "spin",
+            "collapse",
+            "riseBlur",
             "flash",
             "burn",
             "leak",
@@ -189,7 +194,12 @@
             "ink",
             "glitch",
             "streak",
-            "pixel"
+            "pixel",
+            "confetti",
+            "ripple",
+            "scan",
+            "warp",
+            "bokeh"
           ]
         },
         "dir": {

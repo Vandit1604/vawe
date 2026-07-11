@@ -112,6 +112,7 @@ async function audit(format) {
   const K = series.keys, LOOP = series.loop;
   const content = K.map((k, i) => !INFRA.has(k) && !LOOP[i]);
 
+  const ENTRIES = []; // (ix) entry durations across the whole video
   for (const w of windows) {
     if (w.visEnd - w.start < FPS * 0.8) continue; // too short to judge
     const lastVisF = w.visEnd - 1 - ((w.visEnd - 1 - F[0]) % STRIDE || 0);
@@ -121,6 +122,17 @@ async function audit(format) {
     K.forEach((k, i) => { if (!content[i]) return; const v = at(i, lastVisF); if (v) { any = true; maxOp = Math.max(maxOp, v[2]); } });
     if (any && maxOp < 0.9) add('FAIL', 'i:final-hold', w, '', `at ${(lastVisF / FPS).toFixed(2)}s max content opacity ${maxOp.toFixed(2)} < 0.9 (segment ends faded)`);
     if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements — add data-layer="critical" to key elements');
+
+    // (ix) rhythm data: per-element entry duration in this window = first frame opacity >= 0.9
+    K.forEach((k, i) => {
+      if (!content[i]) return;
+      const lo = F.findIndex((f) => f >= w.start);
+      if (lo < 0) return;
+      for (let jj = lo; jj < F.length && F[jj] <= w.visEnd; jj++) {
+        const v = series.rows[i][jj];
+        if (v && v[2] >= 0.9) { const d = (F[jj] - w.start) / FPS; if (d <= 2 && d > 0) ENTRIES.push(+d.toFixed(2)); break; }
+      }
+    });
 
     K.forEach((k, i) => {
       if (!content[i]) return;
@@ -223,6 +235,14 @@ async function audit(format) {
   let gMax = 0, gAny = false;
   K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
   if (gAny && gMax < 0.9) findings.unshift({ level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` });
+
+  // (ix) rhythm monotony — timing is a voice, not a constant (MOTION-CRAFT rule 1)
+  if (ENTRIES.length >= 8) {
+    const buckets = {};
+    for (const e of ENTRIES) { const bk = (Math.round(e / 0.1) * 0.1).toFixed(1); buckets[bk] = (buckets[bk] || 0) + 1; }
+    const top = Object.entries(buckets).sort((x, y) => y[1] - x[1])[0];
+    if (top[1] / ENTRIES.length > 0.8) findings.push({ level: 'WARN', check: 'ix:rhythm', seg: '(video)', key: '', msg: top[1] + '/' + ENTRIES.length + ' entrances land in the same ~' + top[0] + 's bucket — uniform rhythm reads monotone; vary enterDur/stagger per beat' });
+  }
 
   return { format, total, segments: windows.length, findings };
 }

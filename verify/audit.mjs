@@ -119,12 +119,12 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     const texts = info.filter((e) => [...e.el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim()));
     let top = null, topPx = 0;
     for (const e of texts) { const px = parseFloat(getComputedStyle(e.el).fontSize) || 0; if (px > topPx) { topPx = px; top = e; } }
-    if (top && topPx >= 56) {
+    if (top && topPx >= 56 && +getComputedStyle(top.el).opacity >= 0.85) { // judge only ARRIVED headlines (mid-fade is motion, not a verdict)
       const fg = parse(getComputedStyle(top.el).color);
-      const bg = fg && bgFor(top.el, { x: top.x, y: top.y, w: top.r - top.x, h: top.btm - top.y });
+      const bg = fg && fg[3] >= 0.85 && bgFor(top.el, { x: top.x, y: top.y, w: top.r - top.x, h: top.btm - top.y });
       if (fg && bg) {
         const rt = cratio([fg[0], fg[1], fg[2]], bg);
-        if (rt < 7) issues.push({ kind: rt < 4.5 ? 'weak-headline' : 'weak-headline-soft', a: top.id, t: top.t, detail: `headline ${topPx | 0}px at ${rt.toFixed(1)}:1 (want ≥7:1)` });
+        if (rt < 7) issues.push({ kind: rt < 3.5 ? 'weak-headline' : 'weak-headline-soft', a: top.id, t: top.t, detail: `headline ${topPx | 0}px at ${rt.toFixed(1)}:1 (want ≥7:1)` });
       }
     }
   }

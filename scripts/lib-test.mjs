@@ -123,6 +123,17 @@ for (const k of ['flip', 'fall', 'elastic', 'skew', 'focus']) {
 }
 ok('preset focus resolves crisp', PRESETS.focus(1).filter.includes('blur(0.00px)'));
 
+// new kinetic presets (batch 2)
+for (const k of ['tilt', 'stretch', 'shadow']) {
+  ok(`preset ${k} starts hidden-ish`, +PRESETS[k](0).opacity < 0.5);
+  ok(`preset ${k} lands opaque`, approx(+PRESETS[k](1).opacity, 1, 0.01));
+}
+ok('preset gradient sweeps', PRESETS.gradient(0).backgroundPosition !== PRESETS.gradient(1).backgroundPosition);
+ok('preset highlight grows', PRESETS.highlight(1).backgroundSize.startsWith('100'));
+ok('preset underline draws', PRESETS.underline(0.5).backgroundSize.startsWith('50'));
+ok('preset riseClip identity at 1', PRESETS.riseClip(1).transform.includes('(0.00px)'));
+ok('presets deterministic (stretch)', JSON.stringify(PRESETS.stretch(0.37)) === JSON.stringify(PRESETS.stretch(0.37)));
+
 // shake / pulse — deterministic, decaying, zero before the hit
 ok('shake zero before hit', shake(-0.1).x === 0 && shake(0).y === 0);
 ok('shake deterministic', shake(0.2, { seed: 5 }).x === shake(0.2, { seed: 5 }).x);

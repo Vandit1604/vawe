@@ -132,7 +132,8 @@ array is **one number per item, in item order**.
 4. **Check frames** before declaring done: `make look M=<format>` / `make frame M=<format> N=<n>`
    (or `make verify`). Eyeball the hook, a reveal, and the end screen.
 5. Fix the data and re-render — never silently ship an unverified video.
-6. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one); `make ledger-add D=<file>` after the user approves it.
+6. **Motion craft:** consult `docs/MOTION-CRAFT.md` (rules + effect-selection guide) when picking presets/cuts/stings.
+7. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one); `make ledger-add D=<file>` after the user approves it.
 
 > **Editing a `scene.html`?** Read the `shortwave-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

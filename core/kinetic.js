@@ -1,7 +1,7 @@
 // kinetic.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
-import { clamp01, easeOutCubic, easeOutBack, spring } from './lib.js';
+import { clamp01, easeOutCubic, easeOutBack, spring, hashSeed } from './lib.js';
 
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.
@@ -75,7 +75,43 @@ export const PRESETS = {
   skew: (u, { dist = 70 } = {}) => { const k = 1 - easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateX(${(-k * dist).toFixed(2)}px) skewX(${(-k * 14).toFixed(1)}deg)` }; },
   // focus pull: heavy blur + slight over-scale resolving to crisp
   focus: (u, { px = 22 } = {}) => ({ opacity: clamp01(u * 1.3), transform: `scale(${(1 + (1 - easeOutCubic(clamp01(u))) * 0.06).toFixed(3)})`, filter: `blur(${((1 - easeOutCubic(clamp01(u))) * px).toFixed(2)}px)` }),
+  // decode: deterministic scramble -> resolve (tech reveal; hero words only). Uses data-final
+  // stashed by animateUnits on first call; character choice = hashSeed(unit index, step) — pure.
+  decode: (u, { i = 0 } = {}) => {
+    const uu = clamp01(u);
+    return { opacity: uu > 0 ? 1 : 0, __decode: uu, transform: 'none' }; // resolved in animateUnits (needs textContent)
+  },
+  // tilt: small rotate-in + rise (sporty/editorial)
+  tilt: (u, { deg = 8, dist = 26 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px) rotate(${((1 - e) * -deg).toFixed(2)}deg)` }; },
+  // stretch: horizontal smear that snaps true (impact words)
+  stretch: (u, { from = 1.6 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 2), transform: `scaleX(${(from + (1 - from) * e).toFixed(3)})`, filter: `blur(${((1 - e) * 6).toFixed(2)}px)` }; },
+  // gradient sweep: background-clip text, gradient slides through (ONE hero word per film)
+  gradient: (u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
+  // highlight: marker band grows behind the unit (emphasis mid-sentence)
+  highlight: (u, { color = 'rgba(255,220,90,0.35)' } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% 78%`, backgroundPosition: '0 60%', transform: 'none' }; },
+  // underline: draws left -> right beneath the unit
+  underline: (u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
+  // shadow: poster lift — long shadow collapses as the word settles
+  shadow: (u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
+  // riseClip: word rises out of its own baseline (needs clip wrappers — pass clip:true to splitText... handled by animateUnits fallback to plain rise if no wrapper)
+  riseClip: (u, { dist = 44 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutCubic(clamp01(u))) * dist).toFixed(2)}px)` }),
 };
+
+// decode support: scrambles textContent deterministically until u resolves each char L->R.
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ023456789#$%&';
+export function decodeText(el, u, unitIndex) {
+  if (el.__final == null) el.__final = el.textContent;
+  const fin = el.__final, n = fin.length;
+  if (u >= 1) { if (el.textContent !== fin) el.textContent = fin; return; }
+  const settled = Math.floor(clamp01(u) * (n + 1));
+  const step = Math.floor(clamp01(u) * 24); // scramble evolves with u (pure)
+  let out = '';
+  for (let c = 0; c < n; c++) {
+    if (c < settled || fin[c] === ' ') out += fin[c];
+    else out += GLYPHS[hashSeed(`${unitIndex}:${c}:${step}`) % GLYPHS.length];
+  }
+  if (el.textContent !== out) el.textContent = out;
+}
 
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
@@ -85,7 +121,15 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     if (loop || preset === 'wave') {
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
     } else {
-      Object.assign(el.style, fn(unitProgress(t, i, units.length, { each, stagger }), popts));
+      const u = unitProgress(t, i, units.length, { each, stagger });
+      if (preset === 'decode') { decodeText(el, u, i); el.style.opacity = u > 0 ? '1' : '0'; return; }
+      if (preset === 'riseClip' && el.parentElement && !el.parentElement.__clip) {
+        // clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged)
+        const w = document.createElement('span');
+        w.style.display = 'inline-block'; w.style.overflow = 'hidden'; w.style.verticalAlign = 'bottom'; w.__clip = true;
+        el.parentElement.insertBefore(w, el); w.appendChild(el);
+      }
+      Object.assign(el.style, fn(u, popts));
     }
   });
 }

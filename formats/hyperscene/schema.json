@@ -89,7 +89,12 @@
             "ink",
             "glitch",
             "streak",
-            "pixel"
+            "pixel",
+            "confetti",
+            "ripple",
+            "scan",
+            "warp",
+            "bokeh"
           ]
         },
         "dur": {
@@ -132,7 +137,7 @@
       "label": "Layers",
       "required": true,
       "minItems": 1,
-      "maxItems": 80,
+      "maxItems": 120,
       "item": {
         "type": {
           "type": "string",
@@ -280,7 +285,12 @@
             "roll",
             "letterbox",
             "drop",
-            "jitter"
+            "jitter",
+            "blinds",
+            "skewWhip",
+            "spin",
+            "collapse",
+            "riseBlur"
           ]
         },
         "dir": {
@@ -308,7 +318,7 @@
         },
         "preset": {
           "type": "string",
-          "label": "Kinetic preset (up/down/type/scale/blur/bounce/slide/wave)"
+          "label": "Kinetic preset (up/down/type/scale/blur/bounce/slide/wave/flip/fall/elastic/skew/focus/decode/tilt/stretch/gradient/highlight/underline/shadow/riseClip)"
         },
         "stagger": {
           "type": "number",

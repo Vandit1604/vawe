@@ -3,7 +3,7 @@
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 
-**Vocabulary size: 21 cut presentations × 8 timings × 4 directions, 9 shader stings, 13 kinetic
+**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 14 shader stings, 21 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -26,27 +26,32 @@ That is millions of distinct combinations before copy, layout, and color even en
 | `wipe` / `circleWipe` / `clockWipe` | `(t, ...)` → clip-path | raw reveal shapes |
 | `installVirtualClock` | auto in `boot()` | Date/rAF/timers/Math.random frozen to the frame |
 
-## Cuts (`core/transitions.js`) — 21 presentations × 8 timings
+## Cuts (`core/transitions.js`) — 26 presentations × 8 timings
 
 `cutStyle(name, seqState, {timing, dir, dist, cx, cy})` → full style set (never leaves properties stuck).
 
 - **Geometric**: `slide` `whip` (motion-blurred throw) `punch` (scale burst) `zoom` (push-through)
   `cube` (perspective hinge) `squeeze` (smear-stretch) `roll` `drop` (gravity) `rise` `flip` `jitter` (decaying shake)
-- **Reveals**: `wipe` `iris` `clock` `barn` `letterbox` + feathered `softwipe` `softiris` (18% gradient edge)
+  `skewWhip` (sheared throw) `spin` (logo rotate) `collapse` (vertical fold) `riseBlur` (premium defocus arrival)
+- **Reveals**: `wipe` `iris` `clock` `barn` `letterbox` `blinds` (slat mask) + feathered `softwipe` `softiris`
 - **Optical**: `fade` `blur` (defocus dissolve) · `none`
 - **Timings**: `linear` `smooth` `out` `snappy` `pop` + velocity ramps `rush` `brake` `ramp`
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 
-## Shader stings (`core/shaders.js`) — 9 WebGL cover-the-cut effects
+## Shader stings (`core/shaders.js`) — 14 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (warm light)
 `grain` `dissolve` (to white) `ink` (to near-black) `glitch` (RGB slice bars) `streak` (radial
-rays, 4-tap motion smear) `pixel` (mosaic). Peak them AT the cut; they hide the hard edge.
+rays, 4-tap motion smear) `pixel` (mosaic) `confetti` (seeded burst) `ripple` (impact rings) `scan`
+(CRT sweep) `warp` (barrel pulse) `bokeh` (dreamy discs). Peak them AT the cut; see MOTION-CRAFT
+for the when-to-use guide.
 
-## Kinetic type (`core/kinetic.js`) — 13 presets × char/word/line splits
+## Kinetic type (`core/kinetic.js`) — 21 presets × char/word/line splits
 
 `splitText(el, mode)` (preserves `<b>/<em>`) + `animateUnits(units, t, {preset, stagger, each})`:
-`up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`.
+`up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`
+`decode` (scramble-resolve) `tilt` `stretch` `gradient` (sweep) `highlight` (marker) `underline` `shadow`
+(poster lift) `riseClip` (baseline reveal). Reels: cuts-demo.mp4 + type-demo.mp4.
 
 ## Backgrounds (`core/backgrounds.js`) — 14 canvas presets, theme-recolored
 

@@ -23,7 +23,7 @@ export const TIMINGS = {
   ramp: (p) => speedRamp(clamp01(p)),
 };
 
-const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none' };
+const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
 const style = (over) => ({ ...IDENT, ...over });
 const sign = (dir) => (dir === 'right' || dir === 'down' ? -1 : 1);
 const axis = (dir) => (dir === 'up' || dir === 'down' ? 'Y' : 'X');
@@ -124,6 +124,31 @@ export const PRESENTATIONS = {
   drop: {
     enter: (p, o) => style({ opacity: clamp01(p * 1.8).toFixed(3), transform: `translateY(${(-(1 - p) * (1 - p) * o.dist * 2.2).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translateY(${(p * p * o.dist * 2.2).toFixed(2)}px) rotate(${(p * 2.5).toFixed(2)}deg)` }),
+  },
+  // venetian blinds: slat mask sweeps open (editorial reveal)
+  blinds: {
+    enter: (p, o) => { const off = ((1 - clamp01(p)) * 120).toFixed(1); return style({ ...mask(`repeating-linear-gradient(${gradAngle(o.dir)}, #000 0 84px, transparent 84px 120px)`), maskSize: '100% 100%', maskPosition: `0 ${off}px`, WebkitMaskPosition: `0 ${off}px`, opacity: clamp01(p * 1.2 + 0.25).toFixed(3) }); },
+    exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
+  },
+  // skew whip: the whip with shear that straightens — velocity you can see in the letterforms
+  skewWhip: {
+    enter: (p, o) => style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 2.6).toFixed(2)}px) skew${axis(o.dir) === 'X' ? 'X' : 'Y'}(${(sign(o.dir) * (1 - p) * -12).toFixed(2)}deg)`, filter: `blur(${((1 - p) * 10).toFixed(2)}px)` }),
+    exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 2.6).toFixed(2)}px) skew${axis(o.dir) === 'X' ? 'X' : 'Y'}(${(-sign(o.dir) * p * 12).toFixed(2)}deg)`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
+  },
+  // spin: rotate + scale settle (logos, badges, seals)
+  spin: {
+    enter: (p, o) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `rotate(${(sign(o.dir) * (1 - p) * 90).toFixed(1)}deg) scale(${lerp(0.5, 1, p).toFixed(4)})` }),
+    exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 60).toFixed(1)}deg) scale(${lerp(1, 0.7, p).toFixed(4)})` }),
+  },
+  // collapse: vertical fold (terminal/data beats)
+  collapse: {
+    enter: (p) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `scaleY(${lerp(0.05, 1, p).toFixed(4)})` }),
+    exit: (p) => style({ opacity: (1 - p).toFixed(3), transform: `scaleY(${lerp(1, 0.05, p).toFixed(4)})` }),
+  },
+  // rise-blur: slow premium arrival — rise through heavy defocus
+  riseBlur: {
+    enter: (p, o) => style({ opacity: clamp01(p * 1.2).toFixed(3), transform: `translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px)`, filter: `blur(${((1 - p) * 22).toFixed(2)}px)` }),
+    exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.5).toFixed(2)}px)`, filter: `blur(${(p * 22).toFixed(2)}px)` }),
   },
   // glitch jitter: quantized deterministic shake that decays as the scene lands
   jitter: {

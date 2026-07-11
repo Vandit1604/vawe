@@ -82,7 +82,10 @@ per beat to the target duration. THEN pick the path:
 - Anything bespoke → **hyperscene** (open canvas: layers/cuts/stings/bg windows/camera —
   `formats/hyperscene/schema.json` is the contract).
 
-## Step 3b — Choreography rules (anti-monotony; from motion-design craft)
+## Step 3b — Choreography rules (anti-monotony)
+
+**Read `docs/MOTION-CRAFT.md` before storyboarding** — the stored rulebook: 10 rules with their
+enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection guide.
 
 - **Layout variety**: no layout archetype twice in a row. Rotate: split (headline left / artifact
   right) · centered-top with full-width artifact · full-bleed statement · asymmetric card-over-board.

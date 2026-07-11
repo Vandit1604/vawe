@@ -10,7 +10,7 @@
 // Effects: flash (white pop), burn (film-burn ember front), leak (warm light leak),
 // grain (noise burst), dissolve (fbm dissolve to white), ink (fbm bleed to near-black),
 // glitch (RGB slice bars), streak (radial zoom-blur rays), pixel (mosaic flicker).
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel'];
+export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh'];
 
 const FRAG = `
 precision highp float;
@@ -78,6 +78,43 @@ void main(){
     float px = mix(12.0, 72.0, hash(vec2(stp, u_seed)));
     float g = hash(floor(uv*px) + stp);
     c = vec4(vec3(g), bell*0.4*step(0.55, g));
+  } else if (u_fx == 9) {                              /* confetti burst */
+    for (int i = 0; i < 40; i++) {
+      float fi = float(i);
+      float ax = hash(vec2(fi, u_seed));
+      float sp = 0.35 + 0.65*hash(vec2(fi+40.0, u_seed));
+      float px = ax + (hash(vec2(fi+80.0, u_seed)) - 0.5) * 0.35 * pp;
+      float py = 1.0 - pp*sp*1.4 + 0.35*pp*pp;         /* up then gravity */
+      vec2 d = (uv - vec2(px, py)) * vec2(60.0, 90.0);
+      float q = step(abs(d.x), 0.5) * step(abs(d.y), 0.9);
+      vec3 col = 0.5 + 0.5*cos(6.2831*(vec3(0.0,0.33,0.67) + hash(vec2(fi+120.0, u_seed))));
+      c.rgb = mix(c.rgb, col, q); c.a = max(c.a, q * (1.0 - pp*pp));
+    }
+  } else if (u_fx == 10) {                             /* ripple rings */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float r = length(d);
+    float ring = sin((r - pp*0.9) * 60.0) * exp(-r*4.0) * bell;
+    c = vec4(vec3(1.0), max(0.0, ring) * 0.35);
+  } else if (u_fx == 11) {                             /* scanline sweep */
+    float band = smoothstep(0.05, 0.0, abs(uv.y - pp));
+    float lines = step(0.5, fract(uv.y * u_res.y * 0.25)) * 0.06;
+    c = vec4(vec3(1.0), (band*0.5 + lines*bell));
+  } else if (u_fx == 12) {                             /* barrel warp pulse (darkens edges as space bends) */
+    vec2 d = uv - 0.5;
+    float r2 = dot(d, d);
+    float k = bell * 0.35;
+    float vign = smoothstep(0.7, 0.2, r2 * (1.0 + k*3.0));
+    c = vec4(vec3(0.0), (1.0 - vign) * bell * 0.5);
+  } else if (u_fx == 13) {                             /* bokeh discs drift */
+    for (int i = 0; i < 12; i++) {
+      float fi = float(i);
+      vec2 pcen = vec2(hash(vec2(fi, u_seed)), hash(vec2(fi+12.0, u_seed)));
+      pcen.x += (pp - 0.5) * 0.25 * (0.5 + hash(vec2(fi+24.0, u_seed)));
+      float rad = 0.03 + 0.06*hash(vec2(fi+36.0, u_seed));
+      vec2 d = uv - pcen; d.x *= u_res.x/u_res.y;
+      float disc = smoothstep(rad, rad*0.55, length(d));
+      c.rgb = mix(c.rgb, vec3(1.0), disc*0.5); c.a = max(c.a, disc * bell * 0.22);
+    }
   }
   gl_FragColor = vec4(c.rgb*c.a, c.a);                 /* premultiplied */
 }`;
