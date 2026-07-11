@@ -18,11 +18,11 @@
     { "type": "text", "text": "Pay per call.", "font": "serif", "x": 60, "y": 372, "w": 820, "size": 156,
       "split": "word", "preset": "up", "each": 0.55, "stagger": 0.07, "start": 3.2, "duration": 2.05, "anim": "none", "track": 5 },
 
-    { "type": "text", "text": "01 — Write a SKILL.md", "x": 60, "y": 352, "w": 820, "size": 82, "weight": 800,
+    { "type": "text", "text": "01, Write a SKILL.md", "x": 60, "y": 352, "w": 820, "size": 82, "weight": 800,
       "split": "word", "preset": "up", "stagger": 0.05, "each": 0.42, "start": 5.35, "duration": 1.65, "track": 5 },
-    { "type": "text", "text": "02 — It becomes a callable agent", "x": 60, "y": 352, "w": 900, "size": 68, "weight": 800,
+    { "type": "text", "text": "02, It becomes a callable agent", "x": 60, "y": 352, "w": 900, "size": 68, "weight": 800,
       "split": "word", "preset": "up", "stagger": 0.045, "each": 0.42, "start": 7.05, "duration": 1.7, "track": 5 },
-    { "type": "text", "text": "03 — Anyone calls it. You keep <b>80%.</b>", "x": 60, "y": 352, "w": 860, "size": 70, "weight": 800,
+    { "type": "text", "text": "03, Anyone calls it. You keep <b>80%.</b>", "x": 60, "y": 352, "w": 860, "size": 70, "weight": 800,
       "split": "word", "preset": "up", "stagger": 0.045, "each": 0.42, "start": 8.8, "duration": 1.95, "track": 5 },
 
     { "type": "text", "text": "12,400 agents live", "x": 60, "y": 300, "w": 900, "size": 96, "weight": 800,

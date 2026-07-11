@@ -76,7 +76,7 @@
         $('icA').innerHTML = icon(data.a.icon, data.a.name.slice(0, 1).toUpperCase());
         $('icB').innerHTML = icon(data.b.icon, data.b.name.slice(0, 1).toUpperCase());
         const win = data[data.overall === 'a' ? 'a' : 'b'];
-        $('verdict').innerHTML = `<div class="vd-ic">${icon(win.icon, win.name.slice(0, 1).toUpperCase())}</div><div class="vd-name num">${win.name}</div><div class="vd-tag">wins — ${data.verdict || 'and it\'s not close'}</div>`;
+        $('verdict').innerHTML = `<div class="vd-ic">${icon(win.icon, win.name.slice(0, 1).toUpperCase())}</div><div class="vd-name num">${win.name}</div><div class="vd-tag">wins · ${data.verdict || 'and it\'s not close'}</div>`;
         const stage = $('stage'), total = Math.round(duration * fps);
 
         function renderFrame(f) {

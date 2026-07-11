@@ -293,7 +293,7 @@
           // tag: name the winner (or call out the upset)
           const tag = $('mTag');
           if (revealed) {
-            tag.textContent = m.upset ? `🤯 UPSET — ${short(m.winner)} advances` : `${short(m.winner)} advances`;
+            tag.textContent = m.upset ? `🤯 UPSET · ${short(m.winner)} advances` : `${short(m.winner)} advances`;
             tag.classList.toggle('upset', m.upset);
             tag.style.opacity = clamp01((tt - s.reveal - 0.25) / 0.3).toFixed(2);
           } else { tag.style.opacity = '0'; }

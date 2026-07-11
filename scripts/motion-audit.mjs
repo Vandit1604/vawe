@@ -141,6 +141,28 @@ async function audit(format) {
         }
         prev = v; prevF = f;
       }
+      // (viii) SHIMMER — sustained sub-pixel motion on settled text reads as "shaking glyphs":
+      // slow camera scales and coarse rounding move text 0.05–1.5px EVERY frame with little net
+      // travel. Flag any ≥1s span where ≥80% of steps are tiny but nonzero and net travel < 4px.
+      {
+        const winN = Math.max(4, Math.round(FPS / STRIDE));  // ~1s of samples
+        const pts = [];
+        for (let j = lo; j < hi; j++) { const v = series.rows[i][j]; pts.push(v ? [v[0], v[1]] : null); }
+        let flagged = false;
+        for (let s0 = 0; s0 + winN < pts.length && !flagged; s0 += Math.max(2, winN >> 1)) {
+          let tiny = 0, total = 0;
+          for (let j = s0 + 1; j <= s0 + winN; j++) {
+            if (!pts[j] || !pts[j - 1]) { total = 0; break; }
+            const d = Math.abs(pts[j][0] - pts[j - 1][0]) + Math.abs(pts[j][1] - pts[j - 1][1]);
+            total++;
+            if (d > 0.04 && d < 1.5) tiny++;
+          }
+          if (total >= winN - 1 && tiny / total >= 0.8) {
+            const net = Math.abs(pts[s0 + winN][0] - pts[s0][0]) + Math.abs(pts[s0 + winN][1] - pts[s0][1]);
+            if (net < 4) { add('WARN', 'viii:shimmer', w, k, `sub-pixel motion every frame ~${((F[lo + s0]) / FPS).toFixed(1)}s (slow camera scale or coarse rounding) — text shakes`); flagged = true; }
+          }
+        }
+      }
       // (ii) reveal monotonicity — opacity must not visibly dip mid-scene
       if (maxDrop > 0.15) add('FAIL', 'ii:monotonic', w, k, `opacity drops ${maxDrop.toFixed(2)} at ${(dropAt / FPS).toFixed(2)}s (mid-scene fade)`);
       // (iv) count-up sanity — a counter must be monotone (up OR down: timers count down,

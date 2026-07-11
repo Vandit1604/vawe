@@ -6,7 +6,7 @@
   "cta": "Subscribe for more",
   "audio": { "music": "assets/music.wav", "musicGain": 0.4 },
   "rounds": [
-    { "a": "Greenland", "iconA": "/engine/assets/flags/gl.svg", "b": "DR Congo", "iconB": "/engine/assets/flags/cd.svg", "valA": 2166000, "valB": 2345000, "unit": "km²", "pct": 38, "fact": "DR Congo is <b>bigger</b> than Greenland — maps lie" },
+    { "a": "Greenland", "iconA": "/engine/assets/flags/gl.svg", "b": "DR Congo", "iconB": "/engine/assets/flags/cd.svg", "valA": 2166000, "valB": 2345000, "unit": "km²", "pct": 38, "fact": "DR Congo is <b>bigger</b> than Greenland, maps lie" },
     { "a": "Russia", "iconA": "/engine/assets/flags/ru.svg", "b": "Pluto", "iconB": "🪐", "valA": 17100000, "valB": 16600000, "unit": "km²", "pct": 22, "fact": "Russia has <b>more surface area</b> than Pluto 🤯" },
     { "a": "Australia", "iconA": "/engine/assets/flags/au.svg", "b": "The Moon", "iconB": "🌕", "valA": 7700000, "valB": 37900000, "unit": "km²", "pct": 41, "fact": "The Moon's surface is <b>5× Australia</b>" },
     { "a": "Sahara Desert", "iconA": "🏜️", "b": "United States", "iconB": "/engine/assets/flags/us.svg", "valA": 9200000, "valB": 9830000, "unit": "km²", "pct": 44, "fact": "The USA is <b>slightly bigger</b> than the entire Sahara" },

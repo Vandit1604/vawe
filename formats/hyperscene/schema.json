@@ -1,33 +1,529 @@
 {
-  "title": "Hyperscene (generic composition)",
-  "description": "Data-driven layered motion graphics (another engine-style). layers[] declare text/image with position, timing (start/duration), a clip anim, and optional kinetic split+preset. No per-topic code — the JSON is the video.",
-  "note": "data.theme sets palette/fonts/motion. captions[] burn in word/sentence-synced text.",
+  "title": "Hyperscene (open canvas)",
+  "description": "Generic data-driven composition — the JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
+  "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080×1920 portrait, 1920×1080 landscape).",
   "fields": {
-    "duration": { "type": "number", "label": "Total seconds (else inferred from last clip)", "min": 0.5, "max": 120 },
-    "captionMode": { "type": "string", "label": "Caption style", "enum": ["sentence", "word"] },
-    "layers": { "type": "array", "label": "Layers", "required": true, "minItems": 1, "item": {
-      "type": { "type": "string", "label": "Layer type", "required": true, "enum": ["text", "image"] },
-      "text": { "type": "string", "label": "Text (text layers; may use <b>/<em>)" },
-      "src": { "type": "string", "label": "Image path (image layers)" },
-      "x": { "type": "number", "label": "Left px" }, "y": { "type": "number", "label": "Top px" },
-      "w": { "type": "number", "label": "Width px" }, "h": { "type": "number", "label": "Image height px" },
-      "align": { "type": "string", "label": "Text align", "enum": ["left", "center", "right"] },
-      "font": { "type": "string", "label": "Face", "enum": ["sans", "serif", "mono"] },
-      "size": { "type": "number", "label": "Font px" }, "weight": { "type": "number", "label": "Font weight" },
-      "color": { "type": "string", "label": "Color override" },
-      "start": { "type": "number", "label": "Start s", "min": 0 },
-      "duration": { "type": "number", "label": "Duration s", "min": 0 },
-      "track": { "type": "number", "label": "z-order" },
-      "anim": { "type": "string", "label": "Clip enter anim", "enum": ["fade", "up", "rise", "pop", "scale", "slide-left", "slide-right", "slide-up", "slide-down", "wipe", "wipe-right", "iris", "clock", "none"] },
-      "out": { "type": "string", "label": "Clip exit anim (defaults to reverse of anim)" },
-      "split": { "type": "string", "label": "Kinetic split", "enum": ["char", "word", "line"] },
-      "preset": { "type": "string", "label": "Kinetic preset", "enum": ["up", "down", "type", "scale", "blur", "bounce", "slide", "wave"] },
-      "stagger": { "type": "number", "label": "Per-unit delay s" },
-      "each": { "type": "number", "label": "Per-unit anim s" }
-    } },
-    "captions": { "type": "array", "label": "Burn-in captions", "item": {
-      "t0": { "type": "number", "label": "Start s", "required": true },
-      "t1": { "type": "number", "label": "End s", "required": true },
-      "text": { "type": "string", "label": "Caption text", "required": true } } }
+    "orientation": {
+      "type": "string",
+      "label": "Orientation",
+      "enum": [
+        "portrait",
+        "landscape"
+      ]
+    },
+    "duration": {
+      "type": "number",
+      "label": "Total duration (s)",
+      "min": 0.5,
+      "max": 120
+    },
+    "captionMode": {
+      "type": "string",
+      "label": "Caption style",
+      "enum": [
+        "sentence",
+        "word"
+      ]
+    },
+    "bg": {
+      "type": "array",
+      "label": "Background windows (canvas, theme palette)",
+      "item": {
+        "preset": {
+          "type": "string",
+          "label": "bgPreset name",
+          "required": true,
+          "enum": [
+            "paper",
+            "paperShapes",
+            "paperDots",
+            "soft",
+            "accent",
+            "ink",
+            "dotmatrix",
+            "aurora",
+            "mesh",
+            "constellation",
+            "spotlight",
+            "brandglow",
+            "plain"
+          ]
+        },
+        "from": {
+          "type": "number",
+          "label": "Window start (s)"
+        },
+        "to": {
+          "type": "number",
+          "label": "Window end (s)"
+        },
+        "value": {
+          "type": "string",
+          "label": "Force light/dark treatment",
+          "enum": [
+            "light",
+            "dark"
+          ]
+        }
+      }
+    },
+    "stings": {
+      "type": "array",
+      "label": "Shader boundary effects",
+      "item": {
+        "t": {
+          "type": "number",
+          "label": "Center time (s)",
+          "required": true
+        },
+        "fx": {
+          "type": "string",
+          "label": "Effect",
+          "required": true,
+          "enum": [
+            "flash",
+            "burn",
+            "leak",
+            "grain",
+            "dissolve",
+            "ink",
+            "glitch",
+            "streak",
+            "pixel"
+          ]
+        },
+        "dur": {
+          "type": "number",
+          "label": "Effect span (s)",
+          "min": 0.3,
+          "max": 3
+        },
+        "seed": {
+          "type": "number",
+          "label": "Noise seed"
+        }
+      }
+    },
+    "camera": {
+      "type": "array",
+      "label": "Global camera keyframes",
+      "item": {
+        "t": {
+          "type": "number",
+          "label": "Time (s)",
+          "required": true
+        },
+        "s": {
+          "type": "number",
+          "label": "Scale"
+        },
+        "x": {
+          "type": "number",
+          "label": "Pan X (px)"
+        },
+        "y": {
+          "type": "number",
+          "label": "Pan Y (px)"
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "label": "Layers",
+      "required": true,
+      "minItems": 1,
+      "maxItems": 80,
+      "item": {
+        "type": {
+          "type": "string",
+          "label": "Layer type",
+          "enum": [
+            "text",
+            "image",
+            "component",
+            "rect",
+            "count",
+            "group",
+            "glow",
+            "board"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "label": "Text (may use <b>/<em>)"
+        },
+        "src": {
+          "type": "string",
+          "label": "Image / captured-component path"
+        },
+        "x": {
+          "type": "number",
+          "label": "Left (px)"
+        },
+        "y": {
+          "type": "number",
+          "label": "Top (px)"
+        },
+        "w": {
+          "type": "number",
+          "label": "Width (px)"
+        },
+        "h": {
+          "type": "number",
+          "label": "Height (px, image/rect)"
+        },
+        "align": {
+          "type": "string",
+          "label": "Text align",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "font": {
+          "type": "string",
+          "label": "Face",
+          "enum": [
+            "sans",
+            "serif",
+            "mono"
+          ]
+        },
+        "size": {
+          "type": "number",
+          "label": "Font size (px)",
+          "min": 18,
+          "max": 260
+        },
+        "weight": {
+          "type": "number",
+          "label": "Font weight",
+          "min": 100,
+          "max": 900
+        },
+        "color": {
+          "type": "string",
+          "label": "Glow color / text color"
+        },
+        "tracking": {
+          "type": "string",
+          "label": "Letter-spacing"
+        },
+        "fit": {
+          "type": "boolean",
+          "label": "Auto-size text down to fit w"
+        },
+        "bg": {
+          "type": "string",
+          "label": "Fill (rect)"
+        },
+        "radius": {
+          "type": "number",
+          "label": "Corner radius (rect/ken-image)"
+        },
+        "border": {
+          "type": "string",
+          "label": "Border (rect)"
+        },
+        "shadow": {
+          "type": "boolean",
+          "label": "Soft shadow (rect)"
+        },
+        "start": {
+          "label": "Window start: seconds, or relative \"otherId+0.5\" / \"otherId.end-0.2\""
+        },
+        "duration": {
+          "type": "number",
+          "label": "Window length (s)"
+        },
+        "track": {
+          "type": "number",
+          "label": "z-order track"
+        },
+        "anim": {
+          "type": "string",
+          "label": "driveClips enter anim (fade/rise/pop/slideL/...)"
+        },
+        "out": {
+          "type": "string",
+          "label": "driveClips exit anim"
+        },
+        "exitDur": {
+          "type": "number",
+          "label": "Exit window (s; 0 = hold to end)"
+        },
+        "enterDur": {
+          "type": "number",
+          "label": "Enter window (s, cut layers)"
+        },
+        "cut": {
+          "type": "string",
+          "label": "Cut-kit presentation",
+          "enum": [
+            "fade",
+            "slide",
+            "whip",
+            "punch",
+            "wipe",
+            "iris",
+            "clock",
+            "flip",
+            "rise",
+            "blur",
+            "zoom",
+            "cube",
+            "barn",
+            "softwipe",
+            "softiris",
+            "squeeze",
+            "roll",
+            "letterbox",
+            "drop",
+            "jitter"
+          ]
+        },
+        "dir": {
+          "type": "string",
+          "label": "Cut direction",
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ]
+        },
+        "dist": {
+          "type": "number",
+          "label": "Cut travel (px)"
+        },
+        "split": {
+          "type": "string",
+          "label": "Kinetic split",
+          "enum": [
+            "char",
+            "word",
+            "line"
+          ]
+        },
+        "preset": {
+          "type": "string",
+          "label": "Kinetic preset (up/down/type/scale/blur/bounce/slide/wave)"
+        },
+        "stagger": {
+          "type": "number",
+          "label": "Per-unit delay (s)"
+        },
+        "each": {
+          "type": "number",
+          "label": "Per-unit duration (s)"
+        },
+        "loop": {
+          "type": "boolean",
+          "label": "Loop the kinetic preset"
+        },
+        "filter": {
+          "type": "string",
+          "label": "CSS filter"
+        },
+        "mask": {
+          "type": "string",
+          "label": "CSS mask-image"
+        },
+        "critical": {
+          "type": "boolean",
+          "label": "Force include/exclude from layout audit"
+        },
+        "ken": {
+          "label": "Ken Burns zoom (image): true or {from,to,fx,fy}"
+        },
+        "from": {
+          "type": "number",
+          "label": "Count start value (count)"
+        },
+        "to": {
+          "type": "number",
+          "label": "Count end value (count)"
+        },
+        "decimals": {
+          "type": "number",
+          "label": "Decimal places (count)",
+          "min": 0,
+          "max": 3
+        },
+        "prefix": {
+          "type": "string",
+          "label": "Count prefix (e.g. +, $)"
+        },
+        "suffix": {
+          "type": "string",
+          "label": "Count suffix (e.g. %, s)"
+        },
+        "countStart": {
+          "type": "number",
+          "label": "Count begins (s into window)"
+        },
+        "countDur": {
+          "type": "number",
+          "label": "Count duration (s)"
+        },
+        "ease": {
+          "type": "string",
+          "label": "Count easing (EASINGS name, e.g. ramp)"
+        },
+        "id": {
+          "type": "string",
+          "label": "Layer id (anchor target)"
+        },
+        "anchor": {
+          "type": "string",
+          "label": "Position relative to layer with this id"
+        },
+        "at": {
+          "type": "string",
+          "label": "Placement",
+          "enum": [
+            "below",
+            "below-center",
+            "above",
+            "above-center",
+            "right",
+            "left"
+          ]
+        },
+        "dx": {
+          "type": "number",
+          "label": "Anchor offset x (px)"
+        },
+        "dy": {
+          "type": "number",
+          "label": "Anchor offset y (px)"
+        },
+        "direction": {
+          "type": "string",
+          "label": "Group flow",
+          "enum": [
+            "row",
+            "column"
+          ]
+        },
+        "gap": {
+          "type": "number",
+          "label": "Group gap (px)"
+        },
+        "pad": {
+          "label": "Padding (px or CSS string) — groups and text chips"
+        },
+        "justify": {
+          "type": "string",
+          "label": "Group justify-content"
+        },
+        "children": {
+          "type": "array",
+          "label": "Group children (text/image/count, laid out by flow)",
+          "item": {
+            "type": {
+              "type": "string",
+              "label": "Child type",
+              "enum": [
+                "text",
+                "image",
+                "count"
+              ]
+            }
+          }
+        },
+        "elevation": {
+          "type": "number",
+          "label": "Physical depth 1–4 (ring + lit edge + stacked shadows)",
+          "min": 1,
+          "max": 4
+        },
+        "on": {
+          "type": "string",
+          "label": "Elevation surface variant",
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "glow": {
+          "label": "Ambient glow: hex color, or true for theme accent"
+        },
+        "intensity": {
+          "type": "number",
+          "label": "Glow opacity",
+          "min": 0.05,
+          "max": 0.6
+        },
+        "beam": {
+          "type": "string",
+          "label": "Glow becomes a directional beam",
+          "enum": [
+            "right",
+            "left",
+            "up",
+            "down"
+          ]
+        },
+        "fade": {
+          "type": "string",
+          "label": "Static edge fade (exclusive with cut)",
+          "enum": [
+            "right",
+            "left",
+            "top",
+            "bottom",
+            "edges"
+          ]
+        },
+        "reflect": {
+          "label": "Floor reflection: true or opacity 0.05–0.3"
+        },
+        "cols": {
+          "type": "array",
+          "label": "Board columns (≤4): {title, count, cards:[{id,title,labels:[{t,c}]}] ≤5}",
+          "item": {
+            "title": {
+              "type": "string",
+              "label": "Column title"
+            }
+          }
+        },
+        "headSize": {
+          "type": "number",
+          "label": "Board column-header px"
+        },
+        "cardSize": {
+          "type": "number",
+          "label": "Board card base px"
+        },
+        "part": {
+          "type": "string",
+          "label": "Scene part name (capture-scene JSONs)"
+        }
+      }
+    },
+    "captions": {
+      "type": "array",
+      "label": "Caption windows",
+      "item": {
+        "t0": {
+          "type": "number",
+          "label": "Start (s)",
+          "required": true
+        },
+        "t1": {
+          "type": "number",
+          "label": "End (s)",
+          "required": true
+        },
+        "text": {
+          "type": "string",
+          "label": "Caption text",
+          "required": true
+        }
+      }
+    }
   }
 }

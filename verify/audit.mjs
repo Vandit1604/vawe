@@ -40,7 +40,7 @@ function startServer() {
 // runs in-page: render frame n, measure every visible [data-layer=critical] box, return issues.
 function auditFrameFn(n, SAFE, MIN_GAP) {
   window.__engine.renderFrame(n);
-  const vis = (el) => { const s = getComputedStyle(el); return s.visibility !== 'hidden' && +s.opacity > 0.05; };
+  const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
   const els = [...document.querySelectorAll('[data-layer="critical"]')].filter((el) => {
     const b = el.getBoundingClientRect(); return b.width > 1 && b.height > 1 && vis(el);
   });
@@ -69,6 +69,86 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     if (oy > 0) gap = Math.min(gap, -ox);
     if (gap !== Infinity && gap >= 0 && gap < MIN_GAP) issues.push({ kind: 'tight', a: A.id, b: B.id, detail: `${gap | 0}px` });
   }
+  // contrast (WCAG-ish) on critical TEXT: effective bg = nearest ancestor solid background-color,
+  // else sampled from the bg <canvas> under the element's box, else the body/stage color.
+  const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+  const parse = (c) => { const m = c && c.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\)/); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; };
+  const cratio = (a, b) => { const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)]; return (hi + 0.05) / (lo + 0.05); };
+  const cv = document.querySelector('canvas#cv'); // ONLY the bg canvas convention — grain/fx canvases are decoration, not backdrop
+  const cvCtx = cv ? cv.getContext('2d') : null; // webgl canvases return null here — safely skipped
+  const bgFor = (el, bx) => {
+    for (let p = el; p; p = p.parentElement) {
+      if (cv && p.contains(cv)) break; // this ancestor's bg sits BEHIND the bg canvas — not the backdrop
+      const c = parse(getComputedStyle(p).backgroundColor);
+      if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
+    }
+    // flat-layer scenes (hyperscene): the visual backdrop may be a SIBLING rect, not an ancestor —
+    // probe the actual paint stack under the element's center for the first solid background.
+    for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
+      if (p === el || el.contains(p) || p.contains(el)) continue;
+      const c = parse(getComputedStyle(p).backgroundColor);
+      if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
+    }
+    if (cvCtx) {
+      const pts = [[bx.x + bx.w / 2, bx.y + bx.h / 2], [bx.x + 6, bx.y + 6], [bx.x + bx.w - 6, bx.y + 6], [bx.x + 6, bx.y + bx.h - 6], [bx.x + bx.w - 6, bx.y + bx.h - 6]];
+      let r = 0, g = 0, b = 0, k = 0;
+      for (const [px, py] of pts) {
+        const sx = Math.max(0, Math.min(cv.width - 1, px | 0)), sy = Math.max(0, Math.min(cv.height - 1, py | 0));
+        const d = cvCtx.getImageData(sx, sy, 1, 1).data;
+        if (d[3] > 10) { r += d[0]; g += d[1]; b += d[2]; k++; }
+      }
+      if (k) return [r / k, g / k, b / k];
+    }
+    const st = parse(getComputedStyle(document.body).backgroundColor);
+    if (st && st[3] > 0.85) return [st[0], st[1], st[2]];
+    return null; // gradient/image backdrops: no confident color → don't guess, don't flag
+  };
+  for (const e of info) {
+    if (![...e.el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim())) continue; // containers: skip
+    const fg = parse(getComputedStyle(e.el).color);
+    if (!fg || fg[3] < 0.5) continue;
+    const bg = bgFor(e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
+    if (!bg) continue;
+    const rt = cratio([fg[0], fg[1], fg[2]], bg);
+    // display type in video: hard-fail only the unreadable (<2.5:1), warn under WCAG large-text 3.5
+    if (rt < 3.5) issues.push({ kind: rt < 2.5 ? 'contrast' : 'contrast-soft', a: e.id, t: e.t, detail: `ratio ${rt.toFixed(1)}:1` });
+  }
+  // HEADLINE DOMINANCE: the largest visible text on a frame is the headline — legibility (4.5:1)
+  // is not enough for display type; below 7:1 it reads washed-out ("gray heading" bug class).
+  {
+    const texts = info.filter((e) => [...e.el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim()));
+    let top = null, topPx = 0;
+    for (const e of texts) { const px = parseFloat(getComputedStyle(e.el).fontSize) || 0; if (px > topPx) { topPx = px; top = e; } }
+    if (top && topPx >= 56) {
+      const fg = parse(getComputedStyle(top.el).color);
+      const bg = fg && bgFor(top.el, { x: top.x, y: top.y, w: top.r - top.x, h: top.btm - top.y });
+      if (fg && bg) {
+        const rt = cratio([fg[0], fg[1], fg[2]], bg);
+        if (rt < 7) issues.push({ kind: rt < 4.5 ? 'weak-headline' : 'weak-headline-soft', a: top.id, t: top.t, detail: `headline ${topPx | 0}px at ${rt.toFixed(1)}:1 (want ≥7:1)` });
+      }
+    }
+  }
+  // IMAGE contrast: a critical logo/icon can vanish into a same-hue backdrop (orange-on-orange) —
+  // average the image's opaque pixels and hold them to the WCAG non-text bar (3:1; hard < 1.7).
+  const imgProbe = document.createElement('canvas'); imgProbe.width = imgProbe.height = 24;
+  const ipc = imgProbe.getContext('2d', { willReadFrequently: true });
+  for (const e of info) {
+    const im = e.el.tagName === 'IMG' ? e.el : ((e.el.children.length === 1 || !e.el.textContent.trim()) ? e.el.querySelector('img') : null);
+    if (!im || !im.complete || !im.naturalWidth) continue;
+    let avg;
+    try {
+      ipc.clearRect(0, 0, 24, 24); ipc.drawImage(im, 0, 0, 24, 24);
+      const d = ipc.getImageData(0, 0, 24, 24).data;
+      let r = 0, g = 0, b = 0, k = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
+      if (k < 20) continue; // nearly empty raster — nothing to judge
+      avg = [r / k, g / k, b / k];
+    } catch { continue; } // cross-origin taint → skip, never guess
+    const bg = bgFor(im === e.el ? e.el : e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
+    if (!bg) continue;
+    const rt = cratio(avg, bg);
+    if (rt < 3) issues.push({ kind: rt < 1.7 ? 'contrast' : 'contrast-soft', a: e.id || 'img', t: (im.getAttribute('src') || '').split('/').pop().slice(0, 18), detail: `image vs bg ${rt.toFixed(1)}:1` });
+  }
   return { issues, count: info.length };
 }
 
@@ -88,15 +168,18 @@ function overlayFn(n, SAFE) {
   }
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe']);
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const rows = [];
 
-for (const m of modules) {
-  const sample = `formats/${m}/sample.json`;
-  if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m, hard: 1, warn: 0, crit: 0, note: 'no sample.json' }); continue; }
+for (const spec of modules) {
+  // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
+  const isData = spec.endsWith('.json');
+  const sample = isData ? spec : `formats/${spec}/sample.json`;
+  if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
+  const m = isData ? (JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).module || spec) : spec;
   const page = await browser.newPage();
   // landscape-aware: read the sample's orientation so landscape formats are audited at their real dims
   const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
@@ -132,7 +215,7 @@ for (const m of modules) {
   // de-dup repeated issues (same kind+elements) to the first frame they appear on
   const uniq = (list) => { const seen = new Set(), out = []; for (const i of list) { const k = `${i.kind}|${i.a}|${i.b || ''}`; if (!seen.has(k)) { seen.add(k); out.push(i); } } return out; };
   const hu = uniq(hard), wu = uniq(warn);
-  rows.push({ m, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
+  rows.push({ m: isData ? `${m} · ${path.basename(sample)}` : m, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
 
   await page.evaluate(overlayFn, worst.f, safe);
   await page.screenshot({ path: path.join(OUT, `${m}.png`) });

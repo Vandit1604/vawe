@@ -18,7 +18,16 @@ export function validateData(schema, data) {
   const errors = [];
   if (!schema || !isObj(schema.fields)) return errors; // no/blank schema → nothing to check
   walk(schema.fields, data || {}, '', errors);
+  noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
   return errors;
+}
+
+// Em-dashes are banned in all rendered text (brand voice rule). Checks every string VALUE in the
+// data (schema labels are internal and exempt). Use a comma, period, or · instead.
+function noEmdash(v, path, errors) {
+  if (typeof v === 'string') { if (v.includes('\u2014')) errors.push(`${path || 'data'} contains an em-dash (—): "${v.slice(0, 48)}…" — use , . or ·`); }
+  else if (Array.isArray(v)) v.forEach((x, i) => noEmdash(x, `${path}[${i}]`, errors));
+  else if (isObj(v)) for (const [k, x] of Object.entries(v)) { if (k === 'module' || k === 'theme') continue; noEmdash(x, path ? `${path}.${k}` : k, errors); }
 }
 
 function walk(fields, obj, path, errors) {

@@ -220,10 +220,8 @@ async function main() {
     colors: { bg, surface, ink, accent, accentSoft, muted, border, dominant },
     type: theme.type, favicon,
     identity: { voice, motion, energetic, bgStrategy },
-    // storyboard hint: default beat plan (fill copy from product.*). See docs/DESIGN-DATABASE.md §Storyboard.
-    storyboard: dominant === 'light'
-      ? ['hook: tagline (paperShapes)', 'problem/what: statement (paper)', 'how-it-works: steps/demo (paper)', 'proof: stats (paper)', 'cta: url (soft/paperShapes)']
-      : ['hook: tagline (aurora)', 'problem: statement (spotlight)', 'how: steps (dotmatrix/ink)', 'proof: stats (constellation)', 'cta: url (brandglow)'],
+    // no storyboard hint on purpose: story structure is DESIGNED per product (make lookbook →
+    // study → storyboard traced to observations), never suggested from a canned beat plan.
   };
   fs.mkdirSync(path.join(ROOT, 'dna'), { recursive: true });
   const dnaPath = path.join(ROOT, 'dna', name + '.json');

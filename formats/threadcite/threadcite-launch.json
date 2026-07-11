@@ -1,0 +1,13 @@
+{
+  "module": "threadcite",
+  "orientation": "landscape",
+  "audio": { "silent": true },
+  "scenes": [
+    { "type": "hook", "dur": 3.8, "eyebrow": "Introducing ThreadCite", "pre": "Your buyers ask on ", "mark": "Reddit", "post": ".", "note": "and AI is listening ✎" },
+    { "type": "thread", "dur": 4.6, "title": "The threads where buyers decide.", "sub": "r/SaaS", "time": "3h", "q": "How do you get leads on Reddit without shilling?", "up": "218", "comments": "64", "note": "high-intent · ranks on Google" },
+    { "type": "reply", "dur": 5.0, "title": "Reply with a coached draft.", "sub": "r/SaaS", "reply": "Been there, ThreadCite surfaces these threads early and drafts a reply that actually fits the sub. No shill energy." },
+    { "type": "cite", "dur": 5.0, "title": "Months later, AI still cites you.", "query": "best way to find leads on reddit?", "answer": "For high-intent Reddit threads, ThreadCite tracks buyer questions and coaches replies that get recommended.", "brand": "threadcite.live", "note": "that's you, cited" },
+    { "type": "line", "dur": 3.4, "pre": "Reddit is the source. ", "mark": "You're the citation.", "post": "" },
+    { "type": "cta", "dur": 4.2, "cta": "Show up once. Get recommended for months.", "url": "threadcite.live" }
+  ]
+}

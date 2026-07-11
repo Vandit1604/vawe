@@ -5,20 +5,27 @@
     <title>hyperscene</title>
     <link rel="stylesheet" href="/core/tokens.css" />
     <style>
-      /* hyperscene — a GENERIC, data-driven layered composition (another engine-style template
-         instantiation). data.layers = [{type,text/src, x/y/w, timing, anim, split/preset}]; the
-         scene builds the DOM + drives it purely in n via compose.driveClips + kinetic.animateUnits.
-         No per-topic code — the JSON is the video. */
+      /* hyperscene — the OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
+         video. No per-topic code, no sealed scenes — layers (text/image/component/rect) + timed
+         windows + kinetic splits + the cut kit (core/transitions.js) + shader stings
+         (core/shaders.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
       .chrome { display: none; }
-      /* stage background = the theme gradient (g0..g2) when present, else transparent (shows the
-         default dark .stage). Lets a themed hyperscene carry its brand backdrop for free. */
+      .stage { background: none !important; }
+      .stage::before, .stage::after { display: none !important; }
+      /* stage fallback = the theme gradient (g0..g2) when no data.bg windows are declared */
       .hs-stage { position: absolute; inset: 0; overflow: hidden;
         background: radial-gradient(82% 60% at 66% 42%, var(--g2, transparent) 0%, var(--g1, transparent) 46%, var(--g0, transparent) 100%); }
+      #cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; transform-origin: 50% 45%; }
+      #cam { position: absolute; inset: 0; will-change: transform; transform-origin: 50% 50%; }
       .hs-layer { position: absolute; will-change: transform, opacity, filter; }
       .hs-text { color: var(--text); line-height: 1.04; }
-      .hs-text b { color: #fff; }
+      .hs-text b { color: var(--em, #fff); }
       .hs-text em { font-style: italic; font-family: var(--font-serif, 'Instrument Serif'); }
       .hs-img { display: block; object-fit: contain; }
+      .hs-rect { box-sizing: border-box; }
+      .hs-group { display: flex; box-sizing: border-box; }
+      .hs-group > .hs-text, .hs-group > .hs-img-wrap { position: relative; }
+      .hs-comp { transform-origin: 0 0; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 100px rgba(20,20,30,0.16); }
       /* caption bar */
       .hs-cap { position: absolute; left: 60px; right: 180px; bottom: 300px; z-index: 90; text-align: center;
         font: 700 46px var(--font-sans, 'Inter'), sans-serif; color: #fff; text-shadow: 0 3px 24px rgba(0,0,0,0.7);
@@ -28,69 +35,311 @@
   </head>
   <body>
     <div class="stage" id="stage">
-      <div class="hs-stage" id="root"></div>
+      <div class="hs-stage" id="root">
+        <canvas id="cv"></canvas>
+        <div id="cam"></div>
+      </div>
       <div class="hs-cap" id="cap" data-motion="loop"></div>
       <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
     </div>
     <script type="module">
-      import { boot, icon, clamp01 } from '/core/lib.js';
+      import { boot, icon, clamp01, lerp, fitText, easeInOutCubic, kenBurns, interpolate, resolveEasing, trackingFor } from '/core/lib.js';
       import { driveClips, seekAll } from '/core/compose.js';
       import { splitText, animateUnits } from '/core/kinetic.js';
+      import { renderBg, bgPreset } from '/core/backgrounds.js';
+      import { cutStyle } from '/core/transitions.js';
+      import { createShaderOverlay, SHADER_FX } from '/core/shaders.js';
       const $ = (id) => document.getElementById(id);
 
-      boot((data, fps) => {
-        const root = $('root');
+      boot((data, fps, theme) => {
+        const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
+        const [W, H] = landscape ? [1920, 1080] : [1080, 1920];
+        const cam = $('cam'), cv = $('cv');
+        cv.width = W; cv.height = H;
+        const ctx = cv.getContext('2d');
+
+        // ---- bg windows: [{preset, from, to, value}] drawn on canvas from the THEME's palette ----
+        const bgWins = (data.bg || []).map((b) => ({ from: b.from ?? 0, to: b.to ?? 1e9, preset: b.preset || 'paper', value: b.value, spec: bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined) }));
+        if (!bgWins.length) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
+        // ink-aware default text color: a layer with no explicit color gets dark ink over light
+        // bg windows and light text over dark ones (looked up at the layer's midpoint) — otherwise
+        // a light-text theme (plinth) silently renders white-on-paper.
+        const LIGHT_BGS = ['paper', 'paperShapes', 'paperDots', 'soft', 'dotmatrix'];
+        const inkAt = (t) => {
+          if (!bgWins.length) return null; // theme-gradient stage: keep the theme's own text color
+          let w = bgWins[0];
+          for (const b of bgWins) if (t >= b.from && t < b.to) w = b;
+          const light = LIGHT_BGS.includes(w.preset) && w.value !== 'dark';
+          return light ? 'var(--ink, #191917)' : 'var(--on-dark, var(--text, #f4f5f2))';
+        };
+
+        // ---- shader stings: [{t, fx, dur, seed}] — boundary effects on a WebGL overlay ----
+        const stings = (data.stings || []).filter((s) => SHADER_FX.includes(s.fx));
+        const fxo = createShaderOverlay($('root'), W, H);
+
+        // ---- relative TIMING: start may be "otherId+0.5" or "otherId.end-0.2" ----
+        // Stagger chains become declared relationships instead of hand-added arithmetic
+        // (the temporal twin of `anchor`). Multi-pass resolve; unresolvable → loud failure.
+        {
+          const byId = {};
+          for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+          const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
+          for (let pass = 0; pass < 8; pass++) {
+            let pending = 0;
+            for (const L of data.layers || []) {
+              if (typeof L.start !== 'string') continue;
+              const m = RX.exec(L.start.trim());
+              if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}": unknown reference`);
+              const T = byId[m[1]];
+              if (typeof T.start === 'string') { pending++; continue; } // resolve target first
+              L.start = (T.start ?? 0) + (m[2] ? (T.duration ?? 2) : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
+            }
+            if (!pending) break;
+            if (pass === 7) throw new Error('relative starts: circular reference');
+          }
+        }
+        // ---- anchoring: position a layer RELATIVE to another (id → anchor/at/dx/dy) ----
+        // Annotations, chips and badges point at what they annotate by declared relationship
+        // instead of eyeballed coordinates. Resolved purely from the JSON geometry before any
+        // DOM exists (targets need w; h falls back to size*1.2 for text).
+        {
+          const byId = {};
+          for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+          for (const L of data.layers || []) {
+            const T = L.anchor && byId[L.anchor];
+            if (!T) continue;
+            const tw = T.w ?? 0, th = T.h ?? ((T.size ?? 96) * 1.2);
+            const dx = L.dx ?? 0, dy = L.dy ?? 12, at = L.at || 'below';
+            if (at.startsWith('below')) L.y = (T.y ?? 0) + th + dy;
+            else if (at.startsWith('above')) L.y = (T.y ?? 0) - ((L.h ?? (L.size ?? 96) * 1.2) + dy);
+            else L.y = (T.y ?? 0) + (L.dy ?? 0);
+            if (at === 'right') L.x = (T.x ?? 0) + tw + (L.dx ?? 12);
+            else if (at === 'left') L.x = (T.x ?? 0) - ((L.w ?? 300) + (L.dx ?? 12));
+            else if (at.endsWith('center') && L.w != null) L.x = (T.x ?? 0) + tw / 2 - L.w / 2 + dx;
+            else L.x = (T.x ?? 0) + dx;
+          }
+        }
+        function styleText(el, L, midT) {
+          const serif = L.font === 'serif', mono = L.font === 'mono';
+          el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : 'sans'})`;
+          el.style.fontStyle = serif ? 'italic' : 'normal';
+          el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
+          el.style.letterSpacing = L.tracking ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96) : '-0.03em'));
+          el.style.fontSize = (L.size ?? 96) + 'px';
+          if (L.w != null) el.style.width = L.w + 'px';
+          if (L.align) el.style.textAlign = L.align;
+          const auto = inkAt(midT);
+          if (L.color) el.style.color = L.color; else if (auto) el.style.color = auto;
+          el.innerHTML = L.type === 'count' ? '' : (L.text || '');
+          if (L.type === 'count') { el.style.fontVariantNumeric = 'tabular-nums'; el.textContent = (L.prefix || '') + (L.from ?? 0).toFixed(L.decimals ?? 0) + (L.suffix || ''); }
+        }
+        function chipBox(el, L) { // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer
+          if (L.bg == null && !L.border && !L.shadow && !L.elevation) return;
+          if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface, #141516)';
+          if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+          el.style.borderRadius = (L.radius ?? 16) + 'px';
+          if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--border, rgba(0,0,0,0.08))' : L.border;
+          if (L.elevation) {
+            // physical depth, from linear.app's real CSS: inset hairline ring + lit top edge +
+            // a STACK of decreasing-blur drops (one flat shadow is what reads as a flat div)
+            const light = L.on === 'light';
+            const stack = [
+              light ? 'inset 0 0 0 1px rgba(0,0,0,0.08)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              light ? 'inset 0 1px 0 rgba(255,255,255,0.7)' : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+              '0 1px 1px rgba(0,0,0,0.07)', '0 2px 2px rgba(0,0,0,0.05)',
+            ];
+            const e = Math.min(4, Math.max(1, L.elevation | 0));
+            if (e >= 2) stack.push('0 4px 8px rgba(0,0,0,0.2)');
+            if (e >= 3) stack.push('0 12px 24px rgba(0,0,0,0.28)');
+            if (e >= 4) stack.push('0 0 64px rgba(0,0,0,0.4)');
+            if (L.glow) stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow, rgba(94,106,210,0.25))' : hexA(L.glow, 0.25)}`);
+            el.style.boxShadow = stack.join(', ');
+          } else if (L.shadow) el.style.boxShadow = '0 24px 70px rgba(20,20,25,0.12)';
+          if (el.classList.contains('hs-text')) el.style.display = 'inline-block';
+        }
+        // hexA('#5e6ad2', .25) → rgba string (glow/beam colors come as brand hex)
+        function hexA(hex, a) {
+          const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
+          if (!m) return hex;
+          const n = parseInt(m[1], 16);
+          return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+        }
+        // fade: static edge mask. MUTUALLY EXCLUSIVE with `cut` — every cut presentation writes
+        // maskImage identity each frame and would silently erase the fade.
+        function applyFade(el, L) {
+          if (!L.fade) return;
+          if (L.cut) throw new Error(`layer "${L.text || L.type}": fade and cut are mutually exclusive — put the fade on an inner layer`);
+          const g = { right: 'linear-gradient(90deg, #000 55%, transparent 98%)',
+                      left: 'linear-gradient(270deg, #000 55%, transparent 98%)',
+                      bottom: 'linear-gradient(180deg, #000 55%, transparent 98%)',
+                      top: 'linear-gradient(0deg, #000 55%, transparent 98%)',
+                      edges: 'radial-gradient(120% 120% at 50% 50%, #000 60%, transparent 100%)' }[L.fade];
+          if (g) { el.style.maskImage = g; el.style.webkitMaskImage = g; }
+        }
+        const extra = []; // group children, animated on their group's window
         const layers = (data.layers || []).map((L, idx) => {
           const el = document.createElement('div');
-          el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : 'hs-text');
-          // positioning
+          el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : L.type === 'rect' ? 'hs-rect' : L.type === 'component' ? 'hs-comp-wrap' : L.type === 'group' ? 'hs-group' : 'hs-text');
+          const isCount = L.type === 'count'; // number that counts from→to (timer, stats) — styled as text
           el.style.left = (L.x ?? 60) + 'px';
           el.style.top = (L.y ?? 240) + 'px';
           if (L.w != null) el.style.width = L.w + 'px';
           if (L.align) el.style.textAlign = L.align;
-          if (L.filter) el.style.filter = L.filter;               // e.g. "grayscale(1) contrast(1.05)"
-          if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; } // edge dissolve
+          if (L.filter) el.style.filter = L.filter;
+          if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
+          applyFade(el, L);
+          if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
           // timing → data-attributes consumed by compose.driveClips
           el.dataset.start = String(L.start ?? 0);
           if (L.duration != null) el.dataset.duration = String(L.duration);
           el.dataset.track = String(L.track ?? idx);
-          el.dataset.anim = L.split ? 'none' : (L.anim || 'fade');
+          el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
+          if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
           if (L.split) el.dataset.enter = '0';
+          else if (L.enterDur != null && !L.cut) el.dataset.enter = String(L.enterDur); // rhythm: per-layer entry pace
           if (L.out) el.dataset.out = L.out;
           if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
 
           if (L.type === 'image') {
             el.innerHTML = icon(L.src, '');
             const im = el.querySelector('img'); if (im) { im.className = 'hs-img'; if (L.h) im.style.height = L.h + 'px'; if (L.w) im.style.width = L.w + 'px'; }
+            // ken: tasteful slow zoom on the image INSIDE a clipped frame (photo treatment).
+            // {from, to, fx, fy} or true for the 1.0→1.07 default; travels once, never reverses.
+            if (L.ken && im) {
+              Object.assign(el.style, { overflow: 'hidden', borderRadius: (L.radius ?? 18) + 'px' });
+              im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%';
+              if (L.h) el.style.height = L.h + 'px';
+            }
+          } else if (L.type === 'group') {
+            // ARCHITECTURAL fix for hand-coordinated siblings: a group is a flex CONTAINER —
+            // children lay out by flow (gap/pad/align), so card+label+chip can never desync,
+            // and DOM ancestry matches visual stacking (contrast/audit see the real backdrop).
+            el.style.flexDirection = L.direction === 'column' ? 'column' : 'row';
+            el.style.gap = (L.gap ?? 24) + 'px';
+            el.style.alignItems = L.align2 || 'center';
+            el.style.justifyContent = L.justify || 'flex-start';
+            if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+            if (L.h != null) el.style.height = L.h + 'px';
+            chipBox(el, L);
+            for (const C of L.children || []) {
+              const c = document.createElement('div');
+              c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
+              if (C.type === 'image') {
+                c.innerHTML = icon(C.src, '');
+                const im = c.querySelector('img'); if (im) { im.className = 'hs-img'; if (C.h) im.style.height = C.h + 'px'; if (C.w) im.style.width = C.w + 'px'; }
+              } else {
+                styleText(c, C, (L.start ?? 0) + (L.duration ?? 2) / 2);
+                chipBox(c, C);
+              }
+              if (C.critical) c.setAttribute('data-layer', 'critical');
+              el.appendChild(c);
+              // children inherit the group's window for kinetic/count animation
+              extra.push({ L: { ...C, start: L.start, duration: L.duration }, el: c, units: C.split ? splitText(c, C.split) : null });
+            }
+          } else if (L.type === 'rect') {
+            // a panel / card / pill: pure box, no text (put text in its own layer on a higher track)
+            if (L.h != null) el.style.height = L.h + 'px';
+            if (L.bg == null && !L.elevation) el.style.background = '#fff';
+            chipBox(el, L);
+          } else if (L.type === 'glow') {
+            // soft light: radial center-glow, or a directional beam (the roadmap-trail look).
+            // Pure gradient div — no canvas, no per-frame writes; place on a low track.
+            const c = L.color === true || L.color == null ? 'var(--accent-glow, rgba(94,106,210,0.25))' : hexA(L.color, L.intensity ?? 0.25);
+            if (L.h != null) el.style.height = L.h + 'px';
+            const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
+            el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
+                                      : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
+            el.style.pointerEvents = 'none';
+          } else if (L.type === 'board') {
+            // believable populated workspace from pure data: columns of mini issue-cards with
+            // the elevation-1 treatment. Hard caps (4 cols × 5 cards); enters as ONE clip.
+            const cols = (L.cols || []).slice(0, 4);
+            const colW = ((L.w ?? 1200) - (cols.length - 1) * (L.gap ?? 28)) / Math.max(1, cols.length);
+            const ring = 'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 1px rgba(0,0,0,0.07), 0 2px 2px rgba(0,0,0,0.05)';
+            el.style.display = 'flex'; el.style.gap = (L.gap ?? 28) + 'px';
+            el.innerHTML = cols.map((c) => `
+              <div style="width:${colW.toFixed(1)}px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;gap:12px;align-items:baseline;font:600 ${L.headSize ?? 24}px var(--font-sans,'Inter');color:var(--text,#f7f8f8)">${c.title || ''}<span style="font:500 ${(L.headSize ?? 24) - 4}px var(--font-mono,'JetBrains Mono');color:var(--dim,#8a8f98)">${c.count ?? ''}</span></div>
+                ${(c.cards || []).slice(0, 5).map((k) => `
+                  <div style="background:var(--surface,#141516);border-radius:10px;padding:18px 20px;box-shadow:${ring}">
+                    <div style="font:500 ${L.cardSize ?? 19}px var(--font-mono,'JetBrains Mono');color:var(--dim,#8a8f98)">${k.id || ''}</div>
+                    <div style="font:510 ${(L.cardSize ?? 19) + 3}px var(--font-sans,'Inter');color:var(--text2,#b4b8bd);margin-top:6px">${k.title || ''}</div>
+                    ${(k.labels || []).length ? `<div style="display:flex;gap:10px;margin-top:12px">${k.labels.map((lb) => `<span style="font:500 ${(L.cardSize ?? 19) - 3}px var(--font-sans,'Inter');color:var(--text2,#b4b8bd);background:rgba(255,255,255,0.04);border-radius:5px;padding:3px 10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${lb.c || '#8a8f98'};margin-right:7px;vertical-align:1px"></span>${lb.t}</span>`).join('')}</div>` : ''}
+                  </div>`).join('')}
+              </div>`).join('');
+          } else if (L.type === 'component') {
+            // a REAL UI capture (capture-component.mjs), or one PART of a captured animated
+            // scene (capture-scene.mjs) — parts carry their own w/h and are re-animated here.
+            let c = (window.__components && window.__components[L.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
+            if (L.part && c.parts) c = c.parts.find((pp) => pp.name === L.part) || { html: `<div style="color:#888">part ${L.part} missing</div>`, w: 600, h: 300 };
+            const fit = (L.w || 1200) / Math.max(1, c.w);
+            el.style.width = Math.round(c.w * fit) + 'px';
+            el.style.height = Math.round(c.h * fit) + 'px';
+            el.innerHTML = `<div class="hs-comp" style="width:${c.w}px;height:${c.h}px;transform:scale(${fit.toFixed(4)})">${c.html}</div>`;
           } else {
-            const serif = L.font === 'serif', mono = L.font === 'mono';
-            el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : 'sans'})`;
-            el.style.fontSize = (L.size ?? 96) + 'px';
-            el.style.fontStyle = serif ? 'italic' : 'normal';
-            el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
-            el.style.letterSpacing = L.tracking ?? (serif ? '0' : '-0.03em');
-            if (L.color) el.style.color = L.color;
-            el.innerHTML = L.text || '';
+            styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
+            chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
+            if (L.fit && L.w) { // auto-size to the layer width (single-line safety for headlines)
+              cam.appendChild(el); // needs to be in-DOM for computed font-family
+              const fam = getComputedStyle(el).fontFamily.split(',')[0];
+              el.style.fontSize = fitText(el.textContent, L.w, { font: (px) => `${L.weight ?? 800} ${px}px ${fam}`, max: L.size ?? 96, min: 34 }) + 'px';
+              el.remove();
+            }
           }
-          root.appendChild(el);
+          // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
+          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };
         });
 
+        layers.push(...extra); // group children join the per-frame animation loop
         // duration: explicit, else the last clip's end (+0.4 tail)
         const lastEnd = layers.reduce((m, { L }) => Math.max(m, (L.start ?? 0) + (L.duration ?? 2)), 0);
         const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
         const caps = data.captions || [];
         const capMode = data.captionMode || 'sentence';
+        const camKf = data.camera || [];
+
+        function cameraAt(t) {
+          if (!camKf.length) return null;
+          let a = camKf[0], b = camKf[camKf.length - 1];
+          for (let i = 0; i < camKf.length - 1; i++) { if (t >= camKf[i].t && t <= camKf[i + 1].t) { a = camKf[i]; b = camKf[i + 1]; break; } if (t > camKf[i + 1].t) a = b = camKf[i + 1]; }
+          const p = a === b ? 1 : easeInOutCubic(clamp01((t - a.t) / (b.t - a.t)));
+          return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p) };
+        }
 
         function renderFrame(f) {
           const t = f / fps;
-          driveClips(root, t); // declarative clip timing + enter/exit + z-order
-          // kinetic split-text: animate units on their local clock (clip appears instantly, units reveal)
-          for (const { L, units } of layers) {
-            if (!units) continue;
+          // theme bg on canvas (last matching window wins) + a continuous slow breathe
+          if (bgWins.length) {
+            let spec = bgWins[0].spec;
+            for (const w of bgWins) if (t >= w.from && t < w.to) spec = w.spec;
+            renderBg(ctx, W, H, t, spec);
+            cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
+          }
+          driveClips(cam, t); // declarative clip timing + enter/exit + z-order
+          for (const { L, el, units } of layers) {
             const start = L.start ?? 0, end = start + (L.duration ?? 2);
-            if (t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || 'up', stagger: L.stagger ?? 0.06, each: L.each ?? 0.5, loop: L.loop, dist: L.dist });
+            // cut kit: a declared cut owns this layer's enter/exit styling (over driveClips's fade)
+            if (L.cut && t >= start && t < end) {
+              const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;
+              const enter = enD > 0 ? clamp01((t - start) / enD) : 1;
+              const exit = exD > 0 ? clamp01((t - (end - exD)) / exD) : 0;
+              Object.assign(el.style, cutStyle(L.cut, { enter, exit }, { dir: L.dir, dist: L.dist ?? 110 }));
+            }
+            // kinetic split-text on its local clock (clip appears instantly, units reveal)
+            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || 'up', stagger: L.stagger ?? 0.06, each: L.each ?? 0.5, loop: L.loop, dist: L.dist });
+            // count layers: value is a pure fn of local time over [countStart, countStart+countDur]
+            if (L.type === 'count' && t >= start && t < end) {
+              const cs = L.countStart ?? 0.2, cd = L.countDur ?? 1.6;
+              const v = interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: resolveEasing(L.ease || 'easeOutCubic') });
+              el.textContent = (L.prefix || '') + v.toFixed(L.decimals ?? 0) + (L.suffix || '');
+            }
+            // ken burns zoom on image layers (continuous over the whole window, identity outside)
+            if (L.ken) { const im = el.querySelector('img'); if (im) Object.assign(im.style, t >= start && t < end
+              ? kenBurns(t - start, L.duration ?? 2, L.ken === true ? {} : L.ken)
+              : { transform: 'scale(1)', transformOrigin: '50% 50%' }); }
           }
           // captions: show the caption whose window contains t
           const cap = caps.find((c) => t >= c.t0 && t < c.t1);
@@ -98,9 +347,20 @@
           capEl.className = 'hs-cap ' + (capMode === 'word' ? 'word' : '');
           if (cap) { capEl.innerHTML = cap.text; const in01 = clamp01((t - cap.t0) / 0.14), out01 = clamp01((cap.t1 - t) / 0.14); capEl.style.opacity = (in01 * out01).toFixed(2); }
           else capEl.style.opacity = '0';
+          // global camera
+          const c = cameraAt(t);
+          cam.style.transform = c ? `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : 'none';
+          // shader stings (each spans its dur centered on t)
+          let drew = false;
+          for (const s of stings) {
+            const d = s.dur ?? 1.0;
+            const p = (t - (s.t - d / 2)) / d;
+            if (p > 0 && p < 1) { fxo.draw(s.fx, p, s.seed ?? 0); drew = true; }
+          }
+          if (!drew) fxo.clear();
           seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
         }
-        return { fps, duration, renderFrame };
+        return { fps, duration, stings: stings.map((s) => s.t), renderFrame };
       });
     </script>
   </body>

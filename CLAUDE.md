@@ -34,6 +34,7 @@ Every format is built on **hook → suspense → payoff**. The data must earn at
   or small numbers with a unit suffix (`unit: "$B"`, value `880` → `$880B`). The engine compacts ≥1e6.
 
 ## Hard rules
+- **No em-dashes (—) in any on-screen text** , the validator rejects them. Use a comma, period, or ·.
 
 - First-frame `hook` ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - `fact` / `question` may contain `<b>…</b>` (rendered as HTML). Plain text elsewhere.
@@ -121,15 +122,6 @@ array is **one number per item, in item order**.
   "frames": [ { "label": "1990", "values": [5, 280] }, { "label": "2024", "values": [3500, 480] } ] }
 ```
 
-## Optional: generate hook/title copy first
-
-A static (no-AI) template library proposes hooks/titles you can pick from:
-```bash
-node scripts/hooks.mjs --data formats/higherlower/apps.json --slot hook   # prints ranked variants
-node scripts/hooks.mjs --data … --slot hook --apply 5                     # writes choice into data.hook
-```
-Titles/descriptions/comments go to `engine/out/<name>.meta.json` (no publishing layer exists yet).
-
 ## After writing a JSON
 
 1. **Images:** `make assets D=formats/<format>/<topic>.json` fills any missing icons
@@ -140,6 +132,7 @@ Titles/descriptions/comments go to `engine/out/<name>.meta.json` (no publishing 
 4. **Check frames** before declaring done: `make look M=<format>` / `make frame M=<format> N=<n>`
    (or `make verify`). Eyeball the hook, a reveal, and the end screen.
 5. Fix the data and re-render — never silently ship an unverified video.
+6. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one); `make ledger-add D=<file>` after the user approves it.
 
 > **Editing a `scene.html`?** Read the `shortwave-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

@@ -12,7 +12,7 @@
       /* kill the shared tokens.css .stage dark bg + grid + vignette — the canvas owns the background */
       .stage { background: none !important; }
       .stage::before, .stage::after { display: none !important; }
-      .dm { position: absolute; inset: 0; overflow: hidden; font-family: var(--font-sans, 'Inter'), sans-serif; color: #f4f5ff; }
+      .dm { --acc: var(--em, #1f3bff); --tint: var(--accent-soft, #a9b4ff); --ink2: var(--ink, #181815); --mut: var(--muted, #6e6e68); --bord: var(--border, #e6e6e1); position: absolute; inset: 0; overflow: hidden; font-family: var(--font-sans, 'Inter'), sans-serif; color: #f4f5ff; }
       #cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; transform-origin: 50% 45%; }
       .sc { position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; will-change: transform, opacity; }
       .cam { position: relative; will-change: transform; transform-origin: 50% 50%; display: flex; flex-direction: column; align-items: center; }
@@ -44,21 +44,21 @@
       .pipe { width: 1120px; display: flex; flex-direction: column; gap: 26px; }
       .pipe .row { display: flex; align-items: center; gap: 28px; padding: 28px 34px; border-radius: 16px; background: rgba(12,14,34,0.6);
         border: 1px solid rgba(169,180,255,0.16); }
-      .pipe .ic { width: 54px; height: 54px; flex: 0 0 54px; display: flex; align-items: center; justify-content: center; color: #a9b4ff; }
+      .pipe .ic { width: 54px; height: 54px; flex: 0 0 54px; display: flex; align-items: center; justify-content: center; color: var(--tint); }
       .pipe .lb { flex: 1; font: 700 40px var(--font-sans, 'Inter'), sans-serif; letter-spacing: -0.01em; }
       .pipe .st { width: 46px; height: 46px; }
-      .spinner { width: 40px; height: 40px; border: 4px solid rgba(169,180,255,0.25); border-top-color: #1f3bff; border-radius: 50%; }
+      .spinner { width: 40px; height: 40px; border: 4px solid rgba(169,180,255,0.25); border-top-color: var(--acc); border-radius: 50%; }
       .bar { margin-top: 8px; height: 8px; border-radius: 6px; background: rgba(169,180,255,0.16); overflow: hidden; }
-      .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #1f3bff, #757dbb); border-radius: 6px; }
+      .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--acc), var(--tint)); border-radius: 6px; }
       .live { margin-top: 30px; display: flex; align-items: center; gap: 18px; justify-content: center; font: 700 42px var(--font-sans, 'Inter'); }
-      .live .u { font: 600 34px var(--font-mono, 'Geist Mono'), monospace; color: #a9b4ff; }
+      .live .u { font: 600 34px var(--font-mono, 'Geist Mono'), monospace; color: var(--tint); }
 
       /* ---- API call ---- */
       .req { display: flex; align-items: center; gap: 18px; font: 600 34px var(--font-mono, 'Geist Mono'), monospace; }
-      .req .m { padding: 8px 18px; border-radius: 8px; background: #1f3bff; color: #fff; font-weight: 700; }
+      .req .m { padding: 8px 18px; border-radius: 8px; background: var(--acc); color: #fff; font-weight: 700; }
       .req .u { color: #c7cbe8; }
       .sendbtn { margin-top: 30px; display: inline-flex; align-items: center; gap: 12px; padding: 18px 32px; border-radius: 12px;
-        background: #1f3bff; color: #fff; font: 700 30px var(--font-sans, 'Inter'); box-shadow: 0 12px 40px rgba(31,59,255,0.5); }
+        background: var(--acc); color: #fff; font: 700 30px var(--font-sans, 'Inter'); box-shadow: 0 12px 40px rgba(0,0,0,0.22); }
       .resp { margin-top: 30px; border-radius: 16px; background: rgba(12,14,34,0.7); border: 1px solid rgba(169,180,255,0.18); padding: 30px 34px;
         font: 500 32px var(--font-mono, 'Geist Mono'), monospace; color: #c7cbe8; will-change: transform, opacity; }
       .resp .k { color: #7d8bff; }
@@ -78,38 +78,42 @@
       .total .l { margin-top: 12px; font: 600 36px var(--font-sans, 'Inter'); color: #a9b4ff; }
 
       /* ---- generic text scenes ---- */
-      .eyebrow { font: 600 30px var(--font-mono, 'Geist Mono'), monospace; letter-spacing: 0.04em; color: #a9b4ff; margin-bottom: 30px; text-align: center; }
+      .eyebrow { font: 600 30px var(--font-mono, 'Geist Mono'), monospace; letter-spacing: 0.04em; color: var(--tint); margin-bottom: 30px; text-align: center; }
       .big { font: 800 124px var(--font-sans, 'Inter'); line-height: 0.98; letter-spacing: -0.035em; text-align: center; max-width: 1500px; }
-      .big em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: #a9b4ff; }
+      .big em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: var(--tint); }
       .sub2 { margin-top: 26px; font: italic 400 66px var(--font-serif, 'Instrument Serif'), serif; color: #fff; text-align: center; }
       .kw { display: inline-block; white-space: pre; will-change: transform, opacity; }
       .ctaUrl { margin-top: 40px; display: inline-block; padding: 20px 42px; background: #0a0c1e; color: #fff;
-        font: 600 44px var(--font-mono, 'Geist Mono'), monospace; border: 1px solid #1f3bff; box-shadow: 0 0 44px rgba(31,59,255,0.5); }
+        font: 600 44px var(--font-mono, 'Geist Mono'), monospace; border: 1px solid var(--acc); box-shadow: 0 0 44px rgba(0,0,0,0.25); }
 
       .sec-title { font: 700 58px var(--font-sans, 'Inter'); letter-spacing: -0.02em; margin-bottom: 40px; text-align: center; }
-      .sec-title em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: #a9b4ff; }
+      .sec-title em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: var(--tint); }
 
       /* ---- LIGHT scenes (white/paper bg): ink text + light cards + blue accents. The code/call
          windows stay dark on purpose — a dark code block on a white page reads premium + authentic. ---- */
-      .sc.light { color: #181815; }
-      .sc.light .eyebrow { color: #6e6e68; }
-      .sc.light .big em, .sc.light .sec-title em, .sc.light .ctaH em { color: #1f3bff; }
-      .sc.light .sub2 { color: #4a4a44; }
-      .sc.light .total .v { color: #181815; }
-      .sc.light .total .l { color: #6e6e68; }
-      .sc.light .pipe .row { background: #fff; border-color: #e6e6e1; box-shadow: 0 20px 50px rgba(20,20,18,0.06); }
-      .sc.light .pipe .ic { color: #1f3bff; }
-      .sc.light .pipe .lb { color: #181815; }
-      .sc.light .live { color: #181815; } .sc.light .live .u { color: #6e6e68; }
-      .sc.light .bar { background: #e6e6e1; }
-      .sc.light .feed .fr { background: #fff; border-color: #e6e6e1; color: #1f3bff; box-shadow: 0 16px 40px rgba(20,20,18,0.05); }
-      .sc.light .feed .fr .nm { color: #181815; }
+      /* dark scenes: the soft tint can sink into bright aurora patches — lift the caption */
+      .sc.dark .eyebrow { color: var(--accent-soft, #cfd6ff); }
+      /* accent-bg scenes: tinted accents would vanish on the accent itself — force white */
+      .sc.on-accent .big em, .sc.on-accent .sec-title em, .sc.on-accent .sub2, .sc.on-accent .eyebrow { color: #fff; }
+      .sc.light { color: var(--ink2); }
+      .sc.light .eyebrow { color: var(--mut); }
+      .sc.light .big em, .sc.light .sec-title em, .sc.light .ctaH em { color: var(--acc); }
+      .sc.light .sub2 { color: var(--mut); }
+      .sc.light .total .v { color: var(--ink2); }
+      .sc.light .total .l { color: var(--mut); }
+      .sc.light .pipe .row { background: #fff; border-color: var(--bord); box-shadow: 0 20px 50px rgba(20,20,18,0.06); }
+      .sc.light .pipe .ic { color: var(--acc); }
+      .sc.light .pipe .lb { color: var(--ink2); }
+      .sc.light .live { color: var(--ink2); } .sc.light .live .u { color: var(--mut); }
+      .sc.light .bar { background: var(--bord); }
+      .sc.light .feed .fr { background: #fff; border-color: var(--bord); color: var(--acc); box-shadow: 0 16px 40px rgba(20,20,18,0.05); }
+      .sc.light .feed .fr .nm { color: var(--ink2); }
       .sc.light .cta-logo, .light .brandmk { }
 
       /* ---- cursor + click ripple ---- */
       .cursor { position: absolute; z-index: 60; width: 46px; height: 46px; left: 0; top: 0; opacity: 0; pointer-events: none;
         filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4)); will-change: transform, opacity; }
-      .ripple { position: absolute; z-index: 55; border: 3px solid #1f3bff; border-radius: 50%; opacity: 0; pointer-events: none; will-change: transform, opacity; }
+      .ripple { position: absolute; z-index: 55; border: 3px solid var(--acc); border-radius: 50%; opacity: 0; pointer-events: none; will-change: transform, opacity; }
       .brandmk { position: absolute; top: 54px; left: 60px; width: 58px; height: 58px; z-index: 30; border-radius: 15px; box-shadow: 0 8px 24px rgba(8,10,34,0.35); }
       .dm-dip { position: absolute; inset: 0; z-index: 45; opacity: 0; pointer-events: none; }
     </style>
@@ -128,6 +132,8 @@
     <script type="module">
       import { boot, clamp01, lerp, interpolate, spring, sequence, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutExpo, easeOutBack, formatNumber, icon } from '/core/lib.js';
       import { splitText, animateUnits } from '/core/kinetic.js';
+      import { cutStyle } from '/core/transitions.js';
+      import { createShaderOverlay, SHADER_FX } from '/core/shaders.js';
       import { renderBg, bgPreset } from '/core/backgrounds.js';
       import { svgIcon } from '/core/icons.js';
       const $ = (id) => document.getElementById(id);
@@ -135,8 +141,13 @@
       const W = 1920, H = 1080;
 
       const LIGHT_BGS = ['paper', 'paperShapes', 'paperDots', 'soft', 'dotmatrix'];
-      boot((data, fps) => {
+      boot((data, fps, theme) => {
         const ctx = $('cv').getContext('2d'), root = $('root');
+        // brand-aware chrome: the theme's bg pack drives every canvas preset; the corner chip is
+        // overridable per-video (default stays the Plinth mark so sample.json renders unchanged)
+        const BGPAL = (theme && theme.bg) || undefined;
+        if (data.brand) $('brand').src = data.brand;
+        const fxo = createShaderOverlay(document.querySelector('.dm'), W, H); // boundary shader layer
         // shared timing contract (declared BEFORE buildScene runs — TDZ):
         // a scene is fully opaque from TRANS → dur−TRANS; payoffs must settle by settleBy(dur)
         // so they hold for HOLD seconds at full visibility before the exit begins.
@@ -158,7 +169,7 @@
           const dur = sc.dur || 5;
           const bgName = sc.bg || 'paper';
           const value = sc.value || (LIGHT_BGS.includes(bgName) ? 'light' : 'dark');
-          const b = { i, dur, type: sc.type, bg: bgPreset(bgName, value), value, cursor: null, camera: sc.camera, animate: () => {} };
+          const b = { i, dur, type: sc.type, bg: bgPreset(bgName, value, BGPAL), value, cursor: null, camera: sc.camera, animate: () => {}, cut: sc.transition, cutDir: sc.dir };
 
           if (sc.type === 'title' || sc.type === 'statement') {
             const { el, cam } = mkScene(`${sc.eyebrow ? `<div class="eyebrow" data-layer="critical">${sc.eyebrow}</div>` : ''}<div class="big" data-layer="critical">${sc.title || sc.text}</div>${sc.sub ? `<div class="sub2" data-layer="critical">${sc.sub}</div>` : ''}`);
@@ -251,13 +262,18 @@
             // render a REAL UI component lifted off the site (scripts/capture-component.mjs), scaled to fit.
             const c = (window.__components && window.__components[sc.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
             const fit = (sc.scale || 1) * Math.min(1360 / Math.max(1, c.w), 780 / Math.max(1, c.h), 1.6);
-            const { el, cam } = mkScene(`${sc.title ? `<div class="sec-title" data-layer="critical">${sc.title}</div>` : ''}<div class="capwrap" style="position:relative;width:${c.w}px;height:${c.h}px;transform-origin:center;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(20,20,30,0.16)">${c.html}</div>`);
+            // the layout box gets the SCALED dims (transform doesn't shrink layout — a raw-size box
+            // taller than the frame pushed the title off the top edge); the natural-size capture is
+            // centered inside it and scaled from center.
+            const fw = Math.round(c.w * fit), fh = Math.round(c.h * fit);
+            const { el, cam } = mkScene(`${sc.title ? `<div class="sec-title" data-layer="critical">${sc.title}</div>` : ''}<div style="position:relative;width:${fw}px;height:${fh}px"><div class="capwrap" style="position:absolute;left:50%;top:50%;width:${c.w}px;height:${c.h}px;transform-origin:center;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(20,20,30,0.16)">${c.html}</div></div>`);
             b.el = el; b.cam = cam;
             const wrap = cam.querySelector('.capwrap');
             b.camera = sc.camera; b.cursor = sc.cursor;
-            b.animate = (lt) => { const p = interpolate(lt, [0.1, 0.55], [0, 1], { easing: easeOutExpo }); setT(wrap, { opacity: clamp01(p).toFixed(2), transform: `scale(${(fit * lerp(0.94, 1, p)).toFixed(3)})` }); };
+            b.animate = (lt) => { const p = interpolate(lt, [0.1, 0.55], [0, 1], { easing: easeOutExpo }); setT(wrap, { opacity: clamp01(p).toFixed(2), transform: `translate(-50%,-50%) scale(${(fit * lerp(0.94, 1, p)).toFixed(3)})` }); };
           } else { const { el, cam } = mkScene(`<div class="big" data-layer="critical">${sc.text || ''}</div>`); b.el = el; b.cam = cam; }
           if (b.el) b.el.classList.add(value === 'light' ? 'light' : 'dark');
+          if (bgName === 'accent' || bgName === 'brandglow') b.el.classList.add('on-accent');
           return b;
         }
 
@@ -290,11 +306,17 @@
             if (i !== idx) { b.el.style.display = 'none'; return; }
             b.el.style.display = 'flex';
             const enter = seq.enter, exit = seq.exit;
-            // varied transitions by scene index: push / scale / rise
-            const mode = i % 3;
-            const tf = mode === 0 ? `translateY(${((1 - easeOutExpo(enter)) * 48).toFixed(1)}px)` : mode === 1 ? `scale(${lerp(0.94, 1, easeOutExpo(enter)).toFixed(4)})` : `translateX(${((1 - easeOutExpo(enter)) * -300).toFixed(1)}px)`;
-            b.el.style.opacity = (easeOutCubic(clamp01(enter)) * (1 - exit)).toFixed(3); // eased: ~86% opaque by 0.2s so content reveals at IN0 don't stack on a half-faded scene
-            b.el.style.transform = `${tf} scale(${lerp(1, 1.03, easeOutQuart(exit)).toFixed(4)})`;
+            if (b.cut && !SHADER_FX.includes(b.cut)) {
+              // declared cut → the transitions kit owns opacity/transform/filter/clip for this root
+              const st = cutStyle(b.cut, seq, { dir: b.cutDir || (i % 2 ? 'left' : 'right'), dist: 110 });
+              setT(b.el, st);
+            } else {
+              // default (and under shader cuts): the original push / scale / rise variety
+              const mode = i % 3;
+              const tf = mode === 0 ? `translateY(${((1 - easeOutExpo(enter)) * 48).toFixed(1)}px)` : mode === 1 ? `scale(${lerp(0.94, 1, easeOutExpo(enter)).toFixed(4)})` : `translateX(${((1 - easeOutExpo(enter)) * -300).toFixed(1)}px)`;
+              b.el.style.opacity = (easeOutCubic(clamp01(enter)) * (1 - exit)).toFixed(3); // eased: ~86% opaque by 0.2s so content reveals at IN0 don't stack on a half-faded scene
+              b.el.style.transform = `${tf} scale(${lerp(1, 1.03, easeOutQuart(exit)).toFixed(4)})`;
+            }
             // camera zoom-in/out on the mockup
             const cam = cameraAt(b.camera, lt);
             b.cam.style.transform = `scale(${cam.s.toFixed(4)}) translate(${cam.x.toFixed(1)}px, ${cam.y.toFixed(1)}px)`;
@@ -315,9 +337,20 @@
             else ripple.style.opacity = '0';
           } else { cursor.style.opacity = '0'; ripple.style.opacity = '0'; }
 
-          // dip transition at boundaries (brand blue)
-          let dipA = 0; bounds.slice(0, -1).forEach((bnd) => { const d = Math.abs(t - bnd); if (d < 0.2) dipA = Math.max(dipA, 0.85 * (1 - d / 0.2)); });
-          setT($('dip'), { opacity: dipA.toFixed(3), background: '#1f3bff' });
+          // boundary layer: shader cut if the INCOMING scene declares one, else the brand dip.
+          // fxp spans exit+enter (2×TRANS) centered on the bound, so the effect peaks at the cut.
+          let dipA = 0, drew = false;
+          bounds.slice(0, -1).forEach((bnd, k) => {
+            const inc = built[k + 1];
+            if (inc && SHADER_FX.includes(inc.cut)) {
+              const fxp = (t - (bnd - TRANS)) / (2 * TRANS);
+              if (fxp > 0 && fxp < 1) { fxo.draw(inc.cut, fxp, k + 1); drew = true; }
+            } else if (!inc || !inc.cut) {
+              const d = Math.abs(t - bnd); if (d < 0.2) dipA = Math.max(dipA, 0.85 * (1 - d / 0.2));
+            }
+          });
+          if (!drew) fxo.clear();
+          setT($('dip'), { opacity: dipA.toFixed(3), background: 'var(--em, #1f3bff)' });
 
           cur.animate(lt, seq);
         }

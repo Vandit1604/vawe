@@ -7,7 +7,7 @@
   "scenes": [
     { "type": "title", "bg": "paperShapes", "value": "light", "eyebrow": "REDDIT LEADS · AI CITATIONS", "title": "Find your Reddit leads. <em>Get cited by AI.</em>", "dur": 3.6 },
     { "type": "statement", "bg": "paper", "value": "light", "text": "Your buyers ask on Reddit <em>every day.</em>", "dur": 3.0 },
-    { "type": "statement", "bg": "paper", "value": "light", "text": "You're just not in the thread — <em>yet.</em>", "dur": 3.0 },
+    { "type": "statement", "bg": "paper", "value": "light", "text": "You're just not in the thread, <em>yet.</em>", "dur": 3.0 },
     { "type": "steps", "bg": "paper", "value": "light", "title": "How ThreadCite works", "dur": 5.0, "steps": [
       { "n": "01", "h": "Tell us your site", "d": "We learn what you sell and who buys." },
       { "n": "02", "h": "We find your threads", "d": "High-intent Reddit questions, daily." },

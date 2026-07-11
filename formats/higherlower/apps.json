@@ -10,6 +10,6 @@
     { "a": "TikTok", "iconA": "/engine/assets/icons/tiktok.svg", "b": "Instagram", "iconB": "/engine/assets/icons/instagram.svg", "valA": 1560000000, "valB": 2000000000, "unit": "users", "pct": 41, "fact": "Instagram quietly beats TikTok by <b>~450M</b>" },
     { "a": "WhatsApp", "iconA": "/engine/assets/icons/whatsapp.svg", "b": "YouTube", "iconB": "/engine/assets/icons/youtube.svg", "valA": 2000000000, "valB": 2500000000, "unit": "users", "pct": 49, "fact": "YouTube edges WhatsApp by <b>500M</b>" },
     { "a": "WeChat", "iconA": "/engine/assets/icons/wechat.svg", "b": "TikTok", "iconB": "/engine/assets/icons/tiktok.svg", "valA": 1340000000, "valB": 1560000000, "unit": "users", "pct": 38, "fact": "TikTok just passed WeChat" },
-    { "a": "YouTube", "iconA": "/engine/assets/icons/youtube.svg", "b": "Facebook", "iconB": "/engine/assets/icons/facebook.svg", "valA": 2500000000, "valB": 3070000000, "unit": "users", "pct": 21, "fact": "“Facebook is dead”? Still <b>#1</b> — 3 billion users" }
+    { "a": "YouTube", "iconA": "/engine/assets/icons/youtube.svg", "b": "Facebook", "iconB": "/engine/assets/icons/facebook.svg", "valA": 2500000000, "valB": 3070000000, "unit": "users", "pct": 21, "fact": "“Facebook is dead”? Still <b>#1</b>, 3 billion users" }
   ]
 }

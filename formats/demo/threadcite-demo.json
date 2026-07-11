@@ -1,0 +1,95 @@
+{
+  "module": "demo",
+  "orientation": "landscape",
+  "theme": "threadcite",
+  "audio": {
+    "silent": true
+  },
+  "scenes": [
+    {
+      "type": "title",
+      "bg": "paperShapes",
+      "eyebrow": "NEW · THREADCITE",
+      "title": "Turn Reddit threads into <em>customers.</em>",
+      "sub": "Watch how.",
+      "dur": 4
+    },
+    {
+      "type": "statement",
+      "bg": "ink",
+      "text": "Buyers ask Reddit. <em>AI answers with Reddit.</em>",
+      "dur": 3.4,
+      "transition": "punch"
+    },
+    {
+      "type": "component",
+      "bg": "paper",
+      "title": "This is ThreadCite.",
+      "src": "/engine/assets/brands/threadcite/components/howitworks.json",
+      "dur": 6,
+      "camera": [
+        {
+          "t": 0.4,
+          "s": 1
+        },
+        {
+          "t": 5.6,
+          "s": 1.09
+        }
+      ],
+      "transition": "flash"
+    },
+    {
+      "type": "deploy",
+      "bg": "paper",
+      "title": "How ThreadCite works",
+      "url": "threadcite.live",
+      "dur": 5.6,
+      "steps": [
+        {
+          "ic": "globe",
+          "lb": "Tell us your site"
+        },
+        {
+          "ic": "spark",
+          "lb": "We find your threads"
+        },
+        {
+          "ic": "braces",
+          "lb": "Coached reply drafts"
+        },
+        {
+          "ic": "check",
+          "lb": "See where you show up"
+        }
+      ],
+      "transition": "whip",
+      "dir": "left"
+    },
+    {
+      "type": "statement",
+      "bg": "paper",
+      "text": "Replies that read <em>human</em>, not shill.",
+      "dur": 3.2,
+      "transition": "whip",
+      "dir": "right"
+    },
+    {
+      "type": "statement",
+      "bg": "soft",
+      "text": "Show up once. Get recommended for <em>months.</em>",
+      "dur": 3.2,
+      "transition": "dissolve"
+    },
+    {
+      "type": "cta",
+      "bg": "accent",
+      "logo": "/engine/assets/brands/threadcite/icon.svg",
+      "cta": "Get found where <em>buyers ask.</em>",
+      "url": "threadcite.live",
+      "dur": 4.6,
+      "transition": "burn"
+    }
+  ],
+  "brand": "/engine/assets/brands/threadcite/icon.svg"
+}

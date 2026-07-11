@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit review hooks install-hooks studio studio-check assets list clean
+.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit lookbook photos similar ledger ledger-add review install-hooks studio studio-check assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -35,10 +35,6 @@ frame:
 assets:
 	node scripts/assets.mjs $(D) $(if $(WRITE),--write)
 
-# make hooks D=formats/higherlower/apps.json [SLOT=hook] — print hook variants to pick
-hooks:
-	node scripts/hooks.mjs --data $(D) --slot $(or $(SLOT),hook)
-
 # make verify  — integrity + safe-zone + contact sheets (all formats)
 verify:
 	node verify/run.js
@@ -68,11 +64,32 @@ lib-test:
 brandkit:
 	node scripts/brandkit.mjs $(URL) $(NAME)
 
-# make compose DNA=dna/brand.json [FORMAT=brandfilm|demo|launch] [DUR=30] [WRITE=1]  — deterministic
-# storyboard compiler: Brand DNA → complete renderable scenes JSON (same input → byte-identical
-# output). Dry-run prints the beat table; WRITE=1 saves formats/<format>/<brand>.json.
-compose:
-	node scripts/compose.mjs $(DNA) --format $(or $(FORMAT),brandfilm) $(if $(DUR),--duration $(DUR)) $(if $(WRITE),--write)
+# make lookbook URL=https://site.com NAME=brand  — screenshot the site (full page + viewports) for
+# art direction study: derive the video's design language from the brand's own look, no canned styles.
+lookbook:
+	node scripts/lookbook.mjs $(URL) $(NAME)
+
+# make similar [D="a.json b.json"]  — sameness audit: score authored videos pairwise (motion vocab
+# + beat structure + layout). Cross-brand SAME (>0.75) fails; the anti-template gate.
+similar:
+	node scripts/similarity.mjs $(D)
+
+# make ledger D=formats/x/video.json  — check a design against ALL shipped designs (cross-video
+# memory); make ledger-add D=… logs it after shipping.
+ledger:
+	node scripts/ledger.mjs check $(D)
+ledger-add:
+	node scripts/ledger.mjs add $(D)
+
+# make photos Q="server room" NAME=brand [N=4]  — fetch openly-licensed photos (Openverse: cc0/pdm/by)
+# with attribution recorded to credits.json. Use in clipped image layers with ken burns zoom.
+photos:
+	node scripts/photos.mjs "$(Q)" $(NAME) $(if $(N),--n $(N))
+
+# make capture-scene URL=… SEL="section" NAME=brand LABEL=intake PARTS="sel1,sel2"  — capture an
+# ANIMATED site section as parts (relative geometry) to re-stage with our motion primitives.
+capture-scene:
+	node scripts/capture-scene.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) --parts "$(PARTS)"
 
 # make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
 # (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/capture-component.mjs.

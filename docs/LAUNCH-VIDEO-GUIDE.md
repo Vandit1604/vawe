@@ -20,17 +20,16 @@ Crawls the site's CSS and writes:
 
 Read `dna/<name>.json` — it tells you the dominant colour, the beats, and whether to go plain or busy.
 
-## Step 2 — Compose a renderable draft from the DNA (deterministic)
+## Step 2 — Study the site, then design (no templates)
 
 ```bash
-make compose DNA=dna/<name>.json [FORMAT=brandfilm|demo|launch] [DUR=30] [WRITE=1]
+make lookbook URL=https://site.com NAME=brand    # full-page + viewport screenshots for study
 ```
-The storyboard compiler (`scripts/compose.mjs`) turns the DNA into a **complete, schema-valid,
-renderable** scenes JSON — same DNA → byte-identical output. It classifies the site's headings
-(steps / features / CTA), budgets durations to the target, sets bg/value from the dominance
-strategy, and never invents numbers (stats only from an explicit `dna.stats`). Dry-run prints the
-beat table; `WRITE=1` saves `formats/<format>/<name>.json`. **Then polish the copy by hand** —
-the compiler gives you a correct draft, you give it taste.
+Read `engine/assets/brands/<name>/look/*.png` and name the design language in words —
+typography, density, shape language, signature details, motion character (the
+`shortwave-video-planning` skill is the checklist). Then storyboard by hand: every beat's
+copy comes from the site's own words, every visual choice traces to an observation from the
+lookbook. There is no draft generator on purpose — story structure is designed per product.
 
 For a hand-authored storyboard instead, pick a spine by the brand's voice (see `docs/DESIGN-DATABASE.md §15`):
 mission→**Golden Circle** · performance→**PAS / Hook-Story-Offer** · transformation→**BAB** · launch→**AIDA**.

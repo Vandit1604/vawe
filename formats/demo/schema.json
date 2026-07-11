@@ -3,35 +3,210 @@
   "description": "Landscape product walkthrough with working UI mockups (code editor, deploy pipeline, live API call w/ cursor, earnings), camera zoom + moving backgrounds. Scene types: title, statement, code, deploy, call, earn, cta, component.",
   "note": "data.theme (string name or inline object) sets palette/fonts/motion — validated separately by validateTheme.",
   "fields": {
-    "orientation": { "type": "string", "label": "Orientation", "enum": ["portrait", "landscape"] },
-    "scenes": { "type": "array", "label": "Scenes (hook → build → proof → payoff → CTA)", "required": true, "minItems": 2, "maxItems": 16, "item": {
-      "type": { "type": "string", "label": "Scene type", "required": true, "enum": ["title", "statement", "code", "deploy", "call", "earn", "cta", "component"] },
-      "dur": { "type": "number", "label": "Duration (s)", "min": 2, "max": 14 },
-      "bg": { "type": "string", "label": "Background preset (paper/paperShapes/soft/accent/ink/…)" },
-      "value": { "type": "string", "label": "Force light/dark treatment", "enum": ["light", "dark"] },
-      "eyebrow": { "type": "string", "label": "Eyebrow (title/statement)" },
-      "title": { "type": "string", "label": "Headline (may use <em>…</em>)" },
-      "text": { "type": "string", "label": "Statement text (alt to title)" },
-      "sub": { "type": "string", "label": "Subline" },
-      "file": { "type": "string", "label": "Window filename chip (code/call)" },
-      "lines": { "type": "array", "label": "Code lines typed out (code)", "maxItems": 12 },
-      "steps": { "type": "array", "label": "Pipeline steps (deploy)", "maxItems": 6, "item": {
-        "ic": { "type": "string", "label": "Icon name (core/icons.js)" },
-        "lb": { "type": "string", "label": "Step label", "required": true } } },
-      "url": { "type": "string", "label": "URL line (deploy/call/cta)" },
-      "resp": { "type": "string", "label": "Response payload text (call)" },
-      "latency": { "type": "string", "label": "Latency badge (call)" },
-      "cost": { "type": "string", "label": "Cost badge (call)" },
-      "calls": { "type": "array", "label": "Earning feed rows (earn)", "maxItems": 8, "item": {
-        "nm": { "type": "string", "label": "Caller name", "required": true },
-        "v": { "type": "number", "label": "$ per call", "required": true, "min": 0 } } },
-      "total": { "type": "number", "label": "Count-up target (earn)", "min": 0 },
-      "cta": { "type": "string", "label": "CTA headline (cta)" },
-      "logo": { "type": "string", "label": "Logo path (cta)" },
-      "src": { "type": "string", "label": "Captured component JSON path (component)" },
-      "scale": { "type": "number", "label": "Component scale multiplier", "min": 0.2, "max": 2 },
-      "camera": { "type": "array", "label": "Camera keyframes [{t,s,x,y}]" },
-      "cursor": { "type": "array", "label": "Cursor keyframes [{t,x,y,click}]" }
-    } }
+    "orientation": {
+      "type": "string",
+      "label": "Orientation",
+      "enum": [
+        "portrait",
+        "landscape"
+      ]
+    },
+    "scenes": {
+      "type": "array",
+      "label": "Scenes (hook → build → proof → payoff → CTA)",
+      "required": true,
+      "minItems": 2,
+      "maxItems": 16,
+      "item": {
+        "type": {
+          "type": "string",
+          "label": "Scene type",
+          "required": true,
+          "enum": [
+            "title",
+            "statement",
+            "code",
+            "deploy",
+            "call",
+            "earn",
+            "cta",
+            "component"
+          ]
+        },
+        "dur": {
+          "type": "number",
+          "label": "Duration (s)",
+          "min": 2,
+          "max": 14
+        },
+        "bg": {
+          "type": "string",
+          "label": "Background preset (paper/paperShapes/soft/accent/ink/…)"
+        },
+        "value": {
+          "type": "string",
+          "label": "Force light/dark treatment",
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "eyebrow": {
+          "type": "string",
+          "label": "Eyebrow (title/statement)"
+        },
+        "title": {
+          "type": "string",
+          "label": "Headline (may use <em>…</em>)"
+        },
+        "text": {
+          "type": "string",
+          "label": "Statement text (alt to title)"
+        },
+        "sub": {
+          "type": "string",
+          "label": "Subline"
+        },
+        "file": {
+          "type": "string",
+          "label": "Window filename chip (code/call)"
+        },
+        "lines": {
+          "type": "array",
+          "label": "Code lines typed out (code)",
+          "maxItems": 12
+        },
+        "steps": {
+          "type": "array",
+          "label": "Pipeline steps (deploy)",
+          "maxItems": 6,
+          "item": {
+            "ic": {
+              "type": "string",
+              "label": "Icon name (core/icons.js)"
+            },
+            "lb": {
+              "type": "string",
+              "label": "Step label",
+              "required": true
+            }
+          }
+        },
+        "url": {
+          "type": "string",
+          "label": "URL line (deploy/call/cta)"
+        },
+        "resp": {
+          "type": "string",
+          "label": "Response payload text (call)"
+        },
+        "latency": {
+          "type": "string",
+          "label": "Latency badge (call)"
+        },
+        "cost": {
+          "type": "string",
+          "label": "Cost badge (call)"
+        },
+        "calls": {
+          "type": "array",
+          "label": "Earning feed rows (earn)",
+          "maxItems": 8,
+          "item": {
+            "nm": {
+              "type": "string",
+              "label": "Caller name",
+              "required": true
+            },
+            "v": {
+              "type": "number",
+              "label": "$ per call",
+              "required": true,
+              "min": 0
+            }
+          }
+        },
+        "total": {
+          "type": "number",
+          "label": "Count-up target (earn)",
+          "min": 0
+        },
+        "cta": {
+          "type": "string",
+          "label": "CTA headline (cta)"
+        },
+        "logo": {
+          "type": "string",
+          "label": "Logo path (cta)"
+        },
+        "src": {
+          "type": "string",
+          "label": "Captured component JSON path (component)"
+        },
+        "scale": {
+          "type": "number",
+          "label": "Component scale multiplier",
+          "min": 0.2,
+          "max": 2
+        },
+        "camera": {
+          "type": "array",
+          "label": "Camera keyframes [{t,s,x,y}]"
+        },
+        "cursor": {
+          "type": "array",
+          "label": "Cursor keyframes [{t,x,y,click}]"
+        },
+        "transition": {
+          "type": "string",
+          "label": "Cut INTO this scene",
+          "enum": [
+            "fade",
+            "slide",
+            "whip",
+            "punch",
+            "wipe",
+            "iris",
+            "clock",
+            "flip",
+            "rise",
+            "blur",
+            "zoom",
+            "cube",
+            "barn",
+            "softwipe",
+            "softiris",
+            "squeeze",
+            "roll",
+            "letterbox",
+            "drop",
+            "jitter",
+            "flash",
+            "burn",
+            "leak",
+            "grain",
+            "dissolve",
+            "ink",
+            "glitch",
+            "streak",
+            "pixel"
+          ]
+        },
+        "dir": {
+          "type": "string",
+          "label": "Cut direction",
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ]
+        }
+      }
+    },
+    "brand": {
+      "type": "string",
+      "label": "Corner brand chip image path (defaults to the Plinth mark)"
+    }
   }
 }

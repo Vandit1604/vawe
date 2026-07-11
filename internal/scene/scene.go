@@ -4,6 +4,10 @@
 package scene
 
 import (
+	"bytes"
+
+	"github.com/chromedp/cdproto/runtime"
+	"image/png"
 	"context"
 	"fmt"
 	"net"
@@ -83,6 +87,43 @@ func newTab(parent context.Context, url string) (context.Context, context.Cancel
 }
 
 // Capture renders module's scene (data at dataURL) and writes total PNGs to framesDir.
+// pngDiffRatio: fraction of pixels whose any-channel delta exceeds a small epsilon.
+// Distinguishes cross-tab raster noise (a few hundredths of a percent) from real motion.
+func pngDiffRatio(a, b []byte) (float64, error) {
+	ia, err := png.Decode(bytes.NewReader(a))
+	if err != nil {
+		return 1, err
+	}
+	ib, err := png.Decode(bytes.NewReader(b))
+	if err != nil {
+		return 1, err
+	}
+	ra, rb := ia.Bounds(), ib.Bounds()
+	if ra != rb {
+		return 1, fmt.Errorf("dims differ")
+	}
+	var diff, total int
+	for y := ra.Min.Y; y < ra.Max.Y; y++ {
+		for x := ra.Min.X; x < ra.Max.X; x++ {
+			r1, g1, b1, _ := ia.At(x, y).RGBA()
+			r2, g2, b2, _ := ib.At(x, y).RGBA()
+			total++
+			const eps = 3 << 8 // 8-bit delta of 3, in 16-bit space
+			if absd(r1, r2) > eps || absd(g1, g2) > eps || absd(b1, b2) > eps {
+				diff++
+			}
+		}
+	}
+	return float64(diff) / float64(total), nil
+}
+
+func absd(a, b uint32) uint32 {
+	if a > b {
+		return a - b
+	}
+	return b - a
+}
+
 func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool) (Meta, error) {
 	var meta Meta
 	srv, port, err := Serve(repoRoot)
@@ -117,9 +158,67 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		workers = total
 	}
 
-	frames := make(chan int, total)
+	// ---- static-frame dedup: capture each RUN of identical frames once ----
+	// frameSig(n) hashes every per-frame DOM write + downsampled canvas pixels. Runs of equal
+	// signatures capture only their first frame; the rest are hardlinked afterwards. Mid-run
+	// ANCHOR frames are captured anyway and byte-compared — a mismatch means the signature
+	// missed real motion, and we fail LOUDLY (purity culture: no silent wrong frames).
+	// SHORTWAVE_NO_DEDUP=1 disables.
+	rep := make([]int, total)
+	for f := range rep {
+		rep[f] = f
+	}
+	if os.Getenv("SHORTWAVE_NO_DEDUP") == "" {
+		var sigs []string
+		expr := fmt.Sprintf(`(() => { const out = []; for (let f = 0; f < %d; f++) out.push(window.__engine.frameSig ? String(window.__engine.frameSig(f)) : 'nofsig' + f); return out; })()`, total)
+		if err := chromedp.Run(ctx0, chromedp.Evaluate(expr, &sigs)); err == nil && len(sigs) == total {
+			for f := 1; f < total; f++ {
+				if sigs[f] == sigs[f-1] {
+					rep[f] = rep[f-1]
+				}
+			}
+		}
+	}
+	type capJob struct {
+		frame  int
+		path   string
+		anchor int // ≥0: after capturing, render THIS frame too and verify pixels match in-memory.
+		// Same-worker verification on purpose: it checks the SIGNATURE's honesty (does equal-sig
+		// mean equal pixels in one instance), not cross-instance raster identity, which differs
+		// at baseline for saturated text and always has across adjacent frames.
+	}
+	framePath := func(f int) string { return filepath.Join(framesDir, fmt.Sprintf("%05d.png", f)) }
+	anchorFor := map[int]int{} // rep frame → mid-run anchor frame (runs ≥10)
+	for f := 0; f < total; {
+		r := rep[f]
+		end := f
+		for end < total && rep[end] == r {
+			end++
+		}
+		if end-f >= 10 {
+			mid := f + (end-f)/2
+			if mid != r {
+				anchorFor[r] = mid
+			}
+		}
+		f = end
+	}
+	jobs := []capJob{}
+	dups := 0
 	for f := 0; f < total; f++ {
-		frames <- f
+		if rep[f] == f {
+			a := -1
+			if m, ok := anchorFor[f]; ok {
+				a = m
+			}
+			jobs = append(jobs, capJob{f, framePath(f), a})
+		} else {
+			dups++
+		}
+	}
+	frames := make(chan capJob, len(jobs))
+	for _, j := range jobs {
+		frames <- j
 	}
 	close(frames)
 
@@ -135,16 +234,39 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				return fmt.Errorf("transparent bg: %w", err)
 			}
 		}
-		for f := range frames {
+		shoot := func(f int) ([]byte, error) {
 			var buf []byte
-			if err := chromedp.Run(ctx,
+			// await two REAL animation frames after renderFrame so the compositor has committed
+			// this frame's paint before the screenshot (rAF is virtualized for scene code; the
+			// renderer keeps the native one as __realRaf).
+			err := chromedp.Run(ctx,
 				chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
+				chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
 				chromedp.CaptureScreenshot(&buf),
-			); err != nil {
-				return fmt.Errorf("frame %d: %w", f, err)
+			)
+			return buf, err
+		}
+		for j := range frames {
+			buf, err := shoot(j.frame)
+			if err != nil {
+				return fmt.Errorf("frame %d: %w", j.frame, err)
 			}
-			if err := os.WriteFile(filepath.Join(framesDir, fmt.Sprintf("%05d.png", f)), buf, 0644); err != nil {
+			if err := os.WriteFile(j.path, buf, 0644); err != nil {
 				return err
+			}
+			if j.anchor >= 0 { // same-instance signature honesty check
+				abuf, err := shoot(j.anchor)
+				if err != nil {
+					return fmt.Errorf("anchor %d: %w", j.anchor, err)
+				}
+				if !bytes.Equal(buf, abuf) {
+					ratio, derr := pngDiffRatio(buf, abuf)
+					if derr != nil || ratio > 0.0005 {
+						os.WriteFile("/tmp/dedup_rep.png", buf, 0644)
+						os.WriteFile("/tmp/dedup_anchor.png", abuf, 0644)
+						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with SHORTWAVE_NO_DEDUP=1 and report (pair in /tmp/dedup_*.png)", j.frame, j.anchor, ratio*100)
+					}
+				}
 			}
 		}
 		return nil
@@ -181,6 +303,25 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		if e != nil {
 			return meta, e
 		}
+	}
+	anchorsOK := len(anchorFor)
+	if dups > 0 {
+		for f := 0; f < total; f++ {
+			if rep[f] == f {
+				continue
+			}
+			src, dst := framePath(rep[f]), framePath(f)
+			if err := os.Link(src, dst); err != nil {
+				b, rerr := os.ReadFile(src)
+				if rerr != nil {
+					return meta, rerr
+				}
+				if werr := os.WriteFile(dst, b, 0644); werr != nil {
+					return meta, werr
+				}
+			}
+		}
+		fmt.Printf("▶ dedup: %d/%d frames captured (%d reused · %d anchors verified)\n", total-dups, total, dups, anchorsOK)
 	}
 	return meta, nil
 }

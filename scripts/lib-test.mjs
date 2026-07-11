@@ -2,8 +2,9 @@
 // No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_THEME,
-  sequence, wipe, circleWipe, clockWipe } from '../core/lib.js';
+  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor } from '../core/lib.js';
 import { unitProgress, PRESETS } from '../core/kinetic.js';
+import { PRESENTATIONS, cutStyle } from '../core/transitions.js';
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -107,12 +108,61 @@ ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stag
 ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
 ok('unitProgress clamped [0,1]', (() => { for (let t = -1; t < 3; t += 0.1) { const u = unitProgress(t, 1, 4); if (u < 0 || u > 1) return false; } return true; })());
 ok('preset up hidden at 0', PRESETS.up(0).opacity === 0 && PRESETS.up(0).transform.includes('translateY'));
-ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.0px)'));
+ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.00px)'));
 ok('preset type hard on/off', PRESETS.type(0).opacity === 0 && PRESETS.type(0.01).opacity === 1);
 ok('preset scale grows', PRESETS.scale(1).transform.includes('scale(1'));
-ok('preset blur clears', PRESETS.blur(1).filter.includes('blur(0.0px)'));
+ok('preset blur clears', PRESETS.blur(1).filter.includes('blur(0.00px)'));
 ok('preset wave oscillates', PRESETS.wave(0).transform !== PRESETS.wave(0.25).transform);
 ok('presets deterministic', PRESETS.bounce(0.4).transform === PRESETS.bounce(0.4).transform);
+
+
+// new kinetic presets: hidden at 0, fully landed at 1
+for (const k of ['flip', 'fall', 'elastic', 'skew', 'focus']) {
+  ok(`preset ${k} starts hidden`, PRESETS[k](0).opacity === 0);
+  ok(`preset ${k} lands opaque`, approx(+PRESETS[k](1).opacity, 1, 0.01));
+}
+ok('preset focus resolves crisp', PRESETS.focus(1).filter.includes('blur(0.00px)'));
+
+// shake / pulse — deterministic, decaying, zero before the hit
+ok('shake zero before hit', shake(-0.1).x === 0 && shake(0).y === 0);
+ok('shake deterministic', shake(0.2, { seed: 5 }).x === shake(0.2, { seed: 5 }).x);
+ok('shake seeds differ', shake(0.2, { seed: 5 }).x !== shake(0.2, { seed: 9 }).x);
+ok('shake decays', Math.abs(shake(2).x) < Math.abs(shake(0.05).x) + 1e-9);
+ok('pulse centered', approx(pulse(0), 1, 0.05) && pulse(0.6) !== pulse(0.3));
+
+// velocity ramping — monotone, endpoints exact, peak-velocity placement honored
+ok('accel endpoints', accel(0) === 0 && accel(1) === 1);
+ok('accel slow start', accel(0.3) < 0.3);
+ok('decel fast start', decel(0.3) > 0.3);
+ok('speedRamp endpoints', speedRamp(0) === 0 && speedRamp(1) === 1);
+ok('speedRamp slow at both ends', speedRamp(0.1) < 0.1 && speedRamp(0.9) > 0.9);
+ok('speedRamp monotone', (() => { let prev = 0; for (let t = 0; t <= 1.001; t += 0.01) { const v = speedRamp(t); if (v < prev - 1e-9) return false; prev = v; } return true; })());
+ok('speedRamp peak shifts', speedRamp(0.3, { peak: 0.2 }) > speedRamp(0.3, { peak: 0.8 }));
+ok('EASINGS has ramps', typeof EASINGS.ramp === 'function' && typeof EASINGS.rush === 'function' && typeof EASINGS.brake === 'function');
+
+// optical tracking — em string, monotone tighter as size grows
+ok('trackingFor em string', trackingFor(16).endsWith('em'));
+ok('trackingFor tightens', parseFloat(trackingFor(120)) < parseFloat(trackingFor(16)));
+ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-6 && Math.abs(parseFloat(trackingFor(120)) - -0.022) < 1e-6);
+
+// transitions kit: every presentation lands at full visibility (enter(1)); fade-out family exits hidden
+{
+  const opts = { dir: 'left', dist: 90, cx: 50, cy: 50 };
+  for (const [name, P] of Object.entries(PRESENTATIONS)) {
+    if (name === 'none') continue;
+    const landed = P.enter(1, opts);
+    ok(`cut ${name} lands visible`, approx(+(landed.opacity ?? 1), 1, 0.01));
+    if (landed.filter && landed.filter !== 'none') ok(`cut ${name} lands unblurred`, landed.filter.includes('(0.00px)'));
+    if (!['wipe', 'iris', 'clock', 'softwipe', 'softiris', 'barn', 'letterbox'].includes(name)) {
+      const gone = P.exit(1, opts);
+      ok(`cut ${name} exits hidden`, +(gone.opacity ?? 1) <= 0.05);
+    }
+  }
+  const steady = cutStyle('whip', { enter: 1, exit: 0 }, opts);
+  ok('cutStyle steady opaque', approx(+steady.opacity, 1, 0.01));
+  ok('cutStyle exit fades', +cutStyle('fade', { enter: 1, exit: 0.9 }, opts).opacity < 0.2);
+  ok('cutStyle deterministic', JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)) === JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)));
+}
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -10,6 +10,6 @@
     { "a": "Horse", "iconA": "🐎", "b": "Greyhound", "iconB": "🐕", "valA": 88, "valB": 74, "unit": "km/h", "pct": 55, "fact": "A racehorse tops out around <b>88 km/h</b>" },
     { "a": "Kangaroo", "iconA": "🦘", "b": "Greyhound", "iconB": "🐕", "valA": 71, "valB": 74, "unit": "km/h", "pct": 43, "fact": "A greyhound just beats a kangaroo" },
     { "a": "Lion", "iconA": "🦁", "b": "Horse", "iconB": "🐎", "valA": 80, "valB": 88, "unit": "km/h", "pct": 34, "fact": "A horse <b>outruns a lion</b>" },
-    { "a": "Cheetah", "iconA": "🐆", "b": "Falcon", "iconB": "🦅", "valA": 120, "valB": 389, "unit": "km/h", "pct": 27, "fact": "A diving falcon hits <b>389 km/h</b> — the fastest animal alive" }
+    { "a": "Cheetah", "iconA": "🐆", "b": "Falcon", "iconB": "🦅", "valA": 120, "valB": 389, "unit": "km/h", "pct": 27, "fact": "A diving falcon hits <b>389 km/h</b>, the fastest animal alive" }
   ]
 }

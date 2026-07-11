@@ -22,7 +22,7 @@
       .sc.dark { color: var(--on-dark, #f4f5ff); } .sc.light { color: var(--on-light, #12162e); }
       .sc.center { align-items: center; text-align: center; }
 
-      .eyebrow { font: 600 30px var(--font-mono, 'Geist Mono'), monospace; letter-spacing: 0.04em; color: var(--em, #7d8bff); margin-bottom: 32px; }
+      .eyebrow { font: 600 30px var(--font-mono, 'Geist Mono'), monospace; letter-spacing: 0.04em; color: var(--em, #cfd6ff); margin-bottom: 32px; }
       .light .eyebrow { color: var(--accent, #1f3bff); }
       .title { font: 800 122px var(--font-sans, 'Inter'), sans-serif; line-height: 0.98; letter-spacing: -0.035em; max-width: 1400px; text-shadow: 0 6px 60px rgba(6,8,30,0.5); }
       .title em, .stmt em, .ctaH em { font: italic 400 1.02em var(--font-serif, 'Instrument Serif'), serif; color: var(--em, #a9b4ff); }
@@ -115,7 +115,7 @@
           const el = document.createElement('div');
           const auto = autoBg(i);
           const value = sc.value || auto.value;
-          const bg = bgPreset(sc.bg || auto.name, value, PAL);
+          const bg = bgPreset(sc.bg || auto.name, value, (theme && theme.bg) || PAL);
           el.className = 'sc ' + value + (sc.type === 'statement' || sc.type === 'stats' || sc.type === 'quote' || sc.type === 'cta' || sc.type === 'steps' || sc.type === 'features' ? ' center' : '');
           const dur = sc.dur || (sc.type === 'statement' ? 3.0 : sc.type === 'cta' ? 4.0 : 3.6);
           let animate = () => {};

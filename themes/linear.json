@@ -1,0 +1,92 @@
+{
+  "name": "linear",
+  "note": "Rebuilt from lookbook study July 2026 \u2014 crawler misread the SPA. DARK-first: near-black, white medium-weight Inter, gray body, hairline borders; color ONLY as semantic UI state (orange in-progress, teal/green icons). Motion: precise, small, zero bounce.",
+  "palette": {
+    "bg": "#08090a",
+    "bg2": "#101012",
+    "surface": "#141516",
+    "surface2": "#0e0f10",
+    "line": "rgba(247,248,248,0.08)",
+    "lineStrong": "rgba(247,248,248,0.14)",
+    "text": "#f7f8f8",
+    "text2": "#b4b8bd",
+    "dim": "#8a8f98",
+    "accent": "#5e6ad2",
+    "accentDim": "rgba(94,106,210,0.16)",
+    "accentGlow": "rgba(94,106,210,0.35)",
+    "up": "#4cb782",
+    "down": "#eb5757"
+  },
+  "gradient": [
+    "#101012",
+    "#0b0c0d",
+    "#08090a"
+  ],
+  "type": {
+    "sans": "Inter",
+    "mono": "JetBrains Mono",
+    "optical": true
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.0,
+    "settle": 0.38,
+    "enter": 22,
+    "durationScale": 0.9,
+    "stagger": 0.04
+  },
+  "bg": {
+    "accent": "94,106,210",
+    "tint": "138,143,152",
+    "tint2": "94,106,210",
+    "dotLight": "138,143,152",
+    "paperBase": [
+      "#ffffff",
+      "#f7f8f8"
+    ],
+    "softBase": [
+      "#e8eafd",
+      "#dfe1fb"
+    ],
+    "accentBase": [
+      "#5e6ad2",
+      "#4552b8"
+    ],
+    "inkBase": [
+      "#101012",
+      "#08090a"
+    ],
+    "border": "#26282b",
+    "dark": [
+      "#101012",
+      "#08090a"
+    ],
+    "darkMesh": [
+      "#121316",
+      "#08090a"
+    ],
+    "deep": [
+      "#0e0f11",
+      "#070809"
+    ],
+    "light": [
+      "#ffffff",
+      "#f7f8f8"
+    ],
+    "ink": [
+      "#101012",
+      "#08090a"
+    ],
+    "paper": "#ffffff"
+  },
+  "vars": {
+    "--ink": "#08090a",
+    "--paper": "#ffffff",
+    "--muted": "#8a8f98",
+    "--em": "#5e6ad2",
+    "--on-light": "#08090a",
+    "--on-dark": "#f7f8f8",
+    "--border": "#26282b",
+    "--accent-soft": "#b4b8bd"
+  }
+}
