@@ -1,6 +1,6 @@
 {
   "name": "linear",
-  "note": "Rebuilt from lookbook study July 2026 \u2014 crawler misread the SPA. DARK-first: near-black, white medium-weight Inter, gray body, hairline borders; color ONLY as semantic UI state (orange in-progress, teal/green icons). Motion: precise, small, zero bounce.",
+  "note": "Rebuilt from lookbook study July 2026 — crawler misread the SPA. DARK-first: near-black, white medium-weight Inter, gray body, hairline borders; color ONLY as semantic UI state (orange in-progress, teal/green icons). Motion: precise, small, zero bounce.",
   "palette": {
     "bg": "#08090a",
     "bg2": "#101012",
@@ -15,7 +15,8 @@
     "accentDim": "rgba(94,106,210,0.16)",
     "accentGlow": "rgba(94,106,210,0.35)",
     "up": "#4cb782",
-    "down": "#eb5757"
+    "down": "#eb5757",
+    "ink": "#16181d"
   },
   "gradient": [
     "#101012",
@@ -25,11 +26,13 @@
   "type": {
     "sans": "Inter",
     "mono": "JetBrains Mono",
-    "optical": true
+    "optical": true,
+    "num": "Inter",
+    "serif": "Inter"
   },
   "motion": {
     "easing": "easeOutExpo",
-    "bounce": 0.0,
+    "bounce": 0,
     "settle": 0.38,
     "enter": 22,
     "durationScale": 0.9,

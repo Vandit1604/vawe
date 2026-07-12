@@ -1,0 +1,94 @@
+{
+  "name": "ditherkit",
+  "note": "Rebuilt from the real rendered page July 2026 — brandkit misread the SPA as light/coral; the actual experience is DARK: near-black canvas, monospace Geist wordmark, ordered-dither chart fills in blue (Desktop) → purple (Mobile). Blue is the one live accent (active tab, preview button, area glow). Use ONLY these. Motion: calm, editorial, slow settle, zero bounce.",
+  "palette": {
+    "bg": "#0a0a0b",
+    "bg2": "#101013",
+    "surface": "#151518",
+    "surface2": "#0e0e11",
+    "line": "rgba(255,255,255,0.08)",
+    "lineStrong": "rgba(255,255,255,0.15)",
+    "text": "#ededed",
+    "text2": "#b6b6ba",
+    "dim": "#6e6e72",
+    "accent": "#3b82f6",
+    "accentDim": "rgba(59,130,246,0.16)",
+    "accentGlow": "rgba(59,130,246,0.40)",
+    "up": "#3b82f6",
+    "down": "#a855f7",
+    "ink": "#141418"
+  },
+  "gradient": [
+    "#0e0e14",
+    "#0a0a0d",
+    "#050507"
+  ],
+  "type": {
+    "sans": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono",
+    "serif": "Geist"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0,
+    "settle": 0.4,
+    "enter": 24,
+    "durationScale": 1.0,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "59,130,246",
+    "tint": "110,110,114",
+    "tint2": "168,85,247",
+    "dotLight": "120,120,130",
+    "paperBase": [
+      "#ffffff",
+      "#f5f5f5"
+    ],
+    "softBase": [
+      "#12233f",
+      "#0d1830"
+    ],
+    "accentBase": [
+      "#3b82f6",
+      "#2563eb"
+    ],
+    "inkBase": [
+      "#0e0e14",
+      "#050507"
+    ],
+    "border": "#232327",
+    "dark": [
+      "#0e0e14",
+      "#050507"
+    ],
+    "darkMesh": [
+      "#111119",
+      "#050507"
+    ],
+    "deep": [
+      "#0b0b0f",
+      "#040405"
+    ],
+    "light": [
+      "#ffffff",
+      "#f5f5f5"
+    ],
+    "ink": [
+      "#0e0e14",
+      "#050507"
+    ],
+    "paper": "#0a0a0b"
+  },
+  "vars": {
+    "--ink": "#0a0a0b",
+    "--paper": "#0a0a0b",
+    "--muted": "#6e6e72",
+    "--em": "#3b82f6",
+    "--on-light": "#0a0a0b",
+    "--on-dark": "#ededed",
+    "--border": "#232327",
+    "--accent-soft": "rgba(59,130,246,0.16)"
+  }
+}

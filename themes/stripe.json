@@ -1,0 +1,14 @@
+{
+  "name": "stripe",
+  "note": "Reflecting stripe.com — WHITE-first, ink navy #0a2540, slate subheads, indigo #635bff action, the signature multicolor gradient as the one hero device. Font: Hanken Grotesk (free grotesque) standing in for Stripe's licensed Söhne.",
+  "palette": {
+    "bg": "#ffffff", "bg2": "#f7fafc", "surface": "#ffffff", "surface2": "#f6f9fc",
+    "line": "rgba(10,37,64,0.09)", "lineStrong": "rgba(10,37,64,0.16)",
+    "text": "#0a2540", "text2": "#425466", "dim": "#8898aa", "ink": "#0a2540",
+    "accent": "#635bff", "accentDim": "rgba(99,91,255,0.12)", "accentGlow": "rgba(99,91,255,0.38)",
+    "up": "#00b843", "down": "#e0396f"
+  },
+  "gradient": ["#ffffff", "#f8fafc", "#eef3f8"],
+  "type": { "sans": "Sohne", "num": "Sohne", "serif": "Instrument Serif", "mono": "JetBrains Mono" },
+  "motion": { "easing": "easeOutExpo", "bounce": 0.2, "settle": 0.42, "enter": 40, "durationScale": 1, "stagger": 0.05 }
+}

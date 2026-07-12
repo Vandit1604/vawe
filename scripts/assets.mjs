@@ -1,8 +1,8 @@
 // scripts/assets.mjs — make integrating images easy. Given a data JSON, fill every item that has a
 // name but no real image: country → flag (flagcdn, public domain), brand → logo (simple-icons, free),
 // else → a generated topic card (scripts/cards.mjs). Rewrites the icon paths in place.
-//   node scripts/assets.mjs formats/higherlower/topic.json            (dry run — prints the plan)
-//   node scripts/assets.mjs formats/higherlower/topic.json --write    (fetch/generate + save JSON)
+//   node scripts/assets.mjs formats/hyperscene/video.json            (dry run — prints the plan)
+//   node scripts/assets.mjs formats/hyperscene/video.json --write    (fetch/generate + save JSON)
 //   flags:  --no-fetch (skip network, cards only) · --replace-emoji (also replace emoji icons)
 import fs from 'node:fs';
 import path from 'node:path';

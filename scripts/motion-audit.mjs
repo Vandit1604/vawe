@@ -88,7 +88,7 @@ async function audit(format) {
   // ---- segments (frame windows + transition) ----
   // meta.segments = the format DECLARES its scene windows → the motion contract is enforceable (FAIL).
   // Fallback to stings is heuristic (stings are often beat markers, not cuts) → observations only (WARN).
-  let segs = (meta.segments || []).map((s) => ({ name: s.name || s.label || s.type, dur: s.dur ?? (s.t1 - s.t0), trans: s.transition ?? 0.4 })); // accepts {dur} or studio {t0,t1}
+  let segs = (meta.segments || []).map((s) => ({ name: s.name || s.label || s.type, dur: s.dur ?? (s.t1 - s.t0), trans: s.transition ?? 0.4 })); // accepts {dur} or {t0,t1}
   const declared = segs.length > 0;
   if (!segs.length && (meta.stings || []).length) {
     const cuts = [...meta.stings, total / FPS]; let prev = 0;
@@ -242,6 +242,15 @@ async function audit(format) {
     for (const e of ENTRIES) { const bk = (Math.round(e / 0.1) * 0.1).toFixed(1); buckets[bk] = (buckets[bk] || 0) + 1; }
     const top = Object.entries(buckets).sort((x, y) => y[1] - x[1])[0];
     if (top[1] / ENTRIES.length > 0.8) findings.push({ level: 'WARN', check: 'ix:rhythm', seg: '(video)', key: '', msg: top[1] + '/' + ENTRIES.length + ' entrances land in the same ~' + top[0] + 's bucket — uniform rhythm reads monotone; vary enterDur/stagger per beat' });
+  }
+
+  // (x) preset monotony — one entrance device for the whole film = the "all text just rises" failure.
+  // Static read of the data (the preset isn't visible in frames). MOTION-CRAFT: one device per scene role.
+  const presets = (data.layers || []).filter((L) => L.split).map((L) => L.preset || 'up');
+  if (presets.length >= 5) {
+    const cnt = {}; for (const p of presets) cnt[p] = (cnt[p] || 0) + 1;
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+    if (top[1] / presets.length > 0.7) findings.push({ level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' });
   }
 
   return { format, total, segments: windows.length, findings };

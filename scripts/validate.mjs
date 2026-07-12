@@ -3,12 +3,14 @@
 // render pre-first-frame on bad data (clear message, no wasted frames); (2) `make validate` (the
 // CLI main below) checks data files from the shell. Pure + browser-safe: no top-level node imports.
 //
-// Schema vocabulary (backward-compatible superset of the studio quick-edit schema):
+// Schema vocabulary (the authoring schema):
 //   { type: string|number|boolean|array|object, label, default,
 //     required?, min?, max?, enum?, minLength?, pattern?,        // scalars
 //     minItems?, maxItems?, item?,                               // arrays (item = field map)
 //     fields? }                                                  // objects (nested field map)
 // Only fields PRESENT in the schema are checked; unknown data keys (module, audio, theme, …) pass.
+
+import { themeErrors } from '../core/theme-contract.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
@@ -70,12 +72,16 @@ function checkField(spec, val, at, errors) {
   }
 }
 
-// validateTheme(theme): shape-check an INLINE theme object (named themes are trusted files).
-// Returns string[] of errors. undefined/string specs are fine (handled elsewhere).
+// validateTheme(theme): shape-check a theme spec. A data JSON MUST declare its theme (name or
+// inline object) — there is no default look (core/theme-contract.js). Inline objects are
+// completeness-checked here; named themes are completeness-checked by the CLI below (it can read
+// the file) and again at boot by applyTheme.
 export function validateTheme(spec) {
   const errors = [];
-  if (spec == null || typeof spec === 'string') return errors;
+  if (spec == null) return ['data.theme is required (a theme name or an inline theme object) — no default look exists'];
+  if (typeof spec === 'string') return errors;
   if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeOf(spec)})`];
+  errors.push(...themeErrors(spec).map((m) => `theme incomplete: ${m}`));
   if ('palette' in spec && !isObj(spec.palette)) errors.push('theme.palette must be an object');
   if ('type' in spec && !isObj(spec.type)) errors.push('theme.type must be an object');
   if ('vars' in spec && !isObj(spec.vars)) errors.push('theme.vars must be an object');
@@ -119,6 +125,13 @@ if (isMain) {
     const schemaPath = mod && path.join(root, 'formats', mod, 'schema.json');
     try { schema = schemaPath && fs.existsSync(schemaPath) ? readJSON(schemaPath) : null; } catch (e) { schema = null; }
     const errors = validateAll(schema, data);
+    // named themes: the CLI can read the file, so completeness-check it here (boot re-checks).
+    if (typeof data.theme === 'string') {
+      const tp = path.join(root, 'themes', data.theme + '.json');
+      if (!fs.existsSync(tp)) errors.push(`theme "${data.theme}" not found (themes/${data.theme}.json)`);
+      else { try { errors.push(...themeErrors(readJSON(tp)).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
+        catch (e) { errors.push(`theme "${data.theme}" unreadable: ${e.message}`); } }
+    }
     if (errors.length) {
       failed++;
       console.error(`✗ ${path.relative(root, file)} (${mod || 'no module'})`);

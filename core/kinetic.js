@@ -1,7 +1,7 @@
 // kinetic.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
-import { clamp01, easeOutCubic, easeOutBack, spring, hashSeed } from './lib.js';
+import { clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './lib.js';
 
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.
@@ -51,8 +51,8 @@ export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06 } = {}) {
 // ---------- presets: u∈[0,1] → style object (compositor-friendly props only) ----------
 export const PRESETS = {
   // rise + fade (default kinetic reveal)
-  up: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutCubic(u)) * dist).toFixed(2)}px)` }),
-  down: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutCubic(u)) * dist).toFixed(2)}px)` }),
+  up: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
+  down: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
   // typewriter: hard on/off (unit is fully in once its progress passes ~0)
   type: (u) => ({ opacity: u > 0 ? 1 : 0, transform: 'none' }),
   // scale up from small
@@ -62,7 +62,7 @@ export const PRESETS = {
   // springy bounce in
   bounce: (u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u * settle * 2, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
   // slide from a side
-  slide: (u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutCubic(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
+  slide: (u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
   // persistent sinusoidal wave (u is used as raw phase, not a one-shot) — pass loop:true in animateUnits
   wave: (u, { amp = 14, phase = 0 } = {}) => ({ opacity: 1, transform: `translateY(${(Math.sin(u * Math.PI * 2 + phase) * amp).toFixed(2)}px)` }),
   // 3D flip-up per unit (cards/letters somersault into place)
@@ -82,7 +82,7 @@ export const PRESETS = {
     return { opacity: uu > 0 ? 1 : 0, __decode: uu, transform: 'none' }; // resolved in animateUnits (needs textContent)
   },
   // tilt: small rotate-in + rise (sporty/editorial)
-  tilt: (u, { deg = 8, dist = 26 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px) rotate(${((1 - e) * -deg).toFixed(2)}deg)` }; },
+  tilt: (u, { deg = 8, dist = 26 } = {}) => { const e = easeOutSettle(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px) rotate(${((1 - e) * -deg).toFixed(2)}deg)` }; },
   // stretch: horizontal smear that snaps true (impact words)
   stretch: (u, { from = 1.6 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 2), transform: `scaleX(${(from + (1 - from) * e).toFixed(3)})`, filter: `blur(${((1 - e) * 6).toFixed(2)}px)` }; },
   // gradient sweep: background-clip text, gradient slides through (ONE hero word per film)
@@ -94,7 +94,7 @@ export const PRESETS = {
   // shadow: poster lift — long shadow collapses as the word settles
   shadow: (u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
   // riseClip: word rises out of its own baseline (needs clip wrappers — pass clip:true to splitText... handled by animateUnits fallback to plain rise if no wrapper)
-  riseClip: (u, { dist = 44 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutCubic(clamp01(u))) * dist).toFixed(2)}px)` }),
+  riseClip: (u, { dist = 44 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}px)` }),
 };
 
 // decode support: scrambles textContent deterministically until u resolves each char L->R.

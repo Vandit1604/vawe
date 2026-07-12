@@ -58,6 +58,23 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     if (e.clip) issues.push({ kind: 'overflow', a: e.id, t: e.t, detail: `content ${e.sw}x${e.sh} clipped to ${e.cw}x${e.ch}` });
     if (e.x < SAFE.x0 - 1 || e.r > SAFE.x1 + 1 || e.y < SAFE.y0 - 1 || e.btm > SAFE.y1 + 1) issues.push({ kind: 'safe', a: e.id, t: e.t, detail: `(${e.x | 0},${e.y | 0},${e.r | 0},${e.btm | 0})` });
   }
+  // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
+  // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
+  const MIN_IMG = window.innerHeight * 0.05;
+  for (const im of document.querySelectorAll('.hs-img-wrap > img')) {
+    if (!vis(im)) continue;
+    const b = im.getBoundingClientRect();
+    if (b.height > 1 && b.height < MIN_IMG) issues.push({ kind: 'tiny-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `${b.height | 0}px tall < ${MIN_IMG | 0}px floor (5% frame h) — logos read at ~7%` });
+  }
+  // text legibility floor: a text layer rendered below ~1.3% of frame height is unreadable at video
+  // distance. Frame-relative so it scales to portrait/landscape.
+  const MIN_TXT = window.innerHeight * 0.013;
+  for (const tx of document.querySelectorAll('.hs-text')) {
+    if (!vis(tx)) continue;
+    const t = (tx.textContent || '').trim(); if (!t) continue;
+    const fs = parseFloat(getComputedStyle(tx).fontSize);
+    if (fs && fs < MIN_TXT && tx.getBoundingClientRect().width > 1) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
+  }
   for (let i = 0; i < info.length; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
     if (A.el.contains(B.el) || B.el.contains(A.el)) continue;          // skip nested pairs
@@ -197,6 +214,15 @@ for (const spec of modules) {
     meta.segments.forEach((s, i) => { acc += s.dur ?? (s.t1 - s.t0); if (i < meta.segments.length - 1) cuts.push({ t: acc, trans: s.transition ?? 0.4 }); });
     inTransition = (f) => cuts.some((c) => Math.abs(f / fps - c.t) < c.trans + 0.05);
   }
+  // a MOVING camera (data.camera keyframes with changing x/y/s) is cinematography: elements crossing
+  // the frame edge mid-travel are not safe-zone breaches. Overlap/contrast still checked everywhere.
+  let camMoving = () => false;
+  try {
+    const kf = JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).camera || [];
+    const moves = kf.slice(1).map((b, i) => ({ a: kf[i], b }))
+      .filter(({ a, b }) => (a.x ?? 0) !== (b.x ?? 0) || (a.y ?? 0) !== (b.y ?? 0) || (a.s ?? 1) !== (b.s ?? 1));
+    if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
+  } catch {}
   const frames = [...new Set([...(meta.stings || []).map((t) => Math.round(t * fps)),
     ...Array.from({ length: SAMPLES }, (_, i) => Math.round(((i + 0.5) / SAMPLES) * total))])]
     .filter((f) => f >= 0 && f < total && !inTransition(f)).sort((a, b) => a - b);
@@ -208,7 +234,7 @@ for (const spec of modules) {
     critMax = Math.max(critMax, count);
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
-    for (const i of issues) all.push({ f, ...i });
+    for (const i of issues) { if (i.kind === 'safe' && camMoving(f)) continue; all.push({ f, ...i }); }
   }
   const hard = all.filter((i) => HARD.has(i.kind));
   const warn = all.filter((i) => !HARD.has(i.kind));

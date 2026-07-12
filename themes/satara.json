@@ -1,0 +1,94 @@
+{
+  "name": "satara",
+  "note": "From the Satara brand kit image: WHITE-first (off-white paper, near-black warm text) with a single vivid orange accent, plus a dark business-card treatment. Bold geometric rounded sans wordmark. Motion: confident, snappy, geometric.",
+  "palette": {
+    "bg": "#f2f1ee",
+    "bg2": "#ffffff",
+    "surface": "#ffffff",
+    "surface2": "#e9e8e3",
+    "line": "rgba(28,23,18,0.10)",
+    "lineStrong": "rgba(28,23,18,0.18)",
+    "text": "#1c1712",
+    "text2": "#4a453f",
+    "dim": "#8a857d",
+    "accent": "#f26e21",
+    "accentDim": "rgba(242,110,33,0.16)",
+    "accentGlow": "rgba(242,110,33,0.42)",
+    "up": "#f26e21",
+    "down": "#f26e21",
+    "ink": "#201914"
+  },
+  "gradient": [
+    "#ffffff",
+    "#f7f6f3",
+    "#f2f1ee"
+  ],
+  "type": {
+    "sans": "Plus Jakarta Sans",
+    "mono": "Geist Mono",
+    "num": "Plus Jakarta Sans",
+    "serif": "Plus Jakarta Sans"
+  },
+  "motion": {
+    "easing": "easeOutBack",
+    "bounce": 0.2,
+    "settle": 0.5,
+    "enter": 40,
+    "durationScale": 0.95,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "242,110,33",
+    "tint": "138,133,125",
+    "tint2": "242,110,33",
+    "dotLight": "150,145,136",
+    "paperBase": [
+      "#ffffff",
+      "#f2f1ee"
+    ],
+    "softBase": [
+      "#fdeee3",
+      "#fbe2d1"
+    ],
+    "accentBase": [
+      "#f26e21",
+      "#d9591a"
+    ],
+    "inkBase": [
+      "#2a211a",
+      "#160f0a"
+    ],
+    "border": "#e4e2dc",
+    "dark": [
+      "#2a211a",
+      "#160f0a"
+    ],
+    "darkMesh": [
+      "#31261d",
+      "#160f0a"
+    ],
+    "deep": [
+      "#241c15",
+      "#120c08"
+    ],
+    "light": [
+      "#ffffff",
+      "#f2f1ee"
+    ],
+    "ink": [
+      "#2a211a",
+      "#160f0a"
+    ],
+    "paper": "#f2f1ee"
+  },
+  "vars": {
+    "--ink": "#1c1712",
+    "--paper": "#f2f1ee",
+    "--muted": "#8a857d",
+    "--em": "#f26e21",
+    "--on-light": "#1c1712",
+    "--on-dark": "#f7f6f3",
+    "--border": "#e4e2dc",
+    "--accent-soft": "rgba(242,110,33,0.16)"
+  }
+}

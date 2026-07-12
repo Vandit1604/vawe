@@ -42,25 +42,46 @@ visibility via `stage.className = 'stage phase-' + phase`) → `.safe` (the safe
 `data-layer="critical"` so the layout audit checks them.
 
 ```html
-<link rel="stylesheet" href="/core/tokens.css" />
-<link rel="stylesheet" href="/core/visuals.css" />   <!-- opt-in: image/visual treatments -->
-<div class="stage phase-hook">
-  <div class="safe"><div class="hook-title" data-layer="critical">…</div></div>
-</div>
+<link rel="stylesheet" href="/core/tokens.css" />   <!-- plumbing only: fonts + geometry + reset -->
+<div class="stage">…</div>
 ```
 
-## Use tokens — don't hardcode px (this is what keeps spacing in rhythm)
+## The theme owns the look — no fallbacks, no default look
 
-`core/tokens.css` defines scales. Reach for them instead of magic numbers:
+`core/tokens.css` is PLUMBING: font registration, frame geometry (`--vw/--vh/--safe-*`), the
+determinism reset, `.stage`/`.num`/`.icon-img`/debug overlay. It contains zero colors, font choices,
+scales or shadows. Every look var (`--font-*`, `--bg`, `--text/-2`, `--dim`, `--ink`, `--surface/-2`,
+`--line/-strong`, `--accent/-dim/-glow`, `--up`/`--down`, `--g0..2`) is written by `applyTheme()` from
+the video's theme, and `core/theme-contract.js` requires the theme to be COMPLETE — a missing key
+fails at `make validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
+scene: if the var is a look value it comes from the theme (guaranteed), and a hardcoded fallback is
+exactly the "wrong-look video renders anyway" bug the contract exists to prevent. Data JSONs must
+declare `"theme"` (name or inline object).
 
-- **Type:** `--fs-1 … --fs-9` (28→168px) + `--lh-tight/-snug/-body`, `--tr-tight/-label`.
-- **Spacing:** `--sp-0 … --sp-7` (8→140px) for `gap`/`padding`. Layout helpers: `.stack-N`, `.cluster-N`.
-- **Color:** `--text/-2`, `--dim`, `--up`/`--down` (data semantics), `--accent` (lime, brand chrome
-  ONLY — never the up-color), `--accent-2` (cyan, decor only).
-- **Depth:** `--r-sm/-md/-lg/-xl`, `--shadow-1/-2/-3`, `--glow-accent`.
+Spacing/size rhythm lives in the video JSON (explicit px per layer) and the layout audit — a label
+and its value are a *unit* (~12px apart); separate groups get 32px+.
 
-A label and its value are a *unit* — keep them ~`var(--sp-1)` apart, not touching. Separate groups
-get `var(--sp-3)`+.
+## Beat the AI slop when hand-writing HTML (hooks, CTAs, cards)
+
+Hand-authored HTML is where generic output creeps in. **Load `taste-skill` first** (Design Read + the
+three dials + Anti-Default Discipline), then `impeccable` for craft — both vendored in `.claude/skills/`.
+Non-negotiable moves:
+- **Asymmetry over centered.** Default to an off-center anchor (hard-left, or a 2/3 split), not
+  `align:center` on everything. Centered-everything is the #1 AI tell.
+- **Scale contrast.** One oversized hero (a word, a number) paired with tiny understated text — a rhythm
+  of extremes, not one safe size step.
+- **A committed non-generic face.** Reflecting a real brand → its captured font. Anything else → never
+  Inter or Space Grotesk (the slop faces); reach for Instrument Serif (editorial), a captured face, or one
+  you register via brandkit.
+- **One bespoke visual device, not card soup.** Avoid the equal rounded-card grid and the rounded-icon-
+  tile-above-a-heading. Invent one signature motif per video.
+- **Layout by containment — group-first.** Anything with a spatial relationship (a label+value, a logo
+  row, a card grid, a checkout card's contents) goes in a `group` (flex/grid box; children flow by `gap`,
+  and children can be **nested groups**) — never two absolute `x/y` layers you space by eye (that's what
+  collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the another engine/HF
+  flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
+- **Gate it:** `make slop D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
+  clear its flags before you render. Full routing: `AGENTS.md`.
 
 ## Animation — pure primitives in `core/lib.js` (no GSAP)
 
@@ -93,8 +114,8 @@ copyrighted media (posters/stills/album art) in a published video.
   SVG (deterministic per-title palette, grain, vignette, frame). Use when no clean image exists.
 - **`icon(value, fallback)`** turns an image path into `<img class="icon-img">`, else renders the
   fallback (emoji/monogram). Always pass a monogram fallback: `icon(c.icon, name[0].toUpperCase())`.
-- **Treatments** (opt-in `/core/visuals.css`): `.ic-ring`, `.ic-duotone` (set `--duo`), `.ic-glow`,
-  `.tex-grain`, `.badge`/`.chip`, `.frame-gradient`. Richer visuals from a class, no per-frame cost.
+- Chips/badges/cards come from `chipBox` on any layer (bg/pad/radius/border/elevation in the JSON) —
+  there is no shared treatment stylesheet (visuals.css was removed with the template formats).
 
 ## QA loop — run before declaring a scene done
 

@@ -1,82 +1,77 @@
 # Shortwave
 
-Data-driven render engine for faceless YouTube Shorts / IG Reels. Output: **1080×1920, 30 fps,
-H.264 + AAC**, ~18–40s per format. Each **format is a self-contained folder** of HTML/CSS/JS;
-a Go service drives headless Chrome to capture frames and ffmpeg to encode (+ film grain) and
-mux audio.
+A deterministic, data-driven motion-graphics engine. **One self-describing JSON → one rendered video**
+(30 fps, H.264 + AAC, portrait 1080×1920 or landscape 1920×1080). A Go service drives headless Chrome
+to seek an HTML/CSS scene frame-by-frame and ffmpeg to encode (+ film grain) and mux audio.
+
+There is exactly **one module: `hyperscene`** — an open canvas of composable primitives
+(text · image · component · rect · group · glow · count + camera · cuts · shader stings · captions).
+**No templates.** You compose each video from the vocabulary in [`docs/PRIMITIVES.md`](docs/PRIMITIVES.md);
+the JSON *is* the video.
 
 ## One JSON → one video
 
-A single self-describing JSON controls everything — it names the format and carries the content:
-
 ```jsonc
-{ "module": "higherlower",          // which format folder renders it
-  "hook": "Bet you can't score 5/5",
-  "hookSub": "Which app has more users?",
-  "rounds": [ /* … fields per formats/higherlower/schema.json … */ ] }
+{ "module": "hyperscene",
+  "orientation": "landscape",       // or omit for portrait
+  "theme": "linear",                // palette + fonts (themes/<name>.json) — use ONLY the brand's colours
+  "layers": [ /* text/image/rect/group/count … see formats/hyperscene/schema.json */ ],
+  "stings": [ /* shader transitions */ ],
+  "audio": { "auto": true } }       // auto sound-design (whoosh on cuts, hits on stings, music bed)
 ```
 
 ```
-make list                          # formats + where each schema/sample lives
-./bin/shortwave path/to/video.json    # module from the JSON, out → engine/out/<name>.mp4
-make video D=path/to/video.json    # same, via make
+make list                              # module + its schema/sample
+./bin/shortwave path/to/video.json     # → engine/out/<name>.mp4  (add --draft for fast no-grain)
+make video D=path/to/video.json        # same, via make
 ```
 
-**Authoring workflow:** ask Claude Code to write the JSON — point it at `formats/<name>/schema.json`
-(the field contract) and `sample.json` (a working example), then render the file. `--module` /
-`--out` are optional overrides; the JSON is the single source of truth.
+**Authoring:** ask Claude Code to write the JSON, grounded in `formats/hyperscene/schema.json` (the field
+contract), `sample.json` (a working example), and [`docs/PRIMITIVES.md`](docs/PRIMITIVES.md). Reflecting a
+real brand? `make brandkit URL=… NAME=…` + `make sections URL=… NAME=…` capture its real colours, fonts,
+and sections. Full loop + doctrine live in [`CLAUDE.md`](CLAUDE.md).
+
+## Determinism
+
+`renderFrame(n)` is a **pure function of `n`** — the same JSON renders byte-identical frames regardless of
+render order (which is what lets frames shard across parallel tabs). Guarded by `make probe` (purity) and
+`make snap` (DOM signature diff). No wall-clock, no un-seeded randomness.
 
 ## Layout
 
 ```
-core/                     shared, stable (rarely changes)
-  tokens.css                design system: tokens, fonts, stage, cards, hook/outro
-  lib.js                    helpers (easing, number format) + the boot(build) contract
-formats/<name>/           a format = one isolated folder (imports core, never another format)
-  scene.html                markup + scoped <style> + renderFrame(n) logic
-  schema.json               editable fields (for the future editor)
-  sample.json               example data
-  assets/                   format-specific music / sfx (falls back to engine/assets)
-engine/assets/            global fonts + default sfx + music.wav
-cmd/render, internal/     the Go render service (chromedp + ffmpeg + audio mixer + queue)
-scripts/                  preview (storyboard), gen-audio, setup-assets  (Node)
-verify/                   integrity + safe-zone + contact-sheet checks
+core/            the primitives (pure, browser+node): lib.js (motion math), kinetic.js, transitions.js,
+                 shaders.js, backgrounds.js, compose.js, timeline.js, theme-contract.js, tokens.css
+formats/hyperscene/  scene.html (the renderer) · schema.json (field contract) · sample.json (reference)
+themes/          brand palettes + fonts (theme-contract.js defines the required shape; no fallback look)
+cmd/render, internal/   the Go render service (chromedp capture + ffmpeg encode + PCM audio mixer + queue)
+scripts/         authoring + gate tools (preview, beats, captions, assets, brandkit, validate, probe …)
+verify/          integrity + safe-zone + WCAG-contrast checks
+engine/assets/   fonts · sfx · music.wav · brand asset packs
+docs/            PRIMITIVES.md (vocabulary) · MOTION-CRAFT.md · DESIGN-DATABASE.md · CODEMAPS/ARCHITECTURE.md
 ```
 
 ## Commands
 
 ```
-make build                 build the Go renderer (bin/shortwave)
-make render M=higherlower  render one format → engine/out/<name>.mp4
-make all                   render every format (queue)
-make look M=barrace        storyboard (key frames) for visual review
-make frame M=growth N=560  one exact frame
-make assets D=…[WRITE=1]   fill missing icons: country→flag, brand→logo, else a topic card
-make audit [M=…]           layout audit: overlap / clipped text / things too close
-make lib-test              motion-primitive asserts (core/lib.js)
-make probe [M=…]           render-order purity (protects sharded rendering)
-make verify                integrity + safe-zone + contact sheets
-make review                fast health snapshot (lib-test + audit + master sheet)
-node scripts/gen-audio.mjs regenerate procedural sfx/music   (npm run setup:audio)
+make video D=…            render one JSON → engine/out/<name>.mp4   (--draft / --no-grain flags)
+make list                 the module + schema/sample paths
+make look M=hyperscene    storyboard key frames        make beats D=…   first/mid/last of every beat
+make validate [D=…]       schema + no-emdash check      make schema-check   engine↔schema drift
+make probe [M=…]          render-order purity           make snap M=… [SAVE=1]  DOM signature diff
+make audit [M=…]          overlap / clip / safe-zone / WCAG contrast
+make motion [M=…]         motion contract (holds, monotonic reveals, settles, no shimmer)
+make lib-test             pure-JS asserts for the motion primitives
+make slop D=…             anti-slop detector            make feature-audit   primitive utilisation report
+make captions D=… TEXT=…  auto-timed burned-in subtitles (muted-social)
+make brandkit / sections / capture   capture a real site's colours, sections, live components
+make ledger D=… / similar cross-video sameness gates    make review   fast health snapshot
+node scripts/gen-audio.mjs   regenerate the procedural music bed + sfx
 ```
 
-Render flags: `--fps 30 --workers N --draft --no-grain`.
+## The scene contract
 
-**Authoring scenes:** read the `shortwave-scene-authoring` skill (purity, tokens, motion
-primitives, image system, QA loop). Full system map: [`docs/CODEMAPS/ARCHITECTURE.md`](docs/CODEMAPS/ARCHITECTURE.md).
-
-## Add or edit a format
-
-A format only ever touches its own `formats/<name>/` folder. To add one: copy a folder, edit
-`scene.html` (it imports `core/`), define `schema.json` + `sample.json`. The renderer finds it
-by listing `formats/`. **After any scene edit, check frames** (`make look M=<name>`) before moving on.
-
-### The scene contract
-
-`scene.html` imports `boot` from `/core/lib.js` and calls `boot(build)`, where
-`build(data, fps)` returns `{ fps, duration, stings, sfx, renderFrame(n) }`. The page exposes
-`window.__engine.{meta, renderFrame}`; the renderer reads `meta` and drives `renderFrame(n)` per frame.
-
-- Mark cross-post-critical text with `data-layer="critical"` (verify asserts it stays inside the safe zone).
-- Audio cues: `sfx: [{ t, name }]` (whoosh/tick/reveal/correct), placed at their times over the music bed.
-- Outro is shared: phase `cta` hides the body and shows a centered "Subscribe for more" end screen.
+`formats/hyperscene/scene.html` imports `boot` from `/core/lib.js` and calls `boot(build)`, where
+`build(data, fps, theme)` returns `{ fps, duration, stings, sfx, renderFrame(n) }`. The page exposes
+`window.__engine.{meta, renderFrame}`; the Go renderer reads `meta` and drives `renderFrame(n)` per frame.
+Editing `scene.html` or `core/`? Read the `shortwave-scene-authoring` skill and run `make probe` + `make review`.

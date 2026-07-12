@@ -31,9 +31,9 @@ which is what makes the sharded capture correct. Guarded by `make probe`.
 | `core/compose.js` | declarative composition (another engine parity) | `driveClips(root,t)` reads `data-start/-duration/-track/-anim/-out` → timed multi-layer clips w/ enter/exit + z-order; `registerTimeline`/`seekAll(t)` = seekable **animation-adapter interface** (GSAP/WAAPI/custom). |
 | `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
 | `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
-| `core/visuals.css` | opt-in visual treatments | `.ic-ring/-duotone/-glow`, `.tex-grain`, `.badge/.chip`, `.frame-gradient`. |
+| `core/theme-contract.js` | required theme keys (no default look) | `themeErrors()` — shared by validate (node) + applyTheme (browser). |
 | `formats/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
-| `formats/<name>/schema.json` | field schema | drives the studio quick-edit panel (not a validator yet). |
+| `formats/hyperscene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
 | `formats/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
 | `formats/hyperscene/` | generic data-driven format | layered composition from `data.layers[]` (text/image + timing + anim + kinetic split/preset) + `data.captions[]`. No per-topic code — the JSON is the video. |
 | `scripts/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. |
@@ -42,10 +42,10 @@ which is what makes the sharded capture correct. Guarded by `make probe`.
 | `internal/encode` (Go) | ffmpeg wrapper | H.264 + grain; `Mux` adds audio. |
 | `internal/audio` (Go) | PCM mixer | music loop + named sfx at cue times + **VO ducking** + sting + limiter. |
 | `internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
-| `scripts/` | authoring tools | `cards.mjs` (parametric topic cards), `assets.mjs` (auto-source icons), `preview.mjs` (storyboards), `probe-purity.mjs`, `lib-test.mjs`, `hooks.mjs` (copy variants), `gen-posters.mjs`. |
+| `scripts/` | authoring tools | `cards.mjs` (parametric topic cards), `assets.mjs` (auto-source icons), `preview.mjs`/`beats.mjs` (storyboards), `captions.mjs` (auto-timed subtitles), `gen-audio.mjs` (regenerate the music bed + sfx), `probe-purity.mjs`, `lib-test.mjs`, `schema-drift.mjs`, `feature-audit.mjs`. |
 | `verify/` | review tooling | `run.js` (`make verify`: integrity + safe-zone + contact sheets), `audit.mjs` (`make audit`: overlap/overflow/spacing), `review.mjs` (`make review`: fast snapshot). |
-| `studio/` | in-browser editor | live preview + timeline (editable pacing) + audio preview. `check.mjs` = headless health check (pre-push gate). **Not the current focus.** |
-| `.githooks/pre-push` | pre-push gate | runs `make studio-check`; install with `make install-hooks`. |
+| `scripts/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for another engine-level output (sound, vocals, generated imagery) — no consumers yet; do not delete as "dead code". |
+| `.githooks/pre-push` | pre-push gate | runs `make schema-check lib-test`; install with `make install-hooks`. |
 
 ## Contracts (don't break these)
 

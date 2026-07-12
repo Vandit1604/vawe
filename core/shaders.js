@@ -15,6 +15,9 @@ export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', '
 const FRAG = `
 precision highp float;
 uniform vec2 u_res; uniform float u_p; uniform float u_seed; uniform int u_fx;
+uniform vec3 u_tint; uniform float u_tintAmt; uniform float u_intensity;  /* optional recolour + strength */
+uniform vec3 u_pal[4]; uniform int u_palN;                                /* author-chosen palette (leak) */
+vec3 palAt(int k){ if(k<=0) return u_pal[0]; if(k==1) return u_pal[1]; if(k==2) return u_pal[2]; return u_pal[3]; }
 float hash(vec2 p){ p = fract(p*vec2(123.34, 456.21) + u_seed); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
@@ -37,15 +40,31 @@ void main(){
     vec3 col = mix(vec3(0.03, 0.012, 0.004), ember, rim);
     float a = max(burned*bell, rim*bell*0.95);
     c = vec4(col, a);
-  } else if (u_fx == 2) {                              /* light leak */
-    vec2 p1 = vec2(0.82 + 0.12*vnoise(vec2(u_seed, 1.7)), 0.18);
-    float l1 = smoothstep(0.75, 0.0, length(uv-p1));
-    float l2 = smoothstep(0.95, 0.0, length(uv-vec2(0.08, 0.92)));
-    vec3 warm = vec3(1.0, 0.55, 0.25)*l1 + vec3(1.0, 0.8, 0.5)*l2*0.7;
-    c = vec4(warm, bell*0.7*max(l1, l2*0.8));
-  } else if (u_fx == 3) {                              /* grain burst */
-    float g = hash(floor(uv*u_res*0.5) + floor(pp*24.0));
-    c = vec4(vec3(g), bell*0.45*g);
+  } else if (u_fx == 2) {                              /* light leak — seed-generative, multi-hue */
+    vec3 col = vec3(0.0); float amax = 0.0;                              /* every seed = a different leak */
+    for (int i = 0; i < 4; i++) {
+      float fi = float(i);
+      vec2 lp = vec2(0.12 + 0.76*hash(vec2(fi, u_seed)), 0.12 + 0.76*hash(vec2(fi+5.0, u_seed)));
+      float rad = 0.32 + 0.5*hash(vec2(fi+9.0, u_seed));
+      float l = smoothstep(rad, 0.0, length(uv - lp));
+      vec3 hue;                                                          /* colours = your palette, else seed-generated */
+      if (u_palN > 0) { hue = palAt(int(mod(fi, float(u_palN)))); }
+      else { float h = hash(vec2(fi+13.0, u_seed)); hue = 0.5 + 0.5*cos(6.2831*(h + vec3(0.0, 0.33, 0.67))); }
+      col += hue * l * (0.55 + 0.6*hash(vec2(fi+21.0, u_seed)));
+      amax = max(amax, l);
+    }
+    float sd = hash(vec2(u_seed, 3.7)) - 0.5;                            /* a soft diagonal film streak */
+    float streak = smoothstep(0.32, 0.0, abs(uv.x - uv.y - sd));
+    vec3 sh;
+    if (u_palN > 0) { sh = palAt(int(mod(hash(vec2(u_seed, 7.1))*4.0, float(u_palN)))); }
+    else { sh = 0.5 + 0.5*cos(6.2831*(hash(vec2(u_seed, 7.1)) + vec3(0.0, 0.33, 0.67))); }
+    col += sh * streak * 0.45; amax = max(amax, streak*0.55);
+    c = vec4(min(col, vec3(1.5)), bell * 0.8 * clamp(amax, 0.0, 1.0));
+  } else if (u_fx == 3) {                              /* film grain — dense fine specks */
+    float g1 = hash(floor(uv*u_res*0.9) + floor(pp*40.0));
+    float g2 = hash(floor(uv*u_res*0.9) + floor(pp*40.0) + 17.0);
+    float sp = smoothstep(0.58, 1.0, g1) + 0.5*smoothstep(0.68, 1.0, g2);
+    c = vec4(vec3(0.92), bell*0.55*sp);
   } else if (u_fx == 4) {                              /* dissolve to white */
     float n = fbm(uv*6.0 + u_seed);
     float a = smoothstep(n-0.18, n+0.18, bell*1.15);
@@ -55,29 +74,32 @@ void main(){
     float a = smoothstep(n-0.14, n+0.14, bell*1.2);
     float rim = smoothstep(0.12, 0.0, abs(n - bell*1.2));
     c = vec4(mix(vec3(0.02, 0.015, 0.012), vec3(0.24, 0.1, 0.04), rim), a*0.96);
-  } else if (u_fx == 6) {                              /* glitch slice bars */
-    float row = floor(uv.y*36.0);
-    float stp = floor(pp*14.0);
-    float r1 = hash(vec2(row, stp));
-    float on = step(0.78, r1);
-    vec3 col = vec3(hash(vec2(row+7.0, stp)), hash(vec2(row+13.0, stp)), hash(vec2(row+29.0, stp)));
-    float edge = step(0.965, hash(vec2(floor(uv.x*90.0), row+stp)));
-    c = vec4(mix(col, vec3(1.0), edge), max(on*0.55, edge*0.8)*bell);
-  } else if (u_fx == 7) {                              /* radial zoom streaks */
-    vec2 d = uv - 0.5;
+  } else if (u_fx == 6) {                              /* rgb glitch — channel-split displaced bars */
+    float row = floor(uv.y*44.0);
+    float stp = floor(pp*16.0);
+    float on = step(0.66, hash(vec2(row, stp)));       /* which rows tear this step */
+    float sh = (hash(vec2(row+9.0, stp)) - 0.5) * 0.16 * on;   /* per-row horizontal shift */
+    float rc = step(0.45, hash(vec2(floor((uv.x+sh+0.014)*72.0), row+stp)));
+    float gc = step(0.45, hash(vec2(floor((uv.x+sh)*72.0),        row+stp+3.0)));
+    float bc = step(0.45, hash(vec2(floor((uv.x+sh-0.014)*72.0), row+stp+7.0)));
+    vec3 col = vec3(rc, gc, bc);
+    float a = on * max(rc, max(gc, bc)) * bell * 0.9;
+    c = vec4(col, a);
+  } else if (u_fx == 7) {                              /* light streaks — sharp radial rays + hot core */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
     float ang = atan(d.y, d.x);
     float r = length(d);
-    float ray = 0.0;                                   /* 4-tap angular blur = deterministic motion smear */
-    for (int i = 0; i < 4; i++) {
-      float aa = ang + float(i)*0.012*bell;
-      ray += pow(vnoise(vec2(aa*7.0 + u_seed, floor(pp*3.0))), 3.0);
-    }
-    c = vec4(vec3(1.0), (ray/4.0) * bell * smoothstep(0.1, 0.75, r) * 0.9);
-  } else if (u_fx == 8) {                              /* mosaic flicker */
-    float stp = floor(pp*12.0);
-    float px = mix(12.0, 72.0, hash(vec2(stp, u_seed)));
-    float g = hash(floor(uv*px) + stp);
-    c = vec4(vec3(g), bell*0.4*step(0.55, g));
+    float rays = pow(0.5 + 0.5*sin(ang*9.0 + u_seed*6.28), 6.0);       /* many fine rays */
+    rays += pow(0.5 + 0.5*sin(ang*2.0 + 1.57), 26.0) * 1.4;            /* 2 dominant anamorphic streaks */
+    float core = smoothstep(0.16, 0.0, r);                             /* bright hot centre */
+    float fall = smoothstep(0.95, 0.04, r);                            /* reach the edges then fade */
+    c = vec4(vec3(1.0), (rays*fall*0.5 + core*0.85) * bell);
+  } else if (u_fx == 8) {                              /* pixelate — chunky mosaic fills then clears */
+    float px = 30.0;
+    vec2 cell = floor(uv * vec2(px*u_res.x/u_res.y, px));
+    float cover = step(hash(cell), bell*1.15);                         /* more blocks as bell rises */
+    float shade = mix(0.32, 1.0, hash(cell + 3.1));
+    c = vec4(vec3(shade), cover * bell * 0.82);
   } else if (u_fx == 9) {                              /* confetti burst */
     for (int i = 0; i < 40; i++) {
       float fi = float(i);
@@ -90,21 +112,26 @@ void main(){
       vec3 col = 0.5 + 0.5*cos(6.2831*(vec3(0.0,0.33,0.67) + hash(vec2(fi+120.0, u_seed))));
       c.rgb = mix(c.rgb, col, q); c.a = max(c.a, q * (1.0 - pp*pp));
     }
-  } else if (u_fx == 10) {                             /* ripple rings */
+  } else if (u_fx == 10) {                             /* ripple rings — expand across the whole frame */
     vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
     float r = length(d);
-    float ring = sin((r - pp*0.9) * 60.0) * exp(-r*4.0) * bell;
-    c = vec4(vec3(1.0), max(0.0, ring) * 0.35);
-  } else if (u_fx == 11) {                             /* scanline sweep */
-    float band = smoothstep(0.05, 0.0, abs(uv.y - pp));
-    float lines = step(0.5, fract(uv.y * u_res.y * 0.25)) * 0.06;
-    c = vec4(vec3(1.0), (band*0.5 + lines*bell));
-  } else if (u_fx == 12) {                             /* barrel warp pulse (darkens edges as space bends) */
-    vec2 d = uv - 0.5;
-    float r2 = dot(d, d);
-    float k = bell * 0.35;
-    float vign = smoothstep(0.7, 0.2, r2 * (1.0 + k*3.0));
-    c = vec4(vec3(0.0), (1.0 - vign) * bell * 0.5);
+    float front = pp * 1.5;                            /* wavefront sweeps past the corners */
+    float rings = sin((r - front) * 42.0);
+    float behind = smoothstep(front, front - 0.55, r);  /* rings live behind the expanding front */
+    float env = smoothstep(0.0, 0.12, pp) * smoothstep(1.0, 0.62, pp);
+    c = vec4(vec3(1.0), max(0.0, rings) * behind * env * 0.5);
+  } else if (u_fx == 11) {                             /* scanline sweep — CRT band + trailing glow + lines */
+    float band = smoothstep(0.055, 0.0, abs(uv.y - pp));
+    float trail = smoothstep(0.3, 0.0, pp - uv.y) * step(uv.y, pp);    /* glow trailing the band */
+    float lines = (0.5 + 0.5*sin(uv.y * u_res.y * 0.5)) * 0.10;        /* CRT scanlines */
+    c = vec4(vec3(1.0), (band*0.85 + trail*0.28 + lines*bell) * bell);
+  } else if (u_fx == 12) {                             /* barrel warp — expanding refraction shock ring */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float r = length(d);
+    float edge = pp * 0.95;                            /* shock radius sweeps out past the corners */
+    float ring = smoothstep(0.06, 0.0, abs(r - edge)); /* bright refraction front */
+    float dark = smoothstep(0.16, 0.06, abs(r - edge)) * step(r, edge); /* compression darkens behind it */
+    c = vec4(vec3(ring), (ring*0.8 + dark*0.35) * bell);
   } else if (u_fx == 13) {                             /* bokeh discs drift */
     for (int i = 0; i < 12; i++) {
       float fi = float(i);
@@ -116,6 +143,12 @@ void main(){
       c.rgb = mix(c.rgb, vec3(1.0), disc*0.5); c.a = max(c.a, disc * bell * 0.22);
     }
   }
+  // optional tint: recolour by luminance → u_tint (amt 0 = untouched); u_intensity scales strength
+  if (u_tintAmt > 0.0) {
+    float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+    c.rgb = mix(c.rgb, u_tint * clamp(lum * 1.8, 0.0, 1.0), u_tintAmt);
+  }
+  c.a *= u_intensity;
   gl_FragColor = vec4(c.rgb*c.a, c.a);                 /* premultiplied */
 }`;
 
@@ -141,19 +174,29 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
   const loc = gl.getAttribLocation(prog, 'a');
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = { res: gl.getUniformLocation(prog, 'u_res'), p: gl.getUniformLocation(prog, 'u_p'),
-    seed: gl.getUniformLocation(prog, 'u_seed'), fx: gl.getUniformLocation(prog, 'u_fx') };
+    seed: gl.getUniformLocation(prog, 'u_seed'), fx: gl.getUniformLocation(prog, 'u_fx'),
+    tint: gl.getUniformLocation(prog, 'u_tint'), tintAmt: gl.getUniformLocation(prog, 'u_tintAmt'), intensity: gl.getUniformLocation(prog, 'u_intensity'),
+    pal: gl.getUniformLocation(prog, 'u_pal'), palN: gl.getUniformLocation(prog, 'u_palN') };
   gl.viewport(0, 0, w, h);
   gl.uniform2f(U.res, w, h);
   let last = ''; // dedup identical draws (same args → same pixels; skip the GL work)
   return {
     canvas,
-    draw(effect, progress, seed = 0) {
+    // tint: [r,g,b] 0..1 mono recolour (null = native). intensity scales strength. palette: up to 4
+    // [r,g,b] the leak is built from (the seed only arranges them) — art-directable multicolour leaks.
+    draw(effect, progress, seed = 0, tint = null, intensity = 1, palette = null) {
       const idx = SHADER_FX.indexOf(effect);
       if (idx < 0) return this.clear();
-      const key = idx + ':' + progress.toFixed(4) + ':' + seed;
+      const pal = palette && palette.length ? palette.slice(0, 4) : null;
+      const key = idx + ':' + progress.toFixed(4) + ':' + seed + ':' + (tint ? tint.join(',') : '') + ':' + intensity + ':' + (pal ? pal.flat().join(',') : '');
       if (key === last) return; last = key;
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform1f(U.p, progress); gl.uniform1f(U.seed, seed); gl.uniform1i(U.fx, idx);
+      gl.uniform3f(U.tint, tint ? tint[0] : 1, tint ? tint[1] : 1, tint ? tint[2] : 1);
+      gl.uniform1f(U.tintAmt, tint ? 1 : 0); gl.uniform1f(U.intensity, intensity);
+      const flat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      if (pal) pal.forEach((c, i) => { flat[i * 3] = c[0]; flat[i * 3 + 1] = c[1]; flat[i * 3 + 2] = c[2]; });
+      gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, pal ? pal.length : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
     clear() { if (last === '') return; last = ''; gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },

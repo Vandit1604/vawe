@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit lookbook photos similar ledger ledger-add review install-hooks studio studio-check assets list clean
+.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit lookbook photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -14,7 +14,7 @@ video: build
 list: build
 	./bin/shortwave --list
 
-# make render M=higherlower  — render a format's bundled sample.json
+# make render M=hyperscene  — render a format's bundled sample.json
 render: build
 	./bin/shortwave --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
 
@@ -22,11 +22,11 @@ render: build
 all: build
 	./bin/shortwave --all
 
-# make look M=higherlower         — storyboard (key frames) for visual review
+# make look M=hyperscene         — storyboard (key frames) for visual review
 look:
 	node scripts/preview.mjs $(M)
 
-# make frame M=higherlower N=560  — one exact frame
+# make frame M=hyperscene N=560  — one exact frame
 frame:
 	node scripts/preview.mjs $(M) $(N)
 
@@ -39,7 +39,7 @@ assets:
 verify:
 	node verify/run.js
 
-# make audit [M=higherlower]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
+# make audit [M=hyperscene]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
 # [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
 audit:
 	node verify/audit.mjs $(M)
@@ -69,10 +69,50 @@ brandkit:
 lookbook:
 	node scripts/lookbook.mjs $(URL) $(NAME)
 
+# make sections URL=https://site.com NAME=brand  — inventory the page as SECTIONS: one screenshot per
+# major block + sections.json (stable selector + ready-to-paste `make capture` command per section).
+# The doctrine step: capture the real sections, don't rewrite them. Storyboard = one beat per section.
+sections:
+	node scripts/sections.mjs $(URL) $(NAME) $(if $(VIEWPORT),--viewport $(VIEWPORT))
+
+# make preview HTML=path/frag.html [THEME=linear] [BG=#hex] [W=1400] [SERVE=1]  — render a single
+# hand-written fragment (or a captured component JSON) STANDALONE on the theme bg → /tmp/preview.png.
+# SERVE=1 keeps it LIVE in your browser instead (real fonts/assets). "is this HTML doing what I want?".
+preview:
+	node scripts/preview-fragment.mjs $(HTML) $(if $(THEME),--theme $(THEME)) $(if $(BG),--bg $(BG)) $(if $(W),--w $(W)) $(if $(SERVE),--serve)
+
+# make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
+# sheet → /tmp/beats.png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+beats:
+	node scripts/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
+
+# make sheet NAME=brand [SERVE=1]  — DESIGN SHEET: every captured element on one page (on the theme bg),
+# labelled with size + font-substitution warnings. Review + fix the raw material BEFORE building a video.
+# Default → /tmp/sheet.png (tall contact sheet). SERVE=1 → live in your browser (real fonts, scrollable).
+sheet:
+	node scripts/design-sheet.mjs $(NAME) $(if $(THEME),--theme $(THEME)) $(if $(SERVE),--serve)
+
+# make slop D=formats/x/video.json [AT=1.5]  — ANTI-SLOP gate: render the real DOM at a frame and run the
+# vendored impeccable detector (41 rules: overused fonts, purple/blue gradients, card-in-card, centered
+# defaults, …). Catches AI-generic tells in the HTML we hand-author. See .claude/skills/{taste-skill,impeccable}.
+slop:
+	node scripts/slop.mjs $(D) $(if $(AT),--at $(AT))
+
 # make similar [D="a.json b.json"]  — sameness audit: score authored videos pairwise (motion vocab
 # + beat structure + layout). Cross-brand SAME (>0.75) fails; the anti-template gate.
 similar:
 	node scripts/similarity.mjs $(D)
+
+# make feature-audit  — static utilization report: framework vocabulary (kinetic presets / cuts /
+# shader stings) + capability primitives (group/motion/spring/fitH…) vs what authored videos use.
+# Surfaces under-adopted primitives + preset-monotony. WARN tier (always exits 0).
+feature-audit:
+	node scripts/feature-audit.mjs
+
+# make captions D=formats/x/video.json TEXT="script"  — auto-time a script into muted-social burned-in
+# subtitles (captionMode:pop). Deterministic (time proportional to word count). See scripts/captions.mjs.
+captions:
+	node scripts/captions.mjs $(D) "$(TEXT)"
 
 # make ledger D=formats/x/video.json  — check a design against ALL shipped designs (cross-video
 # memory); make ledger-add D=… logs it after shipping.
@@ -101,31 +141,27 @@ capture:
 validate:
 	node scripts/validate.mjs $(D)
 
+# make schema-check  — assert every layer prop the engine (scene.html) reads is defined in schema.json
+# (catches drift like a new primitive that shipped without a schema entry). Exits 1 on drift.
+schema-check:
+	node scripts/schema-drift.mjs
+
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review:
 	node verify/review.mjs
 
-# make probe [M=bracket]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
+# make probe [M=hyperscene]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe:
 	@if [ -n "$(M)" ]; then node scripts/probe-purity.mjs $(M); else \
 		for d in formats/*/scene.html; do f=$$(basename $$(dirname $$d)); \
 		node scripts/probe-purity.mjs $$f || exit 1; done; fi
 
-# make studio  — live in-browser editor + preview (edit content, see it instantly; no render)
-studio:
-	node studio/server.mjs
-
-# make studio-check  — drive the studio headless across every format×orientation; fail on
-# scene errors, 4xx, or wrong dims. Writes a contact sheet to /tmp/studio_check.png.
-studio-check:
-	node studio/check.mjs
-
-# make install-hooks  — activate the version-controlled git hooks (pre-push runs studio-check)
+# make install-hooks  — activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks:
 	git config core.hooksPath .githooks
-	@echo "✓ git hooks active (.githooks) — pre-push runs studio-check"
+	@echo "✓ git hooks active (.githooks) — pre-push runs schema-check + lib-test"
 
 clean:
 	rm -rf bin engine/out/*.mp4

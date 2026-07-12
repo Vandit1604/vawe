@@ -22,7 +22,8 @@
       "label": "Caption style",
       "enum": [
         "sentence",
-        "word"
+        "word",
+        "pop"
       ]
     },
     "bg": {
@@ -64,6 +65,14 @@
             "light",
             "dark"
           ]
+        },
+        "opts": {
+          "type": "object",
+          "label": "Per-video tuning: { intensity, dotAlpha, spacing, drift, grain }"
+        },
+        "seed": {
+          "type": "number",
+          "label": "Vary the preset's positions/phase (default = hash of theme+preset, so brands differ)"
         }
       }
     },
@@ -106,6 +115,18 @@
         "seed": {
           "type": "number",
           "label": "Noise seed"
+        },
+        "color": {
+          "type": "string",
+          "label": "Tint hex (recolours the effect; omit for native colours)"
+        },
+        "intensity": {
+          "type": "number",
+          "label": "Strength multiplier (1 = default)"
+        },
+        "colors": {
+          "type": "array",
+          "label": "leak: up to 4 hex colours the leak is built from (seed only arranges them)"
         }
       }
     },
@@ -307,6 +328,28 @@
           "type": "number",
           "label": "Cut travel (px)"
         },
+        "cutTiming": {
+          "type": "string",
+          "label": "Cut timing curve",
+          "enum": [
+            "linear",
+            "smooth",
+            "out",
+            "snappy",
+            "pop",
+            "rush",
+            "brake",
+            "ramp"
+          ]
+        },
+        "cx": {
+          "type": "number",
+          "label": "Iris/soft-iris centre X (0-100%)"
+        },
+        "cy": {
+          "type": "number",
+          "label": "Iris/soft-iris centre Y (0-100%)"
+        },
         "split": {
           "type": "string",
           "label": "Kinetic split",
@@ -331,6 +374,10 @@
         "loop": {
           "type": "boolean",
           "label": "Loop the kinetic preset"
+        },
+        "presetOpts": {
+          "type": "object",
+          "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
         },
         "filter": {
           "type": "string",
@@ -430,7 +477,7 @@
         },
         "children": {
           "type": "array",
-          "label": "Group children (text/image/count, laid out by flow)",
+          "label": "Group children — text/image/count, or a nested group (layout by flow)",
           "item": {
             "type": {
               "type": "string",
@@ -438,9 +485,77 @@
               "enum": [
                 "text",
                 "image",
-                "count"
+                "count",
+                "group"
               ]
             }
+          }
+        },
+        "layout": {
+          "type": "string",
+          "label": "Group layout: row | column | grid",
+          "enum": [
+            "row",
+            "column",
+            "grid"
+          ]
+        },
+        "gridCols": {
+          "type": "number",
+          "label": "Grid column count (layout:grid)",
+          "min": 1,
+          "max": 8
+        },
+        "colw": {
+          "type": "number",
+          "label": "Grid column width in px (layout:grid; default 1fr)"
+        },
+        "fitH": {
+          "type": "number",
+          "label": "Max height (px) for multi-line auto-fit (with fit+w) — binary-search font to fit"
+        },
+        "maxLines": {
+          "type": "number",
+          "label": "Auto-fit safety: shrink a headline that wraps past this many lines (default 5)"
+        },
+        "items": {
+          "type": "string",
+          "label": "align-items for a group (flex/grid): flex-start | center | flex-end | stretch | baseline"
+        },
+        "align2": {
+          "type": "string",
+          "label": "DEPRECATED alias of `items` (align-items) — use `items`"
+        },
+        "wrap": {
+          "type": "boolean",
+          "label": "Flex-wrap the row"
+        },
+        "colGap": {
+          "type": "number",
+          "label": "Grid column gap (px)"
+        },
+        "rowGap": {
+          "type": "number",
+          "label": "Grid row gap (px)"
+        },
+        "grow": {
+          "type": "number",
+          "label": "Child flex-grow (in a group)"
+        },
+        "basis": {
+          "label": "Child flex-basis (px or CSS length)"
+        },
+        "motion": {
+          "type": "array",
+          "label": "Keyframe track — element choreography (pure in t). Offsets on the base position.",
+          "item": {
+            "t": { "type": "number", "label": "Seconds from layer start" },
+            "x": { "type": "number", "label": "X offset (px)" },
+            "y": { "type": "number", "label": "Y offset (px)" },
+            "scale": { "type": "number", "label": "Scale multiplier" },
+            "rot": { "type": "number", "label": "Rotation (deg)" },
+            "opacity": { "type": "number", "label": "Opacity multiplier" },
+            "ease": { "type": "string", "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)" }
           }
         },
         "elevation": {

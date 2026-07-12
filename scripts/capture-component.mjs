@@ -23,7 +23,7 @@ if (!url || !selector || !brand || !label) {
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 const SETTLE = parseInt(flag('--settle', '0'), 10);
 
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'], protocolTimeout: 240000 });
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
@@ -31,13 +31,16 @@ catch (e) { // slow page: retry on domcontentloaded rather than silently capturi
   console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`);
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
 }
-// settle DETERMINISTICALLY: fonts loaded + target in view + its images decoded + two frames painted
+// settle: fonts loaded + target in view + its images decoded + two frames painted. Every wait is
+// time-capped so a font/image that never resolves (a lazy <img> with no src fires neither onload nor
+// onerror) can't hang the capture — it just proceeds after the cap.
 await page.evaluate(async (selector) => {
-  await document.fonts.ready;
+  const cap = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+  await cap(document.fonts.ready, 4000);
   const el = document.querySelector(selector);
   if (el) {
     el.scrollIntoView({ block: 'center' });
-    await Promise.all([...el.querySelectorAll('img')].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
+    await cap(Promise.all([...el.querySelectorAll('img')].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; }))), 4000);
   }
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 }, selector);
@@ -61,11 +64,13 @@ const result = await page.evaluate((selector) => {
   const DEFAULT = { 'z-index': 'auto', 'transform': 'none', 'background-image': 'none', 'box-shadow': 'none',
     'text-shadow': 'none', 'text-decoration': 'none solid rgb(0, 0, 0)', 'letter-spacing': 'normal', 'filter': 'none',
     'backdrop-filter': 'none', 'list-style': 'outside none none', 'opacity': '1' };
-  // pass 1: read computed (from the live cascade) and write inline onto each node
-  function inline(node) {
-    if (node.nodeType !== 1) return;
-    const cs = getComputedStyle(node);
-    let s = '';
+  // FLAT two-pass over a STATIC node list — no recursion over live children, no cloneNode + lockstep
+  // copy (that machinery hangs on some sections). Read every node's computed style FIRST (before any
+  // mutation, so inherited values stay intact), then apply inline directly on the live nodes and take
+  // outerHTML. The page is discarded after, so mutating it is fine.
+  const all = [el, ...el.querySelectorAll('*')].filter((n) => n.nodeType === 1);
+  const styles = all.map((node) => {
+    const cs = getComputedStyle(node); let s = '';
     for (const p of PROPS) { let v = cs.getPropertyValue(p); if (!v) continue;
       if (p.startsWith('margin') && v === '0px') continue; if (p.startsWith('padding') && v === '0px') continue;
       if (p.startsWith('border-') && (v.startsWith('0px') || v.endsWith('none rgb(0, 0, 0)'))) continue;
@@ -73,32 +78,22 @@ const result = await page.evaluate((selector) => {
       if (p === 'background-image' && v !== 'none') v = v.replace(/url\((['"]?)([^'")]+)\1\)/g, (m, q, u) => `url("${abs(u)}")`);
       s += `${p}:${v};`;
     }
-    node.__inline = s;
-    for (const c of node.children) inline(c);
-  }
-  inline(el);
-  // pass 2: apply inline, strip classes/ids/handlers, absolutize images
-  function apply(node) {
-    if (node.nodeType !== 1) return;
-    node.setAttribute('style', node.__inline || '');
+    return s;
+  });
+  const fonts = [...new Set(all.map((n) => getComputedStyle(n).fontFamily.split(',')[0].replace(/['"]/g, '').trim()).filter(Boolean))];
+  all.forEach((node, i) => {
+    node.setAttribute('style', styles[i]);
     node.removeAttribute('class'); node.removeAttribute('id');
-    // before stripping srcset, promote its LARGEST candidate into src (lazy loaders often leave a placeholder src)
+    // before stripping srcset, promote its LARGEST candidate into src (lazy loaders leave a placeholder)
     if (node.tagName === 'IMG' && node.getAttribute('srcset')) {
-      const best = node.getAttribute('srcset').split(',').map((s) => { const [u, d] = s.trim().split(/\s+/); return { u, w: parseFloat(d) || 1 }; }).sort((a, b) => b.w - a.w)[0];
+      const best = node.getAttribute('srcset').split(',').map((x) => { const [u, d] = x.trim().split(/\s+/); return { u, w: parseFloat(d) || 1 }; }).sort((a, b) => b.w - a.w)[0];
       if (best?.u) node.setAttribute('src', best.u);
     }
     for (const a of [...node.attributes]) if (/^on/i.test(a.name) || a.name === 'srcset' || a.name === 'loading') node.removeAttribute(a.name);
     if (node.tagName === 'IMG' && node.getAttribute('src')) node.setAttribute('src', abs(node.getAttribute('src')));
-    for (const c of node.children) apply(c);
-  }
-  const clone = el.cloneNode(true);
-  // walk clone + live in lockstep to copy the __inline we computed on the live tree
-  (function copy(live, cl) { cl.__inline = live.__inline; for (let i = 0; i < live.children.length; i++) copy(live.children[i], cl.children[i]); })(el, clone);
-  apply(clone);
-  // distinct font families the component actually uses — recorded so render-time misses are loud
-  const fonts = [...new Set([el, ...el.querySelectorAll('*')].map((n) => getComputedStyle(n).fontFamily.split(',')[0].replace(/['"]/g, '').trim()).filter(Boolean))];
+  });
   const r = el.getBoundingClientRect();
-  return { html: clone.outerHTML, w: Math.round(r.width), h: Math.round(r.height), fonts };
+  return { html: el.outerHTML, w: Math.round(r.width), h: Math.round(r.height), fonts };
 }, selector);
 
 await browser.close();

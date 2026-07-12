@@ -1,0 +1,14 @@
+{
+  "name": "northwind",
+  "note": "Fictional B2B platform business for the another engine-vs-ours bakeoff. Dark indigo, one blue accent.",
+  "palette": {
+    "bg": "#0a0b10", "bg2": "#0d0f16", "surface": "#14161f", "surface2": "#0f111a",
+    "line": "rgba(255,255,255,0.08)", "lineStrong": "rgba(255,255,255,0.14)",
+    "text": "#f4f6fb", "text2": "#b6bccb", "dim": "#8b93a7", "ink": "#14161f",
+    "accent": "#6d8bff", "accentDim": "rgba(109,139,255,0.16)", "accentGlow": "rgba(109,139,255,0.4)",
+    "up": "#2fb37a", "down": "#e8543f"
+  },
+  "gradient": ["#0d0f16", "#0b0c12", "#0a0b10"],
+  "type": { "sans": "Inter", "num": "Inter", "serif": "Inter", "mono": "JetBrains Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.4, "settle": 0.5, "enter": 44, "durationScale": 1, "stagger": 0.06 }
+}

@@ -3,6 +3,7 @@
 
 // relative specifier resolves in BOTH the browser (/core/lib.js → /scripts/validate.mjs) and node.
 import { validateAll } from '../scripts/validate.mjs';
+import { themeErrors } from './theme-contract.js';
 
 export const FPS = 30;
 
@@ -81,6 +82,20 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
   const wd = omega * Math.sqrt(1 - zeta * zeta), env = Math.exp(-zeta * omega * t);
   return 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
 }
+
+// spring as a t→t EASING (settles by t=1), so any keyframe track — `motion[].ease`, count `ease`,
+// cut timing — can overshoot-and-settle organically. Same idea as another engine's Easing.spring /
+// another engine' springEase, pure in t. Overshoots >1 mid-way (that's the point); lands exactly at 1.
+Object.assign(EASINGS, {
+  spring: (t) => spring(clamp01(t), { bounce: 0.35, settle: 0.92 }),
+  'spring-bouncy': (t) => spring(clamp01(t), { bounce: 0.55, settle: 0.94 }),
+  'spring-stiff': (t) => spring(clamp01(t), { bounce: 0.12, settle: 0.72 }),
+});
+// easeOutSettle — the DEFAULT entrance feel: a gentle overshoot that settles (premium, not bouncy).
+// A touch of life on every rise/reveal vs the old flat easeOutCubic. Endpoints are SNAPPED exactly
+// (0 and 1) so the held state sits at true rest — no sub-pixel residual that would blur text on hold.
+export const easeOutSettle = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.25, settle: 0.62 }));
+EASINGS.settle = easeOutSettle;
 // springSettle(opts) — seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {
   const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
@@ -102,7 +117,7 @@ export function track(n, fps, beats) {
 }
 
 // transition helpers → {opacity, transform} (compositor-friendly only). Object.assign onto el.style.
-export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${(1 - easeOutCubic(clamp01(t))) * dist}px)` });
+export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${(1 - easeOutSettle(clamp01(t))) * dist}px)` });
 export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
 export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
 export const slide = (t, dir = 'left', dist = 60) => {
@@ -174,6 +189,21 @@ export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, ma
   let px = max;
   while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
   return px;
+}
+// fitBox(el, {maxW, maxH, max, min}) — MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
+// `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
+// within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
+export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
+  el.style.width = maxW + 'px';
+  let lo = min, hi = max, best = min;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= maxH + 1 && el.scrollWidth <= maxW + 1) { best = mid; lo = mid + 1; }
+    else hi = mid - 1;
+  }
+  el.style.fontSize = best + 'px';
+  return best;
 }
 
 // ---------- sequencing (another engine Sequence/TransitionSeries parity) — pure in n ----------
@@ -324,65 +354,48 @@ async function preloadImages(data) {
 }
 
 // ---------- taste: swappable theme (palette + gradient + fonts + motion personality) ----------
-// A theme is data. DEFAULT_THEME mirrors tokens.css EXACTLY so a scene with no `data.theme`
-// renders byte-identical to today. Named themes (themes/<name>.json) are brand kits; an inline
-// object on data.theme is the one-off escape hatch. Merge order: DEFAULT ← named ← inline.
-// Applied once in boot() (pure — the CSS vars are identical on every frame).
-export const DEFAULT_THEME = {
-  palette: {
-    bg: '#0a0a0c', bg2: '#0d0e11', surface: '#16181d', surface2: '#101216',
-    line: 'rgba(244, 245, 242, 0.07)', lineStrong: 'rgba(244, 245, 242, 0.12)',
-    text: '#f4f5f2', text2: '#b9bcc2', dim: '#6e7178',
-    up: '#3fd07a', up2: '#6ff0a4', down: '#ff5a6e',
-    accent: '#c2f23b', accentDim: 'rgba(194, 242, 59, 0.16)', accentGlow: 'rgba(194, 242, 59, 0.4)',
-    accent2: '#4de3ff', grid: 'rgba(194, 242, 59, 0.2)', grid2: 'rgba(77, 227, 255, 0.26)',
-    glass: 'rgba(21, 22, 26, 0.6)', highlight: 'rgba(244, 245, 242, 0.6)',
-  },
-  // gradient stops a scene may consume as --g0/--g1/--g2 (launch teaser uses these).
-  gradient: [],
-  type: { sans: 'Inter', num: 'Space Grotesk', serif: 'Instrument Serif', mono: 'Geist Mono' },
-  // motion personality — primitives read these as defaults (see spring/rise theme-aware wrappers).
-  motion: { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.06 },
-};
+// A theme is data and OWNS the entire look — there is no default look and no merge-over-defaults.
+// Named themes (themes/<name>.json) are brand kits; an inline object on data.theme is the one-off
+// escape hatch. A theme missing required keys (core/theme-contract.js) throws at boot, so a video
+// can never render with fallback CSS. Motion personality alone keeps engine defaults — it tunes
+// HOW primitives move, not what the video looks like.
+export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.06 };
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
-function deepMerge(base, over) {
-  if (!isObj(over)) return over === undefined ? base : over;
-  const out = Array.isArray(base) ? base.slice() : { ...base };
-  for (const k of Object.keys(over)) out[k] = isObj(base?.[k]) ? deepMerge(base[k], over[k]) : over[k];
-  return out;
-}
 
-// resolveTheme(spec): spec is undefined | "name" (→ fetch themes/name.json) | inline object.
+// resolveTheme(spec): spec is "name" (→ fetch themes/name.json) | inline object. REQUIRED —
+// no spec or a failed fetch throws; nothing silently substitutes a look.
 export async function resolveTheme(spec) {
-  let named = {};
   if (typeof spec === 'string' && spec) {
-    try { named = await (await fetch(`/themes/${spec}.json`)).json(); }
-    catch (e) { console.warn(`theme "${spec}" not found, using default`); }
+    const res = await fetch(`/themes/${spec}.json`);
+    if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json) — no default look exists`);
+    return await res.json();
   }
-  const inline = isObj(spec) ? spec : {};
-  return deepMerge(deepMerge(DEFAULT_THEME, named), inline);
+  if (isObj(spec)) return spec;
+  throw new Error('data.theme is required (a theme name or an inline theme object) — no default look exists');
 }
 
-// applyTheme(theme): write the palette/gradient/font vars onto :root. Fonts are only consumed by
-// scenes that opt into var(--font-*); palette/gradient vars back the shared tokens.css names.
+// applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
+// The ONLY writer of look CSS — tokens.css carries fonts + geometry, never colors or type choices.
 export function applyTheme(theme) {
+  const missing = themeErrors(theme);
+  if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete — missing ${missing.join(', ')}`);
   const root = document.documentElement.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
   set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
   set('--line', P.line); set('--line-strong', P.lineStrong);
-  set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim);
+  set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
   set('--up', P.up); set('--up-2', P.up2); set('--down', P.down);
   set('--accent', P.accent); set('--accent-dim', P.accentDim); set('--accent-glow', P.accentGlow);
   set('--accent-2', P.accent2); set('--grid', P.grid); set('--grid-2', P.grid2);
   set('--glass', P.glass); set('--highlight', P.highlight);
   (theme.gradient || []).forEach((c, i) => set(`--g${i}`, c));
   const T = theme.type || {};
-  if (T.sans) set('--font-sans', `'${T.sans}'`);
-  if (T.num) set('--font-num', `'${T.num}'`);
-  if (T.serif) set('--font-serif', `'${T.serif}'`);
-  if (T.mono) set('--font-mono', `'${T.mono}'`);
+  set('--font-sans', `'${T.sans}'`);
+  set('--font-num', `'${T.num}'`);
+  set('--font-serif', `'${T.serif}'`);
+  set('--font-mono', `'${T.mono}'`);
   // raw passthrough: theme.vars = { "--anything": "value" } for scene-local custom props.
   if (isObj(theme.vars)) for (const [k, v] of Object.entries(theme.vars)) set(k, v);
 }
@@ -392,14 +405,14 @@ export function applyTheme(theme) {
 // spring(t, M), or translateY(M.enter * (1 - eased)). durationScale lets a theme stretch/tighten
 // pacing; stagger is the per-item delay step.
 export function motionDefaults(theme) {
-  const m = (theme && theme.motion) || DEFAULT_THEME.motion;
+  const m = (theme && theme.motion) || DEFAULT_MOTION;
   return {
     easing: resolveEasing(m.easing),
-    bounce: m.bounce ?? DEFAULT_THEME.motion.bounce,
-    settle: m.settle ?? DEFAULT_THEME.motion.settle,
-    enter: m.enter ?? DEFAULT_THEME.motion.enter,
+    bounce: m.bounce ?? DEFAULT_MOTION.bounce,
+    settle: m.settle ?? DEFAULT_MOTION.settle,
+    enter: m.enter ?? DEFAULT_MOTION.enter,
     durationScale: m.durationScale ?? 1,
-    stagger: m.stagger ?? DEFAULT_THEME.motion.stagger,
+    stagger: m.stagger ?? DEFAULT_MOTION.stagger,
   };
 }
 

@@ -1,0 +1,94 @@
+{
+  "name": "mercury",
+  "note": "Mercury-inspired: near-black graphite canvas, strictly monochrome ivory-on-onyx with a single cobalt accent (#5266eb) used sparingly, intermediate type weight (never bold), flat borderless graphite cards. Darkness is the message. Motion: calm, restrained, zero bounce.",
+  "palette": {
+    "bg": "#0d0d11",
+    "bg2": "#131319",
+    "surface": "#1a1a22",
+    "surface2": "#131319",
+    "line": "rgba(255,255,255,0.07)",
+    "lineStrong": "rgba(255,255,255,0.13)",
+    "text": "#ece9e2",
+    "text2": "#a8a8b0",
+    "dim": "#6a6a72",
+    "accent": "#5266eb",
+    "accentDim": "rgba(82,102,235,0.16)",
+    "accentGlow": "rgba(82,102,235,0.40)",
+    "up": "#5266eb",
+    "down": "#5266eb",
+    "ink": "#16161d"
+  },
+  "gradient": [
+    "#141420",
+    "#0e0e14",
+    "#08080c"
+  ],
+  "type": {
+    "sans": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono",
+    "serif": "Geist"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0,
+    "settle": 0.4,
+    "enter": 24,
+    "durationScale": 1.0,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "82,102,235",
+    "tint": "106,106,114",
+    "tint2": "82,102,235",
+    "dotLight": "120,120,132",
+    "paperBase": [
+      "#ffffff",
+      "#f5f5f5"
+    ],
+    "softBase": [
+      "#1a1e33",
+      "#12162a"
+    ],
+    "accentBase": [
+      "#5266eb",
+      "#3d4fd4"
+    ],
+    "inkBase": [
+      "#111119",
+      "#08080c"
+    ],
+    "border": "#232330",
+    "dark": [
+      "#111119",
+      "#08080c"
+    ],
+    "darkMesh": [
+      "#14141f",
+      "#08080c"
+    ],
+    "deep": [
+      "#0c0c12",
+      "#050508"
+    ],
+    "light": [
+      "#ffffff",
+      "#f5f5f5"
+    ],
+    "ink": [
+      "#111119",
+      "#08080c"
+    ],
+    "paper": "#0d0d11"
+  },
+  "vars": {
+    "--ink": "#0d0d11",
+    "--paper": "#0d0d11",
+    "--muted": "#6a6a72",
+    "--em": "#5266eb",
+    "--on-light": "#0d0d11",
+    "--on-dark": "#ece9e2",
+    "--border": "#232330",
+    "--accent-soft": "rgba(82,102,235,0.16)"
+  }
+}

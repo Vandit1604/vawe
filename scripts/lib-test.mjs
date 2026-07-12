@@ -1,10 +1,11 @@
 // scripts/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/lib.js.
 // No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
-  random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_THEME,
+  random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor } from '../core/lib.js';
 import { unitProgress, PRESETS } from '../core/kinetic.js';
 import { PRESENTATIONS, cutStyle } from '../core/transitions.js';
+import { cameraAt, motionAt } from '../core/timeline.js';
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -72,7 +73,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 
 // motionDefaults
 ok('motionDefaults resolves easing to fn', typeof motionDefaults({ motion: { easing: 'easeOutQuart' } }).easing === 'function');
-ok('motionDefaults falls back to DEFAULT', motionDefaults(undefined).bounce === DEFAULT_THEME.motion.bounce);
+ok('motionDefaults falls back to DEFAULT', motionDefaults(undefined).bounce === DEFAULT_MOTION.bounce);
 ok('motionDefaults keeps overrides', motionDefaults({ motion: { enter: 99 } }).enter === 99);
 ok('motionDefaults durationScale default 1', motionDefaults({ motion: {} }).durationScale === 1);
 
@@ -173,6 +174,35 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('cutStyle steady opaque', approx(+steady.opacity, 1, 0.01));
   ok('cutStyle exit fades', +cutStyle('fade', { enter: 1, exit: 0.9 }, opts).opacity < 0.2);
   ok('cutStyle deterministic', JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)) === JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)));
+}
+
+// timeline evaluators (core/timeline.js) — pure math lifted out of scene.html
+{
+  // cameraAt: empty → null; endpoints clamp; midpoint eases between two keyframes
+  ok('cameraAt empty null', cameraAt([], 1) === null);
+  ok('cameraAt undefined null', cameraAt(undefined, 1) === null);
+  const cam = [{ t: 0, s: 1, x: 0, y: 0 }, { t: 2, s: 2, x: 100, y: -50 }];
+  ok('cameraAt before start holds first', cameraAt(cam, -1).s === 1 && cameraAt(cam, -1).x === 0);
+  ok('cameraAt after end holds last', cameraAt(cam, 9).s === 2 && cameraAt(cam, 9).x === 100);
+  const cmid = cameraAt(cam, 1); // easeInOutCubic(0.5) === 0.5 → exact midpoint
+  ok('cameraAt mid scale', approx(cmid.s, 1.5));
+  ok('cameraAt mid pan', approx(cmid.x, 50) && approx(cmid.y, -25));
+  ok('cameraAt defaults missing keys', approx(cameraAt([{ t: 0 }, { t: 1 }], 0.5).s, 1));
+
+  // motionAt: clamps before first / after last kf; lerps a mid-segment; honors per-kf ease
+  const kf = [{ t: 0, x: 0, y: 0, scale: 1, opacity: 0 }, { t: 1, x: 100, y: 20, scale: 2, opacity: 1 }];
+  ok('motionAt before first clamps', motionAt(kf, -1).dx === 0 && motionAt(kf, -1).opacity === 0);
+  ok('motionAt after last clamps', motionAt(kf, 5).dx === 100 && motionAt(kf, 5).opacity === 1);
+  const mmid = motionAt(kf, 0.5); // default ease easeInOutCubic → 0.5 at t=0.5
+  ok('motionAt mid dx', approx(mmid.dx, 50) && approx(mmid.dy, 10));
+  ok('motionAt mid scale', approx(mmid.scale, 1.5) && approx(mmid.opacity, 0.5));
+  ok('motionAt norm defaults', motionAt([{ t: 0 }], 0).scale === 1 && motionAt([{ t: 0 }], 0).opacity === 1);
+  // per-keyframe ease drives the segment (linear vs spring differ off the midpoint)
+  const lin = motionAt([{ t: 0, x: 0 }, { t: 1, x: 100, ease: 'linear' }], 0.25).dx;
+  const spr = motionAt([{ t: 0, x: 0 }, { t: 1, x: 100, ease: 'spring' }], 0.25).dx;
+  ok('motionAt linear ease at .25', approx(lin, 25));
+  ok('motionAt spring ease differs from linear', Math.abs(spr - 25) > 1);
+  ok('motionAt deterministic', JSON.stringify(motionAt(kf, 0.3)) === JSON.stringify(motionAt(kf, 0.3)));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

@@ -1,88 +1,18 @@
-/* base.css — professional Mono + lime design system. Layout + look live here;
-   per-format JS only binds data and drives the frame. */
+/* tokens.css — PLUMBING ONLY: font registration, frame geometry, determinism reset, and the few
+   engine classes every scene shares. Contains NO look values — no colors, no font choices, no
+   scales, no shadows. The theme owns 100% of the look: applyTheme() (core/lib.js) writes every
+   --font-* and palette var onto :root, and core/theme-contract.js guarantees a theme is complete
+   before a single frame renders. A missing theme key is a loud error, never a fallback pixel. */
 
+/* ---------- frame geometry (portrait default; boot sets data-orient from data.orientation) ---------- */
 :root {
-  --bg: #0a0a0c;
-  --bg-2: #0d0e11;
-  --surface: #16181d;
-  --surface-2: #101216;
-  --line: rgba(244, 245, 242, 0.07);
-  --line-strong: rgba(244, 245, 242, 0.12);
-  --text: #f4f5f2;
-  --text-2: #b9bcc2;
-  --dim: #6e7178;
-  --up: #3fd07a;
-  --up-2: #6ff0a4;
-  --down: #ff5a6e;
-  --accent: #c2f23b; /* lime — brand chrome ONLY, never the up-color */
-  --accent-dim: rgba(194, 242, 59, 0.16);
-  /* futuristic FX tokens (extend mono+lime) */
-  --accent-glow: rgba(194, 242, 59, 0.4);
-  --accent-2: #4de3ff; /* electric cyan — DECOR/grid/glow ONLY, never data */
-  --grid: rgba(194, 242, 59, 0.2);
-  --grid-2: rgba(77, 227, 255, 0.26);
-  --glass: rgba(21, 22, 26, 0.6);
-  --highlight: rgba(244, 245, 242, 0.6);
-
-  /* font families — themeable (applyTheme() overrides from data.theme.type). Scenes that opt
-     into these vars get per-theme fonts; the fallbacks keep the default look unchanged. */
-  --font-sans: 'Inter';
-  --font-num: 'Space Grotesk';
-  --font-serif: 'Instrument Serif';
-  --font-mono: 'Geist Mono';
-
-  /* canvas size — orientation-driven (portrait default; landscape overrides below) */
   --vw: 1080px;
   --vh: 1920px;
-
-  /* portrait safe zone: off-center (up + left) for mobile UI overlap */
   --safe-top: 240px;
   --safe-bottom: 580px;
   --safe-left: 60px;
   --safe-right: 180px;
-
-  --r-sm: 16px;
-  --r-md: 28px;
-  --r-lg: 44px;
-  --r-xl: 64px;
-  --shadow-card: 0 26px 70px rgba(0, 0, 0, 0.55);
-
-  /* ---------- type scale (fixed-canvas px, ~1.22 modular). Use these instead of hardcoding
-     font sizes so headings/labels stay in rhythm across formats. ---------- */
-  --fs-1: 28px;   /* fine print / units            */
-  --fs-2: 34px;   /* kicker / labels               */
-  --fs-3: 44px;   /* sub-labels, secondary copy    */
-  --fs-4: 56px;   /* body emphasis                 */
-  --fs-5: 68px;   /* sub-headline                  */
-  --fs-6: 84px;   /* headline                      */
-  --fs-7: 104px;  /* big headline                  */
-  --fs-8: 132px;  /* hero                          */
-  --fs-9: 168px;  /* mega hero / single-line slam  */
-  --lh-tight: 0.98;
-  --lh-snug: 1.08;
-  --lh-body: 1.28;
-  --tr-tight: -0.02em;   /* display tracking        */
-  --tr-label: 0.12em;    /* kicker/label tracking   */
-
-  /* ---------- spacing scale (large — the canvas is 1080 wide). Use for gap/padding. ---------- */
-  --sp-0: 8px;    /* fine in-card gaps */
-  --sp-1: 12px;
-  --sp-2: 20px;
-  --sp-3: 32px;
-  --sp-4: 48px;
-  --sp-5: 72px;
-  --sp-6: 100px;
-  --sp-7: 140px;
-
-  /* ---------- depth scale + accent glow ---------- */
-  --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.4);
-  --shadow-2: var(--shadow-card);
-  --shadow-3: 0 40px 110px rgba(0, 0, 0, 0.62);
-  --glow-accent: 0 0 60px var(--accent-glow);
 }
-
-/* ---------- landscape (16:9) — set data-orient="landscape" on <html> (boot does this
-   from data.orientation). Symmetric, near-centered safe zone for desktop/TV YouTube. ---------- */
 :root[data-orient="landscape"] {
   --vw: 1920px;
   --vh: 1080px;
@@ -92,150 +22,53 @@
   --safe-right: 120px;
 }
 
-/* alpha export (--alpha): drop every opaque backdrop so unpainted pixels render transparent.
-   The motion graphics (text/images/cards) still paint normally → a compositable overlay layer. */
-html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { background: transparent !important; }
-html.alpha .stage::before, html.alpha .stage::after { display: none !important; }
-
 /* determinism: every frame is set explicitly — kill all time-based motion */
 * { margin: 0; padding: 0; box-sizing: border-box; transition: none !important; animation: none !important; }
 
 html, body {
   width: var(--vw); height: var(--vh); overflow: hidden;
   background: var(--bg); color: var(--text);
-  font-family: var(--font-sans, 'Inter'), system-ui, sans-serif;
+  /* Hanken Grotesk is the graceful fallback: if a theme's primary face is a LOCAL-only licensed font
+     (gitignored, e.g. Sohne) a fresh clone renders the free grotesque, not raw sans-serif. */
+  font-family: var(--font-sans), 'Hanken Grotesk', sans-serif;
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
 }
 
-@font-face { font-family: 'Inter'; font-weight: 400; font-display: block; src: url('/engine/assets/fonts/inter-400.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 500; font-display: block; src: url('/engine/assets/fonts/inter-400.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 600; font-display: block; src: url('/engine/assets/fonts/inter-700.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 700; font-display: block; src: url('/engine/assets/fonts/inter-700.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 800; font-display: block; src: url('/engine/assets/fonts/inter-800.woff2') format('woff2'); }
+/* the render surface: geometry only — the theme's bg paints it, bg presets add texture */
+.stage { position: relative; width: var(--vw); height: var(--vh); overflow: hidden; background: var(--bg); }
+
+/* alpha export (--alpha): drop every opaque backdrop so unpainted pixels render transparent.
+   The motion graphics (text/images/cards) still paint normally → a compositable overlay layer. */
+html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { background: transparent !important; }
+
+/* ---------- font REGISTRATION (capability, not choice — the theme picks which are used) ---------- */
+/* Inter = Linear's EXACT self-hosted variable font (static.linear.app/fonts/InterVariable.woff2, full
+   100–900 axis) so a 540 headline is Linear's real medium, byte-for-byte their type. "Inter Variable"/
+   "Inter Display" are the names captured Linear components request; all map to the same real file. */
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter Display'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
+/* captured code UIs request "Berkeley Mono" (Linear's code font) — alias to installed Geist Mono so a
+   diff/terminal capture renders in a real monospace, not the browser default. */
+@font-face { font-family: 'Berkeley Mono'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/engine/assets/fonts/space-500.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/engine/assets/fonts/space-700.woff2') format('woff2'); }
 @font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: normal; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
 @font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: italic; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 600; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
-/* ThreadCite (and any warm-editorial brand) — Plus Jakarta Sans / JetBrains Mono / Caveat (variable) */
+@font-face { font-family: 'Geist'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/Geist.woff2') format('woff2'); }
 @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
 @font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
 @font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/Caveat.woff2') format('woff2'); }
 
-/* numbers everywhere: tabular figures so digits don't jitter on count-up */
-.num { font-family: var(--font-num, 'Space Grotesk'), sans-serif; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
-
-/* ---------- stage: premium graphite + grid + glow + grain ---------- */
-.stage {
-  position: relative; width: var(--vw); height: var(--vh); overflow: hidden;
-  background:
-    radial-gradient(120% 70% at 50% -8%, rgba(194, 242, 59, 0.07), transparent 46%),
-    radial-gradient(100% 60% at 50% 120%, rgba(63, 208, 122, 0.04), transparent 55%),
-    linear-gradient(180deg, var(--bg-2), var(--bg) 60%);
-}
-.stage::before { /* fine engineering grid */
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 90px 90px, 90px 90px;
-  -webkit-mask-image: radial-gradient(120% 90% at 50% 38%, #000 30%, transparent 78%);
-          mask-image: radial-gradient(120% 90% at 50% 38%, #000 30%, transparent 78%);
-}
-.stage::after { /* vignette */
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  box-shadow: inset 0 0 360px 150px rgba(0, 0, 0, 0.66);
-}
-
-/* ---------- safe zone hero column (off-center: up + left) ---------- */
-.safe {
-  position: absolute; left: var(--safe-left); right: var(--safe-right);
-  top: var(--safe-top); bottom: var(--safe-bottom);
-  display: flex; flex-direction: column; align-items: center; z-index: 2;
-}
-
-/* ---------- brand chrome: glowing lime progress rail ---------- */
-.chrome {
-  position: absolute; left: var(--safe-left); right: var(--safe-right);
-  top: calc(var(--safe-top) + 4px); height: 8px; border-radius: 6px;
-  background: rgba(244, 245, 242, 0.07); overflow: hidden; z-index: 6;
-}
-.chrome .progress {
-  height: 100%; width: 0; border-radius: 6px;
-  background: linear-gradient(90deg, var(--accent), #d8ff63);
-  box-shadow: 0 0 18px rgba(194, 242, 59, 0.6);
-}
-/* small lime wordmark slot */
-.brand { position: absolute; top: calc(var(--safe-top) + 22px); left: var(--safe-left);
-  font: 700 24px 'Space Grotesk', sans-serif; letter-spacing: 0.08em; color: var(--accent); opacity: 0.9; z-index: 6; }
-
-/* ---------- act framework ---------- */
-.act { position: absolute; inset: 0; display: none; z-index: 3; }
-.stage.phase-hook .act-hook,
-.stage.phase-body .act-body,
-.stage.phase-cta .act-cta { display: block; }
-/* on the outro, the body is hidden — the CTA gets a clean end screen of its own */
+/* numbers: tabular figures so digits don't jitter on count-up */
+.num { font-family: var(--font-num), monospace; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
 
 /* real logo/flag images sit inside any icon/badge container */
 .icon-img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
-/* ---------- shared surfaces (depth) ---------- */
-.card {
-  background: linear-gradient(180deg, var(--surface), var(--surface-2));
-  border: 1px solid var(--line-strong); border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-/* ---------- shared cold-open hook ---------- */
-.hook-wrap { justify-content: center; gap: 34px; text-align: center; padding: 0 10px; }
-/* long custom text wraps + stays inside the card instead of overflowing the safe zone */
-.kicker { font: 700 34px 'Space Grotesk', sans-serif; letter-spacing: 0.12em; color: var(--dim); padding-left: 0.12em;
-  max-width: 100%; text-wrap: balance; overflow-wrap: break-word; }
-.hook-title { font: 700 116px 'Space Grotesk', sans-serif; line-height: 0.98; letter-spacing: -0.02em;
-  color: var(--accent); text-shadow: 0 0 60px rgba(194, 242, 59, 0.25);
-  max-width: 100%; text-wrap: balance; overflow-wrap: break-word; }
-.hook-sub { font: 600 60px 'Inter', sans-serif; color: var(--text); max-width: 100%; text-wrap: balance; }
-.hook-kick2 { font: 500 42px 'Inter', sans-serif; color: var(--dim); }
-
-/* ---------- shared outro: a clean centered "Subscribe" end screen ---------- */
-.cta-screen {
-  position: absolute; top: var(--safe-top); bottom: var(--safe-bottom);
-  left: var(--safe-left); right: var(--safe-right);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
-  text-align: center; z-index: 7;
-}
-.cta-bell { font-size: 132px; line-height: 1; filter: drop-shadow(0 0 50px var(--accent-dim)); }
-.cta-card {
-  padding: 48px 64px; max-width: 800px;
-  background: linear-gradient(180deg, rgba(26, 28, 33, 0.96), rgba(16, 18, 22, 0.96));
-  border: 1px solid var(--accent); border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card), 0 0 70px var(--accent-dim);
-  font: 800 72px 'Inter', sans-serif; color: var(--text);
-}
-
-/* ---------- layout utilities (stop re-coding flex per scene) ---------- */
-.stack { display: flex; flex-direction: column; align-items: center; }
-.cluster { display: flex; flex-direction: row; align-items: center; }
-.stack-1 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.stack-2 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
-.stack-3 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
-.stack-4 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); }
-.stack-5 { display: flex; flex-direction: column; align-items: center; gap: var(--sp-5); }
-.cluster-1 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-1); }
-.cluster-2 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-2); }
-.cluster-3 { display: flex; flex-direction: row; align-items: center; gap: var(--sp-3); }
-
-/* ---------- helpers ---------- */
-.muted { color: var(--dim); }
-.dim2 { color: var(--text-2); }
-.accent { color: var(--accent); }
-.up { color: var(--up); }
-.down { color: var(--down); }
-.unit { color: var(--dim); font-weight: 500; }
-.row-divider { height: 1px; background: var(--line); width: 100%; }
-
-/* ---------- --debug-safe overlay ---------- */
+/* ---------- ?debug=safe overlay (audit tooling, not look) ---------- */
 .stage.debug-safe .dbg { display: block; }
 .dbg { display: none; position: absolute; inset: 0; z-index: 99; pointer-events: none; }
 .dbg .zone { position: absolute; background: rgba(255, 40, 90, 0.16); }
@@ -245,3 +78,9 @@ html, body {
 .dbg .zr { top: 0; bottom: 0; right: 0; width: var(--safe-right); }
 .dbg .box { position: absolute; left: var(--safe-left); right: var(--safe-right);
   top: var(--safe-top); bottom: var(--safe-bottom); border: 3px solid rgba(120, 240, 60, 0.9); }
+/* Hanken Grotesk (free, open) — a distinctive neo-grotesque; stand-in for brands on licensed faces
+   (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
+/* Sohne (Stripe's licensed Klim face) — the file lives in engine/assets/fonts/local/ which is GITIGNORED.
+   Used locally for fidelity; a clone without it falls back to Hanken Grotesk (see html,body). Never commit it. */
+@font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/local/Sohne.woff2') format('woff2'); }

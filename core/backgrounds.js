@@ -44,14 +44,16 @@ export function dotGrid(ctx, w, h, t, o = {}) {
   const period = o.period ?? 4.5, w2 = (2 * Math.PI) / period, k = o.k ?? 0.03;
   const mode = o.mode ?? 'wave', cx = (o.cx ?? 0.5) * w, cy = (o.cy ?? 0.5) * h;
   const dx = (o.driftX ?? 0) * t, dy = (o.driftY ?? 0) * t;
+  // seed shifts the grid registration + wave phase so the SAME dot preset differs per video
+  const so = o.seed ?? 0, gx = (((so * 29) % spacing) + spacing) % spacing, gy = (((so * 53) % spacing) + spacing) % spacing, ph0 = (so % 100) * 0.0628;
   for (let y = -spacing; y < h + spacing; y += spacing) {
     for (let x = -spacing; x < w + spacing; x += spacing) {
-      const px = x + (dx % spacing), py = y + (dy % spacing);
+      const px = x + (dx % spacing) + gx, py = y + (dy % spacing) + gy;
       let phase;
       if (mode === 'pulse') phase = 0;
       else if (mode === 'ripple') phase = Math.hypot(px - cx, py - cy) * k;
       else phase = (px + py) * k;
-      const v = 0.5 + 0.5 * Math.sin(t * w2 - phase);
+      const v = 0.5 + 0.5 * Math.sin(t * w2 - phase + ph0);
       ctx.beginPath();
       ctx.arc(px, py, rBase + (rPeak - rBase) * v, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${color},${(baseA + (peakA - baseA) * v).toFixed(3)})`;
@@ -99,14 +101,16 @@ export function aurora(ctx, w, h, t, o = {}) {
     { color: '31,182,255', x: 0.55, y: 0.3, r: 480, ax: 100, ay: 80, px: 13, py: 22, ph: 4 },
   ];
   ctx.globalCompositeOperation = 'lighter';
-  for (const b of blobs) {
-    const cx = b.x * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph) * b.ax;
-    const cy = b.y * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph) * b.ay;
+  const so = o.seed ?? 0; // seed jitters blob positions + phase so the SAME preset differs per video
+  blobs.forEach((b, i) => {
+    const jx = Math.sin(so * 7.3 + i * 2.1) * 0.12, jy = Math.cos(so * 5.7 + i * 1.7) * 0.12, jp = so * 0.9 + i;
+    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph + jp) * b.ax;
+    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph + jp) * b.ay;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
     g.addColorStop(0, `rgba(${b.color},${o.intensity ?? 0.5})`);
     g.addColorStop(1, `rgba(${b.color},0)`);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, b.r, 0, Math.PI * 2); ctx.fill();
-  }
+  });
   ctx.globalCompositeOperation = 'source-over';
 }
 
@@ -182,6 +186,28 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
     case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
   }
+}
+
+// applyBgOver(spec, over): per-video tuning of a preset's baked numbers (the palette still owns colour).
+// over = { intensity, dotAlpha, spacing, drift, grain } — scales/overrides the matching fx params.
+// Mutates the freshly-built spec (each bg window builds its own), so no shared state. over falsy = no-op.
+export function applyBgOver(spec, over) {
+  if (!over || !spec) return spec;
+  for (const fx of spec.fx || []) {
+    if (fx.type === 'dots') {
+      if (over.spacing != null) fx.spacing = over.spacing;
+      if (over.dotAlpha != null) { fx.peakAlpha = over.dotAlpha; fx.baseAlpha = +(over.dotAlpha * 0.3).toFixed(3); }
+      else if (over.intensity != null) fx.peakAlpha = +((fx.peakAlpha ?? 0.2) * over.intensity).toFixed(3);
+      if (over.drift != null) { fx.driftX = (fx.driftX ?? 0) * over.drift; fx.driftY = (fx.driftY ?? 0) * over.drift; }
+    } else if (fx.type === 'aurora' || fx.type === 'spotlight') {
+      if (over.intensity != null) fx.intensity = +((fx.intensity ?? 0.5) * over.intensity).toFixed(3);
+    } else if (fx.type === 'shapes') {
+      if (over.intensity != null) fx.alpha = +((fx.alpha ?? 0.1) * over.intensity).toFixed(3);
+    } else if (fx.type === 'grain') {
+      if (over.grain != null) fx.alpha = over.grain;
+    }
+  }
+  return spec;
 }
 
 // renderBg(canvas, t, spec): paint a full scene background from a spec (base + ordered fx list).
