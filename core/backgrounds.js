@@ -170,6 +170,9 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
     case 'ink': return { base: { kind: 'radial', from: P.inkBase[0], to: P.inkBase[1], cx: 0.5, cy: 0.44 }, fx: [
       { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.06, peakAlpha: 0.2, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
     case 'plain': return { base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] };
+    // clean dark radial gradients (NO dots) — what you reach for when you want a plain deep backdrop
+    case 'deep': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.42 }, fx: [grain] };
+    case 'dark': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.44 }, fx: [grain] };
     case 'shapes': return { base: dark ? { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.45 } : { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'shapes', color: P.accent, color2: P.tint, dark, alpha: dark ? 0.14 : 0.08, seed: 4 }, grain ] };
     case 'dotmatrix': return { base: { kind: 'linear', from: P.light[0], to: P.light[1] }, fx: [

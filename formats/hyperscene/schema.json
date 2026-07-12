@@ -47,7 +47,9 @@
             "constellation",
             "spotlight",
             "brandglow",
-            "plain"
+            "plain",
+            "deep",
+            "dark"
           ]
         },
         "from": {
@@ -556,13 +558,34 @@
           "type": "array",
           "label": "Keyframe track — element choreography (pure in t). Offsets on the base position.",
           "item": {
-            "t": { "type": "number", "label": "Seconds from layer start" },
-            "x": { "type": "number", "label": "X offset (px)" },
-            "y": { "type": "number", "label": "Y offset (px)" },
-            "scale": { "type": "number", "label": "Scale multiplier" },
-            "rot": { "type": "number", "label": "Rotation (deg)" },
-            "opacity": { "type": "number", "label": "Opacity multiplier" },
-            "ease": { "type": "string", "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)" }
+            "t": {
+              "type": "number",
+              "label": "Seconds from layer start"
+            },
+            "x": {
+              "type": "number",
+              "label": "X offset (px)"
+            },
+            "y": {
+              "type": "number",
+              "label": "Y offset (px)"
+            },
+            "scale": {
+              "type": "number",
+              "label": "Scale multiplier"
+            },
+            "rot": {
+              "type": "number",
+              "label": "Rotation (deg)"
+            },
+            "opacity": {
+              "type": "number",
+              "label": "Opacity multiplier"
+            },
+            "ease": {
+              "type": "string",
+              "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"
+            }
           }
         },
         "elevation": {
