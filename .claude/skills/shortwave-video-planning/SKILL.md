@@ -53,7 +53,9 @@ a tone, it overrides.
 ## Step 2 — Derive the design language FROM the site (no canned styles)
 
 There is no style menu, and NO auto-heuristic. The brand's own site is the art direction; the taste
-is in the actual pixels. Do the study, literally:
+is in the actual pixels. **Load [`docs/CRAFT/TYPOGRAPHY.md`](../../../docs/CRAFT/TYPOGRAPHY.md) +
+[`COLOR.md`](../../../docs/CRAFT/COLOR.md) before authoring the theme** (how to choose a face / build the
+palette to the contract keys). Do the study, literally:
 
 ```bash
 make sections URL=… NAME=…                              # screenshot every section (the taste lives here)

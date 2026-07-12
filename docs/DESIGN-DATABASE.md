@@ -105,6 +105,10 @@ Left-aligned macro · centred statement · 3-up card row (flow) · 2-col feature
 
 ## 7. Colour & contrast (locked to plinthai.xyz)
 
+> For the GENERAL method (how to build any brand's palette to the theme contract, dominance, WCAG for big
+> type), see [`CRAFT/COLOR.md`](CRAFT/COLOR.md). Below is the worked plinth example.
+
+
 Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light `#c7cbe8` · off-white `#f5f5f2` · ink `#16161a`. **60-30-10:** dark periwinkle field (60) → structural periwinkle tone (30) → electric blue (10, the thing that moves/reveals last). Dark scenes = shades of the periwinkle hue (never pure `#000`). **WCAG:** white text needs bg L ≤ 45% (dark scenes ✓); on light scenes use ink text + blue accent. Vary hue only *within* the periwinkle→blue family; flip **value** (dark↔light) for drama — the value flip is itself a transition.
 
 ---

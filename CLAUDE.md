@@ -61,8 +61,9 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
 Hand-authored HTML regresses to the mean — centered text, Inter, blue/purple gradient, equal card grid.
-Before writing any by hand, **load the `taste-skill`** (state the Design Read + set VARIANCE/MOTION/DENSITY
-dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Both are vendored in `.claude/skills/`.
+Before writing any by hand, **load the relevant [`docs/CRAFT/`](docs/CRAFT/README.md) guide** (how to choose
+a face / palette / layout / image), then the **`taste-skill`** (state the Design Read + set VARIANCE/MOTION/
+DENSITY dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Skills are vendored in `.claude/skills/`.
 Defaults to reach past: **asymmetry over centered · scale contrast (one huge hero + tiny caption) · a
 committed non-generic face** (the real brand font when reflecting a brand; never Inter/Space Grotesk for
 anything generic). Then gate it: **`make slop D=<file>`** runs the impeccable detector (41 rules, no LLM) —

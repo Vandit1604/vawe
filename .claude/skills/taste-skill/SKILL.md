@@ -7,6 +7,10 @@ description: Anti-slop design-taste skill for hand-writing HTML in shortwave vid
 
 > Landing pages, portfolios, and redesigns. Not dashboards, not data tables, not multi-step product UI.
 > Every rule below is **contextual**. None of it fires automatically. First read the brief, then pull only what fits.
+>
+> **In the shortwave repo**, pair this with the decision guides in `docs/CRAFT/` (TYPOGRAPHY · COLOR · LAYOUT ·
+> IMAGERY) — this skill sets the *direction* and enforces anti-default discipline; CRAFT tells you *how to choose*
+> the face / palette / composition; `make slop` (impeccable) checks you did it.
 
 ---
 
