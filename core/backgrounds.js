@@ -129,7 +129,11 @@ export function spotlight(ctx, w, h, t, o = {}) {
 
 // ---- deterministic grain: sparse tinted specks seeded per (frame,index). Kills banding, filmic feel.
 export function grain(ctx, w, h, t, o = {}) {
-  const n = o.count ?? 1400, a = o.alpha ?? 0.05, frame = Math.round(t * (o.fps ?? 30));
+  // hold each grain pattern for `every` frames (default 2) instead of reseeding every frame: full
+  // per-frame grain crawls over static text edges and reads as the type "shaking". Still pure in n
+  // (frame derives from t) and still moves — just at half the rate. `every:1` restores per-frame.
+  const n = o.count ?? 1400, a = o.alpha ?? 0.05, every = o.every ?? 2;
+  const frame = Math.round(t * (o.fps ?? 30) / every) * every;
   ctx.fillStyle = `rgba(255,255,255,${a})`;
   for (let i = 0; i < n; i++) {
     const x = random(`g${frame}:${i}:x`) * w, y = random(`g${frame}:${i}:y`) * h;
