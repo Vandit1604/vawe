@@ -66,7 +66,12 @@
         // ---- bg windows: [{preset, from, to, value}] drawn on canvas from the THEME's palette ----
         // bg seed: default = hash(theme name + preset) so the SAME preset looks different across brands;
         // override per-window with b.seed. Injected into every fx (dots/aurora/shapes/particles read it).
-        const bgWins = (data.bg || []).map((b) => {
+        const bgWins = (data.bg || []).map((b0) => {
+          // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault) —
+          // so each brand has a custom bg it declares once, not a shared global preset name repeated
+          // (the "customize, don't default" rule; fails loud if the theme never authored one).
+          if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
+          const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
           const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined), b.opts);
           const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
           for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;

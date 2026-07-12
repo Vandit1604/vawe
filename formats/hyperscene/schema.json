@@ -33,7 +33,6 @@
         "preset": {
           "type": "string",
           "label": "bgPreset name",
-          "required": true,
           "enum": [
             "paper",
             "paperShapes",
@@ -75,6 +74,10 @@
         "seed": {
           "type": "number",
           "label": "Vary the preset's positions/phase (default = hash of theme+preset, so brands differ)"
+        },
+        "use": {
+          "type": "string",
+          "label": "use:\"theme\" → pull the brand’s own authored backdrop (themes/<name>.json bgDefault)"
         }
       }
     },

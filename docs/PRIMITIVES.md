@@ -80,6 +80,10 @@ plain by default, texture only on hook/CTA.
 - **Seed variation (July 2026):** every preset now takes a `seed` (default = hash of theme name + preset),
   so the SAME preset renders **differently across brands** — aurora/mesh/shapes blobs reposition,
   dot grids shift phase/registration. Kills the "every video's backdrop looks the same" problem. Override per window with `seed`.
+- **Theme-owned bg (customize, don't default):** a theme can author its OWN backdrop in `themes/<name>.json`
+  as `bgDefault: { preset, value?, opts?, seed? }`; a video then says `bg: [{ use: "theme", from, to }]` and
+  gets the brand's authored bg instead of a shared global preset name. Fails loud if the theme never authored
+  one (same no-fallback contract as colours/fonts). Clean dark backdrops: `deep` / `dark` presets (no dots).
 
 ### Customization knobs (added July 2026 — most primitives take overrides now)
 The primitives ship rich defaults but expose their knobs to the JSON; reach for these instead of

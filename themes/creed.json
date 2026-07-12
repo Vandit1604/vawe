@@ -90,5 +90,11 @@
     "--on-dark": "#f3f3f0",
     "--border": "#242428",
     "--accent-soft": "rgba(37,99,235,0.16)"
+  },
+  "bgDefault": {
+    "preset": "mesh",
+    "opts": {
+      "intensity": 0.7
+    }
   }
 }
