@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap motion lib-test validate brandkit lookbook photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
+.PHONY: build video render all look frame verify audit probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -59,15 +59,16 @@ motion:
 lib-test:
 	node scripts/lib-test.mjs
 
-# make brandkit URL=https://site.com NAME=brand  — crawl a site → colours pack (themes/brand.json)
-# + download fonts + fetch favicon. One command to onboard any brand's video (see scripts/brandkit.mjs).
-brandkit:
-	node scripts/brandkit.mjs $(URL) $(NAME)
-
 # make lookbook URL=https://site.com NAME=brand  — screenshot the site (full page + viewports) for
 # art direction study: derive the video's design language from the brand's own look, no canned styles.
 lookbook:
 	node scripts/lookbook.mjs $(URL) $(NAME)
+
+# make palette IMG=engine/assets/brands/<brand>/sections/01-*.png  — EYEDROP the real hero pixels →
+# dominant colours + LIGHT/DARK dominance (grounded, not a heuristic) + a swatch card to /tmp/palette.png.
+# Author themes/<brand>.json from THIS, then verify the video with `make beats VS=<brand>`.
+palette:
+	node scripts/palette.mjs $(IMG)
 
 # make sections URL=https://site.com NAME=brand  — inventory the page as SECTIONS: one screenshot per
 # major block + sections.json (stable selector + ready-to-paste `make capture` command per section).

@@ -1,27 +1,27 @@
 {
   "name": "creed",
-  "note": "Rebuilt from creed.md July 2026. DARK-first product world (near-black #0e0e0d, near-white text) with the brand's sky-BLUE (#2563eb) as the live accent and a purple (#7c3aed) second accent (the 'Identity' mark). The signature hero is a photographic blue sky, not a gradient. Bold Geist / Geist Mono. Motion: punchy, snap easing.",
+  "note": "EYEDROPPED from the real hero pixels (scripts/palette.mjs) July 2026 — WHITE/light-first (avg luminance 0.60, dominant #ffffff), vivid sky-blue accents (#167bf0/#0577f2), purple 'Identity' second accent (#7c3aed), near-black text on white. The signature is a bright full-bleed blue sky. Bold Geist / Geist Mono. Motion: punchy, snap. (Corrects the earlier wrong DARK build.)",
   "palette": {
-    "bg": "#0e0e0d",
-    "bg2": "#151519",
-    "surface": "#1a1a1f",
-    "surface2": "#121216",
-    "line": "rgba(255,255,255,0.08)",
-    "lineStrong": "rgba(255,255,255,0.15)",
-    "text": "#f3f3f0",
-    "text2": "#b2b2b6",
-    "dim": "#6e6e72",
-    "accent": "#2563eb",
-    "accentDim": "rgba(37,99,235,0.16)",
-    "accentGlow": "rgba(37,99,235,0.42)",
-    "up": "#2563eb",
+    "bg": "#ffffff",
+    "bg2": "#f4f5f7",
+    "surface": "#ffffff",
+    "surface2": "#f1f3f6",
+    "line": "rgba(14,14,13,0.10)",
+    "lineStrong": "rgba(14,14,13,0.16)",
+    "text": "#0e0e0d",
+    "text2": "#3d4350",
+    "dim": "#8a8f9c",
+    "accent": "#167bf0",
+    "accentDim": "rgba(22,123,240,0.14)",
+    "accentGlow": "rgba(22,123,240,0.38)",
+    "up": "#167bf0",
     "down": "#7c3aed",
-    "ink": "#16161a"
+    "ink": "#0e0e0d"
   },
   "gradient": [
-    "#101a2e",
-    "#0c1120",
-    "#080a12"
+    "#ffffff",
+    "#f6f8fb",
+    "#eef2f8"
   ],
   "type": {
     "sans": "Geist",
@@ -38,63 +38,60 @@
     "stagger": 0.04
   },
   "bg": {
-    "accent": "37,99,235",
-    "tint": "110,110,118",
+    "accent": "22,123,240",
+    "tint": "138,143,156",
     "tint2": "124,58,237",
-    "dotLight": "120,124,140",
+    "dotLight": "150,160,180",
     "paperBase": [
       "#ffffff",
-      "#f4f5f7"
+      "#eef2f8"
     ],
     "softBase": [
-      "#12233f",
-      "#0e1830"
+      "#eaf3ff",
+      "#dcebff"
     ],
     "accentBase": [
-      "#2563eb",
-      "#1d4ed8"
+      "#167bf0",
+      "#0f63d6"
     ],
     "inkBase": [
-      "#101a2e",
-      "#080a12"
+      "#0e1116",
+      "#05070b"
     ],
-    "border": "#242428",
+    "border": "#e4e7ec",
     "dark": [
-      "#101a2e",
-      "#080a12"
+      "#0e1116",
+      "#05070b"
     ],
     "darkMesh": [
-      "#12203a",
-      "#080a12"
+      "#101722",
+      "#05070b"
     ],
     "deep": [
-      "#0c1220",
-      "#06070d"
+      "#0c1018",
+      "#05070b"
     ],
     "light": [
       "#ffffff",
-      "#f4f5f7"
+      "#eef2f8"
     ],
     "ink": [
-      "#101a2e",
-      "#080a12"
+      "#0e1116",
+      "#05070b"
     ],
-    "paper": "#0e0e0d"
+    "paper": "#ffffff"
   },
   "vars": {
     "--ink": "#0e0e0d",
-    "--paper": "#0e0e0d",
-    "--muted": "#6e6e72",
-    "--em": "#2563eb",
+    "--paper": "#ffffff",
+    "--muted": "#8a8f9c",
+    "--em": "#167bf0",
     "--on-light": "#0e0e0d",
-    "--on-dark": "#f3f3f0",
-    "--border": "#242428",
-    "--accent-soft": "rgba(37,99,235,0.16)"
+    "--on-dark": "#ffffff",
+    "--border": "#e4e7ec",
+    "--accent-soft": "rgba(22,123,240,0.14)"
   },
   "bgDefault": {
-    "preset": "mesh",
-    "opts": {
-      "intensity": 0.7
-    }
+    "preset": "paper"
   }
 }

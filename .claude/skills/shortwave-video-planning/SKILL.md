@@ -27,7 +27,7 @@ go back and lock it.
 
 ## Step 1 — Study FIRST, then ask SITE-GROUNDED questions
 
-Order matters: brandkit + lookbook + a WebFetch of the site's actual copy BEFORE any questions.
+Order matters: sections + lookbook + palette-eyedrop + a WebFetch of the site's copy BEFORE any questions.
 Generic questions (goal? duration?) waste the user's answers. The valuable questions quote the
 site back: WHICH of the brand's own pitches leads, WHICH product surfaces appear, WHICH real
 claims/stats/customers count as proof, WHICH of their CTAs ends it. The better the questions are
@@ -43,7 +43,7 @@ anything already stated or derivable from the repo/DNA.
 2. **Platform + orientation** — X/LinkedIn/site hero → landscape 1920×1080 · Shorts/Reels/TikTok
    → portrait 1080×1920. (Never assume; it changes every coordinate.)
 3. **Duration** — 15s teaser / 30s launch / 60s walkthrough.
-4. **What real material exists** — site URL (→ `make brandkit`), a UI worth capturing
+4. **What real material exists** — site URL (→ `make sections` + `make palette`), a UI worth capturing
    (→ `make capture`), stats that are TRUE (→ `dna.stats`), logo/assets. Never invent numbers.
 5. **CTA** — the exact end action (url, "start free", date).
 
@@ -52,14 +52,22 @@ a tone, it overrides.
 
 ## Step 2 — Derive the design language FROM the site (no canned styles)
 
-There is no style menu. The brand's own site is the art direction. Do the study, literally:
+There is no style menu, and NO auto-heuristic. The brand's own site is the art direction; the taste
+is in the actual pixels. Do the study, literally:
 
 ```bash
-make brandkit URL=… NAME=…      # colors pack + DNA + fonts + favicon
-make lookbook URL=… NAME=…      # screenshots: full page + 3 viewport depths
+make sections URL=… NAME=…                              # screenshot every section (the taste lives here)
+make lookbook URL=… NAME=…                              # full-page + viewport screenshots
+make palette IMG=engine/assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → colours + dominance
 ```
 
-Read the lookbook images and answer, in words, in your reply:
+**DOMINANCE IS DECIDED BY LOOKING, NEVER BY A FIELD.** `make palette` reports LIGHT/DARK from the hero's
+real luminance + the dominant hexes; then READ the hero screenshot yourself and confirm. A white site
+gets a white-first video. (This is non-negotiable: a mislabeled dominance is how the worst videos happen.)
+Author `themes/<brand>.json` by hand from the eyedropped hexes — bg = the site's dominant, accent = its
+vivid colour, text = its body colour. No "colours pack" is generated for you; you author it from pixels.
+
+Read the lookbook/section images and answer, in words, in your reply:
 - **Typography**: serif/sans/mono mix? weight extremes? tight or airy tracking?
 - **Density**: whitespace-first or busy? big single statements or grids of cards?
 - **Shape language**: radius, borders, shadows — sharp/technical or soft/friendly?
@@ -142,7 +150,10 @@ didn't make, that's a lock-sheet gap — amend the sheet and re-confirm, don't i
 ## Step 4 — Author → verify (non-negotiable ladder)
 
 `make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND
-image contrast) → **`make ledger D=<file>`** (cross-video sameness vs every shipped design —
+image contrast) → **`make beats D=<file> VS=<brand>`** (FIDELITY GATE — stacks each beat beside its
+source section; if the video doesn't read as the SAME brand as the site, it fails: wrong dominance,
+off colours, untasteful imagery all show here. This is mandatory and is exactly the check that catches
+a white site rendered dark) → **`make ledger D=<file>`** (cross-video sameness vs every shipped design —
 SAME fails; fix by changing ≥2 of cut family / beat structure / layout archetype) → eyeball
 hook / payoff / CTA frames. Fix data, re-render. Never ship unverified.
 After the user approves the shipped video: `make ledger-add D=<file>` logs it to the design

@@ -8,7 +8,7 @@ templates.** You do not pour data into a canned layout; you compose each video f
 (and capture the real assets it needs), then render it. You do **not** edit `scene.html` or the Go
 renderer unless explicitly asked.
 
-> **Reflecting a brand/website?** `make brandkit URL=… NAME=…` builds the colours pack + fonts +
+> **Reflecting a brand/website?** `make sections` + `make palette` (eyedrop) builds the colours pack + fonts +
 > favicon; `make sections URL=… NAME=…` inventories every real section to reflect. Design knowledge
 > lives in **`docs/DESIGN-DATABASE.md`**; the primitive vocabulary in **`docs/PRIMITIVES.md`**; motion
 > rules in **`docs/MOTION-CRAFT.md`**. **Use ONLY the site's colours** and respect dominance

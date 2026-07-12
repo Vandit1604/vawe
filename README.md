@@ -28,8 +28,9 @@ make video D=path/to/video.json        # same, via make
 
 **Authoring:** ask Claude Code to write the JSON, grounded in `formats/hyperscene/schema.json` (the field
 contract), `sample.json` (a working example), and [`docs/PRIMITIVES.md`](docs/PRIMITIVES.md). Reflecting a
-real brand? `make brandkit URL=… NAME=…` + `make sections URL=… NAME=…` capture its real colours, fonts,
-and sections. Full loop + doctrine live in [`CLAUDE.md`](CLAUDE.md).
+real brand? `make sections URL=… NAME=…` screenshots every section and `make palette IMG=…` **eyedrops the
+real pixels** (dominant colours + light/dark), which you author into `themes/<brand>.json` — then verify the
+video reads as the same brand with `make beats VS=<brand>`. Full loop + doctrine live in [`CLAUDE.md`](CLAUDE.md).
 
 ## Determinism
 
@@ -45,7 +46,7 @@ core/            the primitives (pure, browser+node): lib.js (motion math), kine
 formats/hyperscene/  scene.html (the renderer) · schema.json (field contract) · sample.json (reference)
 themes/          brand palettes + fonts (theme-contract.js defines the required shape; no fallback look)
 cmd/render, internal/   the Go render service (chromedp capture + ffmpeg encode + PCM audio mixer + queue)
-scripts/         authoring + gate tools (preview, beats, captions, assets, brandkit, validate, probe …)
+scripts/         authoring + gate tools (preview, beats, palette, captions, assets, validate, probe …)
 verify/          integrity + safe-zone + WCAG-contrast checks
 engine/assets/   fonts · sfx · music.wav · brand asset packs
 docs/            PRIMITIVES.md (vocabulary) · MOTION-CRAFT.md · DESIGN-DATABASE.md · CODEMAPS/ARCHITECTURE.md
@@ -64,7 +65,7 @@ make motion [M=…]         motion contract (holds, monotonic reveals, settles, 
 make lib-test             pure-JS asserts for the motion primitives
 make slop D=…             anti-slop detector            make feature-audit   primitive utilisation report
 make captions D=… TEXT=…  auto-timed burned-in subtitles (muted-social)
-make brandkit / sections / capture   capture a real site's colours, sections, live components
+make sections / palette / capture   eyedrop a real site's colours + capture its sections & live UI
 make ledger D=… / similar cross-video sameness gates    make review   fast health snapshot
 node scripts/gen-audio.mjs   regenerate the procedural music bed + sfx
 ```
