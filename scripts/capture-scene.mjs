@@ -3,14 +3,14 @@
 // board, cards popping in, a message typing); one frozen capture can't express that. This tool
 // captures the section plus each named part (computed styles inlined, same proven approach as
 // capture-component.mjs) and records every part's rect RELATIVE to the section — then prints
-// ready-to-paste hyperscene layer stubs. The author gives each part a window/cut/anim; typing is
+// ready-to-paste scene layer stubs. The author gives each part a window/cut/anim; typing is
 // re-created by overlaying our own `type`-preset text layer on the captured input box.
 //
 //   node scripts/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]
 //   make capture-scene URL=… SEL="section" NAME=brand LABEL=intake PARTS="sel1,sel2"
 //
 // Output: engine/assets/brands/<brand>/scenes/<label>.json  { w, h, parts: [{name, html, x, y, w, h, z}] }
-// Use in hyperscene: { "type": "component", "src": "/engine/assets/brands/<brand>/scenes/<label>.json", "part": "p1", ... }
+// Use in scene: { "type": "component", "src": "/engine/assets/brands/<brand>/scenes/<label>.json", "part": "p1", ... }
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
@@ -115,7 +115,7 @@ const out = path.join(dir, label + '.json');
 fs.writeFileSync(out, JSON.stringify({ url, sectionSel, w: result.w, h: result.h, parts: result.parts }, null, 0) + '\n');
 console.log(`✓ scene "${label}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${result.parts.length} part(s), ${(fs.statSync(out).size / 1024).toFixed(0)}kb)`);
 
-// ready-to-paste hyperscene stubs, scaled into 1920-wide frame space (author adds windows/cuts)
+// ready-to-paste scene stubs, scaled into 1920-wide frame space (author adds windows/cuts)
 const scale = Math.min(1680 / result.w, 900 / result.h);
 const ox = Math.round((1920 - result.w * scale) / 2), oy = Math.round((1080 - result.h * scale) / 2);
 console.log('  layer stubs (assign start/duration/anim per part — background parts first, fade/dim them; foreground gets elevation):');

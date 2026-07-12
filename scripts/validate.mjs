@@ -1,5 +1,5 @@
 // validate.mjs — data + theme validation against a format's schema.json.
-// Runs in TWO places: (1) core/lib.js boot() imports validateData/validateTheme and aborts the
+// Runs in TWO places: (1) core/boot.js boot() imports validateData/validateTheme and aborts the
 // render pre-first-frame on bad data (clear message, no wasted frames); (2) `make validate` (the
 // CLI main below) checks data files from the shell. Pure + browser-safe: no top-level node imports.
 //

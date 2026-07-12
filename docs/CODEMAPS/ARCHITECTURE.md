@@ -26,16 +26,16 @@ which is what makes the sharded capture correct. Guarded by `make probe`.
 
 | Path | What | Notes |
 |---|---|---|
-| `core/lib.js` | shared scene runtime + pure helpers | `boot()`, `icon()`, `preloadImages()`, formatting, the **motion primitives** (`interpolate`/`spring`/`track`/`rise`/`fade`/`pop`/`slide`/`sequence`/`wipe`/`circleWipe`/`clockWipe` + easings + `EASINGS`), **seeded** `random`/`noise`/`hashSeed`/`stagger`, `measureText`/`fitText`, and the **theme system** (`resolveTheme`/`applyTheme`/`motionDefaults`/`DEFAULT_THEME`). All pure in `n`. |
-| `core/kinetic.js` | kinetic-typography kit | `splitText()` (char/word/line) + `PRESETS` (up/down/type/scale/blur/bounce/slide/wave) + `animateUnits()`. Pure per-unit staggered reveals. |
-| `core/compose.js` | declarative composition (another engine parity) | `driveClips(root,t)` reads `data-start/-duration/-track/-anim/-out` → timed multi-layer clips w/ enter/exit + z-order; `registerTimeline`/`seekAll(t)` = seekable **animation-adapter interface** (GSAP/WAAPI/custom). |
+| `core/motion.js` | shared scene runtime + pure helpers | `boot()`, `icon()`, `preloadImages()`, formatting, the **motion primitives** (`interpolate`/`spring`/`track`/`rise`/`fade`/`pop`/`slide`/`sequence`/`wipe`/`circleWipe`/`clockWipe` + easings + `EASINGS`), **seeded** `random`/`noise`/`hashSeed`/`stagger`, `measureText`/`fitText`, and the **theme system** (`resolveTheme`/`applyTheme`/`motionDefaults`/`DEFAULT_THEME`). All pure in `n`. |
+| `core/type.js` | kinetic-typography kit | `splitText()` (char/word/line) + `PRESETS` (up/down/type/scale/blur/bounce/slide/wave) + `animateUnits()`. Pure per-unit staggered reveals. |
+| `core/clips.js` | declarative composition (another engine parity) | `driveClips(root,t)` reads `data-start/-duration/-track/-anim/-out` → timed multi-layer clips w/ enter/exit + z-order; `registerTimeline`/`seekAll(t)` = seekable **animation-adapter interface** (GSAP/WAAPI/custom). |
 | `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
 | `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
 | `core/theme-contract.js` | required theme keys (no default look) | `themeErrors()` — shared by validate (node) + applyTheme (browser). |
 | `formats/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
-| `formats/hyperscene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
+| `formats/scene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
 | `formats/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
-| `formats/hyperscene/` | generic data-driven format | layered composition from `data.layers[]` (text/image + timing + anim + kinetic split/preset) + `data.captions[]`. No per-topic code — the JSON is the video. |
+| `formats/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image + timing + anim + kinetic split/preset) + `data.captions[]`. No per-topic code — the JSON is the video. |
 | `scripts/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. |
 | `cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`, `--alpha` (transparent VP9 `.webm` overlay). |
 | `internal/scene` (Go) | frame capture | parallel tabs; relies on purity. |

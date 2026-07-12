@@ -3,8 +3,8 @@
 // writes `captions` + `captionMode:"pop"` into the JSON. Deterministic: same script + duration → same
 // timing. Emphasise a word with <b>…</b> in the script (renders in the theme accent).
 //
-//   node scripts/captions.mjs formats/hyperscene/video.json "First line. Then the <b>payoff</b>."
-//   make captions D=formats/hyperscene/video.json TEXT="…"
+//   node scripts/captions.mjs formats/scene/video.json "First line. Then the <b>payoff</b>."
+//   make captions D=formats/scene/video.json TEXT="…"
 import fs from 'node:fs';
 
 const [file, text] = [process.argv[2], process.argv[3]];

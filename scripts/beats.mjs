@@ -4,8 +4,8 @@
 // `make sections`) — a side-by-side taste diff: does our beat actually reflect the real section?
 //
 //   node scripts/beats.mjs <data.json> [--vs brand] [--stride 1]
-//   make beats D=formats/hyperscene/linear-30.json            (self check)
-//   make beats D=formats/hyperscene/linear-30.json VS=linear  (fidelity vs captured sections)
+//   make beats D=formats/scene/linear-30.json            (self check)
+//   make beats D=formats/scene/linear-30.json VS=linear  (fidelity vs captured sections)
 //
 // Beat boundaries: data.camera[].t keyframes if present, else data.captions[].start, else even ~5s slices.
 import http from 'node:http';

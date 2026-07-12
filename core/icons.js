@@ -1,5 +1,5 @@
 // icons.js — inline stroke SVG icons (currentColor, deterministic, no network). Premium 24px grid.
-// Use in scenes: svgIcon('bolt', { size: 40, color: '#1f3bff' }). Named separately from lib.js icon()
+// Use in scenes: svgIcon('bolt', { size: 40, color: '#1f3bff' }). Named separately from motion.js icon()
 // (which renders image paths) to avoid collision.
 export const ICONS = {
   file: '<path d="M6 2.5h7l5 5V21.5H6z"/><path d="M13 2.5v5h5"/>',

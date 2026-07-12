@@ -1,11 +1,11 @@
-// scripts/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/lib.js.
+// scripts/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/motion.js.
 // No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor } from '../core/lib.js';
-import { unitProgress, PRESETS } from '../core/kinetic.js';
-import { PRESENTATIONS, cutStyle } from '../core/transitions.js';
-import { cameraAt, motionAt } from '../core/timeline.js';
+  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor } from '../core/motion.js';
+import { unitProgress, PRESETS } from '../core/type.js';
+import { PRESENTATIONS, cutStyle } from '../core/cuts.js';
+import { cameraAt, motionAt } from '../core/sequence.js';
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -176,7 +176,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('cutStyle deterministic', JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)) === JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)));
 }
 
-// timeline evaluators (core/timeline.js) — pure math lifted out of scene.html
+// timeline evaluators (core/sequence.js) — pure math lifted out of scene.html
 {
   // cameraAt: empty → null; endpoints clamp; midpoint eases between two keyframes
   ok('cameraAt empty null', cameraAt([], 1) === null);

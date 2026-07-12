@@ -1,4 +1,4 @@
-// shaders.js — procedural WebGL boundary effects (the "shader transition" layer another engine ships
+// core/stings.js — procedural WebGL boundary effects (the "shader transition" layer another engine ships
 // as GLSL blocks and another engine as shader presentations), adapted to the pure model: one fullscreen
 // quad, one compiled program, and draw(effect, progress, seed) that depends ONLY on its arguments.
 // No wall clock, no accumulating state — same (effect, progress, seed) → same pixels, any order.

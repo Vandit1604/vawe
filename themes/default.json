@@ -1,6 +1,6 @@
 {
   "name": "default",
-  "note": "Mirrors DEFAULT_THEME in core/lib.js (mono + lime). Authoring reference — a scene with no data.theme already renders exactly this. Copy this file to start a new brand kit.",
+  "note": "Mirrors DEFAULT_MOTION in core/motion.js (mono + lime). Authoring reference — a scene with no data.theme already renders exactly this. Copy this file to start a new brand kit.",
   "palette": {
     "bg": "#0a0a0c",
     "bg2": "#0d0e11",

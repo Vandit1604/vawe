@@ -1,6 +1,6 @@
 /* tokens.css — PLUMBING ONLY: font registration, frame geometry, determinism reset, and the few
    engine classes every scene shares. Contains NO look values — no colors, no font choices, no
-   scales, no shadows. The theme owns 100% of the look: applyTheme() (core/lib.js) writes every
+   scales, no shadows. The theme owns 100% of the look: applyTheme() (core/boot.js) writes every
    --font-* and palette var onto :root, and core/theme-contract.js guarantees a theme is complete
    before a single frame renders. A missing theme key is a loud error, never a fallback pixel. */
 

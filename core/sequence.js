@@ -1,9 +1,9 @@
-// core/timeline.js — the pure timeline evaluators, lifted out of scene.html so they can be
+// core/sequence.js — the pure timeline evaluators, lifted out of scene.html so they can be
 // unit-tested without a browser. Every export is a pure function of time (→ pure in frame n),
 // with zero DOM access. Mirrors another engine' packages/engine split (pure (config,t)→value math
 // beside the DOM/capture layer, not entangled with it). scene.html imports these and does the
 // DOM writes; the math lives here and is asserted by scripts/lib-test.mjs.
-import { clamp01, lerp, easeInOutCubic, resolveEasing } from './lib.js';
+import { clamp01, lerp, easeInOutCubic, resolveEasing } from './motion.js';
 
 // cameraAt(camKf, t): global camera keyframes → {s,x,y} (scale + pan), or null when there are none.
 // Keyframe times are SECONDS on the absolute timeline. Holds the last frame past the end.

@@ -7,11 +7,11 @@
 // Run: node scripts/feature-audit.mjs   (make feature-audit)
 import fs from 'fs';
 import path from 'path';
-import { PRESETS } from '../core/kinetic.js';
-import { PRESENTATIONS } from '../core/transitions.js';
-import { SHADER_FX } from '../core/shaders.js';
+import { PRESETS } from '../core/type.js';
+import { PRESENTATIONS } from '../core/cuts.js';
+import { SHADER_FX } from '../core/stings.js';
 
-const DIR = 'formats/hyperscene';
+const DIR = 'formats/scene';
 const SKIP = new Set(['sample.json', 'schema.json']);
 const isReel = (f) => /demo|reel/.test(f); // showcase reels exercise the whole vocab by design
 

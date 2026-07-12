@@ -1,6 +1,6 @@
 # LAUNCH-VIDEO-GUIDE — making a product-launch video for a brand/website
 
-There are no launch "formats" anymore. A launch video is a **`hyperscene` JSON** composed from
+There are no launch "formats" anymore. A launch video is a **`scene` JSON** composed from
 primitives, reflecting the real site. The old `demo`/`brandfilm` templates were removed (no templates).
 
 ## The workflow
@@ -29,5 +29,5 @@ make sections URL=https://site.com NAME=<brand>   # inventory every real section
 ## References
 - Primitive vocabulary: **`docs/PRIMITIVES.md`**  ·  Motion rules: **`docs/MOTION-CRAFT.md`**
 - Design knowledge (backgrounds, transitions, plain-vs-busy): **`docs/DESIGN-DATABASE.md`**
-- Worked example: `formats/hyperscene/linear-30.json` (reflects linear.app section-by-section).
+- Worked example: `formats/scene/linear-30.json` (reflects linear.app section-by-section).
 - Landscape 1920×1080 for launch videos (`"orientation": "landscape"`).

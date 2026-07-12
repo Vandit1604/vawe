@@ -23,7 +23,8 @@ parallel Chrome tabs. So:
 - Guard it: `make probe M=<format>` asserts purity. Run it after any scene-logic change.
 
 ```js
-import { boot, interpolate, easeOutCubic } from '/core/lib.js';
+import { boot } from '/core/boot.js';
+import { interpolate, easeOutCubic } from '/core/motion.js';
 boot((data, fps) => {
   const duration = /* seconds */, total = Math.round(duration * fps);
   function renderFrame(n) {
@@ -83,7 +84,7 @@ Non-negotiable moves:
 - **Gate it:** `make slop D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.
 
-## Animation — pure primitives in `core/lib.js` (no GSAP)
+## Animation — pure primitives in `core/motion.js` (no GSAP)
 
 GSAP gives no render-speed benefit here (we seek-and-screenshot, not real-time playback), and risks
 the purity contract. Use these closed-form, pure-in-`n` helpers instead:

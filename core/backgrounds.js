@@ -1,9 +1,9 @@
 // backgrounds.js — animated background library for premium motion graphics. Everything draws to a
 // <canvas> deterministically from the time input t (seconds) → PURE in n (no Math.random per call;
-// particle seeds come from the seeded random() in lib.js). Composed per scene so no two scenes
+// particle seeds come from the seeded random() in motion.js). Composed per scene so no two scenes
 // share a background (the variety rule). Techniques + parameter ranges are from motion-design refs:
 // dot-matrix wave/ripple, particle field, constellation, aurora blobs, spotlight sweep, grain.
-import { random, clamp01 } from './lib.js';
+import { random, clamp01 } from './motion.js';
 
 // ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat.
 export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '#05061a', cx = 0.6, cy = 0.4, color } = {}) {

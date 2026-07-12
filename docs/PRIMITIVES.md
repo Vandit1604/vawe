@@ -8,7 +8,7 @@ presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
 
-## Motion math (`core/lib.js`, 56 exports)
+## Motion math (`core/motion.js`, 56 exports)
 
 | Primitive | Signature | Use for |
 |---|---|---|
@@ -26,7 +26,7 @@ That is millions of distinct combinations before copy, layout, and color even en
 | `wipe` / `circleWipe` / `clockWipe` | `(t, ...)` → clip-path | raw reveal shapes |
 | `installVirtualClock` | auto in `boot()` | Date/rAF/timers/Math.random frozen to the frame |
 
-## Cuts (`core/transitions.js`) — 26 presentations × 8 timings
+## Cuts (`core/cuts.js`) — 26 presentations × 8 timings
 
 `cutStyle(name, seqState, {timing, dir, dist, cx, cy})` → full style set (never leaves properties stuck).
 
@@ -39,7 +39,7 @@ That is millions of distinct combinations before copy, layout, and color even en
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/shaders.js`) — 22 WebGL cover-the-cut effects
+## Shader stings (`core/stings.js`) — 22 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak — every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
@@ -57,7 +57,7 @@ streaks). Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
-## Kinetic type (`core/kinetic.js`) — 21 presets × char/word/line splits
+## Kinetic type (`core/type.js`) — 21 presets × char/word/line splits
 
 `splitText(el, mode)` (preserves `<b>/<em>`) + `animateUnits(units, t, {preset, stagger, each})`:
 `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`
@@ -106,7 +106,7 @@ accepting the default:
 Defaults are unchanged, so omitting a knob renders exactly as before. If a look feels generic, a
 baked default is usually why — override it.
 
-## Clips & adapters (`core/compose.js`)
+## Clips & adapters (`core/clips.js`)
 
 `driveClips(root, t)` runs any `[data-start]` element's window/enter/exit/z-track (12 anim names);
 `registerTimeline`/`seekAll` seek paused GSAP/WAAPI timelines deterministically.
@@ -128,7 +128,7 @@ same arbitrary motion, still deterministic (no wall clock, dedup-safe).
 
 ## Cameras
 
-- Global: `camera: [{t, s, x, y}]` keyframes (hyperscene) / per-scene `camera` (demo) — eased pans+pushes.
+- Global: `camera: [{t, s, x, y}]` keyframes (scene) / per-scene `camera` (demo) — eased pans+pushes.
 - Continuous: bg breathe `scale(1.05 + 0.02·sin(t·0.35))` — never resets at cuts.
 - Per-image: `ken: true | {from, to, fx, fy}` on image layers — clipped frame, slow zoom.
 - Impact: `shake(t - hitT, {seed})` on the camera wrapper at slam moments.
@@ -186,13 +186,13 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   site's animation with windows/cuts (`component` + `part:"p1"`). Re-type text by overlaying our
   own `type`-preset layer. Icons/dots must be DOM shapes, never out-of-face glyphs.
 
-## The open canvas (`formats/hyperscene/`)
+## The open canvas (`formats/scene/`)
 
 Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color) · `image` (+ `ken`) ·
 `component` (captured real UI) · `rect` (cards/pills/slabs) · `count` (count-up) · `glow` · `board` ·
 `group` (layout box — see below). Per layer: window (`start/duration`), `track` z-order, `cut`+`dir`,
 `anim/out`, `motion[]` (keyframe track). Global `bg[]`, `stings[]`, `camera[]`, `captions[]`.
-Schema: `formats/hyperscene/schema.json`.
+Schema: `formats/scene/schema.json`.
 
 **Layout by containment — `group` is the DEFAULT for anything with a spatial relationship.** A group is
 a flex OR grid box; its children flow with `gap` so a label+value, a logo row, or a card grid can never

@@ -1,7 +1,7 @@
-# FRAMEWORK-AUDIT — the hyperscene engine, benchmarked against another engine & another engine
+# FRAMEWORK-AUDIT — the scene engine, benchmarked against another engine & another engine
 
-Audited July 2026. Scope = the **permanent** engine (not videos): `formats/hyperscene/scene.html`,
-`core/*.js`, `formats/hyperscene/schema.json`, the gates (`verify/audit.mjs`, `scripts/{motion-audit,
+Audited July 2026. Scope = the **permanent** engine (not videos): `formats/scene/scene.html`,
+`core/*.js`, `formats/scene/schema.json`, the gates (`verify/audit.mjs`, `scripts/{motion-audit,
 slop,validate,probe-purity,similarity}.mjs`), `core/tokens.css`, `core/theme-contract.js`.
 
 Method: inline code audit of our engine + source reads of another engine (`packages/core`, `layout-utils`,
@@ -68,7 +68,7 @@ since all frames render in one instance. Chrome BeginFrame capture (HF) is a sec
 
 ## 5. Motion coverage — spring on the keyframe track — 🔴 Med
 **Us:** the `motion` track interpolates keyframes with **eased-linear only** (`motionAt` →
-`resolveEasing`, `scene.html:346`). `spring()` exists in `lib.js` but isn't usable on the track — so
+`resolveEasing`, `scene.html:346`). `spring()` exists in `core/motion.js` but isn't usable on the track — so
 choreography can't overshoot/settle organically.
 **Them:** another engine exposes `Easing.spring({damping,mass,stiffness})` as a plain **`t→t` easing usable
 inside `interpolate`** (`easing.ts:77`). another engine' `springEase.ts` solves the damped oscillator
@@ -80,13 +80,13 @@ bake-to-curve or another engine's live function — both are pure-in-`t`, so det
 
 ## 6. Code health & testability — 🟠 Med
 **Us:** the layer engine is a **427-line inline `<script>`** in `scene.html` — the motion/camera/layer
-math is entangled with DOM writes and can't be unit-tested. `core/lib.js` *is* tested (`lib-test`, 168
+math is entangled with DOM writes and can't be unit-tested. `core/motion.js` *is* tested (`lib-test`, 168
 asserts).
 **Them:** another engine keeps math in small pure modules (`spring/`, `interpolate.ts`, `easing.ts`) with **57
 test files** (bun); another engine splits `parsers` (~26 tests) from `engine` (~43) with vitest — e.g.
 `springEase.ts` is 88 pure lines with 9 tests.
 **Fix (Phase 3):** extract the pure math — `motionAt`, `cameraAt`, keyframe/easing eval — into a
-`core/timeline.js` module of `(config, t) → value` functions; unit-test the table like `spring.test.ts`.
+`core/sequence.js` module of `(config, t) → value` functions; unit-test the table like `spring.test.ts`.
 DOM render stays in `scene.html`. Purity-guarded by `make probe` + `make snap`.
 
 ## 7. Schema ↔ engine drift — 🔴 Med
@@ -110,7 +110,7 @@ typed IR.
 | 5 | Mirror CSS layout prop names + aliases + doc | 1 | ergonomics; back-compat, snap-identical |
 
 ## Deferred to Phase 3 (each its own Medium)
-- Extract pure timeline math → `core/timeline.js` + unit tests (dim 6).
+- Extract pure timeline math → `core/sequence.js` + unit tests (dim 6).
 
 ## Tried & rejected — single-browser + N-tab page pool (dim 4, July 12 2026)
 Implemented one booted browser with N child-context tabs (replacing the browser-per-worker

@@ -1,4 +1,4 @@
-// transitions.js — the scene-CUT kit. another engine's two-axis split, ported to the pure model:
+// core/cuts.js — the scene-CUT kit. another engine's two-axis split, ported to the pure model:
 // a TIMING shapes how progress 0→1 evolves through the cut window; a PRESENTATION says what the
 // cut looks like — pure style objects for the entering / exiting scene root. Everything derives
 // from sequence()'s enter/exit values, so it stays pure in n and composes with in-scene motion.
@@ -8,7 +8,7 @@
 //
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick — byte-identical DOM for any render order.
-import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp } from './lib.js';
+import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp } from './motion.js';
 
 export const TIMINGS = {
   linear: (p) => clamp01(p),

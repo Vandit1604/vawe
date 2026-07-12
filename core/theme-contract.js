@@ -2,7 +2,7 @@
 // anywhere in the engine: tokens.css registers fonts + geometry only, and every color/font the
 // scene consumes comes from the theme. A theme missing any required key fails LOUD (at
 // `make validate` and again at boot) instead of rendering a wrong-looking video.
-// Pure data + one pure function — importable from node (validate) and the browser (lib.js) alike.
+// Pure data + one pure function — importable from node (validate) and the browser (motion.js/boot.js) alike.
 
 export const REQUIRED = {
   palette: ['bg', 'bg2', 'surface', 'surface2', 'line', 'lineStrong',

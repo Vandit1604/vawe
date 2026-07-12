@@ -8,8 +8,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const scene = fs.readFileSync(path.join(ROOT, 'formats/hyperscene/scene.html'), 'utf8');
-const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/hyperscene/schema.json'), 'utf8'));
+const scene = fs.readFileSync(path.join(ROOT, 'formats/scene/scene.html'), 'utf8');
+const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
 
 // props the engine reads off a layer/child object
 const engineProps = new Set();
@@ -31,7 +31,7 @@ const missing = [...engineProps].filter((p) => !defined.has(p) && !INTERNAL.has(
 if (missing.length) {
   console.error(`✗ schema drift — engine reads ${missing.length} prop(s) not in schema.json:`);
   for (const p of missing) console.error(`    • L.${p}`);
-  console.error('  add them to formats/hyperscene/schema.json (or to INTERNAL in this script if truly computed).');
+  console.error('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
   process.exit(1);
 }
 console.log(`✓ schema in sync — all ${engineProps.size} engine props are defined in schema.json`);

@@ -101,8 +101,8 @@ Beat table first (in the reply, not a file): Hook (≤3s, no name-drop if teasin
 Proof (real UI capture / true stat) → Payoff → CTA (3–5s). One idea per beat. Budget seconds
 per beat to the target duration.
 
-There is ONE module: **hyperscene** (the open canvas — layers/cuts/stings/bg windows/camera;
-`formats/hyperscene/schema.json` is the contract). No templates. You compose every video from the
+There is ONE module: **scene** (the open canvas — layers/cuts/stings/bg windows/camera;
+`formats/scene/schema.json` is the contract). No templates. You compose every video from the
 primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
 
 ## Step 3b — Choreography rules (anti-monotony)

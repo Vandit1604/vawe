@@ -101,7 +101,7 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
       const c = parse(getComputedStyle(p).backgroundColor);
       if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
     }
-    // flat-layer scenes (hyperscene): the visual backdrop may be a SIBLING rect, not an ancestor —
+    // flat-layer scenes (scene): the visual backdrop may be a SIBLING rect, not an ancestor —
     // probe the actual paint stack under the element's center for the first solid background.
     for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
       if (p === el || el.contains(p) || p.contains(el)) continue;

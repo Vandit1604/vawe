@@ -14,7 +14,7 @@ video: build
 list: build
 	./bin/shortwave --list
 
-# make render M=hyperscene  — render a format's bundled sample.json
+# make render M=scene  — render a format's bundled sample.json
 render: build
 	./bin/shortwave --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
 
@@ -22,11 +22,11 @@ render: build
 all: build
 	./bin/shortwave --all
 
-# make look M=hyperscene         — storyboard (key frames) for visual review
+# make look M=scene         — storyboard (key frames) for visual review
 look:
 	node scripts/preview.mjs $(M)
 
-# make frame M=hyperscene N=560  — one exact frame
+# make frame M=scene N=560  — one exact frame
 frame:
 	node scripts/preview.mjs $(M) $(N)
 
@@ -39,7 +39,7 @@ assets:
 verify:
 	node verify/run.js
 
-# make audit [M=hyperscene]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
+# make audit [M=scene]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
 # [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
 audit:
 	node verify/audit.mjs $(M)
@@ -60,7 +60,7 @@ snap:
 motion:
 	node scripts/motion-audit.mjs $(M) $(if $(STRIDE),--stride $(STRIDE))
 
-# make lib-test  — fast pure-JS asserts for the core/lib.js motion primitives (no browser)
+# make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/lib-test.mjs
 
@@ -157,7 +157,7 @@ schema-check:
 review:
 	node verify/review.mjs
 
-# make probe [M=hyperscene]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
+# make probe [M=scene]  — assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe:
 	@if [ -n "$(M)" ]; then node scripts/probe-purity.mjs $(M); else \

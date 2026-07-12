@@ -1,10 +1,10 @@
 # CLAUDE.md — authoring videos for this engine
 
 This repo turns **one self-describing JSON → one rendered video** (30fps mp4, portrait 1080×1920 or
-landscape 1920×1080). There is exactly **one module: `hyperscene`** — an open canvas of composable
+landscape 1920×1080). There is exactly **one module: `scene`** — an open canvas of composable
 primitives (text · image · component · rect · group · glow + camera · cuts · stings · captions). **No
 templates.** You do not pour data into a canned layout; you compose each video from the vocabulary in
-`docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a hyperscene JSON**
+`docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a scene JSON**
 (and capture the real assets it needs), then render it. You do **not** edit `scene.html` or the Go
 renderer unless explicitly asked.
 
@@ -17,13 +17,13 @@ renderer unless explicitly asked.
 ## The loop
 
 ```bash
-make list                              # shows the hyperscene module + its schema/sample
+make list                              # shows the scene module + its schema/sample
 ./bin/shortwave path/to/video.json     # module read from JSON → engine/out/<name>.mp4
 make video D=path/to/video.json        # same, via make   (add --draft to bin/shortwave for fast no-grain)
 ```
 
-Every JSON **must** start with `"module": "hyperscene"`. Save new videos as
-`formats/hyperscene/<topic>.json` (siblings of `sample.json`). Always read `sample.json` and an existing
+Every JSON **must** start with `"module": "scene"`. Save new videos as
+`formats/scene/<topic>.json` (siblings of `sample.json`). Always read `sample.json` and an existing
 video (e.g. `linear-30.json`) first as working references, then compose — never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
@@ -82,14 +82,14 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 
 ## After writing a JSON
 
-1. **Images:** `make assets D=formats/hyperscene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
+1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
 2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats.png` (first/mid/last of every
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
 2b. **Anti-slop:** `make slop D=<file>` — impeccable detector on the rendered DOM (overused-font /
    gradient / card-in-card / centered tells). Reach past anything it flags before rendering.
-3. **Render:** `make video D=formats/hyperscene/<topic>.json`.
-4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/hyperscene.png`).
-5. **Check frames** before declaring done: `make look M=hyperscene` / `make frame M=hyperscene N=<n>`.
+3. **Render:** `make video D=formats/scene/<topic>.json`.
+4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
+5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
    Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
 6. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
 7. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);

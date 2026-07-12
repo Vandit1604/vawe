@@ -28,6 +28,6 @@ engine/assets/fonts/local/
 
 # Video/data instances are NOT the framework (framework = scene.html + schema.json + sample.json).
 # Keep the engine + schema + reference sample tracked; ignore the authored videos.
-formats/hyperscene/*.json
-!formats/hyperscene/sample.json
-!formats/hyperscene/schema.json
+formats/scene/*.json
+!formats/scene/sample.json
+!formats/scene/schema.json

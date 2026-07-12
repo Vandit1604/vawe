@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>hyperscene</title>
+    <title>scene</title>
     <link rel="stylesheet" href="/core/tokens.css" />
     <style>
-      /* hyperscene — the OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
+      /* scene — the OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
          video. No per-topic code, no sealed scenes — layers (text/image/component/rect) + timed
-         windows + kinetic splits + the cut kit (core/transitions.js) + shader stings
-         (core/shaders.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
+         windows + kinetic splits + the cut kit (core/cuts.js) + shader stings
+         (core/stings.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
       .chrome { display: none; }
       .stage { background: none !important; }
       .stage::before, .stage::after { display: none !important; }
@@ -47,13 +47,14 @@
       <div class="dbg"><div class="zone zt"></div><div class="zone zb"></div><div class="zone zl"></div><div class="zone zr"></div><div class="box"></div></div>
     </div>
     <script type="module">
-      import { boot, icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/lib.js';
-      import { driveClips, seekAll } from '/core/compose.js';
-      import { splitText, animateUnits } from '/core/kinetic.js';
+      import { boot } from '/core/boot.js';
+      import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/motion.js';
+      import { driveClips, seekAll } from '/core/clips.js';
+      import { splitText, animateUnits } from '/core/type.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
-      import { cutStyle } from '/core/transitions.js';
-      import { createShaderOverlay, SHADER_FX } from '/core/shaders.js';
-      import { cameraAt, motionAt } from '/core/timeline.js';
+      import { cutStyle } from '/core/cuts.js';
+      import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
+      import { cameraAt, motionAt } from '/core/sequence.js';
       const $ = (id) => document.getElementById(id);
 
       boot((data, fps, theme) => {
@@ -416,7 +417,7 @@
         const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
         const caps = data.captions || [];
         const capMode = data.captionMode || 'sentence';
-        const camKf = data.camera || []; // cameraAt/motionAt now live in /core/timeline.js (pure, tested)
+        const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
 
         function renderFrame(f) {
           const t = f / fps;

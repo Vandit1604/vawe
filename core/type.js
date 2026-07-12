@@ -1,7 +1,7 @@
-// kinetic.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
+// core/type.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
-import { clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './lib.js';
+import { clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
 
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.

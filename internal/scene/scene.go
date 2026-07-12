@@ -31,7 +31,7 @@ type Meta struct {
 	Duration    float64     `json:"duration"`
 	TotalFrames int         `json:"totalFrames"`
 	Width       int         `json:"width"`  // capture size — 0 falls back to the portrait default
-	Height      int         `json:"height"` // (set by core/lib.js boot from data.orientation)
+	Height      int         `json:"height"` // (set by core/boot.js boot from data.orientation)
 	Stings      []float64   `json:"stings"`
 	SFX         []audio.Cue `json:"sfx"`
 }

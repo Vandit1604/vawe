@@ -3,8 +3,8 @@
 // the vendored impeccable detector (41 deterministic rules: overused fonts, purple/blue gradients,
 // card-in-card, rounded icon-tile-over-heading, gray-on-color, centered-everything, …). No LLM.
 //
-//   node scripts/slop.mjs formats/hyperscene/northwind.json [--at 1.5]
-//   make slop D=formats/hyperscene/northwind.json
+//   node scripts/slop.mjs formats/scene/northwind.json [--at 1.5]
+//   make slop D=formats/scene/northwind.json
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
