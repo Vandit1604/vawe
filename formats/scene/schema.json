@@ -187,12 +187,17 @@
             "glow",
             "board",
             "doc",
-            "html"
+            "html",
+            "clip"
           ]
         },
         "html": {
           "type": "string",
           "label": "html: raw hand-authored HTML/CSS for the layer (static; <script> stripped)"
+        },
+        "speed": {
+          "type": "number",
+          "label": "clip: playback rate multiplier (1 = realtime; 0.5 = half speed)"
         },
         "filename": {
           "type": "string",

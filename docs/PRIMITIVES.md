@@ -173,6 +173,12 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   (filename + green diff chip) then blocks — `{h,accent}` heading w/ accent left-bar · `{body}` mono
   lines · `{code}` · `{bullets:[…]}`. Auto-height, theme-styled (`--surface`/`--line`/fonts). ONE
   layer instead of hand-placing rect+filename+chip+bar+body. Sizes: `nameSize/hSize/bodySize`.
+- `{type:"clip", src:"/engine/assets/gen/<name>/manifest.json", x, y, w, loop?, speed?, fit?, radius?}`
+  → a generated/any **video played DETERMINISTICALLY** as a preloaded PNG frame sequence. `make gen-video
+  Q="…" NAME=<name>` (kie.ai) or `make gen-clip IN=any.mp4 NAME=<name>` extracts frames + a manifest;
+  `renderFrame(n)` swaps a preloaded `<img>` src per frame (no `<video>`, no async decode → purity holds).
+  `loop` wraps, `speed` scales playback. Generated imagery: `make gen-image Q="…" NAME=<name>` → a normal
+  `image` layer. (Generation needs `KIE_API_KEY`; `gen-clip` works on any local mp4 with no key.)
 - `{type:"html", html:"<div…>", x, y, w}` → **raw hand-authored HTML/CSS as one layer** — full design
   freedom for a rich "money-shot" beat (custom grids, gradients, mixed faces), still positioned and
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity

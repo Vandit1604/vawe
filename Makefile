@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
+.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -136,6 +136,23 @@ photos:
 # ANIMATED site section as parts (relative geometry) to re-stage with our motion primitives.
 capture-scene:
 	node scripts/capture-scene.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) --parts "$(PARTS)"
+
+# ---- generated media (kie.ai; needs KIE_API_KEY or a gitignored .kie.key) ----
+# make gen-image Q="a neon server room" NAME=hero [ASPECT=16:9]  — generate an image → engine/assets/gen/<NAME>.png
+# (use it as a normal { "type": "image", "src": "/engine/assets/gen/<NAME>.png" } layer).
+gen-image:
+	node scripts/kie.mjs image "$(Q)" --out engine/assets/gen/$(NAME).png $(if $(ASPECT),--aspect $(ASPECT))
+
+# make gen-clip IN=path/to.mp4 NAME=city [FPS=30] [W=720]  — extract ANY mp4 (a kie.ai generation or a
+# local file) to a DETERMINISTIC frame sequence + manifest → engine/assets/gen/<NAME>/ (use as a `clip` layer).
+gen-clip:
+	node scripts/gen-clip.mjs $(IN) $(NAME) $(if $(FPS),--fps $(FPS)) $(if $(W),--w $(W))
+
+# make gen-video Q="a drone shot over a city" NAME=city [ASPECT=16:9]  — generate a video AND extract it to a
+# clip in one step (a deterministic `clip` layer). Chains kie.ai video → gen-clip.
+gen-video:
+	node scripts/kie.mjs video "$(Q)" --out engine/assets/gen/$(NAME).mp4 $(if $(ASPECT),--aspect $(ASPECT))
+	node scripts/gen-clip.mjs engine/assets/gen/$(NAME).mp4 $(NAME)
 
 # make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
 # (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/capture-component.mjs.

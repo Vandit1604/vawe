@@ -353,6 +353,14 @@
             el.style.width = Math.round(c.w * fit) + 'px';
             el.style.height = Math.round(c.h * fit) + 'px';
             el.innerHTML = `<div class="hs-comp" style="width:${c.w}px;height:${c.h}px;transform:scale(${fit.toFixed(4)})">${c.html}</div>`;
+          } else if (L.type === 'clip') {
+            // a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame sequence
+            // (scripts/gen-clip.mjs → manifest). No <video>, no async decode — renderFrame(n) swaps
+            // the <img> src to the frame for local time. src = the manifest path (preloaded in boot).
+            const man = (window.__clips && window.__clips[L.src]) || { frames: [], w: 640, h: 360, fps: 30 };
+            if (L.w != null) el.style.width = L.w + 'px';
+            el.style.borderRadius = (L.radius ?? 0) + 'px'; el.style.overflow = 'hidden';
+            el.innerHTML = `<img class="hs-clip-img" style="width:100%;display:block;object-fit:${L.fit || 'cover'}" src="${man.frames[0] || ''}">`;
           } else if (L.type === 'html') {
             // RAW hand-authored HTML/CSS as ONE layer — full design freedom for a beat, still
             // positioned (x/y/w) and animated (anim / motion tracks) by the engine. MUST be static:
@@ -405,7 +413,7 @@
             }
           }
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
-          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board', 'doc', 'component', 'html'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board', 'doc', 'component', 'html', 'clip'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };
@@ -446,6 +454,17 @@
               const cs = L.countStart ?? 0.2, cd = L.countDur ?? 1.6;
               const v = interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: resolveEasing(L.ease || 'easeOutCubic') });
               el.textContent = (L.prefix || '') + v.toFixed(L.decimals ?? 0) + (L.suffix || '');
+            }
+            // clip playback: show the frame for local time (pure fn of n). loop wraps; else clamps.
+            if (L.type === 'clip') {
+              const man = (window.__clips && window.__clips[L.src]) || { frames: [] };
+              const N = man.frames.length;
+              if (N) {
+                const img = el.querySelector('img');
+                let fi = Math.floor((t - start) * (man.fps || 30) * (L.speed ?? 1));
+                fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
+                if (img && img.getAttribute('src') !== man.frames[fi]) img.setAttribute('src', man.frames[fi]);
+              }
             }
             // ken burns zoom on image layers (continuous over the whole window, identity outside)
             if (L.ken) { const im = el.querySelector('img'); if (im) Object.assign(im.style, t >= start && t < end

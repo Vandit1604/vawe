@@ -154,6 +154,19 @@ export async function boot(build) {
     const compPaths = new Set();
     (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') Object.values(o).forEach(scan); else if (typeof o === 'string' && /\/(components|scenes)\/[^/]+\.json$/.test(o)) compPaths.add(o); })(data);
     for (const p of compPaths) { try { window.__components[p] = await (await fetch(p)).json(); } catch (e) {} }
+    // preload generated CLIPS (scripts/gen-clip.mjs): any "/…/manifest.json" string is a frame-sequence
+    // manifest {fps,w,h,frames:[url]}. Decode EVERY frame up front so the `clip` layer can swap an <img>
+    // src per renderFrame(n) with zero async — deterministic playback of a generated/any video.
+    window.__clips = {};
+    const clipPaths = new Set();
+    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') Object.values(o).forEach(scan); else if (typeof o === 'string' && /\/manifest\.json$/.test(o)) clipPaths.add(o); })(data);
+    for (const p of clipPaths) {
+      try {
+        const man = await (await fetch(p)).json();
+        window.__clips[p] = man;
+        await Promise.all((man.frames || []).map((src) => new Promise((res) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(res, res) : res()); im.onerror = () => res(); im.src = src; })));
+      } catch (e) {}
+    }
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme);
     const totalFrames = Math.round(scene.duration * fps);
