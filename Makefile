@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
+.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -43,6 +43,11 @@ verify:
 # [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
 audit:
 	node verify/audit.mjs $(M)
+
+# make audit-test  — regression: proves `make audit` still CATCHES invisible emphasis (blue-on-blue).
+# Runs the audit on a fixture that forces accent-<b>-on-accent-bg and asserts a hard contrast fail.
+audit-test:
+	node verify/contrast-regression.mjs
 
 # make snap M=<format> [SAVE=1]  — check a scene WITHOUT rendering video: capture/diff the per-frame
 # DOM signature (bbox/transform/opacity/font/text). Baseline a refactor, then prove frames unchanged.

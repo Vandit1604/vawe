@@ -39,14 +39,17 @@ That is millions of distinct combinations before copy, layout, and color even en
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/shaders.js`) — 14 WebGL cover-the-cut effects
+## Shader stings (`core/shaders.js`) — 22 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak — every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
 `grain` `dissolve` (to white) `ink` (to near-black) `glitch` (RGB slice bars) `streak` (radial
 rays, 4-tap motion smear) `pixel` (mosaic) `confetti` (seeded burst) `ripple` (impact rings) `scan`
-(CRT sweep) `warp` (barrel pulse) `bokeh` (dreamy discs). Peak them AT the cut; see MOTION-CRAFT
-for the when-to-use guide.
+(CRT sweep) `warp` (barrel pulse) `bokeh` (dreamy discs). Plus 8 **shape-wipes** adapted from the MIT
+gl-transitions catalog into this overlay model (generative, tint/palette-aware): `wipe` (directional,
+seed picks the direction) `circle` (disc from centre) `blinds` (venetian bars) `squares` (staggered
+grid) `pinwheel` (angular arms) `doors` (panels close) `polka` (dot curtain) `swirl` (rotational
+streaks). Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
 - **JSON sting**: `{ t, fx, dur, seed, color?, intensity? }`. `color` (hex) recolours the effect by
   luminance (tint any effect to a brand accent — e.g. cobalt on a mono reel); omit for native colours.
   `intensity` scales strength (1 = default). The white/grey effects (flash/streak/scan/ripple/bokeh/
@@ -71,9 +74,12 @@ for the when-to-use guide.
 
 ## Backgrounds (`core/backgrounds.js`) — 14 canvas presets, theme-recolored
 
-Light: `paper` `paperShapes` `paperDots` `soft` `accent` `dotmatrix` `plain` · Dark: `ink` `aurora`
-`mesh` `constellation` `spotlight` `brandglow` `shapes`. Every preset reads the brand's palette pack;
-plain by default, texture only on hook/CTA.
+Light: `paper` `paperShapes` `paperDots` `soft` `accent` `accentPlain` `dotmatrix` `plain` · Dark:
+`ink` `aurora` `mesh` `constellation` `spotlight` `brandglow` `shapes`. Every preset reads the brand's
+palette pack; plain by default, texture only on hook/CTA. `accentPlain` = the brand accent as a CLEAN
+full-bleed field (grain only, no dots/spotlight) — for plain sites whose hero is a flat colour.
+Over an accent-coloured bg, `<b>` emphasis auto-falls-back to the layer's own colour (no blue-on-blue);
+override any layer's emphasis colour with `emColor`.
 - **JSON bg window**: `{ preset, from, to, value?, opts? }`. `value: "dark"|"light"` forces the treatment.
   `opts` tunes the preset's baked numbers per video: `{ intensity, dotAlpha, spacing, drift, grain }`
   (palette still owns colour). `ink` draws accent-tinted dots — for a clean flat dark, use `plain` + `value:"dark"`.
@@ -163,6 +169,16 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 - `reflect: 0.05–0.3` → floor reflection (`-webkit-box-reflect`).
 - `{type:"board", cols:[{title,count,cards:[{id,title,labels:[{t,c}]}]}]}` → populated mini-Kanban
   from data (≤4×5), elevation-1 cards; dim + fade it behind a foreground card for real density.
+- `{type:"doc", filename, diff, blocks:[…]}` → a markdown/source FILE card from pure data: header
+  (filename + green diff chip) then blocks — `{h,accent}` heading w/ accent left-bar · `{body}` mono
+  lines · `{code}` · `{bullets:[…]}`. Auto-height, theme-styled (`--surface`/`--line`/fonts). ONE
+  layer instead of hand-placing rect+filename+chip+bar+body. Sizes: `nameSize/hSize/bodySize`.
+- `{type:"html", html:"<div…>", x, y, w}` → **raw hand-authored HTML/CSS as one layer** — full design
+  freedom for a rich "money-shot" beat (custom grids, gradients, mixed faces), still positioned and
+  animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity
+  holds. Use theme vars (`var(--font-sans)`, `var(--accent)`) to stay on-brand. The whole block
+  animates as ONE unit (use atomic layers when you want per-element choreography). **Preview standalone
+  first (`make preview HTML=frag.html`) and gate the markup (`make slop`)** — hand HTML regresses to slop.
 - Optical tracking: themes with `type.optical: true` get size-scaled letter-spacing via
   `trackingFor(px)` (−0.008em body → −0.022em hero). Variable weights (510/590) pass through.
 - **Animated site sections**: `make capture-scene URL=… SEL="section" NAME=b LABEL=x PARTS="s1,s2"`

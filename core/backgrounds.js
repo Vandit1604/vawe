@@ -170,6 +170,9 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
     case 'ink': return { base: { kind: 'radial', from: P.inkBase[0], to: P.inkBase[1], cx: 0.5, cy: 0.44 }, fx: [
       { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.06, peakAlpha: 0.2, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
     case 'plain': return { base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] };
+    // accentPlain — the brand's accent colour as a clean full-bleed field (grain only, no dots/spotlight).
+    // For PLAIN sites whose hero is a flat/gradient colour, not a textured one: match plain with plain.
+    case 'accentPlain': return { base: { kind: 'radial', from: P.accentBase[0], to: P.accentBase[1], cx: 0.5, cy: 0.4 }, fx: [grain] };
     // clean dark radial gradients (NO dots) — what you reach for when you want a plain deep backdrop
     case 'deep': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.42 }, fx: [grain] };
     case 'dark': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.44 }, fx: [grain] };

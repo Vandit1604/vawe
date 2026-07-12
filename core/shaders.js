@@ -9,8 +9,11 @@
 //
 // Effects: flash (white pop), burn (film-burn ember front), leak (warm light leak),
 // grain (noise burst), dissolve (fbm dissolve to white), ink (fbm bleed to near-black),
-// glitch (RGB slice bars), streak (radial zoom-blur rays), pixel (mosaic flicker).
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh'];
+// glitch (RGB slice bars), streak (radial zoom-blur rays), pixel (mosaic flicker),
+// confetti, ripple, scan, warp, bokeh; and shape-wipes adapted from the MIT gl-transitions
+// catalog (glslio/gl-transitions) into this overlay model: wipe, circle, blinds, squares,
+// pinwheel, doors, polka, swirl. All generative (uv/progress/seed only) — palette+tint aware.
+export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl'];
 
 const FRAG = `
 precision highp float;
@@ -142,6 +145,37 @@ void main(){
       float disc = smoothstep(rad, rad*0.55, length(d));
       c.rgb = mix(c.rgb, vec3(1.0), disc*0.5); c.a = max(c.a, disc * bell * 0.22);
     }
+  } else if (u_fx == 14) {                             /* wipe — directional band sweeps across (gl-transitions: Directional) */
+    float k = floor(hash(vec2(u_seed, 2.0)) * 4.0);   /* seed picks one of 4 cardinal directions */
+    vec2 nd = k < 1.0 ? vec2(1.0, 0.0) : k < 2.0 ? vec2(-1.0, 0.0) : k < 3.0 ? vec2(0.0, 1.0) : vec2(0.0, -1.0);
+    float proj = dot(uv - 0.5, nd) + 0.5;
+    float edge = pp * 1.2 - 0.1;
+    c = vec4(vec3(1.0), smoothstep(edge + 0.14, edge, proj) * bell);
+  } else if (u_fx == 15) {                             /* circle — disc expands from centre (gl-transitions: circleopen) */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    c = vec4(vec3(1.0), smoothstep(pp*0.95 + 0.08, pp*0.95, length(d)) * bell);
+  } else if (u_fx == 16) {                             /* blinds — venetian bars open together (gl-transitions: windowblinds) */
+    float local = fract(uv.y * 14.0), open = pp * 1.1;
+    c = vec4(vec3(1.0), smoothstep(open + 0.05, open - 0.05, local) * bell);
+  } else if (u_fx == 17) {                             /* squares — grid cells fill in, staggered (gl-transitions: GridFlip) */
+    vec2 cell = floor(uv * vec2(20.0*u_res.x/u_res.y, 20.0));
+    float delay = hash(cell) * 0.55;
+    c = vec4(vec3(1.0), smoothstep(delay, delay + 0.12, pp) * bell);
+  } else if (u_fx == 18) {                             /* pinwheel — angular sweep, 3 arms (gl-transitions: pinwheel) */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float ang = fract((atan(d.y, d.x)/6.28318 + 0.5) * 3.0);
+    c = vec4(vec3(1.0), step(ang, pp * 1.05) * bell);
+  } else if (u_fx == 19) {                             /* doors — panels close from both sides (gl-transitions: DoorWay) */
+    float hx = abs(uv.x - 0.5), close = pp * 0.5;
+    c = vec4(vec3(1.0), smoothstep(0.5 - close - 0.03, 0.5 - close, hx) * bell);
+  } else if (u_fx == 20) {                             /* polka — dot curtain grows to cover (gl-transitions: PolkaDotsCurtain) */
+    vec2 cell = fract(uv * vec2(12.0*u_res.x/u_res.y, 12.0)) - 0.5;
+    c = vec4(vec3(1.0), smoothstep(pp*0.72, pp*0.72 - 0.12, length(cell)) * bell);
+  } else if (u_fx == 21) {                             /* swirl — rotational light streaks from centre (gl-transitions: Swirl) */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float r = length(d);
+    float a0 = atan(d.y, d.x) + (1.0 - smoothstep(0.0, 0.7, r)) * bell * 6.2831;
+    c = vec4(vec3(1.0), pow(0.5 + 0.5*sin(a0 * 8.0), 4.0) * smoothstep(0.85, 0.0, r) * bell * 0.6);
   }
   // optional tint: recolour by luminance → u_tint (amt 0 = untouched); u_intensity scales strength
   if (u_tintAmt > 0.0) {

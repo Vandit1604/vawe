@@ -47,6 +47,7 @@
             "spotlight",
             "brandglow",
             "plain",
+            "accentPlain",
             "deep",
             "dark"
           ]
@@ -108,7 +109,15 @@
             "ripple",
             "scan",
             "warp",
-            "bokeh"
+            "bokeh",
+            "wipe",
+            "circle",
+            "blinds",
+            "squares",
+            "pinwheel",
+            "doors",
+            "polka",
+            "swirl"
           ]
         },
         "dur": {
@@ -176,8 +185,42 @@
             "count",
             "group",
             "glow",
-            "board"
+            "board",
+            "doc",
+            "html"
           ]
+        },
+        "html": {
+          "type": "string",
+          "label": "html: raw hand-authored HTML/CSS for the layer (static; <script> stripped)"
+        },
+        "filename": {
+          "type": "string",
+          "label": "doc: filename shown in the card header (e.g. creed.md)"
+        },
+        "diff": {
+          "type": "string",
+          "label": "doc: diff chip in the header (e.g. +18 -0)"
+        },
+        "blocks": {
+          "type": "array",
+          "label": "doc: content blocks — {h,accent} heading · {body} mono lines · {code} · {bullets:[]}"
+        },
+        "nameSize": {
+          "type": "number",
+          "label": "doc: filename / diff-chip font px (default 30)"
+        },
+        "hSize": {
+          "type": "number",
+          "label": "doc: block-heading font px (default 40)"
+        },
+        "bodySize": {
+          "type": "number",
+          "label": "doc: body / code / bullet font px (default 30)"
+        },
+        "blockGap": {
+          "type": "number",
+          "label": "doc: vertical gap above each heading block (default 22)"
         },
         "text": {
           "type": "string",
@@ -236,6 +279,10 @@
         "color": {
           "type": "string",
           "label": "Glow color / text color"
+        },
+        "emColor": {
+          "type": "string",
+          "label": "<b> emphasis colour (default: brand accent, or inherit over an accent bg)"
         },
         "tracking": {
           "type": "string",

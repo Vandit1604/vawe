@@ -3,6 +3,8 @@
 //   • overlap   — two critical boxes intersect            (HARD fail)
 //   • overflow  — text clipped (scrollW/H > clientW/H)    (HARD fail)
 //   • safe-zone — element outside the SAFE box            (HARD fail)
+//   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
+//                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
 //   • tight     — sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
@@ -129,6 +131,30 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     const rt = cratio([fg[0], fg[1], fg[2]], bg);
     // display type in video: hard-fail only the unreadable (<2.5:1), warn under WCAG large-text 3.5
     if (rt < 3.5) issues.push({ kind: rt < 2.5 ? 'contrast' : 'contrast-soft', a: e.id, t: e.t, detail: `ratio ${rt.toFixed(1)}:1` });
+  }
+  // EMPHASIS + WIDE contrast: the loop above reads each layer's TOP-level colour only. A layer's
+  // <b>/<em> spans carry their OWN colour (--em) — an accent <b> on an accent bg vanishes (the
+  // blue-on-blue bug the old audit missed). Also widen past [data-layer=critical] to ANY headline-
+  // scale text (≥60px), soft-tier when the layer isn't critical so existing videos don't newly HARD-fail.
+  const near = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60; // ≈ same colour = invisible
+  const checkSpan = (span, critical, label) => {
+    const t = (span.textContent || '').trim(); if (!t || !vis(span)) return;
+    const b = span.getBoundingClientRect(); if (b.width < 2 || b.height < 2) return;
+    if ((parseFloat(getComputedStyle(span).fontSize) || 0) < 40) return; // ignore small captions/labels
+    const fg = parse(getComputedStyle(span).color); if (!fg || fg[3] < 0.5) return;
+    const bg = bgFor(span, { x: b.left, y: b.top, w: b.width, h: b.height }); if (!bg) return;
+    const rt = cratio([fg[0], fg[1], fg[2]], bg), invisible = near([fg[0], fg[1], fg[2]], bg);
+    if (rt >= 3.5 && !invisible) return;
+    const hard = critical && (invisible || rt < 2.5);
+    issues.push({ kind: hard ? 'contrast' : 'contrast-soft', a: label, t: t.slice(0, 18),
+      detail: invisible ? `${label} ≈ bg colour (invisible)` : `${label} ${parseFloat(getComputedStyle(span).fontSize) | 0}px at ${rt.toFixed(1)}:1` });
+  };
+  for (const tx of document.querySelectorAll('.hs-text')) {
+    if (!vis(tx)) continue;
+    const critical = tx.getAttribute('data-layer') === 'critical' || !!tx.closest('[data-layer="critical"]');
+    for (const em of tx.querySelectorAll('b, em')) checkSpan(em, critical, em.tagName.toLowerCase()); // <b>/<em> always: they carry --em
+    const px = parseFloat(getComputedStyle(tx).fontSize) || 0; // the whole layer only when headline-scale AND not already checked as critical above
+    if (px >= 60 && !critical && [...tx.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim())) checkSpan(tx, false, 'text');
   }
   // HEADLINE DOMINANCE: the largest visible text on a frame is the headline — legibility (4.5:1)
   // is not enough for display type; below 7:1 it reads washed-out ("gray heading" bug class).

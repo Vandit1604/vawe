@@ -123,6 +123,13 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
   or a Lucide UI icon (`engine/assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
   named things are a missed layer of craft.
+- **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
+  site. A plain/flat site (creed) gets a plain field (`plain`/`paper`/`accentPlain`), never invented
+  dots/shapes. Only use a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/
+  `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
+  wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
+  beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md` — read
+  it before authoring.
 
 ## Step 3c — The LOCK SHEET (freeze this, get sign-off, THEN author)
 
