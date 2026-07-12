@@ -9,6 +9,22 @@ Authoring without a brief produces the same generic video for everyone. This ski
 the five decisions that actually change the output, then locks a deterministic per-brand style
 so no two brands ship the same look.
 
+## THE CONTRACT: plan → LOCK → execute (do NOT generate first)
+
+Planning and generating are two phases with a hard gate between them. **Nothing is rendered until
+the plan is LOCKED and the user signs off.** Then execution is precise transcription of the locked
+spec, not exploration. If you find yourself "trying things" in the JSON, the plan wasn't locked —
+go back and lock it.
+
+1. **Study + brief** (Steps 1–2): capture the site, derive the design language, fill the brief.
+2. **Storyboard** (Step 3): the beat table + per-beat archetype/copy/motion.
+3. **LOCK SHEET** (Step 3c): freeze the full spec — theme colours/fonts, per-beat copy (exact words),
+   layout archetype, coordinates band, image/treatment per beat, motion personality, cuts/stings, CTA.
+   Present it. **Wait for explicit approval.** Change only what the user changes.
+4. **Execute** (Step 4): author the JSON to match the lock sheet exactly, then run the verify ladder.
+   No new creative decisions here — if one is needed, it means the lock sheet had a gap; surface it,
+   don't improvise.
+
 ## Step 1 — Study FIRST, then ask SITE-GROUNDED questions
 
 Order matters: brandkit + lookbook + a WebFetch of the site's actual copy BEFORE any questions.
@@ -75,12 +91,11 @@ different output — this breaks the author's own habits.
 
 Beat table first (in the reply, not a file): Hook (≤3s, no name-drop if teasing) → Build →
 Proof (real UI capture / true stat) → Payoff → CTA (3–5s). One idea per beat. Budget seconds
-per beat to the target duration. THEN pick the path:
+per beat to the target duration.
 
-- Repeating pattern with a tuned format (demo walkthrough, threadcite editorial, launch teaser,
-  brandfilm narrative) → author that format's JSON.
-- Anything bespoke → **hyperscene** (open canvas: layers/cuts/stings/bg windows/camera —
-  `formats/hyperscene/schema.json` is the contract).
+There is ONE module: **hyperscene** (the open canvas — layers/cuts/stings/bg windows/camera;
+`formats/hyperscene/schema.json` is the contract). No templates. You compose every video from the
+primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
 
 ## Step 3b — Choreography rules (anti-monotony)
 
@@ -100,6 +115,29 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
   or a Lucide UI icon (`engine/assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
   named things are a missed layer of craft.
+
+## Step 3c — The LOCK SHEET (freeze this, get sign-off, THEN author)
+
+Write the full spec in the reply as a table and get explicit approval before touching JSON. Every
+row is a decision the JSON will transcribe, not reinterpret:
+
+| Field | Locked value |
+|---|---|
+| Orientation / duration / theme | e.g. landscape · 22s · `themes/creed.json` |
+| Palette + fonts | the exact hexes + face names from the study (used ONLY these) |
+| Motion personality | `{easing, bounce, settle, enter, stagger}` written into the theme |
+| Per beat (one row each) | `t-range · archetype · exact copy · image/treatment · cut-in · motion` |
+| Assets | which real captures / logos / photos, and their treatment |
+| Sound | `audio.auto` on? captions? |
+| CTA | the exact end action + url |
+
+**Image treatments** to name per beat (don't leave images bare): `ken` (slow zoom), **`edgeFade`**
+(white blur dissolving the LEFT+RIGHT edges into the bg — set `edgeFadeColor` to the bg on dark
+scenes), clipped card + `radius`, `component` capture of a live UI section. A still image with no
+treatment reads as slop.
+
+Only after the user approves the lock sheet do you author. If a beat needs a decision the sheet
+didn't make, that's a lock-sheet gap — amend the sheet and re-confirm, don't improvise in the JSON.
 
 ## Step 4 — Author → verify (non-negotiable ladder)
 

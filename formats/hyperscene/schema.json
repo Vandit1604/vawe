@@ -394,6 +394,13 @@
         "ken": {
           "label": "Ken Burns zoom (image): true or {from,to,fx,fy}"
         },
+        "edgeFade": {
+          "label": "Image: fade the LEFT+RIGHT edges into the bg (white by default). true or fade-width %"
+        },
+        "edgeFadeColor": {
+          "type": "string",
+          "label": "Image: colour the edgeFade dissolves into (default #ffffff; set to the bg for dark scenes)"
+        },
         "from": {
           "type": "number",
           "label": "Count start value (count)"

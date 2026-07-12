@@ -277,6 +277,15 @@
               im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%';
               if (L.h) el.style.height = L.h + 'px';
             }
+            // edgeFade: the photo dissolves into a soft (white by default) blur on its LEFT + RIGHT
+            // edges — editorial framing so an image blends into the bg instead of hard-cropping.
+            // edgeFade: true | <fade%> ; edgeFadeColor overrides the fade colour (e.g. the dark bg).
+            if (L.edgeFade && im) {
+              const fw = typeof L.edgeFade === 'number' ? L.edgeFade : 14;
+              const mask = `linear-gradient(90deg, transparent 0%, #000 ${fw}%, #000 ${(100 - fw)}%, transparent 100%)`;
+              im.style.webkitMaskImage = mask; im.style.maskImage = mask;
+              el.style.background = L.edgeFadeColor || '#ffffff';
+            }
           } else if (L.type === 'group') {
             // layout-by-containment: a flex OR grid box; children (any depth) flow with gap so a
             // card+label+chip or a logo row can never desync. DOM ancestry = visual stacking.

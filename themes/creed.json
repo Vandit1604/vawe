@@ -1,0 +1,94 @@
+{
+  "name": "creed",
+  "note": "Rebuilt from creed.md July 2026. DARK-first product world (near-black #0e0e0d, near-white text) with the brand's sky-BLUE (#2563eb) as the live accent and a purple (#7c3aed) second accent (the 'Identity' mark). The signature hero is a photographic blue sky, not a gradient. Bold Geist / Geist Mono. Motion: punchy, snap easing.",
+  "palette": {
+    "bg": "#0e0e0d",
+    "bg2": "#151519",
+    "surface": "#1a1a1f",
+    "surface2": "#121216",
+    "line": "rgba(255,255,255,0.08)",
+    "lineStrong": "rgba(255,255,255,0.15)",
+    "text": "#f3f3f0",
+    "text2": "#b2b2b6",
+    "dim": "#6e6e72",
+    "accent": "#2563eb",
+    "accentDim": "rgba(37,99,235,0.16)",
+    "accentGlow": "rgba(37,99,235,0.42)",
+    "up": "#2563eb",
+    "down": "#7c3aed",
+    "ink": "#16161a"
+  },
+  "gradient": [
+    "#101a2e",
+    "#0c1120",
+    "#080a12"
+  ],
+  "type": {
+    "sans": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono",
+    "serif": "Geist"
+  },
+  "motion": {
+    "easing": "easeOutBack",
+    "bounce": 0.22,
+    "settle": 0.5,
+    "enter": 42,
+    "durationScale": 0.9,
+    "stagger": 0.04
+  },
+  "bg": {
+    "accent": "37,99,235",
+    "tint": "110,110,118",
+    "tint2": "124,58,237",
+    "dotLight": "120,124,140",
+    "paperBase": [
+      "#ffffff",
+      "#f4f5f7"
+    ],
+    "softBase": [
+      "#12233f",
+      "#0e1830"
+    ],
+    "accentBase": [
+      "#2563eb",
+      "#1d4ed8"
+    ],
+    "inkBase": [
+      "#101a2e",
+      "#080a12"
+    ],
+    "border": "#242428",
+    "dark": [
+      "#101a2e",
+      "#080a12"
+    ],
+    "darkMesh": [
+      "#12203a",
+      "#080a12"
+    ],
+    "deep": [
+      "#0c1220",
+      "#06070d"
+    ],
+    "light": [
+      "#ffffff",
+      "#f4f5f7"
+    ],
+    "ink": [
+      "#101a2e",
+      "#080a12"
+    ],
+    "paper": "#0e0e0d"
+  },
+  "vars": {
+    "--ink": "#0e0e0d",
+    "--paper": "#0e0e0d",
+    "--muted": "#6e6e72",
+    "--em": "#2563eb",
+    "--on-light": "#0e0e0d",
+    "--on-dark": "#f3f3f0",
+    "--border": "#242428",
+    "--accent-soft": "rgba(37,99,235,0.16)"
+  }
+}
