@@ -3,6 +3,7 @@
 export function build(kit, el, L) {
   kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
+  microType(kit, el, L); // pro-grade type refinements, on by default (opt out with raw:true)
   if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
     kit.cam.appendChild(el); // needs to be in-DOM to measure
     const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
@@ -20,6 +21,23 @@ export function build(kit, el, L) {
     el.remove();
   }
 }
+// microType: the micro-typography pass — refinements that separate produced from generated, applied to
+// every text/count layer by default. Static styles, measured once → deterministic. Skips mono (code)
+// where tracking/wrap/ligatures are wrong. Author opts out with raw:true, or overrides ls explicitly.
+function microType(kit, el, L) {
+  if (L.raw) return;
+  const size = L.size ?? 96;
+  const mono = L.font === 'mono';
+  // per-size optical tracking (tighter as type scales up) — only when the author didn't set ls.
+  if (L.ls == null && !mono && kit.trackingFor) el.style.letterSpacing = kit.trackingFor(size);
+  // widow/orphan control: balance headlines (even line lengths), pretty on body (no lone last word).
+  if (!mono && !L.split) el.style.textWrap = size >= 40 ? 'balance' : 'pretty';
+  // legibility: real kerning + ligatures on display type; crisp rasterization.
+  el.style.textRendering = 'optimizeLegibility';
+  el.style.fontKerning = mono ? 'none' : 'normal';
+  if (!mono) el.style.fontFeatureSettings = '"kern" 1, "liga" 1, "calt" 1';
+}
+
 // typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
 export function frame(kit, el, L, t) {
   if (!L.typing) return;
