@@ -115,4 +115,22 @@ export const CATALOG = [
     props: { w: 230, h: 440 } },
   { name: 'tabBar', family: 'tabBar', blurb: 'segmented control',
     props: { w: 500, active: 1, tabs: ['Design', 'Motion', 'Export'] } },
+
+  // ── wave 3: lists & structure ──
+  { name: 'checklist', family: 'checklist', blurb: 'checked / unchecked items',
+    props: { w: 460, items: [
+      { text: 'Write scene JSON', done: true }, { text: 'make critique', done: true },
+      { text: 'make catalog', done: true }, { text: 'Render', done: false }] } },
+  { name: 'table', family: 'table', blurb: 'data table (header + rows)',
+    props: { w: 560, cols: ['Format', 'FPS', 'Status'], rows: [
+      ['portrait', '30', 'ready'], ['landscape', '60', 'ready'], ['alpha', '30', 'beta']] } },
+  { name: 'timeline', family: 'timeline', blurb: 'vertical rail of events',
+    props: { w: 460, items: [
+      { title: 'Captured frames', meta: '12:04', done: true }, { title: 'Encoded mp4', meta: '12:05', done: true },
+      { title: 'Uploaded', meta: 'pending', done: false }] } },
+  { name: 'stepFlow', family: 'stepFlow', blurb: 'horizontal numbered steps',
+    props: { w: 560, active: 2, steps: ['Capture', 'Encode', 'Mux', 'Upload'] } },
+  { name: 'kanban', family: 'kanban', blurb: 'columns of cards',
+    props: { w: 560, columns: [
+      { title: 'Todo', cards: ['captions', 'TTS'] }, { title: 'Doing', cards: ['blocks'] }, { title: 'Done', cards: ['60fps', 'lottie'] }] } },
 ];

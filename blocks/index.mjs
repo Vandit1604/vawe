@@ -444,6 +444,73 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 
       children: [text({ text: t, size: 18, weight: i === active ? 600 : 500, color: i === active ? T.ink : T.sub })] })) }];
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// WAVE 3 families — lists & structure.
+
+// checklist — items with checked/unchecked boxes; done rows dim (reads as completed).
+export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 26,
+    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 14, children: [
+      it.done
+        ? box({ w: 26, h: 26, radius: 8, bg: T.green, layout: 'row', justify: 'center', items: 'center', children: [text({ text: '✓', size: 16, weight: 700, color: '#fff' })] })
+        : box({ w: 26, h: 26, radius: 8, bg: T.card, border: `2px solid ${T.hair}` }),
+      text({ text: it.text, size: 21, weight: 500, color: it.done ? T.dim : T.ink }),
+    ] })) }];
+}
+
+// table — a data table: `cols` header + `rows` of cells, hairline-divided.
+export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 } = {}) {
+  const cell = (t, head) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink });
+  const row = (cells, head) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head)) });
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '20px 24px',
+    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [row(cols, true), box({ h: 1, bg: T.hair }),
+      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: 'rgba(0,0,0,0.05)' }), row(r, false)].filter(Boolean))] }];
+}
+
+// timeline — a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
+export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 26,
+    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: 16, children: [
+      { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
+        box({ w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair }),
+        i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
+      ].filter(Boolean) },
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: '0 0 22px', children: [
+        text({ text: it.title, size: 20, weight: 600, color: T.ink }),
+        it.meta && text({ text: it.meta, font: 'mono', size: 15, color: T.dim }),
+      ].filter(Boolean) },
+    ] })) }];
+}
+
+// stepFlow — a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
+export function stepFlow({ x, y, w = 720, steps = [], active = 0, start = 0, dur = 4 } = {}) {
+  const children = [];
+  steps.forEach((s, i) => {
+    const state = i < active ? 'done' : i === active ? 'now' : 'todo';
+    const dotBg = state === 'todo' ? T.surface : T.accent;
+    children.push({ type: 'group', layout: 'column', items: 'center', gap: 10, children: [
+      box({ w: 44, h: 44, radius: 100, bg: dotBg, ...(state === 'now' ? { border: `3px solid ${T.accentSoft}` } : {}),
+        layout: 'row', justify: 'center', items: 'center', children: [text({ text: state === 'done' ? '✓' : String(i + 1), size: 20, weight: 700, color: state === 'todo' ? T.dim : '#fff' })] }),
+      text({ text: s, size: 18, weight: state === 'todo' ? 500 : 600, color: state === 'todo' ? T.sub : T.ink }),
+    ] });
+    if (i < steps.length - 1) children.push({ type: 'group', grow: 1, layout: 'column', children: [box({ h: 21 }), box({ h: 2, radius: 1, bg: i < active ? T.accent : T.hair })] });
+  });
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children }];
+}
+
+// kanban — columns of small cards. columns = [{title, cards:[string]}].
+export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {}) {
+  const colW = (w - 16 * (columns.length - 1)) / columns.length;
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: columns.map((col) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 10, children: [
+      text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim }),
+      ...col.cards.map((c) => box({ bg: T.card, radius: 10, border: HAIR, elevation: 1, pad: '14px 16px', children: [text({ text: c, size: 18, weight: 500, color: T.ink })] })),
+    ] })) }];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
@@ -454,7 +521,8 @@ import { CATALOG } from './catalog.mjs';
 const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browserFrame, pillRow, statBig,
   colorCycle, stripeCard, barChart, diff, quote, notification, kpiRow, callout, comparison, captions,
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
-  fileTree, logLines, commitRow, phoneFrame, tabBar };
+  fileTree, logLines, commitRow, phoneFrame, tabBar,
+  checklist, table, timeline, stepFlow, kanban };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {
