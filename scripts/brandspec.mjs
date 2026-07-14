@@ -49,9 +49,19 @@ const raw = await page.evaluate(() => {
   const btn = document.querySelector('a[class*=button i],button,[class*=btn i],[class*=cta i]');
   const mono = [...document.querySelectorAll('code,pre,[class*=mono i]')].find((e) => (e.textContent || '').trim());
   const bg = (() => { for (const el of [document.querySelector('main,section,[class*=hero i]'), document.body]) { if (!el) continue; const c = getComputedStyle(el).backgroundColor; if (c && !/rgba?\(0, 0, 0, 0\)/.test(c)) return c; } return getComputedStyle(document.body).backgroundColor; })();
+  // ACCENT = the most VIVID prominent colour, not "the first button's bg" (which was often a black chip).
+  // Tally saturated colours (chroma ≥ 0.25 excludes black/white/grey) across CTAs, links, and brand marks
+  // (the logo/icon/mascot is where the accent often lives), weighted by saturation × role-prominence.
+  const sat = (c) => { const m = c && c.match(/\d+(\.\d+)?/g); if (!m || m.length < 3) return 0; const [r, g, b] = m.map(Number); if (m.length > 3 && Number(m[3]) === 0) return 0; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx === 0 ? 0 : (mx - mn) / mx; };
+  const tally = {};
+  const consider = (c, w) => { const s = sat(c); if (s < 0.25) return; tally[c] = (tally[c] || 0) + s * w; };
+  for (const e of document.querySelectorAll('a[class*=button i],button,[class*=btn i],[class*=cta i]')) { const cs = getComputedStyle(e); consider(cs.backgroundColor, 4); consider(cs.color, 1); }
+  for (const e of document.querySelectorAll('svg,[class*=logo i],[class*=icon i],[class*=mark i],[class*=badge i],[class*=pill i]')) { const cs = getComputedStyle(e); consider(cs.backgroundColor, 3); consider(cs.fill, 3); consider(cs.color, 2); }
+  for (const e of document.querySelectorAll('a,[class*=link i],[class*=underline i],[class*=highlight i]')) consider(getComputedStyle(e).color, 1);
+  const accent = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0] || (btn ? getComputedStyle(btn).backgroundColor : null);
   return { vars, faces: [...faces].filter(Boolean), fonts, headline: specOf(headline), body: specOf(body),
     button: btn ? { ...specOf(btn), bg: getComputedStyle(btn).backgroundColor, radius: getComputedStyle(btn).borderRadius } : null,
-    mono: specOf(mono), bg, radiusSample: btn ? getComputedStyle(btn).borderRadius : null };
+    accent, mono: specOf(mono), bg, radiusSample: btn ? getComputedStyle(btn).borderRadius : null };
 });
 await browser.close();
 
@@ -78,11 +88,17 @@ console.log(`\nKEY TYPE (measured):`);
 for (const [k, v] of Object.entries({ headline: raw.headline, body: raw.body, button: raw.button, mono: raw.mono }))
   if (v) console.log(`  ${k.padEnd(9)}: ${v.family} ${v.weight} · ${v.size} · track ${v.tracking} · lh ${v.lineHeight}`);
 
-const bg = raw.bg, text = raw.body?.color || raw.headline?.color, accentC = raw.button?.bg;
+const bg = raw.bg, text = raw.body?.color || raw.headline?.color, accentC = raw.accent || raw.button?.bg;
 console.log(`\nCOLOURS (measured; author theme ONLY from these):`);
 console.log(`  bg      : ${hex(bg)}`);
 console.log(`  text    : ${hex(text)}   contrast vs bg ${ratio(text, bg)?.toFixed(1)}:1 [${grade(ratio(text, bg))}]`);
-if (accentC && rgb(accentC)) console.log(`  accent  : ${hex(accentC)}   (button) vs white ${ratio(accentC, '#fff')?.toFixed(1)}:1 [${grade(ratio(accentC, '#fff'))}] · vs bg ${ratio(accentC, bg)?.toFixed(1)}:1`);
+// accent = the most-saturated prominent colour (ranked across CTAs/links/marks), not "the first button".
+// It can still hide from CSS: a RASTER logo/mascot has no CSS colour, and oklch/oklab values aren't RGB.
+// So print what we found honestly and always point to the eyedrop (pixels never lie).
+if (accentC && rgb(accentC)) console.log(`  accent  : ${hex(accentC)}   vs white ${ratio(accentC, '#fff')?.toFixed(1)}:1 [${grade(ratio(accentC, '#fff'))}] · vs bg ${ratio(accentC, bg)?.toFixed(1)}:1`);
+else if (accentC) console.log(`  accent  : ${accentC}   (non-RGB, e.g. oklch — CONFIRM by eyedrop)`);
+else console.log(`  accent  : none in CSS — the brand colour likely lives in a raster logo/mascot.`);
+console.log(`  → accent is unreliable from CSS alone. EYEDROP the hero to be sure: make palette IMG=engine/assets/brands/<brand>/sections/01-*.png`);
 console.log(`  headline vs bg: ${ratio(raw.headline?.color, bg)?.toFixed(1)}:1 [${grade(ratio(raw.headline?.color, bg))}] (display type wants AAA ≥7)`);
 const tokenColors = Object.entries(raw.vars).filter(([k, v]) => /#|rgb|hsl/.test(v) && /colou?r|bg|text|accent|brand|fg|surface/i.test(k));
 const tokenFonts = Object.entries(raw.vars).filter(([k]) => /font/i.test(k));
