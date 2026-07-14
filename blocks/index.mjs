@@ -15,14 +15,27 @@
 //
 // See docs/BLOCKS.md for the catalog + screenshots.
 
+// THEME-AWARE tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
+// color-mix() for tints — so the SAME block reskins to any brand theme. Still deterministic: the
+// strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
+// Stripe" demo, not a generic surface.
 export const TOKENS = {
-  ink: '#0A0A0A', sub: '#5C5C58', dim: '#9A9A94',
-  paper: '#FCFCFC', card: '#FFFFFF', hair: '#D6D6D2', surface: '#F1F1EF',
-  accent: '#C96442', accentSoft: 'rgba(201,100,66,0.13)', accentInk: '#A94A28',
-  green: '#16A34A', greenBright: '#22C55E', greenSoft: 'rgba(34,197,94,0.14)',
+  ink: 'var(--text)', sub: 'var(--text-2)', dim: 'var(--dim)',
+  paper: 'var(--bg)', card: 'var(--card)', hair: 'var(--line)', surface: 'var(--surface-2)',
+  accent: 'var(--accent)',
+  accentSoft: 'color-mix(in srgb, var(--accent) 14%, transparent)',
+  accentInk: 'var(--accent)',
+  green: 'var(--up)', greenBright: 'var(--up)',
+  greenSoft: 'color-mix(in srgb, var(--up) 16%, transparent)',
+  down: 'var(--down)',
   blurple: '#635BFF', stripeNavy: '#0A2540', stripeTeal: '#3ECF8E', stripeGrey: '#8898AA',
 };
 const T = TOKENS;
+// SERIES — the theme-derived chart palette (accent → success → danger → two mixes). Charts default
+// their per-series/segment colours from this so multi-series graphics reskin with the brand.
+export const SERIES = ['var(--accent)', 'var(--up)', 'var(--down)',
+  'color-mix(in srgb, var(--accent) 55%, var(--text-2))', 'color-mix(in srgb, var(--up) 55%, var(--text-2))'];
+const seriesAt = (i) => SERIES[i % SERIES.length];
 const HAIR = `1px solid ${T.hair}`;
 const r2 = (n) => Math.round(n * 100) / 100;
 
@@ -36,7 +49,7 @@ const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
 // ─────────────────────────────────────────────────────────────────────────────
 // card — elevated white card · tinted inner panel · pill tags · CTA footer arrow
 // The canonical "rich card". Great for a feature grid / capability tile.
-export function card({ x, y, w = 740, h = 336, tint = '#F6E6DE', title, desc, pills = [],
+export function card({ x, y, w = 740, h = 336, tint = 'color-mix(in srgb, var(--accent) 10%, var(--card))', title, desc, pills = [],
   cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
   return [{
     type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 8, pad: 14,
@@ -212,7 +225,7 @@ export function stripeCard({ x, y, w = 380, start = 0, dur = 4 } = {}) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // barChart — labeled bars with values. `data` = [{label, value}]. Scales to the max.
-export function barChart({ x, y, w = 560, h = 260, data = [], color = TOKENS.blurple, start = 0, dur = 4 } = {}) {
+export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0], start = 0, dur = 4 } = {}) {
   const max = Math.max(...data.map((d) => d.value), 1);
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: 14, pad: 22,
     bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
@@ -225,7 +238,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = TOKENS.blu
 
 // diff — a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
 export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
-  const col = { '+': TOKENS.green, '-': '#C0362C', ' ': T.sub };
+  const col = { '+': T.green, '-': T.down, ' ': T.sub };
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 26,
     bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: 22, weight: 400, color: col[ln.sign] || T.ink })) }];
@@ -262,7 +275,7 @@ export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) 
 
 // callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
 export function callout({ x, y, w = 720, text: msg, tone = 'info', start = 0, dur = 4 } = {}) {
-  const ac = { info: TOKENS.blurple, success: TOKENS.green, warn: TOKENS.accent }[tone] || TOKENS.blurple;
+  const ac = { info: T.accent, success: T.green, warn: '#F6A417' }[tone] || TOKENS.blurple;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
     bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
       box({ w: 4, h: 30, radius: 2, bg: ac }),
@@ -296,7 +309,7 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 // (crisp, deterministic, animates as a unit); bar-family stays native boxes for per-bar life.
 
 // lineChart — a trend line (optional area fill) in a hairline card. data = [{label,value}].
-export function lineChart({ x, y, w = 560, h = 240, data = [], color = TOKENS.blurple, area = false, label = '', start = 0, dur = 4 } = {}) {
+export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
   const cw = w - 44, ch = h - (label ? 74 : 44), pad = 8;
   const vals = data.map((d) => d.value); const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
   const n = Math.max(1, data.length - 1);
@@ -316,11 +329,11 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = TOKENS.bl
 export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
   const total = segments.reduce((s, d) => s + d.value, 0) || 1;
   const R = 40, C = 2 * Math.PI * R, sw = 15; let off = 0;
-  const arcs = segments.map((s) => { const len = (s.value / total) * C;
-    const el = `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${s.color}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;
+  const arcs = segments.map((s, i) => { const len = (s.value / total) * C;
+    const el = `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${s.color || seriesAt(i)}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;
     off += len; return el; }).join('');
   const ring = `<svg viewBox="0 0 100 100" width="${w - 44}" height="${w - 44}" style="display:block;margin:0 auto 14px">${arcs}</svg>`;
-  const legend = segments.map((s) => `<div style="display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
+  const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
   const html = `<div style="background:${T.card};border:${HAIR};border-radius:14px;padding:24px;box-sizing:border-box;width:${w}px">`
     + (label ? `<div style="font:600 18px var(--font-mono);color:${T.dim};margin-bottom:14px">${label}</div>` : '')
     + ring + `<div style="display:flex;flex-direction:column;gap:9px">${legend}</div></div>`;
@@ -335,7 +348,7 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
     bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: data.map((d) => ({ type: 'group', layout: 'column', items: 'center', gap: 8, children: [
       { type: 'group', layout: 'column', items: 'stretch', w: bw, gap: 2, children:
-        d.values.map((v, i) => box({ w: bw, h: Math.round((h - 90) * v / max) + 2, radius: i === 0 ? 4 : 0, bg: (series[i] || {}).color || T.blurple })) },
+        d.values.map((v, i) => box({ w: bw, h: Math.round((h - 90) * v / max) + 2, radius: i === 0 ? 4 : 0, bg: (series[i] || {}).color || seriesAt(i) })) },
       text({ text: d.label, size: 18, color: T.dim, font: 'mono' }),
     ] })) }];
 }
@@ -584,7 +597,7 @@ export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur =
 
 // badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
 export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
-  const ac = { ok: T.green, info: TOKENS.blurple, warn: '#F6A417', accent: T.accent }[tone] || T.green;
+  const ac = { ok: T.green, info: T.accent, warn: '#F6A417', accent: T.accent }[tone] || T.green;
   return [{ type: 'group', x, y, bg: '#3A3A38', radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
     start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       text({ text: label, font: 'mono', size: 17, weight: 600, color: '#fff', pad: '4px 12px' }),

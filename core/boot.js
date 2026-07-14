@@ -7,6 +7,15 @@ import { validateAll } from '../scripts/validate.mjs';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
+// ---- tiny hex utils for deriving palette vars the theme didn't declare (e.g. --card) ----
+const hexToRgb = (h) => { let s = String(h).replace('#', ''); if (s.length === 3) s = s.split('').map((c) => c + c).join(''); const n = parseInt(s, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const rgbToHex = (a) => '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const mixHex = (a, b, t) => { try { const A = hexToRgb(a), B = hexToRgb(b); return rgbToHex(A.map((v, i) => v + (B[i] - v) * t)); } catch { return a; } };
+const luma = (h) => { try { const [r, g, b] = hexToRgb(h).map((v) => v / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; } catch { return 1; } };
+// deriveCard: a raised CARD surface. Lighten the theme's surface toward white on light themes, lift it
+// gently on dark — so elevated block cards read correctly on any brand that didn't declare palette.card.
+const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return mixHex(base, '#ffffff', luma(P.bg || base) > 0.55 ? 0.55 : 0.1); };
+
 // preloadImages: walk the data JSON for image-like strings (local paths, /…, or http(s)
 // URLs — incl. user-supplied web image links) and fully load+decode them BEFORE the scene
 // reports ready. Without this the Go renderer can screenshot a frame mid-download → a missing
@@ -52,6 +61,7 @@ export function applyTheme(theme) {
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
   set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
+  set('--card', P.card || deriveCard(P)); // raised card surface (blocks use var(--card))
   set('--line', P.line); set('--line-strong', P.lineStrong);
   set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
   set('--up', P.up); set('--up-2', P.up2); set('--down', P.down);

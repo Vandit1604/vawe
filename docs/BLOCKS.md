@@ -43,8 +43,11 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
 ## Contract
 - Every factory returns an **array** of layers (so a block can stagger its own sub-parts in time).
 - `{x,y}` = top-left, absolute on the 1920×1080 stage. `{start,dur}` in seconds.
-- Colours default to the Creed token set (`TOKENS`); every colour is overridable.
-- Deterministic — no `Date`/random. Same props → same layers.
+- **Theme-aware:** `TOKENS` emit CSS vars (`var(--accent)`, `var(--card)`, …) + `color-mix()`, so the
+  SAME block reskins to any brand theme. Multi-series charts default from a `SERIES` ramp derived from
+  the theme. Preview under any brand: `make catalog THEME=<name>`. (Overridable per call; Stripe hexes in
+  `stripeCard` stay literal on purpose.)
+- Deterministic — no `Date`/random, var strings are static. Same props → same layers.
 
 ## Blocks
 
