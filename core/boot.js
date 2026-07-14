@@ -196,6 +196,7 @@ export async function boot(build) {
         "400 100px 'Geist Mono'", "600 100px 'Geist Mono'",
         "800 100px 'Plus Jakarta Sans'", "700 100px 'JetBrains Mono'", "400 100px 'Caveat'",
         "400 100px 'Hanken Grotesk'", "700 100px 'Hanken Grotesk'", "800 100px 'Hanken Grotesk'",
+        "300 100px 'Archivo'", "400 100px 'Archivo'", "500 100px 'Archivo'", "600 100px 'Archivo'", "700 100px 'Archivo'",
       ];
       // also load whatever the theme actually declares, at the weights scenes use, in case it's a face
       // not in the static list above (belt-and-suspenders for future themes).
