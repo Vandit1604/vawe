@@ -51,6 +51,11 @@ you from.
 - **Stings**: `flash` energy cut · `burn/leak` warm brands · `ink/dissolve` editorial ·
   `glitch/scan/pixel` tech · `streak/warp` speed · `ripple` impact · `bokeh` dreamy divider ·
   `confetti` wins/celebrations only · `grain` texture pulse.
+- **Motion blur** (`"motionBlur": true` on a layer with a `motion` track): a velocity-derived streak on
+  fast moves — the layer smears while travelling, snaps crisp when it settles. Reach for it on whip-ins,
+  fast slides, and hard slams to sell speed and hide the discrete-frame stutter; a `0..1` number tunes
+  strength (default `true` = half-shutter). Skip it on slow/ambient drifts (no streak to earn) and on
+  small body text held mid-move (it dissolves). Pure in the frame → seek-safe, capped so text never melts.
 
 ## The enforcement map (what code already guarantees)
 

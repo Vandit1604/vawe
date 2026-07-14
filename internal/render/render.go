@@ -25,19 +25,25 @@ type Options struct {
 
 type dataFile struct {
 	Audio audio.Config `json:"audio"`
+	FPS   float64      `json:"fps"` // per-scene frame rate (opt-in; default 30, use 60 for smoother fast motion)
 }
 
 // Render renders module (data at dataPath, relative or absolute) to out.
 func Render(repoRoot, module, dataPath, out string, o Options) error {
-	if o.FPS == 0 {
-		o.FPS = 30
-	}
 	dataAbs, _ := filepath.Abs(dataPath)
 	var df dataFile
 	if b, err := os.ReadFile(dataAbs); err == nil {
 		_ = json.Unmarshal(b, &df)
 	} else {
 		return fmt.Errorf("read data: %w", err)
+	}
+	// fps resolution: explicit CLI flag wins; else the scene's own "fps"; else 30.
+	if o.FPS == 0 {
+		if df.FPS > 0 {
+			o.FPS = int(df.FPS)
+		} else {
+			o.FPS = 30
+		}
 	}
 
 	rel, _ := filepath.Rel(repoRoot, dataAbs)
@@ -53,7 +59,11 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 
 	fmt.Printf("▶ %s : capturing across %d workers…\n", module, o.Workers)
 	transparent := o.Transparent || o.BgVideo != "" // compositing needs a transparent graphics layer
-	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent)
+	ss := 2                                          // 2× supersample → crisp text under motion (see scene.downsample)
+	if o.Draft {
+		ss = 1 // draft: skip supersample for fast previews
+	}
+	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss)
 	if err != nil {
 		return err
 	}

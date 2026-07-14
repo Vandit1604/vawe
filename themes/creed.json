@@ -2,21 +2,21 @@
   "name": "creed",
   "note": "EYEDROPPED from the real hero pixels (scripts/palette.mjs) July 2026 — WHITE/light-first (avg luminance 0.60, dominant #ffffff), vivid sky-blue accents (#167bf0/#0577f2), purple 'Identity' second accent (#7c3aed), near-black text on white. The signature is a bright full-bleed blue sky. Bold Geist / Geist Mono. Motion: punchy, snap. (Corrects the earlier wrong DARK build.)",
   "palette": {
-    "bg": "#ffffff",
-    "bg2": "#f4f5f7",
+    "bg": "#f9f9f8",
+    "bg2": "#f3f3f1",
     "surface": "#ffffff",
-    "surface2": "#f1f3f6",
-    "line": "rgba(14,14,13,0.10)",
-    "lineStrong": "rgba(14,14,13,0.16)",
-    "text": "#0e0e0d",
-    "text2": "#3d4350",
-    "dim": "#8a8f9c",
-    "accent": "#167bf0",
-    "accentDim": "rgba(22,123,240,0.14)",
-    "accentGlow": "rgba(22,123,240,0.38)",
-    "up": "#167bf0",
-    "down": "#7c3aed",
-    "ink": "#0e0e0d"
+    "surface2": "#f3f3f1",
+    "line": "rgba(31,31,26,0.10)",
+    "lineStrong": "rgba(31,31,26,0.16)",
+    "text": "#1f1f1a",
+    "text2": "#636360",
+    "dim": "#9a9a96",
+    "accent": "#2563eb",
+    "accentDim": "rgba(37,99,235,0.14)",
+    "accentGlow": "rgba(37,99,235,0.38)",
+    "up": "#1a9e57",
+    "down": "#e5484d",
+    "ink": "#1f1f1a"
   },
   "gradient": [
     "#ffffff",
@@ -31,11 +31,11 @@
   },
   "motion": {
     "easing": "easeOutBack",
-    "bounce": 0.22,
-    "settle": 0.5,
-    "enter": 42,
-    "durationScale": 0.9,
-    "stagger": 0.04
+    "bounce": 0.18,
+    "settle": 0.55,
+    "enter": 40,
+    "durationScale": 1.0,
+    "stagger": 0.05
   },
   "bg": {
     "accent": "22,123,240",
@@ -51,8 +51,8 @@
       "#dcebff"
     ],
     "accentBase": [
-      "#167bf0",
-      "#0f63d6"
+      "#2563eb",
+      "#1d4ed8"
     ],
     "inkBase": [
       "#0e1116",

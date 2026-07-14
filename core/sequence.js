@@ -23,7 +23,7 @@ export function cameraAt(camKf, t) {
 // scale/rot/opacity are composed onto the enter/cut transform. Per-keyframe `ease` (any named
 // easing incl. spring) drives the segment into that keyframe. Holds the endpoints outside range.
 export function motionAt(kfs, lt) {
-  const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1 });
+  const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0 });
   if (lt <= kfs[0].t) return norm(kfs[0]);
   const last = kfs[kfs.length - 1];
   if (lt >= last.t) return norm(last);
@@ -33,7 +33,7 @@ export function motionAt(kfs, lt) {
       const p = a.t === b.t ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((lt - a.t) / (b.t - a.t)));
       return { dx: lerp(a.x ?? 0, b.x ?? 0, p), dy: lerp(a.y ?? 0, b.y ?? 0, p),
         scale: lerp(a.scale ?? 1, b.scale ?? 1, p), rot: lerp(a.rot ?? 0, b.rot ?? 0, p),
-        opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p) };
+        opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p), blur: lerp(a.blur ?? 0, b.blur ?? 0, p) };
     }
   }
   return norm(last);

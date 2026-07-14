@@ -23,11 +23,8 @@ func Video(framesDir string, fps int, grain, draft bool, out string) error {
 	r := strconv.Itoa(fps)
 	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq, "-an"}
 	if !draft && grain {
-		// subtle luma grain only — heavy/temporal noise is incompressible (balloons files).
-		// strength kept LOW (c0s=3): per-frame temporal grain (c0f=t) crawls over sharp text edges and
-		// reads as the type "shaking"; halving the strength keeps a filmic move without the shimmer.
-		// (Fully killing the crawl needs a STATIC grain plate, which then looks like lens dirt — the
-		// low-temporal middle ground is the motion-graphics norm; another engine/another engine bake none by default.)
+		// grain is OPT-IN (`"grain": true`) — only genuinely filmic brands reach here. Low-strength luma
+		// temporal grain: heavy/temporal noise is incompressible and crawls over sharp text as shimmer.
 		args = append(args, "-vf", "noise=c0s=3:c0f=t")
 	}
 	if draft {

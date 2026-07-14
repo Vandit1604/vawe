@@ -35,6 +35,10 @@ export const easeInQuart = (t) => t * t * t * t;
 export const easeInExpo = (t) => (t <= 0 ? 0 : Math.pow(2, 10 * (t - 1)));
 export const easeInOutExpo = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : 1 - Math.pow(2, -20 * t + 10) / 2);
 
+// springStiff — critically-damped settle (NO overshoot); for Creed / restrained brands.
+// Complements the existing overshooting spring() below. Pure, terminal at t≥1 → safe for renderFrame(n).
+export const springStiff = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.exp(-6.5 * t) * (1 + 6.5 * t));
+
 // ---------- velocity ramping ----------
 // accel/decel: pure power curves — k is the acceleration exponent (k=1 linear, k=3 hard launch/brake).
 export const accel = (t, k = 2.4) => Math.pow(clamp01(t), k);
@@ -57,6 +61,8 @@ export const EASINGS = {
   easeInQuart, easeInExpo, easeInOutExpo,
   // velocity-ramp aliases: rush = accelerate away, brake = decelerate in, ramp = slow-fast-slow
   rush: (t) => accel(t), brake: (t) => decel(t), ramp: (t) => speedRamp(t),
+  // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
+  spring: (t) => spring(t), springStiff: (t) => springStiff(t),
 };
 export const resolveEasing = (e) => (typeof e === 'function' ? e : EASINGS[e] || easeOutCubic);
 
@@ -91,10 +97,11 @@ Object.assign(EASINGS, {
   'spring-bouncy': (t) => spring(clamp01(t), { bounce: 0.55, settle: 0.94 }),
   'spring-stiff': (t) => spring(clamp01(t), { bounce: 0.12, settle: 0.72 }),
 });
-// easeOutSettle — the DEFAULT entrance feel: a gentle overshoot that settles (premium, not bouncy).
-// A touch of life on every rise/reveal vs the old flat easeOutCubic. Endpoints are SNAPPED exactly
-// (0 and 1) so the held state sits at true rest — no sub-pixel residual that would blur text on hold.
-export const easeOutSettle = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.25, settle: 0.62 }));
+// easeOutSettle — the DEFAULT entrance feel: a SMOOTH decelerate with just a whisper of settle (premium,
+// not bouncy). Low bounce (0.08) so type glides to rest instead of overshooting/wobbling — a visible
+// bounce on every word reads as "too much movement". Endpoints are SNAPPED exactly (0 and 1) so the held
+// state sits at true rest — no sub-pixel residual that would blur text on hold.
+export const easeOutSettle = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.08, settle: 0.7 }));
 EASINGS.settle = easeOutSettle;
 // springSettle(opts) — seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {

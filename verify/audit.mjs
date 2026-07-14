@@ -101,12 +101,26 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
       const c = parse(getComputedStyle(p).backgroundColor);
       if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
     }
-    // flat-layer scenes (scene): the visual backdrop may be a SIBLING rect, not an ancestor —
-    // probe the actual paint stack under the element's center for the first solid background.
+    // flat-layer scenes (scene): the visual backdrop may be a SIBLING rect OR a full-bleed image
+    // (a photographic hero), not an ancestor — probe the actual paint stack under the element's centre.
+    const bgProbe = document.createElement('canvas'); bgProbe.width = bgProbe.height = 20;
+    const bpc = bgProbe.getContext('2d', { willReadFrequently: true });
     for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
       if (p === el || el.contains(p) || p.contains(el)) continue;
       const c = parse(getComputedStyle(p).backgroundColor);
       if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
+      // a covering <img> (sky/photo backdrop): its opaque-pixel average IS the effective bg colour,
+      // so white/emphasis text over a photo isn't false-flagged as invisible-on-the-canvas-behind-it.
+      const im = p.tagName === 'IMG' ? p : (p.querySelector && p.querySelector('img'));
+      if (im && im.complete && im.naturalWidth) {
+        try {
+          bpc.clearRect(0, 0, 20, 20); bpc.drawImage(im, 0, 0, 20, 20);
+          const d = bpc.getImageData(0, 0, 20, 20).data;
+          let r = 0, g = 0, b = 0, k = 0;
+          for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
+          if (k > 20) return [r / k, g / k, b / k];
+        } catch (e) {} // cross-origin taint → fall through
+      }
     }
     if (cvCtx) {
       const pts = [[bx.x + bx.w / 2, bx.y + bx.h / 2], [bx.x + 6, bx.y + 6], [bx.x + bx.w - 6, bx.y + 6], [bx.x + 6, bx.y + bx.h - 6], [bx.x + bx.w - 6, bx.y + bx.h - 6]];

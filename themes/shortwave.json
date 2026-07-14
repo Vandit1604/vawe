@@ -1,0 +1,64 @@
+{
+  "name": "shortwave",
+  "note": "Launch theme for the Shortwave engine. COLOUR-DRENCHED: each act is an edge-to-edge saturated field; text flips ink/white per field for contrast. Heavy Söhne display + JetBrains Mono. Ink base #0E0E10 behind the fields.",
+  "palette": {
+    "bg": "#0E0E10",
+    "bg2": "#0C0C0E",
+    "surface": "#141416",
+    "surface2": "#1A1A1D",
+    "line": "#F4F4F2",
+    "lineStrong": "#FFFFFF",
+    "text": "#F4F4F2",
+    "text2": "#F4F4F2",
+    "dim": "#8E8E88",
+    "accent": "#FFFFFF",
+    "accentDim": "rgba(255,255,255,0.12)",
+    "accentGlow": "rgba(255,255,255,0.30)",
+    "up": "#FFFFFF",
+    "down": "#8E8E88",
+    "ink": "#0A0A0B"
+  },
+  "gradient": ["#0E0E10", "#0C0C0E", "#0A0A0B"],
+  "type": {
+    "sans": "Sohne",
+    "serif": "Sohne",
+    "mono": "JetBrains Mono",
+    "num": "JetBrains Mono"
+  },
+  "motion": {
+    "easing": "easeOutCubic",
+    "bounce": 0.05,
+    "settle": 0.6,
+    "enter": 44,
+    "durationScale": 1.0,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "255,255,255",
+    "tint": "160,160,158",
+    "tint2": "120,120,118",
+    "dotLight": "200,200,198",
+    "paperBase": ["#0A0A0B", "#060607"],
+    "softBase": ["#141416", "#0A0A0B"],
+    "accentBase": ["#1A1A1D", "#0C0C0E"],
+    "inkBase": ["#0A0A0B", "#060607"],
+    "border": "#1A1A1D",
+    "dark": ["#0A0A0B", "#060607"],
+    "darkMesh": ["#101012", "#060607"],
+    "deep": ["#0C0C0E", "#070708"],
+    "light": ["#0A0A0B", "#060607"],
+    "ink": ["#0A0A0B", "#060607"],
+    "paper": "#0A0A0B"
+  },
+  "vars": {
+    "--ink": "#0A0A0B",
+    "--paper": "#F4F4F2",
+    "--muted": "#8E8E88",
+    "--em": "#FFFFFF",
+    "--on-light": "#0A0A0B",
+    "--on-dark": "#F4F4F2",
+    "--border": "#1A1A1D",
+    "--accent-soft": "rgba(255,255,255,0.12)"
+  },
+  "bgDefault": { "preset": "deep" }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "shortwave-creed",
+  "note": "Shortwave launch film in CREED art-direction: 90% paper-white typographic stage, ONE terracotta accent used only as thin marks (left-edge bar, ticks, underlines), white hairline cards (no shadows, elevation = 1px line), Geist / Geist Mono. Motion is punchy but never overshoots (bounce 0, ease-out only, faster than creed's base).",
+  "palette": {
+    "bg": "#FCFCFC",
+    "bg2": "#F7F7F5",
+    "surface": "#FFFFFF",
+    "surface2": "#F7F7F5",
+    "line": "#E8E8E5",
+    "lineStrong": "#D6D6D2",
+    "text": "#0A0A0A",
+    "text2": "#5C5C58",
+    "dim": "#9A9A94",
+    "ink": "#0A0A0A",
+    "accent": "#C96442",
+    "accentDim": "rgba(201,100,66,0.12)",
+    "accentGlow": "rgba(201,100,66,0.30)",
+    "up": "#1A7F4B",
+    "down": "#C0362C"
+  },
+  "gradient": ["#FCFCFC", "#F7F7F5", "#F1F1EF"],
+  "type": {
+    "sans": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono",
+    "serif": "Geist"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0,
+    "settle": 0.48,
+    "enter": 24,
+    "durationScale": 0.8,
+    "stagger": 0.038
+  },
+  "bg": {
+    "accent": "201,100,66",
+    "tint": "154,154,148",
+    "tint2": "154,154,148",
+    "dotLight": "170,170,164",
+    "paperBase": ["#FCFCFC", "#F1F1EF"],
+    "softBase": ["#F7F7F5", "#F1F1EF"],
+    "accentBase": ["#C96442", "#B4532F"],
+    "inkBase": ["#0F0F0E", "#050504"],
+    "border": "#E8E8E5",
+    "dark": ["#0F0F0E", "#050504"],
+    "darkMesh": ["#14110F", "#050504"],
+    "deep": ["#0F0F0E", "#050504"],
+    "light": ["#FCFCFC", "#F1F1EF"],
+    "ink": ["#0F0F0E", "#050504"],
+    "paper": "#FCFCFC"
+  },
+  "vars": {
+    "--ink": "#0A0A0A",
+    "--paper": "#FCFCFC",
+    "--muted": "#9A9A94",
+    "--em": "#C96442",
+    "--on-light": "#0A0A0A",
+    "--on-dark": "#FCFCFC",
+    "--border": "#E8E8E5",
+    "--accent-soft": "rgba(201,100,66,0.12)"
+  },
+  "bgDefault": { "preset": "paper" }
+}

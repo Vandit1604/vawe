@@ -7,6 +7,7 @@ import (
 	"bytes"
 
 	"github.com/chromedp/cdproto/runtime"
+	"image"
 	"image/png"
 	"context"
 	"fmt"
@@ -47,14 +48,18 @@ func Serve(root string) (*http.Server, int, error) {
 	return srv, ln.Addr().(*net.TCPAddr).Port, nil
 }
 
-func allocOpts() []chromedp.ExecAllocatorOption {
+func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	opts := append([]chromedp.ExecAllocatorOption{},
 		chromedp.Headless,
 		chromedp.NoSandbox,
 		chromedp.Flag("hide-scrollbars", true),
 		chromedp.Flag("force-color-profile", "srgb"),
 		chromedp.Flag("font-render-hinting", "none"),
-		chromedp.Flag("force-device-scale-factor", "1"),
+		// SUPERSAMPLE: capture at ss× device pixels so animated transforms (camera, kinetic type,
+		// stings) land text on a fine grid — the ss×ss box-resolve in downsample() averages the
+		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by
+		// stripping effects. Draft renders at ss=1 for speed.
+		chromedp.Flag("force-device-scale-factor", fmt.Sprintf("%d", ss)),
 		chromedp.WindowSize(W, H),
 	)
 	if p := os.Getenv("CHROME_BIN"); p != "" {
@@ -63,13 +68,13 @@ func allocOpts() []chromedp.ExecAllocatorOption {
 	return opts
 }
 
-// newTab spins up an independent browser + tab loaded at url, ready to render.
-func newTab(parent context.Context, url string) (context.Context, context.CancelFunc, error) {
-	allocCtx, cancelAlloc := chromedp.NewExecAllocator(parent, allocOpts()...)
+// newTab spins up an independent browser + tab loaded at url, ready to render at ss× device scale.
+func newTab(parent context.Context, url string, ss int) (context.Context, context.CancelFunc, error) {
+	allocCtx, cancelAlloc := chromedp.NewExecAllocator(parent, allocOpts(ss)...)
 	ctx, cancelCtx := chromedp.NewContext(allocCtx)
 	cancel := func() { cancelCtx(); cancelAlloc() }
 	err := chromedp.Run(ctx,
-		chromedp.EmulateViewport(W, H),
+		chromedp.EmulateViewport(W, H, chromedp.EmulateScale(float64(ss))),
 		chromedp.Navigate(url),
 		chromedp.Poll("window.__engineReady === true || !!window.__engineError", nil, chromedp.WithPollingTimeout(45*time.Second)),
 	)
@@ -124,7 +129,52 @@ func absd(a, b uint32) uint32 {
 	return b - a
 }
 
-func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool) (Meta, error) {
+// downsample resolves an ss×-supersampled PNG to native size by averaging each ss×ss block — the
+// exact SSAA resolve. Sub-pixel jitter from animated transforms averages out, so text stays crisp
+// instead of shimmering frame-to-frame. Averages alpha-premultiplied channels (correct over the
+// transparent/alpha export too). ss<=1 returns the bytes untouched. Deterministic (fixed kernel).
+func downsample(buf []byte, ss int) ([]byte, error) {
+	if ss <= 1 {
+		return buf, nil
+	}
+	src, err := png.Decode(bytes.NewReader(buf))
+	if err != nil {
+		return nil, err
+	}
+	b := src.Bounds()
+	ow, oh := b.Dx()/ss, b.Dy()/ss
+	dst := image.NewRGBA(image.Rect(0, 0, ow, oh))
+	n := uint32(ss * ss)
+	for y := 0; y < oh; y++ {
+		for x := 0; x < ow; x++ {
+			var r, g, bl, a uint32
+			for dy := 0; dy < ss; dy++ {
+				for dx := 0; dx < ss; dx++ {
+					pr, pg, pb, pa := src.At(b.Min.X+x*ss+dx, b.Min.Y+y*ss+dy).RGBA() // 16-bit premultiplied
+					r += pr
+					g += pg
+					bl += pb
+					a += pa
+				}
+			}
+			i := dst.PixOffset(x, y)
+			dst.Pix[i+0] = uint8((r / n) >> 8)
+			dst.Pix[i+1] = uint8((g / n) >> 8)
+			dst.Pix[i+2] = uint8((bl / n) >> 8)
+			dst.Pix[i+3] = uint8((a / n) >> 8)
+		}
+	}
+	var out bytes.Buffer
+	if err := png.Encode(&out, dst); err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
+}
+
+func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int) (Meta, error) {
+	if ss < 1 {
+		ss = 1
+	}
 	var meta Meta
 	srv, port, err := Serve(repoRoot)
 	if err != nil {
@@ -137,7 +187,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 
 	// one tab for meta
-	ctx0, cancel0, err := newTab(context.Background(), url)
+	ctx0, cancel0, err := newTab(context.Background(), url, ss)
 	if err != nil {
 		return meta, err
 	}
@@ -224,7 +274,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 
 	worker := func(ctx context.Context) error {
 		// size this tab's viewport to the capture dimensions (landscape support)
-		if err := chromedp.Run(ctx, chromedp.EmulateViewport(cw, ch)); err != nil {
+		if err := chromedp.Run(ctx, chromedp.EmulateViewport(cw, ch, chromedp.EmulateScale(float64(ss)))); err != nil {
 			return fmt.Errorf("emulate viewport: %w", err)
 		}
 		// alpha export: override the default page backdrop to fully transparent so
@@ -244,7 +294,10 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
 				chromedp.CaptureScreenshot(&buf),
 			)
-			return buf, err
+			if err != nil {
+				return nil, err
+			}
+			return downsample(buf, ss) // ss× supersample → native size (crisp text under motion)
 		}
 		for j := range frames {
 			buf, err := shoot(j.frame)
@@ -285,7 +338,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				ctx, cancel = ctx0, cancel0
 			} else {
 				var e error
-				ctx, cancel, e = newTab(context.Background(), url)
+				ctx, cancel, e = newTab(context.Background(), url, ss)
 				if e != nil {
 					errs <- e
 					return

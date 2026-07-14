@@ -41,6 +41,55 @@ function noEmdash(v, path, errors) {
   else if (isObj(v)) for (const [k, x] of Object.entries(v)) { if (k === 'module' || k === 'theme') continue; noEmdash(x, path ? `${path}.${k}` : k, errors); }
 }
 
+// lintData(data) → warnings[]: authoring smells the schema can't express. Non-failing (CLI prints ⚠;
+// boot never calls this). Each rule below maps to a real bug that shipped this session and slipped
+// every existing gate. Pure. Scene layers only.
+export function lintData(data) {
+  const warns = [];
+  const layers = Array.isArray(data?.layers) ? data.layers : [];
+  const name = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${L.text.replace(/<[^>]+>/g, '').slice(0, 24)}"` : ''})`;
+
+  // (1) MISSING WINDOW — a layer with no `duration` renders for the ENTIRE video (engine default). Almost
+  //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
+  layers.forEach((L, i) => {
+    if (!isObj(L)) return;
+    if (L.duration == null && L.track !== 0) warns.push(`${name(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
+  });
+
+  // (2) TYPING + MARKUP — `typing` reveals characters LITERALLY, so <b>/<em> show as visible tags
+  //     ("Block <b>7 to 11am</b>" bug). Drop the tags on typed text.
+  layers.forEach((L, i) => {
+    if (isObj(L) && L.typing && typeof L.text === 'string' && /<(b|em)\b/i.test(L.text)) warns.push(`${name(L, i)} uses "typing" with <b>/<em> markup — typing renders tags literally.`);
+  });
+
+  // (3) SCENE COLLISION — two CONTENT layers overlapping in BOTH space and time, not in a
+  //     containment/group/anchor relationship = one scene bleeding into the next (the Preferences↔agents
+  //     overlap). Pure geometry; needs an explicit w to bound a box (numeric starts only).
+  const CONTENT = new Set(['text', 'count', 'doc', 'image', 'group', 'board', 'html']);
+  const box = (L) => {
+    if (typeof L.start === 'string' || L.x == null || L.y == null || L.w == null) return null;
+    const h = L.h != null ? L.h : (L.size ?? 40) * 1.3;
+    const s = L.start ?? 0;
+    return { x0: L.x, y0: L.y, x1: L.x + L.w, y1: L.y + h, s, e: s + (L.duration ?? 2) };
+  };
+  const cand = layers.map((L, i) => ({ L, i, b: isObj(L) && CONTENT.has(L.type || 'text') ? box(L) : null })).filter((o) => o.b);
+  for (let a = 0; a < cand.length; a++) {
+    for (let b = a + 1; b < cand.length; b++) {
+      const A = cand[a], B = cand[b];
+      if (A.L.group || B.L.group || (A.L.anchor && A.L.anchor === B.L.id) || (B.L.anchor && B.L.anchor === A.L.id)) continue;
+      const t0 = Math.max(A.b.s, B.b.s), t1 = Math.min(A.b.e, B.b.e);
+      if (t1 - t0 <= 0.3) continue; // time windows barely/never overlap
+      const ix = Math.min(A.b.x1, B.b.x1) - Math.max(A.b.x0, B.b.x0);
+      const iy = Math.min(A.b.y1, B.b.y1) - Math.max(A.b.y0, B.b.y0);
+      if (ix <= 0 || iy <= 0) continue; // boxes disjoint in space
+      const frac = (ix * iy) / Math.min((A.b.x1 - A.b.x0) * (A.b.y1 - A.b.y0), (B.b.x1 - B.b.x0) * (B.b.y1 - B.b.y0));
+      // full containment (chip inside a card) is intentional; flag the PARTIAL-overlap band only.
+      if (frac >= 0.3 && frac <= 0.95) warns.push(`${name(A.L, A.i)} and ${name(B.L, B.i)} overlap ~${Math.round(frac * 100)}% in space and ${(t1 - t0).toFixed(1)}s in time (t=${t0.toFixed(1)}-${t1.toFixed(1)}) — a scene may be colliding with the next.`);
+    }
+  }
+  return warns;
+}
+
 function walk(fields, obj, path, errors) {
   for (const [key, spec] of Object.entries(fields)) {
     if (!isObj(spec)) continue;
@@ -118,7 +167,8 @@ if (isMain) {
   const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
   const readJSON = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
-  let targets = process.argv.slice(2);
+  const strict = process.argv.includes('--strict'); // treat lint warnings as failures
+  let targets = process.argv.slice(2).filter((a) => !a.startsWith('--'));
   if (targets.length === 0) {
     const fdir = path.join(root, 'formats');
     targets = fs.readdirSync(fdir)
@@ -134,6 +184,12 @@ if (isMain) {
     const schemaPath = mod && path.join(root, 'formats', mod, 'schema.json');
     try { schema = schemaPath && fs.existsSync(schemaPath) ? readJSON(schemaPath) : null; } catch (e) { schema = null; }
     const errors = validateAll(schema, data);
+    // build-time sugar must be expanded before render — the engine's layer registry has no
+    // `block`/`comp` type, so a leftover one renders as NOTHING. Fail loud → run `make expand`.
+    (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
+      if (isObj(L) && (L.type === 'block' || L.type === 'comp'))
+        errors.push(`layer[${i}] is an un-expanded ${L.type} ("${L.block || L.ref}") — run \`make expand D=${path.relative(root, file)}\` and render the .expanded.json.`);
+    });
     // named themes: the CLI can read the file, so completeness-check it here (boot re-checks).
     if (typeof data.theme === 'string') {
       const tp = path.join(root, 'themes', data.theme + '.json');
@@ -148,7 +204,13 @@ if (isMain) {
     } else {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
+    // lint warnings (non-failing unless --strict) — authoring smells the schema can't express
+    const warns = lintData(data);
+    if (warns.length) {
+      if (strict) failed++;
+      for (const w of warns) console.error(`    ⚠ ${w}`);
+    }
   }
-  console.log(`\nvalidate: ${targets.length - failed} ok, ${failed} failed`);
+  console.log(`\nvalidate: ${targets.length - failed} ok, ${failed} ${strict ? 'failed (incl. lint --strict)' : 'failed'}`);
   process.exit(failed ? 1 : 0);
 }

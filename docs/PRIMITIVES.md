@@ -179,6 +179,13 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   `renderFrame(n)` swaps a preloaded `<img>` src per frame (no `<video>`, no async decode → purity holds).
   `loop` wraps, `speed` scales playback. Generated imagery: `make gen-image Q="…" NAME=<name>` → a normal
   `image` layer. (Generation needs `KIE_API_KEY`; `gen-clip` works on any local mp4 with no key.)
+- `{type:"lottie", src:"/engine/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
+  → an **After Effects (Bodymovin) animation played DETERMINISTICALLY**. The runtime (lottie-web SVG,
+  MIT, loaded only when a scene uses it) is driven by ABSOLUTE seek — `goToAndStop((t-start)*fr, true)`
+  per frame — so `renderFrame(n)` stays pure and order-independent (`make probe`). Brings real vector
+  motion (animated logos, spinners, checkmarks, confetti) you can't author from primitives. `loop` wraps,
+  `speed` retimes, `fit:"contain"` letterboxes (default fills). A missing lib/src degrades to an empty
+  layer, never a crash. Drop `.json` exports into `engine/assets/lottie/`.
 - `{type:"html", html:"<div…>", x, y, w}` → **raw hand-authored HTML/CSS as one layer** — full design
   freedom for a rich "money-shot" beat (custom grids, gradients, mixed faces), still positioned and
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity
@@ -194,10 +201,16 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 
 ## The open canvas (`formats/scene/`)
 
-Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color) · `image` (+ `ken`) ·
+**Each primitive lives in its own file** — `core/layers/<type>.js`, exporting `build(kit, el, L)` (DOM)
+and optionally `frame(kit, el, L, t)` (per-frame). `core/layers/index.js` is the registry; `scene.html`
+is a thin orchestrator (bg/camera/stings/timing) that dispatches to it. **Adding a primitive = adding a
+file** (no scene.html edit); shared helpers (styleText/chipBox/layoutGroup/…) live in `core/layers/util.js`.
+
+Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) · `image` (+ `ken`) ·
 `component` (captured real UI) · `rect` (cards/pills/slabs) · `count` (count-up) · `glow` · `board` ·
-`group` (layout box — see below). Per layer: window (`start/duration`), `track` z-order, `cut`+`dir`,
-`anim/out`, `motion[]` (keyframe track). Global `bg[]`, `stings[]`, `camera[]`, `captions[]`.
+`doc` · `html` · `clip` · `cursor` (pointer `path` + `clicks`) · `group` (layout box — see below). Per
+layer: window (`start/duration`), `track` z-order, `cut`+`dir`, `anim/out`, `motion[]` (keyframe track).
+Global `bg[]`, `stings[]`, `camera[]`, `captions[]`.
 Schema: `formats/scene/schema.json`.
 
 **Layout by containment — `group` is the DEFAULT for anything with a spatial relationship.** A group is

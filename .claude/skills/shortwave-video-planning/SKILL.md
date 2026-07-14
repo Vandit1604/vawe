@@ -58,10 +58,18 @@ is in the actual pixels. **Load [`docs/CRAFT/TYPOGRAPHY.md`](../../../docs/CRAFT
 palette to the contract keys). Do the study, literally:
 
 ```bash
+make brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
 make sections URL=… NAME=…                              # screenshot every section (the taste lives here)
 make lookbook URL=… NAME=…                              # full-page + viewport screenshots
-make palette IMG=engine/assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → colours + dominance
+make palette IMG=engine/assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
 ```
+
+**`make brandspec` is the source of truth for TYPE + declared COLOURS — read it, don't guess.** It gives the
+1-3 real faces mapped to primary/secondary/accent, **the weights actually used** (author the headline at the
+MEASURED weight, never a default 800), and the site's `--color-*` tokens (accurate where eyedrop reads a
+photo, e.g. creed's accent is `#2563eb` in CSS, not the sky blue). Use `make palette` for DOMINANCE only.
+Author the font system per [`docs/CRAFT/TYPOGRAPHY.md`](../../../docs/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
+validate every colour pair's contrast per [`COLOR.md`](../../../docs/CRAFT/COLOR.md) before locking.
 
 **DOMINANCE IS DECIDED BY LOOKING, NEVER BY A FIELD.** `make palette` reports LIGHT/DARK from the hero's
 real luminance + the dominant hexes; then READ the hero screenshot yourself and confirm. A white site
@@ -132,6 +140,39 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
   beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md` — read
   it before authoring.
+
+## Step 3b.1 — Every frame FIGHTS for its value (the value gate)
+
+The single most common failure: beats that occupy time without earning it. Before locking any beat,
+apply the **value test** — "if I cut this frame, what does the viewer lose?" If the answer is "nothing"
+or "a restatement of the headline," the beat is not done. Reimagine it until it teaches, proves, or
+delights something no other frame does. Concretely:
+
+- **SHOW the real artifact, never a placeholder label.** The word "scene" / "rendered" / "output" in
+  a box proves nothing — it's a stand-in for work not done. Render an ACTUAL mini-scene (real layers
+  animating: a headline, a counstandard, a card, a themed UI) so the viewer literally watches the engine
+  work. "Show a scene getting bigger" means an actual composed scene scales up, not the string `scene`.
+- **Never claim on-screen what the video doesn't show on-screen.** If copy says "22 shader stings" or
+  "14 backdrops," those effects must visibly appear in the same breath. An unbacked claim is worse than
+  no claim: it invites the viewer to notice the absence. Cut the number or demonstrate it.
+- **Demonstrate flexibility by DOING it live.** "Any colour" is dead as text; make the actual word (or a
+  real UI) cycle through colours continuously on screen. "Any theme" = morph a real rendered card through
+  themes. The proof is the motion, not the noun.
+- **Live demo beats static list.** A grid of numbers (`n=41 …`), a checklist of gate names, or a row of
+  feature pills reads as a spec sheet, not a film. Animate the concept instead: frames re-rendering in
+  parallel, a check drawing on as each gate passes, a value changing and the output updating.
+- **Legibility of effects.** Never use a transition/effect the viewer cannot perceive at its actual size
+  and duration (e.g. `blinds` slats that are invisible in 0.4s). If it doesn't read, it isn't a feature —
+  pick one that does (wipe, iris, push, a real cut).
+- **Anchor every element with intent.** Off-centre or floating content needs a compositional reason
+  (asymmetry, a split, an artifact it points to). Random off-centre reads as a mistake. Center, or anchor.
+- **Real product > abstract metaphor.** To say "it reads a site," show a recognizable rebuilt result
+  (a Stripe-like dashboard/gradient) forming from the input — a concrete, branded payoff beats a token list.
+- **A click must have a consequence.** If a cursor clicks a button, the next frames must show what the
+  click DID (a deploy result, a state change) — a click with no visible outcome is a dead beat.
+
+These are enforcement rules, not suggestions: the LOCK SHEET's per-beat row must name the *artifact that
+earns the frame*, not just the copy. If a beat's only artifact is a word in a box, it fails the gate.
 
 ## Step 3c — The LOCK SHEET (freeze this, get sign-off, THEN author)
 

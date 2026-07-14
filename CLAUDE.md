@@ -27,6 +27,10 @@ Every JSON **must** start with `"module": "scene"`. Save new videos as
 video (e.g. `linear-30.json`) first as working references, then compose — never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
+> **Making something good?** Read **[`docs/TASTE.md`](docs/TASTE.md)** first — the front door to the
+> taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
+> and the author→gate→render quality loop. Everything below is the doctrine it indexes.
+
 ## Content philosophy (what makes these good — follow it)
 
 Every video is built on **hook → suspense → payoff**. The data must earn attention:

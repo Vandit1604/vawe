@@ -24,7 +24,7 @@ func main() {
 	data := flag.String("data", "", "data JSON file (also accepted as a positional arg)")
 	out := flag.String("out", "", "output mp4 (optional — defaults to engine/out/<json-name>.mp4)")
 	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
-	fps := flag.Int("fps", 30, "frames per second")
+	fps := flag.Int("fps", 0, "frames per second (0 = use the scene's fps, else 30)")
 	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 8)), "parallel capture browsers")
 	draft := flag.Bool("draft", false, "fast encode, no grain")
 	noGrain := flag.Bool("no-grain", false, "skip the film-grain pass")
@@ -90,6 +90,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: shortwave <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)
 	}
+	// film grain is OPT-IN (`"grain": true`), not a default. Most brands are clean/digital and have no
+	// grain; it also crawls over sharp text edges as shimmer. Only genuinely filmic/analog brands turn
+	// it on. (--no-grain still forces it off regardless.)
+	opts.Grain = opts.Grain && videoGrain(dataPath)
 
 	mod := *module
 	if mod == "" {
@@ -115,6 +119,20 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("✓ %s\n", outPath)
+}
+
+// videoGrain reports whether a video OPTS IN to film grain via `"grain": true`. Default (absent) is
+// false — grain is a deliberate filmic choice, not something every video pays the shimmer cost for.
+func videoGrain(path string) bool {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	var d struct {
+		Grain *bool `json:"grain"`
+	}
+	_ = json.Unmarshal(b, &d)
+	return d.Grain != nil && *d.Grain
 }
 
 // moduleOf reads just the "module" field from a data JSON.

@@ -1,0 +1,33 @@
+// core/layers/text.js — a text (or count) layer: theme-styled type + chip box + auto-fit safety.
+// Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
+export function build(kit, el, L) {
+  kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
+  kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
+  if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
+    kit.cam.appendChild(el); // needs to be in-DOM to measure
+    const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
+    if (!document.fonts.check(`${L.weight ?? 800} 40px "${fam}"`)) console.warn(`fit: font "${fam}" not loaded — fit measurement may be off`);
+    if (L.fitH) kit.fitBox(el, { maxW: L.w, maxH: L.fitH, max: L.size ?? 96, min: 34 });
+    else el.style.fontSize = kit.fitText(el.textContent, L.w, { font: (px) => `${L.weight ?? 800} ${px}px ${fam}`, max: L.size ?? 96, min: 34 }) + 'px';
+    el.remove();
+  } else if (L.w && !L.split && (L.type === 'text' || !L.type) && L.text) {
+    // AUTO-FIT SAFETY: a headline that overflows its box gets shrunk so it never clips. Fires only on
+    // real overflow (output changes only where already broken). Pure (measured once).
+    kit.cam.appendChild(el);
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || (L.size ?? 96) * 1.15;
+    const maxLines = L.maxLines ?? 5, maxH = L.h ?? maxLines * lh;
+    if (el.scrollHeight > maxH + 2 || el.scrollWidth > L.w + 1) kit.fitBox(el, { maxW: L.w, maxH, max: L.size ?? 96, min: 34 });
+    el.remove();
+  }
+}
+// typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
+export function frame(kit, el, L, t) {
+  if (!L.typing) return;
+  const start = L.start ?? 0, end = start + (L.duration ?? 2);
+  if (!(t >= start && t < end)) return;
+  const cps = L.typing === true ? 24 : L.typing;
+  const full = L.text || '';
+  const n = Math.max(0, Math.min(full.length, Math.floor((t - start) * cps)));
+  const caretOn = L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0;
+  el.textContent = full.slice(0, n) + (caretOn && (n < full.length || L.caretHold) ? '▏' : '');
+}

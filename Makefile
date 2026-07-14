@@ -1,7 +1,7 @@
 # Shortwave — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
+.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
 
 build:
 	go build -o bin/shortwave ./cmd/render
@@ -75,6 +75,14 @@ lookbook:
 palette:
 	node scripts/palette.mjs $(IMG)
 
+# make brandspec URL=https://site.com  — READ the site's real CSS + computed styles (don't guess): the
+# 1-3 real font families with the WEIGHTS actually used (→ primary/secondary/accent), declared :root
+# design tokens (--color-*/--font-*), key colours with WCAG contrast, radius. Run this BEFORE authoring
+# a theme — the accurate source for weight/accent that eyedrop (pixels) can't give (it read creed's
+# accent as the sky-photo blue; the CSS says #2563eb). Pair with `make palette` for dominance.
+brandspec:
+	node scripts/brandspec.mjs $(URL)
+
 # make sections URL=https://site.com NAME=brand  — inventory the page as SECTIONS: one screenshot per
 # major block + sections.json (stable selector + ready-to-paste `make capture` command per section).
 # The doctrine step: capture the real sections, don't rewrite them. Storyboard = one beat per section.
@@ -137,6 +145,12 @@ photos:
 capture-scene:
 	node scripts/capture-scene.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) --parts "$(PARTS)"
 
+# make capture-motion URL=… SEL="section" [ONLOAD=1] [DUR=2.5]  — WATCH a real element animate and emit a
+# motion track (from→rest keyframes) to replay the site's actual move. Scroll-triggered by default; ONLOAD=1
+# for on-load reveals. The motion twin of brandspec: measure the animation, don't guess it.
+capture-motion:
+	node scripts/capture-motion.mjs $(URL) "$(SEL)" $(if $(ONLOAD),--onload) $(if $(DUR),--dur $(DUR))
+
 # ---- generated media (kie.ai; needs KIE_API_KEY or a gitignored .kie.key) ----
 # make gen-image Q="a neon server room" NAME=hero [ASPECT=16:9]  — generate an image → engine/assets/gen/<NAME>.png
 # (use it as a normal { "type": "image", "src": "/engine/assets/gen/<NAME>.png" } layer).
@@ -169,6 +183,11 @@ validate:
 schema-check:
 	node scripts/schema-drift.mjs
 
+# make lint-test  — regression asserts for validate's lintData (missing-duration / typing+markup /
+# scene-collision). Each rule caught a real bug this session; this pins that it still fires.
+lint-test:
+	node scripts/lint-test.mjs
+
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review:
@@ -188,3 +207,26 @@ install-hooks:
 
 clean:
 	rm -rf bin engine/out/*.mp4
+
+critique: ## value-gate: flag hollow/low-value beats (D=<file>)
+	node scripts/critique.mjs $(D)
+
+compare: ## variant selection: tile candidate frames to pick the best (args in ARGS)
+	node scripts/compare.mjs $(ARGS)
+
+expand: ## expand {type:block} + {type:comp} sugar into real layers (D=<file>)
+	node scripts/expand-blocks.mjs $(D)
+
+catalog: build ## render the block registry to paged sheets (browse the arsenal)
+	node scripts/blocks-catalog.mjs
+	@for f in formats/scene/_catalog-*.json; do ./bin/shortwave $$f --draft || exit 1; done
+	@echo "→ engine/out/_catalog-*.mp4 (one page per file)"
+
+inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
+	node scripts/inspect.mjs $(D)
+
+scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
+	node scripts/scrub.mjs $(F)
+
+batch: ## data-driven variants: TPL=<template.json> DATA=<data.json> [render]
+	node scripts/batch.mjs $(TPL) $(DATA)

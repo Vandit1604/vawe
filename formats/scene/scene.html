@@ -19,7 +19,9 @@
       #cam { position: absolute; inset: 0; will-change: transform; transform-origin: 50% 50%; }
       .hs-layer { position: absolute; will-change: transform, opacity, filter; }
       .hs-text { color: var(--text); line-height: 1.04; }
-      .hs-text b { color: var(--em, var(--accent)); }
+      /* <b> is ACCENT EMPHASIS (recolour), not "bolder": inherit the layer weight so emphasis never
+         jumps to UA bold 700 and sits heavier than its own line. Opt into a heavier emphasis explicitly. */
+      .hs-text b { color: var(--em, var(--accent)); font-weight: inherit; }
       .hs-text em { font-style: italic; font-family: var(--font-serif); }
       .hs-img { display: block; object-fit: contain; }
       .hs-rect { box-sizing: border-box; }
@@ -55,6 +57,7 @@
       import { cutStyle } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
+      import { createRenderer } from '/core/layers/index.js';
       const $ = (id) => document.getElementById(id);
 
       boot((data, fps, theme) => {
@@ -74,6 +77,9 @@
           if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
           const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
           const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined), b.opts);
+          // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
+          // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
+          if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');
           const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
           for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;
           return { from: b.from ?? 0, to: b.to ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
@@ -146,125 +152,11 @@
             else L.x = (T.x ?? 0) + dx;
           }
         }
-        function styleText(el, L, midT) {
-          const serif = L.font === 'serif', mono = L.font === 'mono';
-          el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : 'sans'})`;
-          el.style.fontStyle = serif ? 'italic' : 'normal';
-          el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
-          el.style.letterSpacing = L.tracking ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96) : '-0.03em'));
-          el.style.fontSize = (L.size ?? 96) + 'px';
-          if (L.w != null) el.style.width = L.w + 'px';
-          if (L.align) el.style.textAlign = L.align;
-          const auto = inkAt(midT);
-          if (L.color) el.style.color = L.color; else if (auto) el.style.color = auto;
-          // <b> emphasis colour: explicit emColor wins; else the brand accent for the POP — EXCEPT
-          // over an accent-coloured field, where accent-on-accent vanishes, so emphasis falls back to
-          // the layer's OWN colour (bold, always visible). Guard against blue-on-blue. (Must be a real
-          // colour, not the keyword `inherit`: `--em:inherit` resolves invalid and re-triggers accent.)
-          const w = bgWinAt(midT);
-          const layerColor = L.color || auto || 'var(--text)';
-          const emDefault = w && ACCENT_BGS.includes(w.preset) ? layerColor : 'var(--accent)';
-          el.style.setProperty('--em', L.emColor || emDefault);
-          el.innerHTML = L.type === 'count' ? '' : (L.text || '');
-          if (L.type === 'count') { el.style.fontVariantNumeric = 'tabular-nums'; el.textContent = (L.prefix || '') + (L.from ?? 0).toFixed(L.decimals ?? 0) + (L.suffix || ''); }
-        }
-        function chipBox(el, L) { // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer
-          if (L.bg == null && !L.border && !L.shadow && !L.elevation) return;
-          if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
-          if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
-          el.style.borderRadius = (L.radius ?? 16) + 'px';
-          if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
-          if (L.elevation) {
-            // physical depth, from linear.app's real CSS: inset hairline ring + lit top edge +
-            // a STACK of decreasing-blur drops (one flat shadow is what reads as a flat div)
-            const light = L.on === 'light';
-            const stack = [
-              light ? 'inset 0 0 0 1px rgba(0,0,0,0.08)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-              light ? 'inset 0 1px 0 rgba(255,255,255,0.7)' : 'inset 0 1px 0 rgba(255,255,255,0.05)',
-              '0 1px 1px rgba(0,0,0,0.07)', '0 2px 2px rgba(0,0,0,0.05)',
-            ];
-            const e = Math.min(4, Math.max(1, L.elevation | 0));
-            if (e >= 2) stack.push('0 4px 8px rgba(0,0,0,0.2)');
-            if (e >= 3) stack.push('0 12px 24px rgba(0,0,0,0.28)');
-            if (e >= 4) stack.push('0 0 64px rgba(0,0,0,0.4)');
-            if (L.glow) stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, 0.25)}`);
-            el.style.boxShadow = stack.join(', ');
-          } else if (L.shadow) el.style.boxShadow = '0 24px 70px rgba(20,20,25,0.12)';
-          if (el.classList.contains('hs-text')) el.style.display = 'inline-block';
-        }
-        // hexA('#5e6ad2', .25) → rgba string (glow/beam colors come as brand hex)
-        function hexA(hex, a) {
-          const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
-          if (!m) return hex;
-          const n = parseInt(m[1], 16);
-          return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
-        }
-        // fade: static edge mask. MUTUALLY EXCLUSIVE with `cut` — every cut presentation writes
-        // maskImage identity each frame and would silently erase the fade.
-        function applyFade(el, L) {
-          if (!L.fade) return;
-          if (L.cut) throw new Error(`layer "${L.text || L.type}": fade and cut are mutually exclusive — put the fade on an inner layer`);
-          const g = { right: 'linear-gradient(90deg, #000 55%, transparent 98%)',
-                      left: 'linear-gradient(270deg, #000 55%, transparent 98%)',
-                      bottom: 'linear-gradient(180deg, #000 55%, transparent 98%)',
-                      top: 'linear-gradient(0deg, #000 55%, transparent 98%)',
-                      edges: 'radial-gradient(120% 120% at 50% 50%, #000 60%, transparent 100%)' }[L.fade];
-          if (g) { el.style.maskImage = g; el.style.webkitMaskImage = g; }
-        }
         const extra = []; // group children (any depth), animated on their root group's window
-
-        // layout-by-containment: a group is a flex OR grid box; children flow with gap so a
-        // label+value or a logo row can never collide. Mirrors another engine/another engine' flex-not-pixels rule.
-        function layoutGroup(el, L) {
-          if (L.layout === 'grid') {
-            el.style.display = 'grid';
-            el.style.gridTemplateColumns = `repeat(${L.gridCols ?? 2}, ${L.colw ? L.colw + 'px' : '1fr'})`;
-            el.style.columnGap = (L.colGap ?? L.gap ?? 24) + 'px';
-            el.style.rowGap = (L.rowGap ?? L.gap ?? 24) + 'px';
-            el.style.justifyItems = L.items || L.align2 || 'stretch';
-          } else {
-            el.style.display = 'flex';
-            // canonical: `layout` (row|column|grid), `items` (align-items), `justify` (justify-content).
-            // Aliases kept for back-compat: `direction`→layout, `align2`→items.
-            el.style.flexDirection = (L.layout || L.direction) === 'column' ? 'column' : 'row';
-            el.style.gap = (L.gap ?? 24) + 'px';
-            el.style.flexWrap = L.wrap ? 'wrap' : 'nowrap';
-            el.style.alignItems = L.items || L.align2 || 'center';
-            el.style.justifyContent = L.justify || 'flex-start';
-          }
-          if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
-          if (L.h != null) el.style.height = L.h + 'px';
-        }
-        // per-child flex sizing so a child can grow/fix within the row/grid
-        function sizeChild(c, C, isImg) {
-          if (C.grow != null) c.style.flexGrow = String(C.grow);
-          if (C.basis != null) c.style.flexBasis = typeof C.basis === 'number' ? C.basis + 'px' : C.basis;
-          if (!isImg) { if (C.w != null) c.style.width = C.w + 'px'; if (C.h != null) c.style.height = C.h + 'px'; }
-        }
-        // recursive: a child may itself be a group (real nested layout), or a text/image/count leaf.
-        // Leaves join `extra` on the ROOT group's window so kinetic/count/motion animate in sync.
-        function addGroupChild(parentEl, C, rootL) {
-          const c = document.createElement('div');
-          if (C.type === 'group') {
-            c.className = 'hs-group';
-            layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
-            parentEl.appendChild(c);
-            for (const gc of C.children || []) addGroupChild(c, gc, rootL);
-            return;
-          }
-          c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
-          if (C.type === 'image') {
-            c.innerHTML = icon(C.src, '');
-            const im = c.querySelector('img'); if (im) { im.className = 'hs-img'; if (C.h) im.style.height = C.h + 'px'; if (C.w) im.style.width = C.w + 'px'; }
-          } else {
-            styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2);
-            chipBox(c, C);
-          }
-          sizeChild(c, C, C.type === 'image');
-          if (C.critical) c.setAttribute('data-layer', 'critical');
-          parentEl.appendChild(c);
-          extra.push({ L: { ...C, start: rootL.start, duration: rootL.duration }, el: c, units: C.split ? splitText(c, C.split) : null });
-        }
+        // the layer registry (core/layers/*) — one primitive per file; scene.html just dispatches.
+        const renderer = createRenderer({ theme, W, H, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
+          splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
+          extra, components: window.__components, clips: window.__clips, lottie: window.__lottie });
         const layers = (data.layers || []).map((L, idx) => {
           const el = document.createElement('div');
           el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : L.type === 'rect' ? 'hs-rect' : L.type === 'component' ? 'hs-comp-wrap' : L.type === 'group' ? 'hs-group' : 'hs-text');
@@ -275,7 +167,7 @@
           if (L.align) el.style.textAlign = L.align;
           if (L.filter) el.style.filter = L.filter;
           if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
-          applyFade(el, L);
+          renderer.kit.applyFade(el, L);
           if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
           // timing → data-attributes consumed by compose.driveClips
           el.dataset.start = String(L.start ?? 0);
@@ -288,132 +180,9 @@
           if (L.out) el.dataset.out = L.out;
           if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
 
-          if (L.type === 'image') {
-            el.innerHTML = icon(L.src, '');
-            const im = el.querySelector('img'); if (im) { im.className = 'hs-img'; if (L.h) im.style.height = L.h + 'px'; if (L.w) im.style.width = L.w + 'px'; }
-            // ken: tasteful slow zoom on the image INSIDE a clipped frame (photo treatment).
-            // {from, to, fx, fy} or true for the 1.0→1.07 default; travels once, never reverses.
-            if (L.ken && im) {
-              Object.assign(el.style, { overflow: 'hidden', borderRadius: (L.radius ?? 18) + 'px' });
-              im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%';
-              if (L.h) el.style.height = L.h + 'px';
-            }
-            // edgeFade: the photo dissolves into a soft (white by default) blur on its LEFT + RIGHT
-            // edges — editorial framing so an image blends into the bg instead of hard-cropping.
-            // edgeFade: true | <fade%> ; edgeFadeColor overrides the fade colour (e.g. the dark bg).
-            if (L.edgeFade && im) {
-              const fw = typeof L.edgeFade === 'number' ? L.edgeFade : 14;
-              const mask = `linear-gradient(90deg, transparent 0%, #000 ${fw}%, #000 ${(100 - fw)}%, transparent 100%)`;
-              im.style.webkitMaskImage = mask; im.style.maskImage = mask;
-              el.style.background = L.edgeFadeColor || '#ffffff';
-            }
-          } else if (L.type === 'group') {
-            // layout-by-containment: a flex OR grid box; children (any depth) flow with gap so a
-            // card+label+chip or a logo row can never desync. DOM ancestry = visual stacking.
-            layoutGroup(el, L);
-            chipBox(el, L);
-            for (const C of L.children || []) addGroupChild(el, C, L);
-          } else if (L.type === 'rect') {
-            // a panel / card / pill: pure box, no text (put text in its own layer on a higher track)
-            if (L.h != null) el.style.height = L.h + 'px';
-            if (L.bg == null && !L.elevation) el.style.background = '#fff';
-            chipBox(el, L);
-          } else if (L.type === 'glow') {
-            // soft light: radial center-glow, or a directional beam (the roadmap-trail look).
-            // Pure gradient div — no canvas, no per-frame writes; place on a low track.
-            const c = L.color === true || L.color == null ? 'var(--accent-glow)' : hexA(L.color, L.intensity ?? 0.25);
-            if (L.h != null) el.style.height = L.h + 'px';
-            const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
-            el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                                      : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
-            el.style.pointerEvents = 'none';
-          } else if (L.type === 'board') {
-            // believable populated workspace from pure data: columns of mini issue-cards with
-            // the elevation-1 treatment. Hard caps (4 cols × 5 cards); enters as ONE clip.
-            const cols = (L.cols || []).slice(0, 4);
-            const colW = ((L.w ?? 1200) - (cols.length - 1) * (L.gap ?? 28)) / Math.max(1, cols.length);
-            const ring = 'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 1px rgba(0,0,0,0.07), 0 2px 2px rgba(0,0,0,0.05)';
-            el.style.display = 'flex'; el.style.gap = (L.gap ?? 28) + 'px';
-            el.innerHTML = cols.map((c) => `
-              <div style="width:${colW.toFixed(1)}px;display:flex;flex-direction:column;gap:14px">
-                <div style="display:flex;gap:12px;align-items:baseline;font:600 ${L.headSize ?? 24}px var(--font-sans);color:var(--text)">${c.title || ''}<span style="font:500 ${(L.headSize ?? 24) - 4}px var(--font-mono);color:var(--dim)">${c.count ?? ''}</span></div>
-                ${(c.cards || []).slice(0, 5).map((k) => `
-                  <div style="background:var(--surface);border-radius:10px;padding:18px 20px;box-shadow:${ring}">
-                    <div style="font:500 ${L.cardSize ?? 19}px var(--font-mono);color:var(--dim)">${k.id || ''}</div>
-                    <div style="font:510 ${(L.cardSize ?? 19) + 3}px var(--font-sans);color:var(--text-2);margin-top:6px">${k.title || ''}</div>
-                    ${(k.labels || []).length ? `<div style="display:flex;gap:10px;margin-top:12px">${k.labels.map((lb) => `<span style="font:500 ${(L.cardSize ?? 19) - 3}px var(--font-sans);color:var(--text-2);background:rgba(255,255,255,0.04);border-radius:5px;padding:3px 10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${lb.c || '#8a8f98'};margin-right:7px;vertical-align:1px"></span>${lb.t}</span>`).join('')}</div>` : ''}
-                  </div>`).join('')}
-              </div>`).join('');
-          } else if (L.type === 'component') {
-            // a REAL UI capture (capture-component.mjs), or one PART of a captured animated
-            // scene (capture-scene.mjs) — parts carry their own w/h and are re-animated here.
-            let c = (window.__components && window.__components[L.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
-            if (L.part && c.parts) c = c.parts.find((pp) => pp.name === L.part) || { html: `<div style="color:#888">part ${L.part} missing</div>`, w: 600, h: 300 };
-            const fit = (L.w || 1200) / Math.max(1, c.w);
-            el.style.width = Math.round(c.w * fit) + 'px';
-            el.style.height = Math.round(c.h * fit) + 'px';
-            el.innerHTML = `<div class="hs-comp" style="width:${c.w}px;height:${c.h}px;transform:scale(${fit.toFixed(4)})">${c.html}</div>`;
-          } else if (L.type === 'clip') {
-            // a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame sequence
-            // (scripts/gen-clip.mjs → manifest). No <video>, no async decode — renderFrame(n) swaps
-            // the <img> src to the frame for local time. src = the manifest path (preloaded in boot).
-            const man = (window.__clips && window.__clips[L.src]) || { frames: [], w: 640, h: 360, fps: 30 };
-            if (L.w != null) el.style.width = L.w + 'px';
-            el.style.borderRadius = (L.radius ?? 0) + 'px'; el.style.overflow = 'hidden';
-            el.innerHTML = `<img class="hs-clip-img" style="width:100%;display:block;object-fit:${L.fit || 'cover'}" src="${man.frames[0] || ''}">`;
-          } else if (L.type === 'html') {
-            // RAW hand-authored HTML/CSS as ONE layer — full design freedom for a beat, still
-            // positioned (x/y/w) and animated (anim / motion tracks) by the engine. MUST be static:
-            // any <script> is stripped so renderFrame(n) stays pure. Preview standalone first with
-            // `make preview HTML=frag.html`, and gate the markup with `make slop`.
-            if (L.w != null) el.style.width = L.w + 'px';
-            el.innerHTML = `<div class="hs-html">${String(L.html || '').replace(/<script[\s\S]*?<\/script>/gi, '')}</div>`;
-          } else if (L.type === 'doc') {
-            // a markdown / source FILE card from pure data: an optional filename + diff-chip header,
-            // then blocks — heading (accent left-bar), mono body, code, or bullets. One declarative
-            // layer replaces hand-placing a rect + filename + chip + accent-bar + body lines. Theme
-            // styled, auto-height. Recreate any doc/editor UI (the whole point for md-file brands).
-            const mono = 'var(--font-mono)', sans = 'var(--font-sans)';
-            const nS = L.nameSize ?? 30, hS = L.hSize ?? 40, bS = L.bodySize ?? 30;
-            const header = (L.filename || L.diff) ? `
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${L.gap ?? 28}px">
-                <span style="font:500 ${nS}px ${mono};color:var(--dim)">${L.filename || ''}</span>
-                ${L.diff ? `<span style="font:600 ${nS}px ${mono};color:#1a9e57;background:#e8f7ee;border-radius:10px;padding:8px 16px">${L.diff}</span>` : ''}
-              </div>` : '';
-            const blocks = (L.blocks || []).map((b) => {
-              if (b.h != null) { const ac = b.accent || 'var(--accent)';
-                return `<div style="display:flex;align-items:center;gap:16px;margin:${L.blockGap ?? 22}px 0 14px">
-                  <span style="width:5px;height:${hS}px;background:${ac};border-radius:2px"></span>
-                  <span style="font:700 ${hS}px ${sans};color:${ac}">${b.h}</span></div>`; }
-              if (b.code != null) return `<pre style="font:400 ${bS}px ${mono};color:var(--text);background:rgba(128,128,128,0.12);border-radius:10px;padding:18px 20px;margin:12px 0;white-space:pre-wrap">${b.code}</pre>`;
-              if (b.bullets) return `<ul style="margin:8px 0;padding-left:26px">${b.bullets.map((li) => `<li style="font:400 ${bS}px ${mono};color:var(--text-2);margin:6px 0">${li}</li>`).join('')}</ul>`;
-              return `<div style="font:400 ${bS}px ${mono};color:var(--text-2);line-height:1.5;white-space:pre-wrap">${b.body ?? ''}</div>`;
-            }).join('');
-            el.style.width = L.w + 'px';
-            el.innerHTML = `<div style="background:${L.bg || 'var(--surface)'};border:1px solid var(--line);border-radius:${L.radius ?? 18}px;padding:${L.pad ?? 36}px;box-shadow:0 24px 60px rgba(0,0,0,0.10),0 4px 12px rgba(0,0,0,0.05)">${header}${blocks}</div>`;
-          } else {
-            styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
-            chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
-            if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
-              cam.appendChild(el); // needs to be in-DOM to measure
-              const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
-              if (!document.fonts.check(`${L.weight ?? 800} 40px "${fam}"`)) console.warn(`fit: font "${fam}" not loaded — fit measurement may be off`);
-              if (L.fitH) fitBox(el, { maxW: L.w, maxH: L.fitH, max: L.size ?? 96, min: 34 });
-              else el.style.fontSize = fitText(el.textContent, L.w, { font: (px) => `${L.weight ?? 800} ${px}px ${fam}`, max: L.size ?? 96, min: 34 }) + 'px';
-              el.remove();
-            } else if (L.w && !L.split && (L.type === 'text' || !L.type) && L.text) {
-              // AUTO-FIT SAFETY (default): a headline that overflows its box — wraps past ~5 lines, or a
-              // word wider than L.w — gets shrunk to fit so it never clips the frame. Only fires on real
-              // overflow (bug-fix: output changes only where it was already broken). Pure (measured once).
-              cam.appendChild(el);
-              const lh = parseFloat(getComputedStyle(el).lineHeight) || (L.size ?? 96) * 1.15;
-              const maxLines = L.maxLines ?? 5, maxH = L.h ?? maxLines * lh;
-              if (el.scrollHeight > maxH + 2 || el.scrollWidth > L.w + 1) fitBox(el, { maxW: L.w, maxH, max: L.size ?? 96, min: 34 });
-              el.remove();
-            }
-          }
+          renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
-          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board', 'doc', 'component', 'html', 'clip'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };
@@ -449,27 +218,9 @@
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
             if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || 'up', stagger: L.stagger ?? 0.06, each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
-            // count layers: value is a pure fn of local time over [countStart, countStart+countDur]
-            if (L.type === 'count' && t >= start && t < end) {
-              const cs = L.countStart ?? 0.2, cd = L.countDur ?? 1.6;
-              const v = interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: resolveEasing(L.ease || 'easeOutCubic') });
-              el.textContent = (L.prefix || '') + v.toFixed(L.decimals ?? 0) + (L.suffix || '');
-            }
-            // clip playback: show the frame for local time (pure fn of n). loop wraps; else clamps.
-            if (L.type === 'clip') {
-              const man = (window.__clips && window.__clips[L.src]) || { frames: [] };
-              const N = man.frames.length;
-              if (N) {
-                const img = el.querySelector('img');
-                let fi = Math.floor((t - start) * (man.fps || 30) * (L.speed ?? 1));
-                fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
-                if (img && img.getAttribute('src') !== man.frames[fi]) img.setAttribute('src', man.frames[fi]);
-              }
-            }
-            // ken burns zoom on image layers (continuous over the whole window, identity outside)
-            if (L.ken) { const im = el.querySelector('img'); if (im) Object.assign(im.style, t >= start && t < end
-              ? kenBurns(t - start, L.duration ?? 2, L.ken === true ? {} : L.ken)
-              : { transform: 'scale(1)', transformOrigin: '50% 50%' }); }
+            // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
+            // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
+            renderer.frame(el, L, t);
             // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which
             // driveClips/cutStyle already wrote to el.style), and multiply into the composed opacity.
             if (L.motion && L.motion.length && t >= start && t < end) {
@@ -477,6 +228,22 @@
               const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
               el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
               el.style.opacity = ((parseFloat(el.style.opacity) || 1) * m.opacity).toFixed(3);
+              // TWO blur materials, summed into one blur():
+              //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
+              //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
+              //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
+              //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
+              let blurPx = m.blur > 0.01 ? m.blur : 0;
+              if (L.motionBlur) {
+                const shutter = L.motionBlur === true ? 0.5 : +L.motionBlur;
+                const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
+                const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
+                blurPx += Math.min(24, shutter * speed * 0.5);      // half-shutter, capped so text never dissolves
+              }
+              // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
+              // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
+              const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+              el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
             }
           }
           // captions: show the caption whose window contains t

@@ -8,12 +8,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const scene = fs.readFileSync(path.join(ROOT, 'formats/scene/scene.html'), 'utf8');
+// the engine = scene.html (orchestrator) + core/layers/*.js (the primitives, where most L.<prop> reads
+// now live after the layer-registry refactor). Scan BOTH, or moved props silently escape the check.
+const layersDir = path.join(ROOT, 'core/layers');
+const engineFiles = [path.join(ROOT, 'formats/scene/scene.html'),
+  ...fs.readdirSync(layersDir).filter((f) => f.endsWith('.js')).map((f) => path.join(layersDir, f))];
+const engineSrc = engineFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
 
-// props the engine reads off a layer/child object
+// props the engine reads off a layer/child object (L.<prop> or C.<prop>)
 const engineProps = new Set();
-for (const m of scene.matchAll(/\b[LC]\.([a-zA-Z][a-zA-Z0-9]*)/g)) engineProps.add(m[1]);
+for (const m of engineSrc.matchAll(/\b[LC]\.([a-zA-Z][a-zA-Z0-9]*)/g)) engineProps.add(m[1]);
 
 // every field name DEFINED anywhere in the schema (skip the JSON-schema structural keywords)
 const RESERVED = new Set(['type', 'label', 'item', 'enum', 'min', 'max', 'default', 'required',

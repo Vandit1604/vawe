@@ -43,7 +43,9 @@ render order (which is what lets frames shard across parallel tabs). Guarded by 
 ```
 core/            the primitives (pure, browser+node): motion.js (math) + boot.js (scene runtime), type.js, cuts.js,
                  stings.js, backgrounds.js, clips.js, sequence.js, theme-contract.js, tokens.css
-formats/scene/  scene.html (the renderer) · schema.json (field contract) · sample.json (reference)
+core/layers/     the LAYER REGISTRY — one file per primitive (text/image/rect/glow/group/board/doc/html/clip/
+                 cursor/component + count), each exporting build()/frame(). Adding a primitive = adding a file.
+formats/scene/  scene.html (thin orchestrator: bg/camera/stings/timing, dispatches to core/layers) · schema.json · sample.json
 themes/          brand palettes + fonts (theme-contract.js defines the required shape; no fallback look)
 cmd/render, internal/   the Go render service (chromedp capture + ffmpeg encode + PCM audio mixer + queue)
 scripts/         authoring + gate tools (preview, beats, palette, captions, assets, validate, probe …)

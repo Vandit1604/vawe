@@ -94,6 +94,62 @@ as a "use the parent colour" trick — it invalidates the var and triggers the f
 colour) and hard-fails a colour ≈ its background; `make audit-test` (fixture `verify/fixtures/
 emphasis-contrast.json`) proves the check still catches it. This class can no longer ship silently.
 
+## 10. Headline rendered in the generic sans (theme font silently not loaded)
+
+**What:** the creed video's headlines looked like a generic sans, not the theme's Geist.
+**Root cause:** `boot()` awaited a HARDCODED font-preload list, and Geist (the sans) wasn't in it (Geist
+*Mono* was). With `font-display: block`, a face that isn't loaded before the first frame falls back to
+the generic `Hanken Grotesk` / system sans. The list is easy to forget when a new face is added.
+**Fix:** two layers — (1) added Geist (+ Hanken) to the static list; (2) `boot()` now ALSO loads the
+fonts the THEME declares (`theme.type.{sans,serif,mono,num}`) at every weight, so a brand's face can
+never be silently swapped again ("load what you use", like another engine's per-font render-blocking handle).
+Verify a face is really rendering: `document.fonts.check("800 100px '<Face>'")` in a headless boot.
+**Lesson:** if a headline looks generic, first check the face is actually LOADED, not just referenced.
+
+## 11. Guessed the type weight + eyedropped the wrong accent (didn't read the CSS)
+
+**What:** creed's headline shipped at weight 800 (chunky) when the site is **600**; the accent was the
+sky-photo blue `#0575f0` when the brand's real accent is `#2563eb`. Also `<b>` emphasis rendered heavier
+than its own line (UA bold 700 on a 600 layer).
+**Root cause:** authored type/colour from *guesses and pixels*, not the site's declared CSS. Eyedrop reads
+rendered pixels — great for dominance, but it sampled the hero *photo*, not the UI accent token; and no tool
+measured the real font weights, so "big headline = 800" was a guess.
+**Fix (framework):** (1) `make brandspec URL=…` reads the CSS + computed styles → the 1-3 real faces with
+their actual weights (→ primary/secondary/accent), the `--color-*`/`--font-*` tokens, and WCAG contrast.
+Run it BEFORE authoring a theme. (2) `.hs-text b` now `font-weight: inherit` — emphasis is recolour-only,
+never a stray bold. (3) TYPOGRAPHY.md §0/§0b: measure-first + the 1-3 font-role system.
+**Lesson:** for anything DECLARED (font family/weight, brand colour, radius), **read the CSS**; use pixels
+(eyedrop) only for what isn't declared (dominance, a photo's colour).
+
+---
+
+## 12. Text "shaking" — captured at 1×, no anti-alias headroom
+**What happened:** text shimmered/crawled frame-to-frame, worst under camera moves and per-word kinetic
+reveals. I first "fixed" it by STRIPPING the effects (camera, stings, splits) — wrong trade; the video
+went lifeless.
+**Root cause:** the renderer captured at `force-device-scale-factor: 1`. The moment any transform lands
+text on a fractional pixel there is no AA headroom to absorb it, so it crawls.
+**Fix (framework):** `internal/scene/scene.go` now captures at **2× and box-resolves to native 1080p**
+(`downsample` = exact SSAA); draft stays 1×. Sub-pixel jitter averages out → crisp text UNDER motion, so
+effects stay. Verified: held-text churn 73dB (was visibly shimmering).
+**Lesson:** fix a rendering artefact at the RENDER layer, never by deleting the design. Supersample.
+
+## 13. Cursor click missed the button (base-offset footgun)
+**What happened:** a `cursor` `path` ending on the Accept button rendered ~(60,240) px off — the click
+fired in empty space.
+**Root cause:** scene.html defaults every layer to `x:60,y:240`; the cursor `frame` ADDS the path coords
+to that base, so path was silently offset.
+**Fix (framework):** `core/layers/cursor.js` anchors the base at (0,0) when no x/y is authored → `path` is
+absolute screen px by default (explicit x/y still makes it relative). Schema label documents it.
+
+## 14. Silent authoring bugs the schema couldn't catch → `lintData` (make lint-test)
+Three bugs shipped in renders and passed every gate; each is now a `validate` warning (fail with
+`--strict`), pinned by `make lint-test`:
+- **missing `duration`** → a layer renders for the WHOLE video (a "+" gutter leaked 53s).
+- **`typing` + `<b>/<em>`** → typing reveals characters literally, so tags show as text.
+- **scene collision** → two content layers overlapping in space AND time (one scene bled into the next).
+**Lesson:** when a bug slips every gate, add the cheap deterministic gate that would have caught it.
+
 ---
 
 ## Tool-accuracy note (see also: the survey in chat)

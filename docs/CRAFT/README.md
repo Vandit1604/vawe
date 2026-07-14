@@ -1,5 +1,9 @@
 # CRAFT — decision guides for hand-authoring
 
+> **New here? Start at [`../TASTE.md`](../TASTE.md)** — the front door that ties the spines (house-style ·
+> composition · motion · story), the block registry, and the quality loop together. CRAFT is the
+> *house-style* spine it routes to.
+
 **Load the relevant guide BEFORE you hand-write HTML or author a theme.** These answer *how to choose*
 (a face, a palette, a layout, an image) — the decisions that separate intentional design from AI slop.
 They are opinionated checklists, not textbooks: if a rule here wouldn't change what you build, it's cut.

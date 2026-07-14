@@ -1,0 +1,11 @@
+{
+  "module": "scene",
+  "theme": "creed-launch",
+  "duration": 10,
+  "layers": [
+    { "type": "text", "text": "no duration here", "x": 100, "y": 100, "w": 400, "size": 40, "start": 0 },
+    { "type": "text", "text": "Block <b>7 to 11am</b> typed", "x": 100, "y": 300, "w": 500, "size": 30, "typing": 24, "start": 0, "duration": 3 },
+    { "type": "text", "text": "scene A body", "x": 200, "y": 500, "w": 800, "size": 40, "start": 1, "duration": 4 },
+    { "type": "text", "text": "scene B body", "x": 500, "y": 520, "w": 800, "size": 40, "start": 2, "duration": 4 }
+  ]
+}

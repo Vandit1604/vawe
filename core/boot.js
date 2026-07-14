@@ -118,12 +118,21 @@ export async function boot(build) {
   const fps = Number(params.get('fps')) || FPS;
   try {
     try {
-      await Promise.all([
+      // EVERY bundled face must be loaded+decoded here — a face missing from this list falls back to
+      // the generic sans (font-display:block), which is the "why does my headline look generic" bug.
+      // (Geist was missing → Geist-themed videos silently rendered in Hanken/system sans.)
+      const FACES = [
         '400 100px Inter', '600 100px Inter', '700 100px Inter', '800 100px Inter',
         "500 100px 'Space Grotesk'", "700 100px 'Space Grotesk'",
-        "400 100px 'Instrument Serif'", "italic 400 100px 'Instrument Serif'", "400 100px 'Geist Mono'",
+        "400 100px 'Instrument Serif'", "italic 400 100px 'Instrument Serif'",
+        "400 100px 'Geist'", "500 100px 'Geist'", "600 100px 'Geist'", "700 100px 'Geist'", "800 100px 'Geist'",
+        "400 100px 'Geist Mono'", "600 100px 'Geist Mono'",
         "800 100px 'Plus Jakarta Sans'", "700 100px 'JetBrains Mono'", "400 100px 'Caveat'",
-      ].map((f) => document.fonts.load(f)));
+        "400 100px 'Hanken Grotesk'", "700 100px 'Hanken Grotesk'", "800 100px 'Hanken Grotesk'",
+      ];
+      // also load whatever the theme actually declares, at the weights scenes use, in case it's a face
+      // not in the static list above (belt-and-suspenders for future themes).
+      await Promise.all(FACES.map((f) => document.fonts.load(f)));
       await document.fonts.ready;
     } catch (e) {}
     const data = await (await fetch(dataUrl)).json();
@@ -147,6 +156,14 @@ export async function boot(build) {
     const [width, height] = landscape ? [1920, 1080] : [1080, 1920];
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
+    // load the fonts the THEME actually declares (not just the static list above) at every weight a
+    // scene might use — so a brand's face is never silently swapped for the generic fallback. This is
+    // the "load what you use" rule (how another engine ties each font to a render-blocking handle).
+    try {
+      const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
+      await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));
+      await document.fonts.ready;
+    } catch (e) {}
     await preloadImages(data); // web/local images ready before any frame is captured
     // preload captured components (real UI lifted off a site by scripts/capture-component.mjs) so a
     // `component` scene can inject real HTML synchronously. Any string like /…/components/x.json.
@@ -166,6 +183,17 @@ export async function boot(build) {
         window.__clips[p] = man;
         await Promise.all((man.frames || []).map((src) => new Promise((res) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(res, res) : res()); im.onerror = () => res(); im.src = src; })));
       } catch (e) {}
+    }
+    // preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its
+    // src; fetch each once so build() can init the runtime synchronously and seek it per frame.
+    window.__lottie = {};
+    const lottieSrcs = new Set();
+    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.type === 'lottie' && typeof o.src === 'string') lottieSrcs.add(o.src); Object.values(o).forEach(scan); } })(data);
+    if (lottieSrcs.size) {
+      // load the runtime ONLY when a scene uses it (no 168KB parse tax on text-only renders). Before the
+      // virtual clock so no rAF is captured at load; onerror resolves so a missing lib degrades, not hangs.
+      if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/engine/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+      for (const p of lottieSrcs) { try { window.__lottie[p] = await (await fetch(p)).json(); } catch (e) {} }
     }
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme);

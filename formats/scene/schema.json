@@ -17,6 +17,11 @@
       "min": 0.5,
       "max": 120
     },
+    "fps": {
+      "type": "number",
+      "label": "Frame rate (default 30; use 60 for smoother fast motion)",
+      "enum": [24, 30, 60]
+    },
     "captionMode": {
       "type": "string",
       "label": "Caption style",
@@ -188,7 +193,21 @@
             "board",
             "doc",
             "html",
-            "clip"
+            "clip",
+            "cursor",
+            "shader",
+            "lottie"
+          ]
+        },
+        "shader": {
+          "type": "string",
+          "label": "shader: ambient WebGL effect (flow/aurora/plasma/drift/mist) — smooth colour field behind content. Tune with speed · intensity · colors · seed",
+          "enum": [
+            "flow",
+            "aurora",
+            "plasma",
+            "drift",
+            "mist"
           ]
         },
         "html": {
@@ -198,6 +217,30 @@
         "speed": {
           "type": "number",
           "label": "clip: playback rate multiplier (1 = realtime; 0.5 = half speed)"
+        },
+        "typing": {
+          "type": "number",
+          "label": "text: type it out at N chars/sec (true = 24) with a blinking caret"
+        },
+        "caret": {
+          "type": "boolean",
+          "label": "typing: show the blinking caret (default true)"
+        },
+        "caretHold": {
+          "type": "boolean",
+          "label": "typing: keep the caret after the text finishes"
+        },
+        "path": {
+          "type": "array",
+          "label": "cursor: [{t,x,y,ease}] keyframes the pointer follows (x,y = absolute screen px when no layer x/y is set; relative to x/y if it is)"
+        },
+        "clicks": {
+          "type": "array",
+          "label": "cursor: [t, …] local times to fire a click (dip + ripple)"
+        },
+        "rippleColor": {
+          "type": "string",
+          "label": "cursor: click-ripple ring colour"
         },
         "filename": {
           "type": "string",
@@ -268,6 +311,10 @@
             "serif",
             "mono"
           ]
+        },
+        "italic": {
+          "type": "boolean",
+          "label": "Force italic on/off (default: serif is italic, others upright). italic:false = upright serif."
         },
         "size": {
           "type": "number",
@@ -643,6 +690,9 @@
             }
           }
         },
+        "motionBlur": {
+          "label": "Velocity motion blur on this layer's motion track (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. Needs a motion track."
+        },
         "elevation": {
           "type": "number",
           "label": "Physical depth 1–4 (ring + lit edge + stacked shadows)",
@@ -662,9 +712,9 @@
         },
         "intensity": {
           "type": "number",
-          "label": "Glow opacity",
+          "label": "Effect strength: glow opacity (0.05-0.6) · shader visibility (up to 1)",
           "min": 0.05,
-          "max": 0.6
+          "max": 1
         },
         "beam": {
           "type": "string",

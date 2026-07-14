@@ -40,8 +40,10 @@ export function driveClips(root, t) {
       const exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
       if (exitT > 0) {
         exitMul = 1 - exitT;
-        const outFn = el.dataset.out ? resolveAnim(el.dataset.out) : resolveAnim(el.dataset.anim);
-        s = asExit(outFn, exitMul); // reverse the out animation
+        // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit
+        // that reverses the enter on EVERY layer reads as too much motion once cuts/ken are also going.
+        // Opt into a motion-out explicitly with `out` (e.g. out:"rush"/"slide") when a beat wants it.
+        if (el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitMul);
       }
     }
     // compose: apply enter (or exit) transform/clip + fade by the combined opacity
