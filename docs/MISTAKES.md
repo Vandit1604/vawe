@@ -152,6 +152,33 @@ Three bugs shipped in renders and passed every gate; each is now a `validate` wa
 
 ---
 
+## 15. Authored from imagination + hand-math instead of the real asset + the composition tools (argus)
+
+**What:** three flaws shipped in the first argus pass: (a) the pixel-eye **mascot was recreated from
+memory** (a made-up almond) when the real one is a moth-eye creature with antennae + a spiral iris — I had
+it in the captured hero and never traced it; (b) the CTA **headline wasn't centred** — I hand-computed `x`
+and gave it `w` with **no `align`**, so text left-aligned in its box; (c) the **hand-underline missed its
+word** — I hardcoded `x` guessing where "purpose" would render.
+**Root cause:** I placed things by *imagination and arithmetic* instead of by the **real reference** and the
+**composition tools that exist for this**. And worse — when I eyeballed the frames I *noticed* the flaws and
+rationalized them ("reads as the signature, could nudge") instead of fixing them. The static gates
+(validate/critique/slop) can't SEE composition or asset fidelity, so my eye was the only gate and it blinked.
+**Fix (framework + discipline):**
+- **Assets: capture, never recreate.** If the brand has a mark/mascot/illustration, `make capture` it or
+  crop it from the section screenshot (transparent it if needed) and use an `image` layer. Recreating a
+  brand asset from memory is off-brand by definition.
+- **Placement: use `pin`/`col`/`align`, never eyeballed `x`.** `pin:"center"` (optical) centres a hero;
+  a text layer with `w` MUST set `align` or it left-aligns in its box. `critique` now warns on a big text
+  layer with `w` and no `align` (the mis-centre tell).
+- **Annotations bind to their target.** An underline/marker under a word belongs in the SAME element as the
+  word (an html layer, underline absolutely-positioned under the span) or anchored to it — never a blind `x`.
+- **Fix flaws, don't rationalize them.** "Renders + passes the gates" ≠ done. If the eye catches it, fix it.
+**Lesson:** the gates check hollowness and slop; they don't check *taste*. Until the vision-judge exists,
+YOUR eye is the composition/fidelity gate — capture real assets, place with the tools, and never ship a flaw
+you already noticed. (This is the concrete case for building the vision judge, #1 on the taste roadmap.)
+
+---
+
 ## Tool-accuracy note (see also: the survey in chat)
 
 Tools are accurate for MECHANICAL/precise data (exact hexes, geometry, pixel histograms) and unreliable

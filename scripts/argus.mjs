@@ -10,14 +10,9 @@ const INK = 'var(--ink)', SUB = 'var(--text-2)', DIM = 'var(--dim)', COBALT = 'v
 const T = (o) => ({ type: 'text', weight: 400, color: INK, ...o });                 // Archivo defaults light
 const L = [];
 
-// ── the 8-bit pixel-eye mascot (Argus the watchman), recreated as crisp SVG pixels in cobalt ──
-function pixelEye(size, color = '#4772f5') {
-  const outline = [[3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [2, 1], [8, 1], [1, 2], [9, 2], [0, 3], [10, 3], [1, 4], [9, 4], [2, 5], [8, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6]];
-  const pupil = [[4, 2], [5, 2], [6, 2], [4, 3], [5, 3], [6, 3], [4, 4], [5, 4], [6, 4]];
-  const rects = [...outline, ...pupil].map(([x, y]) => `<rect x="${x}" y="${y}" width="1" height="1" fill="${color}"/>`).join('');
-  return `<svg viewBox="0 0 11 7" width="${size}" height="${Math.round(size * 7 / 11)}" shape-rendering="crispEdges" style="display:block">${rects}</svg>`;
-}
-const eye = (x, y, size, start, dur) => ({ type: 'html', x, y, w: size, html: pixelEye(size), start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.3 });
+// the REAL pixel mascot (captured from the site, white bg → composites on our white scene). w centers.
+const eye = (w, y, start, dur) => ({ type: 'image', src: '/engine/assets/brands/argus/mascot.png',
+  x: Math.round((W - w) / 2), y, w, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.3 });
 
 // hand-drawn cobalt underline (a rough marker scribble) under a word — a signature detail.
 const underline = (x, y, w, start) => ({ type: 'html', x, y, w, start, duration: 3,
@@ -26,9 +21,9 @@ const underline = (x, y, w, start) => ({ type: 'html', x, y, w, start, duration:
 
 // ═══ BEAT 1 · HOOK (0–4.2s) — full-bleed statement, mascot watching ═══
 L.push(T({ text: 'argus', x: 92, y: 76, font: 'mono', size: 24, weight: 500, color: DIM, start: 0, duration: 23, track: 1 }));
-L.push(eye(830, 250, 260, 0.1, 4.2));
-L.push(T({ text: "you're posting into", x: 460, y: 640, w: 1000, size: 96, weight: 400, ls: '-0.035em', start: 0.4, duration: 4.2, anim: 'rise', enterDur: 0.55 }));
-L.push(T({ text: 'the void.', x: 460, y: 748, w: 1000, size: 96, weight: 400, color: DIM, ls: '-0.035em', start: 0.6, duration: 4, anim: 'rise', enterDur: 0.55 }));
+L.push(eye(260, 250, 0.1, 4.2));
+L.push(T({ text: "you're posting into", x: 460, y: 640, w: 1000, align: 'center', size: 96, weight: 400, ls: '-0.035em', start: 0.4, duration: 4.2, anim: 'rise', enterDur: 0.55 }));
+L.push(T({ text: 'the void.', x: 460, y: 748, w: 1000, align: 'center', size: 96, weight: 400, color: DIM, ls: '-0.035em', start: 0.6, duration: 4, anim: 'rise', enterDur: 0.55 }));
 
 // ═══ BEAT 2 · THE AUDIT (4.2–10s) — split: copy left, analytics right, one metric red ═══
 L.push(T({ text: 'argus reads your', x: 130, y: 380, size: 62, weight: 400, ls: '-0.03em', start: 4.4, duration: 5.6, anim: 'rise', enterDur: 0.5, cut: 'punch' }));
@@ -61,9 +56,11 @@ L.push(...barChart({ x: 1140, y: 330, w: 640, h: 400, color: COBALT, start: 16.8
   data: [{ label: 'W1', value: 22 }, { label: 'W2', value: 34 }, { label: 'W3', value: 55 }, { label: 'W4', value: 90 }] }));
 
 // ═══ BEAT 5 · CTA (20–23s) — the site's exact words + cobalt waitlist pill ═══
-L.push(eye(890, 300, 150, 20.1, 3));
-L.push(T({ text: 'grow on X, on purpose.', x: 360, y: 500, w: 1200, size: 86, weight: 400, ls: '-0.035em', start: 20.2, duration: 2.8, anim: 'rise', enterDur: 0.5, cut: 'fade' }));
-L.push(underline(1080, 592, 300, 20.7));
+L.push(eye(150, 300, 20.1, 3));
+// headline + underline as ONE html layer: text-align centres the line, and the underline SVG is
+// absolutely positioned UNDER the "purpose." span, so it tracks the word regardless of metrics/centring.
+L.push({ type: 'html', x: 360, y: 490, w: 1200, start: 20.2, duration: 2.8, anim: 'rise', enterDur: 0.5,
+  html: `<div style="font:400 88px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap">grow on X, on <span style="position:relative;display:inline-block">purpose.<svg viewBox="0 0 300 18" preserveAspectRatio="none" style="position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible"><path d="M4 12 Q 90 4, 150 10 T 296 8" stroke="#4772f5" stroke-width="7" fill="none" stroke-linecap="round"/></svg></span></div>` });
 L.push({ type: 'group', x: 760, y: 680, w: 400, bg: COBALT, radius: 999, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',
   start: 20.6, duration: 2.4, anim: 'rise', enterDur: 0.45, children: [T({ text: 'join the waitlist', size: 28, weight: 600, color: '#fff' })] });
 L.push(T({ text: 'argushq.cc', x: 760, y: 800, w: 400, align: 'center', font: 'mono', size: 24, weight: 500, color: DIM, start: 20.9, duration: 2.1, anim: 'rise', enterDur: 0.4 }));

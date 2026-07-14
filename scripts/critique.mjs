@@ -96,6 +96,16 @@ beats.forEach((b, bi) => {
   }
 });
 
+// ---- 7. mis-centre tell: a big text with a WIDE box but no `align` left-aligns inside it (looks off-
+//        centre). If you gave it `w` to centre it, set align:"center". (docs/MISTAKES.md #15.) ----
+for (const l of layers) {
+  if (l.type && l.type !== 'text') continue;
+  if (!l.text || l.split) continue;
+  if ((l.size ?? 0) >= 40 && (l.w ?? 0) >= 600 && !l.align) {
+    F('warn', 'mis-centre', `"${String(l.text).replace(/<[^>]+>/g, '').slice(0, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align" — text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
+  }
+}
+
 // ---- report ----
 findings.sort((a, b) => a.t - b.t);
 const errs = findings.filter((f) => f.sev === 'error');

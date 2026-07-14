@@ -206,6 +206,21 @@ treatment reads as slop.
 Only after the user approves the lock sheet do you author. If a beat needs a decision the sheet
 didn't make, that's a lock-sheet gap — amend the sheet and re-confirm, don't improvise in the JSON.
 
+## Step 3d — Authoring discipline (from the real thing, with the tools — not imagination)
+
+Three failures that ship "renders-fine but wrong" videos (see `docs/MISTAKES.md` #15). Do the opposite:
+- **Assets: capture, never recreate.** If the brand has a mark/mascot/illustration, `make capture` it or
+  crop it from the section screenshot (transparent the bg if needed) → an `image` layer. Recreating a brand
+  asset "from memory" is off-brand by definition — you'll draw a lookalike, not the thing.
+- **Placement: `pin`/`col`/`align`, never eyeballed `x`.** `pin:"center"` (optical) or `pin:"thirds-*"`
+  places a hero; a text layer given `w` MUST set `align` or it left-aligns inside its box and reads
+  off-centre. Don't hand-compute centering math. (`make critique` warns on the `w`-without-`align` tell.)
+- **Annotations bind to their target.** An underline/marker under a word lives in the SAME element as the
+  word (an `html` layer with the underline absolutely-positioned under the span), not a blind `x` guess.
+- **Fix flaws, don't rationalize them.** When you eyeball frames (Step 4), if your eye catches something
+  off, FIX it — never ship a flaw you already noticed. The static gates can't see composition or fidelity;
+  your eye is that gate until the vision-judge exists.
+
 ## Step 4 — Author → verify (non-negotiable ladder)
 
 `make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND
