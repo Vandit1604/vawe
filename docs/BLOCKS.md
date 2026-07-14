@@ -52,7 +52,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_93 entries across 45 families._
+_97 entries across 45 families._
 
 | Block | For |
 |---|---|
@@ -63,6 +63,7 @@ _93 entries across 45 families._
 | `terminal` | command prompt; command decodes in, output reveals |
 | `terminal.git` | git command |
 | `terminal.install` | install command |
+| `terminal.build` | build output |
 | `loadingBar` | determinate fill wipes L→R, lands ✓ done |
 | `deploySuccess` | CI cascade → green "Deployed to production" card |
 | `browserFrame` | window chrome (traffic dots + URL bar) |
@@ -83,6 +84,7 @@ _93 entries across 45 families._
 | `notification.error` | toast, error |
 | `kpiRow` | row of stat cells (value + label) |
 | `kpiRow.money` | KPI row, currency |
+| `kpiRow.time` | latency percentiles |
 | `callout` | info/success/warn strip |
 | `callout.info` | info strip (blurple) |
 | `callout.warn` | warning strip (terracotta) |
@@ -113,6 +115,7 @@ _93 entries across 45 families._
 | `tabBar.four` | four-tab control |
 | `checklist` | checked / unchecked items |
 | `checklist.todo` | checklist, all open |
+| `checklist.done` | checklist, all complete |
 | `table` | data table (header + rows) |
 | `table.pricing` | table, pricing rows |
 | `timeline` | vertical rail of events |
@@ -138,6 +141,7 @@ _93 entries across 45 families._
 | `badge.version` | version badge |
 | `badge.warn` | badge, warning |
 | `badge.info` | badge, info |
+| `badge.beta` | beta status badge |
 | `gauge` | semicircular meter |
 | `gauge.warn` | gauge, low (amber) |
 | `gauge.full` | gauge, complete (green) |

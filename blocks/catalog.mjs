@@ -246,4 +246,12 @@ export const CATALOG = [
     props: { size: 56 } },
   { name: 'quote.customer', family: 'quote', blurb: 'customer quote',
     props: { w: 540, text: 'We shipped a launch film in an afternoon.', author: 'a happy user' } },
+  { name: 'terminal.build', family: 'terminal', blurb: 'build output',
+    props: { w: 560, command: 'make video D=launch.json', output: ['▶ scene : capturing across 8 workers...', '✓ done → out.mp4  (65s, 1950 frames)'] } },
+  { name: 'checklist.done', family: 'checklist', blurb: 'checklist, all complete',
+    props: { w: 460, items: [{ text: 'Blocks library', done: true }, { text: 'Registry + catalog', done: true }, { text: 'Docs auto-gen', done: true }] } },
+  { name: 'kpiRow.time', family: 'kpiRow', blurb: 'latency percentiles',
+    props: { items: [{ value: '42ms', label: 'p50' }, { value: '120ms', label: 'p95' }, { value: '380ms', label: 'p99' }] } },
+  { name: 'badge.beta', family: 'badge', blurb: 'beta status badge',
+    props: { label: 'status', value: 'beta', tone: 'warn' } },
 ];
