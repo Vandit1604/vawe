@@ -30,6 +30,9 @@ how to place layers and compose an `html` layer with intent.
   moment, never by accident.
 - **Rule of thirds:** place the hero on a third-line intersection, not dead-center, and leave lead room in the
   direction of gaze/motion to guide the eye. Motion order = reading order (the most important element moves last).
+- **Composition is built into placement** (resolves per aspect, deterministic): `pin:"thirds-tl|thirds-br|…"`
+  drops a layer on a power point; `pin:"center"` uses OPTICAL center (~46%, reads centered); `col:"2-7"` places
+  it on a 12-column grid (sets x + w). Reach for these instead of eyeballed px — well-composed by default.
 
 ## 5. Video safe zones (this engine)
 - Keep essential text/hero inside **title-safe ≈ inner 90%** of the frame; for social keep key content out of the

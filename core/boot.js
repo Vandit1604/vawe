@@ -29,9 +29,15 @@ const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080
 //   pin: "center|top|bottom|left|right|top-left|…" → shorthand for the x/y edge pair
 export function resolveCoords(data, W, H) {
   const inset = Math.round(Math.min(W, H) * 0.06); // platform safe margin
-  const kw = (v, dim, size) => v === 'center' ? (dim - size) / 2
-    : (v === 'left' || v === 'top') ? inset
-    : (v === 'right' || v === 'bottom') ? dim - inset - size : null;
+  // keywords place a layer of `size` on a canvas line: edges (inside safe inset), true center, OPTICAL
+  // center (~46% — reads centered for a hero), and the two rule-of-thirds power lines (1/3, 2/3).
+  const kw = (v, dim, size) =>
+    v === 'center' ? (dim - size) / 2
+      : v === 'optical' ? dim * 0.46 - size / 2
+      : v === 'third1' ? dim / 3 - size / 2
+      : v === 'third2' ? (2 * dim) / 3 - size / 2
+      : (v === 'left' || v === 'top') ? inset
+      : (v === 'right' || v === 'bottom') ? dim - inset - size : null;
   const num = (v, dim, size) => {
     if (typeof v !== 'string') return v;
     const s = v.trim();
@@ -40,12 +46,25 @@ export function resolveCoords(data, W, H) {
     if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
     const n = parseFloat(s); return isNaN(n) ? v : n;
   };
-  const PIN = { center: ['center', 'center'], top: ['center', 'top'], bottom: ['center', 'bottom'],
+  // pin → [x-keyword, y-keyword]. center uses OPTICAL vertical; thirds land on the power points.
+  const PIN = { center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
     left: ['left', 'center'], right: ['right', 'center'], 'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
-    'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'] };
+    'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'],
+    'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'], 'thirds-bl': ['third1', 'third2'],
+    'thirds-br': ['third2', 'third2'], 'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
+    'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'] };
   for (const L of data.layers || []) {
     if (!isObj(L)) continue;
     if (L.pin && PIN[L.pin]) { const [px, py] = PIN[L.pin]; if (L.x == null) L.x = px; if (L.y == null) L.y = py; }
+    // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
+    if (L.col != null) {
+      const m = inset, cols = L.cols || 12, g = L.gutter ?? Math.round(inset * 0.5);
+      const colW = (W - 2 * m - (cols - 1) * g) / cols;
+      const mm = String(L.col).match(/^(\d+)(?:-(\d+))?$/);
+      if (mm) { const c1 = +mm[1], c2 = mm[2] ? +mm[2] : c1;
+        L.x = Math.round(m + (c1 - 1) * (colW + g));
+        L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g); }
+    }
     if (typeof L.w === 'string') L.w = num(L.w, W, 0);
     if (typeof L.h === 'string') L.h = num(L.h, H, 0);
     const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;

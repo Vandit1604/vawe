@@ -301,8 +301,29 @@
         },
         "pin": {
           "type": "string",
-          "label": "Canvas-relative placement (multi-aspect): sets x/y to an edge/center within the safe inset",
-          "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"]
+          "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",
+          "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right",
+            "thirds-tl", "thirds-tr", "thirds-bl", "thirds-br", "thirds-t", "thirds-b", "thirds-l", "thirds-r"]
+        },
+        "col": {
+          "type": "number|string",
+          "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) → sets x + w"
+        },
+        "cols": {
+          "type": "number",
+          "label": "Grid column count (default 12)"
+        },
+        "gutter": {
+          "type": "number",
+          "label": "Grid gutter px (default = half the safe inset)"
+        },
+        "ls": {
+          "type": "string",
+          "label": "Letter-spacing (e.g. \"-0.03em\"); unset = auto optical tracking by size"
+        },
+        "raw": {
+          "type": "boolean",
+          "label": "Opt out of the micro-typography pass (tracking/balance/kerning)"
         },
         "align": {
           "type": "string",
