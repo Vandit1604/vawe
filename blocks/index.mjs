@@ -382,6 +382,68 @@ export function profileCard({ x, y, w = 360, name = '', role = '', avatar = '', 
     ] }];
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// WAVE 2 families — dev blocks + device/UI chrome.
+
+// fileTree — an indented file/folder list; `active` highlights the focused row.
+export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 20,
+    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 8, pad: '6px 10px',
+      ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
+      children: [
+        box({ w: (it.depth || 0) * 22, h: 18 }),
+        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19,
+          weight: it.active ? 600 : 400, color: it.active ? T.accentInk : (it.type === 'dir' ? T.ink : T.sub) }),
+      ] })) }];
+}
+
+// logLines — a log stream with optional timestamp + level colour. dark = terminal surface.
+export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, dur = 4 } = {}) {
+  const bg = dark ? T.stripeNavy : T.card;
+  const lc = { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' };
+  const base = dark ? '#E8ECF1' : T.ink;
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
+    bg, radius: 12, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
+    children: lines.map((ln) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
+      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#5C6B7F' : T.dim }),
+      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base }),
+    ].filter(Boolean) })) }];
+}
+
+// commitRow — a git history list (hash · message · author · time), hairline-divided.
+export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 0,
+    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: commits.flatMap((c, i) => [
+      i > 0 && box({ h: 1, bg: T.hair }),
+      { type: 'group', layout: 'row', items: 'center', gap: 14, pad: '16px 22px', children: [
+        text({ text: c.hash, font: 'mono', size: 17, weight: 600, color: T.accent }),
+        { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
+          text({ text: c.msg, size: 19, weight: 500, color: T.ink }),
+          text({ text: `${c.author} · ${c.time}`, font: 'mono', size: 15, color: T.dim }),
+        ] },
+      ] },
+    ].filter(Boolean)) }];
+}
+
+// phoneFrame — a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
+export function phoneFrame({ x, y, w = 300, h = 620, start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 10,
+    bg: '#0A0A0A', radius: 44, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [{ type: 'group', grow: 1, bg: T.card, radius: 34, layout: 'column', items: 'center', pad: 12,
+      children: [box({ w: 116, h: 26, radius: 100, bg: '#0A0A0A' })] }] }];
+}
+
+// tabBar — a segmented control; `active` is the selected index (lifted, lit card).
+export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'stretch', gap: 6, pad: 6,
+    bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
+    children: tabs.map((t, i) => ({ type: 'group', grow: 1, layout: 'row', justify: 'center', items: 'center', pad: '10px 0',
+      ...(i === active ? { bg: T.card, radius: 8, elevation: 1 } : {}),
+      children: [text({ text: t, size: 18, weight: i === active ? 600 : 500, color: i === active ? T.ink : T.sub })] })) }];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
@@ -391,7 +453,8 @@ import { CATALOG } from './catalog.mjs';
 
 const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browserFrame, pillRow, statBig,
   colorCycle, stripeCard, barChart, diff, quote, notification, kpiRow, callout, comparison, captions,
-  lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard };
+  lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
+  fileTree, logLines, commitRow, phoneFrame, tabBar };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {

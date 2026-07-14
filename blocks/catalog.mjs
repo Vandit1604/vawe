@@ -93,4 +93,26 @@ export const CATALOG = [
     props: { w: 340, to: 1950, label: 'frames rendered', delta: '+12%', deltaUp: true } },
   { name: 'card.profile', family: 'profileCard', blurb: 'avatar · name · role',
     props: { w: 360, name: 'Ada Lovelace', role: 'Founding Engineer', initials: 'AL' } },
+
+  // ── wave 2: dev blocks + device/UI chrome ──
+  { name: 'fileTree', family: 'fileTree', blurb: 'indented file/folder tree',
+    props: { w: 360, items: [
+      { name: 'core', type: 'dir', depth: 0 }, { name: 'layers', type: 'dir', depth: 1 },
+      { name: 'lottie.js', type: 'file', depth: 2, active: true }, { name: 'motion.js', type: 'file', depth: 1 },
+      { name: 'blocks', type: 'dir', depth: 0 }, { name: 'index.mjs', type: 'file', depth: 1 }] } },
+  { name: 'logLines', family: 'logLines', blurb: 'log stream (timestamp + level colour)',
+    props: { w: 540, lines: [
+      { t: '12:04', level: 'info', text: 'capturing 1950 frames' }, { t: '12:04', level: 'ok', text: 'encode done' },
+      { t: '12:05', level: 'warn', text: 'grain skipped (opt-in)' }, { t: '12:05', level: 'ok', text: 'out.mp4 written' }] } },
+  { name: 'logLines.light', family: 'logLines', blurb: 'log stream on a light surface',
+    props: { w: 540, dark: false, lines: [
+      { level: 'ok', text: 'validate: 1 ok, 0 failed' }, { level: 'ok', text: 'purity OK · order-independent' }] } },
+  { name: 'commitRow', family: 'commitRow', blurb: 'git history list',
+    props: { w: 540, commits: [
+      { hash: 'd417051', msg: 'taste system + block registry', author: 'vandit', time: '2m' },
+      { hash: '94b73bd', msg: 'migrate animation to interpolate()', author: 'vandit', time: '1d' }] } },
+  { name: 'phoneFrame', family: 'phoneFrame', blurb: 'phone shell (draw content on top)',
+    props: { w: 230, h: 440 } },
+  { name: 'tabBar', family: 'tabBar', blurb: 'segmented control',
+    props: { w: 500, active: 1, tabs: ['Design', 'Motion', 'Export'] } },
 ];
