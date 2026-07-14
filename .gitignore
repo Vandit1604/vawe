@@ -21,7 +21,10 @@ verify/snap/
 .kie.key
 engine/assets/gen/
 dna/
-engine/assets/brands/
+engine/assets/brands/**
+!engine/assets/brands/
+!engine/assets/brands/*/
+!engine/assets/brands/*/house-style.md
 
 # paid/licensed fonts — used locally for fidelity, never committed (redistribution)
 engine/assets/fonts/local/

@@ -24,6 +24,16 @@ Every design decision must trace to the **brand's real site**, not your defaults
 (`make palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
 their sites differ — not because a preset changed. Recurring failures: [`MISTAKES.md`](MISTAKES.md).
 
+## Per-brand house style (remembered taste)
+
+The spines above are *general* craft. A brand's *specific* taste is persisted once as
+`engine/assets/brands/<brand>/house-style.md` — its Design Read as declarative rules (dominance · faces ·
+palette · motion · shape · signature details · **NEVERs**). The planning skill **reads it first** so taste
+isn't re-derived every video and every render for that brand stays consistent. Generate/refresh it with
+`make house-style NAME=<brand>` (measured facts auto-fill from the theme; sharpen the judgment lines by
+hand). This is the engine's brand memory — the thing that makes the second video for a brand fast and the
+tenth still on-brand. Example: [`engine/assets/brands/creed/house-style.md`](../engine/assets/brands/creed/house-style.md).
+
 ## The block registry (our component library)
 
 Don't author beat structure from scratch — that's where beats regress to hollow. Compose from

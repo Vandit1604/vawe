@@ -25,6 +25,15 @@ go back and lock it.
    No new creative decisions here — if one is needed, it means the lock sheet had a gap; surface it,
    don't improvise.
 
+## Step 0 — Is this brand already known? Read its house style FIRST
+
+Before any study, check `engine/assets/brands/<brand>/house-style.md`. If it exists, **READ IT and treat
+it as the locked Design Read** — the brand's remembered taste (dominance, faces, palette, motion, shape,
+signature details, NEVERs). Do NOT re-derive what it already states; only study what it leaves open. This
+is the per-brand memory that keeps every video for a brand consistent. If it's missing, do the full study
+below, then persist it with `make house-style NAME=<brand>` and sharpen the `<…>` judgment lines so the
+NEXT video is faster and on-brand. (See `docs/TASTE.md` → per-brand house style.)
+
 ## Step 1 — Study FIRST, then ask SITE-GROUNDED questions
 
 Order matters: sections + lookbook + palette-eyedrop + a WebFetch of the site's copy BEFORE any questions.

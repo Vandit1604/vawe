@@ -225,6 +225,9 @@ catalog: build ## render the block registry to paged sheets (browse the arsenal)
 blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 	node scripts/blocks-docs.mjs
 
+house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
+	node scripts/house-style.mjs $(NAME) $(THEME)
+
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/inspect.mjs $(D)
 
