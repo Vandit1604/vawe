@@ -148,4 +148,20 @@ export const CATALOG = [
     props: { w: 420, message: 'Video rendered to out.mp4', action: 'Open' } },
   { name: 'reactionBar', family: 'reactionBar', blurb: 'reaction count pills',
     props: { reactions: [{ emoji: '🔥', count: 24, mine: true }, { emoji: '👍', count: 12 }, { emoji: '🎉', count: 5 }] } },
+
+  // ── wave 5: brand & motion ──
+  { name: 'logoWall', family: 'logoWall', blurb: 'grid of wordmarks / logos',
+    props: { w: 560, logos: [{ text: 'Stripe' }, { text: 'Linear' }, { text: 'Vercel' }, { text: 'Notion' }, { text: 'Figma' }, { text: 'Raycast' }] } },
+  { name: 'badge', family: 'badge', blurb: 'CI-shield token (label · value)',
+    props: { label: 'build', value: 'passing', tone: 'ok' } },
+  { name: 'badge.version', family: 'badge', blurb: 'version badge',
+    props: { label: 'shortwave', value: 'v2.0', tone: 'accent' } },
+  { name: 'gauge', family: 'gauge', blurb: 'semicircular meter',
+    props: { w: 300, value: 72, label: 'coverage' } },
+  { name: 'progressRing', family: 'progressRing', blurb: 'circular progress + % label',
+    props: { size: 150, value: 68, label: 'render' } },
+  { name: 'banner', family: 'banner', blurb: 'accent announcement bar',
+    props: { w: 560, text: 'Now with 60fps export', cta: 'See how' } },
+  { name: 'spinner', family: 'spinner', blurb: 'looping Lottie (deterministic)',
+    props: { size: 90, label: 'rendering' } },
 ];

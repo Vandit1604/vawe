@@ -570,6 +570,68 @@ export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
       children: [text({ text: r.emoji, size: 19 }), text({ text: String(r.count), size: 17, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'mono' })] })) }];
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// WAVE 5 families — brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
+
+// logoWall — a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
+export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur = 4 } = {}) {
+  const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: 14, items: 'stretch', children:
+      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: 12, border: HAIR, elevation: 1, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',
+        children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: 22, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
+}
+
+// badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
+export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
+  const ac = { ok: T.green, info: TOKENS.blurple, warn: '#F6A417', accent: T.accent }[tone] || T.green;
+  return [{ type: 'group', x, y, bg: '#3A3A38', radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
+    start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+      text({ text: label, font: 'mono', size: 17, weight: 600, color: '#fff', pad: '4px 12px' }),
+      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: '#fff' })] },
+    ] }];
+}
+
+// gauge — a semicircular meter (value / max) in a card.
+export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
+  const arc = 'M8 52 A42 42 0 0 1 92 52';
+  const svg = `<svg viewBox="0 0 100 60" width="${w - 48}" style="display:block;margin:0 auto 4px">`
+    + `<path d="${arc}" fill="none" stroke="${T.hair}" stroke-width="10" stroke-linecap="round"/>`
+    + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(semi * pct).toFixed(2)} ${semi.toFixed(2)}"/></svg>`;
+  const html = `<div style="background:${T.card};border:${HAIR};border-radius:14px;padding:22px;box-sizing:border-box;width:${w}px;text-align:center">${svg}`
+    + `<div style="font:700 34px var(--font-sans);color:${T.ink};letter-spacing:-0.02em;margin-top:-4px">${value}${max === 100 ? '%' : ''}</div>`
+    + (label ? `<div style="font:600 16px var(--font-mono);color:${T.dim};margin-top:4px">${label}</div>` : '') + `</div>`;
+  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+}
+
+// progressRing — a circular progress ring with a % centre label (bare, for overlaying).
+export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  const pct = Math.max(0, Math.min(1, value / max)); const C = 2 * Math.PI * 42;
+  const svg = `<svg viewBox="0 0 100 100" width="${size}" height="${size}" style="display:block">`
+    + `<circle cx="50" cy="50" r="42" fill="none" stroke="${T.hair}" stroke-width="9"/>`
+    + `<circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C * pct).toFixed(2)} ${C.toFixed(2)}" transform="rotate(-90 50 50)"/>`
+    + `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-weight="700" font-size="22" fill="${T.ink}">${Math.round(pct * 100)}%</text></svg>`;
+  const html = `<div style="width:${size}px">${svg}${label ? `<div style="text-align:center;font:600 16px var(--font-mono);color:${T.dim};margin-top:8px">${label}</div>` : ''}</div>`;
+  return [{ type: 'html', x, y, w: size, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+}
+
+// banner — a full-width accent announcement bar: icon · message · CTA.
+export function banner({ x, y, w = 720, text: msg = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 22px',
+    bg: accent, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+      text({ text: icon, size: 20, color: '#fff' }), text({ text: msg, size: 20, weight: 600, color: '#fff', grow: 1 }),
+      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: '#fff' })] },
+    ].filter(Boolean) }];
+}
+
+// spinner — a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
+export function spinner({ x, y, size = 90, src = '/engine/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
+  const out = [{ type: 'lottie', src, x, y, w: size, h: size, loop: true, start, duration: dur }];
+  if (label) out.push(text({ text: label, x, y: r2(y + size + 12), font: 'mono', size: 18, color: T.dim, start: r2(start + 0.2), duration: dur }));
+  return out;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
@@ -582,7 +644,8 @@ const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browse
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
   fileTree, logLines, commitRow, phoneFrame, tabBar,
   checklist, table, timeline, stepFlow, kanban,
-  chatBubble, tweetCard, avatarStack, toast, reactionBar };
+  chatBubble, tweetCard, avatarStack, toast, reactionBar,
+  logoWall, badge, gauge, progressRing, banner, spinner };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {
