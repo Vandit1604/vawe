@@ -228,6 +228,9 @@ blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/house-style.mjs $(NAME) $(THEME)
 
+direct: ## motion director: pick cuts/stings per transition (D=<file> [WRITE=1])
+	node scripts/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
+
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/inspect.mjs $(D)
 

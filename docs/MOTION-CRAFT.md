@@ -57,6 +57,13 @@ you from.
   strength (default `true` = half-shutter). Skip it on slow/ambient drifts (no streak to earn) and on
   small body text held mid-move (it dissolves). Pure in the frame → seek-safe, capped so text never melts.
 
+### Let the director pick (restraint by default)
+Don't hand-scatter effects. **`make direct D=<file>`** reads the brand's motion personality (`theme.motion`)
+and applies these rules per transition: cover a hard background jump with a sting · whip/punch only when the
+background *doesn't* change · rotate one cut family (no archetype twice) · punchy brands snap, calm brands
+dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.json`. This is how you kill the
+"too many effects" tell — the director chooses fewer, righter effects than an author reaching for variety.
+
 ## The enforcement map (what code already guarantees)
 
 Purity probe (determinism) · motion contract i–v (holds/settles/monotonic/counters/typing) ·
