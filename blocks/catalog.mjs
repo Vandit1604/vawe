@@ -133,4 +133,19 @@ export const CATALOG = [
   { name: 'kanban', family: 'kanban', blurb: 'columns of cards',
     props: { w: 560, columns: [
       { title: 'Todo', cards: ['captions', 'TTS'] }, { title: 'Doing', cards: ['blocks'] }, { title: 'Done', cards: ['60fps', 'lottie'] }] } },
+
+  // ── wave 4: social & messaging ──
+  { name: 'chatBubble', family: 'chatBubble', blurb: 'a message thread',
+    props: { w: 460, messages: [
+      { text: 'One JSON becomes one video?' }, { text: 'Yep. Pure in n.', me: true },
+      { text: 'No timeline?' }, { text: 'None. Just renderFrame.', me: true }] } },
+  { name: 'tweetCard', family: 'tweetCard', blurb: 'a post card + counts',
+    props: { w: 480, name: 'Shortwave', handle: 'shortwave', initials: 'SW', likes: '1.2k', reposts: '340',
+      text: 'One JSON. One video. Deterministic, no timeline.' } },
+  { name: 'avatarStack', family: 'avatarStack', blurb: 'overlapping avatars + overflow',
+    props: { extra: 8, avatars: [{ initials: 'AL' }, { initials: 'GH' }, { initials: 'VS' }, { initials: 'KM' }] } },
+  { name: 'toast', family: 'toast', blurb: 'dark snackbar + action',
+    props: { w: 420, message: 'Video rendered to out.mp4', action: 'Open' } },
+  { name: 'reactionBar', family: 'reactionBar', blurb: 'reaction count pills',
+    props: { reactions: [{ emoji: '🔥', count: 24, mine: true }, { emoji: '👍', count: 12 }, { emoji: '🎉', count: 5 }] } },
 ];

@@ -511,6 +511,65 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
     ] })) }];
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// WAVE 4 families — social & messaging.
+
+// chatBubble — a message thread; `me:true` bubbles right in accent, others left in a hairline card.
+export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 10, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start',
+      start: r2(start + i * 0.12), duration: dur, children: [
+      { type: 'group', bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: 16, pad: '12px 18px',
+        children: [text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink })] }] })) }];
+}
+
+// tweetCard — a post card: avatar · name · @handle · body · repost/like counts.
+export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = '', avatar = '', initials = '', likes = '', reposts = '', start = 0, dur = 4 } = {}) {
+  const av = avatar ? { type: 'image', src: avatar, w: 48, h: 48, radius: 100 }
+    : box({ w: 48, h: 48, radius: 100, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center', children: [text({ text: initials || '•', size: 20, weight: 700, color: T.accentInk })] });
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, pad: 22,
+    bg: T.card, radius: 16, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
+      { type: 'group', layout: 'row', items: 'center', gap: 12, children: [av,
+        { type: 'group', layout: 'column', items: 'flex-start', gap: 1, children: [
+          text({ text: name, size: 20, weight: 700, color: T.ink }), text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim })] }] },
+      text({ text: body, size: 21, weight: 400, color: T.ink }),
+      { type: 'group', layout: 'row', gap: 28, items: 'center', children: [
+        text({ text: '↻ ' + reposts, font: 'mono', size: 16, color: T.dim }),
+        text({ text: '♥ ' + likes, font: 'mono', size: 16, color: T.dim })] },
+    ] }];
+}
+
+// avatarStack — overlapping avatar circles (initials or images) + an optional "+N" overflow.
+export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 0, dur = 4 } = {}) {
+  const step = size * 0.65; const out = [];
+  avatars.forEach((a, i) => {
+    const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: '2px solid #FFFFFF', start: r2(start + i * 0.07), duration: dur, anim: 'rise', enterDur: 0.3 };
+    out.push(typeof a === 'string' ? { type: 'image', src: a, ...common }
+      : { type: 'group', ...common, bg: a.color || T.accentSoft, layout: 'row', justify: 'center', items: 'center', children: [text({ text: a.initials || '•', size: Math.round(size * 0.36), weight: 700, color: T.accentInk })] });
+  });
+  if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: 100, bg: T.surface, border: '2px solid #FFFFFF',
+    layout: 'row', justify: 'center', items: 'center', start: r2(start + avatars.length * 0.07), duration: dur, anim: 'rise', enterDur: 0.3, children: [text({ text: '+' + extra, size: Math.round(size * 0.3), weight: 600, color: T.sub })] });
+  return out;
+}
+
+// toast — a dark snackbar: status dot · message · action link. (notification is the light card variant.)
+export function toast({ x, y, w = 420, message = '', action = '', icon = '✓', accent = TOKENS.green, start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 20px',
+    bg: '#0A0A0A', radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+      box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
+      text({ text: message, size: 19, weight: 500, color: '#F5F5F3', grow: 1 }),
+      action && text({ text: action, size: 18, weight: 600, color: TOKENS.stripeTeal }),
+    ].filter(Boolean) }];
+}
+
+// reactionBar — a row of reaction count-pills; `mine:true` highlights the one you picked.
+export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, layout: 'row', gap: 10, items: 'center', start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
+    children: reactions.map((r) => ({ type: 'group', layout: 'row', items: 'center', gap: 7, pad: '7px 14px', radius: 100,
+      bg: r.mine ? T.accentSoft : T.surface, ...(r.mine ? { border: `1px solid ${T.accent}` } : {}),
+      children: [text({ text: r.emoji, size: 19 }), text({ text: String(r.count), size: 17, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'mono' })] })) }];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
@@ -522,7 +581,8 @@ const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browse
   colorCycle, stripeCard, barChart, diff, quote, notification, kpiRow, callout, comparison, captions,
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
   fileTree, logLines, commitRow, phoneFrame, tabBar,
-  checklist, table, timeline, stepFlow, kanban };
+  checklist, table, timeline, stepFlow, kanban,
+  chatBubble, tweetCard, avatarStack, toast, reactionBar };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {
