@@ -35,7 +35,7 @@ layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 
 **Pick the best of N variants:** `make compare ARGS="a.json b.json c.json --at 3"` → a labeled sheet.
 
-**Preview the whole library:** `node scripts/blocks-catalog.mjs && make video D=formats/scene/_blocks-catalog.json`
+**Preview the whole library:** `make catalog` (auto-renders every entry to paged sheets).
 
 **Gate a scene for value:** `make critique D=formats/scene/<file>.json` — flags placeholder words,
 false claims (e.g. "22 shader stings" with no shader layer), static lists, illegible stings, lonely beats.
@@ -48,18 +48,108 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
 
 ## Blocks
 
-| Block | Use for | Key props |
-|---|---|---|
-| `card` | feature/capability tile — elevated white card, tinted panel, pill tags, CTA arrow | `title, desc, pills[], tint, cta` |
-| `codeBlock` | a code card; `lines` = strings or `{text,color}` for syntax | `lines[], label, dark, size` |
-| `terminal` | a command prompt + output (command decodes in) | `command, output[]` |
-| `loadingBar` | a green fill that wipes L→R and lands `✓ done` | `w, fillDur, label, done` |
-| `deploySuccess` | CI pipeline `Building→Deploying→Live` → green "Deployed to production" card (URL, Ready in 1.2s) | `url, w` |
-| `browserFrame` | window chrome (traffic dots + URL bar); draw content on top | `url, w, h` |
-| `pillRow` | a horizontal row of chip tags | `items[], fg, bg` |
-| `statBig` | scale-contrast stat — huge animated count + tiny label | `to, from, unit, label, size` |
-| `colorCycle` | one word cycling through hues (proof of "any colour" without colour everywhere) | `word, colors[], each` |
-| `stripeCard` | a recognizably-Stripe payments card (Net volume, blurple bar chart + Pay button) | `w` |
+Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editing the manifest. Browse
+them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
+
+<!-- BLOCKS:START -->
+_93 entries across 45 families._
+
+| Block | For |
+|---|---|
+| `card` | elevated card · tinted panel · pill tags · CTA arrow |
+| `codeBlock` | code card; syntax-coloured lines |
+| `codeBlock.light` | code card, light surface |
+| `codeBlock.py` | code card, python |
+| `terminal` | command prompt; command decodes in, output reveals |
+| `terminal.git` | git command |
+| `terminal.install` | install command |
+| `loadingBar` | determinate fill wipes L→R, lands ✓ done |
+| `deploySuccess` | CI cascade → green "Deployed to production" card |
+| `browserFrame` | window chrome (traffic dots + URL bar) |
+| `pillRow` | horizontal row of chip tags |
+| `statBig` | scale-contrast stat — huge count + tiny label |
+| `statBig.currency` | stat with a $ unit |
+| `statBig.time` | stat, ms unit |
+| `colorCycle` | one word cycling through hues |
+| `stripeCard` | recognizably-Stripe payments card |
+| `barChart` | labeled bars scaled to max |
+| `barChart.green` | bars in success green |
+| `diff` | code diff card (+/- coloured) |
+| `diff.config` | config diff |
+| `quote` | pull quote + attribution |
+| `quote.customer` | customer quote |
+| `notification` | toast card (dot + title + body) |
+| `notification.warn` | toast, amber accent |
+| `notification.error` | toast, error |
+| `kpiRow` | row of stat cells (value + label) |
+| `kpiRow.money` | KPI row, currency |
+| `callout` | info/success/warn strip |
+| `callout.info` | info strip (blurple) |
+| `callout.warn` | warning strip (terracotta) |
+| `comparison` | two columns (Before/After · Others/Us) |
+| `comparison.beforeAfter` | Before / After columns |
+| `captions` | timed subtitle chips (bottom overlay) |
+| `lineChart` | trend line in a hairline card |
+| `lineChart.area` | trend line with area fill |
+| `lineChart.down` | declining trend (red) |
+| `donutChart` | ring segments + legend |
+| `donutChart.two` | two-segment ring |
+| `stackedBar` | multi-series stacked bars |
+| `stackedBar.three` | three-series stack |
+| `card.pricing` | plan · price · features · CTA |
+| `card.pricing.free` | pricing, free tier |
+| `card.pricing.team` | pricing, team tier |
+| `card.stat` | boxed KPI with delta chip |
+| `card.stat.down` | KPI card, negative delta |
+| `card.stat.plain` | KPI card, no delta |
+| `card.profile` | avatar · name · role |
+| `fileTree` | indented file/folder tree |
+| `logLines` | log stream (timestamp + level colour) |
+| `logLines.light` | log stream on a light surface |
+| `logLines.errors` | log stream with errors |
+| `commitRow` | git history list |
+| `phoneFrame` | phone shell (draw content on top) |
+| `tabBar` | segmented control |
+| `tabBar.four` | four-tab control |
+| `checklist` | checked / unchecked items |
+| `checklist.todo` | checklist, all open |
+| `table` | data table (header + rows) |
+| `table.pricing` | table, pricing rows |
+| `timeline` | vertical rail of events |
+| `timeline.release` | release timeline |
+| `stepFlow` | horizontal numbered steps |
+| `stepFlow.start` | steps, at start |
+| `stepFlow.done` | steps, all complete |
+| `kanban` | columns of cards |
+| `kanban.two` | two-column board |
+| `chatBubble` | a message thread |
+| `chatBubble.support` | support thread |
+| `tweetCard` | a post card + counts |
+| `avatarStack` | overlapping avatars + overflow |
+| `avatarStack.large` | larger avatar stack |
+| `toast` | dark snackbar + action |
+| `toast.error` | snackbar, error + retry |
+| `toast.info` | snackbar, info |
+| `reactionBar` | reaction count pills |
+| `reactionBar.love` | reactions (love set) |
+| `logoWall` | grid of wordmarks / logos |
+| `logoWall.four` | four logos, 2 cols |
+| `badge` | CI-shield token (label · value) |
+| `badge.version` | version badge |
+| `badge.warn` | badge, warning |
+| `badge.info` | badge, info |
+| `gauge` | semicircular meter |
+| `gauge.warn` | gauge, low (amber) |
+| `gauge.full` | gauge, complete (green) |
+| `progressRing` | circular progress + % label |
+| `progressRing.done` | ring, 100% (green) |
+| `progressRing.low` | ring, low (amber) |
+| `banner` | accent announcement bar |
+| `banner.info` | banner, info (blurple) |
+| `banner.warn` | banner, warning (amber) |
+| `spinner` | looping Lottie (deterministic) |
+| `spinner.small` | small looping Lottie |
+<!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)
 

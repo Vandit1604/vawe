@@ -222,6 +222,9 @@ catalog: build ## render the block registry to paged sheets (browse the arsenal)
 	@for f in formats/scene/_catalog-*.json; do ./bin/shortwave $$f --draft || exit 1; done
 	@echo "→ engine/out/_catalog-*.mp4 (one page per file)"
 
+blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
+	node scripts/blocks-docs.mjs
+
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/inspect.mjs $(D)
 
