@@ -32,6 +32,7 @@ func main() {
 	concurrency := flag.Int("concurrency", 1, "formats rendered at once (--all)")
 	alpha := flag.Bool("alpha", false, "transparent overlay export → VP9/yuva420p .webm (video-only)")
 	bg := flag.String("bg", "", "composite the (alpha) graphics over this background video → out.mp4")
+	aspect := flag.String("aspect", "", "render aspect(s): comma-separated 16:9,9:16,1:1,4:5,4:3 (empty = the scene's own)")
 	flag.Parse()
 
 	repoRoot := repoRoot()
@@ -104,21 +105,38 @@ func main() {
 		os.Exit(1)
 	}
 
-	outPath := *out
-	if outPath == "" {
-		name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
-		ext := ".mp4"
-		if *alpha && *bg == "" {
-			ext = ".webm" // alpha overlay (no bg composite)
+	// aspects: empty = one render at the scene's own aspect; a comma list = one render per aspect,
+	// each output tagged (e.g. video.9x16.mp4). One source → every platform ratio.
+	aspects := []string{""}
+	if *aspect != "" {
+		aspects = strings.Split(*aspect, ",")
+	}
+	ext := ".mp4"
+	if *alpha && *bg == "" {
+		ext = ".webm" // alpha overlay (no bg composite)
+	}
+	name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
+	for _, asp := range aspects {
+		o := opts
+		o.Aspect = strings.TrimSpace(asp)
+		outPath := *out
+		if outPath == "" || len(aspects) > 1 {
+			tag := ""
+			if len(aspects) > 1 && o.Aspect != "" {
+				tag = "." + strings.ReplaceAll(o.Aspect, ":", "x")
+			}
+			base := name
+			if outPath != "" {
+				base = strings.TrimSuffix(filepath.Base(outPath), filepath.Ext(outPath))
+			}
+			outPath = filepath.Join(repoRoot, "engine", "out", base+tag+ext)
 		}
-		outPath = filepath.Join(repoRoot, "engine", "out", name+ext)
+		if err := render.Render(repoRoot, mod, dataPath, outPath, o); err != nil {
+			fmt.Fprintf(os.Stderr, "✗ render failed: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("✓ %s\n", outPath)
 	}
-
-	if err := render.Render(repoRoot, mod, dataPath, outPath, opts); err != nil {
-		fmt.Fprintf(os.Stderr, "✗ render failed: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Printf("✓ %s\n", outPath)
 }
 
 // videoGrain reports whether a video OPTS IN to film grain via `"grain": true`. Default (absent) is

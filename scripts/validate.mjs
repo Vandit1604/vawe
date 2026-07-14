@@ -99,7 +99,8 @@ function walk(fields, obj, path, errors) {
       if (spec.required) errors.push(`${at} is required`);
       continue;
     }
-    if (spec.type && typeOf(val) !== spec.type) {
+    // `type` may be a union like "number|string" (relative coords: 40 or "50%"). Any member matches.
+    if (spec.type && !spec.type.split('|').includes(typeOf(val))) {
       errors.push(`${at} must be a ${spec.type} (got ${typeOf(val)})`);
       continue; // type wrong → skip deeper checks
     }

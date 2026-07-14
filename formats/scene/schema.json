@@ -11,6 +11,11 @@
         "landscape"
       ]
     },
+    "aspect": {
+      "type": "string",
+      "label": "Canvas aspect (overrides orientation). CLI --aspect a,b,c renders multiple in one pass.",
+      "enum": ["16:9", "9:16", "1:1", "4:5", "4:3"]
+    },
     "duration": {
       "type": "number",
       "label": "Total duration (s)",
@@ -279,20 +284,25 @@
           "label": "Image / captured-component path"
         },
         "x": {
-          "type": "number",
-          "label": "Left (px)"
+          "type": "number|string",
+          "label": "Left: px number, or relative \"50%\" / \"50%-40\" / center / left / right (resolved per aspect)"
         },
         "y": {
-          "type": "number",
-          "label": "Top (px)"
+          "type": "number|string",
+          "label": "Top: px number, or relative \"50%\" / center / top / bottom (resolved per aspect)"
         },
         "w": {
-          "type": "number",
-          "label": "Width (px)"
+          "type": "number|string",
+          "label": "Width: px number or \"50%\" of canvas"
         },
         "h": {
-          "type": "number",
-          "label": "Height (px, image/rect)"
+          "type": "number|string",
+          "label": "Height: px number or \"50%\" of canvas"
+        },
+        "pin": {
+          "type": "string",
+          "label": "Canvas-relative placement (multi-aspect): sets x/y to an edge/center within the safe inset",
+          "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"]
         },
         "align": {
           "type": "string",

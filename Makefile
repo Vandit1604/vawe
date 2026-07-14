@@ -8,7 +8,7 @@ build:
 
 # make video D=path/to/video.json  — one self-describing JSON → engine/out/<name>.mp4
 video: build
-	./bin/shortwave $(D)
+	./bin/shortwave $(D) $(if $(ASPECT),--aspect $(ASPECT))
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build

@@ -8,6 +8,19 @@ presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
 
+## Responsive: one source → every aspect
+
+Coordinates can be **absolute px** (default, unchanged) or **canvas-relative** so the SAME scene reflows
+to any platform ratio:
+- `"aspect"` (top-level): `16:9 · 9:16 · 1:1 · 4:5 · 4:3` sets the canvas. Or render several at once:
+  `make video D=<file> ASPECT=9:16,1:1,16:9` → `out.9x16.mp4`, `out.1x1.mp4`, `out.16x9.mp4`.
+- `x`/`y`/`w`/`h` accept a number (px) **or** a string: `"50%"`, `"50%-40"` (fraction ± offset),
+  or a keyword (`center`, `left/right/top/bottom` — anchored inside a per-aspect safe inset).
+- `"pin": "center|top|bottom|left|right|top-left|…"` — shorthand that places a layer relative to the
+  canvas within the safe zone (give it a `w`/`h` so center/edge maths knows its size).
+
+Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scenes are unaffected.
+
 ## Motion math (`core/motion.js`, 56 exports)
 
 | Primitive | Signature | Use for |

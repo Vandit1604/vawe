@@ -171,7 +171,7 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int) (Meta, error) {
+func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int, aspect string) (Meta, error) {
 	if ss < 1 {
 		ss = 1
 	}
@@ -182,6 +182,9 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 	defer srv.Close()
 	url := fmt.Sprintf("http://127.0.0.1:%d/formats/%s/scene.html?data=%s&fps=%d", port, module, dataURL, fps)
+	if aspect != "" {
+		url += "&aspect=" + aspect
+	}
 	if transparent {
 		url += "&alpha=1" // scene drops its opaque background so unpainted pixels stay transparent
 	}

@@ -60,9 +60,10 @@
       import { createRenderer } from '/core/layers/index.js';
       const $ = (id) => document.getElementById(id);
 
-      boot((data, fps, theme) => {
-        const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
-        const [W, H] = landscape ? [1920, 1080] : [1080, 1920];
+      boot((data, fps, theme, canvas) => {
+        // canvas W,H come from boot (aspect-resolved). Fallback keeps standalone use working.
+        const [W, H] = [canvas?.width || 1080, canvas?.height || 1920];
+        const landscape = W > H;
         const cam = $('cam'), cv = $('cv');
         cv.width = W; cv.height = H;
         const ctx = cv.getContext('2d');

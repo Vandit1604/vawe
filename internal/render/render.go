@@ -21,6 +21,7 @@ type Options struct {
 	Grain       bool
 	Transparent bool   // alpha export: transparent capture → VP9/yuva420p .webm (no audio, no grain)
 	BgVideo     string // composite the (alpha) graphics over this background video → out.mp4
+	Aspect      string // render aspect ("16:9"/"9:16"/"1:1"/"4:5"); empty = the scene's own
 }
 
 type dataFile struct {
@@ -63,7 +64,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	if o.Draft {
 		ss = 1 // draft: skip supersample for fast previews
 	}
-	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss)
+	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss, o.Aspect)
 	if err != nil {
 		return err
 	}

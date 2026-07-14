@@ -16,6 +16,44 @@ const luma = (h) => { try { const [r, g, b] = hexToRgb(h).map((v) => v / 255); r
 // gently on dark — so elevated block cards read correctly on any brand that didn't declare palette.card.
 const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return mixHex(base, '#ffffff', luma(P.bg || base) > 0.55 ? 0.55 : 0.1); };
 
+// ---- multi-aspect: canvas sizes + a pure relative-coordinate resolver ----
+// One source renders at any platform ratio. Absolute px coords pass through unchanged (back-compat);
+// relative coords resolve against THIS canvas's W,H so the SAME layer lands right in every aspect.
+const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
+
+// resolveCoords(data, W, H): mutate top-level layer x/y/w/h from relative forms to px. Forms:
+//   number            → px (unchanged)
+//   "50%" / "50%-40"  → fraction of the canvas dim (± an offset)
+//   "center"          → centered given the layer's size
+//   "left/right/top/bottom" → anchored to that edge inside a per-aspect safe inset
+//   pin: "center|top|bottom|left|right|top-left|…" → shorthand for the x/y edge pair
+export function resolveCoords(data, W, H) {
+  const inset = Math.round(Math.min(W, H) * 0.06); // platform safe margin
+  const kw = (v, dim, size) => v === 'center' ? (dim - size) / 2
+    : (v === 'left' || v === 'top') ? inset
+    : (v === 'right' || v === 'bottom') ? dim - inset - size : null;
+  const num = (v, dim, size) => {
+    if (typeof v !== 'string') return v;
+    const s = v.trim();
+    const k = kw(s, dim, size); if (k != null) return Math.round(k);
+    const m = s.match(/^(-?[\d.]+)%\s*([+-]\s*[\d.]+)?$/);
+    if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
+    const n = parseFloat(s); return isNaN(n) ? v : n;
+  };
+  const PIN = { center: ['center', 'center'], top: ['center', 'top'], bottom: ['center', 'bottom'],
+    left: ['left', 'center'], right: ['right', 'center'], 'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
+    'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'] };
+  for (const L of data.layers || []) {
+    if (!isObj(L)) continue;
+    if (L.pin && PIN[L.pin]) { const [px, py] = PIN[L.pin]; if (L.x == null) L.x = px; if (L.y == null) L.y = py; }
+    if (typeof L.w === 'string') L.w = num(L.w, W, 0);
+    if (typeof L.h === 'string') L.h = num(L.h, H, 0);
+    const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
+    if (L.x != null) L.x = num(L.x, W, w);
+    if (L.y != null) L.y = num(L.y, H, h);
+  }
+}
+
 // preloadImages: walk the data JSON for image-like strings (local paths, /…, or http(s)
 // URLs — incl. user-supplied web image links) and fully load+decode them BEFORE the scene
 // reports ready. Without this the Go renderer can screenshot a frame mid-download → a missing
@@ -158,12 +196,16 @@ export async function boot(build) {
         // schema missing/unparseable → skip validation (don't block on tooling gaps)
       }
     }
-    // orientation: portrait (1080×1920) default, or landscape (1920×1080). Drives CSS via
-    // [data-orient] AND the meta dims the Go renderer sizes its viewport + screenshot to.
+    // canvas SIZE by aspect. Priority: ?aspect= URL param (multi-output render) > data.aspect >
+    // orientation fallback (the historic 16:9 / 9:16 defaults). The meta dims flow to the Go renderer,
+    // which sizes its screenshot to them — so one source renders at any aspect with no engine change.
     const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
-    document.documentElement.dataset.orient = landscape ? 'landscape' : 'portrait';
+    const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
+    const [width, height] = ASPECTS[aspectKey] || (landscape ? [1920, 1080] : [1080, 1920]);
+    document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
+    document.documentElement.dataset.aspect = aspectKey;
     if (params.get('alpha')) document.documentElement.classList.add('alpha'); // transparent overlay export
-    const [width, height] = landscape ? [1920, 1080] : [1080, 1920];
+    resolveCoords(data, width, height); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a
@@ -206,7 +248,7 @@ export async function boot(build) {
       for (const p of lottieSrcs) { try { window.__lottie[p] = await (await fetch(p)).json(); } catch (e) {} }
     }
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
-    const scene = build(data, fps, theme);
+    const scene = build(data, fps, theme, { width, height, aspect: aspectKey });
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
