@@ -66,7 +66,12 @@ make inspect  D=<file>       # does the scene actually show what its .intent.jso
 make beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
 make audit                   # overlap / clipped text / safe-zone / WCAG contrast
 make ledger   D=<file>       # cross-video sameness — fails if it repeats a shipped design
+make judge    D=<file> VS=<brand>   # THE GATE THAT SEES — vision rubric on the near-final cut (JUDGE.md)
 ```
+
+The static gates can't see composition, centering, or asset fidelity — `make judge` ([`JUDGE.md`](JUDGE.md))
+preps the key frames + brand house-style + a rubric and the agent scores them. If your eye catches a flaw,
+it's a FIX; never rationalize one you noticed ([`MISTAKES.md`](MISTAKES.md) #15).
 
 If you find yourself *trying things* in the JSON, the plan wasn't locked. Go lock it. If a beat needs
 a decision the plan didn't make, that's a plan gap — amend the plan, don't improvise in the JSON.

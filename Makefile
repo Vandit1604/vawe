@@ -231,6 +231,9 @@ house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [
 direct: ## motion director: pick cuts/stings per transition (D=<file> [WRITE=1])
 	node scripts/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
+judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
+	node scripts/judge.mjs $(D) $(if $(VS),--vs $(VS))
+
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/inspect.mjs $(D)
 
