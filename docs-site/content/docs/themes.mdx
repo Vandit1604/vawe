@@ -1,0 +1,51 @@
+---
+title: Themes
+description: How a theme defines a brand's palette, type, motion, and backdrop, and why every key is required.
+icon: Palette
+---
+
+A theme is what makes two videos built from the same primitives look like different brands. It sets the palette, the fonts, the motion personality, and the default backdrop. You reference one by name in a scene, or pass an inline object.
+
+```json
+{ "theme": "vawe" }
+```
+
+Themes live in `themes/<name>.json`. The repo ships fourteen, including `vawe`, `creed`, `stripe`, `linear`, `mercury`, `argus`, `northwind`, and `ditherkit`.
+
+## The theme contract
+
+A theme has no fallbacks. Every required key must be present, and a missing one fails loudly at [validation](/docs/quality-gates#validate) and at boot. This is deliberate: a half-defined theme that silently falls back to grey is how off-brand videos happen.
+
+| Section | Keys |
+|---|---|
+| `palette` | 15 required: `bg`, `bg2`, `surface`, `surface2`, `line`, `lineStrong`, `text`, `text2`, `dim`, `ink`, `accent`, `accentDim`, `accentGlow`, `up`, `down`. |
+| `type` | 4 required: `sans`, `num`, `serif`, `mono`. A brand with no serif maps `serif` to its sans explicitly. |
+| `gradient` | Three or more colour stops. |
+| `motion` | `easing`, `bounce`, `settle`, `enter`, `durationScale`, `stagger`. The brand's [motion personality](/docs/motion#motion-personality-per-theme). |
+| `bg` | Per-preset base colours and tints, for example `paperBase`, `accentBase`, `dark`. |
+| `vars` | Extra CSS variables like `--ink`, `--em`, `--border`, `--accent-soft`. |
+| `bgDefault` | The brand's authored backdrop, `{preset, value?, opts?, seed?}`. |
+
+## Light or dark is decided by looking
+
+Dominance (whether a brand is white-first or dark-first) is not a field you guess. You look at the real site, confirm the dominant colour, and author the theme from those pixels. A white site gets a white-first video. Getting this backwards is the single most common way a reflected video goes wrong, which is why the [brand reflection](/docs/brand-reflection) workflow eyedrops the hero before anything else.
+
+## Using the brand's backdrop
+
+A theme's `bgDefault` is its authored backdrop. A video pulls it in without repeating the colour:
+
+```json
+{ "bg": [{ "use": "theme" }] }
+```
+
+This keeps the backdrop consistent across every video for a brand. The available presets and how they read the palette are covered in [Backgrounds and images](/docs/backgrounds-and-images#backgrounds).
+
+## Remembering a brand
+
+Once you have studied a brand, persist its design read so the next video starts from it:
+
+```bash
+make house-style NAME=<brand>
+```
+
+This writes `engine/assets/brands/<brand>/house-style.md`: the dominance, faces, palette, motion, shape language, signature details, and the things the brand never does. It is the per-brand memory that keeps every video on-brand.

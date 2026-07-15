@@ -1,0 +1,70 @@
+---
+title: Backgrounds and images
+description: The background presets tied to the brand palette, and how to bring real assets (captures, logos, photos, icons) into a scene.
+icon: Image
+---
+
+## Backgrounds
+
+The backdrop is painted by the top-level `bg` array in windows of time. Each window names a preset, and every preset reads the brand palette, so the same preset looks different for every theme.
+
+```json
+{ "bg": [{ "preset": "soft", "from": 0, "to": 6 }] }
+```
+
+There are 16 presets:
+
+`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark`
+
+<Callout title="A pattern is a seasoning, not the wallpaper">
+The backdrop should exist on the real site. A plain, flat brand gets a plain field (`plain`, `paper`, `accentPlain`), never invented dots or shapes. Even when a site is textured, use a patterned preset on at most a beat or two, never throughout. Content beats stay plain so the content reads.
+</Callout>
+
+Each preset varies by `seed` (defaulting to a hash of the theme and preset name), so the same preset differs across brands. A theme can also author its own backdrop and a video pulls it in with `{ "use": "theme" }`. See [Themes](/docs/themes#using-the-brands-backdrop).
+
+## Images, in order of preference
+
+Always prefer a real image. The order that produces the best result:
+
+1. **Captured real UI**, via `make capture`. A live `component` fragment is the highest-taste source: real logos, gradients, and copy come for free. See [Brand reflection](/docs/brand-reflection).
+2. **Free and openly-licensed images.** Brand logos from `cdn.simpleicons.org`, flags from `flagcdn.com`, and CC0 or CC-BY photos via `make photos` (attribution is recorded automatically).
+3. **Drawn icons** with `svgIcon(name)`. Sixteen are built in: `file`, `check`, `shield`, `bolt`, `dollar`, `link`, `cube`, `agent`, `braces`, `globe`, `arrowRight`, `spark`, `plug`, `clock`, `layers`.
+4. **Generated topic cards** via `make assets`.
+5. **Emoji**, as a last resort.
+
+<Callout type="warn" title="Never embed copyrighted media">
+Movie posters, album covers, film stills, news photos, and paid stock trigger Content ID claims. Capture the real product UI instead.
+</Callout>
+
+## Fetching assets
+
+```bash
+make assets D=formats/scene/my-video.json          # dry run: list missing icons
+make assets D=formats/scene/my-video.json WRITE=1  # fetch them
+```
+
+`make assets` fills gaps: a country becomes a flag, a brand becomes a logo, anything else becomes a generated topic card. For photos:
+
+```bash
+make photos Q="mountain sunrise" NAME=hero N=4
+```
+
+Openverse CC0, public-domain, and CC-BY photos are downloaded with attribution written to `credits.json`. Use them in a clipped `image` layer with `ken`.
+
+## Image treatments
+
+A still with no treatment reads as slop. Give every image one:
+
+- **`ken`** is a slow Ken Burns push, capped at 8% travel, that never reverses.
+- **`edgeFade`** dissolves the left and right edges into the background. Set `edgeFadeColor` to your background on dark scenes.
+- **`radius`** rounds the corners into a card; **`reflect`** adds a floor reflection.
+
+## Video and generated media
+
+Turn any mp4 into a deterministic frame sequence for a `clip` layer:
+
+```bash
+make gen-clip IN=source.mp4 NAME=demo
+```
+
+This extracts frames plus a manifest with no external service. AI image and video generation (`make gen-image`, `make gen-video`) is also available when a `KIE_API_KEY` is set.

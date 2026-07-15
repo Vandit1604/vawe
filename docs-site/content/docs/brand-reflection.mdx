@@ -1,0 +1,60 @@
+---
+title: Brand reflection
+description: The capture-first workflow for turning a real website into an on-brand video, studying the site before authoring a single layer.
+icon: Focus
+---
+
+The best way to make a video for a real brand is not to describe the brand from memory. It is to study the actual site, capture its real sections, and reflect its taste. The taste is already on the page; your job is to carry it into motion.
+
+## Study before you author
+
+Run the study first, in this order. Generic questions waste time; the site answers most of them.
+
+```bash
+make brandspec URL=https://example.com                 # read the real CSS
+make sections URL=https://example.com NAME=example     # screenshot every section
+make lookbook URL=https://example.com NAME=example     # full-page study shots
+make palette IMG=engine/assets/brands/example/sections/01-hero.png
+```
+
+Each tool does one thing:
+
+- **`make brandspec`** reads the site's real CSS: the one to three font families and the weights actually used, the colour tokens, and the contrast of each pair. This is the source of truth for type and declared colours, more accurate than eyedropping a screenshot.
+- **`make sections`** inventories the page as sections. It saves a screenshot per block and a `sections.json` with a stable selector and a ready `make capture` command for each. Storyboard one beat per section, in the site's order.
+- **`make palette`** eyedrops the hero pixels and reports the dominant colours and whether the brand is light-first or dark-first.
+- **`make lookbook`** grabs full-page and viewport shots for art-direction study.
+
+<Callout title="Dominance is decided by looking">
+Whether a video is white-first or dark-first is read from the hero, not assumed. A white site gets a white video. Confirm the dominance by looking at the hero yourself before you author the theme.
+</Callout>
+
+## Author the theme from pixels
+
+From the study, hand-author `themes/<brand>.json`: background is the site's dominant colour, accent is its vivid colour, text is its body colour. Use only the site's colours, at the measured font weights. The [theme contract](/docs/themes#the-theme-contract) lists every key. Then persist the design read so the next video starts from it:
+
+```bash
+make house-style NAME=<brand>
+```
+
+## Capture the real sections
+
+Never retype a site's copy or redraw its UI. Capture the live block into an animatable `component` layer:
+
+```bash
+make capture URL=https://example.com SEL="section:nth-of-type(2)" NAME=hero LABEL="Hero"
+make preview HTML=hero.json THEME=example    # check it standalone → /tmp/preview.png
+```
+
+Real logos, gradients, and copy come for free, and the fonts stay faithful. Only a true `<canvas>` or WebGL section that cannot be captured falls back to a screenshot used as a clipped `image` with `ken`. Animate it the Vawe way (a window, a cut, a camera move, staggered parts), and retype copy with an overlaid `text` layer rather than editing captured glyphs.
+
+Hand-write HTML only for connective tissue: the hook, the CTA, counters. Preview every hand-written fragment before rendering.
+
+## The fidelity gate
+
+Before shipping, prove the video reads as the same brand as the site:
+
+```bash
+make beats D=formats/scene/example.json VS=example
+```
+
+This stacks each beat beside its source section. Wrong dominance, off colours, and untasteful imagery all show up here. It is exactly the check that catches a white site rendered dark. The rest of the checks are in [Quality gates](/docs/quality-gates).

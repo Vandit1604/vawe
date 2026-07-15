@@ -1,0 +1,95 @@
+---
+title: Quickstart
+description: Build the binary, render the sample video, and write your first scene from scratch.
+icon: Rocket
+---
+
+## Build the engine
+
+Vawe is a Go binary that drives headless Chrome and ffmpeg. You need Go, a Chrome or Chromium install, and ffmpeg on your path.
+
+```bash
+make build
+# downloads the free fonts, then: go build -o bin/vawe ./cmd/render
+```
+
+This produces `bin/vawe`. The `make build` step also runs `make fonts`, which pulls the typefaces into `engine/assets/fonts/` (they are fetched, never committed).
+
+## Render the sample
+
+```bash
+make list                        # show the scene module + its schema and sample
+./bin/vawe formats/scene/sample.json
+# → engine/out/sample.mp4
+```
+
+Or through make, which is the same thing with a friendlier name:
+
+```bash
+make video D=formats/scene/sample.json
+```
+
+Add `--draft` for a fast render with no film grain while you iterate:
+
+```bash
+./bin/vawe formats/scene/sample.json --draft
+```
+
+## Write your first scene
+
+Every scene is a JSON file that starts with `"module": "scene"`. Save new videos as `formats/scene/<topic>.json`. Here is a complete, minimal one:
+
+```json title="formats/scene/hello.json"
+{
+  "module": "scene",
+  "orientation": "landscape",
+  "theme": "vawe",
+  "duration": 4,
+  "audio": { "silent": true },
+  "layers": [
+    {
+      "type": "text",
+      "text": "One JSON, <b>one video.</b>",
+      "size": 120,
+      "pin": "center",
+      "split": "word",
+      "preset": "up",
+      "each": 0.4,
+      "stagger": 0.06,
+      "start": 0.3
+    }
+  ]
+}
+```
+
+Render it:
+
+```bash
+make video D=formats/scene/hello.json
+```
+
+You just wrote a scene with one [text layer](/docs/layers#text) that splits its headline into words and rises each one into place, staggered in reading order. The `theme` sets the palette, fonts, and motion personality; `pin: "center"` places the layer in the middle of whatever aspect you render.
+
+<Callout title="No em-dashes">
+On-screen copy cannot contain em-dashes. The [validator](/docs/quality-gates#validate) rejects them. Use a comma, a period, or a middot instead. This keeps typography honest across fonts that render the dash inconsistently.
+</Callout>
+
+## The authoring loop
+
+Once you have a scene, the rhythm is: render, look, fix, repeat.
+
+```bash
+make video D=formats/scene/hello.json     # render
+make look M=scene                          # storyboard the key frames
+make audit                                 # overlap, contrast, safe-zone
+```
+
+Every check has its own page in [Quality gates](/docs/quality-gates). Nothing here needs to run for a video to render, but they are how you catch a murky frame before you ship it.
+
+## Next steps
+
+<Cards>
+  <Card title="The scene file" href="/docs/the-scene" description="Every top-level field, from duration to camera to stings." />
+  <Card title="Layer reference" href="/docs/layers" description="Text, image, rect, count, group, and the rest." />
+  <Card title="The CLI and make targets" href="/docs/cli" description="Flags, the make wrappers, and what each one does." />
+</Cards>

@@ -1,0 +1,50 @@
+---
+title: Audio and captions
+description: The Go PCM mixer, automatic sound design derived from a scene's own cuts and stings, the reusable SFX library, and burned-in captions.
+icon: Volume2
+---
+
+Audio is a separate track. A Go PCM mixer builds the full bed in memory (music, sound effects, voiceover), writes a WAV, and ffmpeg muxes it onto the video. Because it never touches `renderFrame`, adding audio leaves every frame byte-identical.
+
+## The audio object
+
+```json
+{ "audio": { "silent": true } }
+```
+
+The `audio` object takes `music`, `sting`, `vo`, `musicGain`, and `silent`. While you author, `silent: true` is common: it skips music and sound entirely. The mixer runs at 44100 Hz, loops music under the video, ducks it under a voiceover, and applies a soft limiter.
+
+## Automatic sound design
+
+The most useful mode derives sound cues from the scene's own timing:
+
+```json
+{ "audio": { "auto": true } }
+```
+
+With `auto`, the scene reads its own layers and stings and places effects deterministically:
+
+- a **`whoosh`** on every cut, at the cutting layer's `start`
+- a **`reveal`** on every sting, at the sting's `t`
+
+Cue times are a pure function of the JSON, so audio stays reproducible and frames stay snap-identical. You get a scored video without hand-placing a single sound.
+
+## The SFX library
+
+The sounds come from Mixkit under its free license. Fetch them once:
+
+```bash
+make sfx
+```
+
+This downloads the curated set into `engine/assets/sfx/` and records attribution to `credits.json`. The library: `whoosh`, `reveal`, `swoosh`, `pop`, `tick`, `click`, `impact`, `riser`, `beep`, `beep3`, `correct`, `wrong`. `whoosh` covers cuts and `reveal` covers stings, which is what the automatic mode reaches for. The sounds are fetched, never committed.
+
+## Captions
+
+Auto-time a script into burned-in subtitles:
+
+```bash
+make captions D=formats/scene/my-video.json TEXT="your script here"
+```
+
+Each caption's duration is proportional to its word count, computed deterministically, and written into the scene's `captions` array. Pair it with `"captionMode": "pop"` for the muted-social look, where words punch in one at a time. The three modes are `sentence`, `word`, and `pop`.

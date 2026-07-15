@@ -1,0 +1,71 @@
+---
+title: The scene file
+description: The top-level fields a scene JSON is built from, from duration and theme to cameras, backgrounds, and stings.
+icon: FileJson
+---
+
+A scene is one JSON object. It always starts with `"module": "scene"`, and the only required content is a `layers` array with at least one layer. Everything else has a sensible default.
+
+```json
+{
+  "module": "scene",
+  "orientation": "landscape",
+  "theme": "vawe",
+  "duration": 6,
+  "layers": [
+    { "type": "text", "text": "Hello.", "pin": "center", "size": 120 }
+  ]
+}
+```
+
+## Top-level fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `module` | `"scene"` | Required. There is only one module. |
+| `orientation` | `portrait` \| `landscape` | Sets the canvas. Portrait is 1080×1920, landscape 1920×1080. |
+| `aspect` | `16:9` \| `9:16` \| `1:1` \| `4:5` \| `4:3` | Overrides `orientation`. Render several at once with the CLI. See [Aspect ratios](/docs/aspect-ratios). |
+| `duration` | number | Seconds, from 0.5 to 120. |
+| `fps` | `24` \| `30` \| `60` | Defaults to 30. |
+| `theme` | string or object | A theme name (`"vawe"`) or an inline theme object. Drives palette, fonts, and motion. See [Themes](/docs/themes). |
+| `layers` | array | Required. 1 to 120 layers. The whole video. See [Layers](/docs/layers). |
+| `bg` | array | Background windows over time. See [Backgrounds](/docs/backgrounds-and-images). |
+| `camera` | array | Global camera keyframes `{t, s, x, y}` for push-ins and pans. |
+| `stings` | array | Shader effects that cover a cut at a boundary. See [Motion](/docs/motion#shader-stings). |
+| `captions` | array | Timed subtitle entries `{t0, t1, text}`. See [Audio and captions](/docs/audio#captions). |
+| `captionMode` | `sentence` \| `word` \| `pop` | How captions are chunked on screen. |
+| `audio` | object | Music, sound effects, and voiceover. See [Audio](/docs/audio). |
+| `comps` | object | Reusable sub-compositions you place with a `comp` layer. See [Blocks and comps](/docs/blocks#comps). |
+
+## Layers are the video
+
+Layers render back to front by `track` (z-order), each with its own lifetime. A layer appears at `start`, lives for `duration`, animates in with `anim` or a `cut`, and animates out with `out`.
+
+```json
+{
+  "layers": [
+    { "type": "rect", "bg": "surface", "pin": "center", "w": 900, "h": 400, "radius": 24, "track": 0 },
+    { "type": "text", "text": "On top.", "pin": "center", "size": 96, "start": 0.4, "track": 1 }
+  ]
+}
+```
+
+Coordinates can be absolute pixels or relative to the canvas, so the same layer resolves correctly in any aspect. That system is covered in [Aspect ratios](/docs/aspect-ratios), and every layer type and its fields are in the [Layer reference](/docs/layers).
+
+## Cameras, backgrounds, and stings
+
+Three top-level arrays operate above the layers:
+
+- **`camera`** is a global keyframe track. `{t: 0, s: 1}` then `{t: 3, s: 1.08}` is a slow push-in across the whole frame.
+- **`bg`** paints the backdrop in windows of time, each using a named [background preset](/docs/backgrounds-and-images#backgrounds) tied to the theme palette.
+- **`stings`** fire a GPU shader effect at a moment `t` to cover a hard cut between beats. A `flash` on a reveal, a `glitch` at an act break. See [shader stings](/docs/motion#shader-stings).
+
+## The audio object
+
+Audio is a separate track built by a Go mixer, so it never affects a rendered frame. The most common value while you author is silence:
+
+```json
+{ "audio": { "silent": true } }
+```
+
+To score a video automatically from its own cuts and stings, use `{ "audio": { "auto": true } }`. That and the full mixer are covered in [Audio](/docs/audio).

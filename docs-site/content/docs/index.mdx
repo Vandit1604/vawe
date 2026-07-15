@@ -1,0 +1,46 @@
+---
+title: Introduction
+description: Vawe turns one self-describing JSON file into one rendered video, deterministically. Here is what that means and why it is built this way.
+icon: Sparkles
+---
+
+Vawe reads a single JSON file and renders a video from it. No timeline, no editor, no dragging clips around. You describe the scene, and the engine draws every frame.
+
+```bash
+./bin/vawe formats/scene/sample.json
+# → engine/out/sample.mp4
+```
+
+That is the whole loop. The JSON is the source of truth; the mp4 is a build artifact you can delete and regenerate at any time.
+
+## What makes it different
+
+Two ideas do most of the work.
+
+**Everything is one open canvas.** There is exactly one module, `scene`, and it is a vocabulary of composable primitives: text, images, captured UI, charts, cards, cursors, shaders, backgrounds, cuts, and stings. There are no templates to pour data into. You compose each video from the [layer vocabulary](/docs/layers), the same way you would compose a page out of HTML elements.
+
+**Every frame is a pure function of its number.** `renderFrame(n)` depends only on `n`. A virtual clock coerces `Date`, `requestAnimationFrame`, timers, and `Math.random` to frame time, so there is no wall clock and no unseeded randomness anywhere. The same JSON produces byte-identical frames no matter what order they render in. That is what lets frames shard across parallel headless Chrome tabs, and it is what makes a video reproducible and diff-able. Read more in [Determinism](/docs/determinism).
+
+## How a render actually works
+
+```text
+data.json
+  → cmd/render (Go)
+  → chromedp: N headless Chrome tabs, each seeks renderFrame(n) → PNG
+  → internal/encode: ffmpeg stitches the PNG sequence → H.264, adds film grain
+  → internal/audio: a Go PCM mixer builds music + sound effects + voiceover
+  → engine/out/<name>.mp4
+```
+
+The output is a 30fps H.264 mp4 with AAC audio, in portrait (1080×1920), landscape (1920×1080), or square. One source can render [every aspect ratio in a single pass](/docs/aspect-ratios).
+
+## Where to go next
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene." />
+  <Card title="The scene file" href="/docs/the-scene" description="The top-level fields every JSON scene is built from." />
+  <Card title="Layer reference" href="/docs/layers" description="Every layer type and the fields it accepts." />
+  <Card title="Motion" href="/docs/motion" description="Kinetic type presets, cuts, and shader stings." />
+</Cards>
+
+Vawe lives on GitHub at [Vandit1604/vawe](https://github.com/Vandit1604/vawe). These docs describe what the engine does today, drawn straight from the code.

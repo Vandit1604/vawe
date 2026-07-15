@@ -1,0 +1,44 @@
+---
+title: Aspect ratios
+description: Render one scene to 16:9, 9:16, 1:1, and more from a single source, using relative coordinates, pins, and a 12-column grid.
+icon: Ratio
+---
+
+One scene can render every platform ratio in a single pass. You author once, and the same source resolves to a landscape hero, a vertical Reel, and a square post.
+
+```bash
+./bin/vawe formats/scene/my-video.json --aspect 16:9,9:16,1:1
+# → my-video.16x9.mp4, my-video.9x16.mp4, my-video.1x1.mp4
+```
+
+Supported ratios: `16:9`, `9:16`, `1:1`, `4:5`, `4:3`. Each output is tagged with its aspect. Through make:
+
+```bash
+make video D=formats/scene/my-video.json ASPECT=16:9,9:16,1:1
+```
+
+## Why it works: relative coordinates
+
+For a scene to survive being reshaped, its layers cannot be pinned to fixed pixels. Three tools let a layer describe where it belongs, and the engine resolves that to pixels once per aspect, at boot, purely from the width and height.
+
+**Relative values.** `x`, `y`, `w`, and `h` accept a pixel number, a percentage (`"50%"`), a percentage with an offset (`"50%-40"`), or a keyword (`center`, `left`, `right`, `top`, `bottom`) anchored inside a per-aspect safe inset.
+
+```json
+{ "type": "text", "text": "Centered anywhere.", "x": "50%", "y": "40%" }
+```
+
+**Pins.** `pin` places a layer canvas-relative within the safe zone, including rule-of-thirds power points (`thirds-tl`, `thirds-tr`, `thirds-t`, and so on). Give the layer a `w` and `h` so the centering math knows its size.
+
+```json
+{ "type": "text", "text": "Bottom third.", "pin": "thirds-b", "w": 900, "h": 200 }
+```
+
+**The 12-column grid.** `col` places a layer on a grid: `"3"` is a single column, `"2-7"` spans columns 2 through 7 and sets both x and width. `cols` (default 12) and `gutter` tune it.
+
+```json
+{ "type": "image", "src": "photo.jpg", "col": "7-12" }
+```
+
+## Determinism holds
+
+Resolution happens once, at boot, as a pure function of the canvas dimensions. So a multi-aspect render is still fully [deterministic](/docs/determinism): each ratio is its own reproducible output. Scenes authored with absolute pixel coordinates are unaffected; they simply render at their fixed positions.

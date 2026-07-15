@@ -1,0 +1,79 @@
+---
+title: Motion
+description: The kinetic typography presets, cut presentations, and shader stings, plus how each brand moves in its own personality.
+icon: Wind
+---
+
+Motion in Vawe is a vocabulary, not a set of sliders. You pick a named preset for how text enters, a named presentation for how one beat cuts to the next, and an optional named sting to cover a hard boundary. Each is a pure function of frame time, so it renders the same every time.
+
+The craft rules behind these choices (timing as voice, ease out on entrances, one hero motion per beat) live in the repo at [`docs/MOTION-CRAFT.md`](https://github.com/Vandit1604/vawe/blob/main/docs/MOTION-CRAFT.md). This page is the catalog.
+
+## Kinetic typography
+
+Split a headline into units with `split` (`char`, `word`, or `line`), then animate each unit with `preset`. Units enter in reading order, staggered, and settle exactly at rest with a gentle overshoot.
+
+There are **21 presets**:
+
+`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` (looping) · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` (scramble then resolve) · `tilt` · `stretch` · `gradient` (colour sweep) · `highlight` (marker band) · `underline` · `shadow` (poster lift) · `riseClip` (rise from a baseline clip)
+
+```json
+{
+  "type": "text",
+  "text": "Then it holds, deterministic.",
+  "split": "word",
+  "preset": "riseClip",
+  "each": 0.5,
+  "stagger": 0.05
+}
+```
+
+Per-preset knobs go in `presetOpts`, for example `gradient` takes `{c1, c2}`, `highlight` and `underline` take `{color}`, `blur` and `focus` take `{px}`, `tilt` takes `{deg}`, and `wave` takes `{amp, phase}`. If a headline wraps past five lines, the engine auto-shrinks it so it never overflows.
+
+## Cuts and transitions
+
+A `cut` is how a layer enters by moving the frame, used at beat boundaries. Set it on the layer:
+
+```json
+{ "type": "component", "src": "hero.json", "cut": "whip", "cutTiming": "snappy", "dir": "left" }
+```
+
+There are **25 named presentations** (plus `none`):
+
+`fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `jitter` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur`
+
+Each cut takes a **timing** (`cutTiming`, default `smooth`): `linear`, `smooth`, `out`, `snappy`, `pop`, `rush`, `brake`, `ramp`. Directional cuts take `dir` (`left`, `right`, `up`, `down`), and `iris` / `softiris` take a centre with `cx` and `cy`.
+
+<Callout title="Pick a cut you can actually see">
+A transition the viewer cannot perceive at its real size and duration is not a feature. Fast `blinds` slats read as a flicker, not blinds. When in doubt use a cut that reads clearly (a `wipe`, `iris`, or `whip`) at the duration you are giving it.
+</Callout>
+
+## Shader stings
+
+A sting is a brief WebGL effect that covers a cut at a boundary. Set it in the top-level `stings` array, keyed to a moment `t`:
+
+```json
+{ "stings": [{ "t": 6.0, "fx": "glitch", "dur": 0.5, "seed": 7 }] }
+```
+
+There are **22 effects**. Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Plus eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`.
+
+Each takes `dur` (0.3 to 3 seconds) and a `seed`. `color` tints the effect by luminance, `intensity` scales its strength, and `leak` accepts up to four colours in `colors`. Because a sting is keyed on `(progress, seed)` only, it is seek-safe and byte-reproducible.
+
+Reach for a sting to cover a hard background jump at an act break, or a `flash` to punctuate a reveal.
+
+## Ambient shaders
+
+Separate from stings, a `shader` layer paints a slow moving field behind your content for the whole beat: `flow`, `aurora`, `plasma`, `drift`, or `mist`. Tune it with `speed`, `intensity`, `colors`, and `seed`. Use it as atmosphere, not decoration.
+
+## Motion personality per theme
+
+The same primitives move differently for different brands, because each [theme](/docs/themes) carries a `motion` block: `easing`, `bounce`, `settle`, `enter`, `durationScale`, and `stagger`. A punchy brand snaps with a short settle and tight stagger; a calm brand dissolves with a long settle and no bounce. Leaving motion at defaults is shared DNA across brands, so set it.
+
+The motion director can choose cuts and stings for you from a theme's personality:
+
+```bash
+make direct D=formats/scene/my-video.json          # dry run, prints picks
+make direct D=formats/scene/my-video.json WRITE=1  # apply them
+```
+
+It covers hard background jumps with a sting, whips only when the background does not change, and rotates one cut family so a video does not repeat the same move.

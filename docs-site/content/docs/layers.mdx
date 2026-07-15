@@ -1,0 +1,140 @@
+---
+title: Layer reference
+description: Every layer type in the scene vocabulary, the fields each one accepts, and the fields they all share.
+icon: Layers
+---
+
+A layer is one element on the canvas. There are fourteen types, and you compose a video by stacking them. This page lists each type and its own fields; the fields shared by all layers are at the [bottom](#fields-every-layer-shares).
+
+The full list of types: `text`, `image`, `component`, `rect`, `count`, `group`, `glow`, `board`, `doc`, `html`, `clip`, `cursor`, `shader`, `lottie`.
+
+## text
+
+The workhorse. Renders a headline or line of copy, optionally split and animated per unit.
+
+```json
+{
+  "type": "text",
+  "text": "Type that <b>moves</b> like it reads.",
+  "size": 120,
+  "weight": 600,
+  "font": "sans",
+  "split": "word",
+  "preset": "up",
+  "each": 0.35,
+  "stagger": 0.06
+}
+```
+
+- `text` may contain `<b>` and `<em>`. Emphasis picks up `emColor` (the brand accent by default).
+- `size` ranges from 18 to a hard maximum of **260**. `weight` is 100 to 900. `font` is `sans`, `serif`, or `mono`.
+- `split` (`char`, `word`, or `line`) breaks the text into units, and `preset` animates each one. See the [21 kinetic presets](/docs/motion#kinetic-typography). `each` is the per-unit duration, `stagger` the delay between units.
+- `typing` renders a typewriter (a number is chars per second, `true` is 24), with an optional `caret`.
+- `fit` / `fitH` / `maxLines` auto-shrink a headline so it never overflows. `raw: true` opts out of the micro-typography pass.
+
+## image
+
+A still image with a treatment. A bare image reads as flat, so give it one.
+
+```json
+{ "type": "image", "src": "photo.jpg", "ken": true, "edgeFade": true, "radius": 16 }
+```
+
+- `ken` is a Ken Burns push (`true`, or `{from, to, fx, fy}`), capped at 8% travel and never reversing.
+- `edgeFade` dissolves the left and right edges into the background; set `edgeFadeColor` to your background on dark scenes (default `#ffffff`).
+- `radius` rounds the corners; `reflect` adds a floor reflection.
+
+## component
+
+A real UI section captured from a live site with `make capture`, rendered as a crisp, animatable fragment. This is the highest-fidelity image source: real logos, gradients, and copy come for free. See [Brand reflection](/docs/brand-reflection).
+
+## rect
+
+Cards, pills, slabs, dividers. The one gotcha worth memorizing:
+
+<Callout title="rect uses bg and border, not color">
+The fill field is `bg` and the outline is `border`. Writing `color` or `fill` does nothing.
+</Callout>
+
+```json
+{ "type": "rect", "bg": "surface", "border": "line", "radius": 20, "elevation": 2, "w": 800, "h": 300 }
+```
+
+`radius`, `shadow`, `elevation` (1 to 4), `glow`, and `pad` control the look.
+
+## count
+
+A number that animates from one value to another. Great for stats.
+
+```json
+{ "type": "count", "from": 0, "to": 2500000, "countDur": 1.4 }
+```
+
+- Values at or above one million auto-compact to `2.5M` when there is no `unit`. Add `prefix`, `suffix`, or `unit` for small numbers (`unit: "$B"`, `to: 880` renders `$880B`).
+- `decimals` (0 to 3), `countStart`, `countDur`, and `ease` tune the roll.
+
+## group
+
+A layout box that arranges children in a row, column, or grid. This is how you build clusters without hand-placing every element.
+
+```json
+{
+  "type": "group",
+  "layout": "row",
+  "gap": 24,
+  "items": "center",
+  "children": [
+    { "type": "text", "text": "9.8" },
+    { "type": "text", "text": "rating" }
+  ]
+}
+```
+
+`layout` is `row`, `column`, or `grid`; `gap`, `justify`, `wrap`, `gridCols` (1 to 8) control the flow. The box itself takes `bg`, `elevation`, `glow`, `radius`, and `pad`. Children can be text, image, count, or a nested group.
+
+## glow
+
+A soft light source or directional beam.
+
+```json
+{ "type": "glow", "glow": "#2563eb", "intensity": 0.3, "beam": "right" }
+```
+
+`glow` is a hex or `true` (theme accent), `intensity` 0.05 to 0.6, `beam` one of `right`, `left`, `up`, `down`.
+
+## board, doc
+
+Two structured cards. `board` is a mini Kanban (up to 4 columns of cards with labels). `doc` is a file or source card with a filename, an optional `diff`, and typed `blocks` (headings, mono body, code, bullets). Both are handy for product and developer stories.
+
+## clip, lottie
+
+Motion sources. `clip` plays a deterministic PNG frame sequence (produced by `make gen-clip` from any mp4) with a `speed` and `loop`. `lottie` plays a Lottie animation, seeked deterministically to frame time.
+
+## cursor
+
+An animated pointer that glides along a path and clicks. Pair it with a captured UI so a click has a visible consequence.
+
+```json
+{ "type": "cursor", "path": [{ "t": 0, "x": 200, "y": 400 }, { "t": 1.2, "x": 900, "y": 520 }], "clicks": [1.3] }
+```
+
+## shader, html
+
+`shader` is an ambient WebGL field behind your content: `flow`, `aurora`, `plasma`, `drift`, or `mist`, tuned by `speed`, `intensity`, `colors`, and `seed`. (This is different from a [sting](/docs/motion#shader-stings), which is a brief cover over a cut.) `html` drops in hand-authored static HTML and CSS when you need something the primitives do not cover; `<script>` is stripped.
+
+## Fields every layer shares
+
+| Field | Purpose |
+|---|---|
+| `x` `y` `w` `h` | Position and size. Pixels, or relative (`"50%"`, `"50%-40"`, keywords). |
+| `pin` | Place canvas-relative: `center`, `top`, `bottom`, edges, corners, and rule-of-thirds points (`thirds-tl` and friends). Give the layer `w`/`h` so centering math works. |
+| `col` `cols` `gutter` | Place on a 12-column grid. `col: "2-7"` spans columns 2 through 7. |
+| `start` `duration` | When the layer appears and how long it lives. |
+| `track` | Z-order. Higher renders on top. |
+| `anim` `out` `enterDur` `exitDur` | Enter and exit animation and their timings. |
+| `cut` `dir` `dist` `cutTiming` | Enter with a [cut presentation](/docs/motion#cuts-and-transitions) instead of a plain anim. |
+| `motion` | A keyframe track: `[{t, x, y, scale, rot, opacity, ease}]`. Stacks on top of enter, exit, and camera. |
+| `fade` | A static edge fade. Exclusive with `cut` (the builder throws if you set both). |
+| `elevation` `glow` `filter` `mask` | Depth and effects. |
+| `id` `anchor` `at` `dx` `dy` | Anchor this layer to another one. |
+| `critical` | Mark a layer the [audit](/docs/quality-gates#audit) must check for overlap and contrast. |

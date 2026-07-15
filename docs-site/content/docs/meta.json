@@ -1,0 +1,24 @@
+{
+  "title": "Docs",
+  "root": true,
+  "pages": [
+    "index",
+    "quickstart",
+    "---Concepts---",
+    "the-scene",
+    "layers",
+    "determinism",
+    "---Motion and vocabulary---",
+    "motion",
+    "blocks",
+    "---Look and feel---",
+    "themes",
+    "backgrounds-and-images",
+    "audio",
+    "aspect-ratios",
+    "---Workflow---",
+    "cli",
+    "brand-reflection",
+    "quality-gates"
+  ]
+}

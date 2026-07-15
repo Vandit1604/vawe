@@ -1,0 +1,48 @@
+---
+title: Determinism
+description: Why renderFrame(n) is a pure function of the frame number, what that buys you, and how the engine proves it.
+icon: Fingerprint
+---
+
+The same JSON renders byte-identical frames every time, in any order, on any machine. This is the property the whole engine is built around, and it is not an accident of implementation. It is enforced.
+
+## renderFrame(n) is pure
+
+Frame `n` depends only on `n`. To make that true, a virtual clock is installed before the first frame renders, and it coerces every source of ambient state to frame time:
+
+- `Date` and `Date.now()` return the current frame's timestamp, not the wall clock.
+- `requestAnimationFrame` and `setTimeout` fire against frame time.
+- `Math.random` is seeded, so a "random" scatter is the same scatter on every render.
+
+There is no reading of the real clock and no unseeded randomness anywhere in a scene. A value that looks random, like the particle positions in a shader sting, comes from a hash of a seed and the frame, so it is reproducible down to the pixel.
+
+## What determinism buys you
+
+**Parallel rendering.** Because frame 900 does not depend on frames 1 through 899, the engine can open several headless Chrome tabs and have each one seek straight to its assigned frames. That is why a long video renders quickly.
+
+**Reproducibility.** Ship a JSON and anyone gets the same mp4. Re-render months later and nothing drifts.
+
+**Diff-able output.** Two renders of the same scene are identical, so a refactor that should not change the picture can be proven not to, frame by frame.
+
+## The animation contract
+
+Only four CSS properties are ever animated on a visible move: `transform`, `opacity`, `clip-path`, and `filter`. Layout properties are never animated. This keeps motion smooth and, combined with the virtual clock, keeps every frame a clean function of its number.
+
+## How it is proved
+
+Two gates guard determinism, and you can run them yourself.
+
+**`make probe`** renders a sample of frames in scrambled order and diffs the DOM signature of each against a reference render in normal order. If any frame differs, purity is broken and the probe fails.
+
+```bash
+make probe M=scene
+```
+
+**`make snap`** captures a per-frame DOM signature (bounding box, transform, opacity, font, text) without rendering a video. Baseline it before a refactor, run it after, and it tells you exactly which frames changed.
+
+```bash
+make snap M=scene SAVE=1   # baseline
+make snap M=scene          # compare against the baseline
+```
+
+Both live alongside the other checks in [Quality gates](/docs/quality-gates). If you are changing engine internals rather than authoring a video, `make probe` is the check that catches a determinism regression.

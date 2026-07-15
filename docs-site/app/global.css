@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+/* Vawe brand: cobalt primary, matching the marketing site accent (#2563eb). */
+:root {
+  --color-fd-primary: #2563eb;
+}
+
+.dark {
+  --color-fd-primary: #6ab8ff;
+}

@@ -1,0 +1,62 @@
+---
+title: Blocks and comps
+description: The block registry of ready-made, theme-aware components, and comps for reusing your own clusters within a scene.
+icon: Blocks
+---
+
+Some things you draw over and over: a stat card, a line chart, a terminal, a browser frame. Blocks are a library of these, each a pure function that returns real scene layers. You reference one by name and it expands into text, rects, and counts that reskin to whatever theme the video uses.
+
+## Using a block
+
+A block is build-time sugar. You write `{ "type": "block", ... }`, then expand it into real layers before rendering:
+
+```bash
+make expand D=formats/scene/my-video.json
+# writes my-video.expanded.json with the blocks inlined
+```
+
+The [validator](/docs/quality-gates#validate) errors if a video still contains an un-expanded block or comp, so you never accidentally render a placeholder.
+
+## The registry
+
+There are **97 blocks across 45 families**. Browse them all as rendered sheets:
+
+```bash
+make catalog                 # render every block to paged mp4s
+make catalog THEME=stripe    # reskinned to a brand
+```
+
+Families are named plainly, and variants are namespaced (`card`, then `card.pricing`, `card.stat`). A tour of what is there:
+
+**Data and charts.** `lineChart`, `barChart`, `donutChart`, `stackedBar`, `statBig`, `kpiRow`, `gauge`, `progressRing`, `statCard`, `table`.
+
+**Code and dev.** `codeBlock`, `terminal`, `diff`, `fileTree`, `logLines`, `commitRow`, `badge`, `deploySuccess`, `loadingBar`.
+
+**Product and UI.** `browserFrame`, `phoneFrame`, `tabBar`, `toast`, `notification`, `banner`, `callout`, `stripeCard`, `spinner`.
+
+**Social and people.** `tweetCard`, `chatBubble`, `reactionBar`, `avatarStack`, `profileCard` (`card.profile`), `quote`, `logoWall`.
+
+**Structure and flow.** `card`, `pricingCard` (`card.pricing`), `checklist`, `timeline`, `stepFlow`, `kanban`, `board`, `comparison`, `pillRow`, `colorCycle`, `captions`.
+
+Every block reads the brand palette through design tokens, so the same `kpiRow` looks native in a Stripe video and a Linear video. Regenerate the reference table any time with `make blocks-docs`.
+
+## Comps
+
+A block is a shared library. A **comp** is your own reusable cluster, defined once per scene and placed many times. Put it in the top-level `comps` map and drop it in with a `comp` layer:
+
+```json
+{
+  "comps": {
+    "statTile": [
+      { "type": "count", "to": 0, "y": 0 },
+      { "type": "text", "text": "label", "y": 60 }
+    ]
+  },
+  "layers": [
+    { "type": "comp", "ref": "statTile", "x": 200, "y": 400, "start": 0.5 },
+    { "type": "comp", "ref": "statTile", "x": 700, "y": 400, "start": 0.8 }
+  ]
+}
+```
+
+The instance `x`, `y`, and `start` offset every child. Comps can nest, and the expander guards against cycles. Like blocks, they are expanded by `make expand` before rendering.

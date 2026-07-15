@@ -1,0 +1,79 @@
+---
+title: Quality gates
+description: The ladder of checks a video climbs before it ships, from schema validation to a vision gate that scores the rendered frames.
+icon: ShieldCheck
+---
+
+A static engine can produce a technically correct, visually generic video. The gates are the system that fights that. None of them need to run for a video to render, but together they are how you catch a broken frame, a repeated design, or a slop tell before you ship.
+
+They form a ladder. Early gates are cheap and mechanical; later gates look at the rendered pixels.
+
+## validate
+
+```bash
+make validate D=formats/scene/my.json
+```
+
+Schema conformance, no em-dashes in on-screen copy, inline theme keys resolved, and no un-expanded [blocks or comps](/docs/blocks). The same validator runs at boot before the first frame, so a scene that fails here never renders.
+
+## critique
+
+```bash
+make critique D=formats/scene/my.json
+```
+
+The value gate. It flags beats that occupy time without earning it: placeholder words, unbacked claims (copy that says "22 shader stings" with no shader in the scene), static lists that should be animated, stings too fast to perceive, and thin or lonely beats. The test for every frame is simple: if you cut it, what does the viewer lose?
+
+## slop
+
+```bash
+make slop D=formats/scene/my.json
+```
+
+An anti-slop detector. It renders the real DOM at a frame and runs a 41-rule check for the usual tells: overused fonts, purple and blue gradients, cards inside cards, centered-by-default layouts. No language model, just rules. Reach past anything it flags.
+
+## audit
+
+```bash
+make audit M=scene
+```
+
+Layout and accessibility: overlap, clipped text, overflow, safe-zone violations, and WCAG contrast on every layer marked `critical`. It writes an overlay to `/tmp/audit/<fmt>.png` so you can see exactly what it caught.
+
+## beats
+
+```bash
+make beats D=formats/scene/my.json VS=<brand>
+```
+
+The first, middle, and last frame of every beat on one sheet. With `VS=<brand>` it stacks each beat beside its source section, which is the [fidelity check](/docs/brand-reflection#the-fidelity-gate) that a reflected video reads as the same brand as the site.
+
+## judge
+
+```bash
+make judge D=formats/scene/my.json VS=<brand>
+```
+
+The vision gate. It renders the key frames of every beat into one labeled sheet and writes a rubric: the brand's house style plus seven craft dimensions (readability, hierarchy, composition, brand fidelity, asset fidelity, produced-not-generated, and value). Then a vision model reads the sheet against the rubric and returns a pass or fix verdict. It catches what the mechanical gates cannot see: a mis-anchored underline, a muddy frame, a lookalike asset. A pass means every frame clears every dimension.
+
+## ledger
+
+```bash
+make ledger D=formats/scene/my.json         # check
+make ledger-add D=formats/scene/my.json     # log after shipping
+```
+
+Cross-video sameness memory. It fails if a design repeats one you have already shipped. Fix by changing at least two of the cut family, the beat structure, or the layout archetype. After the video is approved, `ledger-add` records it so future videos are checked against it.
+
+## Determinism and refactor gates
+
+Three checks guard the engine itself rather than a single video:
+
+- **`make probe`** renders frames in scrambled order and proves they are byte-identical. See [Determinism](/docs/determinism).
+- **`make snap`** diffs a per-frame DOM signature so a refactor can prove it did not change the picture.
+- **`make lib-test`** runs pure-JS assertions on the motion primitives with no browser.
+- **`make motion`** checks the animation-over-time contract: the final frame holds, reveals are monotonic, payoffs settle before they exit, counters are sane, and typing completes.
+
+## The order to run them
+
+While authoring: `validate`, then `slop` and `beats` to catch problems early. Before rendering the final: `critique`. After rendering: `audit`, then `judge` for the real quality read, then `ledger` to make sure it is not a repeat. `make review` bundles `lib-test`, `audit`, and a master sheet into one quick health snapshot.
