@@ -9,6 +9,15 @@ export const metadata: Metadata = {
     "What Vawe can render: kinetic typography, transitions, shader stings, data stories, product UI, and any aspect ratio. Every clip is one JSON scene.",
 };
 
+type Film = { slug: string; brand: string; dur: string; line: string; tag: string };
+
+const FILMS: Film[] = [
+  { slug: "linear-launch", brand: "Linear", dur: "0:50", line: "The product development system for teams and agents. A dark, keynote-register film: an agent session runs live, then Start building.", tag: "reflected · dark + iris" },
+  { slug: "stripe", brand: "Stripe", dur: "0:45", line: "Financial infrastructure to grow your revenue. The signature gradient mesh, a one-tap payment, a Payment complete.", tag: "reflected · gradient mesh" },
+  { slug: "argus-launch", brand: "Argus", dur: "0:23", line: "Posting into the void becomes grow on X, on purpose. An X-native waitlist teaser, drafted in your voice.", tag: "reflected · white + cobalt" },
+  { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "Every agent forgets who you are. A constellation of AI tools resolves into one memory file: stop starting from scratch.", tag: "reflected · white + ember" },
+];
+
 type Row = { num: string; title: string; body: string; tag: string; src: string; flip?: boolean };
 
 const ROWS: Row[] = [
@@ -31,6 +40,36 @@ export default function Showcase() {
           <h1>What one JSON can render.</h1>
           <p>Every clip below is a single self-describing scene, rendered deterministically, scored automatically. No timeline, no editor.</p>
         </section>
+
+        <section className="films">
+          <div className="films-head">
+            <h2>Four brands, four films.</h2>
+            <p>End-to-end launch films, each authored as one JSON scene from the brand&apos;s own site: reflected colours, real UI, motion in the brand&apos;s own personality. No two look alike.</p>
+          </div>
+          <div className="filmgrid">
+            {FILMS.map((f) => (
+              <figure className="filmcard" key={f.slug}>
+                <div className="fmedia">
+                  <video src={`/assets/films/${f.slug}.mp4`} poster={`/assets/films/${f.slug}.jpg`} autoPlay loop muted playsInline />
+                </div>
+                <figcaption>
+                  <div className="fbrand">
+                    {f.brand}
+                    <span className="fdur">{f.dur}</span>
+                  </div>
+                  <div className="fline">{f.line}</div>
+                  <span className="tag">{f.tag}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        <div className="cap-lead">
+          <div className="num">the vocabulary</div>
+          <h2>And every part, on its own.</h2>
+          <p>The films above are composed from these primitives. Each one is a capability you can reach for by name.</p>
+        </div>
 
         <main>
           {ROWS.map((r) => (

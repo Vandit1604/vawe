@@ -194,6 +194,28 @@ a{color:inherit;text-decoration:none}
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
   background:rgba(15,22,32,.55);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
 
+/* premium films */
+.films{padding:44px 0 8px}
+.films-head{max-width:54ch;margin-bottom:30px}
+.films-head h2{font-size:clamp(1.8rem,3.8vw,2.7rem);line-height:1.02;letter-spacing:-.032em;font-weight:700;margin-bottom:13px;text-wrap:balance}
+.films-head p{color:var(--ink-2);font-size:1.05rem;line-height:1.5}
+.filmgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+.filmcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-1);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease)}
+.filmcard:hover{transform:translateY(-5px);box-shadow:var(--shadow-3);border-color:var(--accent-line)}
+.fmedia{aspect-ratio:16/9;background:#0f1620;overflow:hidden;border-bottom:1px solid var(--line)}
+.fmedia video{width:100%;height:100%;object-fit:cover;display:block}
+.filmcard figcaption{padding:18px 20px 20px}
+.fbrand{display:flex;align-items:baseline;gap:11px;font-weight:700;font-size:1.08rem;letter-spacing:-.015em;margin-bottom:7px}
+.fdur{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+.fline{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-bottom:14px}
+.filmcard .tag{display:inline-flex;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
+  border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;background:var(--bg-2)}
+.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:44px;max-width:48ch}
+.cap-lead h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.03;letter-spacing:-.03em;font-weight:700;margin-bottom:12px;text-wrap:balance}
+.cap-lead p{color:var(--ink-2);font-size:1.02rem;line-height:1.5}
+@media(max-width:760px){.filmgrid{grid-template-columns:1fr}}
+
 /* =========================================================
    BLOCKS REGISTRY
    ========================================================= */
@@ -210,6 +232,34 @@ a{color:inherit;text-decoration:none}
 .bnote{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--ink-2);
   background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:10px;padding:9px 14px}
 .bnote b{color:var(--accent)}
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:34px;padding-bottom:80px}
+.flink{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 24px 22px;
+  box-shadow:var(--shadow-1);transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
+.flink:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--accent-line)}
+.flink .fk{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);margin-bottom:14px}
+.flink h3{font-size:20px;font-weight:700;letter-spacing:-.025em;margin-bottom:8px}
+.flink p{color:var(--ink-2);font-size:14.5px;line-height:1.5}
+.flink .go{margin-top:15px;color:var(--accent);font-weight:600;font-size:14px}
+.flink .go .arw{display:inline-block;transition:transform .25s var(--ease)}
+.flink:hover .go .arw{transform:translateX(4px)}
+.fdetail{padding:8px 0 80px;max-width:900px}
+.fdetail .backlink{color:var(--muted);font-family:var(--font-mono),monospace;font-size:13px;display:inline-block;margin-bottom:22px;transition:color .2s}
+.fdetail .backlink:hover{color:var(--accent)}
+.fdetail .tagline{color:var(--ink-2);font-size:clamp(1.1rem,2vw,1.4rem);line-height:1.4;max-width:44ch;margin-top:6px}
+.demo-media{margin:36px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0f1620;box-shadow:var(--shadow-2)}
+.demo-media video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.fdetail .prose p{color:var(--ink-2);font-size:1.07rem;line-height:1.65;margin-bottom:18px;max-width:66ch}
+.fdetail .prose p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
+.fdetail .foot-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
+.codeblock{background:#0f1620;border-radius:12px;padding:18px 20px;margin:26px 0 6px;box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
+.codeblock .lbl{font-family:var(--font-mono),monospace;font-size:11px;color:#5a6478;margin-bottom:11px}
+.codeblock pre{font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.75;color:#c8cfdb;white-space:pre;margin:0}
+.fdetail .tag{display:inline-flex;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
+  border:1px solid var(--line-2);border-radius:8px;padding:6px 12px;background:var(--bg-2);margin-top:24px}
 
 /* =========================================================
    MICRO-ANIMATIONS
