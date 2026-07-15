@@ -41,3 +41,4 @@ engine/assets/sfx/*.wav
 formats/scene/*.json
 !formats/scene/sample.json
 !formats/scene/schema.json
+engine/assets/music/

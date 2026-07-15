@@ -56,9 +56,24 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
       sw: el.scrollWidth, cw: el.clientWidth, sh: el.scrollHeight, ch: el.clientHeight };
   });
   const issues = [];
+  // A layer mid enter-animation (or a moving `out` exit) is intentionally off-position, so its box
+  // isn't a real safe-zone breach — only flag safe when the layer is at rest. Default exits fade in
+  // place (no movement), so those still get checked. Timing comes from the render's data-* attrs.
+  const FPS = (window.__engine && window.__engine.meta && window.__engine.meta.fps) || 30;
+  const tNow = n / FPS;
+  const midMove = (el) => {
+    if (!el || !el.dataset) return false;
+    const st = parseFloat(el.dataset.start) || 0;
+    const en = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
+    const du = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
+    const exD = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : 0.4;
+    if (tNow < st + en + 0.06) return true;                                            // entering: moves in
+    if (el.dataset.out && du !== Infinity && tNow > st + du - exD - 0.06) return true; // moving exit only
+    return false;
+  };
   for (const e of info) {
     if (e.clip) issues.push({ kind: 'overflow', a: e.id, t: e.t, detail: `content ${e.sw}x${e.sh} clipped to ${e.cw}x${e.ch}` });
-    if (e.x < SAFE.x0 - 1 || e.r > SAFE.x1 + 1 || e.y < SAFE.y0 - 1 || e.btm > SAFE.y1 + 1) issues.push({ kind: 'safe', a: e.id, t: e.t, detail: `(${e.x | 0},${e.y | 0},${e.r | 0},${e.btm | 0})` });
+    if (!midMove(e.el) && (e.x < SAFE.x0 - 1 || e.r > SAFE.x1 + 1 || e.y < SAFE.y0 - 1 || e.btm > SAFE.y1 + 1)) issues.push({ kind: 'safe', a: e.id, t: e.t, detail: `(${e.x | 0},${e.y | 0},${e.r | 0},${e.btm | 0})` });
   }
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
   // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
@@ -73,9 +88,18 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
   const MIN_TXT = window.innerHeight * 0.013;
   for (const tx of document.querySelectorAll('.hs-text')) {
     if (!vis(tx)) continue;
-    const t = (tx.textContent || '').trim(); if (!t) continue;
-    const fs = parseFloat(getComputedStyle(tx).fontSize);
-    if (fs && fs < MIN_TXT && tx.getBoundingClientRect().width > 1) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
+    // Measure the element that actually HOLDS the text (an element with a direct text node), not the
+    // layer wrapper. An `html` layer nests its content in a child styled at its own size, so the
+    // wrapper's inherited 16px default is not what the viewer sees — walk to the real text holders.
+    const holders = [tx, ...tx.querySelectorAll('*')].filter((el) =>
+      [...el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim()));
+    for (const el of holders) {
+      if (!vis(el)) continue;
+      if (el.getBoundingClientRect().width <= 1) continue;
+      const fs = parseFloat(getComputedStyle(el).fontSize) || 0;
+      const t = (el.textContent || '').trim();
+      if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
+    }
   }
   for (let i = 0; i < info.length; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
@@ -136,15 +160,30 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     if (st && st[3] > 0.85) return [st[0], st[1], st[2]];
     return null; // gradient/image backdrops: no confident color → don't guess, don't flag
   };
-  for (const e of info) {
-    if (![...e.el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim())) continue; // containers: skip
-    const fg = parse(getComputedStyle(e.el).color);
+  // Contrast (WCAG AA, size-aware) on EVERY rendered text element, not just [data-layer=critical].
+  // Muted labels and captions are exactly where low-contrast gray-on-white slips through, so check any
+  // element that carries its own text node. A video is usually watched scaled DOWN (not fullscreen), so
+  // the WCAG large-text allowance only applies to genuinely big type (>=48px in-frame); everything else
+  // must clear the 4.5:1 normal-text bar to stay legible at half-size.
+  for (const el of document.querySelectorAll('body *')) {
+    if (el.closest('script, style, noscript, svg')) continue;
+    if (![...el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim())) continue; // only elements with DIRECT text
+    if (!vis(el)) continue;
+    const b = el.getBoundingClientRect();
+    if (b.width < 2 || b.height < 2) continue;
+    const fg = parse(getComputedStyle(el).color);
     if (!fg || fg[3] < 0.5) continue;
-    const bg = bgFor(e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
+    const bg = bgFor(el, { x: b.left, y: b.top, w: b.width, h: b.height });
     if (!bg) continue;
     const rt = cratio([fg[0], fg[1], fg[2]], bg);
-    // display type in video: hard-fail only the unreadable (<2.5:1), warn under WCAG large-text 3.5
-    if (rt < 3.5) issues.push({ kind: rt < 2.5 ? 'contrast' : 'contrast-soft', a: e.id, t: e.t, detail: `ratio ${rt.toFixed(1)}:1` });
+    const px = parseFloat(getComputedStyle(el).fontSize) || 0;
+    const large = px >= 48;            // large display type gets the WCAG large-text bar
+    const want = large ? 3.0 : 4.5;    // WCAG AA pass bar: 4.5 normal, 3.0 large
+    const hardBar = large ? 2.5 : 3.0; // below this the text is unreadable -> hard fail (else soft-warn)
+    if (rt < want) {
+      const id = el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName);
+      issues.push({ kind: rt < hardBar ? 'contrast' : 'contrast-soft', a: id, t: (el.textContent || '').trim().slice(0, 18), detail: `${px | 0}px ${rt.toFixed(1)}:1 (want ${want}:1)` });
+    }
   }
   // EMPHASIS + WIDE contrast: the loop above reads each layer's TOP-level colour only. A layer's
   // <b>/<em> spans carry their OWN colour (--em) — an accent <b> on an accent bg vanishes (the
@@ -238,10 +277,23 @@ for (const spec of modules) {
   if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
   const m = isData ? (JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).module || spec) : spec;
   const page = await browser.newPage();
-  // landscape-aware: read the sample's orientation so landscape formats are audited at their real dims
-  const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
-  const safe = landscape ? SAFE_LAND : SAFE;
-  await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
+  // Audit at the video's REAL dimensions. `aspect` (e.g. "16:9") wins over `orientation`; default
+  // portrait. Getting this wrong (auditing a 16:9 scene at portrait 1080x1920) mis-fires safe-zone
+  // and the tiny-text floor on every landscape video, so parse the aspect ratio properly.
+  const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')); } catch { return {}; } })();
+  let vw = 1080, vh = 1920;
+  const asp = typeof cfg.aspect === 'string' && cfg.aspect.includes(':') ? cfg.aspect.split(':').map(Number) : null;
+  if (asp && asp[0] && asp[1]) {
+    const [aw, ah] = asp;
+    if (aw === ah) { vw = vh = 1080; }
+    else if (aw > ah) { vw = 1920; vh = Math.round(1920 * ah / aw); }
+    else { vh = 1920; vw = Math.round(1920 * aw / ah); }
+  } else if (cfg.orientation === 'landscape') { vw = 1920; vh = 1080; }
+  // safe box: the canonical tight boxes for the two standard sizes, else a proportional inset.
+  const safe = (vw === 1920 && vh === 1080) ? SAFE_LAND
+    : (vw === 1080 && vh === 1920) ? SAFE
+    : { x0: Math.round(vw * 0.05), y0: Math.round(vh * 0.055), x1: Math.round(vw * 0.95), y1: Math.round(vh * 0.945) };
+  await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const meta = await page.evaluate(() => window.__engine.meta);

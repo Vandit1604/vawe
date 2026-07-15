@@ -17,8 +17,10 @@ build: fonts
 	go build -o bin/vawe ./cmd/render
 
 # make video D=path/to/video.json  — one self-describing JSON → engine/out/<name>.mp4
+# Runs the layout/contrast/size audit by default (set NOAUDIT=1 to skip during rapid iteration).
 video: build
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build
