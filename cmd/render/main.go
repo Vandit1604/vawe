@@ -1,4 +1,4 @@
-// Command shortwave — Go render service CLI (mirrors engine/render.js).
+// Command vawe — Go render service CLI (mirrors engine/render.js).
 //
 //	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out engine/out/q.mp4
 //	go run ./cmd/render --all
@@ -15,8 +15,8 @@ import (
 	"runtime"
 	"strings"
 
-	"shortwave/internal/queue"
-	"shortwave/internal/render"
+	"vawe/internal/queue"
+	"vawe/internal/render"
 )
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 				fmt.Printf("✗ %s: %v\n", names[i], e)
 			}
 		}
-		fmt.Printf("\nshortwave --all: %d ok, %d failed\n", len(jobs)-fail, fail)
+		fmt.Printf("\nvawe --all: %d ok, %d failed\n", len(jobs)-fail, fail)
 		if fail > 0 {
 			os.Exit(1)
 		}
@@ -78,17 +78,17 @@ func main() {
 	}
 
 	// One self-describing JSON drives everything:
-	//   shortwave path/to/video.json     → module from its "module" field, out = engine/out/<name>.mp4
+	//   vawe path/to/video.json     → module from its "module" field, out = engine/out/<name>.mp4
 	dataPath := *data
 	if dataPath == "" && flag.NArg() > 0 {
 		dataPath = flag.Arg(0)
 		if flag.NArg() > 1 {
-			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: shortwave foo.json --draft --out x.mp4
+			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: vawe foo.json --draft --out x.mp4
 		}
 	}
 	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg} // rebuild after any trailing flags
 	if dataPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: shortwave <video.json>  [--module N] [--out F] [--draft] | --all | --list")
+		fmt.Fprintln(os.Stderr, "usage: vawe <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)
 	}
 	// film grain is OPT-IN (`"grain": true`), not a default. Most brands are clean/digital and have no

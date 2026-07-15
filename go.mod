@@ -1,4 +1,4 @@
-module shortwave
+module vawe
 
 go 1.26
 

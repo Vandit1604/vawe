@@ -4,23 +4,23 @@
 .PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
 
 build:
-	go build -o bin/shortwave ./cmd/render
+	go build -o bin/vawe ./cmd/render
 
 # make video D=path/to/video.json  — one self-describing JSON → engine/out/<name>.mp4
 video: build
-	./bin/shortwave $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build
-	./bin/shortwave --list
+	./bin/vawe --list
 
 # make render M=scene  — render a format's bundled sample.json
 render: build
-	./bin/shortwave --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
+	./bin/vawe --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
 
 # make all  — every format via the render queue
 all: build
-	./bin/shortwave --all
+	./bin/vawe --all
 
 # make look M=scene         — storyboard (key frames) for visual review
 look:
@@ -219,7 +219,7 @@ expand: ## expand {type:block} + {type:comp} sugar into real layers (D=<file>)
 
 catalog: build ## render the block registry to paged sheets (browse the arsenal)
 	node scripts/blocks-catalog.mjs
-	@for f in formats/scene/_catalog-*.json; do ./bin/shortwave $$f --draft || exit 1; done
+	@for f in formats/scene/_catalog-*.json; do ./bin/vawe $$f --draft || exit 1; done
 	@echo "→ engine/out/_catalog-*.mp4 (one page per file)"
 
 blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest

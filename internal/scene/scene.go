@@ -21,7 +21,7 @@ import (
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/chromedp"
-	"shortwave/internal/audio"
+	"vawe/internal/audio"
 )
 
 const W, H = 1080, 1920

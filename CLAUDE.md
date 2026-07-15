@@ -18,7 +18,7 @@ renderer unless explicitly asked.
 
 ```bash
 make list                              # shows the scene module + its schema/sample
-./bin/shortwave path/to/video.json     # module read from JSON → engine/out/<name>.mp4
+./bin/vawe path/to/video.json     # module read from JSON → engine/out/<name>.mp4
 make video D=path/to/video.json        # same, via make   (add --draft to bin/shortwave for fast no-grain)
 ```
 

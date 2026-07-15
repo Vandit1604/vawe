@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shortwave/internal/audio"
-	"shortwave/internal/encode"
-	"shortwave/internal/scene"
+	"vawe/internal/audio"
+	"vawe/internal/encode"
+	"vawe/internal/scene"
 )
 
 type Options struct {
