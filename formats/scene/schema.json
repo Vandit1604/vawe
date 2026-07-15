@@ -558,6 +558,10 @@
           "type": "string",
           "label": "Count suffix (e.g. %, s)"
         },
+        "unit": {
+          "type": "string",
+          "label": "Count unit appended after the number (e.g. %, k, $B); raw ≥1e6 auto-compacts (2.5B) when no unit"
+        },
         "countStart": {
           "type": "number",
           "label": "Count begins (s into window)"

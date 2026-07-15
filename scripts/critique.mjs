@@ -106,6 +106,16 @@ for (const l of layers) {
   }
 }
 
+// ---- 8. scattered-beat: a beat crammed with too many top-level content elements has no clear focal
+//        (the "make judge" beat-4 class). Rough static proxy for the vision "no hierarchy" finding. ----
+for (const b of beats) {
+  const content = layers.filter((l) => (l.track ?? 9) > 2 && l.x != null && l.y != null
+    && overlaps(l, b.start, b.end + 0.3) && (l.type !== 'text' || (l.size ?? 0) >= 18));
+  if (content.length >= 8) {
+    F('warn', 'scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements — likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
+  }
+}
+
 // ---- report ----
 findings.sort((a, b) => a.t - b.t);
 const errs = findings.filter((f) => f.sev === 'error');
