@@ -25,7 +25,7 @@ fs.mkdirSync(dir, { recursive: true });
 const slug = query.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
 
 const api = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&license=${LICENSES}&size=large&page_size=${Math.min(N * 3, 20)}&fields=id,title,url,creator,license,license_url,foreign_landing_url`;
-const res = await fetch(api, { headers: { 'User-Agent': 'shortwave-video-engine' }, signal: AbortSignal.timeout(20000) });
+const res = await fetch(api, { headers: { 'User-Agent': 'vawe-video-engine' }, signal: AbortSignal.timeout(20000) });
 if (!res.ok) { console.error(`✗ openverse ${res.status}`); process.exit(1); }
 const { results = [] } = await res.json();
 if (!results.length) { console.error(`✗ no openly-licensed results for "${query}" (${LICENSES})`); process.exit(1); }

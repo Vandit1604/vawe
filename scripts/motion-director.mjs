@@ -24,9 +24,9 @@ const settle = motion.settle ?? 0.5, bounce = motion.bounce ?? 0;
 const personality = (bounce > 0.1 || settle < 0.4) ? 'punchy' : (settle >= 0.55 && bounce < 0.05) ? 'calm' : 'neutral';
 
 const FAMILY = {
-  punchy: { cuts: ['punch', 'whip', 'zoom', 'push'], stings: ['flash', 'streak'] },
+  punchy: { cuts: ['punch', 'whip', 'zoom', 'slide'], stings: ['flash', 'streak'] },
   calm: { cuts: ['fade', 'blur', 'riseBlur', 'wipe'], stings: ['dissolve', 'ink', 'bokeh'] },
-  neutral: { cuts: ['fade', 'push', 'wipe', 'blur'], stings: ['dissolve', 'flash'] },
+  neutral: { cuts: ['fade', 'slide', 'wipe', 'blur'], stings: ['dissolve', 'flash'] },
 }[personality];
 
 // beats = clusters of layer start-times (a >1.4s gap starts a new beat), same as critique.

@@ -74,7 +74,7 @@ console.log(`  (${Object.entries(byHow).map(([k, v]) => `${v} ${k}`).join(', ')}
 if (WRITE) {
   for (const p of plan) p.obj[p.key] = p.to;
   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
-  console.log(`\n✓ updated ${dataPath} — render with:  ./bin/shortwave ${path.relative(repoRoot, path.resolve(dataPath))}`);
+  console.log(`\n✓ updated ${dataPath} — render with:  ./bin/vawe ${path.relative(repoRoot, path.resolve(dataPath))}`);
 } else {
   console.log('\n(dry run) re-run with --write to fetch/generate + update the JSON.');
 }

@@ -1,0 +1,64 @@
+{
+  "name": "vawe-site",
+  "note": "Cinematic-dark theme for the Vawe landing page renders. Deep charcoal field, one ice-blue accent, Space Grotesk display + JetBrains Mono. Free faces only (no Sohne).",
+  "palette": {
+    "bg": "#14161a",
+    "bg2": "#101216",
+    "surface": "#1b1e23",
+    "surface2": "#22262c",
+    "line": "#2a2e34",
+    "lineStrong": "#3b414a",
+    "text": "#eef1f4",
+    "text2": "#c4cad2",
+    "dim": "#7d848d",
+    "accent": "#6ab8ff",
+    "accentDim": "rgba(106,184,255,0.14)",
+    "accentGlow": "rgba(106,184,255,0.40)",
+    "up": "#6ab8ff",
+    "down": "#7d848d",
+    "ink": "#0c0e11"
+  },
+  "gradient": ["#16181d", "#121419", "#0e1014"],
+  "type": {
+    "sans": "Space Grotesk",
+    "serif": "Space Grotesk",
+    "mono": "JetBrains Mono",
+    "num": "JetBrains Mono"
+  },
+  "motion": {
+    "easing": "easeOutCubic",
+    "bounce": 0.03,
+    "settle": 0.7,
+    "enter": 40,
+    "durationScale": 1.05,
+    "stagger": 0.06
+  },
+  "bg": {
+    "accent": "106,184,255",
+    "tint": "60,72,88",
+    "tint2": "40,50,62",
+    "dotLight": "70,86,104",
+    "paperBase": ["#14161a", "#0f1115"],
+    "softBase": ["#1b1e23", "#121419"],
+    "accentBase": ["#1a2330", "#101319"],
+    "inkBase": ["#0c0e11", "#08090c"],
+    "border": "#2a2e34",
+    "dark": ["#14161a", "#0d0f13"],
+    "darkMesh": ["#181b21", "#0d0f13"],
+    "deep": ["#121419", "#0d0f13"],
+    "light": ["#1b1e23", "#14161a"],
+    "ink": ["#0c0e11", "#08090c"],
+    "paper": "#14161a"
+  },
+  "vars": {
+    "--ink": "#0c0e11",
+    "--paper": "#eef1f4",
+    "--muted": "#7d848d",
+    "--em": "#6ab8ff",
+    "--on-light": "#0c0e11",
+    "--on-dark": "#eef1f4",
+    "--border": "#2a2e34",
+    "--accent-soft": "rgba(106,184,255,0.14)"
+  },
+  "bgDefault": { "preset": "deep" }
+}

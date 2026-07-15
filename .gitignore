@@ -29,6 +29,13 @@ engine/assets/brands/**
 # paid/licensed fonts — used locally for fidelity, never committed (redistribution)
 engine/assets/fonts/local/
 
+# vendored skill with no declared license — kept local, not redistributed (see CREDITS.md)
+.claude/skills/taste-skill/
+
+# fetched sound effects — same policy as fonts (never committed; `make sfx` re-fetches).
+# credits.json IS tracked (attribution + pinned Mixkit ids for reproducible fetches).
+engine/assets/sfx/*.wav
+
 # Video/data instances are NOT the framework (framework = scene.html + schema.json + sample.json).
 # Keep the engine + schema + reference sample tracked; ignore the authored videos.
 formats/scene/*.json

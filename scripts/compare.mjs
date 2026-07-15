@@ -24,7 +24,7 @@ inputs.forEach((inp, i) => {
   let src = inp;
   if (inp.endsWith('.json')) {
     console.log(`  rendering ${inp} ...`);
-    execFileSync('./bin/shortwave', [inp], { stdio: 'inherit' });
+    execFileSync('./bin/vawe', [inp], { stdio: 'inherit' });
     src = path.join('engine/out', path.basename(inp).replace(/\.json$/, '.mp4'));
   }
   const tile = path.join(tmp, `t${i}.png`);

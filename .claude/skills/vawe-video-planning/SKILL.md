@@ -1,5 +1,5 @@
 ---
-name: shortwave-video-planning
+name: vawe-video-planning
 description: "PLAN BEFORE AUTHORING any video in this repo: collect the brief from the user, lock a per-brand style pack, storyboard, THEN write JSON. Use whenever the user asks to 'make a video' and the goal/platform/duration/tone aren't already pinned down."
 ---
 

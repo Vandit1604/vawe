@@ -1,7 +1,7 @@
 // scripts/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
 import * as B from '../blocks/index.mjs';
-const p = 'formats/scene/shortwave-launch.json';
+const p = 'formats/scene/vawe-launch.json';
 const d = JSON.parse(fs.readFileSync(p, 'utf8'));
 const T = B.TOKENS;
 const has = (l, t) => l.type === 'text' && (l.text || '').includes(t);
@@ -42,7 +42,7 @@ L().forEach((l) => { if (has(l, '26 cuts')) l.text = 'every cut, deterministic';
 rm((l) => has(l, '14 live backdrops') || (l.type === 'group' && (l.start ?? 0) >= 30 && (l.start ?? 0) < 32.5 && (l.y ?? 0) === 620));
 push({ type: 'text', text: 'Backdrops, motion, captions.', x: 160, y: 250, size: 58, weight: 700, color: T.ink, ls: '-0.02em', start: 29.6, duration: 2.8, anim: 'rise', enterDur: 0.4 });
 push(
-  { type: 'image', src: '/engine/assets/brands/shortwave/land1.png', x: 200, y: 430, w: 460, h: 260, radius: 12, ken: { from: 1.08, to: 1 }, start: 29.9, duration: 2.5, anim: 'rise', enterDur: 0.4 },
+  { type: 'image', src: '/engine/assets/brands/vawe/land1.png', x: 200, y: 430, w: 460, h: 260, radius: 12, ken: { from: 1.08, to: 1 }, start: 29.9, duration: 2.5, anim: 'rise', enterDur: 0.4 },
   { type: 'text', text: 'ken burns', x: 200, y: 704, font: 'mono', size: 18, color: T.dim, start: 30.1, duration: 2.3 },
   { type: 'group', x: 730, y: 430, w: 460, h: 260, bg: T.card, radius: 12, elevation: 1, layout: 'column', justify: 'center', items: 'center', start: 30.1, duration: 2.3, anim: 'rise', enterDur: 0.4,
     children: [{ type: 'text', text: 'captions, live', size: 30, weight: 600, color: T.ink, split: 'char', preset: 'decode', each: 0.7, stagger: 0.03 }] },
@@ -66,7 +66,7 @@ push({ type: 'group', x: 700, y: 380, w: 620, layout: 'row', items: 'center', ga
   { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [{ type: 'text', text: '✓', size: 22, weight: 700, color: '#fff' }] },
   { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
     { type: 'text', text: 'Deployed to production', size: 22, weight: 700, color: T.ink },
-    { type: 'text', text: 'app.shortwave.dev', font: 'mono', size: 18, color: T.green }] },
+    { type: 'text', text: 'app.vawe.dev', font: 'mono', size: 18, color: T.green }] },
   { type: 'group', grow: 1, layout: 'row', justify: 'flex-end', children: [{ type: 'text', text: 'Ready in 1.2s', font: 'mono', size: 18, color: T.dim }] },
 ] });
 

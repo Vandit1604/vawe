@@ -1,4 +1,4 @@
-# AGENTS.md — skill router for the shortwave video engine
+# AGENTS.md — skill router for the vawe video engine
 
 This repo turns one self-describing JSON → one rendered video (scene, the open-canvas primitive
 engine — no templates). Read `CLAUDE.md` for the render loop and hard rules. Below: which skill to load
@@ -8,8 +8,8 @@ for which task. **Skills are vendored in `.claude/skills/` — a fresh clone has
 
 | You are about to… | Load this skill (Skill tool) | Then |
 |---|---|---|
-| Author / edit a scene JSON or `scene.html` | **shortwave-scene-authoring** | purity, tokens, motion primitives, capture + QA loop |
-| Plan a new video (brief → storyboard) | **shortwave-video-planning** | site-derived design language, storyboard, ledger |
+| Author / edit a scene JSON or `scene.html` | **vawe-scene-authoring** | purity, tokens, motion primitives, capture + QA loop |
+| Plan a new video (brief → storyboard) | **vawe-video-planning** | site-derived design language, storyboard, ledger |
 | **Hand-write any HTML** (a hook, CTA, card, hero) | **taste-skill** → then **impeccable** | design read + 3 dials, then production craft |
 | Judge / fix a design that "looks AI-generated" | **impeccable** (`critique`, `bolder`, `quieter`) | 41-rule detector + register craft |
 

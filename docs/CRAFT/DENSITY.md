@@ -5,7 +5,7 @@ The single biggest reason a beat looks *generated* (flat, web-page-like, AI) ins
 on empty space reads as a slide. A produced frame has **8–10 meaningful elements** working together:
 the hero, its supporting data, and the *metadata layer* that says "a person crafted this."
 
-This is another engine' `video-composition` doctrine, restored for Shortwave (we had it in the blueprint
+This is another engine' `video-composition` doctrine, restored for Vawe (we had it in the blueprint
 version and stripped it — that's why later cuts felt sparse).
 
 ## The metadata layer (the "produced" tell)

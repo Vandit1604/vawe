@@ -1,9 +1,9 @@
 ---
-name: shortwave-scene-authoring
-description: How to author good-looking, well-spaced, well-animated Shortwave scenes (formats/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
+name: vawe-scene-authoring
+description: How to author good-looking, well-spaced, well-animated Vawe scenes (formats/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
 ---
 
-# Authoring Shortwave scenes
+# Authoring Vawe scenes
 
 One self-describing JSON → one rendered Short (1080×1920, 30fps). Scenes are vanilla HTML/CSS/JS;
 a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You almost never edit the

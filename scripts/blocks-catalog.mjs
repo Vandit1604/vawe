@@ -25,7 +25,7 @@ for (let p = 0; p < pages; p++) {
       L.push({ type: 'text', text: `⚠ ${e.name}: ${err.message}`, x, y: y + 24, size: 18, color: '#C0362C', start: 0.2, duration: 9 });
     }
   });
-  const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'shortwave-creed', duration: 9,
+  const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'vawe-creed', duration: 9,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: 9 }], layers: L };
   fs.writeFileSync(`formats/scene/_catalog-${p + 1}.json`, JSON.stringify(scene, null, 2));
 }

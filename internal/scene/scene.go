@@ -216,12 +216,12 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// signatures capture only their first frame; the rest are hardlinked afterwards. Mid-run
 	// ANCHOR frames are captured anyway and byte-compared — a mismatch means the signature
 	// missed real motion, and we fail LOUDLY (purity culture: no silent wrong frames).
-	// SHORTWAVE_NO_DEDUP=1 disables.
+	// VAWE_NO_DEDUP=1 disables.
 	rep := make([]int, total)
 	for f := range rep {
 		rep[f] = f
 	}
-	if os.Getenv("SHORTWAVE_NO_DEDUP") == "" {
+	if os.Getenv("VAWE_NO_DEDUP") == "" {
 		var sigs []string
 		expr := fmt.Sprintf(`(() => { const out = []; for (let f = 0; f < %d; f++) out.push(window.__engine.frameSig ? String(window.__engine.frameSig(f)) : 'nofsig' + f); return out; })()`, total)
 		if err := chromedp.Run(ctx0, chromedp.Evaluate(expr, &sigs)); err == nil && len(sigs) == total {
@@ -320,7 +320,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 					if derr != nil || ratio > 0.0005 {
 						os.WriteFile("/tmp/dedup_rep.png", buf, 0644)
 						os.WriteFile("/tmp/dedup_anchor.png", abuf, 0644)
-						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with SHORTWAVE_NO_DEDUP=1 and report (pair in /tmp/dedup_*.png)", j.frame, j.anchor, ratio*100)
+						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with VAWE_NO_DEDUP=1 and report (pair in /tmp/dedup_*.png)", j.frame, j.anchor, ratio*100)
 					}
 				}
 			}

@@ -1,8 +1,8 @@
-# Shortwave — architecture codemap
+# Vawe — architecture codemap
 
 > One self-describing JSON → one rendered Short (1080×1920 / 1920×1080, 30fps, mp4).
 > Keep this current as the system grows — it's the shared map. See the
-> `shortwave-scene-authoring` skill for *how to write* scenes.
+> `vawe-scene-authoring` skill for *how to write* scenes.
 
 ## Pipeline (one render)
 

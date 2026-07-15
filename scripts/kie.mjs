@@ -76,7 +76,7 @@ export async function uploadFile(localPath) {
   const b64 = buf.toString('base64');
   const res = await fetch(`${UPLOAD}/api/file-base64-upload`, {
     method: 'POST', headers: authHeaders(),
-    body: JSON.stringify({ base64: `data:application/octet-stream;base64,${b64}`, uploadPath: 'shortwave', fileName: path.basename(localPath) }),
+    body: JSON.stringify({ base64: `data:application/octet-stream;base64,${b64}`, uploadPath: 'vawe', fileName: path.basename(localPath) }),
   });
   const json = await res.json().catch(() => ({}));
   const url = json?.data?.downloadUrl || json?.data?.url || json?.downloadUrl;

@@ -1,6 +1,6 @@
 {
-  "name": "shortwave",
-  "note": "Launch theme for the Shortwave engine. COLOUR-DRENCHED: each act is an edge-to-edge saturated field; text flips ink/white per field for contrast. Heavy Söhne display + JetBrains Mono. Ink base #0E0E10 behind the fields.",
+  "name": "vawe",
+  "note": "Launch theme for the Vawe engine. COLOUR-DRENCHED: each act is an edge-to-edge saturated field; text flips ink/white per field for contrast. Heavy Söhne display + JetBrains Mono. Ink base #0E0E10 behind the fields.",
   "palette": {
     "bg": "#0E0E10",
     "bg2": "#0C0C0E",

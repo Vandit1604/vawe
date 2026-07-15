@@ -11,7 +11,7 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 
 ![Vawe demo](docs/media/vawe-demo.gif)
 
-<sub>*A launch teaser composed entirely from a JSON scene — real product surfaces, brand type, and motion, rendered deterministically.*</sub>
+<sub>*The Vawe wordmark, typed out from a single JSON scene and rendered deterministically to the frame. See more in the [showcase](site/showcase.html).*</sub>
 
 </div>
 
@@ -32,7 +32,7 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 
 ```bash
 # prerequisites: Go 1.21+, Node 18+, ffmpeg, a Chrome/Chromium
-make build                              # → bin/vawe
+make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
 ./bin/vawe formats/scene/sample.json    # → engine/out/sample.mp4
 make video D=formats/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
 ```
@@ -136,5 +136,13 @@ registry), [`docs/MOTION-CRAFT.md`](docs/MOTION-CRAFT.md) (motion rules), and
 
 ## Status & license
 
-Vawe is under active development. License: _TBD before public release._ Contributions and issues welcome
-once the repo is public.
+Vawe is under active development. It's released under the **[Vawe Company License 1.0](LICENSE)** — a
+source-available license in the spirit of Fair Source and the another engine model:
+
+> **Free for individuals and teams of 3 developers or fewer. Larger companies need a paid license for
+> production use.** Rendering your own videos, even inside your own product, is always permitted.
+
+See the plain-English **[License FAQ](LICENSE-FAQ.md)** for who pays and who doesn't, and
+**[CREDITS.md](CREDITS.md)** for third-party attribution. Contributions and issues welcome.
+
+For a commercial license (teams over 3 developers), contact the maintainer via the GitHub repo.

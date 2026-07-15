@@ -27,6 +27,6 @@ rows.forEach((row, i) => {
   const file = path.join(outDir, `${name}.json`);
   fs.writeFileSync(file, JSON.stringify(d, null, 2));
   console.log(`  ${file}`);
-  if (doRender) execFileSync('./bin/shortwave', [file], { stdio: 'inherit' });
+  if (doRender) execFileSync('./bin/vawe', [file], { stdio: 'inherit' });
 });
 console.log(`\n  ${rows.length} variant(s) written to ${outDir}/${doRender ? ' and rendered' : ' (add --render to render)'}`);

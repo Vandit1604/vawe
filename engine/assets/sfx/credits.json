@@ -1,0 +1,65 @@
+{
+  "license": "Mixkit Free License — https://mixkit.co/license/#sfxFree",
+  "sounds": {
+    "swoosh": {
+      "id": 166,
+      "category": "swoosh",
+      "source": "https://mixkit.co/free-sound-effects/swoosh/"
+    },
+    "pop": {
+      "id": 2358,
+      "category": "pop",
+      "source": "https://mixkit.co/free-sound-effects/pop/"
+    },
+    "click": {
+      "id": 2531,
+      "category": "click",
+      "source": "https://mixkit.co/free-sound-effects/click/"
+    },
+    "riser": {
+      "id": 1492,
+      "category": "cinematic",
+      "source": "https://mixkit.co/free-sound-effects/cinematic/"
+    },
+    "impact": {
+      "id": 2908,
+      "category": "impact",
+      "source": "https://mixkit.co/free-sound-effects/impact/"
+    },
+    "whoosh": {
+      "id": 1489,
+      "category": "whoosh",
+      "source": "https://mixkit.co/free-sound-effects/whoosh/"
+    },
+    "reveal": {
+      "id": 1714,
+      "category": "transition",
+      "source": "https://mixkit.co/free-sound-effects/transition/"
+    },
+    "tick": {
+      "id": 1133,
+      "category": "click",
+      "source": "https://mixkit.co/free-sound-effects/click/"
+    },
+    "beep": {
+      "id": 1083,
+      "category": "beep",
+      "source": "https://mixkit.co/free-sound-effects/beep/"
+    },
+    "beep3": {
+      "id": 988,
+      "category": "beep",
+      "source": "https://mixkit.co/free-sound-effects/beep/"
+    },
+    "correct": {
+      "id": 933,
+      "category": "bell",
+      "source": "https://mixkit.co/free-sound-effects/bell/"
+    },
+    "wrong": {
+      "id": 2047,
+      "category": "game",
+      "source": "https://mixkit.co/free-sound-effects/game/"
+    }
+  }
+}

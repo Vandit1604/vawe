@@ -1,3 +1,5 @@
+// Vawe Company License 1.0 — see LICENSE at the repository root.
+//
 // Command vawe — Go render service CLI (mirrors engine/render.js).
 //
 //	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out engine/out/q.mp4

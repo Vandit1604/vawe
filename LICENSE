@@ -1,0 +1,112 @@
+Vawe Company License 1.0
+
+Copyright (c) 2026 Vandit Singh
+
+This is a source-available license, not an Open Source Initiative (OSI) approved
+license. The source is public and free to use for individuals and small teams;
+larger organizations that use Vawe in production need a paid commercial license.
+It is inspired by the Fair Source philosophy and by the another engine license model.
+
+===============================================================================
+1. DEFINITIONS
+===============================================================================
+
+"Software" means Vawe, including its source code, documentation, and any files
+distributed under this license.
+
+"Licensor" means the copyright holder named above.
+
+"You" means the individual or legal entity exercising rights under this license.
+
+"Organization" means You together with all entities that control, are controlled
+by, or are under common control with You. Control means ownership of more than
+50% of the voting interests, or the power to direct management.
+
+"Developer" means any individual who writes, reviews, or maintains software as
+part of an Organization, whether an employee or contractor.
+
+"Production Use" means any use of the Software to create output that is
+distributed, published, sold, or otherwise made available beyond internal
+evaluation, prototyping, or personal projects.
+
+===============================================================================
+2. GRANT — FREE USE
+===============================================================================
+
+Subject to the terms below, the Licensor grants You a worldwide, royalty-free,
+non-exclusive license to use, copy, modify, create derivative works of, and
+distribute the Software, at no charge, if You are any of the following:
+
+  (a) an individual using the Software for personal, educational, research, or
+      hobby purposes;
+
+  (b) an Organization with three (3) or fewer Developers in total; or
+
+  (c) any Organization, for the sole purposes of evaluation, prototyping,
+      development, testing, or non-Production Use.
+
+This free grant is the "Additional Use Grant."
+
+===============================================================================
+3. COMMERCIAL LICENSE — LARGER ORGANIZATIONS
+===============================================================================
+
+If You are an Organization with more than three (3) Developers and You put the
+Software to Production Use, You must obtain a paid commercial license from the
+Licensor. Until You do, You have no license for that use.
+
+To obtain a commercial license, contact the Licensor (see the project README).
+
+===============================================================================
+4. CONDITIONS
+===============================================================================
+
+  (a) You must retain this license text, the copyright notice, and any
+      attribution notices in all copies or substantial portions of the Software.
+
+  (b) You may not offer the Software, or a modified version of it, to third
+      parties as a hosted or managed service whose primary value is the
+      Software's functionality (for example, a competing "video-as-code" or
+      video-rendering service), without a separate written agreement with the
+      Licensor. Using the Software to render your own videos, including as part
+      of your own product, is expressly permitted under the grant above.
+
+  (c) You may not remove or alter any license key, usage notice, or this license
+      as a means of evading Section 3.
+
+  (d) "Vawe" and the Vawe name and logo are trademarks of the Licensor. This
+      license does not grant You rights to use them except for reasonable and
+      customary attribution.
+
+===============================================================================
+5. THIRD-PARTY MATERIAL
+===============================================================================
+
+The Software includes or depends on third-party material under its own license
+(see CREDITS.md). Nothing in this license limits Your rights, or expands Your
+obligations, under those licenses. Fonts are not distributed with the Software;
+they are fetched at build time from their own sources under their own licenses.
+
+===============================================================================
+6. DISCLAIMER AND LIABILITY
+===============================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE LICENSOR BE
+LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+===============================================================================
+7. TERMINATION
+===============================================================================
+
+If You violate this license, Your rights under it terminate automatically. They
+may be reinstated if the Licensor notifies You and You cure the violation within
+30 days, or by written agreement with the Licensor.
+
+===============================================================================
+
+Questions about licensing, or a commercial license for a larger team? See the
+project README for contact details.

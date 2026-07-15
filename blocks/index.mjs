@@ -123,7 +123,7 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, col
 // ─────────────────────────────────────────────────────────────────────────────
 // deploySuccess — a CI pipeline that cascades queued→building→deploying→live, then a success card
 // with a green check, live URL, and "Ready in Xs". The canonical "a click had a consequence" payoff.
-export function deploySuccess({ x, y, w = 620, url = 'app.shortwave.dev', start = 0, rowGap = 52 } = {}) {
+export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', start = 0, rowGap = 52 } = {}) {
   const steps = ['Building', 'Deploying', 'Live'];
   const out = [];
   steps.forEach((label, i) => {
@@ -283,8 +283,8 @@ export function callout({ x, y, w = 720, text: msg, tone = 'info', start = 0, du
     ] }];
 }
 
-// comparison — two columns (e.g. Before / After, Others / Shortwave). Rows are simple strings.
-export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = 'Shortwave', left = [], right = [], start = 0, dur = 4 } = {}) {
+// comparison — two columns (e.g. Before / After, Others / Vawe). Rows are simple strings.
+export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = 'Vawe', left = [], right = [], start = 0, dur = 4 } = {}) {
   const colW = (w - 40) / 2;
   const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'flex-start', gap: 14, pad: 24,
     bg: T.card, radius: 14, border: HAIR, elevation: 1, children: [

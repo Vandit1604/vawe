@@ -19,7 +19,7 @@ renderer unless explicitly asked.
 ```bash
 make list                              # shows the scene module + its schema/sample
 ./bin/vawe path/to/video.json     # module read from JSON → engine/out/<name>.mp4
-make video D=path/to/video.json        # same, via make   (add --draft to bin/shortwave for fast no-grain)
+make video D=path/to/video.json        # same, via make   (add --draft to bin/vawe for fast no-grain)
 ```
 
 Every JSON **must** start with `"module": "scene"`. Save new videos as
@@ -100,6 +100,6 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 7. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
    `make ledger-add D=<file>` after the user approves it.
 
-> **Editing `scene.html`?** Read the `shortwave-scene-authoring` skill first (render-frame purity,
+> **Editing `scene.html`?** Read the `vawe-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image/capture system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.
 > Run `make probe` after scene-logic changes and `make review` for a fast health snapshot.
