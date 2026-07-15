@@ -2,6 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { SourceViewer } from "../components/SourceViewer";
+import LINES from "../../lib/scene-lines.json";
+
+const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
 export const metadata: Metadata = {
   title: "Vawe — showcase",
@@ -38,7 +42,7 @@ export default function Showcase() {
             <span className="dot" /> showcase
           </span>
           <h1>What one JSON can render.</h1>
-          <p>Every clip below is a single self-describing scene, rendered deterministically, scored automatically. No timeline, no editor.</p>
+          <p>Every clip below is a single self-describing scene, rendered deterministically, scored automatically. No timeline, no editor. Hit <span className="mono">View source JSON</span> on any clip to read the exact scene that produced it, and copy it to start from.</p>
         </section>
 
         <section className="films">
@@ -59,6 +63,7 @@ export default function Showcase() {
                   </div>
                   <div className="fline">{f.line}</div>
                   <span className="tag">{f.tag}</span>
+                  <SourceViewer name={f.slug} lines={lineCount(f.slug)} />
                 </figcaption>
               </figure>
             ))}
@@ -82,6 +87,7 @@ export default function Showcase() {
                 <h2>{r.title}</h2>
                 <p>{r.body}</p>
                 <span className="tag">{r.tag}</span>
+                <SourceViewer name={`showcase-${r.src}`} lines={lineCount(`showcase-${r.src}`)} />
               </div>
             </div>
           ))}
@@ -108,6 +114,7 @@ export default function Showcase() {
               <h2>One scene, every ratio.</h2>
               <p>Relative coordinates resolve per aspect: pin, a 12-column grid, optical centering. Render 16:9, 9:16, and 1:1 from the same source, in one pass.</p>
               <span className="tag">--aspect 16:9,9:16,1:1</span>
+              <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
             </div>
           </div>
         </main>

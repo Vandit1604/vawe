@@ -1,0 +1,53 @@
+{
+  "module": "scene",
+  "theme": "vawe-site",
+  "duration": 6,
+  "audio": {
+    "silent": false
+  },
+  "layers": [
+    {
+      "type": "text",
+      "text": "one source, every ratio",
+      "font": "mono",
+      "pin": "top",
+      "w": 820,
+      "size": 26,
+      "align": "center",
+      "color": "var(--accent)",
+      "start": 0.1,
+      "duration": 5.8
+    },
+    {
+      "type": "text",
+      "text": "Any <b>aspect.</b>",
+      "pin": "center",
+      "w": 820,
+      "size": 132,
+      "weight": 700,
+      "align": "center",
+      "split": "word",
+      "preset": "up",
+      "each": 0.5,
+      "stagger": 0.08,
+      "start": 0.6,
+      "duration": 5.2,
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "16:9   ·   9:16   ·   1:1   ·   4:5",
+      "font": "mono",
+      "pin": "bottom",
+      "w": 820,
+      "size": 30,
+      "align": "center",
+      "color": "var(--text2)",
+      "cut": "fade",
+      "start": 2.4,
+      "duration": 3.4,
+      "anim": "none",
+      "exitDur": 0
+    }
+  ]
+}

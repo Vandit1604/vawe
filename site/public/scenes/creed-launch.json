@@ -1,0 +1,2247 @@
+{
+  "module": "scene",
+  "orientation": "landscape",
+  "theme": "creed-launch",
+  "duration": 53,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "paper",
+      "from": 0,
+      "to": 53,
+      "value": "light"
+    }
+  ],
+  "camera": [
+    {
+      "t": 0,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 23.4,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 23.7,
+      "s": 1.13,
+      "x": 0,
+      "y": -10
+    },
+    {
+      "t": 25.4,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 32.2,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 32.5,
+      "s": 0.96,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 33.3,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 50,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 50.3,
+      "s": 1.05,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "t": 51.2,
+      "s": 1,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Every agent <b>forgets who you are.</b>",
+      "font": "sans",
+      "size": 42,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "emColor": "#C96442",
+      "x": 360,
+      "y": 185,
+      "w": 1200,
+      "align": "center",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 0.3,
+      "duration": 4.4,
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 150,
+      "y": 380,
+      "w": 580,
+      "h": 150,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 0.7,
+      "duration": 4.2,
+      "anim": "slideL",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "x": 178,
+      "y": 436,
+      "w": 38,
+      "h": 38,
+      "start": 1,
+      "duration": 3.9,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "so, quick context about me",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 232,
+      "y": 440,
+      "w": 480,
+      "align": "left",
+      "typing": 26,
+      "start": 1,
+      "duration": 3.9,
+      "anim": "none",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 1190,
+      "y": 360,
+      "w": 580,
+      "h": 150,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 0.95,
+      "duration": 3.95,
+      "anim": "slide",
+      "dir": "right",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "x": 1218,
+      "y": 416,
+      "w": 38,
+      "h": 38,
+      "start": 1.25,
+      "duration": 3.65,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "so, quick context about me",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 1272,
+      "y": 420,
+      "w": 480,
+      "align": "left",
+      "typing": 26,
+      "start": 1.25,
+      "duration": 3.65,
+      "anim": "none",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 670,
+      "y": 720,
+      "w": 580,
+      "h": 150,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 1.2,
+      "duration": 3.7,
+      "anim": "rise",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "x": 698,
+      "y": 776,
+      "w": 38,
+      "h": 38,
+      "start": 1.5,
+      "duration": 3.4,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "so, quick context about me",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 752,
+      "y": 780,
+      "w": 480,
+      "align": "left",
+      "typing": 26,
+      "start": 1.5,
+      "duration": 3.4,
+      "anim": "none",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Your context file for all agents",
+      "font": "sans",
+      "size": 104,
+      "weight": 700,
+      "color": "#0A0A0A",
+      "tracking": "-0.03em",
+      "x": 360,
+      "y": 390,
+      "w": 1200,
+      "align": "center",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.55,
+      "stagger": 0.05,
+      "start": 5.4,
+      "duration": 5.4,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "One markdown file every agent reads before it answers.",
+      "font": "sans",
+      "size": 30,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 360,
+      "y": 630,
+      "w": 1200,
+      "align": "center",
+      "start": 6.2,
+      "duration": 4.6,
+      "anim": "rise",
+      "enterDur": 0.6,
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": -6,
+      "y": 0,
+      "w": 2,
+      "h": 1080,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 11,
+      "duration": 0.55,
+      "anim": "none",
+      "track": 90,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.4,
+          "x": 1932,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 1932,
+          "opacity": 0
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "x": 470,
+      "y": 150,
+      "w": 1,
+      "h": 780,
+      "bg": "#D6D6D2",
+      "radius": 0,
+      "start": 11.2,
+      "duration": 8.3,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 86,
+      "y": 214,
+      "w": 4,
+      "h": 28,
+      "bg": "#C96442",
+      "radius": 2,
+      "start": 11.5,
+      "duration": 8,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "group",
+      "x": 110,
+      "y": 210,
+      "layout": "column",
+      "gap": 30,
+      "start": 11.3,
+      "duration": 8.2,
+      "anim": "fade",
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "text",
+          "text": "Identity",
+          "font": "mono",
+          "size": 25,
+          "weight": 500,
+          "color": "#0A0A0A"
+        },
+        {
+          "type": "text",
+          "text": "Goals",
+          "font": "mono",
+          "size": 25,
+          "weight": 400,
+          "color": "#8E8E88"
+        },
+        {
+          "type": "text",
+          "text": "Work",
+          "font": "mono",
+          "size": 25,
+          "weight": 400,
+          "color": "#8E8E88"
+        },
+        {
+          "type": "text",
+          "text": "Preferences",
+          "font": "mono",
+          "size": 25,
+          "weight": 400,
+          "color": "#8E8E88"
+        },
+        {
+          "type": "text",
+          "text": "Routines",
+          "font": "mono",
+          "size": 25,
+          "weight": 400,
+          "color": "#8E8E88"
+        },
+        {
+          "type": "text",
+          "text": "Constraints",
+          "font": "mono",
+          "size": 25,
+          "weight": 400,
+          "color": "#8E8E88"
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "x": 520,
+      "y": 150,
+      "w": 1020,
+      "h": 780,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 11.2,
+      "duration": 8.3,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "creed.md",
+      "font": "mono",
+      "size": 24,
+      "weight": 500,
+      "color": "#8E8E88",
+      "x": 560,
+      "y": 178,
+      "w": 900,
+      "align": "left",
+      "start": 11.3,
+      "duration": 8.2,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Identity",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 236,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 11.6,
+      "duration": 7.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Founder building Helm, a CI dashboard. Ex-Stripe, based in Lisbon.",
+      "font": "mono",
+      "size": 22,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 286,
+      "w": 940,
+      "align": "left",
+      "anim": "fade",
+      "start": 11.9,
+      "duration": 7.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Goals",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 350,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 12.6,
+      "duration": 6.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Ship Helm v2 this quarter without burning weekends.",
+      "font": "mono",
+      "size": 22,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 400,
+      "w": 940,
+      "align": "left",
+      "anim": "fade",
+      "start": 12.9,
+      "duration": 6.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Work",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 464,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 13.6,
+      "duration": 5.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Batches every review into one block after standup.",
+      "font": "mono",
+      "size": 22,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 514,
+      "w": 940,
+      "align": "left",
+      "anim": "fade",
+      "start": 13.9,
+      "duration": 5.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Preferences",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 578,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 14.6,
+      "duration": 4.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Lead with the answer. Skip filler and over-praise.",
+      "font": "mono",
+      "size": 22,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 628,
+      "w": 940,
+      "align": "left",
+      "anim": "fade",
+      "start": 14.9,
+      "duration": 4.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Routines",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 692,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 15.6,
+      "duration": 3.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Constraints",
+      "font": "sans",
+      "size": 32,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 762,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 16.6,
+      "duration": 2.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Preferences",
+      "font": "sans",
+      "size": 44,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 250,
+      "w": 900,
+      "align": "left",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.5,
+      "stagger": 0.05,
+      "start": 19.8,
+      "duration": 3.5,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 520,
+      "y": 258,
+      "w": 5,
+      "h": 40,
+      "bg": "#C96442",
+      "radius": 2,
+      "start": 19.8,
+      "duration": 3.5,
+      "anim": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Lead with the answer, then the supporting detail.",
+      "font": "mono",
+      "size": 32,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 370,
+      "w": 1100,
+      "align": "left",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.4,
+      "stagger": 0.028,
+      "start": 20.2,
+      "duration": 3.1,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Keep replies tight unless depth genuinely helps.",
+      "font": "mono",
+      "size": 32,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 448,
+      "w": 1100,
+      "align": "left",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.4,
+      "stagger": 0.028,
+      "start": 20.7,
+      "duration": 2.6,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Skip filler, hedging, and over-praise.",
+      "font": "mono",
+      "size": 32,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 526,
+      "w": 1100,
+      "align": "left",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.4,
+      "stagger": 0.028,
+      "start": 21.2,
+      "duration": 2.1,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 560,
+      "y": 620,
+      "w": 4,
+      "h": 40,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 21.7,
+      "duration": 1.6,
+      "anim": "none",
+      "exitDur": 0.2,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.1
+        },
+        {
+          "t": 1,
+          "opacity": 1
+        },
+        {
+          "t": 1.5,
+          "opacity": 1
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "x": 770,
+      "y": 430,
+      "w": 380,
+      "h": 230,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 12,
+      "start": 23.7,
+      "duration": 3.1,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "track": 5
+    },
+    {
+      "type": "text",
+      "text": "creed.md",
+      "font": "mono",
+      "size": 24,
+      "weight": 500,
+      "color": "#8E8E88",
+      "x": 770,
+      "y": 528,
+      "w": 380,
+      "align": "center",
+      "start": 23.8,
+      "duration": 3,
+      "anim": "fade",
+      "exitDur": 0.35,
+      "track": 6
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "x": 918,
+      "y": 168,
+      "w": 72,
+      "h": 72,
+      "start": 23.8,
+      "duration": 3,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "x": 1283,
+      "y": 233,
+      "w": 72,
+      "h": 72,
+      "start": 23.85,
+      "duration": 2.95,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "x": 1508,
+      "y": 403,
+      "w": 72,
+      "h": 72,
+      "start": 23.9,
+      "duration": 2.9,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/codex.svg",
+      "x": 1508,
+      "y": 613,
+      "w": 72,
+      "h": 72,
+      "start": 23.95,
+      "duration": 2.85,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/devin.svg",
+      "x": 1283,
+      "y": 783,
+      "w": 72,
+      "h": 72,
+      "start": 24,
+      "duration": 2.8,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/replit.svg",
+      "x": 918,
+      "y": 848,
+      "w": 72,
+      "h": 72,
+      "start": 24.05,
+      "duration": 2.75,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/v0.svg",
+      "x": 553,
+      "y": 783,
+      "w": 72,
+      "h": 72,
+      "start": 24.1,
+      "duration": 2.7,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/grok.svg",
+      "x": 328,
+      "y": 613,
+      "w": 72,
+      "h": 72,
+      "start": 24.15,
+      "duration": 2.65,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/opencode.svg",
+      "x": 328,
+      "y": 403,
+      "w": 72,
+      "h": 72,
+      "start": 24.2,
+      "duration": 2.6,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/claudecode.svg",
+      "x": 553,
+      "y": 233,
+      "w": 72,
+      "h": 72,
+      "start": 24.25,
+      "duration": 2.55,
+      "anim": "none",
+      "exitDur": 0.35,
+      "track": 4,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.5,
+          "opacity": 0.7
+        },
+        {
+          "t": 1.8,
+          "opacity": 1
+        },
+        {
+          "t": 2.2,
+          "opacity": 0.75
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Every agent <b>reads it first.</b>",
+      "font": "sans",
+      "size": 46,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "emColor": "#C96442",
+      "x": 360,
+      "y": 968,
+      "w": 1200,
+      "align": "center",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.5,
+      "stagger": 0.045,
+      "start": 25.3,
+      "duration": 1.5,
+      "exitDur": 0.3,
+      "track": 7
+    },
+    {
+      "type": "rect",
+      "x": -6,
+      "y": 0,
+      "w": 2,
+      "h": 1080,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 26.9,
+      "duration": 0.55,
+      "anim": "none",
+      "track": 90,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.4,
+          "x": 1932,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 1932,
+          "opacity": 0
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "x": 100,
+      "y": 250,
+      "w": 780,
+      "h": 560,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 27.2,
+      "duration": 4.9,
+      "anim": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Plan my week so I actually ship Helm v2.",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 140,
+      "y": 300,
+      "w": 700,
+      "align": "left",
+      "typing": 28,
+      "start": 27.5,
+      "duration": 4.6,
+      "anim": "none",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Read creed.md",
+      "font": "mono",
+      "size": 22,
+      "weight": 500,
+      "color": "#5C5C58",
+      "bg": "#F1F1EF",
+      "pad": "12px 18px",
+      "radius": 8,
+      "x": 140,
+      "y": 390,
+      "w": 260,
+      "align": "center",
+      "anim": "rise",
+      "enterDur": 0.4,
+      "start": 28.4,
+      "duration": 3.7,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 140,
+      "y": 442,
+      "w": 268,
+      "h": 3,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 28.7,
+      "duration": 3.4,
+      "anim": "wipe",
+      "dir": "right",
+      "enterDur": 0.35,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Thought for 4s",
+      "font": "mono",
+      "size": 20,
+      "weight": 400,
+      "color": "#8E8E88",
+      "x": 140,
+      "y": 496,
+      "w": 400,
+      "align": "left",
+      "anim": "fade",
+      "start": 29.1,
+      "duration": 3,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Block 7 to 11am for Helm. No meetings Wednesdays.",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 140,
+      "y": 580,
+      "w": 700,
+      "align": "left",
+      "typing": 30,
+      "start": 29.7,
+      "duration": 2.4,
+      "anim": "none",
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 1000,
+      "y": 250,
+      "w": 800,
+      "h": 560,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 27.2,
+      "duration": 4.9,
+      "anim": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Routines",
+      "font": "sans",
+      "size": 30,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 1040,
+      "y": 300,
+      "w": 700,
+      "align": "left",
+      "anim": "fade",
+      "start": 27.4,
+      "duration": 4.7,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 1030,
+      "y": 400,
+      "w": 720,
+      "h": 50,
+      "bg": "#F6E7E0",
+      "radius": 8,
+      "start": 29,
+      "duration": 3.1,
+      "anim": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Deep work 7 to 11am, no meetings.",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 1050,
+      "y": 409,
+      "w": 700,
+      "align": "left",
+      "anim": "fade",
+      "start": 29,
+      "duration": 3.1,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 1030,
+      "y": 472,
+      "w": 720,
+      "h": 50,
+      "bg": "#F6E7E0",
+      "radius": 8,
+      "start": 29.6,
+      "duration": 2.5,
+      "anim": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Wednesdays stay clear for maker time.",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 1050,
+      "y": 481,
+      "w": 700,
+      "align": "left",
+      "anim": "fade",
+      "start": 29.6,
+      "duration": 2.5,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 520,
+      "y": 220,
+      "w": 880,
+      "h": 470,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 32.4,
+      "duration": 6.1,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 522,
+      "y": 278,
+      "w": 5,
+      "h": 36,
+      "bg": "#C96442",
+      "radius": 2,
+      "start": 32.5,
+      "duration": 6,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Routines",
+      "font": "sans",
+      "size": 36,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 560,
+      "y": 272,
+      "w": 700,
+      "align": "left",
+      "anim": "fade",
+      "start": 32.5,
+      "duration": 6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Deep work 7 to 11am, no meetings.",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 348,
+      "w": 800,
+      "align": "left",
+      "anim": "fade",
+      "start": 32.7,
+      "duration": 5.8,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Wednesdays stay clear for maker time.",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 560,
+      "y": 398,
+      "w": 800,
+      "align": "left",
+      "anim": "fade",
+      "start": 32.9,
+      "duration": 5.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 540,
+      "y": 466,
+      "w": 840,
+      "h": 58,
+      "bg": "#DCF3E4",
+      "border": "1px solid #7FC49B",
+      "radius": 8,
+      "start": 33.4,
+      "duration": 1.3,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 540,
+      "y": 466,
+      "w": 5,
+      "h": 58,
+      "bg": "#148A4E",
+      "radius": 0,
+      "start": 33.4,
+      "duration": 1.3,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "+",
+      "font": "mono",
+      "size": 28,
+      "weight": 700,
+      "color": "#148A4E",
+      "x": 566,
+      "y": 478,
+      "w": 30,
+      "align": "left",
+      "start": 33.4,
+      "duration": 1.3,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Batch code review into a single block after standup.",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "x": 606,
+      "y": 478,
+      "w": 760,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.4,
+      "start": 33.4,
+      "duration": 5.1,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "You batched every review into one block in our last session.",
+      "font": "mono",
+      "size": 20,
+      "weight": 400,
+      "color": "#8E8E88",
+      "x": 560,
+      "y": 556,
+      "w": 800,
+      "align": "left",
+      "anim": "fade",
+      "start": 33.7,
+      "duration": 4.8,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Reject",
+      "font": "mono",
+      "size": 26,
+      "weight": 500,
+      "color": "#5C5C58",
+      "bg": "#F1F1EF",
+      "pad": "16px 0",
+      "radius": 12,
+      "x": 900,
+      "y": 600,
+      "w": 200,
+      "align": "center",
+      "anim": "fade",
+      "start": 33.6,
+      "duration": 4.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Accept",
+      "font": "mono",
+      "size": 26,
+      "weight": 600,
+      "color": "#FCFCFC",
+      "bg": "#C96442",
+      "pad": "16px 0",
+      "radius": 12,
+      "x": 1140,
+      "y": 600,
+      "w": 200,
+      "align": "center",
+      "anim": "fade",
+      "start": 33.6,
+      "duration": 4.9,
+      "exitDur": 0.4
+    },
+    {
+      "type": "cursor",
+      "x": 0,
+      "y": 0,
+      "path": [
+        {
+          "t": 0,
+          "x": 1640,
+          "y": 850
+        },
+        {
+          "t": 1.3,
+          "x": 1234,
+          "y": 624,
+          "ease": "easeOutExpo"
+        }
+      ],
+      "clicks": [
+        1.5
+      ],
+      "rippleColor": "#C96442",
+      "start": 33.2,
+      "duration": 3.6,
+      "track": 200
+    },
+    {
+      "type": "rect",
+      "x": -6,
+      "y": 0,
+      "w": 2,
+      "h": 1080,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 38.7,
+      "duration": 0.55,
+      "anim": "none",
+      "track": 90,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.4,
+          "x": 1932,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 1932,
+          "opacity": 0
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Every session, it gets sharper.",
+      "font": "sans",
+      "size": 40,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 360,
+      "y": 190,
+      "w": 1200,
+      "align": "center",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.5,
+      "stagger": 0.045,
+      "start": 39,
+      "duration": 3,
+      "exitDur": 0.35
+    },
+    {
+      "type": "group",
+      "x": 620,
+      "y": 320,
+      "layout": "grid",
+      "gridCols": 3,
+      "colGap": 34,
+      "rowGap": 28,
+      "start": 39.4,
+      "duration": 2.6,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "text": "+2  Goals",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        },
+        {
+          "type": "text",
+          "text": "+4  Work",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        },
+        {
+          "type": "text",
+          "text": "+1  Identity",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        },
+        {
+          "type": "text",
+          "text": "+3  Routines",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        },
+        {
+          "type": "text",
+          "text": "+5  Prefs",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        },
+        {
+          "type": "text",
+          "text": "+3  Limits",
+          "font": "mono",
+          "size": 22,
+          "weight": 500,
+          "color": "#148A4E",
+          "bg": "#FFFFFF",
+          "border": "1px solid #D6D6D2",
+          "pad": "22px 28px",
+          "radius": 10
+        }
+      ]
+    },
+    {
+      "type": "count",
+      "from": 0,
+      "to": 18,
+      "prefix": "+",
+      "font": "mono",
+      "size": 88,
+      "weight": 600,
+      "color": "#148A4E",
+      "x": 640,
+      "y": 560,
+      "w": 300,
+      "align": "left",
+      "countStart": 0.3,
+      "countDur": 1.6,
+      "ease": "easeOutExpo",
+      "start": 39.8,
+      "duration": 2.6,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "changes  ·  0 rejected  ·  22 proposals",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 900,
+      "y": 585,
+      "w": 700,
+      "align": "left",
+      "anim": "fade",
+      "start": 40.2,
+      "duration": 2.2,
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": -6,
+      "y": 0,
+      "w": 2,
+      "h": 1080,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 42.2,
+      "duration": 0.55,
+      "anim": "none",
+      "track": 90,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.4,
+          "x": 1932,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 1932,
+          "opacity": 0
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Identity",
+      "font": "sans",
+      "size": 36,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 360,
+      "y": 250,
+      "w": 500,
+      "align": "left",
+      "anim": "fade",
+      "start": 42.5,
+      "duration": 4.6,
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 322,
+      "y": 256,
+      "w": 5,
+      "h": 36,
+      "bg": "#C96442",
+      "radius": 2,
+      "start": 42.5,
+      "duration": 4.6,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 360,
+      "y": 360,
+      "w": 240,
+      "h": 240,
+      "bg": "transparent",
+      "border": "6px solid #E2E2DE",
+      "radius": 120,
+      "start": 42.6,
+      "duration": 4.5,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 360,
+      "y": 360,
+      "w": 240,
+      "h": 240,
+      "bg": "transparent",
+      "border": "6px solid #0A0A0A",
+      "radius": 120,
+      "start": 42.8,
+      "duration": 4.3,
+      "anim": "iris",
+      "cut": "clock",
+      "enterDur": 1.5,
+      "cutTiming": "out",
+      "exitDur": 0.4
+    },
+    {
+      "type": "count",
+      "from": 0,
+      "to": 84,
+      "font": "mono",
+      "size": 80,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 360,
+      "y": 424,
+      "w": 240,
+      "align": "center",
+      "countStart": 0.3,
+      "countDur": 1.6,
+      "ease": "easeOutExpo",
+      "start": 42.8,
+      "duration": 4.3,
+      "anim": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "/ 100",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#8E8E88",
+      "x": 360,
+      "y": 520,
+      "w": 240,
+      "align": "center",
+      "anim": "fade",
+      "start": 43.9,
+      "duration": 3.2,
+      "exitDur": 0.4
+    },
+    {
+      "type": "group",
+      "x": 720,
+      "y": 380,
+      "layout": "row",
+      "gap": 16,
+      "wrap": true,
+      "start": 43.6,
+      "duration": 3.5,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "text",
+          "text": "Specific",
+          "font": "mono",
+          "size": 20,
+          "weight": 500,
+          "color": "#0A0A0A",
+          "bg": "#F1F1EF",
+          "pad": "10px 18px",
+          "radius": 20
+        },
+        {
+          "type": "text",
+          "text": "Concrete",
+          "font": "mono",
+          "size": 20,
+          "weight": 500,
+          "color": "#0A0A0A",
+          "bg": "#F1F1EF",
+          "pad": "10px 18px",
+          "radius": 20
+        },
+        {
+          "type": "text",
+          "text": "Thin",
+          "font": "mono",
+          "size": 20,
+          "weight": 500,
+          "color": "#8E8E88",
+          "bg": "#F1F1EF",
+          "pad": "10px 18px",
+          "radius": 20
+        },
+        {
+          "type": "text",
+          "text": "Vague",
+          "font": "mono",
+          "size": 20,
+          "weight": 500,
+          "color": "#8E8E88",
+          "bg": "#F1F1EF",
+          "pad": "10px 18px",
+          "radius": 20
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "<b>+</b>  Reads like a real person",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#0A0A0A",
+      "emColor": "#148A4E",
+      "x": 720,
+      "y": 470,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "start": 44,
+      "duration": 3.1,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "<b>/</b>  One line still reads generic",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#5C5C58",
+      "emColor": "#8E8E88",
+      "x": 720,
+      "y": 520,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "start": 44.4,
+      "duration": 2.7,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "<b>-</b>  Contains a stray line, now removed",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#5C5C58",
+      "emColor": "#C0362C",
+      "x": 720,
+      "y": 570,
+      "w": 900,
+      "align": "left",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "start": 44.8,
+      "duration": 2.3,
+      "exitDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": -6,
+      "y": 0,
+      "w": 2,
+      "h": 1080,
+      "bg": "#C96442",
+      "radius": 0,
+      "start": 47.4,
+      "duration": 0.55,
+      "anim": "none",
+      "track": 90,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.4,
+          "x": 1932,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 1932,
+          "opacity": 0
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "x": 620,
+      "y": 210,
+      "w": 680,
+      "h": 540,
+      "bg": "#FFFFFF",
+      "border": "1px solid #D6D6D2",
+      "radius": 14,
+      "start": 47.6,
+      "duration": 2.6,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.6
+    },
+    {
+      "type": "text",
+      "text": "creed.md",
+      "font": "mono",
+      "size": 22,
+      "weight": 500,
+      "color": "#8E8E88",
+      "x": 660,
+      "y": 240,
+      "w": 600,
+      "align": "left",
+      "anim": "fade",
+      "start": 47.7,
+      "duration": 2.5,
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "Identity",
+      "font": "sans",
+      "size": 26,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 660,
+      "y": 310,
+      "w": 600,
+      "align": "left",
+      "anim": "fade",
+      "start": 47.8,
+      "duration": 2.4,
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "Preferences",
+      "font": "sans",
+      "size": 26,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 660,
+      "y": 410,
+      "w": 600,
+      "align": "left",
+      "anim": "fade",
+      "start": 47.85,
+      "duration": 2.35,
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "Routines",
+      "font": "sans",
+      "size": 26,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 660,
+      "y": 510,
+      "w": 600,
+      "align": "left",
+      "anim": "fade",
+      "start": 47.9,
+      "duration": 2.3,
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "Constraints",
+      "font": "sans",
+      "size": 26,
+      "weight": 600,
+      "color": "#0A0A0A",
+      "x": 660,
+      "y": 610,
+      "w": 600,
+      "align": "left",
+      "anim": "fade",
+      "start": 47.95,
+      "duration": 2.25,
+      "exitDur": 0.5
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "x": 500,
+      "y": 290,
+      "w": 54,
+      "h": 54,
+      "start": 48,
+      "duration": 2.2,
+      "anim": "fade",
+      "exitDur": 0.5,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0.7
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "x": 1370,
+      "y": 290,
+      "w": 54,
+      "h": 54,
+      "start": 48.05,
+      "duration": 2.15,
+      "anim": "fade",
+      "exitDur": 0.5,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0.7
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "x": 500,
+      "y": 620,
+      "w": 54,
+      "h": 54,
+      "start": 48.1,
+      "duration": 2.1,
+      "anim": "fade",
+      "exitDur": 0.5,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0.7
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/agents/codex.svg",
+      "x": 1370,
+      "y": 620,
+      "w": 54,
+      "h": 54,
+      "start": 48.15,
+      "duration": 2.05,
+      "anim": "fade",
+      "exitDur": 0.5,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0.7
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/engine/assets/brands/creed/brandmark.svg",
+      "x": 900,
+      "y": 300,
+      "w": 120,
+      "h": 120,
+      "start": 50.2,
+      "duration": 2.8,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Stop starting from scratch",
+      "font": "sans",
+      "size": 92,
+      "weight": 700,
+      "color": "#0A0A0A",
+      "tracking": "-0.03em",
+      "x": 360,
+      "y": 460,
+      "w": 1200,
+      "align": "center",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.55,
+      "stagger": 0.05,
+      "start": 50.4,
+      "duration": 2.6,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Every agent you use, already up to speed.",
+      "font": "sans",
+      "size": 30,
+      "weight": 400,
+      "color": "#5C5C58",
+      "x": 360,
+      "y": 600,
+      "w": 1200,
+      "align": "center",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "start": 50.9,
+      "duration": 2.1,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Get Started",
+      "font": "mono",
+      "size": 30,
+      "weight": 600,
+      "color": "#FCFCFC",
+      "bg": "#C96442",
+      "pad": "20px 44px",
+      "radius": 12,
+      "x": 810,
+      "y": 690,
+      "w": 300,
+      "align": "center",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "start": 51.2,
+      "duration": 1.8,
+      "exitDur": 0,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "creed.md",
+      "font": "mono",
+      "size": 24,
+      "weight": 400,
+      "color": "#8E8E88",
+      "x": 360,
+      "y": 800,
+      "w": 1200,
+      "align": "center",
+      "anim": "fade",
+      "start": 51.5,
+      "duration": 1.5,
+      "exitDur": 0
+    }
+  ]
+}
