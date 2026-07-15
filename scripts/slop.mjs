@@ -55,8 +55,25 @@ fs.writeFileSync(out, html);
 const detector = path.join(ROOT, '.claude/skills/impeccable/scripts/detect.mjs');
 console.log(`▶ anti-slop scan of ${path.relative(ROOT, dataArg)} @ ${at}s (rendered DOM → ${out})\n`);
 const r = spawnSync('node', [detector, out], { encoding: 'utf8' });
-process.stdout.write(r.stdout || '');
-if (r.stderr) process.stderr.write(r.stderr);
+
+// A declared theme face is VOICE, not a lazy default — flagging it every run (Geist/Archivo/Inter…) trains
+// you to ignore the gate. Suppress overused-font flags that match the brand's real face; keep the rest.
+// (The detector prints findings to stderr, so filter the combined stream, not just stdout.)
+let theme = {};
+try { theme = typeof data.theme === 'string' ? JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', data.theme + '.json'), 'utf8')) : (data.theme || {}); } catch {}
+const brandFaces = new Set(Object.values(theme.type || {}).map((f) => String(f).replace(/['"]/g, '').trim().toLowerCase()));
+const lines = ((r.stdout || '') + (r.stderr || '')).split('\n');
+const kept = []; let suppressed = 0;
+for (let i = 0; i < lines.length; i++) {
+  const m = lines[i].match(/\[overused-font\][^A-Za-z]*font-family:\s*([A-Za-z0-9 '"-]+)/i);
+  if (m && brandFaces.has(m[1].split(',')[0].replace(/['"]/g, '').trim().toLowerCase())) {
+    suppressed++; if ((lines[i + 1] || '').trim().startsWith('→')) i++; // drop the finding + its explanation
+    continue;
+  }
+  const cnt = lines[i].match(/^(\s*)(\d+) anti-patterns? found\./);
+  if (cnt && suppressed) { kept.push(`${cnt[1]}${Math.max(0, +cnt[2] - suppressed)} anti-pattern(s) found.`); continue; }
+  kept.push(lines[i]);
+}
+process.stdout.write(kept.join('\n'));
+if (suppressed) console.log(`\n  (${suppressed} overused-font flag(s) suppressed — "${[...brandFaces].join(', ')}" is ${data.theme || 'this brand'}'s DECLARED face, not a lazy default.)`);
 console.log(`\n  tells above are the AI-slop signature — reach past them (asymmetry, scale contrast, a committed non-generic face).`);
-console.log(`  CONTEXT: an "overused-font" flag on ${data.theme || 'this'} is slop ONLY if the face is your lazy default. If it's the`);
-console.log('  reflected brand\'s REAL typeface (e.g. Linear genuinely uses Inter), it is correct — keep it. See .claude/skills/taste-skill.');
