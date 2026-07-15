@@ -71,9 +71,23 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     if (el.dataset.out && du !== Infinity && tNow > st + du - exD - 0.06) return true; // moving exit only
     return false;
   };
-  for (const e of info) {
-    if (e.clip) issues.push({ kind: 'overflow', a: e.id, t: e.t, detail: `content ${e.sw}x${e.sh} clipped to ${e.cw}x${e.ch}` });
-    if (!midMove(e.el) && (e.x < SAFE.x0 - 1 || e.r > SAFE.x1 + 1 || e.y < SAFE.y0 - 1 || e.btm > SAFE.y1 + 1)) issues.push({ kind: 'safe', a: e.id, t: e.t, detail: `(${e.x | 0},${e.y | 0},${e.r | 0},${e.btm | 0})` });
+  // Safe-zone + overflow on EVERY top-level layer, not just [data-layer=critical]: content that runs
+  // off-frame or gets clipped is always a bug regardless of the layer's role (a corner watermark counts).
+  // Exempt only full-bleed backdrops (a background image/shader meant to reach the edges). Overlap/tight
+  // stay critical-scoped below, because layered overlaps between elements are frequently intentional.
+  const FW = window.innerWidth, FH = window.innerHeight;
+  for (const el of document.querySelectorAll('.hs-layer')) {
+    if (!vis(el)) continue;
+    const b = el.getBoundingClientRect();
+    if (b.width <= 1 || b.height <= 1) continue;
+    if (b.width >= FW * 0.9 && b.height >= FH * 0.9) continue; // full-bleed backdrop — meant to bleed
+    const s = getComputedStyle(el);
+    const id = el.id || (typeof el.className === 'string' ? (el.className.split(' ').filter((c) => c !== 'hs-layer')[0] || 'layer') : el.tagName);
+    const t = (el.textContent || '').trim().slice(0, 18);
+    if ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1))
+      issues.push({ kind: 'overflow', a: id, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
+    if (!midMove(el) && (b.left < SAFE.x0 - 1 || b.right > SAFE.x1 + 1 || b.top < SAFE.y0 - 1 || b.bottom > SAFE.y1 + 1))
+      issues.push({ kind: 'safe', a: id, t, detail: `(${b.left | 0},${b.top | 0},${b.right | 0},${b.bottom | 0})` });
   }
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
   // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
