@@ -13,6 +13,9 @@
 //
 // Width is the ONLY size knob: height is derived from the source so the aspect ratio is never
 // altered here. Cropping a composed frame would destroy the composition the engine just laid out.
+//
+// Widths are ~2x the CSS width the layout gives each video, because most viewers are on a 2x
+// display: a 1x encode is visibly upscaled there (the homepage hero clip was being blown up 2.01x).
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,19 +32,19 @@ const PUB = path.join(root, 'site', 'public', 'assets');
 //          `aspect` made six scenes default to portrait and overwrite their landscape assets).
 const MANIFEST = [
   // group      scene                render                    dest                        width  poster  ar
-  ['hero',   'hero-site',          'hero-site',              'hero.mp4',                   1600, 2.0, 16 / 9],
+  ['hero',   'hero-site',          'hero-site',              'hero.mp4',                   1920, 2.0, 16 / 9],
 
   // homepage gallery strip — same scenes as the showcase rows, smaller
-  ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1100, 4.0, 16 / 9],
-  ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                    900, 3.0, 16 / 9],
-  ['strip',  'showcase-cuts',      'showcase-cuts',          'cuts.mp4',                    900, 2.0, 16 / 9],
+  ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1920, 4.0, 16 / 9],
+  ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],
+  ['strip',  'showcase-cuts',      'showcase-cuts',          'cuts.mp4',                   1120, 2.0, 16 / 9],
 
   // showcase capability rows
-  ['showcase', 'showcase-type',    'showcase-type',          'showcase/type.mp4',          1000, 3.0, 16 / 9],
-  ['showcase', 'showcase-cuts',    'showcase-cuts',          'showcase/cuts.mp4',          1000, 2.0, 16 / 9],
-  ['showcase', 'showcase-stings',  'showcase-stings',        'showcase/stings.mp4',        1000, 4.0, 16 / 9],
-  ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1000, 5.0, 16 / 9],
-  ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1000, 5.0, 16 / 9],
+  ['showcase', 'showcase-type',    'showcase-type',          'showcase/type.mp4',          1280, 3.0, 16 / 9],
+  ['showcase', 'showcase-cuts',    'showcase-cuts',          'showcase/cuts.mp4',          1280, 2.0, 16 / 9],
+  ['showcase', 'showcase-stings',  'showcase-stings',        'showcase/stings.mp4',        1280, 4.0, 16 / 9],
+  ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1280, 5.0, 16 / 9],
+  ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1280, 5.0, 16 / 9],
 
   // the aspect trio — one scene, three ratios. Each box on the page carries the TRUE ratio.
   ['aspect', 'showcase-aspect',    'showcase-aspect.16x9',   'showcase/aspect-169.mp4',     800, 2.0, 16 / 9],
@@ -128,7 +131,7 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
     : ['-an'];
   execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', src,
     '-vf', `scale=${width}:${outH}:flags=lanczos`,
-    '-c:v', 'libx264', '-profile:v', 'high', '-crf', '23', '-preset', 'slow',
+    '-c:v', 'libx264', '-profile:v', 'high', '-crf', '20', '-preset', 'slow',
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart', ...a, dst], { stdio: 'inherit' });
 
   const jpg = dst.replace(/\.mp4$/, '.jpg');
