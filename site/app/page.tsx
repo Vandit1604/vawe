@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Header } from "./components/Header";
+import { HeroTablet } from "./components/HeroTablet";
 import { Footer } from "./components/Footer";
 
 const CODE = `<span class="p">{</span> <span class="k">"module"</span><span class="p">:</span> <span class="s">"scene"</span><span class="p">,</span> <span class="k">"theme"</span><span class="p">:</span> <span class="s">"vawe"</span><span class="p">,</span>
@@ -48,32 +49,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* overlapping product frame */}
+        {/* THE HERO TABLET — a device frame running the real engine (see components/HeroTablet) */}
         <div className="hero-stage pop">
-          <div className="browser">
-            <div className="chrome">
-              <div className="dots">
-                <i />
-                <i />
-                <i />
-              </div>
-              <div className="url">scene.json</div>
-              <div style={{ width: 52 }} />
-            </div>
-            <div className="body">
-              <div className="code">
-                <pre dangerouslySetInnerHTML={{ __html: CODE }} />
-              </div>
-              <div className="out">
-                <span className="arrow" aria-hidden="true">
-                  →
-                </span>
-                <video src="/assets/hero.mp4" poster="/assets/hero.jpg" autoPlay loop muted playsInline />
-              </div>
-            </div>
-          </div>
+          <HeroTablet />
         </div>
       </div>
+
       <div className="hero-foot" />
 
       {/* ===== FEATURES ===== */}

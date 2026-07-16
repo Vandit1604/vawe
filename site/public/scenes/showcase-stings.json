@@ -1,113 +1,116 @@
 {
   "module": "scene",
-  "theme": "vawe-site",
+  "aspect": "16:9",
+  "theme": "vawe",
   "duration": 8.4,
   "audio": {
-    "silent": false
+    "silent": true
   },
-  "stings": [
-    {
-      "t": 0.35,
-      "fx": "flash"
-    },
-    {
-      "t": 2.35,
-      "fx": "glitch"
-    },
-    {
-      "t": 4.35,
-      "fx": "scan"
-    },
-    {
-      "t": 6.35,
-      "fx": "ripple"
-    }
-  ],
   "layers": [
     {
       "type": "text",
-      "text": "shader stings",
-      "font": "mono",
-      "x": 140,
-      "y": 150,
-      "size": 22,
-      "color": "var(--accent)",
-      "start": 0.1,
-      "duration": 8.2
-    },
-    {
-      "type": "text",
-      "text": "flash",
-      "x": 0,
-      "y": 470,
-      "w": 1920,
-      "size": 168,
-      "weight": 700,
+      "text": "Every claim needs",
+      "x": 210,
+      "y": 360,
+      "w": 1500,
       "align": "center",
+      "size": 78,
+      "weight": 500,
+      "color": "var(--text2)",
+      "split": "word",
       "preset": "up",
-      "start": 0.4,
-      "duration": 1.9,
-      "exitDur": 0
+      "stagger": 0.08,
+      "each": 0.5,
+      "start": 0.3,
+      "duration": 3.2,
+      "anim": "none",
+      "exitDur": 0.25
     },
     {
       "type": "text",
-      "text": "glitch",
-      "x": 0,
+      "text": "a <b>moment</b> it lands.",
+      "x": 210,
       "y": 470,
-      "w": 1920,
-      "size": 168,
-      "weight": 700,
+      "w": 1500,
       "align": "center",
+      "size": 122,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.08,
+      "each": 0.5,
+      "start": 1.1,
+      "duration": 2.4,
+      "anim": "none",
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "text": "proof.",
+      "x": 210,
+      "y": 400,
+      "w": 1500,
+      "align": "center",
+      "size": 210,
+      "weight": 700,
       "color": "var(--accent)",
-      "cut": "fade",
-      "start": 2.4,
-      "duration": 1.9,
+      "split": "char",
+      "preset": "stretch",
+      "stagger": 0.03,
+      "each": 0.4,
+      "start": 3.75,
+      "duration": 2.05,
       "anim": "none",
-      "exitDur": 0
+      "exitDur": 0.22
     },
     {
       "type": "text",
-      "text": "scan",
-      "x": 0,
-      "y": 470,
-      "w": 1920,
-      "size": 168,
+      "text": "Punctuation, not decoration.",
+      "x": 210,
+      "y": 460,
+      "w": 1500,
+      "align": "center",
+      "size": 86,
       "weight": 700,
-      "align": "center",
-      "cut": "fade",
-      "start": 4.4,
-      "duration": 1.9,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.5,
+      "start": 6.1,
+      "duration": 2.3,
       "anim": "none",
       "exitDur": 0
+    }
+  ],
+  "cuts": [
+    {
+      "t": 3.7,
+      "style": "punch"
     },
     {
-      "type": "text",
-      "text": "ripple",
-      "x": 0,
-      "y": 470,
-      "w": 1920,
-      "size": 168,
-      "weight": 700,
-      "align": "center",
-      "color": "var(--accent)",
-      "cut": "fade",
-      "start": 6.4,
-      "duration": 2,
-      "anim": "none",
-      "exitDur": 0
+      "t": 6.05,
+      "style": "riseBlur"
+    }
+  ],
+  "stings": [
+    {
+      "t": 3.72,
+      "fx": "flash",
+      "colors": [
+        "#2563eb"
+      ],
+      "intensity": 0.6
     },
     {
-      "type": "text",
-      "text": "GPU shader effects, keyed on (progress, seed) only",
-      "font": "mono",
-      "x": 0,
-      "y": 780,
-      "w": 1920,
-      "size": 24,
-      "color": "var(--dim)",
-      "align": "center",
-      "start": 0.5,
-      "duration": 7.7
+      "t": 6.07,
+      "fx": "leak",
+      "colors": [
+        "#2563eb",
+        "#8fc0ff"
+      ],
+      "intensity": 0.35
     }
   ]
 }

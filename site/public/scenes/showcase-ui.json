@@ -1,34 +1,18 @@
 {
   "module": "scene",
-  "theme": "vawe-site",
+  "aspect": "16:9",
+  "theme": "vawe",
   "duration": 8.4,
   "audio": {
-    "silent": false
+    "silent": true
   },
-  "stings": [
-    {
-      "t": 4.7,
-      "fx": "flash"
-    }
-  ],
   "layers": [
     {
-      "type": "text",
-      "text": "product UI",
-      "font": "mono",
-      "x": 140,
-      "y": 150,
-      "size": 22,
-      "color": "var(--accent)",
-      "start": 0.1,
-      "duration": 8.2
-    },
-    {
       "type": "group",
-      "x": 360,
-      "y": 250,
-      "w": 1200,
-      "h": 620,
+      "x": 400,
+      "y": 190,
+      "w": 1120,
+      "h": 600,
       "layout": "column",
       "items": "stretch",
       "gap": 0,
@@ -36,8 +20,8 @@
       "bg": "var(--card)",
       "radius": 14,
       "elevation": 2,
-      "start": 0.3,
-      "duration": 7.8,
+      "start": 0.25,
+      "duration": 5.6,
       "anim": "rise",
       "enterDur": 0.5,
       "exitDur": 0.35,
@@ -101,17 +85,20 @@
     {
       "type": "text",
       "text": "Overview",
-      "x": 404,
-      "y": 358,
-      "size": 40,
+      "x": 444,
+      "y": 294,
+      "size": 38,
       "weight": 700,
-      "start": 0.7,
-      "duration": 7.4
+      "color": "var(--text)",
+      "start": 0.6,
+      "duration": 5.25,
+      "anim": "fade",
+      "exitDur": 0.2
     },
     {
       "type": "group",
-      "x": 404,
-      "y": 430,
+      "x": 444,
+      "y": 366,
       "w": 330,
       "layout": "column",
       "items": "flex-start",
@@ -121,8 +108,8 @@
       "radius": 14,
       "border": "1px solid var(--line)",
       "elevation": 1,
-      "start": 1,
-      "duration": 7.1,
+      "start": 0.85,
+      "duration": 5,
       "anim": "rise",
       "enterDur": 0.45,
       "exitDur": 0.3,
@@ -138,7 +125,7 @@
         {
           "type": "count",
           "from": 0,
-          "to": 1950,
+          "to": 1350,
           "unit": "",
           "font": "sans",
           "size": 56,
@@ -176,40 +163,40 @@
     },
     {
       "type": "html",
-      "x": 790,
-      "y": 430,
-      "w": 700,
-      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:700px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">renders / hour</div><svg viewBox=\"0 0 656 226\" width=\"100%\" height=\"226\" style=\"display:block;overflow:visible\"><polyline points=\"8.0,146.3 168.0,105.3 328.0,118.1 488.0,49.0 648.0,8.0\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"146.3\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"168.0\" cy=\"105.3\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"328.0\" cy=\"118.1\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"488.0\" cy=\"49.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"648.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--accent)\"/></svg></div>",
-      "start": 1.3,
-      "duration": 6.8,
+      "x": 820,
+      "y": 366,
+      "w": 640,
+      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:640px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">renders / hour</div><svg viewBox=\"0 0 596 216\" width=\"100%\" height=\"216\" style=\"display:block;overflow:visible\"><polygon points=\"8,208 8.0,139.7 153.0,100.7 298.0,112.9 443.0,47.0 588.0,8.0 588,208\" fill=\"var(--up)\" opacity=\"0.12\"/><polyline points=\"8.0,139.7 153.0,100.7 298.0,112.9 443.0,47.0 588.0,8.0\" fill=\"none\" stroke=\"var(--up)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"139.7\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"153.0\" cy=\"100.7\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"298.0\" cy=\"112.9\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"443.0\" cy=\"47.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"588.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/></svg></div>",
+      "start": 1.1,
+      "duration": 4.75,
       "anim": "rise",
       "enterDur": 0.5,
       "exitDur": 0.35
     },
     {
       "type": "cursor",
-      "x": 1350,
-      "y": 780,
-      "size": 42,
-      "start": 3,
-      "duration": 4.6,
+      "x": 1320,
+      "y": 694,
+      "size": 44,
+      "start": 2.4,
+      "duration": 3.45,
       "clicks": [
-        1.6
+        1.5
       ],
       "path": [
         {
           "t": 0,
           "x": -520,
-          "y": -260
+          "y": -280
         },
         {
           "t": 1.4,
           "x": 0,
           "y": 0,
-          "ease": "easeInOutCubic"
+          "ease": "easeOutExpo"
         },
         {
-          "t": 4.6,
+          "t": 3.45,
           "x": 0,
           "y": 0
         }
@@ -217,8 +204,8 @@
     },
     {
       "type": "group",
-      "x": 1090,
-      "y": 740,
+      "x": 1050,
+      "y": 650,
       "w": 430,
       "layout": "row",
       "items": "center",
@@ -227,8 +214,8 @@
       "bg": "#0A0A0A",
       "radius": 12,
       "elevation": 2,
-      "start": 4.8,
-      "duration": 3,
+      "start": 4.05,
+      "duration": 1.8,
       "anim": "rise",
       "enterDur": 0.4,
       "exitDur": 0.3,
@@ -268,6 +255,60 @@
           "color": "#3ECF8E"
         }
       ]
+    },
+    {
+      "type": "text",
+      "text": "No screen recording.",
+      "x": 210,
+      "y": 350,
+      "w": 1500,
+      "align": "center",
+      "size": 88,
+      "weight": 500,
+      "color": "var(--text2)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.44,
+      "start": 6.05,
+      "duration": 2.35,
+      "anim": "none",
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "This is <b>JSON</b>.",
+      "x": 210,
+      "y": 470,
+      "w": 1500,
+      "align": "center",
+      "size": 132,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.08,
+      "each": 0.5,
+      "start": 6.75,
+      "duration": 1.65,
+      "anim": "none",
+      "exitDur": 0
+    }
+  ],
+  "cuts": [
+    {
+      "t": 6,
+      "style": "riseBlur"
+    }
+  ],
+  "stings": [
+    {
+      "t": 4.06,
+      "fx": "flash",
+      "colors": [
+        "#2563eb"
+      ],
+      "intensity": 0.35
     }
   ]
 }
