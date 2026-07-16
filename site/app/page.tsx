@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "./components/Header";
-import { HeroTablet } from "./components/HeroTablet";
+import { HeroEditor } from "./components/HeroEditor";
 import { Footer } from "./components/Footer";
 
 const CODE = `<span class="p">{</span> <span class="k">"module"</span><span class="p">:</span> <span class="s">"scene"</span><span class="p">,</span> <span class="k">"theme"</span><span class="p">:</span> <span class="s">"vawe"</span><span class="p">,</span>
@@ -49,9 +49,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* THE HERO TABLET — a device frame running the real engine (see components/HeroTablet) */}
+        {/* THE HERO EDITOR — an editable browser running the real engine (components/HeroEditor) */}
         <div className="hero-stage pop">
-          <HeroTablet />
+          <HeroEditor />
         </div>
       </div>
 

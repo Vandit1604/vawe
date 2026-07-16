@@ -14,7 +14,13 @@
     "aspect": {
       "type": "string",
       "label": "Canvas aspect (overrides orientation). CLI --aspect a,b,c renders multiple in one pass.",
-      "enum": ["16:9", "9:16", "1:1", "4:5", "4:3"]
+      "enum": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:5",
+        "4:3"
+      ]
     },
     "duration": {
       "type": "number",
@@ -25,7 +31,11 @@
     "fps": {
       "type": "number",
       "label": "Frame rate (default 30; use 60 for smoother fast motion)",
-      "enum": [24, 30, 60]
+      "enum": [
+        24,
+        30,
+        60
+      ]
     },
     "captionMode": {
       "type": "string",
@@ -89,6 +99,72 @@
         "use": {
           "type": "string",
           "label": "use:\"theme\" → pull the brand’s own authored backdrop (themes/<name>.json bgDefault)"
+        }
+      }
+    },
+    "cuts": {
+      "type": "array",
+      "label": "Hard cuts between beats (timing x presentation, from core/cuts.js)",
+      "item": {
+        "t": {
+          "type": "number",
+          "label": "Cut time (s)",
+          "required": true
+        },
+        "style": {
+          "type": "string",
+          "label": "Presentation",
+          "required": true,
+          "enum": [
+            "none",
+            "fade",
+            "slide",
+            "whip",
+            "punch",
+            "wipe",
+            "iris",
+            "clock",
+            "flip",
+            "rise",
+            "blur",
+            "zoom",
+            "cube",
+            "barn",
+            "softwipe",
+            "softiris",
+            "squeeze",
+            "roll",
+            "letterbox",
+            "drop",
+            "blinds",
+            "skewWhip",
+            "spin",
+            "collapse",
+            "riseBlur",
+            "jitter"
+          ]
+        },
+        "dur": {
+          "type": "number",
+          "label": "Cut span (s)",
+          "min": 0.1,
+          "max": 2
+        },
+        "timing": {
+          "type": "string",
+          "label": "Timing curve"
+        },
+        "cx": {
+          "type": "number",
+          "label": "Origin x (0-1)",
+          "min": 0,
+          "max": 1
+        },
+        "cy": {
+          "type": "number",
+          "label": "Origin y (0-1)",
+          "min": 0,
+          "max": 1
         }
       }
     },
@@ -302,16 +378,39 @@
         "pin": {
           "type": "string",
           "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",
-          "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right",
-            "thirds-tl", "thirds-tr", "thirds-bl", "thirds-br", "thirds-t", "thirds-b", "thirds-l", "thirds-r"]
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "thirds-tl",
+            "thirds-tr",
+            "thirds-bl",
+            "thirds-br",
+            "thirds-t",
+            "thirds-b",
+            "thirds-l",
+            "thirds-r"
+          ]
         },
         "col": {
           "type": "number|string",
           "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) → sets x + w"
         },
         "cols": {
-          "type": "number",
-          "label": "Grid column count (default 12)"
+          "type": "array",
+          "label": "Board columns (≤4): {title, count, cards:[{id,title,labels:[{t,c}]}] ≤5}",
+          "item": {
+            "title": {
+              "type": "string",
+              "label": "Column title"
+            }
+          }
         },
         "gutter": {
           "type": "number",
@@ -775,16 +874,6 @@
         },
         "reflect": {
           "label": "Floor reflection: true or opacity 0.05–0.3"
-        },
-        "cols": {
-          "type": "array",
-          "label": "Board columns (≤4): {title, count, cards:[{id,title,labels:[{t,c}]}] ≤5}",
-          "item": {
-            "title": {
-              "type": "string",
-              "label": "Column title"
-            }
-          }
         },
         "headSize": {
           "type": "number",
