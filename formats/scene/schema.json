@@ -487,11 +487,12 @@
         },
         "split": {
           "type": "string",
-          "label": "Kinetic split",
+          "label": "Kinetic split ('path' = SVG strokes, for the `draw` preset)",
           "enum": [
             "char",
             "word",
-            "line"
+            "line",
+            "path"
           ]
         },
         "preset": {

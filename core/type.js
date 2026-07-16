@@ -1,7 +1,7 @@
 // core/type.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
-import { clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
+import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
 
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.
@@ -109,10 +109,12 @@ export const PRESETS = {
   // measurement. `back:true` draws from the far end. Hidden at u=0, exact identity at u=1 (dash
   // cleared, not left at 0, so the stroke renders as authored — dasharray:1 on a closed shape
   // would otherwise round-trip a hairline seam).
-  draw: (u, { ease = easeOutCubic, back = false } = {}) => {
+  draw: (u, { ease = 'easeOutCubic', back = false } = {}) => {
+    // presetOpts arrive from JSON, so `ease` is a NAME here, not a function — resolveEasing takes
+    // either. (Every other preset takes only numbers, so this is the first one that needed it.)
     const k = clamp01(u);
     if (k >= 1) return { opacity: 1, strokeDasharray: 'none', strokeDashoffset: '0' };
-    const p = ease(k);
+    const p = resolveEasing(ease)(k);
     return { opacity: k > 0 ? 1 : 0, strokeDasharray: '1 1', strokeDashoffset: (back ? p - 1 : 1 - p).toFixed(4) };
   },
 };

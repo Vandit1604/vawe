@@ -41,6 +41,29 @@ export const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
 // quint: one notch sharper than quart, softer than expo — the "luxurious settle" for hero moves.
 export const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
 export const easeInOutQuart = (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2);
+
+// ---- the complete named-curve set (easings.net / Penner). Every family in In/Out/InOut so an
+// author never has to hand-roll a curve or settle for a near-miss. All pure, all guarded by the
+// easing-registry contract in lib-test (f(0)=0, f(1)=1, finite, deterministic).
+export const easeInQuad = (t) => t * t;
+export const easeOutQuad = (t) => 1 - (1 - t) * (1 - t);
+export const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+export const easeInQuint = (t) => t * t * t * t * t;
+export const easeInOutQuint = (t) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2);
+// circ: mechanical/geometric — starts or stops very hard. Good for wipes and mechanical UI.
+export const easeInCirc = (t) => 1 - Math.sqrt(1 - Math.pow(t, 2));
+export const easeOutCirc = (t) => Math.sqrt(1 - Math.pow(t - 1, 2));
+export const easeInOutCirc = (t) => (t < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2);
+// back: anticipation — dips BELOW 0 before launching (easeIn) / past 1 before settling (easeOut).
+export const easeInBack = (t) => { const c1 = 1.70158, c3 = c1 + 1; return c3 * t * t * t - c1 * t * t; };
+export const easeInOutBack = (t) => { const c1 = 1.70158, c2 = c1 * 1.525; return t < 0.5 ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2 : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2; };
+// elastic: rubber band. Endpoints snapped so it lands exactly (the raw formula rings past 1).
+export const easeInElastic = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * ((2 * Math.PI) / 3)));
+export const easeInOutElastic = (t) => { const c5 = (2 * Math.PI) / 4.5; return t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c5)) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c5)) / 2 + 1; };
+// bounce: ball drop. Stays inside [0,1] — it never overshoots, it rebounds.
+export const easeOutBounce = (t) => { const n1 = 7.5625, d1 = 2.75; if (t < 1 / d1) return n1 * t * t; if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75; if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375; return n1 * (t -= 2.625 / d1) * t + 0.984375; };
+export const easeInBounce = (t) => 1 - easeOutBounce(1 - t);
+export const easeInOutBounce = (t) => (t < 0.5 ? (1 - easeOutBounce(1 - 2 * t)) / 2 : (1 + easeOutBounce(2 * t - 1)) / 2);
 export const easeInExpo = (t) => (t <= 0 ? 0 : Math.pow(2, 10 * (t - 1)));
 export const easeInOutExpo = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : 1 - Math.pow(2, -20 * t + 10) / 2);
 
@@ -69,6 +92,9 @@ export const EASINGS = {
   easeOutQuart, easeOutExpo, easeOutBack, easeOutElastic,
   easeInQuart, easeInExpo, easeInOutExpo,
   easeInSine, easeOutSine, easeInOutSine, easeOutQuint, easeInOutQuart,
+  easeInQuad, easeOutQuad, easeInOutQuad, easeInQuint, easeInOutQuint,
+  easeInCirc, easeOutCirc, easeInOutCirc, easeInBack, easeInOutBack,
+  easeInElastic, easeInOutElastic, easeInBounce, easeOutBounce, easeInOutBounce,
   // velocity-ramp aliases: rush = accelerate away, brake = decelerate in, ramp = slow-fast-slow
   rush: (t) => accel(t), brake: (t) => decel(t), ramp: (t) => speedRamp(t),
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot

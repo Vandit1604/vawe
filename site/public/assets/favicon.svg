@@ -1,4 +1,9 @@
+<!-- Cobalt tile + white wave: the same curve the header and the video use, and the same pairing as
+     the site's primary button. The old mark was lime #c8ff00 on near-black — a fossil of the
+     engine's original mono+lime default theme that the site left behind when it moved to cobalt.
+     Lime never appears anywhere else in the brand, and it is ~1.4:1 on white, so it can never
+     carry a mark on a light tab strip. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0a0b0d"/>
-  <path d="M4 17 Q9 6 14 17 T24 17 Q27 12 29 8" fill="none" stroke="#c8ff00" stroke-width="2.6" stroke-linecap="round"/>
+  <rect width="32" height="32" rx="7" fill="#2563eb"/>
+  <path d="M4 19 Q9 8 14 19 T24 19 Q27 14 29 10" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
 </svg>

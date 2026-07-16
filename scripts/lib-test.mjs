@@ -218,7 +218,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // new ones: a curve that does not land on 1 silently leaves elements short of their final position.
 {
   const { EASINGS } = await import('../core/motion.js');
-  const OVERSHOOT = new Set(['easeOutBack', 'easeOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle']);
+  // These curves leave [0,1] BY DESIGN: `back` dips below 0 to anticipate, `elastic`/`spring` ring
+  // past 1 before settling. The f(0)=0 / f(1)=1 checks below still apply to them — overshooting is
+  // character, not arriving is a bug (see the spring-bouncy f(1)=0.96 fix).
+  const OVERSHOOT = new Set(['easeOutBack', 'easeInBack', 'easeInOutBack', 'easeOutElastic', 'easeInElastic',
+    'easeInOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle']);
   let bad = [];
   for (const [name, fn] of Object.entries(EASINGS)) {
     if (Math.abs(fn(0)) > 1e-6) bad.push(`${name}(0)!=0`);
