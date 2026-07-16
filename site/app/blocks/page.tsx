@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -40,7 +41,7 @@ export default function Blocks() {
         <section style={{ paddingBottom: 80 }}>
           <div className="bgrid">
             {(blocks as Block[]).map((b) => (
-              <div className="bcard" key={b.name}>
+              <Link className="bcard" href={`/blocks/${b.name}`} key={b.name}>
                 <div className="thumb">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={still(b.name)} alt={b.name} loading="lazy" />
@@ -50,7 +51,7 @@ export default function Blocks() {
                   <div className="bf">{b.family}</div>
                   <div className="bp">{b.blurb || propKeys(b.props)}</div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

@@ -481,6 +481,54 @@ a{color:inherit;text-decoration:none}
   background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:10px;padding:9px 14px}
 .bnote b{color:var(--accent)}
 
+/* ===== BLOCK DETAIL (/blocks/<name>) ======================================================
+   The still IS the argument here: it is the block rendered by the real engine, so it gets the
+   dominant slot and the copy sits beside it rather than over it. */
+.bdetail{padding:34px 0 20px}
+.bd-head{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);
+  align-items:center;padding:22px 0 40px;border-bottom:1px solid var(--line)}
+.bd-head h1{font-size:clamp(2rem,4.4vw,3.2rem);line-height:1;letter-spacing:-.02em;font-weight:800;
+  font-variation-settings:"wdth" var(--wd-display);font-family:var(--font-mono),monospace;margin-bottom:12px}
+.bd-blurb{color:var(--ink-2);font-size:1.05rem;line-height:1.6;max-width:44ch}
+.bd-shot{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#eef1f6;
+  box-shadow:var(--shadow-2)}
+.bd-shot img{display:block;width:100%;height:auto}
+.bd-shot figcaption{font-size:11px;color:var(--muted);padding:8px 12px;background:var(--bg-2);
+  border-top:1px solid var(--line)}
+
+.bd-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);
+  padding:38px 0}
+.bd-h2{font-size:1.15rem;font-weight:700;letter-spacing:-.015em;margin-bottom:6px}
+.bd-count{font-family:var(--font-mono),monospace;font-size:12px;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:2px 8px;margin-left:6px}
+.bd-note{color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:14px;max-width:48ch}
+.bd-code{background:#0d1117;color:#c9d1d9;border-radius:12px;padding:16px 18px;font-size:12.5px;
+  line-height:1.7;overflow-x:auto;border:1px solid var(--line)}
+
+/* hairline rows, not a table-in-a-card */
+.bd-props{border-top:1px solid var(--line)}
+.bd-prop{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.2fr);gap:12px;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.bd-key{color:var(--ink);font-weight:600}
+.bd-type{color:var(--accent);font-size:11px}
+.bd-val{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+
+.bd-sib{padding:8px 0 40px;border-top:1px solid var(--line)}
+.bd-sib .bd-h2{margin:28px 0 14px}
+.bd-siblist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.bd-sibcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);
+  display:block;transition:border-color .2s var(--ease),transform .2s var(--ease)}
+.bd-sibcard:hover{border-color:var(--accent-line);transform:translateY(-2px)}
+.bd-sibcard img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;object-position:top left;
+  background:#eef1f6;border-bottom:1px solid var(--line)}
+.bd-sibcard span{display:block;padding:7px 10px;font-size:11.5px;color:var(--ink-2)}
+
+@media (max-width:860px){
+  .bd-head,.bd-grid{grid-template-columns:1fr}
+  .bd-prop{grid-template-columns:minmax(0,1fr) auto}
+  .bd-val{grid-column:1/-1;text-align:left;white-space:normal}
+}
+
 /* =========================================================
    FEATURES
    ========================================================= */

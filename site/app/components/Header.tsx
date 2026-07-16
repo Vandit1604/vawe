@@ -15,9 +15,10 @@ const NAV = [
   { href: "/features", label: "Features", key: "features" },
 ];
 
-// The docs are a separate fumadocs app (docs-site/). In production set
-// NEXT_PUBLIC_DOCS_URL to its deployed origin, e.g. https://docs.vawe.dev.
-const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001/docs";
+// The docs are a separate fumadocs app (docs-site/) served at /docs via a rewrite in
+// next.config.mjs, so this is just a path — no origin to configure, and nothing to get wrong in
+// production. It used to fall back to a localhost URL, which shipped a dead link to every visitor.
+const DOCS_URL = "/docs";
 
 export function Header({ active, variant = "solid" }: { active?: string; variant?: "over" | "solid" | "pill" }) {
   return (
