@@ -3,7 +3,7 @@ import { Header } from "../components/Header";
 import { EditorClient } from "./EditorClient";
 
 export const metadata: Metadata = {
-  title: "Vawe — editor",
+  title: "Vawe · editor",
   description: "Edit a scene JSON and watch it render live. The real engine, running in your browser.",
 };
 
@@ -12,7 +12,7 @@ export default function EditorPage() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
         <div className="phead">
           <div className="kicker">
             <span className="dot" /> editor

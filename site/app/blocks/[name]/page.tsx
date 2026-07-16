@@ -23,9 +23,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ name: string }> }): Promise<Metadata> {
   const { name } = await params;
   const b = byName(name);
-  if (!b) return { title: "Vawe — block" };
+  if (!b) return { title: "Vawe · block" };
   return {
-    title: `Vawe — ${b.name}`,
+    title: `Vawe · ${b.name}`,
     description: `${b.name}: ${b.blurb}. A deterministic, theme-aware Vawe block you drop into a scene.`,
   };
 }
@@ -48,7 +48,7 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
     <div className="shell">
       <Header active="blocks" />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
           <section className="bdetail">
             <Link className="backlink" href="/blocks">
               ← all blocks

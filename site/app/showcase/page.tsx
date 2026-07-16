@@ -9,7 +9,7 @@ import LINES from "../../lib/scene-lines.json";
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
 export const metadata: Metadata = {
-  title: "Vawe — showcase",
+  title: "Vawe · showcase",
   description:
     "What Vawe can render: kinetic typography, transitions, shader stings, data stories, product UI, and any aspect ratio. Every clip is one JSON scene.",
 };
@@ -38,7 +38,7 @@ export default function Showcase() {
     <div className="shell">
       <Header active="showcase" />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> showcase

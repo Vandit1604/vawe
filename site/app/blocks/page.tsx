@@ -5,7 +5,7 @@ import { Footer } from "../components/Footer";
 import blocks from "../../lib/blocks.json";
 
 export const metadata: Metadata = {
-  title: "Vawe — blocks",
+  title: "Vawe · blocks",
   description:
     "The Vawe block registry: 96 vetted, deterministic, theme-aware components — charts, cards, code, terminals, KPIs, browsers — to compose into videos.",
 };
@@ -22,7 +22,7 @@ export default function Blocks() {
     <div className="shell">
       <Header active="blocks" />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> block registry

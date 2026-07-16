@@ -22,12 +22,11 @@ const DOCS_URL = "/docs";
 
 export function Header({ active, variant = "solid" }: { active?: string; variant?: "over" | "solid" | "pill" }) {
   return (
-    // pill floats over the hero band, so it leaves the flow and <main> can wrap all the content.
+    // The pill floats over the hero band. It is absolute so it can sit on the band without
+    // consuming its top padding — and it is now a CHILD of the band, so its computed background
+    // really is cobalt. Anchoring it to the white .shell made every ancestor-walking contrast
+    // checker read white-on-white and flag the wordmark forever. The skip link moved to layout.
     <div className={variant === "pill" ? "wrap navhold" : "wrap"}>
-      {/* WCAG 2.4.1 — every page's first tab stop jumps the 6-link nav. */}
-      <a className="skip" href="#main">
-        Skip to content
-      </a>
       <header className={`bar ${variant}`}>
         <Link className="mark" href="/">
           <WaveGlyph />

@@ -13,8 +13,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const f = bySlug(slug);
-  if (!f) return { title: "Vawe — features" };
-  return { title: `Vawe — ${f.title}`, description: f.tagline };
+  if (!f) return { title: "Vawe · features" };
+  return { title: `Vawe · ${f.title}`, description: f.tagline };
 }
 
 // render inline `code` spans within a paragraph
@@ -38,7 +38,7 @@ export default async function FeatureDetail({ params }: { params: Promise<{ slug
     <div className="shell">
       <Header active="features" />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
         <section className="fdetail">
           <Link className="backlink" href="/features">
             ← all features

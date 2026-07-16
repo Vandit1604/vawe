@@ -5,7 +5,7 @@ import { Footer } from "../components/Footer";
 import { FEATURES } from "../../lib/features";
 
 export const metadata: Metadata = {
-  title: "Vawe — features",
+  title: "Vawe · features",
   description:
     "Determinism, blocks, kinetic type, cuts, shader stings, sound design, any aspect, and a taste gate ladder. What makes Vawe render on-brand, un-generic video.",
 };
@@ -15,7 +15,7 @@ export default function Features() {
     <div className="shell">
       <Header active="features" />
       <div className="wrap">
-        <main id="main">
+        <main id="content" tabIndex={-1}>
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> features

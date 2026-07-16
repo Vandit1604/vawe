@@ -66,16 +66,19 @@ export default function Home() {
           literally the product. Structure is borrowed from a comp that put a stock sky here — the
           sky is the part anyone can buy, so ours renders instead. The editor floats over the V, so
           the eye lands on the live thing rather than the backdrop. */}
-      <Header variant="pill" />
-      <main id="main">
+      <main>
       <div className="hero-wrap">
+        {/* Header is INSIDE the band: that is what makes its computed background actually cobalt,
+            so contrast checkers see what a viewer sees. #content sits after it, so the skip link
+            still bypasses the nav. */}
         <div className="bookend tap hero-band">
+          <Header variant="pill" />
           {/* backdrop = formats/scene/site-backdrop.json: an ambient shader field with ZERO text
               layers, rendered for this band. Never swap in a capability clip — those all contain
               copy (stings.mp4 is the word "proof." animating), which blurs into drifting smudges
               behind the headline. See DESIGN.md → The Bookend Rule. */}
           <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
-          <div className="wrap hero-head on-accent">
+          <div className="wrap hero-head on-accent" id="content" tabIndex={-1}>
             <span className="eyebrow rise">
               <span className="dot" />
               deterministic motion-graphics engine

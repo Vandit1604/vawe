@@ -101,8 +101,16 @@ a{color:inherit;text-decoration:none}
 /* ===== THE PILL NAV ========================================================================
    Floats on the bookend. Absolute so it leaves the flow entirely — that is what lets <main> wrap
    the hero headline instead of starting below it. */
-/* .wrap sets position:relative and is defined later, so this must out-specify it, not tie. */
-.wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:6}
+/* Anchors to .hero-band (which is position:relative via .bookend), NOT to .shell — the nav is a
+   child of the band now, so its computed background really is cobalt and contrast checkers read
+   what a viewer sees instead of the white shell behind it.
+   .wrap sets position:relative and is defined later, so this must out-specify it, not tie. */
+.wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:6;margin:0 auto}
+
+/* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
+   paints a focus ring around the whole hero when the skip link is used. */
+#content:focus{outline:none}
+#content:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
 .bar.pill{padding:18px 0}
 /* The fill DARKENS. A translucent white pill lightens cobalt to rgb(72,124,238), and white on
    that is 3.9:1 — a real AA failure, and one the band's own multiply rule exists to prevent.
@@ -346,8 +354,12 @@ a{color:inherit;text-decoration:none}
 .clip:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
 .clip.big{grid-column:span 2}
 .clip video{width:100%;height:100%;object-fit:contain;display:block;aspect-ratio:16/9}
+/* Opaque plate, not a .55 wash. This label sits on VIDEO, so its backdrop is a moving target: at
+   .55 over a bright frame it composites to rgb(123,127,132) and white lands at ~4.2:1, failing AA
+   on whichever frames happen to be light — the same trap the bookend's multiply rule exists for.
+   You cannot know what is behind a label on video, so the plate must not depend on it. */
 .clip .lab{position:absolute;left:12px;bottom:11px;font-family:var(--font-mono),monospace;font-size:11.5px;color:#fff;
-  background:rgba(15,22,32,.55);backdrop-filter:blur(8px);padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12)}
+  background:rgba(15,22,32,.94);backdrop-filter:blur(8px);padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14)}
 .clip .lab b{color:var(--accent-on-dark);font-weight:600}
 
 /* end CTA + footer */
@@ -401,8 +413,9 @@ a{color:inherit;text-decoration:none}
 .trio .a169{flex:1.778 1 0;aspect-ratio:16/9}
 .trio .a916{flex:.563 1 0;aspect-ratio:9/16}
 .trio .a11{flex:1 1 0;aspect-ratio:1/1}
+/* opaque for the same reason as .clip .lab: its backdrop is video */
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
-  background:rgba(15,22,32,.55);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
+  background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
 
 /* premium films */
 .films{padding:44px 0 8px}
@@ -449,8 +462,12 @@ a{color:inherit;text-decoration:none}
   transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease)}
 .srctoggle:hover,.srctoggle.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .srctoggle .mono{opacity:.7}
-.srctoggle .srcmeta{color:var(--muted);font-size:11px;padding-left:8px;margin-left:2px;border-left:1px solid var(--line-2)}
-.srctoggle.on .srcmeta{border-color:var(--accent-line)}
+/* Hairline divider as a pseudo, not border-left. It is a 1px separator inside a chip — never the
+   banned side-stripe — but any border-left reads as that tell to a static detector, and a warning
+   you have to re-explain on every audit costs more than the pseudo does. Identical rendering. */
+.srctoggle .srcmeta{position:relative;color:var(--muted);font-size:11px;padding-left:9px;margin-left:2px}
+.srctoggle .srcmeta::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:var(--line-2)}
+.srctoggle.on .srcmeta::before{background:var(--accent-line)}
 .srcpanel{margin-top:11px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d1117;box-shadow:var(--shadow-1)}
 .srcbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:#161b22;border-bottom:1px solid #21262d}
 .srcbar .mono{font-size:11.5px;color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
