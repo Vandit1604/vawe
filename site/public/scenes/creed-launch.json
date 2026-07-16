@@ -113,10 +113,10 @@
     {
       "type": "image",
       "src": "/engine/assets/brands/creed/agents/claude.svg",
-      "x": 178,
-      "y": 436,
-      "w": 38,
-      "h": 38,
+      "x": 169,
+      "y": 427,
+      "w": 56,
+      "h": 56,
       "start": 1,
       "duration": 3.9,
       "anim": "fade",
@@ -160,10 +160,10 @@
     {
       "type": "image",
       "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
-      "x": 1218,
-      "y": 416,
-      "w": 38,
-      "h": 38,
+      "x": 1209,
+      "y": 407,
+      "w": 56,
+      "h": 56,
       "start": 1.25,
       "duration": 3.65,
       "anim": "fade",
@@ -206,10 +206,10 @@
     {
       "type": "image",
       "src": "/engine/assets/brands/creed/agents/cursor.svg",
-      "x": 698,
-      "y": 776,
-      "w": 38,
-      "h": 38,
+      "x": 689,
+      "y": 767,
+      "w": 56,
+      "h": 56,
       "start": 1.5,
       "duration": 3.4,
       "anim": "fade",
@@ -352,7 +352,7 @@
           "font": "mono",
           "size": 25,
           "weight": 400,
-          "color": "#8E8E88"
+          "color": "#757570"
         },
         {
           "type": "text",
@@ -360,7 +360,7 @@
           "font": "mono",
           "size": 25,
           "weight": 400,
-          "color": "#8E8E88"
+          "color": "#757570"
         },
         {
           "type": "text",
@@ -368,7 +368,7 @@
           "font": "mono",
           "size": 25,
           "weight": 400,
-          "color": "#8E8E88"
+          "color": "#757570"
         },
         {
           "type": "text",
@@ -376,7 +376,7 @@
           "font": "mono",
           "size": 25,
           "weight": 400,
-          "color": "#8E8E88"
+          "color": "#757570"
         },
         {
           "type": "text",
@@ -384,7 +384,7 @@
           "font": "mono",
           "size": 25,
           "weight": 400,
-          "color": "#8E8E88"
+          "color": "#757570"
         }
       ]
     },
@@ -408,7 +408,7 @@
       "font": "mono",
       "size": 24,
       "weight": 500,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 560,
       "y": 178,
       "w": 900,
@@ -726,7 +726,7 @@
       "font": "mono",
       "size": 24,
       "weight": 500,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 770,
       "y": 528,
       "w": 380,
@@ -1210,7 +1210,7 @@
       "font": "mono",
       "size": 20,
       "weight": 400,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 140,
       "y": 496,
       "w": 400,
@@ -1472,7 +1472,7 @@
       "font": "mono",
       "size": 20,
       "weight": 400,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 560,
       "y": 556,
       "w": 800,
@@ -1836,7 +1836,7 @@
       "font": "mono",
       "size": 24,
       "weight": 400,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 360,
       "y": 520,
       "w": 240,
@@ -1887,7 +1887,7 @@
           "font": "mono",
           "size": 20,
           "weight": 500,
-          "color": "#8E8E88",
+          "color": "#757570",
           "bg": "#F1F1EF",
           "pad": "10px 18px",
           "radius": 20
@@ -1898,7 +1898,7 @@
           "font": "mono",
           "size": 20,
           "weight": 500,
-          "color": "#8E8E88",
+          "color": "#757570",
           "bg": "#F1F1EF",
           "pad": "10px 18px",
           "radius": 20
@@ -1930,7 +1930,7 @@
       "size": 26,
       "weight": 400,
       "color": "#5C5C58",
-      "emColor": "#8E8E88",
+      "emColor": "#757570",
       "x": 720,
       "y": 520,
       "w": 900,
@@ -2010,7 +2010,7 @@
       "font": "mono",
       "size": 22,
       "weight": 500,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 660,
       "y": 240,
       "w": 600,
@@ -2233,7 +2233,7 @@
       "font": "mono",
       "size": 24,
       "weight": 400,
-      "color": "#8E8E88",
+      "color": "#757570",
       "x": 360,
       "y": 800,
       "w": 1200,

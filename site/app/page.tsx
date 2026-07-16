@@ -57,7 +57,7 @@ export default function Home() {
                 <i />
                 <i />
               </div>
-              <div className="url">vawe.dev / editor</div>
+              <div className="url">scene.json</div>
               <div style={{ width: 52 }} />
             </div>
             <div className="body">

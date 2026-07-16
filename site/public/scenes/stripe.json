@@ -206,7 +206,7 @@
           "font": "mono",
           "size": 22,
           "weight": 600,
-          "color": "#8898aa",
+          "color": "#425466",
           "tracking": "0.12em"
         },
         {
@@ -401,7 +401,7 @@
           "font": "mono",
           "size": 20,
           "weight": 600,
-          "color": "#8898aa",
+          "color": "#425466",
           "tracking": "0.1em"
         },
         {
@@ -467,7 +467,7 @@
       "children": [
         {
           "type": "text",
-          "text": "<span style=\"display:inline-flex;width:34px;height:34px;border-radius:50%;background:#00b843;color:#fff;align-items:center;justify-content:center;font-size:22px\">✓</span>&nbsp;&nbsp;<b style=\"color:#0a2540;font-weight:600\">Payment complete</b>",
+          "text": "<span style=\"display:inline-flex;width:34px;height:34px;border-radius:50%;background:#007a2f;color:#fff;align-items:center;justify-content:center;font-size:22px\">✓</span>&nbsp;&nbsp;<b style=\"color:#0a2540;font-weight:600\">Payment complete</b>",
           "size": 28,
           "weight": 600,
           "color": "#0a2540"
@@ -478,8 +478,8 @@
       "type": "image",
       "id": "cursor",
       "src": "/engine/assets/icons/ui/cursor.svg",
-      "w": 46,
-      "h": 46,
+      "w": 56,
+      "h": 56,
       "track": 60,
       "x": 1300,
       "y": 620,
@@ -540,7 +540,7 @@
       "font": "mono",
       "size": 22,
       "weight": 600,
-      "color": "#8898aa",
+      "color": "#425466",
       "tracking": "0.12em",
       "x": 152,
       "y": 300,
@@ -751,7 +751,7 @@
               "text": "Billing",
               "size": 40,
               "weight": 700,
-              "color": "#00a3ff"
+              "color": "#007abf"
             },
             {
               "type": "text",
@@ -780,7 +780,7 @@
               "text": "Connect",
               "size": 40,
               "weight": 700,
-              "color": "#00b843"
+              "color": "#008832"
             },
             {
               "type": "text",
@@ -809,7 +809,7 @@
               "text": "Radar",
               "size": 40,
               "weight": 700,
-              "color": "#ff5996"
+              "color": "#c74575"
             },
             {
               "type": "text",
@@ -919,7 +919,7 @@
       "font": "mono",
       "size": 24,
       "weight": 500,
-      "color": "#8898aa",
+      "color": "#425466",
       "w": 1620,
       "align": "center",
       "x": 150,

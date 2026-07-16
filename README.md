@@ -125,6 +125,9 @@ make probe [M=…]                        render-order purity (determinism)
 make beats D=… VS=<brand>               first/mid/last of every beat beside the source
 make expand D=…                         expand {type:block}/{type:comp} sugar → real layers
 make compare / scrub / batch            variant selection · contact sheet · data-driven variants
+
+# publish
+make site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving
 ```
 
 ## Docs

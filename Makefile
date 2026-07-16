@@ -254,3 +254,6 @@ scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 
 batch: ## data-driven variants: TPL=<template.json> DATA=<data.json> [render]
 	node scripts/batch.mjs $(TPL) $(DATA)
+
+site-assets: ## engine renders -> site/public/assets (+posters). [RENDER=1] [ONLY=films] [CHECK=1] [FORCE=1]
+	node scripts/site-assets.mjs $(if $(RENDER),--render) $(if $(ONLY),--only $(ONLY)) $(if $(CHECK),--check) $(if $(FORCE),--force)

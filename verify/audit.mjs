@@ -73,8 +73,18 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
   };
   // Safe-zone + overflow on EVERY top-level layer, not just [data-layer=critical]: content that runs
   // off-frame or gets clipped is always a bug regardless of the layer's role (a corner watermark counts).
-  // Exempt only full-bleed backdrops (a background image/shader meant to reach the edges). Overlap/tight
-  // stay critical-scoped below, because layered overlaps between elements are frequently intentional.
+  // Overlap/tight stay critical-scoped below, because layered overlaps are frequently intentional.
+  //
+  // The safe box governs LEGIBLE CONTENT — text the viewer must read, imagery they must recognise.
+  // Decoration (gradient blobs, glows, hairline rules) routinely bleeds off-frame BY DESIGN, so a
+  // layer only earns the safe check when it carries a text node or an image. Text inside a decorative
+  // container is still reached: the walker descends, and child text layers are their own .hs-layer.
+  const carriesContent = (el) => {
+    if (el.querySelector('img, svg')) return true;
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while (w.nextNode()) if (w.currentNode.nodeValue.trim()) return true;
+    return false;
+  };
   const FW = window.innerWidth, FH = window.innerHeight;
   for (const el of document.querySelectorAll('.hs-layer')) {
     if (!vis(el)) continue;
@@ -86,7 +96,7 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     const t = (el.textContent || '').trim().slice(0, 18);
     if ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1))
       issues.push({ kind: 'overflow', a: id, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
-    if (!midMove(el) && (b.left < SAFE.x0 - 1 || b.right > SAFE.x1 + 1 || b.top < SAFE.y0 - 1 || b.bottom > SAFE.y1 + 1))
+    if (!midMove(el) && carriesContent(el) && (b.left < SAFE.x0 - 1 || b.right > SAFE.x1 + 1 || b.top < SAFE.y0 - 1 || b.bottom > SAFE.y1 + 1))
       issues.push({ kind: 'safe', a: id, t, detail: `(${b.left | 0},${b.top | 0},${b.right | 0},${b.bottom | 0})` });
   }
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame

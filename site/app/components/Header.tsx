@@ -9,6 +9,7 @@ export function WaveGlyph({ className = "glyph" }: { className?: string }) {
 }
 
 const NAV = [
+  { href: "/editor", label: "Editor", key: "editor" },
   { href: "/showcase", label: "Showcase", key: "showcase" },
   { href: "/blocks", label: "Blocks", key: "blocks" },
   { href: "/features", label: "Features", key: "features" },

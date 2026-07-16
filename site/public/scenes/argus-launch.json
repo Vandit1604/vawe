@@ -4,7 +4,9 @@
   "aspect": "16:9",
   "duration": 23,
   "audio": {
-    "silent": true
+    "auto": true,
+    "music": "assets/music/hiphop-yt.wav",
+    "musicGain": 0.5
   },
   "bg": [
     {
@@ -23,7 +25,7 @@
       "x": 92,
       "y": 76,
       "font": "mono",
-      "size": 24,
+      "size": 26,
       "start": 0,
       "duration": 23,
       "track": 1
@@ -31,9 +33,9 @@
     {
       "type": "image",
       "src": "/engine/assets/brands/argus/mascot.png",
-      "x": 840,
-      "y": 360,
-      "w": 240,
+      "x": 813.6,
+      "y": 320,
+      "w": 292.8,
       "start": 0.1,
       "duration": 4.2,
       "anim": "rise",
@@ -45,11 +47,11 @@
       "weight": 400,
       "color": "var(--ink)",
       "text": "you're posting into",
-      "x": 460,
-      "y": 560,
-      "w": 1000,
+      "x": 350,
+      "y": 564,
+      "w": 1220,
       "align": "center",
-      "size": 96,
+      "size": 117.1,
       "ls": "-0.035em",
       "start": 0.4,
       "duration": 4.2,
@@ -61,11 +63,11 @@
       "weight": 400,
       "color": "var(--dim)",
       "text": "the void.",
-      "x": 460,
-      "y": 668,
-      "w": 1000,
+      "x": 350,
+      "y": 696,
+      "w": 1220,
       "align": "center",
-      "size": 96,
+      "size": 117.1,
       "ls": "-0.035em",
       "start": 0.6,
       "duration": 4,
@@ -78,8 +80,8 @@
       "color": "var(--ink)",
       "text": "argus reads your",
       "x": 130,
-      "y": 380,
-      "size": 62,
+      "y": 345,
+      "size": 75.6,
       "ls": "-0.03em",
       "start": 4.4,
       "duration": 5.6,
@@ -93,8 +95,8 @@
       "color": "var(--ink)",
       "text": "own X analytics.",
       "x": 130,
-      "y": 452,
-      "size": 62,
+      "y": 433,
+      "size": 75.6,
       "ls": "-0.03em",
       "start": 4.5,
       "duration": 5.5,
@@ -107,8 +109,8 @@
       "color": "var(--accent)",
       "text": "find your one leak.",
       "x": 130,
-      "y": 600,
-      "size": 74,
+      "y": 613,
+      "size": 90.3,
       "ls": "-0.03em",
       "start": 5,
       "duration": 5,
@@ -118,18 +120,18 @@
     {
       "type": "html",
       "x": 132,
-      "y": 690,
-      "w": 470,
+      "y": 726,
+      "w": 590,
       "start": 5.5,
       "duration": 3,
-      "html": "<svg viewBox=\"0 0 470 16\" width=\"470\" height=\"16\" style=\"display:block\"><path d=\"M2 11 Q 141 4, 258.5 9 T 466 7\" stroke=\"#4772f5\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      "html": "<svg viewBox=\"0 0 590 18\" width=\"590\" height=\"18\" style=\"display:block\"><path d=\"M3 12 Q 177 4, 324 10 T 585 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
       "anim": "wipe",
       "enterDur": 0.5
     },
     {
       "type": "group",
       "x": 1080,
-      "y": 300,
+      "y": 247,
       "w": 700,
       "layout": "row",
       "items": "flex-end",
@@ -156,7 +158,7 @@
               "type": "text",
               "weight": 600,
               "text": "60",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -170,7 +172,7 @@
               "type": "text",
               "weight": 500,
               "text": "Mon",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -186,7 +188,7 @@
               "type": "text",
               "weight": 600,
               "text": "52",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -200,7 +202,7 @@
               "type": "text",
               "weight": 500,
               "text": "Tue",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -216,7 +218,7 @@
               "type": "text",
               "weight": 600,
               "text": "44",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -230,7 +232,7 @@
               "type": "text",
               "weight": 500,
               "text": "Wed",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -246,7 +248,7 @@
               "type": "text",
               "weight": 600,
               "text": "30",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -260,7 +262,7 @@
               "type": "text",
               "weight": 500,
               "text": "Thu",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -276,7 +278,7 @@
               "type": "text",
               "weight": 600,
               "text": "22",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -290,7 +292,7 @@
               "type": "text",
               "weight": 500,
               "text": "Fri",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -301,7 +303,7 @@
     {
       "type": "group",
       "x": 1080,
-      "y": 660,
+      "y": 686,
       "w": 340,
       "layout": "column",
       "items": "flex-start",
@@ -320,8 +322,8 @@
         {
           "type": "text",
           "weight": 500,
-          "text": "reply rate · your leak",
-          "size": 18,
+          "text": "reply rate",
+          "size": 26,
           "color": "var(--dim)",
           "font": "mono"
         },
@@ -331,7 +333,7 @@
           "to": 0.4,
           "unit": "%",
           "font": "sans",
-          "size": 56,
+          "size": 68.3,
           "weight": 700,
           "color": "var(--text)",
           "ls": "-0.02em",
@@ -349,14 +351,14 @@
               "type": "text",
               "weight": 500,
               "text": "▼",
-              "size": 15,
+              "size": 26,
               "color": "#C0362C"
             },
             {
               "type": "text",
               "weight": 600,
               "text": "-61%",
-              "size": 17,
+              "size": 26,
               "color": "#C0362C",
               "font": "mono"
             }
@@ -367,7 +369,7 @@
     {
       "type": "group",
       "x": 1450,
-      "y": 660,
+      "y": 686,
       "w": 330,
       "layout": "column",
       "items": "flex-start",
@@ -387,7 +389,7 @@
           "type": "text",
           "weight": 500,
           "text": "impressions / post",
-          "size": 18,
+          "size": 26,
           "color": "var(--dim)",
           "font": "mono"
         },
@@ -397,7 +399,7 @@
           "to": 3,
           "unit": "k",
           "font": "sans",
-          "size": 56,
+          "size": 68.3,
           "weight": 700,
           "color": "var(--text)",
           "ls": "-0.02em",
@@ -415,14 +417,14 @@
               "type": "text",
               "weight": 500,
               "text": "▼",
-              "size": 15,
+              "size": 26,
               "color": "#C0362C"
             },
             {
               "type": "text",
               "weight": 600,
               "text": "-40%",
-              "size": 17,
+              "size": 26,
               "color": "#C0362C",
               "font": "mono"
             }
@@ -435,11 +437,11 @@
       "weight": 400,
       "color": "var(--ink)",
       "text": "it drafts each reply in your voice.",
-      "x": 360,
-      "y": 150,
-      "w": 1200,
+      "x": 228,
+      "y": 214,
+      "w": 1464,
       "align": "center",
-      "size": 56,
+      "size": 68.3,
       "ls": "-0.03em",
       "start": 10.2,
       "duration": 5.8,
@@ -450,7 +452,7 @@
     {
       "type": "group",
       "x": 460,
-      "y": 270,
+      "y": 361,
       "w": 820,
       "layout": "column",
       "items": "stretch",
@@ -486,7 +488,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "F",
-                  "size": 20,
+                  "size": 26,
                   "color": "var(--accent)"
                 }
               ]
@@ -501,7 +503,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "a big account",
-                  "size": 20,
+                  "size": 26,
                   "color": "var(--text)"
                 },
                 {
@@ -509,7 +511,7 @@
                   "weight": 500,
                   "text": "@founder",
                   "font": "mono",
-                  "size": 16,
+                  "size": 26,
                   "color": "var(--dim)"
                 }
               ]
@@ -520,7 +522,7 @@
           "type": "text",
           "weight": 400,
           "text": "shipping is the only growth hack that compounds.",
-          "size": 21,
+          "size": 26,
           "color": "var(--text)"
         },
         {
@@ -534,7 +536,7 @@
               "weight": 500,
               "text": "↻ 210",
               "font": "mono",
-              "size": 16,
+              "size": 26,
               "color": "var(--dim)"
             },
             {
@@ -542,7 +544,7 @@
               "weight": 500,
               "text": "♥ 1.2k",
               "font": "mono",
-              "size": 16,
+              "size": 26,
               "color": "var(--dim)"
             }
           ]
@@ -555,9 +557,9 @@
       "color": "var(--accent)",
       "text": "↳ argus drafts in your voice",
       "x": 560,
-      "y": 500,
+      "y": 641,
       "font": "mono",
-      "size": 20,
+      "size": 26,
       "start": 11.4,
       "duration": 4.6,
       "anim": "rise",
@@ -566,7 +568,7 @@
     {
       "type": "group",
       "x": 560,
-      "y": 542,
+      "y": 692,
       "w": 820,
       "layout": "column",
       "items": "stretch",
@@ -594,7 +596,7 @@
                   "type": "text",
                   "weight": 500,
                   "text": "agreed. we shipped 40 times last month and every reply here came from argus.",
-                  "size": 20,
+                  "size": 26,
                   "color": "#fff"
                 }
               ]
@@ -618,7 +620,7 @@
                   "type": "text",
                   "weight": 500,
                   "text": "the trick: reply to the right 5 people, not the loudest 50.",
-                  "size": 20,
+                  "size": 26,
                   "color": "#fff"
                 }
               ]
@@ -633,8 +635,8 @@
       "color": "var(--ink)",
       "text": "your feed, working.",
       "x": 130,
-      "y": 210,
-      "size": 74,
+      "y": 137,
+      "size": 90.3,
       "ls": "-0.03em",
       "start": 16.2,
       "duration": 3.8,
@@ -645,7 +647,7 @@
     {
       "type": "group",
       "x": 140,
-      "y": 380,
+      "y": 345,
       "layout": "row",
       "items": "flex-start",
       "gap": 120,
@@ -664,7 +666,7 @@
               "type": "text",
               "weight": 700,
               "text": "4.9%",
-              "size": 64,
+              "size": 78.1,
               "color": "var(--text)",
               "ls": "-0.02em"
             },
@@ -672,7 +674,7 @@
               "type": "text",
               "weight": 500,
               "text": "reply rate",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -688,7 +690,7 @@
               "type": "text",
               "weight": 700,
               "text": "38k",
-              "size": 64,
+              "size": 78.1,
               "color": "var(--text)",
               "ls": "-0.02em"
             },
@@ -696,7 +698,7 @@
               "type": "text",
               "weight": 500,
               "text": "impressions",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -712,7 +714,7 @@
               "type": "text",
               "weight": 700,
               "text": "+612",
-              "size": 64,
+              "size": 78.1,
               "color": "var(--text)",
               "ls": "-0.02em"
             },
@@ -720,7 +722,7 @@
               "type": "text",
               "weight": 500,
               "text": "followers / wk",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -734,8 +736,8 @@
       "color": "var(--text-2)",
       "text": "from replying to the right 5, not the loudest 50.",
       "x": 140,
-      "y": 560,
-      "size": 26,
+      "y": 564,
+      "size": 31.7,
       "start": 17.2,
       "duration": 2.8,
       "anim": "rise",
@@ -744,7 +746,7 @@
     {
       "type": "group",
       "x": 1080,
-      "y": 300,
+      "y": 247,
       "w": 700,
       "layout": "row",
       "items": "flex-end",
@@ -771,7 +773,7 @@
               "type": "text",
               "weight": 600,
               "text": "22",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -785,7 +787,7 @@
               "type": "text",
               "weight": 500,
               "text": "W1",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -801,7 +803,7 @@
               "type": "text",
               "weight": 600,
               "text": "34",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -815,7 +817,7 @@
               "type": "text",
               "weight": 500,
               "text": "W2",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -831,7 +833,7 @@
               "type": "text",
               "weight": 600,
               "text": "55",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -845,7 +847,7 @@
               "type": "text",
               "weight": 500,
               "text": "W3",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -861,7 +863,7 @@
               "type": "text",
               "weight": 600,
               "text": "90",
-              "size": 18,
+              "size": 26,
               "color": "var(--text)"
             },
             {
@@ -875,7 +877,7 @@
               "type": "text",
               "weight": 500,
               "text": "W4",
-              "size": 18,
+              "size": 26,
               "color": "var(--dim)",
               "font": "mono"
             }
@@ -886,9 +888,9 @@
     {
       "type": "image",
       "src": "/engine/assets/brands/argus/mascot.png",
-      "x": 885,
-      "y": 360,
-      "w": 150,
+      "x": 868.5,
+      "y": 320,
+      "w": 183,
       "start": 20.1,
       "duration": 3,
       "anim": "rise",
@@ -897,19 +899,19 @@
     },
     {
       "type": "html",
-      "x": 360,
-      "y": 490,
-      "w": 1200,
+      "x": 260,
+      "y": 479,
+      "w": 1400,
       "start": 20.2,
       "duration": 2.8,
       "anim": "rise",
       "enterDur": 0.5,
-      "html": "<div style=\"font:400 88px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap\">grow on X, on <span style=\"position:relative;display:inline-block\">purpose.<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" style=\"position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible\"><path d=\"M4 12 Q 90 4, 150 10 T 296 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg></span></div>"
+      "html": "<div style=\"font:400 107px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap\">grow on X, on <span style=\"position:relative;display:inline-block\">purpose.<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" style=\"position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible\"><path d=\"M4 12 Q 90 4, 150 10 T 296 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg></span></div>"
     },
     {
       "type": "group",
       "x": 760,
-      "y": 680,
+      "y": 711,
       "w": 400,
       "bg": "var(--accent)",
       "radius": 999,
@@ -927,7 +929,7 @@
           "weight": 600,
           "color": "#fff",
           "text": "join the waitlist",
-          "size": 28
+          "size": 34.2
         }
       ]
     },
@@ -936,12 +938,12 @@
       "weight": 500,
       "color": "var(--dim)",
       "text": "argushq.cc",
-      "x": 760,
-      "y": 800,
-      "w": 400,
+      "x": 716,
+      "y": 857,
+      "w": 488,
       "align": "center",
       "font": "mono",
-      "size": 24,
+      "size": 29.3,
       "start": 20.9,
       "duration": 2.1,
       "anim": "rise",

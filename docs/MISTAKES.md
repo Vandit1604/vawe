@@ -179,6 +179,61 @@ you already noticed. (This is the concrete case for building the vision judge, #
 
 ---
 
+## 16. The SITE cropped the videos it was selling (`object-fit: cover`)
+
+**What went wrong:** every `<video>` on the marketing site used `object-fit:cover`, so any clip whose
+container ratio didn't match its file got cropped. The homepage gallery's hero clip lost ~28% of its
+width. Worst: the showcase's "any aspect" row — whose entire claim is *one source renders 16:9, 9:16,
+1:1* — stretched all three into equal-height flex boxes and cropped each one. The feature was refuted
+by its own demo.
+**Root cause:** `cover` is the reflex default for images, where cropping a photo is harmless. A video
+out of this engine is a **composed frame** — every coordinate was placed by the layout gates against a
+known safe box. Cropping it throws away the composition the renderer just proved correct.
+**The fix:** `object-fit:contain` on every video, and containers carry the video's TRUE ratio. For the
+aspect trio, each box's `flex-grow` is set to its own ratio (1.778 / 0.563 / 1.0) so widths scale to
+the container and heights land equal automatically — the shapes ARE the demo.
+**The rule: never crop a rendered frame downstream.** If a box and a clip disagree on shape, the box
+is wrong. Verify by measuring, not squinting: compare `videoWidth/videoHeight` to the rendered
+`getBoundingClientRect()` ratio and assert the mismatch is ~0.
+
+## 17. Widening a gate to "everything" made it flag decoration (safe-zone false positives)
+
+**What went wrong:** the safe-zone/overflow checks were widened from `[data-layer=critical]` to every
+`.hs-layer` (so a corner watermark would be caught). That immediately hard-failed three of four films —
+and **not one hit was real**: stripe's blurred gradient blob (`y:-360`, meant to bleed), linear's `glow`
+bloom, creed's 4px hairline rule.
+**Root cause:** the widening assumed every layer is content. Decoration routinely leaves the frame *by
+design* — that's what makes it decoration.
+**The fix:** the safe box governs **legible content**, so a layer only earns the check when it carries a
+text node or an image (`carriesContent()` in `verify/audit.mjs`). Scoping back to `critical` would have
+been the wrong fix — it would undo the widening and re-hide the watermark case.
+**The rule: when a widened gate fires, triage before you fix.** Ask of each hit "what IS this element?"
+The right discriminator is usually a property of the thing (does it carry content?), not the label
+someone gave it (`critical: true/false`). A gate that cries wolf on decoration gets ignored, and then
+it catches nothing. Removing the noise here also **surfaced a real hit** that had been hiding behind
+linear's glow.
+
+## 18. Six scenes couldn't reproduce their own video (`aspect` lived in the CLI, not the JSON)
+
+**What went wrong:** re-rendering `showcase-{type,cuts,stings,data,ui}` + `hero-site` straight from their
+JSON produced **portrait 1080×1920** videos, which then overwrote the site's landscape assets. Every step
+reported success.
+**Root cause:** those scenes are authored for landscape (`showcase-data` puts a stat at `x:1330`, off-frame
+in a 1080-wide portrait) but declared **no `aspect` and no `orientation`**. The landscape renders only ever
+existed because a human passed `--aspect 16:9` on the command line. The shape lived in shell history, so
+the JSON was not self-describing — the whole premise is *one JSON → one video*, and these needed a JSON
+plus a flag someone had to remember.
+**The fix:** `"aspect": "16:9"` is now IN each scene. Plus a guard: `scripts/site-assets.mjs` records the
+ratio the site layout expects per asset and refuses to encode a render whose real shape disagrees (>1%).
+`showcase-aspect` — the one scene that legitimately renders three ratios — declares its multi-aspect
+render in the manifest instead.
+**The rule: if a render needs a flag to come out right, that flag belongs in the data.** Anything the JSON
+can't reproduce alone will eventually be regenerated wrong by someone who didn't know the incantation.
+Corollary: a build step that transforms media must **assert the shape it expects**, because a wrong-shaped
+video encodes perfectly happily and ships looking fine to every check that only asks "did ffmpeg exit 0?"
+
+---
+
 ## Tool-accuracy note (see also: the survey in chat)
 
 Tools are accurate for MECHANICAL/precise data (exact hexes, geometry, pixel histograms) and unreliable
