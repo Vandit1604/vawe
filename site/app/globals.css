@@ -84,19 +84,37 @@ a{color:inherit;text-decoration:none}
 /* =========================================================
    HERO (image, Creed-style)
    ========================================================= */
-.hero-wrap{position:relative}
-/* the image runs PAST the hero and past the product frame, then dissolves into the next section.
-   Ending it at the frame's edge butt-joints a hard line straight across the page. */
-.hero-bg{position:absolute;inset:0;bottom:-300px;z-index:0;overflow:hidden;background:#8fb7e8}
-.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
-.hero-bg::after{content:'';position:absolute;inset:0;background:
-  /* A soft white bloom behind the copy block. The contrast ratio was already fine (ink is ~10:1 on
-     the gold), but ratio math averages luminance and cannot see TEXTURE: the sub-headline sat on the
-     busy mountain dots and read noisy. This calms the dots exactly where type sits, without a scrim
-     flattening the whole image. */
-  radial-gradient(120% 68% at 50% 30%, rgba(255,255,255,.86) 0%, rgba(255,255,255,.55) 42%, rgba(255,255,255,0) 78%) top/100% 100% no-repeat,
-  /* bottom dissolve — fixed height so it never depends on the hero's measured height */
-  linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--bg) 88%) bottom/100% 380px no-repeat;}
+.hero-wrap{position:relative;background:var(--bg)}
+
+/* ===== THE DOT ARCH ========================================================================
+   Columns of blue dots hang from the top; they run long at the edges and stop short in the
+   middle, so the cleared arch is exactly where the headline sits. Built from two masks over a
+   gradient, so the DOTS carry the gradient rather than being flat:
+     mask 1  the dot grid itself  → the paint only survives inside dots
+     mask 2  an ellipse rising from the bottom-centre → carves the arch
+   Intersected. Replaces an 880KB image with 0 bytes, and the ink type sits on plain white. */
+.hero-bg{position:absolute;inset:0;bottom:-300px;z-index:0;overflow:hidden;background:var(--bg)}
+/* The field is sized to the HERO, not to .hero-bg's -300px bleed: percentages resolve against the
+   box, so inheriting the tall box pushed the arch and the fade below the fold.
+   Arch solved against the sketch — dots stop ~360px in the middle and ~610px at the edges:
+     rx 62% (900px) · transparent core f=0.6 · f*ry = 625 · centre y = 985  →  ry 127%, cy 120% */
+.hero-dots{position:absolute;left:0;right:0;top:0;height:820px;
+  background:linear-gradient(180deg, #1d4ed8 0%, var(--accent) 38%, #8fc0ff 70%, rgba(143,192,255,0) 96%);
+  -webkit-mask-image:
+    radial-gradient(circle at center, #000 1.7px, transparent 1.9px),
+    radial-gradient(ellipse 62% 140% at 50% 126%, transparent 70%, #000 96%);
+  -webkit-mask-size:27px 27px, 100% 100%;
+  -webkit-mask-repeat:repeat, no-repeat;
+  -webkit-mask-composite:source-in;
+  mask-image:
+    radial-gradient(circle at center, #000 1.7px, transparent 1.9px),
+    radial-gradient(ellipse 62% 140% at 50% 126%, transparent 70%, #000 96%);
+  mask-size:27px 27px, 100% 100%;
+  mask-repeat:repeat, no-repeat;
+  mask-composite:intersect;}
+/* the field dissolves into the next section, same as before */
+.hero-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--bg) 88%) bottom/100% 380px no-repeat;}
 .hero-head{position:relative;z-index:2;text-align:center;padding:34px 0 0}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12.5px;
   letter-spacing:.02em;color:var(--ink);background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);

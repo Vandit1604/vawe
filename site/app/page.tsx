@@ -24,8 +24,8 @@ export default function Home() {
     <>
       {/* ===== HERO ===== */}
       <div className="hero-wrap">
-        <div className="hero-bg">
-          <img src="/assets/hero-landscape.webp" alt="" />
+        <div className="hero-bg" aria-hidden="true">
+          <div className="hero-dots" />
         </div>
         <Header variant="over" />
         <div className="wrap hero-head">

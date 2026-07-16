@@ -1,9 +1,1 @@
-{
-  "hero-landscape.jpg": {
-    "title": "Halftone sunset landscape \u2014 mountains, sun, wildflower meadow",
-    "creator": "Vandit Singh (generated)",
-    "source": "assets/brands/vawe/hero-source.png (1536x1024 native, upscaled to 2880x1620)",
-    "license": "Owned by the project",
-    "note": "The halftone dots are large and smooth, so the 1.87x upscale holds without mush. The sky averages rgb(235,193,95): white text on it is 1.70:1, so the hero type is INK (#0f1620 = 10.66:1), not white, and the dark scrim is gone."
-  }
-}
+{}
