@@ -75,8 +75,7 @@ export default function Home() {
       {/* ===== THE CLAIMS ===== */}
       <section className="section">
         <div className="wrap">
-          <div className="kicker">why vawe</div>
-          <h2 className="h2">Video, as code.</h2>
+          {/* heading included: it has to pin with the cards (see Claims.tsx) */}
           <Claims />
         </div>
       </section>

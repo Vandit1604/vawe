@@ -308,89 +308,95 @@ a{color:inherit;text-decoration:none}
   font-variation-settings:"wdth" var(--wd-display)}
 .lead{color:var(--ink-2);font-size:1.08rem;line-height:1.6;max-width:56ch}
 
-/* ===== THE CLAIMS — sticky scrollytelling ==================================================
+/* ===== THE CLAIMS — a PINNED scroll section ================================================
    Was: three identical 1fr cards, each icon + h3 + p. That is two entries off the ban list at
-   once, and it flattened three DIFFERENT kinds of claim into one shape. Each claim now carries
-   a proof artifact that only makes sense for that claim: determinism shows the same frame
-   hashing twice, agent-native shows prose becoming JSON, any-aspect draws the ratios.
+   once, and it flattened three DIFFERENT kinds of claim into one shape. Each claim now carries a
+   proof diagram that only makes sense for that claim.
 
-   The layout makes that argument structural. The claims scroll; ONE panel stays pinned and
-   swaps to whichever claim you are reading; a cobalt rail fills box by box so the active claim
-   is visibly the one the panel is answering. Reading and proving stay side by side, which three
-   static rows could not do — you had to hold the claim in your head while the eye left it.
+   Then it was a sticky right panel with the claims scrolling past it, which was wrong in a way
+   only the eye catches: the left column travelled, so the whole section moved and the diagrams
+   read as sliding around. Now the entire pane PINS. Nothing translates. Scrolling advances state:
+   the card you are on goes cobalt, the others stay paper, and the diagram swaps to answer it.
+   That is the difference between motion that means something and motion that is just travel.
 
-   Sticky survives here only because .shell rounds with clip-path rather than overflow:hidden.
-   overflow would make .shell a scroll container and pin this to a box that never scrolls.
-   align-self:start matters too: a stretched grid item fills the column and has no slack to
-   stick within. */
-.scrolly{margin-top:38px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.82fr);
-  gap:clamp(24px,5vw,72px);align-items:start}
-.scrolly-steps{border-top:1px solid var(--line)}
+   .pin is the runway; .pin-in is the screen that holds still inside it. The runway's extra height
+   IS the interaction: 250vh gives 150vh of pinned scrolling over three steps, ~50vh each, which is
+   long enough to read a card and short enough not to feel trapped.
 
-/* min-height is the whole mechanism, not padding. A step needs enough scroll distance for the
-   panel to REST on its answer; at natural height these three claims totalled 642px, so all three
-   swaps fired inside one scroll gesture and the panel strobed.
-   It is a ceiling as well as a floor, though: buy more runway than the claim can fill and you get
-   a screen of void per claim, which is the same emptiness this section was rebuilt to remove.
-   38vh is the floor found by measuring: below roughly a third of a viewport the swaps start
-   landing inside a single scroll gesture and the panel strobes again. This section frames the
-   product, it must not become a journey. */
-.step{position:relative;min-height:38vh;display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(30px,4.4vw,52px) clamp(20px,2.4vw,32px) clamp(30px,4.4vw,52px) 0;
-  border-bottom:1px solid var(--line)}
-.step h3{font-size:clamp(1.45rem,2.5vw,2rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;
-  font-variation-settings:"wdth" var(--wd-display);margin-bottom:9px;transition:color .45s var(--ease)}
-.step p{color:var(--ink-2);font-size:15.5px;line-height:1.6;max-width:50ch}
+   Pinning survives here only because .shell rounds with clip-path rather than overflow:hidden.
+   overflow would make .shell a scroll container and pin this to a box that never scrolls. */
+/* ONE knob: --pin-step is how much scroll each claim holds for. Everything else derives from it,
+   so the runway and the sentinels cannot fall out of sync (they did: the sentinel offsets were
+   hardcoded percentages that were only correct for one runway height).
+   runway = one screen for the pane + one step per claim. The pane pins for exactly (runway - 100svh)
+   = 3 steps, which is the whole interaction; the final screen is the section leaving, as any
+   section does. 40svh a step is about one comfortable scroll gesture each. */
+.pin{--pin-step:40svh;--pin-steps:3;
+  position:relative;height:calc(100svh + var(--pin-steps) * var(--pin-step))}
+.pin-in{position:sticky;top:0;min-height:100svh;display:flex;flex-direction:column;
+  justify-content:center;gap:clamp(20px,3.5vh,40px);padding:clamp(40px,7vh,80px) 0}
+.pin-head .kicker{margin-bottom:10px}
+.pin-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+  gap:clamp(24px,4vw,64px);align-items:center;width:100%}
 
-/* The rail sits between the claim and the panel, so it reads as the line connecting the two.
-   Filled for every claim up to the active one (progress, not just a highlight), and the newly
-   active segment draws downward — that is the "moves box by box". */
-.step-rail{position:absolute;top:0;right:0;width:2px;height:100%;background:var(--line)}
-.step-rail::after{content:"";position:absolute;inset:0;background:var(--accent);
-  transform:scaleY(0);transform-origin:top;transition:transform .5s var(--ease)}
-.step[data-on] .step-rail::after{transform:scaleY(1)}
+/* The sentinels: whichever crosses the viewport's middle is the active step, so no scroll
+   listener is needed and no scroll math can drift. Each is 20% of the runway TALL, not a point —
+   a 1px marker against the observer's middle band is two near-zero heights trying to overlap, and
+   it never fired. Tall enough to always cross the band, tiled so exactly one does at a time. */
+.pin-mark{position:absolute;left:0;width:1px;height:var(--pin-step);pointer-events:none}
 
-/* The active claim is marked by COLOUR, not by dimming the other two. Dimming was the obvious
-   move and it is unshippable: --ink-2 body needs opacity >= .74 to hold 4.5:1, and .74 against
-   1.0 is not a perceptible signal. Every opacity that communicates is illegible (.42 measured
-   2.06:1) and every opacity that is legible communicates nothing. De-emphasised text is still
-   text and WCAG does not exempt it.
-   Cobalt on white is 5.17:1, so the marker costs no readability, and it is the accent already
-   carrying the rail, so the active claim and its rail segment light as one thing. */
-.step[data-now] h3{color:var(--accent)}
+.pin-cards{display:grid;gap:12px}
+.pc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;text-align:left;
+  width:100%;padding:clamp(18px,2.2vw,26px);border-radius:14px;cursor:pointer;
+  background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  transition:background .45s var(--ease),border-color .45s var(--ease),color .45s var(--ease),
+    transform .3s var(--ease)}
+.pc:hover{border-color:var(--accent-line);transform:translateY(-1px)}
+/* THE state change. Cobalt fill + white ink: 5.17:1, so it clears AA at both sizes here. */
+.pc[data-on]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc[data-on]:hover{transform:none}
+.pc-n{font-family:var(--font-mono),monospace;font-size:11.5px;padding-top:3px;color:var(--muted);
+  transition:color .45s var(--ease)}
+.pc[data-on] .pc-n{color:#fff}
+.pc-body{display:block}
+.pc-t{display:block;font-size:clamp(1.15rem,1.7vw,1.45rem);font-weight:800;letter-spacing:-.02em;
+  font-variation-settings:"wdth" var(--wd-display);margin-bottom:5px}
+.pc-d{display:block;font-size:14px;line-height:1.55;color:var(--ink-2);transition:color .45s var(--ease)}
+.pc[data-on] .pc-d{color:#fff}
 
-/* The pinned panel. Panes stack in one grid cell, so the stage sizes to the tallest artifact
-   and nothing needs absolute positioning or a hand-set height. */
-/* 40vh, not centred by transform: the panel should sit level with the claim it answers, and the
-   claim is centred in its own 64vh step, so it crosses the middle of the viewport when active. */
-.scrolly-stage{position:sticky;top:34vh;align-self:start;display:grid;justify-items:stretch}
-.stage-in{display:grid;width:100%}
-.stage-pane{grid-area:1/1;opacity:0;transform:translateY(6px);pointer-events:none;
-  transition:opacity .4s var(--ease),transform .4s var(--ease)}
-.stage-pane[data-now]{opacity:1;transform:none}
-/* No caption: the claim it answers is lit directly across from it and the rail points at it, so a
-   label would only say the h3 twice. */
-.scrolly-stage .dg{max-width:440px}
+/* the pinned pane. Panes stack in one grid cell, so the stage sizes to the tallest diagram and
+   nothing needs absolute positioning or a hand-set height. */
+.pin-stage{display:grid;align-self:center}
+.pin-pane{grid-area:1/1;opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.pin-pane[data-on]{opacity:1;transform:none}
+.pin-stage .dg{max-width:560px}
 
-/* mobile: the proof rejoins its claim (nothing to stick beside on a phone) */
-.step-proof{display:none;margin-top:20px}
+/* mobile / no-JS only: the diagram rejoins its claim */
+.pc-proof{display:none;margin-top:16px}
 
 /* ===== THE PROOF DIAGRAMS (components/proofs.tsx) =========================================
    One vocabulary, three diagrams. Cobalt is the only ink (The One Voice Rule); the neutrals are
    the same --line / --bg-2 the rest of the page uses, so these read as drawn by the site rather
    than dropped into it. Text inside an SVG does not inherit the page font, hence the explicit
-   families. Strokes are non-scaling: the wave mark is drawn at scale(3.7) and would otherwise
-   carry an 8px stroke next to the frames' 1.5px. */
+   families. Strokes are non-scaling so the wave mark, which is drawn scaled to each frame's own
+   width, keeps the same hairline as the unscaled geometry beside it. */
 .dg{display:block;width:100%;height:auto;overflow:visible}
 .dg text{font-family:var(--font-mono),monospace}
-.dg-lab{font-size:10.5px;fill:var(--muted);letter-spacing:.01em}
+.dg-lab{font-size:11px;fill:var(--muted);letter-spacing:.01em}
+.dg-lab.is-on{fill:var(--accent);font-weight:600}
+.dg-dim{font-size:9.5px;fill:var(--muted)}
 .dg-hash{font-size:12px;fill:var(--ink-2)}
-.dg-ok{font-size:11px;fill:var(--accent)}
+.dg-hash.is-key{fill:var(--accent);font-weight:600}
 
+/* the filmstrip: paper, with the frame under discussion filled */
+.dg-strip{fill:var(--bg-2);stroke:var(--line);stroke-width:1}
+.dg-perf{fill:var(--bg);stroke:var(--line-2);stroke-width:.8}
 .dg-frame{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dg-frame.is-on{fill:var(--accent)}
 .dg-wave{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
   vector-effect:non-scaling-stroke}
-.dg-eq{stroke:var(--accent);stroke-width:2;stroke-linecap:round}
+.dg-wave.on-fill{stroke:#fff}
 
 .dg-soft{fill:var(--accent-soft);stroke:var(--accent-line);stroke-width:1}
 .dg-card{fill:var(--bg-2);stroke:var(--line);stroke-width:1}
@@ -400,34 +406,44 @@ a{color:inherit;text-decoration:none}
 .dg-k{fill:var(--accent)}
 .dg-s{fill:var(--ink-2)}
 .dg-p{fill:var(--muted)}
+.dg-n{fill:var(--ink-2);font-weight:600}
 
 .dg-chip{fill:var(--accent);stroke:none}
 .dg-chiptx{font-size:11px;fill:#fff}
+.dg-pill{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1}
+.dg-pilltx{font-size:11px;fill:var(--ink-2)}
 /* dashed, and behind the frames: the fan is the relationship, not a thing in its own right */
 .dg-fan{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.55}
 
-/* Below 900 the two columns stop fitting: the panel would be too narrow to read the artifact in,
-   and there is no room beside the text to pin it. So the scrollytelling is dropped rather than
-   shrunk — every claim is simply lit, with its own proof under it. The rail becomes a full
-   progress line down the left, which is the one part that still means something in one column. */
-@media (max-width:900px){
-  .scrolly{grid-template-columns:1fr}
-  .scrolly-stage{display:none}
-  /* min-height buys scroll distance for a panel that no longer exists here — drop it, or every
-     claim becomes a 64vh near-empty screen you have to scroll past. */
-  /* No active claim on mobile: with no panel to point at, marking one is meaningless. */
-  .step{min-height:0;padding:26px 0 26px 22px}
-  .step[data-now] h3{color:var(--ink)}
-  .step-rail{left:0;right:auto}
-  .step-rail::after{transform:scaleY(1)}
-  /* the diagrams scale with their viewBox, so the phone just gets a narrower one */
-  .step-proof{display:block;max-width:440px}
+/* THE UN-PIN. Two audiences, one fallback, because the failure is the same for both:
+   a pinned section is 250vh of runway whose whole point is that JS swaps the state as you cross
+   it. Without that, it is three screens of scrolling past one motionless card.
+   - Below 980 there is no room for a pane beside the cards to pin in the first place.
+   - prefers-reduced-motion: pinning IS motion. A section that refuses to move while the scrollbar
+     says it should is exactly the disconnect between input and view that triggers vestibular
+     symptoms, and it is worse than any fade. Reduced motion must not mean "same trick, no easing".
+   Both get the honest layout: no runway, no pin, every card lit, each diagram under its own claim.
+   (No-JS gets the same, via the <noscript> block in Claims.tsx.) */
+@media (max-width:980px),(prefers-reduced-motion:reduce){
+  .pin{height:auto}
+  .pin-in{position:static;min-height:0;padding:0}
+  .pin-grid{grid-template-columns:1fr;gap:0}
+  .pin-stage{display:none}
+  .pin-mark{display:none}
+  .pin-cards{gap:28px}
+  /* Matched on [data-on], not bare .pc: .pc is (0,1,0) and loses the tie to .pc[data-on] at
+     (0,2,0) no matter how late it appears, so the "active" card stayed cobalt here. With no pin
+     there is no active step, and lighting one at random says otherwise. */
+  .pc,.pc[data-on]{background:var(--bg);border-color:var(--line);color:var(--ink);cursor:default;transform:none}
+  .pc:hover,.pc[data-on]:hover{transform:none;border-color:var(--line)}
+  .pc .pc-n,.pc[data-on] .pc-n{color:var(--muted)}
+  .pc .pc-d,.pc[data-on] .pc-d{color:var(--ink-2)}
+  .pc-proof{display:block;max-width:520px}
 }
-
-/* The swap is CONTENT, not decoration: it still happens, it just does not travel or fade. */
+/* Everything above still transitions on state change for everyone else; only the pin is dropped. */
 @media (prefers-reduced-motion:reduce){
-  .step h3,.step-rail::after,.stage-pane{transition:none}
-  .stage-pane{transform:none}
+  .pc,.pc-n,.pc-d,.pin-pane{transition:none}
+  .pin-pane{transform:none}
 }
 
 /* gallery clips (light frames) */
