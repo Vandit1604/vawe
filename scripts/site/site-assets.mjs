@@ -34,6 +34,12 @@ const MANIFEST = [
   // group      scene                render                    dest                        width  poster  ar
   ['hero',   'hero-site',          'hero-site',              'hero.mp4',                   1920, 2.0, 16 / 9],
 
+  // The hero/footer bookend band. The ONLY contentless scene: no text, no blocks, no stings.
+  // Every other entry in this table demonstrates a capability and therefore has words in it,
+  // which behind a headline read as drifting smudges. Narrow (1280) because the page blurs it
+  // to 30px and multiplies it over cobalt — it is judged on luminance movement, not detail.
+  ['hero',   'site-backdrop',      'site-backdrop',          'backdrop.mp4',               1280, 1.0, 16 / 9],
+
   // homepage gallery strip — same scenes as the showcase rows, smaller
   ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1920, 4.0, 16 / 9],
   ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],

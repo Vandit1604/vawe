@@ -18,9 +18,10 @@ const families = Array.from(new Set((blocks as Block[]).map((b) => b.family))).l
 
 export default function Blocks() {
   return (
-    <>
+    <div className="shell">
       <Header active="blocks" />
       <div className="wrap">
+        <main id="main">
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> block registry
@@ -53,9 +54,10 @@ export default function Blocks() {
             ))}
           </div>
         </section>
+        </main>
 
         <Footer note="theme-aware, deterministic blocks" />
       </div>
-    </>
+    </div>
   );
 }

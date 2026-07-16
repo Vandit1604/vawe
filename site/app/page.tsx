@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Header } from "./components/Header";
 import { HeroEditor } from "./components/HeroEditor";
+import { Clip } from "./components/Clip";
 import { Footer } from "./components/Footer";
 
 const CODE = `<span class="p">{</span> <span class="k">"module"</span><span class="p">:</span> <span class="s">"scene"</span><span class="p">,</span> <span class="k">"theme"</span><span class="p">:</span> <span class="s">"vawe"</span><span class="p">,</span>
@@ -13,35 +14,85 @@ const CODE = `<span class="p">{</span> <span class="k">"module"</span><span clas
       <span class="k">"preset"</span><span class="p">:</span> <span class="a">"up"</span><span class="p">,</span> <span class="k">"size"</span><span class="p">:</span> <span class="a">92</span> <span class="p">}</span>
   <span class="p">]</span> <span class="p">}</span>`;
 
-const FEATURES = [
-  { t: "Deterministic", d: "renderFrame(n) is pure in n. Same JSON, same bytes, any render order. Every video is reproducible and diff-able.", i: "M20 6 9 17l-5-5" },
-  { t: "Agent-native", d: "Authored from a schema and a taste system, not clicked together in a UI. One open canvas of composable primitives.", i: "M12 2v20M2 12h20" },
-  { t: "Any aspect", d: "One source renders 16:9, 9:16, 1:1, and 4:5 in a single pass. Every platform ratio from the same scene.", i: "M3 3h18v18H3zM9 3v18M15 3v18" },
+/* Each claim carries its OWN kind of evidence — that difference is the design. A shared shape
+   here would say these three facts are interchangeable, and they are not. */
+const CLAIMS = [
+  {
+    t: "Deterministic",
+    d: "renderFrame(n) is pure in n. Same JSON, same bytes, any render order. Every video is reproducible and diff-able.",
+    proof: (
+      <div className="pf pf-hash" aria-hidden="true">
+        <i>
+          <span>frame 412</span>
+          <b>a4f0…9c1</b>
+        </i>
+        <i>
+          <span>frame 412, re-rendered</span>
+          <b>a4f0…9c1</b>
+        </i>
+        <i className="eq">identical ✓</i>
+      </div>
+    ),
+  },
+  {
+    t: "Agent-native",
+    d: "Authored from a schema and a taste system, not clicked together in a UI. One open canvas of composable primitives.",
+    proof: (
+      <div className="pf pf-say" aria-hidden="true">
+        <q>“a 15s launch film, cobalt, ends on the wordmark”</q>
+        <code>{`{ "module": "scene", "theme": "vawe",\n  "layers": [ … ] }`}</code>
+      </div>
+    ),
+  },
+  {
+    t: "Any aspect",
+    d: "One source renders 16:9, 9:16, 1:1, and 4:5 in a single pass. Every platform ratio from the same scene.",
+    proof: (
+      <div className="pf pf-ar" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <span>one scene</span>
+      </div>
+    ),
+  },
 ];
 
 export default function Home() {
   return (
-    <>
-      {/* ===== HERO ===== */}
+    <div className="shell">
+      {/* ===== HERO =====
+          The band is the engine's own output under a cobalt scrim: the site's loudest surface is
+          literally the product. Structure is borrowed from a comp that put a stock sky here — the
+          sky is the part anyone can buy, so ours renders instead. The editor floats over the V, so
+          the eye lands on the live thing rather than the backdrop. */}
+      <Header variant="pill" />
+      <main id="main">
       <div className="hero-wrap">
-        <Header variant="over" />
-        <div className="wrap hero-head">
-          <span className="eyebrow rise">
-            <span className="dot" />
-            deterministic motion-graphics engine
-          </span>
-          <h1 className="rise d1">
-            One JSON,
-            <br />
-            one video.
-          </h1>
-          <p className="sub rise d2">
-            A deterministic motion-graphics engine. Write a scene, render a frame-perfect video in any aspect ratio.
-          </p>
-          <div className="hero-cta rise d3">
-            <a className="btn btn-white" href="https://github.com/Vandit1604/vawe">
-              Get early access <span className="arw">→</span>
-            </a>
+        <div className="bookend tap hero-band">
+          {/* backdrop = formats/scene/site-backdrop.json: an ambient shader field with ZERO text
+              layers, rendered for this band. Never swap in a capability clip — those all contain
+              copy (stings.mp4 is the word "proof." animating), which blurs into drifting smudges
+              behind the headline. See DESIGN.md → The Bookend Rule. */}
+          <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
+          <div className="wrap hero-head on-accent">
+            <span className="eyebrow rise">
+              <span className="dot" />
+              deterministic motion-graphics engine
+            </span>
+            <h1 className="rise d1">
+              One JSON,
+              <br />
+              one video.
+            </h1>
+            <p className="sub rise d2">
+              A deterministic motion-graphics engine. Write a scene, render a frame-perfect video in any aspect ratio.
+            </p>
+            <div className="hero-cta rise d3">
+              <a className="btn btn-white" href="https://github.com/Vandit1604/vawe">
+                Get early access <span className="arw">→</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -50,7 +101,7 @@ export default function Home() {
           <HeroEditor />
           {/* mobile: no code pane — you are not typing JSON on a phone. Same scene, rendered. */}
           <figure className="hero-mobile">
-            <video src="/assets/hero.mp4" poster="/assets/hero.jpg" autoPlay loop muted playsInline />
+            <Clip src="/assets/hero.mp4" poster="/assets/hero.jpg" />
             <figcaption className="hm-cta">
               <span>rendered from one JSON</span>
               <Link href="/editor">open the editor →</Link>
@@ -61,21 +112,19 @@ export default function Home() {
 
       <div className="hero-foot" />
 
-      {/* ===== FEATURES ===== */}
+      {/* ===== THE CLAIMS ===== */}
       <section className="section">
         <div className="wrap">
           <div className="kicker">why vawe</div>
           <h2 className="h2">Video, as code.</h2>
-          <div className="feat3">
-            {FEATURES.map((f) => (
-              <div className="fcard" key={f.t}>
-                <div className="ic">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d={f.i} />
-                  </svg>
+          <div className="claims">
+            {CLAIMS.map((c) => (
+              <div className="claim" key={c.t}>
+                <div>
+                  <h3>{c.t}</h3>
+                  <p>{c.d}</p>
                 </div>
-                <h3>{f.t}</h3>
-                <p>{f.d}</p>
+                {c.proof}
               </div>
             ))}
           </div>
@@ -96,19 +145,19 @@ export default function Home() {
           </div>
           <div className="strip">
             <div className="clip big">
-              <video src="/assets/stings.mp4" poster="/assets/stings.jpg" autoPlay loop muted playsInline />
+              <Clip src="/assets/stings.mp4" poster="/assets/stings.jpg" />
               <span className="lab">
                 <b>stings</b> · shader effects
               </span>
             </div>
             <div className="clip">
-              <video src="/assets/type.mp4" poster="/assets/type.jpg" autoPlay loop muted playsInline />
+              <Clip src="/assets/type.mp4" poster="/assets/type.jpg" />
               <span className="lab">
                 <b>type</b> · kinetic typography
               </span>
             </div>
             <div className="clip">
-              <video src="/assets/cuts.mp4" poster="/assets/cuts.jpg" autoPlay loop muted playsInline />
+              <Clip src="/assets/cuts.mp4" poster="/assets/cuts.jpg" />
               <span className="lab">
                 <b>cuts</b> · transitions
               </span>
@@ -117,23 +166,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== END ===== */}
-      <section className="section end">
-        <div className="wrap">
-          <h2 className="h2">Compose a scene. Render it. Ship it.</h2>
-          <p className="lead">Free for individuals and small teams. One JSON in, one frame-perfect video out.</p>
-          <div className="hero-cta">
-            <a className="btn btn-primary" href="https://github.com/Vandit1604/vawe">
-              ★ Star on GitHub
-            </a>
-            <Link className="btn btn-ghost" href="/features">
-              Explore features
-            </Link>
-          </div>
-        </div>
-      </section>
+      </main>
 
-      <Footer />
-    </>
+      <Footer bookend />
+    </div>
   );
 }

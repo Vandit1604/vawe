@@ -61,6 +61,8 @@ export function ScenePlayer({ json, onError }: { json: string; onError: (e: stri
 
     const el = document.createElement("iframe");
     el.className = "sp-frame";
+    // WCAG 4.1.2 — the most important element on the page was announcing as an unnamed frame.
+    el.title = "Live render of the scene JSON";
     const aspect = parsed?.aspect || "16:9";
     el.src = `/formats/scene/scene.html?data=${encodeURIComponent(blob)}&fps=30&aspect=${encodeURIComponent(aspect)}`;
 

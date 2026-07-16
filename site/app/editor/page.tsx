@@ -9,9 +9,10 @@ export const metadata: Metadata = {
 
 export default function EditorPage() {
   return (
-    <>
+    <div className="shell">
       <Header />
       <div className="wrap">
+        <main id="main">
         <div className="phead">
           <div className="kicker">
             <span className="dot" /> editor
@@ -31,7 +32,8 @@ export default function EditorPage() {
           </p>
         </div>
         <EditorClient />
+        </main>
       </div>
-    </>
+    </div>
   );
 }

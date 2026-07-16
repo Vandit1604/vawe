@@ -12,9 +12,10 @@ export const metadata: Metadata = {
 
 export default function Features() {
   return (
-    <>
+    <div className="shell">
       <Header active="features" />
       <div className="wrap">
+        <main id="main">
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> features
@@ -31,7 +32,8 @@ export default function Features() {
             {FEATURES.map((f) => (
               <Link className="flink" href={`/features/${f.slug}`} key={f.slug}>
                 <div className="fk">{f.kicker}</div>
-                <h3>{f.title}</h3>
+                {/* h2, not h3: these sit directly under the page h1 with no intermediate level. */}
+                <h2>{f.title}</h2>
                 <p>{f.tagline}</p>
                 <div className="go">
                   Explore <span className="arw">→</span>
@@ -40,9 +42,10 @@ export default function Features() {
             ))}
           </div>
         </section>
+        </main>
 
         <Footer note="one open canvas of primitives" />
       </div>
-    </>
+    </div>
   );
 }

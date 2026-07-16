@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Anybody, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const sans = Space_Grotesk({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+// Anybody carries a real wdth axis (50-150) alongside wght (100-900). The width axis is the point:
+// a motion engine's own type should be able to move. See DESIGN.md → The Width Is Motion Rule.
+const sans = Anybody({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#14161a" };
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
+import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { SourceViewer } from "../components/SourceViewer";
 import LINES from "../../lib/scene-lines.json";
@@ -34,9 +35,10 @@ const ROWS: Row[] = [
 
 export default function Showcase() {
   return (
-    <>
+    <div className="shell">
       <Header active="showcase" />
       <div className="wrap">
+        <main id="main">
         <section className="phead">
           <span className="kicker">
             <span className="dot" /> showcase
@@ -54,7 +56,7 @@ export default function Showcase() {
             {FILMS.map((f) => (
               <figure className="filmcard" key={f.slug}>
                 <div className="fmedia">
-                  <video src={`/assets/films/${f.slug}.mp4`} poster={`/assets/films/${f.slug}.jpg`} autoPlay loop muted playsInline />
+                  <Clip src={`/assets/films/${f.slug}.mp4`} poster={`/assets/films/${f.slug}.jpg`} />
                 </div>
                 <figcaption>
                   <div className="fbrand">
@@ -76,11 +78,10 @@ export default function Showcase() {
           <p>The films above are composed from these primitives. Each one is a capability you can reach for by name.</p>
         </div>
 
-        <main>
           {ROWS.map((r) => (
             <div className={r.flip ? "row flip" : "row"} key={r.src}>
               <div className="media">
-                <video src={`/assets/showcase/${r.src}.mp4`} poster={`/assets/showcase/${r.src}.jpg`} autoPlay loop muted playsInline />
+                <Clip src={`/assets/showcase/${r.src}.mp4`} poster={`/assets/showcase/${r.src}.jpg`} />
               </div>
               <div className="copy">
                 <div className="num">{r.num}</div>
@@ -96,15 +97,15 @@ export default function Showcase() {
             <div className="media">
               <div className="trio">
                 <div className="ar a169">
-                  <video src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
                   <span>16:9</span>
                 </div>
                 <div className="ar a916">
-                  <video src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
                   <span>9:16</span>
                 </div>
                 <div className="ar a11">
-                  <video src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
                   <span>1:1</span>
                 </div>
               </div>
@@ -117,7 +118,6 @@ export default function Showcase() {
               <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
             </div>
           </div>
-        </main>
 
         <section className="section end">
           <h2 className="h2">
@@ -132,9 +132,10 @@ export default function Showcase() {
             </Link>
           </div>
         </section>
+        </main>
 
         <Footer note="every clip is one JSON scene" />
       </div>
-    </>
+    </div>
   );
 }

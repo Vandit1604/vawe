@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Header } from "../../components/Header";
+import { Clip } from "../../components/Clip";
 import { Footer } from "../../components/Footer";
 import { FEATURES, bySlug } from "../../../lib/features";
 
@@ -34,9 +35,10 @@ export default async function FeatureDetail({ params }: { params: Promise<{ slug
   const isInternalDocs = f.docs.startsWith("/");
 
   return (
-    <>
+    <div className="shell">
       <Header active="features" />
       <div className="wrap">
+        <main id="main">
         <section className="fdetail">
           <Link className="backlink" href="/features">
             ← all features
@@ -51,22 +53,22 @@ export default async function FeatureDetail({ params }: { params: Promise<{ slug
             <div className="demo-media" style={{ background: "transparent", border: "none", boxShadow: "none", padding: 0 }}>
               <div className="trio">
                 <div className="ar a169">
-                  <video src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
                   <span>16:9</span>
                 </div>
                 <div className="ar a916">
-                  <video src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
                   <span>9:16</span>
                 </div>
                 <div className="ar a11">
-                  <video src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" autoPlay loop muted playsInline />
+                  <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
                   <span>1:1</span>
                 </div>
               </div>
             </div>
           ) : f.demo ? (
             <div className="demo-media">
-              <video src={f.demo} poster={f.poster ?? undefined} autoPlay loop muted playsInline />
+              <Clip src={f.demo} poster={f.poster ?? undefined} />
             </div>
           ) : null}
 
@@ -102,9 +104,10 @@ export default async function FeatureDetail({ params }: { params: Promise<{ slug
             </Link>
           </div>
         </section>
+        </main>
 
         <Footer note={f.tag} />
       </div>
-    </>
+    </div>
   );
 }
