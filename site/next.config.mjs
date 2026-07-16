@@ -16,8 +16,14 @@ const nextConfig = {
   output: "standalone",
   async rewrites() {
     return [
+      // the docs pages (fumadocs already routes these at /docs in its own app)
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },
       { source: "/docs/:path*", destination: `${DOCS_ORIGIN}/docs/:path*` },
+      // its assets, which docs-site emits under assetPrefix "/docs-static" precisely so they do
+      // not collide with this app's own /_next/*
+      { source: "/docs-static/:path*", destination: `${DOCS_ORIGIN}/docs-static/:path*` },
+      // fumadocs' search endpoint
+      { source: "/api/search", destination: `${DOCS_ORIGIN}/api/search` },
     ];
   },
 };
