@@ -3,7 +3,7 @@
 // decode); instead we pre-extract the video to a PNG frame sequence + a manifest, and the `clip` layer
 // swaps a preloaded <img> src per frame. Frames are downscaled to the display width to stay light.
 //
-//   node scripts/gen-clip.mjs engine/assets/gen/city.mp4 city            # → engine/assets/gen/city/
+//   node scripts/gen-clip.mjs assets/gen/city.mp4 city            # → assets/gen/city/
 //   node scripts/gen-clip.mjs in.mp4 city --fps 30 --w 720
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,7 @@ const opt = (k, d) => { const i = rest.indexOf(k); return i >= 0 ? rest[i + 1] :
 const fps = Number(opt('--fps', 30));
 const W = Number(opt('--w', 720));
 
-const outDir = path.join('engine/assets/gen', name);
+const outDir = path.join('assets/gen', name);
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 

@@ -1,4 +1,4 @@
-// Slice the rendered `make catalog` pages (engine/out/_catalog-N.mp4) into one still per block
+// Slice the rendered `make catalog` pages (out/_catalog-N.mp4) into one still per block
 // → site/public/assets/blocks/<name>.png, in blocks.json (grid) order. The catalog lays out 6 blocks
 // per page on a 3x2 grid (see scripts/blocks-catalog.mjs); we grab a settled frame and crop each cell.
 import fs from "node:fs";
@@ -13,7 +13,7 @@ const pages = Math.ceil(grid.length / PER);
 let done = 0, miss = 0;
 
 for (let p = 1; p <= pages; p++) {
-  const mp4 = `engine/out/_catalog-${p}.mp4`;
+  const mp4 = `out/_catalog-${p}.mp4`;
   if (!fs.existsSync(mp4)) { console.error(`missing ${mp4}`); miss += PER; continue; }
   for (let i = 0; i < PER; i++) {
     const block = grid[(p - 1) * PER + i];

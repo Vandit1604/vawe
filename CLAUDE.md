@@ -18,7 +18,7 @@ renderer unless explicitly asked.
 
 ```bash
 make list                              # shows the scene module + its schema/sample
-./bin/vawe path/to/video.json     # module read from JSON → engine/out/<name>.mp4
+./bin/vawe path/to/video.json     # module read from JSON → out/<name>.mp4
 make video D=path/to/video.json        # same, via make   (add --draft to bin/vawe for fast no-grain)
 ```
 
@@ -78,7 +78,7 @@ it must be clean before you render.
 **Always prefer a real image.** Order of preference:
 1. **Captured real UI** — `make capture` (a live component) is the highest-taste source.
 2. **Free/openly-licensed images** — brand logos `curl https://cdn.simpleicons.org/<slug>/<hex>` →
-   `engine/assets/icons/`; flags `flagcdn.com/<iso2>.svg` → `engine/assets/flags/`; CC0/CC-BY photos
+   `assets/icons/`; flags `flagcdn.com/<iso2>.svg` → `assets/flags/`; CC0/CC-BY photos
    via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
 3. **Drawn icons** — `svgIcon(name)`. 4. **Generated cards** — `make assets`. 5. **Emoji** — last resort.
 

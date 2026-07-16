@@ -65,7 +65,7 @@ make `group` render image children, then simplify the affected videos.
 
 **What:** white monochrome logos (anthropic/github/markdown) were invisible on the white content bg.
 **Root cause:** grabbed the wrong monochrome variant for the surface.
-**Fix:** keep both variants in `engine/assets/icons/` — light (`#f3f3f0`) for dark bgs, `-dark`
+**Fix:** keep both variants in `assets/icons/` — light (`#f3f3f0`) for dark bgs, `-dark`
 (`#0e0e0d`) for white bgs — and pick by the beat's background. (A dark logo on white, a light logo on
 blue.)
 

@@ -60,7 +60,7 @@ const beats = bounds.map((t0, i) => ({ i, t0, t1: i + 1 < bounds.length ? bounds
 // optional source sections for the fidelity column
 let sections = [];
 if (vs) {
-  try { sections = JSON.parse(fs.readFileSync(path.join(ROOT, 'engine/assets/brands', vs, 'sections', 'sections.json'), 'utf8')).sections; }
+  try { sections = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/brands', vs, 'sections', 'sections.json'), 'utf8')).sections; }
   catch { console.warn(`  ⚠ --vs ${vs}: no sections.json (run: make sections URL=… NAME=${vs}) — skipping fidelity column`); }
 }
 

@@ -5,7 +5,7 @@
 // true average luminance, not one section's. Writes a swatch card to /tmp/palette.png. NOT a
 // substitute for looking: confirm against the screenshots + the make beats VS=<brand> fidelity gate.
 //
-//   node scripts/palette.mjs engine/assets/brands/<brand>/sections   # whole page (recommended)
+//   node scripts/palette.mjs assets/brands/<brand>/sections   # whole page (recommended)
 //   node scripts/palette.mjs path/to/one-screenshot.png              # single image
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';

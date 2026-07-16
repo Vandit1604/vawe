@@ -6,7 +6,7 @@
 //   make sheet NAME=linear            → /tmp/sheet.png  (one tall contact sheet)
 //   make sheet NAME=linear SERVE=1    → live in your browser (real fonts/assets, scrollable)
 //
-// Reads every engine/assets/brands/<brand>/components/*.json ({html,w,h,fonts}) — the captures.
+// Reads every assets/brands/<brand>/components/*.json ({html,w,h,fonts}) — the captures.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,7 +22,7 @@ const themeName = flag('--theme', brand);
 let bg = '#0a0a0c';
 try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch {}
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'components');
+const dir = path.join(ROOT, 'assets/brands', brand, 'components');
 if (!fs.existsSync(dir)) { console.error(`✗ no components for "${brand}" — run: make capture …  (dir: ${path.relative(ROOT, dir)})`); process.exit(1); }
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
 if (!files.length) { console.error(`✗ no captured components in ${path.relative(ROOT, dir)}`); process.exit(1); }

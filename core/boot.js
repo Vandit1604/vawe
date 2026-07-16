@@ -265,7 +265,7 @@ export async function boot(build) {
     if (lottieSrcs.size) {
       // load the runtime ONLY when a scene uses it (no 168KB parse tax on text-only renders). Before the
       // virtual clock so no rAF is captured at load; onerror resolves so a missing lib degrades, not hangs.
-      if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/engine/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+      if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
       for (const p of lottieSrcs) { try { window.__lottie[p] = await (await fetch(p)).json(); } catch (e) {} }
     }
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time

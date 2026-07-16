@@ -33,7 +33,7 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 ```bash
 # prerequisites: Go 1.21+, Node 18+, ffmpeg, a Chrome/Chromium
 make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
-./bin/vawe formats/scene/sample.json    # → engine/out/sample.mp4
+./bin/vawe formats/scene/sample.json    # → out/sample.mp4
 make video D=formats/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
 ```
 
@@ -96,8 +96,9 @@ formats/scene/   scene.html (thin orchestrator) · schema.json (the contract) ·
 themes/          brand palettes + fonts + motion personality (theme-contract.js defines the shape)
 cmd/render,      the Go render service: chromedp capture · ffmpeg encode/mux · audio mixer · queue
   internal/
-engine/assets/   fonts · vendored runtimes (lottie) · brand asset packs (house-style.md committed)
-engine/out/      rendered mp4s (gitignored)
+assets/          fonts · icons · vendored runtimes (lottie) · music/sfx · brand packs
+                 (served at /assets/… — the browser fetches fonts from here)
+out/             rendered mp4s (gitignored)
 
 scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
   gates/           prove it is good — lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
@@ -112,7 +113,7 @@ docs/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JU
 
 ```bash
 # render
-make video D=<file> [ASPECT=9:16,1:1]   render one JSON → engine/out/<name>.mp4  (--draft / --no-grain)
+make video D=<file> [ASPECT=9:16,1:1]   render one JSON → out/<name>.mp4  (--draft / --no-grain)
 make list                               formats + their schema/sample
 
 # taste

@@ -2,7 +2,7 @@
 // A deterministic palette derived from the title gives each card a distinct, on-brand look:
 // dark→mid gradient + soft grain + vignette + accent frame + balanced wrapped title.
 // Use as a library (import { card, slugify }) or a CLI:
-//   node scripts/cards.mjs "Quantum Computing" --sub "the next frontier" --out engine/assets/cards/qc.svg
+//   node scripts/cards.mjs "Quantum Computing" --sub "the next frontier" --out assets/cards/qc.svg
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -70,7 +70,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const title = args.find((a) => !a.startsWith('--')) || 'Untitled';
   const get = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
-  const out = get('--out') || `engine/assets/cards/${slugify(title)}.svg`;
+  const out = get('--out') || `assets/cards/${slugify(title)}.svg`;
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, card({ title, subtitle: get('--sub') || '' }));
   console.log(`✓ card → ${out}`);

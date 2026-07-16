@@ -27,7 +27,7 @@ go back and lock it.
 
 ## Step 0 — Is this brand already known? Read its house style FIRST
 
-Before any study, check `engine/assets/brands/<brand>/house-style.md`. If it exists, **READ IT and treat
+Before any study, check `assets/brands/<brand>/house-style.md`. If it exists, **READ IT and treat
 it as the locked Design Read** — the brand's remembered taste (dominance, faces, palette, motion, shape,
 signature details, NEVERs). Do NOT re-derive what it already states; only study what it leaves open. This
 is the per-brand memory that keeps every video for a brand consistent. If it's missing, do the full study
@@ -70,7 +70,7 @@ palette to the contract keys). Do the study, literally:
 make brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
 make sections URL=… NAME=…                              # screenshot every section (the taste lives here)
 make lookbook URL=… NAME=…                              # full-page + viewport screenshots
-make palette IMG=engine/assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
+make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
 ```
 
 **`make brandspec` is the source of truth for TYPE + declared COLOURS — read it, don't guess.** It gives the
@@ -140,7 +140,7 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
 - **Easing = physics**: entrances decelerate (ease-out family), exits accelerate (rush), ambient
   loops sinusoidal. Never linear on visible moves.
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
-  or a Lucide UI icon (`engine/assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
+  or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
   named things are a missed layer of craft.
 - **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
   site. A plain/flat site (creed) gets a plain field (`plain`/`paper`/`accentPlain`), never invented

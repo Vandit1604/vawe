@@ -109,8 +109,9 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	}
 
 	formatDir := filepath.Join(repoRoot, "formats", module)
-	engineRoot := filepath.Join(repoRoot, "engine")
-	hasAudio := audio.Render(df.Audio, meta.Duration, meta.Stings, meta.SFX, formatDir, engineRoot, tmpAudio)
+	// assets/ lives at the repo root now (it was engine/assets). The resolver joins base+path and
+	// falls back to base+"assets"+file, so the base IS the repo root.
+	hasAudio := audio.Render(df.Audio, meta.Duration, meta.Stings, meta.SFX, formatDir, repoRoot, tmpAudio)
 	if hasAudio {
 		fmt.Println("▶ muxing audio…")
 		if err := encode.Mux(tmpVideo, tmpAudio, out); err != nil {

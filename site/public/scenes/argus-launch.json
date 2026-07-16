@@ -32,7 +32,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/argus/mascot.png",
+      "src": "/assets/brands/argus/mascot.png",
       "x": 813.6,
       "y": 320,
       "w": 292.8,
@@ -887,7 +887,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/argus/mascot.png",
+      "src": "/assets/brands/argus/mascot.png",
       "x": 868.5,
       "y": 320,
       "w": 183,

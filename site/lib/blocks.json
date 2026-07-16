@@ -259,7 +259,7 @@
    "size": 19,
    "lines": [
     "./bin/vawe video.json",
-    "✓ engine/out/video.mp4"
+    "✓ out/video.mp4"
    ]
   }
  },

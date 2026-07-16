@@ -1,7 +1,7 @@
 // scripts/house-style.mjs — scaffold a brand's persisted DESIGN READ as declarative markdown, so the
 // planning skill reads taste instead of re-deriving it every video (the another engine "house style" pattern).
 // Measured facts (faces, palette, motion, dominance) are auto-filled from themes/<name>.json; the
-// judgment lines (<…>) are yours to sharpen from the site study. Writes engine/assets/brands/<name>/house-style.md.
+// judgment lines (<…>) are yours to sharpen from the site study. Writes assets/brands/<name>/house-style.md.
 //
 // Usage: node scripts/house-style.mjs <brand>            (theme = themes/<brand>.json)
 //        node scripts/house-style.mjs <brand> <theme>    (explicit theme name)
@@ -22,7 +22,7 @@ const luma = (h) => { try { let s = String(h).replace('#', ''); if (s.length ===
 const dominance = luma(C.bg) > 0.5 ? 'light-first' : 'dark-first';
 const motionFeel = (M.bounce ?? 0) > 0.1 ? 'playful (has bounce)' : (M.settle ?? 0.5) < 0.35 ? 'punchy (snaps, no bounce)' : 'calm (long settle)';
 
-const dir = path.join('engine', 'assets', 'brands', brand);
+const dir = path.join('assets', 'brands', brand);
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, 'house-style.md');
 const keep = fs.existsSync(out); // don't clobber hand-sharpened judgment on re-run — only refresh a fenced block
@@ -83,7 +83,7 @@ ${measured}
 - <e.g. gradients · centered heroes · Inter · stock imagery · em-dashes on screen>
 
 ## Assets
-- logo/marks + \`sections/\` + \`photos/\` under \`engine/assets/brands/${brand}/\`
+- logo/marks + \`sections/\` + \`photos/\` under \`assets/brands/${brand}/\`
 `;
 
 fs.writeFileSync(out, body);

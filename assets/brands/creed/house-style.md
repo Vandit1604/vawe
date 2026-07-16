@@ -42,4 +42,4 @@
 - Gradients · centered hero blocks (asymmetry instead) · Inter or any generic sans · stock imagery · em-dashes on screen · shadows on cards.
 
 ## Assets
-- logo/marks + `sections/` + `photos/` under `engine/assets/brands/creed/`
+- logo/marks + `sections/` + `photos/` under `assets/brands/creed/`

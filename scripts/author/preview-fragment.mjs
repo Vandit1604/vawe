@@ -1,7 +1,7 @@
 // preview-fragment.mjs — the "is this HTML doing what I want?" loop. Author a hand-written fragment
 // (a hero card, a testimonial, a title block), preview it STANDALONE on the theme background at frame
 // scale, and actually LOOK at it — before it disappears into a 900-frame render. Reuses the repo http
-// server so /engine/assets/… and @font-face URLs resolve exactly as they do at render time.
+// server so /assets/… and @font-face URLs resolve exactly as they do at render time.
 //
 //   node scripts/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
 //   make preview HTML=path/to/frag.html THEME=linear

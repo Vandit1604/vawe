@@ -16,7 +16,7 @@ data.json ──► cmd/render (Go) ──► chromedp: N headless Chrome tabs
                                      ▼
                               internal/audio  (Go PCM mixer: music + sfx cues + VO duck)
                                      ▼
-                              internal/encode.Mux ──► engine/out/<name>.mp4
+                              internal/encode.Mux ──► out/<name>.mp4
 ```
 
 The **load-bearing invariant**: `renderFrame(n)` is pure in `n` (byte-identical regardless of order),
@@ -62,7 +62,7 @@ which is what makes the sharded capture correct. Guarded by `make probe`.
 
 ```
 make list                 # formats + where schema/sample live
-make video D=…            # render one JSON → engine/out/<name>.mp4
+make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look M=… / frame M=… N=…   # storyboard / one frame
 make lib-test             # motion-primitive asserts (instant)

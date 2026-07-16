@@ -1,5 +1,5 @@
 # The site image needs: scripts/ core/ themes/ formats/scene/{scene.html,schema.json}
-# engine/assets/{icons,vendor} and site/. Everything else is render-only or local build output.
+# assets/{icons,vendor} and site/. Everything else is render-only or local build output.
 **/node_modules
 **/.next
 **/.source
@@ -7,13 +7,13 @@
 .claude
 
 # render artifacts + render-only assets (the browser never touches these; Go mixes audio at encode)
-engine/out
-engine/assets/music
-engine/assets/sfx
-engine/assets/fonts
-engine/assets/brands
-engine/assets/plinth
-engine/assets/flags
+out
+assets/music
+assets/sfx
+assets/fonts
+assets/brands
+assets/plinth
+assets/flags
 
 # not part of the site image
 docs-site

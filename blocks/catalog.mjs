@@ -61,7 +61,7 @@ export const CATALOG = [
   // ── namespaced variants: distinct registry entries built PURELY from preset props (no factory code).
   //    This is the cheapest way to grow the arsenal — a data row is a new named block.
   { name: 'codeBlock.light', family: 'codeBlock', blurb: 'code card, light surface',
-    props: { w: 540, dark: false, label: 'terminal', size: 19, lines: ['./bin/vawe video.json', '✓ engine/out/video.mp4'] } },
+    props: { w: 540, dark: false, label: 'terminal', size: 19, lines: ['./bin/vawe video.json', '✓ out/video.mp4'] } },
   { name: 'callout.info', family: 'callout', blurb: 'info strip (blurple)',
     props: { w: 540, text: 'Layers compose from a single canvas.', tone: 'info' } },
   { name: 'callout.warn', family: 'callout', blurb: 'warning strip (terracotta)',

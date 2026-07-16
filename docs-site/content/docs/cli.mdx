@@ -12,12 +12,12 @@ The renderer is a single Go binary, built by `make build`:
 ./bin/vawe formats/scene/my-video.json
 ```
 
-The module is read from the JSON's `"module"` field, and the output defaults to `engine/out/<name>.mp4`. Flags may follow the file.
+The module is read from the JSON's `"module"` field, and the output defaults to `out/<name>.mp4`. Flags may follow the file.
 
 | Flag | Purpose |
 |---|---|
 | `--data` | The scene JSON (also accepted as a positional argument). |
-| `--out` | Output path. Defaults to `engine/out/<name>.mp4`. |
+| `--out` | Output path. Defaults to `out/<name>.mp4`. |
 | `--draft` | Fast encode with no film grain, for iterating. |
 | `--no-grain` | Encode without grain but otherwise full quality. |
 | `--aspect` | Comma-separated ratios to render in one pass, for example `16:9,9:16,1:1`. |
@@ -48,7 +48,7 @@ make clean                              # remove the binary and rendered mp4s
 make look M=scene                       # storyboard the key frames
 make frame M=scene N=42                 # one exact frame
 make beats D=formats/scene/my.json      # first, mid, and last frame of every beat → /tmp/beats.png
-make scrub F=engine/out/my.mp4          # a contact sheet of the whole film
+make scrub F=out/my.mp4          # a contact sheet of the whole film
 ```
 
 ### Assets and previews

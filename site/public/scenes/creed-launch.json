@@ -112,7 +112,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "src": "/assets/brands/creed/agents/claude.svg",
       "x": 169,
       "y": 427,
       "w": 56,
@@ -159,7 +159,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "src": "/assets/brands/creed/agents/chatgpt.svg",
       "x": 1209,
       "y": 407,
       "w": 56,
@@ -205,7 +205,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "src": "/assets/brands/creed/agents/cursor.svg",
       "x": 689,
       "y": 767,
       "w": 56,
@@ -739,7 +739,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "src": "/assets/brands/creed/agents/claude.svg",
       "x": 918,
       "y": 168,
       "w": 72,
@@ -774,7 +774,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "src": "/assets/brands/creed/agents/chatgpt.svg",
       "x": 1283,
       "y": 233,
       "w": 72,
@@ -809,7 +809,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "src": "/assets/brands/creed/agents/cursor.svg",
       "x": 1508,
       "y": 403,
       "w": 72,
@@ -844,7 +844,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/codex.svg",
+      "src": "/assets/brands/creed/agents/codex.svg",
       "x": 1508,
       "y": 613,
       "w": 72,
@@ -879,7 +879,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/devin.svg",
+      "src": "/assets/brands/creed/agents/devin.svg",
       "x": 1283,
       "y": 783,
       "w": 72,
@@ -914,7 +914,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/replit.svg",
+      "src": "/assets/brands/creed/agents/replit.svg",
       "x": 918,
       "y": 848,
       "w": 72,
@@ -949,7 +949,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/v0.svg",
+      "src": "/assets/brands/creed/agents/v0.svg",
       "x": 553,
       "y": 783,
       "w": 72,
@@ -984,7 +984,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/grok.svg",
+      "src": "/assets/brands/creed/agents/grok.svg",
       "x": 328,
       "y": 613,
       "w": 72,
@@ -1019,7 +1019,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/opencode.svg",
+      "src": "/assets/brands/creed/agents/opencode.svg",
       "x": 328,
       "y": 403,
       "w": 72,
@@ -1054,7 +1054,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/claudecode.svg",
+      "src": "/assets/brands/creed/agents/claudecode.svg",
       "x": 553,
       "y": 233,
       "w": 72,
@@ -2086,7 +2086,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/claude.svg",
+      "src": "/assets/brands/creed/agents/claude.svg",
       "x": 500,
       "y": 290,
       "w": 54,
@@ -2104,7 +2104,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/chatgpt.svg",
+      "src": "/assets/brands/creed/agents/chatgpt.svg",
       "x": 1370,
       "y": 290,
       "w": 54,
@@ -2122,7 +2122,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/cursor.svg",
+      "src": "/assets/brands/creed/agents/cursor.svg",
       "x": 500,
       "y": 620,
       "w": 54,
@@ -2140,7 +2140,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/agents/codex.svg",
+      "src": "/assets/brands/creed/agents/codex.svg",
       "x": 1370,
       "y": 620,
       "w": 54,
@@ -2158,7 +2158,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/creed/brandmark.svg",
+      "src": "/assets/brands/creed/brandmark.svg",
       "x": 900,
       "y": 300,
       "w": 120,

@@ -8,7 +8,7 @@ Vawe reads a single JSON file and renders a video from it. No timeline, no edito
 
 ```bash
 ./bin/vawe formats/scene/sample.json
-# → engine/out/sample.mp4
+# → out/sample.mp4
 ```
 
 That is the whole loop. The JSON is the source of truth; the mp4 is a build artifact you can delete and regenerate at any time.
@@ -29,7 +29,7 @@ data.json
   → chromedp: N headless Chrome tabs, each seeks renderFrame(n) → PNG
   → internal/encode: ffmpeg stitches the PNG sequence → H.264, adds film grain
   → internal/audio: a Go PCM mixer builds music + sound effects + voiceover
-  → engine/out/<name>.mp4
+  → out/<name>.mp4
 ```
 
 The output is a 30fps H.264 mp4 with AAC audio, in portrait (1080×1920), landscape (1920×1080), or square. One source can render [every aspect ratio in a single pass](/docs/aspect-ratios).

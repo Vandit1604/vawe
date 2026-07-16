@@ -6,7 +6,7 @@
 //   node scripts/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]
 //   make photos Q="server room" NAME=acme
 //
-// Output: engine/assets/brands/<brand>/photos/<slug>-<i>.jpg + credits.json (license + author + url).
+// Output: assets/brands/<brand>/photos/<slug>-<i>.jpg + credits.json (license + author + url).
 // Taste rule (enforced by the caller, documented here): photos go in CLIPPED frames with a ken
 // burns zoom (layer: {type:'image', src, ken:true}) — never raw full-bleed screenshots of moods.
 import fs from 'node:fs';
@@ -20,7 +20,7 @@ const N = parseInt(flag('--n', '4'), 10);
 const LICENSES = flag('--license', 'cc0,pdm,by');
 if (!query || !brand) { console.error('usage: node scripts/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]'); process.exit(1); }
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'photos');
+const dir = path.join(ROOT, 'assets/brands', brand, 'photos');
 fs.mkdirSync(dir, { recursive: true });
 const slug = query.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
 
@@ -49,6 +49,6 @@ for (const r of results) {
 }
 fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 2) + '\n');
 if (!saved) { console.error('✗ downloads all failed'); process.exit(1); }
-console.log(`→ ${saved} photo(s) in engine/assets/brands/${brand}/photos/ · attribution in credits.json`);
-console.log(`  use: { "type": "image", "src": "/engine/assets/brands/${brand}/photos/${slug}-1.jpg", "w": 900, "h": 560, "ken": true }`);
+console.log(`→ ${saved} photo(s) in assets/brands/${brand}/photos/ · attribution in credits.json`);
+console.log(`  use: { "type": "image", "src": "/assets/brands/${brand}/photos/${slug}-1.jpg", "w": 900, "h": 560, "ken": true }`);
 if (LICENSES.includes('by')) console.log('  ⚠ CC-BY items need visible credit — put creator in a caption or end-card (see credits.json).');

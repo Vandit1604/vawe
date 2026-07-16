@@ -56,10 +56,10 @@ for (const s of all) {
   const slug = slugify(s.name), key = s.name.toLowerCase().trim();
   let to = null, how = '';
   const iso = COUNTRY[key];
-  if (iso) { const dest = path.join(repoRoot, 'engine/assets/flags', iso + '.svg');
-    if (fs.existsSync(dest) || await tryFetch(`https://flagcdn.com/${iso}.svg`, dest)) { to = `/engine/assets/flags/${iso}.svg`; how = 'flag'; } }
-  if (!to) { const dest = path.join(repoRoot, 'engine/assets/icons', slug + '.svg');
-    if (fs.existsSync(dest) || await tryFetch(`https://cdn.simpleicons.org/${slug}`, dest)) { to = `/engine/assets/icons/${slug}.svg`; how = 'logo'; } }
+  if (iso) { const dest = path.join(repoRoot, 'assets/flags', iso + '.svg');
+    if (fs.existsSync(dest) || await tryFetch(`https://flagcdn.com/${iso}.svg`, dest)) { to = `/assets/flags/${iso}.svg`; how = 'flag'; } }
+  if (!to) { const dest = path.join(repoRoot, 'assets/icons', slug + '.svg');
+    if (fs.existsSync(dest) || await tryFetch(`https://cdn.simpleicons.org/${slug}`, dest)) { to = `/assets/icons/${slug}.svg`; how = 'logo'; } }
   if (!to) { const dest = path.join(cardsDir, slug + '.svg'); fs.mkdirSync(cardsDir, { recursive: true });
     fs.writeFileSync(dest, card({ title: s.name })); to = path.relative(fmtDir, dest); how = 'card'; }
   done.set(s.name, to); plan.push({ ...s, to, how });

@@ -13,11 +13,11 @@ const inp = process.argv[2];
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : d; };
 if (!inp) { console.error('usage: node scripts/judge.mjs <scene.json|mp4> [--vs <brand>]'); process.exit(2); }
 
-// resolve the rendered mp4 (from a scene JSON → engine/out/<name>.mp4, or a direct mp4) + the scene for beats.
+// resolve the rendered mp4 (from a scene JSON → out/<name>.mp4, or a direct mp4) + the scene for beats.
 let mp4 = inp, scene = null;
 if (inp.endsWith('.json')) {
   scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
-  mp4 = path.join('engine', 'out', path.basename(inp).replace(/\.json$/, '.mp4'));
+  mp4 = path.join('out', path.basename(inp).replace(/\.json$/, '.mp4'));
 }
 if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at ${mp4} — render first (\`make video D=${inp}\`), then judge.`); process.exit(1); }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
@@ -57,7 +57,7 @@ const filter = tiles.map((_, i) => `[${i}:v]pad=${TW + 4}:${TH + 4}:2:2:white[p$
 ff(['-y', ...tiles.flatMap((t) => ['-i', t]), '-filter_complex', filter, `${dir}/sheet.png`]);
 
 // the rubric = the brand's house-style (the scoring KEY) + the 7 craft dimensions + a verdict template.
-const hsPath = brand && path.join('engine', 'assets', 'brands', brand, 'house-style.md');
+const hsPath = brand && path.join('assets', 'brands', brand, 'house-style.md');
 const houseStyle = hsPath && fs.existsSync(hsPath) ? fs.readFileSync(hsPath, 'utf8') : `(no house-style for "${brand || '?'}" — judge on the craft rubric + general brand-fidelity only)`;
 const rubric = `# Judge sheet — ${path.basename(mp4)} (${tiles.length} key frames, ${landscape ? 'landscape' : 'portrait'})
 

@@ -69,7 +69,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/ui/inbox.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />1.0&nbsp;&nbsp;Intake →",
+      "text": "<img src=\"/assets/icons/ui/inbox.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />1.0&nbsp;&nbsp;Intake →",
       "font": "mono",
       "size": 26,
       "weight": 600,
@@ -258,7 +258,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/ui/map.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />2.0&nbsp;&nbsp;Plan →",
+      "text": "<img src=\"/assets/icons/ui/map.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />2.0&nbsp;&nbsp;Plan →",
       "font": "mono",
       "size": 26,
       "weight": 600,
@@ -466,7 +466,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/ui/bot.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />3.0&nbsp;&nbsp;Build →",
+      "text": "<img src=\"/assets/icons/ui/bot.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />3.0&nbsp;&nbsp;Build →",
       "font": "mono",
       "size": 26,
       "weight": 600,
@@ -567,7 +567,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/ui/git-pull-request.svg\" style=\"width:22px;height:22px;vertical-align:-3px;margin-right:10px;filter:hue-rotate(0deg)\" />PR opened · review ready",
+      "text": "<img src=\"/assets/icons/ui/git-pull-request.svg\" style=\"width:22px;height:22px;vertical-align:-3px;margin-right:10px;filter:hue-rotate(0deg)\" />PR opened · review ready",
       "font": "mono",
       "size": 24,
       "weight": 600,
@@ -600,7 +600,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/githubcopilot.svg\" style=\"width:22px;height:22px;vertical-align:-4px;margin-right:10px\" />GitHub Copilot",
+      "text": "<img src=\"/assets/icons/githubcopilot.svg\" style=\"width:22px;height:22px;vertical-align:-4px;margin-right:10px\" />GitHub Copilot",
       "font": "mono",
       "size": 22,
       "weight": 600,
@@ -617,7 +617,7 @@
     },
     {
       "type": "text",
-      "text": "<img src=\"/engine/assets/icons/cursor.svg\" style=\"width:22px;height:22px;vertical-align:-4px;margin-right:10px\" />Cursor",
+      "text": "<img src=\"/assets/icons/cursor.svg\" style=\"width:22px;height:22px;vertical-align:-4px;margin-right:10px\" />Cursor",
       "font": "mono",
       "size": 22,
       "weight": 600,
@@ -707,7 +707,7 @@
     },
     {
       "type": "image",
-      "src": "/engine/assets/brands/linear/icon.png",
+      "src": "/assets/brands/linear/icon.png",
       "x": 928,
       "y": 300,
       "w": 64,

@@ -639,7 +639,7 @@ export function banner({ x, y, w = 720, text: msg = '', cta = '', icon = '★', 
 }
 
 // spinner — a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
-export function spinner({ x, y, size = 90, src = '/engine/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
+export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
   const out = [{ type: 'lottie', src, x, y, w: size, h: size, loop: true, start, duration: dur }];
   if (label) out.push(text({ text: label, x, y: r2(y + size + 12), font: 'mono', size: 18, color: T.dim, start: r2(start + 0.2), duration: dur }));
   return out;

@@ -315,27 +315,27 @@
       "children": [
         {
           "type": "image",
-          "src": "/engine/assets/icons/amazon.svg",
+          "src": "/assets/icons/amazon.svg",
           "h": 88
         },
         {
           "type": "image",
-          "src": "/engine/assets/icons/nvidia.svg",
+          "src": "/assets/icons/nvidia.svg",
           "h": 88
         },
         {
           "type": "image",
-          "src": "/engine/assets/icons/coinbase.svg",
+          "src": "/assets/icons/coinbase.svg",
           "h": 82
         },
         {
           "type": "image",
-          "src": "/engine/assets/icons/google.svg",
+          "src": "/assets/icons/google.svg",
           "h": 84
         },
         {
           "type": "image",
-          "src": "/engine/assets/icons/shopify.svg",
+          "src": "/assets/icons/shopify.svg",
           "h": 92
         }
       ],
@@ -477,7 +477,7 @@
     {
       "type": "image",
       "id": "cursor",
-      "src": "/engine/assets/icons/ui/cursor.svg",
+      "src": "/assets/icons/ui/cursor.svg",
       "w": 56,
       "h": 56,
       "track": 60,
@@ -840,7 +840,7 @@
       "type": "image",
       "track": 20,
       "id": "ctamark",
-      "src": "/engine/assets/icons/stripe.svg",
+      "src": "/assets/icons/stripe.svg",
       "h": 96,
       "x": 912,
       "y": 320,

@@ -27,9 +27,9 @@ A raw, untreated, off-brand photo reads as slop and fails the beats fidelity gat
   news/press photos, paid stock without a license, copyrighted music. **Capture the real product UI instead.**
 
 ## 4. Icons
-- **Brand marks → simple-icons** (`curl https://cdn.simpleicons.org/<slug>/<hex>` → `engine/assets/icons/`).
+- **Brand marks → simple-icons** (`curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/`).
   Whenever a company/product/tool is *named*, show its mark — text-only lists of named things are a missed layer.
-- **UI / action icons → one line set** (Lucide/Feather, in `engine/assets/icons/ui/`, MIT). Draw with `svgIcon(name)`.
+- **UI / action icons → one line set** (Lucide/Feather, in `assets/icons/ui/`, MIT). Draw with `svgIcon(name)`.
 - **Never mix icon families** — one stroke set, one weight; match stroke weight to the text weight next to it.
 - **Mono by default;** colour only for authentic brand logos. Keep a light variant (`#f3f3f0`) for dark bgs and a
   `-dark` variant (`#0e0e0d`) for light bgs — a mono logo the same value as the bg is invisible (see [../MISTAKES.md](../MISTAKES.md) #7).

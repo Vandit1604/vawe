@@ -11,7 +11,7 @@ const T = (o) => ({ type: 'text', weight: 400, color: INK, ...o });             
 const L = [];
 
 // the REAL pixel mascot (captured from the site, white bg → composites on our white scene). w centers.
-const eye = (w, y, start, dur) => ({ type: 'image', src: '/engine/assets/brands/argus/mascot.png',
+const eye = (w, y, start, dur) => ({ type: 'image', src: '/assets/brands/argus/mascot.png',
   x: Math.round((W - w) / 2), y, w, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.3 });
 
 // hand-drawn cobalt underline (a rough marker scribble) under a word — a signature detail.

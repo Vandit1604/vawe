@@ -45,22 +45,22 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 /* Inter = Linear's EXACT self-hosted variable font (static.linear.app/fonts/InterVariable.woff2, full
    100–900 axis) so a 540 headline is Linear's real medium, byte-for-byte their type. "Inter Variable"/
    "Inter Display" are the names captured Linear components request; all map to the same real file. */
-@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
-@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
-@font-face { font-family: 'Inter Display'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter Display'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
 /* captured code UIs request "Berkeley Mono" (Linear's code font) — alias to installed Geist Mono so a
    diff/terminal capture renders in a real monospace, not the browser default. */
-@font-face { font-family: 'Berkeley Mono'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
-@font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/engine/assets/fonts/space-500.woff2') format('woff2'); }
-@font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/engine/assets/fonts/space-700.woff2') format('woff2'); }
-@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: normal; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
-@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: italic; font-display: block; src: url('/engine/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
-@font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
-@font-face { font-family: 'Geist Mono'; font-weight: 600; font-display: block; src: url('/engine/assets/fonts/GeistMono.woff2') format('woff2'); }
-@font-face { font-family: 'Geist'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/Geist.woff2') format('woff2'); }
-@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400 800; font-display: block; src: url('/engine/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
-@font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/engine/assets/fonts/Caveat.woff2') format('woff2'); }
+@font-face { font-family: 'Berkeley Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
+@font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/assets/fonts/space-500.woff2') format('woff2'); }
+@font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/assets/fonts/space-700.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: normal; font-display: block; src: url('/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: italic; font-display: block; src: url('/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 600; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-weight: 400 800; font-display: block; src: url('/assets/fonts/Geist.woff2') format('woff2'); }
+@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400 800; font-display: block; src: url('/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
+@font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/Caveat.woff2') format('woff2'); }
 
 /* numbers: tabular figures so digits don't jitter on count-up */
 .num { font-family: var(--font-num), monospace; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
@@ -80,9 +80,9 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
   top: var(--safe-top); bottom: var(--safe-bottom); border: 3px solid rgba(120, 240, 60, 0.9); }
 /* Hanken Grotesk (free, open) — a distinctive neo-grotesque; stand-in for brands on licensed faces
    (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
-@font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
-/* Sohne (Stripe's licensed Klim face) — the file lives in engine/assets/fonts/local/ which is GITIGNORED.
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
+/* Sohne (Stripe's licensed Klim face) — the file lives in assets/fonts/local/ which is GITIGNORED.
    Used locally for fidelity; a clone without it falls back to Hanken Grotesk (see html,body). Never commit it. */
-@font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block; src: url('/engine/assets/fonts/local/Sohne.woff2') format('woff2'); }
+@font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/local/Sohne.woff2') format('woff2'); }
 /* Archivo (OFL, Google Fonts) — argushq.cc's real display face (headline weight 300, tight tracking). */
-@font-face { font-family: 'Archivo'; font-weight: 300 700; font-display: block; src: url('/engine/assets/fonts/Archivo.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; font-weight: 300 700; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }

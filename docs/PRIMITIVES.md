@@ -151,9 +151,9 @@ same arbitrary motion, still deterministic (no wall clock, dedup-safe).
 The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX cues + limiter); these turn it on:
 
 - **Auto sound-design**: `"audio": { "auto": true }` — the scene derives SFX cues from its own timing
-  (whoosh on every `cut`, a reveal hit on every sting) and the mixer beds `engine/assets/music.wav` under
+  (whoosh on every `cut`, a reveal hit on every sting) and the mixer beds `assets/music.wav` under
   it. Pure: cue times are a function of the JSON, and it never touches `renderFrame` (frames stay
-  snap-identical, audio is a separate track). Assets: `engine/assets/sfx/{whoosh,reveal,tick,…}.wav`.
+  snap-identical, audio is a separate track). Assets: `assets/sfx/{whoosh,reveal,tick,…}.wav`.
 - **Muted-social captions**: `captionMode: "pop"` — big bold bottom-third burned-in subtitles (accent on
   `<b>…</b>`), the style social autoplay needs. `make captions D=<file> TEXT="First line. The <b>payoff</b>."`
   auto-times a script into the `captions` array (time ∝ word count, deterministic). Watches fine on mute.
@@ -162,8 +162,8 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 
 1. `make brandkit` / favicon + `make capture` (real product UI, pixel-faithful, animatable)
 2. `make lookbook URL=… NAME=…` — study shots (art direction, not for rendering)
-3. Brand logos: `curl https://cdn.simpleicons.org/<slug>/<hex>` → `engine/assets/icons/` (free)
-4. Flags: `flagcdn.com/<iso2>.svg` (public domain) → `engine/assets/flags/`
+3. Brand logos: `curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/` (free)
+4. Flags: `flagcdn.com/<iso2>.svg` (public domain) → `assets/flags/`
 5. Photos: `make photos Q="…" NAME=brand` — Openverse cc0/pdm/by, attribution auto-recorded in
    `credits.json`; use ONLY in clipped frames with `ken` (CC-BY needs visible credit)
 6. Drawn icons: `svgIcon(name)` — `file check shield bolt dollar link cube agent braces globe arrowRight spark plug clock layers`
@@ -186,19 +186,19 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   (filename + green diff chip) then blocks — `{h,accent}` heading w/ accent left-bar · `{body}` mono
   lines · `{code}` · `{bullets:[…]}`. Auto-height, theme-styled (`--surface`/`--line`/fonts). ONE
   layer instead of hand-placing rect+filename+chip+bar+body. Sizes: `nameSize/hSize/bodySize`.
-- `{type:"clip", src:"/engine/assets/gen/<name>/manifest.json", x, y, w, loop?, speed?, fit?, radius?}`
+- `{type:"clip", src:"/assets/gen/<name>/manifest.json", x, y, w, loop?, speed?, fit?, radius?}`
   → a generated/any **video played DETERMINISTICALLY** as a preloaded PNG frame sequence. `make gen-video
   Q="…" NAME=<name>` (kie.ai) or `make gen-clip IN=any.mp4 NAME=<name>` extracts frames + a manifest;
   `renderFrame(n)` swaps a preloaded `<img>` src per frame (no `<video>`, no async decode → purity holds).
   `loop` wraps, `speed` scales playback. Generated imagery: `make gen-image Q="…" NAME=<name>` → a normal
   `image` layer. (Generation needs `KIE_API_KEY`; `gen-clip` works on any local mp4 with no key.)
-- `{type:"lottie", src:"/engine/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
+- `{type:"lottie", src:"/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
   → an **After Effects (Bodymovin) animation played DETERMINISTICALLY**. The runtime (lottie-web SVG,
   MIT, loaded only when a scene uses it) is driven by ABSOLUTE seek — `goToAndStop((t-start)*fr, true)`
   per frame — so `renderFrame(n)` stays pure and order-independent (`make probe`). Brings real vector
   motion (animated logos, spinners, checkmarks, confetti) you can't author from primitives. `loop` wraps,
   `speed` retimes, `fit:"contain"` letterboxes (default fills). A missing lib/src degrades to an empty
-  layer, never a crash. Drop `.json` exports into `engine/assets/lottie/`.
+  layer, never a crash. Drop `.json` exports into `assets/lottie/`.
 - `{type:"html", html:"<div…>", x, y, w}` → **raw hand-authored HTML/CSS as one layer** — full design
   freedom for a rich "money-shot" beat (custom grids, gradients, mixed faces), still positioned and
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity

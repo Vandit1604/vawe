@@ -4,7 +4,7 @@
 // The point is the doctrine flip: don't rewrite the site by hand — capture its real sections (real
 // assets, real taste) and re-animate them. This tool tells you exactly what's there and how to grab it.
 //
-//   node scripts/sections.mjs <url> <brand>     →  engine/assets/brands/<brand>/sections/NN-*.png + sections.json
+//   node scripts/sections.mjs <url> <brand>     →  assets/brands/<brand>/sections/NN-*.png + sections.json
 //   make sections URL=https://linear.app NAME=linear
 //
 // Each manifest entry: { i, label, sel, x, y, w, h, kind, note, capture } where `sel` is a nth-of-type
@@ -20,7 +20,7 @@ const [url, brand] = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] 
 if (!url || !brand) { console.error('usage: node scripts/sections.mjs <url> <brand> [--viewport WxH]'); process.exit(1); }
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'sections');
+const dir = path.join(ROOT, 'assets/brands', brand, 'sections');
 fs.mkdirSync(dir, { recursive: true });
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });

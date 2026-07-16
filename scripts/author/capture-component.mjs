@@ -6,7 +6,7 @@
 //   node scripts/capture-component.mjs <url> "<css-selector>" <brand> <label> [--viewport 1512x950] [--settle 500]
 //   make capture URL=https://site.com SEL=".pricing-card" NAME=acme LABEL=pricing
 //
-// Output: engine/assets/brands/<brand>/components/<label>.json
+// Output: assets/brands/<brand>/components/<label>.json
 // Note: ::before/::after pseudo-elements can't be inlined (a known limitation) — most cards are fine.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -99,7 +99,7 @@ const result = await page.evaluate((selector) => {
 await browser.close();
 if (!result || result.error) { console.error('✗ capture failed:', result?.error || 'no result'); process.exit(1); }
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'components');
+const dir = path.join(ROOT, 'assets/brands', brand, 'components');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
 fs.writeFileSync(out, JSON.stringify({ url, selector, w: result.w, h: result.h, fonts: result.fonts, html: result.html }, null, 0) + '\n');
@@ -113,4 +113,4 @@ try {
       console.warn(`  ⚠ font "${f}" is used by this component but has no @font-face in core/tokens.css — it will SUBSTITUTE at render. Run brandkit (downloads fonts) or add it manually.`);
   }
 } catch {}
-console.log(`  use in a demo scene: { "type": "component", "use": "${label}", "src": "/engine/assets/brands/${brand}/components/${label}.json" }`);
+console.log(`  use in a demo scene: { "type": "component", "use": "${label}", "src": "/assets/brands/${brand}/components/${label}.json" }`);

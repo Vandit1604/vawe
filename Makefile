@@ -3,20 +3,20 @@
 
 .PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
 
-# make fonts  — download the free, openly-licensed faces into the gitignored engine/assets/fonts/
+# make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
 fonts:
 	node scripts/media/fonts.mjs
 
 # make sfx  — download the curated sound-effects library (Mixkit Free License) into the gitignored
-# engine/assets/sfx/. The mixer auto-places cuts→whoosh / stings→reveal; drop these in for scored video.
+# assets/sfx/. The mixer auto-places cuts→whoosh / stings→reveal; drop these in for scored video.
 sfx:
 	node scripts/media/sfx.mjs
 
 build: fonts
 	go build -o bin/vawe ./cmd/render
 
-# make video D=path/to/video.json  — one self-describing JSON → engine/out/<name>.mp4
+# make video D=path/to/video.json  — one self-describing JSON → out/<name>.mp4
 # Runs the layout/contrast/size audit by default (set NOAUDIT=1 to skip during rapid iteration).
 video: build
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
@@ -28,7 +28,7 @@ list: build
 
 # make render M=scene  — render a format's bundled sample.json
 render: build
-	./bin/vawe --module $(M) --data formats/$(M)/sample.json --out engine/out/$(M).mp4
+	./bin/vawe --module $(M) --data formats/$(M)/sample.json --out out/$(M).mp4
 
 # make all  — every format via the render queue
 all: build
@@ -81,7 +81,7 @@ lib-test:
 lookbook:
 	node scripts/brand/lookbook.mjs $(URL) $(NAME)
 
-# make palette IMG=engine/assets/brands/<brand>/sections/01-*.png  — EYEDROP the real hero pixels →
+# make palette IMG=assets/brands/<brand>/sections/01-*.png  — EYEDROP the real hero pixels →
 # dominant colours + LIGHT/DARK dominance (grounded, not a heuristic) + a swatch card to /tmp/palette.png.
 # Author themes/<brand>.json from THIS, then verify the video with `make beats VS=<brand>`.
 palette:
@@ -164,21 +164,21 @@ capture-motion:
 	node scripts/author/capture-motion.mjs $(URL) "$(SEL)" $(if $(ONLOAD),--onload) $(if $(DUR),--dur $(DUR))
 
 # ---- generated media (kie.ai; needs KIE_API_KEY or a gitignored .kie.key) ----
-# make gen-image Q="a neon server room" NAME=hero [ASPECT=16:9]  — generate an image → engine/assets/gen/<NAME>.png
-# (use it as a normal { "type": "image", "src": "/engine/assets/gen/<NAME>.png" } layer).
+# make gen-image Q="a neon server room" NAME=hero [ASPECT=16:9]  — generate an image → assets/gen/<NAME>.png
+# (use it as a normal { "type": "image", "src": "/assets/gen/<NAME>.png" } layer).
 gen-image:
-	node scripts/media/kie.mjs image "$(Q)" --out engine/assets/gen/$(NAME).png $(if $(ASPECT),--aspect $(ASPECT))
+	node scripts/media/kie.mjs image "$(Q)" --out assets/gen/$(NAME).png $(if $(ASPECT),--aspect $(ASPECT))
 
 # make gen-clip IN=path/to.mp4 NAME=city [FPS=30] [W=720]  — extract ANY mp4 (a kie.ai generation or a
-# local file) to a DETERMINISTIC frame sequence + manifest → engine/assets/gen/<NAME>/ (use as a `clip` layer).
+# local file) to a DETERMINISTIC frame sequence + manifest → assets/gen/<NAME>/ (use as a `clip` layer).
 gen-clip:
 	node scripts/media/gen-clip.mjs $(IN) $(NAME) $(if $(FPS),--fps $(FPS)) $(if $(W),--w $(W))
 
 # make gen-video Q="a drone shot over a city" NAME=city [ASPECT=16:9]  — generate a video AND extract it to a
 # clip in one step (a deterministic `clip` layer). Chains kie.ai video → gen-clip.
 gen-video:
-	node scripts/media/kie.mjs video "$(Q)" --out engine/assets/gen/$(NAME).mp4 $(if $(ASPECT),--aspect $(ASPECT))
-	node scripts/media/gen-clip.mjs engine/assets/gen/$(NAME).mp4 $(NAME)
+	node scripts/media/kie.mjs video "$(Q)" --out assets/gen/$(NAME).mp4 $(if $(ASPECT),--aspect $(ASPECT))
+	node scripts/media/gen-clip.mjs assets/gen/$(NAME).mp4 $(NAME)
 
 # make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
 # (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/author/capture-component.mjs.
@@ -218,7 +218,7 @@ install-hooks:
 	@echo "✓ git hooks active (.githooks) — pre-push runs schema-check + lib-test"
 
 clean:
-	rm -rf bin engine/out/*.mp4
+	rm -rf bin out/*.mp4
 
 critique: ## value-gate: flag hollow/low-value beats (D=<file>)
 	node scripts/gates/critique.mjs $(D)
@@ -232,7 +232,7 @@ expand: ## expand {type:block} + {type:comp} sugar into real layers (D=<file>)
 catalog: build ## render the block registry to paged sheets (browse the arsenal)
 	node scripts/site/blocks-catalog.mjs
 	@for f in formats/scene/_catalog-*.json; do ./bin/vawe $$f --draft || exit 1; done
-	@echo "→ engine/out/_catalog-*.mp4 (one page per file)"
+	@echo "→ out/_catalog-*.mp4 (one page per file)"
 
 blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 	node scripts/site/blocks-docs.mjs

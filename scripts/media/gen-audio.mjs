@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const ASSETS = path.join(root, 'engine', 'assets');
+const ASSETS = path.join(root, 'assets');
 const SFX = path.join(ASSETS, 'sfx');
 fs.mkdirSync(SFX, { recursive: true });
 

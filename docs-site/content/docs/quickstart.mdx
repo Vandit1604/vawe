@@ -13,14 +13,14 @@ make build
 # downloads the free fonts, then: go build -o bin/vawe ./cmd/render
 ```
 
-This produces `bin/vawe`. The `make build` step also runs `make fonts`, which pulls the typefaces into `engine/assets/fonts/` (they are fetched, never committed).
+This produces `bin/vawe`. The `make build` step also runs `make fonts`, which pulls the typefaces into `assets/fonts/` (they are fetched, never committed).
 
 ## Render the sample
 
 ```bash
 make list                        # show the scene module + its schema and sample
 ./bin/vawe formats/scene/sample.json
-# → engine/out/sample.mp4
+# → out/sample.mp4
 ```
 
 Or through make, which is the same thing with a friendlier name:

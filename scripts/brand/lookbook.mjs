@@ -3,7 +3,7 @@
 // these images and derives the video's design language from the brand's own typography, spacing,
 // shape language and density — instead of picking a canned style.
 //
-//   node scripts/lookbook.mjs <url> <brand>     →  engine/assets/brands/<brand>/look/*.png
+//   node scripts/lookbook.mjs <url> <brand>     →  assets/brands/<brand>/look/*.png
 //   make lookbook URL=https://site.com NAME=acme
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,7 +13,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 const [url, brand] = process.argv.slice(2);
 if (!url || !brand) { console.error('usage: node scripts/lookbook.mjs <url> <brand>'); process.exit(1); }
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'look');
+const dir = path.join(ROOT, 'assets/brands', brand, 'look');
 fs.mkdirSync(dir, { recursive: true });
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
@@ -37,5 +37,5 @@ for (let i = 0; i < stops.length; i++) {
   await page.screenshot({ path: path.join(dir, `view-${i}.png`) });
 }
 await browser.close();
-console.log(`✓ lookbook → engine/assets/brands/${brand}/look/  (full.png + ${stops.length} viewport shots)`);
+console.log(`✓ lookbook → assets/brands/${brand}/look/  (full.png + ${stops.length} viewport shots)`);
 console.log('  study these before authoring: typography, density, shape language, imagery, voice.');

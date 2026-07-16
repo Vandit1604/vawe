@@ -1,7 +1,7 @@
 // Fetch the FREE, openly-licensed faces the engine registers in core/tokens.css into the
-// gitignored engine/assets/fonts/. No font binary is committed to the repo (redistribution) — a
+// gitignored assets/fonts/. No font binary is committed to the repo (redistribution) — a
 // fresh clone runs `make fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
-// engine/assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
+// assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
 //
 //   node scripts/fonts.mjs            download any missing free faces
 //   node scripts/fonts.mjs --force    redownload everything
@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const DEST = path.join(repoRoot, 'engine/assets/fonts');
+const DEST = path.join(repoRoot, 'assets/fonts');
 const FORCE = process.argv.includes('--force');
 const CDN = 'https://cdn.jsdelivr.net/npm';
 
@@ -60,5 +60,5 @@ for (const r of results) {
   if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name}  — ${r.why}`); }
 }
 console.log(`fonts: ${ok} downloaded, ${skip} present, ${fail} failed${fail ? '' : ' — all free faces ready'}`);
-console.log('note: Sohne is paid (Klim) — drop your own copy in engine/assets/fonts/local/Sohne.woff2 (gitignored).');
+console.log('note: Sohne is paid (Klim) — drop your own copy in assets/fonts/local/Sohne.woff2 (gitignored).');
 if (fail) process.exit(1);

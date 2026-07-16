@@ -1,12 +1,12 @@
 // site-assets.mjs — the ONE way engine renders become site assets.
 //
-// engine/out/<scene>.mp4  →  site/public/assets/<path>.mp4 (+ .jpg poster)
+// out/<scene>.mp4  →  site/public/assets/<path>.mp4 (+ .jpg poster)
 //
 // This step used to be hand-run ffmpeg, so the site drifted from the scenes it claims to show.
 // The manifest below is the contract: every video on the site names the scene it came from and
 // the width it ships at. Re-run after re-rendering any scene.
 //
-//   node scripts/site-assets.mjs                 # encode from existing engine/out renders
+//   node scripts/site-assets.mjs                 # encode from existing out renders
 //   node scripts/site-assets.mjs --render        # render every scene first, then encode
 //   node scripts/site-assets.mjs --only films    # limit to one group
 //   node scripts/site-assets.mjs --check         # report staleness, write nothing
@@ -22,10 +22,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const OUT = path.join(root, 'engine', 'out');
+const OUT = path.join(root, 'out');
 const PUB = path.join(root, 'site', 'public', 'assets');
 
-// scene = formats/scene/<scene>.json → engine/out/<render>.mp4 → site/public/assets/<dest>
+// scene = formats/scene/<scene>.json → out/<render>.mp4 → site/public/assets/<dest>
 // poster = seconds into the clip to grab the still (pick a frame that reads at a glance).
 // ar     = the ratio the SITE LAYOUT expects. Asserted against the real render, because a scene
 //          that renders the wrong shape otherwise encodes and ships silently (it did: a missing
@@ -100,7 +100,7 @@ let mismatched = 0;
 for (const [group, scene, render, dest, width, poster, ar] of rows) {
   const src = path.join(OUT, `${render}.mp4`);
   const dst = path.join(PUB, dest);
-  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at engine/out/${render}.mp4 — run with --render`); process.exit(1); }
+  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at out/${render}.mp4 — run with --render`); process.exit(1); }
 
   const { w, h } = probe(src);
 

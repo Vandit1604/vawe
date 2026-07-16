@@ -2,7 +2,7 @@
 //
 // Command vawe — Go render service CLI (mirrors engine/render.js).
 //
-//	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out engine/out/q.mp4
+//	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out out/q.mp4
 //	go run ./cmd/render --all
 //
 // flags: --fps 30  --workers N  --draft  --no-grain  --concurrency 1 (for --all)
@@ -24,7 +24,7 @@ import (
 func main() {
 	module := flag.String("module", "", "format name (optional — taken from the JSON's \"module\" field)")
 	data := flag.String("data", "", "data JSON file (also accepted as a positional arg)")
-	out := flag.String("out", "", "output mp4 (optional — defaults to engine/out/<json-name>.mp4)")
+	out := flag.String("out", "", "output mp4 (optional — defaults to out/<json-name>.mp4)")
 	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
 	fps := flag.Int("fps", 0, "frames per second (0 = use the scene's fps, else 30)")
 	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 8)), "parallel capture browsers")
@@ -60,7 +60,7 @@ func main() {
 			if !exists(scenePath) || !exists(sample) {
 				continue
 			}
-			outPath := filepath.Join(repoRoot, "engine", "out", name+".mp4")
+			outPath := filepath.Join(repoRoot, "out", name+".mp4")
 			names = append(names, name)
 			jobs = append(jobs, func() error { return render.Render(repoRoot, name, sample, outPath, opts) })
 		}
@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// One self-describing JSON drives everything:
-	//   vawe path/to/video.json     → module from its "module" field, out = engine/out/<name>.mp4
+	//   vawe path/to/video.json     → module from its "module" field, out = out/<name>.mp4
 	dataPath := *data
 	if dataPath == "" && flag.NArg() > 0 {
 		dataPath = flag.Arg(0)
@@ -131,7 +131,7 @@ func main() {
 			if outPath != "" {
 				base = strings.TrimSuffix(filepath.Base(outPath), filepath.Ext(outPath))
 			}
-			outPath = filepath.Join(repoRoot, "engine", "out", base+tag+ext)
+			outPath = filepath.Join(repoRoot, "out", base+tag+ext)
 		}
 		if err := render.Render(repoRoot, mod, dataPath, outPath, o); err != nil {
 			fmt.Fprintf(os.Stderr, "✗ render failed: %v\n", err)

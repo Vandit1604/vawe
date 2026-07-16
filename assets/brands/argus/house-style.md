@@ -42,4 +42,4 @@
 - Gradients as decoration · a second colour (cobalt is the only accent) · bold-heavy headlines (the brand is light-weight) · Title Case (lowercase) · em-dashes on screen · stock imagery.
 
 ## Assets
-- pixel-eye mascot + `sections/` under `engine/assets/brands/argus/`
+- pixel-eye mascot + `sections/` under `assets/brands/argus/`

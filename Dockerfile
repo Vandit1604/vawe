@@ -12,8 +12,8 @@ COPY scripts ./scripts
 COPY core ./core
 COPY themes ./themes
 COPY formats/scene/scene.html formats/scene/schema.json ./formats/scene/
-COPY engine/assets/icons ./engine/assets/icons
-COPY engine/assets/vendor ./engine/assets/vendor
+COPY assets/icons ./assets/icons
+COPY assets/vendor ./assets/vendor
 
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none — and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.

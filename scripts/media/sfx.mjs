@@ -1,4 +1,4 @@
-// Fetch a curated, reusable sound-effects library into the gitignored engine/assets/sfx/.
+// Fetch a curated, reusable sound-effects library into the gitignored assets/sfx/.
 // The Go audio mixer (internal/audio/audio.go) already places named cues at times derived
 // deterministically from a scene's cuts (-> whoosh) and stings (-> reveal); drop these WAVs in
 // and every non-silent scene gets scored automatically. No binary is committed (same policy as
@@ -9,13 +9,13 @@
 //
 // Each entry maps an ENGINE CUE NAME to a Mixkit category + which ranked result to take. Mixkit
 // orders categories by popularity, so a low index is a well-regarded sound. Chosen ids are pinned
-// to engine/assets/sfx/credits.json so re-fetches are reproducible.
+// to assets/sfx/credits.json so re-fetches are reproducible.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const DEST = path.join(repoRoot, 'engine/assets/sfx');
+const DEST = path.join(repoRoot, 'assets/sfx');
 const CREDITS = path.join(DEST, 'credits.json');
 const FORCE = process.argv.includes('--force');
 const UA = { 'User-Agent': 'Mozilla/5.0 (vawe sfx fetcher)' };

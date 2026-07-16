@@ -25,7 +25,7 @@ inputs.forEach((inp, i) => {
   if (inp.endsWith('.json')) {
     console.log(`  rendering ${inp} ...`);
     execFileSync('./bin/vawe', [inp], { stdio: 'inherit' });
-    src = path.join('engine/out', path.basename(inp).replace(/\.json$/, '.mp4'));
+    src = path.join('out', path.basename(inp).replace(/\.json$/, '.mp4'));
   }
   const tile = path.join(tmp, `t${i}.png`);
   if (src.endsWith('.png')) ff(['-y', '-i', src, '-vf', 'scale=620:349', tile]);

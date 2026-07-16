@@ -9,8 +9,8 @@
 //   node scripts/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]
 //   make capture-scene URL=… SEL="section" NAME=brand LABEL=intake PARTS="sel1,sel2"
 //
-// Output: engine/assets/brands/<brand>/scenes/<label>.json  { w, h, parts: [{name, html, x, y, w, h, z}] }
-// Use in scene: { "type": "component", "src": "/engine/assets/brands/<brand>/scenes/<label>.json", "part": "p1", ... }
+// Output: assets/brands/<brand>/scenes/<label>.json  { w, h, parts: [{name, html, x, y, w, h, z}] }
+// Use in scene: { "type": "component", "src": "/assets/brands/<brand>/scenes/<label>.json", "part": "p1", ... }
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
@@ -109,7 +109,7 @@ for (const m of missing) console.warn(`  ⚠ ${m.error}`);
 result.parts = result.parts.filter((p) => !p.error);
 if (!result.parts.length) { console.error('✗ no parts captured'); process.exit(1); }
 
-const dir = path.join(ROOT, 'engine/assets/brands', brand, 'scenes');
+const dir = path.join(ROOT, 'assets/brands', brand, 'scenes');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
 fs.writeFileSync(out, JSON.stringify({ url, sectionSel, w: result.w, h: result.h, parts: result.parts }, null, 0) + '\n');
@@ -120,5 +120,5 @@ const scale = Math.min(1680 / result.w, 900 / result.h);
 const ox = Math.round((1920 - result.w * scale) / 2), oy = Math.round((1080 - result.h * scale) / 2);
 console.log('  layer stubs (assign start/duration/anim per part — background parts first, fade/dim them; foreground gets elevation):');
 for (const p of result.parts.sort((a, b) => a.z - b.z)) {
-  console.log(`  { "type": "component", "src": "/engine/assets/brands/${brand}/scenes/${label}.json", "part": "${p.name}", "x": ${ox + Math.round(p.x * scale)}, "y": ${oy + Math.round(p.y * scale)}, "w": ${Math.round(p.w * scale)}, "start": 0, "duration": 5 },  // ${p.sel}`);
+  console.log(`  { "type": "component", "src": "/assets/brands/${brand}/scenes/${label}.json", "part": "${p.name}", "x": ${ox + Math.round(p.x * scale)}, "y": ${oy + Math.round(p.y * scale)}, "w": ${Math.round(p.w * scale)}, "start": 0, "duration": 5 },  // ${p.sel}`);
 }

@@ -24,9 +24,10 @@ const PUB = path.join(root, 'site', 'public');
 const COPY = [
   ['core', 'core'],                                   // the engine itself (216K, zero node imports)
   ['themes', 'themes'],                               // boot.js fetches /themes/<name>.json
-  ['engine/assets/fonts', 'engine/assets/fonts'],     // boot() blocks on document.fonts for every face
-  ['engine/assets/icons', 'engine/assets/icons'],     // svgIcon() + lucide UI marks
-  ['engine/assets/vendor', 'engine/assets/vendor'],   // lottie runtime (lazy-loaded by boot)
+  // these land inside the site's OWN public/assets/, which is why .gitignore names them
+  ['assets/fonts', 'assets/fonts'],     // boot() blocks on document.fonts for every face
+  ['assets/icons', 'assets/icons'],     // svgIcon() + lucide UI marks
+  ['assets/vendor', 'assets/vendor'],   // lottie runtime (lazy-loaded by boot)
 ];
 const FILES = [
   ['formats/scene/scene.html', 'formats/scene/scene.html'],
