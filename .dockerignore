@@ -14,6 +14,14 @@ assets/fonts
 assets/brands
 assets/plinth
 assets/flags
+# ...except the handful of real marks the playable scenes reach for (144K of brands' 59M).
+# scripts/site/site-engine.mjs derives the list from the scenes themselves and FAILS the build if
+# one is absent, so these negations are what let it find them: without them the build context has
+# no assets/brands at all and every one 404s in production, which is exactly what happened.
+!assets/brands/creed/agents
+!assets/brands/creed/brandmark.svg
+!assets/brands/argus/mascot.png
+!assets/brands/linear/icon.png
 
 # not part of the site image
 # NB: docs-site IS part of it — the image runs the docs app on 3001 and the site rewrites /docs to

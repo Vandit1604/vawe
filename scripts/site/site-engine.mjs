@@ -61,5 +61,39 @@ for (const [src, dst] of COPY) {
 }
 for (const [src, dst] of FILES) put(path.join(root, src), path.join(PUB, dst));
 
+// ── whatever the playable scenes actually reference ──────────────────────────────────────────
+// assets/brands is 59M of section shots and lookbooks and stays out, but the scenes the editor can
+// load reach into it for a handful of real marks: creed's agent logos, argus's mascot, linear's
+// icon. 144K of the 59M. They were not shipped, so every one 404'd in production the moment the
+// editor could load a film — invisible locally, where the whole 59M is on disk.
+//
+// Derived, never listed: this reads the scenes and ships exactly what they name, so adding a scene
+// that reaches for a new asset cannot silently 404 again. A missing one FAILS THE BUILD, because
+// the alternative is what already happened — finding out from the browser console in production.
+const sceneDir = path.join(PUB, 'scenes');
+const wanted = new Set();
+if (fs.existsSync(sceneDir)) {
+  for (const f of fs.readdirSync(sceneDir).filter((n) => n.endsWith('.json'))) {
+    const text = fs.readFileSync(path.join(sceneDir, f), 'utf8');
+    // any /assets/... path in any string value, however nested
+    for (const m of text.matchAll(/\/assets\/[A-Za-z0-9._\-/]+\.[A-Za-z0-9]+/g)) wanted.add(m[0]);
+  }
+}
+const missing = [];
+for (const ref of wanted) {
+  const rel = ref.replace(/^\//, '');
+  // already covered by a COPY rule (icons, fonts, vendor) → skip
+  if (COPY.some(([, dst]) => rel.startsWith(dst + '/'))) continue;
+  const from = path.join(root, rel);
+  if (!fs.existsSync(from)) { missing.push(ref); continue; }
+  put(from, path.join(PUB, rel));
+}
+if (missing.length) {
+  console.error(`✗ ${missing.length} asset(s) referenced by a scene but absent from the repo:`);
+  for (const m of missing) console.error(`    ${m}`);
+  console.error('  A scene may only reference assets that ship, or the editor 404s them in production.');
+  process.exit(1);
+}
+
 if (DRY) console.log(drift ? `\n~ ${drift} file(s) drifted — run without --check` : '\n✓ site engine in sync');
 else console.log(`✓ engine → site/public  (${copied} file(s), ${(bytes / 1024) | 0}KB)`);

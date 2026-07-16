@@ -14,6 +14,9 @@ COPY themes ./themes
 COPY formats/scene/scene.html formats/scene/schema.json ./formats/scene/
 COPY assets/icons ./assets/icons
 COPY assets/vendor ./assets/vendor
+# Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
+# brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
+COPY assets/brands ./assets/brands
 
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none — and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.
