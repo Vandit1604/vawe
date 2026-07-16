@@ -1,0 +1,114 @@
+{
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe-site",
+ "duration": 8.4,
+ "audio": {
+  "silent": false
+ },
+ "stings": [
+  {
+   "t": 0.35,
+   "fx": "flash"
+  },
+  {
+   "t": 2.35,
+   "fx": "glitch"
+  },
+  {
+   "t": 4.35,
+   "fx": "scan"
+  },
+  {
+   "t": 6.35,
+   "fx": "ripple"
+  }
+ ],
+ "layers": [
+  {
+   "type": "text",
+   "text": "shader stings",
+   "font": "mono",
+   "x": 140,
+   "y": 150,
+   "size": 22,
+   "color": "var(--accent)",
+   "start": 0.1,
+   "duration": 8.2
+  },
+  {
+   "type": "text",
+   "text": "flash",
+   "x": 0,
+   "y": 470,
+   "w": 1920,
+   "size": 168,
+   "weight": 700,
+   "align": "center",
+   "preset": "up",
+   "start": 0.4,
+   "duration": 1.9,
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "glitch",
+   "x": 0,
+   "y": 470,
+   "w": 1920,
+   "size": 168,
+   "weight": 700,
+   "align": "center",
+   "color": "var(--accent)",
+   "cut": "fade",
+   "start": 2.4,
+   "duration": 1.9,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "scan",
+   "x": 0,
+   "y": 470,
+   "w": 1920,
+   "size": 168,
+   "weight": 700,
+   "align": "center",
+   "cut": "fade",
+   "start": 4.4,
+   "duration": 1.9,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "ripple",
+   "x": 0,
+   "y": 470,
+   "w": 1920,
+   "size": 168,
+   "weight": 700,
+   "align": "center",
+   "color": "var(--accent)",
+   "cut": "fade",
+   "start": 6.4,
+   "duration": 2,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "GPU shader effects, keyed on (progress, seed) only",
+   "font": "mono",
+   "x": 0,
+   "y": 780,
+   "w": 1920,
+   "size": 24,
+   "color": "var(--dim)",
+   "align": "center",
+   "start": 0.5,
+   "duration": 7.7
+  }
+ ]
+}

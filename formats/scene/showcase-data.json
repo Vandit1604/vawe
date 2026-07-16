@@ -1,0 +1,176 @@
+{
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe-site",
+ "duration": 9.6,
+ "audio": {
+  "silent": false
+ },
+ "stings": [
+  {
+   "t": 0.8,
+   "fx": "leak"
+  },
+  {
+   "t": 3,
+   "fx": "flash"
+  }
+ ],
+ "layers": [
+  {
+   "type": "text",
+   "text": "data story",
+   "font": "mono",
+   "x": 140,
+   "y": 150,
+   "size": 22,
+   "color": "var(--accent)",
+   "start": 0.1,
+   "duration": 9.4
+  },
+  {
+   "type": "text",
+   "text": "Requests, per day.",
+   "x": 140,
+   "y": 250,
+   "size": 82,
+   "weight": 700,
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.06,
+   "each": 0.45,
+   "start": 0.3,
+   "duration": 9.2
+  },
+  {
+   "type": "html",
+   "x": 140,
+   "y": 470,
+   "w": 1050,
+   "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:1050px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">requests / day</div><svg viewBox=\"0 0 1006 326\" width=\"100%\" height=\"326\" style=\"display:block;overflow:visible\"><polyline points=\"8.0,215.7 173.0,187.0 338.0,196.6 503.0,116.7 668.0,91.1 833.0,36.8 998.0,8.0\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"215.7\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"173.0\" cy=\"187.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"338.0\" cy=\"196.6\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"503.0\" cy=\"116.7\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"668.0\" cy=\"91.1\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"833.0\" cy=\"36.8\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"998.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--accent)\"/></svg></div>",
+   "start": 0.8,
+   "duration": 8.6,
+   "anim": "rise",
+   "enterDur": 0.5,
+   "exitDur": 0.35
+  },
+  {
+   "type": "count",
+   "x": 1330,
+   "y": 430,
+   "from": 0,
+   "to": 2400000,
+   "unit": "",
+   "font": "sans",
+   "size": 150,
+   "weight": 700,
+   "color": "var(--text)",
+   "ls": "-0.03em",
+   "countStart": 0.2,
+   "countDur": 1.4,
+   "ease": "easeOutExpo",
+   "start": 3,
+   "duration": 6.4,
+   "anim": "rise",
+   "enterDur": 0.4
+  },
+  {
+   "type": "text",
+   "weight": 500,
+   "text": "requests / month",
+   "x": 1330,
+   "y": 565,
+   "font": "mono",
+   "size": 20,
+   "color": "var(--dim)",
+   "start": 3.3,
+   "duration": 6.1000000000000005
+  },
+  {
+   "type": "group",
+   "x": 140,
+   "y": 940,
+   "layout": "row",
+   "items": "flex-start",
+   "gap": 80,
+   "start": 5.4,
+   "duration": 4,
+   "anim": "rise",
+   "enterDur": 0.45,
+   "children": [
+    {
+     "type": "group",
+     "layout": "column",
+     "items": "flex-start",
+     "gap": 4,
+     "children": [
+      {
+       "type": "text",
+       "weight": 700,
+       "text": "+41%",
+       "size": 64,
+       "color": "var(--text)",
+       "ls": "-0.02em"
+      },
+      {
+       "type": "text",
+       "weight": 500,
+       "text": "week over week",
+       "size": 18,
+       "color": "var(--dim)",
+       "font": "mono"
+      }
+     ]
+    },
+    {
+     "type": "group",
+     "layout": "column",
+     "items": "flex-start",
+     "gap": 4,
+     "children": [
+      {
+       "type": "text",
+       "weight": 700,
+       "text": "97",
+       "size": 64,
+       "color": "var(--text)",
+       "ls": "-0.02em"
+      },
+      {
+       "type": "text",
+       "weight": 500,
+       "text": "peak / day",
+       "size": 18,
+       "color": "var(--dim)",
+       "font": "mono"
+      }
+     ]
+    },
+    {
+     "type": "group",
+     "layout": "column",
+     "items": "flex-start",
+     "gap": 4,
+     "children": [
+      {
+       "type": "text",
+       "weight": 700,
+       "text": "0",
+       "size": 64,
+       "color": "var(--text)",
+       "ls": "-0.02em"
+      },
+      {
+       "type": "text",
+       "weight": 500,
+       "text": "dropped",
+       "size": 18,
+       "color": "var(--dim)",
+       "font": "mono"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
