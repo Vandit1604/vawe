@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ../scripts/site-engine.mjs",
+    "predev": "node ../scripts/site/site-engine.mjs",
     "dev": "next dev",
-    "prebuild": "node ../scripts/site-engine.mjs",
+    "prebuild": "node ../scripts/site/site-engine.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

@@ -1,0 +1,74 @@
+// preview-fragment.mjs — the "is this HTML doing what I want?" loop. Author a hand-written fragment
+// (a hero card, a testimonial, a title block), preview it STANDALONE on the theme background at frame
+// scale, and actually LOOK at it — before it disappears into a 900-frame render. Reuses the repo http
+// server so /engine/assets/… and @font-face URLs resolve exactly as they do at render time.
+//
+//   node scripts/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
+//   make preview HTML=path/to/frag.html THEME=linear
+//
+// Accepts a raw HTML file, OR a captured component/scene JSON ({html} or {parts:[{html}]}) so you can
+// eyeball a `make capture` result too. Writes /tmp/preview.png (1920×1080).
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import puppeteer from 'puppeteer';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const argv = process.argv.slice(2);
+const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
+const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
+if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
+const boxW = parseInt(flag('--w', '1400'), 10);
+const themeName = flag('--theme', 'default');
+let bg = flag('--bg', null);
+if (!bg) { try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch { bg = '#0a0a0c'; } }
+
+// pull the fragment out of raw HTML or a captured JSON ({html} | {parts:[{html}]})
+let raw = fs.readFileSync(src, 'utf8');
+if (src.endsWith('.json')) {
+  const j = JSON.parse(raw);
+  raw = j.html || (j.parts || []).map((p) => `<div style="position:relative;margin:24px auto">${p.html}</div>`).join('') || raw;
+}
+
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2',
+  '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+const page$html = `<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/core/tokens.css">
+<style>*{box-sizing:border-box}html,body{margin:0;background:${bg};color:#f7f8f8}
+/* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
+   1920x1080 via the screenshot clip, so it's unaffected. */
+#stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
+#frag{width:${boxW}px;position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
+<body><div id="stage"><div id="frag">${raw}</div></div></body></html>`;
+
+const server = http.createServer((req, res) => {
+  const url = decodeURIComponent(req.url.split('?')[0]);
+  if (url === '/__frag') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(page$html); }
+  const p = path.join(ROOT, url.replace(/^\/+/, ''));
+  if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
+  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
+  fs.createReadStream(p).pipe(res);
+});
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const port = server.address().port;
+
+// --serve: keep the page live in your browser (real fonts/assets, interactive) instead of a PNG
+if (argv.includes('--serve')) {
+  const url = `http://127.0.0.1:${port}/__frag`;
+  console.log(`▶ serving ${path.relative(ROOT, src)} at  ${url}   (theme ${themeName})`);
+  console.log('  open that URL in your browser. Ctrl-C to stop.');
+  try { await import('node:child_process').then((cp) => cp.exec(`open "${url}"`)); } catch {}
+} else {
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+const page = await browser.newPage();
+await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
+await page.goto(`http://127.0.0.1:${port}/__frag`, { waitUntil: 'load' });
+await page.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
+const out = '/tmp/preview.png';
+await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
+  await browser.close(); server.close();
+  console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName}, bg ${bg}, box ${boxW}px)`);
+  console.log('  open it / Read it and check: real fonts? real assets loaded? spacing + hierarchy right?');
+  console.log('  want it live in your browser instead of a PNG?  add --serve');
+}

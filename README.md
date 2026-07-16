@@ -85,8 +85,10 @@ order — verified by `make probe` (renders sampled frames in scrambled order an
 ## Architecture
 
 ```
-core/            pure primitives (browser + node): motion.js (math), boot.js (runtime + virtual clock),
-                 type.js, cuts.js, stings.js, backgrounds.js, sequence.js, theme-contract.js, tokens.css
+core/            THE ENGINE — pure, browser+node, self-contained (imports nothing outside core/):
+                 motion.js (math + 39 easings), boot.js (runtime + virtual clock), type.js (kinetic
+                 presets), cuts.js, stings.js, backgrounds.js, sequence.js, validate.mjs (the schema
+                 validator — boot.js imports it, so it is engine code, not tooling), theme-contract.js
 core/layers/     the LAYER REGISTRY — one file per primitive (text/image/rect/glow/group/count/clip/
                  cursor/component/html/board/doc/shader/lottie), each exporting build()/frame()
 blocks/          the taste library: manifest-driven component registry (index.mjs + catalog.mjs)
@@ -94,9 +96,15 @@ formats/scene/   scene.html (thin orchestrator) · schema.json (the contract) ·
 themes/          brand palettes + fonts + motion personality (theme-contract.js defines the shape)
 cmd/render,      the Go render service: chromedp capture · ffmpeg encode/mux · audio mixer · queue
   internal/
-scripts/         authoring + gate tools (validate, probe, critique, slop, judge, catalog, brandspec,
-                 house-style, direct, beats, palette, sections, expand, compare, batch …)
 engine/assets/   fonts · vendored runtimes (lottie) · brand asset packs (house-style.md committed)
+engine/out/      rendered mp4s (gitignored)
+
+scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
+  gates/           prove it is good — lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
+  brand/           study a real site — brandspec · sections · lookbook · palette · house-style · photos
+  media/           fetch or make assets — fonts · sfx · gen-audio · assets · cards
+  author/          compose a scene — beats · expand · batch · captions · preview · capture-*
+  site/            build the website — site-assets · site-engine · rules-build · blocks-*
 docs/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
 ```
 

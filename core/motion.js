@@ -3,7 +3,8 @@
 // The theme/clock/boot RUNTIME lives in core/boot.js.
 // just time->data transforms + the scene boot.
 
-// relative specifier resolves in BOTH the browser (/core/lib.js → /scripts/validate.mjs) and node.
+// core/ is self-contained: the validator lives here too (core/validate.mjs), because boot.js
+// imports it and the browser must be able to resolve it. It is engine code, not tooling.
 
 export const FPS = 30;
 

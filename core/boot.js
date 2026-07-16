@@ -4,7 +4,7 @@
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
-import { validateAll } from '../scripts/validate.mjs';
+import { validateAll } from './validate.mjs';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
