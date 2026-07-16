@@ -25,8 +25,7 @@ export default function Home() {
       {/* ===== HERO ===== */}
       <div className="hero-wrap">
         <div className="hero-bg">
-          {/* NOTE: replace with a licensed/owned image before public launch */}
-          <img src="/assets/hero-landscape.jpg" alt="" />
+          <img src="/assets/hero-landscape.webp" alt="" />
         </div>
         <Header variant="over" />
         <div className="wrap hero-head">
