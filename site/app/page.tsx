@@ -52,6 +52,14 @@ export default function Home() {
         {/* THE HERO EDITOR — an editable browser running the real engine (components/HeroEditor) */}
         <div className="hero-stage pop">
           <HeroEditor />
+          {/* mobile: no code pane — you are not typing JSON on a phone. Same scene, rendered. */}
+          <figure className="hero-mobile">
+            <video src="/assets/hero.mp4" poster="/assets/hero.jpg" autoPlay loop muted playsInline />
+            <figcaption className="hm-cta">
+              <span>rendered from one JSON</span>
+              <Link href="/editor">open the editor →</Link>
+            </figcaption>
+          </figure>
         </div>
       </div>
 
