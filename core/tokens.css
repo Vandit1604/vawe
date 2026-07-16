@@ -82,7 +82,17 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
    (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
 @font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
 /* Sohne (Stripe's licensed Klim face) — the file lives in assets/fonts/local/ which is GITIGNORED.
-   Used locally for fidelity; a clone without it falls back to Hanken Grotesk (see html,body). Never commit it. */
-@font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/local/Sohne.woff2') format('woff2'); }
+   Never commit it.
+   The second src IS the fallback, and it has to live here rather than in a font stack: a theme names
+   ONE family ("Sohne"), and boot() does document.fonts.load("400 100px 'Sohne'") — so a CSS stack
+   would never be consulted for the load and the name would simply fail to resolve. Chaining src
+   means 'Sohne' resolves to Hanken Grotesk wherever the licensed file is absent, which is every
+   deploy: the browser editor was rendering the Stripe scene in a raw system sans and 404ing.
+   Hanken Grotesk is the fallback this file already intended, it is OFL/Google Fonts, and it is
+   already vendored and shipped, so this costs no new bytes. Local renders still get real Sohne,
+   because the first src wins wherever it exists. */
+@font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block;
+  src: url('/assets/fonts/local/Sohne.woff2') format('woff2'),
+       url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
 /* Archivo (OFL, Google Fonts) — argushq.cc's real display face (headline weight 300, tight tracking). */
 @font-face { font-family: 'Archivo'; font-weight: 300 700; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }

@@ -19,6 +19,38 @@ gets a **closed-form or seeded-deterministic** implementation, or it does not sh
 This is not a purity fetish. It is what `make probe` checks, and it is the property the whole
 product is sold on.
 
+## Not an effect, and ahead of every effect: aspect ratios
+
+**Multi-aspect is not finished, and it is load-bearing for the whole list.** "One source renders
+16:9, 9:16, 1:1 and 4:5" is a headline claim on the site, the `showcase-aspect` scene exists to
+prove it, and the section of the homepage that pins now argues it. It does not yet hold up.
+
+The failure is not in the renderer, which sizes the canvas correctly per `--aspect` and does its job.
+It is that **the scene author has to solve the layout for each ratio by hand, and nothing stops them
+getting it wrong.** `showcase-aspect.json` itself shipped with `x: 60, w: 1800` — pixels tuned to a
+1920 canvas — so at 9:16 the box overflowed by 780px and cut "ratio." clean off the frame. The one
+beat advertising relative coordinates was hand-computing absolute ones, and it took a human eye to
+notice. That is the shape of the problem: a scene renders "fine" at every ratio and is wrong at all
+but one.
+
+What is missing, roughly in order:
+
+- **A gate.** `make audit` checks overlap, clipping and contrast at ONE aspect. Every claim on the
+  site says four. It should run per aspect and fail on any of them, which would have caught the
+  overflow above the moment it was authored.
+- **Layout that resolves rather than gets computed.** `pin` / `col` / `align` exist and work; the
+  problem is that absolute `x`/`w` is still the path of least resistance and silently means "16:9
+  only". Either the validator rejects absolute coordinates in a multi-aspect scene, or authoring
+  defaults to relative and absolute is opt-in.
+- **Per-aspect overrides.** Some beats genuinely need a different composition at 9:16 than 16:9,
+  not the same one re-solved. There is no way to say so today.
+- **A safe area worth the name.** Portrait platforms cover the top and bottom of the frame with
+  their own chrome; the safe-zone check does not know that a 9:16 render is destined for a feed.
+- **4:5 is claimed but barely exercised.** It appears in copy and in one diagram. It needs a scene.
+
+Until this is solid, "any aspect" is a promise the engine keeps only when the author does the work
+by hand. That is worth more than any new sting, because it is already being sold.
+
 ## Cost tiers
 
 | Tier | Substrate | Cost | Why |
@@ -116,6 +148,9 @@ the backlog than a wish-list is.
 
 ## What I would build first
 
+0. **Aspect ratios** (above). Not an effect, and ahead of all of them: it is a claim already on the
+   site that the engine only half keeps. Ship the per-aspect gate first, since a bug the eye has to
+   catch is a bug that ships.
 1. **Lower thirds** (Tier 1, one component → twelve entries). Highest ratio of surface to effort in
    the whole list.
 2. **Shader transitions** (Tier 3). `core/shaders.js` already has the machinery; each is one
