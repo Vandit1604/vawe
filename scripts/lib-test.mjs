@@ -213,5 +213,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('motionAt deterministic', JSON.stringify(motionAt(kf, 0.3)) === JSON.stringify(motionAt(kf, 0.3)));
 }
 
+// ---- easing registry contract ----------------------------------------------------------------
+// Every named easing must be a real 0->1 curve. Asserted across the WHOLE registry, not just the
+// new ones: a curve that does not land on 1 silently leaves elements short of their final position.
+{
+  const { EASINGS } = await import('../core/motion.js');
+  const OVERSHOOT = new Set(['easeOutBack', 'easeOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle']);
+  let bad = [];
+  for (const [name, fn] of Object.entries(EASINGS)) {
+    if (Math.abs(fn(0)) > 1e-6) bad.push(`${name}(0)!=0`);
+    if (Math.abs(fn(1) - 1) > 1e-6) bad.push(`${name}(1)!=1`);
+    if (fn(0.5) !== fn(0.5)) bad.push(`${name} nondeterministic/NaN`);
+    if (!OVERSHOOT.has(name)) { // overshoot curves legitimately leave [0,1]
+      for (let t = 0; t <= 1; t += 0.05) { const v = fn(t); if (v < -1e-6 || v > 1 + 1e-6) { bad.push(`${name} out of range at ${t.toFixed(2)}`); break; } }
+    }
+  }
+  ok(`easings: all ${Object.keys(EASINGS).length} land 0->1${bad.length ? ' — ' + bad.slice(0, 4).join(', ') : ''}`, bad.length === 0);
+  // the sine family closes a documented gap: the planning skill says "ambient loops sinusoidal"
+  ok('easing sine family present', ['easeInSine', 'easeOutSine', 'easeInOutSine'].every((k) => typeof EASINGS[k] === 'function'));
+  ok('easeOutSine is gentler than easeOutQuint early', EASINGS.easeOutSine(0.25) < EASINGS.easeOutQuint(0.25));
+  ok('easeInOutSine symmetric', Math.abs(EASINGS.easeInOutSine(0.5) - 0.5) < 1e-9);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

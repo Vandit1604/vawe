@@ -32,6 +32,15 @@ export const punch = (t, amt = 0.14) => 1 + amt * Math.sin(clamp01(t) * Math.PI)
 export const easeInCubic = (t) => t * t * t;
 export const easeOutElastic = (t) => { if (t <= 0) return 0; if (t >= 1) return 1; const p = 0.3; return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1; };
 export const easeInQuart = (t) => t * t * t * t;
+// sine family — MOTION-CRAFT / the planning skill prescribe "ambient loops sinusoidal", which was
+// unexpressable until now: the registry had no sine curve at all. This is the gentlest ease there
+// is (no hard stop), which is exactly what a drifting/breathing loop wants.
+export const easeInSine = (t) => 1 - Math.cos((t * Math.PI) / 2);
+export const easeOutSine = (t) => Math.sin((t * Math.PI) / 2);
+export const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+// quint: one notch sharper than quart, softer than expo — the "luxurious settle" for hero moves.
+export const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
+export const easeInOutQuart = (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2);
 export const easeInExpo = (t) => (t <= 0 ? 0 : Math.pow(2, 10 * (t - 1)));
 export const easeInOutExpo = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : 1 - Math.pow(2, -20 * t + 10) / 2);
 
@@ -59,6 +68,7 @@ export const EASINGS = {
   linear: (t) => t, easeInCubic, easeOutCubic, easeInOutCubic,
   easeOutQuart, easeOutExpo, easeOutBack, easeOutElastic,
   easeInQuart, easeInExpo, easeInOutExpo,
+  easeInSine, easeOutSine, easeInOutSine, easeOutQuint, easeInOutQuart,
   // velocity-ramp aliases: rush = accelerate away, brake = decelerate in, ramp = slow-fast-slow
   rush: (t) => accel(t), brake: (t) => decel(t), ramp: (t) => speedRamp(t),
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
@@ -92,10 +102,17 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
 // spring as a t→t EASING (settles by t=1), so any keyframe track — `motion[].ease`, count `ease`,
 // cut timing — can overshoot-and-settle organically. Same idea as another engine's Easing.spring /
 // another engine' springEase, pure in t. Overshoots >1 mid-way (that's the point); lands exactly at 1.
+//
+// spring() is a damped oscillator in SECONDS, and it has not stopped ringing at t=1 — sampling it
+// directly over [0,1] made `spring-bouncy` land at 0.96 and STAY there, i.e. an element eased with
+// it never actually reached its keyframe (breaking MOTION-CRAFT rule 5, "settle and hold"). Map t
+// onto each spring's own settle window so the ring completes inside [0,1], and snap the endpoints
+// exactly the way easeOutSettle does. Guarded by the easing-registry contract in lib-test.
+const springEase = (o) => { const T = springSettle(o); return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(clamp01(t) * T, o)); };
 Object.assign(EASINGS, {
-  spring: (t) => spring(clamp01(t), { bounce: 0.35, settle: 0.92 }),
-  'spring-bouncy': (t) => spring(clamp01(t), { bounce: 0.55, settle: 0.94 }),
-  'spring-stiff': (t) => spring(clamp01(t), { bounce: 0.12, settle: 0.72 }),
+  spring: springEase({ bounce: 0.35, settle: 0.92 }),
+  'spring-bouncy': springEase({ bounce: 0.55, settle: 0.94 }),
+  'spring-stiff': springEase({ bounce: 0.12, settle: 0.72 }),
 });
 // easeOutSettle — the DEFAULT entrance feel: a SMOOTH decelerate with just a whisper of settle (premium,
 // not bouncy). Low bounce (0.08) so type glides to rest instead of overshooting/wobbling — a visible
