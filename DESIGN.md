@@ -144,6 +144,8 @@ A near-monochrome paper system with a single saturated cobalt that appears only 
 
 **The Muted Floor Rule.** `#697182` is the lightest colour that may hold text, anywhere, at any size. Light gray "for elegance" is the single most common reason interfaces become unreadable, and it is not available here. If text feels loud, resize it or reweight it. Never fade it.
 
+*Corollary: `opacity` is not a loophole.* The rule names a colour, and opacity is not a colour, which is exactly how it gets violated. Fading text composites it toward the background and lands somewhere no token would ever have permitted. The scrollytelling claims were built de-emphasising the inactive rows at `opacity: .42` and measured **2.06:1**, less than half the required 4.5. The fix is not a gentler fade, because the arithmetic forecloses it: `--ink-2` needs **opacity ≥ .74** to clear 4.5:1, and .74 against 1.0 is not a perceptible difference. **Every opacity that communicates is illegible; every opacity that is legible communicates nothing.** So de-emphasis by fading text is not a tool this site has. Mark the active thing instead: cobalt at 5.17:1 says "this one" while every word stays readable, which is also why the emphasis and the rail are the same blue. De-emphasised text is still text; WCAG does not exempt it for being the part you are not reading yet.
+
 **The Shared Blue Rule.** `#2563eb` is one value with two homes: `site/app/globals.css` and `themes/vawe.json`. Change one without the other and the site stops matching the films it displays. They move together or not at all.
 
 ## 3. Typography

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "./components/Header";
 import { HeroEditor } from "./components/HeroEditor";
 import { Clip } from "./components/Clip";
+import { Claims } from "./components/Claims";
 import { Footer } from "./components/Footer";
 
 const CODE = `<span class="p">{</span> <span class="k">"module"</span><span class="p">:</span> <span class="s">"scene"</span><span class="p">,</span> <span class="k">"theme"</span><span class="p">:</span> <span class="s">"vawe"</span><span class="p">,</span>
@@ -13,50 +14,6 @@ const CODE = `<span class="p">{</span> <span class="k">"module"</span><span clas
       <span class="k">"text"</span><span class="p">:</span> <span class="s">"from pure data."</span><span class="p">,</span>
       <span class="k">"preset"</span><span class="p">:</span> <span class="a">"up"</span><span class="p">,</span> <span class="k">"size"</span><span class="p">:</span> <span class="a">92</span> <span class="p">}</span>
   <span class="p">]</span> <span class="p">}</span>`;
-
-/* Each claim carries its OWN kind of evidence — that difference is the design. A shared shape
-   here would say these three facts are interchangeable, and they are not. */
-const CLAIMS = [
-  {
-    t: "Deterministic",
-    d: "renderFrame(n) is pure in n. Same JSON, same bytes, any render order. Every video is reproducible and diff-able.",
-    proof: (
-      <div className="pf pf-hash" aria-hidden="true">
-        <i>
-          <span>frame 412</span>
-          <b>a4f0…9c1</b>
-        </i>
-        <i>
-          <span>frame 412, re-rendered</span>
-          <b>a4f0…9c1</b>
-        </i>
-        <i className="eq">identical ✓</i>
-      </div>
-    ),
-  },
-  {
-    t: "Agent-native",
-    d: "Authored from a schema and a taste system, not clicked together in a UI. One open canvas of composable primitives.",
-    proof: (
-      <div className="pf pf-say" aria-hidden="true">
-        <q>“a 15s launch film, cobalt, ends on the wordmark”</q>
-        <code>{`{ "module": "scene", "theme": "vawe",\n  "layers": [ … ] }`}</code>
-      </div>
-    ),
-  },
-  {
-    t: "Any aspect",
-    d: "One source renders 16:9, 9:16, 1:1, and 4:5 in a single pass. Every platform ratio from the same scene.",
-    proof: (
-      <div className="pf pf-ar" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-        <span>one scene</span>
-      </div>
-    ),
-  },
-];
 
 export default function Home() {
   return (
@@ -120,17 +77,7 @@ export default function Home() {
         <div className="wrap">
           <div className="kicker">why vawe</div>
           <h2 className="h2">Video, as code.</h2>
-          <div className="claims">
-            {CLAIMS.map((c) => (
-              <div className="claim" key={c.t}>
-                <div>
-                  <h3>{c.t}</h3>
-                  <p>{c.d}</p>
-                </div>
-                {c.proof}
-              </div>
-            ))}
-          </div>
+          <Claims />
         </div>
       </section>
 
