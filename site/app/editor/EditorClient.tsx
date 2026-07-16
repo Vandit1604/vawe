@@ -1,6 +1,9 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { foldable, foldEffect, unfoldAll } from "@codemirror/language";
+import type { EditorView } from "@codemirror/view";
 import { ScenePlayer } from "./ScenePlayer";
+import { CodeEditor } from "./CodeEditor";
 
 /* Every scene in site/public/scenes, not a hand-picked six. The showcase links here with
  * ?scene=<id> from each clip, so anything it can link to must be loadable and must be able to name
@@ -65,6 +68,41 @@ export function EditorClient() {
   const [picked, setPicked] = useState("");
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const view = useRef<EditorView | null>(null);
+
+  /* NOT CodeMirror's foldAll. That walks from line 1, and line 1 of a scene is the root `{`, so the
+     first thing it folds is the whole document: 900 lines collapse to `{…}`, which hides everything
+     and tells you nothing. Starting the walk on line 2 folds each TOP-LEVEL value instead, leaving
+     module/aspect/theme/duration readable with `"layers": […]` beside them — the scene as a table
+     of contents, which is the thing worth having on a 900-line film. The gutter chevrons still fold
+     any single layer from there. */
+  const fold = () => {
+    const v = view.current;
+    if (!v) return;
+    const { state } = v;
+    if (state.doc.lines < 2) return;
+    const effects = [];
+    let pos = state.doc.line(2).from;
+    while (pos < state.doc.length) {
+      const line = v.lineBlockAt(pos);
+      const range = foldable(state, line.from, line.to);
+      if (range) {
+        effects.push(foldEffect.of(range));
+        pos = v.lineBlockAt(range.to).to + 1;
+      } else {
+        pos = line.to + 1;
+      }
+    }
+    if (effects.length) v.dispatch({ effects });
+    v.focus();
+  };
+
+  const unfold = () => {
+    const v = view.current;
+    if (!v) return;
+    unfoldAll(v);
+    v.focus();
+  };
 
   // debounce: rebooting the scene on every keystroke would thrash fonts + theme fetches
   useEffect(() => {
@@ -170,14 +208,18 @@ export function EditorClient() {
         </p>
         <div className="ed-panehead">
           <span className="ed-file">scene.json</span>
-          <span className="ed-lines">{json.split("\n").length} lines</span>
+          <span className="ed-lines">
+            {json.split("\n").length} {json.split("\n").length === 1 ? "line" : "lines"}
+          </span>
+          <button className="ed-fold" onClick={fold} title="Collapse top-level values">
+            fold
+          </button>
+          <button className="ed-fold" onClick={unfold} title="Expand everything">
+            unfold
+          </button>
           <button className="ed-copy" onClick={copy}>{copied ? "copied ✓" : "copy"}</button>
         </div>
-        <textarea
-          className="ed-code" value={json} spellCheck={false}
-          onChange={(e) => setJson(e.target.value)}
-          aria-label="Scene JSON"
-        />
+        <CodeEditor value={json} onChange={setJson} viewRef={view} />
         <div className={`ed-status ${parseErr || err ? "bad" : "ok"}`}>
           {parseErr ? `invalid JSON · ${parseErr}` : err ? err : "valid · rendering live"}
         </div>

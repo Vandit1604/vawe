@@ -780,16 +780,26 @@ a{color:inherit;text-decoration:none}
 .ed-panehead{display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-bottom:0;
   border-radius:12px 12px 0 0;padding:9px 12px}
 .ed-file{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2)}
-.ed-lines{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);margin-left:auto}
+.ed-lines{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);margin-left:auto;margin-right:2px}
 .ed-copy{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);background:#fff;
   border:1px solid var(--line-2);border-radius:6px;padding:3px 9px;cursor:pointer}
 .ed-copy:hover{border-color:var(--accent)}
 
-.ed-code{width:100%;height:clamp(360px,52vh,600px);resize:vertical;display:block;
-  font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.7;color:var(--ink-2);
-  background:#fff;border:1px solid var(--line);border-radius:0;padding:14px;outline:none;
-  white-space:pre;overflow:auto;tab-size:1}
-.ed-code:focus{border-color:var(--accent);background:var(--bg-2)}
+/* The CodeMirror host. Everything inside it is themed from the editor's own theme object (see
+   CodeEditor.tsx) because CodeMirror injects scoped styles that a plain stylesheet fights; only
+   the box lives here. resize:vertical is deliberate — a 900-line film wants more than 52vh, and
+   the drag handle is the cheapest way to say so. */
+.ed-cm{width:100%;height:clamp(360px,52vh,600px);resize:vertical;overflow:hidden;
+  border:1px solid var(--line);background:#fff}
+.ed-cm:focus-within{border-color:var(--accent)}
+.ed-cm .cm-editor{height:100%}
+/* Cobalt, exactly like .ed-copy beside it: all three are buttons, and THE AFFORDANCE RULE says
+   the accent is what marks a thing you can act on. Drawn in ink-2 they were the only grey controls
+   on the site, sitting one gap away from a cobalt one that does the same kind of job. */
+.ed-fold{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);background:#fff;
+  border:1px solid var(--line-2);border-radius:6px;padding:3px 9px;cursor:pointer;
+  transition:border-color .2s var(--ease)}
+.ed-fold:hover{border-color:var(--accent)}
 
 .ed-status{font-family:var(--font-mono),monospace;font-size:11.5px;padding:8px 12px;border:1px solid;
   border-radius:0 0 12px 12px;border-top:0;word-break:break-word;max-height:96px;overflow:auto}
