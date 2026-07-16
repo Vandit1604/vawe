@@ -332,8 +332,10 @@ a{color:inherit;text-decoration:none}
    swaps fired inside one scroll gesture and the panel strobed.
    It is a ceiling as well as a floor, though: buy more runway than the claim can fill and you get
    a screen of void per claim, which is the same emptiness this section was rebuilt to remove.
-   48vh is the least that still lets one claim be read at a time. */
-.step{position:relative;min-height:48vh;display:flex;flex-direction:column;justify-content:center;
+   38vh is the floor found by measuring: below roughly a third of a viewport the swaps start
+   landing inside a single scroll gesture and the panel strobes again. This section frames the
+   product, it must not become a journey. */
+.step{position:relative;min-height:38vh;display:flex;flex-direction:column;justify-content:center;
   padding:clamp(30px,4.4vw,52px) clamp(20px,2.4vw,32px) clamp(30px,4.4vw,52px) 0;
   border-bottom:1px solid var(--line)}
 .step h3{font-size:clamp(1.45rem,2.5vw,2rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;
@@ -366,39 +368,43 @@ a{color:inherit;text-decoration:none}
 .stage-pane{grid-area:1/1;opacity:0;transform:translateY(6px);pointer-events:none;
   transition:opacity .4s var(--ease),transform .4s var(--ease)}
 .stage-pane[data-now]{opacity:1;transform:none}
-/* The panel has to CARRY this column, not float in it: at 340px/12px these artifacts read as
-   footnotes parked in white space. No caption either — the claim it answers is lit directly
-   across from it and the rail points at it, so a label would just say the h3 twice. */
-.scrolly .pf{font-family:var(--font-mono),monospace;font-size:13px;color:var(--muted);width:100%}
+/* No caption: the claim it answers is lit directly across from it and the rail points at it, so a
+   label would only say the h3 twice. */
+.scrolly-stage .dg{max-width:440px}
 
 /* mobile: the proof rejoins its claim (nothing to stick beside on a phone) */
 .step-proof{display:none;margin-top:20px}
 
-/* determinism: the same frame, rendered twice, out of order, byte-identical */
-.pf-hash{display:grid;gap:9px}
-.pf-hash i{display:flex;justify-content:space-between;gap:14px;font-style:normal;
-  border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg-2)}
-.pf-hash i b{color:var(--ink-2);font-weight:500}
-.pf-hash .eq{border:0;background:none;padding:4px 0;color:var(--accent);justify-content:flex-start;gap:8px}
+/* ===== THE PROOF DIAGRAMS (components/proofs.tsx) =========================================
+   One vocabulary, three diagrams. Cobalt is the only ink (The One Voice Rule); the neutrals are
+   the same --line / --bg-2 the rest of the page uses, so these read as drawn by the site rather
+   than dropped into it. Text inside an SVG does not inherit the page font, hence the explicit
+   families. Strokes are non-scaling: the wave mark is drawn at scale(3.7) and would otherwise
+   carry an 8px stroke next to the frames' 1.5px. */
+.dg{display:block;width:100%;height:auto;overflow:visible}
+.dg text{font-family:var(--font-mono),monospace}
+.dg-lab{font-size:10.5px;fill:var(--muted);letter-spacing:.01em}
+.dg-hash{font-size:12px;fill:var(--ink-2)}
+.dg-ok{font-size:11px;fill:var(--accent)}
 
-/* agent-native: prose in, contract out */
-.pf-say{display:grid;gap:9px}
-.pf-say q{quotes:none;display:block;background:var(--accent-soft);border:1px solid var(--accent-line);
-  color:var(--ink-2);border-radius:10px;padding:14px 16px;line-height:1.5}
-.pf-say code{display:block;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
-  color:var(--ink-2);white-space:pre;overflow-x:auto;line-height:1.6}
+.dg-frame{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dg-wave{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke}
+.dg-eq{stroke:var(--accent);stroke-width:2;stroke-linecap:round}
 
-/* any aspect: one height, every ratio — drawn, not described.
-   One height drives all three widths through the actual ratio, so the artifact cannot drift out
-   of sync with the claim it is proving: 9:16 IS 0.5625 of the height here, not a number I typed
-   that happened to look right. Shrinking it is then a single value. */
-.pf-ar{--arh:84px;display:flex;align-items:flex-end;gap:14px}
-.pf-ar i{display:block;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:5px;
-  flex:none;height:var(--arh)}
-.pf-ar i:nth-child(1){width:calc(var(--arh) * 16 / 9)}
-.pf-ar i:nth-child(2){width:calc(var(--arh) * 9 / 16)}
-.pf-ar i:nth-child(3){width:var(--arh)}
-.pf-ar span{align-self:flex-end;padding-bottom:3px;font-size:12px}
+.dg-soft{fill:var(--accent-soft);stroke:var(--accent-line);stroke-width:1}
+.dg-card{fill:var(--bg-2);stroke:var(--line);stroke-width:1}
+.dg-arrow{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.dg-quote{font-size:12.5px;fill:var(--ink-2)}
+.dg-code{font-size:12.5px;fill:var(--ink-2);white-space:pre}
+.dg-k{fill:var(--accent)}
+.dg-s{fill:var(--ink-2)}
+.dg-p{fill:var(--muted)}
+
+.dg-chip{fill:var(--accent);stroke:none}
+.dg-chiptx{font-size:11px;fill:#fff}
+/* dashed, and behind the frames: the fan is the relationship, not a thing in its own right */
+.dg-fan{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.55}
 
 /* Below 900 the two columns stop fitting: the panel would be too narrow to read the artifact in,
    and there is no room beside the text to pin it. So the scrollytelling is dropped rather than
@@ -414,9 +420,8 @@ a{color:inherit;text-decoration:none}
   .step[data-now] h3{color:var(--ink)}
   .step-rail{left:0;right:auto}
   .step-rail::after{transform:scaleY(1)}
-  .step-proof{display:block}
-  /* the 84px ratio row is 389px wide before padding — it overflowed a 390px phone */
-  .pf-ar{--arh:54px;gap:10px}
+  /* the diagrams scale with their viewBox, so the phone just gets a narrower one */
+  .step-proof{display:block;max-width:440px}
 }
 
 /* The swap is CONTENT, not decoration: it still happens, it just does not travel or fade. */
@@ -488,8 +493,17 @@ a{color:inherit;text-decoration:none}
 .num{font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--accent);letter-spacing:.03em;margin-bottom:12px}
 .copy h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
 .copy p{color:var(--ink-2);font-size:15.5px;line-height:1.55;max-width:40ch}
-.copy .tag{display:inline-flex;margin-top:16px;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
-  border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;background:var(--bg-2)}
+/* Inert metadata, per THE AFFORDANCE RULE below: no box, no accent, no verb. It was a bordered
+   chip identical to the control beneath it. These strings already announce themselves as specs
+   ("cut: whip · punch"), so they need no chrome to be read as data, only to be kept quiet.
+   One rule for all three places it appears; it was duplicated three times, drifting by a pixel of
+   padding each. */
+/* flex + fit-content, NOT inline-flex: block-level so it takes its own line in the block contexts
+   (.copy, .filmcard figcaption) where it is followed by .srcopen, and shrink-to-fit so it is still
+   only as wide as its text. As inline-flex the two sat on one line and collided. Inside
+   .aspects-foot the flex parent blockifies both anyway, so they stay side by side there. */
+.tag{display:flex;width:fit-content;margin-top:16px;font-family:var(--font-mono),monospace;font-size:12px;
+  color:var(--muted);letter-spacing:.01em}
 /* each box carries its video's TRUE ratio — the shapes ARE the demo, so they must not be cropped.
    flex-grow is set to each box's own ratio, so widths scale to the container and heights land equal. */
 /* ===== ANY ASPECT (full-measure) ==========================================================
@@ -547,8 +561,7 @@ a{color:inherit;text-decoration:none}
 .fbrand{display:flex;align-items:baseline;gap:11px;font-weight:700;font-size:1.08rem;letter-spacing:-.015em;margin-bottom:7px}
 .fdur{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.02em}
 .fline{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-bottom:14px}
-.filmcard .tag{display:inline-flex;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
-  border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;background:var(--bg-2)}
+.filmcard .tag{margin-top:0}
 .cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:44px;
   display:grid;align-items:end;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
   column-gap:clamp(28px,5vw,72px)}
@@ -563,31 +576,38 @@ a{color:inherit;text-decoration:none}
 .cap-lead p{color:var(--ink-2);font-size:1.02rem;line-height:1.5}
 @media(max-width:760px){.filmgrid{grid-template-columns:1fr}}
 
-/* source-JSON viewer */
-.srcview{margin-top:15px}
-.srctoggle{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink-2);
-  background:var(--bg-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 12px;cursor:pointer;
-  transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease)}
-.srctoggle:hover,.srctoggle.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.srctoggle .mono{opacity:.7}
-/* Hairline divider as a pseudo, not border-left. It is a 1px separator inside a chip — never the
-   banned side-stripe — but any border-left reads as that tell to a static detector, and a warning
-   you have to re-explain on every audit costs more than the pseudo does. Identical rendering. */
-.srctoggle .srcmeta{position:relative;color:var(--muted);font-size:11px;padding-left:9px;margin-left:2px}
-.srctoggle .srcmeta::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:var(--line-2)}
-.srctoggle.on .srcmeta::before{background:var(--accent-line)}
-.srcpanel{margin-top:11px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d1117;box-shadow:var(--shadow-1)}
-.srcbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:#161b22;border-bottom:1px solid #21262d}
-.srcbar .mono{font-size:11.5px;color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srccopy{flex:none;font-family:var(--font-mono),monospace;font-size:11.5px;color:#c9d1d9;background:#21262d;border:1px solid #30363d;
-  border-radius:6px;padding:4px 11px;cursor:pointer;transition:background .15s,color .15s}
-.srccopy:hover{background:#30363d;color:#fff}
-.srccode{margin:0;max-height:440px;overflow:auto;padding:16px 18px;font-family:var(--font-mono),monospace;font-size:12.5px;
-  line-height:1.6;color:#c9d1d9;white-space:pre;tab-size:2}
-.srccode .j-key{color:#7ee787}
-.srccode .j-str{color:#a5d6ff}
-.srccode .j-num{color:#79c0ff}
-.srccode .j-bool,.srccode .j-null{color:#ff7b72}
+/* ===== THE AFFORDANCE RULE ================================================================
+   A bordered mono chip on --bg-2 meant two opposite things on the same card: `.tag` was inert
+   metadata and `.srctoggle` was the control right beneath it, drawn identically. You could not
+   tell which one you could click, so you clicked neither.
+
+   ONE rule now decides it, and cobalt is the whole of it: COBALT AND A VERB MEANS YOU CAN ACT
+   ON IT. Chrome does not signal interactivity here, colour does. That gives The One Voice Rule a
+   job beyond decoration: the single accent marks the things you can touch, which is also why it
+   must stay scarce. Inert data gets no box, no accent, and no verb, so it can never be mistaken
+   for a control again. New chip: pick a side. */
+
+/* the action: cobalt, a verb, an arrow. Navigates to the editor with the scene loaded. */
+.srcopen{display:flex;width:fit-content;align-items:center;gap:8px;margin-top:15px;
+  font-family:var(--font-mono),monospace;font-size:12.5px;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:8px;padding:7px 12px;
+  transition:border-color .2s var(--ease),background .2s var(--ease)}
+.srcopen:hover{border-color:var(--accent);background:#e2ebff}
+/* No opacity on either of these. Fading them to .75 and .7 measured 3.08:1 and 2.84:1 against a
+   required 4.5 — the same trap DESIGN.md's Muted Floor corollary describes, walked into again
+   within the hour. Quieter means a colour that is quieter, never a colour turned down. */
+.srcopen .srcbrace{color:var(--accent)}
+/* Hairline divider as a pseudo, not border-left. It is a 1px separator inside a chip, never the
+   banned side-stripe, but any border-left reads as that tell to a static detector, and a warning
+   you re-explain at every audit costs more than the pseudo does. Identical rendering. */
+/* --ink-2, not --muted. The Muted Floor is a floor ON WHITE: #697182 holds 4.9:1 there but only
+   4.41:1 on this cobalt-tinted fill, which is under AA. A token that is "the lightest colour that
+   may hold text" is only that on the surface it was measured against. */
+.srcopen .srcmeta{position:relative;color:var(--ink-2);font-weight:400;font-size:11px;
+  padding-left:9px;margin-left:2px}
+.srcopen .srcmeta::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:var(--accent-line)}
+.srcopen .arw{display:inline-block;transition:transform .25s var(--ease)}
+.srcopen:hover .arw{transform:translateX(3px)}
 
 /* =========================================================
    BLOCKS REGISTRY
@@ -679,8 +699,7 @@ a{color:inherit;text-decoration:none}
 .codeblock{background:#0f1620;border-radius:12px;padding:18px 20px;margin:26px 0 6px;box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
 .codeblock .lbl{font-family:var(--font-mono),monospace;font-size:11px;color:#5a6478;margin-bottom:11px}
 .codeblock pre{font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.75;color:#c8cfdb;white-space:pre;margin:0}
-.fdetail .tag{display:inline-flex;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
-  border:1px solid var(--line-2);border-radius:8px;padding:6px 12px;background:var(--bg-2);margin-top:24px}
+.fdetail .tag{margin-top:24px}
 
 /* =========================================================
    MICRO-ANIMATIONS
@@ -734,7 +753,11 @@ a{color:inherit;text-decoration:none}
 .ed-presel.is-loading select{border-color:var(--accent);cursor:progress}
 
 /* The repo is private: this is a state, not a link, so it must not look clickable. */
-.ghsoon{cursor:default;color:var(--muted);background:var(--bg-2);box-shadow:none}
+/* A state, not a control, so it drops the button's chrome entirely rather than wearing it greyed
+   out: same affordance rule as .tag vs .srcopen. A bordered, shadowed pill that does nothing when
+   clicked is the collision this rule exists to stop, and "disabled button" reads as "broken
+   button" anyway. Quiet text next to the nav links says pending, which is what is true. */
+.ghsoon{cursor:default;color:var(--muted);background:none;border-color:transparent;box-shadow:none;font-weight:500}
 .ghsoon:hover{transform:none;box-shadow:none}
 .bar.pill .ghsoon{background:rgba(11,31,84,.28);border-color:rgba(255,255,255,.24);color:#fff}
 

@@ -1,71 +1,25 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-
-// lightweight JSON syntax highlighter — escapes HTML, then wraps tokens in spans.
-function highlight(json: string): string {
-  const esc = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return esc.replace(
-    /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(?:\s*:)?)|(\b(?:true|false)\b)|(\bnull\b)|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
-    (m, str, bool, nul, num) => {
-      if (str) return `<span class="j-${/:\s*$/.test(str) ? "key" : "str"}">${str}</span>`;
-      if (bool) return `<span class="j-bool">${m}</span>`;
-      if (nul) return `<span class="j-null">${m}</span>`;
-      if (num) return `<span class="j-num">${m}</span>`;
-      return m;
-    }
-  );
-}
-
+/* Opens the scene in the editor. It used to expand the JSON inline, which was wrong twice over:
+ * an accordion mid-page shoves everything below it down, so the thing you were reading jumps away
+ * from under your eyes, and reading JSON is not the point anyway. The editor already shows the
+ * same source AND renders it live AND lets you edit it, so "view the source" and "go where the
+ * source runs" are the same intent, and only one of them costs a layout shift.
+ *
+ * It is a real <Link>, not a button with a router push: middle-click, cmd-click, open-in-new-tab
+ * and "copy link address" all work for free, and it needs no client JS at all.
+ */
 export function SourceViewer({ name, lines }: { name: string; lines: number }) {
-  const [open, setOpen] = useState(false);
-  const [html, setHtml] = useState<string | null>(null);
-  const [raw, setRaw] = useState("");
-  const [copied, setCopied] = useState(false);
-
-  async function toggle() {
-    if (!open && html === null) {
-      try {
-        const text = await (await fetch(`/scenes/${name}.json`)).text();
-        setRaw(text);
-        setHtml(highlight(text));
-      } catch {
-        setHtml("// could not load source");
-      }
-    }
-    setOpen((v) => !v);
-  }
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(raw);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* clipboard unavailable */
-    }
-  }
-
   return (
-    <div className="srcview">
-      <button className={open ? "srctoggle on" : "srctoggle"} onClick={toggle} aria-expanded={open}>
-        <span className="mono">{"{ }"}</span>
-        {open ? "Hide source" : "View source JSON"}
-        <span className="srcmeta">{lines} lines</span>
-      </button>
-      {open && (
-        <div className="srcpanel">
-          <div className="srcbar">
-            <span className="mono">formats/scene/{name}.json</span>
-            <button className="srccopy" onClick={copy}>
-              {copied ? "Copied ✓" : "Copy"}
-            </button>
-          </div>
-          <pre className="srccode">
-            <code dangerouslySetInnerHTML={{ __html: html ?? "" }} />
-          </pre>
-        </div>
-      )}
-    </div>
+    <Link className="srcopen" href={`/editor?scene=${encodeURIComponent(name)}`}>
+      <span className="srcbrace" aria-hidden="true">
+        {"{ }"}
+      </span>
+      Open the JSON in the editor
+      <span className="srcmeta">{lines} lines</span>
+      <span className="arw" aria-hidden="true">
+        →
+      </span>
+    </Link>
   );
 }

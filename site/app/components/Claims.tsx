@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ProofHash, ProofSay, ProofAspect } from "./proofs";
 
 /* Sticky scrollytelling: the claims scroll on the left, one proof artifact stays pinned on the
  * right and swaps to match whichever claim you are reading, and a cobalt rail fills box by box
@@ -19,41 +20,17 @@ const CLAIMS: Claim[] = [
   {
     t: "Deterministic",
     d: "renderFrame(n) is pure in n. Same JSON, same bytes, any render order. Every video is reproducible and diff-able.",
-    proof: (
-      <div className="pf pf-hash">
-        <i>
-          <span>frame 412</span>
-          <b>a4f0…9c1</b>
-        </i>
-        <i>
-          <span>frame 412, re-rendered</span>
-          <b>a4f0…9c1</b>
-        </i>
-        <i className="eq">identical ✓</i>
-      </div>
-    ),
+    proof: <ProofHash />,
   },
   {
     t: "Agent-native",
     d: "Authored from a schema and a taste system, not clicked together in a UI. One open canvas of composable primitives.",
-    proof: (
-      <div className="pf pf-say">
-        <q>“a 15s launch film, cobalt, ends on the wordmark”</q>
-        <code>{`{ "module": "scene", "theme": "vawe",\n  "layers": [ … ] }`}</code>
-      </div>
-    ),
+    proof: <ProofSay />,
   },
   {
     t: "Any aspect",
     d: "One source renders 16:9, 9:16, 1:1, and 4:5 in a single pass. Every platform ratio from the same scene.",
-    proof: (
-      <div className="pf pf-ar">
-        <i />
-        <i />
-        <i />
-        <span>one scene</span>
-      </div>
-    ),
+    proof: <ProofAspect />,
   },
 ];
 

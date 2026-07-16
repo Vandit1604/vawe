@@ -2,14 +2,34 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScenePlayer } from "./ScenePlayer";
 
-const PRESETS = [
-  { id: "showcase-type", label: "kinetic type" },
-  { id: "showcase-cuts", label: "cuts" },
-  { id: "showcase-stings", label: "shader stings" },
-  { id: "showcase-data", label: "data story" },
-  { id: "showcase-ui", label: "product UI" },
-  { id: "argus-launch", label: "argus · film" },
+/* Every scene in site/public/scenes, not a hand-picked six. The showcase links here with
+ * ?scene=<id> from each clip, so anything it can link to must be loadable and must be able to name
+ * itself in the picker. Grouped, because a flat list of eleven where four are 20-40KB films reads
+ * as one undifferentiated pile. */
+const GROUPS: { group: string; items: { id: string; label: string }[] }[] = [
+  {
+    group: "capabilities",
+    items: [
+      { id: "showcase-type", label: "kinetic type" },
+      { id: "showcase-cuts", label: "cuts" },
+      { id: "showcase-stings", label: "shader stings" },
+      { id: "showcase-data", label: "data story" },
+      { id: "showcase-ui", label: "product UI" },
+      { id: "showcase-aspect", label: "any aspect" },
+      { id: "hero-site", label: "the hero scene" },
+    ],
+  },
+  {
+    group: "films",
+    items: [
+      { id: "argus-launch", label: "argus · launch film" },
+      { id: "linear-launch", label: "linear · launch film" },
+      { id: "stripe", label: "stripe · launch film" },
+      { id: "creed-launch", label: "creed · launch film" },
+    ],
+  },
 ];
+const PRESETS = GROUPS.flatMap((g) => g.items);
 
 const STARTER = `{
  "module": "scene",
@@ -68,6 +88,19 @@ export function EditorClient() {
     setLoading(null);
   };
 
+  /* Deep link from the showcase: /editor?scene=<id>.
+   * The id is matched against PRESETS rather than handed to fetch, because it is a URL parameter
+   * anyone can write and it would otherwise be interpolated straight into a request path, where
+   * ?scene=../../something would go and fetch exactly that. Matching a known list means the only
+   * reachable scenes are the ones we ship.
+   * Read once on mount from location, not useSearchParams: this is an entry point rather than
+   * reactive state, and useSearchParams would opt this static page out of prerendering. */
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("scene");
+    if (id && PRESETS.some((p) => p.id === id)) void load(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const copy = async () => {
     await navigator.clipboard.writeText(json);
     setCopied(true); setTimeout(() => setCopied(false), 1400);
@@ -103,10 +136,14 @@ export function EditorClient() {
               <option value="" disabled>
                 Pick an example scene…
               </option>
-              {PRESETS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
+              {GROUPS.map((g) => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.items.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <span className="ed-caret" aria-hidden="true">
