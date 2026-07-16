@@ -465,7 +465,11 @@ a{color:inherit;text-decoration:none}
 .phead .kicker{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1}
 .phead h1{grid-column:1;grid-row:2}
 .phead > p:first-of-type{grid-column:2;grid-row:2;align-self:end;padding-bottom:.5em;max-width:46ch}
-/* anything after the lead (bnote, phead-rules) spans and drops below */
+/* Anything after the lead spans and drops below. Only chips and inline notes belong here (.bnote):
+   a row-3 element is full measure, ~110ch, which no prose may be. The editor's Claude pointer used
+   to sit here as a wall-to-wall sentence under a half-empty right column, which is how a header
+   manages to read as crowded and empty at once. It is an input method, so it moved next to the
+   other input methods in the editor's own panel. Keep this row for chips. */
 .phead > p:not(:first-of-type),.phead .bnote{grid-column:1/-1;grid-row:3}
 @media (max-width:860px){
   .phead{grid-template-columns:1fr;row-gap:14px}
@@ -776,10 +780,10 @@ a{color:inherit;text-decoration:none}
   .ed{grid-template-columns:1fr}
   .ed-main{position:static}
 }
-.phead-rules{margin-top:14px;font-size:15px;color:var(--muted)}
-.phead-rules a{color:var(--accent);font-weight:600}
-.phead-rules a:hover{text-decoration:underline}
-.phead-rules code{font-family:var(--font-mono),monospace;font-size:13px;background:var(--accent-soft);
+.ed-claude{margin:-2px 0 4px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+.ed-claude a{color:var(--accent);font-weight:600}
+.ed-claude a:hover{text-decoration:underline}
+.ed-claude code{font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--accent-soft);
   border:1px solid var(--accent-line);border-radius:5px;padding:1px 6px}
 
 /* The nav had no mobile treatment: at 390px it measured 484px wide and scrolled the whole page

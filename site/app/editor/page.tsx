@@ -22,14 +22,6 @@ export default function EditorPage() {
             The engine is a web page, so it runs here as-is. Pick a scene or write your own, and watch
             every frame render live. No account, no key, nothing sent anywhere.
           </p>
-          <p className="phead-rules">
-            Want Claude to write one for you? Give it{" "}
-            <a href="/vawe-rules.md" target="_blank" rel="noreferrer">
-              <code>vawe-rules.md</code>
-            </a>{" "}
-            — every layer type, preset, easing, cut and taste rule, generated from the engine so it
-            cannot drift. Paste what comes back into the editor.
-          </p>
         </div>
         <EditorClient />
         </main>

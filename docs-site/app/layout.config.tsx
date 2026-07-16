@@ -19,9 +19,16 @@ export const baseOptions: BaseLayoutProps = {
         Vawe
       </span>
     ),
+    // the wordmark goes home: proxied at /docs under the site's origin, this app is one section of
+    // that site, and without this there was no way back to it from here at all.
+    url: '/',
   },
+  // No GitHub link: the repo is private, so it was a nav item that 404s for every reader. The site
+  // dropped the same link for the same reason; this file was missed. These are where a reader of
+  // the docs actually wants to go next, and they resolve because the site serves this app.
   links: [
     { text: 'Docs', url: '/docs', active: 'nested-url' },
-    { text: 'GitHub', url: 'https://github.com/Vandit1604/vawe', external: true },
+    { text: 'Editor', url: '/editor' },
+    { text: 'Showcase', url: '/showcase' },
   ],
 };

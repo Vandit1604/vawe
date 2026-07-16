@@ -36,9 +36,13 @@ RUN npm run build
 # down is not worth the extra moving part for a project this size.
 WORKDIR /repo/docs-site
 COPY docs-site/package.json docs-site/package-lock.json ./
-RUN npm ci
+# --ignore-scripts is load-bearing: this package's postinstall runs `fumadocs-mdx`, which reads
+# source.config.ts and content/. Neither is in this layer, and neither may be — copying them here
+# to satisfy the postinstall would make every prose edit bust the dependency cache. So install the
+# deps only, and generate .source below, once the content is actually present.
+RUN npm ci --ignore-scripts
 COPY docs-site/ ./
-RUN npm run build
+RUN npx fumadocs-mdx && npm run build
 
 # --- runtime: standalone server only, no dev deps ---
 FROM node:22-alpine AS runner

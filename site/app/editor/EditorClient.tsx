@@ -119,6 +119,18 @@ export function EditorClient() {
               : "or edit the JSON below, it renders as you type"}
           </span>
         </div>
+        {/* The third way in, so it sits with the other two. This lived in the page header, where
+            it was preamble to read before reaching the tool, and it stretched one sentence across
+            the full measure. Someone asking "how do I get a scene in here?" is looking exactly
+            here. */}
+        <p className="ed-claude">
+          Or have Claude write one. Give it{" "}
+          <a href="/vawe-rules.md" target="_blank" rel="noreferrer">
+            <code>vawe-rules.md</code>
+          </a>
+          , every layer type, preset, easing, cut and taste rule, generated from the engine so it
+          cannot drift, then paste what comes back.
+        </p>
         <div className="ed-panehead">
           <span className="ed-file">scene.json</span>
           <span className="ed-lines">{json.split("\n").length} lines</span>
