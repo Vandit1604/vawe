@@ -65,9 +65,15 @@ a{color:inherit;text-decoration:none}
 /* ===== THE SHELL ===========================================================================
    The page is a card floating on a field, not a document bleeding to the window edge. It frames
    the site the way a contact sheet frames its frames — which is the whole North Star. */
-.shell{position:relative;background:var(--bg);border-radius:26px;overflow:hidden;margin:10px;
+/* clip-path, NOT overflow:hidden. overflow:hidden makes this a scroll container, and
+   `animation-timeline: view()` resolves against the nearest scrollport — so every scroll-driven
+   animation inside the shell silently anchored to a box that never scrolls and never advanced.
+   It failed the worst way: content readable, animation dead, nothing to see in a screenshot.
+   clip-path rounds the corners identically without creating a scrollport. */
+.shell{position:relative;background:var(--bg);border-radius:26px;margin:10px;
+  clip-path:inset(0 round 26px);
   box-shadow:0 1px 3px rgba(16,22,32,.06),0 12px 40px -18px rgba(16,22,32,.18)}
-@media (max-width:640px){ .shell{margin:6px;border-radius:18px} }
+@media (max-width:640px){ .shell{margin:6px;border-radius:18px;clip-path:inset(0 round 18px)} }
 
 /* ===== THE BOOKEND =========================================================================
    A band of the engine's own output, full-bleed, committed to cobalt. Structure borrowed from a
@@ -308,6 +314,42 @@ a{color:inherit;text-decoration:none}
    ruled row carrying a proof artifact that only makes sense for that claim: determinism shows
    the same frame hashing twice, agent-native shows prose becoming JSON, any-aspect draws the
    ratios. Different claims, different evidence, no cards. */
+/* ===== SCROLL-DRIVEN CLAIMS ===============================================================
+   Each claim resolves as it enters: the row settles, and its proof artifact lands a beat later,
+   so motion order = reading order. Scroll-driven via animation-timeline, so it is tied to the
+   scrollbar rather than a timer — nothing plays off-screen, nothing replays on re-entry.
+   Three guards, all load-bearing:
+   1. @supports — where animation-timeline is unsupported, animation-timeline is ignored but the
+      animation would still RUN on a time basis and flash. Gating the whole block means those
+      browsers get the finished state, immediately.
+   2. prefers-reduced-motion — no animation at all.
+   3. The finished state is the DEFAULT. The keyframes only ever animate FROM something TO the
+      default, so content is never gated behind a class that may not fire (headless renderers and
+      background tabs). If every guard fails, the section still reads perfectly.
+   Restraint is deliberate: this frames the video, it must not outshine it. Opacity and 14px of
+   travel, nothing more. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .claim{animation:claimIn linear both;animation-timeline:view();animation-range:entry 8% cover 30%}
+    .claim .pf{animation:proofIn linear both;animation-timeline:view();animation-range:entry 14% cover 38%}
+    /* the artifacts each resolve in their own way — the variation IS the section's argument */
+    .pf-hash i{animation:hashIn linear both;animation-timeline:view();animation-range:entry 18% cover 40%}
+    .pf-hash i:nth-child(2){animation-range:entry 22% cover 44%}
+    .pf-hash .eq{animation-range:entry 28% cover 48%}
+    .pf-ar i{animation:barIn linear both;animation-timeline:view();animation-range:entry 18% cover 42%;
+      transform-origin:bottom center}
+    .pf-ar i:nth-child(2){animation-range:entry 22% cover 46%}
+    .pf-ar i:nth-child(3){animation-range:entry 26% cover 50%}
+  }
+}
+/* Every `from` keeps a visible floor — nothing here ever reaches opacity 0. These are position-
+   driven, not time-driven, so they cannot "fail to fire" like a class-triggered transition; but a
+   zero floor means any future breakage hides content outright, and no reveal is worth that. */
+@keyframes claimIn{from{opacity:.25;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes proofIn{from{opacity:.18;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes hashIn{from{opacity:.18;transform:translateX(10px)}to{opacity:1;transform:none}}
+@keyframes barIn{from{opacity:.18;transform:scaleY(.2)}to{opacity:1;transform:none}}
+
 .claims{margin-top:38px;border-top:1px solid var(--line)}
 .claim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:clamp(20px,5vw,60px);
   align-items:center;padding:clamp(26px,3.6vw,40px) 0;border-bottom:1px solid var(--line)}
@@ -406,13 +448,35 @@ a{color:inherit;text-decoration:none}
   border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;background:var(--bg-2)}
 /* each box carries its video's TRUE ratio — the shapes ARE the demo, so they must not be cropped.
    flex-grow is set to each box's own ratio, so widths scale to the container and heights land equal. */
-.trio{display:flex;gap:14px;align-items:center;justify-content:center;padding:14px}
-.trio .ar{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg-2);
-  box-shadow:var(--shadow-1);min-width:0}
+/* ===== ANY ASPECT (full-measure) ==========================================================
+   flex-basis proportional to each ratio + aspect-ratio ⇒ all three resolve to the SAME height,
+   so width is the only variable and the point ("one scene, three crops") reads instantly.
+   That maths was always right; the beat just never had the width to show it. */
+.aspects{padding:44px 0 8px;border-top:1px solid var(--line);margin-top:20px}
+.aspects-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);
+  align-items:end;margin-bottom:26px}
+.aspects-head h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
+  font-weight:800;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin-top:8px}
+.aspects-head p{color:var(--ink-2);font-size:1.02rem;line-height:1.6;max-width:46ch;align-self:end}
+.aspects-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
+
+.trio{display:flex;gap:clamp(10px,1.4vw,18px);align-items:flex-end;justify-content:center;padding:0}
+.trio .ar{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:var(--bg-2);box-shadow:var(--shadow-2);min-width:0;margin:0}
 .trio .ar video{display:block;height:100%;width:100%;object-fit:contain}
 .trio .a169{flex:1.778 1 0;aspect-ratio:16/9}
 .trio .a916{flex:.563 1 0;aspect-ratio:9/16}
 .trio .a11{flex:1 1 0;aspect-ratio:1/1}
+/* the ratio label is the caption, and it is the only differentiator worth reading */
+.trio .ar figcaption{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;
+  font-size:11px;color:#fff;background:rgba(15,22,32,.94);padding:3px 8px;border-radius:6px}
+@media (max-width:760px){
+  .aspects-head{grid-template-columns:1fr;row-gap:12px}
+  .trio{flex-wrap:wrap;justify-content:flex-start}
+  .trio .a169{flex:1 1 100%}
+  .trio .a916{flex:0 1 30%}
+  .trio .a11{flex:0 1 55%}
+}
 /* opaque for the same reason as .clip .lab: its backdrop is video */
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
@@ -602,12 +666,22 @@ a{color:inherit;text-decoration:none}
    ========================================================= */
 .ed{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:24px;padding:20px 0 80px;align-items:start}
 .ed-side{display:flex;flex-direction:column;min-width:0}
-.ed-presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-.ed-presets button{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);background:var(--bg-2);
-  border:1px solid var(--line-2);border-radius:999px;padding:6px 12px;cursor:pointer;
-  transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease)}
-.ed-presets button:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.ed-presets button:disabled{opacity:.5;cursor:default}
+/* Was a row of pills. Pills are TAGS — the same shape the site uses for inert metadata — so they
+   read as labels describing the editor rather than the way in, and nobody clicked them. A labelled
+   select is unambiguous: it looks like a control because it is one. */
+.ed-presets{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.ed-preslab{font-size:12.5px;font-weight:600;color:var(--ink)}
+.ed-presel{position:relative;display:inline-flex;max-width:340px}
+.ed-presel select{appearance:none;width:100%;font-family:inherit;font-size:14px;font-weight:500;
+  color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:10px;
+  padding:10px 38px 10px 13px;cursor:pointer;box-shadow:var(--shadow-1);
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.ed-presel select:hover:not(:disabled){border-color:var(--accent)}
+.ed-presel select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.ed-presel select:disabled{opacity:.6;cursor:progress}
+.ed-caret{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;
+  color:var(--accent);font-size:12px}
+.ed-preshint{font-size:12px;color:var(--muted)}
 
 .ed-panehead{display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-bottom:0;
   border-radius:12px 12px 0 0;padding:9px 12px}

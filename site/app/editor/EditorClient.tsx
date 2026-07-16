@@ -77,12 +77,36 @@ export function EditorClient() {
   return (
     <div className="ed">
       <div className="ed-side">
+        {/* A native <select>, not a pill row. Pills read as tags — inert labels describing the
+            thing — so nobody clicks them, and these are the fastest way into the editor. A select
+            announces itself as a control, and brings keyboard, mobile and screen readers for free. */}
         <div className="ed-presets">
-          {PRESETS.map((p) => (
-            <button key={p.id} onClick={() => load(p.id)} disabled={loading === p.id}>
-              {loading === p.id ? "…" : p.label}
-            </button>
-          ))}
+          <label className="ed-preslab" htmlFor="ed-scene">
+            Load a scene
+          </label>
+          <div className="ed-presel">
+            <select
+              id="ed-scene"
+              value=""
+              disabled={!!loading}
+              onChange={(e) => {
+                if (e.target.value) load(e.target.value);
+              }}
+            >
+              <option value="" disabled>
+                {loading ? "loading…" : "Pick an example scene…"}
+              </option>
+              {PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <span className="ed-caret" aria-hidden="true">
+              ▾
+            </span>
+          </div>
+          <span className="ed-preshint">or edit the JSON below, it renders as you type</span>
         </div>
         <div className="ed-panehead">
           <span className="ed-file">scene.json</span>

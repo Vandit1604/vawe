@@ -93,27 +93,32 @@ export default function Showcase() {
             </div>
           ))}
 
-          <div className="row flip">
-            <div className="media">
-              <div className="trio">
-                <div className="ar a169">
-                  <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
-                  <span>16:9</span>
-                </div>
-                <div className="ar a916">
-                  <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
-                  <span>9:16</span>
-                </div>
-                <div className="ar a11">
-                  <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
-                  <span>1:1</span>
-                </div>
+          {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
+              wide — you could not see the scene, so the one thing it claims to prove (same scene,
+              three crops) was unprovable. Three ratios side by side need the whole measure. */}
+          <div className="aspects">
+            <div className="aspects-head">
+              <div>
+                <div className="num">06 / any aspect</div>
+                <h2>One scene, every ratio.</h2>
               </div>
-            </div>
-            <div className="copy">
-              <div className="num">06 / any aspect</div>
-              <h2>One scene, every ratio.</h2>
               <p>Relative coordinates resolve per aspect: pin, a 12-column grid, optical centering. Render 16:9, 9:16, and 1:1 from the same source, in one pass.</p>
+            </div>
+            <div className="trio">
+              <figure className="ar a169">
+                <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
+                <figcaption>16:9</figcaption>
+              </figure>
+              <figure className="ar a916">
+                <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
+                <figcaption>9:16</figcaption>
+              </figure>
+              <figure className="ar a11">
+                <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
+                <figcaption>1:1</figcaption>
+              </figure>
+            </div>
+            <div className="aspects-foot">
               <span className="tag">--aspect 16:9,9:16,1:1</span>
               <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
             </div>
