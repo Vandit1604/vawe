@@ -115,6 +115,14 @@ ok('preset scale grows', PRESETS.scale(1).transform.includes('scale(1'));
 ok('preset blur clears', PRESETS.blur(1).filter.includes('blur(0.00px)'));
 ok('preset wave oscillates', PRESETS.wave(0).transform !== PRESETS.wave(0.25).transform);
 ok('presets deterministic', PRESETS.bounce(0.4).transform === PRESETS.bounce(0.4).transform);
+// draw: the stroke-on preset. pathLength=1 normalisation (splitText 'path') means the offset is the
+// remaining fraction of the line, so these asserts are exact and need no DOM.
+ok('preset draw hidden at 0', PRESETS.draw(0).opacity === 0 && PRESETS.draw(0).strokeDashoffset === '1.0000');
+ok('preset draw identity at 1', PRESETS.draw(1).strokeDasharray === 'none' && PRESETS.draw(1).strokeDashoffset === '0' && PRESETS.draw(1).opacity === 1);
+ok('preset draw monotonic', (() => { let prev = 2; for (let u = 0; u < 1; u += 0.05) { const o = +PRESETS.draw(u).strokeDashoffset; if (o > prev + 1e-9) return false; prev = o; } return true; })());
+ok('preset draw clamped [0,1]', (() => { for (let u = -0.5; u < 1; u += 0.1) { const o = +PRESETS.draw(u).strokeDashoffset; if (o < 0 || o > 1) return false; } return true; })());
+ok('preset draw back reverses', PRESETS.draw(0.25).strokeDashoffset !== PRESETS.draw(0.25, { back: true }).strokeDashoffset);
+ok('preset draw deterministic', PRESETS.draw(0.37).strokeDashoffset === PRESETS.draw(0.37).strokeDashoffset);
 
 
 // new kinetic presets: hidden at 0, fully landed at 1

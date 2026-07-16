@@ -9,6 +9,15 @@ import { clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } f
 // element shells are kept in place and their text split inside them, so `.big em` styling reaches
 // the units. Plain-text inputs produce the exact same DOM as before.
 export function splitText(el, mode = 'word') {
+  // 'path': the units are SVG strokes, not glyphs — for the `draw` preset (a logo/icon/chart line
+  // drawing itself on). Stamping pathLength="1" here NORMALISES every path to a unit length, so the
+  // preset is a pure function of u with no getTotalLength() measurement and no layout read. Returns
+  // early: the DOM is not restructured at all, so nothing else about the element changes.
+  if (mode === 'path') {
+    const paths = [...el.querySelectorAll('path, line, polyline, circle, rect, ellipse')];
+    for (const p of paths) p.setAttribute('pathLength', '1');
+    return paths;
+  }
   const mk = (t) => { const s = document.createElement('span'); s.className = 'ku'; s.style.display = 'inline-block'; s.style.whiteSpace = 'pre'; s.textContent = t; return s; };
   const units = [];
   const splitInto = (dest, text) => {
@@ -95,6 +104,17 @@ export const PRESETS = {
   shadow: (u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
   // riseClip: word rises out of its own baseline (needs clip wrappers — pass clip:true to splitText... handled by animateUnits fallback to plain rise if no wrapper)
   riseClip: (u, { dist = 44 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}px)` }),
+  // draw: an SVG stroke draws itself on. Pairs with splitText(el,'path'), which stamps
+  // pathLength="1" so dash units are normalised — the offset is then a pure function of u with no
+  // measurement. `back:true` draws from the far end. Hidden at u=0, exact identity at u=1 (dash
+  // cleared, not left at 0, so the stroke renders as authored — dasharray:1 on a closed shape
+  // would otherwise round-trip a hairline seam).
+  draw: (u, { ease = easeOutCubic, back = false } = {}) => {
+    const k = clamp01(u);
+    if (k >= 1) return { opacity: 1, strokeDasharray: 'none', strokeDashoffset: '0' };
+    const p = ease(k);
+    return { opacity: k > 0 ? 1 : 0, strokeDasharray: '1 1', strokeDashoffset: (back ? p - 1 : 1 - p).toFixed(4) };
+  },
 };
 
 // decode support: scrambles textContent deterministically until u resolves each char L->R.
