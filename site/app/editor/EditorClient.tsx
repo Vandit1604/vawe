@@ -40,6 +40,9 @@ export function EditorClient() {
   const [live, setLive] = useState(STARTER);   // only pushed to the player when it parses
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
+  // the select's bound value: what is actually on screen. "" = the starter scene, which is not in
+  // the list, so the placeholder shows until a real pick is made.
+  const [picked, setPicked] = useState("");
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -60,6 +63,7 @@ export function EditorClient() {
       const text = await r.text();
       setJson(text);
       setLive(text);
+      setPicked(id);                       // only on success: a failed load must not claim to be loaded
     } catch (e) { setErr(String(e)); }
     setLoading(null);
   };
@@ -80,21 +84,24 @@ export function EditorClient() {
         {/* A native <select>, not a pill row. Pills read as tags — inert labels describing the
             thing — so nobody clicks them, and these are the fastest way into the editor. A select
             announces itself as a control, and brings keyboard, mobile and screen readers for free. */}
+        {/* value is bound to `picked`, not "": a select that resets itself forgets what you chose,
+            so the control never reflected the scene on screen. Fetching a scene is a real wait, so
+            it says so — an editor that goes quiet while loading reads as broken. */}
         <div className="ed-presets">
           <label className="ed-preslab" htmlFor="ed-scene">
             Load a scene
           </label>
-          <div className="ed-presel">
+          <div className={`ed-presel${loading ? " is-loading" : ""}`}>
             <select
               id="ed-scene"
-              value=""
+              value={picked}
               disabled={!!loading}
               onChange={(e) => {
                 if (e.target.value) load(e.target.value);
               }}
             >
               <option value="" disabled>
-                {loading ? "loading…" : "Pick an example scene…"}
+                Pick an example scene…
               </option>
               {PRESETS.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -103,10 +110,14 @@ export function EditorClient() {
               ))}
             </select>
             <span className="ed-caret" aria-hidden="true">
-              ▾
+              {loading ? <span className="ed-spin" /> : "▾"}
             </span>
           </div>
-          <span className="ed-preshint">or edit the JSON below, it renders as you type</span>
+          <span className="ed-preshint" aria-live="polite">
+            {loading
+              ? `loading ${PRESETS.find((p) => p.id === loading)?.label ?? "scene"}…`
+              : "or edit the JSON below, it renders as you type"}
+          </span>
         </div>
         <div className="ed-panehead">
           <span className="ed-file">scene.json</span>

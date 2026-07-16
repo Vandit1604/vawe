@@ -92,9 +92,9 @@ export default function Home() {
               A deterministic motion-graphics engine. Write a scene, render a frame-perfect video in any aspect ratio.
             </p>
             <div className="hero-cta rise d3">
-              <a className="btn btn-white" href="https://github.com/Vandit1604/vawe">
-                Get early access <span className="arw">→</span>
-              </a>
+              <Link className="btn btn-white" href="/editor">
+                Try the editor <span className="arw">→</span>
+              </Link>
             </div>
           </div>
         </div>

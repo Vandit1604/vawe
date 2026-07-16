@@ -680,8 +680,19 @@ a{color:inherit;text-decoration:none}
 .ed-presel select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
 .ed-presel select:disabled{opacity:.6;cursor:progress}
 .ed-caret{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;
-  color:var(--accent);font-size:12px}
-.ed-preshint{font-size:12px;color:var(--muted)}
+  color:var(--accent);font-size:12px;display:flex;align-items:center}
+.ed-preshint{font-size:12px;color:var(--muted);min-height:1.2em}
+/* Fetching a scene is a real wait. Silence during it reads as a dead control. */
+.ed-spin{width:12px;height:12px;border-radius:50%;display:block;
+  border:2px solid var(--accent-line);border-top-color:var(--accent);animation:edspin .7s linear infinite}
+@keyframes edspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){ .ed-spin{animation-duration:2s} }
+.ed-presel.is-loading select{border-color:var(--accent);cursor:progress}
+
+/* The repo is private: this is a state, not a link, so it must not look clickable. */
+.ghsoon{cursor:default;color:var(--muted);background:var(--bg-2);box-shadow:none}
+.ghsoon:hover{transform:none;box-shadow:none}
+.bar.pill .ghsoon{background:rgba(11,31,84,.28);border-color:rgba(255,255,255,.24);color:#fff}
 
 .ed-panehead{display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-bottom:0;
   border-radius:12px 12px 0 0;padding:9px 12px}

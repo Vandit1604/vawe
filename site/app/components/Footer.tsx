@@ -18,17 +18,17 @@ export function Footer({ note = "one JSON, one video", bookend = false }: { note
       <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
       <div className="wrap foot-in on-accent">
         <p className="foot-cta">Compose a scene. Render it. Ship it.</p>
-        <p className="foot-sub">Free for individuals and small teams. One JSON in, one frame-perfect video out.</p>
+        <p className="foot-sub">One JSON in, one frame-perfect video out. No account, no key, nothing sent anywhere.</p>
         <div className="foot-act">
-          <a className="btn btn-white" href="https://github.com/Vandit1604/vawe">
-            ★ Star on GitHub
+          <a className="btn btn-white" href="/editor">
+            Try the editor <span className="arw">→</span>
           </a>
           <a className="btn btn-onaccent" href="/features">
             Explore features <span className="arw">→</span>
           </a>
         </div>
         <div className="foot-links">
-          <a href="https://github.com/Vandit1604/vawe">GitHub</a>
+          <a href="/blocks">Blocks</a>
           <a href="/showcase">Showcase</a>
           <a href="/editor">Editor</a>
           <a href="/features">Features</a>

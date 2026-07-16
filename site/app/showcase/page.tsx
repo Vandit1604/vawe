@@ -129,9 +129,9 @@ export default function Showcase() {
             Compose your own, in <span className="accent">JSON</span>.
           </h2>
           <div className="hero-cta">
-            <a className="btn btn-primary" href="https://github.com/Vandit1604/vawe">
-              Get early access
-            </a>
+            <Link className="btn btn-primary" href="/editor">
+              Try the editor
+            </Link>
             <Link className="btn btn-ghost" href="/">
               ← Back home
             </Link>

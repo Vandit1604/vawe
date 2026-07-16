@@ -3,6 +3,7 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 6,
+  "note": "This scene IS the claim: 'relative coordinates resolve per aspect'. It previously used x:60/w:1800, absolute pixels tuned for a 1920-wide canvas, so at 9:16 (1080 wide) the 1800-wide text box overflowed by 780px and the word 'ratio.' was cut clean off the frame. The one beat that advertises the layout system was the one beat hand-computing pixels, and it refuted itself on screen. Use pin here, forever. Anything with a hard-coded x/w cannot survive --aspect.",
   "audio": {
     "silent": true
   },
@@ -10,10 +11,8 @@
     {
       "type": "text",
       "text": "one source",
-      "x": 60,
-      "y": 320,
-      "w": 1800,
-      "align": "center",
+      "pin": "center",
+      "dy": -190,
       "size": 38,
       "font": "mono",
       "color": "var(--dim)",
@@ -26,11 +25,9 @@
     {
       "type": "text",
       "text": "every <b>ratio</b>.",
-      "x": 60,
-      "y": 410,
-      "w": 1800,
-      "align": "center",
-      "size": 148,
+      "pin": "center",
+      "dy": 20,
+      "size": 112,
       "weight": 700,
       "color": "var(--text)",
       "split": "word",
