@@ -55,7 +55,11 @@ a{color:inherit;text-decoration:none}
 .nav .ghbtn:hover{transform:translateY(-1px);box-shadow:var(--shadow-2)}
 /* over-image variant (landing hero) */
 .bar.over .mark,.bar.over .nav{color:var(--ink)}
-.bar.over .nav a:hover{background:rgba(255,255,255,.5)}
+.bar.over .nav{background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-radius:14px;padding:3px 4px;
+  box-shadow:0 0 0 1px rgba(16,22,32,.05)}
+.bar.over .nav a:hover{background:var(--accent-soft);color:var(--accent)}
+.bar.over .mark{background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-radius:12px;padding:5px 12px;
+  box-shadow:0 0 0 1px rgba(16,22,32,.05)}
 .bar.over .glyph{color:var(--accent)}
 /* solid variant (interior) */
 .bar.solid{border-bottom:1px solid var(--line)}
@@ -94,23 +98,32 @@ a{color:inherit;text-decoration:none}
      mask 2  an ellipse rising from the bottom-centre → carves the arch
    Intersected. Replaces an 880KB image with 0 bytes, and the ink type sits on plain white. */
 .hero-bg{position:absolute;inset:0;bottom:-300px;z-index:0;overflow:hidden;background:var(--bg)}
-/* The field is sized to the HERO, not to .hero-bg's -300px bleed: percentages resolve against the
-   box, so inheriting the tall box pushed the arch and the fade below the fold.
-   Arch solved against the sketch — dots stop ~360px in the middle and ~610px at the edges:
-     rx 62% (900px) · transparent core f=0.6 · f*ry = 625 · centre y = 985  →  ry 127%, cy 120% */
+/* ===== THE BALL ARCH =======================================================================
+   Balls, not dots: each is its own radial with the light off-centre (top-left), shading through
+   cobalt to deep blue at the rim — so they read as spheres rather than flat pips. The whole field
+   is a second gradient laid over them, so the mass goes deep blue at the top and pale toward the
+   bottom, and the hero reads blue overall.
+   The arch is unchanged: an ellipse rising from below clears the middle for the headline, and the
+   clearing stays plain white so the ink type keeps 18:1. Sized to the HERO (820px), never to
+   .hero-bg's -300px bleed — mask percentages resolve against the box, and inheriting the tall box
+   is what pushed the arch below the fold. */
 .hero-dots{position:absolute;left:0;right:0;top:0;height:820px;
-  background:linear-gradient(180deg, #1d4ed8 0%, var(--accent) 38%, #8fc0ff 70%, rgba(143,192,255,0) 96%);
+  background-image:
+    /* the ball: light at 36/32, cobalt core, deep-blue rim, hard cut to a sphere edge */
+    radial-gradient(circle 11px at 38% 34%, #dbeafe 0%, #93c5fd 22%, #3b82f6 52%, #1d4ed8 82%, rgba(29,78,216,0) 100%);
+  background-size:32px 32px;
+  /* the field's own top-to-bottom fade, and the arch */
   -webkit-mask-image:
-    radial-gradient(circle at center, #000 1.7px, transparent 1.9px),
+    linear-gradient(180deg, #000 0%, rgba(0,0,0,.92) 46%, rgba(0,0,0,.55) 74%, rgba(0,0,0,0) 97%),
     radial-gradient(ellipse 62% 140% at 50% 126%, transparent 70%, #000 96%);
-  -webkit-mask-size:27px 27px, 100% 100%;
-  -webkit-mask-repeat:repeat, no-repeat;
+  -webkit-mask-size:100% 100%, 100% 100%;
+  -webkit-mask-repeat:no-repeat, no-repeat;
   -webkit-mask-composite:source-in;
   mask-image:
-    radial-gradient(circle at center, #000 1.7px, transparent 1.9px),
+    linear-gradient(180deg, #000 0%, rgba(0,0,0,.92) 46%, rgba(0,0,0,.55) 74%, rgba(0,0,0,0) 97%),
     radial-gradient(ellipse 62% 140% at 50% 126%, transparent 70%, #000 96%);
-  mask-size:27px 27px, 100% 100%;
-  mask-repeat:repeat, no-repeat;
+  mask-size:100% 100%, 100% 100%;
+  mask-repeat:no-repeat, no-repeat;
   mask-composite:intersect;}
 /* the field dissolves into the next section, same as before */
 .hero-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
