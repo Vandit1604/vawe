@@ -5,7 +5,7 @@
   "duration": 14,
   "note": "The site's hero/footer bookend backdrop. Deliberately CONTENTLESS: one ambient shader field, no text, no blocks, no cuts, no stings. Every other clip in assets/ demonstrates a capability, which means every other clip has words in it, and words behind a headline read as drifting smudges. This one exists only to be a surface. The page blurs it, multiplies it over cobalt and crops it, so it is judged on luminance movement alone, never on legibility. If you add a layer with copy in it, you have broken the one thing this file is for.",
   "bg": [
-    { "preset": "deep", "from": 0, "to": 14, "value": "dark" }
+    { "preset": "accentPlain", "from": 0, "to": 14 }
   ],
   "layers": [
     {
@@ -17,7 +17,7 @@
       "enterDur": 0,
       "exitDur": 0,
       "speed": 0.22,
-      "intensity": 0.95,
+      "intensity": 0.3,
       "seed": 7,
       "colors": ["#2563eb", "#1d4ed8", "#8fc0ff", "#3b82f6"]
     }

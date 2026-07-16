@@ -86,12 +86,13 @@ a{color:inherit;text-decoration:none}
  *    Contrast becomes a property of the blend mode instead of a thing to re-audit per frame.
  *    Never swap this for soft-light/overlay/screen: those can lighten, and the guarantee dies.
  */
+/* opacity is the shadow dial. The field still has luminance variation, and multiply turns any
+   dark region into what reads as a shadow on the band; at .28 the whole range lands within ~5%
+   of cobalt, so it is movement rather than shading. */
 .bookend video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;
-  mix-blend-mode:multiply;opacity:.62;filter:blur(30px) saturate(1.35);transform:scale(1.16)}
-/* Weights the band toward its foot so the V reads. multiply, so it can only darken. */
-.bookend::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(180deg, rgba(11,31,84,0) 40%, rgba(11,31,84,.30) 100%);
-  mix-blend-mode:multiply}
+  mix-blend-mode:multiply;opacity:.28;filter:blur(30px) saturate(1.35);transform:scale(1.16)}
+/* No darkening gradient. It weighted each band's foot to make the V read, but it just looked like
+   a shadow slumped under the footer. The V has a shape; it does not need shading to be seen. */
 /* The V. The hero band comes to a point at centre-bottom, so the paper below reads as something
    the band is pouring into rather than a seam between two rectangles. */
 .bookend.tap{clip-path:polygon(0 0,100% 0,100% 64%,50% 100%,0 64%);padding-bottom:clamp(70px,9vw,132px)}
@@ -362,8 +363,21 @@ a{color:inherit;text-decoration:none}
 /* =========================================================
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */
-.phead{padding:52px 0 8px;max-width:48ch}
-.phead .kicker{display:inline-flex;align-items:center;gap:8px}
+/* Was max-width:48ch on the whole block — but ch resolves against the CONTAINER's 16px font, so
+   it capped the header at ~430px while holding a 64px headline. The h1 wrapped to three lines and
+   ~60% of the page sat empty. Headline left, lead right: the space gets used instead of voided. */
+.phead{padding:52px 0 8px;display:grid;align-items:end;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:clamp(28px,5vw,72px)}
+.phead .kicker{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1}
+.phead h1{grid-column:1;grid-row:2}
+.phead > p:first-of-type{grid-column:2;grid-row:2;align-self:end;padding-bottom:.5em;max-width:46ch}
+/* anything after the lead (bnote, phead-rules) spans and drops below */
+.phead > p:not(:first-of-type),.phead .bnote{grid-column:1/-1;grid-row:3}
+@media (max-width:860px){
+  .phead{grid-template-columns:1fr;row-gap:14px}
+  .phead .kicker,.phead h1,.phead > p:first-of-type,.phead > p:not(:first-of-type),.phead .bnote{
+    grid-column:1;grid-row:auto;padding-bottom:0}
+}
 .phead .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .phead h1{font-size:clamp(2.4rem,5.5vw,4rem);line-height:1;font-weight:700;letter-spacing:-.035em;margin-bottom:16px;text-wrap:balance}
 .phead p{color:var(--ink-2);font-size:1.1rem;line-height:1.5}
@@ -392,7 +406,14 @@ a{color:inherit;text-decoration:none}
 
 /* premium films */
 .films{padding:44px 0 8px}
-.films-head{max-width:54ch;margin-bottom:30px}
+/* same void, same fix as .phead: heading left, lead right */
+.films-head{margin-bottom:30px;display:grid;align-items:end;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:clamp(28px,5vw,72px)}
+.films-head p{grid-column:2;align-self:end;padding-bottom:.4em;max-width:46ch}
+@media (max-width:860px){
+  .films-head{grid-template-columns:1fr;row-gap:12px}
+  .films-head p{grid-column:1;padding-bottom:0}
+}
 .films-head h2{font-size:clamp(1.8rem,3.8vw,2.7rem);line-height:1.02;letter-spacing:-.032em;font-weight:700;margin-bottom:13px;text-wrap:balance}
 .films-head p{color:var(--ink-2);font-size:1.05rem;line-height:1.5}
 .filmgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
@@ -407,7 +428,16 @@ a{color:inherit;text-decoration:none}
 .fline{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-bottom:14px}
 .filmcard .tag{display:inline-flex;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
   border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;background:var(--bg-2)}
-.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:44px;max-width:48ch}
+.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:44px;
+  display:grid;align-items:end;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  column-gap:clamp(28px,5vw,72px)}
+.cap-lead .num{grid-column:1;grid-row:1}
+.cap-lead h2{grid-column:1;grid-row:2}
+.cap-lead p{grid-column:2;grid-row:2;align-self:end;padding-bottom:.4em;max-width:46ch}
+@media (max-width:860px){
+  .cap-lead{grid-template-columns:1fr;row-gap:12px}
+  .cap-lead .num,.cap-lead h2,.cap-lead p{grid-column:1;grid-row:auto;padding-bottom:0}
+}
 .cap-lead h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.03;letter-spacing:-.03em;font-weight:700;margin-bottom:12px;text-wrap:balance}
 .cap-lead p{color:var(--ink-2);font-size:1.02rem;line-height:1.5}
 @media(max-width:760px){.filmgrid{grid-template-columns:1fr}}
