@@ -8,7 +8,9 @@
     "prebuild": "node ../scripts/site/site-engine.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:docs": "npm --prefix ../docs-site run dev -- -p 3001",
+    "dev:all": "node ../scripts/site/dev-all.mjs"
   },
   "dependencies": {
     "next": "^15.1.6",

@@ -7,10 +7,7 @@ export function Footer({ note = "one JSON, one video", bookend = false }: { note
   if (!bookend) {
     return (
       <footer className="foot wrap">
-        <span>
-          © 2026 Vawe ·{" "}
-          <a href="https://github.com/Vandit1604/vawe/blob/main/LICENSE">Vawe Company License</a> · free for teams ≤ 3
-        </span>
+        <span>© 2026 Vawe · free to experiment with while it is early</span>
         <span className="mono">{note}</span>
       </footer>
     );
@@ -37,11 +34,11 @@ export function Footer({ note = "one JSON, one video", bookend = false }: { note
           <a href="/features">Features</a>
         </div>
         <div className="foot-rule" />
+        {/* No licence tier here. "free for teams ≤ 3" is an enforcement claim, and leading a
+            pre-launch page with a rule one person cannot enforce reads as defensive. The LICENSE
+            file is still in the repo for anyone who goes looking. Invite the experiment instead. */}
         <div className="foot-meta">
-          <span>
-            © 2026 Vawe ·{" "}
-            <a href="https://github.com/Vandit1604/vawe/blob/main/LICENSE">Vawe Company License</a> · free for teams ≤ 3
-          </span>
+          <span>© 2026 Vawe · free to experiment with while it is early</span>
           <span className="mono">{note}</span>
         </div>
       </div>
