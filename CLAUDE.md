@@ -94,6 +94,10 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    gradient / card-in-card / centered tells). Reach past anything it flags before rendering.
 3. **Render:** `make video D=formats/scene/<topic>.json`.
 4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
+   **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
+   A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text
+   layer needs `w` (+ `align`) or it lands left-edge-on-centre; and `dx`/`dy` only apply with `anchor`.
+   Both render silently. Audit every canvas you intend to ship.
 5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
    Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
 6. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.

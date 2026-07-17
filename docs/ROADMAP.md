@@ -33,15 +33,42 @@ beat advertising relative coordinates was hand-computing absolute ones, and it t
 notice. That is the shape of the problem: a scene renders "fine" at every ratio and is wrong at all
 but one.
 
+**Update: the gate is built (`make audit ASPECT=16:9,9:16,1:1,4:5|all`), and the first thing it did
+was find two more bugs in that same six-second scene.** The fix for the overflow above had been
+`pin: "center"` with no `w`. But `pin` centres *a box*, and `resolveCoords` sizes a missing `w` as 0,
+so `center` resolved to `(W-0)/2` and put the layer's LEFT EDGE on the centre line. It rendered
+jammed into the right half **at every aspect, 16:9 included**, and passed the audit only because the
+ink happened to land inside the safe box there. Separately, the `dy: -190 / dy: 20` meant to separate
+its two lines were silently dropped (`dx`/`dy` are read only inside `scene.html`'s anchor pass), so
+both lines rendered at the same `y`, overlapping. A scene whose entire job is proving multi-aspect
+was wrong in three different ways, and rendering it at its own ratio revealed none of them.
+
+The lesson generalises past aspect ratios: **the checks were measuring the wrong thing.** Safe-zone
+measured the container border box, so a text layer given a `w` (which it needs) flagged its own empty
+slack as off-frame, which pushes an author to shrink `w` until the *box* fits — tuning a number, not
+fixing a layout. It now measures the ink for layers that paint no box of their own. And a degenerate
+`pin` is a fact about the SOURCE, not about any rendered frame, so it is now checked by name rather
+than hoped to trip a measurement.
+
 What is missing, roughly in order:
 
-- **A gate.** `make audit` checks overlap, clipping and contrast at ONE aspect. Every claim on the
-  site says four. It should run per aspect and fail on any of them, which would have caught the
-  overflow above the moment it was authored.
+- ~~**A gate.**~~ **Done.** `make audit ASPECT=…` mirrors `bin/vawe --aspect`, audits each canvas the
+  CLI would ship, and writes one overlay per ratio. It also reports a scene that fails to boot instead
+  of dying on an uncaught `TypeError` — previously one broken scene meant every *other* scene in the
+  sweep went unaudited, which is how four unloadable scenes (`plinth-ad`, `vawe-launch`,
+  `threadcite-*`, all missing or incomplete themes) stayed invisible.
 - **Layout that resolves rather than gets computed.** `pin` / `col` / `align` exist and work; the
   problem is that absolute `x`/`w` is still the path of least resistance and silently means "16:9
   only". Either the validator rejects absolute coordinates in a multi-aspect scene, or authoring
-  defaults to relative and absolute is opt-in.
+  defaults to relative and absolute is opt-in. **The `pin`-without-`w` trap argues the deeper fix is
+  in `resolveCoords` itself**: sizing an absent `w` as 0 turns a centring keyword into a left-edge
+  placement without a word of complaint. Making `center` fall back to measuring the rendered layer
+  (or refusing to resolve) would remove the trap rather than police it. That changes placement for
+  every existing scene, so it needs a `make snap` baseline and a deliberate call.
+- **The y axis has the same trap, unchecked.** A missing `h` makes `pin: "center"` resolve `y` to
+  `0.46*H` — top edge on the optical line, not the layer centred on it. It skews by half a line rather
+  than throwing content off-frame, and enough scenes have quietly tuned around it that flagging it
+  today would be mostly noise. It is still wrong, and it is the same root cause.
 - **Per-aspect overrides.** Some beats genuinely need a different composition at 9:16 than 16:9,
   not the same one re-solved. There is no way to say so today.
 - **A safe area worth the name.** Portrait platforms cover the top and bottom of the frame with
@@ -149,8 +176,9 @@ the backlog than a wish-list is.
 ## What I would build first
 
 0. **Aspect ratios** (above). Not an effect, and ahead of all of them: it is a claim already on the
-   site that the engine only half keeps. Ship the per-aspect gate first, since a bug the eye has to
-   catch is a bug that ships.
+   site that the engine only half keeps. ~~Ship the per-aspect gate first~~ — **done**; it paid for
+   itself immediately by finding three bugs in the one scene that exists to prove the claim. What
+   remains is the `resolveCoords` trap behind them and a scene that exercises 4:5.
 1. **Lower thirds** (Tier 1, one component → twelve entries). Highest ratio of surface to effort in
    the whole list.
 2. **Shader transitions** (Tier 3). `core/shaders.js` already has the machinery; each is one

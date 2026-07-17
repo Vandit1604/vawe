@@ -8,6 +8,12 @@
 //   • tight     — sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
+//
+// --aspect 16:9,9:16,1:1,4:5 (or `all`) audits the SAME canvas list the renderer would ship, mirroring
+// `bin/vawe --aspect a,b,c`. This exists because a scene renders "fine" at every aspect and can be wrong
+// at all but one: layout is solved per ratio by hand, so absolute coords tuned to 1920 silently overflow
+// 1080. Auditing one aspect while the CLI ships four is a gate that agrees with itself and not with the
+// output. Default stays the scene's own aspect, so a single-aspect scene costs nothing.
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
@@ -24,8 +30,48 @@ const SAFE_LAND = { x0: 90, y0: 60, x1: 1830, y1: 1020 };       // landscape saf
 const MIN_GAP = 8;                                     // px; tighter than this between siblings = warn (cramped)
 const SAMPLES = 14;                                    // frames sampled across the timeline
 
-const modules = process.argv.slice(2).length ? process.argv.slice(2)
+// canvas sizes, kept in step with ASPECTS in core/boot.js — the engine is the authority on what a
+// ratio means in pixels; this table only has to agree with it.
+const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
+
+const argv = process.argv.slice(2);
+const aspectAt = argv.findIndex((a) => a === '--aspect' || a.startsWith('--aspect='));
+let aspectArg = '';
+if (aspectAt !== -1) {
+  const flag = argv[aspectAt];
+  aspectArg = flag.includes('=') ? flag.slice(flag.indexOf('=') + 1) : (argv[aspectAt + 1] || '');
+  argv.splice(aspectAt, flag.includes('=') ? 1 : 2);
+}
+// '' = audit whatever the scene itself declares (the default, and the back-compatible behaviour).
+const askedAspects = aspectArg === 'all' ? Object.keys(ASPECTS)
+  : aspectArg ? aspectArg.split(',').map((s) => s.trim()).filter(Boolean) : [''];
+const badAspect = askedAspects.find((a) => a && !ASPECTS[a]);
+if (badAspect) { console.error(`unknown aspect "${badAspect}" — known: ${Object.keys(ASPECTS).join(', ')}, or "all"`); process.exit(2); }
+
+const modules = argv.length ? argv
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
+
+// dimsFor(key, cfg): the canvas this audit runs at. An explicit --aspect wins; else the scene's own
+// `aspect` field; else `orientation`; else portrait. A ratio the ASPECTS table doesn't name is still
+// honoured (a scene may carry any "w:h"), sized to fit the long edge at 1920.
+function dimsFor(key, cfg) {
+  const named = key || (typeof cfg.aspect === 'string' ? cfg.aspect : '');
+  if (named && ASPECTS[named]) return ASPECTS[named];
+  const asp = named.includes(':') ? named.split(':').map(Number) : null;
+  if (asp && asp[0] && asp[1]) {
+    const [aw, ah] = asp;
+    if (aw === ah) return [1080, 1080];
+    return aw > ah ? [1920, Math.round(1920 * ah / aw)] : [Math.round(1920 * aw / ah), 1920];
+  }
+  return cfg.orientation === 'landscape' ? [1920, 1080] : [1080, 1920];
+}
+
+// safeFor(vw, vh): 9:16 and 16:9 get the canonical tight boxes. 9:16's is deliberately NOT symmetric —
+// it reserves the right rail and the bottom caption strip that Reels/TikTok/Shorts paint over the frame.
+// Feed ratios (1:1, 4:5) carry no such chrome, so they get a plain proportional inset.
+const safeFor = (vw, vh) => (vw === 1920 && vh === 1080) ? SAFE_LAND
+  : (vw === 1080 && vh === 1920) ? SAFE
+  : { x0: Math.round(vw * 0.05), y0: Math.round(vh * 0.055), x1: Math.round(vw * 0.95), y1: Math.round(vh * 0.945) };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4' };
@@ -85,6 +131,27 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     while (w.nextNode()) if (w.currentNode.nodeValue.trim()) return true;
     return false;
   };
+  // What the safe check must measure is what the VIEWER can see. A text layer given a `w` (which it
+  // needs, since pin centres a box) paints nothing but glyphs: the container is invisible slack, and
+  // centred text leaves half that slack on each side. Measuring the container flags empty air as
+  // off-frame and pushes the author to shrink `w` until the BOX fits, which is tuning a number against
+  // the tightest ratio, not fixing a layout. So when a layer paints no box of its own (no background,
+  // border, or shadow), measure the ink instead — a Range over its contents hugs the real line boxes.
+  // Anything that paints (cards, rects, images) keeps its border box, because there the box IS visible.
+  const paintsBox = (s) => {
+    const bg = s.backgroundColor || '';
+    const opaqueBg = !(bg === 'transparent' || /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(bg));
+    return opaqueBg || s.backgroundImage !== 'none' || s.boxShadow !== 'none' ||
+      parseFloat(s.borderTopWidth) > 0 || parseFloat(s.borderLeftWidth) > 0 ||
+      parseFloat(s.borderRightWidth) > 0 || parseFloat(s.borderBottomWidth) > 0;
+  };
+  const inkRect = (el) => {
+    if (el.querySelector('img, svg')) return null;      // replaced content: the element box IS the ink
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    const b = r.getBoundingClientRect();
+    return (b.width > 1 && b.height > 1) ? b : null;
+  };
   const FW = window.innerWidth, FH = window.innerHeight;
   for (const el of document.querySelectorAll('.hs-layer')) {
     if (!vis(el)) continue;
@@ -96,8 +163,9 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     const t = (el.textContent || '').trim().slice(0, 18);
     if ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1))
       issues.push({ kind: 'overflow', a: id, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
-    if (!midMove(el) && carriesContent(el) && (b.left < SAFE.x0 - 1 || b.right > SAFE.x1 + 1 || b.top < SAFE.y0 - 1 || b.bottom > SAFE.y1 + 1))
-      issues.push({ kind: 'safe', a: id, t, detail: `(${b.left | 0},${b.top | 0},${b.right | 0},${b.bottom | 0})` });
+    const sb = (!paintsBox(s) && inkRect(el)) || b;   // measure what's visible: ink for bare text, box otherwise
+    if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
+      issues.push({ kind: 'safe', a: id, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
   }
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
   // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
@@ -288,7 +356,43 @@ function overlayFn(n, SAFE) {
   }
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline']);
+// Some layout bugs live in the SOURCE and are invisible to any single rendered frame, so they must be
+// caught by name rather than hoped to trip a measurement.
+//
+// `pin`/`x` centring keywords resolve against the LAYER'S OWN SIZE (core/boot.js resolveCoords: `center`
+// → (W - size)/2). A layer with no `w` has size 0, so `center` means (W-0)/2 — the layer's LEFT EDGE
+// lands on the centre line and the content runs off to the right. It renders wrong at every aspect, but
+// only fails the safe check where the ink happens to spill past the box, so a wide canvas hides it
+// completely. showcase-aspect.json shipped exactly this and passed at its own 16:9 for months.
+// `right`/`third2` are degenerate the same way and land further off-frame.
+const NEEDS_W = new Set(['center', 'optical', 'third1', 'third2', 'right']);
+// pin → the x-keyword it implies (core/boot.js PIN). Only the x axis is checked: a missing `h` skews y
+// by half a line, which is a real but survivable offset, whereas a missing `w` throws content off-frame.
+const PIN_X = { center: 'center', top: 'center', bottom: 'center', left: 'left', right: 'right',
+  'top-left': 'left', 'top-right': 'right', 'bottom-left': 'left', 'bottom-right': 'right',
+  'thirds-tl': 'third1', 'thirds-tr': 'third2', 'thirds-bl': 'third1', 'thirds-br': 'third2',
+  'thirds-t': 'center', 'thirds-b': 'center', 'thirds-l': 'third1', 'thirds-r': 'third2' };
+
+function sourceIssues(cfg) {
+  const out = [];
+  for (const L of cfg.layers || []) {
+    if (!L || typeof L !== 'object') continue;
+    const id = L.id || L.type || 'layer';
+    const t = String(L.text ?? '').replace(/<[^>]+>/g, '').trim().slice(0, 18);
+    const xkw = L.x != null ? (typeof L.x === 'string' ? L.x : null) : (L.pin ? PIN_X[L.pin] : null);
+    // `anchor` overwrites x downstream (scene.html), and `col` sets both x and w, so neither is affected.
+    if (xkw && NEEDS_W.has(xkw) && L.w == null && L.col == null && !L.anchor)
+      out.push({ kind: 'degenerate-pin', a: id, t,
+        detail: `${L.pin ? `pin:"${L.pin}"` : `x:"${L.x}"`} positions a box of width w, but w is unset (=0) — the layer's left edge lands on the ${xkw} line instead of the layer centring on it. Set w (e.g. "88%") + align.` });
+    // dx/dy are read only inside scene.html's anchor pass (`const T = L.anchor && byId[L.anchor]`), so
+    // without a resolvable anchor they are silently dropped — authored intent that never renders.
+    if ((L.dx != null || L.dy != null) && !L.anchor)
+      out.push({ kind: 'dead-offset', a: id, t, detail: `dx/dy are anchor offsets and do nothing without \`anchor\` — the layer renders unshifted` });
+  }
+  return out;
+}
+
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
@@ -299,27 +403,36 @@ for (const spec of modules) {
   const isData = spec.endsWith('.json');
   const sample = isData ? spec : `formats/${spec}/sample.json`;
   if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
-  const m = isData ? (JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).module || spec) : spec;
-  const page = await browser.newPage();
-  // Audit at the video's REAL dimensions. `aspect` (e.g. "16:9") wins over `orientation`; default
-  // portrait. Getting this wrong (auditing a 16:9 scene at portrait 1080x1920) mis-fires safe-zone
-  // and the tiny-text floor on every landscape video, so parse the aspect ratio properly.
   const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')); } catch { return {}; } })();
-  let vw = 1080, vh = 1920;
-  const asp = typeof cfg.aspect === 'string' && cfg.aspect.includes(':') ? cfg.aspect.split(':').map(Number) : null;
-  if (asp && asp[0] && asp[1]) {
-    const [aw, ah] = asp;
-    if (aw === ah) { vw = vh = 1080; }
-    else if (aw > ah) { vw = 1920; vh = Math.round(1920 * ah / aw); }
-    else { vh = 1920; vw = Math.round(1920 * aw / ah); }
-  } else if (cfg.orientation === 'landscape') { vw = 1920; vh = 1080; }
-  // safe box: the canonical tight boxes for the two standard sizes, else a proportional inset.
-  const safe = (vw === 1920 && vh === 1080) ? SAFE_LAND
-    : (vw === 1080 && vh === 1920) ? SAFE
-    : { x0: Math.round(vw * 0.05), y0: Math.round(vh * 0.055), x1: Math.round(vw * 0.95), y1: Math.round(vh * 0.945) };
+  const m = isData ? (cfg.module || spec) : spec;
+
+  // source checks are aspect-independent (they're about the JSON, not a canvas) — report them once
+  const si = sourceIssues(cfg);
+  if (si.length) rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [source]`,
+    hard: si.filter((i) => HARD.has(i.kind)).length, warn: si.filter((i) => !HARD.has(i.kind)).length, crit: 0, items: si });
+
+for (const aspectKey of askedAspects) {
+  const page = await browser.newPage();
+  // Audit at the video's REAL dimensions. Getting this wrong (auditing a 16:9 scene at portrait
+  // 1080x1920) mis-fires safe-zone and the tiny-text floor on every landscape video.
+  const [vw, vh] = dimsFor(aspectKey, cfg);
+  const safe = safeFor(vw, vh);
   await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
+  // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
+  // canvas the CLI would actually ship rather than a re-implementation of it.
+  const q = aspectKey ? `&aspect=${encodeURIComponent(aspectKey)}` : '';
+  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30${q}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  // A scene that refuses to boot is the loudest possible failure, so report it as one. Reading
+  // __engine.meta unconditionally threw an uncaught TypeError here, which killed the whole run: one
+  // broken scene meant every OTHER scene in a `make audit` sweep went unaudited and unreported, and the
+  // gate exited on a stack trace that named puppeteer rather than the scene.
+  const engErr = await page.evaluate(() => window.__engineError && String(window.__engineError));
+  if (engErr || !(await page.evaluate(() => !!(window.__engine && window.__engine.meta)))) {
+    rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`,
+      hard: 1, warn: 0, crit: 0, note: `scene did not load: ${(engErr || 'engine never became ready').split('\n')[0]}` });
+    await page.close(); continue;
+  }
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames, fps = meta.fps || 30;
   // skip frames inside scene transitions (enter/exit motion is intentionally off-position/faded);
@@ -357,11 +470,15 @@ for (const spec of modules) {
   // de-dup repeated issues (same kind+elements) to the first frame they appear on
   const uniq = (list) => { const seen = new Set(), out = []; for (const i of list) { const k = `${i.kind}|${i.a}|${i.b || ''}`; if (!seen.has(k)) { seen.add(k); out.push(i); } } return out; };
   const hu = uniq(hard), wu = uniq(warn);
-  rows.push({ m: isData ? `${m} · ${path.basename(sample)}` : m, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
+  const label = `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`;
+  rows.push({ m: label, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
 
   await page.evaluate(overlayFn, worst.f, safe);
-  await page.screenshot({ path: path.join(OUT, `${m}.png`) });
+  // one overlay per audited canvas — the whole point is comparing where the SAME scene breaks per ratio
+  const shot = `${m}${aspectKey ? `.${aspectKey.replace(':', 'x')}` : ''}.png`;
+  await page.screenshot({ path: path.join(OUT, shot) });
   await page.close();
+}
 }
 await browser.close(); server.close();
 
@@ -374,7 +491,7 @@ for (const r of rows) {
   if (r.note) console.log(`    ${r.note}`);
   for (const i of (r.items || [])) {
     const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
-    console.log(`    [${i.kind}] f${i.f} ${who} — ${i.detail}`);
+    console.log(`    [${i.kind}] ${i.f == null ? '' : `f${i.f} `}${who} — ${i.detail}`);
   }
 }
 console.log(`\noverlays: ${OUT}/<format>.png`);

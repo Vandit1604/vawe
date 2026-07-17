@@ -51,10 +51,12 @@ assets:
 verify:
 	node verify/run.js
 
-# make audit [M=scene]  — layout audit: overlap / overflow / safe-zone / tight-spacing on
-# [data-layer=critical] across sampled frames. Annotated overlays → /tmp/audit/<format>.png.
+# make audit [M=scene] [ASPECT=16:9,9:16|all]  — layout audit: overlap / overflow / safe-zone /
+# tight-spacing on [data-layer=critical] across sampled frames. Annotated overlays →
+# /tmp/audit/<format>[.<aspect>].png. ASPECT mirrors `bin/vawe --aspect`: audit every canvas you ship,
+# because a scene can pass at its own ratio and overflow every other one.
 audit:
-	node verify/audit.mjs $(M)
+	node verify/audit.mjs $(M) $(if $(ASPECT),--aspect $(ASPECT))
 
 # make audit-test  — regression: proves `make audit` still CATCHES invisible emphasis (blue-on-blue).
 # Runs the audit on a fixture that forces accent-<b>-on-accent-bg and asserts a hard contrast fail.
