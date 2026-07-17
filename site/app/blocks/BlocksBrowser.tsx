@@ -15,8 +15,51 @@ import { useMemo, useState } from "react";
 
 export type Block = { name: string; family: string; blurb: string; props: Record<string, unknown> };
 
-const still = (name: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.png`;
+const asset = (name: string, ext: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.${ext}`;
 const propKeys = (props: Record<string, unknown>) => Object.keys(props).slice(0, 6).join(" · ") || "—";
+
+/* A block is MOTION, and a still is the one thing it cannot show. The clip is the block's own cell,
+ * cropped from the rendered catalog: the real engine output, not a re-creation.
+ *
+ * It loads on press, never before. 108 cards autoplaying would be 108 decoders and ~2.3MB pulled for a
+ * page most people scroll past, so the <video> element does not exist until you ask for it — the still
+ * is what ships, and the clip is opt-in. `preload="none"` is belt and braces for the same reason.
+ *
+ * Playing is a state, so the control says so: it toggles back to the still, and aria-pressed tells a
+ * screen reader which state it is in rather than leaving "play" to mean both things.
+ */
+function BlockThumb({ name }: { name: string }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <div className="thumb">
+      {playing ? (
+        // eslint-disable-next-line jsx-a11y/media-has-caption
+        <video src={asset(name, "mp4")} poster={asset(name, "png")} autoPlay loop muted playsInline preload="none" />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={asset(name, "png")} alt={name} loading="lazy" />
+      )}
+      <button
+        className="bplay"
+        {...(playing ? { "data-on": "" } : {})}
+        aria-pressed={playing}
+        aria-label={playing ? `Stop ${name}` : `Play ${name}`}
+        onClick={(e) => {
+          // the whole card is a link to the detail page; play means "show me the move", not "leave"
+          e.preventDefault();
+          e.stopPropagation();
+          setPlaying((p) => !p);
+        }}
+      >
+        {playing ? (
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
+        )}
+      </button>
+    </div>
+  );
+}
 
 export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
   const [q, setQ] = useState("");
@@ -106,10 +149,7 @@ export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
         <div className="bgrid">
           {shown.map((b) => (
             <Link className="bcard" href={`/blocks/${b.name}`} key={b.name}>
-              <div className="thumb">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={still(b.name)} alt={b.name} loading="lazy" />
-              </div>
+              <BlockThumb name={b.name} />
               <div className="meta">
                 <div className="bn">{b.name}</div>
                 <div className="bf">{b.family}</div>

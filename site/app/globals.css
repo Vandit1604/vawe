@@ -632,8 +632,30 @@ a{color:inherit;text-decoration:none}
 .bcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-1);
   display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
 .bcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--accent-line)}
-.bcard .thumb{aspect-ratio:3/2;background:#eef1f6;overflow:hidden;border-bottom:1px solid var(--line)}
-.bcard .thumb img{width:100%;height:100%;object-fit:cover;object-position:top left}
+/* The thumb CENTRES its media and caps it, never stretches it. `cover` + `top left` was cropping a
+   block that was already stranded in the top-left of its own image (the still was the whole catalog
+   cell), so the frame agreed with the dead space instead of fixing it. The stills are now cropped to
+   each block's measured bounds, so the block IS the image: place-items centres it, and max-width/height
+   with auto sizing means a 170px badge renders at 170px while a 540px card scales down to fit. That is
+   their real relative size, and nothing is ever upscaled into blur. */
+.bcard .thumb{position:relative;aspect-ratio:3/2;background:#eef1f6;overflow:hidden;
+  border-bottom:1px solid var(--line);display:grid;place-items:center;padding:10px}
+.bcard .thumb img,.bcard .thumb video{max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;display:block}
+
+/* Play: cobalt + an icon = actionable, per The Affordance Rule. It sits ON the card (which is a link to
+   the detail page), so it stops the click from navigating — pressing play means "show me this move",
+   not "take me away". Hidden from a11y duplication: the card's own link already names the block. */
+.bplay{position:absolute;right:8px;bottom:8px;z-index:2;display:grid;place-items:center;
+  width:32px;height:32px;padding:0;border-radius:999px;cursor:pointer;
+  color:#fff;background:var(--accent);border:1px solid var(--accent);
+  box-shadow:0 2px 10px rgb(15 23 42 / .18);opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.bcard:hover .bplay,.bplay:focus-visible,.bplay[data-on]{opacity:1}
+.bplay:hover{transform:scale(1.08)}
+.bplay svg{width:14px;height:14px;fill:currentColor}
+/* Touch and keyboard have no hover, so the control must be permanently visible there or it does not
+   exist. (any-hover:none) is the honest query: it asks about the input, not the screen width. */
+@media (any-hover:none){.bplay{opacity:1}}
 .bcard .meta{padding:13px 15px 15px}
 .bcard .bn{font-family:var(--font-mono),monospace;font-size:13.5px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
 .bcard .bf{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);margin:5px 0 9px}

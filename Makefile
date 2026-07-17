@@ -247,6 +247,12 @@ blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manif
 # this reminds you to re-render the catalog rather than pretending the pictures are still right.
 blocks-sync: blocks-docs blocks-json ## regenerate everything derived from the block manifest
 
+# make blocks-media — measure + crop one still AND one clip per block from the rendered catalog pages.
+# Needs `make catalog` first (it reads out/_catalog-*.mp4). The crop rect is measured per block, so a
+# block is centred in its own thumbnail instead of stranded in the corner of its cell.
+blocks-media: ## crop per-block stills + clips from the rendered catalog (run after `make catalog`)
+	node scripts/site/blocks-stills.mjs
+
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
