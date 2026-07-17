@@ -107,14 +107,15 @@ export const FEATURES: Feature[] = [
   {
     slug: "multi-aspect",
     kicker: "07 / any aspect",
-    title: "One scene, every ratio.",
+    title: "One scene, every ratio you compose for.",
     tagline: "Relative coordinates resolve per aspect.",
     demo: null,
     poster: null,
     aspectTrio: true,
     body: [
       "Pin keywords, a 12-column grid, and optical centering resolve to pixels per canvas, deterministically. The same source renders 16:9, 9:16, 1:1, and 4:5 in a single pass.",
-      "Author once; ship every platform ratio.",
+      "The condition is real: absolute x and w are pixels tuned to one canvas, so a hand-placed scene is composed for the ratio you placed it at, not for four. Compose in relative coordinates and the ratio becomes a flag rather than a rewrite.",
+      "make audit ASPECT=all checks every canvas you intend to ship, because a scene renders fine at its own ratio and can be wrong at all the others.",
     ],
     tag: "--aspect 16:9,9:16,1:1",
     docs: `${GH}#any-aspect`,

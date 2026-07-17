@@ -33,8 +33,13 @@ const CLAIMS: Claim[] = [
     proof: <ProofSay />,
   },
   {
+    // The claim is conditioned on purpose. The engine renders any of the five canvases in one pass,
+    // and pin/col/% genuinely resolve per canvas — but absolute x/w is pixels tuned to one ratio, so
+    // "every platform ratio from the same scene" was true of the engine and not of a scene that
+    // hand-places coordinates. Naming the condition is not a smaller claim: the relative vocabulary
+    // IS the feature, and a promise the author has to keep by hand is worth less than an honest one.
     t: "Any aspect",
-    d: "One source renders 16:9, 9:16, 1:1, and 4:5 in a single pass. Every platform ratio from the same scene.",
+    d: "Pin keywords, a 12-column grid, and optical centering resolve to pixels per canvas. Compose in those and one source renders 16:9, 9:16, 1:1, and 4:5 in a single pass.",
     proof: <ProofAspect />,
   },
 ];

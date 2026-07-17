@@ -151,8 +151,13 @@ export function ProofSay() {
    One source, four ratios. Every frame shares ONE height and takes its width from the ratio
    itself, so the drawing is the claim rather than an illustration of it. Four, not three: the
    sentence beside this says 16:9, 9:16, 1:1 and 4:5, and a diagram showing three is the sentence
-   quietly failing. */
-const H = 132;
+   quietly failing.
+
+   The bus is LABELLED with what does the work, because an unlabelled fan claims the ratios arrive
+   for free. They do not: pin/col/% resolve per canvas, and absolute x/w is pixels tuned to one
+   ratio. The label is the difference between "one source becomes four" (true of the engine) and
+   "any scene becomes four" (true only of a scene composed relatively). Measured, not hedged: of the
+   ten real scenes in this repo, exactly one survives a change of ratio. */
 const RATIOS = [
   { label: "16:9", dim: "1920×1080", r: 16 / 9 },
   { label: "9:16", dim: "1080×1920", r: 9 / 16 },
@@ -160,41 +165,55 @@ const RATIOS = [
   { label: "4:5", dim: "1080×1350", r: 4 / 5 },
 ];
 
+/* H is DERIVED, not chosen. Every frame shares one height and takes its width from its ratio, so the
+   row's total width is H * Σr + gaps — and picking H by eye is picking a total by accident. It was
+   hardcoded at 132, which needs 589px inside a 520 viewBox: the row started at x = -34 and was clipped
+   at BOTH ends, losing the left of 16:9 and the right of 4:5 on the live landing page. Solving for H
+   instead means the row always fits, and adding a fifth ratio re-solves it rather than silently
+   cropping one. This is the same lesson as the scene it illustrates: derive the layout, don't tune it. */
+const GAP = 14;
+const PAD = 10;
+const SUM_R = RATIOS.reduce((a, x) => a + x.r, 0);
+const H = Math.floor((520 - 2 * PAD - GAP * (RATIOS.length - 1)) / SUM_R);
+const FRAME_TOP = 90;
+
 export function ProofAspect() {
-  const gap = 14;
   const widths = RATIOS.map((x) => Math.round(H * x.r));
-  const total = widths.reduce((a, b) => a + b, 0) + gap * (RATIOS.length - 1);
+  const total = widths.reduce((a, b) => a + b, 0) + GAP * (RATIOS.length - 1);
   let x = Math.round((520 - total) / 2);
   const cells = RATIOS.map((rt, i) => {
     const w = widths[i];
     const c = { ...rt, x, w, cx: x + w / 2 };
-    x += w + gap;
+    x += w + GAP;
     return c;
   });
 
   return (
     <svg className="dg" viewBox={VB} role="img" aria-hidden="true">
-      <rect className="dg-chip" x="212" y="6" width="96" height="28" rx="7" />
-      <text className="dg-chiptx" x="260" y="24" textAnchor="middle">scene.json</text>
-      <text className="dg-lab" x="260" y="52" textAnchor="middle">one source · one pass</text>
+      <rect className="dg-chip" x="212" y="4" width="96" height="28" rx="7" />
+      <text className="dg-chiptx" x="260" y="22" textAnchor="middle">scene.json</text>
+      {/* The payload, not a caption: these are what travel down the bus and resolve per canvas. An
+          unlabelled source would let the fan below imply the ratios are free. */}
+      <text className="dg-dim" x="260" y="46" textAnchor="middle">pin · col · %</text>
+      <text className="dg-lab" x="260" y="64" textAnchor="middle">resolve per canvas · one pass</text>
 
       {/* A drop, a bus, four drops. Curving from the chip to each centre made the four paths cross
           each other right where they left it, which read as tangle rather than fan-out. */}
-      <path className="dg-fan" d="M260 60v10" />
-      <path className="dg-fan" d={`M${cells[0].cx} 70H${cells[cells.length - 1].cx}`} />
+      <path className="dg-fan" d="M260 70v6" />
+      <path className="dg-fan" d={`M${cells[0].cx} 76H${cells[cells.length - 1].cx}`} />
       {cells.map((c) => (
-        <path key={c.label} className="dg-fan" d={`M${c.cx} 70v20`} />
+        <path key={c.label} className="dg-fan" d={`M${c.cx} 76v14`} />
       ))}
 
       {cells.map((c) => (
         <g key={c.label}>
-          <rect className="dg-frame" x={c.x} y="92" width={c.w} height={H} rx="7" />
+          <rect className="dg-frame" x={c.x} y={FRAME_TOP} width={c.w} height={H} rx="7" />
           {/* the same mark in every frame, sized to ITS width: the engine recomposes a scene per
               aspect (pin, relative coords), it does not crop one master. Empty outlines would have
               shown four ratios and left "one scene" as a caption to take on faith. */}
-          <path className="dg-wave" d={WAVE} transform={waveAt(c.cx, 92 + H / 2, c.w * 0.56)} />
-          <text className="dg-lab is-on" x={c.cx} y="248" textAnchor="middle">{c.label}</text>
-          <text className="dg-dim" x={c.cx} y="266" textAnchor="middle">{c.dim}</text>
+          <path className="dg-wave" d={WAVE} transform={waveAt(c.cx, FRAME_TOP + H / 2, c.w * 0.56)} />
+          <text className="dg-lab is-on" x={c.cx} y={FRAME_TOP + H + 24} textAnchor="middle">{c.label}</text>
+          <text className="dg-dim" x={c.cx} y={FRAME_TOP + H + 42} textAnchor="middle">{c.dim}</text>
         </g>
       ))}
     </svg>
