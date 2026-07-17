@@ -4,7 +4,7 @@ No templates. These are the words; you write the sentences. Counts are exact (fr
 Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 13 ambient
-shader looks, 20 composite looks, 24 kinetic
+shader looks, 26 composite looks, 24 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -340,7 +340,8 @@ vignette`), applied via `filter:` like any grade. All pure CSS (filter functions
 — no SVG, no per-frame work → deterministic. Tier A (20): **glow** `neon` `dreamyHaze` `halationFilm`
 `angelic` `hologram` `glitchGlow` · **analog** `vhs` `super8` `crt` `filmNoir` `fadedPolaroid`
 `nostalgia` · **sci-fi** `cyberpunk` `nightVision` `thermal` · **camera** `lomo` `droneCinematic`
-`vintageAnamorphic` · **hit** `impact` `timeFreeze`.
+`vintageAnamorphic` · **hit** `impact` `timeFreeze` · **distort** (static feDisplacementMap) `glassWarp`
+`heatWarp` `melt` `watercolor` `dreamSequence` `rippleGlass`.
 - **Customization (defaults just work):** every look reskins to the theme with zero config. Quick:
   `filter: "neon:0.9"` (the one positional arg is always `strength` 0..1). Full: `filter: "neon"` +
   **`lookOpts: { color, color2, strength, grain, vignette, warmth }`**. `strength` is a master dial —

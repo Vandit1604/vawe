@@ -71,6 +71,8 @@ const PASSES = {
   grayscale: (o) => ({ fns: [`grayscale(${n2(clamp(o.a ?? 1, 0, 1))})`] }),
   invert: () => ({ fns: ['invert(1)'] }),
   blurSoft: (o) => ({ fns: [`blur(${n2(o.px ?? 0.5)}px)`] }),
+  // static SVG turbulence displacement (reuses core/filters.js). scale grows with strength.
+  displace: (o, s) => ({ fns: [resolveFilter(`displace:${o.freq ?? 0.012},${n2((o.scale ?? 14) * (0.5 + 0.8 * s))}`).filter] }),
   // gradient map (SVG, reuses core/filters.js). Use sparingly (recolours by luminance).
   gradientMap: (o) => ({ fns: [resolveFilter(o.colors ? `gradientMap:${o.colors.join(',')}` : 'gradientMap').filter] }),
   // a translucent colour wash (screen = lift toward colour; multiply = tint down)
@@ -120,6 +122,13 @@ export const LOOKS = {
   // --- motion-emphasis (static "hit" looks; pair with shake/stings for motion) ---
   impact: { d: { strength: 0.9, color: '#ffffff' }, p: [['overexpose', { amt: 0.6 }], ['chromatic', { px: 4 }], ['bloom', { size: 0.8, glowColor: '#ffffff' }], ['vignette', { vignette: 0.5 }]] },
   timeFreeze: { d: { strength: 0.7, color: '#bcd6ff' }, p: [['desaturate', { amt: 0.4 }], ['wash', { color: '#5a8cff', amt: 0.12, blend: 'screen' }], ['bloom', { size: 0.5, glowColor: '#bcd6ff' }], ['chromatic', { px: 1.5 }], ['vignette', { vignette: 0.4 }]] },
+  // --- Tier B: distortion looks (static feDisplacementMap — deterministic, no frame hook) ---
+  glassWarp: { d: { strength: 0.6, color: '#ffffff' }, p: [['displace', { freq: 0.02, scale: 9 }], ['blurSoft', { px: 0.4 }], ['bloom', { size: 0.4, glowColor: '#ffffff' }]] },
+  heatWarp: { d: { strength: 0.6, color: '#ffb060' }, p: [['displace', { freq: 0.01, scale: 12 }], ['wash', { color: '#ff8a2b', amt: 0.1, blend: 'screen' }], ['brightness', { k: 1.04 }]] },
+  melt: { d: { strength: 0.7 }, p: [['displace', { freq: 0.006, scale: 24 }], ['blurSoft', { px: 0.5 }], ['contrast', { k: 1.05 }]] },
+  watercolor: { d: { strength: 0.6, color: '#eef0e8' }, p: [['displace', { freq: 0.015, scale: 11 }], ['desaturate', { amt: 0.25 }], ['contrast', { k: 0.95 }], ['wash', { color: '#f2ede0', amt: 0.12, blend: 'multiply' }], ['grain', { grain: 0.15 }]] },
+  dreamSequence: { d: { strength: 0.7, color: '#ffe7c0' }, p: [['displace', { freq: 0.01, scale: 7 }], ['blurSoft', { px: 0.5 }], ['bloom', { size: 0.7, glowColor: '#ffe7c0' }], ['wash', { color: '#ffd9a8', amt: 0.1, blend: 'screen' }], ['grain', { grain: 0.16 }]] },
+  rippleGlass: { d: { strength: 0.55, color: '#bfe0ff' }, p: [['displace', { freq: 0.03, scale: 8 }], ['bloom', { size: 0.35, glowColor: '#bfe0ff' }], ['vignette', { vignette: 0.3 }]] },
 };
 
 // merge look defaults ← lookOpts ← positional strength; strength stays a clamped master dial.

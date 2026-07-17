@@ -481,7 +481,9 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- composite looks (core/looks.js) ----
 {
-  ok(`looks: ${LOOK_NAMES.length} looks registered (>=18)`, LOOK_NAMES.length >= 18);
+  ok(`looks: ${LOOK_NAMES.length} looks registered (>=26)`, LOOK_NAMES.length >= 26);
+  ok('looks: Tier-B glassWarp uses an SVG displacement filter', resolveComposite('glassWarp').filter.includes('url("#f-displace-'));
+  ok('looks: displace scale grows with strength', (() => { const big = resolveComposite('melt', {}, 1).filter, sm = resolveComposite('melt', {}, 0.1).filter; return big !== sm; })());
   ok('looks: unknown name -> null', resolveComposite('nope') === null);
   ok('looks: isLook/lookName parse a spec', isLook('neon:0.9') && lookName('neon:0.9') === 'neon' && !isLook('duotone'));
   const neon = resolveComposite('neon');

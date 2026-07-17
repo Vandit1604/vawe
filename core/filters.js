@@ -40,6 +40,7 @@ export const FILTER_PRESETS = {
   gradientMap: { kind: 'svg', mode: 'ramp', stops: 0 },
   posterize: { kind: 'svg', mode: 'posterize' },
   chromaGlow: { kind: 'css', mode: 'glow' },
+  displace: { kind: 'svg', mode: 'displace' },
   vignette: { kind: 'overlay' },
 };
 
@@ -155,13 +156,31 @@ export function ensureFilterDef(name, opts = {}) {
   if (!preset || preset.kind !== 'svg') throw new Error(`ensureFilterDef: "${name}" is not an SVG-filter preset`);
   const stops = preset.mode === 'ramp' ? (opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || [])) : null;
   const levels = preset.mode === 'posterize' ? Math.max(2, Math.round(opts.levels || 4)) : null;
-  const id = defId(name, stops, levels);
+  const disp = preset.mode === 'displace'
+    ? { freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4), scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1) } : null;
+  const id = disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_') : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
 
   const f = document.createElementNS(SVG_NS, 'filter');
   f.setAttribute('id', id);
   f.setAttribute('color-interpolation-filters', 'sRGB'); // tableValues are authored in sRGB space
+
+  if (preset.mode === 'displace') {
+    // static feTurbulence → feDisplacementMap: warps the layer's own pixels by a fixed noise field
+    // (fixed seed → deterministic; no frame hook). Wide region so warped edges are not clipped.
+    for (const [k, v] of [['x', '-30%'], ['y', '-30%'], ['width', '160%'], ['height', '160%']]) f.setAttribute(k, v);
+    const turb = document.createElementNS(SVG_NS, 'feTurbulence');
+    turb.setAttribute('type', 'fractalNoise'); turb.setAttribute('baseFrequency', String(disp.freq));
+    turb.setAttribute('numOctaves', '2'); turb.setAttribute('seed', '1'); turb.setAttribute('result', 'n');
+    const dm = document.createElementNS(SVG_NS, 'feDisplacementMap');
+    dm.setAttribute('in', 'SourceGraphic'); dm.setAttribute('in2', 'n'); dm.setAttribute('scale', String(disp.scale));
+    dm.setAttribute('xChannelSelector', 'R'); dm.setAttribute('yChannelSelector', 'G');
+    f.appendChild(turb); f.appendChild(dm);
+    defsHost().appendChild(f);
+    return id;
+  }
+
   const ct = document.createElementNS(SVG_NS, 'feComponentTransfer');
   if (preset.mode === 'ramp') {
     // luminance → per-channel ramp: type="table" linearly interpolates between the stops, which IS
@@ -204,7 +223,8 @@ export function resolveFilter(spec) {
     return { filter: '', overlay: `radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(${r},${g},${b},${s}) 100%)` };
   }
 
-  const opts = preset.mode === 'posterize' ? { levels: nums[0] } : { colors };
+  const opts = preset.mode === 'posterize' ? { levels: nums[0] }
+    : preset.mode === 'displace' ? { freq: nums[0], scale: nums[1] } : { colors };
   return { filter: `url("#${ensureFilterDef(name, opts)}")`, overlay: null };
 }
 
