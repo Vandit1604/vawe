@@ -98,6 +98,11 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text
    layer needs `w` (+ `align`) or it lands left-edge-on-centre; and `dx`/`dy` only apply with `anchor`.
    Both render silently. Audit every canvas you intend to ship.
+   **Going to a phone feed? Set `"destination": "tiktok" | "reels" | "shorts"`** (default `web`).
+   It decides the safe area, and the safe area is not a property of the shape: 9:16 for a website hero
+   and 9:16 for TikTok are the same canvas, but TikTok paints a rail down the right and captions across
+   the bottom. Edge keywords (`pin:"bottom"` etc.) and `col` resolve against that box, so declaring the
+   destination is what keeps content out from under the chrome. One definition: `core/safe.js`.
 5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
    Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
 6. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.

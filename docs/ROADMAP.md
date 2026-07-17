@@ -50,29 +50,64 @@ fixing a layout. It now measures the ink for layers that paint no box of their o
 `pin` is a fact about the SOURCE, not about any rendered frame, so it is now checked by name rather
 than hoped to trip a measurement.
 
-What is missing, roughly in order:
+### The measured state (`make audit ASPECT=16:9,9:16,1:1,4:5`)
+
+Not an estimate. Every scene, at the four ratios the site advertises; ✓ = zero hard issues:
+
+```
+scene              16:9   9:16   1:1    4:5
+showcase-aspect      ✓      ✓      ✓      ✓
+stripe               ✓    ✗(11)  ✗(11)  ✗(11)
+linear-launch        ✓    ✗(18)  ✗(18)  ✗(18)
+creed-launch         ✓    ✗(19)  ✗(19)  ✗(19)
+argus-launch         ✓    ✗(14)  ✗(14)  ✗(14)
+vawe-intro           ✓    ✗(11)  ✗(11)  ✗(11)
+hero-site            ✓     ✗(4)   ✗(4)   ✗(4)
+showcase-cuts        ✓     ✗(3)   ✗(3)   ✗(3)
+showcase-ui          ✓     ✗(6)   ✗(6)   ✗(6)
+showcase-data        ✓     ✗(5)   ✗(5)   ✗(5)
+```
+
+**One six-second scene survives a change of ratio.** The counts are identical across 9:16/1:1/4:5
+because the failure is not per-ratio: it is "not 1920 wide". Across all 45 scenes, `col` is used
+**zero** times and `pin` **once** — the whole relative-coordinate system is one layer. Everything else
+is hand-placed absolute pixels tuned to a 1920x1080 canvas.
+
+Read that carefully, because it is not "nine broken scenes". Each of those scenes declares
+`aspect: "16:9"` and only ever ships 16:9, and at 16:9 every one of them is clean. Nothing is broken.
+**The claim is what is broad.** So the fix is a fork, and it is a product call, not an engineering one:
+either make the claim precise (the engine renders any aspect; a scene is composed for the ones it
+declares), or build per-aspect composition so a film can genuinely ship four.
+
+### What is missing, roughly in order
 
 - ~~**A gate.**~~ **Done.** `make audit ASPECT=…` mirrors `bin/vawe --aspect`, audits each canvas the
   CLI would ship, and writes one overlay per ratio. It also reports a scene that fails to boot instead
   of dying on an uncaught `TypeError` — previously one broken scene meant every *other* scene in the
   sweep went unaudited, which is how four unloadable scenes (`plinth-ad`, `vawe-launch`,
   `threadcite-*`, all missing or incomplete themes) stayed invisible.
-- **Layout that resolves rather than gets computed.** `pin` / `col` / `align` exist and work; the
-  problem is that absolute `x`/`w` is still the path of least resistance and silently means "16:9
-  only". Either the validator rejects absolute coordinates in a multi-aspect scene, or authoring
-  defaults to relative and absolute is opt-in. **The `pin`-without-`w` trap argues the deeper fix is
-  in `resolveCoords` itself**: sizing an absent `w` as 0 turns a centring keyword into a left-edge
-  placement without a word of complaint. Making `center` fall back to measuring the rendered layer
-  (or refusing to resolve) would remove the trap rather than police it. That changes placement for
-  every existing scene, so it needs a `make snap` baseline and a deliberate call.
-- **The y axis has the same trap, unchecked.** A missing `h` makes `pin: "center"` resolve `y` to
-  `0.46*H` — top edge on the optical line, not the layer centred on it. It skews by half a line rather
-  than throwing content off-frame, and enough scenes have quietly tuned around it that flagging it
-  today would be mostly noise. It is still wrong, and it is the same root cause.
-- **Per-aspect overrides.** Some beats genuinely need a different composition at 9:16 than 16:9,
-  not the same one re-solved. There is no way to say so today.
-- **A safe area worth the name.** Portrait platforms cover the top and bottom of the frame with
-  their own chrome; the safe-zone check does not know that a 9:16 render is destined for a feed.
+- ~~**A safe area worth the name.**~~ **Done** — `core/safe.js`. There were FOUR safe zones (boot's 6%
+  inset, tokens.css's per-orientation table, and a box each in audit.mjs and run.js) and they
+  disagreed: three of four engine edge pins placed content into the zone the audit rejected. They were
+  irreconcilable because "safe" was three ideas at once — a **margin** (a property of the canvas), a
+  platform's **chrome** (a property of the DESTINATION: 9:16 for a hero and 9:16 for TikTok are the
+  same canvas with different unusable regions), and an **anchor**. One function now answers all of it,
+  keyed on `destination`, and placement and checking share it, so `pin:"bottom"` cannot fail.
+- **Layout that resolves rather than gets computed.** This is now THE gap, and the table above is its
+  size. `pin`/`col`/`align` work; absolute `x`/`w` is still the path of least resistance and silently
+  means "16:9 only". Either the validator rejects absolute coordinates in a multi-aspect scene, or
+  authoring defaults to relative and absolute is opt-in. **The deeper fix is in `resolveCoords`**:
+  sizing an absent `w` as 0 turns a centring keyword into a left-edge placement without complaint.
+  Making `center` measure the rendered layer (or refuse) would remove the trap rather than police it.
+  That moves every centred layer, so it needs a `make snap` baseline and a deliberate call.
+- **The y axis has the same trap, unchecked.** A missing `h` makes `pin:"center"` resolve `y` to
+  `0.46*H` — top edge on the optical line, not the layer centred on it. (The far edges no longer have
+  this problem: `bottom` estimates a text layer's height as `size*1.2`, matching scene.html's anchor
+  fallback. No width equivalent is possible.) It skews by half a line rather than throwing content
+  off-frame, and enough scenes have tuned around it that flagging it today would be mostly noise. It
+  is still wrong, and it is the same root cause.
+- **Per-aspect overrides.** Some beats genuinely need a different composition at 9:16 than 16:9, not
+  the same one re-solved. There is no way to say so today. This is what the table above actually needs.
 - **4:5 is claimed but barely exercised.** It appears in copy and in one diagram. It needs a scene.
 
 Until this is solid, "any aspect" is a promise the engine keeps only when the author does the work
