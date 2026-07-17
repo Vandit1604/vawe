@@ -4,7 +4,7 @@ No templates. These are the words; you write the sentences. Counts are exact (fr
 Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 13 ambient
-shader looks, 24 kinetic
+shader looks, 20 composite looks, 24 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -332,6 +332,23 @@ not a filter. SVG defs inject once at build, so the render stays pure in n.
   halos at growing radii, plus a 1px warm-top / cool-bottom fringe for the chromatic hint. No SVG, no
   per-frame work. Put it on a `text` layer over a dark bg for a neon sign; composes with any entrance
   preset (try `chroma`). `chromaGlow:1.5` for a bigger bloom on large display type.
+
+## Composite looks (`core/looks.js`) — named filter stacks on any layer
+
+A **look** is a named stack of pure passes in canonical order (`distort → color → glow → texture →
+vignette`), applied via `filter:` like any grade. All pure CSS (filter functions + inset overlay divs)
+— no SVG, no per-frame work → deterministic. Tier A (20): **glow** `neon` `dreamyHaze` `halationFilm`
+`angelic` `hologram` `glitchGlow` · **analog** `vhs` `super8` `crt` `filmNoir` `fadedPolaroid`
+`nostalgia` · **sci-fi** `cyberpunk` `nightVision` `thermal` · **camera** `lomo` `droneCinematic`
+`vintageAnamorphic` · **hit** `impact` `timeFreeze`.
+- **Customization (defaults just work):** every look reskins to the theme with zero config. Quick:
+  `filter: "neon:0.9"` (the one positional arg is always `strength` 0..1). Full: `filter: "neon"` +
+  **`lookOpts: { color, color2, strength, grain, vignette, warmth }`**. `strength` is a master dial —
+  one number scales bloom radius, overlay alpha, grain and chromatic px together.
+- **Colours** default to `var(--accent)`/tokens, so a look matches the brand; looks whose identity is a
+  fixed palette (`cyberpunk` teal/magenta, `nightVision` green, `thermal` ramp) default to that but take
+  overrides. Apply a full-frame look to a `group`/full-frame layer; a text look (`neon`, glow) to the text.
+  Reel: looks-reel.mp4. (More looks needing Canvas/WebGL passes are wave-4.)
 
 ## Caption styles
 

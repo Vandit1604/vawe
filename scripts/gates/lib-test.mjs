@@ -16,6 +16,7 @@ import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
+import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName } from '../../core/looks.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -476,6 +477,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   // barrel is a static lens vignette by design (no motion) — exempt it from the animate check
   ok(`ambient: wave-3 looks animate (except static barrel)${still.filter((n) => n !== 'barrel').length ? ' — frozen: ' + still.filter((n) => n !== 'barrel').join(', ') : ''}`, still.every((n) => n === 'barrel'));
+}
+
+// ---- composite looks (core/looks.js) ----
+{
+  ok(`looks: ${LOOK_NAMES.length} looks registered (>=18)`, LOOK_NAMES.length >= 18);
+  ok('looks: unknown name -> null', resolveComposite('nope') === null);
+  ok('looks: isLook/lookName parse a spec', isLook('neon:0.9') && lookName('neon:0.9') === 'neon' && !isLook('duotone'));
+  const neon = resolveComposite('neon');
+  ok('looks: neon yields a filter with grade + bloom', neon.filter.includes('saturate(') && neon.filter.includes('drop-shadow('));
+  ok('looks: colour default reskins to theme token', neon.filter.includes('var(--accent)'));
+  ok('looks: lookOpts colour overrides the default', resolveComposite('neon', { color: '#ff0000' }).filter.includes('#ff0000') && !resolveComposite('neon', { color: '#ff0000' }).filter.includes('var(--accent)'));
+  // strength is a real master dial: bloom radii grow with it
+  const maxR = (f) => Math.max(...(f.match(/(\d+\.\d+)px/g) || ['0px']).map(parseFloat));
+  ok('looks: strength scales the look (bloom radii grow)', maxR(resolveComposite('neon', {}, 1).filter) > maxR(resolveComposite('neon', {}, 0.1).filter));
+  ok('looks: strength clamps to [0,1]', resolveComposite('neon', {}, 5).filter === resolveComposite('neon', {}, 1).filter);
+  // overlays: crt stacks scanlines + vignette, in pipeline order (texture before vignette)
+  const crt = resolveComposite('crt');
+  ok('looks: crt returns >=2 overlays (scanlines + vignette)', crt.overlays.length >= 2);
+  ok('looks: pipeline order — grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('drop-shadow('));
+  ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
+  ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

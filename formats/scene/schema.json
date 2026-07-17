@@ -654,9 +654,13 @@
           "type": "object",
           "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
         },
+        "lookOpts": {
+          "type": "object",
+          "label": "Composite-look knobs (core/looks.js): color · color2 · strength (0..1 master dial) · grain · vignette · warmth. Defaults reskin to the theme."
+        },
         "filter": {
           "type": "string",
-          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow for text-shaped chromatic neon; params after a colon) \u2014 core/filters.js"
+          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/\u2026 core/looks.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
         },
         "mask": {
           "type": "string",
