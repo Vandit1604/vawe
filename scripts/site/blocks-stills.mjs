@@ -3,8 +3,13 @@
 // per page on a 3x2 grid (see scripts/blocks-catalog.mjs); we grab a settled frame and crop each cell.
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
+import { CATALOG } from "../../blocks/catalog.mjs";
 
-const grid = JSON.parse(fs.readFileSync("site/lib/blocks.json", "utf8"));
+// The grid MUST come from the same source blocks-catalog.mjs laid the pages out from, and in the same
+// order: this script identifies each block purely by its cell index, so a grid that disagrees with the
+// rendered video by one row crops every later block from the wrong cell and writes it under the right
+// name. This used to read site/lib/blocks.json, a hand-kept copy that agreed by luck.
+const grid = CATALOG.filter((e) => !e.overlay);
 const OUT = "site/public/assets/blocks";
 fs.mkdirSync(OUT, { recursive: true });
 

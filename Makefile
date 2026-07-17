@@ -239,6 +239,14 @@ catalog: build ## render the block registry to paged sheets (browse the arsenal)
 blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 	node scripts/site/blocks-docs.mjs
 
+blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manifest
+	node scripts/site/blocks-json.mjs
+
+# make blocks-sync — after adding a block: docs table + the site's grid, both from blocks/catalog.mjs.
+# Adding a block to the grid also invalidates every LATER still (each is cropped by cell index), so
+# this reminds you to re-render the catalog rather than pretending the pictures are still right.
+blocks-sync: blocks-docs blocks-json ## regenerate everything derived from the block manifest
+
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
