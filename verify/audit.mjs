@@ -217,7 +217,19 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
   // contrast (WCAG-ish) on critical TEXT: effective bg = nearest ancestor solid background-color,
   // else sampled from the bg <canvas> under the element's box, else the body/stage color.
   const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
-  const parse = (c) => { const m = c && c.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\)/); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; };
+  // parse: rgb()/rgba() AND color(srgb r g b / a). The second form is what Chromium returns as the
+  // COMPUTED value of any color-mix() — and the blocks library mixes colours everywhere (accentSoft
+  // pills, card tints, artwork squares). Before this, every such backgroundColor failed to parse, the
+  // ancestor walk skipped it as if transparent, and the probe fell through to the white card behind:
+  // a white-on-cobalt artwork square measured as white-on-white 1.0:1. Unparseable is not the same as
+  // transparent, and treating it that way made the whole color-mix surface of the repo unmeasurable.
+  const parse = (c) => {
+    let m = c && c.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\)/);
+    if (m) return [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];
+    m = c && c.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/);
+    if (m) return [Math.round(+m[1] * 255), Math.round(+m[2] * 255), Math.round(+m[3] * 255), m[4] === undefined ? 1 : +m[4]];
+    return null;
+  };
   const cratio = (a, b) => { const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)]; return (hi + 0.05) / (lo + 0.05); };
   const cv = document.querySelector('canvas#cv'); // ONLY the bg canvas convention — grain/fx canvases are decoration, not backdrop
   const cvCtx = cv ? cv.getContext('2d') : null; // webgl canvases return null here — safely skipped

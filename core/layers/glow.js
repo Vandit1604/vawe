@@ -1,9 +1,152 @@
-// core/layers/glow.js — soft light: radial centre-glow, or a directional beam. Pure gradient div.
+// core/layers/glow.js — soft light: radial centre-glow, a directional beam, or a named light
+// PHENOMENON via `preset`. Pure gradient div(s), no WebGL.
+//
+// Why these five presets: they are the light jobs a motion-graphics scene actually needs, and each
+// reads as a distinct phenomenon rather than "another blob":
+//   bloom     — light overflowing a bright source; puts energy AT a point (behind a logo, a number).
+//   halation  — film-style warm ring + tight core; nostalgia/glamour on a highlight, quiet by default.
+//   diffusion — a broad veil that lifts blacks over an area (screen blend); softens a busy region.
+//   rimLight  — an off-centre crescent; edge-lights a subject placed beside it, gives it dimension.
+//   spotlight — a directional soft-edged cone (angle in degrees); stages a reveal, directs the eye.
+// Colours come from color-mix over var(--accent) / white so every theme reskins them — never a
+// hardcoded brand colour. All geometry/colour maths lives in exported PURE string builders
+// (smoke-testable with plain node, no DOM).
+//
+// Pulse purity: L.pulse breathes opacity sinusoidally from LOCAL t inside frame(kit,el,L,t) — a pure
+// function of t (no wall clock, no state), so renderFrame(n) stays deterministic and seek-safe.
+// Amplitude is capped at 0.15 (a breath, not a strobe). The pulse writes to an INNER node, because
+// scene.html's driveClips owns el.style.opacity for enter/exit fades. As in shader.js, frame() stamps
+// el.dataset so a pulse-only frame always changes the DOM signature — otherwise the render's
+// static-frame dedup could wrongly reuse a frame.
+//
+// Back-compat: a glow with NO preset takes the exact original code path (same node, same background
+// string) — existing scenes render byte-identical; the snap gate would catch any drift.
+
+// ---- pure helpers (exported for lib tests) -------------------------------------------------------
+
+// translucent version of any CSS colour (works on var()/color-mix, unlike rgba(hex))
+export const alphaMix = (c, a) => `color-mix(in srgb, ${c} ${Math.round(a * 100)}%, transparent)`;
+// whiten a colour toward light: liftWhite(c, 70) = 30% colour + 70% white (a hot core)
+export const liftWhite = (c, w) => `color-mix(in srgb, ${c} ${100 - w}%, white)`;
+
+// presetSpec(name, o) → { background, blend?, mask? } or null for unknown names.
+// o: { i intensity 0..1, cx/cy centre 0..1 within the layer box, angle deg (spotlight), color }
+export function presetSpec(name, o = {}) {
+  const c = o.color || 'var(--accent)';
+  const px = ((o.cx ?? 0.5) * 100).toFixed(1), py = ((o.cy ?? 0.5) * 100).toFixed(1);
+  const at = `at ${px}% ${py}%`;
+
+  if (name === 'bloom') {
+    // hot near-white core → accent falloff: light overflowing a bright source
+    const i = o.i ?? 0.4;
+    return { background:
+      `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 70), Math.min(1, i * 1.1))} 0%, ` +
+      `${alphaMix(c, i * 0.55)} 28%, ${alphaMix(c, i * 0.18)} 52%, transparent 74%)` };
+  }
+
+  if (name === 'halation') {
+    // tight warm core + a wide faint ring (film halation); intensity default is LOW on purpose
+    const i = o.i ?? 0.3;
+    const warm = `color-mix(in srgb, ${c} 55%, #ffe9c9)`;
+    return { background:
+      `radial-gradient(26% 26% ${at}, ${alphaMix(liftWhite(warm, 40), i * 0.8)} 0%, transparent 62%), ` +
+      `radial-gradient(50% 50% ${at}, transparent 50%, ${alphaMix(warm, i * 0.28)} 66%, transparent 84%)` };
+  }
+
+  if (name === 'diffusion') {
+    // broad low-alpha white veil, screen-blended: lifts blacks without recolouring content below
+    const i = o.i ?? 0.4;
+    return { blend: 'screen', background:
+      `radial-gradient(75% 75% ${at}, ${alphaMix('white', i * 0.4)} 0%, ` +
+      `${alphaMix('white', i * 0.16)} 55%, transparent 100%)` };
+  }
+
+  if (name === 'rimLight') {
+    // bright radial with an offset circle masked OUT of it → an off-centre crescent. The mask circle
+    // sits down-left of the centre, so the lit edge faces up-right: place the subject there.
+    const i = o.i ?? 0.4;
+    const mx = (Math.max(0, (o.cx ?? 0.5) - 0.14) * 100).toFixed(1);
+    const my = (Math.min(1, (o.cy ?? 0.5) + 0.07) * 100).toFixed(1);
+    return {
+      background:
+        `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 55), i * 0.9)} 0%, ` +
+        `${alphaMix(c, i * 0.35)} 40%, transparent 68%)`,
+      mask: `radial-gradient(55% 55% at ${mx}% ${my}%, transparent 58%, #000 74%)`,
+    };
+  }
+
+  if (name === 'spotlight') {
+    // soft-edged cone from an apex (default above-left), aimed by `angle` (CSS deg: 0 = up, cw);
+    // a radial mask from the apex fades the beam with distance so it never hard-clips the box edge.
+    const i = o.i ?? 0.4;
+    const ax = ((o.cx ?? 0.12) * 100).toFixed(1), ay = ((o.cy ?? 0) * 100).toFixed(1);
+    const ang = o.angle ?? 150, lc = liftWhite(c, 60);
+    return {
+      background:
+        `conic-gradient(from ${ang - 28}deg at ${ax}% ${ay}%, transparent 0deg, ` +
+        `${alphaMix(lc, i * 0.28)} 12deg, ${alphaMix(lc, i * 0.55)} 28deg, ` +
+        `${alphaMix(lc, i * 0.28)} 44deg, transparent 56deg)`,
+      mask: `radial-gradient(120% 120% at ${ax}% ${ay}%, #000 30%, transparent 88%)`,
+    };
+  }
+
+  return null;
+}
+
+// pure pulse maths: opacity multiplier at local time lt, period p seconds, amplitude clamped ≤ 0.15
+export function pulseOpacity(lt, p, amp = 0.12) {
+  const a = Math.min(0.15, Math.max(0, amp));
+  return 1 - a + a * Math.sin((2 * Math.PI * lt) / Math.max(0.1, p));
+}
+
+// ---- layer builder -------------------------------------------------------------------------------
+
 export function build(kit, el, L) {
-  const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
   if (L.h != null) el.style.height = L.h + 'px';
-  const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
-  el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                            : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
   el.style.pointerEvents = 'none';
+
+  const spec = L.preset ? presetSpec(L.preset, {
+    i: L.intensity, cx: L.cx, cy: L.cy, angle: L.angle,
+    color: L.color && L.color !== true ? L.color : undefined,
+  }) : null;
+
+  if (!spec && !L.pulse) {
+    // ORIGINAL path, untouched: no preset, no pulse → identical output to the pre-preset builder
+    const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
+    const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
+    el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
+                              : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
+    return;
+  }
+
+  // preset and/or pulse → paint on an inner node, so pulse opacity never fights driveClips's
+  // enter/exit fade (scene.html owns el.style.opacity on the clip element)
+  const inner = document.createElement('div');
+  inner.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+  if (spec) {
+    inner.style.background = spec.background;
+    if (spec.blend) inner.style.mixBlendMode = spec.blend;
+    if (spec.mask) { inner.style.maskImage = spec.mask; inner.style.webkitMaskImage = spec.mask; }
+  } else {
+    // pulse on a classic (preset-less) glow: same gradient as the original path, one node deeper
+    const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
+    const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
+    inner.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
+                                 : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
+  }
+  // .hs-layer is already position:absolute (a containing block) — never override it here
+  el.appendChild(inner);
+  el.__glowInner = inner;
+}
+
+// breathe from LOCAL t (pure in t → deterministic, seek-safe). Stamp el.dataset.gp so a pulse-only
+// frame always changes the DOM signature — same rationale as shader.js: without it the render's
+// static-frame dedup could wrongly reuse a frame.
+export function frame(kit, el, L, t) {
+  if (!L.pulse || !el.__glowInner) return;
+  const start = L.start ?? 0, end = start + (L.duration ?? 2);
+  if (!(t >= start && t < end)) return;
+  const o = pulseOpacity(t - start, +L.pulse, L.pulseAmp);
+  el.__glowInner.style.opacity = o.toFixed(3);
+  el.dataset.gp = o.toFixed(3);
 }

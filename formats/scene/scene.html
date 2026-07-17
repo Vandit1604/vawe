@@ -37,6 +37,18 @@
       .hs-cap.pop { left: 8%; right: 8%; bottom: 12%; font: 800 64px var(--font-sans), sans-serif;
         letter-spacing: -0.01em; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.95); }
       .hs-cap.pop b, .hs-cap.pop em { color: var(--accent); font-style: normal; }
+      /* caption STYLES (wave 1) — word-timed treatments on the pop layout (core/captions.js drives
+         the per-word progress). All look values are theme tokens; the .styled scrim plate exists so
+         contrast is computable — the video content behind a caption is unknown, a plate is not. */
+      .hs-cap.styled { left: 8%; right: 8%; bottom: 12%; font: 700 64px var(--font-sans), sans-serif;
+        letter-spacing: -0.01em; color: var(--text); text-shadow: none;
+        background: color-mix(in srgb, var(--bg) 78%, transparent);
+        border-radius: 18px; padding: 14px 30px; }
+      .hs-cap.styled b, .hs-cap.styled em { color: var(--accent); font-style: normal; }
+      .hs-cap.pillKaraoke .ku { padding: 3px 16px; margin: 3px 3px; border-radius: 999px;
+        background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
+      .hs-cap.clipWipe .cw.base { color: color-mix(in srgb, var(--text) 76%, var(--bg)); }
+      .hs-cap.clipWipe .cw.over { position: absolute; inset: 14px 30px; color: var(--accent); }
     </style>
   </head>
   <body>
@@ -53,6 +65,7 @@
       import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/motion.js';
       import { driveClips, seekAll } from '/core/clips.js';
       import { splitText, animateUnits } from '/core/type.js';
+      import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
       import { cutStyle } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
@@ -195,6 +208,11 @@
         const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
         const caps = data.captions || [];
         const capMode = data.captionMode || 'sentence';
+        // captionStyle: a word-timed treatment (core/captions.js) layered on the pop layout.
+        // Unknown names fail LOUD at boot, matching the theme doctrine — never a silent fallback look.
+        const capStyle = data.captionStyle || null;
+        if (capStyle && !CAP_STYLES[capStyle])
+          throw new Error(`unknown captionStyle "${capStyle}" — known: ${Object.keys(CAP_STYLES).join(', ')}`);
         const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
 
         function renderFrame(f) {
@@ -247,18 +265,43 @@
               el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
             }
           }
-          // captions: show the caption whose window contains t
+          // captions: show the caption whose window contains t. `captionStyle` layers a word-timed
+          // treatment on the pop layout. DOM is rebuilt only when the LINE changes — the memo key is
+          // a pure function of t (which caption owns t), so seeks stay order-independent — and then
+          // every style prop is rewritten every frame (authoritative writes, like the motion-blur
+          // recompose above), so a cold seek renders byte-identical to a warm one.
           const cap = caps.find((c) => t >= c.t0 && t < c.t1);
           const capEl = $('cap');
-          capEl.className = 'hs-cap ' + (capMode === 'word' ? 'word' : capMode === 'pop' ? 'pop' : '');
+          capEl.className = 'hs-cap ' + (capStyle ? 'styled ' + capStyle
+            : capMode === 'word' ? 'word' : capMode === 'pop' ? 'pop' : '');
           if (cap) {
-            capEl.innerHTML = cap.text;
+            const key = cap.t0 + '|' + cap.text;
+            if (capEl.__key !== key) {
+              capEl.__key = key;
+              if (capStyle === 'clipWipe') {
+                capEl.innerHTML = `<div class="cw base">${cap.text}</div><div class="cw over">${cap.text}</div>`;
+                capEl.__units = null;
+              } else if (capStyle) {
+                capEl.innerHTML = cap.text;
+                capEl.__units = splitText(capEl, 'word'); // the kinetic splitter (core/type.js)
+              } else { capEl.innerHTML = cap.text; capEl.__units = null; }
+              capEl.__wins = capStyle ? capWords(cap) : null;
+            }
             const in01 = clamp01((t - cap.t0) / 0.14), out01 = clamp01((cap.t1 - t) / 0.14);
             capEl.style.opacity = (in01 * out01).toFixed(2);
-            // pop mode: a small rise + scale on entry (snappy social subtitle). Pure in t.
-            capEl.style.transform = capMode === 'pop'
+            capEl.style.transform = (capMode === 'pop' || capStyle)
               ? `translateY(${((1 - in01) * 18).toFixed(1)}px) scale(${(0.95 + 0.05 * in01).toFixed(3)})` : 'none';
-          } else { capEl.style.opacity = '0'; }
+            if (capStyle === 'clipWipe') {
+              Object.assign(capEl.lastElementChild.style, CAP_STYLES.clipWipe(lineU(t, capEl.__wins)));
+            } else if (capStyle && capEl.__units && capEl.__units.length === capEl.__wins.length) {
+              // length guard: pathological markup can make splitText and the stripped-word count
+              // disagree; degrade to the plain styled plate instead of misaligned karaoke.
+              capEl.__units.forEach((el, i) => {
+                const win = capEl.__wins[i];
+                Object.assign(el.style, CAP_STYLES[capStyle](wordU(t, win), t >= win.t0 && t < win.t1));
+              });
+            }
+          } else { capEl.style.opacity = '0'; capEl.__key = null; }
           // global camera
           const c = cameraAt(camKf, t);
           cam.style.transform = c ? `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : 'none';

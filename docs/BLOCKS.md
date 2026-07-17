@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_109 entries across 46 families._
+_118 entries across 49 families._
 
 | Block | For |
 |---|---|
@@ -63,6 +63,12 @@ _109 entries across 46 families._
 | `codeBlock` | code card; syntax-coloured lines |
 | `codeBlock.light` | code card, light surface |
 | `codeBlock.py` | code card, python |
+| `codeBlock.midnight` | code theme · cool dark, blue-first cycling |
+| `codeBlock.ember` | code theme · warm dark, amber and rose |
+| `codeBlock.forest` | code theme · deep green, mossy accents |
+| `codeBlock.ocean` | code theme · deep blue, cyan-led |
+| `codeBlock.neon` | code theme · near-black, vivid signage hues |
+| `codeBlock.paper` | code theme · warm light, print-ink syntax |
 | `terminal` | command prompt; command decodes in, output reveals |
 | `terminal.git` | git command |
 | `terminal.install` | install command |
@@ -168,6 +174,9 @@ _109 entries across 46 families._
 | `lowerThird.colourBlock` | two offset blocks, ink then accent |
 | `lowerThird.stackBars` | plate over a short accent bar · reads as a mark |
 | `lowerThird.newsTicker` | accent chip + line · role IS the chip (LIVE/BREAKING) |
+| `nowPlaying` | music-player card · artwork, progress, transport |
+| `videoLowerThird` | creator lower third · avatar, subs, red CTA |
+| `followCard` | name over handle, pill CTA |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

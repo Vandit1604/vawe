@@ -176,6 +176,9 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   decreasing-blur shadows (linear.app's real recipe; one flat shadow reads as a flat div).
   `glow: "#hex"|true` adds a 64px ambient halo. `on:"light"` flips the ring for light surfaces.
 - `{type:"glow"}` layer → radial center-glow; `beam:"right|left|up|down"` → directional color
+  Wave 1 adds `preset` — five light phenomena: `bloom` (energy at a point) · `halation` (film-warm
+  ring) · `diffusion` (area veil) · `rimLight` (edge crescent) · `spotlight` (aimable cone, `angle`).
+  Optional `pulse` (sine period, seconds) breathes opacity, amplitude clamped ≤ 0.15, pure in t.
   trail (roadmap-bar look). Pure gradient divs; place on a low track.
 - `fade: "right|left|top|bottom|edges"` → static edge mask on any layer. **Exclusive with `cut`**
   (cuts reset mask each frame) — the builder throws.
@@ -288,3 +291,20 @@ Study the site (`make lookbook`), inventory every section (`make sections`), nam
 language in words, trace every choice to an observation, pull copy from the site's own words, then
 **capture its real sections and re-animate them**; compose connective tissue from THIS vocabulary.
 Structure is designed per product; nothing here decides your story for you.
+
+
+## Colour-grade filter presets (any layer)
+
+`filter:` accepts a raw CSS filter string OR a named grade (core/filters.js): `duotone` · `tritone` ·
+`gradientMap` · `posterize` · `sepia` · `vignette`, with params after a colon
+(`duotone:#141414,#7cffd4`, `posterize:5`, `sepia:0.6`, `vignette:0.55`). Bare names derive their
+colours from the theme (ink shadows, accent highlights). Vignette is honestly an overlay, not a
+filter. SVG defs inject once at build, so the render stays pure in n.
+
+## Caption styles
+
+`captionStyle:` layers a word-timed treatment on the pop caption layout (core/captions.js):
+`highlight` · `pillKaraoke` · `weightShift` · `clipWipe`. Per-line `words:[{t0,t1}]` gives real
+karaoke timing; without it, windows distribute across the line proportional to word length, so
+`make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
+never opacity — the styled plate keeps every state above WCAG 4.5:1.

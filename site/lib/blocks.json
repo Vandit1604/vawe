@@ -1809,5 +1809,134 @@
       "name": "Renders every frame in parallel",
       "role": "live"
     }
+  },
+  {
+    "name": "codeBlock.midnight",
+    "family": "codeBlock",
+    "blurb": "code theme · cool dark, blue-first cycling",
+    "props": {
+      "w": 540,
+      "theme": "midnight",
+      "label": "app.ts",
+      "size": 19,
+      "lines": [
+        "const scene = load('video.json')",
+        "const frames = render(scene)",
+        "encode(frames, 'out.mp4')"
+      ]
+    }
+  },
+  {
+    "name": "codeBlock.ember",
+    "family": "codeBlock",
+    "blurb": "code theme · warm dark, amber and rose",
+    "props": {
+      "w": 540,
+      "theme": "ember",
+      "label": "render.py",
+      "size": 19,
+      "lines": [
+        "from vawe import render",
+        "clip = render('launch.json')",
+        "clip.save('out.mp4')"
+      ]
+    }
+  },
+  {
+    "name": "codeBlock.forest",
+    "family": "codeBlock",
+    "blurb": "code theme · deep green, mossy accents",
+    "props": {
+      "w": 540,
+      "theme": "forest",
+      "label": "deploy.sh",
+      "size": 19,
+      "lines": [
+        "make video D=launch.json",
+        "make audit",
+        "git push origin main"
+      ]
+    }
+  },
+  {
+    "name": "codeBlock.ocean",
+    "family": "codeBlock",
+    "blurb": "code theme · deep blue, cyan-led",
+    "props": {
+      "w": 540,
+      "theme": "ocean",
+      "label": "scene.json",
+      "size": 19,
+      "lines": [
+        "{ \"module\": \"scene\",",
+        "  \"theme\": \"creed\",",
+        "  \"fps\": 30 }"
+      ]
+    }
+  },
+  {
+    "name": "codeBlock.neon",
+    "family": "codeBlock",
+    "blurb": "code theme · near-black, vivid signage hues",
+    "props": {
+      "w": 540,
+      "theme": "neon",
+      "label": "worker.js",
+      "size": 19,
+      "lines": [
+        "onmessage = async (e) => {",
+        "  const f = await renderFrame(e.data.n)",
+        "  postMessage(f) }"
+      ]
+    }
+  },
+  {
+    "name": "codeBlock.paper",
+    "family": "codeBlock",
+    "blurb": "code theme · warm light, print-ink syntax",
+    "props": {
+      "w": 540,
+      "theme": "paper",
+      "label": "notes.md",
+      "size": 19,
+      "lines": [
+        "## release checklist",
+        "- [x] blocks registry",
+        "- [ ] captions pass"
+      ]
+    }
+  },
+  {
+    "name": "nowPlaying",
+    "family": "nowPlaying",
+    "blurb": "music-player card · artwork, progress, transport",
+    "props": {
+      "w": 380,
+      "track": "Golden Hour",
+      "artist": "Field Notes",
+      "progress": 0.62
+    }
+  },
+  {
+    "name": "videoLowerThird",
+    "family": "videoLowerThird",
+    "blurb": "creator lower third · avatar, subs, red CTA",
+    "props": {
+      "w": 520,
+      "channel": "Studio Vawe",
+      "subscribers": "128K subscribers",
+      "cta": "Subscribe"
+    }
+  },
+  {
+    "name": "followCard",
+    "family": "followCard",
+    "blurb": "name over handle, pill CTA",
+    "props": {
+      "w": 360,
+      "name": "Ana Roth",
+      "handle": "anaroth",
+      "cta": "Follow"
+    }
   }
 ]

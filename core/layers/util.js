@@ -2,6 +2,8 @@
 // them to the scene's services (theme, inkAt, cam, splitText, …) so every primitive builder is a small
 // pure-ish file that takes the kit. Ported verbatim from scene.html's inline helpers (byte-identical).
 
+import { applyLayerFilter } from '../filters.js';
+
 // hexA('#5e6ad2', .25) → rgba string (glow/beam colours come as brand hex)
 export function hexA(hex, a) {
   const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
@@ -62,6 +64,10 @@ export function createKit(ctx) {
   }
 
   function applyFade(el, L) { // static edge mask; MUTUALLY EXCLUSIVE with `cut`
+    // filter routing rides here because scene.html calls applyFade for EVERY layer right after it
+    // writes the raw L.filter string — resolving named grade presets (core/filters.js) at this hook
+    // needs no consumption-point edit. Raw CSS filter strings resolve to themselves (no-op).
+    if (L.filter) applyLayerFilter(el, L.filter);
     if (!L.fade) return;
     if (L.cut) throw new Error(`layer "${L.text || L.type}": fade and cut are mutually exclusive — put the fade on an inner layer`);
     const g = { right: 'linear-gradient(90deg, #000 55%, transparent 98%)',

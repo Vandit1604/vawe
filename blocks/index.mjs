@@ -69,19 +69,46 @@ export function card({ x, y, w = 740, h = 336, tint = 'color-mix(in srgb, var(--
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// codeBlock — a code card. `lines` are strings OR {text,color} for syntax colour.
-export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24,
+// CODE_THEMES — curated editor palettes for codeBlock. Hex literals on purpose: like the stripeCard
+// hexes, a code theme IS its exact colours (theme tokens would dissolve twelve looks into one).
+// Every fg/label/syntax colour was checked against its bg with the WCAG formula — the minimum in the
+// set is 4.68:1, so nothing here can murk out on render. Names are descriptive, not editor brands.
+// `light: true` flips the card chrome (hairline + elevation instead of the dark inner border).
+const CODE_THEMES = {
+  midnight: { bg: '#0D1117', fg: '#E6EDF3', label: '#8B949E', syntax: ['#79C0FF', '#7EE787', '#FFA657', '#D2A8FF', '#FF7B72', '#A5D6FF'] },
+  ink:      { bg: '#16161E', fg: '#C8D0F0', label: '#8A91B4', syntax: ['#7AA2F7', '#9ECE6A', '#E0AF68', '#BB9AF7', '#7DCFFF'] },
+  ember:    { bg: '#1F1210', fg: '#F2E4DC', label: '#B39A8F', syntax: ['#FF9F6B', '#F0C674', '#E89AA6', '#8FD3B6', '#D7A8F0'] },
+  forest:   { bg: '#0B1F16', fg: '#DCEDE2', label: '#8FB3A0', syntax: ['#7FD8A4', '#C7E08B', '#EFCB68', '#6FC9C4', '#B7A8F0', '#F0A48F'] },
+  ocean:    { bg: '#071E2E', fg: '#D8EAF5', label: '#8AAEC2', syntax: ['#5FC6E8', '#7FD8A4', '#EFC060', '#A0B8F8', '#F09AA0'] },
+  dusk:     { bg: '#1E1B2E', fg: '#E4DFF5', label: '#9C93C0', syntax: ['#B39DF0', '#8AB8F5', '#E8A0C8', '#8FD8B0', '#EFC060'] },
+  slate:    { bg: '#20242C', fg: '#DDE3EA', label: '#98A3B0', syntax: ['#88BBEE', '#93CFA8', '#E5B567', '#C6A5E8', '#7ED2CE'] },
+  neon:     { bg: '#0A0E14', fg: '#E8F0F8', label: '#8896A8', syntax: ['#4AE3B5', '#5AC8FA', '#F5D76E', '#F58AC0', '#B69CFF', '#9CE07A'] },
+  aurora:   { bg: '#101820', fg: '#DEE8E8', label: '#8CA0A8', syntax: ['#5AD8C0', '#88C0F0', '#D0A8F8', '#F0B860', '#F08A98', '#A8D878'] },
+  paper:    { bg: '#FAF8F2', fg: '#2A2C33', label: '#6D7075', light: true, syntax: ['#9A4A00', '#1E68C5', '#1F6B3A', '#8A3FA8', '#B02A37'] },
+  linen:    { bg: '#F6EFE3', fg: '#3A3128', label: '#77685C', light: true, syntax: ['#8C4A10', '#20655E', '#8A3B60', '#4E5FB8', '#5A6E20'] },
+  frost:    { bg: '#EFF4F8', fg: '#22303C', label: '#5D6E7E', light: true, syntax: ['#155FB0', '#0F6E62', '#7A3FA0', '#A03050', '#6B5A10'] },
+};
+
+// codeBlock — a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
+// names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the
+// palette's syntax colours cycled by line index (deterministic: same lines → same paint).
+export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24, theme,
   start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
-  const bg = dark ? T.stripeNavy : T.card, fg = dark ? '#E8ECF1' : T.ink;
+  const P = theme ? CODE_THEMES[theme] : null;
+  if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}" — one of ${Object.keys(CODE_THEMES).join(', ')}`);
+  const isDark = P ? !P.light : dark;
+  const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? '#E8ECF1' : T.ink);
   const kids = [];
-  if (label) kids.push(text({ text: label, font: 'mono', size: 18, color: dark ? T.stripeGrey : T.dim }));
+  if (label) kids.push(text({ text: label, font: 'mono', size: 18, color: P ? P.label : (dark ? T.stripeGrey : T.dim) }));
+  let cyc = 0; // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits to its neighbours' explicit colours
   for (const ln of lines) {
-    const s = typeof ln === 'string' ? { text: ln, color: fg } : { text: ln.text, color: ln.color || fg };
+    const auto = P ? P.syntax[cyc++ % P.syntax.length] : fg;
+    const s = typeof ln === 'string' ? { text: ln, color: auto } : { text: ln.text, color: ln.color || auto };
     kids.push(text({ ...s, font: 'mono', size, weight: 400 }));
   }
   return [{
     type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 30,
-    bg, radius: 14, border: dark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(dark ? {} : { elevation: 1 }),
+    bg, radius: 14, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: 1 }),
     start, duration: dur, anim, enterDur, exitDur: 0.35, children: kids,
   }];
 }
@@ -583,6 +610,90 @@ export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
       children: [text({ text: r.emoji, size: 19 }), text({ text: String(r.count), size: 17, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'mono' })] })) }];
 }
 
+// initials fallback for avatar/artwork shapes: first letters of the first two words. Deterministic,
+// and it means every social block still reads as "a real account" without shipping an image asset.
+const initialsOf = (s) => String(s).trim().split(/\s+/).slice(0, 2).map((w) => (w[0] || '').toUpperCase()).join('') || '•';
+
+// ── social SHAPES — player card, creator lower third, follow card. Shapes only, on purpose: no
+//    platform logos, wordmarks, or lockups (licence rule). The silhouette carries the recognition.
+
+// nowPlaying — a music-player card: square artwork (accent gradient + initials if no art), title over
+// artist, a progress bar, transport glyphs. `progress` is 0..1 of the track.
+export function nowPlaying({ x, y, w = 380, track = '', artist = '', art = '', progress = 0.4, start = 0, dur = 4 } = {}) {
+  const p = Math.max(0, Math.min(1, progress));
+  const innerW = w - 44; // the card's pad: 22 a side
+  const artEl = art ? { type: 'image', src: art, w: 72, h: 72, radius: 12 }
+    : box({ w: 72, h: 72, radius: 12,
+        // SOLID on purpose. This was a gradient, and a gradient is a background-IMAGE: the computed
+        // background-color under the initials stays transparent, so any contrast probe (ours included)
+        // falls through to the white card behind and reads white-on-white — unmeasurable even when it
+        // looks fine. A var() colour appended to the shorthand does not survive to a computed
+        // background-color either (tried). A solid is measurable by construction, and a flat accent
+        // artwork square is the cleaner shape anyway.
+        bg: 'color-mix(in srgb, var(--accent) 88%, var(--text))',
+        layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: initialsOf(track), size: 26, weight: 700, color: '#fff' })] });
+  return [{
+    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 22,
+    bg: T.card, radius: 16, border: HAIR, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [
+      { type: 'group', layout: 'row', items: 'center', gap: 16, children: [
+        artEl,
+        { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+          text({ text: track, size: 22, weight: 700, color: T.ink }),
+          text({ text: artist, size: 17, color: T.sub }),
+        ] },
+      ] },
+      // the fill is a box INSIDE the track box (rect isn't allowed as a group child); its width IS the progress
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 0, start: r2(start + 0.15), duration: dur, anim: 'wipe', enterDur: 0.4,
+        children: [box({ w: innerW, h: 5, radius: 100, bg: T.surface, layout: 'row', justify: 'flex-start', items: 'stretch',
+          children: [box({ w: r2(innerW * p), h: 5, radius: 100, bg: T.accent })] })] },
+      { type: 'group', layout: 'row', justify: 'center', items: 'center', gap: 34,
+        start: r2(start + 0.25), duration: dur, anim: 'rise', enterDur: 0.35, children: [
+          text({ text: '◁', size: 22, weight: 600, color: T.sub }),
+          box({ w: 48, h: 48, radius: 100, bg: T.ink, layout: 'row', justify: 'center', items: 'center',
+            children: [text({ text: '▷', size: 20, weight: 700, color: T.paper })] }),
+          text({ text: '▷|', size: 22, weight: 600, color: T.sub }),
+        ] },
+    ],
+  }];
+}
+
+// videoLowerThird — creator identifier: avatar circle · channel over subscriber count · a CTA chip.
+// The chip sits in var(--down): the theme's danger/red token keeps it in the subscribe-red family on
+// every brand without hard-coding a platform hex (shape, not lockup — the licence rule again).
+export function videoLowerThird({ x, y, w = 520, channel = '', subscribers = '', avatar = '', cta = 'Subscribe', start = 0, dur = 4 } = {}) {
+  const av = avatar ? { type: 'image', src: avatar, w: 56, h: 56, radius: 100 }
+    : box({ w: 56, h: 56, radius: 100, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: initialsOf(channel), size: 20, weight: 700, color: T.accentInk })] });
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 20px',
+    bg: T.card, radius: 14, border: HAIR, elevation: 2, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
+    children: [
+      av,
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+        text({ text: channel, size: 22, weight: 700, color: T.ink }),
+        subscribers && text({ text: subscribers, font: 'mono', size: 16, color: T.dim }),
+      ].filter(Boolean) },
+      { type: 'group', bg: T.down, radius: 100, pad: '10px 22px', start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
+        children: [text({ text: cta, size: 18, weight: 700, color: '#fff' })] },
+    ] }];
+}
+
+// followCard — name over @handle, a pill CTA on the right. The pill is ink-on-paper inverted (not
+// accent) so it reads as THE button of the card, not another tinted chip.
+export function followCard({ x, y, w = 360, handle = '', name = '', cta = 'Follow', start = 0, dur = 4 } = {}) {
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '18px 22px',
+    bg: T.card, radius: 16, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
+    children: [
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
+        text({ text: name, size: 21, weight: 700, color: T.ink }),
+        text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim }),
+      ] },
+      { type: 'group', bg: T.ink, radius: 100, pad: '9px 20px', start: r2(start + 0.18), duration: dur, anim: 'rise', enterDur: 0.3,
+        children: [text({ text: cta, size: 17, weight: 700, color: T.paper })] },
+    ] }];
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // WAVE 5 families — brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
 
@@ -816,7 +927,7 @@ const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browse
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
   fileTree, logLines, commitRow, phoneFrame, tabBar,
   checklist, table, timeline, stepFlow, kanban,
-  chatBubble, tweetCard, avatarStack, toast, reactionBar,
+  chatBubble, tweetCard, avatarStack, toast, reactionBar, nowPlaying, videoLowerThird, followCard,
   logoWall, badge, gauge, progressRing, banner, spinner, lowerThird };
 
 export const BLOCKS = { ...FACTORIES };

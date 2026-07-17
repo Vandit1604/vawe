@@ -19,6 +19,16 @@ gets a **closed-form or seeded-deterministic** implementation, or it does not sh
 This is not a purity fetish. It is what `make probe` checks, and it is the property the whole
 product is sold on.
 
+**Known violation (found 2026-07-17, unfixed):** the Go renderer's frame-dedup makes re-renders of an
+UNCHANGED scene pixel-different when the scene carries long-settling motion. Spring settles leave
+sub-pixel movement inside the DOM signature's rounding, so near-identical frames group together, and
+WHICH frame becomes the group's captured representative depends on worker order across the 8 parallel
+tabs. Catalog pages differ ~4% of pixels (max delta 88) between two back-to-back renders of the same
+JSON; scenes with fade-only motion (showcase-aspect) stay byte-identical. The fix belongs in the
+renderer (tighten the signature, or make representative selection deterministic, e.g. always the
+group's FIRST frame by index); until then `make catalog` avoids re-rendering unchanged pages so the
+site's clips do not churn, which contains the symptom, not the cause.
+
 ## Not an effect, and ahead of every effect: aspect ratios
 
 **Multi-aspect is not finished, and it is load-bearing for the whole list.** "One source renders

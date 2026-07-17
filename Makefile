@@ -233,7 +233,13 @@ expand: ## expand {type:block} + {type:comp} sugar into real layers (D=<file>)
 
 catalog: build ## render the block registry to paged sheets (browse the arsenal)
 	node scripts/site/blocks-catalog.mjs
-	@for f in formats/scene/_catalog-*.json; do ./bin/vawe $$f --draft || exit 1; done
+	@# render only pages whose JSON changed since their mp4 (blocks-catalog writes-on-change): the
+	@# renderer's frame-dedup makes re-renders of UNCHANGED pages pixel-different (worker-order picks
+	@# a different representative frame per static group), which churns every cropped clip in git.
+	@for f in formats/scene/_catalog-*.json; do \
+	  m=out/_catalog-$$(basename $$f .json | sed 's/_catalog-//').mp4; \
+	  if [ ! -f $$m ] || [ $$f -nt $$m ]; then ./bin/vawe $$f --draft || exit 1; else echo "  · $$m up to date"; fi; \
+	done
 	@echo "→ out/_catalog-*.mp4 (one page per file)"
 
 blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest

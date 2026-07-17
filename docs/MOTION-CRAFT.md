@@ -71,3 +71,27 @@ shimmer viii (no shaking text) · rhythm ix (no monotone entries) · layout audi
 safe-zone / clipping) · contrast gates (text 4.5+, images 3+, headline dominance 7+) ·
 no-emdash · similarity + ledger (cross-video sameness). Everything else in this file is taste —
 which is why it's written down.
+
+
+## Wave-1 effect selection (colour grades · glow · captions)
+
+Colour-grade filter presets (any layer, `filter:` — core/filters.js):
+- **duotone** — collapse a busy photo into two brand colours so it reads as graphic, not photographic; the bare default (ink to accent) makes any image on-brand instantly.
+- **tritone** — duotone with a mid-tone, for photos that lose too much in two colours (faces, product shots).
+- **gradientMap** — a full stylised grade for hero imagery that should feel art-directed, not filtered.
+- **posterize** — screen-print bands for a punchy retro beat; keep levels 4-6, below 4 gets muddy.
+- **sepia** — the archive-footage cue; partial (`sepia:0.6`) reads warmer, less costume-y.
+- **vignette** — pull the eye to centre on full-bleed imagery; keep under 0.6 or it reads as a tunnel.
+
+Glow presets (`type:"glow"`, `preset:` — core/layers/glow.js):
+- **bloom** — energy AT a bright point: behind a logo, a lit number, a payoff word.
+- **halation** — film-warm glamour on a single highlight; keep intensity low, felt not seen.
+- **diffusion** — soften a busy dark region so foreground text floats; an area treatment, not a point.
+- **rimLight** — edge-light a subject placed to the crescent's upper-right; gives a cutout dimension.
+- **spotlight** — stage a reveal: aim the cone (angle, default from above-left) at what enters next.
+
+Caption styles (`captionStyle:` — core/captions.js; word-timed, degrade to length-proportional pacing):
+- **highlight** — marker-pen emphasis with a read trail; the default when the caption IS the content.
+- **pillKaraoke** — the loudest, most social; fast hype cuts over busy footage, never over dense UI.
+- **weightShift** — the quietest; product demos and calm brand films; needs a multi-weight face.
+- **clipWipe** — lyric-video energy for one hero line; only on themes whose accent clears 4.5:1.

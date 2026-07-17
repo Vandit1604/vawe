@@ -34,7 +34,15 @@ for (let p = 0; p < pages; p++) {
   });
   const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'vawe-creed', duration: 9,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: 9 }], layers: L };
-  fs.writeFileSync(`formats/scene/_catalog-${p + 1}.json`, JSON.stringify(scene, null, 2));
+  // Write only on CHANGE, so `make catalog` can skip re-rendering untouched pages by mtime. This
+  // matters more than it looks: the renderer's frame-dedup picks a representative frame per
+  // static-ish group, and WHICH frame wins varies across the 8 parallel workers when spring settles
+  // leave sub-pixel motion inside the signature's rounding — so re-rendering an UNCHANGED page
+  // produces a pixel-different mp4, and every clip cropped from it churns in git for no reason.
+  // (Pre-existing renderer behaviour, recorded in docs/ROADMAP.md; not fixed here.)
+  const out = `formats/scene/_catalog-${p + 1}.json`;
+  const body = JSON.stringify(scene, null, 2);
+  if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== body) fs.writeFileSync(out, body);
 }
 // Remove pages a SHRINKING registry left behind. `make catalog` renders formats/scene/_catalog-*.json
 // by glob, so a stale page keeps getting rendered as a real one long after nothing points at it.

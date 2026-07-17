@@ -58,6 +58,16 @@
         "pop"
       ]
     },
+    "captionStyle": {
+      "type": "string",
+      "label": "Word-timed caption treatment on the pop layout (core/captions.js). Optional per-line words:[{t0,t1}].",
+      "enum": [
+        "highlight",
+        "pillKaraoke",
+        "weightShift",
+        "clipWipe"
+      ]
+    },
     "bg": {
       "type": "array",
       "label": "Background windows (canvas, theme palette)",
@@ -608,7 +618,7 @@
         },
         "preset": {
           "type": "string",
-          "label": "Kinetic preset (up/down/type/scale/blur/bounce/slide/wave/flip/fall/elastic/skew/focus/decode/tilt/stretch/gradient/highlight/underline/shadow/riseClip)"
+          "label": "Kinetic preset (split text) OR glow preset (bloom/halation/diffusion/rimLight/spotlight on a glow layer)"
         },
         "stagger": {
           "type": "number",
@@ -628,7 +638,7 @@
         },
         "filter": {
           "type": "string",
-          "label": "CSS filter"
+          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, params after a colon) \u2014 core/filters.js"
         },
         "mask": {
           "type": "string",
@@ -898,6 +908,21 @@
         "part": {
           "type": "string",
           "label": "Scene part name (capture-scene JSONs)"
+        },
+        "pulse": {
+          "type": "number",
+          "label": "glow: gentle breathing, sine period in seconds (amplitude <= 0.15; off by default)",
+          "min": 0.5
+        },
+        "pulseAmp": {
+          "type": "number",
+          "label": "glow: pulse amplitude 0-0.15 (default 0.12)",
+          "min": 0,
+          "max": 0.15
+        },
+        "angle": {
+          "type": "number",
+          "label": "glow spotlight: beam direction in degrees (0 = up, clockwise; default 150 = from above-left)"
         }
       }
     },
