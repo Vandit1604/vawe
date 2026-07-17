@@ -636,7 +636,7 @@
         },
         "preset": {
           "type": "string",
-          "label": "Kinetic preset (split text) OR glow preset (bloom/halation/diffusion/rimLight/spotlight on a glow layer)"
+          "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
         },
         "stagger": {
           "type": "number",
@@ -656,7 +656,7 @@
         },
         "filter": {
           "type": "string",
-          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, params after a colon) \u2014 core/filters.js"
+          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow for text-shaped chromatic neon; params after a colon) \u2014 core/filters.js"
         },
         "mask": {
           "type": "string",
@@ -941,6 +941,11 @@
         "angle": {
           "type": "number",
           "label": "glow spotlight: beam direction in degrees (0 = up, clockwise; default 150 = from above-left)"
+        },
+        "cycle": {
+          "type": "number",
+          "label": "glow chromaCycle: seconds for the hue to sweep the full spectrum (default 6)",
+          "min": 0.5
         }
       }
     },

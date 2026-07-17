@@ -117,6 +117,28 @@ export const PRESETS = {
     const p = resolveEasing(ease)(k);
     return { opacity: k > 0 ? 1 : 0, strokeDasharray: '1 1', strokeDashoffset: (back ? p - 1 : 1 - p).toFixed(4) };
   },
+  // chroma: chromatic-aberration entrance. R/G/B channels split apart (textShadow ghosts) and
+  // converge as the unit settles to a CRISP glyph (residual 0 by default → no colour border at rest;
+  // pass residual:>0 to leave a hair of fringe). The satisfying part is the misregistration resolving.
+  chroma: (u, { dist = 16, rise = 10, residual = 0 } = {}) => {
+    const e = easeOutCubic(clamp01(u));
+    const off = ((1 - e) * dist + residual);
+    const y = (1 - easeOutSettle(clamp01(u))) * rise;
+    return { opacity: clamp01(u * 2), transform: `translateY(${y.toFixed(2)}px)`,
+      textShadow: `${off.toFixed(2)}px 0 0 rgba(255,0,64,0.75), ${(-off).toFixed(2)}px 0 0 rgba(0,180,255,0.75)` };
+  },
+  // swing: each unit hinges down from its top edge and swings past centre with a spring, settling
+  // upright (pendulum). Playful; good on short words / punchy brands.
+  swing: (u, { deg = 24, bounce = 0.5, settle = 0.55 } = {}) => {
+    const s = spring(clamp01(u), { bounce, settle });
+    return { opacity: clamp01(u * 2.5), transformOrigin: 'top center', transform: `rotate(${((1 - s) * deg).toFixed(2)}deg)` };
+  },
+  // unfold: each unit opens from edge-on (rotateY) about its left hinge to lie flat — a card/panel
+  // turning to face you. Premium; reads well on serif or heavy display faces.
+  unfold: (u, { deg = 90 } = {}) => {
+    const e = easeOutCubic(clamp01(u));
+    return { opacity: clamp01(u * 2), transformOrigin: 'left center', transform: `perspective(820px) rotateY(${((1 - e) * -deg).toFixed(1)}deg)` };
+  },
 };
 
 // decode support: scrambles textContent deterministically until u resolves each char L->R.

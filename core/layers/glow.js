@@ -90,7 +90,31 @@ export function presetSpec(name, o = {}) {
     };
   }
 
+  if (name === 'chromatic') {
+    // RGB-split halo: red/green/blue radial copies offset left/centre/right, screen-blended so they
+    // add to white in the core and fringe to colour at the edges. Chromatic is a SPECTRUM by
+    // definition, so the channel hues are intentionally hard RGB, not theme tokens (the halo tints as
+    // a whole via hue-rotate on chromaCycle, or leave it as the classic aberration).
+    const i = o.i ?? 0.4;
+    const gg = (col, ox) => `radial-gradient(46% 46% at ${(+px + ox).toFixed(1)}% ${py}%, ${alphaMix(col, i * 0.7)} 0%, transparent 66%)`;
+    return { blend: 'screen', background: `${gg('#ff0033', -4.5)}, ${gg('#00ff5a', 0)}, ${gg('#0066ff', 4.5)}` };
+  }
+
+  if (name === 'chromaCycle') {
+    // a saturated neon bloom whose HUE sweeps the spectrum over time (driven in frame()); the static
+    // spec is the magenta starting state, screen-blended so it reads as emitted light.
+    const i = o.i ?? 0.45;
+    return { blend: 'screen', background:
+      `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite('#ff2fd0', 30), i)} 0%, ` +
+      `${alphaMix('#ff2fd0', i * 0.5)} 34%, transparent 72%)` };
+  }
+
   return null;
+}
+
+// pure hue at local time lt: full 0..360 sweep every `cycle` seconds (default 6s). Pure in lt.
+export function cycleHue(lt, cycle = 6) {
+  return (((lt / Math.max(0.1, cycle)) % 1) * 360);
 }
 
 // pure pulse maths: opacity multiplier at local time lt, period p seconds, amplitude clamped ≤ 0.15
@@ -143,10 +167,20 @@ export function build(kit, el, L) {
 // frame always changes the DOM signature — same rationale as shader.js: without it the render's
 // static-frame dedup could wrongly reuse a frame.
 export function frame(kit, el, L, t) {
-  if (!L.pulse || !el.__glowInner) return;
+  const cycling = L.preset === 'chromaCycle';
+  if ((!L.pulse && !cycling) || !el.__glowInner) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
-  const o = pulseOpacity(t - start, +L.pulse, L.pulseAmp);
-  el.__glowInner.style.opacity = o.toFixed(3);
-  el.dataset.gp = o.toFixed(3);
+  if (L.pulse) {
+    const o = pulseOpacity(t - start, +L.pulse, L.pulseAmp);
+    el.__glowInner.style.opacity = o.toFixed(3);
+    el.dataset.gp = o.toFixed(3);
+  }
+  if (cycling) {
+    // hue sweeps the spectrum over time; pure in local t → deterministic, seek-safe. Stamp dataset so
+    // a hue-only frame changes the DOM signature (same rationale as pulse / shader.js).
+    const h = cycleHue(t - start, L.cycle != null ? +L.cycle : 6);
+    el.__glowInner.style.filter = `hue-rotate(${h.toFixed(1)}deg)`;
+    el.dataset.gh = h.toFixed(1);
+  }
 }

@@ -39,8 +39,25 @@ export const FILTER_PRESETS = {
   tritone: { kind: 'svg', mode: 'ramp', stops: 3 },
   gradientMap: { kind: 'svg', mode: 'ramp', stops: 0 },
   posterize: { kind: 'svg', mode: 'posterize' },
+  chromaGlow: { kind: 'css', mode: 'glow' },
   vignette: { kind: 'overlay' },
 };
+
+// chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape — a clean
+// white glow that warms in the mid halo and cools at the outer edge, with NO hard coloured border on
+// the glyph. It is just a stack of CSS drop-shadows (each follows the glyph alpha), so it needs no SVG
+// and no per-frame work: every pass is a 0-offset blur (radial, no directional fringe), from a tight
+// white core out to a wide cool halo. `chromaGlow:size` scales the bloom (default 1). Pure in n.
+export function chromaGlowFilter(size = 1) {
+  const s = size > 0 ? size : 1;
+  const r = (px) => (px * s).toFixed(1);
+  return [
+    `drop-shadow(0 0 ${r(3)}px rgba(255,255,255,0.95))`,  // tight white core bleed (softens the edge)
+    `drop-shadow(0 0 ${r(8)}px rgba(255,255,255,0.9))`,   // white bloom
+    `drop-shadow(0 0 ${r(18)}px rgba(255,246,225,0.75))`, // warm mid halo (diffuse, no edge)
+    `drop-shadow(0 0 ${r(40)}px rgba(198,220,255,0.6))`,  // cool soft outer halo
+  ].join(' ');
+}
 
 // ---- colour plumbing (pure) ----
 
@@ -176,8 +193,10 @@ export function resolveFilter(spec) {
   const preset = FILTER_PRESETS[name];
   if (!preset) return { filter: spec, overlay: null }; // raw CSS filter passthrough
 
-  if (preset.kind === 'css') // sepia
-    return { filter: `sepia(${Math.min(1, Math.max(0, nums[0] ?? 1))})`, overlay: null };
+  if (preset.kind === 'css') {
+    if (preset.mode === 'glow') return { filter: chromaGlowFilter(nums[0] ?? 1), overlay: null }; // chromaGlow
+    return { filter: `sepia(${Math.min(1, Math.max(0, nums[0] ?? 1))})`, overlay: null }; // sepia
+  }
 
   if (preset.kind === 'overlay') { // vignette
     const s = Math.min(1, Math.max(0, nums[0] ?? 0.45));

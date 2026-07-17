@@ -4,7 +4,7 @@ No templates. These are the words; you write the sentences. Counts are exact (fr
 Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 13 ambient
-shader looks, 21 kinetic
+shader looks, 24 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -95,12 +95,14 @@ Two roles:
   the DOM under it) — honest, and still perfectly composable. Knobs: `speed` · `intensity` · `colors`
   · `seed`. Reel: _wave3-reel demonstrates all eight overlay looks over live copy.
 
-## Kinetic type (`core/type.js`) — 21 presets × char/word/line splits
+## Kinetic type (`core/type.js`) — 24 presets × char/word/line splits
 
 `splitText(el, mode)` (preserves `<b>/<em>`) + `animateUnits(units, t, {preset, stagger, each})`:
 `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`
 `decode` (scramble-resolve) `tilt` `stretch` `gradient` (sweep) `highlight` (marker) `underline` `shadow`
-(poster lift) `riseClip` (baseline reveal). Reels: cuts-demo.mp4 + type-demo.mp4.
+(poster lift) `riseClip` (baseline reveal) `chroma` (chromatic-aberration split converging to crisp,
+leaves a hair of fringe) `swing` (hinge from the top edge, pendulum settle) `unfold` (rotateY open
+from edge-on). Reels: cuts-demo.mp4 + type-demo.mp4 + chromatic.mp4.
 - **Default feel (July 2026):** entrances (`up`/`down`/`slide`/`tilt`/`riseClip` + the `rise` anim) now
   use **`easeOutSettle`** — a gentle overshoot that lands *exactly* at rest (endpoints snapped, so no
   sub-pixel blur on hold). Premium settle by default vs the old flat cubic.
@@ -321,10 +323,15 @@ Structure is designed per product; nothing here decides your story for you.
 ## Colour-grade filter presets (any layer)
 
 `filter:` accepts a raw CSS filter string OR a named grade (core/filters.js): `duotone` · `tritone` ·
-`gradientMap` · `posterize` · `sepia` · `vignette`, with params after a colon
-(`duotone:#141414,#7cffd4`, `posterize:5`, `sepia:0.6`, `vignette:0.55`). Bare names derive their
-colours from the theme (ink shadows, accent highlights). Vignette is honestly an overlay, not a
-filter. SVG defs inject once at build, so the render stays pure in n.
+`gradientMap` · `posterize` · `sepia` · `vignette` · **`chromaGlow`**, with params after a colon
+(`duotone:#141414,#7cffd4`, `posterize:5`, `sepia:0.6`, `vignette:0.55`, `chromaGlow:4,9`). Bare names
+derive their colours from the theme (ink shadows, accent highlights). Vignette is honestly an overlay,
+not a filter. SVG defs inject once at build, so the render stays pure in n.
+- **`chromaGlow`** (`size`, default 1) is the "chromatic glow": a soft neon bloom in the layer's OWN
+  shape, just a stacked CSS `drop-shadow` chain (each follows the glyph alpha) — white → warm → cool
+  halos at growing radii, plus a 1px warm-top / cool-bottom fringe for the chromatic hint. No SVG, no
+  per-frame work. Put it on a `text` layer over a dark bg for a neon sign; composes with any entrance
+  preset (try `chroma`). `chromaGlow:1.5` for a bigger bloom on large display type.
 
 ## Caption styles
 
