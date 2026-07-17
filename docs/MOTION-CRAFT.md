@@ -50,7 +50,13 @@ you from.
   `letterbox/barn` cinematic openers · `riseBlur` premium slow beats · `jitter` alarm/glitch only.
 - **Stings**: `flash` energy cut · `burn/leak` warm brands · `ink/dissolve` editorial ·
   `glitch/scan/pixel` tech · `streak/warp` speed · `ripple` impact · `bokeh` dreamy divider ·
-  `confetti` wins/celebrations only · `grain` texture pulse.
+  `confetti` wins/celebrations only · `grain` texture pulse · `crossWarp` a wipe with grit (organic
+  brands where `wipe` is too clean; dark scenes) · `domainWarp` art/culture beats, one per film · `sdfIris`
+  playful reveal (the seeded shape is the personality; dark scenes) · `vortex` dramatic pivots, "everything
+  changes here" · `ridgedBurn` hotter burn for launches/records · `lens` premium product glamour (dark scenes, it is a light source) ·
+  `thermal` intensity/data beats, sparingly · `whipPan` momentum cut when the layout also moves
+  sideways · `chromaticSplit` impact with a tech accent (softer than `glitch`) · `dispersion`
+  spectral flourish for color/light stories only.
 - **Motion blur** (`"motionBlur": true` on a layer with a `motion` track): a velocity-derived streak on
   fast moves — the layer smears while travelling, snaps crisp when it settles. Reach for it on whip-ins,
   fast slides, and hard slams to sell speed and hide the discrete-frame stutter; a `0..1` number tunes

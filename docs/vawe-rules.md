@@ -59,7 +59,7 @@ JSON *is* the video.
 | `align` | string | Text align — one of: `left` `center` `right` |
 | `font` | string | Face — one of: `sans` `serif` `mono` |
 | `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset) — one of: `char` `word` `line` `path` |
-| `preset` | string | Kinetic preset (up/down/type/scale/blur/bounce/slide/wave/flip/fall/elastic/sk |
+| `preset` | string | Kinetic preset (split text) OR glow preset (bloom/halation/diffusion/rimLight/ |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
 | `stagger` | number | Per-unit delay (s) |
 | `each` | number | Per-unit duration (s) |
@@ -101,11 +101,11 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 `"cuts": [{ "t": 3.2, "style": "punch" }]` — `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
 
-## Shader stings (22)
+## Shader stings (32)
 
 `"stings": [{ "t": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]`
 
-`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`
+`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion`
 
 A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 

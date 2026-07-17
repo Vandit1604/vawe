@@ -3,7 +3,7 @@
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 
-**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 14 shader stings, 21 kinetic
+**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 21 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -52,7 +52,7 @@ Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scen
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/stings.js`) — 22 WebGL cover-the-cut effects
+## Shader stings (`core/stings.js`) — 32 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak — every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
@@ -62,7 +62,15 @@ rays, 4-tap motion smear) `pixel` (mosaic) `confetti` (seeded burst) `ripple` (i
 gl-transitions catalog into this overlay model (generative, tint/palette-aware): `wipe` (directional,
 seed picks the direction) `circle` (disc from centre) `blinds` (venetian bars) `squares` (staggered
 grid) `pinwheel` (angular arms) `doors` (panels close) `polka` (dot curtain) `swirl` (rotational
-streaks). Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
+streaks). And the **warp/chromatic family** (wave 2, all generative): `crossWarp` (a wipe whose
+edge is dragged by noise, seed picks the direction) `domainWarp` (liquid marble wash; takes
+`colors` for the veins like leak) `sdfIris` (iris wipe through a seeded shape: star/hex/diamond/
+triangle) `vortex` (ink spiral pulls into a dark eye) `ridgedBurn` (filament ember front sweeps
+up, hotter than burn) `lens` (flare: hot core + ghost discs + anamorphic streak) `thermal`
+(iron-bow heat veil, coarse sensor cells) `whipPan` (horizontal smear streaks race the cut)
+`chromaticSplit` (rgb-fringed shock ring, channels tear apart then reconverge) `dispersion`
+(a spectral prism band sweeps the frame). Peak them AT the cut; see MOTION-CRAFT for the
+when-to-use guide.
 - **JSON sting**: `{ t, fx, dur, seed, color?, intensity? }`. `color` (hex) recolours the effect by
   luminance (tint any effect to a brand accent — e.g. cobalt on a mono reel); omit for native colours.
   `intensity` scales strength (1 = default). The white/grey effects (flash/streak/scan/ripple/bokeh/

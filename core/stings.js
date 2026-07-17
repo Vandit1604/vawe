@@ -12,8 +12,12 @@
 // glitch (RGB slice bars), streak (radial zoom-blur rays), pixel (mosaic flicker),
 // confetti, ripple, scan, warp, bokeh; and shape-wipes adapted from the MIT gl-transitions
 // catalog (glslio/gl-transitions) into this overlay model: wipe, circle, blinds, squares,
-// pinwheel, doors, polka, swirl. All generative (uv/progress/seed only) — palette+tint aware.
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl'];
+// pinwheel, doors, polka, swirl. Wave-2 warp/chromatic family: crossWarp (noise-smeared
+// directional veil), domainWarp (liquid marble wash), sdfIris (seeded shape iris), vortex
+// (ink spiral), ridgedBurn (filament ember front), lens (flare + ghosts), thermal (iron-bow
+// heat veil), whipPan (horizontal smear), chromaticSplit (rgb-fringed shock ring),
+// dispersion (prism band). All generative (uv/progress/seed only) — palette+tint aware.
+export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion'];
 
 const FRAG = `
 precision highp float;
@@ -176,6 +180,107 @@ void main(){
     float r = length(d);
     float a0 = atan(d.y, d.x) + (1.0 - smoothstep(0.0, 0.7, r)) * bell * 6.2831;
     c = vec4(vec3(1.0), pow(0.5 + 0.5*sin(a0 * 8.0), 4.0) * smoothstep(0.85, 0.0, r) * bell * 0.6);
+  } else if (u_fx == 22) {                             /* crossWarp — noise-smeared directional veil */
+    float k = floor(hash(vec2(u_seed, 5.0)) * 4.0);   /* seed picks one of 4 cardinal directions */
+    vec2 nd = k < 1.0 ? vec2(1.0, 0.0) : k < 2.0 ? vec2(-1.0, 0.0) : k < 3.0 ? vec2(0.0, 1.0) : vec2(0.0, -1.0);
+    float w = fbm(uv*4.0 + u_seed);
+    float proj = dot(uv - 0.5, nd) + 0.5 + (w - 0.5)*0.35;   /* the wipe edge is dragged by noise */
+    float edge = pp * 1.5 - 0.25;
+    float a = smoothstep(edge + 0.22, edge, proj);
+    float rim = smoothstep(0.10, 0.0, abs(proj - edge - 0.11));
+    c = vec4(vec3(1.0), (a*0.92 + rim*0.5) * bell);
+  } else if (u_fx == 23) {                             /* domainWarp — liquid marble wash (fbm through fbm) */
+    vec2 q = vec2(fbm(uv*3.0 + u_seed), fbm(uv*3.0 + u_seed + 7.3));
+    float r = fbm(uv*3.0 + 3.5*q + u_seed);
+    float a = smoothstep(r - 0.22, r + 0.22, bell*1.25);
+    float rim = smoothstep(0.16, 0.0, abs(r - bell*1.25));
+    vec3 hue;                                          /* marble veins take your palette, else seed hues */
+    if (u_palN > 0) { hue = palAt(int(mod(floor(r*4.0), float(u_palN)))); }
+    else { hue = 0.5 + 0.5*cos(6.2831*(r*0.5 + hash(vec2(u_seed, 9.1)) + vec3(0.0, 0.33, 0.67))); }
+    c = vec4(mix(vec3(0.98), hue, 0.35 + 0.5*rim), a*0.95);
+  } else if (u_fx == 24) {                             /* sdfIris — iris wipe through a seeded shape */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float ang = atan(d.y, d.x);
+    float k = floor(hash(vec2(u_seed, 11.0)) * 4.0);  /* star / hex / diamond / triangle */
+    float n = k < 1.0 ? 5.0 : k < 2.0 ? 6.0 : k < 3.0 ? 4.0 : 3.0;
+    float pinch = k < 1.0 ? 0.35 : 0.12;              /* star lobes cut deep, polygons stay taut */
+    float rr = length(d) * (1.0 + pinch * (0.5 + 0.5*cos(ang*n + u_seed)));
+    float front = pp * 1.1;
+    float rim = smoothstep(0.05, 0.0, abs(rr - front));
+    c = vec4(vec3(1.0), (smoothstep(front + 0.07, front, rr)*0.95 + rim*0.5) * bell);
+  } else if (u_fx == 25) {                             /* vortex — ink spiral pulls into a dark eye */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float r = length(d);
+    float twist = bell * 7.0 * (1.0 - smoothstep(0.0, 0.9, r));
+    float a0 = atan(d.y, d.x) + twist + u_seed;
+    float arms = pow(0.5 + 0.5*sin(a0*3.0 + r*14.0), 3.0);
+    float eye = smoothstep(0.30*bell, 0.0, r);
+    float cover = smoothstep(0.9, 0.15, r) * bell;
+    vec3 col = mix(vec3(0.02, 0.02, 0.03), vec3(0.85, 0.9, 1.0), arms*0.5 + eye*0.6);
+    c = vec4(col, (arms*0.7 + eye*0.9) * cover);
+  } else if (u_fx == 26) {                             /* ridgedBurn — filament ember front sweeps up */
+    float n = fbm(uv*4.0 + u_seed);
+    float ridge = 1.0 - abs(2.0*n - 1.0);             /* fold the noise → sharp filaments */
+    float field = (1.0 - uv.y)*0.6 + ridge*0.4;
+    float d = field - (1.3*pp - 0.1);
+    float burned = smoothstep(0.04, -0.02, d);
+    float rim = smoothstep(0.09, 0.0, abs(d));
+    float fil = pow(ridge, 4.0) * rim;                /* white-hot filament cores in the front */
+    vec3 col = mix(vec3(0.04, 0.01, 0.0), vec3(1.0, 0.55, 0.1), rim) + vec3(1.0, 0.9, 0.6)*fil;
+    c = vec4(col, max(burned*bell, rim*bell*0.95));
+  } else if (u_fx == 27) {                             /* lens — flare: hot core, ghosts down the axis, anamorphic streak */
+    vec2 lp = vec2(0.2 + 0.6*hash(vec2(u_seed, 1.0)), 0.25 + 0.5*hash(vec2(u_seed, 2.0)));
+    vec2 d = uv - lp; d.x *= u_res.x/u_res.y;
+    float core = smoothstep(0.22, 0.0, length(d));
+    float streakH = smoothstep(0.012 + 0.05*core, 0.0, abs(uv.y - lp.y)) * smoothstep(0.75, 0.1, abs(uv.x - lp.x));
+    vec2 axis = vec2(0.5, 0.5) - lp;                  /* ghost discs march through frame centre */
+    float ghosts = 0.0;
+    for (int i = 1; i <= 4; i++) {
+      float fi = float(i);
+      vec2 gd = uv - (lp + axis * 0.55 * fi); gd.x *= u_res.x/u_res.y;
+      float grad = 0.02 + 0.022*fi;
+      ghosts += smoothstep(grad, grad*0.45, length(gd)) * (0.45 - 0.07*fi);
+    }
+    vec3 col = vec3(1.0)*core + vec3(0.6, 0.8, 1.0)*streakH + vec3(0.9, 0.7, 1.0)*ghosts;
+    c = vec4(col, (core*0.9 + streakH*0.6 + ghosts*0.8) * bell);
+  } else if (u_fx == 28) {                             /* thermal — iron-bow heat veil, coarse cells */
+    vec2 cell = floor(uv * vec2(96.0*u_res.x/u_res.y, 96.0)) / 96.0;
+    float heat = fbm(cell*3.0 + u_seed) * (0.6 + 0.55*bell);
+    vec3 col = mix(vec3(0.05, 0.0, 0.12), vec3(0.55, 0.0, 0.55), smoothstep(0.0, 0.35, heat));
+    col = mix(col, vec3(0.95, 0.35, 0.05), smoothstep(0.35, 0.62, heat));
+    col = mix(col, vec3(1.0, 0.85, 0.25), smoothstep(0.62, 0.8, heat));
+    col = mix(col, vec3(1.0), smoothstep(0.8, 0.95, heat));
+    float sweep = smoothstep(0.05, 0.0, abs(uv.y - (1.0 - pp)));   /* sensor line rides the cut */
+    c = vec4(col + vec3(0.2)*sweep, (0.85*smoothstep(0.15, 0.45, heat) + sweep*0.3) * bell);
+  } else if (u_fx == 29) {                             /* whipPan — horizontal smear streaks race the cut */
+    float dir = hash(vec2(u_seed, 4.0)) < 0.5 ? -1.0 : 1.0;
+    float n1 = vnoise(vec2(uv.x*2.2 - dir*pp*7.0, uv.y*90.0) + u_seed);
+    float n2 = vnoise(vec2(uv.x*5.0 - dir*pp*11.0, uv.y*160.0) + u_seed*1.7);
+    float streaks = 0.6*n1 + 0.4*n2;                  /* low-freq x, high-freq y = long smears */
+    float body = smoothstep(0.35, 0.85, streaks);
+    c = vec4(vec3(0.92, 0.95, 1.0)*(0.55 + 0.45*streaks), body * bell * 0.9);
+  } else if (u_fx == 30) {                             /* chromaticSplit — rgb-fringed shock ring + edge fringe */
+    float k = hash(vec2(u_seed, 6.0)) * 6.2831;
+    vec2 off = vec2(cos(k), sin(k)) * 0.035 * bell;   /* channels tear apart mid-cut, reconverge */
+    vec2 d0 = uv - 0.5; d0.x *= u_res.x/u_res.y;
+    float edge = pp * 0.9;
+    float rr = smoothstep(0.05, 0.0, abs(length(d0 + off) - edge));
+    float gg = smoothstep(0.05, 0.0, abs(length(d0) - edge));
+    float bb = smoothstep(0.05, 0.0, abs(length(d0 - off) - edge));
+    float vr = smoothstep(0.45, 0.95, length(d0 + off*3.0));
+    float vg = smoothstep(0.45, 0.95, length(d0));
+    float vb = smoothstep(0.45, 0.95, length(d0 - off*3.0));
+    vec3 col = vec3(rr + vr*0.6, gg + vg*0.6, bb + vb*0.6);
+    c = vec4(col, (max(max(rr, gg), bb) + max(max(vr, vg), vb)*0.45) * bell);
+  } else if (u_fx == 31) {                             /* dispersion — a spectral prism band sweeps the frame */
+    float k = floor(hash(vec2(u_seed, 8.0)) * 2.0);   /* seed picks the sweep direction */
+    float proj = (k < 1.0 ? (uv.x + uv.y*0.35) : (1.0 - uv.x + uv.y*0.35)) / 1.35;
+    float band = proj - (pp*1.5 - 0.25);
+    float w = fbm(vec2(proj*6.0, uv.y*3.0) + u_seed);
+    float inb = smoothstep(0.3, 0.0, abs(band + (w - 0.5)*0.18));
+    vec3 spec = 0.5 + 0.5*cos(6.2831*((band*3.0 + w*0.4) + vec3(0.0, 0.33, 0.67)));
+    float shard = pow(0.5 + 0.5*sin((proj + w*0.2)*40.0), 3.0);   /* fine prism shards inside the band */
+    c = vec4(mix(spec, vec3(1.0), 0.25), inb * (0.5 + 0.5*shard) * bell);
   }
   // optional tint: recolour by luminance → u_tint (amt 0 = untouched); u_intensity scales strength
   if (u_tintAmt > 0.0) {

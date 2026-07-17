@@ -225,7 +225,17 @@
             "pinwheel",
             "doors",
             "polka",
-            "swirl"
+            "swirl",
+            "crossWarp",
+            "domainWarp",
+            "sdfIris",
+            "vortex",
+            "ridgedBurn",
+            "lens",
+            "thermal",
+            "whipPan",
+            "chromaticSplit",
+            "dispersion"
           ]
         },
         "dur": {

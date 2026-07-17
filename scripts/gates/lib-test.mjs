@@ -14,6 +14,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js
 import { presetSpec, pulseOpacity, alphaMix, liftWhite } from '../../core/layers/glow.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
+import { SHADER_FX } from '../../core/stings.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -405,6 +406,30 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('captions: weightShift dims via color-mix, never opacity', (() => { const st = CAP_STYLES.weightShift(1, false); return st.opacity === undefined && st.color.includes('color-mix'); })());
   ok('captions: weightShift bump settles to 1', CAP_STYLES.weightShift(1, true).transform === 'scale(1.000)');
   ok('captions: clipWipe hidden at 0, full at 1', CAP_STYLES.clipWipe(0).clipPath.includes('100.00%') && CAP_STYLES.clipWipe(1).clipPath.includes('0.00%'));
+}
+
+// ---- shader stings ----
+// The overlay itself is GL, so JS asserts the contract around it: one name list, one shader branch
+// per name, and the schema exposing exactly that vocabulary — the three surfaces that can drift.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
+  ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length === 32 && new Set(SHADER_FX).size === SHADER_FX.length);
+  const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('const VERT'));
+  const noBranch = SHADER_FX.map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
+  ok(`stings: FRAG has a branch for every effect${noBranch.length ? ' — missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok('stings: no shader branch past the end of the list', !frag.includes(`u_fx == ${SHADER_FX.length}`));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const en = schema.fields.stings.item.fx.enum;
+  ok('stings: schema fx enum is exactly SHADER_FX, in order', JSON.stringify(en) === JSON.stringify(SHADER_FX));
+  // every branch keys off pp/bell (progress) — a branch that ignores progress would freeze mid-cut
+  const wave2 = ['crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion'];
+  const frozen = wave2.filter((name) => {
+    const i = SHADER_FX.indexOf(name);
+    const next = SHADER_FX[i + 1] ? frag.indexOf(`u_fx == ${i + 1}`) : frag.length;
+    const body = frag.slice(frag.indexOf(`u_fx == ${i}`), next);
+    return !(body.includes('pp') || body.includes('bell'));
+  });
+  ok(`stings: wave-2 branches all depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
