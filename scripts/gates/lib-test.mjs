@@ -6,6 +6,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
+import { safeArea, DESTINATION_NAMES, nativeAspect } from '../../core/safe.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 
@@ -239,6 +240,53 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('easing sine family present', ['easeInSine', 'easeOutSine', 'easeInOutSine'].every((k) => typeof EASINGS[k] === 'function'));
   ok('easeOutSine is gentler than easeOutQuint early', EASINGS.easeOutSine(0.25) < EASINGS.easeOutQuint(0.25));
   ok('easeInOutSine symmetric', Math.abs(EASINGS.easeInOutSine(0.5) - 0.5) < 1e-9);
+}
+
+// ---- the safe area ----
+// The point of core/safe.js is that ONE function answers "where may content live", so the asserts that
+// matter are the relationships the four old tables got wrong, not the arithmetic.
+{
+  const A = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350] };
+
+  ok('safe: unknown destination throws (never a silent default box)',
+    (() => { try { safeArea(1080, 1920, 'nope'); return false; } catch { return true; } })());
+
+  // web = margin only. This is the default precisely so that a portrait canvas does NOT inherit a
+  // phone feed's caption strip just for being taller than it is wide — the bug this module exists for.
+  const web = safeArea(1080, 1920, 'web');
+  ok('safe: web is symmetric margin only', web.x0 === web.margin && web.y0 === web.margin
+    && web.x1 === 1080 - web.margin && web.y1 === 1920 - web.margin);
+  ok('safe: margin is 6% of the SHORT edge at every ratio',
+    Object.values(A).every(([w, h]) => safeArea(w, h, 'web').margin === Math.round(Math.min(w, h) * 0.06)));
+
+  // The regression that started this: 1:1 and 4:5 were classed "portrait" and given TikTok's 240/580,
+  // reserving 76% of a square's height. A square destined for a feed must keep essentially all of it.
+  const sq = safeArea(1080, 1080, 'feed');
+  ok(`safe: 1:1 feed keeps its frame (was 24% usable, now ${(100 * (sq.y1 - sq.y0) / 1080).toFixed(0)}%)`,
+    (sq.y1 - sq.y0) / 1080 > 0.85);
+  ok('safe: 4:5 feed keeps its frame', (() => { const s = safeArea(1080, 1350, 'feed'); return (s.y1 - s.y0) / 1350 > 0.85; })());
+
+  // tiktok must still reproduce the repo's existing portrait box — those are the only platform numbers
+  // with provenance, so carrying them over as fractions must not quietly change them.
+  const tt = safeArea(1080, 1920, 'tiktok');
+  ok(`safe: tiktok 9:16 keeps the historic chrome (y0=${tt.y0} y1=${tt.y1} x1=${tt.x1})`,
+    tt.y0 === 240 && tt.y1 === 1340 && tt.x1 === 900);
+  ok('safe: tiktok reserves more than web (chrome is real)', tt.y1 < web.y1 && tt.x1 < web.x1);
+
+  // max(), never sum: a platform rail already reaches the frame edge, so adding margin double-counts.
+  ok('safe: chrome and margin combine with max, not +',
+    tt.x0 === tt.margin && tt.y0 === Math.round(1920 * 0.125));
+
+  // Every destination must produce a box that is inside the canvas and non-empty at its native ratio.
+  const bad = [];
+  for (const name of DESTINATION_NAMES) {
+    const [w, h] = A[nativeAspect(name) || '16:9'];
+    const s = safeArea(w, h, name);
+    if (!(s.x0 >= 0 && s.y0 >= 0 && s.x1 <= w && s.y1 <= h && s.x1 > s.x0 && s.y1 > s.y0)) bad.push(name);
+  }
+  ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ' — ' + bad.join(', ') : ''}`, bad.length === 0);
+  ok('safe: nativeAspect is null for the canvas-agnostic ones',
+    nativeAspect('web') === null && nativeAspect('feed') === null && nativeAspect('tiktok') === '9:16');
 }
 
 // ---- the block registry ----

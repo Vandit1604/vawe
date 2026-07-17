@@ -19,20 +19,16 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS } from '../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
 const OUT = '/tmp/audit';
 fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
 
-const SAFE = { x0: 60, y0: 240, x1: 900, y1: 1340 };            // portrait safe box (matches verify/run.js)
-const SAFE_LAND = { x0: 90, y0: 60, x1: 1830, y1: 1020 };       // landscape safe box (formats pad ~150px)
 const MIN_GAP = 8;                                     // px; tighter than this between siblings = warn (cramped)
 const SAMPLES = 14;                                    // frames sampled across the timeline
 
-// canvas sizes, kept in step with ASPECTS in core/boot.js — the engine is the authority on what a
-// ratio means in pixels; this table only has to agree with it.
-const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
 
 const argv = process.argv.slice(2);
 const aspectAt = argv.findIndex((a) => a === '--aspect' || a.startsWith('--aspect='));
@@ -66,12 +62,13 @@ function dimsFor(key, cfg) {
   return cfg.orientation === 'landscape' ? [1920, 1080] : [1080, 1920];
 }
 
-// safeFor(vw, vh): 9:16 and 16:9 get the canonical tight boxes. 9:16's is deliberately NOT symmetric —
-// it reserves the right rail and the bottom caption strip that Reels/TikTok/Shorts paint over the frame.
-// Feed ratios (1:1, 4:5) carry no such chrome, so they get a plain proportional inset.
-const safeFor = (vw, vh) => (vw === 1920 && vh === 1080) ? SAFE_LAND
-  : (vw === 1080 && vh === 1920) ? SAFE
-  : { x0: Math.round(vw * 0.05), y0: Math.round(vh * 0.055), x1: Math.round(vw * 0.95), y1: Math.round(vh * 0.945) };
+// The safe box comes from core/safe.js — the SAME function boot.js places against and writes to
+// --safe-* for the debug overlay. This file used to carry its own tables (a portrait box, a landscape
+// box, and a proportional fallback for everything else), which is how the checker ended up rejecting
+// content the engine's own `pin:"bottom"` had just placed. A gate that disagrees with the thing it
+// gates is not a gate. The chrome depends on where the video is going, so the scene's `destination`
+// decides it; `web` (margin only) is the default.
+const safeFor = (vw, vh, cfg) => safeArea(vw, vh, cfg.destination || 'web');
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4' };
@@ -153,20 +150,33 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
     return (b.width > 1 && b.height > 1) ? b : null;
   };
   const FW = window.innerWidth, FH = window.innerHeight;
-  for (const el of document.querySelectorAll('.hs-layer')) {
-    if (!vis(el)) continue;
+  // `li` = the layer's index in document order. It is the only STABLE per-element identity available:
+  // the walk below is over every .hs-layer whether visible or not, so an index means the same element
+  // on every frame. The id/class label alone is not an identity — every text layer is `hs-text` — and
+  // de-duping on it collapsed N distinct off-frame layers into one reported failure.
+  [...document.querySelectorAll('.hs-layer')].forEach((el, li) => {
+    if (!vis(el)) return;
     const b = el.getBoundingClientRect();
-    if (b.width <= 1 || b.height <= 1) continue;
-    if (b.width >= FW * 0.9 && b.height >= FH * 0.9) continue; // full-bleed backdrop — meant to bleed
+    if (b.width <= 1 || b.height <= 1) return;
+    if (b.width >= FW * 0.9 && b.height >= FH * 0.9) return; // full-bleed backdrop — meant to bleed
     const s = getComputedStyle(el);
     const id = el.id || (typeof el.className === 'string' ? (el.className.split(' ').filter((c) => c !== 'hs-layer')[0] || 'layer') : el.tagName);
     const t = (el.textContent || '').trim().slice(0, 18);
     if ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1))
-      issues.push({ kind: 'overflow', a: id, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
-    const sb = (!paintsBox(s) && inkRect(el)) || b;   // measure what's visible: ink for bare text, box otherwise
+      issues.push({ kind: 'overflow', a: id, li, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
+    // Measure what's visible, per axis, because the two axes lie in opposite directions:
+    //   HORIZONTAL — use the ink. A centred text layer needs a `w` (pin centres a box), and that `w` is
+    //     mostly empty slack; measuring the container flags empty air as off-frame.
+    //   VERTICAL — use the border box. The box already hugs the text, whereas the ink is a LINE box and
+    //     includes the font's full ascent/descent: with .hs-text's line-height 1.04 (tighter than the
+    //     font's natural metrics) the ink overhangs the box by ~4px at size 30, scaling with size. That
+    //     overhang is half-leading, not glyphs, so measuring it would fail a layer sitting exactly on
+    //     the safe line for content the viewer cannot see.
+    const ink = !paintsBox(s) && inkRect(el);
+    const sb = ink ? { left: ink.left, right: ink.right, top: b.top, bottom: b.bottom } : b;
     if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
-      issues.push({ kind: 'safe', a: id, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
-  }
+      issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
+  });
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
   // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
   const MIN_IMG = window.innerHeight * 0.05;
@@ -416,7 +426,7 @@ for (const aspectKey of askedAspects) {
   // Audit at the video's REAL dimensions. Getting this wrong (auditing a 16:9 scene at portrait
   // 1080x1920) mis-fires safe-zone and the tiny-text floor on every landscape video.
   const [vw, vh] = dimsFor(aspectKey, cfg);
-  const safe = safeFor(vw, vh);
+  const safe = safeFor(vw, vh, cfg);
   await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 1 });
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
@@ -467,8 +477,13 @@ for (const aspectKey of askedAspects) {
   }
   const hard = all.filter((i) => HARD.has(i.kind));
   const warn = all.filter((i) => !HARD.has(i.kind));
-  // de-dup repeated issues (same kind+elements) to the first frame they appear on
-  const uniq = (list) => { const seen = new Set(), out = []; for (const i of list) { const k = `${i.kind}|${i.a}|${i.b || ''}`; if (!seen.has(k)) { seen.add(k); out.push(i); } } return out; };
+  // De-dup repeated issues to the first frame they appear on: the SAME element failing on 12 sampled
+  // frames is one bug, not twelve. Identity is the layer index (`li`) where we have it, because the
+  // label is a class name — `hs-text` for every text layer — so keying on it merged unrelated layers
+  // and reported 1 of 4 real off-frame failures. Fall back to label+text for issues that carry no
+  // index (the critical-element checks, whose `a`/`b` are already per-element ids).
+  const key = (i) => `${i.kind}|${i.li ?? `${i.a}|${i.t || ''}`}|${i.b || ''}`;
+  const uniq = (list) => { const seen = new Set(), out = []; for (const i of list) { const k = key(i); if (!seen.has(k)) { seen.add(k); out.push(i); } } return out; };
   const hu = uniq(hard), wu = uniq(warn);
   const label = `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`;
   rows.push({ m: label, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });

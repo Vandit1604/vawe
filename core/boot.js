@@ -5,6 +5,7 @@
 import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
+import { safeArea, ASPECTS } from './safe.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
@@ -20,7 +21,6 @@ const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return 
 // ---- multi-aspect: canvas sizes + a pure relative-coordinate resolver ----
 // One source renders at any platform ratio. Absolute px coords pass through unchanged (back-compat);
 // relative coords resolve against THIS canvas's W,H so the SAME layer lands right in every aspect.
-const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
 
 // resolveCoords(data, W, H): mutate top-level layer x/y/w/h from relative forms to px. Forms:
 //   number            → px (unchanged)
@@ -28,21 +28,35 @@ const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080
 //   "center"          → centered given the layer's size
 //   "left/right/top/bottom" → anchored to that edge inside a per-aspect safe inset
 //   pin: "center|top|bottom|left|right|top-left|…" → shorthand for the x/y edge pair
-export function resolveCoords(data, W, H) {
-  const inset = Math.round(Math.min(W, H) * 0.06); // platform safe margin
-  // keywords place a layer of `size` on a canvas line: edges (inside safe inset), true center, OPTICAL
-  // center (~46% — reads centered for a hero), and the two rule-of-thirds power lines (1/3, 2/3).
-  const kw = (v, dim, size) =>
+export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
+  const inset = safe.margin;
+  // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
+  //   • EDGES (left/right/top/bottom) resolve against the SAFE BOX. This is the invariant that makes
+  //     the system honest: `pin:"bottom"` lands on the safe box's bottom, so an edge pin can never
+  //     produce a safe-zone failure. It used to resolve against a 6% inset while the audit checked a
+  //     different box entirely, so the engine placed content 550px inside the zone the gate rejected.
+  //   • CENTRE / OPTICAL / THIRDS resolve against the CANVAS, because centred means centred. The safe
+  //     box is deliberately asymmetric on a phone feed (the rail is only on the right); centring in it
+  //     would push every hero off the visual centre to dodge chrome the viewer can see past anyway.
+  //     If centred content collides with chrome, that is a composition call, and the audit says so.
+  // `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
+  // text-height fallback, and ONLY the far edges (right/bottom) use it — they are the two keywords that
+  // must subtract a size to work at all, so with size 0 they placed the layer's NEAR edge on the far
+  // safe line and hung the whole layer outside it. (`pin:"bottom"` set top=1340 on a 1340 safe bottom.)
+  // centre/optical/thirds keep using the raw `size`: feeding them `est` would shift every centred layer
+  // in the repo by half a line, and a missing `w` there is already reported as `degenerate-pin` by the
+  // audit rather than papered over with a guess.
+  const kw = (v, dim, size, lo, hi, est) =>
     v === 'center' ? (dim - size) / 2
       : v === 'optical' ? dim * 0.46 - size / 2
       : v === 'third1' ? dim / 3 - size / 2
       : v === 'third2' ? (2 * dim) / 3 - size / 2
-      : (v === 'left' || v === 'top') ? inset
-      : (v === 'right' || v === 'bottom') ? dim - inset - size : null;
-  const num = (v, dim, size) => {
+      : (v === 'left' || v === 'top') ? lo
+      : (v === 'right' || v === 'bottom') ? hi - est : null;
+  const num = (v, dim, size, lo, hi, est = size) => {
     if (typeof v !== 'string') return v;
     const s = v.trim();
-    const k = kw(s, dim, size); if (k != null) return Math.round(k);
+    const k = kw(s, dim, size, lo, hi, est); if (k != null) return Math.round(k);
     const m = s.match(/^(-?[\d.]+)%\s*([+-]\s*[\d.]+)?$/);
     if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
     const n = parseFloat(s); return isNaN(n) ? v : n;
@@ -58,19 +72,27 @@ export function resolveCoords(data, W, H) {
     if (!isObj(L)) continue;
     if (L.pin && PIN[L.pin]) { const [px, py] = PIN[L.pin]; if (L.x == null) L.x = px; if (L.y == null) L.y = py; }
     // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
+    // The grid spans the SAFE box, not the canvas, for the same reason the edge keywords do: a column
+    // layout that runs under a platform's rail is not a layout.
     if (L.col != null) {
-      const m = inset, cols = L.cols || 12, g = L.gutter ?? Math.round(inset * 0.5);
-      const colW = (W - 2 * m - (cols - 1) * g) / cols;
+      const cols = L.cols || 12, g = L.gutter ?? Math.round(inset * 0.5);
+      const gridW = safe.x1 - safe.x0;
+      const colW = (gridW - (cols - 1) * g) / cols;
       const mm = String(L.col).match(/^(\d+)(?:-(\d+))?$/);
       if (mm) { const c1 = +mm[1], c2 = mm[2] ? +mm[2] : c1;
-        L.x = Math.round(m + (c1 - 1) * (colW + g));
+        L.x = Math.round(safe.x0 + (c1 - 1) * (colW + g));
         L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g); }
     }
-    if (typeof L.w === 'string') L.w = num(L.w, W, 0);
-    if (typeof L.h === 'string') L.h = num(L.h, H, 0);
+    if (typeof L.w === 'string') L.w = num(L.w, W, 0, safe.x0, safe.x1);
+    if (typeof L.h === 'string') L.h = num(L.h, H, 0, safe.y0, safe.y1);
     const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
-    if (L.x != null) L.x = num(L.x, W, w);
-    if (L.y != null) L.y = num(L.y, H, h);
+    // A text layer rarely declares `h`, so estimate it from the font size for the bottom edge. size*1.2
+    // is not a new invention: formats/scene/scene.html uses exactly this fallback to anchor layers to
+    // each other. There is deliberately NO equivalent for width — a string's rendered width cannot be
+    // known before layout, so `pin:"right"` without `w` stays an authoring error the audit reports.
+    const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
+    if (L.x != null) L.x = num(L.x, W, w, safe.x0, safe.x1);
+    if (L.y != null) L.y = num(L.y, H, h, safe.y0, safe.y1, hEst);
   }
 }
 
@@ -225,8 +247,25 @@ export async function boot(build) {
     const [width, height] = ASPECTS[aspectKey] || (landscape ? [1920, 1080] : [1080, 1920]);
     document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
     document.documentElement.dataset.aspect = aspectKey;
+    // The canvas is set HERE, from the aspect we just resolved, never inferred from data-orient. It used
+    // to come only from tokens.css, which keys on portrait/landscape — a binary that cannot describe five
+    // ratios. So 1:1 and 4:5 got a 1080x1920 stage and 4:3 got a 1920x1080 one: the stage was not the
+    // frame, it was a standard stage with the overflow cropped off. Anything anchored to the stage rather
+    // than to a layer (a background, the .hs-cap bar at bottom:300px) landed outside the visible frame.
+    const rootStyle = document.documentElement.style;
+    rootStyle.setProperty('--vw', width + 'px');
+    rootStyle.setProperty('--vh', height + 'px');
+    // ONE safe area, from core/safe.js, written to CSS so the ?debug=safe overlay draws the SAME box the
+    // audit checks and resolveCoords places against. `destination` names the chrome (a phone feed paints
+    // over the frame; a website does not) and defaults to `web`, so a tall canvas no longer inherits
+    // TikTok's caption strip merely for being tall.
+    const safe = safeArea(width, height, data.destination || 'web');
+    rootStyle.setProperty('--safe-top', safe.y0 + 'px');
+    rootStyle.setProperty('--safe-bottom', (height - safe.y1) + 'px');
+    rootStyle.setProperty('--safe-left', safe.x0 + 'px');
+    rootStyle.setProperty('--safe-right', (width - safe.x1) + 'px');
     if (params.get('alpha')) document.documentElement.classList.add('alpha'); // transparent overlay export
-    resolveCoords(data, width, height); // relative coords (%, center, edge, pin) → px for THIS canvas
+    resolveCoords(data, width, height, safe); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a

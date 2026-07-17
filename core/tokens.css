@@ -4,22 +4,24 @@
    --font-* and palette var onto :root, and core/theme-contract.js guarantees a theme is complete
    before a single frame renders. A missing theme key is a loud error, never a fallback pixel. */
 
-/* ---------- frame geometry (portrait default; boot sets data-orient from data.orientation) ---------- */
+/* ---------- frame geometry — PRE-BOOT FALLBACK ONLY ----------
+   boot() overwrites all six of these on :root before the first frame: --vw/--vh from the resolved
+   aspect, --safe-* from core/safe.js (the single safe-area definition). They live here only so the
+   page is not zero-sized in the instant before boot runs, and for fragment previews that never boot.
+
+   They used to be the real source, keyed on [data-orient], and that was the bug. data-orient is
+   `width > height` — a binary that cannot describe five ratios. 1:1 and 4:5 both resolved to
+   "portrait", so a square got a 1080x1920 stage (cropped to 1080 tall) and TikTok's 240/580 safe
+   inset, which reserved 76% of its height. Do NOT reintroduce a per-orientation table here: the
+   canvas is a function of the aspect, and the safe area is a function of the aspect AND the
+   destination, neither of which CSS can see. */
 :root {
   --vw: 1080px;
   --vh: 1920px;
-  --safe-top: 240px;
-  --safe-bottom: 580px;
-  --safe-left: 60px;
-  --safe-right: 180px;
-}
-:root[data-orient="landscape"] {
-  --vw: 1920px;
-  --vh: 1080px;
-  --safe-top: 80px;
-  --safe-bottom: 90px;
-  --safe-left: 120px;
-  --safe-right: 120px;
+  --safe-top: 65px;
+  --safe-bottom: 65px;
+  --safe-left: 65px;
+  --safe-right: 65px;
 }
 
 /* determinism: every frame is set explicitly — kill all time-based motion */

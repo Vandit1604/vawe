@@ -8,12 +8,17 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
+import { safeArea, ASPECTS } from '../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
 const OUT = path.join(repoRoot, 'verify', 'out');
 fs.mkdirSync(OUT, { recursive: true });
-const SAFE = { x0: 60, y0: 240, x1: 900, y1: 1340 };
+// The canvas and the safe box come from the SAMPLE, via core/safe.js — the same function boot.js
+// places against and verify/audit.mjs checks with. This file used to hardcode a portrait 1080x1920
+// viewport, a portrait safe box, and a 1080x1920 integrity assert, so it could only ever be right for
+// one of the five aspects the engine renders, and it was a fourth independent opinion on "safe".
+const dimsFor = (cfg) => ASPECTS[cfg.aspect] || (cfg.orientation === 'landscape' ? [1920, 1080] : [1080, 1920]);
 
 const modules = process.argv.slice(2).length ? process.argv.slice(2)
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
@@ -64,6 +69,9 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', 
 for (const m of modules) {
   const sample = `formats/${m}/sample.json`;
   if (!fs.existsSync(path.join(repoRoot, sample))) { add('exists', m, false, 'no sample.json'); continue; }
+  const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')); } catch { return {}; } })();
+  const [VW, VH] = dimsFor(cfg);
+  const SAFE = safeArea(VW, VH, cfg.destination || 'web');
   const out = path.join(OUT, `${m}.mp4`);
   console.log(`\n=== ${m} : render ===`);
   const r = spawnSync('go', ['run', './cmd/render', '--module', m, '--data', sample, '--out', out], { cwd: repoRoot, stdio: 'inherit' });
@@ -71,7 +79,7 @@ for (const m of modules) {
 
   // live scene for meta + safe-zone bboxes
   const page = await browser.newPage();
-  await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+  await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const meta = await page.evaluate(() => window.__engine.meta);
@@ -79,9 +87,9 @@ for (const m of modules) {
 
   // integrity
   const fp = ffprobe(out);
-  const v1 = fp.w === 1080 && fp.h === 1920 && Math.abs(fp.fps - 30) < 0.1 && fp.codec === 'h264'
+  const v1 = fp.w === VW && fp.h === VH && Math.abs(fp.fps - 30) < 0.1 && fp.codec === 'h264'
     && Math.abs(fp.duration - meta.duration) <= 0.3 && !!fp.audioCodec;
-  add('integrity', m, v1, `${fp.w}x${fp.h} ${fp.fps}fps ${fp.codec} ${fp.duration}s/${meta.duration.toFixed(2)} audio=${fp.audioCodec}`);
+  add('integrity', m, v1, `${fp.w}x${fp.h} (want ${VW}x${VH}) ${fp.fps}fps ${fp.codec} ${fp.duration}s/${meta.duration.toFixed(2)} audio=${fp.audioCodec}`);
 
   // safe-zone: every [data-layer=critical] bbox inside SAFE across 5 frames
   let safe = true; const bad = [];
