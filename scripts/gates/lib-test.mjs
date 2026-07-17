@@ -6,9 +6,14 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect } from '../../core/safe.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -326,6 +331,23 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     catch { return false; }
   });
   ok(`registry: every block is deterministic${drift.length ? ' — ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
+
+  // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
+  // would mean ~4 minutes of rendering plus Chromium, ffmpeg and Go inside a node:22-alpine image, to
+  // buy only what this assert buys for free. The cost of committing derived output is that it can go
+  // stale silently — add a block, forget `make blocks-media`, ship a card with a broken image. So the
+  // gate stands in for the build step: every registry entry must have both its still and its clip.
+  // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
+  {
+    const mediaDir = path.join(repoRoot, 'site/public/assets/blocks');
+    const gridRows = CATALOG.filter((e) => !e.overlay);
+    const noMedia = gridRows.filter((e) => {
+      const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
+      return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.mp4`));
+    }).map((e) => e.name);
+    ok(`registry: all ${gridRows.length} grid blocks have a still + clip${noMedia.length ? ` — run \`make catalog && make blocks-media\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+      noMedia.length === 0);
+  }
 
   // lowerThird: one component, twelve chromes. The variant IS the block, so an unknown one must be
   // loud rather than silently falling back to a default nobody asked for.

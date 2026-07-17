@@ -1,5 +1,9 @@
-// Slice the rendered `make catalog` pages (out/_catalog-N.mp4) into one still AND one short clip per
-// block → site/public/assets/blocks/<name>.{png,mp4}. Run after `make catalog`, via `make blocks-media`.
+// One still AND one short clip per block → site/public/assets/blocks/<name>.{png,mp4}.
+// Run after `make catalog`, via `make blocks-media`.
+//
+// The still is SCREENSHOT from the live page (lossless, so it changes only when the block does); the
+// clip is cropped out of the rendered out/_catalog-N.mp4 (a video must be encoded). Both use the same
+// measured rect, so they show the same region.
 //
 // The crop rect is MEASURED, not assumed. This used to crop the whole 600x490 cell, which was wrong
 // twice over: the block is placed at its cell's TOP-LEFT, so every thumbnail was a small block stranded
@@ -114,7 +118,6 @@ for (let p = 1; p <= pages; p++) {
     return { rects, lastSeen };
   }, { samples: SAMPLES, per: PER, COLS, CELL_W, CELL_H, X0, Y0, BLOCK_DY });
   const rects = measured.rects;
-  await page.close();
 
   for (let i = 0; i < PER; i++) {
     const block = grid[(p - 1) * PER + i];
@@ -132,14 +135,21 @@ for (let p = 1; p <= pages; p++) {
     const stillT = Math.min(seen, SETTLED) === seen ? seen : SAMPLES.filter((t) => t <= SETTLED).pop() ?? SETTLED;
     const x0 = clamp(Math.round(m.x0 - PAD), cellX, cellR), y0 = clamp(Math.round(m.y0 - PAD), cellY, cellB);
     const x1 = clamp(Math.round(m.x1 + PAD), cellX, cellR), y1 = clamp(Math.round(m.y1 + PAD), cellY, cellB);
-    // ffmpeg needs even dimensions for h264
+    // even dimensions: h264 requires them, and the still shares the rect so both show the same region
     const w = Math.max(2, (x1 - x0) & ~1), h = Math.max(2, (y1 - y0) & ~1);
     const safe = block.name.replace(/[^a-z0-9.]/gi, "_");
     const crop = `crop=${w}:${h}:${x0}:${y0}`;
 
+    // The still is captured from the LIVE PAGE, not cropped out of the mp4. The page is already open
+    // and already rendering the exact frame we measured, so a clipped screenshot here is lossless and
+    // deterministic: a still now changes only when its block changes. Cropping the h264 instead meant
+    // every still carried the encoder's noise, so re-running this rewrote all 108 PNGs with ~9.8% of
+    // pixels different and nothing visibly changed — 4.3MB of new blobs in git per regeneration.
+    // (The clip below still comes from the mp4; a video has to be encoded, so it re-encodes. Its churn
+    // is bounded instead by blocks-catalog.mjs no longer printing a registry-wide count on every page.)
     try {
-      execFileSync("ffmpeg", ["-y", "-v", "error", "-ss", String(stillT), "-i", mp4,
-        "-vf", crop, "-frames:v", "1", `${OUT}/${safe}.png`], { stdio: "pipe" });
+      await page.evaluate((t) => window.__engine.renderFrame(Math.round(t * 30)), stillT);
+      await page.screenshot({ path: `${OUT}/${safe}.png`, clip: { x: x0, y: y0, width: w, height: h } });
       done++;
     } catch (e) { console.error(`still fail ${block.name}: ${e.message.slice(0, 60)}`); miss++; continue; }
 
@@ -153,6 +163,7 @@ for (let p = 1; p <= pages; p++) {
       clips++;
     } catch (e) { console.error(`clip fail ${block.name}: ${e.message.slice(0, 60)}`); }
   }
+  await page.close();
 }
 await browser.close(); server.close();
 const bytes = fs.readdirSync(OUT).filter((f) => f.endsWith(".mp4")).reduce((a, f) => a + fs.statSync(path.join(OUT, f)).size, 0);

@@ -12,7 +12,14 @@ const pages = Math.ceil(grid.length / PER);
 
 for (let p = 0; p < pages; p++) {
   const L = [{ type: 'text', text: `blocks · registry`, x: 70, y: 52, font: 'mono', size: 20, color: 'var(--text-2)', start: 0, duration: 9 },
-    { type: 'text', text: `page ${p + 1}/${pages} · ${grid.length} blocks`, x: 1560, y: 52, font: 'mono', size: 18, color: 'var(--dim)', start: 0, duration: 9 }];
+    // Deliberately just the page number: NOTHING here may depend on the size of the registry. This
+    // read `page N/${pages} · ${grid.length} blocks`, so adding one block changed text on every page,
+    // every frame re-encoded, and H.264 rate control redistributed quantization noise across the whole
+    // image. The per-block crops sit far below this line and still came out byte-different (~9.8% of
+    // pixels, max delta 13/255 — invisible), so ONE cosmetic label dirtied all 108 stills and 108 clips
+    // on every regeneration and wrote 4.3MB of new blobs into git history for no visible change.
+    // Now appending a block only re-renders the page it lands on.
+    { type: 'text', text: `page ${p + 1}`, x: 1560, y: 52, font: 'mono', size: 18, color: 'var(--dim)', start: 0, duration: 9 }];
   grid.slice(p * PER, p * PER + PER).forEach((e, i) => {
     const col = i % COLS, row = (i / COLS) | 0;
     const x = X0 + col * CELL_W, y = Y0 + row * CELL_H;
@@ -29,4 +36,11 @@ for (let p = 0; p < pages; p++) {
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: 9 }], layers: L };
   fs.writeFileSync(`formats/scene/_catalog-${p + 1}.json`, JSON.stringify(scene, null, 2));
 }
-console.log(`wrote ${pages} catalog page(s) · ${grid.length} grid blocks (${CATALOG.length} total registry entries) → formats/scene/_catalog-*.json`);
+// Remove pages a SHRINKING registry left behind. `make catalog` renders formats/scene/_catalog-*.json
+// by glob, so a stale page keeps getting rendered as a real one long after nothing points at it.
+const stale = fs.readdirSync('formats/scene')
+  .filter((f) => /^_catalog-(\d+)\.json$/.test(f) && +f.match(/^_catalog-(\d+)\.json$/)[1] > pages);
+for (const f of stale) fs.rmSync(`formats/scene/${f}`);
+
+console.log(`wrote ${pages} catalog page(s) · ${grid.length} grid blocks (${CATALOG.length} total registry entries) → formats/scene/_catalog-*.json`
+  + (stale.length ? `\n  removed ${stale.length} stale page(s): ${stale.join(', ')}` : ''));
