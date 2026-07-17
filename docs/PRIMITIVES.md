@@ -3,7 +3,8 @@
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 
-**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 21 kinetic
+**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 13 ambient
+shader looks, 21 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -77,6 +78,22 @@ when-to-use guide.
   grain/pixel/dissolve) tint cleanly; the coloured ones (leak/burn/glitch/confetti) shift toward the tint.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
+
+## Ambient shader looks (`core/shaders-ambient.js`) — 13 continuous WebGL fields (the `shader` layer)
+
+Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
+Two roles:
+- **Fields behind content** (low track, intensity ~0.3): `flow` (premium mesh gradient) `aurora`
+  (undulating curtain) `plasma` (two-tone interference) `drift` (soft bokeh) `mist` (near-still haze).
+- **Overlay looks on top of content** (high track, intensity ~0.6-0.9): `vhs` (tracking noise, chroma
+  fringe, scanlines, dropouts) `crt` (phosphor stripe mask + rolling refresh bar + vignette)
+  `filmGrain` (animated grain + dust, luminance-only so contrast holds) `lightLeak` (warm blobs drift
+  in from an edge, looping; `colors` sets the hues). Plus a **distortion-styled** set: `barrel`
+  (lens vignette + faint edge chromatic fringe) `heatShimmer` (warm haze rising in wavy bands) `ripple`
+  (gentle water caustics) `kaleidoscope` (mirrored rotating mandala; `colors`-aware). These are
+  self-generated veils, not true screen-space warps of the pixels below (a WebGL canvas can't sample
+  the DOM under it) — honest, and still perfectly composable. Knobs: `speed` · `intensity` · `colors`
+  · `seed`. Reel: _wave3-reel demonstrates all eight overlay looks over live copy.
 
 ## Kinetic type (`core/type.js`) — 21 presets × char/word/line splits
 

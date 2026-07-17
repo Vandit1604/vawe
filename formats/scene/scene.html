@@ -196,7 +196,7 @@
 
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
-          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };

@@ -15,6 +15,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite } from '../../core/layers
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
+import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -430,6 +431,31 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !(body.includes('pp') || body.includes('bell'));
   });
   ok(`stings: wave-2 branches all depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+}
+
+// ---- ambient shader looks ----
+// Same three surfaces as stings, one difference: the last effect is the dispatch's trailing `else`
+// (it has no `u_fx==N` literal), so branches are checked for indices 0..N-2 plus a final else.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'shaders-ambient.js'), 'utf8');
+  ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length === 13 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
+  const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
+  const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
+  ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, frag.includes('kaleidoscope') && !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
+  // wave-3 looks must animate — a branch that ignores t would be a frozen still, defeating "loop"
+  const wave3 = ['vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope'];
+  const still = wave3.filter((name) => {
+    const i = AMBIENT_FX.indexOf(name);
+    const start = i === AMBIENT_FX.length - 1 ? frag.lastIndexOf('} else {') : frag.indexOf(`u_fx==${i}`);
+    const nextI = frag.indexOf(`u_fx==${i + 1}`);
+    const body = frag.slice(start, nextI > start ? nextI : start + 600);
+    return !/\bt\b/.test(body);
+  });
+  // barrel is a static lens vignette by design (no motion) — exempt it from the animate check
+  ok(`ambient: wave-3 looks animate (except static barrel)${still.filter((n) => n !== 'barrel').length ? ' — frozen: ' + still.filter((n) => n !== 'barrel').join(', ') : ''}`, still.every((n) => n === 'barrel'));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

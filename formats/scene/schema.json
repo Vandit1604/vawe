@@ -314,13 +314,21 @@
         },
         "shader": {
           "type": "string",
-          "label": "shader: ambient WebGL effect (flow/aurora/plasma/drift/mist) \u2014 smooth colour field behind content. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
+          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
           "enum": [
             "flow",
             "aurora",
             "plasma",
             "drift",
-            "mist"
+            "mist",
+            "vhs",
+            "crt",
+            "filmGrain",
+            "lightLeak",
+            "barrel",
+            "heatShimmer",
+            "ripple",
+            "kaleidoscope"
           ]
         },
         "html": {

@@ -57,6 +57,13 @@ you from.
   `thermal` intensity/data beats, sparingly · `whipPan` momentum cut when the layout also moves
   sideways · `chromaticSplit` impact with a tech accent (softer than `glitch`) · `dispersion`
   spectral flourish for color/light stories only.
+- **Ambient shader looks** (`shader` layer, looping): fields BEHIND content at intensity ~0.3 — `flow`
+  premium default · `aurora` soft/organic · `plasma` retro/energetic · `drift` calm/dreamy · `mist`
+  barely-there. Overlay looks ON TOP at intensity ~0.6-0.9, one per film — `vhs` lo-fi/nostalgic ·
+  `crt` retro-tech/terminal · `filmGrain` texture on flat frames (keeps contrast) · `lightLeak` warm
+  analog warmth over a hero · `barrel` a lens-shot feel · `heatShimmer` tension/heat/desert · `ripple`
+  calm water/reflection · `kaleidoscope` a music/psychedelic flourish. Place overlays on a high track;
+  they veil, they don't warp the pixels beneath. Don't stack two, and never behind small body copy.
 - **Motion blur** (`"motionBlur": true` on a layer with a `motion` track): a velocity-derived streak on
   fast moves — the layer smears while travelling, snaps crisp when it settles. Reach for it on whip-ins,
   fast slides, and hard slams to sell speed and hide the discrete-frame stutter; a `0..1` number tunes
