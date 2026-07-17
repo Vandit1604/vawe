@@ -254,4 +254,33 @@ export const CATALOG = [
     props: { items: [{ value: '42ms', label: 'p50' }, { value: '120ms', label: 'p95' }, { value: '380ms', label: 'p99' }] } },
   { name: 'badge.beta', family: 'badge', blurb: 'beta status badge',
     props: { label: 'status', value: 'beta', tone: 'warn' } },
+
+  // ── lower thirds ─────────────────────────────────────────────────────────────
+  // Twelve entries, one factory: the layout (name over role) is fixed, the material around it is the
+  // variant. Each row's copy suits its chrome, because a BILD block and a soft pill are not the same
+  // register, and demoing both with "Jane Doe / Designer" would hide the only thing that differs.
+  { name: 'lowerThird.cleanBar', family: 'lowerThird', blurb: 'hairline plate · name over role · the quiet one',
+    props: { variant: 'cleanBar', name: 'Ana Roth', role: 'Principal engineer, Platform' } },
+  { name: 'lowerThird.boldBlock', family: 'lowerThird', blurb: 'name reversed out of a solid accent block',
+    props: { variant: 'boldBlock', name: 'Ana Roth', role: 'Principal engineer' } },
+  { name: 'lowerThird.bild', family: 'lowerThird', blurb: 'tabloid front page · caps, reversed, loud',
+    props: { variant: 'bild', name: 'Sold out', role: 'in four minutes' } },
+  { name: 'lowerThird.darkCard', family: 'lowerThird', blurb: 'dark card · the one that survives bright photography',
+    props: { variant: 'darkCard', name: 'Kite Studio', role: 'Lisbon, Portugal' } },
+  { name: 'lowerThird.sideRule', family: 'lowerThird', blurb: 'thick accent rule, no plate · needs a calm backdrop',
+    props: { variant: 'sideRule', name: 'Ana Roth', role: 'Principal engineer' } },
+  { name: 'lowerThird.kickerName', family: 'lowerThird', blurb: 'mono kicker above, big name below',
+    props: { variant: 'kickerName', name: 'Northwind', role: 'Now in beta' } },
+  { name: 'lowerThird.accentUnderline', family: 'lowerThird', blurb: 'underline draws under the name (kinetic)',
+    props: { variant: 'accentUnderline', name: 'Ana Roth', role: 'Principal engineer' } },
+  { name: 'lowerThird.maskReveal', family: 'lowerThird', blurb: 'name rises out of a clipped baseline, word by word',
+    props: { variant: 'maskReveal', name: 'One source', role: 'every ratio' } },
+  { name: 'lowerThird.softPill', family: 'lowerThird', blurb: 'soft accent pill · product tours, not news',
+    props: { variant: 'softPill', name: 'Northwind', role: 'v2.1' } },
+  { name: 'lowerThird.colourBlock', family: 'lowerThird', blurb: 'two offset blocks, ink then accent',
+    props: { variant: 'colourBlock', name: 'Ana Roth', role: 'Principal engineer' } },
+  { name: 'lowerThird.stackBars', family: 'lowerThird', blurb: 'plate over a short accent bar · reads as a mark',
+    props: { variant: 'stackBars', name: 'Ana Roth', role: 'Principal engineer' } },
+  { name: 'lowerThird.newsTicker', family: 'lowerThird', blurb: 'accent chip + line · role IS the chip (LIVE/BREAKING)',
+    props: { variant: 'newsTicker', name: 'Renders every frame in parallel', role: 'live' } },
 ];

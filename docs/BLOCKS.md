@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_97 entries across 45 families._
+_109 entries across 46 families._
 
 | Block | For |
 |---|---|
@@ -156,6 +156,18 @@ _97 entries across 45 families._
 | `banner.warn` | banner, warning (amber) |
 | `spinner` | looping Lottie (deterministic) |
 | `spinner.small` | small looping Lottie |
+| `lowerThird.cleanBar` | hairline plate · name over role · the quiet one |
+| `lowerThird.boldBlock` | name reversed out of a solid accent block |
+| `lowerThird.bild` | tabloid front page · caps, reversed, loud |
+| `lowerThird.darkCard` | dark card · the one that survives bright photography |
+| `lowerThird.sideRule` | thick accent rule, no plate · needs a calm backdrop |
+| `lowerThird.kickerName` | mono kicker above, big name below |
+| `lowerThird.accentUnderline` | underline draws under the name (kinetic) |
+| `lowerThird.maskReveal` | name rises out of a clipped baseline, word by word |
+| `lowerThird.softPill` | soft accent pill · product tours, not news |
+| `lowerThird.colourBlock` | two offset blocks, ink then accent |
+| `lowerThird.stackBars` | plate over a short accent bar · reads as a mark |
+| `lowerThird.newsTicker` | accent chip + line · role IS the chip (LIVE/BREAKING) |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

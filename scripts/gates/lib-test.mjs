@@ -6,6 +6,8 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
+import { BLOCKS } from '../../blocks/index.mjs';
+import { CATALOG } from '../../blocks/catalog.mjs';
 
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
@@ -237,6 +239,55 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('easing sine family present', ['easeInSine', 'easeOutSine', 'easeInOutSine'].every((k) => typeof EASINGS[k] === 'function'));
   ok('easeOutSine is gentler than easeOutQuint early', EASINGS.easeOutSine(0.25) < EASINGS.easeOutQuint(0.25));
   ok('easeInOutSine symmetric', Math.abs(EASINGS.easeInOutSine(0.5) - 0.5) < 1e-9);
+}
+
+// ---- the block registry ----
+// Nothing tested blocks/ at all, so a manifest row naming a family that does not exist, or a factory
+// returning junk, only surfaced when someone rendered a catalog sheet and looked at it. These asserts
+// hold the registry's actual contract (index.mjs header): every factory returns an ARRAY of layer
+// objects, and same props → same layers.
+{
+  const names = Object.keys(BLOCKS);
+  ok(`registry: ${names.length} blocks exported`, names.length > 0);
+
+  // Call each row the way `make catalog` does: family factory + the manifest's props. A BARE name in
+  // the registry is the raw factory with NO props merged, so calling it by name yields an empty block
+  // (captions with no lines is correctly []) — that is the registry working, not a bug to assert on.
+  const build = (e, opts = {}) => BLOCKS[e.family]({ ...(e.props || {}), x: 100, y: 100, start: 0, dur: 4, ...opts });
+  const bad = [];
+  for (const e of CATALOG) {
+    if (!BLOCKS[e.name]) { bad.push(`${e.name}: not in registry`); continue; }
+    if (!BLOCKS[e.family]) { bad.push(`${e.name}: family "${e.family}" has no factory`); continue; }
+    let out;
+    try { out = build(e); }
+    catch (err) { bad.push(`${e.name}: threw ${err.message}`); continue; }
+    if (!Array.isArray(out) || !out.length) { bad.push(`${e.name}: did not return a non-empty array`); continue; }
+    if (!out.every((L) => L && typeof L === 'object' && typeof L.type === 'string'))
+      bad.push(`${e.name}: returned a layer with no type`);
+    // The schema's `size` min is 18, and the validator checks TOP-LEVEL layers, so a block emitting a
+    // smaller top-level size is a scene that cannot boot. Group children are not validated (which is
+    // why card.stat's 15px inner label is legal), so this only asserts what the validator enforces.
+    const small = out.filter((L) => typeof L.size === 'number' && L.size < 18).map((L) => L.size);
+    if (small.length) bad.push(`${e.name}: top-level text size ${small.join(',')} < the schema's 18px min`);
+  }
+  ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ' — ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
+
+  // determinism is the product; a block that reads a clock or Math.random breaks every render.
+  const drift = CATALOG.filter((e) => BLOCKS[e.family]).filter((e) => {
+    try { return JSON.stringify(build(e, { x: 10, start: 1 })) !== JSON.stringify(build(e, { x: 10, start: 1 })); }
+    catch { return false; }
+  });
+  ok(`registry: every block is deterministic${drift.length ? ' — ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
+
+  // lowerThird: one component, twelve chromes. The variant IS the block, so an unknown one must be
+  // loud rather than silently falling back to a default nobody asked for.
+  const lts = CATALOG.filter((e) => e.family === 'lowerThird');
+  ok(`lowerThird: 12 variants registered (got ${lts.length})`, lts.length === 12);
+  ok('lowerThird: unknown variant throws', (() => {
+    try { BLOCKS.lowerThird({ variant: 'nope', name: 'x' }); return false; } catch { return true; }
+  })());
+  ok('lowerThird: role is optional (name alone still builds)',
+    lts.every((e) => BLOCKS[e.family]({ variant: e.props.variant, name: 'Solo' }).length >= 1));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

@@ -638,6 +638,165 @@ export function banner({ x, y, w = 720, text: msg = '', cta = '', icon = '★', 
     ].filter(Boolean) }];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// lowerThird — the name/role identifier broadcast has used for sixty years: who is speaking, while
+// they speak. ONE component, twelve chromes, because what differs between a BILD front page and a
+// Vercel keynote caption is not the layout (name over role, lower left) but the material around it.
+// `variant` picks the material; everything else is shared.
+//
+// The spine every variant honours:
+//   name — the identifier (a person, a product, a place). Always the dominant element.
+//   role — the qualifier underneath. Always subordinate: smaller, dimmer, or set in mono. Optional.
+//   x, y — TOP-LEVEL of the block, as everywhere in this file. y ~820 sits it in the lower third of a
+//          1080 stage; the caller places it, because "lower third" is a convention, not a rule.
+//
+// Motion: `wipe` for anything with a plate (a plate arrives edge-first, which is what reads as
+// broadcast rather than as a fading label), `rise` for bare text. Every variant is pure in n: entrances
+// are driven by driveClips off data-start, and the two kinetic presets used here (`underline`,
+// `riseClip`) are pure functions of unit progress. Nothing steps from a previous frame.
+const LT_FONT = { name: { size: 46, weight: 700, tracking: '-0.02em' }, role: { size: 21, weight: 500 } };
+
+export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = 'cleanBar',
+  accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  const N = LT_FONT.name, R = LT_FONT.role;
+  const s2 = r2(start + 0.12);                      // the role trails the name by ~2 frames: reading order
+  const wipeIn = { start, duration: dur, anim: 'wipe', enterDur: 0.42, exitDur: 0.28 };
+  const riseIn = { start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3 };
+  // Two group defaults actively fight a lower third, so every variant states its intent:
+  //   radius ?? 16    — a "hard block" silently arrives with soft corners (util.js chipBox).
+  //   items ?? center — a column CENTRES its children, so the role floats under the name instead of
+  //                     sharing its left edge. A lower third is a left-aligned form; the edge IS the design.
+  const HARD = { radius: 0 };
+  const stackL = { layout: 'column', items: 'flex-start' };
+
+  switch (variant) {
+    // A plate the colour of the page, hairline-bordered. The quiet one: use it when the frame is busy
+    // and the identifier must not compete with it.
+    case 'cleanBar':
+      return [{ type: 'group', x, y, ...stackL, gap: 3, pad: '16px 24px', bg: T.card,
+        radius: 6, border: HAIR, ...wipeIn, children: [
+          text({ text: name, ...N, color: T.ink }),
+          role && text({ text: role, ...R, color: T.dim }),
+        ].filter(Boolean) }];
+
+    // Name reversed out of a solid accent block, role in an ink block beneath. The default broadcast
+    // read: two hard rectangles, no radius, no apology.
+    case 'boldBlock':
+      return [
+        { type: 'group', x, y, pad: '12px 20px', bg: accent, ...HARD, ...wipeIn,
+          children: [text({ text: name, ...N, color: '#fff' })] },
+        role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '9px 20px', bg: T.ink, ...HARD,
+          ...wipeIn, start: s2, children: [text({ text: role, ...R, color: '#fff' })] } : null,
+      ].filter(Boolean);
+
+    // BILD: the German tabloid front page. Caps, reversed out of accent, tracked TIGHT and set huge.
+    // The loudest variant in the set, and it is supposed to be.
+    case 'bild':
+      return [
+        { type: 'group', x, y, pad: '10px 18px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
+          text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: '#fff' }),
+        ] },
+        role ? { type: 'group', x: r2(x + 14), y: r2(y + 84), pad: '8px 16px', bg: T.ink, ...HARD, ...wipeIn,
+          start: s2, enterDur: 0.3, children: [
+            text({ text: String(role).toUpperCase(), size: 22, weight: 700, tracking: '0.04em', color: '#fff' }),
+          ] } : null,
+      ].filter(Boolean);
+
+    // A dark elevated card. The only variant that works over bright photography without a scrim.
+    case 'darkCard':
+      return [{ type: 'group', x, y, ...stackL, gap: 4, pad: '18px 26px', bg: 'rgba(16,18,24,0.92)',
+        radius: 12, ...riseIn, children: [
+          text({ text: name, ...N, color: '#fff' }),
+          role && text({ text: role, ...R, color: 'rgba(255,255,255,0.72)' }),
+        ].filter(Boolean) }];
+
+    // A thick accent rule, then the text. No plate at all: the rule alone carries the identity, so it
+    // needs a calm backdrop to land on. (A rule beside text is broadcast grammar, not a card stripe.)
+    case 'sideRule':
+      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 18, ...riseIn, children: [
+        box({ w: 6, h: r2(N.size + (role ? R.size + 14 : 0)), bg: accent }),
+        { type: 'group', ...stackL, gap: 3, children: [
+          text({ text: name, ...N, color: T.ink }),
+          role && text({ text: role, ...R, color: T.dim }),
+        ].filter(Boolean) },
+      ] }];
+
+    // Kicker above, name below: the role becomes a small mono label that INTRODUCES the name rather
+    // than trailing it. Reverses the usual hierarchy without weakening it.
+    case 'kickerName':
+      return [{ type: 'group', x, y, ...stackL, gap: 7, ...riseIn, children: [
+        // 18 matches the schema's floor for a top-level text layer. As a group child it would be
+        // allowed to go smaller, and a kicker is exactly the element that wants to: don't. Carry the
+        // emphasis with tracking and colour, which cost no legibility.
+        role && text({ text: String(role).toUpperCase(), font: 'mono', size: 18, weight: 600,
+          tracking: '0.12em', color: accent }),
+        text({ text: name, size: 54, weight: 700, tracking: '-0.025em', color: T.ink }),
+      ].filter(Boolean) }];
+
+    // The underline DRAWS under the name (kinetic `underline`, pure in unit progress). Bare text, so
+    // it inherits whatever the frame is doing behind it.
+    case 'accentUnderline':
+      return [
+        text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'underline',
+          presetOpts: { color: accent }, each: 0.5, stagger: 0.06, start, duration: dur, exitDur: 0.3 }),
+        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
+          start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
+      ].filter(Boolean);
+
+    // The name rises out of a clipped baseline, one word at a time (kinetic `riseClip`) — type moving
+    // the way it reads. The most "designed" entrance in the set; give it a slow beat.
+    case 'maskReveal':
+      return [
+        text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'riseClip',
+          each: 0.55, stagger: 0.08, start, duration: dur, exitDur: 0.3 }),
+        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
+          start: r2(start + 0.4), duration: r2(dur - 0.4), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
+      ].filter(Boolean);
+
+    // Soft accent pill, fully rounded. The friendly one: product tours, not news.
+    case 'softPill':
+      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 12, pad: '12px 26px',
+        bg: T.accentSoft, radius: 100, ...riseIn, children: [
+          text({ text: name, size: 34, weight: 700, tracking: '-0.02em', color: T.accentInk }),
+          role && text({ text: role, size: 19, weight: 500, color: T.accentInk }),
+        ].filter(Boolean) }];
+
+    // Two blocks, offset and staggered in time so the eye reads name → role as one gesture, not two
+    // labels. The offset is what stops it being `boldBlock` with extra steps.
+    case 'colourBlock':
+      return [
+        { type: 'group', x, y, pad: '13px 22px', bg: T.ink, ...HARD, ...wipeIn,
+          children: [text({ text: name, ...N, color: '#fff' })] },
+        role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 18px', bg: accent, ...HARD,
+          ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
+      ].filter(Boolean);
+
+    // A plate over a deliberately shorter accent bar. Reads as a mark rather than a plate.
+    case 'stackBars':
+      return [
+        { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
+          children: [text({ text: name, ...N, color: T.ink })] },
+        role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '7px 24px', bg: accent, ...HARD, ...wipeIn,
+          start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
+      ].filter(Boolean);
+
+    // A ticker bar: accent chip, then the line. `role` is the chip (LIVE / BREAKING / 09:41), which is
+    // why this variant reads the props in the opposite order to every other one.
+    case 'newsTicker':
+      return [{ type: 'group', x, y, layout: 'row', items: 'stretch', gap: 0, bg: T.ink, radius: 4,
+        ...wipeIn, children: [
+          { type: 'group', bg: accent, pad: '12px 18px', items: 'center',
+            children: [text({ text: String(role || 'LIVE').toUpperCase(), font: 'mono', size: 18,
+              weight: 700, tracking: '0.08em', color: '#fff' })] },
+          { type: 'group', pad: '12px 22px', items: 'center',
+            children: [text({ text: name, size: 30, weight: 600, color: '#fff' })] },
+        ] }];
+
+    default:
+      throw new Error(`lowerThird: unknown variant "${variant}" — see blocks/catalog.mjs for the twelve`);
+  }
+}
+
 // spinner — a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
 export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
   const out = [{ type: 'lottie', src, x, y, w: size, h: size, loop: true, start, duration: dur }];
@@ -658,7 +817,7 @@ const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browse
   fileTree, logLines, commitRow, phoneFrame, tabBar,
   checklist, table, timeline, stepFlow, kanban,
   chatBubble, tweetCard, avatarStack, toast, reactionBar,
-  logoWall, badge, gauge, progressRing, banner, spinner };
+  logoWall, badge, gauge, progressRing, banner, spinner, lowerThird };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {
