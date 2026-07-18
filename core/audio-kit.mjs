@@ -158,15 +158,28 @@ export const CUES = {
   release: { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 4600, filterQ: 1.8, attack: 0.001, decay: 0.016, peak: 0.12 }, { kind: 'tone', waveform: 'sine', frequency: 3200, offset: 0.006, attack: 0.001, decay: 0.05, peak: 0.02 }] },
   toggle:  { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 2400, filterQ: 1.6, attack: 0.001, decay: 0.022, peak: 0.12 }, { kind: 'tone', waveform: 'sine', frequency: 880, glideTo: 1320, glideTime: 0.05, attack: 0.002, decay: 0.06, peak: 0.03 }] },
   // --- keystrokes -------------------------------------------------------------
-  // A key click is a ~20ms broadband transient, nothing more. Three voicings because a real keyboard
-  // does not make the identical sound 38 times: rotating them is what stops a typed line reading as a
-  // machine gun. Anything longer than the gap between keystrokes stops being a click and becomes a
-  // drone — assets/sfx/click.wav was 19.6s and 38 of them overlapped into a passing train (#51).
-  key1:    { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 2400, filterQ: 1.6, attack: 0.001, decay: 0.016, peak: 0.12 }] },
-  key2:    { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 3100, filterQ: 1.7, attack: 0.001, decay: 0.013, peak: 0.11 }] },
-  key3:    { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 1950, filterQ: 1.5, attack: 0.001, decay: 0.019, peak: 0.12 }] },
-  keyspace:{ masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 1150, filterQ: 1.1, attack: 0.001, decay: 0.026, peak: 0.14 }] },
-  keyenter:{ masterGain: 0.45, layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 1500, filterQ: 1.2, attack: 0.001, decay: 0.034, peak: 0.16 }] },
+  // A key is a THUD, not a tick. The sound is the keycap bottoming out: most of the energy is low
+  // (a lowpass-shaped body around 300-450Hz over ~45ms) with only a trace of higher clack on top.
+  // The first attempt was a narrow bandpass up at 2-3kHz with Q~1.6, which is a mouse click or a
+  // Geiger counter — all treble, no body, and the resonant Q is what read as "sharp" (#55).
+  // Low Q keeps it soft: a high Q rings, and a ring at this length is heard as a chirp.
+  // Three voicings because a real keyboard does not make the identical sound 38 times.
+  key1:    { masterGain: 0.34, layers: [
+    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 380, filterQ: 0.7, attack: 0.002, decay: 0.018, peak: 0.10 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1750, filterQ: 0.8, attack: 0.001, decay: 0.007, peak: 0.022 }] },
+  key2:    { masterGain: 0.34, layers: [
+    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 430, filterQ: 0.7, attack: 0.002, decay: 0.015, peak: 0.095 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 2050, filterQ: 0.8, attack: 0.001, decay: 0.006, peak: 0.020 }] },
+  key3:    { masterGain: 0.34, layers: [
+    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 330, filterQ: 0.7, attack: 0.002, decay: 0.021, peak: 0.105 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1520, filterQ: 0.8, attack: 0.001, decay: 0.008, peak: 0.024 }] },
+  // the spacebar is bigger and hollower: deeper body, longer decay, almost no clack
+  keyspace:{ masterGain: 0.34, layers: [
+    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 250, filterQ: 0.7, attack: 0.003, decay: 0.028, peak: 0.115 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1100, filterQ: 0.7, attack: 0.001, decay: 0.007, peak: 0.014 }] },
+  keyenter:{ masterGain: 0.38, layers: [
+    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 300, filterQ: 0.7, attack: 0.003, decay: 0.080, peak: 0.125 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1300, filterQ: 0.8, attack: 0.001, decay: 0.014, peak: 0.020 }] },
   // --- states ----------------------------------------------------------------
   success: { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 659.25, attack: 0.005, decay: 0.18, peak: 0.07 }, { kind: 'tone', waveform: 'sine', frequency: 987.77, offset: 0.08, attack: 0.005, decay: 0.24, peak: 0.06 }], shimmer: { delay: 0.11, feedback: 0.22, wet: 0.16, lowpass: 4200 } },
   error:   { masterGain: 0.45, layers: [{ kind: 'tone', waveform: 'sine', frequency: 320, glideTo: 190, glideTime: 0.12, attack: 0.004, decay: 0.16, peak: 0.08 }] },

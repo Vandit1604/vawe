@@ -885,3 +885,44 @@ the actual wordmark. Magnifier + mic are real Lucide icons (ISC) with the stroke
 SVG loaded as an `<img>` has no `currentColor` to inherit and renders invisible.
 **Rule:** "close enough" on a brand asset is never close enough. The eye that knows the brand is the
 eye you are showing it to.
+
+---
+
+## 54. The build artifact's name leaked into the deliverable
+
+**What:** the film shipped as `out/search-demo.expanded.mp4`.
+**Root cause:** `expand-blocks.mjs` writes `<name>.expanded.json` as an intermediate, and the renderer
+names its output after whatever file it was handed. So every block-authored scene carries the
+pipeline's internals in the one string a human actually reads.
+**Fix:** the renderer strips a trailing `.expanded` when deriving the output name.
+**Rule:** intermediate filenames are for the pipeline. The output name is for a person.
+
+---
+
+## 55. A "click" that was all treble is a Geiger counter, not a keyboard
+
+**What:** after the 19.6s sample was replaced, the typing still did not sound like typing — reported
+as too sharp and too loud.
+**Root cause:** the replacement voicings were a narrow bandpass at 2-3kHz with Q≈1.6. That is a mouse
+click: all treble, no body, and a resonant Q rings, which at this length is heard as a chirp. A key
+is a THUD — the keycap bottoming out, most of the energy low.
+**Fix:** each key is now a lowpass-shaped body (250-430Hz) with only a trace of clack on top, Q≈0.7,
+and the default cue gain dropped 0.22 → 0.13. Measured: 8dB more energy below 800Hz than above.
+**Rule:** synthesize the physical event, not the word for it. "Click" is a name; the sound is a mass
+hitting a stop.
+
+---
+
+## 56. My own gate measured file length instead of sound length
+
+**What:** `make sfx-check` (written one commit earlier to catch #51) failed the corrected key clicks.
+**Root cause:** it measured WAV duration. `writeWav` pads a decay tail, so a 46ms click sits in a
+0.31s file — and the reverse is worse: a file that is 20ms of tick followed by 19s of silence would
+have PASSED a length check while being exactly the bug the gate exists to catch.
+**Fix:** the gate decodes the PCM and reports the last moment the signal is above -45dBFS. Which
+immediately proved the envelopes really were too long (0.22s audible against a 0.09s keystroke gap),
+so the voicings were shortened until each key dies before the next arrives.
+**Also:** the decoder only handled 16-bit, so it called every 24-bit recorded sample "unreadable" —
+a narrow reader reported as broken files. Now handles 16/24/32-bit and float.
+**Rule:** the fifth time this session (see #39, #41, #45, #48). The rule was right; the thing it
+measured was a proxy for the rule. Ask what the sentence actually claims, then measure THAT.

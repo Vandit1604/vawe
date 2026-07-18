@@ -401,7 +401,7 @@
               // one repeated sample is what turns a typed line into a machine gun. Deterministic by
               // index, so the same copy always sounds the same. Space gets its own heavier voicing.
               const KEYS = ['key1', 'key2', 'key3'];
-              keyCues.push({ t: +kt.toFixed(3), name: full[i] === ' ' ? 'keyspace' : KEYS[i % 3], gain: L.keyGain ?? 0.22 });
+              keyCues.push({ t: +kt.toFixed(3), name: full[i] === ' ' ? 'keyspace' : KEYS[i % 3], gain: L.keyGain ?? 0.13 });
             }
           }
           // A key train is legitimately dense, so it gets its own tighter floor. The 0.09 merge above
