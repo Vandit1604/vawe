@@ -154,9 +154,19 @@ the existing `codeBlock` block, not twenty-four features.
 
 ## Tier 2 — Canvas 2D
 
-Halftone, newsprint/Bayer dither, ASCII render, pixel sorting, mosaic/stained glass, cross-hatch,
-stipple, low-poly triangulate, voxelize, **Grid Pixelate Wipe**, **Matrix Decode**, **Code Typing**
-/ **Code Diff** / **Code Highlight Sweep** / **Code Scroll To Line** (text metrics, not shaders).
+**Shipped (`core/canvas-fx.js`, `canvasFx` on an image layer):** halftone · Bayer dither · mosaic ·
+stipple · ASCII · edgeDetect (Sobel) · crosshatch, plus stylized presets blueprint/comic/risograph/
+sketch/matrix/newsprint. Determinism story settled: **baked once at build** (boot's awaited preload →
+static PNG), so the pixels never change per frame — probe/snap prove it. See `docs/DESIGN-NOTES/tier5.md`
+for the general carve-out taxonomy this used.
+
+**Remaining:** pixel sorting, stained glass, low-poly triangulate, voxelize, **Grid Pixelate Wipe**,
+**Matrix Decode** (generative rain, a pure-in-n canvas layer — not an image bake), **Code Typing** /
+**Code Diff** / **Code Highlight Sweep** / **Code Scroll To Line** (text metrics, not shaders).
+
+**Excluded on purpose (break determinism — cannot ship as-is):** datamosh / P-frame freeze (codec +
+stateful), feedback/phosphor trails (frame feedback), low-fps stutter (per-frame state). These are the
+"Tier D" of the composite-looks plan; they would violate pure-in-n and are documented, not built.
 
 **Data maps** (Spain, US, US bubble/flow/hex, world) live here too: real GeoJSON + a projection.
 The map is easy; sourcing accurate boundary data is the actual work, and inaccurate maps are worse

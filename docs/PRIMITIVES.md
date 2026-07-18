@@ -351,6 +351,19 @@ vignette`), applied via `filter:` like any grade. All pure CSS (filter functions
   overrides. Apply a full-frame look to a `group`/full-frame layer; a text look (`neon`, glow) to the text.
   Reel: looks-reel.mp4. (More looks needing Canvas/WebGL passes are wave-4.)
 
+## Canvas image passes (`core/canvas-fx.js`) — `canvasFx` on an image layer
+
+Per-pixel Tier-2 looks BAKED ONCE at build (in boot's awaited image-preload) into a static PNG, so
+the pixels never change per frame → deterministic by construction (probe/snap prove it). Set
+`canvasFx` on an `image` layer: a name or `{ fx, cell, ink, paper, seed, … }`.
+- **Base passes**: `halftone` (ink dots by darkness) · `dither` (Bayer newsprint 2-tone) · `mosaic`
+  (pixelate) · `stipple` (seeded dot density) · `ascii` (glyph ramp) · `edgeDetect` (Sobel) · `crosshatch`.
+- **Stylized presets** (base pass + tuned colours): `blueprint` (edges on blue) · `comic` (black
+  halftone) · `risograph` (pink halftone) · `sketch` (crosshatch) · `matrix` (green ascii) · `newsprint`
+  (sepia dither). `canvasFx:"blueprint"` or override: `{ fx:"comic", cell:5, ink:"#111" }`.
+- Only bakes local/same-origin images (cross-origin taints `getImageData` → the raw image shows).
+  Best on static images; pairs with a `filter:` grade for extra colour. Reel: canvasfx-reel / tierc-reel.
+
 ## Caption styles
 
 `captionStyle:` layers a word-timed treatment on the pop caption layout (core/captions.js):
