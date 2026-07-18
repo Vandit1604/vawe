@@ -132,7 +132,28 @@ for (const e of CATALOG) {
   walk(e.props || {}, 'props');
 }
 
-const ORDER = ['baked-claim', 'claim-default', 'baked-superlative', 'brand-default', 'baked-brand', 'dead-prop', 'prop-divergence'];
+// CONTRAST. `CODE_THEMES` was measured (the set's minimum is 4.68:1) and nothing else in the file
+// was, so five hardcoded pairs shipped below the bar — white on amber at 2.05:1 and a toast action
+// link at 2.00:1 among them. Only literal hex pairs can be judged statically; CSS vars resolve at
+// render and are the layout audit's job. That is a real limit, so it is stated, not hidden.
+const lum = (h) => { const n = parseInt(h.slice(1), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+// pairs the factories actually render: a literal `color:` inside a group carrying a literal `bg:`
+for (const [name, body] of Object.entries(FACTORIES)) {
+  for (const grp of body.match(/bg:\s*'#[0-9a-fA-F]{6}'[\s\S]{0,320}?\}/g) || []) {
+    const bg = /bg:\s*'(#[0-9a-fA-F]{6})'/.exec(grp)?.[1];
+    for (const fg of [...grp.matchAll(/color:\s*'(#[0-9a-fA-F]{3,6})'/g)].map((m) => m[1])) {
+      const full = fg.length === 4 ? '#' + [...fg.slice(1)].map((c) => c + c).join('') : fg;
+      if (!bg || full.length !== 7) continue;
+      const r = ratio(full, bg);
+      if (r < 4.5) issues.push({ name, kind: 'contrast', detail: `${full} on ${bg} is ${r.toFixed(2)}:1 — under the 4.5:1 body bar. Pick a readable foreground (see \`onColor\`) or darken the fill.` });
+    }
+  }
+}
+
+const ORDER = ['contrast', 'baked-claim', 'claim-default', 'baked-superlative', 'brand-default', 'baked-brand', 'dead-prop', 'prop-divergence'];
 issues.sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
 console.log(`── block audit · ${Object.keys(FACTORIES).length} factories, ${CATALOG.length} catalog entries\n`);
 if (!issues.length) { console.log('✓ no factory ships a claim, a brand, a dead prop or a divergent vocabulary'); process.exit(0); }

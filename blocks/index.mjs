@@ -46,6 +46,20 @@ const box = (o) => ({ type: 'group', radius: 0, ...o });       // a coloured box
 const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
   text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '7px 16px' });
 
+// onColor(bg) — pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
+// over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
+// arbitrary `accent` with no check, and on the amber tone that measures 2.05:1. Only literal hexes can
+// be judged at build time; a CSS var resolves at render, and the theme contract already requires its
+// accent to carry white, so a var falls through to white by design rather than by omission.
+export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
+  const m = /^#([0-9a-f]{6})$/i.exec(String(bg || ''));
+  if (!m) return light;
+  const n = parseInt(m[1], 16);
+  const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+  return (1.05 / (L + 0.05)) >= 4.5 ? light : dark;   // white clears 4.5:1? else go dark
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // card — elevated white card · tinted inner panel · pill tags · CTA footer arrow
 // The canonical "rich card". Great for a feature grid / capability tile.
@@ -315,7 +329,7 @@ export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) 
 // callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
 export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone = 'info', start = 0, dur = 4 } = {}) {
   msg = msg ?? body ?? title;
-  const ac = { info: T.accent, success: T.green, warn: '#F6A417' }[tone] || TOKENS.blurple;
+  const ac = { info: T.accent, success: T.green, warn: '#F6A417' }[tone] || T.accent;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
     bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
       box({ w: 4, h: 30, radius: 2, bg: ac }),
@@ -456,12 +470,18 @@ export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {})
 // logLines — a log stream with optional timestamp + level colour. dark = terminal surface.
 export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, dur = 4 } = {}) {
   const bg = dark ? T.stripeNavy : T.card;
-  const lc = { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' };
+  // Two palettes, because one set of level colours cannot clear 4.5:1 on both a near-black card and a
+  // white one. Measured against their own surface: light info 5.46:1, light warn 5.93:1, dark stamp
+  // 6.00:1. The file already proved it knows how to do this — CODE_THEMES records a measured 4.68:1
+  // minimum — and nothing else got the same treatment (MISTAKES #71).
+  const lc = dark
+    ? { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' }
+    : { info: '#5A6B7F', ok: '#1F6B3A', warn: '#8A5A00', error: '#B02A37' };
   const base = dark ? '#E8ECF1' : T.ink;
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
     bg, radius: 12, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
     children: lines.map((ln) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
-      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#5C6B7F' : T.dim }),
+      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#8FA3BA' : T.dim }),
       text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base }),
     ].filter(Boolean) })) }];
 }
@@ -531,7 +551,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '20px 24px',
     bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [row(cols, true), box({ h: 1, bg: T.hair }),
-      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: 'rgba(0,0,0,0.05)' }), row(r, false)].filter(Boolean))] }];
+      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }), row(r, false)].filter(Boolean))] }];
 }
 
 // timeline — a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
@@ -608,11 +628,11 @@ export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = 
 export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 0, dur = 4 } = {}) {
   const step = size * 0.65; const out = [];
   avatars.forEach((a, i) => {
-    const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: '2px solid #FFFFFF', start: r2(start + i * 0.07), duration: dur, anim: 'rise', enterDur: 0.3 };
+    const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: `2px solid ${T.card}`, start: r2(start + i * 0.07), duration: dur, anim: 'rise', enterDur: 0.3 };
     out.push(typeof a === 'string' ? { type: 'image', src: a, ...common }
       : { type: 'group', ...common, bg: a.color || T.accentSoft, layout: 'row', justify: 'center', items: 'center', children: [text({ text: a.initials || '•', size: Math.round(size * 0.36), weight: 700, color: T.accentInk })] });
   });
-  if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: 100, bg: T.surface, border: '2px solid #FFFFFF',
+  if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: 100, bg: T.surface, border: `2px solid ${T.card}`,
     layout: 'row', justify: 'center', items: 'center', start: r2(start + avatars.length * 0.07), duration: dur, anim: 'rise', enterDur: 0.3, children: [text({ text: '+' + extra, size: Math.round(size * 0.3), weight: 600, color: T.sub })] });
   return out;
 }
@@ -628,7 +648,7 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
     bg: '#0A0A0A', radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
       text({ text: message, size: 19, weight: 500, color: '#F5F5F3', grow: 1 }),
-      action && text({ text: action, size: 18, weight: 600, color: TOKENS.stripeTeal }),
+      action && text({ text: action, size: 18, weight: 600, color: T.accentInk }),
     ].filter(Boolean) }];
 }
 
@@ -739,10 +759,13 @@ export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur =
 // badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
 export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
   const ac = { ok: T.green, info: T.accent, warn: '#F6A417', accent: T.accent }[tone] || T.green;
+  // White on the amber fill measures 2.05:1. Ink on it measures 8.86:1, and dark-on-amber is what a
+  // warning chip looks like anyway — the fix keeps the brand colour and changes the text.
+  const onAc = onColor(ac);
   return [{ type: 'group', x, y, bg: '#3A3A38', radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
     start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       text({ text: label, font: 'mono', size: 17, weight: 600, color: '#fff', pad: '4px 12px' }),
-      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: '#fff' })] },
+      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc })] },
     ] }];
 }
 
@@ -775,8 +798,8 @@ export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', c
   msg = msg || body || title;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 22px',
     bg: accent, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
-      text({ text: icon, size: 20, color: '#fff' }), text({ text: msg, size: 20, weight: 600, color: '#fff', grow: 1 }),
-      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: '#fff' })] },
+      text({ text: icon, size: 20, color: onColor(accent) }), text({ text: msg, size: 20, weight: 600, color: onColor(accent), grow: 1 }),
+      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: onColor(accent) })] },
     ].filter(Boolean) }];
 }
 

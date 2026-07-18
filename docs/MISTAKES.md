@@ -1162,3 +1162,31 @@ resolved but never mixed — its only effect was letting an auto-discovered `ass
 silent audio track onto a scene that asked for none; removed.
 **Rule:** when the same concept has two code paths, the one that is not the default will rot. Make the
 second path call the first, not copy it.
+
+---
+
+## 71. Only one colour set in the block library was ever measured
+
+**What:** five hardcoded colour pairs shipped below the WCAG body bar. Measured: white on the amber
+`warn` fill **2.05:1** (in `badge` and `banner`), the `toast` action LINK **2.00:1**, `logLines` info
+**2.95:1** and warn **2.05:1** on its light surface, and the dark-surface timestamp **2.86:1**.
+**Root cause:** `CODE_THEMES` carries a comment recording a measured 4.68:1 minimum across the set, so
+the file demonstrably knew how to do this. Nothing else got the same treatment. The engine's own
+layout audit checks contrast on RENDERED text, which catches a scene but never a block that no scene
+happens to use yet — and the block is what reaches every future video.
+**Fixes, each measured rather than eyeballed:**
+- `onColor(bg)` picks a foreground by luminance instead of assuming `#fff` works. `banner` was putting
+  white on a CALLER-SUPPLIED accent with no check at all; it now reads ink on a light one and white on
+  a dark one, verified both directions.
+- The amber stays the brand amber and the TEXT changes (ink on amber is 8.86:1). Darkening the amber
+  enough to carry white produces a muddy brown that is no longer a warning colour.
+- `logLines` gets two measured palettes; one set of level colours cannot clear 4.5:1 on both a
+  near-black card and a white one.
+- The `toast` action link was Stripe's teal used as text on a light card — unreadable AND a
+  brand-named token leaking into a generic block. Now the theme's accent.
+**Gate:** `make blocks-audit` computes the ratio for every literal `color:` inside a literal `bg:` and
+fails under 4.5:1, pinned in gate-test. Its stated limit: only literal hex pairs can be judged
+statically — CSS vars resolve at render and remain the layout audit's job.
+**Also fixed:** two theme-breaks in the same sweep — `avatarStack` hardcoded `#FFFFFF` rings and
+`table` hardcoded `rgba(0,0,0,0.05)` dividers, both invisible on a dark theme, both now tokens.
+**Rule:** a measurement that was done once, for one set, is a habit nobody formed.
