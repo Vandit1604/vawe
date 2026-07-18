@@ -1,0 +1,67 @@
+{
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe",
+ "duration": 20.0,
+ "audio": { "silent": true },
+
+ "bg": [{ "t": 0, "preset": "ink" }],
+
+ "layers": [
+  { "type": "rect", "x": 360, "y": 300, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.0, "duration": 3.0, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "rect", "x": 780, "y": 300, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.05, "duration": 2.95, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "rect", "x": 1200, "y": 300, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.1, "duration": 2.9, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "rect", "x": 360, "y": 560, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.1, "duration": 2.9, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "rect", "x": 780, "y": 560, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.15, "duration": 2.85, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "rect", "x": 1200, "y": 560, "w": 360, "h": 200, "bg": "rgba(255,255,255,0.05)", "border": "1px solid rgba(255,255,255,0.10)", "radius": 14, "start": 0.2, "duration": 2.8, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
+
+  { "type": "text", "text": "A template is a <b>cage</b>.", "x": 210, "y": 440, "w": 1500, "align": "center", "size": 118, "weight": 700, "color": "#ffffff", "filter": "chromaGlow:1.2", "split": "word", "preset": "chroma", "presetOpts": { "dist": 18 }, "stagger": 0.06, "each": 0.5, "start": 0.5, "duration": 2.7, "anim": "none", "exitDur": 0.3 },
+  { "type": "text", "text": "every tool ships one", "x": 210, "y": 640, "w": 1500, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 1.2, "duration": 2.0, "anim": "fade", "enterDur": 0.4, "exitDur": 0.25 },
+
+  { "type": "text", "text": "We ship a <b>vocabulary</b>.", "x": 210, "y": 440, "w": 1500, "align": "center", "size": 130, "weight": 700, "color": "#ffffff", "split": "char", "preset": "decode", "stagger": 0.02, "each": 0.4, "start": 3.45, "duration": 2.55, "anim": "none", "exitDur": 0.3 },
+  { "type": "text", "text": "compose, do not fill in", "x": 210, "y": 640, "w": 1500, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 4.4, "duration": 1.6, "anim": "fade", "enterDur": 0.4, "exitDur": 0.25 },
+
+  { "type": "text", "text": "One look reskins every frame.", "x": 210, "y": 250, "w": 1500, "align": "center", "size": 74, "weight": 500, "color": "#9fb0c8", "split": "word", "preset": "up", "stagger": 0.05, "each": 0.42, "start": 6.6, "duration": 3.3, "anim": "none", "exitDur": 0.3 },
+  { "type": "rect", "x": 660, "y": 440, "w": 600, "h": 340, "bg": "#172231", "border": "1px solid #8fc0ff", "radius": 20, "elevation": 2, "start": 6.9, "duration": 3.0, "anim": "riseClip", "enterDur": 0.5, "exitDur": 0.3 },
+  { "type": "group", "x": 660, "y": 460, "w": 600, "h": 300, "filter": "neon", "start": 7.0, "duration": 2.9, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3, "children": [
+    { "type": "text", "text": "neon", "x": 660, "y": 490, "w": 600, "align": "center", "size": 34, "font": "mono", "color": "#8fc0ff" },
+    { "type": "text", "text": "26", "x": 660, "y": 530, "w": 600, "align": "center", "size": 150, "weight": 700, "color": "#ffffff" },
+    { "type": "text", "text": "composite looks", "x": 660, "y": 710, "w": 600, "align": "center", "size": 30, "font": "mono", "color": "#9fb0c8" }
+  ] },
+
+  { "type": "text", "text": "Type that <b>performs</b>.", "x": 210, "y": 240, "w": 1500, "align": "center", "size": 74, "weight": 500, "color": "#9fb0c8", "start": 10.4, "duration": 3.1, "anim": "fade", "enterDur": 0.4, "exitDur": 0.3 },
+  { "type": "text", "text": "swing", "x": 210, "y": 440, "w": 1500, "align": "center", "size": 180, "weight": 700, "color": "#ffffff", "split": "char", "preset": "swing", "stagger": 0.06, "each": 0.5, "start": 10.6, "duration": 1.05, "anim": "none", "exitDur": 0.15 },
+  { "type": "text", "text": "unfold", "x": 210, "y": 440, "w": 1500, "align": "center", "size": 180, "weight": 700, "color": "#ffffff", "split": "char", "preset": "unfold", "stagger": 0.07, "each": 0.5, "start": 11.65, "duration": 1.0, "anim": "none", "exitDur": 0.15 },
+  { "type": "text", "text": "stretch", "x": 210, "y": 440, "w": 1500, "align": "center", "size": 180, "weight": 700, "color": "#8fc0ff", "split": "char", "preset": "stretch", "stagger": 0.04, "each": 0.5, "start": 12.6, "duration": 1.0, "anim": "none", "exitDur": 0.2 },
+
+  { "type": "text", "text": "The vocabulary, counted.", "x": 210, "y": 250, "w": 1500, "align": "center", "size": 68, "weight": 500, "color": "#9fb0c8", "start": 13.8, "duration": 2.7, "anim": "fade", "enterDur": 0.4, "exitDur": 0.3 },
+  { "type": "count", "x": 120, "y": 460, "w": 420, "align": "center", "from": 0, "to": 832, "unit": "", "size": 118, "weight": 700, "color": "#ffffff", "ls": "-0.03em", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "start": 13.95, "duration": 2.55, "anim": "rise", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "text", "text": "cuts", "x": 120, "y": 630, "w": 420, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 14.1, "duration": 2.4, "anim": "fade", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "count", "x": 540, "y": 460, "w": 420, "align": "center", "from": 0, "to": 33, "unit": "", "size": 118, "weight": 700, "color": "#ffffff", "ls": "-0.03em", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "start": 14.1, "duration": 2.4, "anim": "rise", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "text", "text": "stings", "x": 540, "y": 630, "w": 420, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 14.25, "duration": 2.25, "anim": "fade", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "count", "x": 960, "y": 460, "w": 420, "align": "center", "from": 0, "to": 26, "unit": "", "size": 118, "weight": 700, "color": "#ffffff", "ls": "-0.03em", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "start": 14.25, "duration": 2.25, "anim": "rise", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "text", "text": "looks", "x": 960, "y": 630, "w": 420, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 14.4, "duration": 2.1, "anim": "fade", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "count", "x": 1380, "y": 460, "w": 420, "align": "center", "from": 0, "to": 25, "unit": "", "size": 118, "weight": 700, "color": "#8fc0ff", "ls": "-0.03em", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "start": 14.4, "duration": 2.1, "anim": "rise", "enterDur": 0.35, "exitDur": 0.25 },
+  { "type": "text", "text": "type presets", "x": 1380, "y": 630, "w": 420, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 14.55, "duration": 1.95, "anim": "fade", "enterDur": 0.35, "exitDur": 0.25 },
+
+  { "type": "text", "text": "832 × 33 × 26 × 25", "x": 210, "y": 240, "w": 1500, "align": "center", "size": 44, "font": "mono", "color": "#7c869a", "start": 16.7, "duration": 3.3, "anim": "fade", "enterDur": 0.4, "exitDur": 0.4 },
+  { "type": "count", "x": 210, "y": 370, "w": 1500, "align": "center", "from": 0, "to": 17846400, "unit": "", "size": 220, "weight": 800, "color": "#ffffff", "ls": "-0.04em", "filter": "chromaGlow:1.4", "countStart": 0.15, "countDur": 2.0, "ease": "easeOutExpo", "start": 16.75, "duration": 3.25, "anim": "pop", "enterDur": 0.5 },
+  { "type": "text", "text": "combinations. one JSON.", "x": 210, "y": 700, "w": 1500, "align": "center", "size": 84, "weight": 700, "color": "#ffffff", "split": "word", "preset": "up", "stagger": 0.06, "each": 0.5, "start": 17.9, "duration": 2.1, "anim": "none", "exitDur": 0.3 },
+  { "type": "text", "text": "zero templates", "x": 210, "y": 860, "w": 1500, "align": "center", "size": 30, "font": "mono", "color": "#7c869a", "start": 18.4, "duration": 1.6, "anim": "fade", "enterDur": 0.4, "exitDur": 0.3 }
+ ],
+
+ "cuts": [
+  { "t": 3.25, "style": "punch" },
+  { "t": 6.45, "style": "whip" },
+  { "t": 10.25, "style": "flip" },
+  { "t": 13.65, "style": "riseBlur" },
+  { "t": 16.65, "style": "iris" }
+ ],
+
+ "stings": [
+  { "t": 3.25, "fx": "chromaticSplit", "seed": 7, "intensity": 0.7 },
+  { "t": 6.45, "fx": "crossWarp", "seed": 3, "colors": ["#2563eb", "#8fc0ff"], "intensity": 0.6 },
+  { "t": 10.25, "fx": "dispersion", "seed": 11, "intensity": 0.55 },
+  { "t": 16.65, "fx": "gridPixelateWipe", "seed": 5, "color": "#2563eb", "intensity": 0.75 }
+ ]
+}
