@@ -26,6 +26,8 @@ const ROLES = {
   reveal: 'chime',     // a sting — the thing that lands
   // named cues an author can place directly
   tick: 'tick', press: 'press', release: 'release', toggle: 'toggle', click: 'press',
+  // keystrokes — short transients the typing sound design rotates through
+  key1: 'key1', key2: 'key2', key3: 'key3', keyspace: 'keyspace', keyenter: 'keyenter',
   chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
   success: 'success', error: 'error', ready: 'ready', pop: 'droplet',
 };
@@ -47,10 +49,14 @@ if (process.argv.includes('--list')) {
   process.exit(0);
 }
 
-let n = 0, total = 0;
+const FORCE = process.argv.includes('--force');
+let n = 0, total = 0, kept = 0;
 for (const [role, cue] of Object.entries(ROLES)) {
   const spec = CUES[cue];
   if (!spec) { console.error(`✗ role "${role}" points at unknown cue "${cue}"`); process.exit(1); }
+  // `make audio` and `make sfx` write the SAME directory, so baking used to silently replace every
+  // recorded sample with a synthesized one. Additive by default; --force to re-bake everything.
+  if (!FORCE && fs.existsSync(path.join(SFX, `${role}.wav`))) { kept++; continue; }
   // seed from the ROLE name so each file is stable and independent of table order
   const seed = [...role].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7);
   // Normalized to a common ceiling; per-cue balance is the mixer's job (sfxGain in audio.go).
@@ -76,5 +82,5 @@ for (const [name, opts] of Object.entries(BEDS)) {
 fs.copyFileSync(path.join(MUSIC, 'calm.wav'), path.join(root, 'assets/music.wav'));
 
 console.log(`✓ baked ${n} file(s), ${total.toFixed(1)}s of audio @ ${SR}Hz — synthesized, deterministic, no licence`);
-console.log(`  sfx   → assets/sfx/     (${Object.keys(ROLES).length} roles)`);
+console.log(`  sfx   → assets/sfx/     (${n} written, ${kept} kept — --force to re-bake)`);
 console.log(`  music → assets/music/   (${Object.keys(BEDS).join(', ')}) + assets/music.wav default`);

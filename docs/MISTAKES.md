@@ -838,3 +838,50 @@ because the engine knows the measured width and arithmetic in a factory does not
 **Fix:** the mark centres via the group's own `justify` (or a text layer's `align` over its width).
 **Rule:** the rule against hand-computed centring applies to BLOCK CODE too, not just scene JSON. A
 factory is the worst place for it — the error ships to every caller.
+
+---
+
+## 51. A sound effect named `click` was 19.6 seconds long
+
+**What:** the typing sound design was reported as "sounding like a train going by".
+**Root cause:** `assets/sfx/click.wav` was **19.6 seconds**. The Mixkit fetcher asks for "the 4th
+ranked result in the click category" and saves whatever comes back; nothing ever checked that a file
+named `click` was actually a click. The keystroke cues then fired one every 0.09s, so ~215 copies of a
+19-second sample overlapped into a continuous drone. The sound design was correct; the sample was not.
+**Fix:** keystrokes are now GENERATED, not downloaded — `key1/key2/key3/keyspace/keyenter` in
+core/audio-kit.mjs are ~15-35ms bandpassed noise transients, which is physically what a key click is.
+Three voicings rotate by character index, because a real keyboard does not make the identical sound
+38 times and one repeated sample is its own kind of machine gun.
+**Gate:** `make sfx-check` — every cue must be the SHAPE its role claims. A transient that outlasts
+the gap between two of its own triggers is not a transient, and that is checkable arithmetic.
+**Also found:** `make audio` (synth) and `make sfx` (recorded) write the same directory, so baking
+silently replaced every recorded sample. Baking is now additive; `--force` to overwrite.
+**Rule:** a downloaded asset is an input, not a fact. Check its shape against the role you gave it.
+
+---
+
+## 52. The demo was silently scored
+
+**What:** every window of the search demo measured ~-23dB, including the stretches that should have
+been silent — which made it impossible to tell whether the keystroke fix had worked.
+**Root cause:** the Go mixer resolves `cfg.Music` and falls back to auto-discovering
+`assets/music.wav`. A scene that never asks for music gets a bed anyway if that file exists.
+**Fix (this scene):** `musicGain: 0` — a UI demo is not scored; the interface sounds ARE the sound
+design. With the bed gone the gaps read -91dB, which is how you can prove the clicks are discrete.
+**Rule:** an auto-discovered default that the JSON never mentions is invisible in the JSON. When
+measuring a change, first check what else is in the signal.
+
+---
+
+## 53. A wordmark re-typed in the theme's font is a lookalike
+
+**What:** "Google" was drawn as six coloured text layers in whatever face the theme shipped (Anybody).
+It read as Google-ish and the user spotted it immediately: "you google written in your own font".
+**Root cause:** the authoring rules already say capture or fetch a brand asset, never recreate it —
+and I recreated one, then hand-typed its hexes. The colours were right; the letterforms were not, and
+letterforms are most of what a wordmark IS.
+**Fix:** the block takes a `logo` (a real SVG) which wins over `word`/`brand`, and the demo points at
+the actual wordmark. Magnifier + mic are real Lucide icons (ISC) with the stroke baked, because an
+SVG loaded as an `<img>` has no `currentColor` to inherit and renders invisible.
+**Rule:** "close enough" on a brand asset is never close enough. The eye that knows the brand is the
+eye you are showing it to.

@@ -29,6 +29,11 @@ beatmap:
 sfx:
 	node scripts/media/sfx.mjs
 
+# make sfx-check  — is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
+# a typed line came out sounding like a passing train (docs/MISTAKES.md #51).
+sfx-check:
+	node scripts/gates/sfx-audit.mjs
+
 build: fonts
 	go build -o bin/vawe ./cmd/render
 

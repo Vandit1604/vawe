@@ -930,57 +930,82 @@ export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', lab
 const SEARCH_LINK = 'color-mix(in srgb, var(--accent) 82%, var(--text))';
 
 export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
-  brand = 'Search', word = null, query = '', results = [], markAlign = 'center',
+  brand = 'Search', word = null, logo = null, logoW = 272, logoH = 92,
+  query = '', results = [], markAlign = 'center',
   cps = 11, clickIndex = 0, cursorStart, start = 0, dur = 5 } = {}) {
   const out = [];
-  const BAR_H = 66, RADIUS = 999;
+  const BAR_H = 60, PAD = 22, ICON = 24;
 
-  // the wordmark: one text layer per letter so each can carry its own colour, laid out in a row group
-  // `logotype` marks this as a brand mark: WCAG 1.4.3 exempts logotypes from the contrast bar, and a
-  // real multi-colour wordmark needs that (a brand's own yellow on white is ~1.7:1 and recolouring it
-  // would make the mark wrong). Set on the GROUP so it covers every letter beneath it.
-  // Centering is the ENGINE's job (a group's justify / a text layer's align over its own width), never
-  // arithmetic here: `x + w/2 - 150` assumed one word at one size and mis-centred every other
-  // combination, which is exactly the hand-computed-centring trap the authoring rules call out.
-  const mark = (cy, size) => (word && word.length)
-    ? { type: 'group', x, y: cy, w, layout: 'row', gap: 0, items: 'baseline', logotype: true,
+  // THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
+  // the theme happens to ship is a lookalike, not the brand — the authoring rules call this out
+  // directly ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter
+  // colours) and `brand` (plain text) remain for marks you do not have a file for.
+  // `logotype` applies the WCAG 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
+  const mark = (cy, h) => {
+    const common = { start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3, logotype: true };
+    if (logo) {
+      const iw = Math.round(h * (logoW / logoH));
+      return { type: 'image', src: logo, w: iw, h, y: cy,
+        x: markAlign === 'left' ? x : Math.round(x + (w - iw) / 2), ...common };
+    }
+    if (word && word.length) {
+      return { type: 'group', x, y: cy, w, layout: 'row', gap: 0, items: 'baseline', ...common,
         justify: markAlign === 'left' ? 'flex-start' : 'center',
-        start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3,
-        children: word.map((L) => text({ text: L.c, size, weight: 700, color: L.color, ls: '-0.04em' })) }
-    : text({ text: brand, x, y: cy, w, align: markAlign === 'left' ? 'left' : 'center',
-        size, weight: 700, color: T.ink, ls: '-0.04em', logotype: true,
-        start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3 });
+        children: word.map((L) => text({ text: L.c, size: h, weight: 700, color: L.color, ls: '-0.04em' })) };
+    }
+    return text({ text: brand, x, y: cy, w, align: markAlign === 'left' ? 'left' : 'center',
+      size: h, weight: 700, color: T.ink, ls: '-0.04em', ...common });
+  };
+
+  // THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge — the real
+  // furniture of a search field. The icons are Lucide (ISC) with the stroke baked, because an SVG
+  // loaded as an <img> has no currentColor to inherit and would render invisible.
+  const bar = (bx, by, bw, st, d, textSize) => {
+    const r = [];
+    r.push(rect({ x: bx, y: by, w: bw, h: BAR_H, radius: BAR_H / 2, bg: T.card, border: HAIR, elevation: 1,
+      start: st, duration: d, anim: 'rise', enterDur: 0.45, exitDur: 0.3 }));
+    r.push({ type: 'image', src: '/assets/icons/ui/search.svg', w: ICON, h: ICON,
+      x: bx + PAD, y: by + (BAR_H - ICON) / 2,
+      start: r2(st + 0.06), duration: r2(d - 0.06), anim: 'fade', enterDur: 0.4, exitDur: 0.25 });
+    r.push({ type: 'image', src: '/assets/icons/ui/mic.svg', w: ICON - 2, h: ICON - 2,
+      x: bx + bw - PAD - (ICON - 2), y: by + (BAR_H - ICON + 2) / 2,
+      start: r2(st + 0.1), duration: r2(d - 0.1), anim: 'fade', enterDur: 0.4, exitDur: 0.25 });
+    return r;
+  };
+  const TEXT_X = (bx) => bx + PAD + ICON + 16;   // clears the magnifier
+  const TEXT_W = (bw) => bw - (PAD + ICON + 16) - (PAD + ICON + 12);
 
   if (variant === 'home') {
-    const barY = y + 210;
-    // markAlign 'left' anchors the wordmark to the bar's left edge instead of over its centre — an
-    // asymmetric search page, which is both a better composition and what most real product shots do.
-    out.push(mark(y, 104));
-    out.push(rect({ x, y: barY, w, h: BAR_H, radius: RADIUS, bg: T.card, border: HAIR, elevation: 1,
-      start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'rise', enterDur: 0.45, exitDur: 0.3 }));
-    // the query types INTO the bar. `typing` is chars/sec, and the engine sounds one key per char.
-    out.push(text({ text: query, x: x + 38, y: barY + 17, w: w - 76, size: 28, color: T.ink,
+    const barY = y + 180;
+    out.push(mark(y, 92));
+    out.push(...bar(x, barY, w, r2(start + 0.35), r2(dur - 0.35), 26));
+    // the query types INTO the bar, clear of the magnifier. `typing` is chars/sec and the engine
+    // derives one key click per revealed character from (start, cps, text).
+    out.push(text({ text: query, x: TEXT_X(x), y: barY + 16, w: TEXT_W(w), size: 26, color: T.ink,
       typing: cps, start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
     return out;
   }
 
-  // ---- results ----
-  const barW = Math.round(w * 0.66);
-  out.push(rect({ x, y, w: barW, h: 54, radius: RADIUS, bg: T.card, border: HAIR, elevation: 1,
-    start, duration: dur, anim: 'slide-up', out: 'slide-down', enterDur: 0.4, exitDur: 0.3 }));
-  out.push(text({ text: query, x: x + 30, y: y + 12, w: barW - 60, size: 24, color: T.ink,
+  // ---- results: the mark shrinks to the top-left and the bar sits beside it, as it really does ----
+  const MARK_H = 34, GAP = 40;
+  const markW = Math.round(MARK_H * (logoW / logoH));
+  const barX = x + (logo || word ? markW + GAP : 150);
+  const barW = Math.min(w - (barX - x), 720);
+  out.push({ ...mark(y + 12, MARK_H), x, logotype: true });
+  out.push(...bar(barX, y, barW, start, dur, 22));
+  out.push(text({ text: query, x: TEXT_X(barX), y: y + 15, w: TEXT_W(barW), size: 22, color: T.ink,
     start: r2(start + 0.08), duration: r2(dur - 0.08), anim: 'fade', enterDur: 0.3, exitDur: 0.25 }));
 
-  const ROW = 132, top = y + 108;
+  const ROW = 128, top = y + 124, RX = barX;
   results.forEach((res, i) => {
     const ry = top + i * ROW;
-    const st = r2(start + 0.3 + i * 0.1);          // staggered: motion order is reading order
+    const st = r2(start + 0.3 + i * 0.1);       // staggered: motion order is reading order
     const d = r2(start + dur - st);
-    out.push(text({ text: res.url, x, y: ry, w, size: 19, font: 'mono', color: T.dim,
+    out.push(text({ text: res.url, x: RX, y: ry, w: w - (RX - x), size: 19, font: 'mono', color: T.dim,
       start: st, duration: d, anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
-    out.push(text({ text: res.title, x, y: ry + 26, w, size: 32, weight: 500, color: SEARCH_LINK,
+    out.push(text({ text: res.title, x: RX, y: ry + 26, w: w - (RX - x), size: 32, weight: 500, color: SEARCH_LINK,
       start: r2(st + 0.04), duration: r2(d - 0.04), anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
-    if (res.snippet) out.push(text({ text: res.snippet, x, y: ry + 72, w, size: 19, color: T.sub,
+    if (res.snippet) out.push(text({ text: res.snippet, x: RX, y: ry + 72, w: w - (RX - x), size: 19, color: T.sub,
       start: r2(st + 0.08), duration: r2(d - 0.08), anim: 'fade', enterDur: 0.45, exitDur: 0.25 }));
   });
 
@@ -988,10 +1013,9 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   // cut on `cursorStart + 0.9` — the block places the click, the scene pays it off.
   if (results.length && clickIndex != null) {
     const cs = cursorStart != null ? cursorStart : r2(start + dur - 1.5);
-    const targetY = top + clickIndex * ROW + 40;
     out.push({ type: 'cursor', size: 36, start: cs, duration: r2(start + dur - cs),
       path: [{ t: 0, x: x + w - 120, y: top + results.length * ROW },
-             { t: 0.75, x: x + 210, y: targetY }],
+             { t: 0.75, x: RX + 60, y: top + clickIndex * ROW + 40 }],
       clicks: [0.9] });
   }
   return out;
