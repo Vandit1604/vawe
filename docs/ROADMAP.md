@@ -216,19 +216,14 @@ approximation and should be labelled one — never implied to be the real contro
 ## Tier 5 — blocked on a determinism story
 
 These are **not** "hard", they are **unsolved for this engine**, and shipping them naively breaks
-the product's central claim:
+the product's central claim. (Audio-reactivity used to sit here and no longer does: `make spectrum`
+bakes per-frame band energy offline and the render reads row `n` of a table, so it never was a
+determinism problem once the analysis moved out of the frame. See `core/spectrum.js`.)
 
 - **Particle/fluid sims** (smoke, fog, fluid/ink diffusion, reaction-diffusion, boids, gravity
   fields, disintegration, sand pour). Sims are iterative; `renderFrame(412)` cannot step 411 frames
   first. Needs closed-form motion, or a precomputed baked buffer keyed by frame, or an explicit
   "sim layers render in-order" carve-out that costs frame sharding.
-- ~~**Audio-reactive**~~ **Built.** `make spectrum MUSIC=…` bakes per-frame band energy beside a track
-  (`core/spectrum.js` is the pure DSP, `<name>.spectrum.json` the sidecar); a scene points at it with
-  `audio.spectrum` and any layer reacts with `react: { band, prop, range }`. The determinism story is
-  the one predicted here: the ANALYSIS is offline, so the render reads row `n` of a table and never
-  touches a decoder — probe and canvas-purity both hold. Bands are normalised PER BAND so each is
-  usable, and the sidecar reports each band's absolute `peak` so an author can tell a silent band from
-  a loud one rather than keying a pulse to amplified noise.
 - **True motion blur.** Sub-frame accumulation in the render pipeline.
 - **Depth estimation** for 2.5D parallax from a flat image. Needs a model in the pipeline.
 - **Chroma key / luma key / difference matte.** Easy per-pixel; the question is where source video

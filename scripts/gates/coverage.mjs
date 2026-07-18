@@ -46,7 +46,11 @@ for (const { j } of scenes) {
   for (const b of j.bg || []) if (b?.preset) used.bg.add(b.preset);
   for (const l of layersOf(j)) {
     if (l.type) used.type.add(l.type);
+    // `anim` and `out` draw from the SAME registry (core/clips.js ANIM), so counting only `anim`
+    // reported `defocus` as unexercised while tpot-launch used it on five layers as an exit. A
+    // coverage gate that undercounts sends you to build something that already ships.
     if (l.anim) used.anim.add(l.anim);
+    if (l.out) used.anim.add(l.out);
     if (l.preset) used.preset.add(l.preset);
     if (l.canvasFx) used.canvasFx.add(typeof l.canvasFx === 'string' ? l.canvasFx : l.canvasFx.fx);
     if (l.paint) used.paint.add(l.paint);
