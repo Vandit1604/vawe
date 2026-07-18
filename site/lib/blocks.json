@@ -1938,5 +1938,65 @@
       "handle": "anaroth",
       "cta": "Follow"
     }
+  },
+  {
+    "name": "searchEngine.home",
+    "family": "searchEngine",
+    "blurb": "search home — wordmark + pill, query types in (keys click)",
+    "props": {
+      "variant": "home",
+      "w": 540,
+      "cps": 11,
+      "query": "deterministic video from json",
+      "word": [
+        {
+          "c": "S",
+          "color": "#4285F4"
+        },
+        {
+          "c": "e",
+          "color": "#EA4335"
+        },
+        {
+          "c": "a",
+          "color": "#FBBC05"
+        },
+        {
+          "c": "r",
+          "color": "#4285F4"
+        },
+        {
+          "c": "c",
+          "color": "#34A853"
+        },
+        {
+          "c": "h",
+          "color": "#EA4335"
+        }
+      ]
+    }
+  },
+  {
+    "name": "searchEngine.results",
+    "family": "searchEngine",
+    "blurb": "search results — ranked links, cursor clicks one",
+    "props": {
+      "variant": "results",
+      "w": 540,
+      "query": "video from json",
+      "clickIndex": 0,
+      "results": [
+        {
+          "url": "vawe.dev › docs",
+          "title": "One JSON. Any brand.",
+          "snippet": "Same input, same frames, every time."
+        },
+        {
+          "url": "vawe.dev › blocks",
+          "title": "The block registry",
+          "snippet": "Vetted blocks you compose, not author."
+        }
+      ]
+    }
   }
 ]

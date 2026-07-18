@@ -810,3 +810,31 @@ planning artifacts like `*.intent.json`) plus every `themes/*.json` checked dire
 **What it found on the first run:** 4 broken scenes and 3 incomplete themes.
 **Rule:** a validator is only as good as the file list you point it at, and the default list is the
 one everybody actually uses. Same family as #45 — the rule was fine, the coverage was the bug.
+
+---
+
+## 49. Sound had no way to come from the picture
+
+**What:** the brief was "typing, with a click on each keystroke". Every existing route put the author
+in charge of placing 38 individual cues by hand, which drift the moment the copy or the speed changes.
+**Root cause:** `audio.auto` derived cues from cuts and stings only — the two things that live in the
+scene's *structure*. A `typing` layer already reveals character i at exactly `start + (i+1)/cps`
+(core/layers/text.js), so the sound was fully determined and simply never read.
+**Fix:** auto sound-design emits one key cue per revealed character from that same expression. Change
+the copy or the speed and the clicks follow, because both come from one formula.
+**Gotcha found while doing it:** the existing cue merge drops anything within 0.09s of the previous
+cue, which at any realistic typing speed would have silently eaten every other letter. Keystrokes get
+their own tighter floor; structural cues keep the old one.
+**Rule:** if a value is already determined by the picture, the author should never be typing it twice.
+
+---
+
+## 50. A block hand-computed its own centring
+
+**What:** the searchEngine wordmark was centred with `x + w/2 - 150`. It looked right for the one word
+at the one size I tested and was wrong everywhere else — the site thumbnail cropped the mark in half.
+**Root cause:** the authoring rules already say placement is `pin`/`col`/`align`, never eyeballed `x`,
+because the engine knows the measured width and arithmetic in a factory does not.
+**Fix:** the mark centres via the group's own `justify` (or a text layer's `align` over its width).
+**Rule:** the rule against hand-computed centring applies to BLOCK CODE too, not just scene JSON. A
+factory is the worst place for it — the error ships to every caller.

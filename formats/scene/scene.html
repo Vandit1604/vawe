@@ -209,6 +209,11 @@
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
           if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          // WCAG 1.4.3 exempts logotypes: "text that is part of a logo or brand name has no minimum
+          // contrast requirement". A multi-colour wordmark is the case — a brand's own yellow on white
+          // is legitimately below the bar and changing it would make the mark wrong. Opt IN explicitly
+          // per layer so it can never be an accident, and so the exemption is visible in the JSON.
+          if (L.logotype) el.setAttribute('data-logotype', '1');
           cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };
@@ -379,6 +384,31 @@
           for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
           cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
           for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
+          // KEYSTROKES. core/layers/text.js reveals character i at exactly start + (i+1)/cps, so the
+          // click for that character is that same expression — the sound is derived from the formula
+          // that draws the picture rather than dialled in by hand, which is the only way a typing
+          // sound stays in sync when the copy or the speed changes.
+          const keyCues = [];
+          for (const { L } of layers) {
+            if (!L.typing || L.keyClicks === false) continue;
+            const cps = L.typing === true ? 24 : +L.typing;
+            const full = String(L.text || ''), st = +(L.start ?? 0);
+            const end = st + (L.duration != null ? +L.duration : Infinity);
+            for (let i = 0; i < full.length; i++) {
+              const kt = st + (i + 1) / cps;
+              if (kt >= end) break;                       // never sound a character the window never reveals
+              keyCues.push({ t: +kt.toFixed(3), name: full[i] === ' ' ? 'tick' : 'click', gain: L.keyGain ?? 0.3 });
+            }
+          }
+          // A key train is legitimately dense, so it gets its own tighter floor. The 0.09 merge above
+          // is there to stop two STRUCTURAL cues stacking on one instant; applied to keystrokes it
+          // would silently drop every other letter at any realistic typing speed.
+          if (keyCues.length) {
+            keyCues.sort((a, b) => a.t - b.t);
+            const keys = [];
+            for (const c of keyCues) if (!keys.length || c.t - keys[keys.length - 1].t > 0.03) keys.push(c);
+            sfx = sfx.concat(keys).sort((a, b) => a.t - b.t);
+          }
         }
         return { fps, duration, stings: stings.map((s) => s.t), sfx, renderFrame };
       });

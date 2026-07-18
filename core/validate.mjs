@@ -121,7 +121,12 @@ function checkField(spec, val, at, errors) {
       break;
     case 'string':
       if (spec.minLength != null && val.length < spec.minLength) errors.push(`${at} must be ≥ ${spec.minLength} chars`);
-      if (spec.enum && !spec.enum.includes(val)) errors.push(`${at} "${val}" is not valid.${nearest(val, spec.enum)} One of: ${spec.enum.join(', ')}`);
+      if (spec.enum && !spec.enum.includes(val)) {
+      // `block`/`comp` are BUILD-TIME sugar, not layer types. Reporting them as an unknown enum buries
+      // the dedicated "run make expand" message under a list of 15 types that are all wrong answers.
+      if (!(at.endsWith('.type') && (val === 'block' || val === 'comp')))
+        errors.push(`${at} "${val}" is not valid.${nearest(val, spec.enum)} One of: ${spec.enum.join(', ')}`);
+    }
       if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} must match /${spec.pattern}/ (got "${val}")`);
       break;
     case 'array':
@@ -191,6 +196,10 @@ if (isMain) {
         // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
         const fp = path.join(dir, n);
         try { if (!JSON.parse(fs.readFileSync(fp, 'utf8')).module) continue; } catch { }
+        // A scene authored with block/comp sugar is a SOURCE; `make expand` writes the renderable
+        // <name>.expanded.json beside it, and that is what gets validated and rendered. Checking the
+        // source too would report "un-expanded block" forever on a file that is correct as authored.
+        if (!n.endsWith('.expanded.json') && fs.existsSync(fp.replace(/\.json$/, '.expanded.json'))) continue;
         targets.push(fp);
       }
     }

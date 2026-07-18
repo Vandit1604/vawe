@@ -193,7 +193,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // distance. Frame-relative so it scales to portrait/landscape.
   const MIN_TXT = window.innerHeight * 0.013;
   for (const tx of document.querySelectorAll('.hs-text')) {
-    if (!vis(tx)) continue;
+    if (!vis(tx)) continue;   // the logotype exemption is CONTRAST-only (WCAG 1.4.3); a mark still has to be big enough to see
     // Measure the element that actually HOLDS the text (an element with a direct text node), not the
     // layer wrapper. An `html` layer nests its content in a child styled at its own size, so the
     // wrapper's inherited 16px default is not what the viewer sees — walk to the real text holders.
@@ -346,6 +346,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (!vis(el)) continue;
     const b = el.getBoundingClientRect();
     if (b.width < 2 || b.height < 2) continue;
+    if (el.closest('[data-logotype]')) continue; // WCAG 1.4.3 logotype exemption, declared per layer
     const fg = parse(getComputedStyle(el).color);
     if (!fg || fg[3] < 0.5) continue;
     const bg = bgFor(el, { x: b.left, y: b.top, w: b.width, h: b.height });
@@ -378,7 +379,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       detail: invisible ? `${label} ≈ bg colour (invisible)` : `${label} ${parseFloat(getComputedStyle(span).fontSize) | 0}px at ${rt.toFixed(1)}:1` });
   };
   for (const tx of document.querySelectorAll('.hs-text')) {
-    if (!vis(tx)) continue;
+    if (!vis(tx) || tx.closest('[data-logotype]')) continue; // WCAG 1.4.3 logotype exemption
     const critical = tx.getAttribute('data-layer') === 'critical' || !!tx.closest('[data-layer="critical"]');
     for (const em of tx.querySelectorAll('b, em')) checkSpan(em, critical, em.tagName.toLowerCase()); // <b>/<em> always: they carry --em
     const px = parseFloat(getComputedStyle(tx).fontSize) || 0; // the whole layer only when headline-scale AND not already checked as critical above

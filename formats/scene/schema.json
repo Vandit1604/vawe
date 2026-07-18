@@ -987,6 +987,20 @@
           "type": "number",
           "label": "glow chromaCycle: seconds for the hue to sweep the full spectrum (default 6)",
           "min": 0.5
+        },
+        "logotype": {
+          "type": "boolean",
+          "label": "Text is part of a logo/brand mark \u2014 exempt from the CONTRAST bar only (WCAG 1.4.3)"
+        },
+        "keyClicks": {
+          "type": "boolean",
+          "label": "Set false to silence the per-character key clicks a `typing` layer emits"
+        },
+        "keyGain": {
+          "type": "number",
+          "label": "Gain of the per-character key click (default 0.3)",
+          "min": 0,
+          "max": 1
         }
       }
     },

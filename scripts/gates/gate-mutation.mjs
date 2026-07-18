@@ -53,6 +53,17 @@ const CASES = [
     scene: scene([{ type: 'rect', x: 150, y: 380, w: 460, h: 160, bg: '#0093eb', radius: 26, start: 0, duration: 2 },
                   TXT({ text: 'Tech', x: 150, y: 400, w: 460, align: 'center', size: 110, color: '#ffffff' })]) },
 
+  // The logotype exemption (WCAG 1.4.3) is contrast-ONLY and must be declared. Pinned in all three
+  // directions so it cannot quietly become "any low-contrast text is fine".
+  { gate: 'audit', name: 'logotype · a declared brand mark is contrast-exempt', expect: 'pass',
+    scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', logotype: true, start: 0, duration: 2,
+                    children: [{ type: 'text', text: 'o', size: 104, weight: 700, color: '#FBBC05' }] }]) },
+  { gate: 'audit', name: 'logotype · undeclared low-contrast display text still fails', expect: 'fail', match: /contrast|weak-headline/,
+    scene: scene([TXT({ text: 'o', size: 104, weight: 700, color: '#FBBC05' })]) },
+  { gate: 'audit', name: 'logotype · exemption does NOT cover the tiny-text floor', expect: 'fail', match: /tiny-text/, outputOnly: true,
+    scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', logotype: true, start: 0, duration: 2,
+                    children: [{ type: 'text', text: 'unreadably small mark', size: 9, color: '#FBBC05' }] }]) },
+
   // ---- validator: must FAIL on vocabulary that does not exist ----
   { gate: 'validate', name: 'unknown anim name', expect: 'fail', match: /anim|not valid/i,
     scene: scene([TXT({ anim: 'slideL' })]) },
@@ -83,8 +94,9 @@ for (const c of CASES) {
   const failed = r.code !== 0;
   let ok, why;
   if (c.expect === 'fail') {
-    ok = failed && (!c.match || c.match.test(r.out));
-    why = !failed ? 'gate stayed SILENT on a fixture built to break it' : 'gate failed but for the wrong reason';
+    // outputOnly: the rule is WARN-tier, so it reports without exiting non-zero. Assert it SPOKE.
+    ok = (c.outputOnly ? true : failed) && (!c.match || c.match.test(r.out));
+    why = !failed && !c.outputOnly ? 'gate stayed SILENT on a fixture built to break it' : 'gate failed but for the wrong reason';
   } else {
     ok = !failed;
     why = 'gate FIRED on a fixture that is correct (false positive)';

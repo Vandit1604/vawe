@@ -917,6 +917,86 @@ export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', lab
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
+// ─────────────────────────────────────────────────────────────────────────────
+// searchEngine — a search page in the two states that actually tell a story:
+//   variant 'home'    → the wordmark over an empty pill, the query TYPING into it
+//   variant 'results' → a compact bar carrying the query, ranked results, a cursor clicking one
+//
+// The wordmark is a PROP, never baked in. A block that hardcodes one company's mark is a picture of
+// that company, not a reusable piece: pass `brand` for a plain wordmark, or `word` for a per-letter
+// coloured one. Every layer is top-level and absolutely placed rather than flowed inside a group,
+// because the query is a `typing` layer and its per-character key clicks are derived by the engine
+// from (start, cps, text) — keeping it top-level keeps that timing readable at the call site.
+const SEARCH_LINK = 'color-mix(in srgb, var(--accent) 82%, var(--text))';
+
+export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
+  brand = 'Search', word = null, query = '', results = [], markAlign = 'center',
+  cps = 11, clickIndex = 0, cursorStart, start = 0, dur = 5 } = {}) {
+  const out = [];
+  const BAR_H = 66, RADIUS = 999;
+
+  // the wordmark: one text layer per letter so each can carry its own colour, laid out in a row group
+  // `logotype` marks this as a brand mark: WCAG 1.4.3 exempts logotypes from the contrast bar, and a
+  // real multi-colour wordmark needs that (a brand's own yellow on white is ~1.7:1 and recolouring it
+  // would make the mark wrong). Set on the GROUP so it covers every letter beneath it.
+  // Centering is the ENGINE's job (a group's justify / a text layer's align over its own width), never
+  // arithmetic here: `x + w/2 - 150` assumed one word at one size and mis-centred every other
+  // combination, which is exactly the hand-computed-centring trap the authoring rules call out.
+  const mark = (cy, size) => (word && word.length)
+    ? { type: 'group', x, y: cy, w, layout: 'row', gap: 0, items: 'baseline', logotype: true,
+        justify: markAlign === 'left' ? 'flex-start' : 'center',
+        start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3,
+        children: word.map((L) => text({ text: L.c, size, weight: 700, color: L.color, ls: '-0.04em' })) }
+    : text({ text: brand, x, y: cy, w, align: markAlign === 'left' ? 'left' : 'center',
+        size, weight: 700, color: T.ink, ls: '-0.04em', logotype: true,
+        start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3 });
+
+  if (variant === 'home') {
+    const barY = y + 210;
+    // markAlign 'left' anchors the wordmark to the bar's left edge instead of over its centre — an
+    // asymmetric search page, which is both a better composition and what most real product shots do.
+    out.push(mark(y, 104));
+    out.push(rect({ x, y: barY, w, h: BAR_H, radius: RADIUS, bg: T.card, border: HAIR, elevation: 1,
+      start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'rise', enterDur: 0.45, exitDur: 0.3 }));
+    // the query types INTO the bar. `typing` is chars/sec, and the engine sounds one key per char.
+    out.push(text({ text: query, x: x + 38, y: barY + 17, w: w - 76, size: 28, color: T.ink,
+      typing: cps, start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
+    return out;
+  }
+
+  // ---- results ----
+  const barW = Math.round(w * 0.66);
+  out.push(rect({ x, y, w: barW, h: 54, radius: RADIUS, bg: T.card, border: HAIR, elevation: 1,
+    start, duration: dur, anim: 'slide-up', out: 'slide-down', enterDur: 0.4, exitDur: 0.3 }));
+  out.push(text({ text: query, x: x + 30, y: y + 12, w: barW - 60, size: 24, color: T.ink,
+    start: r2(start + 0.08), duration: r2(dur - 0.08), anim: 'fade', enterDur: 0.3, exitDur: 0.25 }));
+
+  const ROW = 132, top = y + 108;
+  results.forEach((res, i) => {
+    const ry = top + i * ROW;
+    const st = r2(start + 0.3 + i * 0.1);          // staggered: motion order is reading order
+    const d = r2(start + dur - st);
+    out.push(text({ text: res.url, x, y: ry, w, size: 19, font: 'mono', color: T.dim,
+      start: st, duration: d, anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
+    out.push(text({ text: res.title, x, y: ry + 26, w, size: 32, weight: 500, color: SEARCH_LINK,
+      start: r2(st + 0.04), duration: r2(d - 0.04), anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
+    if (res.snippet) out.push(text({ text: res.snippet, x, y: ry + 72, w, size: 19, color: T.sub,
+      start: r2(st + 0.08), duration: r2(d - 0.08), anim: 'fade', enterDur: 0.45, exitDur: 0.25 }));
+  });
+
+  // the pointer travels to the chosen result and clicks it. A click needs a consequence, so callers
+  // cut on `cursorStart + 0.9` — the block places the click, the scene pays it off.
+  if (results.length && clickIndex != null) {
+    const cs = cursorStart != null ? cursorStart : r2(start + dur - 1.5);
+    const targetY = top + clickIndex * ROW + 40;
+    out.push({ type: 'cursor', size: 36, start: cs, duration: r2(start + dur - cs),
+      path: [{ t: 0, x: x + w - 120, y: top + results.length * ROW },
+             { t: 0.75, x: x + 210, y: targetY }],
+      clicks: [0.9] });
+  }
+  return out;
+}
+
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
 // opts, so a scene can still override anything. Adding a variant = a row in blocks/catalog.mjs (+ a
 // `variant` branch in the family). See docs/BLOCKS.md (auto-generated) and docs/TASTE.md.
@@ -928,7 +1008,7 @@ const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browse
   fileTree, logLines, commitRow, phoneFrame, tabBar,
   checklist, table, timeline, stepFlow, kanban,
   chatBubble, tweetCard, avatarStack, toast, reactionBar, nowPlaying, videoLowerThird, followCard,
-  logoWall, badge, gauge, progressRing, banner, spinner, lowerThird };
+  logoWall, badge, gauge, progressRing, banner, spinner, lowerThird, searchEngine };
 
 export const BLOCKS = { ...FACTORIES };
 for (const e of CATALOG) {
