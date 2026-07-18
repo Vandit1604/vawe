@@ -680,6 +680,9 @@
           "type": "string",
           "label": "Image: colour the edgeFade dissolves into (default #ffffff; set to the bg for dark scenes)"
         },
+        "canvasFx": {
+          "label": "Image: Tier-2 Canvas pass baked once at build (deterministic). Name (halftone/dither/mosaic) or { fx, cell, ink, paper, seed }. core/canvas-fx.js"
+        },
         "from": {
           "type": "number",
           "label": "Count start value (count)"

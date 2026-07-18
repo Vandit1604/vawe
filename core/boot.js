@@ -6,6 +6,7 @@ import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { safeArea, ASPECTS } from './safe.js';
+import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
@@ -277,6 +278,21 @@ export async function boot(build) {
       await document.fonts.ready;
     } catch (e) {}
     await preloadImages(data); // web/local images ready before any frame is captured
+    // Tier-2 CANVAS FX: bake each image with a `canvasFx` (halftone/dither/mosaic/…) ONCE here, in the
+    // awaited readiness phase, into a static PNG data-URL. image.js then swaps the <img> src to it, so
+    // the pixels are static at frame time → renderFrame(n) stays byte-identical (probe/snap prove it).
+    window.__canvasFx = {};
+    const cfxJobs = [];
+    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.type === 'image' && o.canvasFx && typeof o.src === 'string') cfxJobs.push({ src: o.src, spec: o.canvasFx }); Object.values(o).forEach(scan); } })(data);
+    for (const job of cfxJobs) {
+      const key = canvasFxKey(job.src, job.spec);
+      if (window.__canvasFx[key]) continue;
+      try {
+        const img = await new Promise((res, rej) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => (im.decode ? im.decode().then(() => res(im), () => res(im)) : res(im)); im.onerror = rej; im.src = job.src; });
+        const url = bakeCanvasFx(img, job.spec);
+        if (url) window.__canvasFx[key] = url;
+      } catch (e) { /* missing/tainted source → image.js falls back to the raw <img> */ }
+    }
     // preload captured components (real UI lifted off a site by scripts/capture-component.mjs) so a
     // `component` scene can inject real HTML synchronously. Any string like /…/components/x.json.
     window.__components = {};

@@ -1,7 +1,15 @@
 // core/layers/image.js — an <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
+// `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
+import { canvasFxKey } from '../canvas-fx.js';
+
 export function build(kit, el, L) {
   el.innerHTML = kit.icon(L.src, '');
   const im = el.querySelector('img'); if (im) { im.className = 'hs-img'; if (L.h) im.style.height = L.h + 'px'; if (L.w) im.style.width = L.w + 'px'; }
+  // baked canvas FX: replace the source with the pre-processed static image (deterministic)
+  if (L.canvasFx && im && typeof window !== 'undefined' && window.__canvasFx) {
+    const baked = window.__canvasFx[canvasFxKey(L.src, L.canvasFx)];
+    if (baked) im.src = baked;
+  }
   if (L.ken && im) {
     Object.assign(el.style, { overflow: 'hidden', borderRadius: (L.radius ?? 18) + 'px' });
     im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%';
