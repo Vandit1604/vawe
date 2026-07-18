@@ -96,6 +96,17 @@ motion:
 conformance:
 	node scripts/gates/conformance.mjs $(P)
 
+# make gate-test  — MUTATION-test the gates: feed each one a fixture built to trip it and assert it
+# FIRES, plus fixtures that must PASS so a gate cannot buy sensitivity with false positives.
+# A gate that cannot fail reports green forever (MISTAKES #26).
+gate-test:
+	node scripts/gates/gate-mutation.mjs
+
+# make coverage  — which engine vocabulary no authored scene exercises. Conformance proves a value
+# works; this says whether anything USES it. WARN tier, always exits 0.
+coverage:
+	node scripts/gates/coverage.mjs
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs

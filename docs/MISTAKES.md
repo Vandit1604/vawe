@@ -485,3 +485,40 @@ a beat-matched video that ignores intent is not better, just differently wrong.
 a track with a real pulse. The detector says "WEAK — do not snap to this" rather than inventing a
 grid. Verified against a synthetic 120 BPM click track in `make lib-test`.
 
+---
+
+## 33. Who checks the checkers — `make gate-test`
+
+The image legibility floor guarded on `b.height > 1`, so the ONE case it existed to catch — an image
+occupying no space — was the one case it skipped (#26). Nothing noticed, because **a gate being quiet
+looks exactly like a gate being satisfied.**
+
+`make gate-test` mutation-tests the gates: each is fed a fixture built to trip it, and must SPEAK.
+The mirror cases matter as much — fixtures that must PASS, so a gate cannot buy sensitivity by crying
+wolf, which is what briefly made the layout audit call every cross-dissolve a collision (#25).
+Two of the eleven cases can only be tested by breaking the thing the gate guards, so they mutate the
+SOURCE (remove an `@font-face`, drift the anim enum) and restore it in a `finally`-shaped path.
+
+Current: 11/11 — overlap, contrast, safe-zone, tiny-text, clean-scene, cross-dissolve, unknown anim,
+unknown cut style, valid scene, font fallback, enum drift.
+
+---
+
+## 34. Coverage — conformance proves it works, this asks if anything uses it
+
+`make coverage` reports which vocabulary no authored scene exercises. Unused vocabulary is where
+regressions live undetected: nothing renders it, so no screenshot shows it and no gate misses it.
+The audio path had zero coverage of both kinds, which is exactly why the `cuts` array produced no
+sound for as long as it existed (#23).
+
+First run across 59 scenes: kinetic presets 100%, composite looks 100%, canvas fx 100%, layer types
+93%, shader stings 85%, enter anims 64%, **cut styles 38%**. That last number is only meaningful
+*because* cuts now render — before #29 it would have been a lie in either direction.
+
+WARN tier by design (always exits 0): a brand-new effect is legitimately unused on the day it lands.
+
+**The report had to be fixed before it was trustworthy**, the same lesson as the conformance triage:
+its first run claimed `t`, `dur`, `style` and `timing` were unused props. They are used constantly —
+on `cuts`/`stings`/`bg` items, which the collector never walked. A coverage report that cries wolf
+gets ignored exactly like a gate that does.
+
