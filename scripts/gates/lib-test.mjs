@@ -9,7 +9,7 @@ import { cameraAt, motionAt } from '../../core/sequence.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { safeArea, DESTINATION_NAMES, nativeAspect } from '../../core/safe.js';
+import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue } from '../../core/layers/glow.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
@@ -600,6 +600,38 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const leaving = opacityEnvelope(1, t), arriving = opacityEnvelope(t, 0);
       if (Math.abs(leaving + arriving - 1) > 1e-9) return false;
     } return true; })());
+}
+
+// ---- sceneDims (core/safe.js) — how big is the frame, asked once ----
+{
+  ok('dims: aspect wins', sceneDims({ aspect: '16:9' }).join() === '1920,1080');
+  ok('dims: portrait aspect', sceneDims({ aspect: '9:16' }).join() === '1080,1920');
+  ok('dims: an explicit key overrides the scene', sceneDims({ aspect: '9:16' }, '1:1').join() === '1080,1080');
+  ok('dims: legacy orientation still honoured', sceneDims({ orientation: 'landscape' }).join() === '1920,1080');
+  ok('dims: portrait is the default', sceneDims({}).join() === '1080,1920');
+  // THE regression: `aspect` must beat the absence of `orientation`. Five tools read only the latter,
+  // so every 16:9 scene rendered into a portrait viewport and was silently cropped (MISTAKES #46).
+  ok('dims: aspect alone is enough (no orientation field)', sceneDims({ aspect: '16:9' })[0] === 1920);
+  ok('dims: an unnamed ratio fits the long edge', sceneDims({ aspect: '21:9' }).join() === '1920,823');
+}
+
+// ---- ONE definition of the canvas: no tool may re-derive dimensions from `orientation` ----
+// core/safe.js exists because four copies of the safe box disagreed; the same then happened to the
+// frame size across eight call sites. This asserts the copies stay gone rather than trusting a memo.
+{
+  const scan = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const fp = path.join(dir, e.name);
+    if (e.isDirectory()) return e.name === 'node_modules' ? [] : scan(fp);
+    return /\.(mjs|js)$/.test(e.name) ? [fp] : [];
+  });
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const offenders = [];
+  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'core'))]) {
+    if (fp.endsWith(path.join('core', 'safe.js')) || fp.endsWith(path.join('gates', 'lib-test.mjs'))) continue;
+    const src = fs.readFileSync(fp, 'utf8');
+    if (/landscape\s*\?\s*(1920\s*:\s*1080|\[1920)/.test(src)) offenders.push(path.relative(root, fp));
+  }
+  ok(`dims: nobody re-derives the canvas (${offenders.join(', ') || 'clean'})`, offenders.length === 0);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

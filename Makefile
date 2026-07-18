@@ -84,11 +84,12 @@ audit-test:
 snap:
 	node scripts/gates/scene-snap.mjs $(M) $(if $(SAVE),--save)
 
-# make motion [M=<format>] [STRIDE=2]  — animation-over-time audit: renders every frame headless (no
-# video) and asserts the motion contract (final frame holds, reveals monotonic, payoffs settle before
-# the exit, counters sane, typing completes). The check `make snap`/`make audit` can't do.
+# make motion [M=<format>] [D=<file.json>] [STRIDE=2]  — animation-over-time audit: renders every frame
+# headless (no video) and asserts the motion contract (final frame holds, reveals monotonic, payoffs
+# settle before the exit, counters sane, typing completes). The check `make snap`/`make audit` can't do.
+# D forwards to --data; without it the target silently audited sample.json instead of your scene.
 motion:
-	node scripts/gates/motion-audit.mjs $(M) $(if $(STRIDE),--stride $(STRIDE))
+	node scripts/gates/motion-audit.mjs $(M) $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE))
 
 # make conformance [enums|props|paths]  — does the engine DO what it says it accepts? Applies every
 # declared enum value and every layer prop, and asserts the OUTPUT CHANGED. Catches the dominant bug

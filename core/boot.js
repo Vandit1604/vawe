@@ -5,7 +5,7 @@
 import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
-import { safeArea, ASPECTS } from './safe.js';
+import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
 import { loadRegistered, auditFonts } from './fonts.js';
 
@@ -234,7 +234,7 @@ export async function boot(build) {
     // which sizes its screenshot to them — so one source renders at any aspect with no engine change.
     const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
     const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
-    const [width, height] = ASPECTS[aspectKey] || (landscape ? [1920, 1080] : [1080, 1920]);
+    const [width, height] = sceneDims(data, aspectKey);
     document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
     document.documentElement.dataset.aspect = aspectKey;
     // The canvas is set HERE, from the aspect we just resolved, never inferred from data-orient. It used

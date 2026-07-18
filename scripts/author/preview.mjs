@@ -9,6 +9,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2];
@@ -37,9 +38,11 @@ const port = server.address().port;
 const t0 = Date.now();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
-// landscape-aware: render at the data's real dims (a landscape scene in a portrait viewport crops)
-const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
-const VW = landscape ? 1920 : 1080, VH = landscape ? 1080 : 1920;
+// The viewport must be the canvas the renderer would actually produce, or a preview is a crop of a
+// different video. This read `orientation`, which almost no scene declares — scenes declare `aspect` —
+// so every 16:9 scene previewed into a 1080x1920 portrait window, silently (MISTAKES #46).
+const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')); } catch { return {}; } })();
+const [VW, VH] = sceneDims(cfg);
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
@@ -60,6 +63,8 @@ if (single != null) {
   await browser.close(); server.close(); process.exit(0);
 }
 
+// tiles keep the scene's own ratio — a fixed 300x533 squashed every landscape frame in the sheet
+const TILE_W = VW >= VH ? 400 : 300, TILE_H = Math.round(TILE_W * VH / VW);
 const tmp = '/tmp/preview_frames'; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const ts = [0.3, 1.2, ...stings.flatMap((s) => [s - 0.2, s + 0.5]), duration * 0.55, duration - 1.0, duration - 0.15]
   .filter((t) => t >= 0 && t < duration).sort((a, b) => a - b);
@@ -70,7 +75,7 @@ for (let i = 0; i < uniq.length; i++) {
   await grab(Math.round(uniq[i] * F), raw);
   const labeled = path.join(tmp, `${String(i).padStart(2, '0')}.png`);
   spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', raw, '-vf',
-    `scale=300:533,drawtext=text='${uniq[i].toFixed(1)}s':x=8:y=8:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.65`, labeled]);
+    `scale=${TILE_W}:${TILE_H},drawtext=text='${uniq[i].toFixed(1)}s':x=8:y=8:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.65`, labeled]);
   tiles.push(labeled);
 }
 await browser.close(); server.close();

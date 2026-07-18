@@ -19,7 +19,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS } from '../core/safe.js';
+import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -47,20 +47,9 @@ if (badAspect) { console.error(`unknown aspect "${badAspect}" — known: ${Objec
 const modules = argv.length ? argv
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
 
-// dimsFor(key, cfg): the canvas this audit runs at. An explicit --aspect wins; else the scene's own
-// `aspect` field; else `orientation`; else portrait. A ratio the ASPECTS table doesn't name is still
-// honoured (a scene may carry any "w:h"), sized to fit the long edge at 1920.
-function dimsFor(key, cfg) {
-  const named = key || (typeof cfg.aspect === 'string' ? cfg.aspect : '');
-  if (named && ASPECTS[named]) return ASPECTS[named];
-  const asp = named.includes(':') ? named.split(':').map(Number) : null;
-  if (asp && asp[0] && asp[1]) {
-    const [aw, ah] = asp;
-    if (aw === ah) return [1080, 1080];
-    return aw > ah ? [1920, Math.round(1920 * ah / aw)] : [Math.round(1920 * aw / ah), 1920];
-  }
-  return cfg.orientation === 'landscape' ? [1920, 1080] : [1080, 1920];
-}
+// The canvas this audit runs at comes from core/safe.js, alongside the safe box it feeds — same
+// reason the safe box lives there. An explicit --aspect wins; else the scene's own `aspect`.
+const dimsFor = (key, cfg) => sceneDims(cfg, key);
 
 // The safe box comes from core/safe.js — the SAME function boot.js places against and writes to
 // --safe-* for the debug overlay. This file used to carry its own tables (a portrait box, a landscape

@@ -11,6 +11,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { sceneDims } from '../../core/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -31,10 +32,10 @@ const server = http.createServer((req, res) => {
 });
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const port = server.address().port;
-const landscape = data.orientation === 'landscape';
+const [VW, VH] = sceneDims(data);
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
-await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
+await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
 await page.evaluate((n) => window.__engine.renderFrame(n), Math.round(at * 30));

@@ -34,6 +34,33 @@
 // verify/audit.mjs both import this; neither keeps a copy.
 export const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
 
+/**
+ * sceneDims(cfg, key?) — the canvas a scene renders at, in pixels. An explicit key (an --aspect flag)
+ * wins; else the scene's own `aspect`; else the legacy `orientation`; else portrait. A ratio the
+ * ASPECTS table doesn't name is still honoured, sized to fit the long edge at 1920.
+ *
+ * WHY THIS IS HERE and not in each tool: the header above describes four copies of the SAFE box that
+ * disagreed. The same thing had already happened one level down, to the question of how big the frame
+ * is — eight call sites, three of which read `aspect` and five of which knew only about `orientation`.
+ * Since scenes declare `aspect` and almost none declare `orientation`, those five silently rendered
+ * every landscape scene into a 1080x1920 portrait viewport and cropped it: `make frame`, `make beats`,
+ * `make slop`, `make motion` and `make snap` were all judging a canvas the renderer never produces.
+ * Nothing failed, because a cropped viewport is a perfectly stable, perfectly deterministic wrong
+ * answer. Dimensions and the safe area are the same question asked twice; both live here (MISTAKES #46).
+ */
+export function sceneDims(cfg = {}, key = '') {
+  const named = key || (typeof cfg.aspect === 'string' ? cfg.aspect : '');
+  if (named && ASPECTS[named]) return ASPECTS[named];
+  if (named.includes(':')) {
+    const [aw, ah] = named.split(':').map(Number);
+    if (aw && ah) {
+      if (aw === ah) return [1080, 1080];
+      return aw > ah ? [1920, Math.round(1920 * ah / aw)] : [Math.round(1920 * aw / ah), 1920];
+    }
+  }
+  return (cfg.orientation === 'landscape' || cfg.orient === 'landscape') ? [1920, 1080] : [1080, 1920];
+}
+
 // The bleed margin, as a fraction of the SHORT edge, so it reads the same at any ratio. 0.06 is the
 // value core/boot.js already used to place with; keeping it means this change moves no existing pixel.
 export const MARGIN = 0.06;

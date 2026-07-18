@@ -10,6 +10,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap');
@@ -25,9 +26,10 @@ const port = server.address().port;
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
-// landscape-aware: signatures must be captured at the format's real dims
-const landscape = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8')).orientation === 'landscape'; } catch { return false; } })();
-await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
+// Signatures must be captured at the format's real dims, or the baseline records a cropped canvas.
+const snapCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8')); } catch { return {}; } })();
+const [SVW, SVH] = sceneDims(snapCfg);
+await page.setViewport({ width: SVW, height: SVH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/formats/${m}/sample.json&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
 const meta = await page.evaluate(() => window.__engine.meta);

@@ -14,6 +14,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { sceneDims } from '../../core/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -37,8 +38,8 @@ const server = http.createServer((req, res) => {
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const port = server.address().port;
 
-const landscape = data.orientation === 'landscape';
-const VW = landscape ? 1920 : 1080, VH = landscape ? 1080 : 1920;
+
+const [VW, VH] = sceneDims(data);
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });

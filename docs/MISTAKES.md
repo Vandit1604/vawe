@@ -759,3 +759,37 @@ ticks. That is the one frame where a layer is guaranteed on screen and finished 
 also never been reported.
 **Rule:** the third time (see #39, #41) the blind spot was in the sampling and not in the rule. When a
 gate is quiet about something you can SEE, suspect its frame list before its logic.
+
+---
+
+## 46. Five tools rendered every landscape scene into a portrait viewport
+
+**What:** `make frame` on a 16:9 scene produced a 1080x1920 image: the video, cropped. Noticed by
+accident while chasing #43, and worked around by pulling frames out of the mp4 instead.
+**Root cause:** the frame size was re-derived at eight call sites, and they had drifted into two
+groups. `core/boot.js`, `verify/audit.mjs` and `verify/run.js` read `aspect`. `preview.mjs`,
+`beats.mjs`, `slop.mjs`, `motion-audit.mjs` and `scene-snap.mjs` read only `orientation` — a field
+almost no scene declares, because scenes declare `aspect`. So `make frame`, `make beats`, `make slop`,
+`make motion` and `make snap` were all judging a canvas the renderer never produces.
+**Why nothing failed:** a cropped viewport is a perfectly stable, perfectly deterministic wrong
+answer. Every gate passed; they were passing on the wrong picture.
+**Fix:** `sceneDims(cfg, key?)` in `core/safe.js` — dimensions and the safe area are the same question
+asked twice, so they live together. All eight call sites import it; nobody re-derives.
+**Gate:** `make lib-test` unit-tests sceneDims AND scans `core/`, `scripts/`, `verify/` for anyone
+re-deriving the canvas from `orientation`. Proven to fire by reintroducing a copy.
+**Rule:** this is the same failure as the safe box (see the header of `core/safe.js`), one level down.
+When a value is computed in more than one place, the copies do not drift together, and the quiet one
+is the one you are looking at.
+
+---
+
+## 47. `make motion D=...` audited a different file and said nothing
+
+**What:** `make motion D=formats/scene/tpot-launch.json` reported "228 frames" for a 747-frame scene.
+It was auditing `sample.json`.
+**Root cause:** the tool supports `--data`, but the Makefile target only forwarded `M` and `STRIDE`.
+`D` was accepted by make, dropped on the floor, and the report printed only the format name, so there
+was no way to tell which scene the verdict belonged to.
+**Fix:** the target forwards `D` to `--data`, and the report line names the data file it read.
+**Rule:** same class as #19 and #28 — input accepted and silently ignored. A report that does not name
+its input cannot be checked against the thing you meant to check.

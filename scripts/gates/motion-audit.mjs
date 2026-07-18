@@ -21,6 +21,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -50,14 +51,15 @@ const parseNum = (t) => {
 
 async function audit(format) {
   const dataPath = DATA || `formats/${format}/sample.json`;
+  const dataName = dataPath.split('/').pop();
   const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
-  const landscape = data.orientation === 'landscape';
+  const [VW, VH] = sceneDims(data);
   const page = await browser.newPage();
-  await page.setViewport({ width: landscape ? 1920 : 1080, height: landscape ? 1080 : 1920, deviceScaleFactor: 1 });
+  await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const err = await page.evaluate(() => window.__engineError);
-  if (err) { await page.close(); return { format, error: String(err), findings: [] }; }
+  if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames;
 
@@ -253,7 +255,7 @@ async function audit(format) {
     if (top[1] / presets.length > 0.7) findings.push({ level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' });
   }
 
-  return { format, total, segments: windows.length, findings };
+  return { format, data: dataName, total, segments: windows.length, findings };
 }
 
 const results = [];
@@ -269,7 +271,9 @@ else {
   for (const r of results) {
     if (r.error) { console.log(`✗ err  ${r.format} — ${r.error}`); continue; }
     const fails = r.findings.filter((x) => x.level === 'FAIL'), warns = r.findings.filter((x) => x.level === 'WARN');
-    console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
+    // name the data file audited: `make motion D=...` used to drop D and silently audit sample.json,
+    // and the report gave no way to tell which scene you were reading (MISTAKES #47).
+    console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format} · ${r.data}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
     const show = [...fails, ...warns];
     for (const x of show.slice(0, 30)) console.log(`    [${x.level === 'FAIL' ? x.check : x.check + ' · warn'}] ${x.seg || ''}${x.key ? ' "' + x.key + '"' : ''} — ${x.msg}`);
     if (show.length > 30) console.log(`    … +${show.length - 30} more`);

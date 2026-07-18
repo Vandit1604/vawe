@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
-import { safeArea, ASPECTS } from '../core/safe.js';
+import { safeArea, ASPECTS, sceneDims } from '../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -18,7 +18,7 @@ fs.mkdirSync(OUT, { recursive: true });
 // places against and verify/audit.mjs checks with. This file used to hardcode a portrait 1080x1920
 // viewport, a portrait safe box, and a 1080x1920 integrity assert, so it could only ever be right for
 // one of the five aspects the engine renders, and it was a fourth independent opinion on "safe".
-const dimsFor = (cfg) => ASPECTS[cfg.aspect] || (cfg.orientation === 'landscape' ? [1920, 1080] : [1080, 1920]);
+const dimsFor = (cfg) => sceneDims(cfg);
 
 const modules = process.argv.slice(2).length ? process.argv.slice(2)
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
