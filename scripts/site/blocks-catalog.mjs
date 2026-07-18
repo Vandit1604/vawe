@@ -32,7 +32,7 @@ for (let p = 0; p < pages; p++) {
       L.push({ type: 'text', text: `⚠ ${e.name}: ${err.message}`, x, y: y + 24, size: 18, color: '#C0362C', start: 0.2, duration: 9 });
     }
   });
-  const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'vawe-creed', duration: 9,
+  const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'vawe', duration: 9,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: 9 }], layers: L };
   // Write only on CHANGE, so `make catalog` can skip re-rendering untouched pages by mtime. This
   // matters more than it looks: the renderer's frame-dedup picks a representative frame per
