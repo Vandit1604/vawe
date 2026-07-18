@@ -709,3 +709,53 @@ layer and rasterizes it through the filter pipeline. With ~50 image layers carry
 **Rule:** an animation's identity must be genuinely free, because it is the value the scene spends
 almost all of its frames at. "Visually identical" is not the same as "costs nothing".
 
+
+---
+
+## 43. A captured component's root margin falls out of the box the capture measured
+
+**What:** tpot's recaps card shipped visibly cropped along the bottom, its rounded corners and padding
+sliced off. Reported by eye, twice, before it was chased properly.
+**Root cause:** `capture-component.mjs` records the element's `getBoundingClientRect()`, which is a
+BORDER box and excludes margins. The renderer then sizes `.hs-comp` to exactly that box and puts the
+element inside it. The captured root carried `margin-top: 24px`, so the content sat 24px low in a
+166px box and needed 190px; `.hs-comp`'s `overflow:hidden` ate the difference in silence.
+**Fix:** the root's margins are dropped at capture (they describe siblings that do not come along),
+AND `component.js` zeroes the root child's margin at build time so components already on disk heal
+without a re-capture.
+**Gate:** `clipped-component` (HARD) in the layout audit — content that does not fit its captured box.
+**Rule:** when one number describes a box and another describes the thing inside it, state which box
+you mean. Border box vs margin box is the whole bug.
+
+---
+
+## 44. The headline bar rejected a brand's own button colour
+
+**What:** the audit hard-failed white on `#0093eb` at 112px — tpot's real primary, the exact treatment
+its site ships on buttons.
+**Root cause:** `weak-headline` requires >= 7:1 of the largest text on the frame. That bar exists for
+display type on the SCENE FIELD, where a low-saturation tint of the background reads as a washed-out
+grey heading. It cannot tell that case apart from text on a deliberate, saturated, filled chip, which
+does not wash out and which WCAG judges at the large-text bar.
+**Fix:** the bar is 3:1 when an opaque sibling shape sits under the text (a structural test, not a
+colour heuristic), 7:1 otherwise.
+**Gate:** two `make gate-test` cases, pinned in both directions — a grey headline on the field must
+still HARD fail, and a headline on a filled chip must pass.
+**Rule:** loosening a rule for one video kills it unless the tightening half is pinned in the same
+commit.
+
+---
+
+## 45. The layout audit sampled 14 uniform frames and missed a whole beat
+
+**What:** #43 shipped for as long as it existed while `make audit` reported green — and the audit was
+run every time.
+**Root cause:** the audit sampled 14 evenly-spaced frames. Across 25s that is one every 1.8s, and the
+recaps card is on screen for 1.4s (frames 190-232). The samples fell at 187 and 240. Every rule in
+the file was skipping the card entirely; none of them was wrong.
+**Fix:** sampling is content-aware — the resting midpoint of every layer is sampled, not just uniform
+ticks. That is the one frame where a layer is guaranteed on screen and finished animating.
+**What it found immediately:** #43, plus the events card overrunning the safe area by 45px, which had
+also never been reported.
+**Rule:** the third time (see #39, #41) the blind spot was in the sampling and not in the rule. When a
+gate is quiet about something you can SEE, suspect its frame list before its logic.

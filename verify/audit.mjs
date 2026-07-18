@@ -242,6 +242,17 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
       detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs — descenders/edges are being cut` });
   }
+  // A captured component is sized to the box the capture MEASURED. If the re-rendered content does not
+  // fit that box, .hs-comp's overflow:hidden trims it and the result reads as a screenshot cropped at
+  // the edge — the loudest possible "this is broken" signal, delivered silently. clipped-text guards
+  // the same failure one level down, but it only walks .hs-text: a component is a foreign DOM subtree
+  // and no rule looked at it at all, so a card lost its bottom 24px for as long as it shipped (#43).
+  for (const el of document.querySelectorAll('.hs-comp')) {
+    if (!vis(el) || !atRest(el)) continue;
+    const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
+    if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-component', a: 'component',
+      detail: `content needs ${el.scrollWidth}x${el.scrollHeight} but the captured box is ${el.clientWidth}x${el.clientHeight} — ${dy > 1 ? `${dy}px` : `${dx}px`} is being cut off. A margin on the captured root is the usual cause (capture measures a border box).` });
+  }
   // A CROSS-DISSOLVE is two layers deliberately sharing the same box while one fades out and the
   // other fades in. That is the standard way to morph a headline between two states, and reading it
   // as a collision would make dissolves unusable — the gate would forbid a technique the engine
@@ -384,6 +395,19 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const px = parseFloat(getComputedStyle(tx).fontSize) || 0; // the whole layer only when headline-scale AND not already checked as critical above
     if (px >= 60 && !critical && [...tx.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim())) checkSpan(tx, false, 'text');
   }
+  // Did the AUTHOR put an opaque shape behind this text (a chip, a pill, a filled panel), as opposed
+  // to the text simply sitting on the scene field? That distinction is what separates the two cases
+  // the headline rule below would otherwise conflate. It is a structural question, not a colour one,
+  // so it is answered structurally: is there an opaque sibling element in the paint stack under it.
+  const onOwnFill = (el, bx) => {
+    for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
+      if (p === el || el.contains(p) || p.contains(el)) continue;
+      const c = parse(getComputedStyle(p).backgroundColor);
+      if (c && c[3] > 0.85) return true;
+      if (p.tagName === 'IMG' || (p.querySelector && p.querySelector('img'))) return false; // a photo backdrop is a field, not a chip
+    }
+    return false;
+  };
   // HEADLINE DOMINANCE: the largest visible text on a frame is the headline — legibility (4.5:1)
   // is not enough for display type; below 7:1 it reads washed-out ("gray heading" bug class).
   {
@@ -395,7 +419,15 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       const bg = fg && fg[3] >= 0.85 && bgFor(top.el, { x: top.x, y: top.y, w: top.r - top.x, h: top.btm - top.y });
       if (fg && bg) {
         const rt = cratio([fg[0], fg[1], fg[2]], bg);
-        if (rt < 7) issues.push({ kind: rt < 3.5 ? 'weak-headline' : 'weak-headline-soft', a: top.id, t: top.t, detail: `headline ${topPx | 0}px at ${rt.toFixed(1)}:1 (want ≥7:1)` });
+        // The 7:1 bar exists for display type on the SCENE FIELD, where a low-saturation tint of the
+        // background reads as a washed-out grey heading. Text on a filled chip cannot wash out — it is
+        // a deliberate, saturated block, and WCAG judges exactly that case at the large-text bar. Held
+        // to 7:1, the gate rejected white on a brand's own button blue, which is a treatment the brand
+        // ships on its real site. Same rule, the right bar for the situation (MISTAKES #44).
+        const chip = onOwnFill(top.el, { x: top.x, y: top.y, w: top.r - top.x, h: top.btm - top.y });
+        const bar = chip ? 3 : 7;
+        if (rt < bar) issues.push({ kind: rt < (chip ? 2.5 : 3.5) ? 'weak-headline' : 'weak-headline-soft', a: top.id, t: top.t,
+          detail: `headline ${topPx | 0}px at ${rt.toFixed(1)}:1 (want ≥${bar}:1${chip ? ', large text on a filled chip' : ''})` });
       }
     }
   }
@@ -475,7 +507,7 @@ function sourceIssues(cfg) {
   return out;
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text']);
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
@@ -539,7 +571,28 @@ for (const aspectKey of askedAspects) {
       .filter(({ a, b }) => (a.x ?? 0) !== (b.x ?? 0) || (a.y ?? 0) !== (b.y ?? 0) || (a.s ?? 1) !== (b.s ?? 1));
     if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
   } catch {}
+  // CONTENT-AWARE SAMPLING. Uniform ticks alone have a blind spot exactly the width of a beat: with
+  // 14 samples across 25s they sit 1.8s apart, so a card on screen for 1.4s can fall cleanly between
+  // two of them and every rule in this file silently skips it. That is not hypothetical — a captured
+  // component shipped visibly cropped while the audit reported green, because frames 187 and 240
+  // straddled its 190-232 window (MISTAKES #45). So: also sample the RESTING MIDPOINT of every layer,
+  // which is the one frame where that layer is guaranteed on screen and done animating.
+  const layerMids = (() => {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8'));
+      const out = [];
+      const walk = (ls) => { for (const L of ls || []) {
+        if (!L || typeof L !== 'object') continue;
+        const st = +L.start || 0, du = L.duration != null ? +L.duration : (total / fps) - st;
+        if (du > 0) out.push(Math.round((st + du / 2) * fps));
+        if (L.children) walk(L.children); // a group child rides its parent's window; harmless duplicate
+      } };
+      walk(cfg.layers);
+      return out;
+    } catch { return []; }
+  })();
   const frames = [...new Set([...(meta.stings || []).map((t) => Math.round(t * fps)),
+    ...layerMids,
     ...Array.from({ length: SAMPLES }, (_, i) => Math.round(((i + 0.5) / SAMPLES) * total))])]
     .filter((f) => f >= 0 && f < total && !inTransition(f)).sort((a, b) => a - b);
 

@@ -7,4 +7,10 @@ export function build(kit, el, L) {
   el.style.width = Math.round(c.w * fit) + 'px';
   el.style.height = Math.round(c.h * fit) + 'px';
   el.innerHTML = `<div class="hs-comp" style="width:${c.w}px;height:${c.h}px;transform:scale(${fit.toFixed(4)})">${c.html}</div>`;
+  // THE INVARIANT: the captured root's box IS the component's box. c.w/c.h come from a border box
+  // (getBoundingClientRect excludes margin), so a root margin offsets the content inside a box sized
+  // without it and .hs-comp's overflow:hidden silently eats the difference. Enforced here as well as
+  // at capture time so components already on disk heal without a re-capture (MISTAKES #43).
+  const rootEl = el.firstElementChild?.firstElementChild;
+  if (rootEl) rootEl.style.margin = '0';
 }

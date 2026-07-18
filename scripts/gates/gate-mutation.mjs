@@ -45,6 +45,14 @@ const CASES = [
     scene: scene([TXT({ text: 'State A', duration: 1.2, exitDur: 0.4 }),
                   TXT({ text: 'State B', start: 0.9, duration: 1.1, anim: 'fade', enterDur: 0.4 })]) },
 
+  // The headline bar relaxes to WCAG-large ONLY on a filled chip (#44). Both halves are pinned here,
+  // because a rule that was loosened for one video and never re-tested is how a guard quietly dies.
+  { gate: 'audit', name: 'weak-headline · washed-out display type on the field', expect: 'fail', match: /weak-headline/,
+    scene: scene([TXT({ text: 'Washed out heading', size: 110, color: '#9aa3ad' })]) },
+  { gate: 'audit', name: 'headline on a filled brand chip is NOT weak (#44)', expect: 'pass',
+    scene: scene([{ type: 'rect', x: 150, y: 380, w: 460, h: 160, bg: '#0093eb', radius: 26, start: 0, duration: 2 },
+                  TXT({ text: 'Tech', x: 150, y: 400, w: 460, align: 'center', size: 110, color: '#ffffff' })]) },
+
   // ---- validator: must FAIL on vocabulary that does not exist ----
   { gate: 'validate', name: 'unknown anim name', expect: 'fail', match: /anim|not valid/i,
     scene: scene([TXT({ anim: 'slideL' })]) },
@@ -98,6 +106,9 @@ const srcCases = [
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
                              '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
     cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true },
+  { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
+    mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
+    cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-component/ },
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },

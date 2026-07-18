@@ -78,9 +78,14 @@ const result = await page.evaluate((selector) => {
   // mutation, so inherited values stay intact), then apply inline directly on the live nodes and take
   // outerHTML. The page is discarded after, so mutating it is fine.
   const all = [el, ...el.querySelectorAll('*')].filter((n) => n.nodeType === 1);
-  const styles = all.map((node) => {
+  const styles = all.map((node, idx) => {
     const cs = getComputedStyle(node); let s = '';
     for (const p of PROPS) { let v = cs.getPropertyValue(p); if (!v) continue;
+      // The ROOT's margins describe its relationship to siblings that do not come with it. Keeping
+      // them offsets the content inside a box measured from the border box (getBoundingClientRect
+      // excludes margin), so the overflow is clipped away by .hs-comp — a captured card silently lost
+      // its bottom 24px (MISTAKES #43). Children keep their margins; only the root's are meaningless.
+      if (idx === 0 && p.startsWith('margin')) continue;
       if (p.startsWith('margin') && v === '0px') continue; if (p.startsWith('padding') && v === '0px') continue;
       if (p.startsWith('border-') && (v.startsWith('0px') || v.endsWith('none rgb(0, 0, 0)'))) continue;
       if (DEFAULT[p] === v) continue;

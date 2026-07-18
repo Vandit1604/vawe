@@ -79,8 +79,16 @@ export function createKit(ctx) {
     if (g) { el.style.maskImage = g; el.style.webkitMaskImage = g; }
   }
 
-  function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box
-    if (L.layout === 'grid') {
+  function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box, or FREE placement
+    // `free`: children carry their own x/y inside the group instead of flowing. Without it, any
+    // composition whose positions are computed (a bubble map, a ring, a scatter) costs ONE TOP-LEVEL
+    // LAYER PER ELEMENT — 46 for tpot's map — and slams into the 120-layer cap for a reason that has
+    // nothing to do with complexity. Flow layouts cannot express "at this coordinate", so authors had
+    // no way down. With `free` + per-child `delay` the same composition is a single layer.
+    if (L.layout === 'free') {
+      el.style.display = 'block';
+      el.dataset.free = '1'; // read by addGroupChild — children must place themselves
+    } else if (L.layout === 'grid') {
       el.style.display = 'grid';
       el.style.gridTemplateColumns = `repeat(${L.gridCols ?? 2}, ${L.colw ? L.colw + 'px' : '1fr'})`;
       el.style.columnGap = (L.colGap ?? L.gap ?? 24) + 'px';
@@ -130,8 +138,13 @@ export function createKit(ctx) {
     }
     sizeChild(c, C, C.type === 'image');
     if (C.critical) c.setAttribute('data-layer', 'critical');
+    if (parentEl.dataset.free) { c.style.position = 'absolute'; c.style.left = (C.x || 0) + 'px'; c.style.top = (C.y || 0) + 'px'; }
     parentEl.appendChild(c);
-    extra.push({ L: { ...C, start: rootL.start, duration: rootL.duration }, el: c, units: C.split ? splitText(c, C.split) : null });
+    // `delay` staggers a child WITHIN its group's window (it still ends with the group, so the exit
+    // stays in formation). Group children previously all shared the root's exact window, which is why
+    // a wall could only ever arrive as one block. Defaults to 0 → existing groups are unchanged.
+    const d = Math.max(0, +C.delay || 0);
+    extra.push({ L: { ...C, start: (rootL.start ?? 0) + d, duration: Math.max(0, (rootL.duration ?? 0) - d) }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
   return { ...ctx, hexA, styleText, chipBox, applyFade, layoutGroup, sizeChild, addGroupChild };
