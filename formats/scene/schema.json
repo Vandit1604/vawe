@@ -532,8 +532,8 @@
           "max": 900
         },
         "color": {
-          "type": "string",
-          "label": "Glow color / text color"
+          "type": "string|boolean",
+          "label": "Glow color / text color (glow accepts true = the theme accent glow)"
         },
         "emColor": {
           "type": "string",

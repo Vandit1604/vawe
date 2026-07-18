@@ -7,7 +7,13 @@ export function frame(kit, el, L, t) {
   if (!(t >= start && t < end)) return;
   const cs = L.countStart ?? 0.2, cd = L.countDur ?? 1.6;
   const v = kit.interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: kit.resolveEasing(L.ease || 'easeOutCubic') });
-  el.textContent = (L.prefix || '') + fmtCount(v, L) + (L.unit || L.suffix || '');
+  // A leading currency symbol in `unit` is hoisted to the front: `unit:"$B"` reads "$880B", which is
+  // what CLAUDE.md documents and what the catalog's own statBig.currency assumed. Appending it
+  // verbatim produced "880$B" — the doc, the manifest and the engine each said something different
+  // (docs/MISTAKES.md #76). Plain units (%/k/ms) are untouched.
+  const rawUnit = L.unit || L.suffix || '';
+  const cur = /^([$€£¥])(.*)$/.exec(rawUnit);
+  el.textContent = (L.prefix || '') + (cur ? cur[1] : '') + fmtCount(v, L) + (cur ? cur[2] : rawUnit);
 }
 
 // fmtCount: number formatting that reads RIGHT. With a `unit` (%/k/$B) the author owns scale, so just apply

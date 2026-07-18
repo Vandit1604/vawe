@@ -58,7 +58,7 @@
       "type": "text",
       "text": "The work is done.<br>The write-up is not.",
       "x": 150,
-      "y": 380,
+      "y": 420,
       "w": 640,
       "align": "left",
       "size": 66,
@@ -76,9 +76,9 @@
     {
       "type": "group",
       "x": 900,
-      "y": 250,
+      "y": 300,
       "w": 840,
-      "h": 560,
+      "h": 400,
       "layout": "column",
       "items": "stretch",
       "gap": 0,
@@ -254,9 +254,9 @@
     },
     {
       "type": "group",
-      "x": 610,
-      "y": 340,
-      "w": 700,
+      "x": 330,
+      "y": 460,
+      "w": 760,
       "layout": "column",
       "items": "stretch",
       "gap": 10,
@@ -334,9 +334,9 @@
     },
     {
       "type": "group",
-      "x": 1330,
-      "y": 730,
-      "w": 420,
+      "x": 1230,
+      "y": 660,
+      "w": 460,
       "layout": "row",
       "items": "flex-start",
       "gap": 14,
@@ -387,9 +387,9 @@
     {
       "type": "group",
       "x": 460,
-      "y": 150,
+      "y": 220,
       "w": 1000,
-      "h": 680,
+      "h": 400,
       "layout": "column",
       "items": "stretch",
       "gap": 0,
@@ -661,7 +661,7 @@
                 ]
               },
               "varsDur": 0.44,
-              "varsDelay": 1.93,
+              "varsDelay": 1.88,
               "varsEase": "linear"
             }
           ]
@@ -680,20 +680,20 @@
           "y": 900
         },
         {
-          "t": 1.75,
-          "x": 1010,
-          "y": 700
+          "t": 1.9,
+          "x": 640,
+          "y": 542
         }
       ],
       "clicks": [
-        1.9
+        2.05
       ]
     },
     {
       "type": "text",
       "text": "One button. It has already read the week.",
       "x": 460,
-      "y": 880,
+      "y": 700,
       "w": 1000,
       "align": "center",
       "size": 34,
@@ -709,7 +709,7 @@
       "x": 130,
       "y": 230,
       "w": 830,
-      "h": 560,
+      "h": 470,
       "layout": "column",
       "items": "stretch",
       "gap": 0,
@@ -877,7 +877,7 @@
                     {
                       "type": "text",
                       "weight": 600,
-                      "text": "Explore",
+                      "text": "Send it",
                       "size": 22,
                       "color": "var(--text)"
                     },
@@ -996,7 +996,7 @@
     {
       "type": "group",
       "x": 180,
-      "y": 360,
+      "y": 420,
       "w": 640,
       "layout": "column",
       "items": "stretch",
@@ -1145,7 +1145,7 @@
     {
       "type": "html",
       "x": 1100,
-      "y": 360,
+      "y": 420,
       "w": 640,
       "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:640px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">demo workspace · updates sent</div><svg viewBox=\"0 0 596 226\" width=\"100%\" height=\"226\" style=\"display:block;overflow:visible\"><polyline points=\"8.0,176.0 153.0,134.0 298.0,134.0 443.0,92.0 588.0,8.0\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-dasharray=\"614.5\" stroke-dashoffset=\"calc(614.5 * (1 - var(--p, 1)))\"/><circle cx=\"8.0\" cy=\"176.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"153.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"298.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"443.0\" cy=\"92.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"588.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--accent)\"/></svg></div>",
       "start": 14.35,
@@ -1167,7 +1167,7 @@
       "type": "text",
       "text": "Sample data from the demo workspace.",
       "x": 1100,
-      "y": 700,
+      "y": 760,
       "w": 640,
       "align": "left",
       "size": 26,
@@ -1672,7 +1672,7 @@
                             {
                               "type": "text",
                               "weight": 700,
-                              "text": "Ines Marlow",
+                              "text": "Ines",
                               "size": 20,
                               "color": "var(--text)"
                             },

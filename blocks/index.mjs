@@ -249,12 +249,12 @@ export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft,
 
 // ─────────────────────────────────────────────────────────────────────────────
 // statBig — scale-contrast stat: a huge animated number + a tiny label. `to` counts up.
-export function statBig({ x, y, to = 0, from = 0, unit = '', label, size = 150, color = T.ink,
+export function statBig({ x, y, to = 0, from = 0, unit = '', prefix = '', label, size = 150, color = T.ink,
   start = 0, dur = 4 } = {}) {
   // THE NUMBER COUNTS UP and the label is already there to receive it. The layer only fades in: a
   // stat that also slides has two motions competing for the one thing you are meant to read.
   return [
-    { type: 'count', x, y, from, to, unit, font: 'sans', size, weight: 700, color, ls: '-0.03em',
+    { type: 'count', x, y, from, to, unit, prefix, font: 'sans', size, weight: 700, color, ls: '-0.03em',
       countStart: 0.15, countDur: 1.4, ease: 'easeOutExpo', start, duration: dur, anim: 'fade', enterDur: 0.25 },
     label && text({ text: label, x, y: y + size * 0.9, font: 'mono', size: 20, color: T.dim, start: r2(start + 0.3), duration: dur - 0.3 }),
   ].filter(Boolean);

@@ -1310,3 +1310,50 @@ summary line and hides whatever error printed above it. I diagnosed from evidenc
 **Outcome:** still unexplained, and now honestly labelled as such. What it produced instead was #74 —
 trying to force the failure is what exposed the vacuous distinctness check.
 **Rule:** never diagnose from `tail -1`. If a gate fails, read all of it.
+
+---
+
+## 76. The doc, the manifest and the engine each said something different about `unit`
+
+**What:** `CLAUDE.md` documents `unit: "$B"` with value `880` rendering as **`$880B`**. The catalog
+ships `statBig.currency` with exactly those props. The engine rendered **`880$B`** — the shipped
+variant was backwards, and the doctrine file taught it wrong.
+**Root cause:** `core/layers/count.js` appended `unit` verbatim. Nobody had rendered the currency
+variant and looked at it; a catalog still exists for it, which means the wrong output has been on the
+site the whole time.
+**Fix:** a leading currency symbol in `unit` is hoisted in front of the number, so `unit:"$B"` reads
+`$880B` as documented. Plain units (`%`, `k`, `ms`) are untouched.
+**Also:** `statBig` forwarded `unit` but not `prefix`, so the one block whose stated job is the big
+number could not render a currency stat at all. That is why the money film's hero was a hand-written
+`count` layer rather than the block the film was about. `prefix` is forwarded now.
+**Rule:** three sources of truth for one behaviour is two too many. When a doc, a manifest and an
+implementation all describe the same thing, only one of them is executable — check that one.
+
+---
+
+## 77. The overlap check does not see text that grows by wrapping (OPEN)
+
+**What:** a showcase end card had a headline wrap to two lines and land directly on top of the mono
+filepath beneath it. `make audit` reported **0 hard issues**.
+**Root cause (suspected, not yet proven):** overlap is measured between declared layer boxes, and a
+text layer that wraps grows beyond the box the check reasons about, into the next layer's space.
+**Status: OPEN.** I have the reproduction (widening `w` from 1100 to 1420 so the headline holds one
+line fixed it) but have not confirmed the mechanism, and I am not going to write a third gate patch
+tonight on a hypothesis — see #74, where exactly that produced a regression.
+**Why it matters:** this is the "renders silently wrong" class the roadmap describes. Two of the four
+showcase films had a composition defect that passed every gate, and both were caught by looking.
+**Related, also open:** nothing measures vertical mass distribution. Six of twelve beats initially put
+all content in the upper 60% with a dead bottom third, and every one passed the safe-zone check.
+
+---
+
+## 78. Non-block layers get no unknown-prop check at all
+
+**What:** a scene wrote `{"type":"glow","r":620,"opacity":0.5}` and got no glow. `core/layers/glow.js`
+sizes from `w`/`h` and takes `color`+`intensity`; `r` and `opacity` are not props it reads.
+**Root cause:** `make expand` warns when a BLOCK is handed a prop its factory does not accept
+(MISTAKES #60). Nothing does the equivalent for a raw layer, so an unknown prop on a `glow`, `paint`
+or `shader` layer is accepted and silently dropped — the exact class this repo has spent the most
+effort eliminating, still live on the primitive path.
+**Fix not attempted here.** The schema knows every declared prop per layer type, so the check is
+available; it needs care about props that are legitimately type-agnostic.

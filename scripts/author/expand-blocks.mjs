@@ -17,6 +17,7 @@
 // Usage: node scripts/expand-blocks.mjs <scene.json> [out.json]   (default out = <scene>.expanded.json)
 import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
+import { CATALOG } from '../../blocks/catalog.mjs';
 
 const inp = process.argv[2];
 if (!inp) { console.error('usage: node scripts/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
@@ -47,7 +48,11 @@ function expand(layer, stack) {
     // The parameter names are readable off the factory source, so the mismatch is checkable.
     // A namespaced entry ("searchEngine.home") resolves to a WRAPPER that merges the manifest props
     // and calls the family, so introspecting it reads the wrapper's own signature. Walk to the family.
-    const famFn = layer.block.includes('.') ? B[layer.block.split('.')[0]] : f;
+    // Use the catalog's declared `family`, not the first path segment: `card.pricing.free` has family
+    // `pricingCard`, so splitting on '.' introspected `card` and warned that correct props were being
+    // ignored. A false warning trains authors to distrust a system that is otherwise right.
+    const entry = CATALOG.find((e) => e.name === layer.block);
+    const famFn = entry ? B[entry.family] : (layer.block.includes('.') ? B[layer.block.split('.')[0]] : f);
     const sig = famFn && /\(\s*\{([^}]*)\}/.exec(famFn.toString());
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));

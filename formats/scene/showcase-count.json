@@ -82,11 +82,11 @@
     { "type": "rect", "x": 150, "y": 356, "w": 96, "h": 6, "radius": 3, "bg": "var(--accent)",
       "start": 17.4, "duration": 2.2, "anim": "wipe-right", "enterDur": 0.45, "exitDur": 0 },
     { "type": "text", "text": "Four counters. One layer type.",
-      "x": 150, "y": 430, "w": 1100, "align": "left", "size": 82, "weight": 600, "color": "var(--text)",
+      "x": 150, "y": 430, "w": 1420, "align": "left", "size": 82, "weight": 600, "color": "var(--text)",
       "split": "word", "preset": "up", "stagger": 0.07, "each": 0.46,
       "start": 17.45, "duration": 2.15, "anim": "none", "exitDur": 0 },
     { "type": "text", "text": "formats/scene/showcase-count.json",
-      "x": 150, "y": 590, "w": 900, "align": "left", "size": 28, "font": "mono", "color": "var(--dim)",
+      "x": 150, "y": 600, "w": 900, "align": "left", "size": 28, "font": "mono", "color": "var(--dim)",
       "start": 17.9, "duration": 1.7, "anim": "fade", "enterDur": 0.5, "exitDur": 0 }
   ]
 }
