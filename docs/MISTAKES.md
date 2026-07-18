@@ -554,3 +554,35 @@ text layer. Mutation-tested in `make gate-test` (12/12).
    INVARIANT (the translate value is 0; travel is in %; u=0 is fully behind the mask), never the
    formatting.
 
+---
+
+## 36. Fixing cuts made the safe-zone gate fire on every cut
+
+**What:** the first render of the coverage reel failed with 2 HARD safe-zone violations — text measured
+at `x=-88` when it was authored at `x=140`.
+**Root cause:** a scene cut displaces the whole CAMERA for the length of its window, so mid-cut every
+layer is legitimately off its mark, including outside the safe box. The audit already understood that
+a layer mid-entrance is intentionally out of position (`midMove`), but it knew nothing about cuts —
+because until an hour earlier the `cuts` array rendered nothing at all (#29). The moment cuts started
+moving the camera, a cut in flight read as a safe-zone breach.
+**Fix:** the audit now receives the cut windows and skips positional checks inside them, mirroring
+`scene.html`'s own filter (`none` excluded, `dur` split evenly around `t`). The must-fail
+safe-zone mutation case still passes, so the rule did not go soft.
+**The general lesson:** turning on a dormant feature does not just add behaviour, it changes the
+assumptions every gate was written under. When something starts rendering for the first time, re-run
+the whole ladder against a scene that uses it hard — which is exactly what the coverage reel is for.
+
+---
+
+## 37. `make coverage-reel` — renders whatever nothing else renders
+
+Conformance proves a value changes the frame; coverage says nothing USES it. Neither says it LOOKS
+right, and the descender bug (#35) was a real effect doing real work while slicing the glyphs.
+
+`make coverage-reel` generates a reel from the LIVE coverage gap — add an effect and it is in the reel
+with no edit — then renders it. First run moved enter anims 64% -> 100%, cut styles 38% -> 96% and
+shader stings 85% -> 100%, and immediately surfaced #36.
+
+Cut styles stop at 25/26 on purpose: `none` is a documented no-op the builder filters before the
+renderer sees it. Listing it would make the reel look permanently incomplete for no reason.
+

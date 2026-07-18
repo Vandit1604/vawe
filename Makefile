@@ -102,6 +102,12 @@ conformance:
 gate-test:
 	node scripts/gates/gate-mutation.mjs
 
+# make coverage-reel  — generate + render a reel of whatever `make coverage` says nothing exercises,
+# derived from the LIVE gap so it never goes stale. Watch it: the gates only prove it did not crash.
+coverage-reel:
+	node scripts/author/coverage-reel.mjs
+	$(MAKE) video D=formats/scene/_coverage-reel.json
+
 # make coverage  — which engine vocabulary no authored scene exercises. Conformance proves a value
 # works; this says whether anything USES it. WARN tier, always exits 0.
 coverage:

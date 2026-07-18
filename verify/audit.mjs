@@ -83,7 +83,7 @@ function startServer() {
 }
 
 // runs in-page: render frame n, measure every visible [data-layer=critical] box, return issues.
-function auditFrameFn(n, SAFE, MIN_GAP) {
+function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
   const els = [...document.querySelectorAll('[data-layer="critical"]')].filter((el) => {
@@ -104,7 +104,13 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
   // place (no movement), so those still get checked. Timing comes from the render's data-* attrs.
   const FPS = (window.__engine && window.__engine.meta && window.__engine.meta.fps) || 30;
   const tNow = n / FPS;
+  // A SCENE CUT displaces the whole camera for the length of its window, so during one every layer
+  // is legitimately off its mark — including outside the safe box. midMove() understands per-layer
+  // entrances but knew nothing about cuts, because until recently the cuts array rendered nothing at
+  // all (MISTAKES #29); the moment it did, a cut mid-flight read as 15 safe-zone violations.
+  const inCut = (CUTS || []).some((c) => Math.abs(tNow - c.t) < c.half + 0.02);
   const midMove = (el) => {
+    if (inCut) return true;
     if (!el || !el.dataset) return false;
     const st = parseFloat(el.dataset.start) || 0;
     const en = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
@@ -494,6 +500,10 @@ for (const aspectKey of askedAspects) {
   // 1080x1920) mis-fires safe-zone and the tiny-text floor on every landscape video.
   const [vw, vh] = dimsFor(aspectKey, cfg);
   const safe = safeFor(vw, vh, cfg);
+  // cut windows the renderer will actually apply (mirrors scene.html: `none` is filtered, `dur` is
+  // the TOTAL window split evenly around t)
+  const cutWindows = (cfg.cuts || []).filter((c) => c && c.style && c.style !== 'none')
+    .map((c) => ({ t: +c.t, half: (c.dur ?? 0.36) / 2 }));
   await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 1 });
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
@@ -536,7 +546,7 @@ for (const aspectKey of askedAspects) {
   const all = [];
   let critMax = 0, worst = { f: frames[0] || 0, n: -1 };
   for (const f of frames) {
-    const { issues, count } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP);
+    const { issues, count } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows);
     critMax = Math.max(critMax, count);
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
