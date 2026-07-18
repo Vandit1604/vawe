@@ -360,11 +360,19 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   const PY = (v) => ((ch - pad) - ((v - min) / ((max - min) || 1)) * (ch - 2 * pad)).toFixed(1);
   const pts = data.map((d, i) => `${PX(i)},${PY(d.value)}`).join(' ');
   const dots = data.map((d, i) => `<circle cx="${PX(i)}" cy="${PY(d.value)}" r="2.6" fill="${color}"/>`).join('');
+  // exact polyline length, so the draw-on dash is right for any data rather than a fudge factor
+  const len = data.reduce((acc, d, i) => i === 0 ? 0
+    : acc + Math.hypot(+PX(i) - +PX(i - 1), +PY(d.value) - +PY(data[i - 1].value)), 0) || 1;
   const svg = `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
     + (area ? `<polygon points="${pad},${ch - pad} ${pts} ${cw - pad},${ch - pad}" fill="${color}" opacity="0.12"/>` : '')
-    + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
+    + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"`
+    + ` stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="calc(${len.toFixed(1)} * (1 - var(--p, 1)))"/>${dots}</svg>`;
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
-  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+  // the line DRAWS ON rather than the card sliding in — the motion a line chart is for. `len` is the
+  // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
+  return [{ type: 'html', x, y, w, html, start, duration: dur,
+    anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+    vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic' }];
 }
 
 // donutChart — a ring split into segments + a legend. segments = [{value,color,label}].
@@ -760,14 +768,21 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
 export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
   const arc = 'M8 52 A42 42 0 0 1 92 52';
+  // The arc SWEEPS to its reading instead of the whole card sliding in. `--p` is driven by the engine
+  // over the layer's window (0 → pct), and the dash length is computed from it in CSS — so the motion
+  // is the thing the block is FOR, which is what makes the registry browsable: you see what a gauge
+  // does, not that a card can rise. Deterministic: --p is a pure function of t.
   const svg = (inner) => `<svg viewBox="0 0 100 60" width="${inner}" style="display:block;margin:0 auto 4px">`
     + `<path d="${arc}" fill="none" stroke="${T.hair}" stroke-width="10" stroke-linecap="round"/>`
-    + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(semi * pct).toFixed(2)} ${semi.toFixed(2)}"/></svg>`;
+    + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"`
+    + ` stroke-dasharray="calc(${semi.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${semi.toFixed(2)}"/></svg>`;
   // the reading and its caption sit BELOW the arc, so they are body, not htmlCard's heading row.
   const html = htmlCard({ w, pad: CHART_PAD, align: 'center', body: (inner) => svg(inner)
     + `<div style="font:700 34px var(--font-sans);color:${T.ink};letter-spacing:-0.02em;margin-top:-4px">${value}${max === 100 ? '%' : ''}</div>`
     + (label ? `<div style="font:600 16px var(--font-mono);color:${T.dim};margin-top:4px">${label}</div>` : '') });
-  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+  return [{ type: 'html', x, y, w, html, start, duration: dur,
+    anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+    vars: { '--p': [0, pct] }, varsDur: 1.1, varsDelay: 0.15, varsEase: 'easeOutCubic' }];
 }
 
 // progressRing — a circular progress ring with a % centre label (bare, for overlaying).

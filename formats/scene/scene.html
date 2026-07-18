@@ -251,6 +251,22 @@
             // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
             // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
             renderer.frame(el, L, t);
+            // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
+            // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
+            // because there was no way to animate what the block actually DOES. A gauge cannot sweep
+            // to its reading, a bar cannot grow, a line cannot draw on. Interpolating a custom property
+            // fixes the whole class at once: the block writes `var(--p)` into its own CSS or SVG and
+            // the engine drives the number. Pure in n — the value is a function of t and nothing else.
+            //   vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic'
+            if (L.vars && t >= start) {
+              const vd = L.varsDur ?? 1.0, v0 = start + (L.varsDelay ?? 0);
+              const u = vd > 0 ? clamp01((t - v0) / vd) : 1;
+              const e = resolveEasing(L.varsEase || 'easeOutCubic')(u);
+              for (const [name, range] of Object.entries(L.vars)) {
+                const [a, b] = Array.isArray(range) ? range : [0, range];
+                el.style.setProperty(name, (a + (b - a) * e).toFixed(4));
+              }
+            }
             // AUDIO REACT: modulate a property from the baked per-frame band energy. Composed BEFORE
             // the motion track so an authored choreography still wins the outer transform, and read
             // from a table indexed by n — the frame never analyses audio, so purity is untouched.

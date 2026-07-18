@@ -1073,6 +1073,24 @@
         "react": {
           "type": "object|array",
           "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] } \u2014 needs audio.spectrum"
+        },
+        "vars": {
+          "type": "object",
+          "label": "Animate CSS custom properties over the layer's window: { \"--p\": [from, to] }"
+        },
+        "varsDur": {
+          "type": "number",
+          "label": "Seconds the `vars` sweep takes (default 1)",
+          "min": 0
+        },
+        "varsDelay": {
+          "type": "number",
+          "label": "Seconds into the layer before the `vars` sweep starts",
+          "min": 0
+        },
+        "varsEase": {
+          "type": "string",
+          "label": "Easing for the `vars` sweep (default easeOutCubic)"
         }
       }
     },
