@@ -32,8 +32,33 @@ await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/formats/
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
 const meta = await page.evaluate(() => window.__engine.meta);
 const total = meta.totalFrames;
-// sample ~20 frames across the timeline (+ every sting)
-const frames = [...new Set([...(meta.stings || []).map((t) => Math.round(t * 30)), ...Array.from({ length: 20 }, (_, i) => Math.round(((i + 0.5) / 20) * total))])].filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
+// Sample WHERE THE MOTION IS. An even spread lands almost entirely in steady state — transition
+// windows are 0.3-0.6s — so this gate reported IDENTICAL after every fade curve in the engine was
+// re-eased (#38). Transition frames are derived from the same data-* attributes driveClips reads, so
+// the sampling follows whatever the scene actually does rather than a fixed grid.
+const motionFrames = await page.evaluate(() => {
+  const out = new Set();
+  const FPS = (window.__engine.meta && window.__engine.meta.fps) || 30;
+  const at = (t) => { const f = Math.round(t * FPS); if (f >= 0) out.add(f); };
+  for (const el of document.querySelectorAll('[data-start]')) {
+    const st = parseFloat(el.dataset.start) || 0;
+    const en = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
+    const du = el.dataset.duration != null ? parseFloat(el.dataset.duration) : null;
+    const ex = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : 0.4;
+    at(st + en * 0.3); at(st + en * 0.7);                       // mid-entrance, both sides of the curve
+    if (du != null && Number.isFinite(du)) { at(st + du - ex * 0.7); at(st + du - ex * 0.3); } // mid-exit
+  }
+  return [...out];
+});
+const cutFrames = (() => { try {
+  const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8'));
+  return (j.cuts || []).flatMap((c) => { const h = (c.dur ?? 0.36) / 2; return [c.t - h * 0.5, c.t, c.t + h * 0.5]; }).map((t) => Math.round(t * 30));
+} catch { return []; } })();
+const frames = [...new Set([
+  ...(meta.stings || []).map((t) => Math.round(t * 30)),
+  ...motionFrames, ...cutFrames,
+  ...Array.from({ length: 20 }, (_, i) => Math.round(((i + 0.5) / 20) * total)),
+])].filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
 
 const sig = await page.evaluate((frames) => {
   const round = (v) => Math.round(v * 10) / 10;
@@ -46,7 +71,7 @@ const sig = await page.evaluate((frames) => {
       const s = getComputedStyle(el); if (s.visibility === 'hidden' || +s.opacity === 0) continue;
       const key = el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName);
       els[key] = { x: round(b.left), y: round(b.top), w: round(b.width), h: round(b.height),
-        tf: s.transform === 'none' ? '' : s.transform, op: round(+s.opacity), fs: s.fontSize, c: s.color,
+        tf: s.transform === 'none' ? '' : s.transform, op: Math.round(+s.opacity * 1000) / 1000, fs: s.fontSize, c: s.color,
         t: (el.textContent || '').trim().slice(0, 24) };
     }
     snap[f] = els;
@@ -69,7 +94,11 @@ for (const f of Object.keys(sig)) {
     if (!b[k]) { diffs.push(`f${f} -${k} (gone)`); continue; }
     for (const fld of Object.keys(fields)) {
       const av = a[k][fld], bv = b[k][fld];
-      if ((typeof av === 'number' ? Math.abs(av - bv) > 0.6 : av !== bv)) diffs.push(`f${f} ${k}.${fields[fld]}: ${JSON.stringify(av)} → ${JSON.stringify(bv)}`);
+      // Tolerance is PER FIELD. A shared 0.6 threshold is sane for a pixel box and meaningless for
+      // opacity, which lives on 0..1 — it took a >60% opacity change to register, which is why
+      // re-easing every fade in the engine diffed as nothing at all.
+      const tol = fld === 'op' ? 0.02 : 0.6;
+      if ((typeof av === 'number' ? Math.abs(av - bv) > tol : av !== bv)) diffs.push(`f${f} ${k}.${fields[fld]}: ${JSON.stringify(av)} → ${JSON.stringify(bv)}`);
     }
   }
 }

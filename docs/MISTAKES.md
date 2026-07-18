@@ -631,3 +631,32 @@ for every t. The invariant is the point; anyone re-easing one side alone will fa
 and are not, because layers hand over the same pixels. When changing a curve, measure the SUM across
 a real handoff, not the shape of one side.
 
+---
+
+## 39. `make snap` reported IDENTICAL after every fade curve in the engine changed
+
+**What:** re-easing the opacity envelope (#38) altered every fade in every scene. `make snap`, whose
+whole job is "prove the rendered frames are unchanged", diffed it as nothing at all.
+**Root cause — two, and the second is worse:**
+1. It sampled **20 evenly spaced frames**. Transition windows are 0.3-0.6s, so an even grid lands
+   almost entirely in steady state. The gate was measuring the parts of the timeline where nothing
+   happens.
+2. Opacity was stored rounded to 1 decimal and compared with a **shared 0.6 tolerance**. That
+   threshold is sane for a pixel box and meaningless on a 0..1 scale: it took a >60% opacity change
+   to register. Even had it sampled the right frames, it would still have seen nothing.
+**Fix:** frames are now derived from where the motion IS — mid-entrance and mid-exit of every layer,
+read from the same `data-*` attributes `driveClips` uses, plus cut windows and stings, plus the even
+spread for general coverage. Tolerance is per field: 0.02 for opacity, 0.6 for geometry.
+**Proof, not assertion:** reverting the easing now produces
+`f97 hs-layer.opacity: 0.296 → 0.667`, where the old gate printed IDENTICAL. Locked as a mutation
+case in `make gate-test` (13/13).
+
+**A gate can speak without exiting non-zero.** snap is a review tool — an intended change is still a
+change — so it reports and exits 0 on purpose. The mutation harness now supports asserting on OUTPUT
+alone for exactly that shape of gate, rather than forcing every gate to be pass/fail.
+
+**The pattern across #26, #35, #38 and this one:** a gate's blind spot is never in the rule it
+states, it is in the sampling or the tolerance underneath it. `b.height > 1` skipped zero-height
+images; the overflow rule never descended into nested masks; this one measured the quiet parts of
+the timeline with a threshold nothing could cross. Ask what a gate CANNOT see, not what it checks.
+

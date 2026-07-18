@@ -94,6 +94,10 @@ const srcCases = [
   { name: 'clipped-text · riseClip mask too short for descenders', file: 'core/type.js',
     mutate: (s) => s.replace("        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';\n", ''),
     cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-text/ },
+  { name: 'snap · opacity easing reverted to linear', file: 'core/clips.js',
+    mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
+                             '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
+    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true },
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
@@ -107,7 +111,9 @@ for (const c of srcCases) {
   fs.writeFileSync(p, mutated);
   const r = run(c.cmd[0], c.cmd[1]);
   fs.writeFileSync(p, orig); // always restore, even if the gate throws
-  const ok = r.code !== 0 && c.match.test(r.out);
+  // snap reports rather than fails (an intended change is still a change), so some cases
+  // assert on OUTPUT alone — a gate can speak without exiting non-zero.
+  const ok = (c.outputOnly ? true : r.code !== 0) && c.match.test(r.out);
   console.log(`   ${ok ? '✓' : '✗'} ${'source'.padEnd(9)} must-fail  ${c.name}`);
   if (ok) pass++; else broken.push({ name: c.name, why: r.code === 0 ? 'gate stayed SILENT after its guard was removed' : 'fired for the wrong reason', out: r.out.split('\n').filter(Boolean).slice(-3).join(' | ').slice(0, 220) });
 }
