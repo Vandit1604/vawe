@@ -150,8 +150,12 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, col
 // ─────────────────────────────────────────────────────────────────────────────
 // deploySuccess — a CI pipeline that cascades queued→building→deploying→live, then a success card
 // with a green check, live URL, and "Ready in Xs". The canonical "a click had a consequence" payoff.
-export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', start = 0, rowGap = 52 } = {}) {
-  const steps = ['Building', 'Deploying', 'Live'];
+// `title`/`note`/`steps` are PROPS. They used to be constants, which meant every caller shipped the
+// words "Deployed to production" and — worse — "Ready in 1.2s", an invented statistic baked into the
+// factory. This repo's own rule is that an unbacked number is worse than no number, so `note` now
+// defaults to nothing: a timing claim only appears when a caller can stand behind it.
+export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'Deployed to production',
+  note = null, steps = ['Building', 'Deploying', 'Live'], start = 0, rowGap = 52 } = {}) {
   const out = [];
   steps.forEach((label, i) => {
     const t = r2(start + i * 0.55);
@@ -170,12 +174,12 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', start = 0, 
     children: [
       { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: '#fff' })] },
       { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
-        text({ text: 'Deployed to production', size: 22, weight: 700, color: T.ink }),
+        text({ text: title, size: 22, weight: 700, color: T.ink }),
         text({ text: url, font: 'mono', size: 18, color: T.green }),
       ] },
-      { type: 'group', grow: 1, layout: 'row', justify: 'flex-end', children: [
-        text({ text: 'Ready in 1.2s', font: 'mono', size: 18, color: T.dim }),
-      ] },
+      ...(note ? [{ type: 'group', grow: 1, layout: 'row', justify: 'flex-end', children: [
+        text({ text: note, font: 'mono', size: 18, color: T.dim }),
+      ] }] : []),
     ],
   });
   return out;
@@ -183,7 +187,11 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', start = 0, 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // browserFrame — window chrome (traffic dots + URL bar). Draw content on top via other layers.
-export function browserFrame({ x, y, w = 900, h = 560, url = 'stripe.com', start = 0, dur = 4 } = {}) {
+// `url` defaulted to a real company's domain, which put a brand into every caller that did not think
+// to override it — the repo's rule is to ship the SHAPE, never a brand lockup. `children` is the
+// content slot: without it a caller had to hand-stack absolute coordinates over the chrome and any
+// change to w/h silently broke the alignment.
+export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', children = [], start = 0, dur = 4 } = {}) {
   return [{
     type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 0,
     bg: T.card, radius: 14, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
@@ -194,6 +202,7 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'stripe.com', start
           { type: 'group', bg: T.surface, radius: 100, pad: '6px 20px', children: [text({ text: url, font: 'mono', size: 18, color: T.sub })] },
         ] },
       ] },
+      ...(children.length ? [{ type: 'group', grow: 1, layout: 'column', items: 'stretch', pad: '0 18px 18px', children }] : []),
     ],
   }];
 }
@@ -468,11 +477,21 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
 }
 
 // phoneFrame — a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
-export function phoneFrame({ x, y, w = 300, h = 620, start = 0, dur = 4 } = {}) {
+// `children` is the SCREEN. Without it the block was a bezel around an empty card, so any app content
+// had to be absolutely placed over it from the scene using coordinates derived by hand from the pad —
+// arithmetic that broke silently the moment w or h changed. `status` draws the clock/indicator row,
+// without which the frame reads as a black rectangle rather than a phone in use.
+export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '9:41',
+  start = 0, dur = 4 } = {}) {
+  const screen = [box({ w: 116, h: 26, radius: 100, bg: '#0A0A0A' })];
+  if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: '6px 4px 0',
+    children: [text({ text: time, size: 14, weight: 600, color: T.ink }),
+               text({ text: '▮▮▮', size: 12, color: T.dim })] });
+  if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: 10, pad: '10px 0 0', children });
   return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 10,
     bg: '#0A0A0A', radius: 44, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [{ type: 'group', grow: 1, bg: T.card, radius: 34, layout: 'column', items: 'center', pad: 12,
-      children: [box({ w: 116, h: 26, radius: 100, bg: '#0A0A0A' })] }] }];
+      children: screen }] }];
 }
 
 // tabBar — a segmented control; `active` is the selected index (lifted, lit card).
