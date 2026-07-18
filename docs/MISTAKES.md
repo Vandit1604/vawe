@@ -308,3 +308,75 @@ comparison against three generics (all-equal = the family resolved), plus an `@f
 check to catch the nastiest case: a font that paints only because it is installed on THIS machine
 (`SYSTEM-LUCK`) and falls back everywhere else.
 **Gate:** `make font-audit D=<file>` → `out/<name>.fonts.json`, exits 1 on FALLBACK / SYSTEM-LUCK / BROKEN.
+
+---
+
+## 23. Auto sound-design ignored the `cuts` array (so a scored film was silent at every cut)
+
+**What:** `audio:{auto:true}` produced no cut cues. The film cut five times and none of them made a sound.
+**Root cause:** the builder derived cues from LAYER-level `L.cut` and from `stings` only. The top-level
+`cuts` array — which is how a scene actually cuts between beats — was never read.
+**Fix:** `cuts` are now a cue source, and the mapping is style-aware (`CUT_CUE`): a `punch` snaps
+(`press`), a `softwipe` breathes (`whisper`), a `rise` blooms. One whoosh on everything is not sound
+design. Authors can also place cues directly with `audio.cues:[{t,name,gain}]`.
+
+---
+
+## 24. A group image child silently dropped `radius` (same bug as #19, one level down)
+
+**What:** avatars that were perfect circles as top-level layers turned back into squares the moment
+they were moved inside a `group` to save layer budget.
+**Root cause:** `addGroupChild` honoured every image prop except `radius`. Fixing #19 in
+`core/layers/image.js` did nothing for group children, which take a completely separate code path.
+**Fix:** group image children clip too, with cover-fit when both `w` and `h` are given.
+**Rule:** when you fix "a prop is silently ignored", grep for EVERY path that builds that primitive.
+A primitive with two constructors has two places to forget.
+
+---
+
+## 25. The layout audit called a cross-dissolve a collision
+
+**What:** morphing a headline between two states (A fading out while B fades in, same box) tripped a
+HARD `overlap` failure, which would have made dissolves unusable engine-wide.
+**Root cause:** the overlap rule compared boxes with no notion of time or opacity. Two boxes in the
+same place is normally a bug; during a hand-off it is the technique working.
+**Fix:** overlap is skipped only for a genuine hand-off — one layer inside its exit window, the other
+inside its enter window, and BOTH below full opacity. Two solid overlapping layers still hard-fail
+(regression-tested with a fixture).
+**Related:** #17. A gate widened without a notion of intent starts flagging correct work.
+
+---
+
+## 26. Two more silent-ignore traps found while auditing the first one
+
+**`b.height > 1` skipped collapsed images.** The image legibility floor only considered images
+TALLER than 1px, so an image that laid out at zero — visible layer, no pixels — was the one case it
+could never report. Now a HARD `collapsed-image`, measured on the LAYOUT box (`offsetWidth/Height`)
+rather than the painted rect, so an image mid-`scale` entry is not a false positive.
+
+**`document.fonts.check()` was still used in `core/layers/text.js`.** Same inverted API as #22: it
+returns true for a family that does not exist and false for a registered-but-unloaded one, so the
+auto-fit warning fired on healthy fonts and stayed quiet on missing ones. Replaced with
+`isPainting()` from `core/fonts.js`.
+
+**Discipline note — do not claim a regression you have not reproduced.** While guarding the #19 fix
+I asserted that forcing `height:100%` "would collapse the argus mascot to zero". It does not: the
+mascot measures 268px with and without the guard. The guard is still correct (cover-fit is meaningless
+without a box) but the justification was invented. Measure the claim, then make it.
+
+---
+
+## 27. Sound was a downloaded sample library, not part of the framework
+
+**What:** every cue came from Mixkit over the network, into a gitignored folder, with per-file
+licensing to track.
+**Fix:** `core/audio-kit.mjs` — the engine now SYNTHESIZES its own audio: oscillators, seeded noise,
+RBJ biquads, envelopes, a feedback-delay shimmer, a WAV writer, and a parameterized music-bed
+generator. `make audio` bakes every cue + bed. Cue voicings are ported from Cuelume (MIT © Daniel
+White); the DSP is ours because Web Audio does not exist in a build step.
+**Why it matters:** a cue is now a pure function of its spec + seed, so the same JSON always scores
+the same mix (asserted in `make lib-test`), there is nothing to license, and a fresh clone needs no
+network. **Gotcha:** Cuelume's `peak` values are Web Audio UI gains and bake out at -25..-40 dBFS,
+inaudible under a bed — every cue is peak-normalized to a common ceiling and balance is left to the
+mixer's per-cue gain, which is where balance belongs.
+

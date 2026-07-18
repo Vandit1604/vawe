@@ -8,6 +8,11 @@
 fonts:
 	node scripts/media/fonts.mjs
 
+# make audio  — bake every cue + music bed from PARAMETERS (core/audio-kit.mjs). No network, no
+# licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
+audio:
+	node scripts/media/audio-bake.mjs
+
 # make sfx  — download the curated sound-effects library (Mixkit Free License) into the gitignored
 # assets/sfx/. The mixer auto-places cuts→whoosh / stings→reveal; drop these in for scored video.
 sfx:

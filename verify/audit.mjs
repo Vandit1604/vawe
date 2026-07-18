@@ -183,6 +183,15 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
   for (const im of document.querySelectorAll('.hs-img-wrap > img')) {
     if (!vis(im)) continue;
     const b = im.getBoundingClientRect();
+    // COLLAPSED image = the layer is on screen but occupies no space, so it renders as nothing. The
+    // old `b.height > 1` guard SKIPPED exactly this case, which is how a width-only image layer could
+    // silently vanish when cover-fit forced height:100% on a wrapper with no height (MISTAKES #19).
+    // Measure the LAYOUT box (offsetWidth/Height), not the painted rect: an image mid-`scale` entry
+    // legitimately has a ~0 painted rect, but its layout box is still full size.
+    if (im.offsetHeight < 1 || im.offsetWidth < 1) {
+      issues.push({ kind: 'collapsed-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `lays out ${im.offsetWidth}x${im.offsetHeight} — visible but occupies no space, renders as nothing` });
+      continue;
+    }
     if (b.height > 1 && b.height < MIN_IMG) issues.push({ kind: 'tiny-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `${b.height | 0}px tall < ${MIN_IMG | 0}px floor (5% frame h) — logos read at ~7%` });
   }
   // text legibility floor: a text layer rendered below ~1.3% of frame height is unreadable at video
@@ -203,11 +212,33 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
       if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
     }
   }
+  // A CROSS-DISSOLVE is two layers deliberately sharing the same box while one fades out and the
+  // other fades in. That is the standard way to morph a headline between two states, and reading it
+  // as a collision would make dissolves unusable — the gate would forbid a technique the engine
+  // ships. Only exempt a genuine hand-off: both partly transparent, one exiting while the other
+  // enters. Two solid overlapping layers are still a hard fail.
+  const fading = (el) => {
+    if (!el || !el.dataset || el.dataset.start == null) return null;
+    const st = parseFloat(el.dataset.start) || 0;
+    const en = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
+    const du = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
+    const exD = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : 0.4;
+    if (tNow < st + en) return 'in';
+    if (du !== Infinity && tNow > st + du - exD) return 'out';
+    return null;
+  };
+  const crossDissolve = (A, B) => {
+    const fa = fading(A.el), fb = fading(B.el);
+    if (!fa || !fb || fa === fb) return false;                          // need one in + one out
+    const oa = +getComputedStyle(A.el).opacity, ob = +getComputedStyle(B.el).opacity;
+    return oa < 0.98 && ob < 0.98;                                      // both mid-blend, neither solid
+  };
   for (let i = 0; i < info.length; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
     if (A.el.contains(B.el) || B.el.contains(A.el)) continue;          // skip nested pairs
     const ox = Math.min(A.r, B.r) - Math.max(A.x, B.x);                // >0 → overlap on X
     const oy = Math.min(A.btm, B.btm) - Math.max(A.y, B.y);            // >0 → overlap on Y
+    if (ox > 2 && oy > 2 && crossDissolve(A, B)) continue;             // intentional hand-off
     if (ox > 2 && oy > 2) { issues.push({ kind: 'overlap', a: A.id, b: B.id, detail: `${ox | 0}x${oy | 0}px` }); continue; }
     let gap = Infinity;                                                // gap only meaningful when they share one axis
     if (ox > 0) gap = Math.min(gap, -oy);
@@ -414,7 +445,7 @@ function sourceIssues(cfg) {
   return out;
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin']);
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });

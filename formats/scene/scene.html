@@ -321,9 +321,25 @@
         // Does NOT touch renderFrame, so frames stay byte-identical (audio is a separate track).
         let sfx = [];
         if (data.audio && data.audio.auto) {
+          // Cut style -> cue. One whoosh on everything is not sound design: a punch should snap and
+          // a softwipe should breathe. Mirrors CUT_CUE in scripts/media/audio-bake.mjs.
+          const CUT_CUE = {
+            punch: 'press', whip: 'whisper', skewWhip: 'whisper', jitter: 'tick',
+            softwipe: 'whisper', wipe: 'whisper', softiris: 'bloom', iris: 'bloom',
+            rise: 'bloom', riseBlur: 'bloom', drop: 'droplet', zoom: 'droplet',
+            slide: 'whisper', fade: 'whisper', blur: 'whisper',
+            flip: 'toggle', spin: 'toggle', cube: 'toggle', roll: 'toggle',
+            clock: 'tick', blinds: 'tick', barn: 'tick',
+            squeeze: 'press', collapse: 'press', letterbox: 'press',
+          };
           const cues = [];
-          for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: 'whoosh' });
+          for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
+          // TOP-LEVEL cuts were silently ignored — the `cuts` array is how a scene actually cuts
+          // between beats, so an auto-scored film came out with no cut sound at all.
+          for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
           for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
+          // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
+          for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
           cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
           for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
         }

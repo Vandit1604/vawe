@@ -117,6 +117,13 @@ export function createKit(ctx) {
     if (C.type === 'image') {
       c.innerHTML = icon(C.src, '');
       const im = c.querySelector('img'); if (im) { im.className = 'hs-img'; if (C.h) im.style.height = C.h + 'px'; if (C.w) im.style.width = C.w + 'px'; }
+      // A group image honoured every prop EXCEPT radius, so an avatar that is a circle as a top-level
+      // layer turned back into a square the moment it moved inside a group. Same bug as MISTAKES #19:
+      // a prop the engine accepts and ignores. Clip here too, with cover-fit when a box is defined.
+      if (C.radius != null && im) {
+        c.style.overflow = 'hidden'; c.style.borderRadius = C.radius + 'px';
+        if (C.w && C.h) { im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%'; c.style.width = C.w + 'px'; c.style.height = C.h + 'px'; }
+      }
     } else {
       styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2);
       chipBox(c, C);

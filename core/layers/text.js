@@ -1,5 +1,7 @@
 // core/layers/text.js — a text (or count) layer: theme-styled type + chip box + auto-fit safety.
 // Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
+import { isPainting } from '../fonts.js';
+
 export function build(kit, el, L) {
   kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
@@ -7,7 +9,11 @@ export function build(kit, el, L) {
   if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
     kit.cam.appendChild(el); // needs to be in-DOM to measure
     const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
-    if (!document.fonts.check(`${L.weight ?? 800} 40px "${fam}"`)) console.warn(`fit: font "${fam}" not loaded — fit measurement may be off`);
+    // NOT document.fonts.check() — it is inverted for this question. Measured in headless Chrome it
+    // returns true for a family that does not exist and false for a registered-but-unloaded one, so
+    // this warning fired on correct fonts and stayed silent on missing ones. isPainting() width-probes
+    // the family against three generics instead (all-equal = it really resolved). See core/fonts.js.
+    if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back) — fit measurement will be wrong. Run: make font-audit`);
     if (L.fitH) kit.fitBox(el, { maxW: L.w, maxH: L.fitH, max: L.size ?? 96, min: 34 });
     else el.style.fontSize = kit.fitText(el.textContent, L.w, { font: (px) => `${L.weight ?? 800} ${px}px ${fam}`, max: L.size ?? 96, min: 34 }) + 'px';
     el.remove();
