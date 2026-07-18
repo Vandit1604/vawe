@@ -522,3 +522,35 @@ its first run claimed `t`, `dur`, `style` and `timing` were unused props. They a
 on `cuts`/`stings`/`bg` items, which the collector never walked. A coverage report that cries wolf
 gets ignored exactly like a gate that does.
 
+---
+
+## 35. Descenders were sliced off every `riseClip` word (shipped, in every scene using it)
+
+**What:** g, y, p rendered with flat bottoms — "coverin_g everythin_g" cut through the tails. Visible
+in shipped video across 11 scenes.
+**Root cause:** two correct-looking decisions that are wrong together.
+`core/type.js` wraps each `riseClip` word in a span with `overflow: hidden` so the word can rise out
+from behind a mask. `.hs-text` sets `line-height: 1.04`. A 1.04 line box is TIGHTER than the ink
+extent of any real face, so the mask was smaller than the glyphs it contained: measured at 76px,
+`clientHeight` 79 against `scrollHeight` 92 — **13px sliced off every word**, whether or not it had a
+descender.
+**Fix (root, not per-scene):** the mask now carries `padding-bottom: 0.3em` with a matching
+`margin-bottom: -0.3em`, so the clip region grows to hold the full ink while the layout does not move
+a pixel. And `dist` became a PERCENTAGE of the unit's own height instead of 44px: 44px is a different
+fraction of a 40px caption than of a 150px headline, so at large sizes the word was already half
+visible at u=0 and the mask read as a smudge rather than an edge.
+**Gate so it can never ship again:** `clipped-text` (HARD) in `make audit` — any masked, text-bearing
+element whose ink exceeds its clip box. The existing `overflow` rule could not see this: it only
+inspected top-level and `[data-layer=critical]` elements, and the mask is a span NESTED inside the
+text layer. Mutation-tested in `make gate-test` (12/12).
+
+**Two mistakes made while fixing it, both worth keeping:**
+1. *"Transforms don't affect scroll metrics"* — false. A transformed descendant contributes to its
+   ancestor's scrollable overflow, so mid-rise every masked word reports a huge `scrollHeight`. The
+   first version of the gate confidently flagged the very fix that removed the real clipping. The
+   check now measures only when the word is AT REST.
+2. The lib-test assertion pinned the literal string `(0.00px)`, so it failed the moment the unit was
+   corrected — while saying nothing about whether the preset actually lands at identity. Assert the
+   INVARIANT (the translate value is 0; travel is in %; u=0 is fully behind the mask), never the
+   formatting.
+

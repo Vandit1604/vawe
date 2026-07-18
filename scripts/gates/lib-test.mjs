@@ -167,7 +167,13 @@ for (const k of ['tilt', 'stretch', 'shadow']) {
 ok('preset gradient sweeps', PRESETS.gradient(0).backgroundPosition !== PRESETS.gradient(1).backgroundPosition);
 ok('preset highlight grows', PRESETS.highlight(1).backgroundSize.startsWith('100'));
 ok('preset underline draws', PRESETS.underline(0.5).backgroundSize.startsWith('50'));
-ok('preset riseClip identity at 1', PRESETS.riseClip(1).transform.includes('(0.00px)'));
+// riseClip travels in PERCENT of the unit's own height, not px: 44px was a different fraction of a
+// 40px caption than of a 150px headline, so at large sizes the word was already half out from behind
+// its mask at u=0. These assert the invariant, not the literal string — the old assertion pinned
+// "(0.00px)" and so failed the moment the unit was corrected, which says nothing about identity.
+ok('preset riseClip identity at 1', parseFloat(PRESETS.riseClip(1).transform.match(/-?[\d.]+/)[0]) === 0);
+ok('preset riseClip travels in % (scales with type size)', PRESETS.riseClip(0).transform.includes('%'));
+ok('preset riseClip starts fully behind its mask', parseFloat(PRESETS.riseClip(0).transform.match(/-?[\d.]+/)[0]) >= 110);
 ok('presets deterministic (stretch)', JSON.stringify(PRESETS.stretch(0.37)) === JSON.stringify(PRESETS.stretch(0.37)));
 
 // shake / pulse — deterministic, decaying, zero before the hit

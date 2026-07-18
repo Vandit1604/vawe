@@ -212,6 +212,30 @@ function auditFrameFn(n, SAFE, MIN_GAP) {
       if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
     }
   }
+  // CLIPPED GLYPHS. The overflow rule above only inspects top-level/critical layers, so a mask NESTED
+  // inside a text layer was invisible to it: `riseClip` wraps every word in overflow:hidden, and
+  // .hs-text's 1.04 line-height is tighter than any real font's descender depth, so 13px was sliced
+  // off every word at 76px and shipped as flat-bottomed g/y/p (MISTAKES #35).
+  // Only measured while the word is AT REST. A transformed descendant contributes to its ancestor's
+  // scrollable overflow, so mid-rise every masked word reports a huge scrollHeight — which is the
+  // effect working, not a defect. (Assuming otherwise produced a confident false positive on the
+  // very fix that removed the real clipping, which is the whole reason gates get mutation-tested.)
+  const atRest = (host) => {
+    const kid = host.firstElementChild;
+    if (!kid) return true;
+    const tf = getComputedStyle(kid).transform;
+    return tf === 'none' || tf === 'matrix(1, 0, 0, 1, 0, 0)';
+  };
+  for (const el of document.querySelectorAll('.hs-text *, .hs-cap *')) {
+    const cs = getComputedStyle(el);
+    if (cs.overflow !== 'hidden' && cs.overflowY !== 'hidden') continue;
+    if (el.querySelector('img, canvas, svg, video')) continue;      // media clips on purpose
+    const txt = (el.textContent || '').trim();
+    if (!txt || !vis(el) || !atRest(el)) continue;
+    const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
+    if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
+      detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs — descenders/edges are being cut` });
+  }
   // A CROSS-DISSOLVE is two layers deliberately sharing the same box while one fades out and the
   // other fades in. That is the standard way to morph a headline between two states, and reading it
   // as a collision would make dissolves unusable — the gate would forbid a technique the engine
@@ -445,7 +469,7 @@ function sourceIssues(cfg) {
   return out;
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image']);
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });

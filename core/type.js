@@ -102,8 +102,12 @@ export const PRESETS = {
   underline: (u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
   // shadow: poster lift — long shadow collapses as the word settles
   shadow: (u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
-  // riseClip: word rises out of its own baseline (needs clip wrappers — pass clip:true to splitText... handled by animateUnits fallback to plain rise if no wrapper)
-  riseClip: (u, { dist = 44 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}px)` }),
+  // riseClip: the word rises out from behind a mask at its own baseline.
+  // `dist` is a PERCENTAGE of the unit's own height, not px. It was 44px, which is a different
+  // fraction of a 40px caption than of a 150px headline — at large sizes the word was already
+  // half-visible at u=0, so the mask read as a smudge instead of an edge. A percentage is
+  // self-scaling and needs no measurement, so the preset stays a pure function of u.
+  riseClip: (u, { dist = 130 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}%)` }),
   // draw: an SVG stroke draws itself on. Pairs with splitText(el,'path'), which stamps
   // pathLength="1" so dash units are normalised — the offset is then a pure function of u with no
   // measurement. `back:true` draws from the far end. Hidden at u=0, exact identity at u=1 (dash
@@ -171,6 +175,12 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
         // clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged)
         const w = document.createElement('span');
         w.style.display = 'inline-block'; w.style.overflow = 'hidden'; w.style.verticalAlign = 'bottom'; w.__clip = true;
+        // THE MASK MUST CONTAIN THE FONT'S FULL INK, NOT ITS LINE BOX. .hs-text sets line-height 1.04
+        // — tighter than the descender depth of any real face — so `overflow: hidden` sliced 13px off
+        // EVERY word at 76px, which is why g/y/p rendered with flat bottoms in shipped video. Pad the
+        // mask downward and pull the identical amount back with a negative margin: the clip region
+        // grows, the layout does not move a pixel. 0.3em clears the deepest descenders we ship.
+        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';
         el.parentElement.insertBefore(w, el); w.appendChild(el);
       }
       Object.assign(el.style, fn(u, popts));
