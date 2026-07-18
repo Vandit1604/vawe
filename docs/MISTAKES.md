@@ -1137,3 +1137,28 @@ the beat — where the stagger, had it existed, was already over. The check coul
 top-level layer. Measured after: `0.80 · 0.74 · 0.67 · 0.58 · 0.48 · 0.36`.
 **Rule:** verify a TRANSITION at a frame where it is mid-flight. A settled frame proves the end state
 and says nothing about how it got there — which is the entire content of the feature.
+
+---
+
+## 70. Group children ran a re-implemented subset of the layer pipeline
+
+**What:** eleven separate "the engine accepts this and ignores it" bugs, all one root cause.
+`applyFade`, `mask`, `reflect`, `logotype`, image `canvasFx`/`ken`/`edgeFade`, text `fit`/`fitH`/
+`maxLines`/`raw`+microType, and `pin`/`col`/`"50%"` coordinates ALL worked on a top-level layer and
+were silently dropped the moment the same layer moved inside a group.
+**Root cause:** `addGroupChild` re-implemented a SUBSET of each primitive's build inline instead of
+calling it, and `scene.html` applied the per-layer decoration only on its own path. Two
+implementations of one pipeline; the smaller one kept falling behind. `canvasFx` was the sharpest
+case — `boot.js` scans recursively, so a child's effect was BAKED at load and then thrown away.
+`resolveCoords` had the same shape: it looped `data.layers` with no recursion, while `applyAt`
+(written later, ten lines away) does recurse.
+**Fix:** children delegate leaf construction to `REGISTRY[type].build` via an injected `buildLeaf`
+(util.js cannot import the registry — circular), both paths call one `decorate()` helper, and
+`resolveCoords` walks children. Re-implementing a builder is how a subset drifts; calling it cannot.
+**Also fixed in the same pass:** author-placed `audio.cues` and the whole keystroke train were inside
+the `if (audio.auto)` guard, so a scene that hand-placed a cue got silence unless it also opted into
+automatic sound design. `auto` now gates only the DERIVED cut/sting cues. And `data.audio.sting` was
+resolved but never mixed — its only effect was letting an auto-discovered `assets/sting.wav` force a
+silent audio track onto a scene that asked for none; removed.
+**Rule:** when the same concept has two code paths, the one that is not the default will rot. Make the
+second path call the first, not copy it.

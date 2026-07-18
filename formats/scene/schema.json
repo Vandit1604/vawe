@@ -187,6 +187,14 @@
           "label": "Origin y (0-1)",
           "min": 0,
           "max": 1
+        },
+        "dir": {
+          "type": "string",
+          "label": "Direction the cut travels (left|right|up|down)"
+        },
+        "dist": {
+          "type": "number",
+          "label": "Travel distance in px for a directional cut"
         }
       }
     },
@@ -1088,6 +1096,10 @@
           "required": true
         }
       }
+    },
+    "grain": {
+      "type": "boolean",
+      "label": "Opt in to the in-engine canvas grain (default off, matching the ffmpeg pass)"
     }
   }
 }

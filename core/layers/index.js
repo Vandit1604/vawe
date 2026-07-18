@@ -27,6 +27,10 @@ export const LAYER_TYPES = Object.keys(REGISTRY);
 
 export function createRenderer(ctx) {
   const kit = createKit(ctx);
+  // Injected AFTER the kit exists (util.js cannot import this file — that would be circular). This is
+  // what lets a group child run the same builder as a top-level layer instead of a re-implemented
+  // subset of it (docs/MISTAKES.md #70).
+  kit.buildLeaf = (el, L) => (REGISTRY[L.type] || text).build(kit, el, L);
   return {
     kit,
     // construct a layer's DOM (default primitive = text; count reuses the text build)

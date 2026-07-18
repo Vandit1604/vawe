@@ -79,6 +79,17 @@ export function createKit(ctx) {
     if (g) { el.style.maskImage = g; el.style.webkitMaskImage = g; }
   }
 
+  // The per-layer decoration that scene.html applied to top-level layers and to nothing else, so
+  // `filter`, `mask`, `fade`, `lookOpts`, `reflect` and `logotype` were all silently dropped the moment
+  // a layer moved inside a group. Extracted so there is ONE definition and both paths call it — the
+  // same reason the safe box and the canvas size each had to be collapsed to one (MISTAKES #70).
+  function decorate(el, L) {
+    if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
+    applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
+    if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
+    if (L.logotype) el.setAttribute('data-logotype', '1');
+  }
+
   function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box, or FREE placement
     // `free`: children carry their own x/y inside the group instead of flowing. Without it, any
     // composition whose positions are computed (a bubble map, a ring, a scatter) costs ONE TOP-LEVEL
@@ -122,20 +133,14 @@ export function createKit(ctx) {
       return;
     }
     c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
-    if (C.type === 'image') {
-      c.innerHTML = icon(C.src, '');
-      const im = c.querySelector('img'); if (im) { im.className = 'hs-img'; if (C.h) im.style.height = C.h + 'px'; if (C.w) im.style.width = C.w + 'px'; }
-      // A group image honoured every prop EXCEPT radius, so an avatar that is a circle as a top-level
-      // layer turned back into a square the moment it moved inside a group. Same bug as MISTAKES #19:
-      // a prop the engine accepts and ignores. Clip here too, with cover-fit when a box is defined.
-      if (C.radius != null && im) {
-        c.style.overflow = 'hidden'; c.style.borderRadius = C.radius + 'px';
-        if (C.w && C.h) { im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%'; c.style.width = C.w + 'px'; c.style.height = C.h + 'px'; }
-      }
-    } else {
-      styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2);
-      chipBox(c, C);
-    }
+    // DELEGATE to the primitive. This file used to re-implement a SUBSET of each type's build inline,
+    // which is why a child silently lost image `canvasFx` (baked at boot, then thrown away), `ken`'s
+    // clip box, `edgeFade`, and text's `fit`/`fitH`/`maxLines`/`raw` and the whole microType pass.
+    // Re-implementing a builder is how the subset drifts from the original; calling it cannot.
+    if (api.buildLeaf) api.buildLeaf(c, C);
+    else if (C.type === 'image') { c.innerHTML = icon(C.src, ''); }
+    else { styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2); chipBox(c, C); }
+    decorate(c, C);
     sizeChild(c, C, C.type === 'image');
     if (C.critical) c.setAttribute('data-layer', 'critical');
     if (parentEl.dataset.free) { c.style.position = 'absolute'; c.style.left = (C.x || 0) + 'px'; c.style.top = (C.y || 0) + 'px'; }
@@ -161,5 +166,6 @@ export function createKit(ctx) {
     extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
-  return { ...ctx, hexA, styleText, chipBox, applyFade, layoutGroup, sizeChild, addGroupChild };
+  const api = { ...ctx, hexA, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
+  return api;
 }

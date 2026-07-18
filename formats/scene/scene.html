@@ -193,9 +193,7 @@
           if (L.w != null) el.style.width = L.w + 'px';
           if (L.align) el.style.textAlign = L.align;
           if (L.filter) el.style.filter = L.filter;
-          if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
-          renderer.kit.applyFade(el, L);
-          if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
+          renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
           // timing → data-attributes consumed by compose.driveClips
           el.dataset.start = String(L.start ?? 0);
           if (L.duration != null) el.dataset.duration = String(L.duration);
@@ -210,11 +208,6 @@
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
           if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
-          // WCAG 1.4.3 exempts logotypes: "text that is part of a logo or brand name has no minimum
-          // contrast requirement". A multi-colour wordmark is the case — a brand's own yellow on white
-          // is legitimately below the bar and changing it would make the mark wrong. Opt IN explicitly
-          // per layer so it can never be an accident, and so the exemption is visible in the JSON.
-          if (L.logotype) el.setAttribute('data-logotype', '1');
           cam.appendChild(el);
           const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
           return { L, el, units };
@@ -387,7 +380,12 @@
         // music.wav under it. Pure — cue times are a function of the JSON, so the mix is reproducible.
         // Does NOT touch renderFrame, so frames stay byte-identical (audio is a separate track).
         let sfx = [];
-        if (data.audio && data.audio.auto) {
+        // `auto` gates the DERIVED cues (cut/sting) only. It used to wrap the author-placed cues and
+        // the keystroke train as well, so a scene that hand-placed a cue, or set keyGain on a typing
+        // layer, got silence unless it also opted into automatic sound design — a dependency nothing
+        // documented and nobody would guess (MISTAKES #70).
+        const audioCfg = data.audio || {};
+        {
           // Cut style -> cue. One whoosh on everything is not sound design: a punch should snap and
           // a softwipe should breathe. Mirrors CUT_CUE in scripts/media/audio-bake.mjs.
           const CUT_CUE = {
@@ -400,11 +398,11 @@
             squeeze: 'press', collapse: 'press', letterbox: 'press',
           };
           const cues = [];
-          for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
+          if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
           // TOP-LEVEL cuts were silently ignored — the `cuts` array is how a scene actually cuts
           // between beats, so an auto-scored film came out with no cut sound at all.
-          for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
-          for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
+          if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
+          if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
           // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
           for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
           cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));

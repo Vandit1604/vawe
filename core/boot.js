@@ -70,8 +70,12 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
     'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'], 'thirds-bl': ['third1', 'third2'],
     'thirds-br': ['third2', 'third2'], 'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
     'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'] };
-  for (const L of data.layers || []) {
-    if (!isObj(L)) continue;
+  // Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
+  // inert inside a group — and in a `layout:"free"` group a "50%" string reached CSS as `left:50%px`,
+  // which is not a coordinate at all. `applyAt` already recurses; this did not (MISTAKES #70).
+  const allLayers = [];
+  (function walk(ls) { for (const L of ls || []) { if (!isObj(L)) continue; allLayers.push(L); if (L.children) walk(L.children); } })(data.layers);
+  for (const L of allLayers) {
     if (L.pin && PIN[L.pin]) { const [px, py] = PIN[L.pin]; if (L.x == null) L.x = px; if (L.y == null) L.y = py; }
     // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
     // The grid spans the SAFE box, not the canvas, for the same reason the edge keywords do: a column

@@ -32,7 +32,6 @@ type Cue struct {
 // Config is the data.audio block.
 type Config struct {
 	Music     string   `json:"music"`
-	Sting     string   `json:"sting"`
 	VO        string   `json:"vo"`
 	MusicGain *float64 `json:"musicGain,omitempty"`
 	// SfxGain scales EVERY effect cue, including the ones auto sound-design derives from cuts and
@@ -64,8 +63,12 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 
 	musicFile := resolve(bases, cfg.Music, "music.wav")
 	voFile := resolve(bases, cfg.VO, "")
-	stingFile := resolve(bases, cfg.Sting, "sting.wav")
-	if musicFile == "" && voFile == "" && stingFile == "" && len(sfx) == 0 {
+	// `Sting` was resolved here and then used ONLY in the emptiness guard below — its samples never
+	// reached the mix, so the field did nothing except let an auto-discovered assets/sting.wav force a
+	// silent audio track onto a scene that asked for none. No scene sets it, and what a "sting file"
+	// should mean is ambiguous now that scene.html emits per-sting `reveal` cues into the sfx list.
+	// Removed rather than left as config that reads as intent (docs/MISTAKES.md #70).
+	if musicFile == "" && voFile == "" && len(sfx) == 0 {
 		return false
 	}
 
