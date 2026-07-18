@@ -1,15 +1,29 @@
 {
   "name": "plinth-auto",
-  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these.",
+  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase) \u2014 nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
   "palette": {
-    "bg": "#fff",
+    "bg": "#ffffff",
     "text": "#181815",
     "accent": "#1f3bff",
-    "accent2": "#6e6e68"
+    "accent2": "#6e6e68",
+    "bg2": "#f4f4f1",
+    "surface": "#ffffff",
+    "surface2": "#f4f4f1",
+    "line": "#e6e6e1",
+    "lineStrong": "#6e6e68",
+    "text2": "#343431",
+    "dim": "#6e6e68",
+    "ink": "#181815",
+    "accentDim": "#ebedff",
+    "accentGlow": "rgba(31,59,255,0.28)",
+    "up": "#1f3bff",
+    "down": "#6e6e68"
   },
   "type": {
     "sans": "Inter",
-    "mono": "Geist Mono"
+    "mono": "Geist Mono",
+    "serif": "Inter",
+    "num": "Inter"
   },
   "bg": {
     "accent": "31,59,255",
@@ -64,5 +78,10 @@
     "--on-dark": "#fff",
     "--border": "#e6e6e1",
     "--accent-soft": "#ebedff"
-  }
+  },
+  "gradient": [
+    "#ffffff",
+    "#f4f4f1",
+    "#ebedff"
+  ]
 }

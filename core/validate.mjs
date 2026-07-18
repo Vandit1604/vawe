@@ -174,11 +174,29 @@ if (isMain) {
 
   const strict = process.argv.includes('--strict'); // treat lint warnings as failures
   let targets = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+  // No args used to mean "formats/*/sample.json" — with one format, that is ONE file, while 60
+  // authored scenes and every theme pack went unchecked. So a scene could carry an anim name that
+  // never existed (silently resolving to fade) and a theme could be missing half the contract, for
+  // as long as nobody happened to re-render it by hand. Default is now EVERY authored scene and
+  // EVERY theme, because a validator nobody points at the real files validates nothing (#48).
+  let themeTargets = [];
   if (targets.length === 0) {
     const fdir = path.join(root, 'formats');
-    targets = fs.readdirSync(fdir)
-      .map((n) => path.join(fdir, n, 'sample.json'))
-      .filter((p) => fs.existsSync(p));
+    for (const fmt of fs.readdirSync(fdir)) {
+      const dir = path.join(fdir, fmt);
+      if (!fs.statSync(dir).isDirectory()) continue;
+      for (const n of fs.readdirSync(dir)) {
+        if (!n.endsWith('.json') || n === 'schema.json') continue;
+        // only actual scenes: a formats/ dir also holds planning artifacts (*.intent.json carries
+        // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
+        const fp = path.join(dir, n);
+        try { if (!JSON.parse(fs.readFileSync(fp, 'utf8')).module) continue; } catch { }
+        targets.push(fp);
+      }
+    }
+    targets.sort();
+    const tdir = path.join(root, 'themes');
+    if (fs.existsSync(tdir)) themeTargets = fs.readdirSync(tdir).filter((n) => n.endsWith('.json')).sort().map((n) => path.join(tdir, n));
   }
 
   let failed = 0;
@@ -216,6 +234,16 @@ if (isMain) {
       for (const w of warns) console.error(`    ⚠ ${w}`);
     }
   }
-  console.log(`\nvalidate: ${targets.length - failed} ok, ${failed} ${strict ? 'failed (incl. lint --strict)' : 'failed'}`);
+  // Themes are checked directly, not only via a scene that happens to name one. A pack sitting in
+  // themes/ half-written is a landmine for whoever authors the next video against that brand.
+  let themeFailed = 0;
+  for (const tf of themeTargets) {
+    let errs;
+    try { errs = themeErrors(readJSON(tf)); } catch (e) { errs = [`unreadable: ${e.message}`]; }
+    if (errs.length) { themeFailed++; console.error(`✗ ${path.relative(root, tf)}`); for (const e of errs) console.error(`    • ${e}`); }
+  }
+  if (themeTargets.length) console.log(`themes: ${themeTargets.length - themeFailed} ok, ${themeFailed} incomplete`);
+  failed += themeFailed;
+  console.log(`\nvalidate: ${targets.length - (failed - themeFailed)} ok, ${failed} ${strict ? 'failed (incl. lint --strict)' : 'failed'}`);
   process.exit(failed ? 1 : 0);
 }

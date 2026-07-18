@@ -1,11 +1,40 @@
 {
   "name": "plinth",
-  "note": "PlinthAI brand kit — periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy).",
+  "note": "PlinthAI brand kit \u2014 periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy). Palette completed to the theme contract (core/theme-contract.js) from the pack's OWN gradient stops and accent \u2014 no colour here is invented; dark-first, so text is the near-white.",
   "palette": {
     "text": "#f5f5f2",
-    "accent": "#1f3bff"
+    "accent": "#1f3bff",
+    "bg": "#454e92",
+    "bg2": "#757dbb",
+    "surface": "#757dbb",
+    "surface2": "#454e92",
+    "line": "#757dbb",
+    "lineStrong": "#c7cbe8",
+    "text2": "#c7cbe8",
+    "dim": "#c7cbe8",
+    "ink": "#f5f5f2",
+    "accentDim": "#c7cbe8",
+    "accentGlow": "rgba(31,59,255,0.28)",
+    "up": "#1f3bff",
+    "down": "#c7cbe8"
   },
-  "gradient": ["#454e92", "#757dbb", "#c7cbe8"],
-  "type": { "sans": "Inter", "serif": "Instrument Serif", "mono": "Geist Mono" },
-  "motion": { "easing": "easeOutCubic", "bounce": 0.4, "settle": 0.62, "enter": 52, "durationScale": 1, "stagger": 0.08 }
+  "gradient": [
+    "#454e92",
+    "#757dbb",
+    "#c7cbe8"
+  ],
+  "type": {
+    "sans": "Inter",
+    "serif": "Instrument Serif",
+    "mono": "Geist Mono",
+    "num": "Inter"
+  },
+  "motion": {
+    "easing": "easeOutCubic",
+    "bounce": 0.4,
+    "settle": 0.62,
+    "enter": 52,
+    "durationScale": 1,
+    "stagger": 0.08
+  }
 }

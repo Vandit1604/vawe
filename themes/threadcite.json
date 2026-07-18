@@ -1,16 +1,29 @@
 {
   "name": "threadcite",
-  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data).",
+  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent) \u2014 nothing invented.",
   "palette": {
     "bg": "#fbfaf8",
     "text": "#0f0e0d",
     "accent": "#e1500f",
-    "accent2": "#5f5e58"
+    "accent2": "#5f5e58",
+    "bg2": "#ffffff",
+    "surface": "#ffffff",
+    "surface2": "#fbfaf8",
+    "line": "#dad9d7",
+    "lineStrong": "#5f5e58",
+    "text2": "#2b2a29",
+    "dim": "#5f5e58",
+    "ink": "#0f0e0d",
+    "accentDim": "#f7e2d7",
+    "accentGlow": "rgba(225,80,15,0.28)",
+    "up": "#e1500f",
+    "down": "#5f5e58"
   },
   "type": {
     "sans": "Plus Jakarta Sans",
     "mono": "JetBrains Mono",
-    "serif": "Caveat"
+    "serif": "Caveat",
+    "num": "Plus Jakarta Sans"
   },
   "bg": {
     "accent": "225,80,15",
@@ -73,5 +86,10 @@
     "enter": 44,
     "durationScale": 0.95,
     "stagger": 0.05
-  }
+  },
+  "gradient": [
+    "#ffffff",
+    "#fbfaf8",
+    "#f7e2d7"
+  ]
 }

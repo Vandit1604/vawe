@@ -793,3 +793,20 @@ was no way to tell which scene the verdict belonged to.
 **Fix:** the target forwards `D` to `--data`, and the report line names the data file it read.
 **Rule:** same class as #19 and #28 — input accepted and silently ignored. A report that does not name
 its input cannot be checked against the thing you meant to check.
+
+---
+
+## 48. `make validate` with no arguments validated one file out of sixty
+
+**What:** a scene carried `anim: "slideL"` — a name that never existed — and two theme packs were
+missing half the contract. All of it sat green for months.
+**Root cause:** the no-argument target meant "every `formats/*/sample.json`". There is one format, so
+that is ONE file. The 60 authored scenes were only ever checked if someone happened to pass `D=`, and
+the 17 theme packs were only checked indirectly, via a scene that named one. `themes/threadcite.json`
+and `themes/plinth-auto.json` were auto-extracted with 4 palette keys against a contract requiring 15,
+so every video for those brands was unrenderable and nothing said so until you tried.
+**Fix:** no arguments now means every scene that declares a `module` (which naturally excludes
+planning artifacts like `*.intent.json`) plus every `themes/*.json` checked directly.
+**What it found on the first run:** 4 broken scenes and 3 incomplete themes.
+**Rule:** a validator is only as good as the file list you point it at, and the default list is the
+one everybody actually uses. Same family as #45 — the rule was fine, the coverage was the bug.
