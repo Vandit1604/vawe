@@ -12,9 +12,9 @@ The craft rules behind these choices (timing as voice, ease out on entrances, on
 
 Split a headline into units with `split` (`char`, `word`, or `line`), then animate each unit with `preset`. Units enter in reading order, staggered, and settle exactly at rest with a gentle overshoot.
 
-There are **21 presets**:
+There are **25 presets**:
 
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` (looping) · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` (scramble then resolve) · `tilt` · `stretch` · `gradient` (colour sweep) · `highlight` (marker band) · `underline` · `shadow` (poster lift) · `riseClip` (rise from a baseline clip)
+`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` (looping) · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` (scramble then resolve) · `tilt` · `stretch` · `gradient` (colour sweep) · `highlight` (marker band) · `underline` · `shadow` (poster lift) · `riseClip` (rise from a baseline clip) · `draw` (an SVG stroke drawing itself on) · `chroma` (RGB-split that settles crisp) · `swing` (pendulum from a pivot) · `unfold` (a 3D unfold to flat)
 
 ```json
 {
@@ -55,7 +55,7 @@ A sting is a brief WebGL effect that covers a cut at a boundary. Set it in the t
 { "stings": [{ "t": 6.0, "fx": "glitch", "dur": 0.5, "seed": 7 }] }
 ```
 
-There are **22 effects**. Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Plus eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`.
+There are **33 effects**. Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`. Plus eleven warp and chromatic effects: `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` (a pixel-block curtain that sweeps the cut).
 
 Each takes `dur` (0.3 to 3 seconds) and a `seed`. `color` tints the effect by luminance, `intensity` scales its strength, and `leak` accepts up to four colours in `colors`. Because a sting is keyed on `(progress, seed)` only, it is seek-safe and byte-reproducible.
 
@@ -63,7 +63,17 @@ Reach for a sting to cover a hard background jump at an act break, or a `flash` 
 
 ## Ambient shaders
 
-Separate from stings, a `shader` layer paints a slow moving field behind your content for the whole beat: `flow`, `aurora`, `plasma`, `drift`, or `mist`. Tune it with `speed`, `intensity`, `colors`, and `seed`. Use it as atmosphere, not decoration.
+Separate from stings, a `shader` layer paints a continuous WebGL field for the whole beat, pure in local time. There are **14 looks** in two roles. Fields **behind** content (low track, low intensity): `flow`, `aurora`, `plasma`, `drift`, `mist`, and `matrixDecode` (digital rain). Overlay looks **on top** of content (high track, intensity ~0.6 to 0.9): `vhs`, `crt`, `filmGrain`, `lightLeak`, plus a distortion-styled set `barrel`, `heatShimmer`, `ripple`, `kaleidoscope`. Tune with `speed`, `intensity`, `colors`, and `seed`. Use it as atmosphere, not decoration; do not stack two.
+
+## Composite looks
+
+A **look** is a named cinematic grade applied to any layer or group with `filter`. Where a sting covers a moment and an ambient shader fills a beat, a look colours the content itself: a stack of colour, glow, texture, and vignette passes resolved to CSS. There are **26**: `neon` · `dreamyHaze` · `halationFilm` · `angelic` · `hologram` · `glitchGlow` · `vhs` · `super8` · `crt` · `filmNoir` · `fadedPolaroid` · `nostalgia` · `cyberpunk` · `nightVision` · `thermal` · `lomo` · `droneCinematic` · `vintageAnamorphic` · `impact` · `timeFreeze` · `glassWarp` · `heatWarp` · `melt` · `watercolor` · `dreamSequence` · `rippleGlass`.
+
+```json
+{ "type": "group", "filter": "neon", "children": [ /* ... */ ] }
+```
+
+A strength rides on the name (`"neon:0.6"`), and `lookOpts` overrides properties (many looks default their colour to the brand accent, so a look reskins per theme). Reach for one look per beat, on real content, never as decoration on empty space.
 
 ## Motion personality per theme
 

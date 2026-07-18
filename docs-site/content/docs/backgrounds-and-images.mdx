@@ -58,6 +58,11 @@ A still with no treatment reads as slop. Give every image one:
 - **`ken`** is a slow Ken Burns push, capped at 8% travel, that never reverses.
 - **`edgeFade`** dissolves the left and right edges into the background. Set `edgeFadeColor` to your background on dark scenes.
 - **`radius`** rounds the corners into a card; **`reflect`** adds a floor reflection.
+- **`canvasFx`** runs a per-pixel Canvas pass over the image. There are **8**: `halftone`, `dither`, `mosaic`, `stipple`, `ascii`, `edgeDetect`, `crosshatch`, and `pixelSort` (sort bright spans by luminance for a glitch smear). Name it directly or pass `{ fx, cell, ink, paper, seed }`. It bakes **once at build** into a static image, so the frame stays pure. Stylized presets (`blueprint`, `comic`, `risograph`, `sketch`, `matrix`, `newsprint`) expand to a tuned pass.
+
+```json
+{ "type": "image", "src": "hero.png", "canvasFx": { "fx": "halftone", "cell": 8 } }
+```
 
 ## Video and generated media
 
