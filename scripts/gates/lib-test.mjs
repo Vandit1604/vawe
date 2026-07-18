@@ -22,6 +22,7 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { lift } from '../../core/motion.js';
+import { opacityEnvelope } from '../../core/clips.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -584,6 +585,21 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // the `lift` entrance must actually travel — pop only scaled 14%, which read as flat
   ok('motion: lift travels further than pop at t=0', parseFloat(String(lift(0).transform).match(/scale\(([\d.]+)/)[1]) < 0.75);
   ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));
+}
+
+// ---- opacity envelope (core/clips.js) — eased, and safe to cross-dissolve with ----
+{
+  ok('envelope: not linear (an entrance decelerates)', opacityEnvelope(0.25, 0) > 0.4);
+  ok('envelope: 0 at the start, 1 when settled', opacityEnvelope(0, 0) === 0 && opacityEnvelope(1, 0) === 1);
+  ok('envelope: gone at the end of an exit', opacityEnvelope(1, 1) === 0);
+  ok('envelope: monotonic in', (() => { let p = -1; for (let t = 0; t <= 1.001; t += 0.05) { const v = opacityEnvelope(t, 0); if (v < p - 1e-9) return false; p = v; } return true; })());
+  // THE invariant: a handoff (A exiting while B enters, matched windows) holds constant density.
+  // Without it the blend brightens in the middle and reads as muddy — measured 1.71 before the fix.
+  ok('envelope: a matched handoff sums to exactly 1', (() => {
+    for (let t = 0; t <= 1.001; t += 0.05) {
+      const leaving = opacityEnvelope(1, t), arriving = opacityEnvelope(t, 0);
+      if (Math.abs(leaving + arriving - 1) > 1e-9) return false;
+    } return true; })());
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

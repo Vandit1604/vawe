@@ -602,3 +602,32 @@ the deterministic PNG frame sequence the layer plays — so `assets/gen/` stays 
 clone self-heals, exactly like fonts, sfx and music. Verified by hashing three frames a second apart:
 a frozen poster and a playing clip look identical in a single screenshot.
 
+---
+
+## 38. Every fade in the engine was linear (and the obvious fix broke cross-dissolves)
+
+**What:** entrances and exits felt slightly wrong in a way that is hard to point at.
+**Root cause:** `core/clips.js` composed opacity as `clamp01(enterT) * exitMul` — **two linear ramps**
+— while the transform beside it was eased (`rise` settles on `easeOutSettle`). The two halves of a
+single entrance therefore arrived on different curves. `docs/MOTION-CRAFT.md` has said "entrances
+decelerate, exits accelerate, never linear on visible moves" the whole time; the engine simply did
+not do it, and no gate could see it because a linear fade is not a defect, just a dull one.
+
+**The first fix was wrong, and measuring caught it.** Easing the two halves independently —
+`easeOutCubic` in, `1 - easeInCubic` out — is the textbook answer and it BREAKS handoffs: two layers
+sharing the same pixels then both sit high through the middle of the blend. Measured across tpot's
+This/Tech handoff, the opacity sum peaked at **1.71** where linear had held 1.00. The dissolve went
+muddy — the exact problem the coverage reel had just been repaced to avoid.
+
+**The right fix:** the exit curve is the MIRROR of the entrance curve (`1 - easeOutCubic`), not an
+independent one. A matched handoff then sums to exactly 1 at every instant, so density stays
+constant, while a solo fade still eases instead of ramping. Re-measured: 1.00 flat across the handoff.
+
+**Locked in `make lib-test`:** the envelope is exported as `opacityEnvelope(enterT, exitT)` and
+asserted on both properties — non-linear, monotonic, endpoints exact, and `leaving + arriving === 1`
+for every t. The invariant is the point; anyone re-easing one side alone will fail that assert.
+
+**The general lesson:** a curve is not a local decision. Entrance and exit easing look independent
+and are not, because layers hand over the same pixels. When changing a curve, measure the SUM across
+a real handoff, not the shape of one side.
+

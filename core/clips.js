@@ -4,7 +4,7 @@
 // Both are PURE in the time input: driveClips(root, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
-import { clamp01, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
+import { clamp01, easeOutCubic, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
 const ANIM = {
@@ -18,6 +18,15 @@ const ANIM = {
 // them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
 // and therefore silently resolved to fade (MISTAKES #21).
 export const ANIM_NAMES = Object.keys(ANIM);
+
+/**
+ * The opacity envelope every layer fades through. Eased, and MIRRORED: the exit curve is the
+ * complement of the entrance curve, so two layers handing over the same pixels sum to exactly 1.
+ * Independent ease-out/ease-in curves both sit high mid-blend (measured 1.71 across a real handoff)
+ * and the dissolve goes muddy. Pure, and exported so `make lib-test` can hold both properties.
+ */
+export const opacityEnvelope = (enterT, exitT = 0) =>
+  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);
 /** Unknown names fall back to fade SILENTLY — that is why `make conformance` asserts each is distinct. */
 const resolveAnim = (name) => ANIM[name] || fade;
 // invert an enter transition into an exit (reverse the progress: 1→hidden).
@@ -40,9 +49,9 @@ export function driveClips(root, t) {
     el.style.pointerEvents = '';
     const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
     const enterS = resolveAnim(el.dataset.anim)(enterT);
-    let s = enterS, exitMul = 1;
+    let s = enterS, exitMul = 1, exitT = 0;
     if (Number.isFinite(end)) {
-      const exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
+      exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
       if (exitT > 0) {
         exitMul = 1 - exitT;
         // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit
@@ -51,9 +60,19 @@ export function driveClips(root, t) {
         if (el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitMul);
       }
     }
-    // compose: apply enter (or exit) transform/clip + fade by the combined opacity
+    // compose: apply enter (or exit) transform/clip + fade by the combined opacity.
+    // The opacity envelope is EASED, not linear. This line used to multiply two linear ramps while
+    // the transform beside it was eased (`rise` settles on easeOutSettle), so the two halves of a
+    // single entrance arrived on different curves — the thing you feel as "the easing is off"
+    // without being able to point at it. docs/MOTION-CRAFT.md has said "entrances decelerate, exits
+    // accelerate, never linear on visible moves" the whole time; the engine just did not do it.
     Object.assign(el.style, s);
-    el.style.opacity = String((clamp01(enterT) * exitMul).toFixed(3));
+    // The exit is the MIRROR of the entrance curve, not an independent one. That matters because two
+    // layers handing over share the same pixels: with independent ease-out/ease-in curves both sit
+    // high through the middle of the blend (measured sum 1.71 across tpot's This handoff) and the
+    // dissolve turns muddy — the very problem the reel was repaced to avoid. Mirrored curves sum to
+    // exactly 1 for any matched handoff, while a solo fade still eases instead of ramping linearly.
+    el.style.opacity = String(opacityEnvelope(enterT, exitT).toFixed(3));
   }
 }
 
