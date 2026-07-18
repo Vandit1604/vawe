@@ -32,6 +32,11 @@ beatmap:
 
 # make sfx-check  — is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
 # a typed line came out sounding like a passing train (docs/MISTAKES.md #51).
+# make spectrum MUSIC=assets/music/x.wav [FPS=30] — bake per-frame band energy beside a track, so
+# layers can react to the music while renderFrame(n) stays a pure table lookup.
+spectrum:
+	node scripts/media/spectrum.mjs $(MUSIC) $(if $(FPS),--fps $(FPS))
+
 sfx-check:
 	node scripts/gates/sfx-audit.mjs
 

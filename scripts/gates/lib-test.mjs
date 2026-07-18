@@ -23,6 +23,7 @@ import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/aud
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope } from '../../core/clips.js';
+import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -632,6 +633,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     if (/landscape\s*\?\s*(1920\s*:\s*1080|\[1920)/.test(src)) offenders.push(path.relative(root, fp));
   }
   ok(`dims: nobody re-derives the canvas (${offenders.join(', ') || 'clean'})`, offenders.length === 0);
+}
+
+// ---- spectrum (core/spectrum.js) — the audio-reactive bake is a pure transform ----
+{
+  const sr = 44100, n = sr, sig = new Float64Array(n);
+  for (let i = 0; i < n; i++) sig[i] = Math.sin(2 * Math.PI * 80 * i / sr) * (i < n / 2 ? 1 : 0.05);
+  const sp = bandEnergies(sig, sr, 30, BANDS);
+  ok('spectrum: one row per video frame', sp.frames.length === 30);
+  ok('spectrum: a row per band', sp.frames[0].length === BANDS.length);
+  ok('spectrum: normalised into 0..1', sp.frames.every((r) => r.every((v) => v >= 0 && v <= 1)));
+  // Compare ABSOLUTE peaks, not the normalised columns: every band is normalised to its own max, so
+  // the normalised value of a silent band is meaningless on its own. That is exactly why `peak` exists.
+  ok('spectrum: an 80Hz tone lands in the LOW band', sp.peak[0] > sp.peak[2] * 10);
+  ok('spectrum: peak exposes that a band is near-silent', sp.peak[2] < 0.05);
+  ok('spectrum: a quiet passage reads lower than a loud one', sp.frames[25][0] < sp.frames[5][0]);
+  // THE property the determinism claim rests on: same samples in, same table out, always.
+  ok('spectrum: deterministic', JSON.stringify(bandEnergies(sig, sr, 30, BANDS)) === JSON.stringify(sp));
+  ok('spectrum: sampleAt holds the endpoints', sampleAt(sp, 9999, 'low') === sp.frames[sp.frames.length - 1][0]);
+  // a typo must make the effect STAND STILL mid-render, never throw
+  ok('spectrum: an unknown band is 0, not a throw', sampleAt(sp, 5, 'nope') === 0);
+  ok('spectrum: a missing table is 0, not a throw', sampleAt(null, 5, 'low') === 0);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

@@ -278,6 +278,19 @@ export async function boot(build) {
       await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));
       await document.fonts.ready;
     } catch (e) {}
+    // AUDIO-REACTIVITY, loaded here in the awaited readiness phase for the same reason canvasFx bakes
+    // here: by frame time it must be a plain table. `audio.spectrum` names a sidecar written offline by
+    // scripts/media/spectrum.mjs; the render reads row n and never touches a decoder, so renderFrame(n)
+    // stays as pure as it was. A missing sidecar is a warning, not a throw — the scene still renders,
+    // the reactive layers simply hold still, which is a far better failure than a black video.
+    window.__spectrum = null;
+    if (data.audio && data.audio.spectrum) {
+      try {
+        const r = await fetch(data.audio.spectrum.startsWith('/') ? data.audio.spectrum : '/' + data.audio.spectrum);
+        if (r.ok) window.__spectrum = await r.json();
+        else console.warn(`spectrum: ${data.audio.spectrum} not found (${r.status}) — react layers will hold still`);
+      } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable — react layers will hold still`); }
+    }
     await preloadImages(data); // web/local images ready before any frame is captured
     // Tier-2 CANVAS FX: bake each image with a `canvasFx` (halftone/dither/mosaic/…) ONCE here, in the
     // awaited readiness phase, into a static PNG data-URL. image.js then swaps the <img> src to it, so

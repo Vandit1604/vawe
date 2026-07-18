@@ -1061,6 +1061,10 @@
         "headColor": {
           "type": "string",
           "label": "Leading-character colour (paint matrix)"
+        },
+        "react": {
+          "type": "object|array",
+          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] } \u2014 needs audio.spectrum"
         }
       }
     },

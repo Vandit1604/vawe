@@ -1066,3 +1066,21 @@ the engine owns — the exact shape of #21, in the gate whose entire job is noti
 effects get their own coverage row from `PAINT_FX_NAMES` the same way.
 **Rule:** a gate that restates a vocabulary will eventually disagree with it, and it fails toward
 silence — 100% of a stale list looks exactly like 100% of the real one.
+
+---
+
+## 66. Per-band normalisation makes silence look loud
+
+**What:** the first spectrum bake normalised each band to its own maximum, so on a bass-heavy track
+the `high` column still swept the full 0..1 range. A layer keyed to `high` would pulse convincingly
+against essentially nothing.
+**Root cause:** per-band normalisation is the right default — without it a track with no top end
+leaves that band pinned at zero and the effect looks broken — but normalising away the difference
+between "quiet" and "absent" hides the one fact the author needs.
+**Fix:** the sidecar reports each band's ABSOLUTE `peak` alongside the normalised frames, and the bake
+prints it (`high 0.0291`), flagging `(near-silent)` under 0.01.
+**Caught by:** a lib-test assertion that was itself wrong — it compared normalised columns across
+bands, which is meaningless by construction. Writing the test is what surfaced that the output was
+missing the number the test needed.
+**Rule:** when a normalisation makes two different situations look identical, publish the number it
+normalised away.

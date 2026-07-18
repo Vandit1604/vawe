@@ -70,6 +70,7 @@
       import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
+      import { sampleAt } from '/core/spectrum.js';
       import { createRenderer } from '/core/layers/index.js';
       const $ = (id) => document.getElementById(id);
 
@@ -257,6 +258,25 @@
             // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
             // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
             renderer.frame(el, L, t);
+            // AUDIO REACT: modulate a property from the baked per-frame band energy. Composed BEFORE
+            // the motion track so an authored choreography still wins the outer transform, and read
+            // from a table indexed by n — the frame never analyses audio, so purity is untouched.
+            if (L.react && window.__spectrum && t >= start && t < end) {
+              const rs = Array.isArray(L.react) ? L.react : [L.react];
+              for (const r of rs) {
+                const v = sampleAt(window.__spectrum, f, r.band || 'low');   // f IS the frame index
+                const [lo, hi] = r.range || [0, 1];
+                const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
+                if (r.prop === 'opacity') el.style.opacity = ((parseFloat(el.style.opacity) || 1) * val).toFixed(3);
+                else if (r.prop === 'blur') {
+                  const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+                  el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
+                } else { // default: scale
+                  const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
+                  el.style.transform = `scale(${val.toFixed(4)})${base}`;
+                }
+              }
+            }
             // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which
             // driveClips/cutStyle already wrote to el.style), and multiply into the composed opacity.
             if (L.motion && L.motion.length && t >= start && t < end) {
