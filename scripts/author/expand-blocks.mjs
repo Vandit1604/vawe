@@ -67,6 +67,18 @@ function expand(layer, stack) {
       .map((l) => shift(l, dx, dy, dt))
       .flatMap((l) => expand(l, [...stack, layer.ref]));
   }
+  // SLOTS. A container block takes `children`, and those children may themselves be blocks —
+  // `{type:'block', block:'listRow'}` inside a phoneFrame. `expand` only ever mapped a block's OUTPUT
+  // array, so a nested descriptor sat in the tree as an unrenderable `type:"block"` layer and the
+  // validator's un-expanded-block error was the only thing that noticed. Descending here is what makes
+  // composition real: a block can hold a block, which is the difference between a device frame that is
+  // a picture of a bezel and one you can put an app inside.
+  // Descend through EVERY nesting level, not just direct children: a container's slot is usually a few
+  // groups down (phoneFrame puts its screen inside a bezel inside a card), so checking one level found
+  // nothing. Non-block children pass through untouched, so this is a no-op for every existing scene.
+  if (Array.isArray(layer.children) && layer.children.length) {
+    return [{ ...layer, children: layer.children.flatMap((c) => expand(c, stack)) }];
+  }
   return [layer];
 }
 
