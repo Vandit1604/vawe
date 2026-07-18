@@ -1010,3 +1010,28 @@ ones — the loudest sounds in the film were the ones the JSON never mentions.
 entries for `correct`/`wrong`/`beep`/`beep3`, which cannot be emitted since the library became
 Cuelume-only — dead config that reads as intent.
 **Rule:** anything the engine generates on your behalf needs a dial, or the generated thing wins.
+
+---
+
+## 62. The schema was narrower than the engine
+
+**What:** `border: true` on a rect — which `core/layers/util.js` explicitly supports, mapping it to a
+1px hairline — was rejected by `make validate` as "must be a string".
+**Root cause:** the schema declared `border` as `string`. Schema drift usually runs the other way (the
+schema advertising something the engine ignores, #21/#28); this is the mirror, and it is worse in one
+respect: it rejects input that would have rendered correctly, so the author "fixes" working JSON.
+**Fix:** `string|boolean`, which the validator's union types already support.
+**Rule:** `make schema-check` proves every engine prop is DECLARED. It does not prove the declared
+TYPE matches what the engine accepts. Those are two different claims.
+
+---
+
+## 63. `at` was already taken
+
+**What:** per-aspect overrides were implemented on a layer key `at` and silently did nothing.
+**Root cause:** `at` already existed in the schema as a layer PLACEMENT prop (below/above/right/left),
+and the patch guarded with `if ('at' not in item)` — so the declaration was skipped, the old string
+enum stayed, and every override failed type validation instead of applying.
+**Fix:** renamed to `aspects`. Caught in one run because the prop was declared in the schema before
+being used; had it gone undeclared, the overrides would have been silently ignored at render.
+**Rule:** declare the prop first, then implement it. The schema is the place a name collision is cheap.

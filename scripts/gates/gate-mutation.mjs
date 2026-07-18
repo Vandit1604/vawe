@@ -64,6 +64,19 @@ const CASES = [
     scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', logotype: true, start: 0, duration: 2,
                     children: [{ type: 'text', text: 'unreadably small mark', size: 9, color: '#FBBC05' }] }]) },
 
+  // A centring keyword must have something to centre. Pinned on BOTH axes and in both directions,
+  // including the deliberate text-y carve-out, so "measure later" cannot quietly become "never".
+  { gate: 'validate', name: 'layout · x:"center" with no w', expect: 'fail', match: /positions a box of width/,
+    scene: scene([{ type: 'text', text: 'centred', x: 'center', y: 400, size: 90, start: 0, duration: 2 }]) },
+  { gate: 'validate', name: 'layout · pin:"center" with no w', expect: 'fail', match: /positions a box of width/,
+    scene: scene([{ type: 'text', text: 'pinned', pin: 'center', size: 90, start: 0, duration: 2 }]) },
+  { gate: 'validate', name: 'layout · y:"center" on an image with no h', expect: 'fail', match: /positions a box of height/,
+    scene: scene([{ type: 'image', src: '/assets/icons/ui/search.svg', x: 100, y: 'center', w: 80, start: 0, duration: 2 }]) },
+  { gate: 'validate', name: 'layout · w + align is correct usage', expect: 'pass',
+    scene: scene([{ type: 'text', text: 'fine', x: 'center', y: 400, w: 1200, align: 'center', size: 90, start: 0, duration: 2 }]) },
+  { gate: 'validate', name: 'layout · text y-centring is the deliberate carve-out', expect: 'pass',
+    scene: scene([{ type: 'text', text: 'fine', x: 100, y: 'center', w: 1200, size: 90, start: 0, duration: 2 }]) },
+
   // ---- validator: must FAIL on vocabulary that does not exist ----
   { gate: 'validate', name: 'unknown anim name', expect: 'fail', match: /anim|not valid/i,
     scene: scene([TXT({ anim: 'slideL' })]) },

@@ -301,6 +301,10 @@
           "label": "Perspective distance in px (default 1600; lower = stronger)",
           "min": 200,
           "max": 6000
+        },
+        "aspects": {
+          "type": "object",
+          "label": "Per-aspect overrides for this camera keyframe"
         }
       }
     },
@@ -543,8 +547,8 @@
           "label": "Corner radius (rect/ken-image)"
         },
         "border": {
-          "type": "string",
-          "label": "Border (rect)"
+          "type": "string|boolean",
+          "label": "Border (rect) (true = a 1px hairline in var(--line))"
         },
         "shadow": {
           "type": "boolean",
@@ -1023,6 +1027,10 @@
         "keyCue": {
           "type": "string",
           "label": "Which cue a `typing` layer clicks with (default 'press')"
+        },
+        "aspects": {
+          "type": "object",
+          "label": "Per-aspect overrides: { \"9:16\": { \u2026props\u2026 } } merged over this layer at that canvas only"
         }
       }
     },

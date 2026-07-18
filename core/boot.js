@@ -255,6 +255,18 @@ export async function boot(build) {
     rootStyle.setProperty('--safe-left', safe.x0 + 'px');
     rootStyle.setProperty('--safe-right', (width - safe.x1) + 'px');
     if (params.get('alpha')) document.documentElement.classList.add('alpha'); // transparent overlay export
+    // PER-ASPECT OVERRIDES. Some beats genuinely need a different COMPOSITION at 9:16 than at 16:9, not
+    // the same one re-solved: a two-column split has no portrait equivalent, it becomes a stack. Until
+    // now there was no way to say so, so "any aspect" held only while the author hand-tuned one ratio
+    // and hoped. `at` is a map of aspect key -> partial layer props, merged over the layer for THIS
+    // canvas only. Applied BEFORE resolveCoords so an overridden w/h/x/y resolves like any other.
+    const applyAt = (ls) => { for (const L of ls || []) {
+      if (!L || typeof L !== 'object') continue;
+      if (L.aspects && L.aspects[aspectKey]) Object.assign(L, L.aspects[aspectKey]);
+      if (L.children) applyAt(L.children);
+    } };
+    applyAt(data.layers);
+    if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
     resolveCoords(data, width, height, safe); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)

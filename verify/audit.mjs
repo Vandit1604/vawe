@@ -20,6 +20,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
+import { layoutErrors } from '../core/validate.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -467,28 +468,17 @@ function overlayFn(n, SAFE) {
 // `pin`/`x` centring keywords resolve against the LAYER'S OWN SIZE (core/boot.js resolveCoords: `center`
 // → (W - size)/2). A layer with no `w` has size 0, so `center` means (W-0)/2 — the layer's LEFT EDGE
 // lands on the centre line and the content runs off to the right. It renders wrong at every aspect, but
-// only fails the safe check where the ink happens to spill past the box, so a wide canvas hides it
-// completely. showcase-aspect.json shipped exactly this and passed at its own 16:9 for months.
-// `right`/`third2` are degenerate the same way and land further off-frame.
-const NEEDS_W = new Set(['center', 'optical', 'third1', 'third2', 'right']);
-// pin → the x-keyword it implies (core/boot.js PIN). Only the x axis is checked: a missing `h` skews y
-// by half a line, which is a real but survivable offset, whereas a missing `w` throws content off-frame.
-const PIN_X = { center: 'center', top: 'center', bottom: 'center', left: 'left', right: 'right',
-  'top-left': 'left', 'top-right': 'right', 'bottom-left': 'left', 'bottom-right': 'right',
-  'thirds-tl': 'third1', 'thirds-tr': 'third2', 'thirds-bl': 'third1', 'thirds-br': 'third2',
-  'thirds-t': 'center', 'thirds-b': 'center', 'thirds-l': 'third1', 'thirds-r': 'third2' };
-
+// Layout placement (a centring keyword with nothing to centre) is defined ONCE, in core/validate.mjs,
+// and imported here. It used to live in this file with its own NEEDS_W/PIN_X tables — a second copy of
+// a rule the engine also needs, which is the exact shape of the bug that gave the repo four safe boxes
+// and eight canvas-size derivations (docs/MISTAKES.md #46). The validator is the owner; the audit
+// reports the same finding so a render surfaces it too.
 function sourceIssues(cfg) {
-  const out = [];
+  const out = layoutErrors(cfg).map((detail) => ({ kind: 'degenerate-pin', a: 'layout', t: '', detail }));
   for (const L of cfg.layers || []) {
     if (!L || typeof L !== 'object') continue;
     const id = L.id || L.type || 'layer';
     const t = String(L.text ?? '').replace(/<[^>]+>/g, '').trim().slice(0, 18);
-    const xkw = L.x != null ? (typeof L.x === 'string' ? L.x : null) : (L.pin ? PIN_X[L.pin] : null);
-    // `anchor` overwrites x downstream (scene.html), and `col` sets both x and w, so neither is affected.
-    if (xkw && NEEDS_W.has(xkw) && L.w == null && L.col == null && !L.anchor)
-      out.push({ kind: 'degenerate-pin', a: id, t,
-        detail: `${L.pin ? `pin:"${L.pin}"` : `x:"${L.x}"`} positions a box of width w, but w is unset (=0) — the layer's left edge lands on the ${xkw} line instead of the layer centring on it. Set w (e.g. "88%") + align.` });
     // dx/dy are read only inside scene.html's anchor pass (`const T = L.anchor && byId[L.anchor]`), so
     // without a resolvable anchor they are silently dropped — authored intent that never renders.
     if ((L.dx != null || L.dy != null) && !L.anchor)

@@ -103,22 +103,24 @@ declares), or build per-aspect composition so a film can genuinely ship four.
   platform's **chrome** (a property of the DESTINATION: 9:16 for a hero and 9:16 for TikTok are the
   same canvas with different unusable regions), and an **anchor**. One function now answers all of it,
   keyed on `destination`, and placement and checking share it, so `pin:"bottom"` cannot fail.
-- **Layout that resolves rather than gets computed.** This is now THE gap, and the table above is its
-  size. `pin`/`col`/`align` work; absolute `x`/`w` is still the path of least resistance and silently
-  means "16:9 only". Either the validator rejects absolute coordinates in a multi-aspect scene, or
-  authoring defaults to relative and absolute is opt-in. **The deeper fix is in `resolveCoords`**:
-  sizing an absent `w` as 0 turns a centring keyword into a left-edge placement without complaint.
-  Making `center` measure the rendered layer (or refuse) would remove the trap rather than police it.
-  That moves every centred layer, so it needs a `make snap` baseline and a deliberate call.
-- **The y axis has the same trap, unchecked.** A missing `h` makes `pin:"center"` resolve `y` to
+- ~~**Layout that resolves rather than gets computed.**~~ **Refused, not yet measured.** A centring
+  keyword with nothing to centre is now a VALIDATE error (`core/validate.mjs` `layoutErrors`), so it
+  fails at `make validate` and in boot before a frame renders, on both axes. The rule lives in exactly
+  one place and `verify/audit.mjs` imports it. The *measure* half — making `center` size itself from
+  the rendered layer — is still open and still moves every centred layer, so it stays deliberate.
+- ~~**The y axis has the same trap, unchecked.**~~ **Checked**, except on text/count, where `size*1.2`
+  is a defensible estimate and enough scenes have tuned around the current behaviour that changing it
+  would move shipped content. That carve-out is pinned in `make gate-test`. Original note: A missing `h` makes `pin:"center"` resolve `y` to
   `0.46*H` — top edge on the optical line, not the layer centred on it. (The far edges no longer have
   this problem: `bottom` estimates a text layer's height as `size*1.2`, matching scene.html's anchor
   fallback. No width equivalent is possible.) It skews by half a line rather than throwing content
   off-frame, and enough scenes have tuned around it that flagging it today would be mostly noise. It
   is still wrong, and it is the same root cause.
-- **Per-aspect overrides.** Some beats genuinely need a different composition at 9:16 than 16:9, not
-  the same one re-solved. There is no way to say so today. This is what the table above actually needs.
-- **4:5 is claimed but barely exercised.** It appears in copy and in one diagram. It needs a scene.
+- ~~**Per-aspect overrides.**~~ **Done** — `aspects: { "9:16": { …props… } }` on any layer or camera
+  keyframe, merged for that canvas only, applied before `resolveCoords`. The validator checks every
+  declared variant, so an override cannot reintroduce the centring trap at one ratio only.
+- ~~**4:5 is claimed but barely exercised.**~~ **Done** — `formats/scene/aspects-demo.json` composes
+  for all five ratios and passes `make audit ASPECT=all`.
 
 Until this is solid, "any aspect" is a promise the engine keeps only when the author does the work
 by hand. That is worth more than any new sting, because it is already being sold.

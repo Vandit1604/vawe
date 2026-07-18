@@ -15,6 +15,7 @@
 // Only fields PRESENT in the schema are checked; unknown data keys (module, audio, theme, …) pass.
 
 import { themeErrors } from '../core/theme-contract.js';
+import { ASPECTS } from '../core/safe.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -28,12 +29,72 @@ function nearest(val, opts) {
 }
 const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
 
+// ---------- LAYOUT: a centring keyword needs something to centre ----------
+// resolveCoords places a box of size `size` on a canvas line. With `w` unset that size is 0, so
+// `x:"center"` puts the layer's LEFT EDGE on the centre line and `x:"right"` hangs it off the frame —
+// silently, and only visibly wrong at some aspects. The audit has flagged this on the x axis for a
+// while; the rule lives HERE now so it fails at `make validate` AND in boot (which imports this
+// module) before a single frame renders, and so there is exactly one copy of it. Two copies is how
+// the safe box and the canvas size each drifted into four (docs/MISTAKES.md #46).
+//
+// The Y axis is the same trap. It is enforced only where no honest estimate exists: a text layer's
+// height is reliably ~size*1.2 and scenes have tuned around the current behaviour, so applying that
+// estimate would MOVE shipped content. That is the deliberate "measure later" half — see ROADMAP.
+const PIN_AXIS = {
+  center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
+  left: ['left', 'center'], right: ['right', 'center'],
+  'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
+  'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'],
+  'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'],
+  'thirds-bl': ['third1', 'third2'], 'thirds-br': ['third2', 'third2'],
+  'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
+  'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'],
+};
+// keywords that SUBTRACT the layer's size, and are therefore meaningless without one
+const NEEDS_SIZE = new Set(['center', 'optical', 'third1', 'third2', 'right', 'bottom']);
+// types whose extent the engine can estimate from `size` — excluded from the y rule for now
+const TEXTISH = new Set(['text', 'count']);
+
+export function layoutErrors(cfg) {
+  const out = [];
+  (cfg.layers || []).forEach((L0, i) => {
+    if (!isObj(L0)) return;
+    if (L0.anchor) return;                      // anchor overwrites x/y downstream
+    const label0 = `layers[${i}] (${L0.type || 'text'}${typeof L0.text === 'string' ? ` "${L0.text.replace(/<[^>]+>/g, '').slice(0, 20)}"` : ''})`;
+    // `aspects` is checked as the MERGED layer, once per declared aspect. An override that drops `w` while
+    // keeping a centring keyword is the same trap, visible only at that one canvas — which is the
+    // failure mode per-aspect overrides exist to prevent, so it cannot be the failure mode they add.
+    const variants = [[L0, label0]];
+    if (isObj(L0.aspects)) for (const [k, over] of Object.entries(L0.aspects)) {
+      if (!ASPECTS[k]) { out.push(`${label0}: aspects."${k}" is not a known aspect — one of ${Object.keys(ASPECTS).join(', ')}`); continue; }
+      if (!isObj(over)) { out.push(`${label0}: aspects."${k}" must be an object of layer props`); continue; }
+      variants.push([{ ...L0, ...over }, `${label0} at "${k}"`]);
+    }
+    for (const [L, label] of variants) check(L, label, out);
+  });
+  return out;
+}
+
+function check(L, label, out) {
+  {
+    const pin = L.pin && PIN_AXIS[L.pin];
+    const kwx = typeof L.x === 'string' ? L.x : (L.x == null && pin ? pin[0] : null);
+    const kwy = typeof L.y === 'string' ? L.y : (L.y == null && pin ? pin[1] : null);
+    const how = (kw, axis) => `${L.pin ? `pin:"${L.pin}"` : `${axis}:"${kw}"`}`;
+    if (kwx && NEEDS_SIZE.has(kwx) && L.w == null && L.col == null)
+      out.push(`${label}: ${how(kwx, 'x')} positions a box of width \`w\`, but \`w\` is unset (=0), so the layer's left edge lands on the ${kwx} line instead of the layer sitting on it. Set \`w\` (e.g. "88%") and \`align\`.`);
+    if (kwy && NEEDS_SIZE.has(kwy) && L.h == null && !TEXTISH.has(L.type || 'text'))
+      out.push(`${label}: ${how(kwy, 'y')} positions a box of height \`h\`, but \`h\` is unset (=0), so the layer's top edge lands on the ${kwy} line. Set \`h\`.`);
+  }
+}
+
 // validateData(schema, data) -> string[] of human-readable errors ([] = valid).
 export function validateData(schema, data) {
   const errors = [];
   if (!schema || !isObj(schema.fields)) return errors; // no/blank schema → nothing to check
   walk(schema.fields, data || {}, '', errors);
   noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
+  errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   return errors;
 }
 
