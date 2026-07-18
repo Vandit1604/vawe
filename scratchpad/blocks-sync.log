@@ -1,4 +1,0 @@
-node scripts/site/blocks-docs.mjs
-regenerated docs/BLOCKS.md — 118 entries, 49 families
-node scripts/site/blocks-json.mjs
-blocks-json: 117 entries → site/lib/blocks.json

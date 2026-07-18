@@ -64,3 +64,6 @@ site/public/assets/vendor/
 # same rule: site-engine copies these out of assets/brands/ because a scene names them. Committing
 # them would put a second copy of a tracked file in the repo, free to drift from the original.
 site/public/assets/brands/
+
+# local scratch (agent shell logs) — never commit
+/scratchpad/
