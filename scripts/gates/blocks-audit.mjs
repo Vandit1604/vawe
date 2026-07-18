@@ -18,7 +18,12 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import * as B from '../../blocks/index.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SRC = fs.readFileSync(path.join(repoRoot, 'blocks/index.mjs'), 'utf8');
+// BOTH files, because the shared primitives moved to blocks/kit.mjs and a rule that stops at a file
+// boundary is a rule with a hole in it: `avatarEl` and `toneColor` now paint for every identity and
+// status block in the library, so an unreadable pair or a baked brand in there reaches more callers
+// than one in any single factory would. The gate reads what ships, not one file of it.
+const SRC = ['blocks/index.mjs', 'blocks/kit.mjs', 'blocks/app.mjs']
+  .map((f) => fs.readFileSync(path.join(repoRoot, f), 'utf8')).join('\n');
 // THE MANIFEST IS A SECOND SOURCE OF DEFAULTS, and auditing only the factories misses it completely.
 // Proven the hard way: the brand URL was removed from `browserFrame` and the catalog row put it
 // straight back, and the invented "1.2s" was removed from `deploySuccess` and still shipped from a
@@ -46,9 +51,15 @@ function bodies() {
   marks.forEach((mk, i) => { out[mk.name] = SRC.slice(mk.at, i + 1 < marks.length ? marks[i + 1].at : SRC.length); });
   return out;
 }
-// string literals in the source, minus the ones inside a // comment line
+// string literals in the source, minus the ones inside a // comment line.
+// EMPTY strings are matched and discarded rather than skipped: a scanner that only looks for 2+ chars
+// pairs the CLOSING quote of one `''` with the OPENING quote of the next, so a signature reading
+// `sub = '', meta = ''` handed the gate the literal ", meta = " and it reported a real brand in a
+// factory that contains no copy at all. A gate that cries wolf is ignored exactly like a gate that
+// stays silent (MISTAKES #25).
 const literals = (body) => body.split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l))
-  .flatMap((l) => [...l.matchAll(/'([^'\\]{2,80})'|"([^"\\]{2,80})"/g)].map((x) => x[1] ?? x[2]));
+  .flatMap((l) => [...l.matchAll(/'([^'\\]{0,80})'|"([^"\\]{0,80})"/g)].map((x) => x[1] ?? x[2]))
+  .filter((s) => s.length >= 2);
 
 const issues = [];
 const FACTORIES = bodies();
@@ -95,7 +106,9 @@ for (const fam of FAMILIES) {
 for (const e of CATALOG) {
   const fam = B[e.family]; if (!fam) continue;
   const known = new Set(props(e.family));
-  if (!known.size) continue;
+  // A signature it cannot read used to `continue`, so an entry whose factory lived in another file was
+  // skipped silently — the check reported nothing and looked identical to the check passing.
+  if (!known.size) { issues.push({ name: e.name, kind: 'unauditable', detail: `cannot read \`${e.family}\`'s signature, so its props are unchecked. If the factory moved, this gate must be able to see it.` }); continue; }
   const unknown = Object.keys(e.props || {}).filter((k) => !known.has(k));
   if (unknown.length) issues.push({ name: e.name, kind: 'dead-prop', detail: `manifest passes ${unknown.map((u) => `\`${u}\``).join(', ')}, which \`${e.family}\` does not accept — silently dropped.` });
 }
@@ -153,7 +166,7 @@ for (const [name, body] of Object.entries(FACTORIES)) {
   }
 }
 
-const ORDER = ['contrast', 'baked-claim', 'claim-default', 'baked-superlative', 'brand-default', 'baked-brand', 'dead-prop', 'prop-divergence'];
+const ORDER = ['contrast', 'unauditable', 'baked-claim', 'claim-default', 'baked-superlative', 'brand-default', 'baked-brand', 'dead-prop', 'prop-divergence'];
 issues.sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
 console.log(`── block audit · ${Object.keys(FACTORIES).length} factories, ${CATALOG.length} catalog entries\n`);
 if (!issues.length) { console.log('✓ no factory ships a claim, a brand, a dead prop or a divergent vocabulary'); process.exit(0); }

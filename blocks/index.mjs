@@ -15,50 +15,16 @@
 //
 // See docs/BLOCKS.md for the catalog + screenshots.
 
-// THEME-AWARE tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
-// color-mix() for tints — so the SAME block reskins to any brand theme. Still deterministic: the
-// strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
-// Stripe" demo, not a generic surface.
-export const TOKENS = {
-  ink: 'var(--text)', sub: 'var(--text-2)', dim: 'var(--dim)',
-  paper: 'var(--bg)', card: 'var(--card)', hair: 'var(--line)', surface: 'var(--surface-2)',
-  accent: 'var(--accent)',
-  accentSoft: 'color-mix(in srgb, var(--accent) 14%, transparent)',
-  accentInk: 'var(--accent)',
-  green: 'var(--up)', greenBright: 'var(--up)',
-  greenSoft: 'color-mix(in srgb, var(--up) 16%, transparent)',
-  down: 'var(--down)',
-  blurple: '#635BFF', stripeNavy: '#0A2540', stripeTeal: '#3ECF8E', stripeGrey: '#8898AA',
-};
+// The shared vocabulary — tokens, layer primitives, card chrome, the radius scale, tone colours and
+// the one avatar implementation — lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
+// exists because every one of those things had been copied per-block and had drifted per-copy.
+import {
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
+  R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
+} from './kit.mjs';
+
+export { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl };
 const T = TOKENS;
-// SERIES — the theme-derived chart palette (accent → success → danger → two mixes). Charts default
-// their per-series/segment colours from this so multi-series graphics reskin with the brand.
-export const SERIES = ['var(--accent)', 'var(--up)', 'var(--down)',
-  'color-mix(in srgb, var(--accent) 55%, var(--text-2))', 'color-mix(in srgb, var(--up) 55%, var(--text-2))'];
-const seriesAt = (i) => SERIES[i % SERIES.length];
-const HAIR = `1px solid ${T.hair}`;
-const r2 = (n) => Math.round(n * 100) / 100;
-
-// ---- small helpers ----
-const text = (o) => ({ type: 'text', weight: 500, ...o });
-const rect = (o) => ({ type: 'rect', radius: 0, ...o });      // TOP-LEVEL boxes only
-const box = (o) => ({ type: 'group', radius: 0, ...o });       // a coloured box usable as a GROUP CHILD (rect isn't allowed there)
-const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
-  text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '7px 16px' });
-
-// onColor(bg) — pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
-// over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
-// arbitrary `accent` with no check, and on the amber tone that measures 2.05:1. Only literal hexes can
-// be judged at build time; a CSS var resolves at render, and the theme contract already requires its
-// accent to carry white, so a var falls through to white by design rather than by omission.
-export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
-  const m = /^#([0-9a-f]{6})$/i.exec(String(bg || ''));
-  if (!m) return light;
-  const n = parseInt(m[1], 16);
-  const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
-  const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
-  return (1.05 / (L + 0.05)) >= 4.5 ? light : dark;   // white clears 4.5:1? else go dark
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // card — elevated white card · tinted inner panel · pill tags · CTA footer arrow
@@ -133,7 +99,7 @@ export function terminal({ x, y, w = 720, command, output = [], start = 0, dur =
   const out = [];
   out.push({
     type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 10, pad: 26,
-    bg: T.card, radius: 12, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.4,
+    ...cardChrome({ radius: R.tight }), start, duration: dur, enterDur: 0.4,
     children: [
       { type: 'group', layout: 'row', gap: 10, items: 'center', children: [
         text({ text: '$', font: 'mono', size: 22, color: T.accent, weight: 600 }),
@@ -156,8 +122,11 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, col
       anim: 'wipe', enterDur: fillDur }),
   ];
   if (label) out.push(text({ text: label, x, y: y + 18, font: 'mono', size: 18, color: T.sub, start, duration: fillDur + 1.2 }));
-  if (done) out.push(text({ text: '✓ done', x: x + w - 70, y: y - 34, font: 'mono', size: 18, weight: 600,
-    color: T.green, start: r2(start + fillDur), duration: 1.0, anim: 'rise', enterDur: 0.3 }));
+  // right-aligned by LAYOUT, not by guessing the string's width: `x + w - 70` was a guess at "✓ done"
+  // in 18px mono, so any other label, size or font drifted off the bar's end.
+  if (done) out.push({ type: 'group', x, y: y - 34, w, layout: 'row', justify: 'flex-end',
+    start: r2(start + fillDur), duration: 1.0, anim: 'rise', enterDur: 0.3,
+    children: [text({ text: '✓ done', font: 'mono', size: 18, weight: 600, color: T.green })] });
   return out;
 }
 
@@ -168,23 +137,31 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, col
 // words "Deployed to production" and — worse — "Ready in 1.2s", an invented statistic baked into the
 // factory. This repo's own rule is that an unbacked number is worse than no number, so `note` now
 // defaults to nothing: a timing claim only appears when a caller can stand behind it.
+//
+// `active` is the index of the step currently RUNNING; everything before it has finished and
+// everything after it is still queued. It exists because the glyph condition was a tautology
+// (`done || i === steps.length - 1`, where `done` was `i < steps.length - 1`), so every step rendered
+// ✓ from the first frame and the pipeline cascade this block exists to show was unreachable. The
+// default is "all done", which is exactly what the broken condition produced, so existing callers see
+// no change and a caller that wants the cascade can finally ask for it.
 export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'Deployed to production',
-  note = null, steps = ['Building', 'Deploying', 'Live'], start = 0, rowGap = 52 } = {}) {
+  note = null, steps = ['Building', 'Deploying', 'Live'], active = null, start = 0, rowGap = 52 } = {}) {
   const out = [];
+  const at = active == null ? steps.length : active;
+  const lead = Math.min(at, steps.length - 1);   // the row the eye should be on: the running one, or the outcome
   steps.forEach((label, i) => {
     const t = r2(start + i * 0.55);
-    const done = i < steps.length - 1;
-    out.push(text({ text: (done || i === steps.length - 1) ? '✓' : '•', x, y: y + i * rowGap, font: 'mono',
-      size: 24, weight: 700, color: i === steps.length - 1 ? T.green : T.green, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
+    out.push(text({ text: i < at ? '✓' : i === at ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
+      size: 24, weight: 700, color: i <= at ? T.green : T.dim, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
     out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22,
-      color: i === steps.length - 1 ? T.ink : T.sub, start: t, duration: 6 }));
+      color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
   });
   // success card
   const cy = y + steps.length * rowGap + 30;
   out.push({
     type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: 16, pad: 22,
-    bg: T.card, radius: 14, border: `1px solid ${T.greenSoft}`, elevation: 1,
-    start: r2(start + steps.length * 0.55), duration: 6, anim: 'rise', enterDur: 0.45,
+    ...cardChrome({ border: `1px solid ${T.greenSoft}` }),
+    start: r2(start + steps.length * 0.55), duration: 6, enterDur: 0.45,
     children: [
       { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: '#fff' })] },
       { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
@@ -208,7 +185,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
 export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', children = [], start = 0, dur = 4 } = {}) {
   return [{
     type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    bg: T.card, radius: 14, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    bg: T.card, radius: R.card, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
       { type: 'group', layout: 'row', items: 'center', gap: 8, pad: '14px 18px', children: [
         ...['#FF5F57', '#FEBC2E', '#28C840'].map((c) => box({ w: 12, h: 12, radius: 100, bg: c })),
@@ -276,15 +253,27 @@ export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// The chart card's furniture, named ONCE. Every plot area and bar width is derived from these, so a
+// chart cannot disagree with its own padding the way `w - 48` on `padding:22` did.
+const CHART_PAD = 22;     // the card's inset, all four sides
+const CHART_GAP = 14;     // between bars
+const CHART_GAP_Y = 8;    // between a bar and its captions
+const CHART_ROW = 18;     // a caption row's font size, which is what it costs in height
+
 // barChart — labeled bars with values. `data` = [{label, value}]. Scales to the max.
 export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0], start = 0, dur = 4 } = {}) {
   const max = Math.max(...data.map((d) => d.value), 1);
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: 14, pad: 22,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: data.map((dp) => ({ type: 'group', layout: 'column', items: 'center', gap: 8, children: [
-      text({ text: String(dp.value), size: 18, weight: 600, color: T.ink }),
-      box({ w: Math.max(22, (w - 44 - 14 * (data.length - 1)) / data.length - 8), h: Math.round((h - 90) * dp.value / max) + 6, radius: 6, bg: color }),
-      text({ text: dp.label, size: 18, color: T.dim, font: 'mono' }),
+  // The plot height is what is LEFT after the card's own furniture: its pad, plus the value caption
+  // above each bar and the label below it with their gaps. It used to be `h - 90`, a guess that went
+  // NEGATIVE below h ≈ 90 and inverted every bar.
+  const plot = Math.max(0, h - 2 * CHART_PAD - 2 * (CHART_ROW + CHART_GAP_Y));
+  const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 22 });
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: CHART_GAP, pad: CHART_PAD,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
+    children: data.map((dp) => ({ type: 'group', layout: 'column', items: 'center', gap: CHART_GAP_Y, children: [
+      text({ text: String(dp.value), size: CHART_ROW, weight: 600, color: T.ink }),
+      box({ w: bw, h: Math.round(plot * dp.value / max) + 6, radius: 6, bg: color }),
+      text({ text: dp.label, size: CHART_ROW, color: T.dim, font: 'mono' }),
     ] })) }];
 }
 
@@ -292,7 +281,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
 export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   const col = { '+': T.green, '-': T.down, ' ': T.sub };
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 26,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: 22, weight: 400, color: col[ln.sign] || T.ink })) }];
 }
 
@@ -308,7 +297,7 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
 export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   title = title ?? message; body = body ?? desc;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, pad: 20,
-    bg: T.card, radius: 14, border: HAIR, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3, children: [
+    ...cardChrome({ elevation: 2 }), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
       box({ w: 12, h: 12, radius: 100, bg: accent }),
       { type: 'group', layout: 'column', gap: 6, items: 'flex-start', grow: 1, children: [
         text({ text: title, size: 22, weight: 700, color: T.ink }),
@@ -329,9 +318,9 @@ export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) 
 // callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
 export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone = 'info', start = 0, dur = 4 } = {}) {
   msg = msg ?? body ?? title;
-  const ac = { info: T.accent, success: T.green, warn: '#F6A417' }[tone] || T.accent;
+  const ac = toneColor(tone);
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
-    bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
+    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
       box({ w: 4, h: 30, radius: 2, bg: ac }),
       text({ text: msg, size: 22, weight: 500, color: T.ink }),
     ] }];
@@ -341,7 +330,7 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
 export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = 'Vawe', left = [], right = [], start = 0, dur = 4 } = {}) {
   const colW = (w - 40) / 2;
   const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'flex-start', gap: 14, pad: 24,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, children: [
+    ...cardChrome(), children: [
       text({ text: title, size: 26, weight: 700, color: accent }),
       ...items.map((it) => text({ text: it, size: 20, color: T.sub })),
     ] });
@@ -364,7 +353,7 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 
 // lineChart — a trend line (optional area fill) in a hairline card. data = [{label,value}].
 export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
-  const cw = w - 44, ch = h - (label ? 74 : 44), pad = 8;
+  const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
   const vals = data.map((d) => d.value); const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
   const n = Math.max(1, data.length - 1);
   const PX = (i) => (pad + (i / n) * (cw - 2 * pad)).toFixed(1);
@@ -374,36 +363,36 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   const svg = `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
     + (area ? `<polygon points="${pad},${ch - pad} ${pts} ${cw - pad},${ch - pad}" fill="${color}" opacity="0.12"/>` : '')
     + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
-  const html = `<div style="background:${T.card};border:${HAIR};border-radius:14px;padding:22px;box-sizing:border-box;width:${w}px">`
-    + (label ? `<div style="font:600 18px var(--font-mono);color:${T.dim};margin-bottom:14px">${label}</div>` : '') + svg + `</div>`;
+  const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
   return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // donutChart — a ring split into segments + a legend. segments = [{value,color,label}].
 export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
   const total = segments.reduce((s, d) => s + d.value, 0) || 1;
-  const R = 40, C = 2 * Math.PI * R, sw = 15; let off = 0;
+  const rad = 40, C = 2 * Math.PI * rad, sw = 15; let off = 0;
   const arcs = segments.map((s, i) => { const len = (s.value / total) * C;
-    const el = `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${s.color || seriesAt(i)}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;
+    const el = `<circle cx="50" cy="50" r="${rad}" fill="none" stroke="${s.color || seriesAt(i)}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;
     off += len; return el; }).join('');
-  const ring = `<svg viewBox="0 0 100 100" width="${w - 44}" height="${w - 44}" style="display:block;margin:0 auto 14px">${arcs}</svg>`;
+  const ring = (inner) => `<svg viewBox="0 0 100 100" width="${inner}" height="${inner}" style="display:block;margin:0 auto 14px">${arcs}</svg>`;
   const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
-  const html = `<div style="background:${T.card};border:${HAIR};border-radius:14px;padding:24px;box-sizing:border-box;width:${w}px">`
-    + (label ? `<div style="font:600 18px var(--font-mono);color:${T.dim};margin-bottom:14px">${label}</div>` : '')
-    + ring + `<div style="display:flex;flex-direction:column;gap:9px">${legend}</div></div>`;
+  const html = htmlCard({ w, pad: CHART_PAD, label,
+    body: (inner) => ring(inner) + `<div style="display:flex;flex-direction:column;gap:9px">${legend}</div>` });
   return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // stackedBar — multi-series bars. data = [{label,values:[..]}], series = [{name,color}].
 export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], start = 0, dur = 4 } = {}) {
   const totals = data.map((d) => d.values.reduce((s, v) => s + v, 0)); const max = Math.max(...totals, 1);
-  const bw = Math.max(24, (w - 44 - 14 * (data.length - 1)) / data.length - 8);
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: 14, pad: 22,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: data.map((d) => ({ type: 'group', layout: 'column', items: 'center', gap: 8, children: [
+  // one caption row here, not two: a stack carries no value label above it (see barChart).
+  const plot = Math.max(0, h - 2 * CHART_PAD - (CHART_ROW + CHART_GAP_Y));
+  const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 24 });
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: CHART_GAP, pad: CHART_PAD,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
+    children: data.map((d) => ({ type: 'group', layout: 'column', items: 'center', gap: CHART_GAP_Y, children: [
       { type: 'group', layout: 'column', items: 'stretch', w: bw, gap: 2, children:
-        d.values.map((v, i) => box({ w: bw, h: Math.round((h - 90) * v / max) + 2, radius: i === 0 ? 4 : 0, bg: (series[i] || {}).color || seriesAt(i) })) },
-      text({ text: d.label, size: 18, color: T.dim, font: 'mono' }),
+        d.values.map((v, i) => box({ w: bw, h: Math.round(plot * v / max) + 2, radius: i === 0 ? 4 : 0, bg: (series[i] || {}).color || seriesAt(i) })) },
+      text({ text: d.label, size: CHART_ROW, color: T.dim, font: 'mono' }),
     ] })) }];
 }
 
@@ -412,7 +401,7 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
 // set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
 export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 28,
-    bg: T.card, radius: 16, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? 2 : 1,
+    bg: T.card, radius: R.soft, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? 2 : 1,
     start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
       text({ text: plan, size: 20, weight: 600, color: highlight ? T.accentInk : T.sub, font: 'mono' }),
       { type: 'group', layout: 'row', items: 'flex-end', gap: 4, children: [
@@ -429,7 +418,7 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
 // statCard — a boxed KPI: label · animated count · optional delta chip.
 export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '', delta = '', deltaUp = true, start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 26,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3, children: [
+    ...cardChrome(), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
       text({ text: label, size: 18, color: T.dim, font: 'mono' }),
       { type: 'count', from, to, unit, font: 'sans', size: 56, weight: 700, color: T.ink, ls: '-0.02em', countStart: 0.2, countDur: 1.2, ease: 'easeOutExpo' },
       delta && { type: 'group', layout: 'row', items: 'center', gap: 6, children: [
@@ -439,15 +428,15 @@ export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '
 }
 
 // profileCard — avatar (image or initials) · name · role. For testimonials / team / "who said it".
-export function profileCard({ x, y, w = 360, name = '', role = '', avatar = '', initials = '', start = 0, dur = 4 } = {}) {
-  const av = avatar
-    ? { type: 'image', src: avatar, w: 56, h: 56, radius: 100 }
-    : box({ w: 56, h: 56, radius: 100, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: initials || '•', size: 22, weight: 700, color: T.accentInk })] });
+// One of the five identity blocks. They all speak the SAME surface now: {name, handle?, sub?, avatar,
+// initials}, with each block's old prop name kept as an alias — a shared vocabulary is worth nothing
+// if adopting it breaks the callers (MISTAKES #67). `role` is this block's word for `sub`.
+export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', avatar = '', initials = '', start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 22,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3, children: [
-      av, { type: 'group', layout: 'column', items: 'flex-start', gap: 4, children: [
-        text({ text: name, size: 22, weight: 700, color: T.ink }), text({ text: role, size: 18, color: T.sub })] },
+    ...cardChrome(), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
+      avatarEl({ avatar, initials, name, size: 56 }),
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 4, children: [
+        text({ text: name, size: 22, weight: 700, color: T.ink }), text({ text: sub || role, size: 18, color: T.sub })] },
     ] }];
 }
 
@@ -457,7 +446,7 @@ export function profileCard({ x, y, w = 360, name = '', role = '', avatar = '', 
 // fileTree — an indented file/folder list; `active` highlights the focused row.
 export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 20,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 8, pad: '6px 10px',
       ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
       children: [
@@ -479,7 +468,7 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
     : { info: '#5A6B7F', ok: '#1F6B3A', warn: '#8A5A00', error: '#B02A37' };
   const base = dark ? '#E8ECF1' : T.ink;
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
-    bg, radius: 12, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
+    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
     children: lines.map((ln) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
       ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#8FA3BA' : T.dim }),
       text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base }),
@@ -489,7 +478,7 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
 // commitRow — a git history list (hash · message · author · time), hairline-divided.
 export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: commits.flatMap((c, i) => [
       i > 0 && box({ h: 1, bg: T.hair }),
       { type: 'group', layout: 'row', items: 'center', gap: 14, pad: '16px 22px', children: [
@@ -509,7 +498,9 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
 // without which the frame reads as a black rectangle rather than a phone in use.
 export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '9:41',
   start = 0, dur = 4 } = {}) {
-  const screen = [box({ w: 116, h: 26, radius: 100, bg: '#0A0A0A' })];
+  // the notch is a PROPORTION of the device, not a fixed 116px — at the catalog's w:230 that constant
+  // covered more than half the screen. 0.39 / 0.087 of w reproduce the shipped look at w:300.
+  const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: 100, bg: '#0A0A0A' })];
   if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: '6px 4px 0',
     children: [text({ text: time, size: 14, weight: 600, color: T.ink }),
                text({ text: '▮▮▮', size: 12, color: T.dim })] });
@@ -523,7 +514,7 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
 // tabBar — a segmented control; `active` is the selected index (lifted, lit card).
 export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'row', items: 'stretch', gap: 6, pad: 6,
-    bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
+    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
     children: tabs.map((t, i) => ({ type: 'group', grow: 1, layout: 'row', justify: 'center', items: 'center', pad: '10px 0',
       ...(i === active ? { bg: T.card, radius: 8, elevation: 1 } : {}),
       children: [text({ text: t, size: 18, weight: i === active ? 600 : 500, color: i === active ? T.ink : T.sub })] })) }];
@@ -535,7 +526,7 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 
 // checklist — items with checked/unchecked boxes; done rows dim (reads as completed).
 export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 26,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 14, children: [
       it.done
         ? box({ w: 26, h: 26, radius: 8, bg: T.green, layout: 'row', justify: 'center', items: 'center', children: [text({ text: '✓', size: 16, weight: 700, color: '#fff' })] })
@@ -549,7 +540,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
   const cell = (t, head) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink });
   const row = (cells, head) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head)) });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '20px 24px',
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: [row(cols, true), box({ h: 1, bg: T.hair }),
       ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }), row(r, false)].filter(Boolean))] }];
 }
@@ -557,7 +548,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
 // timeline — a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
 export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 26,
-    bg: T.card, radius: 14, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: 16, children: [
       { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
         box({ w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair }),
@@ -592,7 +583,7 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: columns.map((col) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 10, children: [
       text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim }),
-      ...col.cards.map((c) => box({ bg: T.card, radius: 10, border: HAIR, elevation: 1, pad: '14px 16px', children: [text({ text: c, size: 18, weight: 500, color: T.ink })] })),
+      ...col.cards.map((c) => box({ bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '14px 16px', children: [text({ text: c, size: 18, weight: 500, color: T.ink })] })),
     ] })) }];
 }
 
@@ -604,17 +595,15 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 10, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start',
       start: r2(start + i * 0.12), duration: dur, children: [
-      { type: 'group', bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: 16, pad: '12px 18px',
+      { type: 'group', bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 18px',
         children: [text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink })] }] })) }];
 }
 
 // tweetCard — a post card: avatar · name · @handle · body · repost/like counts.
 export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = '', avatar = '', initials = '', likes = '', reposts = '', start = 0, dur = 4 } = {}) {
-  const av = avatar ? { type: 'image', src: avatar, w: 48, h: 48, radius: 100 }
-    : box({ w: 48, h: 48, radius: 100, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center', children: [text({ text: initials || '•', size: 20, weight: 700, color: T.accentInk })] });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, pad: 22,
-    bg: T.card, radius: 16, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
-      { type: 'group', layout: 'row', items: 'center', gap: 12, children: [av,
+    ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.5, exitDur: 0.35, children: [
+      { type: 'group', layout: 'row', items: 'center', gap: 12, children: [avatarEl({ avatar, initials, name, size: 48 }),
         { type: 'group', layout: 'column', items: 'flex-start', gap: 1, children: [
           text({ text: name, size: 20, weight: 700, color: T.ink }), text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim })] }] },
       text({ text: body, size: 21, weight: 400, color: T.ink }),
@@ -629,8 +618,8 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
   const step = size * 0.65; const out = [];
   avatars.forEach((a, i) => {
     const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: `2px solid ${T.card}`, start: r2(start + i * 0.07), duration: dur, anim: 'rise', enterDur: 0.3 };
-    out.push(typeof a === 'string' ? { type: 'image', src: a, ...common }
-      : { type: 'group', ...common, bg: a.color || T.accentSoft, layout: 'row', justify: 'center', items: 'center', children: [text({ text: a.initials || '•', size: Math.round(size * 0.36), weight: 700, color: T.accentInk })] });
+    const av = typeof a === 'string' ? { avatar: a } : { avatar: a.avatar, initials: a.initials, name: a.name, bg: a.color || T.accentSoft };
+    out.push({ ...avatarEl({ size, ...av }), ...common });
   });
   if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: 100, bg: T.surface, border: `2px solid ${T.card}`,
     layout: 'row', justify: 'center', items: 'center', start: r2(start + avatars.length * 0.07), duration: dur, anim: 'rise', enterDur: 0.3, children: [text({ text: '+' + extra, size: Math.round(size * 0.3), weight: 600, color: T.sub })] });
@@ -645,7 +634,7 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
 export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green, start = 0, dur = 4 } = {}) {
   message = title ?? message;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 20px',
-    bg: '#0A0A0A', radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+    bg: '#0A0A0A', radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
       text({ text: message, size: 19, weight: 500, color: '#F5F5F3', grow: 1 }),
       action && text({ text: action, size: 18, weight: 600, color: T.accentInk }),
@@ -660,38 +649,33 @@ export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
       children: [text({ text: r.emoji, size: 19 }), text({ text: String(r.count), size: 17, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'mono' })] })) }];
 }
 
-// initials fallback for avatar/artwork shapes: first letters of the first two words. Deterministic,
-// and it means every social block still reads as "a real account" without shipping an image asset.
-const initialsOf = (s) => String(s).trim().split(/\s+/).slice(0, 2).map((w) => (w[0] || '').toUpperCase()).join('') || '•';
 
 // ── social SHAPES — player card, creator lower third, follow card. Shapes only, on purpose: no
 //    platform logos, wordmarks, or lockups (licence rule). The silhouette carries the recognition.
 
 // nowPlaying — a music-player card: square artwork (accent gradient + initials if no art), title over
 // artist, a progress bar, transport glyphs. `progress` is 0..1 of the track.
-export function nowPlaying({ x, y, w = 380, track = '', artist = '', art = '', progress = 0.4, start = 0, dur = 4 } = {}) {
+export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', artist = '', avatar = '', art = '',
+  initials = '', progress = 0.4, start = 0, dur = 4 } = {}) {
   const p = Math.max(0, Math.min(1, progress));
-  const innerW = w - 44; // the card's pad: 22 a side
-  const artEl = art ? { type: 'image', src: art, w: 72, h: 72, radius: 12 }
-    : box({ w: 72, h: 72, radius: 12,
-        // SOLID on purpose. This was a gradient, and a gradient is a background-IMAGE: the computed
-        // background-color under the initials stays transparent, so any contrast probe (ours included)
-        // falls through to the white card behind and reads white-on-white — unmeasurable even when it
-        // looks fine. A var() colour appended to the shorthand does not survive to a computed
-        // background-color either (tried). A solid is measurable by construction, and a flat accent
-        // artwork square is the cleaner shape anyway.
-        bg: 'color-mix(in srgb, var(--accent) 88%, var(--text))',
-        layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: initialsOf(track), size: 26, weight: 700, color: '#fff' })] });
+  const PAD = 22, innerW = w - 2 * PAD;
+  const title = name || track, by = sub || artist;
+  // The artwork square is the same identity element as the other blocks' avatars, only square.
+  const artEl = avatarEl({ avatar: avatar || art, initials, name: title, size: 72, radius: 12,
+    // SOLID on purpose. A gradient is a background-IMAGE: the computed background-color under the
+    // initials stays transparent, so any contrast probe (ours included) falls through to the white
+    // card behind and reads white-on-white — unmeasurable even when it looks fine. A var() colour
+    // appended to the shorthand does not survive to a computed background-color either (tried).
+    bg: 'color-mix(in srgb, var(--accent) 88%, var(--text))', color: '#fff' });
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 22,
-    bg: T.card, radius: 16, border: HAIR, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: PAD,
+    ...cardChrome({ radius: R.soft, elevation: 2 }), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: [
       { type: 'group', layout: 'row', items: 'center', gap: 16, children: [
         artEl,
         { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
-          text({ text: track, size: 22, weight: 700, color: T.ink }),
-          text({ text: artist, size: 17, color: T.sub }),
+          text({ text: title, size: 22, weight: 700, color: T.ink }),
+          text({ text: by, size: 17, color: T.sub }),
         ] },
       ] },
       // the fill is a box INSIDE the track box (rect isn't allowed as a group child); its width IS the progress
@@ -712,17 +696,16 @@ export function nowPlaying({ x, y, w = 380, track = '', artist = '', art = '', p
 // videoLowerThird — creator identifier: avatar circle · channel over subscriber count · a CTA chip.
 // The chip sits in var(--down): the theme's danger/red token keeps it in the subscribe-red family on
 // every brand without hard-coding a platform hex (shape, not lockup — the licence rule again).
-export function videoLowerThird({ x, y, w = 520, channel = '', subscribers = '', avatar = '', cta = 'Subscribe', start = 0, dur = 4 } = {}) {
-  const av = avatar ? { type: 'image', src: avatar, w: 56, h: 56, radius: 100 }
-    : box({ w: 56, h: 56, radius: 100, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: initialsOf(channel), size: 20, weight: 700, color: T.accentInk })] });
+export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = '', subscribers = '',
+  avatar = '', initials = '', cta = 'Subscribe', start = 0, dur = 4 } = {}) {
+  const who = name || channel, count = sub || subscribers;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 20px',
-    bg: T.card, radius: 14, border: HAIR, elevation: 2, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
+    ...cardChrome({ elevation: 2 }), start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
     children: [
-      av,
+      avatarEl({ avatar, initials, name: who, size: 56 }),
       { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
-        text({ text: channel, size: 22, weight: 700, color: T.ink }),
-        subscribers && text({ text: subscribers, font: 'mono', size: 16, color: T.dim }),
+        text({ text: who, size: 22, weight: 700, color: T.ink }),
+        count && text({ text: count, font: 'mono', size: 16, color: T.dim }),
       ].filter(Boolean) },
       { type: 'group', bg: T.down, radius: 100, pad: '10px 22px', start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
         children: [text({ text: cta, size: 18, weight: 700, color: '#fff' })] },
@@ -731,10 +714,14 @@ export function videoLowerThird({ x, y, w = 520, channel = '', subscribers = '',
 
 // followCard — name over @handle, a pill CTA on the right. The pill is ink-on-paper inverted (not
 // accent) so it reads as THE button of the card, not another tinted chip.
-export function followCard({ x, y, w = 360, handle = '', name = '', cta = 'Follow', start = 0, dur = 4 } = {}) {
+// It speaks the shared identity surface, so it can now carry an avatar. It only draws one when the
+// caller supplies `avatar` or `initials`: a card designed without a portrait must not sprout an
+// invented circle just because it learned the vocabulary.
+export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '', initials = '', cta = 'Follow', start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '18px 22px',
-    bg: T.card, radius: 16, border: HAIR, elevation: 1, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
+    ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.45, exitDur: 0.3,
     children: [
+      ...(avatar || initials ? [avatarEl({ avatar, initials, name, size: 44 })] : []),
       { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
         text({ text: name, size: 21, weight: 700, color: T.ink }),
         text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim }),
@@ -752,13 +739,13 @@ export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur =
   const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: rows.map((r) => ({ type: 'group', layout: 'row', gap: 14, items: 'stretch', children:
-      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: 12, border: HAIR, elevation: 1, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',
+      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',
         children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: 22, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
 }
 
 // badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
 export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
-  const ac = { ok: T.green, info: T.accent, warn: '#F6A417', accent: T.accent }[tone] || T.green;
+  const ac = toneColor(tone);
   // White on the amber fill measures 2.05:1. Ink on it measures 8.86:1, and dark-on-amber is what a
   // warning chip looks like anyway — the fix keeps the brand colour and changes the text.
   const onAc = onColor(ac);
@@ -773,12 +760,13 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
 export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
   const arc = 'M8 52 A42 42 0 0 1 92 52';
-  const svg = `<svg viewBox="0 0 100 60" width="${w - 48}" style="display:block;margin:0 auto 4px">`
+  const svg = (inner) => `<svg viewBox="0 0 100 60" width="${inner}" style="display:block;margin:0 auto 4px">`
     + `<path d="${arc}" fill="none" stroke="${T.hair}" stroke-width="10" stroke-linecap="round"/>`
     + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(semi * pct).toFixed(2)} ${semi.toFixed(2)}"/></svg>`;
-  const html = `<div style="background:${T.card};border:${HAIR};border-radius:14px;padding:22px;box-sizing:border-box;width:${w}px;text-align:center">${svg}`
+  // the reading and its caption sit BELOW the arc, so they are body, not htmlCard's heading row.
+  const html = htmlCard({ w, pad: CHART_PAD, align: 'center', body: (inner) => svg(inner)
     + `<div style="font:700 34px var(--font-sans);color:${T.ink};letter-spacing:-0.02em;margin-top:-4px">${value}${max === 100 ? '%' : ''}</div>`
-    + (label ? `<div style="font:600 16px var(--font-mono);color:${T.dim};margin-top:4px">${label}</div>` : '') + `</div>`;
+    + (label ? `<div style="font:600 16px var(--font-mono);color:${T.dim};margin-top:4px">${label}</div>` : '') });
   return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
 }
 
@@ -1084,7 +1072,12 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 // `variant` branch in the family). See docs/BLOCKS.md (auto-generated) and docs/TASTE.md.
 import { CATALOG } from './catalog.mjs';
 
-const FACTORIES = { card, codeBlock, terminal, loadingBar, deploySuccess, browserFrame, pillRow, statBig,
+// The app-surface family lives in blocks/app.mjs (same kit, same contract); the registry is here, so
+// it is imported and merged rather than duplicated.
+import * as APP from './app.mjs';
+export * from './app.mjs';
+
+const FACTORIES = { ...APP, card, codeBlock, terminal, loadingBar, deploySuccess, browserFrame, pillRow, statBig,
   colorCycle, stripeCard, barChart, diff, quote, notification, kpiRow, callout, comparison, captions,
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
   fileTree, logLines, commitRow, phoneFrame, tabBar,
@@ -1098,3 +1091,7 @@ for (const e of CATALOG) {
   const fam = FACTORIES[e.family];
   if (fam) BLOCKS[e.name] = (opts = {}) => fam({ ...(e.props || {}), ...opts });
 }
+
+// APP SURFACES — the app-content families (feed/list/settings/profile/onboarding/empty) live in
+// blocks/app.mjs and are re-exported here so `blocks/index.mjs` stays the single import point.
+export * from './app.mjs';

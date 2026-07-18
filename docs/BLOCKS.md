@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_126 entries across 50 families._
+_132 entries across 56 families._
 
 | Block | For |
 |---|---|
@@ -185,6 +185,12 @@ _126 entries across 50 families._
 | `followCard` | name over handle, pill CTA |
 | `searchEngine.home` | search home — wordmark + pill, query types in (keys click) |
 | `searchEngine.results` | search results — ranked links, cursor clicks one |
+| `feedRow` | feed item · avatar, name, timestamp, body |
+| `listRow` | generic list item · icon tile, title over sub, trailing detail |
+| `settingsRow` | settings row · label + toggle, chevron or value |
+| `profileHeader` | account header · avatar over name, handle, stat row |
+| `onboardCard` | onboarding pane · progress dots, title, body, CTA |
+| `emptyState` | zero state · icon tile, what is missing, the action that fills it |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

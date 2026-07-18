@@ -326,4 +326,19 @@ export const CATALOG = [
     props: {"w": 540, "theme": "linen", "label": "README.md", "size": 19, "lines": ["# vawe", "One JSON. One video.", "Deterministic to the frame."]} },
   { name: 'codeBlock.frost', family: 'codeBlock', blurb: 'code theme · cool light, ice-blue syntax',
     props: {"w": 540, "theme": "frost", "label": "safe.ts", "size": 19, "lines": ["const [w, h] = sceneDims(cfg)", "const box = safeArea(w, h, dest)", "return box.x1 - box.x0"]} },
+  // APP SURFACES (blocks/app.mjs). Before these, `nowPlaying` was the only block that depicted the
+  // inside of a product, so a product-demo film could only be about a music app. Appended at the END
+  // on purpose: the site crops thumbnails by cell index, so inserting mid-list re-cuts every later still.
+  { name: 'feedRow', family: 'feedRow', blurb: 'feed item · avatar, name, timestamp, body',
+    props: { w: 520, name: 'Wren Alcott', sub: '@wren', time: 'just now', body: 'Moved the Fieldwork draft into the shared workspace.' } },
+  { name: 'listRow', family: 'listRow', blurb: 'generic list item · icon tile, title over sub, trailing detail',
+    props: { w: 520, icon: '✉', title: 'Weekly digest', sub: 'Kite Studio', meta: 'Today' } },
+  { name: 'settingsRow', family: 'settingsRow', blurb: 'settings row · label + toggle, chevron or value',
+    props: { w: 520, label: 'Sync across devices', sub: 'Keep every draft current everywhere', control: 'toggle', value: true } },
+  { name: 'profileHeader', family: 'profileHeader', blurb: 'account header · avatar over name, handle, stat row',
+    props: { w: 460, name: 'Wren Alcott', handle: 'wren', stats: [{ value: '0', label: 'posts' }, { value: '0', label: 'lists' }, { value: '0', label: 'saved' }] } },
+  { name: 'onboardCard', family: 'onboardCard', blurb: 'onboarding pane · progress dots, title, body, CTA',
+    props: { w: 460, step: 2, of: 3, title: 'Pick a workspace', body: 'Choose where new drafts are saved. You can change this later.', cta: 'Continue' } },
+  { name: 'emptyState', family: 'emptyState', blurb: 'zero state · icon tile, what is missing, the action that fills it',
+    props: { w: 460, icon: '☐', title: 'Nothing here yet', body: 'Anything you save shows up in this list.', cta: 'Add the first one' } },
 ];

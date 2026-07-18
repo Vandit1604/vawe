@@ -1190,3 +1190,58 @@ statically — CSS vars resolve at render and remain the layout audit's job.
 **Also fixed:** two theme-breaks in the same sweep — `avatarStack` hardcoded `#FFFFFF` rings and
 `table` hardcoded `rgba(0,0,0,0.05)` dividers, both invisible on a dark theme, both now tokens.
 **Rule:** a measurement that was done once, for one set, is a habit nobody formed.
+
+## 72. A block's whole reason for existing sat behind a condition that was always true
+
+**What happened:** `deploySuccess` exists to show a CI pipeline CASCADING — queued, then building, then
+live. It never cascaded. The glyph was `const done = i < steps.length - 1;` followed by
+`(done || i === steps.length - 1) ? '✓' : '•'`, which is `true` for every index by construction, so all
+steps rendered ✓ from the first frame. The colour beside it was `i === last ? T.green : T.green`, two
+identical branches. Nobody noticed because a card of green ticks looks like a deploy card.
+**Root cause:** a tautology reads as a considered condition. `done ||` LOOKS like it is doing work, and
+the dead `'•'` branch documented an intent the code could not reach. Both survived review twice.
+**Fix:** an `active` prop — `i < active ? '✓' : i === active ? '•' : '·'` — defaulting to "all done",
+which is exactly what the broken condition produced, so no existing caller changes. The identity
+ternary is gone.
+**Gate:** none catches this class, and that is stated rather than papered over: no test asserted the
+cascade, and a gate that proves a branch is reachable is a linter's job, not a render gate's. What the
+sweep did add is `make blocks-audit` reading `blocks/kit.mjs` and `blocks/app.mjs`, not just
+`blocks/index.mjs` — the shared primitives moved out of the audited file and a rule that stops at a
+file boundary is a rule with a hole in it.
+**Found in the same sweep, all the same shape (a copy that drifted from its original):**
+- FOUR avatar implementations across five identity blocks, two of which derived initials from a name
+  prop spelled differently in each. Now one `avatarEl` in `kit.mjs`; every identity block speaks
+  `{name, handle?, sub?, avatar, initials}` with its old prop kept as an alias.
+- THREE html-card wrappers whose inner width disagreed with their own padding: `w - 48` on
+  `padding:22`, `w - 44` on `padding:24`. Now one `htmlCard` that DERIVES the inner width from the pad
+  and hands it to the body, so it cannot be restated wrongly.
+- ~15 copies of the hairline-card chrome carrying three radii with no rule behind which. Now
+  `cardChrome()` plus a named scale where RADIUS ENCODES REGISTER: `R.tight` instrument surfaces,
+  `R.card` the default content card, `R.soft` person-facing social/identity/commerce cards.
+- TWO tone→colour maps where `ok` and `success` were the same state under two names with different
+  fallbacks. One `toneColor()`, both spellings accepted.
+- Magic numbers that broke at non-default sizes: `h - 90` went NEGATIVE below h≈90 and inverted every
+  bar; `phoneFrame`'s fixed 116px notch covered half the screen at the catalog's own `w:230`; the
+  `loadingBar` done-label was positioned at `x + w - 70`, a guess at the string's rendered width.
+  All now derived from real pad/label values, clamped, or right-aligned by layout.
+**Rule:** every copy is correct only until someone fixes one of them.
+
+---
+
+## 72. The block gate audited one file while the registry became four
+
+**What:** `blocks/index.mjs` was split into `kit.mjs` (shared primitives) and `app.mjs` (app surfaces).
+`make blocks-audit` kept reading the single path it was written against and reported green over both
+new files — 10 of 61 factories were never audited for brands, invented figures or contrast.
+**Root cause:** the same failure it exists to prevent, recurring one level over. Two commits earlier
+this gate audited the factories and missed the manifest (#68); now it audited one factory file and
+missed the others. Each time the rule was right and the FILE LIST was the bug.
+**Fix:** it globs `blocks/*.mjs`. A new factory file is audited the day it lands, not the day someone
+remembers. Its dead-prop check also used to `continue` when it could not read a signature — silent,
+and indistinguishable from passing; it now reports `unauditable` and fails.
+**A correction to my own fix:** the scan false-positived on `", meta = "`, and I "fixed" it by removing
+`meta` from the brand list. That was a patch on a symptom: the real cause was the literal scanner
+pairing the CLOSING quote of one empty default with the OPENING quote of the next. With the scanner
+corrected, `meta` is back in the list — the rule did not need weakening, the parser needed fixing.
+**Rule:** when a gate is quiet about something you can see, check its INPUT SET before its logic. Four
+of the last eight gate bugs were the file list, not the rule.
