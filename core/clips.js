@@ -4,11 +4,11 @@
 // Both are PURE in the time input: driveClips(root, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
-import { clamp01, easeOutCubic, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
+import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
 const ANIM = {
-  fade, up: rise, rise, pop, scale: pop, lift,
+  fade, up: rise, rise, pop, scale: pop, lift, defocus,
   'slide-left': (t) => slide(t, 'left'), 'slide-right': (t) => slide(t, 'right'),
   'slide-up': (t) => slide(t, 'up'), 'slide-down': (t) => slide(t, 'down'),
   wipe: (t) => wipe(t, 'left'), 'wipe-right': (t) => wipe(t, 'right'),
@@ -30,7 +30,12 @@ export const opacityEnvelope = (enterT, exitT = 0) =>
 /** Unknown names fall back to fade SILENTLY — that is why `make conformance` asserts each is distinct. */
 const resolveAnim = (name) => ANIM[name] || fade;
 // invert an enter transition into an exit (reverse the progress: 1→hidden).
-const asExit = (fn, t) => fn(1 - clamp01(t));
+// Play an entrance BACKWARDS to make an exit: progress 1 (settled) -> 0 (offset/hidden).
+// Takes exitT (0 at the start of the exit, 1 at the end), NOT exitMul — passing the already-inverted
+// exitMul cancelled the inversion, so `out` ran the entrance FORWARDS: the layer teleported to its
+// offset the instant the exit began and then slid home while fading. Every directional exit in the
+// engine was backwards (MISTAKES #40).
+const asExit = (fn, exitT) => fn(1 - clamp01(exitT));
 
 // driveClips(root, t): position every [data-start] clip in time. A clip is visible on
 // [start, start+duration); it plays data-anim on entry and data-out (or its reverse anim) on exit.
@@ -57,16 +62,27 @@ export function driveClips(root, t) {
         // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit
         // that reverses the enter on EVERY layer reads as too much motion once cuts/ken are also going.
         // Opt into a motion-out explicitly with `out` (e.g. out:"rush"/"slide") when a beat wants it.
-        if (el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitMul);
+        if (el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitT);
       }
     }
+    // Clear what the OTHER animation could have written before applying this one. Entrances and
+    // exits write different CSS properties — `defocus` writes filter, `wipe` writes clipPath, `rise`
+    // writes only transform — so a property set during an exit was never cleared by the entrance and
+    // STUCK. Frames render out of order across workers, so "a later frame" is not "after": a frame
+    // that had rendered clean alone came back blurred once an exit frame had run. cutStyle has always
+    // returned its full style set for exactly this reason; the anim registry had no such contract.
+    // Only the layer's OWN anims contribute keys, so an authored `filter` look on a layer that does
+    // not animate filter is left alone. (MISTAKES #41)
+    const outFn = el.dataset.out ? resolveAnim(el.dataset.out) : null;
+    const restingKeys = { ...(outFn ? outFn(1) : {}), ...resolveAnim(el.dataset.anim)(1) };
+
     // compose: apply enter (or exit) transform/clip + fade by the combined opacity.
     // The opacity envelope is EASED, not linear. This line used to multiply two linear ramps while
     // the transform beside it was eased (`rise` settles on easeOutSettle), so the two halves of a
     // single entrance arrived on different curves — the thing you feel as "the easing is off"
     // without being able to point at it. docs/MOTION-CRAFT.md has said "entrances decelerate, exits
     // accelerate, never linear on visible moves" the whole time; the engine just did not do it.
-    Object.assign(el.style, s);
+    Object.assign(el.style, restingKeys, s);
     // The exit is the MIRROR of the entrance curve, not an independent one. That matters because two
     // layers handing over share the same pixels: with independent ease-out/ease-in curves both sit
     // high through the middle of the blend (measured sum 1.71 across tpot's This handoff) and the

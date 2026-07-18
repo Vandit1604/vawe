@@ -68,7 +68,10 @@ const dom = async (n) => {
       const cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return;
       const leaf = el.children.length === 0;
-      out.push(el.tagName + '|' + (leaf ? el.textContent.trim() : '') + '|' + cs.transform + '|' + cs.opacity + '|' + cs.color);
+      // filter + clipPath are in the signature because an entrance/exit pair can write them and a
+      // stuck value is invisible to text/transform/opacity/colour alone — which is how a blur that
+      // survived across frames passed this gate (MISTAKES #41).
+      out.push(el.tagName + '|' + (leaf ? el.textContent.trim() : '') + '|' + cs.transform + '|' + cs.opacity + '|' + cs.color + '|' + cs.filter + '|' + cs.clipPath);
       for (const c of el.children) walk(c);
     };
     walk(document.querySelector('.stage'));
@@ -84,8 +87,12 @@ samples.push(total - 1);
 let fails = 0;
 for (const n of samples) {
   const a = await dom(n);
-  // dirty any hidden frame-to-frame state with a far-away frame, then re-render n
-  await dom(n < total / 2 ? total - 1 : 0);
+  // Dirty the state with frames that actually RUN something, not just far-away ones. The old
+  // scrambler used frame 0 or the last frame; at both, a layer mid-timeline is off-window and
+  // driveClips returns before writing any style — so nothing got dirtied and a genuinely sticky
+  // property (a blur left behind by an exit) passed this gate. n+9 lands roughly one exit-window
+  // later, which is where the writes that stick actually happen. (MISTAKES #41)
+  for (const scram of [Math.min(total - 1, n + 9), total - 1, 0, Math.max(0, n - 9)]) await dom(scram);
   const b = await dom(n);
   if (a !== b) {
     fails++;

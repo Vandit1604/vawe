@@ -660,3 +660,52 @@ states, it is in the sampling or the tolerance underneath it. `b.height > 1` ski
 images; the overflow rule never descended into nested masks; this one measured the quiet parts of
 the timeline with a threshold nothing could cross. Ask what a gate CANNOT see, not what it checks.
 
+---
+
+## 40. Every directional exit in the engine ran backwards
+
+**What:** `out:"slide-up"` made the layer TELEPORT to its offset the instant the exit began, then
+slide back to rest while fading. Every directional exit, in every scene using one (5 of them).
+**Root cause:** `asExit = (fn, t) => fn(1 - t)` was called with `exitMul` (already `1 - exitT`), so the
+two inversions cancelled and the entrance played FORWARDS. Measured: `out:"slide-up"` gave
+`translate(0,-60px)` at exit start and `translate(0,0)` at exit end — exactly inverted.
+**Fix:** pass `exitT`. Verified: 0 offset at the start, full offset at the end.
+**Why no gate saw it:** nothing asserts the DIRECTION of motion, only that frames are pure and boxes
+are in-bounds. An exit that animates the wrong way is perfectly deterministic and perfectly in-frame.
+
+---
+
+## 41. A blur left behind by an exit stuck to frames rendered later
+
+**What:** the hook rendered sharp in isolation and blurred in the final video.
+**Root cause:** `defocus` writes `filter`; `fade`/`rise`/`slide` do not. `Object.assign(el.style, s)`
+only writes the keys the active animation returns, so a `filter` set during an exit was never
+cleared. Frames render across 8 workers in arbitrary order, so "a later frame" is not "after":
+measured, frame 111 rendered `filter: none` alone and `blur(9.8px)` once an exit frame had run.
+`cutStyle` has always returned its FULL style set for exactly this reason; the anim registry had no
+such contract.
+**Fix:** `driveClips` now writes the resting values of the layer's own enter+exit animations before
+applying the active one. Only the layer's OWN anims contribute keys, so an authored `filter` look on
+a layer that does not animate filter is untouched.
+
+**`make probe` did not catch it, twice over.** Its signature omitted `filter` and `clipPath`, and its
+scrambler only dirtied state with frame 0 or the last frame — at both, a mid-timeline layer is
+off-window and `driveClips` returns before writing anything, so nothing got dirtied. It now records
+those properties and scrambles with `n±9` (about one exit window away), which is where the writes
+that stick actually happen. With the fix reverted: 2/25 frames now fail. Same shape as #39 — the
+blind spot was in the sampling and the field list, never in the rule.
+
+---
+
+## 42. `blur(0px)` is not free, and identity values are written every frame
+
+**What:** after the #41 fix the render started failing with `frame N: context canceled` — a per-frame
+timeout, on a scene that had just rendered fine.
+**Root cause:** the resting value is written on EVERY frame, and `defocus` returned
+`filter: blur(0.00px)` at rest. A zero-radius blur is still a filter: the compositor promotes the
+layer and rasterizes it through the filter pipeline. With ~50 image layers carrying a resting defocus
+(46 map bubbles plus a 102-avatar wall) that alone pushed frames past the timeout.
+**Fix:** `defocus` returns `filter: 'none'` at u >= 1.
+**Rule:** an animation's identity must be genuinely free, because it is the value the scene spends
+almost all of its frames at. "Visually identical" is not the same as "costs nothing".
+

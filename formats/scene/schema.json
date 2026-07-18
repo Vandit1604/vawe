@@ -553,6 +553,7 @@
             "pop",
             "scale",
             "lift",
+            "defocus",
             "slide-left",
             "slide-right",
             "slide-up",

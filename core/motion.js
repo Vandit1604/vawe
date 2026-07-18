@@ -180,6 +180,18 @@ export const lift = (t, { from = 0.68, dist = 30 } = {}) => {
   return { opacity: clamp01(u * 2.2),
     transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px) scale(${(from + (1 - from) * e).toFixed(4)})` };
 };
+// defocus — enters/leaves through focus rather than through space. Paired with `out:"defocus"` it
+// gives the blur exit that reads as "this is done" without moving anything, which is what you want
+// when the layer is a card or a face and sliding it would fight the content.
+export const defocus = (t, { max = 14 } = {}) => {
+  const u = clamp01(t);
+  // At rest this MUST be `none`, not `blur(0px)`. A zero-radius blur is still a filter, so the
+  // compositor promotes the layer and rasterizes it through the filter pipeline every frame — with
+  // ~50 image layers carrying a resting defocus that alone pushed frames past the render timeout.
+  // Identity has to be free, because the resting value is written on every frame of the scene.
+  if (u >= 1) return { opacity: 1, filter: 'none' };
+  return { opacity: u, filter: `blur(${((1 - easeOutCubic(u)) * max).toFixed(2)}px)` };
+};
 export const slide = (t, dir = 'left', dist = 60) => {
   const k = 1 - easeOutCubic(clamp01(t));
   const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist;

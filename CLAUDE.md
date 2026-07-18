@@ -47,6 +47,22 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
+## Launch-video rules (standing, asked for directly — apply to every launch film)
+
+1. **Check EVERY page, not the homepage.** `make sections` inventories one URL. Crawl the whole site
+   (routes, view modes, empty states) before storyboarding — tpot's real product turned out to be
+   `/dir` with its LIST/CARD/BUBBLE toggle, which the homepage never shows, and the payoff shot came
+   from a view no landing page links to.
+2. **Give the logo prominence.** A mark sized like a bullet next to a headline reads as punctuation.
+   It should be a deliberate element (~100px+ beside a title, 150px+ on the end card), not a marker.
+3. **Pair entrances with their exits, directionally.** A layer that enters from the right should leave
+   to the left — one continuous direction of travel per beat, never enter-and-retreat. Use
+   `anim:"slide-right"` + `out:"slide-left"`.
+4. **Blur out when moving would fight the content.** `out:"defocus"` leaves through focus instead of
+   through space. Correct for faces, cards and dense grids, where sliding 50 elements reads as chaos.
+5. **A changing word belongs in a fixed box.** If one word swaps mid-sentence, put it in a fixed-width
+   chip so nothing after it reflows — and the chip is the natural place for the brand colour.
+
 ## Reflecting a real website (capture-first — the taste is already on the page)
 
 Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. Instead:
