@@ -283,6 +283,24 @@
         "y": {
           "type": "number",
           "label": "Pan Y (px)"
+        },
+        "rx": {
+          "type": "number",
+          "label": "Camera tilt about X, degrees (perspective)",
+          "min": -45,
+          "max": 45
+        },
+        "ry": {
+          "type": "number",
+          "label": "Camera tilt about Y, degrees (perspective)",
+          "min": -45,
+          "max": 45
+        },
+        "p": {
+          "type": "number",
+          "label": "Perspective distance in px (default 1600; lower = stronger)",
+          "min": 200,
+          "max": 6000
         }
       }
     },
@@ -1001,6 +1019,10 @@
           "label": "Gain of the per-character key click (default 0.3)",
           "min": 0,
           "max": 1
+        },
+        "keyCue": {
+          "type": "string",
+          "label": "Which cue a `typing` layer clicks with (default 'press')"
         }
       }
     },

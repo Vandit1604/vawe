@@ -15,7 +15,14 @@ export function cameraAt(camKf, t) {
     if (t > camKf[i + 1].t) a = b = camKf[i + 1];
   }
   const p = a === b ? 1 : easeInOutCubic(clamp01((t - a.t) / (b.t - a.t)));
-  return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p) };
+  // rx/ry are a 3D TILT of the whole stage, and they belong to the camera rather than to a layer for a
+  // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
+  // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
+  // apart. Applied once on the camera root, every layer shares one vanishing point and the frame reads
+  // as a single plane in space — which is what "perspective on the frame" means (docs/MISTAKES.md #59).
+  return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p),
+    rx: lerp(a.rx ?? 0, b.rx ?? 0, p), ry: lerp(a.ry ?? 0, b.ry ?? 0, p),
+    persp: lerp(a.p ?? 1600, b.p ?? 1600, p) };
 }
 
 // motionAt(kfs, lt): per-layer keyframe track → {dx,dy,scale,rot,opacity}. Keyframe times are

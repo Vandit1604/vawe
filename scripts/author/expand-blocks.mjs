@@ -25,6 +25,7 @@ const d = JSON.parse(fs.readFileSync(inp, 'utf8'));
 
 const comps = d.comps || {};
 let nBlocks = 0, nComps = 0;
+const warnings = [];
 
 // offset a comp's authored-at-origin layer by the instance's x/y/start (group children flow, untouched).
 const shift = (layer, dx, dy, dt) => ({
@@ -40,6 +41,19 @@ function expand(layer, stack) {
     const f = B.BLOCKS[layer.block];
     if (!f) throw new Error(`unknown block "${layer.block}". known: ${Object.keys(B.BLOCKS).join(', ')}`);
     const { type, block, ...opts } = layer;
+    // A factory destructures the props it knows and silently ignores the rest, so a typo or a prop the
+    // block never wired through renders as nothing at all and the JSON still looks right. That is how
+    // `keyGain: 0.055` sat in this scene while the render used the default (docs/MISTAKES.md #60).
+    // The parameter names are readable off the factory source, so the mismatch is checkable.
+    // A namespaced entry ("searchEngine.home") resolves to a WRAPPER that merges the manifest props
+    // and calls the family, so introspecting it reads the wrapper's own signature. Walk to the family.
+    const famFn = layer.block.includes('.') ? B[layer.block.split('.')[0]] : f;
+    const sig = famFn && /\(\s*\{([^}]*)\}/.exec(famFn.toString());
+    if (sig) {
+      const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
+      const unknown = Object.keys(opts).filter((k) => !known.has(k));
+      if (unknown.length) warnings.push(`block "${layer.block}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')} — not a prop it accepts (known: ${[...known].join(', ')})`);
+    }
     nBlocks++;
     return f(opts).flatMap((l) => expand(l, stack)); // a block could emit comps in theory — stay recursive
   }
@@ -60,3 +74,4 @@ d.layers = (d.layers || []).flatMap((l) => expand(l, []));
 delete d.comps;
 fs.writeFileSync(out, JSON.stringify(d, null, 2));
 console.log(`expanded ${nBlocks} block + ${nComps} comp instance(s) → ${out} (${d.layers.length} total layers)`);
+for (const w of warnings) console.error(`  ⚠ ${w}`);

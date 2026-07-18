@@ -962,3 +962,51 @@ per-key variation is dynamics (±12% gain, deterministic by index) rather than a
 **Rule:** when a port sounds wrong, diff it against the original before concluding the technique is
 wrong. A hand-copied table is the thing most likely to be lying — the same failure as the schema
 advertising an anim that never existed (#21).
+
+---
+
+## 59. Perspective is a camera property, not a layer property
+
+**What:** "perspective effects on the frames" looks at first like a per-layer tilt.
+**Root cause it would have hit:** CSS `perspective()` takes its vanishing point from the element it is
+applied to. Tilt the browser-frame layer and the search content, which are siblings, and each rotates
+about its OWN centre — the window leans one way, the text inside leans another, and the composition
+comes apart. There is no per-layer angle that composes correctly.
+**Fix:** rx/ry/p are CAMERA keyframes. Applied once on the camera root, every layer shares one
+vanishing point and the frame reads as a single plane in space. Emitted only when a tilt is actually
+non-zero, because a `perspective()` function with no rotation still promotes the subtree into a 3D
+rendering context and changes rasterisation — scenes that never tilt stay byte-identical (snap agrees).
+**Rule:** when an effect has to apply to several elements *as one thing*, it belongs to the thing that
+already contains them.
+
+---
+
+## 60. A block silently swallowed the prop that carried its sound
+
+**What:** `keyGain: 0.055` was set on the searchEngine block and the render stayed at the 0.13 default.
+Measured twice before it was noticed, because the JSON looked correct.
+**Root cause:** a factory destructures the props it knows and ignores the rest. `keyGain` was never a
+parameter, so it evaporated at the call site. Same class as #19/#28: input accepted, then dropped.
+**Fix:** the block forwards keyCue/keyGain onto the typing layer, AND `make expand` now warns when a
+block layer carries a prop its factory does not accept — the parameter names are readable off the
+factory source, so the mismatch is checkable rather than a matter of remembering.
+**Gotcha:** a namespaced entry ("searchEngine.home") resolves to a wrapper that merges manifest props
+and calls the family, so introspecting the wrapper reads the wrong signature. The check walks to the
+family factory first.
+**Rule:** the third time a silent-ignore has cost a debugging round this session. Every place the
+engine accepts a bag of options is a place it can swallow one.
+
+---
+
+## 61. Auto-derived cues had no volume dial
+
+**What:** with keystrokes softened to 0.055, the transition cues were ~11x louder and the mix was
+still not "soft".
+**Root cause:** the Go mixer keeps a per-cue gain table and defaults anything absent to 0.6. The cues
+auto sound-design derives from cuts and stings carry no gain of their own, so they always landed at
+that default. An author could trim the cues they placed BY HAND and had no way to touch the derived
+ones — the loudest sounds in the film were the ones the JSON never mentions.
+**Fix:** `audio.sfxGain` scales every effect cue, derived ones included. Also removed the table's
+entries for `correct`/`wrong`/`beep`/`beep3`, which cannot be emitted since the library became
+Cuelume-only — dead config that reads as intent.
+**Rule:** anything the engine generates on your behalf needs a dial, or the generated thing wins.

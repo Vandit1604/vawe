@@ -17,7 +17,10 @@ const (
 	micro     = 0.3 // micro-silence before each sting (seconds)
 )
 
-var sfxGain = map[string]float64{"tick": 0.45, "whoosh": 0.45, "reveal": 0.82, "correct": 0.7, "wrong": 0.6, "beep": 0.5, "beep3": 0.58}
+// Per-cue trim, so cues of different natures sit together at their authored gain. Anything absent
+// defaults to 0.6. `correct`/`wrong`/`beep`/`beep3` were dropped when the library became Cuelume-only;
+// entries for cues that cannot be emitted are dead config, so they are gone too.
+var sfxGain = map[string]float64{"tick": 0.45, "whoosh": 0.45, "reveal": 0.82}
 
 // Cue is one placed sound effect.
 type Cue struct {
@@ -32,6 +35,10 @@ type Config struct {
 	Sting     string   `json:"sting"`
 	VO        string   `json:"vo"`
 	MusicGain *float64 `json:"musicGain,omitempty"`
+	// SfxGain scales EVERY effect cue, including the ones auto sound-design derives from cuts and
+	// stings. Without it a scene could only trim the cues it placed by hand: the derived ones fell back
+	// to the table above and drowned quiet authored cues (keystrokes at 0.055 under cuts at 0.6).
+	SfxGain *float64 `json:"sfxGain,omitempty"`
 	// Silent renders the video with no audio track at all — skips the default
 	// music.wav/sting.wav auto-discovery. Use for motion-graphics overlays.
 	Silent bool `json:"silent,omitempty"`
@@ -147,6 +154,9 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 		}
 		if cue.Gain != nil {
 			g = *cue.Gain
+		}
+		if cfg.SfxGain != nil {
+			g *= *cfg.SfxGain
 		}
 		start := int(math.Round(cue.T * sr))
 		for i := 0; i < len(clip) && start+i >= 0 && start+i < total; i++ {

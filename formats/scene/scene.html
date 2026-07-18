@@ -321,7 +321,12 @@
           } else { capEl.style.opacity = '0'; capEl.__key = null; }
           // global camera
           const c = cameraAt(camKf, t);
-          const camTf = c ? `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
+          // perspective() must lead the transform list, and is emitted ONLY when a tilt is actually
+          // asked for — a perspective function with no rotation still promotes the layer into a 3D
+          // rendering context and changes rasterisation, so scenes that never tilt stay byte-identical.
+          const tilt = c && (Math.abs(c.rx) > 0.001 || Math.abs(c.ry) > 0.001)
+            ? `perspective(${c.persp.toFixed(0)}px) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg) ` : '';
+          const camTf = c ? `${tilt}scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
           // SCENE CUTS. `cuts` declares a transition between beats and, until now, rendered nothing:
           // cutStyle() was only ever wired to the layer-level `L.cut`, so the whole cut vocabulary was
           // inert in every scene that used the top-level array (MISTAKES #29). A scene cut treats the
@@ -397,12 +402,12 @@
             for (let i = 0; i < full.length; i++) {
               const kt = st + (i + 1) / cps;
               if (kt >= end) break;                       // never sound a character the window never reveals
-              // Cuelume's `press` IS the key-press cue — that is what it is for, so keystrokes use it
-              // rather than a voicing invented next to the library. Variation comes from DYNAMICS, not
-              // from a different sound: a real keyboard varies in force, not in identity. Deterministic
-              // by character index so the same copy always sounds the same.
+              // Cuelume's `press` IS the key-press cue, so that is the default — but which cue and how
+              // loud is a TASTE decision, so it is authorable (`keyCue`, `keyGain`) rather than welded
+              // into the engine. Variation is DYNAMICS, not a second sound: a keyboard varies in force,
+              // not identity. Deterministic by index, so the same copy always sounds the same.
               const vary = 1 + ((i * 7919) % 5 - 2) * 0.06;   // +/-12%, pure function of the index
-              keyCues.push({ t: +kt.toFixed(3), name: 'press',
+              keyCues.push({ t: +kt.toFixed(3), name: L.keyCue || 'press',
                 gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
             }
           }

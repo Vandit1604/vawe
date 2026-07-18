@@ -932,7 +932,7 @@ const SEARCH_LINK = 'color-mix(in srgb, var(--accent) 82%, var(--text))';
 export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   brand = 'Search', word = null, logo = null, logoW = 272, logoH = 92,
   query = '', results = [], markAlign = 'center',
-  cps = 11, clickIndex = 0, cursorStart, start = 0, dur = 5 } = {}) {
+  cps = 11, keyCue, keyGain, clickIndex = 0, cursorStart, start = 0, dur = 5 } = {}) {
   const out = [];
   const BAR_H = 60, PAD = 22, ICON = 24;
 
@@ -981,8 +981,12 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
     out.push(...bar(x, barY, w, r2(start + 0.35), r2(dur - 0.35), 26));
     // the query types INTO the bar, clear of the magnifier. `typing` is chars/sec and the engine
     // derives one key click per revealed character from (start, cps, text).
+    // keyCue/keyGain are the SOUND of this block, so they must reach the typing layer the engine
+    // derives key clicks from. They were accepted at the call site and dropped here, which is the
+    // silent-substitution class again: the JSON said 0.055 and the render stayed at the default.
     out.push(text({ text: query, x: TEXT_X(x), y: barY + 16, w: TEXT_W(w), size: 26, color: T.ink,
-      typing: cps, start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
+      typing: cps, ...(keyCue ? { keyCue } : {}), ...(keyGain != null ? { keyGain } : {}),
+      start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
     return out;
   }
 
