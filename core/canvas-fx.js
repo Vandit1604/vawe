@@ -83,6 +83,85 @@ export const CANVAS_FX = {
       }
     }
   },
+  // stipple: seeded dots on paper, denser where the source is dark (deterministic via hash01)
+  stipple(srcCtx, dstCtx, W, H, o, seed) {
+    const cell = Math.max(3, Math.round(o.cell ?? 5));
+    dstCtx.fillStyle = o.paper || '#ffffff'; dstCtx.fillRect(0, 0, W, H);
+    dstCtx.fillStyle = o.ink || '#141414';
+    const { data } = srcCtx.getImageData(0, 0, W, H);
+    for (let y = 0; y < H; y += cell) {
+      for (let x = 0; x < W; x += cell) {
+        const [r, g, b] = cellAverage(data, W, x, y, cell, cell, H);
+        const dark = 1 - luma(r, g, b) / 255;
+        // more darkness → higher chance a dot lands; jitter its position deterministically
+        if (hash01(x, y, seed) < dark) {
+          const jx = x + hash01(x + 1, y, seed) * cell, jy = y + hash01(x, y + 1, seed) * cell;
+          dstCtx.beginPath(); dstCtx.arc(jx, jy, 0.5 + dark * (cell * 0.18), 0, 6.2831853); dstCtx.fill();
+        }
+      }
+    }
+  },
+  // ascii: one glyph per cell chosen by darkness from a ramp (light→dark), monospaced ink on paper
+  ascii(srcCtx, dstCtx, W, H, o) {
+    const cell = Math.max(6, Math.round(o.cell ?? 10));
+    const ramp = o.ramp || ' .:-=+*#%@';
+    dstCtx.fillStyle = o.paper || '#0b0b0b'; dstCtx.fillRect(0, 0, W, H);
+    dstCtx.fillStyle = o.ink || '#d8ffd0';
+    dstCtx.font = `${cell}px monospace`; dstCtx.textBaseline = 'top';
+    const { data } = srcCtx.getImageData(0, 0, W, H);
+    for (let y = 0; y < H; y += cell) {
+      for (let x = 0; x < W; x += cell) {
+        const [r, g, b] = cellAverage(data, W, x, y, cell, cell, H);
+        const dark = 1 - luma(r, g, b) / 255;
+        const ch = ramp[Math.min(ramp.length - 1, Math.floor(dark * ramp.length))];
+        if (ch !== ' ') dstCtx.fillText(ch, x, y);
+      }
+    }
+  },
+  // edgeDetect: Sobel magnitude → bright edges on a dark ground (feeds blueprint/sketch looks)
+  edgeDetect(srcCtx, dstCtx, W, H, o) {
+    const { data } = srcCtx.getImageData(0, 0, W, H);
+    const g = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) g[i] = luma(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]);
+    const out = dstCtx.createImageData(W, H);
+    const line = o.line || [220, 235, 255], bg = o.bg || [8, 12, 24];
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const gx = (x > 0 && x < W - 1 && y > 0 && y < H - 1);
+        let mag = 0;
+        if (gx) {
+          const p = (xx, yy) => g[yy * W + xx];
+          const sx = -p(x - 1, y - 1) - 2 * p(x - 1, y) - p(x - 1, y + 1) + p(x + 1, y - 1) + 2 * p(x + 1, y) + p(x + 1, y + 1);
+          const sy = -p(x - 1, y - 1) - 2 * p(x, y - 1) - p(x + 1, y - 1) + p(x - 1, y + 1) + 2 * p(x, y + 1) + p(x + 1, y + 1);
+          mag = Math.min(1, Math.sqrt(sx * sx + sy * sy) / (o.thresh ? o.thresh * 255 : 255));
+        }
+        const i = (y * W + x) * 4;
+        out.data[i] = bg[0] + (line[0] - bg[0]) * mag;
+        out.data[i + 1] = bg[1] + (line[1] - bg[1]) * mag;
+        out.data[i + 2] = bg[2] + (line[2] - bg[2]) * mag;
+        out.data[i + 3] = 255;
+      }
+    }
+    dstCtx.putImageData(out, 0, 0);
+  },
+  // crosshatch: diagonal strokes whose density steps with darkness (pencil/engraving)
+  crosshatch(srcCtx, dstCtx, W, H, o) {
+    const cell = Math.max(4, Math.round(o.cell ?? 6));
+    dstCtx.fillStyle = o.paper || '#f4f1e8'; dstCtx.fillRect(0, 0, W, H);
+    dstCtx.strokeStyle = o.ink || '#20242c'; dstCtx.lineWidth = 1;
+    const { data } = srcCtx.getImageData(0, 0, W, H);
+    for (let y = 0; y < H; y += cell) {
+      for (let x = 0; x < W; x += cell) {
+        const [r, g, b] = cellAverage(data, W, x, y, cell, cell, H);
+        const dark = 1 - luma(r, g, b) / 255;
+        dstCtx.beginPath();
+        if (dark > 0.2) { dstCtx.moveTo(x, y + cell); dstCtx.lineTo(x + cell, y); }        // first hatch
+        if (dark > 0.5) { dstCtx.moveTo(x, y); dstCtx.lineTo(x + cell, y + cell); }         // cross at mid-dark
+        if (dark > 0.75) { dstCtx.moveTo(x + cell / 2, y); dstCtx.lineTo(x + cell / 2, y + cell); } // vertical when darkest
+        dstCtx.stroke();
+      }
+    }
+  },
 };
 
 // bakeCanvasFx(img, spec) → PNG data-URL, or null. spec is a name string or { fx, cell, ink, paper, seed }.
