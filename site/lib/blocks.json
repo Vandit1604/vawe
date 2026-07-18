@@ -82,7 +82,7 @@
     "props": {
       "w": 540,
       "h": 300,
-      "url": "stripe.com"
+      "url": "example.com"
     }
   },
   {
@@ -195,7 +195,7 @@
     "props": {
       "w": 440,
       "title": "Render complete",
-      "body": "out.mp4 · 65s · 1950 frames",
+      "body": "out.mp4 is ready",
       "accent": "var(--up)"
     }
   },
@@ -863,22 +863,22 @@
       "w": 560,
       "logos": [
         {
-          "text": "Stripe"
+          "text": "Northwind"
         },
         {
-          "text": "Linear"
+          "text": "Meridian"
         },
         {
-          "text": "Vercel"
+          "text": "Kite Studio"
         },
         {
-          "text": "Notion"
+          "text": "Fieldwork"
         },
         {
-          "text": "Figma"
+          "text": "Atlas Type"
         },
         {
-          "text": "Raycast"
+          "text": "Orbit Labs"
         }
       ]
     }
@@ -985,7 +985,7 @@
       "command": "npm i vawe",
       "output": [
         "added 1 package",
-        "done in 1.2s"
+        "added 1 package"
       ]
     }
   },
@@ -1549,16 +1549,16 @@
       "cols": 2,
       "logos": [
         {
-          "text": "Stripe"
+          "text": "Northwind"
         },
         {
-          "text": "Linear"
+          "text": "Meridian"
         },
         {
-          "text": "Vercel"
+          "text": "Kite Studio"
         },
         {
-          "text": "Figma"
+          "text": "Atlas Type"
         }
       ]
     }
@@ -1633,7 +1633,7 @@
       "command": "make video D=launch.json",
       "output": [
         "▶ scene : capturing across 8 workers...",
-        "✓ done → out.mp4  (65s, 1950 frames)"
+        "✓ done → out.mp4"
       ]
     }
   },

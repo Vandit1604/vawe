@@ -144,7 +144,21 @@ export function createKit(ctx) {
     // stays in formation). Group children previously all shared the root's exact window, which is why
     // a wall could only ever arrive as one block. Defaults to 0 → existing groups are unchanged.
     const d = Math.max(0, +C.delay || 0);
-    extra.push({ L: { ...C, start: (rootL.start ?? 0) + d, duration: Math.max(0, (rootL.duration ?? 0) - d) }, el: c, units: C.split ? splitText(c, C.split) : null });
+    const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
+    // driveClips owns every timed element and it finds them by `[data-start]` (core/clips.js). A group
+    // child never had those attributes, so its ENTRANCE came from the group's window no matter what the
+    // child declared: `delay` shifted a start that only the cut/motion/units paths read, and the child
+    // still faded in with its siblings. 69 authored uses, every one inert — including the one this prop
+    // was added for, which was signed off from a settled frame where the stagger was already over
+    // (MISTAKES #69). Writing the dataset hands the child to the same driver as a top-level layer, so
+    // delay/anim/out/enterDur/exitDur mean here exactly what they mean out there.
+    c.dataset.start = String(cStart);
+    c.dataset.duration = String(cDur);
+    if (C.anim) c.dataset.anim = C.anim;
+    if (C.out) c.dataset.out = C.out;
+    if (C.enterDur != null) c.dataset.enter = String(C.enterDur);
+    if (C.exitDur != null) c.dataset.exitDur = String(C.exitDur);
+    extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
   return { ...ctx, hexA, styleText, chipBox, applyFade, layoutGroup, sizeChild, addGroupChild };

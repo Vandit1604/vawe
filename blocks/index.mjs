@@ -243,18 +243,20 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 // ─────────────────────────────────────────────────────────────────────────────
 // stripeCard — a recognizably-"Stripe" payments card: amount + mini bar chart + blurple Pay button.
 // Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
-export function stripeCard({ x, y, w = 380, start = 0, dur = 4 } = {}) {
+// `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
+// baked, so every video that used this block published the same invented number (MISTAKES #67).
+export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
   const bars = [38, 52, 44, 66, 58, 80, 72];
   return [{
     type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 18, pad: 26,
     bg: T.card, radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
       text({ text: 'Net volume', size: 18, color: T.stripeGrey, font: 'mono' }),
-      text({ text: '$3,528.19', size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
+      text({ text: (amount || ''), size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
       { type: 'group', layout: 'row', items: 'flex-end', gap: 8, h: 70, children:
         bars.map((b) => box({ w: 26, h: b, radius: 4, bg: T.blurple })) },
       { type: 'group', bg: T.blurple, radius: 6, pad: '14px 0', layout: 'row', justify: 'center',
-        children: [text({ text: 'Pay $3,528.19', size: 18, weight: 600, color: '#fff' })] },
+        children: [text({ text: (amount ? `Pay ${amount}` : 'Pay'), size: 18, weight: 600, color: '#fff' })] },
     ],
   }];
 }
@@ -289,7 +291,8 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
 }
 
 // notification — a toast card (icon + title + body). Good for "it just happened" beats.
-export function notification({ x, y, w = 460, title, body, accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  title = title ?? message; body = body ?? desc;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, pad: 20,
     bg: T.card, radius: 14, border: HAIR, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3, children: [
       box({ w: 12, h: 12, radius: 100, bg: accent }),
@@ -310,7 +313,8 @@ export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) 
 }
 
 // callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
-export function callout({ x, y, w = 720, text: msg, tone = 'info', start = 0, dur = 4 } = {}) {
+export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone = 'info', start = 0, dur = 4 } = {}) {
+  msg = msg ?? body ?? title;
   const ac = { info: T.accent, success: T.green, warn: '#F6A417' }[tone] || TOKENS.blurple;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
     bg: T.surface, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
@@ -390,7 +394,9 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
 }
 
 // pricingCard — plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
-export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '$29', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
+// `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
+// set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
+export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 28,
     bg: T.card, radius: 16, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? 2 : 1,
     start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
@@ -612,7 +618,12 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
 }
 
 // toast — a dark snackbar: status dot · message · action link. (notification is the light card variant.)
-export function toast({ x, y, w = 420, message = '', action = '', icon = '✓', accent = TOKENS.green, start = 0, dur = 4 } = {}) {
+// The alert family (notification · toast · callout · banner) now shares ONE vocabulary: `title` and
+// `body`. Each block had invented its own words for the same two slots, so an author relearned the
+// block every time. Old names stay as aliases — a shared vocabulary is worth nothing if adopting it
+// breaks every caller (MISTAKES #67).
+export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green, start = 0, dur = 4 } = {}) {
+  message = title ?? message;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 20px',
     bg: '#0A0A0A', radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
@@ -760,7 +771,8 @@ export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '
 }
 
 // banner — a full-width accent announcement bar: icon · message · CTA.
-export function banner({ x, y, w = 720, text: msg = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+  msg = msg || body || title;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 22px',
     bg: accent, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       text({ text: icon, size: 20, color: '#fff' }), text({ text: msg, size: 20, weight: 600, color: '#fff', grow: 1 }),

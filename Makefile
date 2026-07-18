@@ -37,6 +37,11 @@ beatmap:
 spectrum:
 	node scripts/media/spectrum.mjs $(MUSIC) $(if $(FPS),--fps $(FPS))
 
+# make blocks-audit — do the block FACTORIES obey the copy rules the videos are held to? A block
+# ships to every caller, so an invented number or a brand default in one reaches every video.
+blocks-audit:
+	node scripts/gates/blocks-audit.mjs
+
 sfx-check:
 	node scripts/gates/sfx-audit.mjs
 

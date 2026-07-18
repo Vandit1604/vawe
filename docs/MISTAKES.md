@@ -1084,3 +1084,56 @@ bands, which is meaningless by construction. Writing the test is what surfaced t
 missing the number the test needed.
 **Rule:** when a normalisation makes two different situations look identical, publish the number it
 normalised away.
+
+---
+
+## 67. Block factories were exempt from the rules the videos obey
+
+**What:** `deploySuccess` baked in "Ready in 1.2s" and `browserFrame` defaulted `url` to a real
+company's domain. Both shipped to every caller. Found by a human storyboarding a film, not by a gate.
+**Root cause:** the copy rules ("never invent numbers", "ship the shape, never a brand lockup") were
+enforced on scene JSON by `make validate`, and on nothing else. A block is authored content that
+reaches every video that uses it, so it needed the same treatment and never got it.
+**Fix:** `make blocks-audit` — invented figures, brand defaults, superlatives, dead props, and
+prop-surface divergence across a family. Pinned in gate-test in both directions.
+**Also fixed while the gate was being written:** `stripeCard` baked its amount, `pricingCard`
+defaulted `price` to a figure, and the alert family (notification/toast/callout/banner) named the same
+two slots four different ways — now one vocabulary with the old names as aliases, because a shared
+vocabulary is worth nothing if adopting it breaks every caller.
+**Rule:** a rule enforced on one artefact and not on the artefact that generates it is half a rule.
+
+---
+
+## 68. The gate audited the factories and missed the manifest
+
+**What:** `make blocks-audit` reported "✓ no factory ships a claim or a brand" while `catalog.mjs`
+shipped `url: 'stripe.com'` and `'done in 1.2s'` — the exact two defects the gate had just been
+written to catch, one file over.
+**Root cause:** the gate read `blocks/index.mjs`. But a namespaced catalog entry supplies its own
+props, so **the manifest is a second, independent source of defaults**, and it is what lands in
+`docs/BLOCKS.md` and the site thumbnails. Removing a brand from a factory while the manifest puts it
+back is not a fix.
+**Fix:** the gate walks every string in every catalog row's `props`, with a reasoned exemption list
+(`FIGURE_IS_THE_POINT`) so a price on a pricing card is a specimen and a render time in a terminal is
+a claim. It then found five real defects, including a logo wall of six real company marks.
+**Rule:** the seventh time this session. The rule was right; the thing it measured was a proxy for it.
+Ask what the artefact IS, then check that — not the file you happened to open first.
+
+---
+
+## 69. `delay` never delayed anything, and I signed it off from a settled frame
+
+**What:** the per-child `delay` prop added for tpot's CTA ring was completely inert. Measured: the
+first six ring avatars sat at opacity `1,1,1,1,1,1` on every frame of the entrance.
+**Root cause:** `driveClips` owns every timed element and finds them by `[data-start]`
+(`core/clips.js:44`). `addGroupChild` never wrote those attributes, so a group child's entrance always
+came from its PARENT's window. `delay` shifted a `start` that only the cut/motion/split paths read.
+69 authored uses across shipped scenes, every one non-functional — and the same call-site gap silently
+dropped `anim`, `out`, `enterDur`, `exitDur` and `track` on children too.
+**How it shipped:** I wrote the prop, wrote a comment stating it staggers, described the ring as
+"blooming outward from the logo" in a report, and verified it by looking at a frame near the END of
+the beat — where the stagger, had it existed, was already over. The check could not have failed.
+**Fix:** `addGroupChild` writes the child's timing dataset, handing it to the same driver as a
+top-level layer. Measured after: `0.80 · 0.74 · 0.67 · 0.58 · 0.48 · 0.36`.
+**Rule:** verify a TRANSITION at a frame where it is mid-flight. A settled frame proves the end state
+and says nothing about how it got there — which is the entire content of the feature.
