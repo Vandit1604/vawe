@@ -273,6 +273,53 @@ determinism problem once the analysis moved out of the frame. See `core/spectrum
   sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel
   entry over a `clip`, i.e. content, not a determinism problem.
 
+## What a showcase actually found (App Showcase, 2026-07-19)
+
+The instruction in the next section — build the showcases last and let them dictate the backlog — was
+tested by storyboarding an **App Showcase** against all 125 catalog blocks without writing the film.
+It surfaced 17 gaps. Three were defects and are FIXED; the other fourteen are the backlog, recorded
+here rather than left in a transcript.
+
+**Fixed:** `phoneFrame`/`browserFrame` had no content slot (`children` now, plus a phone status row);
+`browserFrame` defaulted `url` to a real company's domain; `deploySuccess` baked in the invented
+statistic "Ready in 1.2s" (now `title`/`note`/`steps` props, `note` defaulting to nothing).
+
+**The structural one — fix this before more effects.** `nowPlaying` is the ONLY app-content block in
+the catalog. Everything else is dev-tooling (terminal, fileTree, diff, kanban, logLines, commitRow) or
+marketing chrome. A product-demo storyboard could only depict a *music app*, because that is the one
+app the vocabulary can describe. Wanted: a generic **feed row**, **list item**, **settings row**,
+**profile header**, **onboarding card**, **empty state**. Six small factories buy more than any
+transition on this page.
+
+**Containers and composition**
+- No **split-screen / picture-in-picture** primitive. Every "split" archetype is hand-chosen x
+  coordinates, so the layout discipline lives in the author's head and in arithmetic.
+- `comparison.beforeAfter` takes two columns of STRINGS. It cannot hold two screens, so a
+  before/after beat — the most standard product-demo shape there is — cannot be built.
+
+**State that cannot move**
+- `tabBar` takes a static `active` index. No `activeFrom`/`activeTo`, so a tab switch cannot animate,
+  and tab bars are icon-over-label in every real app while this one is text-only.
+- `stepFlow` has the same frozen `active`. A build sequence can only show its finished state.
+- No **app-scroll or screen-transition** block at all. Nothing moves from screen A to screen B inside
+  a device frame, which is the single most common motion in a product demo.
+
+**Interaction**
+- The `cursor` LAYER exists but the only block that emits one is `searchEngine.results`, with a
+  hardcoded two-point path. There is no standalone `cursor`/`tap` block, so any other click must be
+  hand-timed against a magic offset.
+- No **mobile keyboard**. `searchEngine.home` is a desktop shape, so a phone-shaped field with a
+  rising keyboard is unbuildable.
+- `card`'s `cta` renders an arrow chip with no press state, so a CTA beat has nothing to depress.
+
+**Proof surfaces**
+- No **app-store / install** block: no rating row (stars + count), no install button. `followCard` is
+  the nearest shape.
+- `avatarStack` is bare circles and a `+N` with no caption slot, so it proves nothing without a
+  hand-placed text layer beside it. Wanted: a `socialProof` block that owns both.
+- `toast`/`notification` cannot stack or expire, and the icon prop exists on one and not the other.
+- `loadingBar`/`progressRing` assume card-scale width and do not read inside a device screen.
+
 ## The Showcases
 
 **App Showcase**, **Apple Money Count**, **Blue Sweater Intro**, **North Korea Locked Down**,
