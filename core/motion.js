@@ -171,6 +171,15 @@ export function track(n, fps, beats) {
 export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${(1 - easeOutSettle(clamp01(t))) * dist}px)` });
 export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
 export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
+// lift — the entrance for things that should feel ALIVE arriving (faces, cards, chips) rather than
+// merely appearing. `pop` scales from 0.86, a 14% change that reads as flat at avatar size; this
+// travels further (0.68), rises as it grows, and settles with a small overshoot, so a staggered row
+// reads as a wave rather than a checklist. Pure in t like every other entrance.
+export const lift = (t, { from = 0.68, dist = 30 } = {}) => {
+  const u = clamp01(t), e = easeOutBack(u);
+  return { opacity: clamp01(u * 2.2),
+    transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px) scale(${(from + (1 - from) * e).toFixed(4)})` };
+};
 export const slide = (t, dir = 'left', dist = 60) => {
   const k = 1 - easeOutCubic(clamp01(t));
   const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist;

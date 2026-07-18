@@ -13,6 +13,17 @@ fonts:
 audio:
 	node scripts/media/audio-bake.mjs
 
+# make music GENRE=ambient N=0 NAME=launch  — fetch a real soundtrack (Mixkit free stock music) into
+# the gitignored assets/music/ and record its provenance in credits.json. The MUSIC licence differs
+# from the sfx one and is not machine-readable — confirm before commercial release.
+music:
+	node scripts/media/music.mjs $(if $(ID),--id $(ID)) $(GENRE) $(N) $(NAME)
+
+# make beatmap MUSIC=assets/music/launch.wav  — detect tempo + beat grid -> <name>.beats.json, so an
+# edit can be built ON the music. Reports confidence; an ambient pad has no beat and it says so.
+beatmap:
+	node scripts/media/beatmap.mjs $(MUSIC)
+
 # make sfx  — download the curated sound-effects library (Mixkit Free License) into the gitignored
 # assets/sfx/. The mixer auto-places cuts→whoosh / stings→reveal; drop these in for scored video.
 sfx:

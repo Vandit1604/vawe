@@ -441,3 +441,47 @@ Two rules came out of that, both now enforced in the harness:
    anim, `up` for preset. Naming them stops one guaranteed false finding per category, forever.
 An allowlist entry must carry a REASON, never a bare name, or it becomes the place bugs hide.
 
+---
+
+## 30. Synthesized cues sounded like buzzing; music now comes from real recordings
+
+**What:** the ported Cuelume voicings (#27) were correct DSP and unpleasant audio — thin sine/noise
+blips that read as buzzing under picture.
+**Fix:** deleted the generated cues, restored the recorded Mixkit sfx library, and added
+`make music` to fetch a real soundtrack. Synthesis is still the right tool for a deterministic
+*test* tone; it was the wrong tool for something a person listens to.
+**Licensing:** `assets/music/` is gitignored, so the repo never REDISTRIBUTES a track — the main
+licence risk. Provenance (id, source, licence URL) is recorded in `assets/music/credits.json`, and
+the fetcher prints that the Mixkit **music** licence is separate from the sfx one and could NOT be
+read programmatically (it renders client-side). Confirm before publishing commercially.
+
+---
+
+## 31. A hand-typed enum in the schema rejected a valid new value within minutes
+
+**What:** adding the `lift` entrance to `core/clips.js` made `make validate` reject every layer using
+it — the schema's anim enum was a hand-typed copy of the registry.
+**Root cause:** the same copy that once advertised `slideL`, an anim that never existed (#21). A copy
+drifts in BOTH directions: it can name something that does not exist, and it can miss something that
+does.
+**Fix:** `make schema-check` now asserts the schema's anim enum EQUALS `ANIM_NAMES` from
+`core/clips.js`, and fails loudly with both sets printed when they diverge.
+**Rule:** if a gate or a schema restates a list the code owns, it will eventually certify a lie.
+Derive it, or assert equality with the source.
+
+---
+
+## 32. Beat matching: build the edit ON the music, do not drag cuts onto it
+
+**What:** snapping existing cut times to the nearest beat did nothing useful — at 77 BPM the bars are
+3.11s apart, so the nearest beat was often half a second away from the intended edit point.
+**The fix that worked:** derive the beat boundaries FROM the grid instead. Every beat in the tpot film
+is now an exact beat index of `assets/music/launch.wav`, so the structure is musical by construction
+rather than nudged toward musical.
+**Guard kept anyway:** `snapToBeat` refuses to move a cut further than `maxShift` (0.12s default).
+Silently dragging an edit a third of a second to hit a beat destroys the timing the author wrote —
+a beat-matched video that ignores intent is not better, just differently wrong.
+**Honesty:** `estimateTempo` returns a `confidence`, and an ambient pad scores ~1.35 against ~7.4 for
+a track with a real pulse. The detector says "WEAK — do not snap to this" rather than inventing a
+grid. Verified against a synthetic 120 BPM click track in `make lib-test`.
+

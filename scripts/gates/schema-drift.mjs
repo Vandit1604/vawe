@@ -5,6 +5,7 @@
 //
 //   node scripts/schema-drift.mjs      (make schema-check) — exits 1 on drift
 import fs from 'node:fs';
+import { ANIM_NAMES } from '../../core/clips.js';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -40,3 +41,24 @@ if (missing.length) {
   process.exit(1);
 }
 console.log(`✓ schema in sync — all ${engineProps.size} engine props are defined in schema.json`);
+
+// The anim enum is a COPY of core/clips.js's registry, and a copy drifts: the schema once advertised
+// "slideL", an anim that never existed and so silently resolved to fade (MISTAKES #21), and adding
+// `lift` to the registry instantly made the schema reject a valid value. Assert they are the same set
+// so the copy can never be wrong in either direction.
+{
+  const schema = JSON.parse(fs.readFileSync(new URL('../../formats/scene/schema.json', import.meta.url), 'utf8'));
+  let declared = null;
+  const walk = (o) => { if (!o || typeof o !== 'object' || declared) return;
+    if (o.label && String(o.label).startsWith('Enter anim') && Array.isArray(o.enum)) { declared = o.enum; return; }
+    for (const k in o) walk(o[k]); };
+  walk(schema);
+  const want = [...ANIM_NAMES, 'none'].sort().join(',');
+  const got = (declared || []).slice().sort().join(',');
+  if (got !== want) {
+    console.error(`\u2717 anim enum DRIFT\n    schema: ${got}\n    engine: ${want}`);
+    process.exit(1);
+  }
+  console.log(`\u2713 anim enum in sync with core/clips.js (${ANIM_NAMES.length} names)`);
+}
+

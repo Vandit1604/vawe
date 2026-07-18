@@ -20,6 +20,8 @@ import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName } from '../../cor
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
+import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
+import { lift } from '../../core/motion.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -544,6 +546,38 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('audio: music bed is deterministic', (() => { const x = musicBed({ loop: 2 }), y = musicBed({ loop: 2 }); return x.every((v, i) => v === y[i]); })());
   ok('audio: biquad bandpass rejects DC', (() => { const f = biquad('bandpass', 2000, 1.5); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return Math.abs(last) < 0.05; })());
   ok('audio: biquad lowpass passes DC', (() => { const f = biquad('lowpass', 8000, 0.707); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return last > 0.8; })());
+}
+
+// ---- beat detection (core/beats.js) — the grid a beat-matched edit is built on ----
+{
+  const SR = 44100;
+  // synthetic 120 BPM click track: a beat every 0.5s. If the detector cannot find THIS, it cannot
+  // find a real one, and a wrong grid puts every cut between the beats instead of on them.
+  const dur = 12, click = new Float32Array(SR * dur);
+  for (let b = 0; b * 0.5 < dur; b++) {
+    const o = Math.round(b * 0.5 * SR);
+    for (let i = 0; i < 900 && o + i < click.length; i++) click[o + i] = Math.sin(i * 0.35) * Math.exp(-i / 220);
+  }
+  const { env, hopSeconds } = onsetEnvelope(click, SR);
+  const { bpm, periodFrames, confidence } = estimateTempo(env, hopSeconds);
+  ok('beats: detects 120 BPM on a synthetic click track', Math.abs(bpm - 120) < 4);
+  ok('beats: reports high confidence on a clear pulse', confidence > 3);
+  const phase = estimatePhase(env, periodFrames);
+  const grid = beatGrid(periodFrames, phase, hopSeconds, dur);
+  ok('beats: grid spacing matches the tempo', grid.length > 20 && Math.abs((grid[5] - grid[4]) - 0.5) < 0.03);
+  ok('beats: grid phase lands on the clicks', Math.abs(grid[4] - Math.round(grid[4] / 0.5) * 0.5) < 0.06);
+  // silence has no pulse — the detector must say so rather than invent a grid to snap cuts to
+  const { env: envQ, hopSeconds: hq } = onsetEnvelope(new Float32Array(SR * 4), SR);
+  ok('beats: silence yields no confident tempo', estimateTempo(envQ, hq).confidence < 1.6);
+  // snapping must respect the author's intent
+  const bts = [0, 0.5, 1, 1.5, 2];
+  ok('beats: snapToBeat pulls a near miss onto the beat', snapToBeat(1.04, bts, 0.12) === 1);
+  ok('beats: snapToBeat REFUSES to drag a far cut', snapToBeat(1.28, bts, 0.12) === 1.28);
+  ok('beats: snapToBeat is a no-op with no grid', snapToBeat(3.3, [], 0.12) === 3.3);
+  ok('beats: downbeats take every 4th beat', downbeats([0, 1, 2, 3, 4, 5, 6, 7, 8], 4).join() === '0,4,8');
+  // the `lift` entrance must actually travel — pop only scaled 14%, which read as flat
+  ok('motion: lift travels further than pop at t=0', parseFloat(String(lift(0).transform).match(/scale\(([\d.]+)/)[1]) < 0.75);
+  ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
