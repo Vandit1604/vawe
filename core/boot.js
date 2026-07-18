@@ -215,6 +215,7 @@ export async function boot(build) {
       const FACES = [
         '400 100px Inter', '600 100px Inter', '700 100px Inter', '800 100px Inter',
         "500 100px 'Space Grotesk'", "700 100px 'Space Grotesk'",
+        "400 100px 'Anybody'", "500 100px 'Anybody'", "600 100px 'Anybody'", "700 100px 'Anybody'", "800 100px 'Anybody'",
         "400 100px 'Instrument Serif'", "italic 400 100px 'Instrument Serif'",
         "400 100px 'Geist'", "500 100px 'Geist'", "600 100px 'Geist'", "700 100px 'Geist'", "800 100px 'Geist'",
         "400 100px 'Geist Mono'", "600 100px 'Geist Mono'",
