@@ -208,7 +208,7 @@
 
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
-          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+          if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           // WCAG 1.4.3 exempts logotypes: "text that is part of a logo or brand name has no minimum
           // contrast requirement". A multi-colour wordmark is the case — a brand's own yellow on white
           // is legitimately below the bar and changing it would make the mark wrong. Opt IN explicitly

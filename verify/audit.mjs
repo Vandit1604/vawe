@@ -311,6 +311,23 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
       // a covering <img> (sky/photo backdrop): its opaque-pixel average IS the effective bg colour,
       // so white/emphasis text over a photo isn't false-flagged as invisible-on-the-canvas-behind-it.
+      // A <canvas> counts for exactly the same reason and was not handled: the `shader` and `paint`
+      // layers both paint into one, so every headline over a generated backdrop measured 1.0:1 against
+      // a backdrop the gate could not see. drawImage (not getContext('2d')) so a WebGL canvas works too.
+      const cvEl = p.tagName === 'CANVAS' ? p : (p.querySelector && p.querySelector('canvas'));
+      if (cvEl && cvEl.width && cvEl.height) {
+        try {
+          bpc.clearRect(0, 0, 20, 20); bpc.drawImage(cvEl, 0, 0, 20, 20);
+          const d = bpc.getImageData(0, 0, 20, 20).data;
+          let r = 0, g = 0, b = 0, k = 0;
+          for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
+          // Only a canvas that actually COVERS counts as the backdrop. A `waves` layer is a few
+          // translucent lines over a transparent field, so averaging its handful of opaque pixels
+          // reported "the backdrop is blue" when the backdrop is the white scene behind it. Require
+          // most of the sample to be opaque; otherwise fall through to whatever is really behind.
+          if (k >= 280) return [r / k, g / k, b / k];   // 280/400 ≈ 70% coverage
+        } catch { /* tainted → fall through */ }
+      }
       const im = p.tagName === 'IMG' ? p : (p.querySelector && p.querySelector('img'));
       if (im && im.complete && im.naturalWidth) {
         try {

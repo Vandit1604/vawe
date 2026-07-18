@@ -35,6 +35,11 @@ beatmap:
 sfx-check:
 	node scripts/gates/sfx-audit.mjs
 
+# make canvas-purity [M=scene] [D=<file>] — do the shader/paint PIXELS depend only on n? `make probe`
+# compares a DOM signature and structurally cannot see inside a canvas (docs/MISTAKES.md #64).
+canvas-purity:
+	node scripts/gates/canvas-purity.mjs $(if $(M),$(M),scene) $(D)
+
 build: fonts
 	go build -o bin/vawe ./cmd/render
 

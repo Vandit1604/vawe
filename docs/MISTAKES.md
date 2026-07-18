@@ -1035,3 +1035,34 @@ enum stayed, and every override failed type validation instead of applying.
 **Fix:** renamed to `aspects`. Caught in one run because the prop was declared in the schema before
 being used; had it gone undeclared, the overrides would have been silently ignored at render.
 **Rule:** declare the prop first, then implement it. The schema is the place a name collision is cheap.
+
+---
+
+## 64. `make probe` cannot see inside a canvas
+
+**What:** the new `paint` layer passed `make probe` cleanly. A pixel-level check of the same scene
+found 2 of 6 frames rendering DIFFERENT PIXELS depending on render order.
+**Root cause (the impurity):** `frame()` returned early when the layer was off-window, so its canvas
+still held whatever it had last drawn. Frames render across 8 workers in arbitrary order, so the
+canvas contents were a function of render order rather than of `t`. `shader` had the identical bug.
+Invisible today only because `driveClips` sets opacity 0 off-window — impurity waiting for the day a
+paint layer gets a non-zero resting opacity.
+**Root cause (why probe missed it):** probe compares a DOM SIGNATURE — attributes and computed styles.
+A canvas layer puts its entire output in a place that signature cannot reach, so probe was measuring
+everything about these layers except the thing they produce.
+**Fix:** both layer types clear when off-window. New gate `make canvas-purity` hashes the actual
+pixels, pinned in gate-test by reverting the clear.
+**Rule:** the sixth time this session (#39, #41, #45, #48, #56). When you add a layer that produces
+output through a NEW channel, ask which existing gate can see that channel. Usually none can.
+
+---
+
+## 65. `make coverage` reported 15 layer types as 14/14
+
+**What:** after `paint` landed, coverage still said "layer type 100% 14/14".
+**Root cause:** `LAYER_TYPES` was a hand-typed array in the gate. A hand-copied list of a vocabulary
+the engine owns — the exact shape of #21, in the gate whose entire job is noticing what is missing.
+**Fix:** `core/layers/index.js` exports `LAYER_TYPES` from the registry; coverage imports it. Paint
+effects get their own coverage row from `PAINT_FX_NAMES` the same way.
+**Rule:** a gate that restates a vocabulary will eventually disagree with it, and it fails toward
+silence — 100% of a stale list looks exactly like 100% of the real one.

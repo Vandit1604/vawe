@@ -20,8 +20,10 @@ export function build(kit, el, L) {
 // always changes the DOM signature — otherwise the render's static-frame dedup could wrongly reuse a frame.
 export function frame(kit, el, L, t) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  if (!(t >= start && t < end)) return;
   const inst = el.__shader; if (!inst) return;
+  // off-window leaves the last drawn frame in the GL buffer, so the canvas contents depend on render
+  // ORDER rather than on t. Invisible today (opacity 0) but impure; see core/layers/paint.js.
+  if (!(t >= start && t < end)) { if (inst.clear) inst.clear(); return; }
   const lt = (t - start) * (L.speed ?? 1);
   inst.draw(L.shader || 'flow', lt, L.seed ?? 0, el.__pal, L.intensity ?? 0.35);
   el.dataset.st = lt.toFixed(2);

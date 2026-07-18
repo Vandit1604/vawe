@@ -162,9 +162,17 @@ sketch/matrix/newsprint. Determinism story settled: **baked once at build** (boo
 static PNG), so the pixels never change per frame — probe/snap prove it. See `docs/DESIGN-NOTES/tier5.md`
 for the general carve-out taxonomy this used.
 
+**The generative half now exists.** `paint` is a layer type (`core/layers/paint.js` + `core/paint-fx.js`):
+a Canvas 2D surface redrawn every frame as a pure function of local time, mirroring how `shader` works.
+That is the piece **Matrix Decode** was waiting on, and it ships with `matrix` · `starfield` · `waves`.
+The contract each effect keeps: no accumulation, no Math.random/Date, and CLOSED-FORM motion (a
+particle's position is f(lt), never "last position + velocity") — which is exactly the line between
+this tier and the sims in Tier 5. Guarded by `make canvas-purity`, which hashes real pixels because
+`make probe` compares a DOM signature and structurally cannot see inside a canvas.
+
 **Remaining:** pixel sorting, stained glass, low-poly triangulate, voxelize, **Grid Pixelate Wipe**,
-**Matrix Decode** (generative rain, a pure-in-n canvas layer — not an image bake), **Code Typing** /
-**Code Diff** / **Code Highlight Sweep** / **Code Scroll To Line** (text metrics, not shaders).
+**Code Typing** / **Code Diff** / **Code Highlight Sweep** / **Code Scroll To Line** (text metrics,
+not shaders). New generative effects are now content — one entry in `PAINT_FX`, no framework work.
 
 **Excluded on purpose (break determinism — cannot ship as-is):** datamosh / P-frame freeze (codec +
 stateful), feedback/phosphor trails (frame feedback), low-fps stutter (per-frame state). These are the

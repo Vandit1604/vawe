@@ -197,6 +197,9 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
+    // wipe the buffer when the layer is off-window, so the canvas holds a function of t and not of
+    // whichever frame a worker happened to draw last (core/layers/shader.js).
+    clear() { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }

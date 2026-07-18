@@ -14,6 +14,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ANIM_NAMES } from '../../core/clips.js';
+import { LAYER_TYPES } from '../../core/layers/index.js';
+import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { PRESETS } from '../../core/type.js';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
@@ -32,7 +34,7 @@ const layersOf = (j) => { const out = [];
   push(j.layers); return out; };
 
 const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Set(), look: new Set(),
-  canvasFx: new Set(), bg: new Set(), type: new Set(), prop: new Set() };
+  canvasFx: new Set(), paint: new Set(), bg: new Set(), type: new Set(), prop: new Set() };
 
 for (const { j } of scenes) {
   // Props live on cuts/stings/bg/camera ITEMS too, not just layers. Collecting only layer keys made
@@ -47,12 +49,12 @@ for (const { j } of scenes) {
     if (l.anim) used.anim.add(l.anim);
     if (l.preset) used.preset.add(l.preset);
     if (l.canvasFx) used.canvasFx.add(typeof l.canvasFx === 'string' ? l.canvasFx : l.canvasFx.fx);
+    if (l.paint) used.paint.add(l.paint);
     if (l.filter) used.look.add(String(l.filter).split(':')[0].trim());
     for (const k of Object.keys(l)) used.prop.add(k);
   }
 }
 
-const LAYER_TYPES = ['text', 'image', 'component', 'rect', 'count', 'group', 'glow', 'board', 'doc', 'html', 'clip', 'cursor', 'shader', 'lottie'];
 const schemaProps = (() => { const s = JSON.parse(fs.readFileSync(path.join(dir, 'schema.json'), 'utf8'));
   const out = new Set(); const walk = (o) => { if (!o || typeof o !== 'object') return;
     if (o.properties) Object.keys(o.properties).forEach((k) => out.add(k));
@@ -67,6 +69,7 @@ const GROUPS = [
   ['shader sting', SHADER_FX, used.sting],
   ['composite look', LOOK_NAMES, used.look],
   ['canvas fx', CANVAS_FX_NAMES, used.canvasFx],
+  ['paint fx', PAINT_FX_NAMES, used.paint],
 ];
 
 console.log(`── coverage across ${scenes.length} authored scene(s)\n`);

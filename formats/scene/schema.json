@@ -332,7 +332,8 @@
             "clip",
             "cursor",
             "shader",
-            "lottie"
+            "lottie",
+            "paint"
           ]
         },
         "shader": {
@@ -1031,6 +1032,35 @@
         "aspects": {
           "type": "object",
           "label": "Per-aspect overrides: { \"9:16\": { \u2026props\u2026 } } merged over this layer at that canvas only"
+        },
+        "paint": {
+          "type": "string",
+          "label": "Generative canvas effect (paint layer)",
+          "enum": [
+            "matrix",
+            "starfield",
+            "waves"
+          ]
+        },
+        "count": {
+          "type": "number",
+          "label": "Particle/line count (paint)"
+        },
+        "amp": {
+          "type": "number",
+          "label": "Wave amplitude (paint)"
+        },
+        "tail": {
+          "type": "number",
+          "label": "Trail length in cells (paint matrix)"
+        },
+        "rate": {
+          "type": "number",
+          "label": "Glyph changes per second (paint matrix)"
+        },
+        "headColor": {
+          "type": "string",
+          "label": "Leading-character colour (paint matrix)"
         }
       }
     },
