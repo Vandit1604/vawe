@@ -10,6 +10,7 @@
 // Note: ::before/::after pseudo-elements can't be inlined (a known limitation) — most cards are fine.
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import puppeteer from 'puppeteer';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -22,10 +23,18 @@ if (!url || !selector || !brand || !label) {
 }
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 const SETTLE = parseInt(flag('--settle', '0'), 10);
+// --localstorage k=v[,k=v]  — seed localStorage BEFORE first paint. Sites persist their light/dark
+// choice there (tpot.cc: theme=light), and a component captured in the wrong mode bakes the wrong
+// surface colour into the JSON — a dark card dropped onto a white scene, with no way to retint it.
+const LS = flag('--localstorage', '');
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'], protocolTimeout: 240000 });
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
+if (LS) {
+  const pairs = LS.split(',').map((kv) => kv.split('=').map((s) => s.trim()));
+  await page.evaluateOnNewDocument((ps) => { try { for (const [k, v] of ps) localStorage.setItem(k, v); } catch {} }, pairs);
+}
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
 catch (e) { // slow page: retry on domcontentloaded rather than silently capturing a half-loaded DOM
   console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`);
@@ -102,7 +111,34 @@ if (!result || result.error) { console.error('✗ capture failed:', result?.erro
 const dir = path.join(ROOT, 'assets/brands', brand, 'components');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
+
+// LOCALIZE every remote asset. The capture absolutizes <img> src against the live site, which makes
+// the component depend on the network at RENDER time — the images 404 in an offline/CI render and
+// the card comes out blank (the tpot Moments avatars and the Events banner both did). A component
+// must be self-contained: pull each asset next to the JSON and rewrite the html to point at it.
+const media = path.join(dir, 'media');
+const urls = [...new Set([...result.html.matchAll(/https?:\/\/[^"')\s]+/g)].map((m) => m[0]))]
+  .filter((u) => /\.(jpe?g|png|webp|gif|svg|avif)(\?|$)/i.test(u));
+let localized = 0, missed = 0;
+for (const u of urls) {
+  const ext = (u.match(/\.(jpe?g|png|webp|gif|svg|avif)/i) || ['.png'])[0];
+  const name = crypto.createHash('sha1').update(u).digest('hex').slice(0, 12) + ext;
+  const dest = path.join(media, name);
+  if (!fs.existsSync(dest)) {
+    try {
+      const r = await fetch(u);
+      if (!r.ok) { missed++; console.warn(`  ⚠ asset ${r.status} — left remote: ${u.slice(0, 78)}`); continue; }
+      fs.mkdirSync(media, { recursive: true });
+      fs.writeFileSync(dest, Buffer.from(await r.arrayBuffer()));
+    } catch (e) { missed++; console.warn(`  ⚠ asset fetch failed — left remote: ${u.slice(0, 60)}`); continue; }
+  }
+  result.html = result.html.split(u).join(`/assets/brands/${brand}/components/media/${name}`);
+  localized++;
+}
+
 fs.writeFileSync(out, JSON.stringify({ url, selector, w: result.w, h: result.h, fonts: result.fonts, html: result.html }, null, 0) + '\n');
+if (localized) console.log(`  ✓ localized ${localized} asset(s) → components/media/ (render stays offline + deterministic)`);
+if (missed) console.warn(`  ⚠ ${missed} asset(s) still point at the network — they WILL 404 in a headless render`);
 console.log(`✓ captured "${selector}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${(result.html.length / 1024).toFixed(1)}kb)`);
 // warn LOUDLY when a used font isn't installed — otherwise it silently substitutes at render time
 try {

@@ -545,7 +545,8 @@
         },
         "anim": {
           "type": "string",
-          "label": "driveClips enter anim (fade/rise/pop/slideL/...)"
+          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | slide-left | slide-right | slide-up | slide-down | wipe | wipe-right | iris | clock. Unknown names fall back to fade silently — there is no 'slide', and direction is part of the name, not a separate prop.",
+          "enum": ["fade", "up", "rise", "pop", "scale", "slide-left", "slide-right", "slide-up", "slide-down", "wipe", "wipe-right", "iris", "clock", "none"]
         },
         "out": {
           "type": "string",

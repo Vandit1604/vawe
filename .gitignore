@@ -12,6 +12,7 @@ bin/
 verify/out/
 verify/*_contactsheet.png
 out/*.meta.json
+out/*.fonts.json
 verify/frames/
 
 # transient DOM snapshot baselines (make snap)

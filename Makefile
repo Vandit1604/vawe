@@ -185,7 +185,7 @@ gen-video:
 # make capture URL=… SEL=".card" NAME=brand LABEL=pricing  — lift a REAL UI component off a live site
 # (its HTML + computed CSS) into an animatable `component` scene fragment. See scripts/author/capture-component.mjs.
 capture:
-	node scripts/author/capture-component.mjs $(URL) "$(SEL)" $(NAME) $(LABEL)
+	node scripts/author/capture-component.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) $(if $(LS),--localstorage "$(LS)") $(if $(SETTLE),--settle $(SETTLE))
 
 # make validate [D=formats/x/topic.json]  — check data + inline theme against the format schema.
 # No D = validate every formats/*/sample.json. Same validator boot() runs before rendering.
@@ -213,6 +213,13 @@ probe:
 	@if [ -n "$(M)" ]; then node scripts/gates/probe-purity.mjs $(M); else \
 		for d in formats/*/scene.html; do f=$$(basename $$(dirname $$d)); \
 		node scripts/gates/probe-purity.mjs $$f || exit 1; done; fi
+
+# make font-audit [D=formats/scene/x.json] [M=scene]  — assert every family the scene renders is
+# actually vendored, loaded and painting. Catches the silent substitution that shipped Geist,
+# Anybody and Manrope in the wrong typeface. Writes out/<name>.fonts.json. Exits 1 on any non-OK.
+# (Distinct from `make fonts`, which DOWNLOADS the faces.)
+font-audit:
+	node scripts/gates/font-audit.mjs $(if $(M),$(M),scene) $(D)
 
 # make install-hooks  — activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks:

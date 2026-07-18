@@ -7,6 +7,7 @@ import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { safeArea, ASPECTS } from './safe.js';
 import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
+import { loadRegistered, auditFonts } from './fonts.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
@@ -209,24 +210,11 @@ export async function boot(build) {
   const fps = Number(params.get('fps')) || FPS;
   try {
     try {
-      // EVERY bundled face must be loaded+decoded here — a face missing from this list falls back to
-      // the generic sans (font-display:block), which is the "why does my headline look generic" bug.
-      // (Geist was missing → Geist-themed videos silently rendered in Hanken/system sans.)
-      const FACES = [
-        '400 100px Inter', '600 100px Inter', '700 100px Inter', '800 100px Inter',
-        "500 100px 'Space Grotesk'", "700 100px 'Space Grotesk'",
-        "400 100px 'Anybody'", "500 100px 'Anybody'", "600 100px 'Anybody'", "700 100px 'Anybody'", "800 100px 'Anybody'",
-        "400 100px 'Instrument Serif'", "italic 400 100px 'Instrument Serif'",
-        "400 100px 'Geist'", "500 100px 'Geist'", "600 100px 'Geist'", "700 100px 'Geist'", "800 100px 'Geist'",
-        "400 100px 'Geist Mono'", "600 100px 'Geist Mono'",
-        "800 100px 'Plus Jakarta Sans'", "700 100px 'JetBrains Mono'", "400 100px 'Caveat'",
-        "400 100px 'Hanken Grotesk'", "700 100px 'Hanken Grotesk'", "800 100px 'Hanken Grotesk'",
-        "300 100px 'Archivo'", "400 100px 'Archivo'", "500 100px 'Archivo'", "600 100px 'Archivo'", "700 100px 'Archivo'",
-      ];
-      // also load whatever the theme actually declares, at the weights scenes use, in case it's a face
-      // not in the static list above (belt-and-suspenders for future themes).
-      await Promise.all(FACES.map((f) => document.fonts.load(f)));
-      await document.fonts.ready;
+      // Load every face the CSS declares. This list used to be hardcoded, which meant a newly
+      // vendored family rendered as a generic until someone remembered to add it here — that is
+      // exactly how Geist, Anybody and Manrope each shipped wrong. It is now DERIVED from the
+      // @font-face rules, so vendoring a font is the only step. See core/fonts.js.
+      await loadRegistered();
     } catch (e) {}
     const data = await (await fetch(dataUrl)).json();
     // validate data + inline theme against the format's schema BEFORE building/rendering — a bad
@@ -331,6 +319,9 @@ export async function boot(build) {
     window.__engine = {
       meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], segments: scene.segments || [] },
       renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
+      // Font audit is a FUNCTION, not a value: it inspects the families the DOM actually asks for,
+      // so it must run against a rendered frame (layers that are not up yet declare nothing).
+      auditFonts: () => auditFonts(document.querySelector('.stage')),
     };
     // frameSig(n): cheap content signature for the renderer's static-frame dedup — covers every
     // per-frame write (inline styles/text/attrs via innerHTML) plus canvas pixels (downsampled

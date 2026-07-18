@@ -108,6 +108,32 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 6. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
 7. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
    `make ledger-add D=<file>` after the user approves it.
+8. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
+
+## The framework harvest (do this EVERY render — the engine must compound)
+
+Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
+next author hits the identical wall and the engine never improves. So **after every render, before
+declaring done, list every problem hit this pass and classify each one**:
+
+| Class | Test | Action |
+|---|---|---|
+| **Framework bug** | Would ANY author hit this on a different brand? Did the engine do something silently wrong, or accept input it then ignored? | **Fix it in the engine/tooling now**, then delete the JSON-side workaround |
+| **Gate gap** | The render was wrong and no gate said anything, or the error message didn't name the real cause | **Extend the gate / sharpen the message** |
+| **Authoring choice** | Specific to this brand's taste, copy, or composition | Fix in the JSON only |
+
+Rules that make this real, not ceremonial:
+- **A workaround is a bug report.** If you wrote something odd to route around the engine
+  (`ken:{from:1,to:1}` purely to get a border-radius), that IS a framework bug. Fix the engine and
+  remove the hack — never leave the hack as the answer.
+- **Silence is the worst failure.** Any input the engine accepts and then ignores must either work or
+  fail loudly. Silent substitution is how the wrong font and square avatars both shipped.
+- **Log it.** Append every framework-class finding to `docs/MISTAKES.md` (what · root cause · fix ·
+  which gate now catches it). That file is the memory; an unlogged fix gets re-broken.
+- **Check the blast radius** before changing shared behaviour: grep the other scenes for the pattern,
+  and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
+- **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into
+  a scene file.
 
 > **Editing `scene.html`?** Read the `vawe-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image/capture system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

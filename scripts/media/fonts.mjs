@@ -30,6 +30,10 @@ const FONTS = [
   ['space-700.woff2',                `${CDN}/@fontsource/space-grotesk/files/space-grotesk-latin-700-normal.woff2`,           'OFL 1.1'],
   ['InstrumentSerif-Regular.woff2',  `${CDN}/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2`,     'OFL 1.1'],
   ['InstrumentSerif-Italic.woff2',   `${CDN}/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2`,     'OFL 1.1'],
+  // Anybody = the vawe landing page's real sans. Manrope + Fraunces = tpot.cc's real pair.
+  ['Anybody.woff2',                  `${CDN}/@fontsource-variable/anybody/files/anybody-latin-wght-normal.woff2`,             'OFL 1.1'],
+  ['Manrope.woff2',                  `${CDN}/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2`,             'OFL 1.1'],
+  ['Fraunces.woff2',                 `${CDN}/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2`,           'OFL 1.1'],
 ];
 
 // woff2 files start with the ASCII magic "wOF2"

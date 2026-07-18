@@ -243,3 +243,68 @@ patterned). Rule: **use tools to measure, use your eyes to judge.** Specifically
   blend to gray). Read the body-text colour off the screenshot yourself.
 - Any "what does this section mean / which is the hero / plain or textured" question — LOOK, don't infer
   from a script. That is exactly what mistakes #1 and #2 came from.
+
+---
+
+## 19. `radius` on an image was silently ignored unless `ken` was set (engine bug)
+
+**What:** tpot.cc's entire visual identity is CIRCULAR avatars. Every avatar layer was authored with
+`radius: d/2` and every one rendered as a hard square. Nothing warned.
+**Root cause:** `core/layers/image.js` applied `borderRadius` only inside `if (L.ken)`. A plain image
+accepted `radius` and threw it away. The schema label even said "Corner radius (rect/ken-image)", so
+the engine was documented-wrong rather than obviously-wrong.
+**Fix:** radius now clips ANY image (`L.ken || L.radius != null`), and brings `object-fit: cover` with
+it so a non-square source fills the shape instead of distorting. The workaround this replaced —
+`ken:{from:1,to:1}` purely to unlock a border-radius — was itself the bug report.
+**Gate:** `make audit` cannot see "should have been round". The real guard is the rule: any prop the
+engine ACCEPTS must either work or fail loudly. Silent ignore is never acceptable.
+
+---
+
+## 20. Captured components pointed at REMOTE images → blank cards in an offline render
+
+**What:** the tpot Moments card (3 avatars) and Events card (hero banner) rendered empty. The scene
+looked fine in the capture preview and broke in the actual video.
+**Root cause:** `capture-component.mjs` absolutizes `<img src>` against the live site. That makes the
+component depend on the NETWORK at render time; headless render 404s and paints nothing. It also
+breaks determinism — the same JSON renders differently depending on whether the site is reachable.
+**Fix:** capture now LOCALIZES every remote asset into `components/media/` and rewrites the html to
+local paths. Anything it cannot fetch is a loud warning naming the URL.
+**Gate:** a component is only self-contained if it renders with the network off. If you see a blank
+card, check `brokenImgs` before touching layout.
+
+---
+
+## 21. Schema advertised an anim name that does not exist (`slideL`)
+
+**What:** authored `anim:"slide"` + `from:"left"`, guided by the schema label
+`"driveClips enter anim (fade/rise/pop/slideL/...)"`. Validation then failed with
+`layers[81].from must be a number` — an error about `from` (a *count* prop), never mentioning that
+`slide` is not a real anim and `slideL` does not exist either.
+**Root cause:** the label was written from memory, not from `core/clips.js`'s ANIM registry. The real
+names are `slide-left`/`slide-right`/`slide-up`/`slide-down`; direction is part of the NAME, not a
+separate prop. Unknown anim names silently `resolveAnim() -> fade`.
+**Fix:** the schema now carries the exact enum from the registry and states that unknown names fall
+back to fade silently.
+**Rule:** a prop label is documentation. If it lists names, they must be copied from the code that
+resolves them, never recalled.
+
+---
+
+## 22. Fonts substituted silently — twice — because the load list was hand-maintained
+
+**What:** Anybody (vawe) and Manrope (tpot) both rendered in a generic sans. Third occurrence of the
+same class after Geist.
+**Root cause:** `core/boot.js` held a HARDCODED `FACES` array. Vendoring a font required also
+remembering to add it there; nobody remembers a hardcoded list. Worse, `assets/fonts/` is gitignored
+and self-heals via `make fonts`, so a face that was never added to `scripts/media/fonts.mjs` simply
+vanished on a fresh clone.
+**Fix:** (1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/fonts.js`),
+so vendoring is the only step; (2) `make font-audit` fails the build on any family that is not
+vendored + loaded + painting.
+**Do NOT use `document.fonts.check()`** for this — measured in headless Chrome it returns `true` for a
+family that does not exist and `false` for a registered-but-unloaded one. The reliable probe is width
+comparison against three generics (all-equal = the family resolved), plus an `@font-face` registration
+check to catch the nastiest case: a font that paints only because it is installed on THIS machine
+(`SYSTEM-LUCK`) and falls back everywhere else.
+**Gate:** `make font-audit D=<file>` → `out/<name>.fonts.json`, exits 1 on FALLBACK / SYSTEM-LUCK / BROKEN.
