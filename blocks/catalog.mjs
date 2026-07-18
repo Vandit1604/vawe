@@ -311,4 +311,19 @@ export const CATALOG = [
     props: { variant: 'results', w: 540, query: 'video from json', clickIndex: 0, results: [
       { url: 'vawe.dev › docs', title: 'One JSON. Any brand.', snippet: 'Same input, same frames, every time.' },
       { url: 'vawe.dev › blocks', title: 'The block registry', snippet: 'Vetted blocks you compose, not author.' }] } },
+  // The other six CODE_THEMES. All twelve palettes were authored and WCAG-checked together (the set's
+  // minimum is 4.68:1); six of them had no catalog row, so nothing could render them and they were
+  // invisible on the site — authored work sitting one manifest line away from being usable.
+  { name: 'codeBlock.ink', family: 'codeBlock', blurb: 'code theme · indigo dark, violet-blue syntax',
+    props: {"w": 540, "theme": "ink", "label": "scene.ts", "size": 19, "lines": ["export const scene = {", "  module: 'scene',", "  layers: [text, image],", "}"]} },
+  { name: 'codeBlock.dusk', family: 'codeBlock', blurb: 'code theme · plum dark, orchid and rose',
+    props: {"w": 540, "theme": "dusk", "label": "compose.rb", "size": 19, "lines": ["scene = Scene.load('in.json')", "scene.cuts.each { |c| c.snap! }", "scene.render 'out.mp4'"]} },
+  { name: 'codeBlock.slate', family: 'codeBlock', blurb: 'code theme · neutral dark, muted steel syntax',
+    props: {"w": 540, "theme": "slate", "label": "main.go", "size": 19, "lines": ["frames := render.All(scene)", "enc := encode.H264(frames)", "enc.WriteTo(\"out.mp4\")"]} },
+  { name: 'codeBlock.aurora', family: 'codeBlock', blurb: 'code theme · teal dark, mint and violet',
+    props: {"w": 540, "theme": "aurora", "label": "spectrum.js", "size": 19, "lines": ["const spec = bandEnergies(pcm)", "const v = sampleAt(spec, n, 'low')", "return 1 + v * 0.18"]} },
+  { name: 'codeBlock.linen', family: 'codeBlock', blurb: 'code theme · warm light, earthen syntax',
+    props: {"w": 540, "theme": "linen", "label": "README.md", "size": 19, "lines": ["# vawe", "One JSON. One video.", "Deterministic to the frame."]} },
+  { name: 'codeBlock.frost', family: 'codeBlock', blurb: 'code theme · cool light, ice-blue syntax',
+    props: {"w": 540, "theme": "frost", "label": "safe.ts", "size": 19, "lines": ["const [w, h] = sceneDims(cfg)", "const box = safeArea(w, h, dest)", "return box.x1 - box.x0"]} },
 ];

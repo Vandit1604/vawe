@@ -170,9 +170,11 @@ particle's position is f(lt), never "last position + velocity") — which is exa
 this tier and the sims in Tier 5. Guarded by `make canvas-purity`, which hashes real pixels because
 `make probe` compares a DOM signature and structurally cannot see inside a canvas.
 
-**Remaining:** pixel sorting, stained glass, low-poly triangulate, voxelize, **Grid Pixelate Wipe**,
-**Code Typing** / **Code Diff** / **Code Highlight Sweep** / **Code Scroll To Line** (text metrics,
-not shaders). New generative effects are now content — one entry in `PAINT_FX`, no framework work.
+**Remaining:** stained glass, low-poly triangulate, voxelize, **Code Typing** / **Code Diff** /
+**Code Highlight Sweep** / **Code Scroll To Line** (text metrics, not shaders). New generative effects
+are now content — one entry in `PAINT_FX`, no framework work.
+(`pixelSort` ships in `CANVAS_FX_NAMES` and `gridPixelateWipe` ships in `SHADER_FX` — both were listed
+here as remaining long after they landed.)
 
 **Excluded on purpose (break determinism — cannot ship as-is):** datamosh / P-frame freeze (codec +
 stateful), feedback/phosphor trails (frame feedback), low-fps stutter (per-frame state). These are the
@@ -184,16 +186,25 @@ than none.
 
 ## Tier 3 — GLSL (one new SHADER_FX each)
 
-The **Shader Transitions** family is the natural next block: chromatic radial split, cross warp
-morph, domain warp dissolve, SDF iris, swirl vortex, ridged burn, ripple waves, gravitational lens,
-thermal distortion, light leak, flash through white, whip pan, cinematic zoom, glitch.
+**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 33 entries and `AMBIENT_FX` 14; between
+them the families below are majority-built. This section used to read as a wish-list and sent two
+consecutive planning passes at work that already existed.
 
-Then **chromatic** (aberration, prism split, RGB offset, dispersion, iridescence), **analog/retro**
-(VHS tracking + bleed, CRT scanlines + curvature + phosphor, film grain/dust/gate weave, dot-crawl),
-**glitch/digital** (datamosh, block displacement, tearing, macroblocking, bit-crush, feedback loop),
-**distortion** (barrel, fisheye, heat shimmer, ripple, twirl, kaleidoscope, displacement map, melt),
-**blur/motion** (radial, zoom, spin, lens/bokeh-shaped, frosted glass), **Code Shader Dissolve**,
-**Glitch RGB** captions, **Liquid Background/Glass**, **Portal**, **Shatter**.
+- **Shader Transitions: 13 of 14 ship.** chromaticSplit · crossWarp · domainWarp · sdfIris · vortex ·
+  ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch. Only *cinematic zoom* is
+  missing, and only as a GLSL sibling of the existing `PRESENTATIONS.zoom`.
+- **chromatic: 4 of 5 ship** (aberration/prism/RGB-offset via the `chromatic` filter primitive,
+  `dispersion` as a sting). Missing: iridescence.
+- **analog/retro: majority ships** — `AMBIENT_FX` vhs · crt · filmGrain · lightLeak, `LOOKS` vhs ·
+  super8 · crt. Missing: film dust / gate weave, dot-crawl. CRT phosphor *trails* stay excluded
+  (frame feedback).
+- **distortion: 6 of 8 ship** — barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
+  displace/melt. Missing: fisheye, and a real (frame-sampling) block displacement.
+- **blur/motion: bokeh ships.** Missing: radial, zoom and spin blur — one `SHADER_FX` entry each,
+  all three sharing one tap loop. Frosted glass is approximated by `LOOKS.glassWarp`.
+- Still absent: **iridescence, bit-crush, macroblocking, Glitch RGB captions, Liquid Background/Glass,
+  Portal, Shatter, Code Shader Dissolve.** The first three are one entry each; the last four need a
+  layer-as-texture path or real geometry.
 
 Note: **true multi-sample motion blur** is not this tier. It means rendering sub-frames and
 accumulating — a render-pipeline change, not a shader. Tier 5.
@@ -224,10 +235,15 @@ determinism problem once the analysis moved out of the frame. See `core/spectrum
   fields, disintegration, sand pour). Sims are iterative; `renderFrame(412)` cannot step 411 frames
   first. Needs closed-form motion, or a precomputed baked buffer keyed by frame, or an explicit
   "sim layers render in-order" carve-out that costs frame sharding.
-- **True motion blur.** Sub-frame accumulation in the render pipeline.
+- **True motion blur.** Sub-frame accumulation in the render pipeline. NOTE: the cheap half already
+  ships — `L.motionBlur` derives a streak from the motion track's velocity, sampled at `t` and
+  `t - 1/fps` so it stays pure in `n` (`formats/scene/scene.html`). What remains is real multi-sample
+  accumulation, which is a quality upgrade rather than a zero-to-one.
 - **Depth estimation** for 2.5D parallax from a flat image. Needs a model in the pipeline.
-- **Chroma key / luma key / difference matte.** Easy per-pixel; the question is where source video
-  enters a scene at all.
+- ~~**Chroma key / luma key / difference matte.**~~ **Unblocked.** The question this was waiting on —
+  where source video enters a scene — is answered: the `clip` layer plays a preloaded PNG frame
+  sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel
+  entry over a `clip`, i.e. content, not a determinism problem.
 
 ## The Showcases
 
@@ -243,16 +259,22 @@ the backlog than a wish-list is.
    site that the engine only half keeps. ~~Ship the per-aspect gate first~~ — **done**; it paid for
    itself immediately by finding three bugs in the one scene that exists to prove the claim. What
    remains is the `resolveCoords` trap behind them and a scene that exercises 4:5.
-1. **Lower thirds** (Tier 1, one component → twelve entries). Highest ratio of surface to effort in
-   the whole list.
-2. **Shader transitions** (Tier 3). `core/shaders.js` already has the machinery; each is one
-   `SHADER_FX` entry, and transitions are what a motion engine is judged on.
-3. **Code snippet themes** (Tier 1). Twenty-four themes = a token set over `codeBlock`. This repo's
-   audience is developers; code that looks like their editor is worth more here than anywhere else.
-4. **Analog/retro** (Tier 3). VHS/CRT/film is the most-requested aesthetic family and it is all
-   fragment shaders.
-5. **The `three` layer type** (Tier 4), once 1-4 prove the vocabulary. It unlocks the largest
-   single block of the list.
+~~1. **Lower thirds**~~ **Done** — all twelve variants ship (`lowerThird.cleanBar` … `.newsTicker`).
+~~2. **Shader transitions**~~ **Done** — 13 of 14; see Tier 3 above.
+~~3. **Code snippet themes**~~ **Done to 12** — `CODE_THEMES` has twelve WCAG-checked palettes and all
+   twelve now have catalog rows. Going to twenty-four is more content, not a different kind of work.
+~~4. **Analog/retro**~~ **Mostly done** — see Tier 3 above.
+5. **The `three` layer type** (Tier 4). Its own precondition ("once 1-4 prove the vocabulary") is now
+   met. Note the risk it was written with has since evaporated: headless WebGL already renders in the
+   Go pipeline (`site-backdrop.json` ships a `shader` layer), and the layer pattern has been proven
+   twice over by `core/layers/shader.js` and `core/layers/paint.js`.
+
+**A standing warning, learned the hard way.** Items 1, 2 and 4 sat on this list as "build first" long
+after they were built, and two planning passes in a row were routed at them. Before building anything
+named here, check the registry that would own it — `SHADER_FX`, `AMBIENT_FX`, `CANVAS_FX_NAMES`,
+`PAINT_FX_NAMES`, `LOOK_NAMES`, `CAP_STYLES`, `PRESENTATIONS`, `blocks/catalog.mjs`. `make coverage`
+prints most of them. A roadmap is a claim about the past as much as the future, and this one decayed
+silently because nothing checked it.
 
 Everything in Tier 5 gets a design note before a line of code. The determinism claim is the
 product; an effect that quietly breaks it costs more than it adds.

@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_120 entries across 50 families._
+_126 entries across 50 families._
 
 | Block | For |
 |---|---|
@@ -69,6 +69,12 @@ _120 entries across 50 families._
 | `codeBlock.ocean` | code theme · deep blue, cyan-led |
 | `codeBlock.neon` | code theme · near-black, vivid signage hues |
 | `codeBlock.paper` | code theme · warm light, print-ink syntax |
+| `codeBlock.ink` | code theme · indigo dark, violet-blue syntax |
+| `codeBlock.dusk` | code theme · plum dark, orchid and rose |
+| `codeBlock.slate` | code theme · neutral dark, muted steel syntax |
+| `codeBlock.aurora` | code theme · teal dark, mint and violet |
+| `codeBlock.linen` | code theme · warm light, earthen syntax |
+| `codeBlock.frost` | code theme · cool light, ice-blue syntax |
 | `terminal` | command prompt; command decodes in, output reveals |
 | `terminal.git` | git command |
 | `terminal.install` | install command |
