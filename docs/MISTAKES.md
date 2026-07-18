@@ -380,3 +380,53 @@ network. **Gotcha:** Cuelume's `peak` values are Web Audio UI gains and bake out
 inaudible under a bed — every cue is peak-normalized to a common ceiling and balance is left to the
 mixer's per-cue gain, which is where balance belongs.
 
+---
+
+## 28. `tracking` was applied and then overwritten one statement later
+
+**What:** every text layer that set `tracking` rendered with automatic optical tracking instead.
+12 shipped scenes are affected.
+**Root cause:** the schema declares TWO synonyms for one CSS property — `ls` and `tracking`, both
+labelled "Letter-spacing". `styleText` applied the author's `tracking`, then `microType` ran and
+overwrote `letterSpacing` because its guard named only `L.ls`. So the value was accepted, applied,
+and discarded within the same build.
+**Fix:** the guard now honours both names.
+**Found by:** `make conformance` (phase 2) — not by reading the code, which looks correct at both sites.
+
+---
+
+## 29. The `cuts` array renders NOTHING (the engine's largest silent-ignore)
+
+**What:** `formats/scene/schema.json:127` declares `cuts` — "Hard cuts between beats (timing x
+presentation, from core/cuts.js)" — with 26 presentation styles, directions and timings. Authors use
+it: 12 shipped scenes carry a top-level `cuts` array, including the tpot launch film and the
+showcase. **None of those cuts produce any visual transition.**
+**Root cause:** `formats/scene/scene.html:235` applies `cutStyle()` only for the LAYER-level prop
+`L.cut`. The top-level `data.cuts` array is read in exactly one place in the whole engine — the auto
+sound-design block — and never reaches the renderer. The vocabulary, the schema entry and
+`core/cuts.js` itself are all real; only the wiring between them is missing.
+**Why nobody noticed:** beats still change on time because each beat's layers have their own
+start/duration windows. The scene LOOKS like it cut; what is missing is the transition treatment, and
+you cannot miss a softwipe you have never seen.
+**Status:** UNFIXED — implementing it changes the output of 12 shipped videos, so it needs a
+deliberate decision, not a drive-by patch.
+**Found by:** `make conformance` (phase 1): all 25 cut styles rendered byte-identical to no-cut.
+
+---
+
+## Method note — how conformance findings must be triaged
+
+The first conformance run reported 13 inert props; 10 were the harness's fault, not the engine's:
+`opacity`/`scale`/`rotate` are CAMERA-KEYFRAME props (schema:858-871, `core/sequence.js:26`), never
+layer props; `look` is not a prop at all (composite looks ride on `filter`, `core/layers/util.js:71`);
+`text.radius`/`pad` are conditional on `bg` by design. A second run reported 20 dead looks — because
+the look names had been typed from memory again, the same mistake as #21.
+
+Two rules came out of that, both now enforced in the harness:
+1. **Derive vocabulary from the registries, never restate it.** The sweep imports `ANIM_NAMES`,
+   `PRESETS`, `LOOK_NAMES`, `CANVAS_FX_NAMES`. A hand-typed list in a gate drifts from the code and
+   then the gate certifies the drift.
+2. **The default value of a vocabulary is identical to the baseline by definition** — `fade` for
+   anim, `up` for preset. Naming them stops one guaranteed false finding per category, forever.
+An allowlist entry must carry a REASON, never a bare name, or it becomes the place bugs hide.
+

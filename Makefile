@@ -79,6 +79,12 @@ snap:
 motion:
 	node scripts/gates/motion-audit.mjs $(M) $(if $(STRIDE),--stride $(STRIDE))
 
+# make conformance [enums|props|paths]  — does the engine DO what it says it accepts? Applies every
+# declared enum value and every layer prop, and asserts the OUTPUT CHANGED. Catches the dominant bug
+# class in this repo (docs/MISTAKES.md #19-28): input accepted, then silently ignored or substituted.
+conformance:
+	node scripts/gates/conformance.mjs $(P)
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs

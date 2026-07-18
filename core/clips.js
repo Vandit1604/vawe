@@ -14,6 +14,11 @@ const ANIM = {
   wipe: (t) => wipe(t, 'left'), 'wipe-right': (t) => wipe(t, 'right'),
   iris: circleWipe, clock: clockWipe,
 };
+// Exported so the schema and the conformance sweep can DERIVE the valid names instead of restating
+// them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
+// and therefore silently resolved to fade (MISTAKES #21).
+export const ANIM_NAMES = Object.keys(ANIM);
+/** Unknown names fall back to fade SILENTLY — that is why `make conformance` asserts each is distinct. */
 const resolveAnim = (name) => ANIM[name] || fade;
 // invert an enter transition into an exit (reverse the progress: 1→hidden).
 const asExit = (fn, t) => fn(1 - clamp01(t));

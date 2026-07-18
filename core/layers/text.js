@@ -34,8 +34,12 @@ function microType(kit, el, L) {
   if (L.raw) return;
   const size = L.size ?? 96;
   const mono = L.font === 'mono';
-  // per-size optical tracking (tighter as type scales up) — only when the author didn't set ls.
-  if (L.ls == null && !mono && kit.trackingFor) el.style.letterSpacing = kit.trackingFor(size);
+  // Per-size optical tracking (tighter as type scales up) — only when the author set NEITHER
+  // letter-spacing prop. The schema declares two synonyms for this one CSS property, `ls` and
+  // `tracking`, and this guard used to name only `ls`: styleText applied the author's `tracking`
+  // and then this line immediately overwrote it. So `tracking` was accepted, applied, and discarded
+  // one statement later — silently, in 12 shipped scenes. (MISTAKES #28; found by `make conformance`.)
+  if (L.ls == null && L.tracking == null && !mono && kit.trackingFor) el.style.letterSpacing = kit.trackingFor(size);
   // widow/orphan control: balance headlines (even line lengths), pretty on body (no lone last word).
   if (!mono && !L.split) el.style.textWrap = size >= 40 ? 'balance' : 'pretty';
   // legibility: real kerning + ligatures on display type; crisp rasterization.
