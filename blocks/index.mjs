@@ -21,6 +21,7 @@
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
   R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
+  sweep, stagger, growUp, fillRight,
 } from './kit.mjs';
 
 export { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl };
@@ -73,19 +74,22 @@ const CODE_THEMES = {
 // names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the
 // palette's syntax colours cycled by line index (deterministic: same lines → same paint).
 export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24, theme,
-  start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
+  start = 0, dur = 4, anim = 'fade', enterDur = 0.25 } = {}) {
   const P = theme ? CODE_THEMES[theme] : null;
   if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}" — one of ${Object.keys(CODE_THEMES).join(', ')}`);
   const isDark = P ? !P.light : dark;
   const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? '#E8ECF1' : T.ink);
   const kids = [];
   if (label) kids.push(text({ text: label, font: 'mono', size: 18, color: P ? P.label : (dark ? T.stripeGrey : T.dim) }));
-  let cyc = 0; // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits to its neighbours' explicit colours
-  for (const ln of lines) {
-    const auto = P ? P.syntax[cyc++ % P.syntax.length] : fg;
+  // THE CODE WRITES ITSELF IN, line after line, off the top of the block — the motion a code card is
+  // FOR. The label (if any) is already there, so the reveal starts at the first line of code.
+  // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits
+  // to its neighbours' explicit colours
+  lines.forEach((ln, i) => {
+    const auto = P ? P.syntax[i % P.syntax.length] : fg;
     const s = typeof ln === 'string' ? { text: ln, color: auto } : { text: ln.text, color: ln.color || auto };
-    kids.push(text({ ...s, font: 'mono', size, weight: 400 }));
-  }
+    kids.push(text({ ...s, font: 'mono', size, weight: 400, ...stagger(i, { step: 0.14, delay: 0.2, anim: 'slide-left', enterDur: 0.28 }) }));
+  });
   return [{
     type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 30,
     bg, radius: 14, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: 1 }),
@@ -95,17 +99,24 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
 
 // ─────────────────────────────────────────────────────────────────────────────
 // terminal — a command prompt + output card. `command` types in; `output` reveals after.
-export function terminal({ x, y, w = 720, command, output = [], start = 0, dur = 4 } = {}) {
+// `cps` is the typing speed in characters per second; the output waits for the command to finish.
+export function terminal({ x, y, w = 720, command, output = [], cps = 18, start = 0, dur = 4 } = {}) {
+  // THE COMMAND TYPES IN, CHARACTER BY CHARACTER, AND THEN THE OUTPUT ANSWERS IT — the one motion a
+  // terminal is for, and the reason the prompt has to land before anything below it does. `typing` is
+  // the engine's own char reveal (chars/sec, pure in t), so the output's start is DERIVED from the
+  // command's length rather than guessed.
+  const typed = (String(command || '').length) / cps;
   const out = [];
   out.push({
     type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 10, pad: 26,
-    ...cardChrome({ radius: R.tight }), start, duration: dur, enterDur: 0.4,
+    ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25,
     children: [
       { type: 'group', layout: 'row', gap: 10, items: 'center', children: [
         text({ text: '$', font: 'mono', size: 22, color: T.accent, weight: 600 }),
-        text({ text: command, font: 'mono', size: 22, color: T.ink, split: 'char', preset: 'decode', each: 0.5, stagger: 0.015 }),
+        text({ text: command, font: 'mono', size: 22, color: T.ink, typing: cps, delay: 0.25, anim: 'fade', enterDur: 0.1 }),
       ] },
-      ...output.map((l, i) => text({ text: l, font: 'mono', size: 20, color: T.sub })),
+      ...output.map((l, i) => text({ text: l, font: 'mono', size: 20, color: T.sub,
+        ...stagger(i, { step: 0.28, delay: r2(0.45 + typed), anim: 'fade', enterDur: 0.2 }) })),
     ],
   });
   return out;
@@ -116,10 +127,15 @@ export function terminal({ x, y, w = 720, command, output = [], start = 0, dur =
 // Returns [track, fill]; add `label`+`done` for a "✓ done" that pops on completion.
 export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, color = T.greenBright,
   settle = T.green, label, done = true } = {}) {
+  // The fill is DRIVEN, not entered. It used to ride `anim:'wipe'` with `enterDur: fillDur`, which
+  // put the whole fill inside the entrance envelope — so the bar spent the entire 1.5s fading up from
+  // transparent while it wiped, and the determinate fill this block exists to show read as a haze.
+  // `--p` is independent of the enter/exit fade: the bar arrives instantly, then FILLS.
+  const life = fillDur + (done ? 1.2 : 0.4);
   const out = [
-    rect({ x, y, w, h, radius: h / 2, bg: T.surface, start, duration: fillDur + (done ? 1.2 : 0.4) }),
-    rect({ x, y, w, h, radius: h / 2, bg: settle, start, duration: fillDur + (done ? 1.2 : 0.4),
-      anim: 'wipe', enterDur: fillDur }),
+    rect({ x, y, w, h, radius: h / 2, bg: T.surface, start, duration: life }),
+    rect({ x, y, w, h, radius: h / 2, bg: settle, start, duration: life,
+      anim: 'fade', enterDur: 0.15, ...fillRight({ delay: 0, dur: fillDur }) }),
   ];
   if (label) out.push(text({ text: label, x, y: y + 18, font: 'mono', size: 18, color: T.sub, start, duration: fillDur + 1.2 }));
   // right-aligned by LAYOUT, not by guessing the string's width: `x + w - 70` was a guess at "✓ done"
@@ -147,21 +163,45 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, col
 export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'Deployed to production',
   note = null, steps = ['Building', 'Deploying', 'Live'], active = null, start = 0, rowGap = 52 } = {}) {
   const out = [];
-  const at = active == null ? steps.length : active;
-  const lead = Math.min(at, steps.length - 1);   // the row the eye should be on: the running one, or the outcome
+  const STEP = 0.55;                              // one step's turn at the front of the pipeline
+  const end = r2(start + steps.length * STEP + 6);
   steps.forEach((label, i) => {
-    const t = r2(start + i * 0.55);
-    out.push(text({ text: i < at ? '✓' : i === at ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
-      size: 24, weight: 700, color: i <= at ? T.green : T.dim, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
-    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22,
-      color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
+    const t = r2(start + i * STEP);               // when step i STARTS running
+    const done = r2(t + STEP);                    // when it completes and the next one takes over
+    if (active != null) {
+      // A caller that names the running step is asking for a FROZEN pipeline (a still of one moment),
+      // so the cascade does not run and every row is drawn in its state at that moment.
+      const lead = Math.min(active, steps.length - 1);
+      out.push(text({ text: i < active ? '✓' : i === active ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
+        size: 24, weight: 700, color: i <= active ? T.green : T.dim, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
+      out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22,
+        color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
+      return;
+    }
+    // THE CASCADE RUNS. Each step is three short-lived layers — queued `·`, running `•`, finished `✓`
+    // — whose windows tile the block's life, so the glyph a frame shows is a pure function of t and
+    // the pipeline visibly advances instead of rendering pre-completed. A glyph is one layer per
+    // STATE rather than one layer that changes, because a layer's text is fixed at build time and
+    // the frame loop is not allowed to step from a previous frame.
+    const glyph = (txt, color, from, life, anim) => life > 0.01 && text({ text: txt, x, y: y + i * rowGap,
+      font: 'mono', size: 24, weight: 700, color, start: r2(from), duration: r2(life), anim, enterDur: 0.18, exitDur: 0.12 });
+    out.push(...[
+      glyph('·', T.dim, start, r2(t - start), 'fade'),
+      glyph('•', T.green, t, STEP, 'pop'),
+      glyph('✓', T.green, done, r2(end - done), 'pop'),
+    ].filter(Boolean));
+    // the label dims until its step is reached, then it is the row the eye is on
+    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22, color: T.sub,
+      start, duration: r2(t - start + 0.01), anim: 'fade', enterDur: 0.2, exitDur: 0 }));
+    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22, color: T.ink,
+      start: t, duration: r2(end - t), anim: 'fade', enterDur: 0.2 }));
   });
   // success card
   const cy = y + steps.length * rowGap + 30;
   out.push({
     type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: 16, pad: 22,
     ...cardChrome({ border: `1px solid ${T.greenSoft}` }),
-    start: r2(start + steps.length * 0.55), duration: 6, enterDur: 0.45,
+    start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop',
     children: [
       { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: '#fff' })] },
       { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
@@ -201,17 +241,21 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 // ─────────────────────────────────────────────────────────────────────────────
 // pillRow — a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {
+  // the chips POP IN one after another — a tag row filling, not a slab sliding up
   return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: 10, items: 'center',
-    start, duration: dur, anim: 'rise', enterDur: 0.4, children: items.map((p) => pill(p, fg, bg)) }];
+    start, duration: dur, anim: 'fade', enterDur: 0.2, children: items.map((p, i) => ({
+      ...pill(p, fg, bg), ...stagger(i, { step: 0.08, delay: 0.1, anim: 'pop', enterDur: 0.26 }) })) }];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // statBig — scale-contrast stat: a huge animated number + a tiny label. `to` counts up.
 export function statBig({ x, y, to = 0, from = 0, unit = '', label, size = 150, color = T.ink,
   start = 0, dur = 4 } = {}) {
+  // THE NUMBER COUNTS UP and the label is already there to receive it. The layer only fades in: a
+  // stat that also slides has two motions competing for the one thing you are meant to read.
   return [
     { type: 'count', x, y, from, to, unit, font: 'sans', size, weight: 700, color, ls: '-0.03em',
-      countStart: 0.2, countDur: 1.4, ease: 'easeOutExpo', start, duration: dur, anim: 'rise', enterDur: 0.4 },
+      countStart: 0.15, countDur: 1.4, ease: 'easeOutExpo', start, duration: dur, anim: 'fade', enterDur: 0.25 },
     label && text({ text: label, x, y: y + size * 0.9, font: 'mono', size: 20, color: T.dim, start: r2(start + 0.3), duration: dur - 0.3 }),
   ].filter(Boolean);
 }
@@ -268,13 +312,20 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
   // NEGATIVE below h ≈ 90 and inverted every bar.
   const plot = Math.max(0, h - 2 * CHART_PAD - 2 * (CHART_ROW + CHART_GAP_Y));
   const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 22 });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: CHART_GAP, pad: CHART_PAD,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: data.map((dp) => ({ type: 'group', layout: 'column', items: 'center', gap: CHART_GAP_Y, children: [
-      text({ text: String(dp.value), size: CHART_ROW, weight: 600, color: T.ink }),
-      box({ w: bw, h: Math.round(plot * dp.value / max) + 6, radius: 6, bg: color }),
-      text({ text: dp.label, size: CHART_ROW, color: T.dim, font: 'mono' }),
-    ] })) }];
+  // THE BARS GROW FROM THE BASELINE — the motion a bar chart is FOR — and the value caption rides up
+  // on top of its own bar. `html` rather than native boxes because a bar's height has to be a
+  // calc() off the driven `--p`, and a group child's height is written as inline px by the engine
+  // (and a nested group is not handed to the clip driver at all, so it cannot animate).
+  // The row is a FIXED height so the card does not resize while the bars grow.
+  const rowH = plot + 2 * (CHART_ROW + CHART_GAP_Y);
+  const col = (dp) => `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:${CHART_GAP_Y}px;height:100%">`
+    + `<div style="font:600 ${CHART_ROW}px var(--font-sans);color:${T.ink}">${dp.value}</div>`
+    + `<div style="width:${r2(bw)}px;height:calc(${Math.round(plot * dp.value / max) + 6}px * var(--p, 1));border-radius:6px;background:${color}"></div>`
+    + `<div style="font:400 ${CHART_ROW}px var(--font-mono);color:${T.dim}">${dp.label}</div></div>`;
+  const html = htmlCard({ w, pad: CHART_PAD, body: () =>
+    `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:${CHART_GAP}px;height:${rowH}px">`
+    + data.map(col).join('') + '</div>' });
+  return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];
 }
 
 // diff — a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
@@ -297,7 +348,10 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
 export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   title = title ?? message; body = body ?? desc;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, pad: 20,
-    ...cardChrome({ elevation: 2 }), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
+    // a notification ARRIVES FROM THE EDGE and leaves the way it came — the short, correct entrance
+    // for a chip. Nothing inside it should perform; it is one small statement.
+    ...cardChrome({ elevation: 2, anim: 'slide-right' }), out: 'slide-right',
+    start, duration: dur, enterDur: 0.4, exitDur: 0.3, children: [
       box({ w: 12, h: 12, radius: 100, bg: accent }),
       { type: 'group', layout: 'column', gap: 6, items: 'flex-start', grow: 1, children: [
         text({ text: title, size: 22, weight: 700, color: T.ink }),
@@ -308,21 +362,34 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
 
 // kpiRow — a row of stat cells (value + label). Scale contrast without a card grid.
 export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, layout: 'row', items: 'flex-start', gap, start, duration: dur, anim: 'rise', enterDur: 0.45, children:
-    items.map((it) => ({ type: 'group', layout: 'column', items: 'flex-start', gap: 4, children: [
-      text({ text: String(it.value), size: 64, weight: 700, color: T.ink, ls: '-0.02em' }),
-      text({ text: it.label, size: 18, color: T.dim, font: 'mono' }),
-    ] })) }];
+  // THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
+  // `count` layer and runs; one that gives a formatted string `value` (`$2.4M`, `42ms` — shapes the
+  // count layer cannot render) lands as text, so a caller opts into the counting by giving a number
+  // rather than by rewriting the row.
+  const figure = (it, beat) => (it.to != null
+    ? { type: 'count', from: it.from ?? 0, to: it.to, unit: it.unit || '', font: 'sans', size: 64, weight: 700,
+        color: T.ink, ls: '-0.02em', countStart: 0.15, countDur: 1.1, ease: 'easeOutExpo', ...beat }
+    : text({ text: String(it.value), size: 64, weight: 700, color: T.ink, ls: '-0.02em', ...beat }));
+  return [{ type: 'group', x, y, layout: 'row', items: 'flex-start', gap, start, duration: dur, anim: 'fade', enterDur: 0.25, children:
+    items.map((it, i) => {
+      const beat = stagger(i, { step: 0.14, delay: 0.15, enterDur: 0.35 });
+      return { type: 'group', layout: 'column', items: 'flex-start', gap: 4, children: [
+        figure(it, beat),
+        text({ text: it.label, size: 18, color: T.dim, font: 'mono', ...beat }),
+      ] };
+    }) }];
 }
 
 // callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
 export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone = 'info', start = 0, dur = 4 } = {}) {
   msg = msg ?? body ?? title;
   const ac = toneColor(tone);
+  // the strip WIPES OPEN from its leading rule, then the message reads in — the short entrance a
+  // status strip is for (a plate arrives edge-first; it does not fly)
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
-    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'rise', enterDur: 0.4, children: [
+    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
       box({ w: 4, h: 30, radius: 2, bg: ac }),
-      text({ text: msg, size: 22, weight: 500, color: T.ink }),
+      text({ text: msg, size: 22, weight: 500, color: T.ink, delay: 0.2, anim: 'fade', enterDur: 0.28 }),
     ] }];
 }
 
@@ -370,23 +437,29 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
   // the line DRAWS ON rather than the card sliding in — the motion a line chart is for. `len` is the
   // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
-  return [{ type: 'html', x, y, w, html, start, duration: dur,
-    anim: 'fade', enterDur: 0.25, exitDur: 0.3,
-    vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic' }];
+  return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.2 }) }];
 }
 
 // donutChart — a ring split into segments + a legend. segments = [{value,color,label}].
 export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
   const total = segments.reduce((s, d) => s + d.value, 0) || 1;
-  const rad = 40, C = 2 * Math.PI * rad, sw = 15; let off = 0;
-  const arcs = segments.map((s, i) => { const len = (s.value / total) * C;
-    const el = `<circle cx="50" cy="50" r="${rad}" fill="none" stroke="${s.color || seriesAt(i)}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;
-    off += len; return el; }).join('');
+  const rad = 40, C = 2 * Math.PI * rad, sw = 15;
+  // The ring SWEEPS round once, revealing each segment in turn, instead of the card sliding in.
+  // The trick that makes one driven variable do it: every segment is drawn as a FULL arc from 12
+  // o'clock out to its own cumulative end, clipped to how far `--p` has travelled — then painted
+  // BACK TO FRONT, so the shorter arcs land on top and each colour owns exactly its own wedge at
+  // every value of --p. One variable, no per-segment timeline, pure in t.
+  let cum = 0;
+  const ends = segments.map((s) => (cum += (s.value / total) * C));
+  const arcs = segments.map((s, i) =>
+    `<circle cx="50" cy="50" r="${rad}" fill="none" stroke="${s.color || seriesAt(i)}" stroke-width="${sw}"`
+    + ` style="stroke-dasharray:min(${ends[i].toFixed(2)}px, calc(${C.toFixed(2)}px * var(--p, 1))) ${C.toFixed(2)}px"`
+    + ` transform="rotate(-90 50 50)"/>`).reverse().join('');
   const ring = (inner) => `<svg viewBox="0 0 100 100" width="${inner}" height="${inner}" style="display:block;margin:0 auto 14px">${arcs}</svg>`;
   const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
   const html = htmlCard({ w, pad: CHART_PAD, label,
     body: (inner) => ring(inner) + `<div style="display:flex;flex-direction:column;gap:9px">${legend}</div>` });
-  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+  return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.3 }) }];
 }
 
 // stackedBar — multi-series bars. data = [{label,values:[..]}], series = [{name,color}].
@@ -395,13 +468,21 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
   // one caption row here, not two: a stack carries no value label above it (see barChart).
   const plot = Math.max(0, h - 2 * CHART_PAD - (CHART_ROW + CHART_GAP_Y));
   const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 24 });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-end', justify: 'space-between', gap: CHART_GAP, pad: CHART_PAD,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: data.map((d) => ({ type: 'group', layout: 'column', items: 'center', gap: CHART_GAP_Y, children: [
-      { type: 'group', layout: 'column', items: 'stretch', w: bw, gap: 2, children:
-        d.values.map((v, i) => box({ w: bw, h: Math.round(plot * v / max) + 2, radius: i === 0 ? 4 : 0, bg: (series[i] || {}).color || seriesAt(i) })) },
-      text({ text: d.label, size: CHART_ROW, color: T.dim, font: 'mono' }),
-    ] })) }];
+  // EACH STACK GROWS FROM THE BASELINE as one column: the wrapper's height IS the driven `--p` and
+  // the bands share it by flex ratio, so the series boundaries hold their proportions the whole way
+  // up instead of each band sliding over its neighbour. Same `html` reason as barChart.
+  const rowH = plot + CHART_ROW + CHART_GAP_Y;
+  const stack = (d) => {
+    const total = d.values.reduce((s, v) => s + v, 0);
+    const bands = d.values.map((v, i) => `<div style="flex:${r2(v)};min-height:0;border-radius:${i === 0 ? '4px 4px 0 0' : '0'};background:${(series[i] || {}).color || seriesAt(i)}"></div>`).join('');
+    return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:${CHART_GAP_Y}px;height:100%">`
+      + `<div style="display:flex;flex-direction:column;gap:2px;width:${r2(bw)}px;height:calc(${Math.round(plot * total / max) + 2}px * var(--p, 1))">${bands}</div>`
+      + `<div style="font:400 ${CHART_ROW}px var(--font-mono);color:${T.dim}">${d.label}</div></div>`;
+  };
+  const html = htmlCard({ w, pad: CHART_PAD, body: () =>
+    `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:${CHART_GAP}px;height:${rowH}px">`
+    + data.map(stack).join('') + '</div>' });
+  return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];
 }
 
 // pricingCard — plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
@@ -425,13 +506,15 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
 
 // statCard — a boxed KPI: label · animated count · optional delta chip.
 export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '', delta = '', deltaUp = true, start = 0, dur = 4 } = {}) {
+  // THE NUMBER COUNTS UP inside a card that is already there, and the delta chip lands after it has
+  // settled — the reading first, then the verdict on it.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 26,
-    ...cardChrome(), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.3, children: [
       text({ text: label, size: 18, color: T.dim, font: 'mono' }),
       { type: 'count', from, to, unit, font: 'sans', size: 56, weight: 700, color: T.ink, ls: '-0.02em', countStart: 0.2, countDur: 1.2, ease: 'easeOutExpo' },
       delta && { type: 'group', layout: 'row', items: 'center', gap: 6, children: [
-        text({ text: deltaUp ? '▲' : '▼', size: 15, color: deltaUp ? T.green : '#C0362C' }),
-        text({ text: delta, size: 17, weight: 600, color: deltaUp ? T.green : '#C0362C', font: 'mono' })] },
+        text({ text: deltaUp ? '▲' : '▼', size: 15, color: deltaUp ? T.green : '#C0362C', delay: 1.25, anim: 'pop', enterDur: 0.3 }),
+        text({ text: delta, size: 17, weight: 600, color: deltaUp ? T.green : '#C0362C', font: 'mono', delay: 1.25, anim: 'pop', enterDur: 0.3 })] },
     ].filter(Boolean) }];
 }
 
@@ -453,14 +536,19 @@ export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', ava
 
 // fileTree — an indented file/folder list; `active` highlights the focused row.
 export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
+  // THE TREE EXPANDS: rows arrive top-down, each sliding in from its own indent. The highlight moved
+  // off the row wrapper and onto the row's own text leaf, because the wrapper is a nested group and
+  // the engine never registers one — the lit row would have been lit from the first frame while its
+  // label was still arriving.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 20,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 8, pad: '6px 10px',
-      ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 8,
       children: [
         box({ w: (it.depth || 0) * 22, h: 18 }),
-        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19,
-          weight: it.active ? 600 : 400, color: it.active ? T.accentInk : (it.type === 'dir' ? T.ink : T.sub) }),
+        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19, pad: '6px 10px',
+          ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
+          weight: it.active ? 600 : 400, color: it.active ? T.accentInk : (it.type === 'dir' ? T.ink : T.sub),
+          ...stagger(i, { step: 0.11, delay: 0.2, anim: 'slide-left', enterDur: 0.3 }) }),
       ] })) }];
 }
 
@@ -475,28 +563,35 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
     ? { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' }
     : { info: '#5A6B7F', ok: '#1F6B3A', warn: '#8A5A00', error: '#B02A37' };
   const base = dark ? '#E8ECF1' : T.ink;
+  // A LOG STREAMS: lines land one after another, fast and even, the way output actually arrives.
+  const beat = (i) => stagger(i, { step: 0.13, delay: 0.15, anim: 'fade', enterDur: 0.18 });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
-    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3,
-    children: lines.map((ln) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
-      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#8FA3BA' : T.dim }),
-      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base }),
+    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+    children: lines.map((ln, i) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
+      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#8FA3BA' : T.dim, ...beat(i) }),
+      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base, ...beat(i) }),
     ].filter(Boolean) })) }];
 }
 
 // commitRow — a git history list (hash · message · author · time), hairline-divided.
 export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: commits.flatMap((c, i) => [
-      i > 0 && box({ h: 1, bg: T.hair }),
-      { type: 'group', layout: 'row', items: 'center', gap: 14, pad: '16px 22px', children: [
-        text({ text: c.hash, font: 'mono', size: 17, weight: 600, color: T.accent }),
-        { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
-          text({ text: c.msg, size: 19, weight: 500, color: T.ink }),
-          text({ text: `${c.author} · ${c.time}`, font: 'mono', size: 15, color: T.dim }),
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    // HISTORY LANDS COMMIT BY COMMIT. Each commit's three leaves share one delay so the row arrives
+    // as a unit (the row wrapper itself is a nested group, which the engine never registers).
+    children: commits.flatMap((c, i) => {
+      const beat = stagger(i, { step: 0.18, delay: 0.2, anim: 'slide-left', enterDur: 0.32 });
+      return [
+        i > 0 && box({ h: 1, bg: T.hair }),
+        { type: 'group', layout: 'row', items: 'center', gap: 14, pad: '16px 22px', children: [
+          text({ text: c.hash, font: 'mono', size: 17, weight: 600, color: T.accent, ...beat }),
+          { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
+            text({ text: c.msg, size: 19, weight: 500, color: T.ink, ...beat }),
+            text({ text: `${c.author} · ${c.time}`, font: 'mono', size: 15, color: T.dim, ...beat }),
+          ] },
         ] },
-      ] },
-    ].filter(Boolean)) }];
+      ].filter(Boolean);
+    }) }];
 }
 
 // phoneFrame — a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
@@ -533,65 +628,98 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 
 
 // checklist — items with checked/unchecked boxes; done rows dim (reads as completed).
 export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
+  // ITEMS TICK OFF ONE AFTER ANOTHER, top to bottom — the motion a checklist is FOR. The card only
+  // fades in; the rows perform.
+  //
+  // The box is a LEAF (a chip on a text layer) rather than a group wrapping a glyph, because only a
+  // leaf child is handed to the clip driver: a nested group child is built and then never registered,
+  // so it cannot carry its own timing. Both states are the SAME glyph in the SAME chip, the open one
+  // simply unpainted, so a row does not resize at the moment it completes.
+  const CHIP = { text: '✓', size: 16, weight: 700, radius: 8, pad: '5px 7px' };
+  const beat = (i, extra) => stagger(i, { step: 0.26, delay: 0.2, enterDur: 0.3, ...extra });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 26,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: items.map((it) => ({ type: 'group', layout: 'row', items: 'center', gap: 14, children: [
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 14, children: [
       it.done
-        ? box({ w: 26, h: 26, radius: 8, bg: T.green, layout: 'row', justify: 'center', items: 'center', children: [text({ text: '✓', size: 16, weight: 700, color: '#fff' })] })
-        : box({ w: 26, h: 26, radius: 8, bg: T.card, border: `2px solid ${T.hair}` }),
-      text({ text: it.text, size: 21, weight: 500, color: it.done ? T.dim : T.ink }),
+        ? text({ ...CHIP, color: '#fff', bg: T.green, border: '2px solid transparent', ...beat(i, { anim: 'pop', delay: 0.34 }) })
+        : text({ ...CHIP, color: 'transparent', bg: T.card, border: `2px solid ${T.hair}`, ...beat(i, { anim: 'fade' }) }),
+      text({ text: it.text, size: 21, weight: 500, color: it.done ? T.dim : T.ink, ...beat(i) }),
     ] })) }];
 }
 
 // table — a data table: `cols` header + `rows` of cells, hairline-divided.
 export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 } = {}) {
-  const cell = (t, head) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink });
-  const row = (cells, head) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head)) });
+  // ROWS FILL IN ONE AFTER ANOTHER under a header that is already there — how a table actually
+  // populates. The timing rides the CELLS, not the row: only a leaf child is registered with the clip
+  // driver, so a row wrapper cannot carry its own window. Every cell in a row shares one delay, so
+  // the row still reads as a single arrival.
+  const cell = (t, head, beat) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink, ...beat });
+  const row = (cells, head, beat = {}) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head, beat)) });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '20px 24px',
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: [row(cols, true), box({ h: 1, bg: T.hair }),
-      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }), row(r, false)].filter(Boolean))] }];
+      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }),
+        row(r, false, stagger(i, { step: 0.16, delay: 0.3, anim: 'slide-left', enterDur: 0.32 }))].filter(Boolean))] }];
 }
 
 // timeline — a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
 export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
+  // THE RAIL ADVANCES DOWN THE SEQUENCE: each dot lands and its entry arrives beside it, in order,
+  // so the eye travels the timeline instead of being handed the whole thing at once. The dot is a
+  // LEAF (an empty text layer carrying the chip) because a nested group child is never registered
+  // with the clip driver and so cannot be timed; the connecting rail stays static, as scaffolding.
+  const beat = (i, extra) => stagger(i, { step: 0.3, delay: 0.2, enterDur: 0.3, ...extra });
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 26,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
+    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: 16, children: [
       { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
-        box({ w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair }),
+        text({ text: '', w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair, ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
         i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
       ].filter(Boolean) },
       { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: '0 0 22px', children: [
-        text({ text: it.title, size: 20, weight: 600, color: T.ink }),
-        it.meta && text({ text: it.meta, font: 'mono', size: 15, color: T.dim }),
+        text({ text: it.title, size: 20, weight: 600, color: T.ink, ...beat(i, { anim: 'slide-left', delay: 0.3 }) }),
+        it.meta && text({ text: it.meta, font: 'mono', size: 15, color: T.dim, ...beat(i, { anim: 'fade', delay: 0.36 }) }),
       ].filter(Boolean) },
     ] })) }];
 }
 
 // stepFlow — a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
 export function stepFlow({ x, y, w = 720, steps = [], active = 0, start = 0, dur = 4 } = {}) {
+  // THE TRACK LIGHTS UP LEFT TO RIGHT, one step at a time: the numeral lands in its ring, then the
+  // step's name, then the next one — so the progress reads as travelled rather than declared. The
+  // rings are scaffolding and stay; the numeral and the label are LEAVES, which is what the engine
+  // registers with the clip driver (a nested group child is built and then never timed).
   const children = [];
   steps.forEach((s, i) => {
     const state = i < active ? 'done' : i === active ? 'now' : 'todo';
     const dotBg = state === 'todo' ? T.surface : T.accent;
     children.push({ type: 'group', layout: 'column', items: 'center', gap: 10, children: [
       box({ w: 44, h: 44, radius: 100, bg: dotBg, ...(state === 'now' ? { border: `3px solid ${T.accentSoft}` } : {}),
-        layout: 'row', justify: 'center', items: 'center', children: [text({ text: state === 'done' ? '✓' : String(i + 1), size: 20, weight: 700, color: state === 'todo' ? T.dim : '#fff' })] }),
-      text({ text: s, size: 18, weight: state === 'todo' ? 500 : 600, color: state === 'todo' ? T.sub : T.ink }),
+        layout: 'row', justify: 'center', items: 'center', children: [
+          text({ text: state === 'done' ? '✓' : String(i + 1), size: 20, weight: 700, color: state === 'todo' ? T.dim : '#fff',
+            ...stagger(i, { step: 0.32, delay: 0.2, anim: 'pop', enterDur: 0.26 }) })] }),
+      text({ text: s, size: 18, weight: state === 'todo' ? 500 : 600, color: state === 'todo' ? T.sub : T.ink,
+        ...stagger(i, { step: 0.32, delay: 0.3, enterDur: 0.3 }) }),
     ] });
-    if (i < steps.length - 1) children.push({ type: 'group', grow: 1, layout: 'column', children: [box({ h: 21 }), box({ h: 2, radius: 1, bg: i < active ? T.accent : T.hair })] });
+    if (i < steps.length - 1) children.push({ type: 'group', grow: 1, layout: 'column', items: 'stretch', children: [box({ h: 21 }), box({ h: 2, radius: 1, bg: i < active ? T.accent : T.hair })] });
   });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children }];
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35, children }];
 }
 
 // kanban — columns of small cards. columns = [{title, cards:[string]}].
 export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {}) {
   const colW = (w - 16 * (columns.length - 1)) / columns.length;
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: columns.map((col) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 10, children: [
-      text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim }),
-      ...col.cards.map((c) => box({ bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '14px 16px', children: [text({ text: c, size: 18, weight: 500, color: T.ink })] })),
+  // THE BOARD DEALS ITSELF: column headers first, then the cards drop in reading order — across the
+  // columns, then down — so the eye is led through the board instead of watching it arrive as a slab.
+  // Each card is a LEAF with the card chrome on it (a group child is never registered with the clip
+  // driver, so a card wrapping its own text could not be timed).
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 10, children: [
+      text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
+      // reading order across the board: card row `ri` in every column lands before row `ri + 1` does
+      ...col.cards.map((c, ri) => text({ text: c, size: 18, weight: 500, color: T.ink,
+        bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '14px 16px',
+        ...stagger(ri * columns.length + ci, { step: 0.11, delay: 0.4, anim: 'pop', enterDur: 0.3 }) })),
     ] })) }];
 }
 
@@ -600,11 +728,15 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
 
 // chatBubble — a message thread; `me:true` bubbles right in accent, others left in a hairline card.
 export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 10, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start',
-      start: r2(start + i * 0.12), duration: dur, children: [
-      { type: 'group', bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 18px',
-        children: [text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink })] }] })) }];
+  // BUBBLES ARRIVE IN SEQUENCE, each from its own side — a conversation happening, not a transcript
+  // appearing. The bubble is a LEAF carrying its own chrome: the row wrapper that used to hold it is
+  // a nested group, and a nested group is built but never registered with the clip driver, so the
+  // per-message `start` this block used to set was accepted and silently ignored on all four bubbles.
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 10, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+    children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start', children: [
+      text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink,
+        bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 18px',
+        ...stagger(i, { step: 0.42, delay: 0.2, anim: m.me ? 'slide-right' : 'slide-left', enterDur: 0.35 }) })] })) }];
 }
 
 // tweetCard — a post card: avatar · name · @handle · body · repost/like counts.
@@ -623,14 +755,17 @@ export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = 
 
 // avatarStack — overlapping avatar circles (initials or images) + an optional "+N" overflow.
 export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 0, dur = 4 } = {}) {
+  // THE AVATARS LAND ONE AFTER ANOTHER, each dropping onto the edge of the last — a team assembling.
+  // These are TOP-LEVEL layers, so the stagger is a real `start` (0.07s apart was fast enough to read
+  // as one block arriving; 0.14 with a `pop` reads as individual people).
   const step = size * 0.65; const out = [];
   avatars.forEach((a, i) => {
-    const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: `2px solid ${T.card}`, start: r2(start + i * 0.07), duration: dur, anim: 'rise', enterDur: 0.3 };
+    const common = { x: r2(x + i * step), y, w: size, h: size, radius: 100, border: `2px solid ${T.card}`, start: r2(start + i * 0.14), duration: r2(dur - i * 0.14), anim: 'pop', enterDur: 0.3 };
     const av = typeof a === 'string' ? { avatar: a } : { avatar: a.avatar, initials: a.initials, name: a.name, bg: a.color || T.accentSoft };
     out.push({ ...avatarEl({ size, ...av }), ...common });
   });
   if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: 100, bg: T.surface, border: `2px solid ${T.card}`,
-    layout: 'row', justify: 'center', items: 'center', start: r2(start + avatars.length * 0.07), duration: dur, anim: 'rise', enterDur: 0.3, children: [text({ text: '+' + extra, size: Math.round(size * 0.3), weight: 600, color: T.sub })] });
+    layout: 'row', justify: 'center', items: 'center', start: r2(start + avatars.length * 0.14), duration: r2(dur - avatars.length * 0.14), anim: 'pop', enterDur: 0.3, children: [text({ text: '+' + extra, size: Math.round(size * 0.3), weight: 600, color: T.sub })] });
   return out;
 }
 
@@ -757,10 +892,12 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   // White on the amber fill measures 2.05:1. Ink on it measures 8.86:1, and dark-on-amber is what a
   // warning chip looks like anyway — the fix keeps the brand colour and changes the text.
   const onAc = onColor(ac);
+  // a shield STAMPS IN, and its value chip lands a beat later — the whole motion of a status token.
+  // Nothing more: over-animating a static chip is how a registry stops reading as a vocabulary.
   return [{ type: 'group', x, y, bg: '#3A3A38', radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
-    start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+    start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
       text({ text: label, font: 'mono', size: 17, weight: 600, color: '#fff', pad: '4px 12px' }),
-      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc })] },
+      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
     ] }];
 }
 
@@ -780,29 +917,32 @@ export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color =
   const html = htmlCard({ w, pad: CHART_PAD, align: 'center', body: (inner) => svg(inner)
     + `<div style="font:700 34px var(--font-sans);color:${T.ink};letter-spacing:-0.02em;margin-top:-4px">${value}${max === 100 ? '%' : ''}</div>`
     + (label ? `<div style="font:600 16px var(--font-mono);color:${T.dim};margin-top:4px">${label}</div>` : '') });
-  return [{ type: 'html', x, y, w, html, start, duration: dur,
-    anim: 'fade', enterDur: 0.25, exitDur: 0.3,
-    vars: { '--p': [0, pct] }, varsDur: 1.1, varsDelay: 0.15, varsEase: 'easeOutCubic' }];
+  return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 
 // progressRing — a circular progress ring with a % centre label (bare, for overlaying).
 export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const C = 2 * Math.PI * 42;
+  // The ring FILLS to its reading (the same `--p` mechanism as gauge), rather than the whole card
+  // sliding in. The dash length is computed in CSS from the driven variable, so the motion is what
+  // the block is for. The `%` stays put: it is the destination the ring is travelling to.
   const svg = `<svg viewBox="0 0 100 100" width="${size}" height="${size}" style="display:block">`
     + `<circle cx="50" cy="50" r="42" fill="none" stroke="${T.hair}" stroke-width="9"/>`
-    + `<circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C * pct).toFixed(2)} ${C.toFixed(2)}" transform="rotate(-90 50 50)"/>`
+    + `<circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"`
+    + ` stroke-dasharray="calc(${C.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${C.toFixed(2)}" transform="rotate(-90 50 50)"/>`
     + `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-weight="700" font-size="22" fill="${T.ink}">${Math.round(pct * 100)}%</text></svg>`;
   const html = `<div style="width:${size}px">${svg}${label ? `<div style="text-align:center;font:600 16px var(--font-mono);color:${T.dim};margin-top:8px">${label}</div>` : ''}</div>`;
-  return [{ type: 'html', x, y, w: size, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
+  return [{ type: 'html', x, y, w: size, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 
 // banner — a full-width accent announcement bar: icon · message · CTA.
 export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   msg = msg || body || title;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 22px',
-    bg: accent, radius: 12, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+    // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
+    bg: accent, radius: 12, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3, children: [
       text({ text: icon, size: 20, color: onColor(accent) }), text({ text: msg, size: 20, weight: 600, color: onColor(accent), grow: 1 }),
-      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: onColor(accent) })] },
+      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: onColor(accent), delay: 0.35, anim: 'pop', enterDur: 0.3 })] },
     ].filter(Boolean) }];
 }
 
@@ -1101,6 +1241,7 @@ const FACTORIES = { ...APP, card, codeBlock, terminal, loadingBar, deploySuccess
   logoWall, badge, gauge, progressRing, banner, spinner, lowerThird, searchEngine };
 
 export const BLOCKS = { ...FACTORIES };
+import * as INTERACT from './interact.mjs'; export * from './interact.mjs'; Object.assign(FACTORIES, INTERACT); Object.assign(BLOCKS, INTERACT); // interaction family: pointer · tap · keyboard · press (blocks/interact.mjs)
 for (const e of CATALOG) {
   if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
   const fam = FACTORIES[e.family];

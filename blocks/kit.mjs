@@ -71,12 +71,48 @@ export const R = { tight: 12, card: 14, soft: 16 };
 // cardChrome — the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because
 // entrance duration is a per-block motion decision, not chrome.
-export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg = T.card } = {}) {
+export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg = T.card, anim = 'rise' } = {}) {
   // `elevation: 0` means NO shadow, and the schema's minimum is 1 — so a flat card omits the key
   // rather than emitting a value the validator rejects. Asking for flat is legitimate (an empty-state
   // surface is meant to read as unfilled); a block that silently emits an unrenderable layer is not.
-  return { bg, radius, border, ...(elevation ? { elevation } : {}), anim: 'rise' };
+  return { bg, radius, border, ...(elevation ? { elevation } : {}), anim };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION. Every factory in the library wore `anim: 'rise'` — a CONTAINER entrance — because the
+// engine could only animate transform/opacity, so a block could only ever ARRIVE. That made the
+// registry unbrowsable: 101 tiles all swiped up and none of them showed what the block is FOR.
+// Three shapes cover the whole library, and each is a pure function of the layer's own window.
+//
+//   sweep()   — the CONTENT performs. The engine interpolates `--p` across the layer's window and
+//               the block writes var(--p) into its own CSS/SVG (an arc's dash, a line's dashoffset).
+//               The card just fades in, fast, and gets out of the way.
+//   stagger() — one row's own start INSIDE its group. Group children are driven off `delay`
+//               (relative to the group's start), never `start`: the engine overwrites a child's
+//               `start` with the group's, so an authored one is accepted and silently ignored.
+//   growUp() / fillRight() — a bar grows from its baseline / a fill wipes L→R. A group child's
+//               height is written as inline px so it cannot be a calc(); the honest equivalent is a
+//               hard-edged mask whose visible fraction IS `--p`, measured from the anchored edge.
+
+const P_EASE = 'easeOutCubic';
+
+export const sweep = ({ to = 1, dur = 1.1, delay = 0.15, ease = P_EASE } = {}) => ({
+  anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+  vars: { '--p': [0, to] }, varsDur: dur, varsDelay: delay, varsEase: ease,
+});
+
+export const stagger = (i, { step = 0.1, delay = 0.15, anim = 'rise', enterDur = 0.32 } = {}) => ({
+  delay: r2(delay + i * step), anim, enterDur,
+});
+
+// The mask is a two-stop gradient with BOTH stops at `--p`, so the edge is hard: the bar reads as
+// growing rather than fading up a gradient.
+const revealMask = (dir) => `linear-gradient(to ${dir}, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))`;
+const reveal = (dir) => ({ delay = 0.15, dur = 0.75, ease = P_EASE } = {}) => ({
+  mask: revealMask(dir), vars: { '--p': [0, 1] }, varsDur: dur, varsDelay: delay, varsEase: ease,
+});
+export const growUp = reveal('top');
+export const fillRight = reveal('right');
 
 // htmlCard — the same hairline card for the html+SVG blocks (charts and gauges, which need curves).
 // THE INNER WIDTH IS DERIVED FROM THE PAD. It used to be restated by hand and two of the three

@@ -22,8 +22,14 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // boundary is a rule with a hole in it: `avatarEl` and `toneColor` now paint for every identity and
 // status block in the library, so an unreadable pair or a baked brand in there reaches more callers
 // than one in any single factory would. The gate reads what ships, not one file of it.
-const SRC = ['blocks/index.mjs', 'blocks/kit.mjs', 'blocks/app.mjs']
-  .map((f) => fs.readFileSync(path.join(repoRoot, f), 'utf8')).join('\n');
+// EVERY blocks/*.mjs, discovered rather than listed. The list was hand-maintained, which makes adding
+// a file the way to escape the gate — and it is the same failure the file boundary already caused
+// once: a new family lands, nobody remembers this array, and its factories ship unaudited. The only
+// signal was an `unauditable` row per catalog entry, which reads as a manifest problem, not a gate
+// that cannot see the code. catalog.mjs is excluded because it is data, audited separately below.
+const SRC = fs.readdirSync(path.join(repoRoot, 'blocks'))
+  .filter((f) => f.endsWith('.mjs') && f !== 'catalog.mjs').sort()
+  .map((f) => fs.readFileSync(path.join(repoRoot, 'blocks', f), 'utf8')).join('\n');
 // THE MANIFEST IS A SECOND SOURCE OF DEFAULTS, and auditing only the factories misses it completely.
 // Proven the hard way: the brand URL was removed from `browserFrame` and the catalog row put it
 // straight back, and the invented "1.2s" was removed from `deploySuccess` and still shipped from a

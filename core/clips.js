@@ -12,6 +12,12 @@ const ANIM = {
   'slide-left': (t) => slide(t, 'left'), 'slide-right': (t) => slide(t, 'right'),
   'slide-up': (t) => slide(t, 'up'), 'slide-down': (t) => slide(t, 'down'),
   wipe: (t) => wipe(t, 'left'), 'wipe-right': (t) => wipe(t, 'right'),
+  // core/motion.js `wipe()` has implemented all four directions since it was written; only the two
+  // horizontal ones were ever registered here, so a bar could not grow from its baseline by name and
+  // blocks reached for a hand-rolled mask instead. Named for the edge the reveal TRAVELS TOWARD, which
+  // is how `wipe`/`wipe-right` already read: `wipe-down` grows downward from the top edge,
+  // `wipe-up` grows upward from the bottom — the one a bar chart wants.
+  'wipe-down': (t) => wipe(t, 'up'), 'wipe-up': (t) => wipe(t, 'down'),
   iris: circleWipe, clock: clockWipe,
 };
 // Exported so the schema and the conformance sweep can DERIVE the valid names instead of restating

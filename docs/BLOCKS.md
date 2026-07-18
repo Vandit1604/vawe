@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_132 entries across 56 families._
+_137 entries across 60 families._
 
 | Block | For |
 |---|---|
@@ -75,7 +75,7 @@ _132 entries across 56 families._
 | `codeBlock.aurora` | code theme · teal dark, mint and violet |
 | `codeBlock.linen` | code theme · warm light, earthen syntax |
 | `codeBlock.frost` | code theme · cool light, ice-blue syntax |
-| `terminal` | command prompt; command decodes in, output reveals |
+| `terminal` | command prompt; command types in, output answers after it |
 | `terminal.git` | git command |
 | `terminal.install` | install command |
 | `terminal.build` | build output |
@@ -191,6 +191,11 @@ _132 entries across 56 families._
 | `profileHeader` | account header · avatar over name, handle, stat row |
 | `onboardCard` | onboarding pane · progress dots, title, body, CTA |
 | `emptyState` | zero state · icon tile, what is missing, the action that fills it |
+| `pointer` | mouse pointer · travels to a target and clicks it (ripple) |
+| `tapRipple` | touch tap · contact dot and an expanding ring, for phone demos |
+| `keyboard` | phone keyboard · qwerty keys, rises up into frame |
+| `keyboard.numeric` | phone keypad · numeric grid, rises up into frame |
+| `pressButton` | CTA that depresses and releases when it is clicked |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

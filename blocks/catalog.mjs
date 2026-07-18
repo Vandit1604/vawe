@@ -21,7 +21,7 @@ export const CATALOG = [
     props: { w: 540, dark: true, label: 'scene.json', size: 19, lines: [
       { text: '{', color: '#8898AA' }, { text: '  "module": "scene",', color: '#E8ECF1' },
       { text: '  "theme": "creed",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
-  { name: 'terminal', family: 'terminal', blurb: 'command prompt; command decodes in, output reveals',
+  { name: 'terminal', family: 'terminal', blurb: 'command prompt; command types in, output answers after it',
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
   { name: 'loadingBar', family: 'loadingBar', blurb: 'determinate fill wipes L→R, lands ✓ done',
     props: { w: 340, fillDur: 1.6, label: 'rendering' } },
@@ -341,4 +341,21 @@ export const CATALOG = [
     props: { w: 460, step: 2, of: 3, title: 'Pick a workspace', body: 'Choose where new drafts are saved. You can change this later.', cta: 'Continue' } },
   { name: 'emptyState', family: 'emptyState', blurb: 'zero state · icon tile, what is missing, the action that fills it',
     props: { w: 460, icon: '☐', title: 'Nothing here yet', body: 'Anything you save shows up in this list.', cta: 'Add the first one' } },
+  // INTERACTION (blocks/interact.mjs). The registry could depict interfaces but not USING them: the
+  // `cursor` layer type was reachable from exactly one block (searchEngine.results) with its path
+  // hardcoded, a touch tap had no shape, and nothing in the library could be pressed. Appended at the
+  // END for the same reason as the app surfaces — the site crops thumbnails by cell index.
+  { name: 'pointer', family: 'pointer', blurb: 'mouse pointer · travels to a target and clicks it (ripple)',
+    props: { to: { dx: 300, dy: 190 }, clickAt: 1.3, size: 44 } },
+  // `at` is late on purpose: a tap is over in half a second, and the sheet samples a block's still at
+  // the last moment it is on screen — an early ripple has already faded by then and the thumbnail is
+  // a blank square. Tapping near the end of the window puts the ring mid-flight in the still.
+  { name: 'tapRipple', family: 'tapRipple', blurb: 'touch tap · contact dot and an expanding ring, for phone demos',
+    props: { at: 4.2, size: 150 } },
+  { name: 'keyboard', family: 'keyboard', blurb: 'phone keyboard · qwerty keys, rises up into frame',
+    props: { w: 420, layout: 'qwerty' } },
+  { name: 'keyboard.numeric', family: 'keyboard', blurb: 'phone keypad · numeric grid, rises up into frame',
+    props: { w: 300, layout: 'numeric' } },
+  { name: 'pressButton', family: 'pressButton', blurb: 'CTA that depresses and releases when it is clicked',
+    props: { w: 280, label: 'Start a project', pressAt: 1 } },
 ];

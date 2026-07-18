@@ -593,7 +593,9 @@
             "wipe-right",
             "iris",
             "clock",
-            "none"
+            "none",
+            "wipe-down",
+            "wipe-up"
           ]
         },
         "out": {

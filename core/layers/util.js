@@ -125,26 +125,33 @@ export function createKit(ctx) {
 
   function addGroupChild(parentEl, C, rootL) { // recursive: nested group OR a text/image/count leaf
     const c = document.createElement('div');
-    if (C.type === 'group') {
+    // A nested GROUP used to return here — before decorate(), before the timing dataset, before the
+    // extra[] push. So `delay`, `anim`, `out`, `enterDur`, `mask`, `filter` and `vars` were accepted on
+    // a nested group and silently ignored, while the identical props worked one node down on a leaf.
+    // MISTAKES #69 fixed exactly this and fixed it for LEAVES ONLY; the early return was two lines
+    // above the code being written and got missed. A group is a timed element like any other.
+    const isGroup = C.type === 'group';
+    if (isGroup) {
       c.className = 'hs-group';
       layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
       parentEl.appendChild(c);
       for (const gc of C.children || []) addGroupChild(c, gc, rootL);
-      return;
     }
-    c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
+    if (!isGroup) c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
     // DELEGATE to the primitive. This file used to re-implement a SUBSET of each type's build inline,
     // which is why a child silently lost image `canvasFx` (baked at boot, then thrown away), `ken`'s
     // clip box, `edgeFade`, and text's `fit`/`fitH`/`maxLines`/`raw` and the whole microType pass.
     // Re-implementing a builder is how the subset drifts from the original; calling it cannot.
-    if (api.buildLeaf) api.buildLeaf(c, C);
-    else if (C.type === 'image') { c.innerHTML = icon(C.src, ''); }
-    else { styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2); chipBox(c, C); }
-    decorate(c, C);
-    sizeChild(c, C, C.type === 'image');
+    if (!isGroup) {
+      if (api.buildLeaf) api.buildLeaf(c, C);
+      else if (C.type === 'image') { c.innerHTML = icon(C.src, ''); }
+      else { styleText(c, C, (rootL.start ?? 0) + (rootL.duration ?? 2) / 2); chipBox(c, C); }
+      sizeChild(c, C, C.type === 'image');
+    }
+    decorate(c, C);   // both paths: mask / filter / look / fade / reflect / logotype
     if (C.critical) c.setAttribute('data-layer', 'critical');
     if (parentEl.dataset.free) { c.style.position = 'absolute'; c.style.left = (C.x || 0) + 'px'; c.style.top = (C.y || 0) + 'px'; }
-    parentEl.appendChild(c);
+    if (!isGroup) parentEl.appendChild(c);   // a group appended itself above, before recursing
     // `delay` staggers a child WITHIN its group's window (it still ends with the group, so the exit
     // stays in formation). Group children previously all shared the root's exact window, which is why
     // a wall could only ever arrive as one block. Defaults to 0 → existing groups are unchanged.

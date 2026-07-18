@@ -47,7 +47,7 @@
   {
     "name": "terminal",
     "family": "terminal",
-    "blurb": "command prompt; command decodes in, output reveals",
+    "blurb": "command prompt; command types in, output answers after it",
     "props": {
       "w": 540,
       "command": "make video",
@@ -2179,6 +2179,56 @@
       "title": "Nothing here yet",
       "body": "Anything you save shows up in this list.",
       "cta": "Add the first one"
+    }
+  },
+  {
+    "name": "pointer",
+    "family": "pointer",
+    "blurb": "mouse pointer · travels to a target and clicks it (ripple)",
+    "props": {
+      "to": {
+        "dx": 300,
+        "dy": 190
+      },
+      "clickAt": 1.3,
+      "size": 44
+    }
+  },
+  {
+    "name": "tapRipple",
+    "family": "tapRipple",
+    "blurb": "touch tap · contact dot and an expanding ring, for phone demos",
+    "props": {
+      "at": 4.2,
+      "size": 150
+    }
+  },
+  {
+    "name": "keyboard",
+    "family": "keyboard",
+    "blurb": "phone keyboard · qwerty keys, rises up into frame",
+    "props": {
+      "w": 420,
+      "layout": "qwerty"
+    }
+  },
+  {
+    "name": "keyboard.numeric",
+    "family": "keyboard",
+    "blurb": "phone keypad · numeric grid, rises up into frame",
+    "props": {
+      "w": 300,
+      "layout": "numeric"
+    }
+  },
+  {
+    "name": "pressButton",
+    "family": "pressButton",
+    "blurb": "CTA that depresses and releases when it is clicked",
+    "props": {
+      "w": 280,
+      "label": "Start a project",
+      "pressAt": 1
     }
   }
 ]

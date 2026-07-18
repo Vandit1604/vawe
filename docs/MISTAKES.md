@@ -1245,3 +1245,28 @@ pairing the CLOSING quote of one empty default with the OPENING quote of the nex
 corrected, `meta` is back in the list — the rule did not need weakening, the parser needed fixing.
 **Rule:** when a gate is quiet about something you can see, check its INPUT SET before its logic. Four
 of the last eight gate bugs were the file list, not the rule.
+
+---
+
+## 73. Every block could only enter, because the engine could only move a box
+
+**What:** 101 of ~130 factories carried `anim: 'rise'`. The block registry — whose entire purpose is
+"see what this does, then use it" — showed 131 tiles all doing the same thing: sliding up.
+**Root cause:** not laziness in the blocks. The engine could drive transform, opacity and blur and
+nothing else, so there was no way to animate what a block IS. A gauge could not sweep to its reading,
+a bar could not grow, a line could not draw on. Every author hit the same wall and reached for the
+same container entrance, and the sameness looked like a style choice rather than a missing capability.
+**Fix:** `vars: { '--p': [0, 1] }` interpolates a CSS custom property across the layer's window. The
+block writes `var(--p)` into its own CSS or SVG and the engine drives the number — one mechanism, so
+~25 blocks got their real motion without 25 bespoke animations. Pure in n.
+**Three gaps it exposed, each fixed:**
+- A nested GROUP returned early in `addGroupChild`, before the decoration, the timing dataset and the
+  clip driver. So `delay`/`anim`/`out`/`mask`/`filter`/`vars` were accepted and ignored on a nested
+  group while working one node down on a leaf. #69 fixed exactly this and fixed it for LEAVES ONLY —
+  the early return was two lines above the code being written.
+- `core/motion.js` `wipe()` has implemented all four directions since it was written; `ANIM` only ever
+  registered the two horizontal ones, so a bar could not grow from its baseline by name.
+- `loadingBar` put its whole fill inside the ENTRANCE envelope (`enterDur: fillDur`), so the bar faded
+  up from transparent for the entire wipe. Anyone reaching for `enterDur` as a duration will hit it.
+**Rule:** when every author makes the same choice, ask what the alternative would have cost them. A
+uniform style across 101 call sites is usually a missing capability wearing a convention's clothes.
