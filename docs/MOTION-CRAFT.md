@@ -56,10 +56,12 @@ you from.
   changes here" · `ridgedBurn` hotter burn for launches/records · `lens` premium product glamour (dark scenes, it is a light source) ·
   `thermal` intensity/data beats, sparingly · `whipPan` momentum cut when the layout also moves
   sideways · `chromaticSplit` impact with a tech accent (softer than `glitch`) · `dispersion`
-  spectral flourish for color/light stories only.
+  spectral flourish for color/light stories only · `gridPixelateWipe` a digital/retro-game or
+  data-glitch cut (tint with `color` to a brand accent; the block front reads as "loading/decoding").
 - **Ambient shader looks** (`shader` layer, looping): fields BEHIND content at intensity ~0.3 — `flow`
   premium default · `aurora` soft/organic · `plasma` retro/energetic · `drift` calm/dreamy · `mist`
-  barely-there. Overlay looks ON TOP at intensity ~0.6-0.9, one per film — `vhs` lo-fi/nostalgic ·
+  barely-there · `matrixDecode` hacker/terminal/AI-code backdrop (`colors[0]` sets the rain hue; keep
+  body copy in the darker gutters). Overlay looks ON TOP at intensity ~0.6-0.9, one per film — `vhs` lo-fi/nostalgic ·
   `crt` retro-tech/terminal · `filmGrain` texture on flat frames (keeps contrast) · `lightLeak` warm
   analog warmth over a hero · `barrel` a lens-shot feel · `heatShimmer` tension/heat/desert · `ripple`
   calm water/reflection · `kaleidoscope` a music/psychedelic flourish. Place overlays on a high track;

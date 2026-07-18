@@ -235,7 +235,8 @@
             "thermal",
             "whipPan",
             "chromaticSplit",
-            "dispersion"
+            "dispersion",
+            "gridPixelateWipe"
           ]
         },
         "dur": {
@@ -314,7 +315,7 @@
         },
         "shader": {
           "type": "string",
-          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
+          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist/matrixDecode. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
           "enum": [
             "flow",
             "aurora",
@@ -328,7 +329,8 @@
             "barrel",
             "heatShimmer",
             "ripple",
-            "kaleidoscope"
+            "kaleidoscope",
+            "matrixDecode"
           ]
         },
         "html": {
@@ -681,7 +683,7 @@
           "label": "Image: colour the edgeFade dissolves into (default #ffffff; set to the bg for dark scenes)"
         },
         "canvasFx": {
-          "label": "Image: Tier-2 Canvas pass baked once at build (deterministic). Name (halftone/dither/mosaic) or { fx, cell, ink, paper, seed }. core/canvas-fx.js"
+          "label": "Image: Tier-2 Canvas pass baked once at build (deterministic). Name (halftone/dither/mosaic/pixelSort/stipple/ascii/edgeDetect/crosshatch) or { fx, cell, ink, paper, seed }. core/canvas-fx.js"
         },
         "from": {
           "type": "number",

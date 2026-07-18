@@ -436,7 +436,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // per name, and the schema exposing exactly that vocabulary — the three surfaces that can drift.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
-  ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length === 32 && new Set(SHADER_FX).size === SHADER_FX.length);
+  ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length === 33 && new Set(SHADER_FX).size === SHADER_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('const VERT'));
   const noBranch = SHADER_FX.map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
   ok(`stings: FRAG has a branch for every effect${noBranch.length ? ' — missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
@@ -453,6 +453,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !(body.includes('pp') || body.includes('bell'));
   });
   ok(`stings: wave-2 branches all depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  // gridPixelateWipe (wave 4) is a transition too — its block curtain must key off progress
+  ok('stings: gridPixelateWipe depends on progress', (() => { const i = SHADER_FX.indexOf('gridPixelateWipe'); const body = frag.slice(frag.indexOf(`u_fx == ${i}`)); return body.includes('pp') && body.includes('bell'); })());
 }
 
 // ---- ambient shader looks ----
@@ -460,11 +462,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // (it has no `u_fx==N` literal), so branches are checked for indices 0..N-2 plus a final else.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'shaders-ambient.js'), 'utf8');
-  ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length === 13 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
+  ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length === 14 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
   ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
-  ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, frag.includes('kaleidoscope') && !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
+  ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, frag.includes('matrixDecode') && !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
   // wave-3 looks must animate — a branch that ignores t would be a frozen still, defeating "loop"
@@ -478,6 +480,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   // barrel is a static lens vignette by design (no motion) — exempt it from the animate check
   ok(`ambient: wave-3 looks animate (except static barrel)${still.filter((n) => n !== 'barrel').length ? ' — frozen: ' + still.filter((n) => n !== 'barrel').join(', ') : ''}`, still.every((n) => n === 'barrel'));
+  // matrixDecode (wave 4, the trailing else) is digital rain — its heads must fall with t
+  ok('ambient: matrixDecode rain depends on time', (() => { const body = frag.slice(frag.lastIndexOf('} else {')); return /\bt\b/.test(body) && body.includes('matrixDecode'); })());
 }
 
 // ---- composite looks (core/looks.js) ----
@@ -515,7 +519,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('canvasfx: cellAverage clamps to image height (no overscan)', (() => { const d = [10, 10, 10, 255, 20, 20, 20, 255]; const [r] = cellAverage(d, 2, 0, 0, 2, 4, 1); return Math.round(r) === 15; })());
   ok('canvasfx: hash01 in [0,1), deterministic, seed-sensitive', (() => { for (let i = 0; i < 50; i++) { const v = hash01(i, i * 2, 3); if (v < 0 || v >= 1) return false; } return hash01(2, 5, 1) === hash01(2, 5, 1) && hash01(2, 5, 1) !== hash01(2, 5, 2); })());
   ok('canvasfx: key is stable + string/object equivalent', canvasFxKey('a.png', 'halftone') === canvasFxKey('a.png', { fx: 'halftone' }) && canvasFxKey('a.png', 'mosaic') !== canvasFxKey('b.png', 'mosaic'));
-  ok('canvasfx: all 7 passes registered', ['halftone', 'dither', 'mosaic', 'stipple', 'ascii', 'edgeDetect', 'crosshatch'].every((n) => CANVAS_FX_NAMES.includes(n)) && CANVAS_FX_NAMES.length === 7);
+  ok('canvasfx: all 8 passes registered', ['halftone', 'dither', 'mosaic', 'stipple', 'ascii', 'edgeDetect', 'crosshatch', 'pixelSort'].every((n) => CANVAS_FX_NAMES.includes(n)) && CANVAS_FX_NAMES.length === 8);
   // Tier-C presets expand to a base pass; author overrides win; every preset targets a real pass
   ok('canvasfx: blueprint preset expands to edgeDetect', resolveFxSpec('blueprint').fx === 'edgeDetect' && resolveFxSpec('matrix').fx === 'ascii');
   ok('canvasfx: preset author-override wins', resolveFxSpec({ fx: 'blueprint', bg: [1, 2, 3] }).bg[0] === 1 && resolveFxSpec({ fx: 'comic', cell: 3 }).cell === 3);

@@ -17,7 +17,7 @@
 // (ink spiral), ridgedBurn (filament ember front), lens (flare + ghosts), thermal (iron-bow
 // heat veil), whipPan (horizontal smear), chromaticSplit (rgb-fringed shock ring),
 // dispersion (prism band). All generative (uv/progress/seed only) — palette+tint aware.
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion'];
+export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion', 'gridPixelateWipe'];
 
 const FRAG = `
 precision highp float;
@@ -281,6 +281,15 @@ void main(){
     vec3 spec = 0.5 + 0.5*cos(6.2831*((band*3.0 + w*0.4) + vec3(0.0, 0.33, 0.67)));
     float shard = pow(0.5 + 0.5*sin((proj + w*0.2)*40.0), 3.0);   /* fine prism shards inside the band */
     c = vec4(mix(spec, vec3(1.0), 0.25), inb * (0.5 + 0.5*shard) * bell);
+  } else if (u_fx == 32) {                             /* gridPixelateWipe — chunky pixel blocks sweep a diagonal, each a quantised block tint */
+    vec2 grid = vec2(26.0*u_res.x/u_res.y, 26.0);
+    vec2 cell = floor(uv * grid);
+    vec2 cc = (cell + 0.5) / grid;
+    float diag = (cc.x + cc.y) * 0.5;                  /* 0..1 diagonal wipe front */
+    float jit = hash(cell) * 0.10;                     /* per-cell grain roughens the front → pixel-art edge */
+    float on = smoothstep(diag + jit + 0.05, diag + jit, pp * 1.2);
+    float q = floor(hash(cell + 7.0) * 3.0 + 1.0) / 3.0;   /* 3 quantised brightness blocks (u_tint recolours) */
+    c = vec4(vec3(q), on * bell);
   }
   // optional tint: recolour by luminance → u_tint (amt 0 = untouched); u_intensity scales strength
   if (u_tintAmt > 0.0) {

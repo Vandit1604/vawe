@@ -3,7 +3,7 @@
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 
-**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 32 shader stings, 13 ambient
+**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 33 shader stings, 14 ambient
 shader looks, 26 composite looks, 24 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
@@ -53,7 +53,7 @@ Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scen
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/stings.js`) — 32 WebGL cover-the-cut effects
+## Shader stings (`core/stings.js`) — 33 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak — every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
@@ -70,8 +70,9 @@ triangle) `vortex` (ink spiral pulls into a dark eye) `ridgedBurn` (filament emb
 up, hotter than burn) `lens` (flare: hot core + ghost discs + anamorphic streak) `thermal`
 (iron-bow heat veil, coarse sensor cells) `whipPan` (horizontal smear streaks race the cut)
 `chromaticSplit` (rgb-fringed shock ring, channels tear apart then reconverge) `dispersion`
-(a spectral prism band sweeps the frame). Peak them AT the cut; see MOTION-CRAFT for the
-when-to-use guide.
+(a spectral prism band sweeps the frame) `gridPixelateWipe` (a chunky pixel-block curtain sweeps
+the diagonal, quantised-brightness blocks with a jittered pixel-art front; `color`-tint aware).
+Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
 - **JSON sting**: `{ t, fx, dur, seed, color?, intensity? }`. `color` (hex) recolours the effect by
   luminance (tint any effect to a brand accent — e.g. cobalt on a mono reel); omit for native colours.
   `intensity` scales strength (1 = default). The white/grey effects (flash/streak/scan/ripple/bokeh/
@@ -79,12 +80,14 @@ when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
-## Ambient shader looks (`core/shaders-ambient.js`) — 13 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/shaders-ambient.js`) — 14 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:
 - **Fields behind content** (low track, intensity ~0.3): `flow` (premium mesh gradient) `aurora`
-  (undulating curtain) `plasma` (two-tone interference) `drift` (soft bokeh) `mist` (near-still haze).
+  (undulating curtain) `plasma` (two-tone interference) `drift` (soft bokeh) `mist` (near-still haze)
+  `matrixDecode` (digital rain: green glyph columns fall with bright white leading cells; `colors[0]`
+  tints the rain — a hacker/terminal backdrop).
 - **Overlay looks on top of content** (high track, intensity ~0.6-0.9): `vhs` (tracking noise, chroma
   fringe, scanlines, dropouts) `crt` (phosphor stripe mask + rolling refresh bar + vignette)
   `filmGrain` (animated grain + dust, luminance-only so contrast holds) `lightLeak` (warm blobs drift
@@ -357,7 +360,8 @@ Per-pixel Tier-2 looks BAKED ONCE at build (in boot's awaited image-preload) int
 the pixels never change per frame → deterministic by construction (probe/snap prove it). Set
 `canvasFx` on an `image` layer: a name or `{ fx, cell, ink, paper, seed, … }`.
 - **Base passes**: `halftone` (ink dots by darkness) · `dither` (Bayer newsprint 2-tone) · `mosaic`
-  (pixelate) · `stipple` (seeded dot density) · `ascii` (glyph ramp) · `edgeDetect` (Sobel) · `crosshatch`.
+  (pixelate) · `stipple` (seeded dot density) · `ascii` (glyph ramp) · `edgeDetect` (Sobel) · `crosshatch`
+  · `pixelSort` (sort bright spans by luma per scan line → glitch smear; `thresh`, `vertical`).
 - **Stylized presets** (base pass + tuned colours): `blueprint` (edges on blue) · `comic` (black
   halftone) · `risograph` (pink halftone) · `sketch` (crosshatch) · `matrix` (green ascii) · `newsprint`
   (sepia dither). `canvasFx:"blueprint"` or override: `{ fx:"comic", cell:5, ink:"#111" }`.

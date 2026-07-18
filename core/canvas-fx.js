@@ -144,6 +144,38 @@ export const CANVAS_FX = {
     }
     dstCtx.putImageData(out, 0, 0);
   },
+  // pixelSort: within each scan line, sort contiguous bright spans by luma → signature glitch smear.
+  // Pure/deterministic: a span is bounded by a luma threshold, then reordered in place (no randomness).
+  pixelSort(srcCtx, dstCtx, W, H, o) {
+    const vertical = !!o.vertical;
+    const thr = (o.thresh ?? 0.55) * 255;               // luma cutoff that bounds a sortable span
+    const img = srcCtx.getImageData(0, 0, W, H);
+    const d = img.data;
+    const at = (x, y) => (y * W + x) * 4;
+    const lum = (x, y) => { const i = at(x, y); return luma(d[i], d[i + 1], d[i + 2]); };
+    const sortLine = (coords) => {
+      const n = coords.length;
+      let s = 0;
+      while (s < n) {
+        while (s < n && lum(coords[s][0], coords[s][1]) <= thr) s++;   // skip to a bright span start
+        let e = s;
+        while (e < n && lum(coords[e][0], coords[e][1]) > thr) e++;    // extend over the bright run
+        if (e - s > 1) {
+          const seg = [];
+          for (let k = s; k < e; k++) { const i = at(coords[k][0], coords[k][1]); seg.push([d[i], d[i + 1], d[i + 2], d[i + 3]]); }
+          seg.sort((a, b) => luma(a[0], a[1], a[2]) - luma(b[0], b[1], b[2]));
+          for (let k = s; k < e; k++) { const i = at(coords[k][0], coords[k][1]); const p = seg[k - s]; d[i] = p[0]; d[i + 1] = p[1]; d[i + 2] = p[2]; d[i + 3] = p[3]; }
+        }
+        s = e;
+      }
+    };
+    if (vertical) {
+      for (let x = 0; x < W; x++) { const col = []; for (let y = 0; y < H; y++) col.push([x, y]); sortLine(col); }
+    } else {
+      for (let y = 0; y < H; y++) { const row = []; for (let x = 0; x < W; x++) row.push([x, y]); sortLine(row); }
+    }
+    dstCtx.putImageData(img, 0, 0);
+  },
   // crosshatch: diagonal strokes whose density steps with darkness (pencil/engraving)
   crosshatch(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(4, Math.round(o.cell ?? 6));

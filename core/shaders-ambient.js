@@ -17,7 +17,7 @@
 //                · lightLeak (looping warm blobs from an edge, palette-aware)
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope'];
+export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode'];
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
@@ -131,7 +131,8 @@ void main(){
     float caust = smoothstep(0.25, 0.9, 0.5 + 0.5*v);
     col = mix(c1, vec3(0.7, 0.85, 1.0), 0.4);            // cool water light
     alpha = caust * 0.24;
-  } else {                                                // kaleidoscope — mirrored rotating mandala (index 12)
+  } else if(u_fx==12){                                    // kaleidoscope — mirrored rotating mandala
+
     vec2 d = uv - 0.5; d.x *= ar; float rad = length(d);
     float ang = atan(d.y, d.x) + t*0.10;
     float seg = 6.2831/6.0;                               // 6-fold symmetry
@@ -141,6 +142,19 @@ void main(){
     kc = mix(kc, c3, blob(q, vec2(0.18, 0.0), 20.0));
     float m = 0.5 + 0.5*sin(q.x*24.0)*sin(q.y*24.0 + t*0.2);
     col = kc; alpha = (0.3 + 0.45*smoothstep(0.2, 0.8, m)) * smoothstep(0.78, 0.08, rad);
+  } else {                                                // matrixDecode — digital rain: bright heads fall down glyph columns (index 13, trailing else)
+    float cols = 44.0, rows = 28.0;
+    float cx = floor(uv.x*cols), cy = floor(uv.y*rows);
+    float speed = 0.18 + 0.5*rhash(vec2(cx, 3.0));       // per-column fall speed (rhash: no banding at big coords)
+    float head = fract(rhash(vec2(cx, 7.0)) - t*speed);  // the bright head cell, wraps 1->0 => falls
+    float rowy = (cy + 0.5)/rows;
+    float below = fract(head - rowy + 1.0);              // 0 at the head, grows along the trailing tail
+    float trail = smoothstep(0.55, 0.0, below);          // green tail fades behind the head
+    float lead = smoothstep(0.05, 0.0, below);           // near-white leading glyph
+    float flick = step(0.45, rhash(vec2(cx, cy + floor(t*7.0))));  // per-cell glyph flicker (stepped time = discrete)
+    vec3 body = P(0, vec3(0.16, 0.95, 0.42));            // palette stop 0 tints the rain (default matrix green)
+    col = mix(body, vec3(0.75, 1.0, 0.85), lead);
+    alpha = (trail*0.65 + lead) * (0.4 + 0.6*flick);
   }
   col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
