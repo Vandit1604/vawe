@@ -24,12 +24,13 @@ const ROLES = {
   // auto sound-design roles the scene builder emits
   whoosh: 'whisper',   // a cut — soft air, never a swoosh cliché
   reveal: 'chime',     // a sting — the thing that lands
-  // named cues an author can place directly
-  tick: 'tick', press: 'press', release: 'release', toggle: 'toggle', click: 'press',
-  // keystrokes — short transients the typing sound design rotates through
-  key1: 'key1', key2: 'key2', key3: 'key3', keyspace: 'keyspace', keyenter: 'keyenter',
+  // Cuelume's own 14, available to an author by name
   chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
-  success: 'success', error: 'error', ready: 'ready', pop: 'pop',
+  tick: 'tick', press: 'press', release: 'release', toggle: 'toggle',
+  success: 'success', error: 'error', page: 'page', loading: 'loading', ready: 'ready',
+  // aliases onto the real cues — NOT new voicings. `click` and `pop` are names people reach for;
+  // both resolve to Cuelume cues rather than to something invented alongside them.
+  click: 'press', pop: 'droplet',
 };
 
 // Cut style -> cue. Sound design is not one whoosh on everything: a punch should snap and a

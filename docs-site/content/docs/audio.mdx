@@ -31,29 +31,36 @@ Cue times are a pure function of the JSON, so audio stays reproducible and frame
 
 ## The SFX library
 
-Every sound is **synthesized from math**, not downloaded. A cue is a small spec (noise or a tone, a
-filter, an envelope) and `renderCue` walks it sample by sample at 44.1kHz with a seeded PRNG for the
-noise. Same spec, same seed, same bytes, on any machine, with no licence and no network.
+Every sound is **synthesized from parameters**, not downloaded. The cue library is
+[Cuelume](https://cuelume-site.pages.dev) v0.1.2 (MIT), ported verbatim: 14 interaction cues, each a
+small spec (noise or a tone, a filter, an envelope) that `renderCue` walks sample by sample at 44.1kHz
+with a seeded PRNG for the noise. Same spec, same seed, same bytes, on any machine, with no licence
+obligation and no network.
 
 ```bash
 make audio        # bake every cue into assets/sfx/ (additive; --force to re-bake)
 make sfx-check    # is each cue the SHAPE its role claims?
 ```
 
-A key click is the clearest example of why this beats a download. It is not a "click sample" — it is
-the physical event: a lowpass-shaped noise body around 300-430Hz (the keycap bottoming out) with a
-trace of bandpassed clack on top, decaying in about 20ms. Every part of that is a number you can
-reason about, so "too sharp" is a Q you lower and "too loud" is a peak you drop.
+The cues: `chime`, `sparkle`, `droplet`, `bloom`, `whisper`, `tick`, `press`, `release`, `toggle`,
+`success`, `error`, `page`, `loading`, `ready`. `whoosh` and `reveal` are the engine's own role names
+(they alias `whisper` and `chime`), which is what the automatic mode reaches for. Nothing is committed;
+`assets/sfx/` is gitignored and self-heals from `make audio`.
 
-The library: `whoosh`, `reveal`, `whisper`, `chime`, `sparkle`, `droplet`, `bloom`, `pop`, `tick`,
-`press`, `release`, `click`, `toggle`, `success`, `error`, `ready`, plus the keystroke voicings
-`key1`/`key2`/`key3`/`keyspace`/`keyenter`. Nothing is committed; `assets/sfx/` is gitignored and
-self-heals from `make audio`.
+Do not hand-edit the specs in `core/audio-kit.mjs`. They were hand-ported once and drifted from the
+real library on 7 of 14 cues, which is a difference you hear and cannot debug from the JSON.
 
-`make sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long, and
-the typing sound design stacked it into a drone. It decodes each WAV and measures how long the signal
-is actually audible (not how long the file is), then holds it to a cap derived from the cue's role: a
-keystroke fires every ~0.09s, so its tail may not outlast the gap.
+### Typing
+
+A `typing` layer emits one `press` per revealed character automatically. `core/layers/text.js` reveals
+character *i* at `start + (i+1)/cps`, so the cue is that same expression — change the copy or the
+speed and the clicks follow. Variation comes from dynamics (a deterministic ±12% gain per index),
+because a real keyboard varies in force, not in identity. `keyClicks: false` silences it; `keyGain`
+sets the level.
+
+`make sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long and the
+typing stacked it into a drone. It decodes each WAV and measures how long the signal is actually
+audible (not how long the file is), then holds it to a cap derived from the cue's role.
 
 ## Captions
 

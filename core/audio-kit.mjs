@@ -145,52 +145,33 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 
 // ---------------------------------------------------------------- CUE LIBRARY
 // Voicings ported from Cuelume (MIT © Daniel White). Grouped by the role a video actually needs.
+// THE CUE LIBRARY — ported VERBATIM from Cuelume v0.1.2 (MIT, (c) 2026 Daniel Belyi),
+// https://github.com/Danilaa1/cuelume · https://cuelume-site.pages.dev
+//
+// Cuelume ships no audio files: every cue is a synthesis spec played live through Web Audio. So
+// "using Cuelume's sounds" means using its PARAMETERS, which is what these are — the same schema
+// renderCue() already consumed, copied exactly rather than approximated.
+//
+// They were previously hand-ported and had DRIFTED: 7 of the 14 differed from the real library
+// (success was a whole different interval) and `page` and `loading` were missing entirely. That drift
+// is why they were described as sounding bad — they were an impression of Cuelume, not Cuelume
+// (docs/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
 export const CUES = {
-  // --- transitions / reveals -------------------------------------------------
-  chime:   { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 1046.5, attack: 0.006, decay: 0.22, peak: 0.09 }, { kind: 'tone', waveform: 'sine', frequency: 1568, offset: 0.09, attack: 0.006, decay: 0.26, peak: 0.08 }], shimmer: { delay: 0.12, feedback: 0.25, wet: 0.18, lowpass: 4000 } },
-  sparkle: { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 1760, offset: 0, attack: 0.003, decay: 0.09, peak: 0.045 }, { kind: 'tone', waveform: 'sine', frequency: 2217, offset: 0.045, attack: 0.003, decay: 0.09, peak: 0.04 }, { kind: 'tone', waveform: 'sine', frequency: 2637, offset: 0.09, attack: 0.003, decay: 0.1, peak: 0.038 }, { kind: 'tone', waveform: 'sine', frequency: 3520, offset: 0.135, attack: 0.003, decay: 0.12, peak: 0.032 }], shimmer: { delay: 0.07, feedback: 0.35, wet: 0.22, lowpass: 6000 } },
-  droplet: { masterGain: 0.55, layers: [{ kind: 'tone', waveform: 'sine', frequency: 1200, glideTo: 550, glideTime: 0.14, attack: 0.004, decay: 0.2, peak: 0.075 }], shimmer: { delay: 0.09, feedback: 0.2, wet: 0.15, lowpass: 3000 } },
-  bloom:   { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 528, attack: 0.06, decay: 0.32, peak: 0.06 }, { kind: 'tone', waveform: 'sine', frequency: 528, detune: 12, attack: 0.06, decay: 0.34, peak: 0.05 }], shimmer: { delay: 0.15, feedback: 0.2, wet: 0.12, lowpass: 2500 } },
-  whisper: { masterGain: 0.5,  layers: [{ kind: 'noise', filterType: 'lowpass', filterFrequency: 1200, filterQ: 0.7, attack: 0.04, decay: 0.16, peak: 0.05 }] },
-  // --- clicks / UI -----------------------------------------------------------
-  tick:    { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 5400, filterQ: 1.8, attack: 0.001, decay: 0.018, peak: 0.14 }, { kind: 'tone', waveform: 'sine', frequency: 2600, attack: 0.001, decay: 0.012, peak: 0.018 }] },
-  press:   { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 1700, filterQ: 1.4, attack: 0.001, decay: 0.02, peak: 0.13 }] },
-  release: { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 4600, filterQ: 1.8, attack: 0.001, decay: 0.016, peak: 0.12 }, { kind: 'tone', waveform: 'sine', frequency: 3200, offset: 0.006, attack: 0.001, decay: 0.05, peak: 0.02 }] },
-  toggle:  { masterGain: 0.4,  layers: [{ kind: 'noise', filterType: 'bandpass', filterFrequency: 2400, filterQ: 1.6, attack: 0.001, decay: 0.022, peak: 0.12 }, { kind: 'tone', waveform: 'sine', frequency: 880, glideTo: 1320, glideTime: 0.05, attack: 0.002, decay: 0.06, peak: 0.03 }] },
-  // --- keystrokes -------------------------------------------------------------
-  // A key is a THUD, not a tick. The sound is the keycap bottoming out: most of the energy is low
-  // (a lowpass-shaped body around 300-450Hz over ~45ms) with only a trace of higher clack on top.
-  // The first attempt was a narrow bandpass up at 2-3kHz with Q~1.6, which is a mouse click or a
-  // Geiger counter — all treble, no body, and the resonant Q is what read as "sharp" (#55).
-  // Low Q keeps it soft: a high Q rings, and a ring at this length is heard as a chirp.
-  // Three voicings because a real keyboard does not make the identical sound 38 times.
-  key1:    { masterGain: 0.34, layers: [
-    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 380, filterQ: 0.7, attack: 0.002, decay: 0.018, peak: 0.10 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1750, filterQ: 0.8, attack: 0.001, decay: 0.007, peak: 0.022 }] },
-  key2:    { masterGain: 0.34, layers: [
-    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 430, filterQ: 0.7, attack: 0.002, decay: 0.015, peak: 0.095 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 2050, filterQ: 0.8, attack: 0.001, decay: 0.006, peak: 0.020 }] },
-  key3:    { masterGain: 0.34, layers: [
-    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 330, filterQ: 0.7, attack: 0.002, decay: 0.021, peak: 0.105 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1520, filterQ: 0.8, attack: 0.001, decay: 0.008, peak: 0.024 }] },
-  // the spacebar is bigger and hollower: deeper body, longer decay, almost no clack
-  keyspace:{ masterGain: 0.34, layers: [
-    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 250, filterQ: 0.7, attack: 0.003, decay: 0.028, peak: 0.115 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1100, filterQ: 0.7, attack: 0.001, decay: 0.007, peak: 0.014 }] },
-  keyenter:{ masterGain: 0.38, layers: [
-    { kind: 'noise', filterType: 'lowpass',  filterFrequency: 300, filterQ: 0.7, attack: 0.003, decay: 0.080, peak: 0.125 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1300, filterQ: 0.8, attack: 0.001, decay: 0.014, peak: 0.020 }] },
-  // pop — a small cavity collapsing: a fast downward pitch glide over ~60ms, no shimmer. It was
-  // aliased to `droplet`, whose shimmer tail runs 0.96s; a "pop" that rings for a second is not a pop,
-  // and it is the cue a UI click lands on (docs/MISTAKES.md #57).
-  pop:     { masterGain: 0.42, layers: [
-    { kind: 'tone', waveform: 'sine', frequency: 880, glideTo: 260, glideTime: 0.045, attack: 0.002, decay: 0.030, peak: 0.10 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1400, filterQ: 0.8, attack: 0.001, decay: 0.008, peak: 0.020 }] },
-  // --- states ----------------------------------------------------------------
-  success: { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 659.25, attack: 0.005, decay: 0.18, peak: 0.07 }, { kind: 'tone', waveform: 'sine', frequency: 987.77, offset: 0.08, attack: 0.005, decay: 0.24, peak: 0.06 }], shimmer: { delay: 0.11, feedback: 0.22, wet: 0.16, lowpass: 4200 } },
-  error:   { masterGain: 0.45, layers: [{ kind: 'tone', waveform: 'sine', frequency: 320, glideTo: 190, glideTime: 0.12, attack: 0.004, decay: 0.16, peak: 0.08 }] },
-  ready:   { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 880, attack: 0.005, decay: 0.16, peak: 0.06 }, { kind: 'tone', waveform: 'sine', frequency: 1320, offset: 0.06, attack: 0.005, decay: 0.2, peak: 0.05 }], shimmer: { delay: 0.1, feedback: 0.2, wet: 0.14, lowpass: 5000 } },
-};
+  chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
+  sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
+  droplet: {"masterGain":0.55, "layers":[{"kind":"tone","waveform":"sine","frequency":1200, "glideTo":550, "glideTime":0.14, "attack":0.004, "decay":0.2, "peak":0.075}], "shimmer":{"delay":0.09, "feedback":0.2, "wet":0.15, "lowpass":3000.0}},
+  bloom: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":528, "attack":0.06, "decay":0.32, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":528, "detune":12, "attack":0.06, "decay":0.34, "peak":0.05}], "shimmer":{"delay":0.15, "feedback":0.2, "wet":0.12, "lowpass":2500}},
+  whisper: {"masterGain":0.5, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1200, "filterQ":0.7, "attack":0.04, "decay":0.16, "peak":0.05}]},
+  tick: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":5400, "filterQ":1.8, "attack":0.001, "decay":0.018, "peak":0.14}, {"kind":"tone","waveform":"sine","frequency":2600, "attack":0.001, "decay":0.012, "peak":0.018}]},
+  press: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":1700, "filterQ":1.4, "attack":0.001, "decay":0.02, "peak":0.13}]},
+  release: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":4600, "filterQ":1.8, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"tone","waveform":"sine","frequency":3200, "offset":0.006, "attack":0.001, "decay":0.05, "peak":0.02}]},
+  toggle: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":2200, "filterQ":1.6, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"noise","filterType":"bandpass","filterFrequency":3800, "filterQ":1.6, "offset":0.024, "attack":0.001, "decay":0.02, "peak":0.1}]},
+  success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},
+  error: {"masterGain":0.42, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":850, "filterQ":1.1, "attack":0.001, "decay":0.035, "peak":0.13}, {"kind":"tone","waveform":"triangle","frequency":440, "offset":0.025, "attack":0.004, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"triangle","frequency":349.23, "offset":0.1, "attack":0.004, "decay":0.14, "peak":0.04}]},
+  page: {"masterGain":0.38, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1800, "filterQ":0.7, "attack":0.006, "decay":0.08, "peak":0.11}, {"kind":"noise","filterType":"bandpass","filterFrequency":4200, "filterQ":1.2, "offset":0.04, "attack":0.004, "decay":0.065, "peak":0.08}, {"kind":"tone","waveform":"sine","frequency":2400, "offset":0.075, "attack":0.002, "decay":0.045, "peak":0.02}]},
+  loading: {"masterGain":0.42, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1400, "filterQ":0.6, "attack":0.035, "decay":0.14, "peak":0.035}, {"kind":"tone","waveform":"sine","frequency":420, "glideTo":630, "glideTime":0.18, "attack":0.025, "decay":0.18, "peak":0.05}], "shimmer":{"delay":0.11, "feedback":0.18, "wet":0.12, "lowpass":2800}},
+  ready: {"masterGain":0.45, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":3200, "filterQ":1.7, "attack":0.001, "decay":0.018, "peak":0.1}, {"kind":"tone","waveform":"sine","frequency":659.25, "offset":0.025, "attack":0.012, "decay":0.2, "peak":0.05}, {"kind":"tone","waveform":"sine","frequency":987.77, "offset":0.025, "attack":0.012, "decay":0.22, "peak":0.035}], "shimmer":{"delay":0.13, "feedback":0.2, "wet":0.13, "lowpass":3600}},
+};;
 
 /**
  * Music bed — a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.

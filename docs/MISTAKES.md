@@ -941,3 +941,24 @@ download was masking a wrong mapping underneath.
 is physically what a small cavity collapsing sounds like. No shimmer.
 **Rule:** an alias is a claim that two things are the same sound. Recorded assets sitting on top of the
 synth path hid the claim being false; the moment the recordings went, the gate found it in one run.
+
+---
+
+## 58. The ported cue library had drifted from the library it was ported from
+
+**What:** the synthesized cues were described as sounding bad, twice, across two sessions. The
+conclusion drawn the first time was "synthesis sounds worse than recordings", and recorded Mixkit
+samples were restored on top of them.
+**Root cause:** the cues were a HAND-PORT of Cuelume, and they had drifted. Diffed against the real
+library (v0.1.2, MIT): 7 of 14 cues differed — `success` was a different musical interval entirely
+(659.25/987.77 against the real 880/1108.73) — and `page` and `loading` were missing. What sounded
+bad was not synthesis. It was an impression of Cuelume rather than Cuelume.
+**Fix:** the specs are extracted verbatim from the library and marked do-not-hand-edit, with the
+source and version in the file. Cuelume ships no audio files at all — every cue is a synthesis spec —
+so "use Cuelume's sounds" and "generate it from math" are the same sentence.
+**What it cost:** two rounds of tuning custom keystroke voicings that should never have existed.
+Cuelume already has `press`, which is literally the key-press cue; keystrokes now use it, and the
+per-key variation is dynamics (±12% gain, deterministic by index) rather than a new sound.
+**Rule:** when a port sounds wrong, diff it against the original before concluding the technique is
+wrong. A hand-copied table is the thing most likely to be lying — the same failure as the schema
+advertising an anim that never existed (#21).

@@ -397,11 +397,13 @@
             for (let i = 0; i < full.length; i++) {
               const kt = st + (i + 1) / cps;
               if (kt >= end) break;                       // never sound a character the window never reveals
-              // Rotate three voicings: a real keyboard does not make the identical sound 38 times, and
-              // one repeated sample is what turns a typed line into a machine gun. Deterministic by
-              // index, so the same copy always sounds the same. Space gets its own heavier voicing.
-              const KEYS = ['key1', 'key2', 'key3'];
-              keyCues.push({ t: +kt.toFixed(3), name: full[i] === ' ' ? 'keyspace' : KEYS[i % 3], gain: L.keyGain ?? 0.13 });
+              // Cuelume's `press` IS the key-press cue — that is what it is for, so keystrokes use it
+              // rather than a voicing invented next to the library. Variation comes from DYNAMICS, not
+              // from a different sound: a real keyboard varies in force, not in identity. Deterministic
+              // by character index so the same copy always sounds the same.
+              const vary = 1 + ((i * 7919) % 5 - 2) * 0.06;   // +/-12%, pure function of the index
+              keyCues.push({ t: +kt.toFixed(3), name: 'press',
+                gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
             }
           }
           // A key train is legitimately dense, so it gets its own tighter floor. The 0.09 merge above
