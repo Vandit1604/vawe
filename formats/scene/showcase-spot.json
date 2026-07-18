@@ -1,0 +1,415 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "threadcite",
+  "duration": 23.5,
+  "audio": { "silent": true },
+  "bg": [
+    { "preset": "paper", "from": 0, "to": 23.5 }
+  ],
+  "cuts": [
+    { "t": 3.45, "style": "softwipe", "dur": 0.4 },
+    { "t": 6.65, "style": "slide", "dur": 0.4 },
+    { "t": 10.25, "style": "rise", "dur": 0.4 },
+    { "t": 13.65, "style": "whip", "dur": 0.36 },
+    { "t": 16.95, "style": "softiris", "dur": 0.42 },
+    { "t": 20.15, "style": "riseBlur", "dur": 0.42 }
+  ],
+  "stings": [
+    { "t": 9.95, "fx": "flash", "dur": 0.4, "seed": 2 }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "The work is done.<br>The write-up is not.",
+      "x": 150,
+      "y": 380,
+      "w": 640,
+      "align": "left",
+      "size": 66,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.055,
+      "each": 0.42,
+      "start": 0.3,
+      "duration": 2.95,
+      "anim": "none",
+      "exitDur": 0.28
+    },
+    {
+      "type": "block",
+      "block": "browserFrame",
+      "x": 900,
+      "y": 250,
+      "w": 840,
+      "h": 560,
+      "url": "tidings.demo/weekly",
+      "start": 0.45,
+      "dur": 2.85,
+      "children": [
+        {
+          "type": "block",
+          "block": "emptyState",
+          "w": 640,
+          "icon": "☰",
+          "title": "Weekly update",
+          "body": "Nothing written yet. Due in four hours.",
+          "cta": "Start writing",
+          "start": 0.9,
+          "dur": 2.4
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Friday asks the same question.",
+      "x": 360,
+      "y": 210,
+      "w": 1200,
+      "align": "center",
+      "size": 54,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 3.6,
+      "duration": 2.9,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "block",
+      "block": "chatBubble",
+      "x": 610,
+      "y": 340,
+      "w": 700,
+      "messages": [
+        { "text": "Where did the sprint land?" },
+        { "text": "Give me an hour, I will write it up.", "me": true },
+        { "text": "Same as last Friday then" }
+      ],
+      "start": 3.85,
+      "dur": 2.65
+    },
+    {
+      "type": "block",
+      "block": "notification",
+      "x": 1330,
+      "y": 730,
+      "w": 420,
+      "title": "Update due today",
+      "body": "Saltmarsh workspace, 4:00pm",
+      "accent": "var(--accent)",
+      "start": 5.0,
+      "dur": 1.5
+    },
+    {
+      "type": "block",
+      "block": "browserFrame",
+      "x": 460,
+      "y": 150,
+      "w": 1000,
+      "h": 680,
+      "url": "tidings.demo/weekly",
+      "start": 6.8,
+      "dur": 3.35,
+      "children": [
+        {
+          "type": "block",
+          "block": "commitRow",
+          "w": 820,
+          "commits": [
+            { "hash": "b31f8ac", "msg": "offline queue survives a reconnect", "author": "ines", "time": "2h" },
+            { "hash": "7d0c412", "msg": "drop the second sync pass", "author": "bram", "time": "1d" },
+            { "hash": "a95e6f0", "msg": "coldharbour import, first pass", "author": "petra", "time": "2d" }
+          ],
+          "start": 7.15,
+          "dur": 3.0
+        },
+        {
+          "type": "block",
+          "block": "pressButton",
+          "w": 320,
+          "label": "Draft the update",
+          "pressAt": 2.15,
+          "start": 7.5,
+          "dur": 2.65
+        }
+      ]
+    },
+    {
+      "type": "block",
+      "block": "pointer",
+      "x": 1380,
+      "y": 900,
+      "to": { "x": 1010, "y": 700 },
+      "clickAt": 1.9,
+      "size": 44,
+      "start": 7.55,
+      "dur": 2.6
+    },
+    {
+      "type": "text",
+      "text": "One button. It has already read the week.",
+      "x": 460,
+      "y": 880,
+      "w": 1000,
+      "align": "center",
+      "size": 34,
+      "color": "var(--text2)",
+      "start": 7.3,
+      "duration": 2.8,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "block",
+      "block": "browserFrame",
+      "x": 130,
+      "y": 230,
+      "w": 830,
+      "h": 560,
+      "url": "tidings.demo/weekly",
+      "start": 10.4,
+      "dur": 3.1,
+      "children": [
+        {
+          "type": "block",
+          "block": "card",
+          "w": 660,
+          "h": 330,
+          "title": "Week of the 14th",
+          "desc": "Offline queue now survives a reconnect. The second sync pass is gone. Coldharbour import landed a first pass.",
+          "pills": ["3 commits", "2 tickets", "1 draft"],
+          "start": 10.75,
+          "dur": 2.75
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "It reads what you shipped,<br>then writes it down.",
+      "x": 1030,
+      "y": 360,
+      "w": 740,
+      "align": "left",
+      "size": 56,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.05,
+      "each": 0.4,
+      "start": 10.6,
+      "duration": 2.9,
+      "anim": "none",
+      "exitDur": 0.28
+    },
+    {
+      "type": "block",
+      "block": "toast",
+      "x": 1030,
+      "y": 640,
+      "w": 420,
+      "message": "Draft ready to send",
+      "action": "Review",
+      "start": 12.1,
+      "dur": 1.4
+    },
+    {
+      "type": "text",
+      "text": "Everything it writes, you can trace.",
+      "x": 360,
+      "y": 180,
+      "w": 1200,
+      "align": "center",
+      "size": 50,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 13.8,
+      "duration": 3.0,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "block",
+      "block": "checklist",
+      "x": 180,
+      "y": 360,
+      "w": 640,
+      "items": [
+        { "text": "Reads the commits you pushed", "done": true },
+        { "text": "Reads the tickets you closed", "done": true },
+        { "text": "Writes the draft in your words", "done": true },
+        { "text": "Waits for you to press send", "done": false }
+      ],
+      "start": 14.1,
+      "dur": 2.7
+    },
+    {
+      "type": "block",
+      "block": "lineChart",
+      "x": 1100,
+      "y": 360,
+      "w": 640,
+      "h": 300,
+      "label": "demo workspace · updates sent",
+      "data": [
+        { "label": "M", "value": 1 },
+        { "label": "T", "value": 2 },
+        { "label": "W", "value": 2 },
+        { "label": "T", "value": 3 },
+        { "label": "F", "value": 5 }
+      ],
+      "start": 14.35,
+      "dur": 2.45
+    },
+    {
+      "type": "text",
+      "text": "Sample data from the demo workspace.",
+      "x": 1100,
+      "y": 700,
+      "w": 640,
+      "align": "left",
+      "size": 26,
+      "font": "mono",
+      "color": "var(--text2)",
+      "start": 14.8,
+      "duration": 2.0,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Start on the free plan.",
+      "x": 360,
+      "y": 210,
+      "w": 1200,
+      "align": "center",
+      "size": 56,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 17.1,
+      "duration": 2.9,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "block",
+      "block": "card.pricing.free",
+      "x": 560,
+      "y": 380,
+      "w": 360,
+      "plan": "Free",
+      "price": "$0",
+      "features": ["One workspace", "Weekly draft", "You press send"],
+      "cta": "Open the demo",
+      "highlight": true,
+      "start": 17.35,
+      "dur": 2.65
+    },
+    {
+      "type": "block",
+      "block": "card.pricing.team",
+      "x": 1000,
+      "y": 380,
+      "w": 360,
+      "plan": "Team",
+      "price": "$18",
+      "features": ["Every workspace", "Shared voice", "Scheduled sends"],
+      "cta": "Talk to us",
+      "highlight": false,
+      "start": 17.55,
+      "dur": 2.45
+    },
+    {
+      "type": "text",
+      "text": "Tidings",
+      "x": 150,
+      "y": 350,
+      "w": 800,
+      "align": "left",
+      "size": 112,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "char",
+      "preset": "up",
+      "stagger": 0.04,
+      "each": 0.42,
+      "start": 20.3,
+      "duration": 3.0,
+      "anim": "none",
+      "exitDur": 0.2
+    },
+    {
+      "type": "rect",
+      "x": 152,
+      "y": 500,
+      "w": 300,
+      "h": 4,
+      "bg": "var(--accent)",
+      "radius": 2,
+      "start": 20.7,
+      "duration": 2.6,
+      "anim": "wipe-right",
+      "enterDur": 0.5,
+      "exitDur": 0.2
+    },
+    {
+      "type": "text",
+      "text": "The status update writes itself. You still sign it.",
+      "x": 152,
+      "y": 545,
+      "w": 760,
+      "align": "left",
+      "size": 32,
+      "color": "var(--text2)",
+      "start": 20.85,
+      "duration": 2.45,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0.3
+    },
+    {
+      "type": "block",
+      "block": "pressButton",
+      "x": 152,
+      "y": 680,
+      "w": 320,
+      "label": "Open the demo",
+      "pressAt": 1.6,
+      "start": 21.1,
+      "dur": 2.2
+    },
+    {
+      "type": "block",
+      "block": "phoneFrame",
+      "x": 1300,
+      "y": 130,
+      "w": 380,
+      "h": 800,
+      "time": "16:00",
+      "start": 20.45,
+      "dur": 2.85,
+      "children": [
+        {
+          "type": "block",
+          "block": "feedRow",
+          "w": 296,
+          "initials": "IM",
+          "name": "Ines Marlow",
+          "sub": "@ines",
+          "time": "4:00pm",
+          "body": "Week of the 14th is posted. Offline queue survives a reconnect.",
+          "start": 20.9,
+          "dur": 2.4
+        }
+      ]
+    }
+  ]
+}

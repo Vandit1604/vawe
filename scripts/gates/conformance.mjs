@@ -72,7 +72,7 @@ async function sig(scene, frames) {
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const err = await page.evaluate(() => window.__engineError || null);
   if (err) return { error: String(err).slice(0, 120) };
-  const out = await page.evaluate((fr) => fr.map((n) => window.__engine.frameSig(n)), frames);
+    const out = await page.evaluate((fr) => fr.map((n) => window.__engine.frameSig(n)), frames);
   scenes.delete(key);
   return { sig: out.join(','), };
 }

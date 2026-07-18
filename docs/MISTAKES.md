@@ -1270,3 +1270,43 @@ block writes `var(--p)` into its own CSS or SVG and the engine drives the number
   up from transparent for the entire wipe. Anyone reaching for `enterDur` as a duration will hit it.
 **Rule:** when every author makes the same choice, ask what the alternative would have cost them. A
 uniform style across 101 call sites is usually a missing capability wearing a convention's clothes.
+
+---
+
+## 74. The conformance sweep cannot detect two identical values (OPEN)
+
+**Status: real defect, evidenced, NOT fixed. My attempted fix was a regression and I reverted it.**
+
+**What:** `make conformance` prints "layer anim · 17 values · 17 distinct ✓". I made `wipe-down`
+byte-identical to `wipe` (both `wipe(t, 'left')`), verified the mutation applied, and it still
+reported 17 distinct.
+**Root cause:** distinctness is decided by `frameSig(n)` (core/boot.js), which hashes
+`document.body.innerHTML`. `scene.html` writes `el.dataset.anim = L.anim`, so the DOM literally
+contains `data-anim="wipe-down"` versus `data-anim="wipe"`. **The signature includes the name of the
+thing being tested**, so two values that render pixel-identically can never collide. The check is
+self-fulfilling for every vocabulary whose value name reaches an attribute — anim, out, cut, preset.
+Phase 2 (props) is sound, because a prop's name usually does not land in the DOM; that is why this
+gate really did catch `tracking` (#28) while being blind here.
+**Attempted fix, reverted:** a `visualSig` hashing computed transform/opacity/filter/clipPath/rects
+plus the camera and image content. It did NOT catch the duplicate, and it introduced five false
+"inert prop" reports in phase 2. Shipping a gate that cries wolf on five real props to fix a blind
+spot on one is a bad trade, and a gate people stop trusting is worse than a known gap.
+**What a correct fix needs:** a signature that is provably (a) blind to identity-revealing attributes
+and (b) at least as sensitive as `frameSig` on every prop phase 2 currently proves. Both halves need
+to be demonstrated before it lands — the second is the one I got wrong.
+**Rule:** a self-fulfilling check reports success forever. When a gate has never failed, ask what it
+would take to MAKE it fail, and then actually try it.
+
+---
+
+## 75. I diagnosed a flake twice from truncated output
+
+**What:** `make conformance` failed twice inside a chain of `make` targets. I attributed it first to
+"concurrent browsers" and then to "a subagent mid-edit on blocks/index.mjs", and reported both.
+**Both were wrong.** Four concurrent conformance runs plus canvas-purity plus probe: all clean.
+Conformance does not import `blocks/` at all — it imports four `core/` registries.
+**Root cause of the misdiagnosis:** every observation came through `| tail -1`, which shows the
+summary line and hides whatever error printed above it. I diagnosed from evidence I had truncated.
+**Outcome:** still unexplained, and now honestly labelled as such. What it produced instead was #74 —
+trying to force the failure is what exposed the vacuous distinctness check.
+**Rule:** never diagnose from `tail -1`. If a gate fails, read all of it.

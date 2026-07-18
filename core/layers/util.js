@@ -83,7 +83,25 @@ export function createKit(ctx) {
   // `filter`, `mask`, `fade`, `lookOpts`, `reflect` and `logotype` were all silently dropped the moment
   // a layer moved inside a group. Extracted so there is ONE definition and both paths call it — the
   // same reason the safe box and the canvas size each had to be collapsed to one (MISTAKES #70).
+  // GLASS. `backdrop-filter` reads the pixels BEHIND an element, which is the one thing the shader
+  // path cannot do — core/stings.js and core/shaders-ambient.js are generative overlays with no
+  // sampler2D, so frosted glass and everything in that family was blocked on a structural
+  // layer-as-texture change. CSS has had the capability all along and the repo had zero occurrences
+  // of it. This is the cheap half: blur/saturate what is behind. It does NOT give radial/zoom/spin
+  // blur, which still need real sampling (docs/ROADMAP.md).
+  //   glass: true            → a sensible frosted default
+  //   glass: 18              → blur radius in px
+  //   glass: 'blur(18px) saturate(1.4)'  → the raw filter, for full control
+  function applyGlass(el, L) {
+    if (L.glass == null || L.glass === false) return;
+    const f = L.glass === true ? 'blur(14px) saturate(1.35)'
+      : typeof L.glass === 'number' ? `blur(${L.glass}px) saturate(1.3)` : String(L.glass);
+    el.style.backdropFilter = f;
+    el.style.webkitBackdropFilter = f;
+  }
+
   function decorate(el, L) {
+    applyGlass(el, L);
     if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;

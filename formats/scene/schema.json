@@ -1093,6 +1093,10 @@
         "varsEase": {
           "type": "string",
           "label": "Easing for the `vars` sweep (default easeOutCubic)"
+        },
+        "glass": {
+          "type": "boolean|number|string",
+          "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
         }
       }
     },
