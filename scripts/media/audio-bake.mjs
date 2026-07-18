@@ -29,7 +29,7 @@ const ROLES = {
   // keystrokes — short transients the typing sound design rotates through
   key1: 'key1', key2: 'key2', key3: 'key3', keyspace: 'keyspace', keyenter: 'keyenter',
   chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
-  success: 'success', error: 'error', ready: 'ready', pop: 'droplet',
+  success: 'success', error: 'error', ready: 'ready', pop: 'pop',
 };
 
 // Cut style -> cue. Sound design is not one whoosh on everything: a punch should snap and a

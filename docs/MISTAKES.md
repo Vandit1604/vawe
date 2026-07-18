@@ -926,3 +926,18 @@ so the voicings were shortened until each key dies before the next arrives.
 a narrow reader reported as broken files. Now handles 16/24/32-bit and float.
 **Rule:** the fifth time this session (see #39, #41, #45, #48). The rule was right; the thing it
 measured was a proxy for the rule. Ask what the sentence actually claims, then measure THAT.
+
+---
+
+## 57. `pop` was an alias for a cue that rings for a second
+
+**What:** with the library rebuilt entirely from the Cuelume voicings, `make sfx-check` failed `pop`:
+0.96s of audible signal against a 0.6s cap for a UI transient.
+**Root cause:** the role table aliased `pop → droplet`, and droplet carries a shimmer (delay 0.09,
+feedback 0.2) that rings long past the transient. It is the cue a UI click lands on. Nobody heard it
+because the recorded Mixkit `pop.wav` (0.48s) had been sitting on top of the alias the whole time — the
+download was masking a wrong mapping underneath.
+**Fix:** `pop` has its own voicing — a sine gliding 880→260Hz over 45ms with a trace of clack, which
+is physically what a small cavity collapsing sounds like. No shimmer.
+**Rule:** an alias is a claim that two things are the same sound. Recorded assets sitting on top of the
+synth path hid the claim being false; the moment the recordings went, the gate found it in one run.

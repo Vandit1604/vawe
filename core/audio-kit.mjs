@@ -180,6 +180,12 @@ export const CUES = {
   keyenter:{ masterGain: 0.38, layers: [
     { kind: 'noise', filterType: 'lowpass',  filterFrequency: 300, filterQ: 0.7, attack: 0.003, decay: 0.080, peak: 0.125 },
     { kind: 'noise', filterType: 'bandpass', filterFrequency: 1300, filterQ: 0.8, attack: 0.001, decay: 0.014, peak: 0.020 }] },
+  // pop — a small cavity collapsing: a fast downward pitch glide over ~60ms, no shimmer. It was
+  // aliased to `droplet`, whose shimmer tail runs 0.96s; a "pop" that rings for a second is not a pop,
+  // and it is the cue a UI click lands on (docs/MISTAKES.md #57).
+  pop:     { masterGain: 0.42, layers: [
+    { kind: 'tone', waveform: 'sine', frequency: 880, glideTo: 260, glideTime: 0.045, attack: 0.002, decay: 0.030, peak: 0.10 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1400, filterQ: 0.8, attack: 0.001, decay: 0.008, peak: 0.020 }] },
   // --- states ----------------------------------------------------------------
   success: { masterGain: 0.5,  layers: [{ kind: 'tone', waveform: 'sine', frequency: 659.25, attack: 0.005, decay: 0.18, peak: 0.07 }, { kind: 'tone', waveform: 'sine', frequency: 987.77, offset: 0.08, attack: 0.005, decay: 0.24, peak: 0.06 }], shimmer: { delay: 0.11, feedback: 0.22, wet: 0.16, lowpass: 4200 } },
   error:   { masterGain: 0.45, layers: [{ kind: 'tone', waveform: 'sine', frequency: 320, glideTo: 190, glideTime: 0.12, attack: 0.004, decay: 0.16, peak: 0.08 }] },

@@ -31,13 +31,29 @@ Cue times are a pure function of the JSON, so audio stays reproducible and frame
 
 ## The SFX library
 
-The sounds come from Mixkit under its free license. Fetch them once:
+Every sound is **synthesized from math**, not downloaded. A cue is a small spec (noise or a tone, a
+filter, an envelope) and `renderCue` walks it sample by sample at 44.1kHz with a seeded PRNG for the
+noise. Same spec, same seed, same bytes, on any machine, with no licence and no network.
 
 ```bash
-make sfx
+make audio        # bake every cue into assets/sfx/ (additive; --force to re-bake)
+make sfx-check    # is each cue the SHAPE its role claims?
 ```
 
-This downloads the curated set into `assets/sfx/` and records attribution to `credits.json`. The library: `whoosh`, `reveal`, `swoosh`, `pop`, `tick`, `click`, `impact`, `riser`, `beep`, `beep3`, `correct`, `wrong`. `whoosh` covers cuts and `reveal` covers stings, which is what the automatic mode reaches for. The sounds are fetched, never committed.
+A key click is the clearest example of why this beats a download. It is not a "click sample" — it is
+the physical event: a lowpass-shaped noise body around 300-430Hz (the keycap bottoming out) with a
+trace of bandpassed clack on top, decaying in about 20ms. Every part of that is a number you can
+reason about, so "too sharp" is a Q you lower and "too loud" is a peak you drop.
+
+The library: `whoosh`, `reveal`, `whisper`, `chime`, `sparkle`, `droplet`, `bloom`, `pop`, `tick`,
+`press`, `release`, `click`, `toggle`, `success`, `error`, `ready`, plus the keystroke voicings
+`key1`/`key2`/`key3`/`keyspace`/`keyenter`. Nothing is committed; `assets/sfx/` is gitignored and
+self-heals from `make audio`.
+
+`make sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long, and
+the typing sound design stacked it into a drone. It decodes each WAV and measures how long the signal
+is actually audible (not how long the file is), then holds it to a cap derived from the cue's role: a
+keystroke fires every ~0.09s, so its tail may not outlast the gap.
 
 ## Captions
 

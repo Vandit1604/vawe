@@ -14,6 +14,7 @@ audio:
 	node scripts/media/audio-bake.mjs
 
 # make music GENRE=ambient N=0 NAME=launch  — fetch a real soundtrack (Mixkit free stock music) into
+#   NOTE: SFX are synthesized (`make audio`); this MUSIC fetcher is the only remaining download.
 # the gitignored assets/music/ and record its provenance in credits.json. The MUSIC licence differs
 # from the sfx one and is not machine-readable — confirm before commercial release.
 music:
@@ -24,10 +25,10 @@ music:
 beatmap:
 	node scripts/media/beatmap.mjs $(MUSIC)
 
-# make sfx  — download the curated sound-effects library (Mixkit Free License) into the gitignored
-# assets/sfx/. The mixer auto-places cuts→whoosh / stings→reveal; drop these in for scored video.
-sfx:
-	node scripts/media/sfx.mjs
+# The sound library is SYNTHESIZED, not downloaded — `make audio` bakes every cue from the Cuelume
+# voicings in core/audio-kit.mjs (noise + biquad + envelope, seeded, deterministic, no licence).
+# scripts/media/sfx.mjs (the old Mixkit fetcher) is kept for reference but is NOT wired to a target:
+# a downloaded file named `click` turned out to be 19.6 seconds long and nothing noticed (MISTAKES #51).
 
 # make sfx-check  — is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
 # a typed line came out sounding like a passing train (docs/MISTAKES.md #51).
