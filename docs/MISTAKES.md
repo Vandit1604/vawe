@@ -586,3 +586,19 @@ shader stings 85% -> 100%, and immediately surfaced #36.
 Cut styles stop at 25/26 on purpose: `none` is a documented no-op the builder filters before the
 renderer sees it. Listing it would make the reel look permanently incomplete for no reason.
 
+**Pacing — the first cut of the reel was unwatchable and the reason is general.** At 1.15s per style
+each boundary stacked THREE overlapping events: the outgoing label lingering 0.26s past the cut, the
+incoming label entering, and the camera mid-cut. You could not tell which transition you were looking
+at. Two fixes, both worth reusing in any demo:
+1. **A hold.** 1.9s per beat, so ~1.3s where the subject sits still and alone. A transition is only
+   legible against something at rest.
+2. **No cross-dissolve between labels.** The outgoing label now ends EXACTLY at the next cut, so one
+   name is ever on screen. Dissolving two big words together is precisely what read as "mixed" — the
+   cut still has content on both sides of it, which is the part worth seeing.
+
+**The `clip` hole.** `clip` was the last uncovered primitive and needs an actual video. Rather than
+commit one, the generator SYNTHESIZES it — an ffmpeg gradient in the engine's palette, decomposed to
+the deterministic PNG frame sequence the layer plays — so `assets/gen/` stays gitignored and a fresh
+clone self-heals, exactly like fonts, sfx and music. Verified by hashing three frames a second apart:
+a frozen poster and a playing clip look identical in a single screenshot.
+
