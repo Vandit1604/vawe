@@ -599,14 +599,14 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
 // had to be absolutely placed over it from the scene using coordinates derived by hand from the pad —
 // arithmetic that broke silently the moment w or h changed. `status` draws the clock/indicator row,
 // without which the frame reads as a black rectangle rather than a phone in use.
-export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '9:41',
+export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '10:24',
   start = 0, dur = 4 } = {}) {
   // the notch is a PROPORTION of the device, not a fixed 116px — at the catalog's w:230 that constant
   // covered more than half the screen. 0.39 / 0.087 of w reproduce the shipped look at w:300.
   const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: 100, bg: '#0A0A0A' })];
   if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: '6px 4px 0',
-    children: [text({ text: time, size: 14, weight: 600, color: T.ink }),
-               text({ text: '▮▮▮', size: 12, color: T.dim })] });
+    children: [text({ text: time, size: Math.round(w * 0.045), weight: 600, color: T.ink }),
+               text({ text: '▮▮▮', size: Math.round(w * 0.038), color: T.dim })] });
   if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: 10, pad: '10px 0 0', children });
   return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 10,
     bg: '#0A0A0A', radius: 44, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
