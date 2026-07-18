@@ -408,9 +408,20 @@ sound-design block — and never reaches the renderer. The vocabulary, the schem
 **Why nobody noticed:** beats still change on time because each beat's layers have their own
 start/duration windows. The scene LOOKS like it cut; what is missing is the transition treatment, and
 you cannot miss a softwipe you have never seen.
-**Status:** UNFIXED — implementing it changes the output of 12 shipped videos, so it needs a
-deliberate decision, not a drive-by patch.
-**Found by:** `make conformance` (phase 1): all 25 cut styles rendered byte-identical to no-cut.
+**Fix:** scene cuts now render. A cut treats the beat LEAVING as an exit and the beat ARRIVING as an
+enter, applied to the camera root (`#cam`) so the whole beat moves as one. The camera already owns
+`cam.style.transform`, so the cut transform is COMPOSED with it rather than overwriting it. Purity is
+safe because `cutStyle` always returns the full style set — the no-cut branch asks for that identity
+explicitly, so nothing written during a cut can stick into a later frame in any render order. An
+unknown style is now a loud build error instead of a silent fall back to `fade`.
+**Found by:** `make conformance` (phase 1): all 25 cut styles rendered byte-identical to no-cut. After
+the fix: 25/25 distinct.
+
+**What the fix then exposed (authoring, not engine):** beats had been authored back-to-back with a
+small GAP at each boundary. That was invisible while cuts rendered nothing, and became a blank frame
+the moment a cut treated the boundary. Two consequences: the default cut window is short (0.36s total)
+because a beat's layers already animate themselves in and out, and a scene's beats must OVERLAP their
+cut rather than meet at it. A transition needs something on both sides of it.
 
 ---
 

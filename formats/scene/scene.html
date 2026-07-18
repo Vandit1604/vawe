@@ -67,7 +67,7 @@
       import { splitText, animateUnits } from '/core/type.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
-      import { cutStyle } from '/core/cuts.js';
+      import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
       import { createRenderer } from '/core/layers/index.js';
@@ -123,6 +123,18 @@
         const stings = (data.stings || []).filter((s) => SHADER_FX.includes(s.fx))
           .map((s) => ({ ...s, _tint: s.color ? hex01(s.color) : null, _intensity: s.intensity ?? 1, _pal: Array.isArray(s.colors) ? s.colors.map(hex01) : null }));
         const fxo = createShaderOverlay($('root'), W, H);
+
+        // ---- scene cuts: [{t, style, dur?, dir?, timing?}] — the transition BETWEEN beats ----
+        // Filtered and sorted once at build, never per frame. An unknown style would silently become
+        // `fade` inside cutStyle, so it is rejected loudly here instead — that silent fallback is how
+        // a nonexistent name survived in the schema for months (MISTAKES #21).
+        const sceneCuts = (data.cuts || [])
+          .filter((c) => c && c.style && c.style !== 'none')
+          .map((c) => {
+            if (!CUT_PRESENTATIONS[c.style]) throw new Error(`unknown cut style "${c.style}" at t=${c.t} — known: ${Object.keys(CUT_PRESENTATIONS).join(', ')}`);
+            return c;
+          })
+          .sort((a, b) => +a.t - +b.t);
 
         // ---- relative TIMING: start may be "otherId+0.5" or "otherId.end-0.2" ----
         // Stagger chains become declared relationships instead of hand-added arithmetic
@@ -304,7 +316,32 @@
           } else { capEl.style.opacity = '0'; capEl.__key = null; }
           // global camera
           const c = cameraAt(camKf, t);
-          cam.style.transform = c ? `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : 'none';
+          const camTf = c ? `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
+          // SCENE CUTS. `cuts` declares a transition between beats and, until now, rendered nothing:
+          // cutStyle() was only ever wired to the layer-level `L.cut`, so the whole cut vocabulary was
+          // inert in every scene that used the top-level array (MISTAKES #29). A scene cut treats the
+          // beat leaving as an EXIT and the beat arriving as an ENTER, applied to the camera root so
+          // the entire beat moves as one. `dur` is the TOTAL window, split evenly around `t`.
+          // Kept SHORT by default (0.36s): a beat's layers already animate themselves out and in, so
+          // a long scene cut stacks on top of that and the frame dips to empty for a noticeable beat.
+          // Authors who want a slow dissolve set `dur` explicitly.
+          // Purity: cutStyle ALWAYS returns the full style set (identity in steady state), and the
+          // no-cut branch asks for that identity explicitly — so a property written during a cut can
+          // never stick into a later frame, whatever order frames are rendered in.
+          let cutS = null;
+          for (const cu of sceneCuts) {
+            const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;
+            if (t <= ct - half || t >= ct + half) continue;
+            const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
+            cutS = t < ct
+              ? cutStyle(cu.style, { exit: (t - (ct - half)) / half, enter: 1 }, o)   // beat leaving
+              : cutStyle(cu.style, { exit: 0, enter: (t - ct) / half }, o);            // beat arriving
+            break;
+          }
+          if (!cutS) cutS = cutStyle('fade', { enter: 1, exit: 0 }, {}); // full identity reset
+          const { transform: cutTf, ...cutRest } = cutS;
+          Object.assign(cam.style, cutRest);
+          cam.style.transform = [camTf, cutTf && cutTf !== 'none' ? cutTf : ''].filter(Boolean).join(' ') || 'none';
           // shader stings (each spans its dur centered on t)
           let drew = false;
           for (const s of stings) {
