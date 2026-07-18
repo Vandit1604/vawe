@@ -209,6 +209,34 @@ consecutive planning passes at work that already existed.
 Note: **true multi-sample motion blur** is not this tier. It means rendering sub-frames and
 accumulating — a render-pipeline change, not a shader. Tier 5.
 
+### The one capability that unblocks a whole cluster: shaders cannot read the frame
+
+Audited 2026-07-19. `core/stings.js` and `core/shaders-ambient.js` contain **zero** `sampler2D` /
+`texture2D`. Both are purely GENERATIVE overlays composited above the scene (stings sit at z-index 70).
+Nothing in the engine can sample what is behind it.
+
+That single fact re-prices a chunk of the backlog. Every one of these reads as "one new `SHADER_FX`
+entry" and is not, because each must transform pixels it cannot currently see:
+
+- radial blur · zoom blur · spin blur (the whole blur/motion family bar bokeh, which is generative)
+- fisheye, and any real lens distortion of the frame
+- bit-crush, macroblocking, real block displacement, real tearing
+- frosted glass, Liquid Background/Glass
+- Code Shader Dissolve (wants a `codeBlock` as its texture)
+
+Two paths, and they are worth pricing before picking:
+1. **`backdrop-filter`** — CSS, cheap, and completely untapped (zero occurrences in `core/`). It reads
+   what is behind an element natively. Gets frosted glass, the Tier-1 Liquid Glass approximation, and
+   blur-behind for free. Does NOT get radial/zoom/spin blur, which need custom sampling.
+2. **Layer-as-texture** — render a layer (or the composited frame) to a texture and hand it to a
+   shader. Unblocks the whole list above. Structural, and the bigger lift.
+
+Prefer 1 first and escalate: it is the same "start Tier 1, escalate only if it looks cheap" logic this
+file already applies to Liquid Glass.
+
+**Genuinely cheap and still absent** (generative, so the overlay path suffices): nebula (one
+`AMBIENT_FX` string in the shipped fbm family), iridescence, dot-crawl.
+
 ## Tier 4 — Three.js / WebGL
 
 Needs a new layer type (`three`?) with a deterministic clock, mirroring how `shader` works today.
