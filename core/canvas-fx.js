@@ -164,10 +164,29 @@ export const CANVAS_FX = {
   },
 };
 
+// Tier-C stylized presets: a base pass + tuned colours. `canvasFx:"blueprint"` expands to these, so
+// the recognisable looks live in the same per-pixel system (not awkwardly split across two mechanisms).
+// Author overrides still win (e.g. `{ fx:"blueprint", line:"#fff" }`).
+export const CANVAS_FX_PRESETS = {
+  blueprint: { fx: 'edgeDetect', line: [205, 226, 255], bg: [10, 38, 92] },
+  comic: { fx: 'halftone', cell: 7, ink: '#141019', paper: '#fef7e6' },
+  risograph: { fx: 'halftone', cell: 8, ink: '#ff3b6b', paper: '#f3ecdb' },
+  sketch: { fx: 'crosshatch', cell: 6, ink: '#20242c', paper: '#f4f1e8' },
+  matrix: { fx: 'ascii', cell: 11, ink: '#3dff8c', paper: '#020806' },
+  newsprint: { fx: 'dither', ink: '#141210', paper: '#efe8d8' },
+};
+
+// resolveFxSpec("blueprint") → { fx:'edgeDetect', line, bg }; a base name or object passes through.
+export function resolveFxSpec(spec) {
+  const o = typeof spec === 'string' ? { fx: spec } : { ...spec };
+  const p = CANVAS_FX_PRESETS[o.fx];
+  return p ? { ...p, ...o, fx: p.fx } : o;
+}
+
 // bakeCanvasFx(img, spec) → PNG data-URL, or null. spec is a name string or { fx, cell, ink, paper, seed }.
 // Runs at build (boot) on an already-decoded image. Caps the working width so huge photos stay cheap.
 export function bakeCanvasFx(img, spec) {
-  const o = typeof spec === 'string' ? { fx: spec } : { ...spec };
+  const o = resolveFxSpec(spec);
   const pass = CANVAS_FX[o.fx];
   if (!pass || typeof document === 'undefined') return null;
   const nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height;
