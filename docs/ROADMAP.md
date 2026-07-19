@@ -299,12 +299,10 @@ here rather than left in a transcript.
 `browserFrame` defaulted `url` to a real company's domain; `deploySuccess` baked in the invented
 statistic "Ready in 1.2s" (now `title`/`note`/`steps` props, `note` defaulting to nothing).
 
-**The structural one — fix this before more effects.** `nowPlaying` is the ONLY app-content block in
-the catalog. Everything else is dev-tooling (terminal, fileTree, diff, kanban, logLines, commitRow) or
-marketing chrome. A product-demo storyboard could only depict a *music app*, because that is the one
-app the vocabulary can describe. Wanted: a generic **feed row**, **list item**, **settings row**,
-**profile header**, **onboarding card**, **empty state**. Six small factories buy more than any
-transition on this page.
+~~**The structural one — fix this before more effects.**~~ **DONE (2026-07-19).** `nowPlaying` used to
+be the ONLY app-content block, so a product-demo storyboard could only depict a *music app*. All six
+factories now ship in `blocks/app.mjs`: `feedRow` · `listRow` · `settingsRow` · `profileHeader` ·
+`onboardCard` · `emptyState`. This was correctly called ahead of any transition on this page.
 
 **Containers and composition**
 - No **split-screen / picture-in-picture** primitive. Every "split" archetype is hand-chosen x
@@ -319,13 +317,10 @@ transition on this page.
 - No **app-scroll or screen-transition** block at all. Nothing moves from screen A to screen B inside
   a device frame, which is the single most common motion in a product demo.
 
-**Interaction**
-- The `cursor` LAYER exists but the only block that emits one is `searchEngine.results`, with a
-  hardcoded two-point path. There is no standalone `cursor`/`tap` block, so any other click must be
-  hand-timed against a magic offset.
-- No **mobile keyboard**. `searchEngine.home` is a desktop shape, so a phone-shaped field with a
-  rising keyboard is unbuildable.
-- `card`'s `cta` renders an arrow chip with no press state, so a CTA beat has nothing to depress.
+**Interaction — DONE (2026-07-19), all three, in `blocks/interact.mjs`**
+- ~~no standalone cursor/tap block~~ → `pointer` (an arbitrary path) and `tapRipple`.
+- ~~no mobile keyboard~~ → `keyboard`, a phone-shaped rising key plane.
+- ~~`card`'s `cta` has no press state~~ → `pressButton`.
 
 **Proof surfaces**
 - No **app-store / install** block: no rating row (stars + count), no install button. `followCard` is
