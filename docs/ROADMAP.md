@@ -292,6 +292,42 @@ determinism problem once the analysis moved out of the frame. See `core/spectrum
   sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel
   entry over a `clip`, i.e. content, not a determinism problem.
 
+## Retro / expressive text (resourceboy.com/text-effects/retro) — backlog
+
+A large family of retro text looks to mine for effects: https://resourceboy.com/text-effects/retro/
+(chrome, letterpress, sticker, foil, neon, halftone, marquee, etc.). Pull from it whenever the
+question is "what text effect should we build next." One is already shipped: the **ransom cutout**
+(`core/ransom.js`, paper + color palettes — see PRIMITIVES). The rest below are queued.
+
+Three near-complete reference implementations were handed over (Study / resourceboy, self-contained
+WebGL1 + React). They are worth building, but note the **shared catch**: as given, each is an
+*interactive site component* — a `requestAnimationFrame` loop driven by `performance.now()`, pointer
+position, and `Math.random()`. That is the exact opposite of `renderFrame(n)` purity. So each has two
+possible homes, and the port differs:
+
+- **As a live SITE block** (like the current blocks browser / editor): drop in almost as-is. The site
+  already runs interactive WebGL; cursor + rAF are fine there. Lowest effort, highest fidelity.
+- **As a VIDEO primitive** (a new fx/layer): must be rewritten **pure in n** — drive every phase from
+  the frame number, delete the cursor input and every `Math.random`/`performance.now`, and follow the
+  multi-pass-bloom-into-FBOs pattern already proven by `core/stings.js` / `core/raymarch-fx.js`. This
+  is the Tier 4 (WebGL) + Tier 5 (determinism) overlap; give it a design note first.
+
+Queued from the handoff:
+- **Blur glow** — a crisp word in a gradient-mapped soft bloom on light paper: rasterize the word to a
+  height-locked white mask, build a real multi-pass Gaussian bloom (4 downsampled H/V blur FBOs) with
+  a depth-of-field focus, sum with falling weights, gamma, then gradient-map the luminance through a
+  5-stop ramp; ink-coloured sharp word on top; soft-light film grain. Ships several light-paper
+  palettes. (Study, WebGL1.)
+- **Chromatic glow** — the same multi-pass bloom, then split into a warm and a cool copy offset in
+  opposite directions with a spectral (multi-tap prism) rainbow rim; grain; palette worlds each with
+  their own wall colour, dark and light modes. The static `chroma` reveal preset and the `chromaGlow`
+  filter already gesture at this; this is the full live version. (Study, WebGL1.)
+- **Real-sprite ransom** — the asset-based cousin of `core/ransom.js`: real cut-out magazine letter
+  sprites (royalty-free WebP, e.g. resourceboy's pack) picked per character with seeded jitter, versus
+  our procedural CSS tiles. Higher fidelity, but needs a vetted royalty-free sprite set committed and
+  served, and for video it must bake to frames (no `Math.random` swap). Procedural ships today; sprites
+  are the upgrade when the asset licensing is settled.
+
 ## What a showcase actually found (App Showcase, 2026-07-19)
 
 The instruction in the next section — build the showcases last and let them dictate the backlog — was
