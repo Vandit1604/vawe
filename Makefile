@@ -50,6 +50,12 @@ blocks-audit:
 dead-branch:
 	node scripts/gates/dead-branch.mjs
 
+# make roadmap-drift — the roadmap lists shipped effects as missing. It decayed this way twice and
+# routed two planning passes at work that already existed; its own closing warning says nothing
+# checked it. Now something does.
+roadmap-drift:
+	node scripts/gates/roadmap-drift.mjs
+
 layer-props:
 	node scripts/gates/layer-props.mjs $(D)
 

@@ -167,6 +167,9 @@ const srcCases = [
   { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/index.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
+  { name: 'roadmap-drift · a shipped effect listed as missing', file: 'docs/ROADMAP.md',
+    mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
+    cmd: ['node', ['scripts/gates/roadmap-drift.mjs']], match: /ROADMAP DRIFT/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/paint.js',
     // Anchored on the clearRect call, not the whole line: the line also carries the resample tick
     // now, and pinning the exact text made the fixture go stale the moment the branch grew. A stale

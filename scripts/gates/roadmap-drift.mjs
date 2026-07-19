@@ -1,0 +1,72 @@
+// scripts/gates/roadmap-drift.mjs — the roadmap is a claim about the PAST as much as the future, and
+// nothing checked it. Twice now it listed shipped work as missing and routed a planning pass at
+// effects that already existed (see its own closing warning, and MISTAKES #83).
+//
+// Two checks, both narrow on purpose:
+//   1. Any registry NAME the roadmap calls absent must not actually be in that registry.
+//   2. Any registry COUNT it quotes must match.
+// Deliberately NOT a prose checker. It only reads sentences that make a falsifiable claim about a
+// registry, because a gate that nags about wording gets ignored and takes the real findings with it.
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { SHADER_FX } from '../../core/stings.js';
+import { AMBIENT_FX } from '../../core/shaders-ambient.js';
+import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
+import { RESAMPLE_FX } from '../../core/resample-fx.js';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
+
+const REGISTRIES = {
+  SHADER_FX: { names: SHADER_FX, src: 'core/stings.js' },
+  AMBIENT_FX: { names: AMBIENT_FX, src: 'core/shaders-ambient.js' },
+  PAINT_FX: { names: PAINT_FX_NAMES, src: 'core/paint-fx.js' },
+  RESAMPLE_FX: { names: RESAMPLE_FX, src: 'core/resample-fx.js' },
+};
+const every = Object.entries(REGISTRIES).flatMap(([reg, { names, src }]) => names.map((n) => ({ n, reg, src })));
+
+const findings = [];
+
+// ---- 1. "still absent" / "missing" lines that name something already shipped ----------------------
+// Strikethrough (~~...~~) is how this doc retires a claim, so a struck line is history, not a claim.
+const ABSENT = /(still absent|^\s*-?\s*missing:|genuinely cheap and still absent|not built|cannot be built)/i;
+doc.split('\n').forEach((line, i) => {
+  if (!ABSENT.test(line)) return;
+  if (line.trim().startsWith('~~') || line.includes('~~**Genuinely')) return;
+  // only the part AFTER the absence marker is a claim of absence
+  const tail = line.slice(line.search(ABSENT));
+  for (const { n, reg, src } of every) {
+    // BACKTICKED only. Matching the bare word flagged "Glitch RGB captions" (a caption feature) as
+    // the `glitch` sting. This doc backticks a registry entry every time it means the registry entry,
+    // and uses plain prose for feature names, so the backtick IS the disambiguator. A gate that
+    // cries wolf on prose gets skimmed, and takes its real findings down with it.
+    if (!tail.includes('`' + n + '`')) continue;
+    findings.push(`docs/ROADMAP.md:${i + 1} calls "${n}" absent, but it ships in ${reg} (${src})\n      ${line.trim().slice(0, 150)}`);
+  }
+});
+
+// ---- 2. quoted registry counts ------------------------------------------------------------------
+// e.g. "`SHADER_FX` holds 34 entries and `AMBIENT_FX` 16"
+for (const [reg, { names, src }] of Object.entries(REGISTRIES)) {
+  const re = new RegExp('`?' + reg + '`?[^.\\n]{0,40}?(\\d+)', 'g');
+  let m;
+  while ((m = re.exec(doc)) !== null) {
+    const claimed = Number(m[1]);
+    // ignore numbers that are obviously not a count of this registry (a year, a line ref)
+    if (claimed > 500) continue;
+    if (claimed === names.length) continue;
+    const line = doc.slice(0, m.index).split('\n').length;
+    findings.push(`docs/ROADMAP.md:${line} says ${reg} holds ${claimed}, but it holds ${names.length} (${src})`);
+  }
+}
+
+if (!findings.length) {
+  console.log(`✓ roadmap in sync — no shipped effect is listed as missing, and every quoted registry count is right`);
+  process.exit(0);
+}
+console.log(`ROADMAP DRIFT (${findings.length})\n`);
+for (const f of findings) console.log(`  ✗ ${f}\n`);
+console.log('A roadmap that lists shipped work as missing routes the next planning pass at phantom work.');
+console.log('This has happened twice (see the standing warning at the end of ROADMAP.md).');
+process.exit(1);

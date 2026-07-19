@@ -1557,3 +1557,28 @@ announced in a line that looks like housekeeping.
 
 **The general rule this earns:** a fixture should anchor on the smallest text that carries the
 behaviour it removes. Pinning a whole line couples the gate's survival to every unrelated edit on it.
+
+---
+
+## #90 — The roadmap decayed again, in the exact way its own closing warning describes
+
+`docs/ROADMAP.md` ends with a standing warning: three items sat on it as "build first" long after they
+were built, two consecutive planning passes were routed at them, and "a roadmap is a claim about the
+past as much as the future, and this one decayed silently because nothing checked it."
+
+Within a single session it decayed again. It listed nebula, iridescence and dot-crawl as "genuinely
+cheap and still absent" hours after all three shipped, and quoted `SHADER_FX` at 33 and `AMBIENT_FX`
+at 14 when they held 34 and 16.
+
+**Root cause:** the warning asked future authors to remember. Nothing enforced it. The same shape as
+the schema enums before `make schema-drift` existed.
+
+**Fix:** `make roadmap-drift`, registered in the mutation harness (37/37). Two narrow checks:
+a line claiming absence may not name a registry entry that ships, and a quoted registry count must
+match the registry. Deliberately not a prose linter.
+
+**One false positive, kept as the design note.** The first version flagged "Glitch RGB captions", a
+caption feature, as the `glitch` sting, because it matched bare words. The doc backticks a registry
+entry every time it means the registry entry and uses plain prose for feature names, so the backtick
+is the disambiguator. A gate that cries wolf on prose gets skimmed and takes its real findings with
+it, which is the same lesson as #85.

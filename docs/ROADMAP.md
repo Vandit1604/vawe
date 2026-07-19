@@ -186,17 +186,17 @@ than none.
 
 ## Tier 3 — GLSL (one new SHADER_FX each)
 
-**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 33 entries and `AMBIENT_FX` 14; between
+**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 34 entries and `AMBIENT_FX` 16; between
 them the families below are majority-built. This section used to read as a wish-list and sent two
 consecutive planning passes at work that already existed.
 
 - **Shader Transitions: 13 of 14 ship.** chromaticSplit · crossWarp · domainWarp · sdfIris · vortex ·
   ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch. Only *cinematic zoom* is
   missing, and only as a GLSL sibling of the existing `PRESENTATIONS.zoom`.
-- **chromatic: 4 of 5 ship** (aberration/prism/RGB-offset via the `chromatic` filter primitive,
-  `dispersion` as a sting). Missing: iridescence.
+- **chromatic: all 5 ship** (aberration/prism/RGB-offset via the `chromatic` filter primitive,
+  `dispersion` and `iridescence` as stings).
 - **analog/retro: majority ships** — `AMBIENT_FX` vhs · crt · filmGrain · lightLeak, `LOOKS` vhs ·
-  super8 · crt. Missing: film dust / gate weave, dot-crawl. CRT phosphor *trails* stay excluded
+  super8 · crt, plus `dotCrawl` in `AMBIENT_FX`. Missing: film dust / gate weave. CRT phosphor *trails* stay excluded
   (frame feedback).
 - **distortion: 7 of 8 ship** — barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
   displace/melt, plus **`fisheye` via `resample`** (see below). Missing: real block displacement of a
@@ -204,8 +204,8 @@ consecutive planning passes at work that already existed.
 - **blur/motion: bokeh ships, and `zoomBlur` + `spinBlur` now ship via `resample`** (see below). They
   needed a texture to sample, not a new `SHADER_FX` entry. Frosted glass now has two answers: the
   `glass` prop (`backdrop-filter`) for a blurred backdrop, `resample:"refract"` for real bending.
-- Still absent: **iridescence, Glitch RGB captions, Liquid Background/Glass, Portal, Shatter, Code
-  Shader Dissolve.** Iridescence is one generative entry; Code Shader Dissolve needs a DOM subtree as a
+- Still absent: **Glitch RGB captions, Liquid Background/Glass, Portal, Shatter, Code
+  Shader Dissolve.** Code Shader Dissolve needs a DOM subtree as a
   texture (Seam C, not built); Portal and Shatter need real geometry. **`bit-crush` and `macroblocking`
   now ship** as `resample` effects.
 
@@ -249,8 +249,8 @@ Both cheap paths shipped:
   That breaks pure-in-`n`, which is the product's central claim. `resample` never samples its own
   previous output; guarded by `make probe` + `make canvas-purity`.
 
-**Genuinely cheap and still absent** (generative, so the overlay path suffices): nebula (one
-`AMBIENT_FX` string in the shipped fbm family), iridescence, dot-crawl.
+~~**Genuinely cheap and still absent** (generative): nebula, iridescence, dot-crawl.~~ **All three
+shipped 2026-07-19**: `nebula` and `dotCrawl` in `AMBIENT_FX`, `iridescence` in `SHADER_FX`.
 
 ## Tier 4 — Three.js / WebGL
 
