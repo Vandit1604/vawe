@@ -2000,3 +2000,32 @@ which also simplified the module. Determinism is the contract, so a shape that l
 non-reproducibly does not ship. Confirmed by the isolation ladder: paper (torn) 4/4 identical, color
 without materials still varied, color with torn-only 4/4 identical — the diagonal shape was the sole
 variable.
+
+---
+
+## #105 — Two shipped scenes do not render the same twice, and nothing was checking
+
+Refactoring boot()'s preloaders, I byte-compared renders across the change. `ransom-demo`,
+`ransom-color-demo` and `canvasfx-reel` were identical; `three-showcase` and `_coverage-reel` were
+not. The obvious read was "the refactor broke the three and clip paths." It hadn't: rendering each
+scene three times on the UNCHANGED committed code produced three different mp4s. Both scenes are
+non-deterministic on `main`, and were before this session.
+
+This is the product's central claim failing in the two scenes built to demonstrate the vocabulary —
+the three.js showcase and the coverage reel. Determinism is the whole pitch; a showcase that renders
+differently every run refutes it.
+
+**Why no gate saw it:** `probe-purity` proves the *DOM* is identical regardless of render order, and
+it passes here. Neither scene's problem is in the DOM — it is in the *pixels*, from GPU raster of
+WebGL/compositing that the DOM check structurally cannot see. `canvas-purity` exists for pixels but is
+not run over these scenes. So the gate that could catch it wasn't pointed at them, which is the same
+sampling failure as #45/#46/#68/#95: the blind spot is never the rule, it is what the rule was aimed at.
+
+**Not fixed here** (out of scope for a refactor commit, and three.js raster determinism is a real
+project — see ROADMAP Tier 4/5). Logged so it is not rediscovered as "the refactor broke it." Next
+step: point a pixel-level purity check at every shipped scene, so a scene that cannot render twice
+identically fails CI instead of sitting in the showcase.
+
+**The method note worth keeping:** the discriminating test was cheap and decisive — before blaming my
+change, render the same scene twice on the *unchanged* code. Byte-comparing across a refactor is
+worthless until you know the baseline is itself reproducible.
