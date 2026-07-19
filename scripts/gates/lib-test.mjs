@@ -24,6 +24,7 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, down
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
+import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
@@ -756,6 +757,20 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // a typo must make the effect STAND STILL mid-render, never throw
   ok('spectrum: an unknown band is 0, not a throw', sampleAt(sp, 5, 'nope') === 0);
   ok('spectrum: a missing table is 0, not a throw', sampleAt(null, 5, 'low') === 0);
+}
+
+{
+  // ransom: the whole effect rests on being a PURE function of (seed, index). If it ever picked up
+  // Math.random or the clock the note would flicker frame to frame — this is the guard for that.
+  const a = ransomGlyph('READ', 3, { accent: '#c8342b' });
+  const b = ransomGlyph('READ', 3, { accent: '#c8342b' });
+  ok('ransom: same (seed,i) → identical glyph spec', JSON.stringify(a) === JSON.stringify(b));
+  ok('ransom: a different index changes the spec', JSON.stringify(ransomGlyph('READ', 4, {})) !== JSON.stringify(a));
+  ok('ransom: a different seed changes the spec', JSON.stringify(ransomGlyph('DEAL', 3, {})) !== JSON.stringify(a));
+  ok('ransom: picks a face from the pool', RANSOM_FACES.some((f) => f.family === a.family));
+  ok('ransom: rotation stays within ±6°', Math.abs(a.rot) <= 6.001);
+  ok('ransom: torn:false yields no clip-path', ransomGlyph('READ', 3, { torn: false }).clip === null);
+  ok('ransom: accent tile carries the passed accent', ransomSwatches('#0af').some((s) => s.bg === '#0af'));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

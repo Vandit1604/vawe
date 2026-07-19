@@ -1950,3 +1950,53 @@ it. Renaming the workdir `/repo` → `/src` re-keyed the parent and the deploy w
 `docker builder prune -af` on the host remains the real cure; Coolify's v1 API exposes no way to run
 it (no exec endpoint, and `docker_cleanup_frequency` is not PATCHable), so this was fixed entirely
 from the repo side.
+
+---
+
+## #102 — `preview.mjs` is non-deterministic where the production render is not
+
+Building the `ransom` treatment, I checked determinism by rendering a frame 5× through
+`make frame` / `scripts/author/preview.mjs` and hashing the PNGs. Five different hashes. I spent a
+dozen cycles chasing a phantom font-load race that did not exist, because the production render was
+byte-identical the whole time.
+
+`preview.mjs`'s fast screenshot does NOT wait for GPU raster to settle. The moment a scene promotes
+many small compositing layers (here: a per-glyph `rotate` on every cutout tile), preview captures
+mid-raster and each grab differs. `bin/vawe` (the Go renderer) waits, so `make video` output is
+byte-identical — which is the determinism the contract actually promises.
+
+**The rule:** `preview.mjs` is for *looking*, never for *proving determinism*. Prove it by rendering
+the real video twice and `cmp`-ing the mp4, or with `make probe`/canvas-purity. A preview tool that is
+flakier than production will invent bugs that aren't there. (Worth hardening preview to wait for a
+stable paint so it stops lying; logged as a follow-up.)
+
+---
+
+## #103 — A failed render left a stale PNG, and the hash read it as "identical"
+
+Chasing #102, I wrote scenes to `/tmp` and rendered them with `preview.mjs`. The preview server only
+serves files under the repo root, so every `/tmp` scene fetched empty and the render **errored without
+writing a new PNG** — leaving the previous run's image in place. `md5 /tmp/preview_scene_100.png` then
+read that stale file and reported the same hash across totally different inputs, "proving" determinism
+about files that never rendered. I nearly concluded the opposite of the truth twice.
+
+**The rule:** a measurement over an output file must first guarantee the file was *freshly produced*.
+`rm -f` the target before each run and hard-fail if it is missing afterward — never hash whatever
+happens to be on disk. Same shape as the byte-identical-snapshot-ID trap (#101): an identifier/artifact
+that cannot have been produced by this run is the loudest signal that the run didn't happen.
+
+---
+
+## #104 — Diagonal clip-path edges rasterise non-deterministically under per-element rotation
+
+The vivid `ransom` palette first shipped extra cut shapes (a pennant point, a sheared parallelogram).
+The production render then varied across runs — 4/4 byte-identical with ragged near-rectangular torn
+edges, but a fresh hash the moment a steep diagonal `clip-path` edge entered, because a long diagonal
+under the tile's own `rotate()` promotes a compositing layer whose edge AA the GPU rasterises with
+timing-dependent results the capture can't fully pin.
+
+**Fix:** the ransom cut stays near-axis-aligned (ragged rectangle only); the exotic shapes were removed,
+which also simplified the module. Determinism is the contract, so a shape that looks good but renders
+non-reproducibly does not ship. Confirmed by the isolation ladder: paper (torn) 4/4 identical, color
+without materials still varied, color with torn-only 4/4 identical — the diagonal shape was the sole
+variable.

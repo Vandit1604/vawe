@@ -115,6 +115,23 @@ from edge-on). Reels: cuts-demo.mp4 + type-demo.mp4 + chromatic.mp4.
   (per-preset overrides, e.g. `gradient` `{c1,c2}` · `highlight`/`underline` `{color}` · `blur`/`focus`
   `{px}` · `tilt` `{deg}` · `wave` `{amp,phase}` · `bounce`/`elastic` `{bounce,settle}` · `scale`/`stretch` `{from}`).
 
+## Ransom cutout (`core/ransom.js`) — comic/kidnapper-note treatment
+
+`"ransom": true` on a `text` layer cuts every glyph from a different source: its own typeface (from a
+pool of 8 distinct OFL classes — grotesque · contrast serif · marker · geometric · editorial serif ·
+wide display · typewriter mono), its own paper swatch, a torn clip-path edge, a ±6° tilt, size and
+baseline jitter, and a lift shadow. Implies `split:"char"` and defaults the entrance to `fall`; pair
+with any preset. Pure in n (every choice is a function of `hashSeed(seed,index)`) — the note is
+byte-identical across render order. Mixed case is preserved from the input.
+- **Two palettes:** `"ransom": true` = muted **paper** (newsprint/kraft, a kidnapper note). `"ransom":
+  { "palette": "color" }` = vivid **magazine cutout** (saturated construction-paper grounds, a neon
+  tile, wood-type, colored ink on colored stock — the `bE KINd` look).
+- **Object knobs**: `{ palette, accent, faces, swatches, ransomSeed }`. `ransomSeed` (also a top-level
+  layer prop) defaults to the text, so the same word always cuts the same way; change it to re-roll.
+- Faces must be registered in `core/tokens.css` or `ransomStyle` throws (never a silent body-font
+  fallback). Edges stay near-axis-aligned on purpose: steeper diagonal cuts rasterise
+  non-deterministically under the per-glyph rotation. Reel: ransom-demo.mp4 · ransom-color-demo.mp4.
+
 ## Backgrounds (`core/backgrounds.js`) — 14 canvas presets, theme-recolored
 
 Light: `paper` `paperShapes` `paperDots` `soft` `accent` `accentPlain` `dotmatrix` `plain` · Dark:

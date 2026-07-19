@@ -710,6 +710,14 @@
           "type": "boolean",
           "label": "Loop the kinetic preset"
         },
+        "ransom": {
+          "type": "boolean|object",
+          "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { accent, faces, swatches }"
+        },
+        "ransomSeed": {
+          "type": "string|number",
+          "label": "Seed for the ransom cutout choices (defaults to the text, so the same word looks the same)"
+        },
         "presetOpts": {
           "type": "object",
           "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"

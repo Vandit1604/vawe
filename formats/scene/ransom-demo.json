@@ -1,0 +1,10 @@
+{
+  "module": "scene",
+  "theme": "vawe-site",
+  "duration": 4,
+  "layers": [
+    { "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "bg": "#141414", "start": 0, "duration": 4 },
+    { "type": "text", "text": "READ THE", "x": 160, "y": 360, "size": 150, "ransom": true, "start": 0.2, "duration": 3.6 },
+    { "type": "text", "text": "FINE PRINT", "x": 160, "y": 560, "size": 170, "ransom": true, "ransomSeed": "fine", "start": 0.7, "duration": 3.1 }
+  ]
+}

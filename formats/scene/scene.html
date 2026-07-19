@@ -65,6 +65,7 @@
       import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/motion.js';
       import { driveClips, seekAll } from '/core/clips.js';
       import { splitText, animateUnits } from '/core/type.js';
+      import { ransomStyle } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
       import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
@@ -209,7 +210,10 @@
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
           if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           cam.appendChild(el);
-          const units = L.split ? splitText(el, L.split) : null; // 'char' | 'word' | 'line'
+          // ransom is a per-CHAR treatment, so it implies a char split when the author did not set one.
+          const splitMode = L.split || (L.ransom ? 'char' : null);
+          const units = splitMode ? splitText(el, splitMode) : null; // 'char' | 'word' | 'line'
+          if (L.ransom && units) ransomStyle(units, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...(typeof L.ransom === 'object' ? L.ransom : {}) });
           return { L, el, units };
         });
 
@@ -247,7 +251,7 @@
             }
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || 'up', stagger: L.stagger ?? 0.06, each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
+            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : 0.06), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
             // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
             // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
             renderer.frame(el, L, t);

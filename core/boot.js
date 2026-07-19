@@ -8,6 +8,7 @@ import { validateAll } from './validate.mjs';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
 import { loadRegistered, auditFonts } from './fonts.js';
+import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
@@ -280,6 +281,21 @@ export async function boot(build) {
     try {
       const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
       await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));
+      // ransom stamps its OWN faces (incl. weight 900 + italics) onto glyphs after build, so the theme's
+      // type map never lists them; without loading them here the first frame races the font download and
+      // the note renders non-deterministically. Same detect-in-the-JSON idiom as the lazy three.js load.
+      if (JSON.stringify(data).includes('"ransom"')) {
+        // Load the NORMAL file for every face unconditionally: an italic face whose @font-face is
+        // normal-only (Fraunces) is painted as a synthesised oblique of the normal file, so THAT is
+        // what must be ready — awaiting only the italic variant matches nothing and leaves the real
+        // font racing. Where a true italic file exists (Instrument Serif) load it too. allSettled so
+        // one unmatched style never aborts the batch.
+        await Promise.allSettled(RANSOM_FACES.flatMap((f) => {
+          const loads = [document.fonts.load(`${f.weight} 100px '${f.family}'`)];
+          if (f.italic) loads.push(document.fonts.load(`italic ${f.weight} 100px '${f.family}'`));
+          return loads;
+        }));
+      }
       await document.fonts.ready;
     } catch (e) {}
     // AUDIO-REACTIVITY, loaded here in the awaited readiness phase for the same reason canvasFx bakes
