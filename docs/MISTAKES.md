@@ -1399,6 +1399,28 @@ everything in the top 60% with a dead bottom third, and every one passed safe-zo
 answers "is it inside the frame", not "does it USE the frame". New `top-heavy`/`bottom-heavy` warn.
 Warn tier because a deliberately weighted beat is a real choice.
 
-**(c) STILL OPEN: nothing proves a code branch is reachable.** `deploySuccess`'s cascade was
-unreachable behind a tautological ternary and no render gate would ever catch it. That is a linter's
-job, and it is recorded rather than pretended away.
+**(c) HALF CLOSED — see #81.** `deploySuccess`'s cascade was unreachable behind a tautological
+ternary. The instance is fixed and the identical-arm half is now gated; the always-true-condition half
+still needs real dataflow analysis and stays open.
+
+
+---
+
+## 81. A decision that decides nothing
+
+**What:** `deploySuccess` shipped `i === last ? T.green : T.green` — a ternary with identical arms —
+beside a condition that was always true. Between them, the step cascade the block exists for could
+never render. No RENDER gate can see this: the output is valid, deterministic, and wrong by omission.
+**Fix (the instance):** an `active` prop drives three distinct glyphs and the colour arms now differ.
+**Fix (the class, half of it):** `make dead-branch` flags any ternary whose arms are textually
+identical. This repo has ONE dependency and intends to keep it, so adding a linter for one rule was
+the wrong trade; the check is 60 lines and reads source text.
+**What it caught on its first run:** `verify/audit.mjs` had `bgFor(im === e.el ? e.el : e.el, …)` —
+correct output, but a ternary that reads as though it decides something. In gate code, written by me,
+while building the gate that finds it.
+**What it deliberately does NOT catch, stated so nobody trusts it past its limit:** a condition that
+is always true because of a variable defined three lines up (`const done = i < n-1` … `done || i === n-1`).
+That needs dataflow analysis, and half a linter pretending to be a whole one is worse than none.
+**Also fixed while building it:** the first version read `a ?? 0 : 0` as a ternary starting at the
+second `?` and reported two identical arms that were not a ternary. A gate's first output is a
+hypothesis, not a finding.

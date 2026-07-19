@@ -513,7 +513,10 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       if (k < 20) continue; // nearly empty raster — nothing to judge
       avg = [r / k, g / k, b / k];
     } catch { continue; } // cross-origin taint → skip, never guess
-    const bg = bgFor(im === e.el ? e.el : e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
+    // the backdrop wanted is the LAYER's, whether the raster is the layer itself or a child <img>.
+    // This was written as `im === e.el ? e.el : e.el`, a ternary with identical arms — correct output,
+    // but it reads as though it decides something. Found by `make dead-branch` on its first run.
+    const bg = bgFor(e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
     if (!bg) continue;
     const rt = cratio(avg, bg);
     if (rt < 3) issues.push({ kind: rt < 1.7 ? 'contrast' : 'contrast-soft', a: e.id || 'img', t: (im.getAttribute('src') || '').split('/').pop().slice(0, 18), detail: `image vs bg ${rt.toFixed(1)}:1` });

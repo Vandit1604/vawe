@@ -44,6 +44,12 @@ blocks-audit:
 
 # make layer-props [D=<file>] — does the engine READ the props a layer sets? `make expand` does this
 # for blocks; the primitive path had nothing, so {"type":"glow","r":620} was accepted and dropped.
+# make dead-branch — a ternary whose arms are identical, i.e. a decision that decides nothing.
+# deploySuccess shipped one next to an always-true condition and its cascade was unreachable; no
+# RENDER gate can see that, because the output is valid, deterministic and wrong by omission.
+dead-branch:
+	node scripts/gates/dead-branch.mjs
+
 layer-props:
 	node scripts/gates/layer-props.mjs $(D)
 
