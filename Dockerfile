@@ -5,14 +5,15 @@
 #   docker build -t vawe-site .
 #   docker run -p 3000:3000 vawe-site
 FROM node:22-alpine AS builder
-WORKDIR /repo
+WORKDIR /src
 
 # --- engine sources the site vendors (see scripts/site/site-engine.mjs COPY list) ---
-# Ordered smallest-first so the layers that change most often sit late in the chain. Do not reorder
-# casually: the deploy host once persisted a BuildKit cache record whose underlying snapshot had been
-# pruned, and every build of that exact chain then died at the first COPY with "failed to stat active
-# key during commit", identically, even under --no-cache. Reordering re-keys the chain and routes
-# around a poisoned record; `docker builder prune -af` on the host is the actual cure.
+# The workdir above is /src, not /repo, on purpose. The deploy host held a BuildKit cache entry for
+# the `WORKDIR /repo` layer whose backing overlay directory had been pruned away, so committing ANY
+# child layer onto it failed with "failed to stat active key during commit" and a snapshot ID that
+# was byte-identical on every build, even under --no-cache. Re-keying the children (reordering these
+# COPYs) did nothing because the broken parent was still reached; renaming the workdir is what
+# re-keys the parent. `docker builder prune -af` on the host is the actual cure.
 COPY themes ./themes
 COPY core ./core
 COPY formats/scene/scene.html formats/scene/schema.json ./formats/scene/
@@ -30,7 +31,7 @@ RUN node scripts/media/fonts.mjs
 
 # --- the site ---
 COPY site/package.json site/package-lock.json ./site/
-WORKDIR /repo/site
+WORKDIR /src/site
 RUN npm ci
 
 COPY site/ ./
@@ -42,7 +43,7 @@ RUN npm run build
 # it. A second container would work too, but this is one deploy and one thing to keep alive: with
 # nothing listening on 3001, /docs 500s, and a docs link that dies whenever a separate service is
 # down is not worth the extra moving part for a project this size.
-WORKDIR /repo/docs-site
+WORKDIR /src/docs-site
 COPY docs-site/package.json docs-site/package-lock.json ./
 # --ignore-scripts is load-bearing: this package's postinstall runs `fumadocs-mdx`, which reads
 # source.config.ts and content/. Neither is in this layer, and neither may be — copying them here
@@ -63,14 +64,14 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 # standalone traces the server; public/ and .next/static are NOT included by it — copy explicitly.
 # each app sets outputFileTracingRoot to its own dir, so its standalone root holds server.js
-COPY --from=builder --chown=nextjs:nodejs /repo/site/.next/standalone ./site
-COPY --from=builder --chown=nextjs:nodejs /repo/site/.next/static ./site/.next/static
-COPY --from=builder --chown=nextjs:nodejs /repo/site/public ./site/public
+COPY --from=builder --chown=nextjs:nodejs /src/site/.next/standalone ./site
+COPY --from=builder --chown=nextjs:nodejs /src/site/.next/static ./site/.next/static
+COPY --from=builder --chown=nextjs:nodejs /src/site/public ./site/public
 
-COPY --from=builder --chown=nextjs:nodejs /repo/docs-site/.next/standalone ./docs
-COPY --from=builder --chown=nextjs:nodejs /repo/docs-site/.next/static ./docs/.next/static
+COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.next/standalone ./docs
+COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.next/static ./docs/.next/static
 # fumadocs resolves content at runtime from .source
-COPY --from=builder --chown=nextjs:nodejs /repo/docs-site/.source ./docs/.source
+COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.source ./docs/.source
 
 # Start docs on 3001, then the site on $PORT. The site proxies /docs to it, so if docs is not up
 # the docs link 500s — start it first and let the site be the process that keeps the container
