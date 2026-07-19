@@ -42,6 +42,11 @@ spectrum:
 blocks-audit:
 	node scripts/gates/blocks-audit.mjs
 
+# make layer-props [D=<file>] — does the engine READ the props a layer sets? `make expand` does this
+# for blocks; the primitive path had nothing, so {"type":"glow","r":620} was accepted and dropped.
+layer-props:
+	node scripts/gates/layer-props.mjs $(D)
+
 sfx-check:
 	node scripts/gates/sfx-audit.mjs
 

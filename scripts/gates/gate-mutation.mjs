@@ -77,6 +77,30 @@ const CASES = [
   { gate: 'validate', name: 'layout · text y-centring is the deliberate carve-out', expect: 'pass',
     scene: scene([{ type: 'text', text: 'fine', x: 100, y: 'center', w: 1200, size: 90, start: 0, duration: 2 }]) },
 
+  // Overlap covers ALL text, not just >=60px "critical" text, because a headline that WRAPS lands on
+  // the small caption beneath it. All four directions pinned: the two legitimate cases must PASS, or
+  // the rule gets reverted the first time it cries wolf on a real design.
+  { gate: 'audit', name: 'overlap · a wrapped headline lands on a small caption', expect: 'fail', match: /overlap/,
+    scene: scene([{ type: 'text', text: 'A headline long enough to wrap onto a second line', x: 200, y: 400, w: 900, size: 90, weight: 600, start: 0, duration: 2 },
+                   { type: 'text', text: 'formats/scene/file.json', x: 200, y: 500, w: 900, size: 24, font: 'mono', start: 0, duration: 2 }]) },
+  { gate: 'audit', name: 'overlap · tight typographic stacking is NOT a collision', expect: 'pass',
+    scene: scene([{ type: 'text', text: '1.2M', x: 200, y: 400, w: 600, size: 120, weight: 700, start: 0, duration: 2 },
+                  { type: 'text', text: 'cups poured', x: 200, y: 508, w: 600, size: 20, font: 'mono', start: 0, duration: 2 }]) },
+  { gate: 'audit', name: 'overlap · text hidden behind an opaque card is NOT a collision', expect: 'pass',
+    // the card is LIGHT so the text beneath it still clears contrast against it — otherwise this
+    // fixture fails on contrast and tells you nothing about occlusion (which is what it did first).
+    scene: scene([{ type: 'text', text: 'behind the card', x: 300, y: 430, w: 600, size: 40, start: 0, duration: 2 },
+                  { type: 'rect', x: 260, y: 380, w: 700, h: 200, bg: '#f4f7fa', radius: 12, start: 0, duration: 2 },
+                  { type: 'text', text: 'on the card', x: 300, y: 440, w: 600, size: 40, start: 0, duration: 2 }]) },
+
+  // Composition: warn-tier, so assert it SPOKE rather than that it exited non-zero.
+  { gate: 'audit', name: 'top-heavy · a beat that abandons the bottom of the frame', expect: 'fail', match: /top-heavy/, outputOnly: true,
+    scene: scene([{ type: 'text', text: 'All the way up here', x: 200, y: 90, w: 1200, size: 80, weight: 600, start: 0, duration: 2 },
+                  { type: 'text', text: 'and nothing below', x: 200, y: 210, w: 1200, size: 30, start: 0, duration: 2 }]) },
+  { gate: 'audit', name: 'a beat that uses the frame is NOT top-heavy', expect: 'pass',
+    scene: scene([{ type: 'text', text: 'Upper', x: 200, y: 240, w: 1200, size: 80, weight: 600, start: 0, duration: 2 },
+                  { type: 'text', text: 'Lower', x: 200, y: 760, w: 1200, size: 80, weight: 600, start: 0, duration: 2 }]) },
+
   // ---- validator: must FAIL on vocabulary that does not exist ----
   { gate: 'validate', name: 'unknown anim name', expect: 'fail', match: /anim|not valid/i,
     scene: scene([TXT({ anim: 'slideL' })]) },
@@ -147,6 +171,14 @@ const srcCases = [
     mutate: (s) => s.replace("  if (!(t >= start && t < end)) { const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0); return; }",
                              "  if (!(t >= start && t < end)) return;"),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
+  { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
+    mutate: (s) => s.replace('export function build', 'const UNUSED_MARKER = 1;\nexport function build'),
+    cmd: ['node', ['scripts/gates/layer-props.mjs', 'formats/scene/_lp-fixture.json']], match: /accepted and dropped|is set and nothing reads it/,
+    before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), JSON.stringify({
+      module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
+      bg: [{ preset: 'plain', from: 0, to: 2 }],
+      layers: [{ type: 'glow', x: 200, y: 200, w: 400, h: 400, r: 620, start: 0, duration: 2 }] })),
+    after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), { force: true }) },
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
@@ -154,12 +186,14 @@ const srcCases = [
 console.log('');
 for (const c of srcCases) {
   const p = path.join(repoRoot, c.file);
+  if (c.before) c.before();
   const orig = fs.readFileSync(p, 'utf8');
   const mutated = c.mutate(orig);
   if (mutated === orig) { console.log(`   ~ SKIP  ${c.name} (mutation did not apply — fixture is stale)`); continue; }
   fs.writeFileSync(p, mutated);
   const r = run(c.cmd[0], c.cmd[1]);
   fs.writeFileSync(p, orig); // always restore, even if the gate throws
+  if (c.after) c.after();
   // snap reports rather than fails (an intended change is still a change), so some cases
   // assert on OUTPUT alone — a gate can speak without exiting non-zero.
   const ok = (c.outputOnly ? true : r.code !== 0) && c.match.test(r.out);

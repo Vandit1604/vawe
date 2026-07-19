@@ -24,7 +24,12 @@ export function createKit(ctx) {
     // `italic:true` slants any face). Non-breaking: omitted → current behaviour.
     el.style.fontStyle = (L.italic != null ? L.italic : serif) ? 'italic' : 'normal';
     el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
-    el.style.letterSpacing = L.tracking ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96) : '-0.03em'));
+    // `ls` and `tracking` are the same property under two names. `ls` was DECLARED in the schema,
+    // documented as "Letter-spacing (e.g. -0.03em)", used in 18 places across shipped scenes — and
+    // only ever read inside a guard in text.js that suppresses auto-tracking. Setting it removed the
+    // optical default and applied nothing (docs/MISTAKES.md #79). Found by `make layer-props` on its
+    // first run, which is the whole reason that gate exists.
+    el.style.letterSpacing = L.tracking ?? L.ls ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96) : '-0.03em'));
     el.style.fontSize = (L.size ?? 96) + 'px';
     if (L.w != null) el.style.width = L.w + 'px';
     if (L.align) el.style.textAlign = L.align;

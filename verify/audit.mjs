@@ -1,6 +1,6 @@
 // verify/audit.mjs — layout audit: catches what eyes catch but checklists miss.
 // Renders each format's sample headless across sampled frames and flags, on [data-layer="critical"]:
-//   • overlap   — two critical boxes intersect            (HARD fail)
+//   • overlap   — two TEXT inks intersect (any size, not just critical)  (HARD fail)
 //   • overflow  — text clipped (scrollW/H > clientW/H)    (HARD fail)
 //   • safe-zone — element outside the SAFE box            (HARD fail)
 //   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
@@ -76,11 +76,25 @@ function startServer() {
 function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
-  const els = [...document.querySelectorAll('[data-layer="critical"]')].filter((el) => {
+  // OVERLAP looked only at [data-layer="critical"] — text >=60px — so a headline that WRAPPED onto a
+  // second line and landed on the small mono caption beneath it was never compared with it. Measured
+  // on the reproduction: the headline occupied y 400-681 and the caption sat at 500-525, entirely
+  // inside it, and the audit said 0 hard (docs/MISTAKES.md #77).
+  // The rule that holds: two TEXT boxes overlapping is a defect; text over a SHAPE is design (a chip
+  // on a rect, a label on a card). So the set is every visible text layer, not every critical one.
+  const els = [...document.querySelectorAll('[data-layer="critical"], .hs-layer.hs-text')].filter((el) => {
+    if (!el.textContent || !el.textContent.trim()) return false;   // shapes and empty wrappers are not the subject
     const b = el.getBoundingClientRect(); return b.width > 1 && b.height > 1 && vis(el);
   });
   const info = els.map((el) => {
-    const b = el.getBoundingClientRect(), s = getComputedStyle(el);
+    const b0 = el.getBoundingClientRect(), s = getComputedStyle(el);
+    // A text element's BOX includes line-height leading; its INK does not. `statBig` tucks its label
+    // under the number's box on purpose and the two never touch visually — comparing raw boxes called
+    // that a collision. Inset each text box by ~16% of its font size top and bottom, which is about
+    // the gap between the em box and the cap-to-descender ink, so the check compares what is SEEN.
+    const fs = parseFloat(s.fontSize) || 0;
+    const inset = el.classList.contains('hs-text') ? fs * 0.16 : 0;
+    const b = { left: b0.left, right: b0.right, top: b0.top + inset, bottom: b0.bottom - inset };
     // overflow only CLIPS (a real bug) when overflow isn't 'visible'; tight line-heights spill
     // visibly and harmlessly, so don't flag those.
     const clipX = s.overflowX !== 'visible', clipY = s.overflowY !== 'visible';
@@ -243,6 +257,25 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-component', a: 'component',
       detail: `content needs ${el.scrollWidth}x${el.scrollHeight} but the captured box is ${el.clientWidth}x${el.clientHeight} — ${dy > 1 ? `${dy}px` : `${dx}px`} is being cut off. A margin on the captured root is the usual cause (capture measures a border box).` });
   }
+  // VERTICAL MASS. Nothing measured where a beat's content SITS in the frame, so a composition with
+  // everything crammed in the top 60% and a dead bottom third passed every check — six of twelve
+  // beats across two showcase films did exactly that, and all six passed safe-zone (MISTAKES #77).
+  // Safe-zone answers "is it inside the frame"; this answers "does it USE the frame". Warn tier: a
+  // deliberately top-weighted beat is a real choice, so this reports and never blocks.
+  {
+    const solid = info.filter((e) => +getComputedStyle(e.el).opacity > 0.9);
+    if (solid.length >= 2) {
+      const top = Math.min(...solid.map((e) => e.y)), btm = Math.max(...solid.map((e) => e.btm));
+      const H = window.innerHeight;
+      const deadBottom = (H - btm) / H, deadTop = top / H;
+      // a third of the frame empty at ONE end, while the other end is nearly flush, reads as a beat
+      // that ran out rather than one that was composed
+      if (deadBottom > 0.33 && deadTop < 0.12) issues.push({ kind: 'top-heavy', a: 'composition',
+        detail: `content ends at ${(btm / H * 100) | 0}% of the frame with the bottom ${(deadBottom * 100) | 0}% empty — the beat uses the top and abandons the rest` });
+      if (deadTop > 0.33 && deadBottom < 0.12) issues.push({ kind: 'bottom-heavy', a: 'composition',
+        detail: `content starts at ${(deadTop * 100) | 0}% down with the top ${(deadTop * 100) | 0}% empty` });
+    }
+  }
   // A CROSS-DISSOLVE is two layers deliberately sharing the same box while one fades out and the
   // other fades in. That is the standard way to morph a headline between two states, and reading it
   // as a collision would make dissolves unusable — the gate would forbid a technique the engine
@@ -270,6 +303,31 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const ox = Math.min(A.r, B.r) - Math.max(A.x, B.x);                // >0 → overlap on X
     const oy = Math.min(A.btm, B.btm) - Math.max(A.y, B.y);            // >0 → overlap on Y
     if (ox > 2 && oy > 2 && crossDissolve(A, B)) continue;             // intentional hand-off
+    // A layer mid-entrance is intentionally off-position, so a transient intersection while it travels
+    // is motion, not a collision — the safe-zone check has always exempted moving layers and overlap
+    // now needs the same exemption, because widening it past `critical` made those transients visible.
+    if (ox > 2 && oy > 2 && (midMove(A.el) || midMove(B.el))) continue;
+    // OCCLUSION. A card floating over a board overlaps the text beneath it by box and hides it by
+    // paint — that is a layered composition, not a collision. Sample the centre of the intersection:
+    // if an opaque surface is painted above the lower of the two, the lower one cannot be SEEN, so
+    // there is nothing to report. Same reasoning as the filled-chip case in the headline rule (#44).
+    if (ox > 2 && oy > 2) {
+      const cx = Math.max(A.x, B.x) + ox / 2, cy = Math.max(A.y, B.y) + oy / 2;
+      const stack = document.elementsFromPoint(cx, cy);
+      const at = (el) => stack.findIndex((e) => e === el || el.contains(e) || e.contains(el));
+      const ia = at(A.el), ib = at(B.el);
+      let hidden = ia < 0 || ib < 0;                    // one is not even painted at that point
+      for (let k = 0; !hidden && k < Math.max(ia, ib); k++) {
+        // a local alpha test: `parse` is declared further down this function, so using it here is a
+        // temporal-dead-zone error (which threw on every scene and made a blast-radius sweep read as
+        // "clean" because a stack trace contains no findings).
+        const bgc = getComputedStyle(stack[k]).backgroundColor || '';
+        const m = /rgba?\(([^)]+)\)/.exec(bgc);
+        const alpha = m ? (m[1].split(',')[3] !== undefined ? parseFloat(m[1].split(',')[3]) : 1) : 0;
+        if (alpha > 0.85) hidden = true;
+      }
+      if (hidden) continue;
+    }
     if (ox > 2 && oy > 2) { issues.push({ kind: 'overlap', a: A.id, b: B.id, detail: `${ox | 0}x${oy | 0}px` }); continue; }
     let gap = Infinity;                                                // gap only meaningful when they share one axis
     if (ox > 0) gap = Math.min(gap, -oy);

@@ -1357,3 +1357,48 @@ or `shader` layer is accepted and silently dropped — the exact class this repo
 effort eliminating, still live on the primitive path.
 **Fix not attempted here.** The schema knows every declared prop per layer type, so the check is
 available; it needs care about props that are legitimately type-agnostic.
+
+---
+
+## 79. `ls` was declared, documented, used 18 times, and never applied
+
+**What:** the schema declares `ls` as "Letter-spacing (e.g. -0.03em)". Eighteen layers across shipped
+scenes set it. `styleText` applied `L.tracking` and never `L.ls`; the only place `ls` was read at all
+was a GUARD in text.js that suppresses auto-tracking when it is present. So setting `ls` removed the
+optical default and applied nothing in its place — strictly worse than omitting it.
+**Found by:** `make layer-props` on its first run, which is the entire reason that gate now exists.
+**Fix:** `ls` is honoured as a synonym for `tracking`. Verified: `ls:"0.4em"` renders 36px, where it
+previously rendered the theme default.
+**Rule:** a prop with a schema entry and a doc string is a promise. The only thing that keeps it is a
+line that reads it.
+
+---
+
+## 80. Three composition defects the gates structurally could not see — now two of them can
+
+Closing #77, and the third stays open on purpose.
+
+**(a) Overlap only compared "critical" layers.** Text under 60px was invisible to it, so a headline
+that WRAPPED onto a second line and landed on the caption beneath it passed. Measured on the
+reproduction: headline y 400-681, caption 500-525, entirely inside it, 0 hard issues.
+Fixed — the set is now every visible TEXT layer, on the rule that two text inks overlapping is a
+defect while text over a SHAPE is design. Getting there took three corrections, each caught by
+measuring rather than reasoning:
+  1. comparing raw boxes flagged `statBig`'s deliberate tight stacking, because a text box includes
+     line-height leading and the ink does not → boxes are inset by ~16% of font size.
+  2. a card floating over a board flagged, though the card is opaque and hides what is beneath →
+     occlusion: sample the intersection, skip if an opaque surface is painted above the lower one.
+  3. my first occlusion attempt used `parse` before its declaration, which threw on EVERY scene — and
+     my blast-radius loop counted findings, so a stack trace read as "clean". I reported that as a
+     clean sweep before noticing. The loop now greps for errors too.
+Pinned four ways in gate-test. On the first real run it caught a genuine, visible defect: northwind's
+wordmark obscured by a tile.
+
+**(b) Nothing measured where content SITS.** Six of twelve beats across two showcase films put
+everything in the top 60% with a dead bottom third, and every one passed safe-zone — that check
+answers "is it inside the frame", not "does it USE the frame". New `top-heavy`/`bottom-heavy` warn.
+Warn tier because a deliberately weighted beat is a real choice.
+
+**(c) STILL OPEN: nothing proves a code branch is reachable.** `deploySuccess`'s cascade was
+unreachable behind a tautological ternary and no render gate would ever catch it. That is a linter's
+job, and it is recorded rather than pretended away.
