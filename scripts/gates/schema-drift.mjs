@@ -10,6 +10,7 @@ import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
+import { THREE_FX } from '../../core/three-scenes.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { PRESETS } from '../../core/type.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
@@ -68,6 +69,7 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     { path: 'layers.item.anim',   want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
     { path: 'layers.item.out',    want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
     { path: 'layers.item.shader', want: AMBIENT_FX,                              src: 'core/shaders-ambient.js AMBIENT_FX' },
+  { path: 'layers.item.three',    want: THREE_FX,                               src: 'core/three-scenes.js THREE_FX' },
   { path: 'layers.item.raymarch', want: RAYMARCH_FX,                            src: 'core/raymarch-fx.js RAYMARCH_FX' },
   { path: 'layers.item.resample', want: RESAMPLE_FX,                            src: 'core/resample-fx.js RESAMPLE_FX' },
   { path: 'layers.item.paint',  want: PAINT_FX_NAMES,                          src: 'core/paint-fx.js PAINT_FX' },

@@ -12,5 +12,10 @@
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
     "puppeteer": "^23.6.0"
+  },
+  "devDependencies": {
+    "fontkit": "^2.0.4",
+    "three": "^0.185.1",
+    "wawoff2": "^2.0.1"
   }
 }

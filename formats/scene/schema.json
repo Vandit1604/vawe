@@ -344,7 +344,8 @@
             "shader",
             "lottie",
             "paint",
-            "raymarch"
+            "raymarch",
+            "three"
           ]
         },
         "shader": {
@@ -850,7 +851,8 @@
                 "shader",
                 "lottie",
                 "paint",
-                "raymarch"
+                "raymarch",
+                "three"
               ]
             },
             "x": {
@@ -1154,6 +1156,61 @@
         "opacity": {
           "type": "number",
           "label": "Base opacity for the layer's whole life, multiplied into the enter/exit fade"
+        },
+        "three": {
+          "type": "string",
+          "label": "three: a real 3D scene (geometry, materials, lights, camera). For what an SDF cannot express: a device body with captured UI on its screen, extruded type from the real brand font, UI planes in depth, a point cloud. Posed absolutely from t, so it stays pure in n.",
+          "enum": [
+            "deviceShowcase",
+            "uiParallax",
+            "pointCloud",
+            "extrudeText"
+          ]
+        },
+        "device": {
+          "label": "three deviceShowcase: 'phone' (default) or 'laptop'"
+        },
+        "screen": {
+          "label": "three deviceShowcase: image src mapped onto the device screen"
+        },
+        "bodyColor": {
+          "label": "three deviceShowcase: device body colour"
+        },
+        "planes": {
+          "label": "three uiParallax: image srcs or {src,x,y,z} placed in depth"
+        },
+        "travel": {
+          "label": "three uiParallax: how far the camera dollies over the layer's window"
+        },
+        "swing": {
+          "label": "three uiParallax: gentle yaw amplitude"
+        },
+        "pointSize": {
+          "label": "three pointCloud: point size in world units"
+        },
+        "morphSpeed": {
+          "label": "three pointCloud: shape morph rate"
+        },
+        "depth": {
+          "label": "three extrudeText: extrusion depth"
+        },
+        "metalness": {
+          "label": "three: PBR metalness"
+        },
+        "roughness": {
+          "label": "three: PBR roughness"
+        },
+        "fov": {
+          "label": "three: camera field of view"
+        },
+        "dolly": {
+          "label": "three: camera distance"
+        },
+        "yaw": {
+          "label": "three: base yaw offset"
+        },
+        "pitch": {
+          "label": "three: base pitch offset"
         }
       }
     },

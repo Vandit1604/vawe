@@ -296,6 +296,23 @@ export async function boot(build) {
       } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable — react layers will hold still`); }
     }
     await preloadImages(data); // web/local images ready before any frame is captured
+    // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
+    // because a `three` layer builds synchronously and would otherwise race the module load, and a
+    // layer that renders empty on the workers that got there first is a purity break, not a glitch.
+    // Loaded here, in the same readiness phase as the canvasFx bake, for the same reason.
+    if (JSON.stringify(data).includes('"three"')) {
+      try { window.THREE = await import('/assets/vendor/three.module.min.js'); }
+      catch (e) { throw new Error('three.js failed to load from /assets/vendor/three.module.min.js: ' + e.message); }
+      // extruded type needs glyph outlines, generated from the repo's own woff2 by `make glyphs`.
+      // A missing typeface is a LOUD failure in three-fx.js rather than a substituted face.
+      window.__typefaces = {};
+      const fonts = new Set();
+      (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); Object.values(o).forEach(scan); } })(data);
+      for (const f of fonts) {
+        try { window.__typefaces[f] = await (await fetch(`/assets/fonts/3d/${f}.typeface.json`)).json(); }
+        catch (e) { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
+      }
+    }
     // Tier-2 CANVAS FX: bake each image with a `canvasFx` (halftone/dither/mosaic/…) ONCE here, in the
     // awaited readiness phase, into a static PNG data-URL. image.js then swaps the <img> src to it, so
     // the pixels are static at frame time → renderFrame(n) stays byte-identical (probe/snap prove it).

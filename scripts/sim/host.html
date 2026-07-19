@@ -1,0 +1,51 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sim host</title>
+<!--
+  The page scripts/sim/run.mjs drives. It exists only to give a sim a real Canvas 2D in the same
+  engine the renderer rasterises with. It holds NO simulation logic: __simFrame(n) advances the sim
+  by exactly one frame and hands back the PNG, so the frame order lives in the baker, in one place.
+-->
+<body style="margin:0;background:#000">
+<script type="module">
+let sim = null, ctx = null, canvas = null, cursor = -1;
+
+window.__simLoad = async (src) => {
+  try {
+    sim = await import(src);
+    const need = ['dims', 'fps', 'frames', 'seed', 'setup', 'step', 'draw'];
+    const missing = need.filter((k) => sim[k] === undefined);
+    if (missing.length) return { error: `sim is missing required export(s): ${missing.join(', ')}` };
+    const { rng } = await import('/sims/lib/rng.mjs');
+    const { w, h } = sim.dims;
+    canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    document.body.appendChild(canvas);
+    ctx = {
+      g: canvas.getContext('2d'), W: w, H: h,
+      fps: sim.fps, frames: sim.frames, seed: sim.seed,
+      rng: rng(sim.seed), state: {}, frame: -1,
+    };
+    sim.setup(ctx);
+    cursor = -1;
+    return { w, h, fps: sim.fps, frames: sim.frames, seed: sim.seed };
+  } catch (e) { return { error: String(e && e.stack || e) }; }
+};
+
+window.__simFrame = (n) => {
+  // Frames are baked strictly in order. Asking for one out of order is a bug in the CALLER, and it
+  // must say so rather than quietly returning a picture of the wrong moment — a sim cannot seek.
+  if (n !== cursor + 1) throw new Error(`sim frames must be baked in order: expected ${cursor + 1}, got ${n}`);
+  cursor = n;
+  ctx.frame = n;
+  sim.step(ctx, n);
+  // cleared to TRANSPARENT, never to a colour: a baked sequence composites over whatever the scene
+  // puts behind it, which is what makes one bake reusable across videos.
+  ctx.g.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.g.globalAlpha = 1;
+  ctx.g.globalCompositeOperation = 'source-over';
+  ctx.g.clearRect(0, 0, ctx.W, ctx.H);
+  sim.draw(ctx);
+  return canvas.toDataURL('image/png');
+};
+</script>

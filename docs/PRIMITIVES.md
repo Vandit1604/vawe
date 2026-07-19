@@ -464,3 +464,37 @@ three.js dependency would earn itself; see `docs/ROADMAP.md`.
 karaoke timing; without it, windows distribute across the line proportional to word length, so
 `make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
 never opacity — the styled plate keeps every state above WCAG 4.5:1.
+
+## Baked simulation (`sims/` · `make sim`) — the stateful tier, run offline
+
+`renderFrame(n)` is a pure function of `n`: eight workers, arbitrary order, byte-identical output.
+A simulation is the exact opposite — frame 412 exists only because 411 ran first — so nothing
+iterative can live inside a layer. Physics, particles, fluid, softbody, frame feedback are all
+excluded by the same one sentence.
+
+They are not excluded from the videos, only from the renderer. A sim runs **offline, in its own
+process, in frame order, as stateful as it likes**, and emits a PNG frame sequence; the scene plays
+that sequence back through the existing `clip` layer. Non-determinism is confined to bake time and
+the renderer keeps exactly one contract. Same shape as `canvasFx` (an image pass baked once at boot)
+and `make spectrum` (band energy baked to a table the render reads by row).
+
+```bash
+make sim D=sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
+make sim-audit                              # seeded? bake fresh against its source? sequence intact?
+```
+
+```json
+{ "type": "clip", "src": "/assets/baked/ember-burst/manifest.json",
+  "x": 110, "y": 90, "w": 620, "start": 0.2, "duration": 2.6 }
+```
+
+The baker emits the `clip` manifest itself, so an author references one path and never restates the
+frame count: `clip` derives its index from `t`, `manifest.fps` and `speed`. Frames are cleared to
+**transparent**, so one bake composites over any scene. `loop: true` wraps; without it the last frame
+holds.
+
+Determinism moved to bake time, it did not disappear. A sim draws every random number from
+`sims/lib/rng.mjs`, seeded by its exported `seed`; `make sim-audit` fails any sim that reaches for
+`Math.random` or the wall clock, any bake whose sim has been edited since (the frames would silently
+keep playing the previous version of the effect), and any sequence with a hole in it. Full contract:
+`sims/README.md`. Shipped: `ember-burst` · `ink-bloom` · `shatter`.

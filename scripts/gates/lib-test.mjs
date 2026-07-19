@@ -26,6 +26,7 @@ import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
+import { THREE_FX } from '../../core/three-scenes.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -469,6 +470,37 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !(body.includes('pp') || body.includes('bell'));
   });
   ok(`stings: all ${SHADER_FX.length} branches depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+}
+
+// ---- three (real geometry) ----
+// three.js is only deterministic if you keep it that way, and nothing about the library enforces it.
+// These are the teeth behind core/three-fx.js's contract: the banned-API list is what stops someone
+// reaching for THREE.Clock or Math.random six months from now and quietly breaking pure-in-n, which
+// probe/canvas-purity would then catch only if the sampled frames happened to disagree.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'three-fx.js'), 'utf8');
+  const code = src.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+  ok(`three: ${THREE_FX.length} scenes, all unique`, THREE_FX.length > 0 && new Set(THREE_FX).size === THREE_FX.length);
+  // ONE list: three-scenes.js names them, three-fx.js implements them, and these must agree. The
+  // split exists only because Node cannot resolve the browser-absolute three import.
+  const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors\) \{/gm)].map((m) => m[1]);
+  const missing = THREE_FX.filter((n) => !implemented.includes(n));
+  const extra = implemented.filter((n) => !THREE_FX.includes(n));
+  ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ' — missing: ' + missing.join(', ') : ''}${extra.length ? ' — orphaned: ' + extra.join(', ') : ''}`,
+     missing.length === 0 && extra.length === 0);
+  const BANNED = ['THREE.Clock', 'T().Clock', 'performance.now', 'Date.now', 'new Date', 'Math.random', 'requestAnimationFrame', 'AnimationMixer'];
+  const used = BANNED.filter((b) => code.includes(b));
+  ok(`three: no wall-clock or unseeded randomness${used.length ? ' — found: ' + used.join(', ') : ''}`, used.length === 0);
+  // A scene that never reads t is a still image rendered the most expensive way available.
+  const frozen = THREE_FX.filter((n) => {
+    const i = code.indexOf(`  ${n}(L, colors) {`);
+    if (i < 0) return true;
+    const body = code.slice(i, code.indexOf('\n  },', i));
+    return !/pose\(t\b/.test(body);
+  });
+  ok(`three: every scene poses from t${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  ok('three: schema enum is exactly THREE_FX, in order', JSON.stringify(schema.fields.layers.item.three.enum) === JSON.stringify(THREE_FX));
 }
 
 // ---- raymarch (3D subjects from distance fields) ----

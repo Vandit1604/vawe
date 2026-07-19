@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video
+.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -110,7 +110,7 @@ verify:
 # /tmp/audit/<format>[.<aspect>].png. ASPECT mirrors `bin/vawe --aspect`: audit every canvas you ship,
 # because a scene can pass at its own ratio and overflow every other one.
 audit:
-	node verify/audit.mjs $(M) $(if $(ASPECT),--aspect $(ASPECT))
+	node verify/audit.mjs $(if $(D),$(D),$(M)) $(if $(ASPECT),--aspect $(ASPECT))
 
 # make audit-test  — regression: proves `make audit` still CATCHES invisible emphasis (blue-on-blue).
 # Runs the audit on a fixture that forces accent-<b>-on-accent-bg and asserts a hard contrast fail.
@@ -364,3 +364,32 @@ batch: ## data-driven variants: TPL=<template.json> DATA=<data.json> [render]
 
 site-assets: ## engine renders -> site/public/assets (+posters). [RENDER=1] [ONLY=films] [CHECK=1] [FORCE=1]
 	node scripts/site/site-assets.mjs $(if $(RENDER),--render) $(if $(ONLY),--only $(ONLY)) $(if $(CHECK),--check) $(if $(FORCE),--force)
+
+# make glyphs FONT=Anybody [WEIGHT=700] [CHARSET=ascii|latin1]
+# woff2 -> three.js typeface JSON (glyph OUTLINES) for extruded 3D text, into assets/fonts/3d/.
+# wawoff2 + fontkit are devDependencies: build-time only, never bundled, never on the render path.
+# Every face here is a VARIABLE font, so the weight is baked explicitly — the default master of
+# Anybody is Thin, and baking it silently would ship the brand headline in a hairline.
+glyphs: ## woff2 -> 3D typeface JSON (FONT=<Name> [WEIGHT=700] [CHARSET=ascii])
+	node scripts/fonts/glyphs.mjs $(FONT) $(if $(WEIGHT),--weight $(WEIGHT)) $(if $(CHARSET),--charset $(CHARSET))
+
+glyphs-verify: ## render a baked typeface with three.js next to the real woff2 -> /tmp/glyphs-<Name>.png (LOOK AT IT)
+	node scripts/fonts/verify-render.mjs $(FONT) $(TEXT)
+
+glyphs-audit: ## fail if any baked 3D typeface is stale against its woff2 or has charset gaps
+	node scripts/gates/glyphs-audit.mjs
+
+# ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
+# renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
+# because 411 ran first. So it runs HERE instead — offline, in its own process, in frame order, as
+# stateful as it likes — and emits a PNG sequence the scene plays back through the existing `clip`
+# layer. Non-determinism is confined to bake time. Same shape as canvas-fx (baked once at boot) and
+# `make spectrum` (FFT baked to a per-frame table). Contract: sims/README.md.
+sim: ## bake a simulation to frames: D=sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
+	node scripts/sim/run.mjs $(D) $(if $(WRITE),--write)
+
+# It is confined, not abolished: same source + same seed must still give the same PNGs. This fails a
+# sim that reaches for Math.random or the clock, a bake whose sim has been edited since (the frames
+# would silently keep playing the previous version of the effect), and a sequence with a hole in it.
+sim-audit: ## sims seeded? bakes fresh against their source? sequences intact?
+	node scripts/gates/sim-audit.mjs

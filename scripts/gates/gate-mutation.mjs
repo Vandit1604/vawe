@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { sourceHash } from '../sim/provenance.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIX = path.join(repoRoot, 'verify/fixtures');
@@ -143,6 +144,19 @@ for (const c of CASES) {
   fs.unlinkSync(f);
 }
 
+/** A minimal, CURRENT bake of `sim` under assets/baked/<name>/ — the fixture the sim cases mutate. */
+function fakeBake(name, sim) {
+  const dir = path.join(repoRoot, 'assets/baked', name);
+  fs.mkdirSync(dir, { recursive: true });
+  const prov = sourceHash(path.join(repoRoot, sim));
+  const frames = ['f0001.png', 'f0002.png'];
+  for (const f of frames) fs.writeFileSync(path.join(dir, f), '');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(
+    { fps: 30, w: 4, h: 4, count: 2, frames: frames.map((f) => `/assets/baked/${name}/${f}`) }, null, 2));
+  fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(
+    { sim, seed: 1, fps: 30, count: 2, w: 4, h: 4, sourceHash: prov.hash, sources: prov.files }, null, 2));
+}
+
 // ---- mutate the SOURCE, not a fixture: some gates can only be tested by breaking the thing they guard.
 const srcCases = [
   { name: 'font-audit · @font-face removed', file: 'core/tokens.css',
@@ -170,6 +184,9 @@ const srcCases = [
   { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "fill": "#000" },'),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "fill"/ },
+  { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/three-fx.js',
+    mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },
   { name: 'raymarch · a scene whose distance field ignores time', file: 'core/raymarch-fx.js',
     mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
                              'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
@@ -221,6 +238,35 @@ const srcCases = [
   { name: 'conformance · blindSig drifts from the frameSig it mirrors', file: 'scripts/gates/conformance.mjs',
     mutate: (s) => s.replace('2166136261, html', '2166136262, html'),
     cmd: ['node', ['scripts/gates/conformance.mjs', 'enums']], match: /disagrees with frameSig/ },
+  // A baked 3D typeface goes stale SILENTLY: swap the woff2 and the old outlines keep rendering
+  // flawless letters in the previous font. Anchored on the `"sourceSha256":"` key rather than on any
+  // hash digits, so re-baking the artifact (which changes every digit) cannot make this fixture stale.
+  { name: 'glyphs-audit · a 3D typeface stale against its woff2', file: 'assets/fonts/3d/Anybody.typeface.json',
+    mutate: (s) => s.replace('"sourceSha256":"', '"sourceSha256":"0'),
+    cmd: ['node', ['scripts/gates/glyphs-audit.mjs']], match: /STALE/ },
+  // ---- Tier B: the offline sim bake. Three defects, three fixtures. A sequence on disk carries no
+  // evidence of its own reproducibility, so all three of these ship SILENTLY: the video renders, the
+  // frames play, and what plays is not what the sim says.
+  { name: 'sim-audit · a sim reaching for unseeded randomness', file: 'sims/ember-burst.mjs',
+    // anchored on the `step` signature: the smallest text that must exist for a sim to BE a sim, so
+    // the fixture cannot go stale against tuning inside the sim's body (MISTAKES #89).
+    mutate: (s) => s.replace('export function step(ctx, i) {', 'export function step(ctx, i) {\n  const drift = Math.random();'),
+    cmd: ['node', ['scripts/gates/sim-audit.mjs']], match: /unseeded/ },
+  { name: 'sim-audit · a bake left behind by an edited sim', file: 'sims/ember-burst.mjs',
+    // any change to the source is the defect; the bake keeps playing the PREVIOUS version of the
+    // effect and nothing downstream can tell. The fixture bake is synthesised so this case does not
+    // depend on assets/baked/ being populated on the machine running the harness.
+    mutate: (s) => s.replace('const GRAVITY = 0.42;', 'const GRAVITY = 0.61;'),
+    cmd: ['node', ['scripts/gates/sim-audit.mjs']], match: /has changed since this was baked/,
+    before: () => fakeBake('_mut-stale', 'sims/ember-burst.mjs'),
+    after: () => fs.rmSync(path.join(repoRoot, 'assets/baked/_mut-stale'), { recursive: true, force: true }) },
+  { name: 'sim-audit · a frame sequence with a hole in it', file: 'assets/baked/_mut-seq/manifest.json',
+    // `clip` indexes by array position, so a missing PNG does not throw: it holds the previous frame.
+    mutate: (s) => s.replace('f0002.png', 'f0009.png'),
+    cmd: ['node', ['scripts/gates/sim-audit.mjs']], match: /expected "f0002.png"|missing on disk/,
+    before: () => fakeBake('_mut-seq', 'sims/ember-burst.mjs'),
+    after: () => fs.rmSync(path.join(repoRoot, 'assets/baked/_mut-seq'), { recursive: true, force: true }) },
+
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },

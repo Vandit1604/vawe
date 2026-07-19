@@ -1813,3 +1813,87 @@ inner group a non-zero offset showed the escape immediately.
 **Fix:** a nested free group is set `position:relative` in `addGroupChild`, not in `layoutGroup`,
 because a TOP-LEVEL free group is already absolute with left/top from scene.html and `relative` would
 break every one of them.
+
+---
+
+## #100 — Every vendored font is VARIABLE, and the obvious extractor reads the wrong master
+
+Building `scripts/fonts/glyphs.mjs` (woff2 → three.js typeface JSON, so `TextGeometry` can extrude
+real brand type instead of helvetiker). The obvious chain is wawoff2 to decompress, then opentype.js
+to read the outlines. It runs, it emits a clean file, and every glyph is correctly shaped.
+
+It is also the wrong font. **opentype.js reads only a variable font's default master**, and this
+repo's faces are all variable with surprising defaults: `Anybody.woff2` defaults to `wght=100`
+(its postscript name is literally `AnybodyThin-Regular`), `Fraunces.woff2` to `wght=900`, and
+`local/Sohne.woff2` to `wght=280.8`. A 3D headline would have shipped in a hairline weight, with
+nothing anywhere reporting a substitution — the exact failure class as the silently-swapped
+`@font-face` (#2's neighbours) but one layer further down, where no font audit can see it because
+by then there is no font left to audit, only numbers.
+
+Inspecting the JSON cannot catch this. Neither can a hash. Only rendering it can.
+
+**Fix:** fontkit instead of opentype.js — it applies `gvar` deltas, so `getVariation({wght})` bakes
+the weight actually asked for. It cannot read woff2's cmap directly, so wawoff2 still runs in front
+of it. The baked weight is a stated default (700), recorded in the artifact and printed on every run.
+Passing `--weight` to a genuinely static font now exits non-zero rather than accepting-then-ignoring.
+
+Two further traps in the same file, both of which produce a valid-looking artifact:
+- **three's `FontLoader` reads curve arguments END-POINT FIRST**, then the controls — the inverse of
+  every canvas/path API. Transposing them parses fine and renders as knotted spaghetti.
+- A codepoint the font lacks comes back as `.notdef`. Baking it yields a blank box mid-word, so
+  missing glyphs are a hard failure naming the codepoints, not a silent hole.
+
+**Gate:** `make glyphs-audit` (`scripts/gates/glyphs-audit.mjs`). These are BAKED artifacts that
+nothing re-derives at render time, so a re-subset woff2 leaves the old outlines rendering flawless
+letters in the previous font forever. Each artifact records its source's sha256; the gate fails on
+mismatch (STALE) and on any gap in the charset it claims to cover (GAPS). Proven able to fire in
+`gate-mutation.mjs`. Verify by RENDERING: `make glyphs-verify FONT=Anybody` puts the extruded
+geometry directly above the same string set in the original woff2 and you look at them.
+
+---
+
+## #101 — The shard grid that was already broken before anything hit it
+
+Building the `sim` tier (Tier B: stateful simulation baked offline to a PNG sequence, played back
+through the existing `clip` layer). `sims/shatter.mjs` disintegrates a panel, so it starts from a
+grid of quads and jitters the vertices to keep the pieces irregular.
+
+The obvious way to write that is to jitter each quad's own four corners. It is wrong, and it is wrong
+in a way that only shows up when you LOOK at the frames: neighbouring cells then disagree about where
+their shared edge is, so the plate is full of gaps from frame 0. The whole beat is a solid surface
+taking a hit, and the surface was never solid. I only caught it by building a contact sheet and
+reading it — the sim was numerically fine, and every gate in the repo would have passed it forever.
+
+**Fix:** one jittered vertex lattice, shared between neighbours, boundary vertices unjittered so the
+panel edge stays straight. Plus two things the first version also got wrong and the sheet also
+showed: adjacent fills that share an exact edge still leave an antialiasing seam (each shard is now
+outset half a pixel about its centroid), and the edge highlight was drawn at rest, outlining every
+seam and giving away the break before it happened (it now fades in only once a shard is loose).
+
+**The class this belongs to.** There is no gate for it and there should not be one. `make sim-audit`
+can prove a sim is seeded, that its bake is current and that its sequence has no holes; it cannot
+prove the sim looks like the thing it is named after. That is the standing rule in this file —
+tools measure, eyes judge — and a baked sequence makes it sharper, because a bake is a build
+artifact that nobody re-renders casually. Anything wrong in it ships until someone looks.
+
+---
+
+## #102 — `git stash` in a shared worktree, while other agents were writing to it
+
+Mine, during the same session. I wanted the pre-change count for `make gate-test`, so I stashed the
+tree, ran the harness, and popped. Two things went wrong at once.
+
+`gate-mutation.mjs` MUTATES source files and restores them, so a run that is interrupted (or one
+whose fixtures fail) can leave a mutation behind. It left `BLIND_ATTRS = []` in `conformance.mjs`.
+That alone is survivable. But the stash then captured the mutated file, and on the way back
+`git stash pop` refused — "local changes would be overwritten" — leaving the tracked half applied,
+the untracked half not, and a stash entry that looked like lost work.
+
+It was not lost: nothing had been dropped and the worktree turned out to be NEWER than the stash,
+because another agent had committed and edited in the meantime. But I could not know that until I
+had diffed the worktree against the stash commit path by path, and for a few minutes it looked like
+I had stashed away someone else's in-progress `three` layer.
+
+**The rule:** never `git stash` a worktree you do not exclusively own. To learn what a gate counted
+before your change, read the count out of git history, or run the gate from a throwaway clone. A
+baseline number is never worth putting a shared tree into a state only a diff can explain.
