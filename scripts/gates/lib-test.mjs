@@ -25,6 +25,7 @@ import { lift } from '../../core/motion.js';
 import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
+import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -456,17 +457,43 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   const en = schema.fields.stings.item.fx.enum;
   ok('stings: schema fx enum is exactly SHADER_FX, in order', JSON.stringify(en) === JSON.stringify(SHADER_FX));
-  // every branch keys off pp/bell (progress) — a branch that ignores progress would freeze mid-cut
-  const wave2 = ['crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion'];
-  const frozen = wave2.filter((name) => {
-    const i = SHADER_FX.indexOf(name);
+  // EVERY branch keys off pp/bell (progress) — a sting that ignores progress freezes mid-cut, which
+  // defeats the only thing a sting is for. Derived from SHADER_FX, not a hand-typed wave list: the
+  // list version covered 10 of 34 effects, so appending an effect added ZERO coverage and a frozen
+  // new sting would have passed. Same failure as the hardcoded counts in MISTAKES #83.
+  const STING_EXEMPT = new Set();   // none: a sting that does not move is not a sting
+  const frozen = SHADER_FX.filter((name, i) => {
+    if (STING_EXEMPT.has(name)) return false;
     const next = SHADER_FX[i + 1] ? frag.indexOf(`u_fx == ${i + 1}`) : frag.length;
-    const body = frag.slice(frag.indexOf(`u_fx == ${i}`), next);
+    const body = frag.slice(frag.indexOf(`u_fx == ${i}`), next > 0 ? next : frag.length);
     return !(body.includes('pp') || body.includes('bell'));
   });
-  ok(`stings: wave-2 branches all depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
-  // gridPixelateWipe (wave 4) is a transition too — its block curtain must key off progress
-  ok('stings: gridPixelateWipe depends on progress', (() => { const i = SHADER_FX.indexOf('gridPixelateWipe'); const body = frag.slice(frag.indexOf(`u_fx == ${i}`)); return body.includes('pp') && body.includes('bell'); })());
+  ok(`stings: all ${SHADER_FX.length} branches depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+}
+
+// ---- raymarch (3D subjects from distance fields) ----
+// Two dispatch ladders here, not one: map() picks the distance field and the shading block picks the
+// material. An effect present in one and missing from the other renders as an untextured silhouette
+// or as nothing, so both are checked.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'raymarch-fx.js'), 'utf8');
+  const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
+  ok(`raymarch: ${RAYMARCH_FX.length} scenes, all unique`, RAYMARCH_FX.length > 0 && new Set(RAYMARCH_FX).size === RAYMARCH_FX.length);
+  const mapFn = frag.slice(frag.indexOf('float map(vec3 p)'), frag.indexOf('vec3 normalAt'));
+  const noMap = RAYMARCH_FX.slice(0, -1).map((_, i) => i).filter((i) => !mapFn.includes(`u_fx == ${i}`));
+  ok(`raymarch: map() dispatches every scene 0..${RAYMARCH_FX.length - 2}${noMap.length ? ' — missing ' + noMap.map((i) => RAYMARCH_FX[i]).join(', ') : ''}`, noMap.length === 0);
+  // every scene needs its own distance function, named for it, and every one must MOVE: a raymarched
+  // subject that ignores time is a still image rendered the most expensive way available.
+  const frozen = RAYMARCH_FX.filter((n) => {
+    const fn = 'map' + n.charAt(0).toUpperCase() + n.slice(1);
+    const i = frag.indexOf('float ' + fn);
+    if (i < 0) return true;
+    const body = frag.slice(i, frag.indexOf('\n}', i));
+    return !body.includes('u_time');
+  });
+  ok(`raymarch: every scene has a named distance field that depends on time${frozen.length ? ' — missing/frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  ok('raymarch: schema enum is exactly RAYMARCH_FX, in order', JSON.stringify(schema.fields.layers.item.raymarch.enum) === JSON.stringify(RAYMARCH_FX));
 }
 
 // ---- resample (layer as texture) ----
@@ -507,17 +534,19 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
-  // wave-3 looks must animate — a branch that ignores t would be a frozen still, defeating "loop"
-  const wave3 = ['vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope'];
-  const still = wave3.filter((name) => {
+  // EVERY ambient look must animate — one that ignores t is a frozen still on a layer whose entire
+  // contract is "loops smoothly". Derived from AMBIENT_FX with a NAMED exemption set, because the
+  // hand-typed wave list covered 8 of 17 and every appended effect landed outside it uncovered.
+  const AMBIENT_EXEMPT = new Set(['barrel']);   // a static lens vignette, motionless by design
+  const still = AMBIENT_FX.filter((name) => {
     const i = AMBIENT_FX.indexOf(name);
     const start = i === AMBIENT_FX.length - 1 ? frag.lastIndexOf('} else {') : frag.indexOf(`u_fx==${i}`);
     const nextI = frag.indexOf(`u_fx==${i + 1}`);
     const body = frag.slice(start, nextI > start ? nextI : start + 600);
     return !/\bt\b/.test(body);
   });
-  // barrel is a static lens vignette by design (no motion) — exempt it from the animate check
-  ok(`ambient: wave-3 looks animate (except static barrel)${still.filter((n) => n !== 'barrel').length ? ' — frozen: ' + still.filter((n) => n !== 'barrel').join(', ') : ''}`, still.every((n) => n === 'barrel'));
+  const stillReal = still.filter((n) => !AMBIENT_EXEMPT.has(n));
+  ok(`ambient: all ${AMBIENT_FX.length} looks animate (exempt: ${[...AMBIENT_EXEMPT].join(', ')})${stillReal.length ? ' — frozen: ' + stillReal.join(', ') : ''}`, stillReal.length === 0);
   // matrixDecode (wave 4, the trailing else) is digital rain — its heads must fall with t
   // Locate a branch by NAME, not by position: this used to slice the trailing `else`, which stopped
   // being matrixDecode the moment two effects were appended after it. A positional assertion silently

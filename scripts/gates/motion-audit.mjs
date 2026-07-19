@@ -108,7 +108,6 @@ async function audit(format) {
 
   // ---- checks ----
   const F = series.frames, at = (i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
-  const inWin = (f, a, b) => f >= a && f < b;
   const findings = [];
   const add = (level, check, seg, key, msg) => findings.push({ level: declared ? level : 'WARN', check, seg: seg?.name, key, msg });
   const K = series.keys, LOOP = series.loop;
@@ -233,7 +232,6 @@ async function audit(format) {
   }
 
   // global final frame (whole video must not end faded)
-  const lastF = F[F.length - 1];
   let gMax = 0, gAny = false;
   K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
   if (gAny && gMax < 0.9) findings.unshift({ level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` });

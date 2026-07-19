@@ -18,6 +18,9 @@
 // Signature = window.__engine.frameSig(n), the engine's own content hash (DOM innerHTML + canvas
 // pixels). Using the engine's hash means WebGL stings and canvas passes are covered too, and the
 // sweep agrees with the thing it is sweeping.
+//
+// ...except that frameSig cannot be used to decide DISTINCTNESS, which is what phase 1 exists to
+// decide. See BLIND_ATTRS below (MISTAKES #74).
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -63,18 +66,89 @@ const page = await browser.newPage();
 const AVATAR = '/assets/brands/tpot/avatars/000-elonmusk.jpg';
 const IMG = fs.existsSync(path.join(repoRoot, AVATAR.slice(1))) ? AVATAR : '/assets/icons/ui/check.svg';
 
+// ------------------------------------------------------- the identity-blind signature (MISTAKES #74)
+//
+// frameSig hashes `document.body.innerHTML`, and scene.html stamps `data-anim="<name>"` on every
+// layer. So the signature CONTAINS THE NAME OF THE THING BEING TESTED: two anims that render
+// pixel-identically could never collide, and phase 1's "17 values · 17 distinct ✓" was a tautology.
+// Proven by making `wipe-down` byte-identical to `wipe` and watching the sweep still say 17.
+//
+// Which attributes actually leak was measured, not guessed: each phase-1 vocabulary was rendered and
+// its own value name searched for in the resulting DOM. `anim` (and its exit twin `out`) leak as a
+// data-attribute. `kinetic preset`, `cut style`, `composite look` and `canvas fx` do NOT — they reach
+// the frame as computed styles or as a baked data-URL, never as their own name. That measurement is
+// why this is a two-attribute redaction and not a free-text scrub of every value name: over-redaction
+// invents duplicates, and a gate that cries wolf gets skimmed (#85, #90).
+const BLIND_ATTRS = ['anim', 'out'];
+
+// blindSig MIRRORS frameSig (core/boot.js) instead of calling it, because the innerHTML term is
+// exactly what must be redacted and frameSig does not expose it separately. A mirror can drift from
+// its original — so with an EMPTY redaction list it must return frameSig's value bit for bit, and
+// that is asserted below before any sweep runs. The reverted `visualSig` attempt failed precisely
+// here: it hashed a hand-picked list of computed properties, was far LESS sensitive than frameSig,
+// and reported five real props as inert. Mirroring makes "at least as sensitive" a fact, not a hope.
+const blindSig = (n, blind) => {
+  window.__engine.renderFrame(n);
+  let html = document.body.innerHTML;
+  for (const a of blind) html = html.replace(new RegExp(` data-${a}="[^"]*"`, 'g'), ` data-${a}="_"`);
+  const fnv = (h, s) => { for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; };
+  let h = fnv(2166136261, html);
+  const probe = document.createElement('canvas'); probe.width = 24; probe.height = 14;
+  const pctx = probe.getContext('2d', { willReadFrequently: true });
+  for (const cv of document.querySelectorAll('canvas')) {
+    if (!cv.width || cv.style.display === 'none') continue;
+    if (cv.getContext('2d')) { h = fnv(h, 'live2d:' + n); continue; }
+    try {
+      pctx.clearRect(0, 0, 24, 14); pctx.drawImage(cv, 0, 0, 24, 14);
+      const d = pctx.getImageData(0, 0, 24, 14).data;
+      let acc = '';
+      for (let i = 0; i < d.length; i += 8) acc += d[i] + ',' + d[i + 3] + ';';
+      h = fnv(h, acc);
+    } catch (e) { h = fnv(h, 'opaque-canvas:' + n); }
+  }
+  return h.toString(36);
+};
+
 let id = 0;
-/** Render a scene and return its content signature across the sampled frames. */
-async function sig(scene, frames) {
+/**
+ * Render a scene and return its content signature across the sampled frames.
+ * `blind` is the list of data-attributes whose values are neutralised first. Phases 2 and 3 pass
+ * nothing and therefore keep using frameSig unchanged — the blind signature is only needed where the
+ * question is "are these two VALUES the same", and confining it there is what keeps the prop sweep
+ * (the one that really caught `tracking`, #28) free of new false positives.
+ */
+async function sig(scene, frames, blind = []) {
   const key = `s${id++}.json`;
   scenes.set(key, JSON.stringify(scene));
   await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   const err = await page.evaluate(() => window.__engineError || null);
   if (err) return { error: String(err).slice(0, 120) };
-    const out = await page.evaluate((fr) => fr.map((n) => window.__engine.frameSig(n)), frames);
+  const out = blind.length
+    ? await page.evaluate((fr, b, src) => fr.map((n) => new Function('return ' + src)()(n, b)), frames, blind, blindSig.toString())
+    : await page.evaluate((fr) => fr.map((n) => window.__engine.frameSig(n)), frames);
   scenes.delete(key);
   return { sig: out.join(','), };
+}
+
+/**
+ * Half one of falsifiability: the mirror is as sensitive as the original.
+ * With nothing redacted, blindSig must reproduce frameSig exactly. If core/boot.js ever changes how
+ * it hashes, this fails immediately and names the drift, instead of the sweep quietly measuring
+ * something weaker than it claims.
+ */
+async function assertMirrorsFrameSig() {
+  const key = `mirror.json`;
+  scenes.set(key, JSON.stringify(base([T(), I({ x: 900, y: 200 })])));
+  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
+  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  const bad = await page.evaluate((src) => {
+    const fn = new Function('return ' + src)();
+    return [0, 7, 15, 29].filter((n) => fn(n, []) !== window.__engine.frameSig(n));
+  }, blindSig.toString());
+  scenes.delete(key);
+  if (bad.length) note('signature', 'blindSig mirror', `blindSig(n, []) disagrees with frameSig at frame(s) ${bad.join(', ')} — the mirror has drifted from core/boot.js, so phase 1 is measuring something WEAKER than the engine's own hash. Re-sync blindSig before trusting any distinctness result.`);
+  return bad.length === 0;
 }
 
 const base = (layers, extra = {}) => ({
@@ -102,6 +176,19 @@ const EXPECTED_INERT = {
   'text.radius': 'chipBox early-returns without bg/border/shadow — a corner radius on a transparent text box is meaningless',
   'text.pad':    'same: padding only applies once the layer has a chip/pill background',
   'rect.shadow': 'rect already paints a fill; shadow needs elevation to differ visibly at this size',
+};
+
+// Declared SYNONYMS: two names deliberately bound to the same function in the registry, not two names
+// that accidentally do the same thing. Same discipline as EXPECTED_INERT — a reason, never a bare
+// pair — because this is the one place a real duplicate could now hide. The very first run of the
+// fixed distinctness check surfaced both of these, which is the evidence that it can see duplicates
+// at all; they are exempt because core/clips.js writes `up: rise, rise` and `pop, scale: pop`
+// literally, i.e. the aliasing is declared, not emergent.
+const EXPECTED_ALIAS = {
+  'layer anim': {
+    'rise=up': '`up` and `rise` are the same entry in the ANIM registry — one spelling names the direction, the other the gesture',
+    'scale=pop': '`scale` and `pop` are the same entry in the ANIM registry — same reason',
+  },
 };
 
 // ---------------------------------------------------------------- PHASE 1 — vocabulary
@@ -141,19 +228,40 @@ async function sweepEnums() {
 
   for (const V of VOCAB) {
     // The baseline is the SAME scene with the value omitted — that is what a silent fallback returns.
-    const baseSig = await sig(V.build(undefined), V.frames);
+    const baseSig = await sig(V.build(undefined), V.frames, BLIND_ATTRS);
     if (baseSig.error) { note('vocab', V.label, `baseline scene errored: ${baseSig.error}`); continue; }
-    const seen = new Map();
-    const dead = [], dupes = [];
+    const seen = new Map(), sigs = new Set();
+    const dead = [], collided = [];
     for (const v of V.values) {
-      const r = await sig(V.build(v), V.frames);
+      const r = await sig(V.build(v), V.frames, BLIND_ATTRS);
       if (r.error) { note('vocab', `${V.label}:${v}`, `render error: ${r.error}`); continue; }
+      sigs.add(r.sig);
       if (r.sig === baseSig.sig && DEFAULTS[V.label] !== v) dead.push(v);
-      else if (seen.has(r.sig)) dupes.push(`${v}=${seen.get(r.sig)}`);
+      else if (seen.has(r.sig)) collided.push(`${v}=${seen.get(r.sig)}`);
       else seen.set(r.sig, v);
     }
+    const aliases = EXPECTED_ALIAS[V.label] || {};
+    const dupes = collided.filter((p) => !aliases[p]);
+
+    // ── HALF TWO OF FALSIFIABILITY: the declared aliases are the POSITIVE CONTROL.
+    // `up`/`rise` and `scale`/`pop` are the same function object in core/clips.js, so any signature
+    // worth trusting MUST see them as one thing. If one stops colliding, the signature has gone back
+    // to carrying the value's identity and every "distinct" printed below is unearned.
+    // The first version of this assertion used the DEFAULT value instead, and it was vacuous: scene.html
+    // stamps `data-anim` on every layer and defaults it to `fade`, so the baseline and `anim:'fade'`
+    // matched even with redaction switched off. Verified by switching it off — the sweep still said
+    // clean. That is the same self-fulfilling shape as the bug being fixed, one level up.
+    for (const pair of Object.keys(aliases)) {
+      if (!collided.includes(pair)) note('vocab', `${V.label} (falsifiability)`, `\`${pair}\` are the same entry in the registry and MUST hash identically, but this sweep saw them as distinct. The signature is identity-revealing again, so nothing below is evidence. Check BLIND_ATTRS against what scene.html now stamps on a layer.`);
+    }
+
     const total = V.values.length;
-    console.log(`   ${V.label.padEnd(18)} ${String(total).padStart(3)} values · ${String(total - dead.length).padStart(3)} distinct${dead.length ? `  ✗ ${dead.length} inert` : '  ✓'}`);
+    // "distinct" counts distinct SIGNATURES. The old arithmetic (values minus inert) could never
+    // print a number below the value count for a duplicate, which is how "17 values · 17 distinct ✓"
+    // survived two values being byte-identical.
+    const distinct = sigs.size;
+    const alias = Object.keys(aliases).length;
+    console.log(`   ${V.label.padEnd(18)} ${String(total).padStart(3)} values · ${String(distinct).padStart(3)} distinct${alias ? ` (${alias} declared alias)` : ''}${dead.length ? `  ✗ ${dead.length} inert` : '  ✓'}`);
     if (dead.length) note('vocab', V.label, `${dead.length}/${total} render IDENTICAL to the fallback (unimplemented or dead vocabulary): ${dead.join(', ')}`);
     if (dupes.length) note('vocab', V.label, `${dupes.length} value(s) render identically to another value: ${dupes.slice(0, 8).join(', ')}`);
   }
@@ -202,7 +310,9 @@ async function sweepPaths() {
   }
 }
 
-if (only === 'all' || only === 'enums') await sweepEnums();
+// Both halves of the distinctness proof run BEFORE the sweep that depends on them: the mirror check
+// here, the default-collides-with-baseline check inside phase 1.
+if (only === 'all' || only === 'enums') { await assertMirrorsFrameSig(); await sweepEnums(); }
 if (only === 'all' || only === 'props') await sweepProps();
 if (only === 'all' || only === 'paths') await sweepPaths();
 

@@ -186,18 +186,22 @@ than none.
 
 ## Tier 3 — GLSL (one new SHADER_FX each)
 
-**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 34 entries and `AMBIENT_FX` 16; between
+**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 35 entries and `AMBIENT_FX` 17; between
 them the families below are majority-built. This section used to read as a wish-list and sent two
 consecutive planning passes at work that already existed.
 
-- **Shader Transitions: 13 of 14 ship.** chromaticSplit · crossWarp · domainWarp · sdfIris · vortex ·
-  ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch. Only *cinematic zoom* is
-  missing, and only as a GLSL sibling of the existing `PRESENTATIONS.zoom`.
+- **Shader Transitions: all 14 ship.** chromaticSplit · crossWarp · domainWarp · sdfIris · vortex ·
+  ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch, and **`cinematicZoom`
+  shipped 2026-07-19** — the GLSL sibling of the `PRESENTATIONS.zoom` cut. A generative overlay cannot
+  smear the pixels under it, so it sells the dolly with the artefacts one leaves: radial streaks that
+  die at the optical centre, a compressing rim, and a centre bloom at peak speed.
 - **chromatic: all 5 ship** (aberration/prism/RGB-offset via the `chromatic` filter primitive,
   `dispersion` and `iridescence` as stings).
 - **analog/retro: majority ships** — `AMBIENT_FX` vhs · crt · filmGrain · lightLeak, `LOOKS` vhs ·
-  super8 · crt, plus `dotCrawl` in `AMBIENT_FX`. Missing: film dust / gate weave. CRT phosphor *trails* stay excluded
-  (frame feedback).
+  super8 · crt, plus `dotCrawl` in `AMBIENT_FX`, and **`gateWeave` shipped 2026-07-19** (film dust,
+  hairs, and the frame drifting in the projector gate — the gate border, dust and hair all ride one
+  closed-form offset, so the picture appears to float without anything being sampled). CRT phosphor
+  *trails* stay excluded (frame feedback).
 - **distortion: 7 of 8 ship** — barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
   displace/melt, plus **`fisheye` via `resample`** (see below). Missing: real block displacement of a
   layer beyond what `macroblock` does.
@@ -304,31 +308,57 @@ be the ONLY app-content block, so a product-demo storyboard could only depict a 
 factories now ship in `blocks/app.mjs`: `feedRow` · `listRow` · `settingsRow` · `profileHeader` ·
 `onboardCard` · `emptyState`. This was correctly called ahead of any transition on this page.
 
-**Containers and composition**
-- No **split-screen / picture-in-picture** primitive. Every "split" archetype is hand-chosen x
-  coordinates, so the layout discipline lives in the author's head and in arithmetic.
-- `comparison.beforeAfter` takes two columns of STRINGS. It cannot hold two screens, so a
-  before/after beat — the most standard product-demo shape there is — cannot be built.
+**Containers and composition — DONE (2026-07-19), both, in `blocks/index.mjs` (WAVE 6)**
+- ~~No **split-screen / picture-in-picture** primitive~~ → **`splitScreen`** (`splitScreen.pip`). A side
+  is a block descriptor `{ block, props }`, the same shape a scene already writes; the container
+  computes the pane box and injects `x`/`y`/`w`/`start`/`dur`. It injects `w` and NOT `h` on purpose:
+  most factories size themselves off content and accept no `h`, and a prop a factory does not
+  destructure is dropped in silence.
+- ~~`comparison.beforeAfter` takes two columns of STRINGS~~ → **`comparison.screens`**. `leftScreen` /
+  `rightScreen` turn the columns into panes and hand the geometry to `splitScreen`. The string form is
+  untouched and takes precedence by absence, so every existing caller renders what it rendered before.
 
-**State that cannot move**
-- `tabBar` takes a static `active` index. No `activeFrom`/`activeTo`, so a tab switch cannot animate,
-  and tab bars are icon-over-label in every real app while this one is text-only.
-- `stepFlow` has the same frozen `active`. A build sequence can only show its finished state.
-- No **app-scroll or screen-transition** block at all. Nothing moves from screen A to screen B inside
-  a device frame, which is the single most common motion in a product demo.
+**State that cannot move — DONE (2026-07-19), all three**
+- ~~`tabBar` takes a static `active` index~~ → **`tabBar.switch`** / **`tabBar.icons`**. `activeFrom` +
+  `activeTo` slide the selection, and `tabs` now take `{ icon, label }`. One `html` layer: the pill
+  translates by `var(--p)` and the ACTIVE-styled copy of the label row lives inside the pill,
+  counter-translated by the same expression, so whichever tab the pill is over renders lit for free.
+  The two copies differ in COLOUR ONLY — a heavier active copy is a WIDER copy, and the alignment
+  depends on the two rows being metrically identical.
+- ~~`stepFlow` has the same frozen `active`~~ → **`stepFlow.build`**. `activeFrom` + `activeTo` sweep one
+  number; rings light and connectors fill as `pos` crosses them. Three states of a ring have to occupy
+  the same 44px, which a flow layout cannot express, so this is one `html` layer too.
+- ~~No **app-scroll or screen-transition** block at all~~ → **`screenSwap`** (`screenSwap.slide`). Every
+  screen shares one box and the windows hand over. It defaults to `wipe` because a wipe is a CLIP: the
+  outgoing screen never travels outside its own box, so a swap inside a device frame does not slide
+  across the bezel. `slide` pairs its directions (enter right, leave left) rather than retreating.
 
 **Interaction — DONE (2026-07-19), all three, in `blocks/interact.mjs`**
 - ~~no standalone cursor/tap block~~ → `pointer` (an arbitrary path) and `tapRipple`.
 - ~~no mobile keyboard~~ → `keyboard`, a phone-shaped rising key plane.
 - ~~`card`'s `cta` has no press state~~ → `pressButton`.
 
-**Proof surfaces**
-- No **app-store / install** block: no rating row (stars + count), no install button. `followCard` is
-  the nearest shape.
-- `avatarStack` is bare circles and a `+N` with no caption slot, so it proves nothing without a
-  hand-placed text layer beside it. Wanted: a `socialProof` block that owns both.
-- `toast`/`notification` cannot stack or expire, and the icon prop exists on one and not the other.
-- `loadingBar`/`progressRing` assume card-scale width and do not read inside a device screen.
+**Proof surfaces — three of four DONE (2026-07-19)**
+- ~~No **app-store / install** block~~ → **`installCard`**, on `followCard`'s conventions. The stars
+  FILL: one row of five glyphs revealed by a hard-edged mask whose fraction is `rating / 5`, so a 4.6
+  lands mid-glyph. Every figure is a prop and every default is empty (`rating` 0 draws no stars), and
+  the count is FORMATTED from a number so the block cannot be handed a sentence.
+- ~~`avatarStack` … proves nothing without a hand-placed text layer~~ → **`socialProof`**, which owns
+  the stack and the caption and puts the caption where the stack actually ends. `caption`/`sub`
+  default to nothing; the `+N` still comes from the caller.
+- ~~`toast`/`notification` cannot stack or expire, and the icon prop exists on one and not the other~~ →
+  **`toast.stack`** / **`notification.stack`**. `items` stacks and expires via one shared
+  `stackWindows` helper in `blocks/kit.mjs`, and each block recurses into its own single-card form so
+  the stacked and single shapes cannot drift. `notification`'s `icon` was in the signature and
+  rendered NOWHERE; it now draws the same chip `toast` does.
+- `loadingBar`/`progressRing` assume card-scale width and do not read inside a device screen. **STILL
+  OPEN** — a sizing question, not a missing capability, and untouched by this pass.
+
+**Found while building the above (not fixed here — it belongs in `core/`):** a NESTED `layout:'free'`
+group does not position its own children. `layoutGroup` sets `display:block` and `addGroupChild` marks
+the children `position:absolute`, but nothing on the group is positioned, so an absolutely-placed
+child escapes to the LAYER root. Free layout works at top level (a layer root is positioned) and
+misplaces one node down, silently. It cost `installCard` a rating track that flew to the card's corner.
 
 ## The Showcases
 

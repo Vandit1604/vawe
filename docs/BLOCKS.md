@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_137 entries across 60 families._
+_149 entries across 64 families._
 
 | Block | For |
 |---|---|
@@ -97,6 +97,7 @@ _137 entries across 60 families._
 | `notification` | toast card (dot + title + body) |
 | `notification.warn` | toast, amber accent |
 | `notification.error` | toast, error |
+| `notification.stack` | alerts that stack and expire, not one that sits |
 | `kpiRow` | row of stat cells (value + label) |
 | `kpiRow.money` | KPI row, currency |
 | `kpiRow.time` | latency percentiles |
@@ -105,6 +106,7 @@ _137 entries across 60 families._
 | `callout.warn` | warning strip (terracotta) |
 | `comparison` | two columns (Before/After · Others/Us) |
 | `comparison.beforeAfter` | Before / After columns |
+| `comparison.screens` | before / after as two SCREENS, not two lists |
 | `captions` | timed subtitle chips (bottom overlay) |
 | `lineChart` | trend line in a hairline card |
 | `lineChart.area` | trend line with area fill |
@@ -128,6 +130,8 @@ _137 entries across 60 families._
 | `phoneFrame` | phone shell (draw content on top) |
 | `tabBar` | segmented control |
 | `tabBar.four` | four-tab control |
+| `tabBar.switch` | the selection SLIDES from one tab to another |
+| `tabBar.icons` | app tab bar · icon over label, selection slides |
 | `checklist` | checked / unchecked items |
 | `checklist.todo` | checklist, all open |
 | `checklist.done` | checklist, all complete |
@@ -138,6 +142,7 @@ _137 entries across 60 families._
 | `stepFlow` | horizontal numbered steps |
 | `stepFlow.start` | steps, at start |
 | `stepFlow.done` | steps, all complete |
+| `stepFlow.build` | the track TRAVELS · rings light and connectors fill in sequence |
 | `kanban` | columns of cards |
 | `kanban.two` | two-column board |
 | `chatBubble` | a message thread |
@@ -148,6 +153,7 @@ _137 entries across 60 families._
 | `toast` | dark snackbar + action |
 | `toast.error` | snackbar, error + retry |
 | `toast.info` | snackbar, info |
+| `toast.stack` | snackbars that stack and expire |
 | `reactionBar` | reaction count pills |
 | `reactionBar.love` | reactions (love set) |
 | `logoWall` | grid of wordmarks / logos |
@@ -196,6 +202,12 @@ _137 entries across 60 families._
 | `keyboard` | phone keyboard · qwerty keys, rises up into frame |
 | `keyboard.numeric` | phone keypad · numeric grid, rises up into frame |
 | `pressButton` | CTA that depresses and releases when it is clicked |
+| `splitScreen` | two panes, one geometry · second pane lands behind the first |
+| `splitScreen.pip` | picture-in-picture · an aside inset over the subject |
+| `screenSwap` | screen A becomes screen B in place (wipe, no travel) |
+| `screenSwap.slide` | screen change that reads as travel · enters right, leaves left |
+| `socialProof` | avatar stack + the line it proves (caption owned by the block) |
+| `installCard` | app-store row · stars sweep to the rating, then install |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

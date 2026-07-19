@@ -279,6 +279,46 @@ if (isMain) {
     const errors = validateAll(schema, data);
     // build-time sugar must be expanded before render — the engine's layer registry has no
     // `block`/`comp` type, so a leftover one renders as NOTHING. Fail loud → run `make expand`.
+    // UNKNOWN PROPS. The engine reads the props it knows and ignores the rest in silence, so
+    // `fill` instead of `bg`, or `colour` instead of `color`, renders a layer that is quietly wrong
+    // and gives the author nothing to search for. Two shipped scenes set `opacity` on a layer for
+    // months with no effect whatsoever. Silence is the worst failure (docs/MISTAKES.md).
+    //
+    // Scoped deliberately:
+    //   · `block`/`comp` layers carry the BLOCK's props, which this schema does not describe and
+    //     must not police — blocks-audit owns those.
+    //   · `_`-prefixed keys are authoring scratch (`_card`, `_img`) and are conventionally ignored.
+    //   · group children are checked against the child schema PLUS the layer schema, because a child
+    //     is built by the same builder as a top-level layer (kit.buildLeaf).
+    if (schema && schema.fields && schema.fields.layers && schema.fields.layers.item) {
+      const LI = Object.keys(schema.fields.layers.item);
+      const CI = Object.keys((schema.fields.layers.item.children || {}).item || {});
+      const CHILD_TYPES = ((schema.fields.layers.item.children || {}).item || {}).type?.enum || [];
+      const checkLayer = (L, where, isChild) => {
+        if (!isObj(L)) return;
+        // The schema defines the child type enum and the ENGINE enforces it at boot, but nothing
+        // checked it here: a `rect` child validated clean and then hard-failed the render with
+        // "not valid. Did you mean 'text'?". Green validate followed by a boot crash is a worse
+        // experience than either outcome alone, because the author trusts the first one.
+        if (isChild && L.type != null && CHILD_TYPES.length && !CHILD_TYPES.includes(L.type)) {
+          errors.push(`${where} type "${L.type}" is not valid as a group child — one of: ${CHILD_TYPES.join(', ')}.`);
+        }
+        if (L.type !== 'block' && L.type !== 'comp') {
+          const known = isChild ? [...CI, ...LI] : LI;
+          for (const k of Object.keys(L)) {
+            if (k.startsWith('_') || known.includes(k)) continue;
+            const near = known.filter((n) => n.toLowerCase() === k.toLowerCase()
+              || (k.length > 3 && (n.startsWith(k.slice(0, 3)) || k.startsWith(n.slice(0, 3)))));
+            errors.push(`${where} has unknown prop "${k}" — the engine will ignore it silently.${near.length ? ' Did you mean: ' + near.slice(0, 3).join(' / ') + '?' : ''}`);
+          }
+        }
+        for (const key of ['children', 'layers']) {
+          if (Array.isArray(L[key])) L[key].forEach((c, j) => checkLayer(c, `${where}.${key}[${j}]`, true));
+        }
+      };
+      (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => checkLayer(L, `layer[${i}]`, false));
+    }
+
     // `resample` binds the layer's OWN raster as a GL texture, so it only means anything on a layer
     // that has one. The engine throws at build time; catching it here names the file and index.
     const RASTER = ['image', 'paint', 'shader'];

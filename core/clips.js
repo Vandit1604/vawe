@@ -94,7 +94,10 @@ export function driveClips(root, t) {
     // high through the middle of the blend (measured sum 1.71 across tpot's This handoff) and the
     // dissolve turns muddy — the very problem the reel was repaced to avoid. Mirrored curves sum to
     // exactly 1 for any matched handoff, while a solo fade still eases instead of ramping linearly.
-    el.style.opacity = String(opacityEnvelope(enterT, exitT).toFixed(3));
+    // multiply in the authored base opacity, so `opacity: 0.4` dims the layer for its whole life
+    // without fighting the entrance/exit fade that shares this property
+    const base = el.dataset.opacity != null ? parseFloat(el.dataset.opacity) : 1;
+    el.style.opacity = String((opacityEnvelope(enterT, exitT) * base).toFixed(3));
   }
 }
 

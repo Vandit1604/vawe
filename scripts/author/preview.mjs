@@ -49,7 +49,7 @@ await page.waitForFunction('window.__engineReady === true || window.__engineErro
 const err = await page.evaluate(() => window.__engineError || null);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 const meta = await page.evaluate(() => window.__engine.meta);
-const { totalFrames: total, duration, stings, fps: F } = meta;
+const { duration, stings, fps: F } = meta;
 
 const grab = async (frame, file) => {
   await page.evaluate((n) => window.__engine.renderFrame(n), frame);

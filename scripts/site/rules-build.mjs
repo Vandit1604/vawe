@@ -25,7 +25,6 @@ const CUTS = enumOf((F.cuts && F.cuts.item && F.cuts.item.style) || {});
 const STINGS = enumOf((F.stings && F.stings.item && F.stings.item.fx) || {});
 const BGS = enumOf((F.bg && F.bg.item && F.bg.item.preset) || {});
 const SPLITS = enumOf(layerItem.split);
-const FONTS = enumOf(layerItem.font);
 const PRESET_NAMES = Object.keys(PRESETS);
 const EASE_NAMES = Object.keys(EASINGS);
 const THEMES = fs.readdirSync(path.join(root, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''));

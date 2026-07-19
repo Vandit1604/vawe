@@ -8,7 +8,6 @@ const has = (l, t) => l.type === 'text' && (l.text || '').includes(t);
 const rm = (pred) => { d.layers = d.layers.filter((l) => !pred(l)); };
 const L = () => d.layers;
 const push = (...xs) => d.layers.push(...xs);
-const clamp = (arr, end) => { arr.forEach((l) => { l.duration = +(end - (l.start ?? 0)).toFixed(2); }); return arr; };
 
 // 0 ── remove decorative terracotta chrome (left bar, ticks, underline); keep CTA (a text-chip, not a rect)
 rm((l) => l.type === 'rect' && l.bg === T.accent && ((l.w <= 6 && l.h >= 200) || (l.h <= 6 && l.w <= 320)));

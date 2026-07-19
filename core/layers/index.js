@@ -17,8 +17,9 @@ import * as doc from './doc.js';
 import * as shader from './shader.js';
 import * as lottie from './lottie.js';
 import * as paint from './paint.js';
+import * as raymarch from './raymarch.js';
 
-const REGISTRY = { text, count, image, group, rect, glow, cursor, clip, html, component, board, doc, shader, lottie, paint };
+const REGISTRY = { text, count, image, group, rect, glow, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the

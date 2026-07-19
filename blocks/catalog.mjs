@@ -358,4 +358,53 @@ export const CATALOG = [
     props: { w: 300, layout: 'numeric' } },
   { name: 'pressButton', family: 'pressButton', blurb: 'CTA that depresses and releases when it is clicked',
     props: { w: 280, label: 'Start a project', pressAt: 1 } },
+
+  // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (docs/ROADMAP.md): no
+  // container owned a split, no block could move between two states, no screen became another screen,
+  // and the proof surfaces proved nothing without a hand-placed caption beside them. Appended at the
+  // END for the same reason as every wave before it — the site crops thumbnails by cell index.
+  { name: 'splitScreen', family: 'splitScreen', blurb: 'two panes, one geometry · second pane lands behind the first',
+    props: { w: 540, h: 96, split: 0.5, gap: 30, divider: true,
+      left: { block: 'listRow', props: { icon: '✉', title: 'Digest', sub: 'Kite Studio', meta: 'Today' } },
+      right: { block: 'listRow', props: { icon: '☰', title: 'Drafts', sub: 'Fieldwork', meta: 'Fri' } } } },
+  { name: 'splitScreen.pip', family: 'splitScreen', blurb: 'picture-in-picture · an aside inset over the subject',
+    props: { w: 540, h: 300, pip: true, pipScale: 0.46, pipInset: 16,
+      left: { block: 'card', props: { w: 540, h: 300, title: 'Open canvas', desc: 'Compose a beat from the vocabulary.', pills: ['Text', 'Image', 'Group'] } },
+      right: { block: 'card.profile', props: { name: 'Ana Roth', role: 'Founding Engineer', initials: 'AL' } } } },
+  { name: 'screenSwap', family: 'screenSwap', blurb: 'screen A becomes screen B in place (wipe, no travel)',
+    props: { w: 460, hold: 2.4, transition: 'wipe', screens: [
+      { block: 'emptyState', props: { w: 460, icon: '☐', title: 'Nothing here yet', body: 'Anything you save shows up in this list.', cta: 'Add the first one' } },
+      { block: 'listRow', props: { w: 460, icon: '✓', title: 'Fieldwork draft', sub: 'Saved to this list', meta: 'now' } },
+      { block: 'onboardCard', props: { w: 460, step: 2, of: 3, title: 'Pick a workspace', body: 'Choose where new drafts are saved.', cta: 'Continue' } }] } },
+  { name: 'screenSwap.slide', family: 'screenSwap', blurb: 'screen change that reads as travel · enters right, leaves left',
+    props: { w: 460, hold: 2.4, transition: 'slide', screens: [
+      { block: 'settingsRow', props: { w: 460, label: 'Sync across devices', sub: 'Keep every draft current everywhere', control: 'toggle', value: true } },
+      { block: 'settingsRow', props: { w: 460, label: 'Notifications', sub: 'Only for shared workspaces', control: 'value', value: 'Mentions' } },
+      { block: 'settingsRow', props: { w: 460, label: 'Appearance', sub: 'Match the system theme', control: 'chevron' } }] } },
+  { name: 'socialProof', family: 'socialProof', blurb: 'avatar stack + the line it proves (caption owned by the block)',
+    props: { extra: 8, size: 48, caption: 'Trusted by working teams', sub: 'across every plan',
+      avatars: [{ initials: 'AL' }, { initials: 'GH' }, { initials: 'VS' }, { initials: 'KM' }] } },
+  { name: 'installCard', family: 'installCard', blurb: 'app-store row · stars sweep to the rating, then install',
+    props: { w: 420, icon: '◆', name: 'Fieldwork', sub: 'Productivity', rating: 4.6, ratings: 1204, cta: 'Install' } },
+  { name: 'tabBar.switch', family: 'tabBar', blurb: 'the selection SLIDES from one tab to another',
+    props: { w: 500, activeFrom: 0, activeTo: 2, switchAt: 1.4, tabs: ['Design', 'Motion', 'Export'] } },
+  { name: 'tabBar.icons', family: 'tabBar', blurb: 'app tab bar · icon over label, selection slides',
+    props: { w: 500, activeFrom: 0, activeTo: 3, switchAt: 1.4, switchDur: 0.8, tabs: [
+      { icon: '⌂', label: 'Home' }, { icon: '⌕', label: 'Search' }, { icon: '✦', label: 'Saved' }, { icon: '◔', label: 'You' }] } },
+  { name: 'stepFlow.build', family: 'stepFlow', blurb: 'the track TRAVELS · rings light and connectors fill in sequence',
+    props: { w: 560, activeFrom: 0, activeTo: 4, buildAt: 0.5, buildDur: 3, steps: ['Capture', 'Encode', 'Mux', 'Upload'] } },
+  { name: 'notification.stack', family: 'notification', blurb: 'alerts that stack and expire, not one that sits',
+    props: { w: 420, life: 2.6, step: 1.1, items: [
+      { title: 'Draft saved', body: 'Fieldwork · shared workspace', icon: '✓', accent: 'var(--up)' },
+      { title: 'New comment', body: 'Wren replied on Motion', icon: '◆' },
+      { title: 'Export ready', body: 'The file is in your downloads', icon: '↓', accent: 'var(--up)' }] } },
+  { name: 'toast.stack', family: 'toast', blurb: 'snackbars that stack and expire',
+    props: { w: 400, life: 2.4, step: 1, items: [
+      { title: 'Block added to the scene', action: 'Undo' },
+      { title: 'Theme switched', action: 'Undo', icon: '◆', accent: 'var(--accent)' },
+      { title: 'Render queued', action: 'View' }] } },
+  { name: 'comparison.screens', family: 'comparison', blurb: 'before / after as two SCREENS, not two lists',
+    props: { w: 560, gap: 24, leftTitle: 'Before', rightTitle: 'After',
+      leftScreen: { block: 'emptyState', props: { icon: '☐', title: 'No drafts', body: 'Nothing has been saved to this list.' } },
+      rightScreen: { block: 'listRow', props: { icon: '✓', title: 'Draft saved', sub: 'Fieldwork', meta: 'now' } } } },
 ];

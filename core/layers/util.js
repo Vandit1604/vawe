@@ -111,6 +111,11 @@ export function createKit(ctx) {
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
     if (L.logotype) el.setAttribute('data-logotype', '1');
+    // An authored base opacity. It CANNOT be written to el.style here: driveClips overwrites
+    // style.opacity every frame from the enter/exit envelope, so a build-time style would be erased
+    // on frame 0 and the prop would do nothing. Two shipped scenes set `opacity` on a paint layer
+    // expecting it to dim and got no effect at all, silently. Hand it to the envelope instead.
+    if (L.opacity != null) el.dataset.opacity = String(L.opacity);
   }
 
   function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box, or FREE placement
@@ -157,6 +162,14 @@ export function createKit(ctx) {
     if (isGroup) {
       c.className = 'hs-group';
       layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
+      // A free group's children place themselves with position:absolute, which resolves against the
+      // nearest POSITIONED ancestor. A top-level layer is absolute, so free layout works there; a
+      // NESTED group is static, so its children escaped past it to the layer root and the group's own
+      // position stopped meaning anything. Set here rather than in layoutGroup because a top-level
+      // free group is already absolute with left/top from scene.html, and relative would break it.
+      // If parentEl is itself free, the line further down overwrites this with absolute, which is
+      // equally a containing block.
+      if (c.dataset.free && !c.style.position) c.style.position = 'relative';
       parentEl.appendChild(c);
       for (const gc of C.children || []) addGroupChild(c, gc, rootL);
     }

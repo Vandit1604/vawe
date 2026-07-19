@@ -17,7 +17,8 @@
 //                · lightLeak (looping warm blobs from an edge, palette-aware)
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl'];
+//   Projector:   gateWeave (film dust, hairs, and the frame drifting in the gate)
+export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave'];
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
@@ -167,7 +168,7 @@ void main(){
     float star = step(0.997, rhash(sg)) * (0.6 + 0.4*sin(t*2.0 + rhash(sg+9.0)*6.28));
     col = nb + vec3(star);
     alpha = smoothstep(0.18, 0.9, cloud) * 0.85 + star*0.9;
-  } else {                                                // dotCrawl — the NTSC chroma artifact that crawls along edges (index 15, trailing else)
+  } else if(u_fx==15){                                    // dotCrawl — the NTSC chroma artifact that crawls along edges
     // A fine diagonal chroma lattice drifting one subcarrier phase per frame — the companion artifact
     // to the shipped vhs/crt pair, which reproduce tracking and phosphor but never this.
     float ph = (p.x + p.y)*180.0 - t*7.0;                           // diagonal subcarrier
@@ -176,6 +177,28 @@ void main(){
     float edge = smoothstep(0.35, 0.95, noise(p*7.0 + t*0.05));     // crawl concentrates on detail
     col = 0.5 + 0.5*chroma;
     alpha = edge * (0.10 + 0.10*abs(lat));
+  } else {                                                // gateWeave — film dust + gate weave (index 16, trailing else)
+    // A frame never sits still in a projector gate: the sprockets let it drift a pixel or two, and it
+    // is the GATE EDGE moving that the eye reads as weave. This layer cannot move the content beneath
+    // it, so the weave is carried by everything it CAN draw — the soft dark frame border, the dust and
+    // the hair all ride ONE offset, and the picture appears to float inside it.
+    vec2 wv = vec2(sin(t*1.7)*0.0018 + sin(t*0.43 + 1.7)*0.0034,
+                   sin(t*2.3 + 1.1)*0.0024 + sin(t*0.61 + 2.2)*0.0042);  // two detuned sines = never repeats visibly
+    vec2 q = uv - wv;                                     // draw everything in the weaving frame's space
+    float edge = min(min(q.x, 1.0 - q.x), min(q.y, 1.0 - q.y));
+    float gate = smoothstep(0.014, 0.0, edge);            // the gate's soft dark border
+    float tstep = floor(t*24.0);                          // dust is re-struck each projected frame, never smeared
+    vec2 dc = vec2(floor(q.x*300.0), floor(q.y*300.0) + tstep*7.0);
+    float dust = step(0.9986, rhash(dc));
+    float dirt = step(0.45, rhash(dc + 31.0));            // emulsion dirt prints black, gate dust prints white
+    float hph = floor(t*0.5);                             // a hair catches in the gate for a couple of seconds
+    float hon = step(0.7, rhash(vec2(hph, 4.0)));
+    float hx = 0.15 + 0.7*rhash(vec2(hph, 8.0));
+    float sway = 0.013*sin(q.y*11.0 + t*1.1) + 0.03*(1.0 - q.y);   // hangs from the top edge and quivers
+    float hlen = 0.35 + 0.4*rhash(vec2(hph, 12.0));
+    float hair = hon * smoothstep(0.0026, 0.0, abs(q.x - (hx + sway))) * step(1.0 - hlen, q.y);
+    col = mix(vec3(1.0), vec3(0.02), max(dust*dirt, max(gate, hair)));
+    alpha = gate*0.6 + dust*0.85 + hair*0.75;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
   alpha *= clamp(u_intensity, 0.0, 1.0);

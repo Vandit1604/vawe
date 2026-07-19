@@ -1582,3 +1582,234 @@ caption feature, as the `glitch` sting, because it matched bare words. The doc b
 entry every time it means the registry entry and uses plain prose for feature names, so the backtick
 is the disambiguator. A gate that cries wolf on prose gets skimmed and takes its real findings with
 it, which is the same lesson as #85.
+
+---
+
+## #91 — The distinctness check decided its own answer, and the fix for it nearly did too
+
+#74 left this open and honest: `make conformance` printed "layer anim · 17 values · 17 distinct ✓"
+while `wipe-down` was byte-identical to `wipe`. The signature is `frameSig`, which hashes
+`document.body.innerHTML`, and scene.html stamps `data-anim="<name>"` on every layer. **The signature
+contained the name of the thing being tested.** Two values that render pixel-identically could never
+collide, so the check could not fail, so it had never failed, so everyone believed it.
+
+**Root cause of the first attempted fix (`visualSig`, reverted).** It replaced the hash with one
+computed from a hand-picked list of properties: transform, opacity, filter, clipPath, rects, camera.
+That list does not include colour, background, letter-spacing, font-family or border-radius, so it
+was far LESS sensitive than the thing it replaced, and phase 2 reported five real props as inert. The
+mistake was treating "blind to identity" and "as sensitive as frameSig" as one problem. They are two,
+and the second is the one that bites.
+
+**Fix.** Keep frameSig's exact hash and redact its input instead. `blindSig` mirrors frameSig line for
+line and neutralises `data-anim` / `data-out` before hashing. Which attributes leak was **measured,
+not guessed**: every phase-1 vocabulary was rendered and searched for its own value name in the
+resulting DOM. Only anim leaks. Preset, cut style, look and canvasFx reach the frame as computed
+styles or as a baked data-URL and never as their own name, which is why this is a two-attribute
+redaction and not a free-text scrub — over-redaction invents duplicates, and that is the #85 failure.
+
+Both halves are now asserted every run, before the sweep that depends on them:
+1. **As sensitive as frameSig** — with an empty redaction list, `blindSig` must reproduce frameSig's
+   value bit for bit. A mirror can drift from its original; this makes the drift loud instead of
+   silently measuring something weaker.
+2. **Actually able to collide** — the declared aliases are the positive control. `up`/`rise` and
+   `scale`/`pop` are literally the same function object in core/clips.js, so any trustworthy signature
+   must see them as one thing.
+
+**Which is how I caught myself repeating the bug.** My first version of (2) asserted that the DEFAULT
+value hashes the same as the no-value baseline. It was vacuous: scene.html stamps `data-anim` on
+every layer and defaults it to `fade`, so baseline and `anim:'fade'` matched even with redaction
+switched OFF. I only found out by switching it off and watching the sweep still report clean — the
+same self-fulfilling shape as the bug being fixed, one level up, written by me while fixing it. An
+assertion you have not watched fail is not an assertion.
+
+**Found on the first honest run:** `rise=up` and `scale=pop` — two real duplicate pairs sitting in the
+production registry the whole time. They are declared synonyms, so they are exempt via `EXPECTED_ALIAS`
+with a stated reason each (the EXPECTED_INERT discipline), and they now double as the positive control.
+The printed count is honest too: "distinct" counts distinct SIGNATURES, so it reads 15 of 17, where
+the old arithmetic could never print a number below the value count no matter how many values collided.
+
+**Gate:** three cases in `make gate-test` — the defect itself (make `wipe-down` render as `wipe`), and
+one for each half of the proof (empty `BLIND_ATTRS`, and a perturbed fnv seed). 45/45.
+
+---
+
+## #92 — The dataflow half of dead-branch, and the rule I had to cut
+
+#81 shipped `make dead-branch` catching one shape — `cond ? X : X` — and said plainly that the
+dataflow half needed real analysis and that half a linter pretending to be a whole one is worse than
+none. This closes the part that can be closed honestly.
+
+**Three rules, one mechanism.** A name that is bound and then never mentioned again in its own file:
+a value computed and discarded, a destructure that drops a field, a function parameter that accepts a
+prop and never reads it (the #19 shape, in source rather than in the DOM). Plus a condition whose
+operands are all constant.
+
+**The measurement underneath it, which is where a gate actually goes wrong.** "Never mentioned again"
+is decided by counting word-boundary occurrences in the WHOLE FILE, raw text included — comments and
+strings count as mentions. That is deliberately the over-counting direction: a shadowed name, a name
+used only from a template literal, a name that appears only in a comment are all MISSED rather than
+invented. Exactly one occurrence means no scope in that file can read it. The bindings are matched
+over the whole file text rather than line by line, because the destructures that matter most here are
+block factories' prop bags and they wrap across lines — a line-scoped scan would have exempted
+precisely the code the rule exists for. That is the same class as every sampling bug in this file:
+the blind spot is never in the rule, it is in the set the rule runs over.
+
+**What it caught on its first run: six.** `clamp` in reimagine, `beatOf` in critique, `inWin` and
+`lastF` in motion-audit, `FONTS` in rules-build, `total` in preview. Four of the six are in gate code.
+Same as #81, where the first run found a dead ternary in the gate being written to find them.
+
+**The rule I cut, and why it is worth writing down.** The constant-condition rule started as "a
+comparison anywhere whose operands are all constant". It produced eight false positives immediately,
+and every one was the same failure: a regex cannot see operator precedence or string boundaries. It
+read `2 === 0` out of `Math.floor(x * 2.2) % 2 === 0`, `1080 > 0.85` out of `(y1 - y0) / 1080 > 0.85`,
+and a `<` that was a character inside a string array. The salvage was to anchor on a place where the
+syntax itself says where the expression begins and ends: only `if (…)` / `while (…)` whose ENTIRE
+contents are token-operator-token. Nothing is left for precedence to change. Eight false positives
+before the anchor, zero after. The broad version would have been a bigger rule and a worse gate.
+
+**Still not caught, stated so nobody trusts it past its limit:** the multi-hop case #81 named
+(`const done = i < n-1` … later `done || i === n-1`), where the condition is invariant only after
+propagating a non-constant expression through another binding. That needs a real dataflow engine over
+a real AST. This repo has one dependency and intends to keep it.
+
+**Gate:** three cases in `make gate-test`, one per rule — a gate that catches one of its three stated
+rules and reports green for the other two is the same failure as no gate at all. The const-bound-literal
+form is the fixture for the condition rule rather than a bare `if (1 === 1)`, because the one-hop
+lookup is the part that could rot silently. Both `dead-branch.mjs` and `gate-mutation.mjs` stay
+excluded, now by one shared reasoned predicate: both QUOTE these patterns on purpose (#85).
+
+---
+
+## #93 — `opacity` on a layer did nothing, in two shipped scenes, for months
+
+`paint-demo.json` and `react-demo.json` both set `opacity` on a paint layer. The engine never read it.
+`driveClips` writes `el.style.opacity` from the enter/exit envelope on every single frame, so even a
+build-time style would have been erased on frame 0. The authored intent was obvious and the result was
+silence.
+
+**Why no gate saw it:** `layer-props` proves every prop the ENGINE SETS is read by some type. It cannot
+see a prop the engine never mentions. `schema-drift` proves every engine-read prop is in the schema,
+which is the same direction. Nothing checked the other direction, from AUTHORED JSON back to the engine.
+
+**Fix:** `decorate()` writes `el.dataset.opacity` and the clips loop multiplies it into the composed
+envelope, so a base opacity coexists with the entrance fade instead of fighting it for one property.
+Verified by rendering two identical black rects, one at `opacity: 0.25`, and reading the pixels:
+`000000` and `bfbfbf`. 191 is exactly 75% white, which is 25% black over white.
+
+**This changes output** for the two scenes above: their paint layers are now dimmer, which is what
+their authors wrote.
+
+---
+
+## #94 — The validator accepted any prop name at all
+
+A layer with `fill` (the rect prop is `bg`), `colour` (it is `color`), and a wholly invented key
+validated clean and rendered wrong in silence. I found it by making the mistake myself: my raymarch
+probe used `fill` and rendered on white, and I spent a minute assuming the raymarch layer had a
+compositing bug.
+
+**Fix:** unknown props on a layer are now a validation error, with a "did you mean" built from
+case-insensitive and prefix matches. Scoped deliberately: `block`/`comp` layers carry the BLOCK's props
+which this schema does not describe, `_`-prefixed keys are authoring scratch, and group children are
+checked against the child schema PLUS the layer schema because a child runs the same builder.
+
+**Blast radius was measured before it was made fatal**, not after: across all 72 scenes it found exactly
+four unknown props. `seed`, `colors` and `opacity` were real engine props missing from `layers.item`
+(added), and `fill` was my own typo. A check like this is only safe once you know it is not going to
+condemn the corpus.
+
+---
+
+## #95 — A gate answered a question it was not asked
+
+`node scripts/gates/scene-snap.mjs scene formats/scene/paint-demo.json` printed
+`✓ IDENTICAL — no DOM/layout change`. It had never opened `paint-demo.json`. Snap takes a FORMAT name
+and always loads that format's `sample.json`; the second argument was matched by
+`args.find(a => !a.startsWith('--'))` picking the FIRST non-flag arg and the rest being dropped on the
+floor.
+
+I used it to check the blast radius of the `opacity` fix and it told me nothing had changed, about the
+one file guaranteed to have changed. I nearly recorded "opacity affects nothing" on that basis.
+
+**Root cause:** silently ignoring an argument. The rule the gate states was fine; the input it actually
+read was not the input it was handed. That is the recurring shape here (#45 sampling, #46 file list,
+#56 measurement, #68 file list), and it is now nine for nine: the blind spot is never the rule.
+
+**Fix:** an extra positional argument is a hard error naming what was ignored and pointing at
+`make compare`.
+
+---
+
+## #96 — Coverage lists that do not grow cover less every time you ship
+
+`lib-test` asserted that stings depend on progress and ambient looks depend on time, over hand-typed
+name lists: `wave2` (10 entries) and `wave3` (8). `SHADER_FX` holds 35 and `AMBIENT_FX` 17. So the
+checks covered 29% and 47% of what they claimed to police, and every effect appended since those lists
+were written landed outside them, uncovered, forever.
+
+A subagent appending `gateWeave` reported this rather than assuming its work was checked: a frozen new
+ambient effect passed 343/343.
+
+**Fix:** derive from the registry, exempt by name. Stings exempt nothing (a sting that does not move is
+not a sting); ambient exempts `barrel` alone, a static lens vignette that is motionless by design.
+Proven by freezing each of the two newest effects in turn: `frozen: cinematicZoom` and
+`frozen: gateWeave`, neither of which the old lists contained.
+
+Third instance today of the same root cause, after #83 (hardcoded counts) and #90 (stale doc counts):
+**a hand-maintained list of things that already exist elsewhere decays the moment someone ships.**
+
+---
+
+## #97 — The docs decayed identically, one file over from the gate watching them
+
+`make roadmap-drift` shipped hours earlier to stop ROADMAP.md listing shipped work as missing. It
+watched one file. `docs/PRIMITIVES.md` states counts in its section HEADINGS and had drifted exactly
+the same way: 33 stings and 14 ambient against a real 35 and 17.
+
+**Fix:** generalized to `make docs-drift`, covering ROADMAP prose claims and PRIMITIVES heading counts.
+It also fails if a heading it expects to find has GONE, because a count check that silently stops
+running is worse than one that never existed.
+
+Writing a gate against a failure mode and then scoping it to one file is its own instance of that
+failure mode.
+
+---
+
+## #98 — A group child was legal at depth 2 and illegal at depth 1
+
+`boot` rejected `{type:'rect'}` as a direct group child ("not valid. Did you mean 'text'?") while two
+SHIPPED scenes used `rect` and `html` children one level deeper and rendered fine. The engine only
+enforced the restriction at depth 1, so the same type was legal or illegal depending on how deeply it
+was nested.
+
+The restriction itself was the stale part. `addGroupChild` delegates to `kit.buildLeaf`, which
+dispatches the SAME registry as a top-level layer, so a child has been able to be any layer type since
+that refactor (MISTAKES #70). The schema's four-name enum was left behind and nobody noticed, because
+the only path that read it was a depth-1 check almost nothing exercised.
+
+**How it surfaced:** I added a validator rule enforcing the enum, and it condemned two shipped videos.
+A new rule that fails the existing corpus is evidence about the RULE, not the corpus.
+
+**Fix:** the child enum is the full layer registry, and `make schema-drift` now derives it from
+`core/layers/index.js` so it cannot drift again. The validator also checks children at every depth,
+where before it stopped after one and a bad type reached the engine as a boot crash after a green
+validate.
+
+---
+
+## #99 — A nested `layout:'free'` group did not position its own children
+
+Reported by a subagent building `splitScreen`. A free group's children are `position:absolute`, which
+resolves against the nearest POSITIONED ancestor. A top-level layer is absolute, so free layout worked
+there; a nested group is static, so its children escaped past it to the layer root and the group's own
+position stopped meaning anything.
+
+**My first test failed to reproduce it, and I nearly dismissed the report.** I nested a free group at
+offset 0,0 inside a group, and the children landed correctly. They would have landed in the same place
+under either hypothesis, because "relative to a group at 0,0" and "relative to the layer root" are the
+same coordinates. A test that cannot distinguish the two answers is not evidence for either. Giving the
+inner group a non-zero offset showed the escape immediately.
+
+**Fix:** a nested free group is set `position:relative` in `addGroupChild`, not in `layoutGroup`,
+because a TOP-LEVEL free group is already absolute with left/top from scene.html and `relative` would
+break every one of them.

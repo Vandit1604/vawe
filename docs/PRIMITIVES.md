@@ -53,7 +53,7 @@ Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scen
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/stings.js`) — 33 WebGL cover-the-cut effects
+## Shader stings (`core/stings.js`) — 35 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak — every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
@@ -80,7 +80,7 @@ Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
-## Ambient shader looks (`core/shaders-ambient.js`) — 14 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/shaders-ambient.js`) — 17 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:
@@ -419,6 +419,43 @@ Not the same as its neighbours, and the difference is what to reach for:
 - **vs `glass`**: `backdrop-filter` reads what is *behind* a layer, but only through the CSS filter
   functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
   frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.
+
+## Raymarched 3D (`core/raymarch-fx.js`) · the `raymarch` layer type — 5 scenes
+
+Real 3D without a 3D engine. A fullscreen quad plus a signed distance field IS a renderer: march a ray
+per pixel, hit an implicit surface, shade it from its normal. No geometry, no scene graph, no
+dependency, and no new determinism story, because a raymarched frame is already a pure function of
+(uv, time) exactly like every other shader here.
+
+```jsonc
+{ "type": "raymarch", "raymarch": "chromeGlass", "x": 600, "y": 240, "w": 720, "h": 720,
+  "start": 1, "duration": 5, "colors": ["#7cc4ff"], "spin": 1, "intensity": 1 }
+```
+
+| scene | what it is |
+|---|---|
+| `metaballs` | soft glossy blobs that merge and separate, orbiting closed-form |
+| `mandelbulb` | the fractal, its power breathing slowly |
+| `chromeGlass` | a mirror-metal torus and sphere reflecting a studio environment |
+| `caustics` | a water surface with light caustics agreeing with its own waves |
+| `holoFoil` | a bounded disc of iridescent foil, thin-film colour over metal |
+
+**Dials.** `colors` tints the scene (first entry is the primary), `intensity` is a brightness and
+alpha dial, `seed` shifts the noise. `speed` and `spin` are separate on purpose: `speed` scales the
+SUBJECT's animation, `spin` scales the CAMERA's orbit, and `spin: 0` holds the camera still while the
+subject keeps moving. A metaball churning under a locked camera is a different shot from the camera
+circling a frozen one, and an author wants both.
+
+**Sizing.** This is a lit subject with a silhouette, not an ambient field: give it a box roughly the
+size the object should occupy and let its transparent surround do the compositing. `caustics` is the
+exception, being a surface rather than an object, and is happy filling its box.
+
+**Cost.** The most expensive primitive in the engine: every pixel marches up to 72 steps. Use it for
+ONE hero shot, size the layer to what it needs, and do not put two on screen at once.
+
+**What it cannot do.** An SDF cannot import a font outline or a mesh, so extruded 3D text, device
+showcases, point clouds and cloth are NOT in reach here. That half of Tier 4 is the only place a
+three.js dependency would earn itself; see `docs/ROADMAP.md`.
 
 ## Caption styles
 

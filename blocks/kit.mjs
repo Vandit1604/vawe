@@ -114,6 +114,20 @@ const reveal = (dir) => ({ delay = 0.15, dur = 0.75, ease = P_EASE } = {}) => ({
 export const growUp = reveal('top');
 export const fillRight = reveal('right');
 
+// stackWindows — N transient surfaces that arrive in order, sit for `life`, and EXPIRE.
+// `toast` and `notification` each rendered exactly one card that lived for the whole beat, so a scene
+// showing two alerts had to place two blocks and hand-compute the second one's y and start. Both of
+// those are geometry, and geometry belongs to the block. One definition, because a second copy of
+// "where does the next one go and when does this one die" is a second copy that drifts.
+//
+// A window is CLIPPED to the block's own end (`start + dur`), never extended past it: an item that
+// outlives its block is a layer the author cannot see the end of.
+export const stackWindows = ({ n = 0, start = 0, dur = 4, step = 0.9, life = 2.2, rowH = 60, gap = 12 } = {}) =>
+  Array.from({ length: Math.max(0, n) }, (_, i) => {
+    const st = r2(start + i * step);
+    return { start: st, dur: Math.max(0.4, r2(Math.min(life, start + dur - st))), dy: i * (rowH + gap) };
+  });
+
 // htmlCard — the same hairline card for the html+SVG blocks (charts and gauges, which need curves).
 // THE INNER WIDTH IS DERIVED FROM THE PAD. It used to be restated by hand and two of the three
 // wrappers were wrong against their own padding (`w - 48` on padding 22, `w - 44` on padding 24).

@@ -21,7 +21,7 @@
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
   R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight,
+  sweep, stagger, growUp, fillRight, stackWindows,
 } from './kit.mjs';
 
 export { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl };
@@ -345,14 +345,34 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
 }
 
 // notification — a toast card (icon + title + body). Good for "it just happened" beats.
-export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
+// `icon` was in this signature, documented by its presence, and rendered NOWHERE — the block drew a
+// bare dot and dropped the glyph. `toast` drew the same dot WITH the glyph in it. So the two halves of
+// one family disagreed about whether a prop existed, and the half that accepted it lied. Same chip,
+// same rule in both: a glyph if one is given, a plain dot if not.
+//
+// `items` stacks: N alerts arriving in order and EXPIRING, which is what an alert actually does. The
+// recursion is the point — one card is the block calling itself with the stack flattened away, so the
+// stacked and single forms cannot render differently.
+export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent,
+  items = null, life = 2.4, step = 1, rowH = 96, gap = 12, start = 0, dur = 4 } = {}) {
+  if (items && items.length) {
+    return stackWindows({ n: items.length, start, dur, step, life, rowH, gap }).flatMap((wnd, i) => {
+      const it = items[i];
+      return notification({ x, y: r2(y + wnd.dy), w, title: it.title ?? it.message, body: it.body ?? it.desc,
+        icon: it.icon ?? icon, accent: it.accent || accent, start: wnd.start, dur: wnd.dur });
+    });
+  }
   title = title ?? message; body = body ?? desc;
+  const dot = icon
+    ? box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: String(icon), size: 14, weight: 700, color: onColor(accent) })] })
+    : box({ w: 12, h: 12, radius: 100, bg: accent });
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, pad: 20,
     // a notification ARRIVES FROM THE EDGE and leaves the way it came — the short, correct entrance
     // for a chip. Nothing inside it should perform; it is one small statement.
     ...cardChrome({ elevation: 2, anim: 'slide-right' }), out: 'slide-right',
     start, duration: dur, enterDur: 0.4, exitDur: 0.3, children: [
-      box({ w: 12, h: 12, radius: 100, bg: accent }),
+      dot,
       { type: 'group', layout: 'column', gap: 6, items: 'flex-start', grow: 1, children: [
         text({ text: title, size: 22, weight: 700, color: T.ink }),
         body && text({ text: body, size: 18, color: T.sub }),
@@ -394,14 +414,36 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
 }
 
 // comparison — two columns (e.g. Before / After, Others / Vawe). Rows are simple strings.
-export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = 'Vawe', left = [], right = [], start = 0, dur = 4 } = {}) {
-  const colW = (w - 40) / 2;
+//
+// …OR TWO SCREENS. A before/after beat is the most standard product-demo shape there is, and this
+// block could only hold two lists of sentences: it could SAY the interface changed and never show it.
+// `leftScreen`/`rightScreen` are block descriptors (`{ block, props }`), and when either is present
+// the columns become panes and `splitScreen` owns the geometry — one definition of "two things, side
+// by side, aligned", not a second one living here.
+//
+// The string form is untouched and takes precedence by absence, so every existing caller renders
+// exactly what it rendered before. An extension that requires editing its callers is a rewrite.
+export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = 'Vawe', left = [], right = [],
+  leftScreen = null, rightScreen = null, gap = 40, start = 0, dur = 4 } = {}) {
+  const colW = (w - gap) / 2;
+  if (leftScreen || rightScreen) {
+    const TITLE_H = 46;
+    const cap = (t, cx, color, st) => text({ text: t, x: cx, y, w: colW, size: 26, weight: 700, color,
+      start: st, duration: r2(start + dur - st), anim: 'slide-down', enterDur: 0.35, exitDur: 0.3 });
+    return [
+      cap(leftTitle, x, T.dim, start),
+      cap(rightTitle, r2(x + colW + gap), TOKENS.accent, r2(start + 0.18)),
+      // no divider: this block does not know how tall its panes are, and a rule drawn to a guessed
+      // height is a line that is wrong at every size but one. The two titles already separate them.
+      ...splitScreen({ x, y: r2(y + TITLE_H), w, gap, left: leftScreen, right: rightScreen, start, dur }),
+    ];
+  }
   const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'flex-start', gap: 14, pad: 24,
     ...cardChrome(), children: [
       text({ text: title, size: 26, weight: 700, color: accent }),
       ...items.map((it) => text({ text: it, size: 20, color: T.sub })),
     ] });
-  return [{ type: 'group', x, y, w, layout: 'row', gap: 40, items: 'stretch', start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+  return [{ type: 'group', x, y, w, layout: 'row', gap, items: 'stretch', start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [col(leftTitle, left, T.dim), col(rightTitle, right, TOKENS.accent)] }];
 }
 
@@ -614,13 +656,66 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
       children: screen }] }];
 }
 
-// tabBar — a segmented control; `active` is the selected index (lifted, lit card).
-export function tabBar({ x, y, w = 520, tabs = [], active = 0, start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'stretch', gap: 6, pad: 6,
-    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
-    children: tabs.map((t, i) => ({ type: 'group', grow: 1, layout: 'row', justify: 'center', items: 'center', pad: '10px 0',
-      ...(i === active ? { bg: T.card, radius: 8, elevation: 1 } : {}),
-      children: [text({ text: t, size: 18, weight: i === active ? 600 : 500, color: i === active ? T.ink : T.sub })] })) }];
+// tabBar — a segmented control / app tab bar. `active` is the selected index; `activeFrom`+`activeTo`
+// make the selection MOVE, which is the only thing a tab bar ever does.
+//
+// TWO DEFECTS, one shape. `active` was a frozen index, so a scene could show a tab bar before a switch
+// or after one and never the switch itself — the single most-filmed interaction in a product demo was
+// the one state this block could not reach. And `tabs` were text-only while every real app tab bar is
+// icon-over-label, so the block depicted a segmented control and was catalogued as a tab bar.
+//
+// THE SELECTION SLIDES, IT DOES NOT CROSS-FADE, and that is why this is one `html` layer rather than
+// the native group it used to be. The lit pill translates by `var(--p)` (the engine's animated custom
+// properties — the same mechanism `gauge` and `pressButton` use), and the ACTIVE-styled copy of the
+// label row lives INSIDE the pill, counter-translated by the same expression. So whichever tab the
+// pill is currently over renders in the active style, for free, at every frame — no per-label opacity
+// arithmetic, and no second timeline that can fall out of sync with the first.
+//
+// `tabs` items are a plain string, or `{ label, icon }` for the icon-over-label form.
+export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null, activeTo = null,
+  switchAt = 0.9, switchDur = 0.5, start = 0, dur = 4 } = {}) {
+  const n = Math.max(1, tabs.length);
+  const from = Math.min(n - 1, Math.max(0, activeFrom ?? active));
+  const to = Math.min(n - 1, Math.max(0, activeTo ?? activeFrom ?? active));
+  const PAD = 6, GAP = 6;
+  const tabW = r2((w - 2 * PAD - GAP * (n - 1)) / n), step = r2(tabW + GAP);
+  const items = tabs.map((t) => (typeof t === 'string' ? { label: t, icon: '' } : t || {}));
+  const withIcons = items.some((t) => t.icon);
+  const rowH = withIcons ? 64 : 40, innerW = r2(w - 2 * PAD);
+  // the pill's offset, as ONE expression used three times (pill, clip window, counter-translate).
+  // `var(--p, 1)` rests at 1 so a bar with no sweep sits on `to` — the settled state, which is what a
+  // still of a tab bar should show.
+  const pos = `calc((${from} + ${r2(to - from)} * var(--p, 1)) * ${step}px)`;
+  // THE TWO COPIES MUST BE THE SAME WIDTH, so they differ in COLOUR ONLY. Weighting the active copy
+  // heavier made it wider than the copy beneath it, and since the clip window's alignment depends on
+  // the two rows being metrically identical, the lit label drifted out of its own pill as the pill
+  // travelled — a bold half-word sticking out of a white box. Colour carries the state; the pill
+  // carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
+  const cell = (t, activeStyle) => `<div style="width:${tabW}px;height:${rowH}px;flex:none;display:flex;`
+    + `flex-direction:column;align-items:center;justify-content:center;gap:3px">`
+    + (t.icon ? `<div style="font:400 ${withIcons ? 22 : 18}px var(--font-sans);line-height:1;`
+        + `color:${activeStyle ? T.accent : T.dim}">${t.icon}</div>` : '')
+    + `<div style="font:600 ${withIcons ? 15 : 18}px var(--font-sans);`
+    + `color:${activeStyle ? T.ink : T.sub};white-space:nowrap">${t.label || ''}</div></div>`;
+  const row = (activeStyle) => `<div style="display:flex;gap:${GAP}px;width:${innerW}px">`
+    + items.map((t) => cell(t, activeStyle)).join('') + '</div>';
+  const html = `<div style="position:relative;box-sizing:border-box;width:${w}px;height:${rowH + 2 * PAD}px;`
+    + `background:${T.surface};border-radius:${R.tight}px">`
+    // the lit pill, and the active-styled row clipped to it
+    + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
+    + `border-radius:8px;background:${T.card};box-shadow:0 1px 2px color-mix(in srgb, var(--text) 14%, transparent);`
+    + `transform:translateX(${pos})"></div>`
+    + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${innerW}px;height:${rowH}px;">`
+    + row(false) + '</div>'
+    + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
+    + `overflow:hidden;border-radius:8px;transform:translateX(${pos})">`
+    + `<div style="position:absolute;left:0;top:0;transform:translateX(calc(-1 * ${pos}))">${row(true)}</div>`
+    + '</div></div>';
+  return [{
+    type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
+    // only a bar that actually MOVES carries a sweep; a static one leaves `--p` at its resting 1.
+    ...(from === to ? {} : { vars: { '--p': [0, 1] }, varsDur: switchDur, varsDelay: Math.max(0, switchAt), varsEase: 'easeOutCubic' }),
+  }];
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -684,26 +779,52 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
 }
 
 // stepFlow — a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
-export function stepFlow({ x, y, w = 720, steps = [], active = 0, start = 0, dur = 4 } = {}) {
-  // THE TRACK LIGHTS UP LEFT TO RIGHT, one step at a time: the numeral lands in its ring, then the
-  // step's name, then the next one — so the progress reads as travelled rather than declared. The
-  // rings are scaffolding and stay; the numeral and the label are LEAVES, which is what the engine
-  // registers with the clip driver (a nested group child is built and then never timed).
-  const children = [];
-  steps.forEach((s, i) => {
-    const state = i < active ? 'done' : i === active ? 'now' : 'todo';
-    const dotBg = state === 'todo' ? T.surface : T.accent;
-    children.push({ type: 'group', layout: 'column', items: 'center', gap: 10, children: [
-      box({ w: 44, h: 44, radius: 100, bg: dotBg, ...(state === 'now' ? { border: `3px solid ${T.accentSoft}` } : {}),
-        layout: 'row', justify: 'center', items: 'center', children: [
-          text({ text: state === 'done' ? '✓' : String(i + 1), size: 20, weight: 700, color: state === 'todo' ? T.dim : '#fff',
-            ...stagger(i, { step: 0.32, delay: 0.2, anim: 'pop', enterDur: 0.26 }) })] }),
-      text({ text: s, size: 18, weight: state === 'todo' ? 500 : 600, color: state === 'todo' ? T.sub : T.ink,
-        ...stagger(i, { step: 0.32, delay: 0.3, enterDur: 0.3 }) }),
-    ] });
-    if (i < steps.length - 1) children.push({ type: 'group', grow: 1, layout: 'column', items: 'stretch', children: [box({ h: 21 }), box({ h: 2, radius: 1, bg: i < active ? T.accent : T.hair })] });
-  });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35, children }];
+// `active` is where the track STANDS; `activeFrom` + `activeTo` are where it TRAVELS between, so the
+// build sequence a step flow describes can actually be watched instead of only reported finished.
+//
+// THE PROGRESS IS ONE NUMBER, and every piece of the track reads it. `--p` sweeps 0→1 across the
+// window and `pos` maps that onto the step index; a ring lights when `pos` reaches it and a connector
+// fills by exactly the fraction of the gap `pos` has crossed. That is why this is one `html` layer:
+// three states of a ring have to occupy the SAME 44px, which a flow layout cannot express, and the
+// connector's fill is a continuous fraction rather than an on/off. Both fall out of the one number.
+// Pure in n: every value here is a function of `--p` and nothing else.
+export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = null, activeTo = null,
+  buildAt = 0.3, buildDur = 0, start = 0, dur = 4 } = {}) {
+  const n = steps.length;
+  const from = Math.max(0, activeFrom ?? active);
+  const to = Math.max(0, activeTo ?? activeFrom ?? active);
+  const RING = 44, GAP = 14, RAIL = 2;
+  // `pos` is a bare parenthesised expression so it can nest inside calc()/clamp() without doubling up.
+  const pos = `(${from} + ${r2(to - from)} * var(--p, 1))`;
+  const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
+  const done = (i) => lit(i + 1);                                     // ...and passed
+  const ring = (i) => `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
+    + `<div style="position:absolute;inset:0;border-radius:50%;background:${T.surface};display:flex;`
+    + `align-items:center;justify-content:center;font:700 20px var(--font-sans);color:${T.dim}">${i + 1}</div>`
+    + `<div style="position:absolute;inset:0;border-radius:50%;background:${T.accent};opacity:${lit(i)}"></div>`
+    + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
+    + `font:700 20px var(--font-sans);color:${onColor(T.accent)};opacity:calc(${lit(i)} - ${done(i)})">${i + 1}</div>`
+    + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
+    + `font:700 20px var(--font-sans);color:${onColor(T.accent)};opacity:${done(i)}">✓</div></div>`;
+  // the label is drawn twice, the reached copy fading in over the unreached one. Same string, so the
+  // two copies are the same width and nothing shifts as a step lights.
+  const label = (s, i) => `<div style="position:relative;margin-top:10px;white-space:nowrap">`
+    + `<div style="font:500 18px var(--font-sans);color:${T.sub}">${s}</div>`
+    + `<div style="position:absolute;left:0;top:0;font:600 18px var(--font-sans);color:${T.ink};`
+    + `opacity:${lit(i)}">${s}</div></div>`;
+  const connector = (i) => `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
+    + `border-radius:1px;background:${T.hair};position:relative;overflow:hidden">`
+    + `<div style="position:absolute;inset:0;background:${T.accent};transform-origin:left center;`
+    + `transform:scaleX(clamp(0, calc(${pos} - ${i}), 1))"></div></div>`;
+  const cells = steps.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;flex:none">`
+    + ring(i) + label(s, i) + '</div>');
+  const track = cells.flatMap((c, i) => (i < n - 1 ? [c, connector(i)] : [c])).join('');
+  const html = `<div style="width:${w}px;display:flex;align-items:flex-start;gap:${GAP}px">${track}</div>`;
+  return [{
+    type: 'html', x, y, w, html, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+    ...(from === to ? {} : { vars: { '--p': [0, 1] }, varsEase: 'easeOutCubic',
+      varsDur: buildDur || r2(0.55 * Math.max(1, Math.abs(to - from))), varsDelay: Math.max(0, buildAt) }),
+  }];
 }
 
 // kanban — columns of small cards. columns = [{title, cards:[string]}].
@@ -769,12 +890,53 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
   return out;
 }
 
+// socialProof — the avatar stack AND the line that says what it proves.
+//
+// `avatarStack` renders circles and a `+N` and stops there, so on its own it asserts nothing: every
+// scene that used it hand-placed a text layer beside it at coordinates derived from the stack's own
+// step arithmetic, which the block already knows and the author had to re-derive. Two callers, two
+// different offsets, and neither one is wrong in a way the author can see. The stack's width is the
+// stack's business; this block owns both halves and puts the caption where the stack actually ends.
+//
+// NO FIGURE IS INVENTED: `caption` and `sub` default to nothing, and the `+N` comes from `extra`,
+// which the caller supplies. A social-proof block that ships a number is the exact defect this
+// registry has already shipped twice.
+export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption = '', sub = '',
+  gap = 18, start = 0, dur = 4 } = {}) {
+  const step = size * 0.65;
+  const cells = avatars.length + (extra > 0 ? 1 : 0);
+  const stackW = cells > 0 ? r2((cells - 1) * step + size) : 0;
+  // the caption arrives AFTER the last avatar lands — the stack assembles, then it is named.
+  const said = r2(start + cells * 0.14 + 0.12);
+  const lines = [
+    caption && text({ text: caption, size: 20, weight: 600, color: T.ink }),
+    sub && text({ text: sub, font: 'mono', size: 15, color: T.dim }),
+  ].filter(Boolean);
+  return [
+    ...avatarStack({ x, y, avatars, extra, size, start, dur }),
+    ...(lines.length ? [{
+      type: 'group', x: r2(x + stackW + gap), y, h: size, layout: 'column', items: 'flex-start',
+      justify: 'center', gap: 3, children: lines,
+      start: said, duration: r2(start + dur - said), anim: 'slide-left', enterDur: 0.35, exitDur: 0.3,
+    }] : []),
+  ];
+}
+
 // toast — a dark snackbar: status dot · message · action link. (notification is the light card variant.)
 // The alert family (notification · toast · callout · banner) now shares ONE vocabulary: `title` and
 // `body`. Each block had invented its own words for the same two slots, so an author relearned the
 // block every time. Old names stay as aliases — a shared vocabulary is worth nothing if adopting it
 // breaks every caller (MISTAKES #67).
-export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green, start = 0, dur = 4 } = {}) {
+export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green,
+  items = null, life = 2.2, step = 0.9, rowH = 58, gap = 12, start = 0, dur = 4 } = {}) {
+  // see `notification` — same stack, same helper, same recursion into the single-card form.
+  if (items && items.length) {
+    return stackWindows({ n: items.length, start, dur, step, life, rowH, gap }).flatMap((wnd, i) => {
+      const it = items[i];
+      return toast({ x, y: r2(y + wnd.dy), w, title: it.title ?? it.message, body: it.body, action: it.action,
+        icon: it.icon ?? icon, accent: it.accent || accent, start: wnd.start, dur: wnd.dur });
+    });
+  }
   message = title ?? message;
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 20px',
     bg: '#0A0A0A', radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
@@ -872,6 +1034,55 @@ export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '',
       { type: 'group', bg: T.ink, radius: 100, pad: '9px 20px', start: r2(start + 0.18), duration: dur, anim: 'rise', enterDur: 0.3,
         children: [text({ text: cta, size: 17, weight: 700, color: T.paper })] },
     ] }];
+}
+
+// installCard — the app-store listing row: icon tile · name over category · a star rating that FILLS
+// · the rating count · the install button. The registry had no proof surface of this shape at all, so
+// a product film could show the app and never show anyone choosing it.
+//
+// Built on followCard's conventions (identity on the left, a pill CTA on the right, one hairline
+// card) because that is the shape it is a sibling of, and a second layout for the same silhouette is
+// how a library stops looking like one library.
+//
+// THE STARS FILL, they are not printed. A rating drawn at its final value is a claim; a rating that
+// sweeps to it is the block showing its own reading, which is what the registry's motion rule asks
+// for. It is ONE row of five glyphs revealed by a hard-edged mask whose visible fraction is
+// `rating / 5`, so a 4.6 lands mid-glyph on the fifth star without anything being redrawn per value.
+//
+// It is one row and not a lit row over an unlit track because a nested `layout:'free'` group does not
+// position its own children: the engine sets `display:block` and marks the children absolute, but
+// nothing on the group is positioned, so an absolutely-placed child escapes to the LAYER root. Free
+// layout works at top level (a layer root is positioned) and silently misplaces one node down. Noted
+// rather than worked around further: this belongs in core/layers/util.js, not in a block.
+//
+// EVERY FIGURE IS A PROP AND EVERY DEFAULT IS EMPTY: `rating` 0 draws no stars, `ratings` 0 draws no
+// count, `cta` empty draws no button. This block cannot ship a number nobody stood behind.
+export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rating = 0, ratings = 0,
+  cta = '', start = 0, dur = 4 } = {}) {
+  const STARS = '★★★★★';
+  const rate = Math.min(5, Math.max(0, +rating || 0));
+  const gold = toneColor('warn');
+  const strip = rate > 0 ? text({ text: STARS, size: 18, color: gold, ls: '0.06em',
+    ...fillRight({ delay: 0.35, dur: 0.8 }), vars: { '--p': [0, r2(rate / 5)] } }) : null;
+  // a count is FORMATTED from a number, never accepted as prose: a caller that has 1200 ratings should
+  // not have to decide how to write it, and the block should not be able to be handed a sentence.
+  const countText = ratings > 0
+    ? (ratings >= 1e6 ? r2(ratings / 1e6) + 'M' : ratings >= 1e3 ? r2(ratings / 1e3) + 'K' : String(Math.round(ratings)))
+    : '';
+  const meta = [strip, countText && text({ text: countText, font: 'mono', size: 15, color: T.dim })].filter(Boolean);
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 18,
+    ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
+      box({ w: 62, h: 62, radius: R.card, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: icon, size: 28, weight: 700, color: T.accentInk })] }),
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 5, grow: 1, children: [
+        text({ text: name, size: 21, weight: 700, color: T.ink }),
+        sub && text({ text: sub, size: 16, color: T.sub }),
+        meta.length && { type: 'group', layout: 'row', items: 'center', gap: 9, children: meta },
+      ].filter(Boolean) },
+      cta && { type: 'group', bg: T.accent, radius: 100, pad: '10px 22px',
+        start: r2(start + 0.22), duration: dur, anim: 'pop', enterDur: 0.3,
+        children: [text({ text: cta, size: 17, weight: 700, color: onColor(T.accent) })] },
+    ].filter(Boolean) }];
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1222,6 +1433,96 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   return out;
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// WAVE 6 — COMPOSITION. Blocks whose content is OTHER BLOCKS.
+//
+// Everything above places itself and draws itself. Nothing above places anything ELSE, so every
+// "split" archetype in every scene was two blocks at two hand-chosen x coordinates, and the rule
+// keeping them aligned lived in the author's head and in arithmetic they re-did per beat. Layout
+// discipline that is not in the engine is not discipline; it is a habit, and habits drift silently.
+//
+// A SIDE IS A BLOCK DESCRIPTOR: `{ block: 'listRow', props: { … } }`, the same `{type:"block"}` shape
+// a scene already writes, so a container costs an author no new vocabulary. The container computes
+// the pane box and injects `x`/`y`/`w`/`start`/`dur`; the pane's own props decide everything else.
+//
+// IT INJECTS `w` AND NOT `h`, deliberately. Most factories in this library size themselves off their
+// content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence —
+// the exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
+// (the divider, the inset), never handed to a pane that may not understand it.
+const paneBlock = (side) => {
+  const f = side && side.block && BLOCKS[side.block];
+  if (!f) throw new Error(`splitScreen: unknown block "${side && side.block}". A side is { block, props }.`);
+  return f;
+};
+const pane = (side, at) => (side ? paneBlock(side)({ ...(side.props || {}), ...at }) : []);
+
+// splitScreen — two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
+// and `pip` insets the second pane into a corner of the first instead of sitting beside it.
+//
+// `split` is the FRACTION of the long axis the first pane gets, so a 60/40 is `split: 0.6` and not two
+// widths a caller has to keep summing to the whole. `lead` staggers the second pane behind the first:
+// two panes landing on the same frame read as one slab arriving, which is the thing a split is not.
+export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', split = 0.5, gap = 24,
+  left = null, right = null, pip = false, pipScale = 0.36, pipInset = 20, pipCorner = 'bottom-right',
+  divider = false, lead = 0.18, start = 0, dur = 4 } = {}) {
+  const f = Math.min(0.9, Math.max(0.1, split));
+  const second = { start: r2(start + lead), dur: r2(dur - lead) };
+  if (pip) {
+    // PICTURE-IN-PICTURE: the second pane is a small inset over the first, and it arrives LAST because
+    // it is the aside, not the subject.
+    const iw = Math.round(w * pipScale);
+    const right2 = pipCorner.endsWith('right');
+    const px = right2 ? x + w - iw - pipInset : x + pipInset;
+    const py = pipCorner.startsWith('top') ? y + pipInset : y + h - Math.round(h * pipScale) - pipInset;
+    return [...pane(left, { x, y, w, start, dur }), ...pane(right, { x: px, y: py, w: iw, ...second })];
+  }
+  const col = orient === 'column';
+  const aW = col ? w : r2((w - gap) * f), bW = col ? w : r2(w - gap - aW);
+  const aH = col ? r2((h - gap) * f) : h;
+  const bX = col ? x : r2(x + aW + gap), bY = col ? r2(y + aH + gap) : y;
+  const rule = divider ? [rect({
+    x: col ? x : r2(x + aW + gap / 2 - 0.5), y: col ? r2(y + aH + gap / 2 - 0.5) : y,
+    w: col ? w : 1, h: col ? 1 : h, bg: T.hair,
+    // the rule OPENS along the seam rather than fading in: a divider is a cut being made.
+    start: r2(start + 0.08), duration: r2(dur - 0.08), anim: col ? 'wipe' : 'wipe-down', enterDur: 0.5, exitDur: 0.3,
+  })] : [];
+  return [...pane(left, { x, y, w: aW, start, dur }), ...rule, ...pane(right, { x: bX, y: bY, w: bW, ...second })];
+}
+
+// screenSwap — screen A becomes screen B (becomes C…) in one place. The single most common motion in
+// a product demo, and the registry could not make it: `phoneFrame` held content and nothing changed
+// the content, so a demo could show one screen per beat and never the move between two.
+//
+// EVERY SCREEN SHARES ONE BOX. That is the whole point — a swap is two screens at the SAME coordinates
+// with handed-over windows, and hand-authoring it means writing the same x/y twice and the handover
+// arithmetic once per pair, which is where it goes wrong.
+//
+// `transition` defaults to `wipe` because a wipe is a CLIP: the outgoing screen is uncovered in place
+// and never travels outside its own box, so a swap inside a device frame does not slide across the
+// bezel. `slide` is offered for a swap that is meant to read as travel, and it pairs its directions
+// (enter from the right, leave to the left) rather than entering and retreating.
+const SWAP = {
+  wipe: { anim: 'wipe', out: 'wipe-right' },
+  slide: { anim: 'slide-right', out: 'slide-left' },
+  fade: { anim: 'fade', out: 'fade' },
+  defocus: { anim: 'defocus', out: 'defocus' },
+};
+export function screenSwap({ x = 0, y = 0, w = 320, screens = [], hold = 1.6, overlap = 0.45,
+  transition = 'wipe', start = 0, dur = 5 } = {}) {
+  const move = SWAP[transition] || SWAP.wipe;
+  const end = start + dur;
+  return screens.flatMap((s, i) => {
+    const st = r2(start + i * hold);
+    if (st >= end) return [];   // a screen whose turn falls past the block's end never gets one
+    // the LAST screen holds to the end of the block; every other one hands over, overlapping its
+    // successor so the two transitions are one move rather than a gap between two.
+    const stop = i === screens.length - 1 ? end : Math.min(end, start + (i + 1) * hold + overlap);
+    return pane(s, { x, y, w, start: st, dur: r2(stop - st) }).map((L) => ({
+      ...L, ...move, enterDur: 0.45, exitDur: 0.4,
+    }));
+  });
+}
+
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
 // opts, so a scene can still override anything. Adding a variant = a row in blocks/catalog.mjs (+ a
 // `variant` branch in the family). See docs/BLOCKS.md (auto-generated) and docs/TASTE.md.
@@ -1237,8 +1538,10 @@ const FACTORIES = { ...APP, card, codeBlock, terminal, loadingBar, deploySuccess
   lineChart, donutChart, stackedBar, pricingCard, statCard, profileCard,
   fileTree, logLines, commitRow, phoneFrame, tabBar,
   checklist, table, timeline, stepFlow, kanban,
-  chatBubble, tweetCard, avatarStack, toast, reactionBar, nowPlaying, videoLowerThird, followCard,
-  logoWall, badge, gauge, progressRing, banner, spinner, lowerThird, searchEngine };
+  chatBubble, tweetCard, avatarStack, socialProof, toast, reactionBar, nowPlaying, videoLowerThird,
+  followCard, installCard,
+  logoWall, badge, gauge, progressRing, banner, spinner, lowerThird, searchEngine,
+  splitScreen, screenSwap };
 
 export const BLOCKS = { ...FACTORIES };
 import * as INTERACT from './interact.mjs'; export * from './interact.mjs'; Object.assign(FACTORIES, INTERACT); Object.assign(BLOCKS, INTERACT); // interaction family: pointer · tap · keyboard · press (blocks/interact.mjs)

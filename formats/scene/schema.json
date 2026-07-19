@@ -245,7 +245,8 @@
             "chromaticSplit",
             "dispersion",
             "gridPixelateWipe",
-            "iridescence"
+            "iridescence",
+            "cinematicZoom"
           ]
         },
         "dur": {
@@ -342,7 +343,8 @@
             "cursor",
             "shader",
             "lottie",
-            "paint"
+            "paint",
+            "raymarch"
           ]
         },
         "shader": {
@@ -364,7 +366,8 @@
             "kaleidoscope",
             "matrixDecode",
             "nebula",
-            "dotCrawl"
+            "dotCrawl",
+            "gateWeave"
           ]
         },
         "html": {
@@ -830,12 +833,24 @@
           "item": {
             "type": {
               "type": "string",
-              "label": "Child type",
+              "label": "Child type. addGroupChild delegates to kit.buildLeaf, which dispatches the SAME layer registry as a top-level layer, so a child may be any layer type.",
               "enum": [
                 "text",
                 "image",
                 "count",
-                "group"
+                "group",
+                "rect",
+                "glow",
+                "cursor",
+                "clip",
+                "html",
+                "component",
+                "board",
+                "doc",
+                "shader",
+                "lottie",
+                "paint",
+                "raymarch"
               ]
             },
             "x": {
@@ -1113,6 +1128,32 @@
             "refract",
             "chromaShift"
           ]
+        },
+        "raymarch": {
+          "type": "string",
+          "label": "raymarch: a lit 3D subject rendered by a distance field (no geometry, no 3D engine). Give it a box the size the object should occupy; its surround is transparent. Dials: colors, intensity, speed (subject), spin (camera orbit), seed.",
+          "enum": [
+            "metaballs",
+            "mandelbulb",
+            "chromeGlass",
+            "caustics",
+            "holoFoil"
+          ]
+        },
+        "spin": {
+          "label": "raymarch: camera orbit speed (0 holds the camera still while the subject moves)"
+        },
+        "seed": {
+          "type": "number",
+          "label": "Deterministic seed for generative layers (shader / paint / raymarch)"
+        },
+        "colors": {
+          "type": "array",
+          "label": "Palette for a generative layer (shader / raymarch), as hex strings"
+        },
+        "opacity": {
+          "type": "number",
+          "label": "Base opacity for the layer's whole life, multiplied into the enter/exit fade"
         }
       }
     },

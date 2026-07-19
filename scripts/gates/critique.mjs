@@ -26,7 +26,6 @@ for (const t of starts) {
   if (!cur || t - cur.end > 1.4) { cur = { start: t, end: t }; beats.push(cur); }
   cur.end = Math.max(cur.end, t);
 }
-const beatOf = (t) => beats.find((b) => t >= b.start - 0.01 && t <= b.end + 3) || beats[beats.length - 1];
 
 const PLACEHOLDER = new Set(['scene', 'rendered', 'output', 'preview', 'demo', 'result', 'example', 'content']);
 const CLAIM = /\b(\d+)\s+(shader|shaders|cut|cuts|backdrop|backdrops|preset|presets|theme|themes|transition|transitions|effect|effects)\b/i;

@@ -167,9 +167,16 @@ const srcCases = [
   { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/index.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
-  { name: 'roadmap-drift · a shipped effect listed as missing', file: 'docs/ROADMAP.md',
+  { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
+    mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "fill": "#000" },'),
+    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "fill"/ },
+  { name: 'raymarch · a scene whose distance field ignores time', file: 'core/raymarch-fx.js',
+    mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
+                             'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /distance field that depends on time/ },
+  { name: 'docs-drift · a shipped effect listed as missing', file: 'docs/ROADMAP.md',
     mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
-    cmd: ['node', ['scripts/gates/roadmap-drift.mjs']], match: /ROADMAP DRIFT/ },
+    cmd: ['node', ['scripts/gates/docs-drift.mjs']], match: /DOCS DRIFT/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/paint.js',
     // Anchored on the clearRect call, not the whole line: the line also carries the resample tick
     // now, and pinning the exact text made the fixture go stale the moment the branch grew. A stale
@@ -187,6 +194,33 @@ const srcCases = [
   { name: 'dead-branch · a ternary whose arms are identical', file: 'core/layers/rect.js',
     mutate: (s) => s.replace('export function build', 'const DEAD = 1 === 1 ? 2 : 2;\nexport function build'),
     cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /both arms are/ },
+  // The dataflow half (MISTAKES #81 left it open, #91 closed it). Three shapes, three fixtures: a gate
+  // that catches one of its three stated rules and reports green for the other two is the same failure
+  // as no gate at all, so each rule is pinned on its own.
+  { name: 'dead-branch · a value computed and never read', file: 'core/layers/rect.js',
+    mutate: (s) => s.replace('export function build', 'const DISCARDED = Math.max(1, 2);\nexport function build'),
+    cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /computed and never read/ },
+  { name: 'dead-branch · a prop accepted and never read', file: 'core/layers/rect.js',
+    mutate: (s) => s.replace('export function build', 'function probeUnusedProp({ neverRead }) { return 1; }\nexport function build'),
+    cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /prop accepted and never read/ },
+  { name: 'dead-branch · a condition decided at author time', file: 'core/layers/rect.js',
+    // via a const-bound literal, not a bare `if (1 === 1)`: the one-hop lookup is the part of the rule
+    // that could rot silently, since a bare tautology would also be caught by cruder text matching.
+    mutate: (s) => s.replace('export function build', 'const PROBE_K = 2;\nif (PROBE_K === 3) { }\nexport function build'),
+    cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /condition cannot vary/ },
+
+  // Conformance's distinctness check was self-fulfilling for four years of vocabulary (MISTAKES #74).
+  // All three of its guards are pinned: the defect itself, and both halves of the proof that the
+  // signature can still see it. A distinctness check nobody can make fail is not a passing check.
+  { name: 'conformance · two anim values that render identically', file: 'core/clips.js',
+    mutate: (s) => s.replace("wipe(t, 'up')", "wipe(t, 'left')"),
+    cmd: ['node', ['scripts/gates/conformance.mjs', 'enums']], match: /render identically to another value/ },
+  { name: 'conformance · the signature goes back to revealing identity', file: 'scripts/gates/conformance.mjs',
+    mutate: (s) => s.replace("['anim', 'out']", '[]'),
+    cmd: ['node', ['scripts/gates/conformance.mjs', 'enums']], match: /falsifiability/ },
+  { name: 'conformance · blindSig drifts from the frameSig it mirrors', file: 'scripts/gates/conformance.mjs',
+    mutate: (s) => s.replace('2166136261, html', '2166136262, html'),
+    cmd: ['node', ['scripts/gates/conformance.mjs', 'enums']], match: /disagrees with frameSig/ },
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
