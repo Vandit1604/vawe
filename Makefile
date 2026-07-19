@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
+.PHONY: docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -394,3 +394,10 @@ sim: ## bake a simulation to frames: D=sims/<name>.mjs [WRITE=1] -> assets/baked
 # would silently keep playing the previous version of the effect), and a sequence with a hole in it.
 sim-audit: ## sims seeded? bakes fresh against their source? sequences intact?
 	node scripts/gates/sim-audit.mjs
+
+# The build context is the WORKING TREE, so .gitignore does not apply to it. assets/baked and
+# assets/gen were gitignored, referenced by no COPY, and shipped to the daemon on every build
+# regardless — 72M of bake output nobody could see in a diff. This measures what Docker would
+# actually send and fails when it exceeds the budget.
+docker-context: ## does the docker build context still fit its budget?
+	node scripts/gates/docker-context.mjs

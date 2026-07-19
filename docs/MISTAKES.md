@@ -1897,3 +1897,56 @@ I had stashed away someone else's in-progress `three` layer.
 **The rule:** never `git stash` a worktree you do not exclusively own. To learn what a gate counted
 before your change, read the count out of git history, or run the gate from a throwaway clone. A
 baseline number is never worth putting a shared tree into a state only a diff can explain.
+
+---
+
+## #100 — The build context is the working tree, so .gitignore does not protect it
+
+`assets/baked` (67M of sim bake output) and `assets/gen` were gitignored, mentioned by no `COPY` in
+the Dockerfile, and shipped to the daemon on **every single build** anyway. Nothing in a diff, a
+review, or `git status` could show it, because the Docker build context is the WORKING TREE and
+`.gitignore` has no bearing on it. Trimming them took the context from 89M to 15.8M.
+
+**Fix:** `make docker-context` walks the tree applying `.dockerignore` the way BuildKit does and
+fails over a 40MB budget, naming the biggest contributors. Mutation-tested: with the two lines
+removed it reports 92.6MB and exits 1; restored, it passes.
+
+Writing that gate immediately reproduced the same class of bug one level down: my first matcher
+turned `**/node_modules` into `.*/node_modules`, which cannot match a ROOT-level `node_modules`, so
+the gate reported 89MB where Docker reported 13.3MB. **A gate that models another tool's semantics
+is only as good as its fidelity to them** — and the cheapest proof is to compare against the real
+tool's own output, which is exactly what caught it.
+
+---
+
+## #101 — I discarded a correct diagnosis because of evidence that never contradicted it
+
+vawe-site had failed every deploy for three days at `COPY scripts ./scripts` with
+`failed to stat active key during commit`. I diagnosed a corrupt BuildKit snapshotter. Then I found
+that `portfolio` had deployed successfully three times that same day on the same host, concluded
+BuildKit was healthy, and abandoned the diagnosis to go hunting for disk pressure and cleanup crons.
+
+The diagnosis was right. Cache corruption in BuildKit is **per cache-record**, not daemon-wide, so a
+different application with a different chain is entirely unaffected. My "discriminating test"
+discriminated nothing: both hypotheses predicted portfolio would succeed.
+
+Worse, the decisive evidence had been sitting in the log from the first failure. The snapshot IDs
+`0qbeajv3vali532ibd3opt5od → rjntgkdwifj56ue8yiqvtxqaw` were **byte-identical** across different
+commits, different contexts, different deployment UUIDs, and `--no-cache`. BuildKit allocates those
+randomly; identical IDs mean nothing was being allocated at all. I had read that line three times
+without registering that a repeated random ID is impossible.
+
+**Two rules:**
+- Before letting evidence kill a hypothesis, ask what the *rival* hypothesis predicts. If both
+  predict what you just saw, you have learned nothing and must not update on it.
+- An identifier that repeats when it should be unique is the loudest signal in a log. Read the
+  values, not just the message.
+
+**The actual cause and cure:** the host cached the `WORKDIR /repo` layer whose backing overlay dir
+had been pruned, so committing ANY child onto it failed regardless of what the child was. Re-keying
+the children (reordering the COPYs) changed nothing, because the broken parent was still reached —
+that reorder is still in the tree and was NOT the fix, which is worth knowing before someone credits
+it. Renaming the workdir `/repo` → `/src` re-keyed the parent and the deploy went green.
+`docker builder prune -af` on the host remains the real cure; Coolify's v1 API exposes no way to run
+it (no exec endpoint, and `docker_cleanup_frequency` is not PATCHable), so this was fixed entirely
+from the repo side.
