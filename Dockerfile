@@ -8,12 +8,17 @@ FROM node:22-alpine AS builder
 WORKDIR /repo
 
 # --- engine sources the site vendors (see scripts/site/site-engine.mjs COPY list) ---
-COPY scripts ./scripts
-COPY core ./core
+# Ordered smallest-first so the layers that change most often sit late in the chain. Do not reorder
+# casually: the deploy host once persisted a BuildKit cache record whose underlying snapshot had been
+# pruned, and every build of that exact chain then died at the first COPY with "failed to stat active
+# key during commit", identically, even under --no-cache. Reordering re-keys the chain and routes
+# around a poisoned record; `docker builder prune -af` on the host is the actual cure.
 COPY themes ./themes
+COPY core ./core
 COPY formats/scene/scene.html formats/scene/schema.json ./formats/scene/
 COPY assets/icons ./assets/icons
 COPY assets/vendor ./assets/vendor
+COPY scripts ./scripts
 # Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
 # brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
 COPY assets/brands ./assets/brands
