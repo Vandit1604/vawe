@@ -1,0 +1,51 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 4,
+      "pad": "18px 26px",
+      "bg": "rgba(16,18,24,0.92)",
+      "radius": 12,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "rise",
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Kite Studio",
+          "size": 46,
+          "tracking": "-0.02em",
+          "color": "#fff"
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "Lisbon, Portugal",
+          "size": 21,
+          "color": "rgba(255,255,255,0.72)"
+        }
+      ]
+    }
+  ]
+}

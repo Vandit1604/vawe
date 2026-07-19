@@ -1,0 +1,64 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "pad": "10px 18px",
+      "bg": "var(--accent)",
+      "radius": 0,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "wipe",
+      "enterDur": 0.3,
+      "exitDur": 0.28,
+      "children": [
+        {
+          "type": "text",
+          "weight": 800,
+          "text": "SOLD OUT",
+          "size": 62,
+          "tracking": "-0.03em",
+          "color": "#fff"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 174,
+      "y": 244,
+      "pad": "8px 16px",
+      "bg": "var(--text)",
+      "radius": 0,
+      "start": 0.32,
+      "duration": 8,
+      "anim": "wipe",
+      "enterDur": 0.3,
+      "exitDur": 0.28,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "IN FOUR MINUTES",
+          "size": 22,
+          "tracking": "0.04em",
+          "color": "#fff"
+        }
+      ]
+    }
+  ]
+}

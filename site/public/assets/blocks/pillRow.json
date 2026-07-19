@@ -1,0 +1,72 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "layout": "row",
+      "wrap": true,
+      "gap": 10,
+      "items": "center",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2,
+      "children": [
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "deterministic",
+          "size": 17,
+          "color": "var(--accent)",
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "radius": 100,
+          "pad": "7px 16px",
+          "delay": 0.1,
+          "anim": "pop",
+          "enterDur": 0.26
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "pure(n)",
+          "size": 17,
+          "color": "var(--accent)",
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "radius": 100,
+          "pad": "7px 16px",
+          "delay": 0.18,
+          "anim": "pop",
+          "enterDur": 0.26
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "no timeline",
+          "size": 17,
+          "color": "var(--accent)",
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "radius": 100,
+          "pad": "7px 16px",
+          "delay": 0.26,
+          "anim": "pop",
+          "enterDur": 0.26
+        }
+      ]
+    }
+  ]
+}

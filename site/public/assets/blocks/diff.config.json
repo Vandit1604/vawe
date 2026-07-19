@@ -1,0 +1,63 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 520,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 6,
+      "pad": 26,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "- \"fps\": 30",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--down)"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "+ \"fps\": 60",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--up)"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "  \"theme\": \"creed\"",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--text-2)"
+        }
+      ]
+    }
+  ]
+}

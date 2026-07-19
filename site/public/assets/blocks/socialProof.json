@@ -1,0 +1,180 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "radius": 100,
+      "w": 48,
+      "h": 48,
+      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "layout": "row",
+      "justify": "center",
+      "items": "center",
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "AL",
+          "size": 19,
+          "color": "var(--accent)"
+        }
+      ],
+      "x": 160,
+      "y": 160,
+      "border": "2px solid var(--card)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.3
+    },
+    {
+      "type": "group",
+      "radius": 100,
+      "w": 48,
+      "h": 48,
+      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "layout": "row",
+      "justify": "center",
+      "items": "center",
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "GH",
+          "size": 19,
+          "color": "var(--accent)"
+        }
+      ],
+      "x": 191.2,
+      "y": 160,
+      "border": "2px solid var(--card)",
+      "start": 0.34,
+      "duration": 7.86,
+      "anim": "pop",
+      "enterDur": 0.3
+    },
+    {
+      "type": "group",
+      "radius": 100,
+      "w": 48,
+      "h": 48,
+      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "layout": "row",
+      "justify": "center",
+      "items": "center",
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "VS",
+          "size": 19,
+          "color": "var(--accent)"
+        }
+      ],
+      "x": 222.4,
+      "y": 160,
+      "border": "2px solid var(--card)",
+      "start": 0.48,
+      "duration": 7.72,
+      "anim": "pop",
+      "enterDur": 0.3
+    },
+    {
+      "type": "group",
+      "radius": 100,
+      "w": 48,
+      "h": 48,
+      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "layout": "row",
+      "justify": "center",
+      "items": "center",
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "KM",
+          "size": 19,
+          "color": "var(--accent)"
+        }
+      ],
+      "x": 253.6,
+      "y": 160,
+      "border": "2px solid var(--card)",
+      "start": 0.62,
+      "duration": 7.58,
+      "anim": "pop",
+      "enterDur": 0.3
+    },
+    {
+      "type": "group",
+      "x": 284.8,
+      "y": 160,
+      "w": 48,
+      "h": 48,
+      "radius": 100,
+      "bg": "var(--surface-2)",
+      "border": "2px solid var(--card)",
+      "layout": "row",
+      "justify": "center",
+      "items": "center",
+      "start": 0.76,
+      "duration": 7.44,
+      "anim": "pop",
+      "enterDur": 0.3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "+8",
+          "size": 14,
+          "color": "var(--text-2)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 350.8,
+      "y": 160,
+      "h": 48,
+      "layout": "column",
+      "items": "flex-start",
+      "justify": "center",
+      "gap": 3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "Trusted by working teams",
+          "size": 20,
+          "color": "var(--text)"
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "across every plan",
+          "font": "mono",
+          "size": 15,
+          "color": "var(--dim)"
+        }
+      ],
+      "start": 1.02,
+      "duration": 7.18,
+      "anim": "slide-left",
+      "enterDur": 0.35,
+      "exitDur": 0.3
+    }
+  ]
+}

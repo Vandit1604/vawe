@@ -1,0 +1,134 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 420,
+      "layout": "row",
+      "items": "center",
+      "gap": 16,
+      "pad": 18,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 14,
+          "w": 62,
+          "h": 62,
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "◆",
+              "size": 28,
+              "color": "var(--accent)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 5,
+          "grow": 1,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Fieldwork",
+              "size": 21,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Productivity",
+              "size": 16,
+              "color": "var(--text-2)"
+            },
+            {
+              "type": "group",
+              "layout": "row",
+              "items": "center",
+              "gap": 9,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "★★★★★",
+                  "size": 18,
+                  "color": "#F6A417",
+                  "ls": "0.06em",
+                  "mask": "linear-gradient(to right, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))",
+                  "vars": {
+                    "--p": [
+                      0,
+                      0.92
+                    ]
+                  },
+                  "varsDur": 0.8,
+                  "varsDelay": 0.35,
+                  "varsEase": "easeOutCubic"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "1.2K",
+                  "font": "mono",
+                  "size": 15,
+                  "color": "var(--dim)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "bg": "var(--accent)",
+          "radius": 100,
+          "pad": "10px 22px",
+          "start": 0.42,
+          "duration": 8,
+          "anim": "pop",
+          "enterDur": 0.3,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Install",
+              "size": 17,
+              "color": "#fff"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "cursor",
+      "size": 44,
+      "start": 0.2,
+      "duration": 8,
+      "path": [
+        {
+          "t": 0,
+          "x": 160,
+          "y": 160
+        },
+        {
+          "t": 1.15,
+          "x": 460,
+          "y": 350
+        }
+      ],
+      "clicks": [
+        1.3
+      ]
+    }
+  ]
+}

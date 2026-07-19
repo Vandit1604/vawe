@@ -1,0 +1,82 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 520,
+      "layout": "row",
+      "items": "center",
+      "gap": 16,
+      "pad": "16px 22px",
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 3,
+          "grow": 1,
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "Sync across devices",
+              "size": 20,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Keep every draft current everywhere",
+              "size": 16,
+              "color": "var(--text-2)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 52,
+          "h": 30,
+          "bg": "var(--accent)",
+          "pad": 3,
+          "layout": "row",
+          "items": "center",
+          "justify": "flex-end",
+          "children": [
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 24,
+              "h": 24,
+              "bg": "var(--card)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

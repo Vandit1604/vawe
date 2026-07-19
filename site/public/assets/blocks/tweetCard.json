@@ -1,0 +1,120 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 480,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 14,
+      "pad": 22,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 12,
+          "children": [
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 48,
+              "h": 48,
+              "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "SW",
+                  "size": 19,
+                  "color": "var(--accent)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "layout": "column",
+              "items": "flex-start",
+              "gap": 1,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Vawe",
+                  "size": 20,
+                  "color": "var(--text)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "@vawe",
+                  "font": "mono",
+                  "size": 16,
+                  "color": "var(--dim)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "One JSON. One video. Deterministic, no timeline.",
+          "size": 21,
+          "color": "var(--text)"
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "gap": 28,
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "↻ 340",
+              "font": "mono",
+              "size": 16,
+              "color": "var(--dim)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "♥ 1.2k",
+              "font": "mono",
+              "size": 16,
+              "color": "var(--dim)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

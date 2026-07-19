@@ -638,10 +638,27 @@ a{color:inherit;text-decoration:none}
    each block's measured bounds, so the block IS the image: place-items centres it, and max-width/height
    with auto sizing means a 170px badge renders at 170px while a 540px card scales down to fit. That is
    their real relative size, and nothing is ever upscaled into blur. */
+/* One grid CELL, both media stacked in it. The explicit minmax(0,1fr) track is load-bearing: an auto
+   track sizes to max-content, so the cell grew to the media's natural width and `max-width:100%`
+   resolved against THAT — a 384px-wide block overflowed a 335px thumb instead of scaling down, and
+   the poster (sized by its own intrinsic width) and the live render disagreed by 15%. */
 .bcard .thumb{position:relative;aspect-ratio:3/2;background:#eef1f6;overflow:hidden;
-  border-bottom:1px solid var(--line);display:grid;place-items:center;padding:10px}
-.bcard .thumb img,.bcard .thumb video{max-width:100%;max-height:100%;width:auto;height:auto;
+  border-bottom:1px solid var(--line);display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);
+  place-items:center;padding:10px}
+.bcard .thumb img,.bcard .thumb .blive{grid-area:1/1;max-width:100%;max-height:100%;width:auto;height:auto;
   object-fit:contain;display:block}
+
+/* The live render, framed exactly like its poster. The scene is a 1920x1080 canvas with one block on
+   it; .blive is a WINDOW the size of the rect that was measured around that block when the poster was
+   screenshot, and the iframe inside stays at full frame size, scaled and slid so the rect fills the
+   window. Sizing the iframe to the window instead would crop the scene to its top-left corner.
+   Because the window carries the same intrinsic size and the same cap-don't-stretch rules as the
+   poster <img>, both land in the same layout box and pressing play cannot make the block jump. */
+.bcard .thumb .blive{position:relative;overflow:hidden;--sp-scale:1;opacity:0;transition:opacity .25s var(--ease)}
+.bcard .thumb .blive[data-ready]{opacity:1}
+.blive-stage{position:absolute;inset:0}
+.blive .sp-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;display:block;
+  transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--bl-x),var(--bl-y))}
 
 /* Play: cobalt + an icon = actionable, per The Affordance Rule. It sits ON the card (which is a link to
    the detail page), so it stops the click from navigating — pressing play means "show me this move",

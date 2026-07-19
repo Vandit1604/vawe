@@ -1,0 +1,169 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 560,
+      "layout": "row",
+      "items": "flex-start",
+      "gap": 16,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "w": 176,
+          "layout": "column",
+          "items": "stretch",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "Todo",
+              "font": "mono",
+              "size": 16,
+              "color": "var(--dim)",
+              "delay": 0.15,
+              "anim": "rise",
+              "enterDur": 0.28
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "captions",
+              "size": 18,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "14px 16px",
+              "delay": 0.4,
+              "anim": "pop",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "TTS",
+              "size": 18,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "14px 16px",
+              "delay": 0.73,
+              "anim": "pop",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "w": 176,
+          "layout": "column",
+          "items": "stretch",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "Doing",
+              "font": "mono",
+              "size": 16,
+              "color": "var(--dim)",
+              "delay": 0.24,
+              "anim": "rise",
+              "enterDur": 0.28
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "blocks",
+              "size": 18,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "14px 16px",
+              "delay": 0.51,
+              "anim": "pop",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "w": 176,
+          "layout": "column",
+          "items": "stretch",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "Done",
+              "font": "mono",
+              "size": 16,
+              "color": "var(--dim)",
+              "delay": 0.33,
+              "anim": "rise",
+              "enterDur": 0.28
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "60fps",
+              "size": 18,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "14px 16px",
+              "delay": 0.62,
+              "anim": "pop",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "lottie",
+              "size": 18,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "14px 16px",
+              "delay": 0.95,
+              "anim": "pop",
+              "enterDur": 0.3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

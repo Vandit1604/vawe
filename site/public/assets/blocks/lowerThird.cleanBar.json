@@ -1,0 +1,52 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 3,
+      "pad": "16px 24px",
+      "bg": "var(--card)",
+      "radius": 6,
+      "border": "1px solid var(--line)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "wipe",
+      "enterDur": 0.42,
+      "exitDur": 0.28,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Ana Roth",
+          "size": 46,
+          "tracking": "-0.02em",
+          "color": "var(--text)"
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "Principal engineer, Platform",
+          "size": 21,
+          "color": "var(--dim)"
+        }
+      ]
+    }
+  ]
+}

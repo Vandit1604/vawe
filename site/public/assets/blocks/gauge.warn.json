@@ -1,0 +1,39 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 300,
+      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:300px;text-align:center\"><svg viewBox=\"0 0 100 60\" width=\"256\" style=\"display:block;margin:0 auto 4px\"><path d=\"M8 52 A42 42 0 0 1 92 52\" fill=\"none\" stroke=\"var(--line)\" stroke-width=\"10\" stroke-linecap=\"round\"/><path d=\"M8 52 A42 42 0 0 1 92 52\" fill=\"none\" stroke=\"#F6A417\" stroke-width=\"10\" stroke-linecap=\"round\" stroke-dasharray=\"calc(131.95 * var(--p, 0.3400)) 131.95\"/></svg><div style=\"font:700 34px var(--font-sans);color:var(--text);letter-spacing:-0.02em;margin-top:-4px\">34%</div><div style=\"font:600 16px var(--font-mono);color:var(--dim);margin-top:4px\">health</div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.3,
+      "vars": {
+        "--p": [
+          0,
+          0.34
+        ]
+      },
+      "varsDur": 1.1,
+      "varsDelay": 0.15,
+      "varsEase": "easeOutCubic"
+    }
+  ]
+}

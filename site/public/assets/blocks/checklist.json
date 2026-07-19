@@ -1,0 +1,167 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 460,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 12,
+      "pad": 26,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "fade",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 16,
+              "radius": 8,
+              "pad": "5px 7px",
+              "color": "#fff",
+              "bg": "var(--up)",
+              "border": "2px solid transparent",
+              "delay": 0.34,
+              "anim": "pop",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Write scene JSON",
+              "size": 21,
+              "color": "var(--dim)",
+              "delay": 0.2,
+              "anim": "rise",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 16,
+              "radius": 8,
+              "pad": "5px 7px",
+              "color": "#fff",
+              "bg": "var(--up)",
+              "border": "2px solid transparent",
+              "delay": 0.6,
+              "anim": "pop",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "make critique",
+              "size": 21,
+              "color": "var(--dim)",
+              "delay": 0.46,
+              "anim": "rise",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 16,
+              "radius": 8,
+              "pad": "5px 7px",
+              "color": "#fff",
+              "bg": "var(--up)",
+              "border": "2px solid transparent",
+              "delay": 0.86,
+              "anim": "pop",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "make catalog",
+              "size": 21,
+              "color": "var(--dim)",
+              "delay": 0.72,
+              "anim": "rise",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 16,
+              "radius": 8,
+              "pad": "5px 7px",
+              "color": "transparent",
+              "bg": "var(--card)",
+              "border": "2px solid var(--line)",
+              "delay": 0.98,
+              "anim": "fade",
+              "enterDur": 0.3
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Render",
+              "size": 21,
+              "color": "var(--text)",
+              "delay": 0.98,
+              "anim": "rise",
+              "enterDur": 0.3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

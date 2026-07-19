@@ -1,0 +1,70 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 440,
+      "layout": "row",
+      "items": "flex-start",
+      "gap": 14,
+      "pad": 20,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 2,
+      "anim": "slide-right",
+      "out": "slide-right",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.4,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 12,
+          "h": 12,
+          "bg": "var(--up)"
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "gap": 6,
+          "items": "flex-start",
+          "grow": 1,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Render complete",
+              "size": 22,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "out.mp4 is ready",
+              "size": 18,
+              "color": "var(--text-2)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

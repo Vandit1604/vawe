@@ -1,0 +1,281 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 460,
+      "layout": "column",
+      "items": "center",
+      "gap": 16,
+      "pad": 34,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px dashed var(--line)",
+      "anim": "wipe",
+      "start": 0.2,
+      "duration": 2.85,
+      "enterDur": 0.45,
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "group",
+          "radius": 16,
+          "w": 60,
+          "h": 60,
+          "bg": "var(--surface-2)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "☐",
+              "size": 26,
+              "color": "var(--text-2)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "center",
+          "gap": 6,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Nothing here yet",
+              "size": 24,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "Anything you save shows up in this list.",
+              "size": 18,
+              "color": "var(--text-2)",
+              "align": "center"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "bg": "var(--text)",
+          "radius": 100,
+          "pad": "11px 24px",
+          "start": 0.4,
+          "duration": 2.85,
+          "anim": "rise",
+          "enterDur": 0.35,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Add the first one",
+              "size": 17,
+              "color": "var(--bg)"
+            }
+          ]
+        }
+      ],
+      "out": "wipe-right"
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 460,
+      "layout": "row",
+      "items": "center",
+      "gap": 16,
+      "pad": "16px 20px",
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "wipe",
+      "start": 2.6,
+      "duration": 2.85,
+      "enterDur": 0.45,
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "group",
+          "radius": 12,
+          "w": 44,
+          "h": 44,
+          "bg": "var(--surface-2)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "✓",
+              "size": 20,
+              "color": "var(--text)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 3,
+          "grow": 1,
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "Fieldwork draft",
+              "size": 20,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Saved to this list",
+              "size": 16,
+              "color": "var(--text-2)"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "now",
+          "font": "mono",
+          "size": 15,
+          "color": "var(--dim)"
+        }
+      ],
+      "out": "wipe-right"
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 460,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 18,
+      "pad": 28,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "wipe",
+      "start": 5,
+      "duration": 3.2,
+      "enterDur": 0.45,
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 8,
+              "h": 8,
+              "bg": "var(--surface-2)"
+            },
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 22,
+              "h": 8,
+              "bg": "var(--accent)"
+            },
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 8,
+              "h": 8,
+              "bg": "var(--surface-2)"
+            },
+            {
+              "type": "group",
+              "radius": 0,
+              "grow": 1
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "2 of 3",
+              "font": "mono",
+              "size": 15,
+              "color": "var(--dim)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 8,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Pick a workspace",
+              "size": 30,
+              "color": "var(--text)",
+              "ls": "-0.02em"
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "Choose where new drafts are saved.",
+              "size": 19,
+              "color": "var(--text-2)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "bg": "var(--accent)",
+          "radius": 12,
+          "pad": "14px 0",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "start": 5.2,
+          "duration": 3.2,
+          "anim": "rise",
+          "enterDur": 0.35,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Continue",
+              "size": 19,
+              "color": "#fff"
+            }
+          ]
+        }
+      ],
+      "out": "wipe-right"
+    }
+  ]
+}

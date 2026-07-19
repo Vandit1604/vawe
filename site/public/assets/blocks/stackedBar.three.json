@@ -1,0 +1,39 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 520,
+      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:520px\"><div style=\"display:flex;align-items:flex-end;justify-content:space-between;gap:14px;height:216px\"><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"display:flex;flex-direction:column;gap:2px;width:141.33px;height:calc(160px * var(--p, 1))\"><div style=\"flex:18;min-height:0;border-radius:4px 4px 0 0;background:var(--accent)\"></div><div style=\"flex:14;min-height:0;border-radius:0;background:var(--up)\"></div><div style=\"flex:8;min-height:0;border-radius:0;background:#F6A417\"></div></div><div style=\"font:400 18px var(--font-mono);color:var(--dim)\">Mon</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"display:flex;flex-direction:column;gap:2px;width:141.33px;height:calc(192px * var(--p, 1))\"><div style=\"flex:22;min-height:0;border-radius:4px 4px 0 0;background:var(--accent)\"></div><div style=\"flex:16;min-height:0;border-radius:0;background:var(--up)\"></div><div style=\"flex:10;min-height:0;border-radius:0;background:#F6A417\"></div></div><div style=\"font:400 18px var(--font-mono);color:var(--dim)\">Tue</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"display:flex;flex-direction:column;gap:2px;width:141.33px;height:calc(192px * var(--p, 1))\"><div style=\"flex:16;min-height:0;border-radius:4px 4px 0 0;background:var(--accent)\"></div><div style=\"flex:20;min-height:0;border-radius:0;background:var(--up)\"></div><div style=\"flex:12;min-height:0;border-radius:0;background:#F6A417\"></div></div><div style=\"font:400 18px var(--font-mono);color:var(--dim)\">Wed</div></div></div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.3,
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDur": 0.9,
+      "varsDelay": 0.15,
+      "varsEase": "easeOutCubic"
+    }
+  ]
+}

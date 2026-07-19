@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "lottie",
+      "src": "/assets/lottie/spin.json",
+      "x": 160,
+      "y": 160,
+      "w": 90,
+      "h": 90,
+      "loop": true,
+      "start": 0.2,
+      "duration": 8
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "rendering",
+      "x": 160,
+      "y": 262,
+      "font": "mono",
+      "size": 18,
+      "color": "var(--dim)",
+      "start": 0.4,
+      "duration": 8
+    }
+  ]
+}

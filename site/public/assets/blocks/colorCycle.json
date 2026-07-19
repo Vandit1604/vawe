@@ -1,0 +1,258 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#4338E8",
+      "ls": "-0.02em",
+      "start": 0.2,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#12B26A",
+      "ls": "-0.02em",
+      "start": 0.6,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#F6A417",
+      "ls": "-0.02em",
+      "start": 1,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#E23B94",
+      "ls": "-0.02em",
+      "start": 1.4,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#1E5BF0",
+      "ls": "-0.02em",
+      "start": 1.8,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#C96442",
+      "ls": "-0.02em",
+      "start": 2.2,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#4338E8",
+      "ls": "-0.02em",
+      "start": 2.6,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#12B26A",
+      "ls": "-0.02em",
+      "start": 3,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#F6A417",
+      "ls": "-0.02em",
+      "start": 3.4,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#E23B94",
+      "ls": "-0.02em",
+      "start": 3.8,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#1E5BF0",
+      "ls": "-0.02em",
+      "start": 4.2,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#C96442",
+      "ls": "-0.02em",
+      "start": 4.6,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#4338E8",
+      "ls": "-0.02em",
+      "start": 5,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#12B26A",
+      "ls": "-0.02em",
+      "start": 5.4,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#F6A417",
+      "ls": "-0.02em",
+      "start": 5.8,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#E23B94",
+      "ls": "-0.02em",
+      "start": 6.2,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#1E5BF0",
+      "ls": "-0.02em",
+      "start": 6.6,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#C96442",
+      "ls": "-0.02em",
+      "start": 7,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#4338E8",
+      "ls": "-0.02em",
+      "start": 7.4,
+      "duration": 0.48
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "colour",
+      "x": 160,
+      "y": 160,
+      "size": 64,
+      "color": "#12B26A",
+      "ls": "-0.02em",
+      "start": 7.8,
+      "duration": 0.4
+    }
+  ]
+}

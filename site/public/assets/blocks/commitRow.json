@@ -1,0 +1,145 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 0,
+      "pad": 0,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "fade",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "pad": "16px 22px",
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "d417051",
+              "font": "mono",
+              "size": 17,
+              "color": "var(--accent)",
+              "delay": 0.2,
+              "anim": "slide-left",
+              "enterDur": 0.32
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "layout": "column",
+              "items": "flex-start",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "taste system + block registry",
+                  "size": 19,
+                  "color": "var(--text)",
+                  "delay": 0.2,
+                  "anim": "slide-left",
+                  "enterDur": 0.32
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "vandit · 2m",
+                  "font": "mono",
+                  "size": 15,
+                  "color": "var(--dim)",
+                  "delay": 0.2,
+                  "anim": "slide-left",
+                  "enterDur": 0.32
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "radius": 0,
+          "h": 1,
+          "bg": "var(--line)"
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 14,
+          "pad": "16px 22px",
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "94b73bd",
+              "font": "mono",
+              "size": 17,
+              "color": "var(--accent)",
+              "delay": 0.38,
+              "anim": "slide-left",
+              "enterDur": 0.32
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "layout": "column",
+              "items": "flex-start",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "migrate animation to interpolate()",
+                  "size": 19,
+                  "color": "var(--text)",
+                  "delay": 0.38,
+                  "anim": "slide-left",
+                  "enterDur": 0.32
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "vandit · 1d",
+                  "font": "mono",
+                  "size": 15,
+                  "color": "var(--dim)",
+                  "delay": 0.38,
+                  "anim": "slide-left",
+                  "enterDur": 0.32
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 300,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 8,
+      "pad": 10,
+      "bg": "var(--surface-2)",
+      "radius": 16,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "slide-up",
+      "out": "slide-down",
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "justify": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "1",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "2",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "3",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "justify": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "4",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "5",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "6",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "justify": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "7",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "8",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "9",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "justify": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": ".",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "0",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "radius": 12,
+              "w": 88,
+              "h": 56,
+              "bg": "var(--card)",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "<",
+                  "size": 26,
+                  "color": "var(--text)"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

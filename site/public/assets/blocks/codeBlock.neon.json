@@ -1,0 +1,79 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 8,
+      "pad": 30,
+      "bg": "#0A0E14",
+      "radius": 14,
+      "border": "1px solid rgba(255,255,255,0.08)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "worker.js",
+          "font": "mono",
+          "size": 18,
+          "color": "#8896A8"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "onmessage = async (e) => {",
+          "color": "#4AE3B5",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.2,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "  const f = await renderFrame(e.data.n)",
+          "color": "#5AC8FA",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.34,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "  postMessage(f) }",
+          "color": "#F5D76E",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.48,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        }
+      ]
+    }
+  ]
+}

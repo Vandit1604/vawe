@@ -1,0 +1,68 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 8,
+      "pad": 30,
+      "bg": "#0A2540",
+      "radius": 14,
+      "border": "1px solid rgba(255,255,255,0.08)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "render.py",
+          "font": "mono",
+          "size": 18,
+          "color": "#8898AA"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "from vawe import render",
+          "color": "#8898AA",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.2,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "render(\"video.json\")",
+          "color": "#E8ECF1",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.34,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        }
+      ]
+    }
+  ]
+}

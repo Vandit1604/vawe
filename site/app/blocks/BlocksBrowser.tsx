@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { BlockLive, type Frame } from "./BlockLive";
+import frames from "../../lib/block-frames.json";
 
 /* Search + family filter over the registry.
  *
@@ -17,28 +19,35 @@ export type Block = { name: string; family: string; blurb: string; props: Record
 
 const asset = (name: string, ext: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.${ext}`;
 const propKeys = (props: Record<string, unknown>) => Object.keys(props).slice(0, 6).join(" · ") || "—";
+const FRAMES = frames as Record<string, Frame>;
 
-/* A block is MOTION, and a still is the one thing it cannot show. The clip is the block's own cell,
- * cropped from the rendered catalog: the real engine output, not a re-creation.
+/* A block is MOTION, and a still is the one thing it cannot show. So pressing play runs the block in
+ * the REAL ENGINE, right here: this page ships core/ and scene.html already (the editor needs them),
+ * and every block has a scene JSON, so the card can boot the same renderFrame(n) the mp4 was made
+ * from. It used to play a pre-encoded clip, which is a strange thing for the marketing page of a
+ * render engine to do, and every one of them 404'd in production. NOT because of .dockerignore: its
+ * `*.mp4` never matched these, since Docker's `*` does not cross a `/` (the homepage's own mp4s serve
+ * fine). They 404'd because the clips and the play button shipped in the same commit, and the running
+ * image predated it. Derived media that must be regenerated whenever its source changes will drift,
+ * and `make blocks-json` had been printing "grid changed, re-run blocks-stills" the whole time.
+ * Rendering live removes the artifact, so there is nothing left to go stale.
  *
- * It loads on press, never before. 108 cards autoplaying would be 108 decoders and ~2.3MB pulled for a
- * page most people scroll past, so the <video> element does not exist until you ask for it — the still
- * is what ships, and the clip is opt-in. `preload="none"` is belt and braces for the same reason.
+ * The poster is what SHIPS. An engine per card is an iframe, a font load and a rAF loop per card, so
+ * the live one exists only while its card is the playing one — `live` is a single name, and starting
+ * a second card unmounts the first, which tears its iframe down (useSceneEngine's cleanup).
  *
  * Playing is a state, so the control says so: it toggles back to the still, and aria-pressed tells a
  * screen reader which state it is in rather than leaving "play" to mean both things.
  */
-function BlockThumb({ name }: { name: string }) {
-  const [playing, setPlaying] = useState(false);
+function BlockThumb({ name, playing, onToggle }: { name: string; playing: boolean; onToggle: () => void }) {
+  const frame = FRAMES[name];
   return (
     <div className="thumb">
-      {playing ? (
-        // eslint-disable-next-line jsx-a11y/media-has-caption
-        <video src={asset(name, "mp4")} poster={asset(name, "png")} autoPlay loop muted playsInline preload="none" />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={asset(name, "png")} alt={name} loading="lazy" />
-      )}
+      {/* The poster stays mounted underneath: the live render fades in only once the engine reports
+          ready, so the card never flashes an empty stage while the scene boots. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={asset(name, "png")} alt={name} loading="lazy" />
+      {playing && frame && <BlockLive name={name} src={asset(name, "json")} frame={frame} />}
       <button
         className="bplay"
         {...(playing ? { "data-on": "" } : {})}
@@ -48,7 +57,7 @@ function BlockThumb({ name }: { name: string }) {
           // the whole card is a link to the detail page; play means "show me the move", not "leave"
           e.preventDefault();
           e.stopPropagation();
-          setPlaying((p) => !p);
+          onToggle();
         }}
       >
         {playing ? (
@@ -64,6 +73,8 @@ function BlockThumb({ name }: { name: string }) {
 export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
   const [q, setQ] = useState("");
   const [fam, setFam] = useState("");
+  // ONE live engine at a time. Each is a full engine boot in an iframe; 148 of them is not viable.
+  const [live, setLive] = useState<string | null>(null);
 
   const families = useMemo(() => {
     const counts = new Map<string, number>();
@@ -149,7 +160,11 @@ export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
         <div className="bgrid">
           {shown.map((b) => (
             <Link className="bcard" href={`/blocks/${b.name}`} key={b.name}>
-              <BlockThumb name={b.name} />
+              <BlockThumb
+                name={b.name}
+                playing={live === b.name}
+                onToggle={() => setLive((cur) => (cur === b.name ? null : b.name))}
+              />
               <div className="meta">
                 <div className="bn">{b.name}</div>
                 <div className="bf">{b.family}</div>

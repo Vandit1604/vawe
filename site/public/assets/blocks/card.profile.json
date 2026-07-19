@@ -1,0 +1,80 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 360,
+      "layout": "row",
+      "items": "center",
+      "gap": 16,
+      "pad": 22,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 56,
+          "h": 56,
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "AL",
+              "size": 22,
+              "color": "var(--accent)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 4,
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Ada Lovelace",
+              "size": 22,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Founding Engineer",
+              "size": 18,
+              "color": "var(--text-2)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

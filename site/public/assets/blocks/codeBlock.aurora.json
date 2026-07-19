@@ -1,0 +1,79 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 8,
+      "pad": 30,
+      "bg": "#101820",
+      "radius": 14,
+      "border": "1px solid rgba(255,255,255,0.08)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "spectrum.js",
+          "font": "mono",
+          "size": 18,
+          "color": "#8CA0A8"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "const spec = bandEnergies(pcm)",
+          "color": "#5AD8C0",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.2,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "const v = sampleAt(spec, n, 'low')",
+          "color": "#88C0F0",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.34,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "return 1 + v * 0.18",
+          "color": "#D0A8F8",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.48,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        }
+      ]
+    }
+  ]
+}

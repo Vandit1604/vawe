@@ -363,20 +363,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`registry: every block is deterministic${drift.length ? ' — ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
 
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
-  // would mean ~4 minutes of rendering plus Chromium, ffmpeg and Go inside a node:22-alpine image, to
-  // buy only what this assert buys for free. The cost of committing derived output is that it can go
-  // stale silently — add a block, forget `make blocks-media`, ship a card with a broken image. So the
-  // gate stands in for the build step: every registry entry must have both its still and its clip.
+  // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
+  // The cost of committing derived output is that it can go stale silently — add a block, forget
+  // `make blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
+  // every registry entry must have both its poster and the scene the site plays live.
   // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
   {
     const mediaDir = path.join(repoRoot, 'site/public/assets/blocks');
     const gridRows = CATALOG.filter((e) => !e.overlay);
     const noMedia = gridRows.filter((e) => {
       const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
-      return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.mp4`));
+      return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.json`));
     }).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a still + clip${noMedia.length ? ` — run \`make catalog && make blocks-media\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? ` — run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
       noMedia.length === 0);
+    // The frame rect is what keeps the poster and the live render framed identically. A block with a
+    // scene but no rect renders nothing on the card at all, which is a silent, invisible failure.
+    const framesPath = path.join(repoRoot, 'site/lib/block-frames.json');
+    const framesOk = fs.existsSync(framesPath) ? JSON.parse(fs.readFileSync(framesPath, 'utf8')) : {};
+    const noFrame = gridRows.filter((e) => !framesOk[e.name]).map((e) => e.name);
+    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? ` — run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
+      noFrame.length === 0);
   }
 
   // lowerThird: one component, twelve chromes. The variant IS the block, so an unknown one must be

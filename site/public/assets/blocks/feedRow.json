@@ -1,0 +1,110 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 520,
+      "layout": "row",
+      "items": "flex-start",
+      "gap": 14,
+      "pad": 20,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 48,
+          "h": 48,
+          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "WA",
+              "size": 19,
+              "color": "var(--accent)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "stretch",
+          "gap": 6,
+          "grow": 1,
+          "children": [
+            {
+              "type": "group",
+              "layout": "row",
+              "items": "center",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Wren Alcott",
+                  "size": 20,
+                  "color": "var(--text)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "@wren",
+                  "font": "mono",
+                  "size": 16,
+                  "color": "var(--dim)"
+                },
+                {
+                  "type": "group",
+                  "radius": 0,
+                  "grow": 1
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "just now",
+                  "font": "mono",
+                  "size": 15,
+                  "color": "var(--dim)"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "Moved the Fieldwork draft into the shared workspace.",
+              "size": 19,
+              "color": "var(--text)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

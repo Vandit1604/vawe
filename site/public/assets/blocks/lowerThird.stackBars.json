@@ -1,0 +1,64 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "pad": "12px 24px",
+      "bg": "var(--card)",
+      "border": "1px solid var(--line)",
+      "radius": 0,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "wipe",
+      "enterDur": 0.42,
+      "exitDur": 0.28,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Ana Roth",
+          "size": 46,
+          "tracking": "-0.02em",
+          "color": "var(--text)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 232,
+      "pad": "7px 24px",
+      "bg": "var(--accent)",
+      "radius": 0,
+      "start": 0.32,
+      "duration": 8,
+      "anim": "wipe",
+      "enterDur": 0.32,
+      "exitDur": 0.28,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "Principal engineer",
+          "size": 21,
+          "color": "#fff"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 7,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "rise",
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "NOW IN BETA",
+          "font": "mono",
+          "size": 18,
+          "tracking": "0.12em",
+          "color": "var(--accent)"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Northwind",
+          "size": 54,
+          "tracking": "-0.025em",
+          "color": "var(--text)"
+        }
+      ]
+    }
+  ]
+}

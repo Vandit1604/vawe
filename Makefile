@@ -333,16 +333,17 @@ blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manifest
 	node scripts/site/blocks-json.mjs
 
-# make blocks-sync — after adding a block: docs table + the site's grid, both from blocks/catalog.mjs.
-# Adding a block to the grid also invalidates every LATER still (each is cropped by cell index), so
-# this reminds you to re-render the catalog rather than pretending the pictures are still right.
-blocks-sync: blocks-docs blocks-json ## regenerate everything derived from the block manifest
+# make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block
+# scenes + posters. blocks-scenes is safe to include here because it needs no render: each block is
+# measured on its own stage, so adding one touches only its own files.
+blocks-sync: blocks-docs blocks-json blocks-scenes ## regenerate everything derived from the block manifest
 
-# make blocks-media — measure + crop one still AND one clip per block from the rendered catalog pages.
-# Needs `make catalog` first (it reads out/_catalog-*.mp4). The crop rect is measured per block, so a
-# block is centred in its own thumbnail instead of stranded in the corner of its cell.
-blocks-media: ## crop per-block stills + clips from the rendered catalog (run after `make catalog`)
-	node scripts/site/blocks-stills.mjs
+# make blocks-scenes — one scene JSON + one poster still per block, for the site's blocks browser.
+# Each block gets its OWN 1920x1080 stage, so there is no cell arithmetic, no neighbour bleeding into
+# a crop, and no dependency on a rendered catalog reel. The site plays the scene live in the engine it
+# already vendors; the poster is the same scene, framed by the same measured rect.
+blocks-scenes: ## per-block scene JSON + poster still for the site (no render needed)
+	node scripts/site/blocks-scenes.mjs
 
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)

@@ -1,0 +1,197 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 360,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 2,
+      "pad": 20,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "fade",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 0,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "▾ core",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "color": "var(--text)",
+              "delay": 0.2,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 22,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "▾ layers",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "color": "var(--text)",
+              "delay": 0.31,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 44,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "· lottie.js",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+              "radius": 8,
+              "color": "var(--accent)",
+              "delay": 0.42,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 22,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "· motion.js",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "color": "var(--text-2)",
+              "delay": 0.53,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 0,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "▾ blocks",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "color": "var(--text)",
+              "delay": 0.64,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "items": "center",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "radius": 0,
+              "w": 22,
+              "h": 18
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "· index.mjs",
+              "font": "mono",
+              "size": 19,
+              "pad": "6px 10px",
+              "color": "var(--text-2)",
+              "delay": 0.75,
+              "anim": "slide-left",
+              "enterDur": 0.3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

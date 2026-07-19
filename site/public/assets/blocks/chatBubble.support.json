@@ -1,0 +1,98 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 460,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 10,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "justify": "flex-start",
+          "children": [
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "My render is grainy",
+              "size": 20,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "radius": 16,
+              "pad": "12px 18px",
+              "delay": 0.2,
+              "anim": "slide-left",
+              "enterDur": 0.35
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "justify": "flex-end",
+          "children": [
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Grain is opt-in, remove \"grain\": true",
+              "size": 20,
+              "color": "#fff",
+              "bg": "var(--accent)",
+              "radius": 16,
+              "pad": "12px 18px",
+              "delay": 0.62,
+              "anim": "slide-right",
+              "enterDur": 0.35
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "justify": "flex-start",
+          "children": [
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Fixed, thanks!",
+              "size": 20,
+              "color": "var(--text)",
+              "bg": "var(--card)",
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "radius": 16,
+              "pad": "12px 18px",
+              "delay": 1.04,
+              "anim": "slide-left",
+              "enterDur": 0.35
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

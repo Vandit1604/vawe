@@ -1,0 +1,64 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "bg": "#3A3A38",
+      "radius": 8,
+      "pad": 4,
+      "layout": "row",
+      "items": "center",
+      "gap": 0,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.32,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "docs",
+          "font": "mono",
+          "size": 17,
+          "color": "#fff",
+          "pad": "4px 12px"
+        },
+        {
+          "type": "group",
+          "bg": "var(--accent)",
+          "radius": 6,
+          "pad": "6px 12px",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "latest",
+              "font": "mono",
+              "size": 17,
+              "color": "#fff",
+              "delay": 0.22,
+              "anim": "pop",
+              "enterDur": 0.26
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

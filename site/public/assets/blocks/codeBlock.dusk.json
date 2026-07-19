@@ -1,0 +1,79 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 8,
+      "pad": 30,
+      "bg": "#1E1B2E",
+      "radius": 14,
+      "border": "1px solid rgba(255,255,255,0.08)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "compose.rb",
+          "font": "mono",
+          "size": 18,
+          "color": "#9C93C0"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "scene = Scene.load('in.json')",
+          "color": "#B39DF0",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.2,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "scene.cuts.each { |c| c.snap! }",
+          "color": "#8AB8F5",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.34,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "scene.render 'out.mp4'",
+          "color": "#E8A0C8",
+          "font": "mono",
+          "size": 19,
+          "delay": 0.48,
+          "anim": "slide-left",
+          "enterDur": 0.28
+        }
+      ]
+    }
+  ]
+}

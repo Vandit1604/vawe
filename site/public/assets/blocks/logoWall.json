@@ -1,0 +1,182 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 560,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 14,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "gap": 14,
+          "items": "stretch",
+          "children": [
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Northwind",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Meridian",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Kite Studio",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "row",
+          "gap": 14,
+          "items": "stretch",
+          "children": [
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Fieldwork",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Atlas Type",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "grow": 1,
+              "bg": "var(--card)",
+              "radius": 12,
+              "border": "1px solid var(--line)",
+              "elevation": 1,
+              "pad": "22px 0",
+              "layout": "row",
+              "justify": "center",
+              "items": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 700,
+                  "text": "Orbit Labs",
+                  "size": 22,
+                  "color": "var(--text-2)",
+                  "ls": "-0.02em"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,14 @@
 // scripts/site/blocks-json.mjs — derive site/lib/blocks.json from the registry manifest.
 // Run via `make blocks-json` (or `make blocks-sync`). Deterministic; no network.
 //
-// WHY THIS EXISTS: site/lib/blocks.json used to be a hand-kept copy of blocks/catalog.mjs, and three
-// things read the same grid from two different sources:
+// WHY THIS EXISTS: site/lib/blocks.json used to be a hand-kept copy of blocks/catalog.mjs, and the
+// things that read the grid read it from two different sources:
 //   • scripts/site/blocks-catalog.mjs lays the pages out from CATALOG.filter(!overlay)
-//   • scripts/site/blocks-stills.mjs  crops those rendered pages using blocks.json's ORDER
 //   • site/app/blocks/*               lists and filters from blocks.json
-// So blocks.json is not just a list, it is the index into a rendered grid. If it disagrees with
-// CATALOG by even one row, every still after the drift point is cropped from the wrong cell and the
-// site shows the wrong picture for the right name — silently, because both files are still valid.
-// The two happened to agree at 96 rows; adding a family broke it. Deriving removes the class.
+// If those disagree by even one row the site shows the wrong picture for the right name, silently,
+// because both files are still valid. They happened to agree at 96 rows; adding a family broke it.
+// Deriving removes the class. (Per-block media is keyed BY NAME now, not by position in this list —
+// see scripts/site/blocks-scenes.mjs — so an ordering drift can no longer misattribute a thumbnail.)
 //
 // The site file is CATALOG minus `overlay` rows, which is exactly the grid the catalog renders
 // (captions is a full-frame overlay and has no cell).
@@ -32,4 +31,4 @@ const gone = prev.filter((p) => !grid.some((b) => b.name === p.name)).map((p) =>
 console.log(`blocks-json: ${grid.length} entries → site/lib/blocks.json`
   + (added.length ? `\n  + ${added.join(', ')}` : '')
   + (gone.length ? `\n  - ${gone.join(', ')}` : ''));
-if (added.length || gone.length) console.log('  grid changed → re-run `make catalog && node scripts/site/blocks-stills.mjs` so the stills match');
+if (added.length || gone.length) console.log('  grid changed → run `make blocks-scenes` so the site has a scene + poster for it');

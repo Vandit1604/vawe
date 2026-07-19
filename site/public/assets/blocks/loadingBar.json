@@ -1,0 +1,86 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "rect",
+      "radius": 3,
+      "x": 160,
+      "y": 160,
+      "w": 340,
+      "h": 6,
+      "bg": "var(--surface-2)",
+      "start": 0.2,
+      "duration": 2.8
+    },
+    {
+      "type": "rect",
+      "radius": 3,
+      "x": 160,
+      "y": 160,
+      "w": 340,
+      "h": 6,
+      "bg": "var(--up)",
+      "start": 0.2,
+      "duration": 2.8,
+      "anim": "fade",
+      "enterDur": 0.15,
+      "mask": "linear-gradient(to right, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))",
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDur": 1.6,
+      "varsDelay": 0,
+      "varsEase": "easeOutCubic"
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "rendering",
+      "x": 160,
+      "y": 178,
+      "font": "mono",
+      "size": 18,
+      "color": "var(--text-2)",
+      "start": 0.2,
+      "duration": 2.8
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 126,
+      "w": 340,
+      "layout": "row",
+      "justify": "flex-end",
+      "start": 1.8,
+      "duration": 1,
+      "anim": "rise",
+      "enterDur": 0.3,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "✓ done",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--up)"
+        }
+      ]
+    }
+  ]
+}

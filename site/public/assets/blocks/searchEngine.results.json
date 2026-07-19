@@ -1,0 +1,210 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "weight": 700,
+      "text": "Search",
+      "x": 160,
+      "y": 172,
+      "w": 540,
+      "align": "center",
+      "size": 34,
+      "color": "var(--text)",
+      "ls": "-0.04em",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "lift",
+      "enterDur": 0.55,
+      "exitDur": 0.3,
+      "logotype": true
+    },
+    {
+      "type": "rect",
+      "radius": 30,
+      "x": 310,
+      "y": 160,
+      "w": 390,
+      "h": 60,
+      "bg": "var(--card)",
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "rise",
+      "enterDur": 0.45,
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/assets/icons/ui/search.svg",
+      "w": 24,
+      "h": 24,
+      "x": 332,
+      "y": 178,
+      "start": 0.26,
+      "duration": 7.94,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "image",
+      "src": "/assets/icons/ui/mic.svg",
+      "w": 22,
+      "h": 22,
+      "x": 656,
+      "y": 179,
+      "start": 0.3,
+      "duration": 7.9,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "video from json",
+      "x": 372,
+      "y": 175,
+      "w": 270,
+      "size": 22,
+      "color": "var(--text)",
+      "start": 0.28,
+      "duration": 7.92,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "vawe.dev › docs",
+      "x": 310,
+      "y": 284,
+      "w": 390,
+      "size": 19,
+      "font": "mono",
+      "color": "var(--dim)",
+      "start": 0.5,
+      "duration": 7.7,
+      "anim": "slide-left",
+      "out": "slide-right",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "One JSON. Any brand.",
+      "x": 310,
+      "y": 310,
+      "w": 390,
+      "size": 32,
+      "color": "color-mix(in srgb, var(--accent) 82%, var(--text))",
+      "start": 0.54,
+      "duration": 7.66,
+      "anim": "slide-left",
+      "out": "slide-right",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "Same input, same frames, every time.",
+      "x": 310,
+      "y": 356,
+      "w": 390,
+      "size": 19,
+      "color": "var(--text-2)",
+      "start": 0.58,
+      "duration": 7.62,
+      "anim": "fade",
+      "enterDur": 0.45,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "vawe.dev › blocks",
+      "x": 310,
+      "y": 412,
+      "w": 390,
+      "size": 19,
+      "font": "mono",
+      "color": "var(--dim)",
+      "start": 0.6,
+      "duration": 7.6,
+      "anim": "slide-left",
+      "out": "slide-right",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "The block registry",
+      "x": 310,
+      "y": 438,
+      "w": 390,
+      "size": 32,
+      "color": "color-mix(in srgb, var(--accent) 82%, var(--text))",
+      "start": 0.64,
+      "duration": 7.56,
+      "anim": "slide-left",
+      "out": "slide-right",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "Vetted blocks you compose, not author.",
+      "x": 310,
+      "y": 484,
+      "w": 390,
+      "size": 19,
+      "color": "var(--text-2)",
+      "start": 0.68,
+      "duration": 7.52,
+      "anim": "fade",
+      "enterDur": 0.45,
+      "exitDur": 0.25
+    },
+    {
+      "type": "cursor",
+      "size": 36,
+      "start": 6.7,
+      "duration": 1.5,
+      "path": [
+        {
+          "t": 0,
+          "x": 580,
+          "y": 540
+        },
+        {
+          "t": 0.75,
+          "x": 370,
+          "y": 324
+        }
+      ],
+      "clicks": [
+        0.9
+      ]
+    }
+  ]
+}

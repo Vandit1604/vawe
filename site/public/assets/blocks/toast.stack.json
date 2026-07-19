@@ -1,0 +1,180 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 400,
+      "layout": "row",
+      "items": "center",
+      "gap": 14,
+      "pad": "16px 20px",
+      "bg": "#0A0A0A",
+      "radius": 12,
+      "elevation": 2,
+      "start": 0.2,
+      "duration": 2.4,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 22,
+          "h": 22,
+          "bg": "var(--up)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 14,
+              "color": "#fff"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "Block added to the scene",
+          "size": 19,
+          "color": "#F5F5F3",
+          "grow": 1
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "Undo",
+          "size": 18,
+          "color": "var(--accent)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 230,
+      "w": 400,
+      "layout": "row",
+      "items": "center",
+      "gap": 14,
+      "pad": "16px 20px",
+      "bg": "#0A0A0A",
+      "radius": 12,
+      "elevation": 2,
+      "start": 1.2,
+      "duration": 2.4,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 22,
+          "h": 22,
+          "bg": "var(--accent)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "◆",
+              "size": 14,
+              "color": "#fff"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "Theme switched",
+          "size": 19,
+          "color": "#F5F5F3",
+          "grow": 1
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "Undo",
+          "size": 18,
+          "color": "var(--accent)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 300,
+      "w": 400,
+      "layout": "row",
+      "items": "center",
+      "gap": 14,
+      "pad": "16px 20px",
+      "bg": "#0A0A0A",
+      "radius": 12,
+      "elevation": 2,
+      "start": 2.2,
+      "duration": 2.4,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "exitDur": 0.3,
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 22,
+          "h": 22,
+          "bg": "var(--up)",
+          "layout": "row",
+          "justify": "center",
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "✓",
+              "size": 14,
+              "color": "#fff"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "Render queued",
+          "size": 19,
+          "color": "#F5F5F3",
+          "grow": 1
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "View",
+          "size": 18,
+          "color": "var(--accent)"
+        }
+      ]
+    }
+  ]
+}

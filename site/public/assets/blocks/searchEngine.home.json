@@ -1,0 +1,142 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "row",
+      "gap": 0,
+      "items": "baseline",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "lift",
+      "enterDur": 0.55,
+      "exitDur": 0.3,
+      "logotype": true,
+      "justify": "center",
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "S",
+          "size": 92,
+          "color": "#4285F4",
+          "ls": "-0.04em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "e",
+          "size": 92,
+          "color": "#EA4335",
+          "ls": "-0.04em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "a",
+          "size": 92,
+          "color": "#FBBC05",
+          "ls": "-0.04em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "r",
+          "size": 92,
+          "color": "#4285F4",
+          "ls": "-0.04em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "c",
+          "size": 92,
+          "color": "#34A853",
+          "ls": "-0.04em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "h",
+          "size": 92,
+          "color": "#EA4335",
+          "ls": "-0.04em"
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "radius": 30,
+      "x": 160,
+      "y": 340,
+      "w": 540,
+      "h": 60,
+      "bg": "var(--card)",
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "start": 0.55,
+      "duration": 7.65,
+      "anim": "rise",
+      "enterDur": 0.45,
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/assets/icons/ui/search.svg",
+      "w": 24,
+      "h": 24,
+      "x": 182,
+      "y": 358,
+      "start": 0.61,
+      "duration": 7.59,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "image",
+      "src": "/assets/icons/ui/mic.svg",
+      "w": 22,
+      "h": 22,
+      "x": 656,
+      "y": 359,
+      "start": 0.65,
+      "duration": 7.55,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.25
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "deterministic video from json",
+      "x": 222,
+      "y": 356,
+      "w": 420,
+      "size": 26,
+      "color": "var(--text)",
+      "typing": 11,
+      "start": 0.95,
+      "duration": 7.25,
+      "anim": "fade",
+      "enterDur": 0.12,
+      "exitDur": 0.25
+    }
+  ]
+}

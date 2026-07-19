@@ -1,0 +1,88 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 540,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 10,
+      "pad": 26,
+      "bg": "var(--card)",
+      "radius": 12,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "fade",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.25,
+      "children": [
+        {
+          "type": "group",
+          "layout": "row",
+          "gap": 10,
+          "items": "center",
+          "children": [
+            {
+              "type": "text",
+              "weight": 600,
+              "text": "$",
+              "font": "mono",
+              "size": 22,
+              "color": "var(--accent)"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "npm i vawe",
+              "font": "mono",
+              "size": 22,
+              "color": "var(--text)",
+              "typing": 18,
+              "delay": 0.25,
+              "anim": "fade",
+              "enterDur": 0.1
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "added 1 package",
+          "font": "mono",
+          "size": 20,
+          "color": "var(--text-2)",
+          "delay": 1.01,
+          "anim": "fade",
+          "enterDur": 0.2
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "added 1 package",
+          "font": "mono",
+          "size": 20,
+          "color": "var(--text-2)",
+          "delay": 1.29,
+          "anim": "fade",
+          "enterDur": 0.2
+        }
+      ]
+    }
+  ]
+}
