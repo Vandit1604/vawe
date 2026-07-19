@@ -6,8 +6,8 @@ import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
-import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
 import { loadRegistered, auditFonts } from './fonts.js';
+import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
@@ -298,82 +298,17 @@ export async function boot(build) {
       }
       await document.fonts.ready;
     } catch (e) {}
-    // AUDIO-REACTIVITY, loaded here in the awaited readiness phase for the same reason canvasFx bakes
-    // here: by frame time it must be a plain table. `audio.spectrum` names a sidecar written offline by
-    // scripts/media/spectrum.mjs; the render reads row n and never touches a decoder, so renderFrame(n)
-    // stays as pure as it was. A missing sidecar is a warning, not a throw — the scene still renders,
-    // the reactive layers simply hold still, which is a far better failure than a black video.
-    window.__spectrum = null;
-    if (data.audio && data.audio.spectrum) {
-      try {
-        const r = await fetch(data.audio.spectrum.startsWith('/') ? data.audio.spectrum : '/' + data.audio.spectrum);
-        if (r.ok) window.__spectrum = await r.json();
-        else console.warn(`spectrum: ${data.audio.spectrum} not found (${r.status}) — react layers will hold still`);
-      } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable — react layers will hold still`); }
-    }
+    // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
+    // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
+    // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx
+    // → components → clips → lottie); three throws loudly if its module fails, the rest degrade quietly.
+    await preloadSpectrum(data);
     await preloadImages(data); // web/local images ready before any frame is captured
-    // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
-    // because a `three` layer builds synchronously and would otherwise race the module load, and a
-    // layer that renders empty on the workers that got there first is a purity break, not a glitch.
-    // Loaded here, in the same readiness phase as the canvasFx bake, for the same reason.
-    if (JSON.stringify(data).includes('"three"')) {
-      try { window.THREE = await import('/assets/vendor/three.module.min.js'); }
-      catch (e) { throw new Error('three.js failed to load from /assets/vendor/three.module.min.js: ' + e.message); }
-      // extruded type needs glyph outlines, generated from the repo's own woff2 by `make glyphs`.
-      // A missing typeface is a LOUD failure in three-fx.js rather than a substituted face.
-      window.__typefaces = {};
-      const fonts = new Set();
-      (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); Object.values(o).forEach(scan); } })(data);
-      for (const f of fonts) {
-        try { window.__typefaces[f] = await (await fetch(`/assets/fonts/3d/${f}.typeface.json`)).json(); }
-        catch (e) { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
-      }
-    }
-    // Tier-2 CANVAS FX: bake each image with a `canvasFx` (halftone/dither/mosaic/…) ONCE here, in the
-    // awaited readiness phase, into a static PNG data-URL. image.js then swaps the <img> src to it, so
-    // the pixels are static at frame time → renderFrame(n) stays byte-identical (probe/snap prove it).
-    window.__canvasFx = {};
-    const cfxJobs = [];
-    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.type === 'image' && o.canvasFx && typeof o.src === 'string') cfxJobs.push({ src: o.src, spec: o.canvasFx }); Object.values(o).forEach(scan); } })(data);
-    for (const job of cfxJobs) {
-      const key = canvasFxKey(job.src, job.spec);
-      if (window.__canvasFx[key]) continue;
-      try {
-        const img = await new Promise((res, rej) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => (im.decode ? im.decode().then(() => res(im), () => res(im)) : res(im)); im.onerror = rej; im.src = job.src; });
-        const url = bakeCanvasFx(img, job.spec);
-        if (url) window.__canvasFx[key] = url;
-      } catch (e) { /* missing/tainted source → image.js falls back to the raw <img> */ }
-    }
-    // preload captured components (real UI lifted off a site by scripts/capture-component.mjs) so a
-    // `component` scene can inject real HTML synchronously. Any string like /…/components/x.json.
-    window.__components = {};
-    const compPaths = new Set();
-    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') Object.values(o).forEach(scan); else if (typeof o === 'string' && /\/(components|scenes)\/[^/]+\.json$/.test(o)) compPaths.add(o); })(data);
-    for (const p of compPaths) { try { window.__components[p] = await (await fetch(p)).json(); } catch (e) {} }
-    // preload generated CLIPS (scripts/gen-clip.mjs): any "/…/manifest.json" string is a frame-sequence
-    // manifest {fps,w,h,frames:[url]}. Decode EVERY frame up front so the `clip` layer can swap an <img>
-    // src per renderFrame(n) with zero async — deterministic playback of a generated/any video.
-    window.__clips = {};
-    const clipPaths = new Set();
-    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') Object.values(o).forEach(scan); else if (typeof o === 'string' && /\/manifest\.json$/.test(o)) clipPaths.add(o); })(data);
-    for (const p of clipPaths) {
-      try {
-        const man = await (await fetch(p)).json();
-        window.__clips[p] = man;
-        await Promise.all((man.frames || []).map((src) => new Promise((res) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(res, res) : res()); im.onerror = () => res(); im.src = src; })));
-      } catch (e) {}
-    }
-    // preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its
-    // src; fetch each once so build() can init the runtime synchronously and seek it per frame.
-    window.__lottie = {};
-    const lottieSrcs = new Set();
-    (function scan(o) { if (Array.isArray(o)) o.forEach(scan); else if (o && typeof o === 'object') { if (o.type === 'lottie' && typeof o.src === 'string') lottieSrcs.add(o.src); Object.values(o).forEach(scan); } })(data);
-    if (lottieSrcs.size) {
-      // load the runtime ONLY when a scene uses it (no 168KB parse tax on text-only renders). Before the
-      // virtual clock so no rAF is captured at load; onerror resolves so a missing lib degrades, not hangs.
-      if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
-      for (const p of lottieSrcs) { try { window.__lottie[p] = await (await fetch(p)).json(); } catch (e) {} }
-    }
+    await preloadThree(data);
+    await preloadCanvasFx(data);
+    await preloadComponents(data);
+    await preloadClips(data);
+    await preloadLottie(data);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey });
     const totalFrames = Math.round(scene.duration * fps);
