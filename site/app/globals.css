@@ -670,6 +670,31 @@ a{color:inherit;text-decoration:none}
 .bcard:hover .bplay,.bplay:focus-visible,.bplay[data-on]{opacity:1}
 .bplay:hover{transform:scale(1.08)}
 .bplay svg{width:14px;height:14px;fill:currentColor}
+
+/* Booting the engine is an iframe + fonts + theme + schema, which is seconds. The ready-gate on
+   .blive keeps that from flashing a black stage, but it also means the press produced no visible
+   change at all until the render landed, and the honest read of that is "the button is broken".
+   Two signals, because they answer different questions: the ring says the CONTROL took the press,
+   the sweep says the SURFACE is still working. The ring alone is 15px and loses at card scale. */
+.bplay[data-loading]{cursor:progress;opacity:1}
+.bplay .bspin{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;
+  transform-origin:center;animation:bspin .75s linear infinite}
+@keyframes bspin{to{transform:rotate(360deg)}}
+
+/* Sits on the thumb's bottom hairline, the one edge no block artwork occupies. */
+.thumb .bboot{position:absolute;left:0;right:0;bottom:0;height:2px;z-index:2;overflow:hidden;
+  background:color-mix(in oklab,var(--accent) 15%,transparent)}
+.thumb .bboot::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;
+  background:var(--accent);animation:bboot 1.15s var(--ease) infinite}
+@keyframes bboot{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+
+/* Reduced motion still has to answer "is it working?", so this fades rather than removing the
+   signal: a loader that stops moving is indistinguishable from the frozen state it exists to deny. */
+@media (prefers-reduced-motion:reduce){
+  .bplay .bspin{animation:bfade 1.3s ease-in-out infinite}
+  .thumb .bboot::after{width:100%;animation:bfade 1.3s ease-in-out infinite}
+  @keyframes bfade{0%,100%{opacity:.3}50%{opacity:1}}
+}
 /* Touch and keyboard have no hover, so the control must be permanently visible there or it does not
    exist. (any-hover:none) is the honest query: it asks about the input, not the screen width. */
 @media (any-hover:none){.bplay{opacity:1}}

@@ -16,7 +16,9 @@ export type Frame = { x: number; y: number; w: number; h: number };
  * the same intrinsic size and the same cap-don't-stretch rules, so it lands in exactly the same
  * layout box, showing exactly the same region.
  */
-export function BlockLive({ name, src, frame }: { name: string; src: string; frame: Frame }) {
+export function BlockLive({ name, src, frame, onReady }: {
+  name: string; src: string; frame: Frame; onReady?: () => void;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const { hostRef, meta } = useSceneEngine({
     dataUrl: src,
@@ -24,6 +26,11 @@ export function BlockLive({ name, src, frame }: { name: string; src: string; fra
     title: `Live render of the ${name} block`,
     playing: true,
   });
+
+  // `meta` arriving is the engine's own ready signal — the same one the fade below is gated on. The
+  // card needs it too, to stop saying "loading", so it is reported up rather than timed separately.
+  const ready = !!meta;
+  useEffect(() => { if (ready) onReady?.(); }, [ready, onReady]);
 
   // The window is capped by the card, so its used width is not frame.w — measure it and scale.
   useEffect(() => {

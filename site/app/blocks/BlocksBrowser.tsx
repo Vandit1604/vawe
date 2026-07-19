@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockLive, type Frame } from "./BlockLive";
 import frames from "../../lib/block-frames.json";
 
@@ -41,18 +41,32 @@ const FRAMES = frames as Record<string, Frame>;
  */
 function BlockThumb({ name, playing, onToggle }: { name: string; playing: boolean; onToggle: () => void }) {
   const frame = FRAMES[name];
+  // Booting an engine is an iframe, a font load, a theme and a schema fetch — seconds, not a tick.
+  // The ready-gate below is what keeps that from flashing a black stage, but on its own it also
+  // means a press produces NO visible change until the render arrives, which reads as a dead button.
+  const [ready, setReady] = useState(false);
+  const booting = playing && !ready;
+  // Stopping must re-arm it, or the next press would claim to be ready before the engine remounts.
+  useEffect(() => { if (!playing) setReady(false); }, [playing]);
+  const onReady = useCallback(() => setReady(true), []);
+
   return (
     <div className="thumb">
       {/* The poster stays mounted underneath: the live render fades in only once the engine reports
           ready, so the card never flashes an empty stage while the scene boots. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={asset(name, "png")} alt={name} loading="lazy" />
-      {playing && frame && <BlockLive name={name} src={asset(name, "json")} frame={frame} />}
+      {playing && frame && <BlockLive name={name} src={asset(name, "json")} frame={frame} onReady={onReady} />}
+      {/* The surface's own signal. The ring on the button says the press landed; this says the work
+          is still running, and it stays legible at card scale where a 15px ring does not. */}
+      {booting && <span className="bboot" aria-hidden="true" />}
       <button
         className="bplay"
         {...(playing ? { "data-on": "" } : {})}
+        {...(booting ? { "data-loading": "" } : {})}
         aria-pressed={playing}
-        aria-label={playing ? `Stop ${name}` : `Play ${name}`}
+        aria-busy={booting}
+        aria-label={booting ? `Loading ${name}` : playing ? `Stop ${name}` : `Play ${name}`}
         onClick={(e) => {
           // the whole card is a link to the detail page; play means "show me the move", not "leave"
           e.preventDefault();
@@ -60,7 +74,12 @@ function BlockThumb({ name, playing, onToggle }: { name: string; playing: boolea
           onToggle();
         }}
       >
-        {playing ? (
+        {booting ? (
+          // 80 of the 88 circumference drawn as a gap: an arc, so the rotation is legible.
+          <svg className="bspin" viewBox="0 0 28 28" aria-hidden="true">
+            <circle cx="14" cy="14" r="10" strokeDasharray="20 43" />
+          </svg>
+        ) : playing ? (
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
         ) : (
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
