@@ -21,6 +21,31 @@ you from.
 | 9 | **Cover the hard cut** | Background jumps (dark↔light) want a sting peaking AT the cut; same-bg scenes can whip/slide raw. | judgment (stings exist) |
 | 10 | **Type moves like it reads** | Text enters in reading order (L→R, top→down), rises from its own baseline, never crosses another line's path. The motion IS part of the meaning (kinetic-type first law). | judgment |
 
+## Speed dials — the numbers, in one place
+
+Rule 1 says timing is a voice; these are the ranges that voice speaks in. Measured against the
+external consensus (Quiet UI text-reveal defaults: duration 100-2000ms, default 600; stagger 5-100ms,
+default 20 — https://next.quietui.org/docs/components/text-reveal), and against what actually reads on
+a 30fps render.
+
+| Dial | JSON | Fast | Default | Calm | Notes |
+|---|---|---|---|---|---|
+| Per-unit reveal | `each` | 0.25-0.35s | 0.5s | 0.75-1.2s | payoff / thesis / ambient (Rule 1) |
+| Reveal stagger | `stagger` | 0.04s | 0.06s | 0.10-0.12s | Rule 3's 60-120ms; below 0.04 the sweep stops reading as a sweep |
+| Cut length | `cutTiming` | `snappy`/`pop` | `smooth` | `out` | velocity contrast between beats (Rule 8) |
+| **Ransom re-roll** | `ransom.cycle` | 0.5s | **1.2s** | 1.6-2.0s | see below |
+| **Ransom re-roll offset** | `ransom.stagger` | 0.08s | 0.16s | 0.2s | keeps letters from flipping in unison |
+
+**`ransom.cycle` deserves its own note, because it is the one dial that is NOT an entrance.** Everything
+else here fires once and settles; a cycling ransom note changes *for the whole shot*, so the eye never
+gets a rest frame. The instinct to reuse entrance timings (0.5s) is wrong — at 12 glyphs that is ~24
+changes a second across the line and reads as noise, not as a note being re-pinned. **Start at 1.2s.**
+Under ~0.8s it stops reading as deliberate; over ~2s it reads as broken. Scale UP with glyph count: the
+more letters on screen, the more total churn per second at the same cycle.
+
+Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blur"` with `each` 0.75 and
+`stagger` 0.06 gives a left-to-right defocus sweep that resolves over ~0.7s (see ransom-internal.json).
+
 ## Genre pacing tables
 
 | Genre | Beat length | Entry pace | Cuts | Stings |

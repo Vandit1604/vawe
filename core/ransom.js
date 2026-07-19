@@ -168,7 +168,7 @@ function paintTile(tile, g, pop = 0) {
 // and whenever the computed variant differs from the applied one the tile is fully repainted. So any
 // render order converges on the same DOM for frame n — which is why there is no easing/pop term here;
 // a per-frame swell would reintroduce the per-frame write it exists to avoid.
-export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', cycle = 0.6, stagger = 0.13 } = {}) {
+export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', cycle = 1.2, stagger = 0.16 } = {}) {
   if (!(cycle > 0)) return;
   units.forEach((el, i) => {
     const tile = el.querySelector('.rns');

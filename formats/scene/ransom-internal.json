@@ -2,20 +2,26 @@
   "module": "scene",
   "theme": "vawe",
   "aspect": "16:9",
-  "duration": 8,
+  "duration": 11.5,
   "layers": [
-    { "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "bg": "#f4f2ec", "start": 0, "duration": 8 },
+    { "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "bg": "#f4f2ec", "start": 0, "duration": 11.5 },
 
     { "type": "text", "text": "Ransom Notes", "x": 210, "y": 430, "w": 1500, "align": "center", "size": 150,
-      "ransom": { "palette": "color", "cycle": 0.5, "stagger": 0.09 },
-      "ransomSeed": "Ransom Notes", "each": 0.4, "start": 0.25, "duration": 2.35 },
+      "ransom": { "palette": "color", "cycle": 1.25, "stagger": 0.16 },
+      "ransomSeed": "Ransom Notes",
+      "preset": "blur", "presetOpts": { "px": 22 }, "each": 0.75, "stagger": 0.06,
+      "start": 0.3, "duration": 3.4 },
 
     { "type": "text", "text": "are achieved", "x": 210, "y": 430, "w": 1500, "align": "center", "size": 150,
-      "ransom": { "palette": "color", "cycle": 0.55, "stagger": 0.1 },
-      "ransomSeed": "achieved", "each": 0.4, "start": 2.75, "duration": 2.35 },
+      "ransom": { "palette": "color", "cycle": 1.35, "stagger": 0.17 },
+      "ransomSeed": "achieved",
+      "preset": "blur", "presetOpts": { "px": 22 }, "each": 0.75, "stagger": 0.06,
+      "start": 4.0, "duration": 3.4 },
 
     { "type": "text", "text": "internally", "x": 210, "y": 430, "w": 1500, "align": "center", "size": 150,
-      "ransom": { "palette": "color", "cycle": 0.6, "stagger": 0.11 },
-      "ransomSeed": "internally", "each": 0.4, "start": 5.25, "duration": 2.6 }
+      "ransom": { "palette": "color", "cycle": 1.15, "stagger": 0.18 },
+      "ransomSeed": "internally",
+      "preset": "blur", "presetOpts": { "px": 22 }, "each": 0.75, "stagger": 0.06,
+      "start": 7.7, "duration": 3.6 }
   ]
 }
