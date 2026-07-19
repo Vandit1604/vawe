@@ -17,7 +17,7 @@
 //                · lightLeak (looping warm blobs from an edge, palette-aware)
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode'];
+export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl'];
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
@@ -142,7 +142,7 @@ void main(){
     kc = mix(kc, c3, blob(q, vec2(0.18, 0.0), 20.0));
     float m = 0.5 + 0.5*sin(q.x*24.0)*sin(q.y*24.0 + t*0.2);
     col = kc; alpha = (0.3 + 0.45*smoothstep(0.2, 0.8, m)) * smoothstep(0.78, 0.08, rad);
-  } else {                                                // matrixDecode — digital rain: bright heads fall down glyph columns (index 13, trailing else)
+  } else if(u_fx==13){                                    // matrixDecode — digital rain: bright heads fall down glyph columns
     float cols = 44.0, rows = 28.0;
     float cx = floor(uv.x*cols), cy = floor(uv.y*rows);
     float speed = 0.18 + 0.5*rhash(vec2(cx, 3.0));       // per-column fall speed (rhash: no banding at big coords)
@@ -155,8 +155,28 @@ void main(){
     vec3 body = P(0, vec3(0.16, 0.95, 0.42));            // palette stop 0 tints the rain (default matrix green)
     col = mix(body, vec3(0.75, 1.0, 0.85), lead);
     alpha = (trail*0.65 + lead) * (0.4 + 0.6*flick);
-  }
-  col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
+  } else if(u_fx==14){                                     // nebula — deep-field gas clouds with a star dusting
+    // Same fbm family as flow/plasma but weighted dark: broad low-frequency clouds, a hot core, and a
+    // sparse star field from a hashed grid. Pure in (t, seed) like every member — no accumulation.
+    vec2 q = p*1.6 + vec2(t*0.020, -t*0.014);
+    float n1 = noise(q), n2 = noise(q*2.3 + 4.0), n3 = noise(q*4.7 - 2.0);
+    float cloud = n1*0.55 + n2*0.30 + n3*0.15;
+    vec3 nb = mix(c0*0.25, c1, smoothstep(0.35, 0.85, cloud));
+    nb = mix(nb, c3, smoothstep(0.62, 0.98, cloud) * 0.65);        // the hot core
+    vec2 sg = floor(p*160.0);                                       // star grid
+    float star = step(0.997, rhash(sg)) * (0.6 + 0.4*sin(t*2.0 + rhash(sg+9.0)*6.28));
+    col = nb + vec3(star);
+    alpha = smoothstep(0.18, 0.9, cloud) * 0.85 + star*0.9;
+  } else {                                                // dotCrawl — the NTSC chroma artifact that crawls along edges (index 15, trailing else)
+    // A fine diagonal chroma lattice drifting one subcarrier phase per frame — the companion artifact
+    // to the shipped vhs/crt pair, which reproduce tracking and phosphor but never this.
+    float ph = (p.x + p.y)*180.0 - t*7.0;                           // diagonal subcarrier
+    float lat = sin(ph);
+    vec3 chroma = vec3(sin(ph), sin(ph + 2.094), sin(ph + 4.188));  // R/G/B 120 degrees apart
+    float edge = smoothstep(0.35, 0.95, noise(p*7.0 + t*0.05));     // crawl concentrates on detail
+    col = 0.5 + 0.5*chroma;
+    alpha = edge * (0.10 + 0.10*abs(lat));
+  } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
   alpha *= clamp(u_intensity, 0.0, 1.0);
   gl_FragColor = vec4(col*alpha, alpha);

@@ -244,7 +244,8 @@
             "whipPan",
             "chromaticSplit",
             "dispersion",
-            "gridPixelateWipe"
+            "gridPixelateWipe",
+            "iridescence"
           ]
         },
         "dur": {
@@ -361,7 +362,9 @@
             "heatShimmer",
             "ripple",
             "kaleidoscope",
-            "matrixDecode"
+            "matrixDecode",
+            "nebula",
+            "dotCrawl"
           ]
         },
         "html": {

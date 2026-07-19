@@ -185,6 +185,11 @@ const srcCases = [
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
+  // the drift check covered ONE enum of eight; adding an ambient fx made the schema reject a valid
+  // value and nothing said so. A second enum is pinned so the generalisation cannot quietly regress.
+  { name: 'schema-drift · a NON-anim enum drifted', file: 'formats/scene/schema.json',
+    mutate: (s) => s.replace('"kaleidoscope",', '"kaleidoscop",'),
+    cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
 ];
 console.log('');
 for (const c of srcCases) {

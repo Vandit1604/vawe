@@ -17,7 +17,7 @@
 // (ink spiral), ridgedBurn (filament ember front), lens (flare + ghosts), thermal (iron-bow
 // heat veil), whipPan (horizontal smear), chromaticSplit (rgb-fringed shock ring),
 // dispersion (prism band). All generative (uv/progress/seed only) — palette+tint aware.
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion', 'gridPixelateWipe'];
+export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion', 'gridPixelateWipe', 'iridescence'];
 
 const FRAG = `
 precision highp float;
@@ -290,6 +290,17 @@ void main(){
     float on = smoothstep(diag + jit + 0.05, diag + jit, pp * 1.2);
     float q = floor(hash(cell + 7.0) * 3.0 + 1.0) / 3.0;   /* 3 quantised brightness blocks (u_tint recolours) */
     c = vec4(vec3(q), on * bell);
+  } else if (u_fx == 33) {                             /* iridescence — thin-film interference sheen */
+    /* Hue as a function of a fake view angle: the film's optical thickness varies across the frame, so
+       the wavelength that constructively interferes shifts and the sheen travels. The companion to the
+       shipped 'dispersion', which splits a beam; this one COATS. Pure in (uv, pp).
+       NOTE: no backticks in here - the whole shader is a JS template literal and one would end it. */
+    vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
+    float view = length(d) * 2.2 + (uv.x + uv.y) * 0.35;   /* stand-in for the angle of incidence */
+    float film = view * 9.0 - pp * 6.2831;                 /* thickness sweeps with progress */
+    vec3 sheen = 0.5 + 0.5 * cos(vec3(film, film + 2.094, film + 4.188));
+    float band = smoothstep(0.0, 0.45, pp) * smoothstep(1.0, 0.55, pp);  /* rises and leaves */
+    c = vec4(sheen, band * bell * 0.55 * smoothstep(1.15, 0.15, length(d)));
   }
   // optional tint: recolour by luminance → u_tint (amt 0 = untouched); u_intensity scales strength
   if (u_tintAmt > 0.0) {

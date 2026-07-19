@@ -46,7 +46,10 @@ const balanced = (s) => (s.match(/'/g) || []).length % 2 === 0 && (s.match(/"/g)
 
 const hits = [];
 for (const fp of files) {
-  if (fp.endsWith(path.join('gates', 'dead-branch.mjs'))) continue;   // this file quotes the pattern
+  // Both this file and the mutation harness QUOTE the pattern on purpose — one to document it, one to
+  // inject it as a fixture. A gate that flags its own test fixture teaches people to ignore it.
+  if (fp.endsWith(path.join('gates', 'dead-branch.mjs'))) continue;
+  if (fp.endsWith(path.join('gates', 'gate-mutation.mjs'))) continue;
   const src = fs.readFileSync(fp, 'utf8');
   src.split('\n').forEach((line, i) => {
     if (/^\s*(\/\/|\*)/.test(line)) return;                            // comments quote examples

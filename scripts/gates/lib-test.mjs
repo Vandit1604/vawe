@@ -447,7 +447,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // per name, and the schema exposing exactly that vocabulary — the three surfaces that can drift.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
-  ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length === 33 && new Set(SHADER_FX).size === SHADER_FX.length);
+  ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length > 0 && new Set(SHADER_FX).size === SHADER_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('const VERT'));
   const noBranch = SHADER_FX.map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
   ok(`stings: FRAG has a branch for every effect${noBranch.length ? ' — missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
@@ -473,11 +473,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // (it has no `u_fx==N` literal), so branches are checked for indices 0..N-2 plus a final else.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'shaders-ambient.js'), 'utf8');
-  ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length === 14 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
+  ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length > 0 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
   ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
-  ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, frag.includes('matrixDecode') && !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
+  ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
   // wave-3 looks must animate — a branch that ignores t would be a frozen still, defeating "loop"
@@ -492,7 +492,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // barrel is a static lens vignette by design (no motion) — exempt it from the animate check
   ok(`ambient: wave-3 looks animate (except static barrel)${still.filter((n) => n !== 'barrel').length ? ' — frozen: ' + still.filter((n) => n !== 'barrel').join(', ') : ''}`, still.every((n) => n === 'barrel'));
   // matrixDecode (wave 4, the trailing else) is digital rain — its heads must fall with t
-  ok('ambient: matrixDecode rain depends on time', (() => { const body = frag.slice(frag.lastIndexOf('} else {')); return /\bt\b/.test(body) && body.includes('matrixDecode'); })());
+  // Locate a branch by NAME, not by position: this used to slice the trailing `else`, which stopped
+  // being matrixDecode the moment two effects were appended after it. A positional assertion silently
+  // starts testing a different thing.
+  const branchOf = (name) => { const i = frag.indexOf(name); if (i < 0) return ''; 
+    const j = frag.indexOf('} else', i); return frag.slice(i, j < 0 ? frag.length : j); };
+  for (const nm of ['matrixDecode', 'nebula', 'dotCrawl']) {
+    ok(`ambient: ${nm} depends on time`, /\bt\b/.test(branchOf(nm)) && branchOf(nm).length > 40);
+  }
 }
 
 // ---- composite looks (core/looks.js) ----

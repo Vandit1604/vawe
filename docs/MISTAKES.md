@@ -1424,3 +1424,54 @@ That needs dataflow analysis, and half a linter pretending to be a whole one is 
 **Also fixed while building it:** the first version read `a ?? 0 : 0` as a ternary starting at the
 second `?` and reported two identical arms that were not a ternary. A gate's first output is a
 hypothesis, not a finding.
+
+---
+
+## #83 — A test that hardcodes a count is edited by whoever breaks it
+
+`lib-test` asserted `SHADER_FX.length === 33` and `AMBIENT_FX.length === 14`. Adding three effects
+failed both. The failure carries no information: nothing is wrong, a number moved. And the fix is
+always to bump the number, which means the assertion has never once caught a real defect — it only
+ever taught the next author to edit the test until it passed.
+
+**Root cause:** asserting an accident (how many there are) instead of a property (all distinct, each
+one reachable). The uniqueness and branch-coverage assertions on the same lines already carried the
+real claim; the count was noise stapled to them.
+
+**Fix:** counts derived (`length > 0 && new Set(x).size === x.length`), so appending an effect can
+never fail the test for the wrong reason, and the per-effect branch-coverage check still fails loudly
+if an effect is added to the enum but never given a shader branch.
+
+**Gate:** `make gate-test` mutates each gate and proves it can still fire — the count removal did not
+weaken it (36/36 still provable).
+
+---
+
+## #84 — A positional assertion silently changed what it was testing
+
+The same file asserted matrixDecode's rain moves with time by slicing `frag.lastIndexOf('} else {')`
+— the trailing branch. That was matrixDecode when it was written. Appending nebula and dotCrawl made
+the trailing branch dotCrawl, so the assertion began testing a different effect while still reading
+as a matrixDecode test. It only surfaced because the name check failed alongside it; had the slice
+been `/\bt\b/` alone, it would have kept passing against the wrong branch forever.
+
+**Root cause:** addressing a thing by its position in a list that grows.
+
+**Fix:** `branchOf(name)` locates a branch by the effect's own name, and the check now runs over
+matrixDecode, nebula and dotCrawl. Same class as the schema-drift fix (#82): name-matching and
+position-matching both drift, exact addressing does not.
+
+---
+
+## #85 — A gate flagged its own test fixture
+
+`dead-branch` reported `gate-mutation.mjs:183 both arms are 2`. That line is the mutation the harness
+*injects* to prove dead-branch can fire. The gate was correct about the text and wrong about the file:
+a fixture is a quotation, not a defect.
+
+**Root cause:** the exclusion list had one entry (dead-branch.mjs, which documents the pattern) and
+missed the second file that quotes the pattern for a different reason.
+
+**Fix:** exclude the mutation harness too. Worth stating plainly because the cost is asymmetric — a
+gate that cries wolf about itself trains people to skim its output, which is exactly how a real
+finding gets missed.
