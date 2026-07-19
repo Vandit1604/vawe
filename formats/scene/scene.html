@@ -65,7 +65,7 @@
       import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/motion.js';
       import { driveClips, seekAll } from '/core/clips.js';
       import { splitText, animateUnits } from '/core/type.js';
-      import { ransomStyle } from '/core/ransom.js';
+      import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
       import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
@@ -252,6 +252,10 @@
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
             if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : 0.06), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
+            // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
+            // place, every frame. Stateless and derived from t, so it stays pure in n.
+            if (units && L.ransom && L.ransom.cycle && t >= start && t < end)
+              ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...L.ransom });
             // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
             // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
             renderer.frame(el, L, t);

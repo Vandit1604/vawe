@@ -2029,3 +2029,29 @@ identically fails CI instead of sitting in the showcase.
 **The method note worth keeping:** the discriminating test was cheap and decisive — before blaming my
 change, render the same scene twice on the *unchanged* code. Byte-comparing across a refactor is
 worthless until you know the baseline is itself reproducible.
+
+---
+
+## #106 — The ransom effect has a determinism ENVELOPE, and I shipped it without knowing where the edge was
+
+`ransom` was verified byte-identical on two scenes (7 glyphs at size 180, 16 glyphs at size 150) and
+shipped as "pure in n". Authoring a three-line note, the render started varying run to run. My first
+three guesses were all wrong: not the new cycling code (the STATIC version of the same scene varied
+too), not machine load (the original 7-glyph scene was still 4/4 identical at load average 18.8, hash
+unchanged), not the drop-shadow (removing it changed nothing).
+
+The real variable is **how much rotated, clip-pathed tile is on screen at once**. Each tile is its own
+compositing layer; past some amount the capture samples mid-raster. Measured: 16 glyphs @150 → 3/3
+identical. 32 glyphs @150 → 3 distinct. 11 glyphs @88 → 3 distinct (small type sits on the AA margin).
+
+**Two lessons.**
+1. "Deterministic" is not a property I verified — it is a property I verified *at the sizes I happened
+   to test*. A purity claim needs its envelope stated, or the next author walks straight out of it. The
+   envelope is now in PRIMITIVES with the measurements.
+2. Four hypotheses, each killed by a cheap discriminating test before moving on (static-vs-cycling,
+   re-run the known-good scene, remove the shadow, vary size and count). That is the habit that finally
+   found it, after #101 where I abandoned a correct diagnosis for want of one.
+
+The video ships within the envelope: one line on screen at a time, size 150, 3/3 byte-identical. The
+general fix is task #27 — a pixel-level purity gate over every shipped scene, which would have drawn
+this boundary automatically instead of me discovering it by surprise.

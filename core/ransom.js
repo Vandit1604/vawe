@@ -81,10 +81,13 @@ function tornClip(rnd, depth = 7) {
 
 // PURE: the full visual spec for glyph `i` of a ransom note. No DOM. Unit-testable, and identical for
 // the same (seed, i) on every machine and render pass. `palette`: 'paper' (default) | 'color'.
-export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, torn = true, palette = 'paper' } = {}) {
+export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, torn = true, palette = 'paper', variant = 0 } = {}) {
   const sw = swatches || (palette === 'color' ? ransomColorSwatches(accent) : ransomSwatches(accent));
-  const r = (salt) => random(`${seed}:${i}:${salt}`);
-  const face = faces[hashSeed(`${seed}:${i}:face`) % faces.length];
+  // `variant` re-rolls the same letter into a different cutout (see ransomTick). Deliberately absent
+  // from the seed when 0, so a static note keeps the exact bytes it rendered before cycling existed.
+  const v = variant ? `:${variant}` : '';
+  const r = (salt) => random(`${seed}:${i}${v}:${salt}`);
+  const face = faces[hashSeed(`${seed}:${i}${v}:face`) % faces.length];
   const swatch = pickWeighted(sw, r('sw'));
   return {
     family: face.family, weight: face.weight, italic: !!face.italic,
@@ -115,7 +118,6 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
     ? 'drop-shadow(0 3px 3px rgba(15,15,20,.5)) drop-shadow(0 8px 10px rgba(15,15,25,.28))'
     : 'drop-shadow(0 2px 2px rgba(0,0,0,.45))';
   units.forEach((el, i) => {
-    const g = ransomGlyph(seed, i, { accent, faces, swatches, palette });
     const glyph = el.textContent;
     el.textContent = '';
     el.style.overflow = 'visible';
@@ -125,24 +127,55 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
     const tile = document.createElement('span');
     tile.className = 'rns';
     tile.textContent = glyph;
-    // Materials give a colour note its variety of SOURCES: `neon` is a lit tube (dark card, the ink
-    // colour glowing through a thin stroke), `wood` is letterpress block (a faint grain over the
-    // ground). Both are pure CSS layered onto the same tile — no assets, still deterministic in n.
-    let material = `background:${g.bg};color:${g.ink};`;
-    if (g.mat === 'neon') {
-      material = `background:${g.bg};color:${g.ink};` +
-        `text-shadow:0 0 4px ${g.ink},0 0 9px ${g.ink};-webkit-text-stroke:.5px ${g.ink};`;
-    } else if (g.mat === 'wood') {
-      material = `background:${g.bg};color:${g.ink};` +
-        `background-image:repeating-linear-gradient(92deg,rgba(0,0,0,.14) 0 1px,rgba(255,255,255,.05) 1px 4px);`;
-    }
-    tile.style.cssText =
-      `display:inline-block;font-family:'${g.family}',sans-serif;font-weight:${g.weight};` +
-      `${g.italic ? 'font-style:italic;' : ''}${material}` +
-      `padding:.06em .16em;margin:0 .03em;` +
-      (g.clip ? `-webkit-clip-path:${g.clip};clip-path:${g.clip};` : '') +
-      `transform:translateY(${g.dy}em) rotate(${g.rot}deg) scale(${g.scale});transform-origin:center`;
+    paintTile(tile, ransomGlyph(seed, i, { accent, faces, swatches, palette }));
     lift.appendChild(tile);
     el.appendChild(lift);
+  });
+}
+
+// Write one glyph spec onto its tile. Shared by the build-time stamp and the per-frame re-roll so the
+// two can never drift. `pop` (0..1) is a momentary swell applied right after a swap.
+// Materials give a colour note its variety of SOURCES: `neon` is a lit tube (dark card, the ink colour
+// glowing through a thin stroke), `wood` is letterpress block (a faint grain over the ground). Both are
+// pure CSS layered onto the same tile — no assets, still deterministic in n.
+function paintTile(tile, g, pop = 0) {
+  let material = `background:${g.bg};color:${g.ink};`;
+  if (g.mat === 'neon') {
+    material += `text-shadow:0 0 4px ${g.ink},0 0 9px ${g.ink};-webkit-text-stroke:.5px ${g.ink};`;
+  } else if (g.mat === 'wood') {
+    material += `background-image:repeating-linear-gradient(92deg,rgba(0,0,0,.14) 0 1px,rgba(255,255,255,.05) 1px 4px);`;
+  }
+  tile.style.cssText =
+    `display:inline-block;font-family:'${g.family}',sans-serif;font-weight:${g.weight};` +
+    `${g.italic ? 'font-style:italic;' : ''}${material}` +
+    `padding:.06em .16em;margin:0 .03em;` +
+    (g.clip ? `-webkit-clip-path:${g.clip};clip-path:${g.clip};` : '') +
+    `transform:translateY(${g.dy}em) rotate(${(g.rot * (1 + pop * 0.5)).toFixed(2)}deg) ` +
+    `scale(${(g.scale * (1 + pop * 0.09)).toFixed(3)});transform-origin:center`;
+}
+
+// Per-frame: re-roll every glyph into a DIFFERENT cutout of the SAME letter, in place. `cycle` is how
+// long one cutout holds (s) and `stagger` offsets each letter's clock so the note shuffles like a board
+// being re-pinned rather than flipping in unison.
+//
+// The tile is repainted ONLY when its variant changes, not every frame. That is a determinism
+// requirement, not an optimisation: rewriting a rotated, clip-pathed tile's style on all ~35 glyphs
+// every frame keeps the compositor re-rasterising and the capture starts sampling mid-raster, which
+// made the render vary run to run (same family as MISTAKES #104/#105). Writing ~2x a second per tile
+// leaves the frame settled.
+//
+// It stays pure in n despite the cached `data-v`: the painted style is a function of `variant` ALONE,
+// and whenever the computed variant differs from the applied one the tile is fully repainted. So any
+// render order converges on the same DOM for frame n — which is why there is no easing/pop term here;
+// a per-frame swell would reintroduce the per-frame write it exists to avoid.
+export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', cycle = 0.6, stagger = 0.13 } = {}) {
+  if (!(cycle > 0)) return;
+  units.forEach((el, i) => {
+    const tile = el.querySelector('.rns');
+    if (!tile) return;
+    const variant = Math.floor((t + i * stagger) / cycle);
+    if (tile.dataset.v === String(variant)) return;
+    paintTile(tile, ransomGlyph(seed, i, { accent, faces, swatches, palette, variant }));
+    tile.dataset.v = String(variant);
   });
 }

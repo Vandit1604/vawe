@@ -128,6 +128,17 @@ byte-identical across render order. Mixed case is preserved from the input.
   tile, wood-type, colored ink on colored stock — the `bE KINd` look).
 - **Object knobs**: `{ palette, accent, faces, swatches, ransomSeed }`. `ransomSeed` (also a top-level
   layer prop) defaults to the text, so the same word always cuts the same way; change it to re-roll.
+- **Cycling** (`"ransom": { "cycle": 0.5 }`): each letter re-rolls into a DIFFERENT cutout of the SAME
+  glyph, in place, every `cycle` seconds, with `stagger` offsetting each letter's clock so the note
+  shuffles rather than flipping in unison. Pure in n (`variant = floor((t + i*stagger)/cycle)`); the
+  tile is repainted only when its variant changes, which is a determinism requirement, not an
+  optimisation. Reel: ransom-internal.mp4.
+- **Determinism envelope — read before authoring.** The tiles are rotated and clip-pathed, so each is
+  its own compositing layer and the capture can sample mid-raster once there are too many. MEASURED:
+  16 glyphs at size 150-170 is byte-identical 3/3; 7 glyphs at 180 is 4/4. But 32 glyphs on screen at
+  once varies run to run, and so does 11 glyphs at size 88. **Keep roughly ≤16 glyphs on screen at
+  size ≥150** — reveal long copy a line at a time rather than stacking it. Verify with a repeat render,
+  never with `make frame` (see MISTAKES #102).
 - Faces must be registered in `core/tokens.css` or `ransomStyle` throws (never a silent body-font
   fallback). Edges stay near-axis-aligned on purpose: steeper diagonal cuts rasterise
   non-deterministically under the per-glyph rotation. Reel: ransom-demo.mp4 · ransom-color-demo.mp4.
