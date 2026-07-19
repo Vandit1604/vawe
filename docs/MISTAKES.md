@@ -1475,3 +1475,85 @@ missed the second file that quotes the pattern for a different reason.
 **Fix:** exclude the mutation harness too. Worth stating plainly because the cost is asymmetric — a
 gate that cries wolf about itself trains people to skim its output, which is exactly how a real
 finding gets missed.
+
+---
+
+## #86 — An incomplete GL texture samples as opaque black, and says nothing
+
+The first resample render was a solid black rectangle. The guard was
+`if (!src || !src.width || !src.height) return;`, meant to skip an image that had not decoded. But an
+`<img>`'s `.width` is its LAYOUT width, which our own CSS had just set to 1400. A 404'd image reports
+`width: 1400, naturalWidth: 0`, sailed through the guard, and got handed to `texImage2D`, which
+warned `INVALID_VALUE: no image` to a console nobody was reading and left the texture INCOMPLETE.
+WebGL samples an incomplete texture as `vec4(0,0,0,1)`. Opaque black. No error, no thrown exception,
+a render that completes successfully and is entirely wrong.
+
+**Root cause:** asking an element for a dimension it reports in two different senses, and picking the
+one that is always non-zero.
+
+**Fix:** `naturalWidth ?? width`, and a failed source now THROWS with the offending URL rather than
+returning early. A black rectangle where a photo should be is not an acceptable render, and "return
+quietly" was the wrong shape of guard for a condition that can only mean something is broken.
+
+**How it was found:** not by looking at the frame (black on a dark scene reads as "the effect is
+subtle"), but by dumping the live DOM and reading the WebGL console warning.
+
+---
+
+## #87 — refract ran every line and did nothing
+
+`refract` computed a surface normal by finite-differencing a noise field:
+`vec2 grad = vec2(n(q+e) - n(q-e), ...)` with `e = 0.004`. That is a DIFFERENCE, not a derivative.
+Dividing by `2e` was missing, so `grad` came out around 0.01 instead of order 1, the sample offset
+landed below a single pixel, and the effect was an identity transform at every strength.
+
+Nothing could have caught this except looking. Every line executed, no branch was dead, the uniform
+was read, the output was a valid image. `make conformance` proves a declared prop CHANGES the output
+and would have passed: `amount` did change the output, by a fraction of a pixel.
+
+**Fix:** `/ (2.0 * e)` and a scale retuned to the now-correct magnitude.
+
+**The other half of this entry is the mistake I nearly made.** In the same contact sheet I read
+`bitCrush` as broken too, at three different strengths. It was not. Measuring the rendered canvas
+gave 27 / 19 / 10 / 4 distinct levels across the dial, exactly as designed. My eye could not see
+10-level quantisation on a textured painting in a 440px thumbnail, and I was one edit away from
+"fixing" correct code. The instrument was wrong, not the shader. Measure the pixels before believing
+the eye on anything subtle, and believe the eye over the pixels on anything compositional.
+
+(The dial was still worth changing: linear `32 → 3` spends most of its travel where nothing visibly
+happens, so it is bit DEPTH now, halving every 0.25.)
+
+---
+
+## #88 — The comment described the intent; the code did the opposite
+
+`fisheye` was labelled "barrel (amt>0.5) or pincushion (amt<0.5)" and computed
+`d * (1.0 + k*r*r*0.6)`. Sampling FURTHER out at the edges pulls the image inward, which is
+pincushion. Above 0.5 it did precisely the opposite of what its own comment promised, and both the
+comment and the code looked right in isolation.
+
+**Fix:** the sign. **Lesson:** a comment stating a direction is a claim that has to be rendered and
+looked at, exactly like a number. Nothing in the type system, the schema, or any gate can check that
+`+` was meant to be `-`.
+
+---
+
+## #89 — The gate that proves every other gate can fire silently stopped proving one
+
+Editing `core/layers/paint.js` for resample changed the off-window line that
+`gate-mutation` patches to prove `canvas-purity` works. The fixture pinned the ENTIRE line, so it no
+longer matched, and the harness printed `~ SKIP (fixture is stale)` and **exited 0**.
+
+So: `canvas-purity` was unproven, the summary quietly read 35/36 instead of 36/36, and CI was green.
+This is the "reports green forever" failure the harness exists to prevent, reproduced inside the
+harness itself. Any edit near a mutated line silently retires a gate, and the retirement is
+announced in a line that looks like housekeeping.
+
+**Fix, two parts:**
+1. A stale fixture is now a FAILURE, not a skip. It names the file and says the gate is UNPROVEN.
+   Verified by pointing a fixture at text that does not exist: exit code is now 1, was 0.
+2. The `canvas-purity` fixture is re-anchored on the `clearRect` call rather than the whole line, so
+   the branch can grow without retiring the gate.
+
+**The general rule this earns:** a fixture should anchor on the smallest text that carries the
+behaviour it removes. Pinning a whole line couples the gate's survival to every unrelated edit on it.

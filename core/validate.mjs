@@ -279,6 +279,20 @@ if (isMain) {
     const errors = validateAll(schema, data);
     // build-time sugar must be expanded before render — the engine's layer registry has no
     // `block`/`comp` type, so a leftover one renders as NOTHING. Fail loud → run `make expand`.
+    // `resample` binds the layer's OWN raster as a GL texture, so it only means anything on a layer
+    // that has one. The engine throws at build time; catching it here names the file and index.
+    const RASTER = ['image', 'paint', 'shader'];
+    (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
+      if (!isObj(L) || !L.resample) return;
+      if (!RASTER.includes(L.type))
+        errors.push(`layer[${i}] has \`resample\` on a "${L.type}" layer, which owns no pixels to sample — raster layers only (${RASTER.join(' · ')}).`);
+      else if (L.type === 'image' && (!L.w || !L.h))
+        errors.push(`layer[${i}] resample on an image needs explicit w and h (the GL buffer is sized at build time).`);
+      // ken is a CSS transform on the <img>; the texture is the img's pixels, which the transform
+      // never touches. Rendering both would silently drop the ken. Refuse instead.
+      if (L.type === 'image' && L.ken)
+        errors.push(`layer[${i}] combines \`ken\` with \`resample\` — ken is a CSS transform and does not reach the sampled pixels, so it would be silently ignored. Pick one.`);
+    });
     (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
       if (isObj(L) && (L.type === 'block' || L.type === 'comp'))
         errors.push(`layer[${i}] is an un-expanded ${L.type} ("${L.block || L.ref}") — run \`make expand D=${path.relative(root, file)}\` and render the .expanded.json.`);

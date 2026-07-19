@@ -3,6 +3,7 @@
 // deterministic. Sits behind content by default (give it a low track + intensity). Not the cut-cover
 // stings — those live in core/stings.js.
 import { createAmbientLayer } from '../shaders-ambient.js';
+import { attachResample, tickResample } from '../resample.js';
 
 const hex3 = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 
@@ -14,6 +15,7 @@ export function build(kit, el, L) {
   el.appendChild(inst.canvas);
   el.__shader = inst;
   el.__pal = Array.isArray(L.colors) && L.colors.length ? L.colors.map(hex3) : null; // null → the shader's colourful default
+  attachResample(kit, el, L);
 }
 
 // draw the ambient shader from LOCAL time (loops smoothly). Stamp el.dataset.st so a shader-only frame
@@ -23,8 +25,9 @@ export function frame(kit, el, L, t) {
   const inst = el.__shader; if (!inst) return;
   // off-window leaves the last drawn frame in the GL buffer, so the canvas contents depend on render
   // ORDER rather than on t. Invisible today (opacity 0) but impure; see core/layers/paint.js.
-  if (!(t >= start && t < end)) { if (inst.clear) inst.clear(); return; }
+  if (!(t >= start && t < end)) { if (inst.clear) inst.clear(); tickResample(el, L, t, false); return; }
   const lt = (t - start) * (L.speed ?? 1);
   inst.draw(L.shader || 'flow', lt, L.seed ?? 0, el.__pal, L.intensity ?? 0.35);
   el.dataset.st = lt.toFixed(2);
+  tickResample(el, L, t, true);   // AFTER inst.draw: sample the pixels this frame produced
 }

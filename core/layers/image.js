@@ -1,6 +1,7 @@
 // core/layers/image.js — an <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
 // `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
 import { canvasFxKey } from '../canvas-fx.js';
+import { attachResample, tickResample } from '../resample.js';
 
 export function build(kit, el, L) {
   el.innerHTML = kit.icon(L.src, '');
@@ -29,13 +30,20 @@ export function build(kit, el, L) {
     im.style.webkitMaskImage = mask; im.style.maskImage = mask;
     el.style.background = L.edgeFadeColor || '#ffffff';
   }
+  attachResample(kit, el, L);
 }
-// ken burns zoom (continuous over the whole window, identity outside)
+// ken burns zoom (continuous over the whole window, identity outside) + resample tick
 export function frame(kit, el, L, t) {
-  if (!L.ken) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  const im = el.querySelector('img'); if (!im) return;
-  Object.assign(im.style, t >= start && t < end
-    ? kit.kenBurns(t - start, L.duration ?? 2, L.ken === true ? {} : L.ken)
-    : { transform: 'scale(1)', transformOrigin: '50% 50%' });
+  const active = t >= start && t < end;
+  if (L.ken) {
+    const im = el.querySelector('img');
+    if (im) Object.assign(im.style, active
+      ? kit.kenBurns(t - start, L.duration ?? 2, L.ken === true ? {} : L.ken)
+      : { transform: 'scale(1)', transformOrigin: '50% 50%' });
+  }
+  // NOTE ken + resample do not compose: ken is a CSS transform on the <img>, and the texture is the
+  // img's own pixels, which a CSS transform does not touch. Rejected at validate rather than
+  // rendered as a silently-ignored ken (docs/MISTAKES.md — silence is the worst failure).
+  tickResample(el, L, t, active);
 }

@@ -71,6 +71,13 @@ you from.
   fast slides, and hard slams to sell speed and hide the discrete-frame stutter; a `0..1` number tunes
   strength (default `true` = half-shutter). Skip it on slow/ambient drifts (no streak to earn) and on
   small body text held mid-move (it dissolves). Pure in the frame → seek-safe, capped so text never melts.
+- **Resample** (`"resample"` on an `image`/`paint`/`shader` layer): the layer's own pixels re-sampled
+  through a shader, so unlike a `filter` it can smear, bend and quantise. One per film, on the hero
+  shot. `zoomBlur` on an impact moment (ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp)
+  · `dissolve` as a transition OUT of an image (`amount:[0.05, 0.95]` erodes it away on an ember front)
+  · `refract` for a liquid-glass hero · `spinBlur` on a rotating badge · `bitCrush`/`macroblock` for a
+  degrade/glitch beat, never as decoration. A constant `amount` is usually the wrong call: half of these
+  only read as motion while they MOVE, so ramp them across the layer's window.
 
 ### Let the director pick (restraint by default)
 Don't hand-scatter effects. **`make direct D=<file>`** reads the brand's motion personality (`theme.motion`)

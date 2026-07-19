@@ -24,6 +24,7 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, down
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
+import { RESAMPLE_FX } from '../../core/resample-fx.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -466,6 +467,32 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`stings: wave-2 branches all depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
   // gridPixelateWipe (wave 4) is a transition too — its block curtain must key off progress
   ok('stings: gridPixelateWipe depends on progress', (() => { const i = SHADER_FX.indexOf('gridPixelateWipe'); const body = frag.slice(frag.indexOf(`u_fx == ${i}`)); return body.includes('pp') && body.includes('bell'); })());
+}
+
+// ---- resample (layer as texture) ----
+// The distinguishing property of this shader vs the sting/ambient ones: EVERY branch must read the
+// source texture. An effect that never calls texture2D is not a resample, it is a veil painted over
+// the layer, and it would silently discard the pixels the author asked to transform.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'resample-fx.js'), 'utf8');
+  const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
+  ok(`resample: ${RESAMPLE_FX.length} effects, all unique`, RESAMPLE_FX.length > 0 && new Set(RESAMPLE_FX).size === RESAMPLE_FX.length);
+  const noBranch = RESAMPLE_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
+  ok(`resample: FRAG has a branch for effects 0..${RESAMPLE_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => RESAMPLE_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok(`resample: last effect (${RESAMPLE_FX[RESAMPLE_FX.length - 1]}) is the trailing else`, !frag.includes(`u_fx == ${RESAMPLE_FX.length - 1}`));
+  const branchAt = (i) => {
+    const start = i === RESAMPLE_FX.length - 1 ? frag.lastIndexOf('} else {') : frag.indexOf(`u_fx == ${i}`);
+    const next = i === RESAMPLE_FX.length - 1 ? frag.length : frag.indexOf('} else', start + 4);
+    return frag.slice(start, next > start ? next : frag.length);
+  };
+  const blind = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('texture2D'));
+  ok(`resample: every effect samples the source texture${blind.length ? ' — blind: ' + blind.join(', ') : ''}`, blind.length === 0);
+  // amount is the one dial every effect exposes; a branch that ignores it cannot be animated,
+  // which is what `amount: [from, to]` exists for.
+  const deaf = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('u_amt'));
+  ok(`resample: every effect responds to amount${deaf.length ? ' — deaf: ' + deaf.join(', ') : ''}`, deaf.length === 0);
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  ok('resample: schema enum is exactly RESAMPLE_FX, in order', JSON.stringify(schema.fields.layers.item.resample.enum) === JSON.stringify(RESAMPLE_FX));
 }
 
 // ---- ambient shader looks ----

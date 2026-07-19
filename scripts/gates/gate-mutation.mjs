@@ -168,8 +168,10 @@ const srcCases = [
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/paint.js',
-    mutate: (s) => s.replace("  if (!(t >= start && t < end)) { const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0); return; }",
-                             "  if (!(t >= start && t < end)) return;"),
+    // Anchored on the clearRect call, not the whole line: the line also carries the resample tick
+    // now, and pinning the exact text made the fixture go stale the moment the branch grew. A stale
+    // fixture SKIPS, which reads as "fine" in the summary while proving nothing.
+    mutate: (s) => s.replace("const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0);", ""),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
     mutate: (s) => s.replace('export function build', 'const UNUSED_MARKER = 1;\nexport function build'),
@@ -197,7 +199,15 @@ for (const c of srcCases) {
   if (c.before) c.before();
   const orig = fs.readFileSync(p, 'utf8');
   const mutated = c.mutate(orig);
-  if (mutated === orig) { console.log(`   ~ SKIP  ${c.name} (mutation did not apply — fixture is stale)`); continue; }
+  // A stale fixture is a FAILURE, not a skip. This is the gate that proves every other gate can
+  // fire; when its fixture stops matching (because the code it patches moved), the gate it vouches
+  // for silently becomes unproven while the run still exits 0. That is precisely the "reports green
+  // forever" failure this whole harness exists to prevent, reproduced inside the harness itself.
+  if (mutated === orig) {
+    console.log(`   ✗ ${'source'.padEnd(9)} must-fail  ${c.name}`);
+    broken.push({ name: c.name, why: 'FIXTURE IS STALE — the mutation no longer applies, so this gate is UNPROVEN. Re-anchor it on text that still exists in ' + c.file, out: '' });
+    continue;
+  }
   fs.writeFileSync(p, mutated);
   const r = run(c.cmd[0], c.cmd[1]);
   fs.writeFileSync(p, orig); // always restore, even if the gate throws

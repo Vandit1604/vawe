@@ -198,41 +198,56 @@ consecutive planning passes at work that already existed.
 - **analog/retro: majority ships** — `AMBIENT_FX` vhs · crt · filmGrain · lightLeak, `LOOKS` vhs ·
   super8 · crt. Missing: film dust / gate weave, dot-crawl. CRT phosphor *trails* stay excluded
   (frame feedback).
-- **distortion: 6 of 8 ship** — barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
-  displace/melt. Missing: fisheye, and a real (frame-sampling) block displacement.
-- **blur/motion: bokeh ships.** Missing: radial, zoom and spin blur — one `SHADER_FX` entry each,
-  all three sharing one tap loop. Frosted glass is approximated by `LOOKS.glassWarp`.
-- Still absent: **iridescence, bit-crush, macroblocking, Glitch RGB captions, Liquid Background/Glass,
-  Portal, Shatter, Code Shader Dissolve.** The first three are one entry each; the last four need a
-  layer-as-texture path or real geometry.
+- **distortion: 7 of 8 ship** — barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
+  displace/melt, plus **`fisheye` via `resample`** (see below). Missing: real block displacement of a
+  layer beyond what `macroblock` does.
+- **blur/motion: bokeh ships, and `zoomBlur` + `spinBlur` now ship via `resample`** (see below). They
+  needed a texture to sample, not a new `SHADER_FX` entry. Frosted glass now has two answers: the
+  `glass` prop (`backdrop-filter`) for a blurred backdrop, `resample:"refract"` for real bending.
+- Still absent: **iridescence, Glitch RGB captions, Liquid Background/Glass, Portal, Shatter, Code
+  Shader Dissolve.** Iridescence is one generative entry; Code Shader Dissolve needs a DOM subtree as a
+  texture (Seam C, not built); Portal and Shatter need real geometry. **`bit-crush` and `macroblocking`
+  now ship** as `resample` effects.
 
 Note: **true multi-sample motion blur** is not this tier. It means rendering sub-frames and
 accumulating — a render-pipeline change, not a shader. Tier 5.
 
-### The one capability that unblocks a whole cluster: shaders cannot read the frame
+### The capability that unblocked a whole cluster: shaders could not read the frame · SEAMS A + B NOW BUILT
 
-Audited 2026-07-19. `core/stings.js` and `core/shaders-ambient.js` contain **zero** `sampler2D` /
-`texture2D`. Both are purely GENERATIVE overlays composited above the scene (stings sit at z-index 70).
-Nothing in the engine can sample what is behind it.
+Audited 2026-07-19, then **built**. The diagnosis stands: `core/stings.js` and `core/shaders-ambient.js`
+contain **zero** `sampler2D` / `texture2D`, and both are purely GENERATIVE overlays composited above the
+scene (stings sit at z-index 70). Nothing in *that* path can sample what is behind it. What changed is
+that the sampling path no longer has to go through it.
 
-That single fact re-prices a chunk of the backlog. Every one of these reads as "one new `SHADER_FX`
-entry" and is not, because each must transform pixels it cannot currently see:
+Both cheap paths shipped:
+1. **`backdrop-filter`**: the `glass` prop on any layer (`core/layers/util.js`). Reads what is behind
+   an element natively: frosted panels, the Tier-1 Liquid Glass approximation, blur-behind. It cannot
+   BEND the backdrop, only filter it, so it never covered the sampling family below.
+2. **Layer-as-texture, SHIPPED as `resample`** (`core/resample-fx.js` + `core/resample.js`). A layer
+   whose content is already a raster is bound as a GL texture and re-sampled through a fragment shader.
+   **Seam A (canvas sources: `paint`, `shader`) and Seam B (image sources: the `<img>` of an `image`
+   layer) are both done.** Spec: `{ fx, amount, speed, seed }` on the layer, `amount` optionally
+   `[from, to]` so the effect animates across the layer's own window. Docs: `docs/PRIMITIVES.md`.
 
-- radial blur · zoom blur · spin blur (the whole blur/motion family bar bokeh, which is generative)
-- fisheye, and any real lens distortion of the frame
-- bit-crush, macroblocking, real block displacement, real tearing
-- frosted glass, Liquid Background/Glass
-- Code Shader Dissolve (wants a `codeBlock` as its texture)
+**Now done** (each was blocked purely on "must transform pixels it cannot see"):
+- ~~radial / zoom blur~~ → `zoomBlur`
+- ~~spin blur~~ → `spinBlur`
+- ~~fisheye, real lens distortion of a layer~~ → `fisheye` (barrel above 0.5, pincushion below)
+- ~~bit-crush~~ → `bitCrush` (depth-halving dial, not a linear level ramp)
+- ~~macroblocking~~ → `macroblock`
+- ~~real glass refraction~~ → `refract` (noise-gradient displacement + per-channel dispersion)
+- plus two that came free once sampling existed: `dissolve` (ember-lit erosion) and `chromaShift`.
 
-Two paths, and they are worth pricing before picking:
-1. **`backdrop-filter`** — CSS, cheap, and completely untapped (zero occurrences in `core/`). It reads
-   what is behind an element natively. Gets frosted glass, the Tier-1 Liquid Glass approximation, and
-   blur-behind for free. Does NOT get radial/zoom/spin blur, which need custom sampling.
-2. **Layer-as-texture** — render a layer (or the composited frame) to a texture and hand it to a
-   shader. Unblocks the whole list above. Structural, and the bigger lift.
-
-Prefer 1 first and escalate: it is the same "start Tier 1, escalate only if it looks cheap" logic this
-file already applies to Liquid Glass.
+**Still NOT built, and deliberately so:**
+- **Seam C, sampling an arbitrary DOM subtree** (`text`, `group`, `component`, `codeBlock`). `resample`
+  needs a raster, and a DOM subtree is not one. Doing it means an offline `foreignObject` bake to a
+  texture in boot's awaited preload, mirroring how `canvasFx` bakes. That work has **not** been done, so
+  **Code Shader Dissolve** (wants a `codeBlock` as its texture) is still blocked, and the validator
+  rejects `resample` on any non-raster layer rather than silently ignoring it.
+- **Full-frame feedback**: sampling the COMPOSITED frame. Out of scope on purpose: the composite is one
+  frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it.
+  That breaks pure-in-`n`, which is the product's central claim. `resample` never samples its own
+  previous output; guarded by `make probe` + `make canvas-purity`.
 
 **Genuinely cheap and still absent** (generative, so the overlay path suffices): nebula (one
 `AMBIENT_FX` string in the shipped fbm family), iridescence, dot-crawl.

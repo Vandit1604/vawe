@@ -4,7 +4,7 @@ No templates. These are the words; you write the sentences. Counts are exact (fr
 Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 33 shader stings, 14 ambient
-shader looks, 26 composite looks, 8 canvas passes, 25 kinetic
+shader looks, 26 composite looks, 8 canvas passes, 8 resample effects (layer-as-texture), 25 kinetic
 presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
 brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
@@ -367,6 +367,58 @@ the pixels never change per frame → deterministic by construction (probe/snap 
   (sepia dither). `canvasFx:"blueprint"` or override: `{ fx:"comic", cell:5, ink:"#111" }`.
 - Only bakes local/same-origin images (cross-origin taints `getImageData` → the raw image shows).
   Best on static images; pairs with a `filter:` grade for extra colour. Reel: canvasfx-reel / tierc-reel.
+
+## Layer as texture (`core/resample-fx.js`) · `resample` on a raster layer
+
+A layer whose content is **already a raster** (an `image` layer's `<img>`, or the canvas a `paint` or
+`shader` layer draws into) is bound as a WebGL texture and re-sampled through a fragment shader. This
+is the one thing the sting/ambient shaders structurally cannot do: they are fullscreen veils generated
+from uniforms, with no access to any pixels. Radial blur, spin blur, fisheye, bit-crush, macroblocking
+and glass refraction are all "read the neighbouring pixels of an existing image", so they all arrive at
+once the moment a layer can be sampled.
+
+```jsonc
+{ "type":"image",  "src":"/assets/x.png", "w":900, "h":600, "resample":{ "fx":"zoomBlur", "amount":0.5 } }
+{ "type":"paint",  "paint":"waves",  "resample":"refract" }                                // string shorthand
+{ "type":"shader", "shader":"flow",  "resample":{ "fx":"dissolve", "amount":[0.05, 0.95] } }
+```
+
+- **Spec**: `fx` (required, one of the 8) · `amount` (0..1; or `[from, to]`, eased across the layer's own
+  window with a smoothstep) · `speed` (time multiplier, default 1) · `seed`.
+
+| `fx` | What it does |
+|---|---|
+| `zoomBlur` | radial smear outward from centre · speed, impact, "the frame is rushing at you" |
+| `spinBlur` | rotational smear around centre; the pivot itself stays sharp |
+| `fisheye` | `amount` > 0.5 barrel bulge, < 0.5 pincushion, 0.5 is the identity transform |
+| `bitCrush` | colour-depth quantisation; each 0.25 of `amount` halves the depth (32 · 16 · 8 · 4 · 2 levels) |
+| `macroblock` | the block artefacts of a starved codec, chroma smear and dropped blocks |
+| `dissolve` | noise-thresholded erosion with an ember-lit burn front |
+| `refract` | liquid glass: bends pixels along a noise gradient, with per-channel dispersion |
+| `chromaShift` | radial RGB separation |
+
+**Constraints (all validator-enforced, all fail loud):**
+1. **Raster layers only**: `image` · `paint` · `shader`. A `text`/`rect`/`group`/`component` layer owns
+   no pixels to sample, so `resample` there is a validation error, never a silent no-op.
+2. **`resample` on an image requires explicit `w` and `h`.** The GL buffer is sized at build time and
+   an unsized `<img>` has no dimensions until it loads.
+3. **`ken` and `resample` cannot combine** on the same image layer. `ken` is a CSS transform on the
+   `<img>` and never reaches the sampled pixels, so it would be silently dropped. Pick one.
+4. **One WebGL context per resampled layer.** This is a hero-shot effect; do not put it on fifty layers.
+5. **Determinism**: pure in local `t`. The source is either static or drawn from `lt` *before* it is
+   sampled, and nothing ever samples its own previous output (no feedback). Proven by `make probe` +
+   `make canvas-purity`.
+
+Not the same as its neighbours, and the difference is what to reach for:
+- **vs `canvasFx`**: baked once at build into a static PNG. Static by construction, so it cannot move,
+  animate, or take an `amount` ramp. Use `canvasFx` for a treated still, `resample` when the treatment
+  itself is the motion.
+- **vs `filter:` / composite looks**: CSS-level, so each output pixel is a function of itself alone.
+  They tint, grade, bloom and posterize; they cannot reach a neighbouring pixel, which is why zoom
+  smear, spin smear and codec blocking cannot be expressed there.
+- **vs `glass`**: `backdrop-filter` reads what is *behind* a layer, but only through the CSS filter
+  functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
+  frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.
 
 ## Caption styles
 

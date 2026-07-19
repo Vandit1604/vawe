@@ -3,6 +3,7 @@
 // change the DOM signature or the renderer's static-frame dedup can reuse a neighbouring frame and the
 // motion silently drops out. See core/paint-fx.js for the determinism contract each effect keeps.
 import { PAINT_FX } from '../paint-fx.js';
+import { attachResample, tickResample } from '../resample.js';
 
 export function build(kit, el, L) {
   const w = Math.round(L.w ?? kit.W), h = Math.round(L.h ?? kit.H);
@@ -13,6 +14,7 @@ export function build(kit, el, L) {
   el.appendChild(cv);
   el.__paint = cv.getContext('2d');
   el.__paintWH = [w, h];
+  attachResample(kit, el, L);
 }
 
 export function frame(kit, el, L, t) {
@@ -23,7 +25,7 @@ export function frame(kit, el, L, t) {
   // 8 workers in arbitrary order. driveClips hides the layer at opacity 0 so it is invisible today,
   // which is exactly why it would never have been noticed: it is impurity waiting for the day someone
   // gives a paint layer a non-zero resting opacity. Same class as MISTAKES #41.
-  if (!(t >= start && t < end)) { const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0); return; }
+  if (!(t >= start && t < end)) { const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0); tickResample(el, L, t, false); return; }
   const fx = PAINT_FX[L.paint];
   if (!fx) throw new Error(`unknown paint "${L.paint}" — one of: ${Object.keys(PAINT_FX).join(', ')}`);
   const [w, h] = el.__paintWH;
@@ -32,4 +34,5 @@ export function frame(kit, el, L, t) {
   if (L.bg) { ctx.fillStyle = L.bg; ctx.fillRect(0, 0, w, h); }
   fx(ctx, w, h, lt, L.seed ?? 0, L);
   el.dataset.st = lt.toFixed(3);
+  tickResample(el, L, t, true);   // AFTER the source draws: we sample this frame's pixels, never last frame's
 }

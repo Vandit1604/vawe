@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
+import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { PRESETS } from '../../core/type.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
@@ -66,7 +67,8 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     { path: 'layers.item.anim',   want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
     { path: 'layers.item.out',    want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
     { path: 'layers.item.shader', want: AMBIENT_FX,                              src: 'core/shaders-ambient.js AMBIENT_FX' },
-    { path: 'layers.item.paint',  want: PAINT_FX_NAMES,                          src: 'core/paint-fx.js PAINT_FX' },
+  { path: 'layers.item.resample', want: RESAMPLE_FX,                            src: 'core/resample-fx.js RESAMPLE_FX' },
+  { path: 'layers.item.paint',  want: PAINT_FX_NAMES,                          src: 'core/paint-fx.js PAINT_FX' },
     { path: 'layers.item.type',   want: LAYER_TYPES,                             src: 'core/layers/index.js REGISTRY' },
     { path: 'cuts.item.style',    want: [...Object.keys(PRESENTATIONS), 'none'], src: 'core/cuts.js PRESENTATIONS' },
     { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
