@@ -252,6 +252,21 @@ Both cheap paths shipped:
   frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it.
   That breaks pure-in-`n`, which is the product's central claim. `resample` never samples its own
   previous output; guarded by `make probe` + `make canvas-purity`.
+- **Seam D — two-scene shader transitions (NOT built).** A cut today transforms ONE scene root
+  (`core/cuts.js`, a another engine-model timing/presentation split) and a sting is a GENERATIVE overlay above
+  it. Neither can blend the outgoing beat INTO the incoming one, because neither samples both as
+  textures. another engine does exactly this: rasterize the two beats either side of a cut to textures
+  `u_from`/`u_to` and run a fragment shader keyed on `u_progress` — which buys whip-pan motion-blur that
+  smears BOTH beats, an sdf-iris that reveals the next beat through a mask, dispersion/lens/warp that
+  bend across the seam, and flash-through-white with independent in/out windows. Ours cannot do any of
+  these; a `PRESENTATIONS` entry can only move/fade/clip one root, and a sting only paints on top.
+  **The determinism story is clean** (both textures are pure functions of `n`, no feedback), so this is
+  effort, not a blocked design. **The build:** a transition primitive that captures the two adjacent
+  beats to offscreen rasters (the `resample` layer-as-texture path already proves single-source capture;
+  this needs a second source and a window that spans the cut), then a small `TRANSITION_FX` GLSL registry
+  keyed on `(progress, seed)` — mirroring `SHADER_FX`. Port targets from the another engine study:
+  `whipPan` (10-tap directional blur on both), `sdfIris`, `flashThroughWhite` (dual smoothstep windows),
+  `crossWarp`, `gravitationalLens`. This is the one thing the two reference engines have that we do not.
 
 ~~**Genuinely cheap and still absent** (generative): nebula, iridescence, dot-crawl.~~ **All three
 shipped 2026-07-19**: `nebula` and `dotCrawl` in `AMBIENT_FX`, `iridescence` in `SHADER_FX`.
