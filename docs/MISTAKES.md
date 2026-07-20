@@ -2253,3 +2253,29 @@ is absent, and those are different diagnoses. Same trap as #101, one level down.
 Also worth stating plainly: this was a knob I added an hour earlier, and it was wrong for one of the
 three kernels I shipped it with. A parameter that means different things to different members of its
 own registry needs the branch written the day it is introduced, not the day one member visibly breaks.
+
+---
+
+## #114 — A build step that stops at the first error reports one error per run
+
+Adding three rows to the site-assets manifest, nothing encoded and the only output was a complaint
+about a different row entirely. `site-assets.mjs` called `process.exit(1)` the moment a manifest row
+had no render in `out/`, and the aspect trio sits ABOVE the films in the table, so one stale row three
+quarters of the way down hid every row beneath it. The new entries were never even attempted.
+
+Worse, the failure was old and partly invisible: the trio had been missing for a long time, and
+because the loop died on the first of the three, only ONE of them was ever named. The site kept
+serving the committed copies, so nothing looked broken from outside.
+
+**Fix:** record and continue, then fail at the end with the full list. The first run after the change
+reported all three instead of one, which is how the gap got closed in a single pass rather than three.
+
+**The lesson.** Fail-fast is right for a corrupting operation and wrong for a report. This loop does
+independent work per row: stopping early buys nothing and costs the operator a round trip per defect.
+Ask which one a step is before choosing — and if it prints a list of problems for a human to fix, it
+owes them the whole list.
+
+**Related, same run:** two renders on the shelf (`threadcite-launch`, `shortwave-launch`) have no
+scene file at all. They cannot be re-rendered, verified, or offered as "view source", so they are
+finished videos the engine can no longer account for. Nothing warns about an orphan render; a check
+that every `out/*.mp4` traces to a `formats/scene/*.json` would.

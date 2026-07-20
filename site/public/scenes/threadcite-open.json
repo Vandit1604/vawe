@@ -1,0 +1,398 @@
+{
+  "module": "scene",
+  "orientation": "landscape",
+  "theme": "threadcite",
+  "duration": 30,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "paperShapes",
+      "from": 0,
+      "to": 4.2
+    },
+    {
+      "preset": "paper",
+      "from": 4.2,
+      "to": 25.4
+    },
+    {
+      "preset": "accent",
+      "value": "dark",
+      "from": 25.4,
+      "to": 30
+    }
+  ],
+  "stings": [
+    {
+      "t": 4.2,
+      "fx": "flash",
+      "dur": 0.9
+    },
+    {
+      "t": 14.6,
+      "fx": "leak",
+      "dur": 1.1,
+      "seed": 3
+    },
+    {
+      "t": 25.4,
+      "fx": "burn",
+      "dur": 1.1,
+      "seed": 7
+    }
+  ],
+  "camera": [
+    {
+      "t": 0,
+      "s": 1
+    },
+    {
+      "t": 8.4,
+      "s": 1
+    },
+    {
+      "t": 14.4,
+      "s": 1.05
+    },
+    {
+      "t": 14.6,
+      "s": 1
+    },
+    {
+      "t": 30,
+      "s": 1.02
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "INTRODUCING THREADCITE",
+      "font": "mono",
+      "size": 32,
+      "weight": 600,
+      "color": "#5f5e58",
+      "tracking": "0.05em",
+      "x": 150,
+      "y": 250,
+      "start": 0.3,
+      "duration": 3.9,
+      "anim": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Turn Reddit threads into <b>customers.</b>",
+      "size": 116,
+      "w": 1400,
+      "x": 150,
+      "y": 330,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 0.5,
+      "duration": 3.7,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "watch how ✎",
+      "font": "serif",
+      "size": 58,
+      "color": "#e1500f",
+      "x": 155,
+      "y": 680,
+      "start": 1.8,
+      "duration": 2.4,
+      "anim": "rise",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Buyers ask Reddit.",
+      "size": 104,
+      "w": 1600,
+      "x": 150,
+      "y": 380,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.06,
+      "each": 0.4,
+      "start": 4.4,
+      "duration": 4,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "<b>AI answers with Reddit.</b>",
+      "size": 104,
+      "w": 1600,
+      "x": 150,
+      "y": 530,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.06,
+      "each": 0.4,
+      "start": 4.9,
+      "duration": 3.5,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "This is ThreadCite.",
+      "size": 64,
+      "x": 150,
+      "y": 84,
+      "start": 8.6,
+      "duration": 6,
+      "anim": "rise",
+      "exitDur": 0.35
+    },
+    {
+      "type": "component",
+      "src": "/assets/brands/threadcite/components/howitworks.json",
+      "w": 1360,
+      "x": 280,
+      "y": 168,
+      "start": 8.6,
+      "duration": 6,
+      "cut": "punch",
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "How ThreadCite works",
+      "size": 64,
+      "x": 150,
+      "y": 110,
+      "start": 14.8,
+      "duration": 5.4,
+      "anim": "rise",
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "x": 460,
+      "y": 250,
+      "w": 1000,
+      "h": 130,
+      "radius": 18,
+      "bg": "#ffffff",
+      "border": "1px solid #dad9d7",
+      "shadow": true,
+      "start": 15,
+      "duration": 5.2,
+      "cut": "whip",
+      "dir": "left",
+      "dist": 60,
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 460,
+      "y": 430,
+      "w": 1000,
+      "h": 130,
+      "radius": 18,
+      "bg": "#ffffff",
+      "border": "1px solid #dad9d7",
+      "shadow": true,
+      "start": 15.35,
+      "duration": 4.85,
+      "cut": "whip",
+      "dir": "right",
+      "dist": 60,
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 460,
+      "y": 610,
+      "w": 1000,
+      "h": 130,
+      "radius": 18,
+      "bg": "#ffffff",
+      "border": "1px solid #dad9d7",
+      "shadow": true,
+      "start": 15.7,
+      "duration": 4.5,
+      "cut": "whip",
+      "dir": "left",
+      "dist": 60,
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 460,
+      "y": 790,
+      "w": 1000,
+      "h": 130,
+      "radius": 18,
+      "bg": "#ffffff",
+      "border": "1px solid #dad9d7",
+      "shadow": true,
+      "start": 16.05,
+      "duration": 4.15,
+      "cut": "whip",
+      "dir": "right",
+      "dist": 60,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "<b>01</b> · Tell us your site",
+      "size": 44,
+      "weight": 700,
+      "x": 520,
+      "y": 288,
+      "w": 900,
+      "start": 15,
+      "duration": 5.2,
+      "cut": "whip",
+      "dir": "left",
+      "dist": 60,
+      "exitDur": 0.3,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "<b>02</b> · We find your threads",
+      "size": 44,
+      "weight": 700,
+      "x": 520,
+      "y": 468,
+      "w": 900,
+      "start": 15.35,
+      "duration": 4.85,
+      "cut": "whip",
+      "dir": "right",
+      "dist": 60,
+      "exitDur": 0.3,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "<b>03</b> · Reply with coached drafts",
+      "size": 44,
+      "weight": 700,
+      "x": 520,
+      "y": 648,
+      "w": 900,
+      "start": 15.7,
+      "duration": 4.5,
+      "cut": "whip",
+      "dir": "left",
+      "dist": 60,
+      "exitDur": 0.3,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "<b>04</b> · See where you show up",
+      "size": 44,
+      "weight": 700,
+      "x": 520,
+      "y": 828,
+      "w": 900,
+      "start": 16.05,
+      "duration": 4.15,
+      "cut": "whip",
+      "dir": "right",
+      "dist": 60,
+      "exitDur": 0.3,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "text": "Reddit is the source. <b>You're the citation.</b>",
+      "size": 96,
+      "w": 1620,
+      "x": 150,
+      "y": 430,
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 20.4,
+      "duration": 5,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Get found where <em>buyers ask.</em>",
+      "size": 108,
+      "w": 1620,
+      "x": 150,
+      "y": 420,
+      "align": "center",
+      "color": "#ffffff",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 25.6,
+      "duration": 4.4,
+      "exitDur": 0
+    },
+    {
+      "type": "rect",
+      "x": 906,
+      "y": 232,
+      "w": 108,
+      "h": 108,
+      "radius": 26,
+      "bg": "#ffffff",
+      "shadow": true,
+      "start": 26.05,
+      "duration": 3.95,
+      "anim": "pop",
+      "exitDur": 0
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/threadcite/icon.svg",
+      "x": 924,
+      "y": 250,
+      "w": 72,
+      "h": 72,
+      "start": 26.05,
+      "duration": 3.95,
+      "anim": "pop",
+      "exitDur": 0,
+      "critical": true
+    },
+    {
+      "type": "rect",
+      "x": 785,
+      "y": 630,
+      "w": 350,
+      "h": 88,
+      "radius": 14,
+      "bg": "#0f0e0d",
+      "start": 26.5,
+      "duration": 3.5,
+      "anim": "rise",
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "threadcite.live",
+      "font": "mono",
+      "size": 40,
+      "weight": 600,
+      "color": "#ffffff",
+      "x": 785,
+      "y": 653,
+      "w": 350,
+      "align": "center",
+      "start": 26.5,
+      "duration": 3.5,
+      "anim": "rise",
+      "exitDur": 0,
+      "critical": true
+    }
+  ]
+}

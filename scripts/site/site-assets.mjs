@@ -61,6 +61,9 @@ const MANIFEST = [
   ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 13.2, 16 / 9],
   ['showcase', 'ransom-intro',     'ransom-intro',           'showcase/ransom.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'gradient-showcase','gradient-showcase',      'showcase/gradients.mp4',     1280, 5.0, 16 / 9],
+  // ditherkit opens on the dithered chart and spends its middle in a near-black transition, so a
+  // midpoint poster would ship an almost empty still. 6.0 is the chart.
+  ['showcase', 'ditherkit',        'ditherkit',              'showcase/dither.mp4',       1280, 6.0, 16 / 9],
 
   // the aspect trio — one scene, three ratios. Each box on the page carries the TRUE ratio.
   ['aspect', 'showcase-aspect',    'showcase-aspect.16x9',   'showcase/aspect-169.mp4',     800, 2.0, 16 / 9],
@@ -72,6 +75,8 @@ const MANIFEST = [
   ['films',  'stripe',             'stripe',                 'films/stripe.mp4',           1280, 3.0, 16 / 9],
   ['films',  'argus-launch',       'argus-launch',           'films/argus-launch.mp4',     1280, 3.0, 16 / 9],
   ['films',  'creed-launch',       'creed-launch',           'films/creed-launch.mp4',     1280, 3.0, 16 / 9],
+  ['films',  'threadcite-open',    'threadcite-open',        'films/threadcite-open.mp4', 1280, 8.0, 16 / 9],
+  ['films',  'plinth-ad',          'plinth-ad',              'films/plinth-ad.mp4',       1280, 22.0, 16 / 9],
 ];
 
 // showcase-aspect is the one scene that intentionally renders three ratios in one pass.
@@ -113,10 +118,15 @@ if (has('--render')) {
 // 2. encode each row to its web size + poster
 let wrote = 0, stale = 0;
 let mismatched = 0;
+const missingRenders = [];
 for (const [group, scene, render, dest, width, poster, ar] of rows) {
   const src = path.join(OUT, `${render}.mp4`);
   const dst = path.join(PUB, dest);
-  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at out/${render}.mp4 — run with --render`); process.exit(1); }
+  // Report and CONTINUE, then fail at the end. Exiting here meant one stale manifest row hid every
+  // row beneath it: three new entries added below the aspect trio silently never encoded, and the
+  // only output was the one error about the trio. A build step that stops at the first problem
+  // reports one problem per run, which is the slowest possible way to fix five.
+  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at out/${render}.mp4 — run with --render`); missingRenders.push(dest); continue; }
 
   const { w, h } = probe(src);
 
@@ -166,6 +176,13 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   wrote++;
 }
 
+if (missingRenders.length) {
+  console.error(`\n✗ ${missingRenders.length} manifest row(s) have no render in out/:`);
+  for (const d of missingRenders) console.error(`    ${d}`);
+  console.error('  Re-run with --render, or drop the row. Rows still in the manifest but absent from');
+  console.error('  out/ mean the site is serving whatever was committed last, which nothing re-checks.');
+  process.exitCode = 1;
+}
 if (mismatched) {
   console.error(`\n✗ ${mismatched} render(s) have the wrong aspect — NOT written. Fix the scene, re-render, re-run.`);
   process.exit(1);

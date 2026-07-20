@@ -21,6 +21,8 @@ const FILMS: Film[] = [
   { slug: "stripe", brand: "Stripe", dur: "0:45", line: "Financial infrastructure to grow your revenue. The signature gradient mesh, a one-tap payment, a Payment complete.", tag: "reflected · gradient mesh" },
   { slug: "argus-launch", brand: "Argus", dur: "0:23", line: "Posting into the void becomes grow on X, on purpose. An X-native waitlist teaser, drafted in your voice.", tag: "reflected · white + cobalt" },
   { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "Every agent forgets who you are. A constellation of AI tools resolves into one memory file: stop starting from scratch.", tag: "reflected · white + ember" },
+  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30", line: "Buyers ask Reddit, and AI answers with Reddit. Threads surfaced early, replies coached warm and ban-safe, and a map of where you show up.", tag: "reflected · white + orange" },
+  { slug: "plinth-ad", brand: "Plinth", dur: "0:27", line: "Anyone calls it, you earn on every call. An MCP endpoint that meters itself, priced per request, paid out at eighty percent.", tag: "reflected · white + cobalt" },
 ];
 
 // `scene` names the JSON the "view source" link opens, defaulting to `showcase-<src>`. It is set to
@@ -37,7 +39,8 @@ const ROWS: Row[] = [
   { num: "05 / product UI", title: "Product demos, rebuilt.", tag: "block: browserFrame · cursor · toast", src: "ui", body: "A dashboard inside a browser frame, a cursor that glides in and clicks, and the click has a consequence: a toast confirms the render." },
   { num: "06 / composite looks", title: "One frame, ten grades.", tag: "filter: thermal · nightVision · filmNoir", src: "looks", flip: true, scene: "looks", body: "The picture holds still and only the grade changes, so you can read what each one did: bloom off the highlights, phosphor scanlines, value stripped to mono, a heat palette remap. Each is one string on the layer, and a number after it sets the strength." },
   { num: "07 / cutout type", title: "Ransom notes, set per frame.", tag: "ransom: paper · color · sprites", src: "ransom", scene: null, body: "Every letter is a real scanned cutout, its face, tint and rotation picked from a seeded hash. The same seed gives the same note on every render, so the letters can keep changing without ever flickering." },
-  { num: "08 / backdrops", title: "Gradient fields, baked cold.", tag: "image: ken burns · radius", src: "gradients", flip: true, scene: null, body: "A library of gradient backgrounds, downscaled once offline so no render ever decodes 4K it is about to throw away. Drop one under a scene and give it a slow push in." },
+  { num: "08 / dithering", title: "Ordered dither, not a texture overlay.", tag: "canvasFx · baked offline", src: "dither", scene: "ditherkit", body: "A Bayer matrix fills a chart with real ordered dither, so it holds up in light and dark and never turns to mud once the video is compressed. Baked once at build, never at frame time." },
+  { num: "09 / backdrops", title: "Gradient fields, baked cold.", tag: "image: ken burns · radius", src: "gradients", flip: true, scene: null, body: "A library of gradient backgrounds, downscaled once offline so no render ever decodes 4K it is about to throw away. Drop one under a scene and give it a slow push in." },
 ];
 
 export default function Showcase() {
@@ -111,7 +114,7 @@ export default function Showcase() {
           <div className="aspects">
             <div className="aspects-head">
               <div>
-                <div className="num">09 / any aspect</div>
+                <div className="num">10 / any aspect</div>
                 <h2>One scene, every ratio.</h2>
               </div>
               <p>Relative coordinates resolve per aspect: pin, a 12-column grid, optical centering. Render 16:9, 9:16, and 1:1 from the same source, in one pass.</p>
