@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -37,13 +38,55 @@ type Meta struct {
 	SFX         []audio.Cue `json:"sfx"`
 }
 
+// served is the ONLY prefix set the render page may fetch. A render needs the engine (core), the
+// theme JSON, the scene HTML + schema (formats), any asset a scene references (assets), and the
+// caller's own scene JSON + uploads under .vawe-data. Nothing else exists as far as the browser is
+// concerned.
+//
+// WHY DEFAULT-DENY, AND WHY HERE. This process renders scenes written by strangers (the MCP product),
+// and a bare http.FileServer rooted at the repo hands the browser every file in it. An <img> or
+// <iframe> pointing at /docs/MISTAKES.md, /blocks/index.mjs or /.git/config renders that file INTO
+// the video and returns it. The html/svg layers strip such tags, but a sanitiser is a curtain; this
+// handler is the wall. A layer type added next year that forgets to sanitise is still contained,
+// because the SERVER, not the layer, decides what may leave.
+var served = []string{
+	"core/", "themes/", "formats/", "assets/",
+	".vawe-data/scenes/", ".vawe-data/uploads/",
+}
+
+func allowed(p string) bool {
+	// path.Clean via filepath collapses ".." so a cleaned path can never climb above the prefix it
+	// starts with; a request that still points outside every prefix is denied.
+	c := filepath.ToSlash(filepath.Clean("/" + p))[1:]
+	if c == "" || strings.Contains(c, "\x00") {
+		return false
+	}
+	for _, pre := range served {
+		if c == strings.TrimSuffix(pre, "/") || strings.HasPrefix(c, pre) {
+			return true
+		}
+	}
+	return false
+}
+
 // Serve starts a static file server rooted at root; returns the server + port.
 func Serve(root string) (*http.Server, int, error) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		return nil, 0, err
 	}
-	srv := &http.Server{Handler: http.FileServer(http.Dir(root))}
+	fileServer := http.FileServer(http.Dir(root))
+	// VAWE_SERVE_ALL=1 restores the old serve-everything behaviour for local debugging ONLY. It must
+	// never be set on a host that renders untrusted scenes.
+	serveAll := os.Getenv("VAWE_SERVE_ALL") == "1"
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !serveAll && !allowed(r.URL.Path) {
+			http.Error(w, "not found", http.StatusNotFound) // 404 not 403: reveal nothing about what exists
+			return
+		}
+		fileServer.ServeHTTP(w, r)
+	})
+	srv := &http.Server{Handler: h}
 	go srv.Serve(ln)
 	return srv, ln.Addr().(*net.TCPAddr).Port, nil
 }
