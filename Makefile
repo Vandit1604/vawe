@@ -147,6 +147,11 @@ coverage-reel:
 	node scripts/author/coverage-reel.mjs
 	$(MAKE) video D=formats/scene/_coverage-reel.json
 
+# make watermark [TEXT="VAWE DRAFT"] [OPACITY=0.1]  — bake the draft watermark sheet. Offline, once;
+# the render only reads the finished PNG. Pass it with ./bin/vawe <scene> --watermark assets/watermark/draft.png
+watermark:
+	node scripts/media/watermark.mjs
+
 # make site-counts  — every capability number written on the SITE, checked against the registry it
 # describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
 # registries had moved (docs/MISTAKES.md #111). Hand-typed counts about a growing registry go stale

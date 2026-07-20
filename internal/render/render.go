@@ -22,6 +22,7 @@ type Options struct {
 	Transparent bool   // alpha export: transparent capture → VP9/yuva420p .webm (no audio, no grain)
 	BgVideo     string // composite the (alpha) graphics over this background video → out.mp4
 	Aspect      string // render aspect ("16:9"/"9:16"/"1:1"/"4:5"); empty = the scene's own
+	Watermark   string // transparent PNG laid over every frame (free previews); empty = clean export
 }
 
 type dataFile struct {
@@ -104,7 +105,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	defer os.Remove(tmpAudio)
 
 	fmt.Println("▶ encoding…")
-	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, tmpVideo); err != nil {
+	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, o.Watermark, tmpVideo); err != nil {
 		return err
 	}
 

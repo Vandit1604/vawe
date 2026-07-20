@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Data-driven faceless Shorts/Reels engine \u2014 self-contained HTML/CSS format folders, GPU render, ffmpeg grain + audio.",
+  "description": "Data-driven faceless Shorts/Reels engine — self-contained HTML/CSS format folders, GPU render, ffmpeg grain + audio.",
   "scripts": {
     "setup:audio": "node scripts/media/gen-audio.mjs",
     "verify": "node verify/run.js",
@@ -11,7 +11,9 @@
   },
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
-    "puppeteer": "^23.6.0"
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "puppeteer": "^23.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "fontkit": "^2.0.4",

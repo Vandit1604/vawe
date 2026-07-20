@@ -34,11 +34,12 @@ func main() {
 	concurrency := flag.Int("concurrency", 1, "formats rendered at once (--all)")
 	alpha := flag.Bool("alpha", false, "transparent overlay export → VP9/yuva420p .webm (video-only)")
 	bg := flag.String("bg", "", "composite the (alpha) graphics over this background video → out.mp4")
+	watermark := flag.String("watermark", "", "transparent PNG laid over every frame (free previews); empty = clean export")
 	aspect := flag.String("aspect", "", "render aspect(s): comma-separated 16:9,9:16,1:1,4:5,4:3 (empty = the scene's own)")
 	flag.Parse()
 
 	repoRoot := repoRoot()
-	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg}
+	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark}
 
 	if *list {
 		listFormats(repoRoot)
@@ -88,7 +89,7 @@ func main() {
 			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: vawe foo.json --draft --out x.mp4
 		}
 	}
-	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg} // rebuild after any trailing flags
+	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark} // rebuild after any trailing flags
 	if dataPath == "" {
 		fmt.Fprintln(os.Stderr, "usage: vawe <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)

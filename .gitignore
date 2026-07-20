@@ -79,3 +79,9 @@ site/public/assets/brands/
 # The BAKED sprite set (assets/ransom, 21MB) is what the engine reads and IS tracked.
 assets/ransom-src/*
 !assets/ransom-src/README.md
+
+# MCP server working data (records, scenes, drafts, exports)
+.vawe-data/
+
+# the baked draft watermark sheet (make watermark)
+assets/watermark/

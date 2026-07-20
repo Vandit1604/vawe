@@ -18,14 +18,41 @@ func run(args ...string) error {
 
 // Video encodes the numbered PNG sequence in framesDir to out. grain adds the film-grain
 // post-process; draft uses an ultrafast preset and skips grain.
-func Video(framesDir string, fps int, grain, draft bool, out string) error {
+// watermark is a transparent PNG (assets/watermark/draft.png, baked by `make watermark`) laid over
+// every frame; empty means none. It is deliberately INDEPENDENT of `draft`: a free preview still has
+// to be good enough to judge composition and colour, so quality and postability are separate dials.
+func Video(framesDir string, fps int, grain, draft bool, watermark, out string) error {
 	seq := filepath.Join(framesDir, "%05d.png")
 	r := strconv.Itoa(fps)
-	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq, "-an"}
+	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq}
+	if watermark != "" {
+		args = append(args, "-i", watermark)
+	}
+	args = append(args, "-an")
+	// grain is OPT-IN (`"grain": true`) — only genuinely filmic brands reach here. Low-strength luma
+	// temporal grain: heavy/temporal noise is incompressible and crawls over sharp text as shimmer.
+	grainFx := ""
 	if !draft && grain {
-		// grain is OPT-IN (`"grain": true`) — only genuinely filmic brands reach here. Low-strength luma
-		// temporal grain: heavy/temporal noise is incompressible and crawls over sharp text as shimmer.
-		args = append(args, "-vf", "noise=c0s=3:c0f=t")
+		grainFx = "noise=c0s=3:c0f=t"
+	}
+	switch {
+	case watermark != "":
+		// scale2ref sizes the 1920x1080 sheet to whatever this scene's frame is, so one baked PNG
+		// serves every aspect. Built as one filter_complex because -vf and -filter_complex cannot
+		// both be given: folding grain in here keeps the two features composable instead of
+		// mutually exclusive.
+		chain := "[base]"
+		if grainFx != "" {
+			chain = "[g]"
+		}
+		fc := "[1:v][0:v]scale2ref[wm][base];"
+		if grainFx != "" {
+			fc += "[base]" + grainFx + "[g];"
+		}
+		fc += chain + "[wm]overlay=0:0[v]"
+		args = append(args, "-filter_complex", fc, "-map", "[v]")
+	case grainFx != "":
+		args = append(args, "-vf", grainFx)
 	}
 	if draft {
 		args = append(args, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "ultrafast")
