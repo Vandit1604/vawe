@@ -74,11 +74,3 @@ site/public/assets/brands/
 # local scratch (agent shell logs) — never commit
 /scratchpad/
 
-# ransom cut-out letter packs: user-supplied and licence-sensitive. The README that explains
-# where to unzip them IS tracked; the images and the baked sprite set are not.
-assets/ransom-src/*
-!assets/ransom-src/README.md
-assets/ransom
-
-# gradient background packs: royalty-free to USE, redistribution of the files is prohibited.
-assets/gradients
