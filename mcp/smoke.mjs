@@ -40,6 +40,23 @@ const guideLen = guide.content[0].text.length;
 console.log(`✓ vawe_guide → ${(guideLen / 1024).toFixed(0)}KB of vocabulary + schema`);
 if (guideLen < 2000) { console.error('✗ guide looks empty — is site/public/vawe-rules.md present?'); process.exit(1); }
 
+// ── adversarial: the leak vectors must be refused, always. This is the regression that keeps the
+// wall shut; if any of these ever renders instead of refusing, a stranger can read the repo. ────────
+const attacks = [
+  { name: 'escaping src', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },
+    layers: [{ type: 'image', src: '/docs/MISTAKES.md', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1 }] } },
+  { name: 'protocol src', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },
+    layers: [{ type: 'image', src: 'file:///etc/passwd', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1 }] } },
+  { name: 'oversize', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },
+    layers: [{ type: 'text', text: 'x'.repeat(1_200_000), x: 0, y: 0, start: 0, duration: 1 }] } },
+];
+for (const a of attacks) {
+  const r = await client.callTool({ name: 'vawe_draft', arguments: { scene: a.scene } });
+  const t = r.content[0].text;
+  if (!t.startsWith('✗')) { console.error(`✗ SECURITY: "${a.name}" was NOT refused:\n${t}`); process.exit(1); }
+}
+console.log(`✓ ${attacks.length} leak vectors refused (escaping src, protocol src, oversize)`);
+
 /** Rendering is asynchronous now, so the smoke test has to poll exactly like a caller does. */
 async function waitFor(id, done, label) {
   for (let i = 0; i < 120; i++) {
@@ -63,9 +80,11 @@ if (RENDER) {
   const drafted = await waitFor(id, (t) => t.includes('draft ready'), 'draft');
   console.log('  ' + drafted.split('\n').slice(0, 2).join('\n  '));
 
-  await client.callTool({ name: 'vawe_export', arguments: { video_id: id } });
+  await client.callTool({ name: 'vawe_export', arguments: { video_id: id, aspects: ['16:9', '9:16'] } });
   const exported = await waitFor(id, (t) => t.includes('exported'), 'export');
-  console.log('  ' + exported.split('\n')[0]);
+  const lines = exported.split('\n').filter((l) => l.includes('://'));
+  if (lines.length < 2) { console.error(`✗ multi-aspect export produced ${lines.length} file(s), wanted 2`); process.exit(1); }
+  console.log(`  ✓ exported 2 ratios:\n  ${lines.join('\n  ')}`);
 }
 
 await client.close();

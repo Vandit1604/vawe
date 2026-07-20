@@ -188,10 +188,16 @@ server.registerTool('vawe_draft', {
 
 // ── vawe_export ──────────────────────────────────────────────────────────────────────────────────
 server.registerTool('vawe_export', {
-  title: 'Export the clean video (paid)',
-  description: 'Re-renders the latest revision without the watermark. Priced by finished duration.',
-  inputSchema: { video_id: z.string() },
-}, async ({ video_id }) => {
+  title: 'Export the clean video',
+  description: 'Re-renders the latest revision without the watermark, priced by duration. Pass '
+    + '`aspects` to get the SAME scene in more than one ratio in one call, e.g. ["16:9","9:16"] for '
+    + 'a landscape post and a vertical reel from one source.',
+  inputSchema: {
+    video_id: z.string(),
+    aspects: z.array(z.string()).optional()
+      .describe('Ratios to export, e.g. ["16:9","9:16","1:1"]. Default: the scene\'s own aspect.'),
+  },
+}, async ({ video_id, aspects }) => {
   const rec = getOwned(video_id);
   if (!rec) return text(`no such video: ${video_id}`);
   if (!rec.draft) return text('draft this video first — export renders the revision you last drafted.');
@@ -210,15 +216,23 @@ server.registerTool('vawe_export', {
   const expanded = scenePath.replace(/\.json$/, '.expanded.json');
   const src = fs.existsSync(expanded) ? expanded : scenePath;
 
-  const out = path.join(store.paths.exports(), `${rec.id}.mp4`);
+  // One render per requested ratio, each to its own file. The scene's own aspect is expressed as
+  // undefined (no --aspect), so a default export matches the draft exactly.
+  const want = (aspects && aspects.length ? aspects : [rec.aspect || '16:9']);
   rec.status = 'exporting';
   store.save(rec);
-  (async () => {   // background for the same reason as draft: this is a full render, not a copy
+  (async () => {
+    const done = [];
     try {
-      await pipe.render(src, out, { watermark: false, aspect: rec.aspect === '16:9' ? undefined : rec.aspect });
+      for (const asp of want) {
+        const tag = want.length > 1 ? '.' + asp.replace(':', 'x') : '';
+        const out = path.join(store.paths.exports(), `${rec.id}${tag}.mp4`);
+        await pipe.render(src, out, { watermark: false, aspect: asp === rec.aspect ? undefined : asp });
+        done.push({ aspect: asp, file: out, url: urlFor('exports', out), seconds: pipe.durationOf(out) });
+      }
       const cur = store.get(rec.id) || rec;
       cur.status = 'exported';
-      cur.export = { file: out, url: urlFor('exports', out), seconds: pipe.durationOf(out) };
+      cur.export = done.length === 1 ? done[0] : { multi: done };
       store.save(cur);
     } catch (e) {
       const cur = store.get(rec.id) || rec;
@@ -227,7 +241,8 @@ server.registerTool('vawe_export', {
       store.save(cur);
     }
   })();
-  return text(`▶ exporting clean (${q.label}). Poll vawe_status("${rec.id}") until status is "exported".`);
+  const label = want.length > 1 ? `${want.length} ratios (${want.join(', ')})` : want[0];
+  return text(`▶ exporting clean · ${label} · ${q.label}. Poll vawe_status("${rec.id}") until status is "exported".`);
 });
 
 // ── vawe_status ──────────────────────────────────────────────────────────────────────────────────
@@ -254,7 +269,9 @@ server.registerTool('vawe_status', {
     return text(`✗ ${rec.status}\n\n${rec.error || 'no detail recorded'}`);
   }
   if (rec.status === 'exported') {
-    return text(`✓ exported (clean)\n  ${rec.export.url}`);
+    const e = rec.export;
+    if (e.multi) return text('✓ exported (clean)\n' + e.multi.map((x) => `  ${x.aspect.padEnd(5)} ${x.url}`).join('\n'));
+    return text(`✓ exported (clean)\n  ${e.url}`);
   }
   if (rec.status === 'drafted') {
     const g = rec.lastGates || {};
