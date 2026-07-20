@@ -40,8 +40,11 @@ function collect() {
   for (const entry of fs.readdirSync(SRC, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     const p = path.join(SRC, entry.name);
     if (entry.isDirectory()) {
-      // folder name IS the character ("A", "!", "and" is ignored as >1 char unless it is a known key)
-      const key = entry.name.length === 1 ? entry.name.toUpperCase() : entry.name.toUpperCase();
+      // A folder name IS the character. Packs also ship grouped extras (_Shapes, _Words,
+      // _Special Characters) whose folder name is a category, not a glyph — skip those rather than
+      // bake a bogus "_SHAPES" key that no text could ever reference.
+      if (entry.name.startsWith('_') || entry.name.length !== 1) continue;
+      const key = entry.name.toUpperCase();
       for (const f of fs.readdirSync(p).sort()) if (IMG.test(f)) add(key, path.join(p, f));
     } else if (IMG.test(entry.name)) {
       // flat: leading run of non-separator chars is the character — "A.png", "A-2.png", "a_3.png"

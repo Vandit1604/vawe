@@ -74,3 +74,8 @@ site/public/assets/brands/
 # local scratch (agent shell logs) — never commit
 /scratchpad/
 
+
+# Raw cut-out letter SOURCES: 850MB of 1-3MB PNGs, re-extractable from the pack zip at any time.
+# The BAKED sprite set (assets/ransom, 21MB) is what the engine reads and IS tracked.
+assets/ransom-src/*
+!assets/ransom-src/README.md
