@@ -194,7 +194,6 @@
           if (L.w != null) el.style.width = L.w + 'px';
           if (L.align) el.style.textAlign = L.align;
           if (L.filter) el.style.filter = L.filter;
-          renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
           // timing → data-attributes consumed by compose.driveClips
           el.dataset.start = String(L.start ?? 0);
           if (L.duration != null) el.dataset.duration = String(L.duration);
@@ -214,6 +213,14 @@
           const splitMode = L.split || (L.ransom ? 'char' : null);
           const units = splitMode ? splitText(el, splitMode) : null; // 'char' | 'word' | 'line'
           if (L.ransom && units) ransomStyle(units, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...(typeof L.ransom === 'object' ? L.ransom : {}) });
+          // decorate LAST, and that order is load-bearing. A composite look appends overlay divs
+          // (scanlines/grain/vignette/lightLeak/washes) as children of the layer, and everything above
+          // rewrites children: the primitive builder does `el.innerHTML = …` and splitText re-wraps the
+          // text. Decorating first meant those overlays were built and then silently thrown away, so a
+          // top-level layer with `filter:"crt"` got the filter half of the look and none of the texture
+          // half, with no error. Group children (core/layers/util.js:187) always built-then-decorated,
+          // which is why the same look was correct inside a group and broken outside one.
+          renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
           return { L, el, units };
         });
 

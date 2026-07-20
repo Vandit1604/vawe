@@ -172,7 +172,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const s = getComputedStyle(el);
     const id = el.id || (typeof el.className === 'string' ? (el.className.split(' ').filter((c) => c !== 'hs-layer')[0] || 'layer') : el.tagName);
     const t = (el.textContent || '').trim().slice(0, 18);
-    if ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1))
+    // An image layer's box exists in order to clip: `object-fit: cover` already overscans, and `ken`
+    // overscans further on purpose — that overscan IS the Ken-Burns move. Measuring it as "content
+    // clipped" fired on every ken layer in the repo (gradient-showcase failed its own audit for this),
+    // which teaches authors the gate is noise. The rule is about clipped TEXT; keep it there.
+    const clipsByDesign = el.classList.contains('hs-img-wrap');
+    if (!clipsByDesign && ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1)))
       issues.push({ kind: 'overflow', a: id, li, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
     // Measure what's visible, per axis, because the two axes lie in opposite directions:
     //   HORIZONTAL — use the ink. A centred text layer needs a `w` (pin centres a box), and that `w` is

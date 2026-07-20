@@ -2055,3 +2055,94 @@ identical. 32 glyphs @150 → 3 distinct. 11 glyphs @88 → 3 distinct (small ty
 The video ships within the envelope: one line on screen at a time, size 150, 3/3 byte-identical. The
 general fix is task #27 — a pixel-level purity gate over every shipped scene, which would have drawn
 this boundary automatically instead of me discovering it by surprise.
+
+---
+
+## #107 — Half of every composite look was thrown away on any top-level layer, silently
+
+Authoring the looks film, `"filter": "crt"` on an image produced a brightness lift and **no
+scanlines**. The same look on a gradient card inside a `group` (looks-reel) rendered its scanlines
+perfectly. That difference was the whole clue.
+
+A look resolves to two halves: a CSS `filter` string written to `el.style`, and a set of overlay divs
+(scanlines · grain · vignette · lightLeak · washes) appended as children of the layer. Both paths call
+the same `decorate()`, which the comment at `core/layers/util.js:187` proudly notes is ONE definition
+shared with group children. It is. The **order** was not:
+
+- group children (`util.js:182-187`): `buildLeaf()` → `decorate()`  ✅
+- top-level layers (`scene.html`): `decorate()` → `renderer.build()`  ❌
+
+Every primitive builder starts with `el.innerHTML = …`, and `splitText` re-wraps text after that. So on
+a top-level layer the overlays were built, then deleted, before the first frame. The `filter` half
+survived because it lives on `el.style`, which is why the look looked *plausible* rather than broken —
+the exact failure mode that hides longest.
+
+**Fix:** `decorate()` now runs LAST, after `build()` and after `splitText`/`ransomStyle`, matching the
+group path. Blast radius was one render: only `looks.json` uses a top-level overlay-bearing look
+(`looks-reel.json`'s three are `neon:*`, which is filter-only). `make probe` and `make snap` both clean.
+
+**The lesson, and it is not "check the order".** Sharing one function across two call sites looks like
+one definition and reads like one definition, so the comment claiming that was believed by everyone
+including me. What is shared is the *callee*; what diverged is the *sequence around it*. A helper being
+common proves nothing about the context being common. Nine looks out of 26 carry overlays; all of them
+were quietly degraded on top-level layers for as long as this has existed.
+
+**Gate gap:** nothing catches "authored input accepted, then discarded". A DOM-level assertion that a
+resolved look's overlay count matches what `resolveComposite` returned would have failed loudly on
+frame 0. Filed as follow-up.
+
+---
+
+## #108 — The layout audit called Ken Burns a bug, so authors learned to ignore it
+
+`make audit` hard-failed the new film with seven `[overflow] hs-img-wrap — content 925x929 clipped to
+900x900`. Ken Burns *works* by scaling the image past its box so the box clips it; `object-fit: cover`
+already overscans before `ken` adds any. The overscan is the mechanism, not a defect.
+
+It was not my scene. The shipped `gradient-showcase.json` fails its own audit the same way, on every
+ken layer. Which means that film was shipped with a red audit, because a gate that cries wolf on a
+correct, universal idiom trains you to skim past it — and then it cannot do its real job either.
+
+**Fix:** the overflow rule skips `.hs-img-wrap`. Its stated purpose (`verify/audit.mjs:4`) is *clipped
+text*; an image box exists in order to clip, so it can never be evidence there.
+
+**The lesson:** a false positive on a common correct pattern is not a cosmetic annoyance, it is a hole
+in the gate. Every author who learns to ignore one line of audit output has also learned to ignore the
+line under it. Measure how often a rule fires on healthy input before trusting the rule.
+
+---
+
+## #109 — `make photos` wrote WebP bytes into files named `.jpg`
+
+Openverse serves whatever the upstream host stored, commonly WebP, from URLs still ending `.jpg`.
+`scripts/brand/photos.mjs` named every download `<slug>-<i>.jpg` regardless of content. Chrome sniffs
+the magic bytes and renders it, so the render was fine and nothing complained — ffmpeg only muttered
+`invalid TIFF header in Exif data`. But the extension was a lie, and anything downstream that trusts
+extensions (a CDN setting `Content-Type` from the suffix; an image pipeline that is not a browser)
+would serve or reject it wrongly.
+
+**Fix:** sniff the magic bytes and use the true extension; the printed usage hint now names the real
+file. Existing assets renamed.
+
+**The lesson:** "it rendered" is not evidence the file is correct. The browser is the most forgiving
+consumer in the chain, so passing in a browser proves the least.
+
+---
+
+## #110 — Two gate messages that describe something other than what they test
+
+Both found while running the ladder on one film; neither is fixed in the gate that reports it.
+
+- **`make beats`** reported "3 beats" for a film with seven distinct visual beats. It derives beats
+  from explicit `cuts`, not from layer boundaries, so a film that cuts by swapping layers is invisible
+  to it. The number is not wrong so much as it is measuring a different thing than the word "beats"
+  promises, which makes it useless exactly where an author would lean on it.
+- **impeccable `flat-type-hierarchy`** flagged sizes 34/42/60 at "ratio 1.8:1" and advised aiming for
+  "at least a 1.25 ratio between steps". 1.8 already exceeds 1.25. The code tests the *total span*
+  (`max/min < 2.0`); the advice describes the *per-step* ratio. Contradictory on its face. Not patched
+  here: the detector is vendored under `.claude/skills/impeccable/`, and forking vendored rules to fix
+  prose costs more than it saves. Reported upstream-ward instead.
+
+**The running theme** (now ~13 instances): a gate's blind spot is never in the rule it states. It is in
+the sampling, the file list, or the measurement underneath it — here, in the gap between what the
+message says it measures and what the code measures.

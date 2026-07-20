@@ -33,6 +33,19 @@ if (!results.length) { console.error(`✗ no openly-licensed results for "${quer
 const creditsPath = path.join(dir, 'credits.json');
 const credits = fs.existsSync(creditsPath) ? JSON.parse(fs.readFileSync(creditsPath, 'utf8')) : {};
 let saved = 0;
+let firstFile = '';
+
+// Openverse serves whatever the upstream host stored — commonly WebP, sometimes PNG, from a URL
+// that still ends in .jpg. Naming every download .jpg regardless is a lie the browser papers over
+// (it sniffs) but nothing else does: a CDN that sets Content-Type from the extension serves a WebP
+// as image/jpeg, and any extension-trusting tool in the chain rejects it. Sniff the magic bytes.
+function extOf(buf) {
+  if (buf.length > 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'webp';
+  if (buf.length > 8 && buf[0] === 0x89 && buf.toString('ascii', 1, 4) === 'PNG') return 'png';
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8) return 'jpg';
+  return 'jpg'; // unknown: keep the historical default rather than invent an extension
+}
+
 for (const r of results) {
   if (saved >= N) break;
   try {
@@ -40,15 +53,16 @@ for (const r of results) {
     if (!img.ok) continue;
     const buf = Buffer.from(await img.arrayBuffer());
     if (buf.length < 30_000) continue; // thumbnails/broken files: too small to print at 1080p
-    const file = `${slug}-${saved + 1}.jpg`;
+    const file = `${slug}-${saved + 1}.${extOf(buf)}`;
     fs.writeFileSync(path.join(dir, file), buf);
     credits[file] = { title: r.title, creator: r.creator, license: r.license, license_url: r.license_url, source: r.foreign_landing_url, query };
     console.log(`✓ ${file}  (${(buf.length / 1024).toFixed(0)}kb · ${r.license.toUpperCase()} · ${r.creator || 'unknown'})`);
+    if (!firstFile) firstFile = file;
     saved++;
   } catch { /* skip slow/dead hosts, keep pulling from the result pool */ }
 }
 fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 2) + '\n');
 if (!saved) { console.error('✗ downloads all failed'); process.exit(1); }
 console.log(`→ ${saved} photo(s) in assets/brands/${brand}/photos/ · attribution in credits.json`);
-console.log(`  use: { "type": "image", "src": "/assets/brands/${brand}/photos/${slug}-1.jpg", "w": 900, "h": 560, "ken": true }`);
+console.log(`  use: { "type": "image", "src": "/assets/brands/${brand}/photos/${firstFile}", "w": 900, "h": 560, "ken": true }`);
 if (LICENSES.includes('by')) console.log('  ⚠ CC-BY items need visible credit — put creator in a caption or end-card (see credits.json).');
