@@ -2307,3 +2307,31 @@ draft, so the next dead dial fails loud the day it is written instead of years l
 The general lesson, again: a parameter that is accepted and silently ignored is the worst kind of bug,
 because the code looks correct and the output looks plausible. The only defence is a check that
 exercises the parameter and asserts an effect (docs/MISTAKES.md #19-28, #107, #113 — same family).
+
+---
+
+## #116 — The audit gate was broken for the ENTIRE MCP flow, and only a real session caught it
+
+A fresh MCP session, told to build a video and read the gate verdicts, reported that the audit gate
+returned "file not found · 1 HARD issue" on every revision. Every other check was clean and it shipped
+anyway by eyeballing frames, but it flagged the gate as broken.
+
+It was. `verify/audit.mjs` did `path.join(repoRoot, sample)` on its argument. The MCP pipeline passes
+an ABSOLUTE path (scenes live under `.vawe-data/`, and the store builds absolute paths), and
+`path.join(repoRoot, "/abs/path")` concatenates into `/repo/abs/path` — which does not exist, so the
+gate reported file-not-found and, being advisory, the draft shipped without a real layout check. The
+browser nav had the same doubling (`?data=/${absolute}`). A relative arg — which is what every manual
+test and `make audit` uses — was fine, so the bug was invisible to everything except the MCP.
+
+**Why my own smoke tests missed it:** the smoke test renders through the MCP with absolute paths, so
+it EXERCISED the bug, but it only asserts "draft ready" — it never reads the audit verdict. The gate
+failed silently into an advisory field nobody checked. It took a session that actually READS the gate
+output to see it.
+
+**Fix:** normalise the arg to a repo-relative path once (`path.isAbsolute` → `path.relative`), reject
+one that escapes the repo, and use that everywhere including the browser URL.
+
+**The lesson:** a smoke test that checks "did it run" cannot catch "did it run correctly". The most
+valuable test I have is a real agent driving the product for a real outcome and reading every result,
+because it uses the outputs the way a customer will — and it found in one run a gate that had been
+dark for the whole life of the MCP.

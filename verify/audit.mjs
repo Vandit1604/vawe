@@ -579,9 +579,15 @@ const rows = [];
 for (const spec of modules) {
   // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
   const isData = spec.endsWith('.json');
-  const sample = isData ? spec : `formats/${spec}/sample.json`;
-  if (!fs.existsSync(path.join(repoRoot, sample))) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
-  const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')); } catch { return {}; } })();
+  const raw = isData ? spec : `formats/${spec}/sample.json`;
+  // Normalise to a repo-RELATIVE path. An absolute arg — which the MCP pipeline passes for a scene
+  // under .vawe-data — otherwise broke everything: `path.join(repoRoot, absolute)` concatenates into
+  // a garbage path (→ "file not found") and `?data=/${absolute}` sends the browser a doubled path.
+  // A relative arg is unchanged. (Bug found by a fresh MCP session auditing every draft.)
+  const sample = path.isAbsolute(raw) ? path.relative(repoRoot, raw) : raw;
+  const absPath = path.join(repoRoot, sample);
+  if (sample.startsWith('..') || !fs.existsSync(absPath)) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
+  const cfg = (() => { try { return JSON.parse(fs.readFileSync(absPath, 'utf8')); } catch { return {}; } })();
   const m = isData ? (cfg.module || spec) : spec;
 
   // source checks are aspect-independent (they're about the JSON, not a canvas) — report them once
@@ -629,7 +635,7 @@ for (const aspectKey of askedAspects) {
   // the frame edge mid-travel are not safe-zone breaches. Overlap/contrast still checked everywhere.
   let camMoving = () => false;
   try {
-    const kf = JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')).camera || [];
+    const kf = JSON.parse(fs.readFileSync(absPath, 'utf8')).camera || [];
     const moves = kf.slice(1).map((b, i) => ({ a: kf[i], b }))
       .filter(({ a, b }) => (a.x ?? 0) !== (b.x ?? 0) || (a.y ?? 0) !== (b.y ?? 0) || (a.s ?? 1) !== (b.s ?? 1));
     if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
@@ -642,7 +648,7 @@ for (const aspectKey of askedAspects) {
   // which is the one frame where that layer is guaranteed on screen and done animating.
   const layerMids = (() => {
     try {
-      const cfg = JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8'));
+      const cfg = JSON.parse(fs.readFileSync(absPath, 'utf8'));
       const out = [];
       const walk = (ls) => { for (const L of ls || []) {
         if (!L || typeof L !== 'object') continue;
@@ -702,6 +708,6 @@ for (const r of rows) {
     console.log(`    [${i.kind}] ${i.f == null ? '' : `f${i.f} `}${who} — ${i.detail}`);
   }
 }
-console.log(`\noverlays: ${OUT}/<format>.png`);
+console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);
 console.log(`${hardTotal ? '✗ ' + hardTotal + ' HARD issue(s)' : '✓ no hard issues'}${warnTotal ? ` · ${warnTotal} warning(s)` : ''}`);
 process.exit(hardTotal ? 1 : 0);
