@@ -61,7 +61,13 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 		bases = append(bases, assetsBase)
 	}
 
-	musicFile := resolve(bases, cfg.Music, "music.wav")
+	// Silence is the DEFAULT. This used to fall back to a discovered "music.wav", so ANY scene that
+	// simply omitted an `audio` key shipped with a bed under it — sound you never asked for, on every
+	// video authored without thinking about audio. A music track is now opt-in: name it, or get silence.
+	musicFile := ""
+	if cfg.Music != "" {
+		musicFile = resolve(bases, cfg.Music, "")
+	}
 	voFile := resolve(bases, cfg.VO, "")
 	// `Sting` was resolved here and then used ONLY in the emptiness guard below — its samples never
 	// reached the mix, so the field did nothing except let an auto-discovered assets/sting.wav force a

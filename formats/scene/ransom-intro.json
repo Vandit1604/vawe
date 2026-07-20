@@ -1,0 +1,73 @@
+{
+  "module": "scene",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 9,
+  "layers": [
+    {
+      "type": "rect",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#f4f2ed",
+      "start": 0,
+      "duration": 9
+    },
+    {
+      "type": "rect",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 560,
+      "bg": "#faf8f4",
+      "start": 0,
+      "duration": 9,
+      "opacity": 0.55
+    },
+    {
+      "type": "text",
+      "text": "INTRODUCING",
+      "x": 260,
+      "y": 390,
+      "w": 1400,
+      "align": "center",
+      "size": 118,
+      "ransom": {
+        "sprites": true
+      },
+      "ransomSeed": "INTRODUCING",
+      "preset": "blur",
+      "presetOpts": {
+        "px": 18
+      },
+      "each": 0.7,
+      "stagger": 0.055,
+      "start": 0.35,
+      "duration": 3.0
+    },
+    {
+      "type": "text",
+      "text": "RANSOM NOTES",
+      "x": 210,
+      "y": 430,
+      "w": 1500,
+      "align": "center",
+      "size": 150,
+      "ransom": {
+        "sprites": true,
+        "cycle": 1.3,
+        "stagger": 0.16
+      },
+      "ransomSeed": "RANSOM NOTES",
+      "preset": "blur",
+      "presetOpts": {
+        "px": 22
+      },
+      "each": 0.8,
+      "stagger": 0.06,
+      "start": 3.6,
+      "duration": 4.3
+    }
+  ]
+}
