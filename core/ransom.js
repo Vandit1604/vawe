@@ -95,8 +95,28 @@ export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, t
     rot: +((r('rot') - 0.5) * 12).toFixed(2),   // ±6°
     scale: +(0.9 + r('scale') * 0.24).toFixed(3), // 0.90–1.14
     dy: +((r('dy') - 0.5) * 0.14).toFixed(3),   // ±0.07em baseline wander
+    pick: r('sprite'),                          // 0..1, chooses which cutout when sprites are in use
     clip: torn ? tornClip((() => { let k = 0; return () => r('clip' + (k++)); })()) : null,
   };
+}
+
+// SPRITE MODE — the real thing. When a cut-out letter pack has been baked (`make ransom-sprites`),
+// each glyph is a photograph of actual torn paper instead of a webfont glyph on a coloured box. That
+// is the whole difference in look: real fibre, real ink, and a tear no clip-path polygon imitates.
+// Sizing is in `em` so one `size` on the layer drives the line, and the WIDTH comes from the sprite's
+// own aspect — a real set has a different width per letter, which is what stops it reading as typed.
+function paintSprite(img, glyph, g, sprites) {
+  const key = glyph.toUpperCase();
+  const variants = sprites.manifest[key];
+  if (!variants || !variants.length) {
+    throw new Error(`ransom sprites: no cutout for "${glyph}" in assets/ransom/manifest.json — add one to assets/ransom-src/${key}/ and re-run \`make ransom-sprites\``);
+  }
+  const v = variants[Math.min(variants.length - 1, Math.floor(g.pick * variants.length))];
+  img.src = sprites.base + v.file;
+  img.alt = glyph;
+  img.style.cssText =
+    `display:block;height:1em;width:${(v.w / v.h).toFixed(4)}em;` +
+    `transform:translateY(${g.dy}em) rotate(${g.rot}deg) scale(${g.scale});transform-origin:center`;
 }
 
 // Apply the ransom treatment to split units (from splitText(el,'char')). Structure per glyph:
@@ -104,10 +124,12 @@ export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, t
 //    └ span.rns-lift  (static drop-shadow, so the tile looks peeled off the page)
 //        └ span.rns   (paper tile: face + bg + ink + rotation + torn clip-path)
 // Three levels so appearance and motion never fight over `transform`/`filter`. Pure in n.
-export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper' } = {}) {
+export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', sprites = false } = {}) {
   // Fail loud if a ransom face is not registered — a silent fallback would make every letter the body
   // font, which is exactly the effect's opposite. Skipped only where there is no DOM (Node gates).
-  if (typeof document !== 'undefined') {
+  const pack = sprites ? (window.__ransomSprites || null) : null;
+  if (sprites && !pack) throw new Error('ransom: sprites:true but no sprite set loaded — run `make ransom-sprites` (see assets/ransom-src/)');
+  if (!sprites && typeof document !== 'undefined') {
     const reg = registeredFamilies();
     const missing = [...new Set(faces.map((f) => f.family))].filter((f) => !reg.has(f));
     if (missing.length) throw new Error(`ransom: face(s) not registered in tokens.css: ${missing.join(', ')} — add an @font-face or drop them from RANSOM_FACES`);
@@ -124,10 +146,11 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
     const lift = document.createElement('span');
     lift.className = 'rns-lift';
     lift.style.cssText = `display:inline-block;filter:${shadow}`;
-    const tile = document.createElement('span');
+    const g = ransomGlyph(seed, i, { accent, faces, swatches, palette });
+    const tile = document.createElement(pack ? 'img' : 'span');
     tile.className = 'rns';
-    tile.textContent = glyph;
-    paintTile(tile, ransomGlyph(seed, i, { accent, faces, swatches, palette }));
+    if (pack) { tile.dataset.ch = glyph; paintSprite(tile, glyph, g, pack); }
+    else { tile.textContent = glyph; paintTile(tile, g); }
     lift.appendChild(tile);
     el.appendChild(lift);
   });
@@ -168,14 +191,17 @@ function paintTile(tile, g, pop = 0) {
 // and whenever the computed variant differs from the applied one the tile is fully repainted. So any
 // render order converges on the same DOM for frame n — which is why there is no easing/pop term here;
 // a per-frame swell would reintroduce the per-frame write it exists to avoid.
-export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', cycle = 1.2, stagger = 0.16 } = {}) {
+export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', sprites = false, cycle = 1.2, stagger = 0.16 } = {}) {
   if (!(cycle > 0)) return;
   units.forEach((el, i) => {
     const tile = el.querySelector('.rns');
     if (!tile) return;
     const variant = Math.floor((t + i * stagger) / cycle);
     if (tile.dataset.v === String(variant)) return;
-    paintTile(tile, ransomGlyph(seed, i, { accent, faces, swatches, palette, variant }));
+    const g = ransomGlyph(seed, i, { accent, faces, swatches, palette, variant });
+    const pack = sprites ? window.__ransomSprites : null;
+    if (pack) paintSprite(tile, tile.dataset.ch || '', g, pack);
+    else paintTile(tile, g);
     tile.dataset.v = String(variant);
   });
 }

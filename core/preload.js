@@ -94,6 +94,21 @@ export async function preloadClips(data) {
   }
 }
 
+// Preload the RANSOM SPRITE SET (assets/ransom/manifest.json + every letter PNG), when a scene opts
+// into `ransom: { sprites: true }`. Decoded up front so ransomStyle can size each scrap from its own
+// aspect synchronously at build — a real cutout set has a different width per letter, and measuring it
+// at frame time would be async, which frame n cannot be.
+export async function preloadRansomSprites(data) {
+  window.__ransomSprites = null;
+  if (!/"sprites"\s*:\s*true/.test(JSON.stringify(data))) return;
+  const base = '/assets/ransom/';
+  let manifest;
+  try { manifest = await (await fetch(base + 'manifest.json')).json(); }
+  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable — run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/'); }
+  await Promise.all(Object.values(manifest).flat().map((v) => decodeImage(base + v.file).catch(() => {})));
+  window.__ransomSprites = { base, manifest };
+}
+
 // Preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its src;
 // fetch each once so build() can init the runtime synchronously and seek it per frame. The runtime is
 // loaded ONLY when a scene uses it (no 168KB parse tax on text-only renders), before the virtual clock

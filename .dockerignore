@@ -13,6 +13,8 @@ assets/sfx
 assets/fonts
 assets/brands
 assets/plinth
+assets/ransom
+assets/ransom-src
 assets/flags
 # ...except the handful of real marks the playable scenes reach for (144K of brands' 59M).
 # scripts/site/site-engine.mjs derives the list from the scenes themselves and FAILS the build if

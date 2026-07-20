@@ -7,7 +7,7 @@ import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
-import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie } from './preload.js';
+import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie, preloadRansomSprites } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
@@ -309,6 +309,7 @@ export async function boot(build) {
     await preloadComponents(data);
     await preloadClips(data);
     await preloadLottie(data);
+    await preloadRansomSprites(data);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey });
     const totalFrames = Math.round(scene.duration * fps);

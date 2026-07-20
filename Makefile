@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
+.PHONY: ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -401,3 +401,8 @@ sim-audit: ## sims seeded? bakes fresh against their source? sequences intact?
 # actually send and fails when it exceeds the budget.
 docker-context: ## does the docker build context still fit its budget?
 	node scripts/gates/docker-context.mjs
+
+# Bake a pack of REAL cut-out letter images into the sprite set the `ransom` layer composes from.
+# Unzip your pack into assets/ransom-src/ (a folder per character is ideal), then run this once.
+ransom-sprites: ## bake assets/ransom-src/ -> assets/ransom/ + manifest.json
+	node scripts/ransom/sprites.mjs
