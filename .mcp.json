@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vawe": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/vandit/Developer/code/shortwave/mcp/server.mjs"
+      ],
+      "env": {}
+    }
+  }
+}
