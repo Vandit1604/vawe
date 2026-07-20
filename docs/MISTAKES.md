@@ -2146,3 +2146,35 @@ Both found while running the ladder on one film; neither is fixed in the gate th
 **The running theme** (now ~13 instances): a gate's blind spot is never in the rule it states. It is in
 the sampling, the file list, or the measurement underneath it — here, in the gap between what the
 message says it measures and what the code measures.
+
+---
+
+## #111 — The site quoted nine capability numbers, and the registry had moved past all of them
+
+Asked to bring the site up to date, I found `96 components`, `96 blocks across 44 families`,
+`44 families`, `a 100-block taste library`, a `<meta>` description promising `96 vetted components`,
+and in `vawe-rules.md` headings claiming 22 kinetic presets, 32 stings, 16 backgrounds and 16 themes.
+Real: 148 blocks, 63 families, 25 presets, 35 stings, 17 backgrounds, 18 themes. The name lists under
+those headings were short by exactly the difference, so the docs an LLM author reads were missing
+three real presets and three real stings.
+
+None of it was written carelessly. Every number was true the day it was typed. That is the whole
+point: a hand-typed count about a growing registry is not wrong, it is *pending*, and nothing was
+watching. `site/lib/blocks.json` had a generator (`make blocks-sync`) and was stale only because
+nobody ran it; the prose had no generator at all.
+
+**Fix:** `scripts/gates/site-counts.mjs` (`make site-counts`) reads the registries, scans the site copy
+for both shapes counts appear in (`148 blocks`, `Kinetic presets (25)`), and fails with file:line, the
+stated number and the real one. It does not rewrite: a count usually sits inside a sentence that needs
+rephrasing, not a substitution.
+
+**It caught me inside ten minutes.** I had hand-typed "64 families" from a number I had computed over
+the whole CATALOG. The site's grid excludes the full-frame overlay row, so the page renders 63. I was
+adding a fresh wrong number to the file I was fixing, and the gate refused it.
+
+**The lesson:** I nearly filed a second bug here too, reporting five blocks "missing from the catalog"
+after diffing registry keys against catalog `name`. Catalog rows are namespaced (`pricingCard.free`)
+with the bare key in `family`; comparing the right field showed nothing missing. Both halves of this
+entry are the same mistake in opposite directions: a number is only meaningful next to the definition
+that produced it, and 148 / 149 / 154 / 63 / 64 are all correct counts of different things. Say which
+one, or the number is noise.

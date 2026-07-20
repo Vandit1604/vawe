@@ -6,13 +6,13 @@ import frames from "../../lib/block-frames.json";
 
 /* Search + family filter over the registry.
  *
- * 96 blocks in one flat grid meant scrolling and hoping. The families come from the data itself
- * rather than a hand-kept category list, so adding a block cannot leave the filter behind: there
- * are 44 of them, near 1:1 with block names, which is exactly why the dropdown alone would not be
- * enough and search carries the real load.
+ * A flat grid of every block meant scrolling and hoping. The families come from the data itself
+ * rather than a hand-kept category list, so adding a block cannot leave the filter behind. There are
+ * nearly as many families as blocks, which is exactly why the dropdown alone would not be enough
+ * and search carries the real load. (Counts live in the registry, not here: see make site-counts.)
  *
- * Filtering happens client-side over an array that is already in the page. All 96 cards still
- * server-render, so the grid is in the HTML for anything that does not run JS.
+ * Filtering happens client-side over an array that is already in the page. Every card still
+ * server-renders, so the grid is in the HTML for anything that does not run JS.
  */
 
 export type Block = { name: string; family: string; blurb: string; props: Record<string, unknown> };

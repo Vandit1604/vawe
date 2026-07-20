@@ -147,6 +147,13 @@ coverage-reel:
 	node scripts/author/coverage-reel.mjs
 	$(MAKE) video D=formats/scene/_coverage-reel.json
 
+# make site-counts  — every capability number written on the SITE, checked against the registry it
+# describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
+# registries had moved (docs/MISTAKES.md #111). Hand-typed counts about a growing registry go stale
+# by default; this is what notices.
+site-counts:
+	node scripts/gates/site-counts.mjs
+
 # make coverage  — which engine vocabulary no authored scene exercises. Conformance proves a value
 # works; this says whether anything USES it. WARN tier, always exits 0.
 coverage:

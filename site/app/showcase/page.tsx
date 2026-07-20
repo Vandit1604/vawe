@@ -23,7 +23,11 @@ const FILMS: Film[] = [
   { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "Every agent forgets who you are. A constellation of AI tools resolves into one memory file: stop starting from scratch.", tag: "reflected · white + ember" },
 ];
 
-type Row = { num: string; title: string; body: string; tag: string; src: string; flip?: boolean };
+// `scene` names the JSON the "view source" link opens, defaulting to `showcase-<src>`. It is set to
+// null for rows whose scene may NOT be published: site-engine ships every asset a published scene
+// references, and the gradient and ransom packs are licensed for use but not for redistribution.
+// The rendered mp4 is a use of them; shipping the source files themselves would not be.
+type Row = { num: string; title: string; body: string; tag: string; src: string; flip?: boolean; scene?: string | null };
 
 const ROWS: Row[] = [
   { num: "01 / kinetic type", title: "Type that moves like it reads.", tag: "preset: up · decode · gradient", src: "type", body: "Split by word or character, each line enters on its own preset, rise to decode to a focus-and-hold. The motion is part of the meaning." },
@@ -31,6 +35,9 @@ const ROWS: Row[] = [
   { num: "03 / shader stings", title: "GPU stings between beats.", tag: "sting: flash · glitch · scan · ripple", src: "stings", body: "Flash, glitch, scan, ripple. Real fragment shaders keyed on (progress, seed) only, so they are seek-safe and byte-reproducible." },
   { num: "04 / data story", title: "Charts that draw themselves.", tag: "block: lineChart · statBig · kpiRow", src: "data", flip: true, body: "A line chart draws on, a number counts up, KPIs land. The easing is the story. All from a data array in the scene JSON." },
   { num: "05 / product UI", title: "Product demos, rebuilt.", tag: "block: browserFrame · cursor · toast", src: "ui", body: "A dashboard inside a browser frame, a cursor that glides in and clicks, and the click has a consequence: a toast confirms the render." },
+  { num: "06 / composite looks", title: "One frame, twenty-six grades.", tag: "filter: neon · crt · thermal · melt", src: "looks", flip: true, scene: "looks", body: "The subject holds still and only the grade changes: neon bloom, CRT scanlines, a thermal palette remap, a displacement melt. Each is one string on the layer, and a number after it sets the strength." },
+  { num: "07 / cutout type", title: "Ransom notes, set per frame.", tag: "ransom: paper · color · sprites", src: "ransom", scene: null, body: "Every letter is a real scanned cutout, its face, tint and rotation picked from a seeded hash. The same seed gives the same note on every render, so the letters can keep changing without ever flickering." },
+  { num: "08 / backdrops", title: "Gradient fields, baked cold.", tag: "image: ken burns · radius", src: "gradients", flip: true, scene: null, body: "A library of gradient backgrounds, downscaled once offline so no render ever decodes 4K it is about to throw away. Drop one under a scene and give it a slow push in." },
 ];
 
 export default function Showcase() {
@@ -88,7 +95,12 @@ export default function Showcase() {
                 <h2>{r.title}</h2>
                 <p>{r.body}</p>
                 <span className="tag">{r.tag}</span>
-                <SourceViewer name={`showcase-${r.src}`} lines={lineCount(`showcase-${r.src}`)} />
+                {r.scene !== null && (
+                  <SourceViewer
+                    name={r.scene ?? `showcase-${r.src}`}
+                    lines={lineCount(r.scene ?? `showcase-${r.src}`)}
+                  />
+                )}
               </div>
             </div>
           ))}
@@ -99,7 +111,7 @@ export default function Showcase() {
           <div className="aspects">
             <div className="aspects-head">
               <div>
-                <div className="num">06 / any aspect</div>
+                <div className="num">09 / any aspect</div>
                 <h2>One scene, every ratio.</h2>
               </div>
               <p>Relative coordinates resolve per aspect: pin, a 12-column grid, optical centering. Render 16:9, 9:16, and 1:1 from the same source, in one pass.</p>

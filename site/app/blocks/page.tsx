@@ -7,7 +7,7 @@ import blocks from "../../lib/blocks.json";
 export const metadata: Metadata = {
   title: "Vawe · blocks",
   description:
-    "The Vawe block registry: 96 vetted, deterministic, theme-aware components (charts, cards, code, terminals, KPIs, browsers) to compose into videos.",
+    "The Vawe block registry: 148 vetted, deterministic, theme-aware components (charts, cards, code, terminals, KPIs, browsers) to compose into videos.",
 };
 
 const families = Array.from(new Set((blocks as Block[]).map((b) => b.family))).length;

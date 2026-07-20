@@ -1,0 +1,292 @@
+{
+  "module": "scene",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 14.2,
+  "audio": {
+    "silent": true
+  },
+  "layers": [
+    {
+      "type": "rect",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#0d0f13",
+      "start": 0,
+      "duration": 14.2
+    },
+    {
+      "type": "rect",
+      "x": 150,
+      "y": 80,
+      "w": 920,
+      "h": 920,
+      "bg": "#232733",
+      "radius": 30,
+      "anim": "rise",
+      "enterDur": 0.6,
+      "start": 0,
+      "duration": 14.2
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "ken": {
+        "from": 1.1,
+        "to": 1.1113
+      },
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 0,
+      "duration": 2.0
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "neon",
+      "ken": {
+        "from": 1.1113,
+        "to": 1.1214
+      },
+      "anim": "none",
+      "start": 2.0,
+      "duration": 1.8
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "crt:1",
+      "ken": {
+        "from": 1.1214,
+        "to": 1.1315
+      },
+      "anim": "none",
+      "start": 3.8,
+      "duration": 1.8
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "filmNoir",
+      "ken": {
+        "from": 1.1315,
+        "to": 1.1417
+      },
+      "anim": "none",
+      "start": 5.6,
+      "duration": 1.8
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "cyberpunk",
+      "ken": {
+        "from": 1.1417,
+        "to": 1.1518
+      },
+      "anim": "none",
+      "start": 7.4,
+      "duration": 1.8
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "thermal",
+      "ken": {
+        "from": 1.1518,
+        "to": 1.162
+      },
+      "anim": "none",
+      "start": 9.2,
+      "duration": 1.8
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/plaster-sculpture-head-3.webp",
+      "x": 160,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "radius": 24,
+      "filter": "melt:1",
+      "ken": {
+        "from": 1.162,
+        "to": 1.18
+      },
+      "anim": "none",
+      "start": 11.0,
+      "duration": 3.2
+    },
+    {
+      "type": "text",
+      "text": "// ungraded",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#8d95a3",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 0.6,
+      "duration": 1.4
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"neon\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 2.0,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"crt\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 3.8,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"filmNoir\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 5.6,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"cyberpunk\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 7.4,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"thermal\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 9.2,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"melt\"",
+      "x": 1180,
+      "y": 512,
+      "w": 620,
+      "align": "left",
+      "size": 42,
+      "font": "mono",
+      "weight": 500,
+      "color": "#e8e8ea",
+      "anim": "none",
+      "start": 11.0,
+      "duration": 1.8
+    },
+    {
+      "type": "text",
+      "text": "26 composite looks",
+      "x": 1180,
+      "y": 462,
+      "w": 620,
+      "align": "left",
+      "size": 72,
+      "font": "sans",
+      "weight": 700,
+      "color": "#ffffff",
+      "tracking": "-1px",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 12.9,
+      "duration": 1.3
+    },
+    {
+      "type": "text",
+      "text": "core/looks.js",
+      "x": 1180,
+      "y": 618,
+      "w": 620,
+      "align": "left",
+      "size": 34,
+      "font": "mono",
+      "weight": 500,
+      "color": "#8d95a3",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 13.05,
+      "duration": 1.15
+    }
+  ]
+}

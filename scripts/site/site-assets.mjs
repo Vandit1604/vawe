@@ -51,6 +51,11 @@ const MANIFEST = [
   ['showcase', 'showcase-stings',  'showcase-stings',        'showcase/stings.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1280, 5.0, 16 / 9],
   ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1280, 5.0, 16 / 9],
+  // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=10.1),
+  // the one beat that reads as colour at thumbnail size; ransom on a settled note rather than mid-swap.
+  ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 10.1, 16 / 9],
+  ['showcase', 'ransom-intro',     'ransom-intro',           'showcase/ransom.mp4',        1280, 4.0, 16 / 9],
+  ['showcase', 'gradient-showcase','gradient-showcase',      'showcase/gradients.mp4',     1280, 5.0, 16 / 9],
 
   // the aspect trio — one scene, three ratios. Each box on the page carries the TRUE ratio.
   ['aspect', 'showcase-aspect',    'showcase-aspect.16x9',   'showcase/aspect-169.mp4',     800, 2.0, 16 / 9],

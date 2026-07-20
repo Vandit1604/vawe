@@ -80,11 +80,11 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string | Border (rect) |
 
-## Kinetic presets (22)
+## Kinetic presets (25)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `underline` · `shadow` · `riseClip` · `draw`
+`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.
@@ -101,24 +101,31 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 `"cuts": [{ "t": 3.2, "style": "punch" }]` — `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
 
-## Shader stings (32)
+## Shader stings (35)
 
 `"stings": [{ "t": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]`
 
-`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion`
+`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` · `iridescence` · `cinematicZoom`
 
 A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
-## Backgrounds (16)
+## Backgrounds (17)
 
-`"bg": [{ "t": 0, "preset": "plain" }]` — `paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark`
+`"bg": [{ "t": 0, "preset": "plain" }]` — `paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `shapes` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark`
 
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (16)
+## Composite looks (26)
 
-`argus` · `creed-launch` · `creed` · `default` · `ditherkit` · `linear` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `vawe-creed` · `vawe-site` · `vawe`
+A look is the value of a layer's `filter` string, tuned further with `lookOpts`. A positional arg
+sets strength 0..1, e.g. `"neon:0.9"`.
+
+`neon` · `dreamyHaze` · `halationFilm` · `angelic` · `hologram` · `glitchGlow` · `vhs` · `super8` · `crt` · `filmNoir` · `fadedPolaroid` · `nostalgia` · `cyberpunk` · `nightVision` · `thermal` · `lomo` · `droneCinematic` · `vintageAnamorphic` · `impact` · `timeFreeze` · `glassWarp` · `heatWarp` · `melt` · `watercolor` · `dreamSequence` · `rippleGlass`
+
+## Themes (18)
+
+`argus` · `creed-launch` · `creed` · `default` · `ditherkit` · `linear` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `tpot` · `vawe-creed` · `vawe-inter` · `vawe-site` · `vawe`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.
