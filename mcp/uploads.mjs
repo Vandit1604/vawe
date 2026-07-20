@@ -47,6 +47,11 @@ export function save(owner, base64) {
   } catch {
     throw new Error('could not decode base64');
   }
+  return saveBuffer(owner, buf);
+}
+
+/** The store path shared by uploads and by the logo/photo fetchers, which already hold a Buffer. */
+export function saveBuffer(owner, buf) {
   if (!buf.length) throw new Error('empty upload');
   if (buf.length > MAX_BYTES) throw new Error(`too large: ${(buf.length / 1e6).toFixed(1)}MB, limit ${MAX_BYTES / 1e6}MB`);
 

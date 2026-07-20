@@ -22,6 +22,9 @@ import path from 'node:path';
 import * as store from './store.mjs';
 import * as uploads from './uploads.mjs';
 import * as pipe from './pipeline.mjs';
+import * as fetchers from './fetchers.mjs';
+import * as catalog from './catalog.mjs';
+import { reflect } from './reflect.mjs';
 import { quote, isPaid, billingEnabled, checkoutUrl } from './pricing.mjs';
 
 const OWNER = process.env.VAWE_OWNER || 'anon';
@@ -103,6 +106,97 @@ server.registerTool('vawe_upload', {
   } catch (e) {
     return text(`✗ ${e.message}`);
   }
+});
+
+// ── vawe_logo ────────────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_logo', {
+  title: 'Fetch a brand logo (simple-icons)',
+  description: 'Get a brand mark by its simple-icons slug (e.g. "stripe", "github", "openai") as an '
+    + 'src you can use in a layer. Optional hex to tint it. Whenever a company or tool is named on '
+    + 'screen, show its mark.',
+  inputSchema: {
+    slug: z.string().describe('simple-icons slug, e.g. "stripe" or "vercel".'),
+    hex: z.string().optional().describe('Tint colour without the #, e.g. "635bff".'),
+  },
+}, async ({ slug, hex }) => {
+  try {
+    const r = await fetchers.logo(OWNER, slug, hex);
+    return text(`✓ ${slug} logo\n  "src": "${r.src}"\n\nSize it small: a logo reads at ~7% of frame height (75-150px on 1080).`);
+  } catch (e) { return text(`✗ ${e.message}`); }
+});
+
+// ── vawe_photo ───────────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_photo', {
+  title: 'Fetch an openly-licensed photo',
+  description: 'Search CC0 / public-domain photos and get one back as an src. No credit line needed, '
+    + 'no content-claim risk. Treat it (radius, ken, a filter) so it does not look pasted in.',
+  inputSchema: { query: z.string().describe('What to find, e.g. "marble bust" or "night city".') },
+}, async ({ query }) => {
+  try {
+    const r = await fetchers.photo(OWNER, query);
+    return text(`✓ photo (${r.license}${r.creator ? ', ' + r.creator : ''})\n  "src": "${r.src}"\n\n`
+      + `Grade it into the scene: add "radius", a slow "ken", or a "filter".`);
+  } catch (e) { return text(`✗ ${e.message}`); }
+});
+
+// ── vawe_reflect ─────────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_reflect', {
+  title: 'Read a brand\'s real colours and fonts from its site',
+  description: 'Give a URL and get back the site\'s actual brand colours and font names, so the video '
+    + 'is authored in the real palette instead of invented ones. Reads the page source, not a '
+    + 'screenshot. Use the vivid brand colours as accents and the neutrals to decide light-first vs '
+    + 'dark-first.',
+  inputSchema: { url: z.string().describe('The brand site, e.g. "stripe.com".') },
+}, async ({ url }) => {
+  try {
+    const r = await reflect(url);
+    return text([
+      `✓ ${r.title || r.url}`,
+      ``,
+      `brand colours:  ${r.brandColours.join('  ') || '(none found)'}`,
+      `neutrals:       ${r.neutrals.join('  ') || '(none)'}   ← decides light-first vs dark-first`,
+      `fonts:          ${r.fonts.join('  ·  ') || '(none found)'}`,
+      ``,
+      `Author the theme from these: bg = the dominant neutral, accent = the most vivid brand colour.`,
+      `For the font, pick the closest role (sans / serif / mono), or upload the real face with vawe_upload.`,
+    ].join('\n'));
+  } catch (e) { return text(`✗ ${e.message}`); }
+});
+
+// ── vawe_examples ────────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_examples', {
+  title: 'Worked example scenes',
+  description: 'List real, shipped scenes to learn structure from, or pass a name to get its full '
+    + 'JSON. Read one before authoring something similar; it is faster than writing from the guide alone.',
+  inputSchema: { name: z.string().optional().describe('An example name to fetch its JSON. Omit to list.') },
+}, async ({ name }) => {
+  if (!name) {
+    return text('Examples (pass a name to see the JSON):\n'
+      + catalog.examples().map((e) => `  ${e.name.padEnd(20)} ${e.teaches}`).join('\n'));
+  }
+  const json = catalog.example(name);
+  return json ? text(json) : text(`no example "${name}". Call vawe_examples with no argument to list them.`);
+});
+
+// ── vawe_capabilities ────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_capabilities', {
+  title: 'The full block + effect vocabulary',
+  description: 'Every composite look, kinetic preset, cut, and block the engine has, read live from '
+    + 'the registries. Use it to discover a block (chart, terminal, pricing card, tweet) instead of '
+    + 'building one by hand.',
+  inputSchema: {},
+}, async () => {
+  const c = await catalog.capabilities();
+  return text([
+    `looks (${c.looks.length}):   ${c.looks.join(' ')}`,
+    ``,
+    `presets (${c.presets.length}): ${c.presets.join(' ')}`,
+    ``,
+    `cuts (${c.cuts.length}):    ${c.cuts.join(' ')}`,
+    ``,
+    `blocks (${c.blocks.length} across ${c.blockFamilies.length} families):`,
+    ...c.blocks.map((b) => `  ${b.name.padEnd(18)} ${b.blurb}`),
+  ].join('\n'));
 });
 
 // ── vawe_draft ───────────────────────────────────────────────────────────────────────────────────

@@ -28,12 +28,30 @@ That last row is a permanent structural advantage. A self-hoster legally cannot 
 
 ## Tools
 
-| Tool | Cost | Does |
-|---|---|---|
-| `vawe_guide` | free | scene format + full effect vocabulary. Call once, cache it. |
-| `vawe_draft` | free | scene → watermarked video + every gate verdict. Repeat as needed. |
-| `vawe_export` | paid | the same scene, clean. |
-| `vawe_status` | free | status, URLs, last gate report. |
+| Tool | Does |
+|---|---|
+| `vawe_guide` | scene format + effect vocabulary. Call once. |
+| `vawe_reflect` | a brand site's real colours + fonts (source, not a screenshot; SSRF-guarded) |
+| `vawe_logo` | a brand mark by simple-icons slug → src |
+| `vawe_photo` | a CC0 / public-domain photo → src |
+| `vawe_upload` | your own image or font → src |
+| `vawe_capabilities` | every look, preset, cut and block, read live from the registries |
+| `vawe_examples` | worked scenes to learn structure from |
+| `vawe_draft` | scene → watermarked video + gate verdicts. Free, repeat. |
+| `vawe_export` | the clean file, one or more aspect ratios. Paid. |
+| `vawe_status` | status, URLs, last gate report. |
+
+## Security
+
+The render file server default-denies (`internal/scene/scene.go`): only `core`, `themes`, `formats`,
+`assets` and the caller's own `.vawe-data/scenes|uploads` are reachable. `docs`, `blocks`, `scripts`,
+`.git`, `LICENSE`, and other owners' records are not. The `html` and `svg` sanitisers and the
+submit-time `src` allowlist are defence in depth in front of that wall. Outbound fetches (logo, photo,
+reflect) go through an SSRF guard that refuses loopback, private and link-local addresses and
+re-checks after redirects. `mcp/smoke.mjs` asserts the leak vectors stay refused.
+
+There is no auth yet: `VAWE_OWNER` is a self-declared string. These guards stop the REPO leaking; they
+do not make the server multi-tenant safe. **Do not expose it publicly until auth exists.**
 
 ## Why drafts are free
 

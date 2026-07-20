@@ -40,9 +40,11 @@ claude mcp add vawe --scope user -- node /Users/vandit/Developer/code/shortwave/
 > 1. Call `vawe_guide` first, once. It returns a short reference: the scene shape, the traps, and the
 >    effect vocabulary. Everything you write must come from it. Do not invent names. Only call it
 >    again with `detail: "full"` if you need a prop the short page does not list.
-> 2. If the video needs a logo, screenshot or brand font, call `vawe_upload` with the file base64
->    encoded and use the `src` it returns.
-> 3. Write the scene JSON yourself and call `vawe_draft` with it. You get back a watermarked video
+> 2. Gather assets. `vawe_reflect(url)` reads a brand's real colours and fonts. `vawe_logo(slug)`
+>    fetches a company mark. `vawe_photo(query)` gets an openly-licensed photo. `vawe_upload` takes
+>    your own file. Each returns an `src` (or a palette) to use.
+> 3. Browse `vawe_capabilities` for a block you can drop in, and `vawe_examples` for a scene to learn
+>    structure from. Then write the scene JSON yourself and call `vawe_draft`. You get back a watermarked video
 >    and every gate verdict.
 > 4. **Read the gate output and fix what it says.** Call `vawe_draft` again with the same `video_id`
 >    to revise. Note that `vawe_draft` returns immediately and renders in the background: poll
