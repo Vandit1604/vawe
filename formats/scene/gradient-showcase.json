@@ -1,254 +1,174 @@
 {
   "module": "scene",
-  "theme": "vawe",
+  "theme": "vawe-inter",
   "aspect": "16:9",
-  "duration": 10.3,
-  "audio": {
-    "silent": true
-  },
+  "duration": 10.6,
   "layers": [
-    {
-      "type": "image",
-      "src": "/assets/gradients/0055.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 0.0,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0055.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 0.0,
-      "duration": 1.35
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0140.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 1.35,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0140.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 1.35,
-      "duration": 1.35
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0355.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 2.7,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0355.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 2.7,
-      "duration": 1.35
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0508.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 4.05,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0508.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 4.05,
-      "duration": 1.35
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0741.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 5.4,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0741.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 5.4,
-      "duration": 1.35
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0940.jpg",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "start": 6.75,
-      "duration": 1.41
-    },
-    {
-      "type": "text",
-      "text": "0940.jpg \u00b7 1920\u00d71080",
-      "x": 90,
-      "y": 940,
-      "size": 28,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "10px 18px",
-      "radius": 8,
-      "anim": "fade",
-      "enterDur": 0.3,
-      "exitDur": 0.25,
-      "start": 6.75,
-      "duration": 1.35
-    },
-    {
-      "type": "text",
-      "text": "GRADIENT BACKGROUNDS",
-      "x": 210,
-      "y": 150,
-      "w": 1500,
-      "align": "center",
-      "size": 52,
-      "font": "mono",
-      "color": "#0f1620",
-      "bg": "#faf9f6",
-      "pad": "14px 26px",
-      "radius": 10,
-      "anim": "fade",
-      "enterDur": 0.6,
-      "start": 0.3,
-      "duration": 7.5
-    },
     {
       "type": "rect",
       "x": 0,
       "y": 0,
       "w": 1920,
       "h": 1080,
-      "bg": "#ffffff",
-      "start": 8.1,
-      "duration": 2.2
+      "bg": "#14161c",
+      "start": 0,
+      "duration": 11
     },
     {
-      "type": "text",
-      "text": "1000 backgrounds",
-      "x": 210,
-      "y": 460,
-      "w": 1500,
-      "align": "center",
-      "size": 96,
-      "color": "#0f1620",
-      "weight": 800,
+      "type": "rect",
+      "x": 290,
+      "y": 160,
+      "w": 1340,
+      "h": 762,
+      "bg": "#232733",
+      "radius": 26,
       "anim": "rise",
-      "start": 8.25,
-      "duration": 2.0
+      "enterDur": 0.6,
+      "start": 0.15,
+      "duration": 10.6
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0055.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 0.5,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0140.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 1.9,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0355.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 3.3,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0508.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 4.7,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0741.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 6.1,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0940.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 7.5,
+      "duration": 1.75
+    },
+    {
+      "type": "image",
+      "src": "/assets/gradients/0299.jpg",
+      "x": 300,
+      "y": 170,
+      "w": 1320,
+      "h": 742,
+      "radius": 18,
+      "ken": {
+        "from": 1.0,
+        "to": 1.05
+      },
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0.35,
+      "start": 8.9,
+      "duration": 1.75
     },
     {
       "type": "text",
-      "text": "make gradients",
-      "x": 210,
-      "y": 620,
-      "w": 1500,
+      "text": "Gradients",
+      "x": 300,
+      "y": 470,
+      "w": 1320,
       "align": "center",
-      "size": 30,
-      "font": "mono",
-      "color": "#2563eb",
+      "size": 150,
+      "font": "sans",
+      "weight": 800,
+      "color": "#ffffff",
+      "tracking": "-4px",
       "anim": "fade",
-      "enterDur": 0.4,
-      "start": 8.65,
-      "duration": 1.6
+      "enterDur": 0.7,
+      "start": 0.9,
+      "duration": 9.4
     }
   ]
 }
