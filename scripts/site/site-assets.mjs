@@ -44,7 +44,7 @@ const MANIFEST = [
   // The `big` cell spans both columns, so it is the only one that renders near full width and the
   // only one encoded at 1920. Everything under it sits in a half-column: 1120 is already generous.
   // Keep the non-big count EVEN — the grid is two up, and an odd tail leaves a hole in the last row.
-  ['strip',  'looks',              'looks',                  'looks.mp4',                  1920, 16.1, 16 / 9],
+  ['strip',  'looks',              'looks',                  'looks.mp4',                  1920, 13.2, 16 / 9],
   ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1120, 4.0, 16 / 9],
   ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],
   ['strip',  'showcase-cuts',      'showcase-cuts',          'cuts.mp4',                   1120, 2.0, 16 / 9],
@@ -56,9 +56,9 @@ const MANIFEST = [
   ['showcase', 'showcase-stings',  'showcase-stings',        'showcase/stings.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1280, 5.0, 16 / 9],
   ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1280, 5.0, 16 / 9],
-  // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=16.1),
+  // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=13.2),
   // the one beat that reads as colour at thumbnail size; ransom on a settled note rather than mid-swap.
-  ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 16.1, 16 / 9],
+  ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 13.2, 16 / 9],
   ['showcase', 'ransom-intro',     'ransom-intro',           'showcase/ransom.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'gradient-showcase','gradient-showcase',      'showcase/gradients.mp4',     1280, 5.0, 16 / 9],
 

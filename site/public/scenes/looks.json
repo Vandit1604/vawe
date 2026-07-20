@@ -2,7 +2,7 @@
   "module": "scene",
   "theme": "vawe",
   "aspect": "16:9",
-  "duration": 29.0,
+  "duration": 28.7,
   "audio": {
     "silent": true
   },
@@ -13,9 +13,22 @@
       "y": 0,
       "w": 1920,
       "h": 1080,
-      "bg": "#0d0f13",
+      "bg": "#f5f3ef",
       "start": 0,
-      "duration": 29.0
+      "duration": 28.7
+    },
+    {
+      "type": "rect",
+      "x": 241,
+      "y": 81,
+      "w": 618,
+      "h": 918,
+      "bg": "#e6e2da",
+      "radius": 26,
+      "anim": "rise",
+      "enterDur": 0.7,
+      "start": 0,
+      "duration": 28.7
     },
     {
       "type": "image",
@@ -24,31 +37,31 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
+      "radius": 20,
       "ken": {
         "from": 1.02,
-        "to": 1.0244
+        "to": 1.027
       },
       "anim": "fade",
-      "enterDur": 0.5,
+      "enterDur": 0.6,
       "start": 0,
-      "duration": 1.6
+      "duration": 2.5
     },
     {
       "type": "text",
       "text": "// ungraded",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#8d95a3",
+      "color": "#6a6f78",
       "anim": "fade",
-      "enterDur": 0.5,
-      "start": 0.5,
-      "duration": 1.1
+      "enterDur": 0.6,
+      "start": 0.7,
+      "duration": 1.8
     },
     {
       "type": "image",
@@ -57,62 +70,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "neon",
+      "radius": 20,
+      "filter": "neon:1",
       "ken": {
-        "from": 1.0244,
-        "to": 1.0272
+        "from": 1.027,
+        "to": 1.0337
       },
       "anim": "none",
-      "start": 1.6,
-      "duration": 1.0
+      "start": 2.5,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"neon\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 1.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "dreamyHaze",
-      "ken": {
-        "from": 1.0272,
-        "to": 1.0299
-      },
-      "anim": "none",
-      "start": 2.6,
-      "duration": 1.0
+      "start": 2.5,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"dreamyHaze\"",
+      "text": "bloom from the highlights",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 2.6,
-      "duration": 1.0
+      "start": 2.5,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -121,222 +117,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "halationFilm",
+      "radius": 20,
+      "filter": "crt:1",
       "ken": {
-        "from": 1.0299,
-        "to": 1.0327
+        "from": 1.0337,
+        "to": 1.0403
       },
       "anim": "none",
-      "start": 3.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"halationFilm\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 3.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "angelic",
-      "ken": {
-        "from": 1.0327,
-        "to": 1.0354
-      },
-      "anim": "none",
-      "start": 4.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"angelic\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 4.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "hologram",
-      "ken": {
-        "from": 1.0354,
-        "to": 1.0382
-      },
-      "anim": "none",
-      "start": 5.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"hologram\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 5.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "glitchGlow",
-      "ken": {
-        "from": 1.0382,
-        "to": 1.041
-      },
-      "anim": "none",
-      "start": 6.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"glitchGlow\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 6.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "vhs",
-      "ken": {
-        "from": 1.041,
-        "to": 1.0437
-      },
-      "anim": "none",
-      "start": 7.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"vhs\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 7.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "super8",
-      "ken": {
-        "from": 1.0437,
-        "to": 1.0465
-      },
-      "anim": "none",
-      "start": 8.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"super8\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 8.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "crt",
-      "ken": {
-        "from": 1.0465,
-        "to": 1.0492
-      },
-      "anim": "none",
-      "start": 9.6,
-      "duration": 1.0
+      "start": 4.9,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"crt\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 9.6,
-      "duration": 1.0
+      "start": 4.9,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "phosphor scanlines",
+      "x": 960,
+      "y": 570,
+      "w": 820,
+      "align": "left",
+      "size": 30,
+      "font": "sans",
+      "weight": 500,
+      "color": "#6a6f78",
+      "anim": "none",
+      "start": 4.9,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -345,62 +164,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "filmNoir",
+      "radius": 20,
+      "filter": "filmNoir:1",
       "ken": {
-        "from": 1.0492,
-        "to": 1.052
+        "from": 1.0403,
+        "to": 1.047
       },
       "anim": "none",
-      "start": 10.6,
-      "duration": 1.0
+      "start": 7.3,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"filmNoir\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 10.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "fadedPolaroid",
-      "ken": {
-        "from": 1.052,
-        "to": 1.0548
-      },
-      "anim": "none",
-      "start": 11.6,
-      "duration": 1.0
+      "start": 7.3,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"fadedPolaroid\"",
+      "text": "value stripped to mono",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 11.6,
-      "duration": 1.0
+      "start": 7.3,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -409,94 +211,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "nostalgia",
+      "radius": 20,
+      "filter": "cyberpunk:1",
       "ken": {
-        "from": 1.0548,
-        "to": 1.0575
+        "from": 1.047,
+        "to": 1.0537
       },
       "anim": "none",
-      "start": 12.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"nostalgia\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 12.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "cyberpunk",
-      "ken": {
-        "from": 1.0575,
-        "to": 1.0603
-      },
-      "anim": "none",
-      "start": 13.6,
-      "duration": 1.0
+      "start": 9.7,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"cyberpunk\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 13.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "nightVision",
-      "ken": {
-        "from": 1.0603,
-        "to": 1.063
-      },
-      "anim": "none",
-      "start": 14.6,
-      "duration": 1.0
+      "start": 9.7,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"nightVision\"",
+      "text": "magenta / cyan chroma",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 14.6,
-      "duration": 1.0
+      "start": 9.7,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -505,62 +258,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "thermal",
+      "radius": 20,
+      "filter": "thermal:1",
       "ken": {
-        "from": 1.063,
-        "to": 1.0658
+        "from": 1.0537,
+        "to": 1.0604
       },
       "anim": "none",
-      "start": 15.6,
-      "duration": 1.0
+      "start": 12.1,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"thermal\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 15.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "lomo",
-      "ken": {
-        "from": 1.0658,
-        "to": 1.0686
-      },
-      "anim": "none",
-      "start": 16.6,
-      "duration": 1.0
+      "start": 12.1,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"lomo\"",
+      "text": "heat palette remap",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 16.6,
-      "duration": 1.0
+      "start": 12.1,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -569,62 +305,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "droneCinematic",
+      "radius": 20,
+      "filter": "nightVision:1",
       "ken": {
-        "from": 1.0686,
-        "to": 1.0713
+        "from": 1.0604,
+        "to": 1.0671
       },
       "anim": "none",
-      "start": 17.6,
-      "duration": 1.0
+      "start": 14.5,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"droneCinematic\"",
+      "text": "\"filter\": \"nightVision\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 17.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "vintageAnamorphic",
-      "ken": {
-        "from": 1.0713,
-        "to": 1.0741
-      },
-      "anim": "none",
-      "start": 18.6,
-      "duration": 1.0
+      "start": 14.5,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"vintageAnamorphic\"",
+      "text": "green phosphor",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 18.6,
-      "duration": 1.0
+      "start": 14.5,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -633,30 +352,45 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "impact",
+      "radius": 20,
+      "filter": "super8:1",
       "ken": {
-        "from": 1.0741,
-        "to": 1.0768
+        "from": 1.0671,
+        "to": 1.0738
       },
       "anim": "none",
-      "start": 19.6,
-      "duration": 1.0
+      "start": 16.9,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"impact\"",
+      "text": "\"filter\": \"super8\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 19.6,
-      "duration": 1.0
+      "start": 16.9,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "sepia grain",
+      "x": 960,
+      "y": 570,
+      "w": 820,
+      "align": "left",
+      "size": 30,
+      "font": "sans",
+      "weight": 500,
+      "color": "#6a6f78",
+      "anim": "none",
+      "start": 16.9,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -665,62 +399,92 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "timeFreeze",
+      "radius": 20,
+      "filter": "fadedPolaroid:1",
       "ken": {
-        "from": 1.0768,
-        "to": 1.0796
+        "from": 1.0738,
+        "to": 1.0805
       },
       "anim": "none",
-      "start": 20.6,
-      "duration": 1.0
+      "start": 19.3,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "\"filter\": \"fadedPolaroid\"",
+      "x": 960,
+      "y": 500,
+      "w": 820,
+      "align": "left",
+      "size": 44,
+      "font": "mono",
+      "weight": 500,
+      "color": "#14161a",
+      "anim": "none",
+      "start": 19.3,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "light leak, lifted blacks",
+      "x": 960,
+      "y": 570,
+      "w": 820,
+      "align": "left",
+      "size": 30,
+      "font": "sans",
+      "weight": 500,
+      "color": "#6a6f78",
+      "anim": "none",
+      "start": 19.3,
+      "duration": 2.4
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/looks/photos/david.jpg",
+      "x": 250,
+      "y": 90,
+      "w": 600,
+      "h": 900,
+      "radius": 20,
+      "filter": "timeFreeze:1",
+      "ken": {
+        "from": 1.0805,
+        "to": 1.0872
+      },
+      "anim": "none",
+      "start": 21.7,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "\"filter\": \"timeFreeze\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 20.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "glassWarp",
-      "ken": {
-        "from": 1.0796,
-        "to": 1.0823
-      },
-      "anim": "none",
-      "start": 21.6,
-      "duration": 1.0
+      "start": 21.7,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"glassWarp\"",
+      "text": "cold blue hold",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 21.6,
-      "duration": 1.0
+      "start": 21.7,
+      "duration": 2.4
     },
     {
       "type": "image",
@@ -729,190 +493,77 @@
       "y": 90,
       "w": 600,
       "h": 900,
-      "radius": 22,
-      "filter": "heatWarp",
+      "radius": 20,
+      "filter": "melt:1",
       "ken": {
-        "from": 1.0823,
-        "to": 1.0851
+        "from": 1.0872,
+        "to": 1.1
       },
       "anim": "none",
-      "start": 22.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"heatWarp\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 22.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "melt",
-      "ken": {
-        "from": 1.0851,
-        "to": 1.0879
-      },
-      "anim": "none",
-      "start": 23.6,
-      "duration": 1.0
+      "start": 24.1,
+      "duration": 4.6
     },
     {
       "type": "text",
       "text": "\"filter\": \"melt\"",
       "x": 960,
-      "y": 512,
+      "y": 500,
       "w": 820,
       "align": "left",
-      "size": 40,
+      "size": 44,
       "font": "mono",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#14161a",
       "anim": "none",
-      "start": 23.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "watercolor",
-      "ken": {
-        "from": 1.0879,
-        "to": 1.0906
-      },
-      "anim": "none",
-      "start": 24.6,
-      "duration": 1.0
+      "start": 24.1,
+      "duration": 2.4
     },
     {
       "type": "text",
-      "text": "\"filter\": \"watercolor\"",
+      "text": "displacement",
       "x": 960,
-      "y": 512,
+      "y": 570,
       "w": 820,
       "align": "left",
-      "size": 40,
-      "font": "mono",
+      "size": 30,
+      "font": "sans",
       "weight": 500,
-      "color": "#e8e8ea",
+      "color": "#6a6f78",
       "anim": "none",
-      "start": 24.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "dreamSequence",
-      "ken": {
-        "from": 1.0906,
-        "to": 1.0934
-      },
-      "anim": "none",
-      "start": 25.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"dreamSequence\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 25.6,
-      "duration": 1.0
-    },
-    {
-      "type": "image",
-      "src": "/assets/brands/looks/photos/david.jpg",
-      "x": 250,
-      "y": 90,
-      "w": 600,
-      "h": 900,
-      "radius": 22,
-      "filter": "rippleGlass",
-      "ken": {
-        "from": 1.0934,
-        "to": 1.0961
-      },
-      "anim": "none",
-      "start": 26.6,
-      "duration": 1.0
-    },
-    {
-      "type": "text",
-      "text": "\"filter\": \"rippleGlass\"",
-      "x": 960,
-      "y": 512,
-      "w": 820,
-      "align": "left",
-      "size": 40,
-      "font": "mono",
-      "weight": 500,
-      "color": "#e8e8ea",
-      "anim": "none",
-      "start": 26.6,
-      "duration": 1.0
+      "start": 24.1,
+      "duration": 2.4
     },
     {
       "type": "text",
       "text": "26 composite looks",
       "x": 960,
-      "y": 462,
+      "y": 452,
       "w": 820,
       "align": "left",
-      "size": 72,
+      "size": 74,
       "font": "sans",
       "weight": 700,
-      "color": "#ffffff",
+      "color": "#14161a",
       "anim": "fade",
-      "enterDur": 0.5,
-      "start": 27.7,
-      "duration": 1.2999999999999998
+      "enterDur": 0.6,
+      "start": 26.65,
+      "duration": 2.0500000000000003
     },
     {
       "type": "text",
       "text": "core/looks.js",
       "x": 960,
-      "y": 618,
+      "y": 560,
       "w": 820,
       "align": "left",
       "size": 34,
       "font": "mono",
       "weight": 500,
-      "color": "#8d95a3",
+      "color": "#6a6f78",
       "anim": "fade",
-      "enterDur": 0.5,
-      "start": 27.85,
-      "duration": 1.15
+      "enterDur": 0.6,
+      "start": 26.85,
+      "duration": 1.85
     }
   ]
 }
