@@ -20,6 +20,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import * as store from './store.mjs';
+import * as uploads from './uploads.mjs';
 import * as pipe from './pipeline.mjs';
 import { quote, isPaid, billingEnabled, checkoutUrl } from './pricing.mjs';
 
@@ -65,6 +66,35 @@ server.registerTool('vawe_guide', {
   if (fs.existsSync(rules)) parts.push(fs.readFileSync(rules, 'utf8'));
   if (fs.existsSync(schema)) parts.push('## Scene schema\n\n```json\n' + fs.readFileSync(schema, 'utf8') + '\n```');
   return text(parts.join('\n\n---\n\n') || 'guide unavailable');
+});
+
+// ── vawe_upload ──────────────────────────────────────────────────────────────────────────────────
+server.registerTool('vawe_upload', {
+  title: 'Upload an image or font to use in a scene',
+  description: 'Send a file as base64 and get back the `src` path to put in a scene layer. Use this '
+    + 'for the logo, product screenshots, or a brand font. Accepts png, jpg, webp, gif, svg, woff2, '
+    + 'ttf, otf, up to 12MB. The type is read from the file itself, so the filename does not matter. '
+    + 'Uploading the same file twice is free and returns the same path.',
+  inputSchema: {
+    data: z.string().describe('The file, base64 encoded. A data: URL prefix is fine.'),
+    label: z.string().optional().describe('What this is, for your own reference (e.g. "logo").'),
+  },
+}, async ({ data, label }) => {
+  try {
+    const r = uploads.save(OWNER, data);
+    return text([
+      `✓ ${label ? label + ' ' : ''}uploaded${r.reused ? ' (already had it)' : ''}  ${r.ext}, ${(r.bytes / 1024).toFixed(0)}KB`,
+      `  "src": "${r.src}"`,
+      ``,
+      `Use it in a layer:`,
+      `  { "type": "image", "src": "${r.src}", "x": 760, "y": 380, "w": 400, "h": 400,`,
+      `    "radius": 0, "anim": "fade", "start": 0.3, "duration": 3 }`,
+      ``,
+      `A logo reads at about 7% of frame height and never below 5%. On 1080 that is 75 to 150px.`,
+    ].join('\n'));
+  } catch (e) {
+    return text(`✗ ${e.message}`);
+  }
 });
 
 // ── vawe_draft ───────────────────────────────────────────────────────────────────────────────────

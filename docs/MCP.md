@@ -40,12 +40,15 @@ claude mcp add vawe --scope user -- node /Users/vandit/Developer/code/shortwave/
 > 1. Call `vawe_guide` first, once. It returns a short reference: the scene shape, the traps, and the
 >    effect vocabulary. Everything you write must come from it. Do not invent names. Only call it
 >    again with `detail: "full"` if you need a prop the short page does not list.
-> 2. Write the scene JSON yourself and call `vawe_draft` with it. You get back a watermarked video
+> 2. If the video needs a logo, screenshot or brand font, call `vawe_upload` with the file base64
+>    encoded and use the `src` it returns.
+> 3. Write the scene JSON yourself and call `vawe_draft` with it. You get back a watermarked video
 >    and every gate verdict.
-> 3. **Read the gate output and fix what it says.** Call `vawe_draft` again with the same `video_id`
->    to revise. Drafts are free, so iterate until it is actually good. Three or four passes is
->    normal; one is usually not enough.
-> 4. When it is right, call `vawe_export` with the `video_id` for the clean file.
+> 4. **Read the gate output and fix what it says.** Call `vawe_draft` again with the same `video_id`
+>    to revise. Note that `vawe_draft` returns immediately and renders in the background: poll
+>    `vawe_status(video_id)` until it says drafted. Drafts are free, so iterate until it is actually
+>    good. Three or four passes is normal; one is usually not enough.
+> 5. When it is right, call `vawe_export` with the `video_id` for the clean file.
 >
 > I want: **<describe the video: what it is for, how long, landscape or portrait, what it must say>**
 
@@ -61,6 +64,12 @@ strength, a two-second dead frame at the end, a count on screen that had gone st
 
 So expect your Claude to draft, look at the gate report, and draft again. If it exports on the first
 try it probably has not looked at anything.
+
+## Bringing your own assets
+
+`vawe_upload` takes a base64 file and returns a `src` for a layer. Images and fonts, 12MB cap, type
+sniffed from the bytes rather than the name. This is how a launch video carries the customer's logo
+and screenshots, which is most of what makes it theirs.
 
 ## Reading the gate report
 

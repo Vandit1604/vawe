@@ -39,6 +39,25 @@ Types: `text` `count` `image` `group` `rect` `glow` `cursor` `clip` `html` `comp
 
 `font` takes a ROLE, not a family: `sans` · `serif` · `mono`.
 
+## Your own images and fonts
+
+Call `vawe_upload` with the file base64 encoded. It returns a `src` to drop straight into a layer.
+
+```json
+{ "type": "image", "src": "/.vawe-data/uploads/…/<hash>.png",
+  "x": 760, "y": 380, "w": 400, "h": 400, "anim": "fade", "start": 0.3, "duration": 3 }
+```
+
+png · jpg · webp · gif · svg · woff2 · ttf · otf, up to 12MB. The type is read from the file itself,
+so the filename does not matter. Re-uploading the same file is free and returns the same path.
+
+A logo reads at about **7% of frame height** and never below 5%. On a 1080-tall frame that is 75 to
+150px. Sized like a bullet next to a headline it reads as punctuation, not as a brand.
+
+Treat an uploaded photo or it looks pasted in: `radius` to clip it, `ken` for a slow push, or a
+`filter` to grade it into the palette. An untreated full-bleed still is the most common way a video
+looks generic.
+
 ## The traps
 
 Every one of these renders without an error and looks wrong.

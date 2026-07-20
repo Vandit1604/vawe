@@ -23,6 +23,7 @@ export const paths = {
   drafts: () => dir('drafts'),
   exports: () => dir('exports'),
   records: () => dir('records'),
+  uploads: () => dir('uploads'),
 };
 
 export const newId = () => 'vid_' + crypto.randomBytes(8).toString('hex');
