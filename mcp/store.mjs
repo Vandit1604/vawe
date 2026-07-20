@@ -7,8 +7,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.env.VAWE_DATA || path.join(process.cwd(), '.vawe-data');
+// Default INSIDE the repo, not process.cwd(). The renderer serves the scene to headless Chrome from
+// a static file server rooted at the repo, so a scene written anywhere else is fetched as a Go 404
+// page and the browser reports `Unexpected non-whitespace character after JSON at position 4` —
+// which is JSON.parse("404 page not found"). Using cwd worked only when the server happened to be
+// started from the repo, i.e. in every test and no real session.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = process.env.VAWE_DATA || path.join(repoRoot, '.vawe-data');
 const dir = (sub) => { const d = path.join(ROOT, sub); fs.mkdirSync(d, { recursive: true }); return d; };
 
 export const paths = {

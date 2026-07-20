@@ -70,9 +70,10 @@ server.registerTool('vawe_guide', {
 // ── vawe_draft ───────────────────────────────────────────────────────────────────────────────────
 server.registerTool('vawe_draft', {
   title: 'Render a free watermarked draft',
-  description: 'Submit a scene JSON. Returns a watermarked video plus every gate verdict so you can '
-    + 'fix the scene and call again. Free and unlimited. The watermark is the ONLY difference from '
-    + 'the paid export: same engine, same quality, so what you judge here is what you get.',
+  description: 'Submit a scene JSON. Validates immediately, then renders in the BACKGROUND and '
+    + 'returns a video_id right away. Poll vawe_status(video_id) until status is "drafted" — a '
+    + '10s video takes a couple of minutes. Free and unlimited; the watermark is the ONLY difference '
+    + 'from the paid export, so what you judge here is what you get.',
   inputSchema: {
     scene: z.record(z.any()).describe('The scene JSON. Must start with "module": "scene".'),
     video_id: z.string().optional().describe('Revise an existing video instead of starting a new one.'),
@@ -84,44 +85,52 @@ server.registerTool('vawe_draft', {
   if (video_id) rec.revisions += 1;
 
   const scenePath = writeScene(rec.id, scene, rec.revisions);
-  const checked = await pipe.check(scenePath);
-  if (!checked.ok) {
+  // Only validate synchronously: it is pure JSON and fast, and a schema error is worth answering in
+  // the same breath so the caller can fix it without a round trip. Every other gate opens a browser.
+  const v = await pipe.validate(scenePath);
+  if (!v.ok) {
     rec.status = 'invalid';
-    rec.lastGates = { stage: checked.stage, report: checked.report };
+    rec.lastGates = { validate: v.report };
     store.save(rec);
-    return text(`✗ the scene did not validate, nothing was rendered.\n\n${checked.report}`);
+    return text(`✗ the scene did not validate, nothing was rendered.\n\n${v.report}`);
   }
 
+  // Render in the BACKGROUND and answer now. MCP clients cancel a tool call after 60s by default
+  // (JSON-RPC -32001), and a ten-second video takes minutes, so a blocking draft is cancelled every
+  // time on real content. The first fresh-session test failed exactly here.
   const out = path.join(store.paths.drafts(), `${rec.id}.r${rec.revisions}.mp4`);
-  let rendered;
-  try {
-    rendered = await pipe.render(checked.target, out, { watermark: true, aspect: aspect || undefined });
-  } catch (e) {
-    rec.status = 'failed';
-    store.save(rec);
-    return text(`✗ render failed.\n\n${e.message}`);
-  }
-
-  const seconds = pipe.durationOf(out);
-  const auditOut = await pipe.audit(checked.target);
-  rec.status = 'drafted';
-  rec.draft = { file: out, url: urlFor('drafts', out), seconds };
-  rec.lastGates = { ...checked.report, audit: auditOut };
+  rec.status = 'rendering';
   store.save(rec);
 
-  const q = quote(seconds || 0);
+  (async () => {
+    try {
+      const g = await pipe.gates(scenePath);          // expand + slop + ledger (browser, slow)
+      await pipe.render(g.target, out, { watermark: true, aspect: aspect || undefined });
+      const seconds = pipe.durationOf(out);
+      const auditOut = await pipe.audit(g.target);
+      const cur = store.get(rec.id) || rec;
+      cur.status = 'drafted';
+      cur.draft = { file: out, url: urlFor('drafts', out), seconds };
+      cur.lastGates = { validate: v.report, ...g.report, audit: auditOut };
+      store.save(cur);
+    } catch (e) {
+      const cur = store.get(rec.id) || rec;
+      cur.status = 'failed';
+      cur.error = e.message;
+      store.save(cur);
+    }
+  })();
+
   return text([
-    `✓ draft ready (watermarked)`,
-    `  video_id: ${rec.id}   revision ${rec.revisions}   ${seconds ? seconds.toFixed(1) + 's' : ''}`,
-    `  ${rec.draft.url}`,
+    `▶ rendering (free draft, watermarked)`,
+    `  video_id: ${rec.id}   revision ${rec.revisions}`,
     ``,
-    `── gates ──`,
-    `audit:  ${auditOut.split('\n').slice(-3).join('\n        ')}`,
-    `slop:   ${(checked.report.slop || '').split('\n').slice(-2).join(' ')}`,
-    `ledger: ${(checked.report.ledger || '').split('\n').slice(-1)[0]}`,
+    `The scene validated. Rendering runs in the background; roughly 10 to 15 seconds of`,
+    `render per second of video, so expect a couple of minutes.`,
     ``,
-    `Fix anything above and call vawe_draft again with video_id "${rec.id}". Drafts are free.`,
-    `When it is right: vawe_export("${rec.id}") — ${q.label}, $${q.usd}.`,
+    `Call vawe_status("${rec.id}") until status is "drafted" (or "failed"). It returns the`,
+    `video URL and every gate verdict. Then fix what the gates say and call vawe_draft again`,
+    `with the same video_id. Drafts are free.`,
   ].join('\n'));
 });
 
@@ -150,15 +159,23 @@ server.registerTool('vawe_export', {
   const src = fs.existsSync(expanded) ? expanded : scenePath;
 
   const out = path.join(store.paths.exports(), `${rec.id}.mp4`);
-  try {
-    await pipe.render(src, out, { watermark: false, aspect: rec.aspect === '16:9' ? undefined : rec.aspect });
-  } catch (e) {
-    return text(`✗ export render failed.\n\n${e.message}`);
-  }
-  rec.status = 'exported';
-  rec.export = { file: out, url: urlFor('exports', out), seconds: pipe.durationOf(out) };
+  rec.status = 'exporting';
   store.save(rec);
-  return text(`✓ clean export ready\n  ${rec.export.url}`);
+  (async () => {   // background for the same reason as draft: this is a full render, not a copy
+    try {
+      await pipe.render(src, out, { watermark: false, aspect: rec.aspect === '16:9' ? undefined : rec.aspect });
+      const cur = store.get(rec.id) || rec;
+      cur.status = 'exported';
+      cur.export = { file: out, url: urlFor('exports', out), seconds: pipe.durationOf(out) };
+      store.save(cur);
+    } catch (e) {
+      const cur = store.get(rec.id) || rec;
+      cur.status = 'export-failed';
+      cur.error = e.message;
+      store.save(cur);
+    }
+  })();
+  return text(`▶ exporting clean (${q.label}). Poll vawe_status("${rec.id}") until status is "exported".`);
 });
 
 // ── vawe_status ──────────────────────────────────────────────────────────────────────────────────
@@ -170,10 +187,39 @@ server.registerTool('vawe_status', {
   if (!video_id) {
     const all = store.list(OWNER);
     if (!all.length) return text('no videos yet — start with vawe_guide, then vawe_draft.');
-    return text(all.map((r) => `${r.id}  ${r.status.padEnd(9)} rev ${r.revisions}  ${r.export ? 'exported' : r.draft ? 'draft' : ''}`).join('\n'));
+    return text(all.map((r) => `${r.id}  ${r.status.padEnd(10)} rev ${r.revisions}`).join('\n'));
   }
   const rec = store.get(video_id);
   if (!rec) return text(`no such video: ${video_id}`);
+
+  // Since rendering moved to the background, THIS is where a caller learns what happened. It has to
+  // answer "is it done", "is it any good" and "what do I do next" in one read, or the model polls
+  // blind and then guesses.
+  if (rec.status === 'rendering' || rec.status === 'exporting') {
+    return text(`▶ ${rec.status} — not finished yet. Wait a bit and call vawe_status("${rec.id}") again.`);
+  }
+  if (rec.status === 'failed' || rec.status === 'export-failed') {
+    return text(`✗ ${rec.status}\n\n${rec.error || 'no detail recorded'}`);
+  }
+  if (rec.status === 'exported') {
+    return text(`✓ exported (clean)\n  ${rec.export.url}`);
+  }
+  if (rec.status === 'drafted') {
+    const g = rec.lastGates || {};
+    const q = quote(rec.draft?.seconds || 0);
+    return text([
+      `✓ draft ready (watermarked)   revision ${rec.revisions}   ${rec.draft.seconds ? rec.draft.seconds.toFixed(1) + 's' : ''}`,
+      `  ${rec.draft.url}`,
+      ``,
+      `── gates ──`,
+      `audit:  ${(g.audit || '').split('\n').filter(Boolean).slice(-3).join('\n        ')}`,
+      `slop:   ${(g.slop || '').split('\n').filter(Boolean).slice(-2).join(' ')}`,
+      `ledger: ${(g.ledger || '').split('\n').filter(Boolean).slice(-1)[0] || ''}`,
+      ``,
+      `Fix anything above and call vawe_draft again with video_id "${rec.id}". Drafts are free.`,
+      `When it is genuinely good: vawe_export("${rec.id}") — ${q.label}, $${q.usd}.`,
+    ].join('\n'));
+  }
   return text(JSON.stringify({ ...rec, billing: billingEnabled() ? 'on' : 'off' }, null, 2));
 });
 

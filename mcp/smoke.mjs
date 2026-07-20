@@ -40,16 +40,32 @@ const guideLen = guide.content[0].text.length;
 console.log(`✓ vawe_guide → ${(guideLen / 1024).toFixed(0)}KB of vocabulary + schema`);
 if (guideLen < 2000) { console.error('✗ guide looks empty — is site/public/vawe-rules.md present?'); process.exit(1); }
 
+/** Rendering is asynchronous now, so the smoke test has to poll exactly like a caller does. */
+async function waitFor(id, done, label) {
+  for (let i = 0; i < 120; i++) {
+    await new Promise((r) => setTimeout(r, 5000));
+    const st = await client.callTool({ name: 'vawe_status', arguments: { video_id: id } });
+    const t = st.content[0].text;
+    if (t.startsWith('✗')) { console.error(`✗ ${label} failed\n${t}`); process.exit(1); }
+    if (done(t)) return t;
+  }
+  console.error(`✗ ${label} never finished`); process.exit(1);
+}
+
 if (RENDER) {
-  console.log('· drafting a 2s scene (renders for real)…');
+  console.log('· drafting a 2s scene (renders for real, in the background)…');
   const draft = await client.callTool({ name: 'vawe_draft', arguments: { scene: SCENE } });
   const out = draft.content[0].text;
-  console.log(out.split('\n').slice(0, 3).map((l) => '  ' + l).join('\n'));
-  if (!out.startsWith('✓')) { console.error('✗ draft failed'); process.exit(1); }
-
+  if (!out.startsWith('▶')) { console.error(`✗ draft not accepted\n${out}`); process.exit(1); }
   const id = /video_id: (\S+)/.exec(out)?.[1];
-  const exported = await client.callTool({ name: 'vawe_export', arguments: { video_id: id } });
-  console.log('  ' + exported.content[0].text.split('\n')[0]);
+  console.log(`  accepted as ${id}`);
+
+  const drafted = await waitFor(id, (t) => t.includes('draft ready'), 'draft');
+  console.log('  ' + drafted.split('\n').slice(0, 2).join('\n  '));
+
+  await client.callTool({ name: 'vawe_export', arguments: { video_id: id } });
+  const exported = await waitFor(id, (t) => t.includes('exported'), 'export');
+  console.log('  ' + exported.split('\n')[0]);
 }
 
 await client.close();

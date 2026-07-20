@@ -32,10 +32,18 @@ async function step(cmd, args, timeout = 15 * 60_000) {
  * point of returning it to the caller: their model can fix its own scene and resubmit, which is far
  * better than us silently "correcting" their intent.
  */
-export async function check(scenePath) {
-  const validate = await step('node', ['core/validate.mjs', scenePath], 60_000);
-  if (!validate.ok) return { ok: false, stage: 'validate', report: validate.out };
+/**
+ * validate ONLY. Pure JSON, no browser, back in well under a second — which is why it is the only
+ * thing a tool call may wait for. Everything else (expand, slop, ledger, audit) opens Chrome and can
+ * outlast an MCP client's 60s cancel, so it belongs behind the async boundary with the render.
+ */
+export async function validate(scenePath) {
+  const r = await step('node', ['core/validate.mjs', scenePath], 60_000);
+  return { ok: r.ok, report: r.out };
+}
 
+/** expand + the advisory gates. Slow (browser), so callers run this in the background. */
+export async function gates(scenePath) {
   // expand-blocks turns {"block":"kpiRow"} into real layers using the PRIVATE factories. It has to
   // run before anything measures the scene, or the gates audit a scene that is mostly placeholders.
   const expanded = scenePath.replace(/\.json$/, '.expanded.json');
@@ -45,11 +53,10 @@ export async function check(scenePath) {
   const slop = await step('node', ['scripts/gates/slop.mjs', target], 180_000);
   const ledger = await step('node', ['scripts/gates/ledger.mjs', 'check', target], 120_000);
   return {
-    ok: true, target,
+    target,
     report: {
-      validate: validate.out,
       expand: expand.ok ? 'ok' : expand.out,
-      // slop and ledger are ADVISORY here. They are taste opinions, and refusing to render someone's
+      // slop and ledger are ADVISORY. They are taste opinions, and refusing to render someone's
       // video because a detector dislikes their font is the wrong side of a paid product.
       slop: slop.out,
       ledger: ledger.out,
