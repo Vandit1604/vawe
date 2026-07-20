@@ -63,23 +63,34 @@ export const PRESETS = {
   up: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
   down: (u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
   // typewriter: hard on/off (unit is fully in once its progress passes ~0)
-  type: (u) => ({ opacity: u > 0 ? 1 : 0, transform: 'none' }),
+  // the zero-motion preset: a hard snap on, no transform. `at` chooses WHERE in the entrance it
+  // snaps (default 0 = the moment it starts). Raise it for a delayed hard cut in a staggered line.
+  type: (u, { at = 0 } = {}) => ({ opacity: u > at ? 1 : 0, transform: 'none' }),
   // scale up from small
   scale: (u, { from = 0.4 } = {}) => ({ opacity: clamp01(u * 2), transform: `scale(${(from + (1 - from) * easeOutBack(u)).toFixed(3)})` }),
   // blur + fade in
   blur: (u, { px = 16 } = {}) => ({ opacity: clamp01(u), filter: `blur(${((1 - easeOutCubic(u)) * px).toFixed(2)}px)` }),
   // springy bounce in
-  bounce: (u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u * settle * 2, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
+  // `settle` used to scale the spring INPUT (`u * settle * 2`) while spring's own omega is 2π/settle,
+  // so the two cancelled and the dial did nothing (docs/MISTAKES.md #115). Input is a constant now, so
+  // settle drives the settle time as named; the constant 1.0 keeps the default (settle 0.5) identical.
+  bounce: (u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
   // slide from a side
   slide: (u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
   // persistent sinusoidal wave (u is used as raw phase, not a one-shot) — pass loop:true in animateUnits
   wave: (u, { amp = 14, phase = 0 } = {}) => ({ opacity: 1, transform: `translateY(${(Math.sin(u * Math.PI * 2 + phase) * amp).toFixed(2)}px)` }),
   // 3D flip-up per unit (cards/letters somersault into place)
-  flip: (u) => ({ opacity: clamp01(u * 1.5), transform: `perspective(900px) rotateX(${((1 - easeOutCubic(u)) * -80).toFixed(1)}deg)` }),
+  // a 3D card flip in. `axis` picks the hinge (x = top-over, y = door-swing) and `deg` the start
+  // angle (bigger = more severe). Defaults reproduce the old fixed behaviour exactly.
+  flip: (u, { axis = 'x', deg = 80 } = {}) => {
+    const a = (1 - easeOutCubic(u)) * -deg;
+    const rot = String(axis).toLowerCase() === 'y' ? `rotateY(${a.toFixed(1)}deg)` : `rotateX(${a.toFixed(1)}deg)`;
+    return { opacity: clamp01(u * 1.5), transform: `perspective(900px) ${rot}` };
+  },
   // fall from above with gravity (accelerating), tiny overshoot squash at landing
   fall: (u, { dist = 90 } = {}) => { const e = easeOutBack(clamp01(u)); return { opacity: clamp01(u * 2), transform: `translateY(${(-(1 - e) * dist).toFixed(2)}px)` }; },
   // elastic pop: springy scale with visible wobble
-  elastic: (u, { bounce = 0.62, settle = 0.5 } = {}) => { const s = spring(clamp01(u) * settle * 2.4, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `scale(${(0.3 + 0.7 * s).toFixed(3)})` }; },
+  elastic: (u, { bounce = 0.62, settle = 0.5 } = {}) => { const s = spring(clamp01(u) * 1.2, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `scale(${(0.3 + 0.7 * s).toFixed(3)})` }; },
   // skew slide: italic shear that straightens as it lands (editorial/sporty)
   skew: (u, { dist = 70 } = {}) => { const k = 1 - easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateX(${(-k * dist).toFixed(2)}px) skewX(${(-k * 14).toFixed(1)}deg)` }; },
   // focus pull: heavy blur + slight over-scale resolving to crisp

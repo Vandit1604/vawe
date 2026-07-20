@@ -187,10 +187,29 @@ server.registerTool('vawe_capabilities', {
   inputSchema: {},
 }, async () => {
   const c = await catalog.capabilities();
+  // Render each preset with its dials, so a caller does not just learn a name exists but how to tune
+  // it. A dial set on a preset that ignores it is reported by the draft gates (dead-knob check).
+  const knobLine = (fam) => {
+    const K = c.knobs[fam]; if (!K) return '';
+    const shared = (K._shared || []).map((k) => k.name).join(' ');
+    const per = Object.entries(K).filter(([p]) => p !== '_shared' && K[p].length)
+      .map(([p, list]) => `    ${p.padEnd(16)} ${list.map((k) => k.name).join(' ')}`);
+    return `  shared dials: ${shared}\n${per.join('\n')}`;
+  };
   return text([
     `looks (${c.looks.length}):   ${c.looks.join(' ')}`,
+    `  dials: strength (0..1, or "neon:0.8") · color · color2 · grain · vignette · warmth`,
     ``,
-    `presets (${c.presets.length}): ${c.presets.join(' ')}`,
+    `kinetic presets (${c.presets.length}) — set via preset + presetOpts:`,
+    knobLine('kinetic'),
+    ``,
+    `three scenes — set via three:"name":`,
+    knobLine('three'),
+    ``,
+    `raymarch / ambient / sting — uniform dials:`,
+    `  raymarch: ${(c.knobs.raymarch._shared).map((k) => k.name).join(' ')}`,
+    `  ambient:  ${(c.knobs.ambient._shared).map((k) => k.name).join(' ')}`,
+    `  sting:    ${(c.knobs.sting._shared).map((k) => k.name).join(' ')}`,
     ``,
     `cuts (${c.cuts.length}):    ${c.cuts.join(' ')}`,
     ``,
@@ -378,6 +397,7 @@ server.registerTool('vawe_status', {
       `audit:  ${(g.audit || '').split('\n').filter(Boolean).slice(-3).join('\n        ')}`,
       `slop:   ${(g.slop || '').split('\n').filter(Boolean).slice(-2).join(' ')}`,
       `ledger: ${(g.ledger || '').split('\n').filter(Boolean).slice(-1)[0] || ''}`,
+      (g.knobs && g.knobs.includes('dead knob')) ? `knobs:  ${g.knobs.split('\n').filter((l) => l.includes('does nothing')).join('\n        ')}` : '',
       ``,
       `Fix anything above and call vawe_draft again with video_id "${rec.id}". Drafts are free.`,
       `When it is genuinely good: vawe_export("${rec.id}") — ${q.label}, $${q.usd}.`,

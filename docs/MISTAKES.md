@@ -2279,3 +2279,31 @@ owes them the whole list.
 scene file at all. They cannot be re-rendered, verified, or offered as "view source", so they are
 finished videos the engine can no longer account for. Nothing warns about an orphan render; a check
 that every `out/*.mp4` traces to a `formats/scene/*.json` would.
+
+---
+
+## #115 — Two kinetic knobs cancelled themselves out and did nothing
+
+Building the knob manifest, a drift guard (set each advertised dial, assert the output moves) flagged
+`bounce.settle` and `elastic.settle` as dead. They were not typos in the manifest; the presets
+genuinely ignored the dial.
+
+The cause is a cancellation. `bounce` fed the spring `spring(u * settle * 2, { bounce, settle })`,
+and `spring` sets its own frequency `omega = 2π / settle`. So the phase was `omega * t =
+(2π/settle) * (u * settle * 2) = 4π * u` — the `settle` in the input and the `settle` in the frequency
+cancel exactly, leaving a result independent of `settle`. An author dialing settle got no change,
+silently. `elastic` had the same shape; `swing` did not (its input is not settle-scaled), which is why
+only two were dead.
+
+**Fix:** make the spring input a constant and let `settle` drive frequency alone. The constant is
+chosen so the default (settle 0.5) reproduces the old output byte-for-byte — and no shipped scene sets
+a custom settle, so the blast radius is zero. The dial now works.
+
+**Why it stayed hidden:** every scene used the default, and at the default the bug is invisible by
+definition (there is nothing to compare against). It took a tool that sets the dial to a NON-default
+value and checks for a change to see it. That tool is now `make knobs-audit`, and it runs on every
+draft, so the next dead dial fails loud the day it is written instead of years later.
+
+The general lesson, again: a parameter that is accepted and silently ignored is the worst kind of bug,
+because the code looks correct and the output looks plausible. The only defence is a check that
+exercises the parameter and asserts an effect (docs/MISTAKES.md #19-28, #107, #113 — same family).

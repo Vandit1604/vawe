@@ -98,6 +98,12 @@ and the whole glow family on dark content (they threshold brightness, so a dark 
 
 ## Kinetic presets (`preset` on a split text layer)
 
+Every preset takes `presetOpts: { … }` dials. Call `vawe_capabilities` for the full per-preset list;
+common ones: `up/down/fall/riseClip` → `dist`; `scale` → `from`; `blur/focus` → `px`; `wave` → `amp phase`;
+`bounce/elastic/swing` → `bounce settle`; `slide` → `dir dist`; `flip` → `axis deg`; `type` → `at`.
+A dial set on a preset that does not read it does nothing — the draft gates report it.
+
+
 `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` `flip` `fall` `elastic` `skew` `focus`
 `decode` `tilt` `stretch` `gradient` `highlight` `underline` `shadow` `riseClip` `draw` `chroma`
 `swing` `unfold`

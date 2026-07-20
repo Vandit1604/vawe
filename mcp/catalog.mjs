@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { repoRoot } from './pipeline.mjs';
+import { KNOBS } from '../core/knobs.js';
 
 // A curated shortlist, not everything in formats/. Each teaches a different structure an author
 // reaches for, and each is self-contained. Returning the JSON is safe: a scene is authoring guidance,
@@ -43,5 +44,6 @@ export async function capabilities() {
     cuts: Object.keys(PRESENTATIONS),
     blockFamilies: families,
     blocks: blocks.map((e) => ({ name: e.name, family: e.family, blurb: e.blurb })),
+    knobs: KNOBS,
   };
 }

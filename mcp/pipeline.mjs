@@ -82,6 +82,7 @@ export async function gates(scenePath) {
 
   const slop = await step('node', ['scripts/gates/slop.mjs', target], 180_000);
   const ledger = await step('node', ['scripts/gates/ledger.mjs', 'check', target], 120_000);
+  const knobs = await step('node', ['scripts/gates/knobs-audit.mjs', scenePath], 30_000);
   return {
     target,
     report: {
@@ -90,6 +91,9 @@ export async function gates(scenePath) {
       // video because a detector dislikes their font is the wrong side of a paid product.
       slop: slop.out,
       ledger: ledger.out,
+      // a dial set on a preset that ignores it: advisory, but it means an intended effect is doing
+      // nothing, which is worth telling the author.
+      knobs: knobs.out,
     },
   };
 }

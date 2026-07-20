@@ -159,6 +159,12 @@ watermark:
 site-counts:
 	node scripts/gates/site-counts.mjs
 
+# make knobs-audit [D=<file>]  — DRIFT GUARD: every dial core/knobs.js advertises must actually change
+# the render (a manifest that lies is worse than none). With D, also reports knobs set on a preset that
+# ignores them (pointSize on extrudeText), turning a silent no-op into a message.
+knobs-audit:
+	node scripts/gates/knobs-audit.mjs $(D)
+
 # make coverage  — which engine vocabulary no authored scene exercises. Conformance proves a value
 # works; this says whether anything USES it. WARN tier, always exits 0.
 coverage:
