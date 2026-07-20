@@ -1,7 +1,8 @@
 // core/looks.js — composite "looks": a named look is a STACK of pure passes applied to a layer via
 // `filter:`. One composer + a small library of pure passes; each look is DATA (an ordered pass list
-// plus default knobs). Everything here is pure CSS (filter functions + overlay divs) — no SVG defs,
-// no per-frame work, no frame feedback — so renderFrame(n) stays deterministic and `make probe` holds.
+// plus default knobs). Passes are CSS filter functions + overlay divs, plus a few static SVG defs
+// (bloom, displace, gradientMap) injected once at build — no per-frame work and no frame feedback, so
+// renderFrame(n) stays deterministic and `make probe` holds.
 //
 // PIPELINE ORDER (the passes of a look are authored in this order; the composer preserves it):
 //   distort → color → glow → texture → vignette/frame
@@ -18,7 +19,7 @@
 //   fns      → CSS filter functions, concatenated in order onto the layer's `filter`.
 //   overlays → inset child divs (texture/vignette), appended in order, ungraded stacking on top.
 
-import { resolveFilter } from './filters.js';
+import { resolveFilter, bloomFilter } from './filters.js';
 
 const n2 = (x) => (+x).toFixed(2);
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -43,11 +44,14 @@ const grainDataUri = (seed) => {
   return `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/%23/g, '%23')}")`;
 };
 
-// bloom: a stack of white/colour drop-shadows at growing radii (each follows the glyph alpha).
+// A luminance bloom (core/filters.js), NOT a stack of drop-shadows. This used to be four nested
+// `drop-shadow`s, which blur the ALPHA channel: on text or a cut-out that traces the glyph and looks
+// right, but on an opaque photo the alpha IS the rectangle, so every glow look painted a glowing box
+// around the frame and left the picture untouched. Thresholding luminance instead means the light
+// comes from the bright parts of the image and a dark edge emits nothing. See docs/MISTAKES.md #112.
 const bloomStack = (size, color, s) => {
   const k = size * (0.5 + 0.7 * s);
-  const r = (px) => (px * k).toFixed(1);
-  return [3, 8, 18, 40].map((px, i) => `drop-shadow(0 0 ${r(px)}px color-mix(in srgb, ${color} ${[95, 88, 74, 60][i]}%, transparent))`).join(' ');
+  return bloomFilter({ color, radius: 14 * k, intensity: 0.55 + 0.75 * s });
 };
 // horizontal-only streak (anamorphic)
 const hStreak = (size, color, s) => {
@@ -176,7 +180,14 @@ export function applyComposite(el, spec, lookOpts) {
   const resolved = resolveComposite(name, lookOpts || {}, positional);
   if (!resolved) return;
   el.__lookApplied = name;
-  if (resolved.filter) el.style.filter = resolved.filter;
+  // On an IMAGE layer the picture is the <img> inside the wrap, and the wrap already clips (it sets
+  // overflow:hidden for `radius`/`ken`). Filtering the wrap put the glow passes OUTSIDE the picture:
+  // a bloom is a drop-shadow, drop-shadows paint beyond the box, and nothing was there to stop them,
+  // so `neon` on a photo lit up the container's border instead of the photo. Filter the <img> and the
+  // wrap clips the bloom to the frame. Overlays stay on the wrap: they are inset:0 and inherit its
+  // radius, which is exactly the coverage they want.
+  const picture = el.classList?.contains('hs-img-wrap') ? el.querySelector('img') : null;
+  if (resolved.filter) (picture || el).style.filter = resolved.filter;
   resolved.overlays.forEach((ov, i) => {
     const d = document.createElement('div');
     d.className = 'hs-look-ov';

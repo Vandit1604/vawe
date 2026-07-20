@@ -41,6 +41,7 @@ export const FILTER_PRESETS = {
   posterize: { kind: 'svg', mode: 'posterize' },
   chromaGlow: { kind: 'css', mode: 'glow' },
   displace: { kind: 'svg', mode: 'displace' },
+  bloom: { kind: 'svg', mode: 'bloom' },
   vignette: { kind: 'overlay' },
 };
 
@@ -147,6 +148,64 @@ function transferFunc(chan, type, values) {
   return fn;
 }
 
+// A glow colour may arrive as a hex, an rgb(), or a theme token. feFlood's flood-color is a
+// presentation attribute and does NOT resolve var(), so it has to be a literal by the time it is
+// written. Resolve here, against the same theme the rest of the grade reads.
+export function glowRGB(color) {
+  const s = String(color || '').trim();
+  if (/^var\(\s*--accent/.test(s)) return themeColors().accent;
+  if (/^var\(\s*--ink/.test(s)) return themeColors().ink;
+  return parseColor(s) || [255, 255, 255];
+}
+
+// bloom — the AFTER EFFECTS model, not the CSS one. `drop-shadow` blurs the ALPHA channel, so on an
+// opaque photo it blurs a rectangle and paints a glowing box around the frame; the picture is never
+// even consulted. A real glow thresholds LUMINANCE, so light comes out of the bright parts INSIDE the
+// image and a dark edge emits nothing:
+//   1. luma  = 0.2126R + 0.7152G + 0.0722B          → written into alpha
+//   2. mask  = clamp((luma - T) / (1 - T), 0, 1)     → feFuncA linear, slope 1/(1-T)
+//   3. bloom = Σ blur(mask · tint, σᵢ)               → two scales, natural falloff
+//   4. out   = source + intensity · bloom            → feComposite arithmetic (additive)
+// Pure in the frame number: no clock, no feedback, one static def shared by every layer using it.
+function buildBloom(f, { rgb, threshold, radius, intensity }) {
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+    return n;
+  };
+  // Room for the halo to develop. It is still clipped by any overflow:hidden ancestor, which is what
+  // keeps the glow inside the picture rather than out on the page.
+  for (const [k, v] of [['x', '-25%'], ['y', '-25%'], ['width', '150%'], ['height', '150%']]) f.setAttribute(k, v);
+
+  // luminance → alpha (RGB rows zeroed; only the A row carries the coefficients)
+  f.appendChild(el('feColorMatrix', {
+    in: 'SourceGraphic', type: 'matrix', result: 'luma',
+    values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0',
+  }));
+  const ct = el('feComponentTransfer', { in: 'luma', result: 'mask' });
+  const slope = 1 / Math.max(0.001, 1 - threshold);
+  ct.appendChild(el('feFuncA', { type: 'linear', slope: slope.toFixed(4), intercept: (-threshold * slope).toFixed(4) }));
+  f.appendChild(ct);
+
+  f.appendChild(el('feFlood', { 'flood-color': `rgb(${rgb.join(',')})`, result: 'tint' }));
+  f.appendChild(el('feComposite', { in: 'tint', in2: 'mask', operator: 'in', result: 'lit' }));
+  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: radius.toFixed(2), result: 'b1' }));
+  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: (radius * 2.6).toFixed(2), result: 'b2' }));
+  // sum the two scales (arithmetic, not feMerge: merge composites OVER, and light adds)
+  f.appendChild(el('feComposite', { in: 'b1', in2: 'b2', operator: 'arithmetic', k1: 0, k2: 0.6, k3: 0.5, k4: 0, result: 'glow' }));
+  // additive back over the picture: out = intensity·glow + source
+  f.appendChild(el('feComposite', {
+    in: 'glow', in2: 'SourceGraphic', operator: 'arithmetic',
+    k1: 0, k2: intensity.toFixed(3), k3: 1, k4: 0,
+  }));
+}
+
+// bloomFilter — the CSS filter value for a luminance bloom. Injects the def on first use and returns
+// `url(#id)`, so it drops straight into a filter list beside saturate()/contrast().
+export function bloomFilter({ color, threshold, radius, intensity } = {}) {
+  return `url(#${ensureFilterDef('bloom', { color, threshold, radius, intensity })})`;
+}
+
 // Idempotently inject the <filter> def for a named look; returns its id. `opts`:
 //   { colors: [[r,g,b],…] }  ramp stops for duotone/tritone/gradientMap (default: theme ink→accent)
 //   { levels: n }            posterize step count (default 4)
@@ -158,13 +217,27 @@ export function ensureFilterDef(name, opts = {}) {
   const levels = preset.mode === 'posterize' ? Math.max(2, Math.round(opts.levels || 4)) : null;
   const disp = preset.mode === 'displace'
     ? { freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4), scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1) } : null;
-  const id = disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_') : defId(name, stops, levels);
+  const bloom = preset.mode === 'bloom' ? {
+    rgb: glowRGB(opts.color),
+    threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
+    radius: Math.max(0.5, opts.radius ?? 14),
+    intensity: Math.max(0, opts.intensity ?? 1),
+  } : null;
+  const id = disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
+    : bloom ? `f-bloom-${bloom.rgb.join('_')}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
+    : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
 
   const f = document.createElementNS(SVG_NS, 'filter');
   f.setAttribute('id', id);
   f.setAttribute('color-interpolation-filters', 'sRGB'); // tableValues are authored in sRGB space
+
+  if (bloom) {
+    buildBloom(f, bloom);
+    defsHost().appendChild(f);
+    return id;
+  }
 
   if (preset.mode === 'displace') {
     // static feTurbulence → feDisplacementMap: warps the layer's own pixels by a fixed noise field

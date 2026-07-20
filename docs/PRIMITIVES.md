@@ -366,6 +366,18 @@ not a filter. SVG defs inject once at build, so the render stays pure in n.
 
 ## Composite looks (`core/looks.js`) — named filter stacks on any layer
 
+**Glow is a luminance bloom, not a drop-shadow.** The six glow-family looks (`neon`, `dreamyHaze`,
+`halationFilm`, `angelic`, `hologram`, `glitchGlow`) threshold the layer's own brightness, blur that,
+and add it back: light leaves the bright parts of the picture and a dark region emits nothing. Two
+consequences worth knowing before you author:
+
+- On a **photo or any opaque box**, the glow appears inside the image, around its highlights. It does
+  NOT trace the layer's rectangle. (It used to, because the pass was a stack of `drop-shadow`s, which
+  blur the alpha channel. See docs/MISTAKES.md #112.)
+- On **dark content there is nothing to glow.** If a glow look looks like a no-op, the subject is
+  below the threshold, not the look failing. Raise the subject's exposure, or pick a look from the
+  colour or texture family instead.
+
 A **look** is a named stack of pure passes in canonical order (`distort → color → glow → texture →
 vignette`), applied via `filter:` like any grade. All pure CSS (filter functions + inset overlay divs)
 — no SVG, no per-frame work → deterministic. Tier A (20): **glow** `neon` `dreamyHaze` `halationFilm`
@@ -441,9 +453,10 @@ Not the same as its neighbours, and the difference is what to reach for:
 - **vs `canvasFx`**: baked once at build into a static PNG. Static by construction, so it cannot move,
   animate, or take an `amount` ramp. Use `canvasFx` for a treated still, `resample` when the treatment
   itself is the motion.
-- **vs `filter:` / composite looks**: CSS-level, so each output pixel is a function of itself alone.
-  They tint, grade, bloom and posterize; they cannot reach a neighbouring pixel, which is why zoom
-  smear, spin smear and codec blocking cannot be expressed there.
+- **vs `filter:` / composite looks**: mostly CSS-level, so most passes make each output pixel a
+  function of itself alone. They tint, grade, bloom and posterize. The three SVG-backed passes
+  (`bloom`, `displace`, `gradientMap`) do read neighbours, but only through a fixed kernel or noise
+  field, so they cannot express a directional zoom smear, spin smear or codec blocking.
 - **vs `glass`**: `backdrop-filter` reads what is *behind* a layer, but only through the CSS filter
   functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
   frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.

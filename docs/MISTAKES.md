@@ -2178,3 +2178,46 @@ with the bare key in `family`; comparing the right field showed nothing missing.
 entry are the same mistake in opposite directions: a number is only meaningful next to the definition
 that produced it, and 148 / 149 / 154 / 63 / 64 are all correct counts of different things. Say which
 one, or the number is noise.
+
+---
+
+## #112 — Every "glow" in the engine was a drop-shadow, which glows the wrong channel
+
+Six looks (`neon`, `dreamyHaze`, `halationFilm`, `angelic`, `hologram`, `glitchGlow`) built their bloom
+from a stack of four `drop-shadow`s. On text and cut-outs that traces the glyph and looks right, so it
+survived a long time. Put it on a photograph and it draws a glowing rectangle around the frame.
+
+**Why, exactly.** `drop-shadow` blurs the **alpha** channel:
+
+    bloom = G(σ) ⊛ alpha(src) · colour
+
+An opaque photo's alpha is a solid rectangle. Blur a rectangle, get a soft rectangle. The picture is
+never an input, which is why the result was identical whether the frame held a face or a grey wall.
+The box was not an artifact; it was the operation working correctly on the wrong channel.
+
+**What After Effects does instead** — it thresholds **luminance**, never alpha:
+
+    1. L     = 0.2126R + 0.7152G + 0.0722B
+    2. mask  = clamp((L - T) / (1 - T), 0, 1)
+    3. bloom = Σᵢ G(σᵢ) ⊛ (mask · tint)
+    4. out   = src + I · bloom
+
+Step 2 is the entire difference. The mask is sparse: only pixels already brighter than T survive, so
+light leaves the lit cheek and the highlights, and a dark edge emits nothing. No boundary term exists,
+so no box can form. It is also what bloom physically is, light scattering in a lens from bright sources.
+
+**Fix:** a real `bloom` SVG filter in `core/filters.js` (feColorMatrix → feComponentTransfer →
+feFlood/feComposite → two feGaussianBlur → additive feComposite), and `bloomStack` in `core/looks.js`
+now returns `url(#…)` instead of four drop-shadows. All six looks were routed through that one
+function, so one change fixed all six. Static def, injected once at build, no frame hook: pure in n.
+
+**Two lessons.**
+1. **CSS filter has no threshold operator, so the engine quietly settled for the primitive it had.**
+   That is the shape of the mistake: not a wrong value, a wrong *model*, adopted because it was the
+   one available and it looked plausible on the first content anyone tried it on. Text hid this for
+   the entire life of the feature.
+2. I nearly shipped the workaround. Asked not to glow the border, I first clipped the bloom to the
+   frame, which made the six glow looks invisible, then inset the picture, which made the rectangle
+   obvious instead of subtle. Both were me negotiating with a broken model. The question "how does
+   After Effects do this without the box" was worth more than either attempt, because it asked what
+   the operation *should* be rather than how to hide what it was.

@@ -41,9 +41,14 @@ const MANIFEST = [
   ['hero',   'site-backdrop',      'site-backdrop',          'backdrop.mp4',               1280, 1.0, 16 / 9],
 
   // homepage gallery strip — same scenes as the showcase rows, smaller
-  ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1920, 4.0, 16 / 9],
+  // The `big` cell spans both columns, so it is the only one that renders near full width and the
+  // only one encoded at 1920. Everything under it sits in a half-column: 1120 is already generous.
+  // Keep the non-big count EVEN — the grid is two up, and an odd tail leaves a hole in the last row.
+  ['strip',  'looks',              'looks',                  'looks.mp4',                  1920, 16.1, 16 / 9],
+  ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1120, 4.0, 16 / 9],
   ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],
   ['strip',  'showcase-cuts',      'showcase-cuts',          'cuts.mp4',                   1120, 2.0, 16 / 9],
+  ['strip',  'ransom-intro',       'ransom-intro',           'ransom.mp4',                 1120, 4.0, 16 / 9],
 
   // showcase capability rows
   ['showcase', 'showcase-type',    'showcase-type',          'showcase/type.mp4',          1280, 3.0, 16 / 9],
@@ -51,9 +56,9 @@ const MANIFEST = [
   ['showcase', 'showcase-stings',  'showcase-stings',        'showcase/stings.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1280, 5.0, 16 / 9],
   ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1280, 5.0, 16 / 9],
-  // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=10.1),
+  // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=16.1),
   // the one beat that reads as colour at thumbnail size; ransom on a settled note rather than mid-swap.
-  ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 10.1, 16 / 9],
+  ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 16.1, 16 / 9],
   ['showcase', 'ransom-intro',     'ransom-intro',           'showcase/ransom.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'gradient-showcase','gradient-showcase',      'showcase/gradients.mp4',     1280, 5.0, 16 / 9],
 
@@ -128,7 +133,14 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   const outH = Math.round((width * h) / w / 2) * 2;       // even height; ratio preserved exactly
   const srcTime = fs.statSync(src).mtimeMs;
   const dstTime = fs.existsSync(dst) ? fs.statSync(dst).mtimeMs : 0;
-  const isStale = srcTime > dstTime;
+  // Staleness is not only "the source moved". Editing THIS FILE — a width, a poster second — must
+  // also invalidate the output, and mtime cannot see that: changing stings from 1920 to 1120 was
+  // reported "up to date" and the 1920 encode stayed on the site, manifest and reality disagreeing
+  // in silence. Ask the existing file what shape it actually is; ffprobe is already a dependency
+  // here, so this needs no sidecar state that could itself go stale.
+  let builtW = null;
+  if (dstTime) { try { builtW = probe(dst).w; } catch { /* unreadable → treat as stale, re-encode */ } }
+  const isStale = srcTime > dstTime || builtW !== width;
 
   if (DRY) {
     if (isStale) { stale++; console.log(`~ stale  ${dest.padEnd(28)} ${w}x${h} → ${width}x${outH}  (${scene})`); }

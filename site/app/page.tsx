@@ -93,7 +93,16 @@ export default function Home() {
             </Link>
           </div>
           <div className="strip">
+            {/* The strip is two up with `big` spanning both columns, so the count under it must stay
+                EVEN or the last row orphans a cell. Five clips is the balanced shape; the rest of the
+                vocabulary lives on /showcase, which this links to. */}
             <div className="clip big">
+              <Clip src="/assets/looks.mp4" poster="/assets/looks.jpg" />
+              <span className="lab">
+                <b>looks</b> · composite grades
+              </span>
+            </div>
+            <div className="clip">
               <Clip src="/assets/stings.mp4" poster="/assets/stings.jpg" />
               <span className="lab">
                 <b>stings</b> · shader effects
@@ -109,6 +118,12 @@ export default function Home() {
               <Clip src="/assets/cuts.mp4" poster="/assets/cuts.jpg" />
               <span className="lab">
                 <b>cuts</b> · transitions
+              </span>
+            </div>
+            <div className="clip">
+              <Clip src="/assets/ransom.mp4" poster="/assets/ransom.jpg" />
+              <span className="lab">
+                <b>ransom</b> · cutout type
               </span>
             </div>
           </div>
