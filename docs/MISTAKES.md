@@ -2221,3 +2221,35 @@ function, so one change fixed all six. Static def, injected once at build, no fr
    obvious instead of subtle. Both were me negotiating with a broken model. The question "how does
    After Effects do this without the box" was worth more than either attempt, because it asked what
    the operation *should* be rather than how to hide what it was.
+
+---
+
+## #113 — A kernel's `amount` knob has to respect what the kernel sums to
+
+Building the relief family, `edgeGlow` rendered as a solid black rectangle. My first read was the
+subject: polished marble is smooth, smooth material has little edge energy, so I amplified after the
+convolution. Still black. The subject was innocent.
+
+`feConvolveMatrix` weights are only meaningful next to their SUM:
+
+- **sum 1** (sharpen, emboss) — output brightness matches input. Scale these *around the identity*
+  (`centre → 1 + (v-1)·a`), which keeps the sum at 1.
+- **sum 0** (edge) — flat areas cancel to black and only boundaries survive. That cancellation IS the
+  effect, and it only happens at exactly zero.
+
+I applied the around-identity rule to both. On the edge kernel that gave centre `1+3(1.3) = 4.9` and
+four neighbours at `-1.3`, summing to **-0.3**. A small negative sum is a constant downward push on
+every pixel, so flat areas went past black and clamped, and the edges went with them. Amplifying
+afterwards multiplies zero.
+
+**Fix:** branch on the base sum. Zero-sum kernels scale uniformly (the sum stays zero); others scale
+around the identity.
+
+**The lesson.** I reached for a property of the *content* to explain a defect in the *operator*, and
+the content was plausible enough to hold me for one wrong fix. The tell I walked past: brightness
+amplification changing nothing at all. If a gain does literally nothing, the signal is not small, it
+is absent, and those are different diagnoses. Same trap as #101, one level down.
+
+Also worth stating plainly: this was a knob I added an hour earlier, and it was wrong for one of the
+three kernels I shipped it with. A parameter that means different things to different members of its
+own registry needs the branch written the day it is introduced, not the day one member visibly breaks.

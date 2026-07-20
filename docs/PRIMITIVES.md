@@ -374,6 +374,13 @@ consequences worth knowing before you author:
 - On a **photo or any opaque box**, the glow appears inside the image, around its highlights. It does
   NOT trace the layer's rectangle. (It used to, because the pass was a stack of `drop-shadow`s, which
   blur the alpha channel. See docs/MISTAKES.md #112.)
+**The relief family reads neighbouring pixels.** `emboss`, `letterpress`, `chrome`, `edgeGlow` and
+`fatten` are built on `feConvolveMatrix`, `feMorphology` and the SVG lighting primitives, so unlike
+every other look they change a layer's apparent SURFACE rather than its colour. They need texture to
+bite: excellent on a photo or heavy display type, nearly invisible on a flat fill. `letterpress` and
+`chrome` light a bump map made from the picture's own brightness, which is why a low-contrast source
+lights as one featureless slab.
+
 - On **dark content there is nothing to glow.** If a glow look looks like a no-op, the subject is
   below the threshold, not the look failing. Raise the subject's exposure, or pick a look from the
   colour or texture family instead.

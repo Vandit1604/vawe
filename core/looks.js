@@ -19,7 +19,7 @@
 //   fns      → CSS filter functions, concatenated in order onto the layer's `filter`.
 //   overlays → inset child divs (texture/vignette), appended in order, ungraded stacking on top.
 
-import { resolveFilter, bloomFilter } from './filters.js';
+import { resolveFilter, bloomFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
 
 const n2 = (x) => (+x).toFixed(2);
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -81,6 +81,11 @@ const PASSES = {
   gradientMap: (o) => ({ fns: [resolveFilter(o.colors ? `gradientMap:${o.colors.join(',')}` : 'gradientMap').filter] }),
   // a translucent colour wash (screen = lift toward colour; multiply = tint down)
   wash: (o, s) => ({ overlays: [{ bg: solidWash(o.color || 'var(--accent)', (o.amt ?? 0.12) * (0.6 + 0.6 * s)), blend: o.blend || 'screen' }] }),
+  // -- relief / kernel (SVG primitives; see core/filters.js) --
+  convolve: (o, s) => ({ fns: [convolveFilter({ kernel: o.kernel || 'emboss', amount: (o.amount ?? 1) * (0.4 + 0.9 * s) })] }),
+  morph: (o, s) => ({ fns: [morphFilter({ op: o.op || 'dilate', radius: (o.radius ?? 1.5) * (0.4 + 0.9 * s) })] }),
+  relief: (o, s) => ({ fns: [reliefFilter({ mode: o.mode || 'diffuse', azimuth: o.azimuth, elevation: o.elevation,
+    surface: (o.surface ?? 2) * (0.5 + 0.8 * s), exponent: o.exponent, constant: o.constant, color: o.lightColor })] }),
   // -- glow --
   bloom: (o, s) => ({ fns: [bloomStack(o.size ?? 1, o.glowColor || o.color || '#ffffff', s)] }),
   hBloom: (o, s) => ({ fns: [hStreak(o.size ?? 1, o.streakColor || '#a9c8ff', s)] }),
@@ -133,6 +138,38 @@ export const LOOKS = {
   watercolor: { d: { strength: 0.6, color: '#eef0e8' }, p: [['displace', { freq: 0.015, scale: 11 }], ['desaturate', { amt: 0.25 }], ['contrast', { k: 0.95 }], ['wash', { color: '#f2ede0', amt: 0.12, blend: 'multiply' }], ['grain', { grain: 0.15 }]] },
   dreamSequence: { d: { strength: 0.7, color: '#ffe7c0' }, p: [['displace', { freq: 0.01, scale: 7 }], ['blurSoft', { px: 0.5 }], ['bloom', { size: 0.7, glowColor: '#ffe7c0' }], ['wash', { color: '#ffd9a8', amt: 0.1, blend: 'screen' }], ['grain', { grain: 0.16 }]] },
   rippleGlass: { d: { strength: 0.55, color: '#bfe0ff' }, p: [['displace', { freq: 0.03, scale: 8 }], ['bloom', { size: 0.35, glowColor: '#bfe0ff' }], ['vignette', { vignette: 0.3 }]] },
+
+  // --- relief family: the SVG primitives (feConvolveMatrix / feMorphology / fe*Lighting) ---
+  // These read NEIGHBOURING pixels, which no CSS filter function can do, so they are the only looks
+  // here that change an image's apparent SURFACE rather than its colour.
+  // emboss — a lit stone rubbing: the kernel reads opposing corners as a light direction, and the
+  // grey bias is what stops flat areas going black.
+  emboss: { d: { strength: 0.8 }, p: [['convolve', { kernel: 'emboss', amount: 1 }], ['desaturate', { amt: 0.5 }], ['contrast', { k: 1.12 }]] },
+  // letterpress — ink pressed INTO paper: diffuse light multiplies the picture, so the surface darkens
+  // where it falls away from the lamp. Warm paper wash and grain sell the stock.
+  // The brightness lift is not taste, it is arithmetic: diffuse light MULTIPLIES, so without it the
+  // whole picture walks toward black and reads as moody stone rather than ink on pale stock.
+  letterpress: { d: { strength: 0.7, color: '#f3ece0' },
+    p: [['relief', { mode: 'diffuse', azimuth: 225, elevation: 62, surface: 2.2, constant: 1.9 }],
+        ['brightness', { k: 1.5 }], ['desaturate', { amt: 0.6 }], ['contrast', { k: 1.04 }],
+        ['wash', { color: '#efe6d6', amt: 0.16, blend: 'screen' }], ['grain', { grain: 0.14 }]] },
+  // chrome — specular light ADDS instead of multiplying, so highlights sit on top of the metal. The
+  // cool tritone under it is what stops it reading as "a shiny photo" and starts it reading as metal.
+  chrome: { d: { strength: 0.85, color: '#dfe8ff' },
+    p: [['relief', { mode: 'specular', azimuth: 235, elevation: 40, surface: 4, exponent: 24, constant: 1.15, lightColor: '#ffffff' }],
+        ['gradientMap', { colors: ['#0b1020', '#8c9bb5', '#f2f6ff'] }], ['contrast', { k: 1.15 }]] },
+  // edgeGlow — the edge kernel cancels flat areas to black and keeps only boundaries, which is a
+  // line drawing of the subject; blooming that gives neon wire.
+  // The edge kernel sums to ~0, so flat areas cancel to black and only boundaries carry signal. On
+  // smooth material (polished marble, skin) that signal is very small, and it has to be amplified
+  // BEFORE the bloom or it never crosses the luminance threshold and the whole frame renders black.
+  edgeGlow: { d: { strength: 0.8, color: 'var(--accent)' },
+    p: [['convolve', { kernel: 'edge', amount: 2.2 }], ['brightness', { k: 6 }],
+        ['contrast', { k: 1.4 }], ['saturate', { k: 1.6 }],
+        ['bloom', { size: 0.8 }], ['vignette', { vignette: 0.3 }]] },
+  // fatten — dilate swells the brightest pixels outward: type gains weight, a photo goes chunky and
+  // poster-like as highlights eat their neighbours.
+  fatten: { d: { strength: 0.6 }, p: [['morph', { op: 'dilate', radius: 1.6 }], ['contrast', { k: 1.08 }], ['saturate', { k: 1.1 }]] },
 };
 
 // merge look defaults ← lookOpts ← positional strength; strength stays a clamped master dial.

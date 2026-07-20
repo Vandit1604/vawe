@@ -42,6 +42,9 @@ export const FILTER_PRESETS = {
   chromaGlow: { kind: 'css', mode: 'glow' },
   displace: { kind: 'svg', mode: 'displace' },
   bloom: { kind: 'svg', mode: 'bloom' },
+  convolve: { kind: 'svg', mode: 'convolve' },     // arbitrary kernel: emboss, edge, sharpen
+  morph: { kind: 'svg', mode: 'morph' },           // dilate / erode: fatten or thin the ink
+  relief: { kind: 'svg', mode: 'relief' },         // 3D lighting off a luminance bump map
   vignette: { kind: 'overlay' },
 };
 
@@ -206,6 +209,84 @@ export function bloomFilter({ color, threshold, radius, intensity } = {}) {
   return `url(#${ensureFilterDef('bloom', { color, threshold, radius, intensity })})`;
 }
 
+// Named 3x3 kernels for feConvolveMatrix. A kernel is just "how much each neighbour contributes",
+// so one primitive covers effects that look unrelated: EMBOSS is an opposing-corners gradient read as
+// a light direction, EDGE is a centre-vs-neighbours difference (flat areas cancel to black, only
+// boundaries survive), SHARPEN is the same difference added back to the original.
+export const KERNELS = {
+  emboss: { k: [-2, -1, 0, -1, 1, 1, 0, 1, 2], bias: 0.5 },
+  edge: { k: [0, -1, 0, -1, 4, -1, 0, -1, 0], bias: 0 },
+  sharpen: { k: [0, -1, 0, -1, 5, -1, 0, -1, 0], bias: 0 },
+};
+
+// convolveFilter / morphFilter / reliefFilter — CSS filter values for the three SVG primitives the
+// engine had never used. Each injects its def on first use and returns `url(#id)`.
+export function convolveFilter({ kernel = 'emboss', amount = 1 } = {}) {
+  return `url(#${ensureFilterDef('convolve', { kernel, amount })})`;
+}
+export function morphFilter({ op = 'dilate', radius = 1 } = {}) {
+  return `url(#${ensureFilterDef('morph', { op, radius })})`;
+}
+export function reliefFilter({ mode = 'diffuse', azimuth = 225, elevation = 55, surface = 2, color, exponent = 20, constant = 1 } = {}) {
+  return `url(#${ensureFilterDef('relief', { mode, azimuth, elevation, surface, color, exponent, constant })})`;
+}
+
+// The three primitives above, built. Each is static: one def, injected once, no frame hook.
+function buildPrimitive(f, { conv, morph, relief }) {
+  const el = (tag, attrs, parent) => {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+    (parent || f).appendChild(n);
+    return n;
+  };
+
+  if (conv) {
+    const { k, bias } = KERNELS[conv.kernel];
+    // How `amount` scales depends on what the kernel SUMS TO, and getting this wrong is silent.
+    //   sum ~1 (sharpen, emboss): scale around the identity, so 0 is a no-op and 1 is the textbook
+    //     kernel. The sum stays 1, so overall brightness is preserved.
+    //   sum ~0 (edge): scale the whole matrix. The sum MUST stay 0 or flat areas no longer cancel —
+    //     scaling around identity took the edge kernel to a sum of -0.3, a net negative that dragged
+    //     the entire frame to black, edges included, and rendered `edgeGlow` as a black rectangle.
+    const base = k.reduce((a, b) => a + b, 0);
+    const scaled = Math.abs(base) < 0.001
+      ? k.map((v) => v * conv.amount)
+      : k.map((v, i) => (i === 4 ? 1 + (v - 1) * conv.amount : v * conv.amount));
+    // preserveAlpha is required: without it the kernel convolves the alpha channel too, which frays
+    // the edge of any clipped layer into a dirty fringe.
+    el('feConvolveMatrix', {
+      in: 'SourceGraphic', order: '3 3', kernelMatrix: scaled.map((v) => +v.toFixed(3)).join(' '),
+      divisor: 1, bias, edgeMode: 'duplicate', preserveAlpha: 'true',
+    });
+    return;
+  }
+
+  if (morph) {
+    // dilate spreads the brightest pixels outward and erode does the reverse: on type it fattens or
+    // thins the stroke, on a photo it swells highlights into chunky blocks.
+    el('feMorphology', { in: 'SourceGraphic', operator: morph.op, radius: morph.radius });
+    return;
+  }
+
+  // relief: light a surface whose HEIGHT is the picture's own brightness. The lighting primitives read
+  // their bump map from ALPHA, and a photo's alpha is a flat rectangle, so luminance has to be moved
+  // into alpha first or the whole image lights as one featureless slab.
+  el('feColorMatrix', {
+    in: 'SourceGraphic', type: 'matrix', result: 'bump',
+    values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0',
+  });
+  const lightTag = relief.mode === 'specular' ? 'feSpecularLighting' : 'feDiffuseLighting';
+  const lit = el(lightTag, relief.mode === 'specular'
+    ? { in: 'bump', result: 'lit', surfaceScale: relief.surface, specularConstant: relief.constant, specularExponent: relief.exponent, 'lighting-color': `rgb(${relief.rgb.join(',')})` }
+    : { in: 'bump', result: 'lit', surfaceScale: relief.surface, diffuseConstant: relief.constant, 'lighting-color': `rgb(${relief.rgb.join(',')})` });
+  el('feDistantLight', { azimuth: relief.azimuth, elevation: relief.elevation }, lit);
+  // diffuse light MULTIPLIES the picture (ink pressed into a lit surface); specular ADDS to it (a
+  // highlight sitting on top of metal). Same primitive family, opposite composite, opposite look.
+  el('feComposite', relief.mode === 'specular'
+    ? { in: 'lit', in2: 'SourceGraphic', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0 }
+    : { in: 'lit', in2: 'SourceGraphic', operator: 'arithmetic', k1: 1, k2: 0, k3: 0, k4: 0 });
+}
+
 // Idempotently inject the <filter> def for a named look; returns its id. `opts`:
 //   { colors: [[r,g,b],…] }  ramp stops for duotone/tritone/gradientMap (default: theme ink→accent)
 //   { levels: n }            posterize step count (default 4)
@@ -220,10 +301,27 @@ export function ensureFilterDef(name, opts = {}) {
   const bloom = preset.mode === 'bloom' ? {
     rgb: glowRGB(opts.color),
     threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
-    radius: Math.max(0.5, opts.radius ?? 14),
+    radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
     intensity: Math.max(0, opts.intensity ?? 1),
   } : null;
+  const conv = preset.mode === 'convolve' ? {
+    kernel: KERNELS[opts.kernel] ? opts.kernel : 'emboss',
+    amount: +Math.max(0.05, Math.min(3, opts.amount ?? 1)).toFixed(3),
+  } : null;
+  const morph = preset.mode === 'morph' ? {
+    op: opts.op === 'erode' ? 'erode' : 'dilate',
+    radius: +Math.max(0.1, Math.min(12, opts.radius ?? 1)).toFixed(2),
+  } : null;
+  const relief = preset.mode === 'relief' ? {
+    mode: opts.mode === 'specular' ? 'specular' : 'diffuse',
+    azimuth: Math.round(opts.azimuth ?? 225), elevation: Math.round(opts.elevation ?? 55),
+    surface: +(+(opts.surface ?? 2)).toFixed(2), exponent: +(opts.exponent ?? 20).toFixed(1),
+    constant: +(opts.constant ?? 1).toFixed(2), rgb: glowRGB(opts.color || '#ffffff'),
+  } : null;
   const id = disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
+    : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
+    : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
+    : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
     : bloom ? `f-bloom-${bloom.rgb.join('_')}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
     : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
@@ -232,6 +330,12 @@ export function ensureFilterDef(name, opts = {}) {
   const f = document.createElementNS(SVG_NS, 'filter');
   f.setAttribute('id', id);
   f.setAttribute('color-interpolation-filters', 'sRGB'); // tableValues are authored in sRGB space
+
+  if (conv || morph || relief) {
+    buildPrimitive(f, { conv, morph, relief });
+    defsHost().appendChild(f);
+    return id;
+  }
 
   if (bloom) {
     buildBloom(f, bloom);

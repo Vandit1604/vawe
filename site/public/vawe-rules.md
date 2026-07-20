@@ -116,12 +116,18 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Composite looks (26)
+## Composite looks (31)
 
 A look is the value of a layer's `filter` string, tuned further with `lookOpts`. A positional arg
 sets strength 0..1, e.g. `"neon:0.9"`.
 
-`neon` · `dreamyHaze` · `halationFilm` · `angelic` · `hologram` · `glitchGlow` · `vhs` · `super8` · `crt` · `filmNoir` · `fadedPolaroid` · `nostalgia` · `cyberpunk` · `nightVision` · `thermal` · `lomo` · `droneCinematic` · `vintageAnamorphic` · `impact` · `timeFreeze` · `glassWarp` · `heatWarp` · `melt` · `watercolor` · `dreamSequence` · `rippleGlass`
+`neon` · `dreamyHaze` · `halationFilm` · `angelic` · `hologram` · `glitchGlow` · `vhs` · `super8` · `crt` · `filmNoir` · `fadedPolaroid` · `nostalgia` · `cyberpunk` · `nightVision` · `thermal` · `lomo` · `droneCinematic` · `vintageAnamorphic` · `impact` · `timeFreeze` · `glassWarp` · `heatWarp` · `melt` · `watercolor` · `dreamSequence` · `rippleGlass` · `emboss` · `letterpress` · `chrome` · `edgeGlow` · `fatten`
+
+The last five are the **relief family**. They read neighbouring pixels (feConvolveMatrix,
+feMorphology, feDiffuseLighting/feSpecularLighting), so they change the apparent SURFACE of a layer
+rather than its colour: `emboss` a stone rubbing, `letterpress` ink pressed into pale stock, `chrome`
+lit metal, `edgeGlow` a glowing wire outline, `fatten` swollen highlights. They need texture to bite,
+so they read best on a photo or heavy type and do very little on a flat fill.
 
 ## Themes (18)
 
