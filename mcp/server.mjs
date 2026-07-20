@@ -41,10 +41,24 @@ const text = (s) => ({ content: [{ type: 'text', text: s }] });
 // ── vawe_guide ───────────────────────────────────────────────────────────────────────────────────
 server.registerTool('vawe_guide', {
   title: 'Vawe authoring guide',
-  description: 'The scene format and the full effect vocabulary (looks, stings, cuts, easings, '
-    + 'presets, themes). Read this ONCE before writing a scene, then write the JSON yourself.',
-  inputSchema: {},
-}, async () => {
+  description: 'How to write a scene. Call with no arguments FIRST — that returns a short reference '
+    + 'that covers almost everything. Only pass detail:"full" if you need a prop it does not list.',
+  inputSchema: {
+    detail: z.enum(['quick', 'full']).optional()
+      .describe('quick (default) = ~6KB reference. full = every schema prop + the complete vocabulary, ~46KB.'),
+  },
+}, async ({ detail }) => {
+  // Default SMALL on purpose. The full guide is 46KB, and a model that spends its context reading
+  // the schema has less left for the thing it was asked to make. The short page covers the shape,
+  // the traps that render wrong without erroring, and which effects actually read on screen — which
+  // is what the first draft needs. `full` is there for the second question, not the first.
+  if (detail !== 'full') {
+    const quick = path.join(pipe.repoRoot, 'docs/SCENE-QUICK.md');
+    if (fs.existsSync(quick)) {
+      return text(fs.readFileSync(quick, 'utf8')
+        + '\n\n---\nNeed a prop not listed here? Call vawe_guide with detail:"full".\n');
+    }
+  }
   const rules = path.join(pipe.repoRoot, 'site/public/vawe-rules.md');
   const schema = path.join(pipe.repoRoot, 'formats/scene/schema.json');
   const parts = [];

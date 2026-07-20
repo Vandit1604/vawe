@@ -37,9 +37,9 @@ claude mcp add vawe --scope user -- node /Users/vandit/Developer/code/shortwave/
 
 > You have a `vawe` MCP server that renders videos.
 >
-> 1. Call `vawe_guide` first, once. It returns the scene format and the full effect vocabulary:
->    looks, stings, cuts, easings, kinetic presets, themes, blocks. Everything you write must come
->    from that vocabulary. Do not invent names.
+> 1. Call `vawe_guide` first, once. It returns a short reference: the scene shape, the traps, and the
+>    effect vocabulary. Everything you write must come from it. Do not invent names. Only call it
+>    again with `detail: "full"` if you need a prop the short page does not list.
 > 2. Write the scene JSON yourself and call `vawe_draft` with it. You get back a watermarked video
 >    and every gate verdict.
 > 3. **Read the gate output and fix what it says.** Call `vawe_draft` again with the same `video_id`
@@ -120,7 +120,16 @@ Billing is **off** by default, so `vawe_export` works immediately while you are 
 | `⏸ Pending approval` | Run `claude` in the repo and approve the server. |
 | `watermark sheet missing` | `make watermark` |
 | `render failed` with no detail | `make build`, then `node mcp/smoke.mjs` to see the real error |
-| guide comes back tiny | `site/public/vawe-rules.md` is missing; run `node scripts/site/site-engine.mjs` |
+| guide comes back ~5KB | Correct. That is the short reference. `detail: "full"` gives the 46KB one. |
+| guide comes back empty | `docs/SCENE-QUICK.md` is missing |
 | tool call hangs | It is rendering. See Timing above. |
+
+## Why the guide is short
+
+`vawe_guide` returns about 5KB by default, not the 46KB schema. A model that spends its context
+reading every prop has less left for the thing it was asked to make, and the first draft does not need
+the schema: it needs the shape, the traps that render wrong without erroring, and which effects
+actually read on screen. That is [`SCENE-QUICK.md`](SCENE-QUICK.md). `detail: "full"` is there for the
+second question, not the first.
 
 More detail on the architecture and what stays server-side: [`../mcp/README.md`](../mcp/README.md).
