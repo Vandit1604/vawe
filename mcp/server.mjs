@@ -39,6 +39,14 @@ function writeScene(id, scene, rev) {
 
 const text = (s) => ({ content: [{ type: 'text', text: s }] });
 
+// A caller may only see their own videos. Without this, a guessed or leaked video_id from another
+// owner would return that record's status and delivery URL. Records are keyed by id, so the owner
+// check happens here rather than in the store.
+function getOwned(video_id) {
+  const rec = store.get(video_id);
+  return rec && rec.owner === OWNER ? rec : null;
+}
+
 // ── vawe_guide ───────────────────────────────────────────────────────────────────────────────────
 server.registerTool('vawe_guide', {
   title: 'Vawe authoring guide',
@@ -110,7 +118,21 @@ server.registerTool('vawe_draft', {
     aspect: z.string().optional().describe('Override aspect, e.g. "9:16". Default: the scene\'s own.'),
   },
 }, async ({ scene, video_id, aspect }) => {
-  const rec = video_id ? store.get(video_id) : store.create({ owner: OWNER, aspect });
+  // Guard before touching disk. A megabyte of JSON is an attack or a bug, and a src that escapes the
+  // served tree is either a mistake or an attempt to read a server file. Both get a clear refusal.
+  const size = Buffer.byteLength(JSON.stringify(scene || {}));
+  if (size > pipe.MAX_SCENE_BYTES) {
+    return text(`✗ scene too large: ${(size / 1024).toFixed(0)}KB, limit ${pipe.MAX_SCENE_BYTES / 1024}KB. A scene is normally a few KB.`);
+  }
+  const refs = pipe.illegalRefs(scene);
+  if (refs.length) {
+    return text('✗ a layer points outside what you may use. A `src` must be a relative path, an '
+      + '`/assets/...` path, or an upload you got from vawe_upload.\n  ' + refs.join('\n  '));
+  }
+
+  // Owner scoping: revising a video you do not own is a "no such video", not an error that confirms
+  // it exists. A new video is created under you.
+  const rec = video_id ? getOwned(video_id) : store.create({ owner: OWNER, aspect });
   if (!rec) return text(`no such video: ${video_id}`);
   if (video_id) rec.revisions += 1;
 
@@ -170,7 +192,7 @@ server.registerTool('vawe_export', {
   description: 'Re-renders the latest revision without the watermark. Priced by finished duration.',
   inputSchema: { video_id: z.string() },
 }, async ({ video_id }) => {
-  const rec = store.get(video_id);
+  const rec = getOwned(video_id);
   if (!rec) return text(`no such video: ${video_id}`);
   if (!rec.draft) return text('draft this video first — export renders the revision you last drafted.');
 
@@ -219,7 +241,7 @@ server.registerTool('vawe_status', {
     if (!all.length) return text('no videos yet — start with vawe_guide, then vawe_draft.');
     return text(all.map((r) => `${r.id}  ${r.status.padEnd(10)} rev ${r.revisions}`).join('\n'));
   }
-  const rec = store.get(video_id);
+  const rec = getOwned(video_id);
   if (!rec) return text(`no such video: ${video_id}`);
 
   // Since rendering moved to the background, THIS is where a caller learns what happened. It has to

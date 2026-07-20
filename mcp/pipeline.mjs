@@ -32,6 +32,36 @@ async function step(cmd, args, timeout = 15 * 60_000) {
  * point of returning it to the caller: their model can fix its own scene and resubmit, which is far
  * better than us silently "correcting" their intent.
  */
+export const MAX_SCENE_BYTES = 1 << 20; // 1MB. A real scene is a few KB; a megabyte is an attack or a bug.
+
+// A scene layer may only point at assets that ship with the engine or that this caller uploaded.
+// The file server already refuses anything else (a bad `src` renders blank), but refusing it HERE,
+// by name, turns a silent blank box into a message the caller's model can act on. It also blocks the
+// path before it reaches the browser at all, which is the belt to the server's braces.
+const OK_ABS = ['/assets/', '/.vawe-data/uploads/'];
+export function illegalRefs(scene) {
+  const bad = [];
+  const walk = (node, at) => {
+    if (Array.isArray(node)) return node.forEach((v, i) => walk(v, `${at}[${i}]`));
+    if (node && typeof node === 'object') {
+      for (const [k, v] of Object.entries(node)) {
+        if (k === 'src' && typeof v === 'string') {
+          // Relative paths resolve inside the served tree and are fine. An absolute path or a
+          // protocol URL can point anywhere, so it must sit under an allowed prefix.
+          const abs = v.startsWith('/');
+          const proto = /^[a-z][a-z0-9+.-]*:/i.test(v) || v.startsWith('//');
+          if ((abs || proto) && !OK_ABS.some((p) => v.startsWith(p))) {
+            bad.push(`${at}.src → ${v.slice(0, 80)}`);
+          }
+        }
+        walk(v, `${at}.${k}`);
+      }
+    }
+  };
+  walk(scene, 'scene');
+  return bad;
+}
+
 /**
  * validate ONLY. Pure JSON, no browser, back in well under a second — which is why it is the only
  * thing a tool call may wait for. Everything else (expand, slop, ledger, audit) opens Chrome and can
