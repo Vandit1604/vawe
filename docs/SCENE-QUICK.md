@@ -58,6 +58,16 @@ Treat an uploaded photo or it looks pasted in: `radius` to clip it, `ken` for a 
 `filter` to grade it into the palette. An untreated full-bleed still is the most common way a video
 looks generic.
 
+## Ransom cutout type
+
+A word made of real scanned torn-paper cutout letters:
+```json
+{ "type": "text", "text": "RANSOM", "x": 140, "y": 380, "w": 1640, "align": "left",
+  "size": 190, "ransom": { "sprites": true }, "start": 0.1, "duration": 2.4 }
+```
+`ransom: { "sprites": true }` uses the real scanned cutouts (best look). `ransom: { "palette": "color" }`
+uses drawn letters on colour tiles instead. Ransom implies a per-character split; do not add `split`.
+
 ## The traps
 
 Every one of these renders without an error and looks wrong.
