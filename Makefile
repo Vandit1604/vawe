@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
+.PHONY: gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -406,3 +406,8 @@ docker-context: ## does the docker build context still fit its budget?
 # Unzip your pack into assets/ransom-src/ (a folder per character is ideal), then run this once.
 ransom-sprites: ## bake assets/ransom-src/ -> assets/ransom/ + manifest.json
 	node scripts/ransom/sprites.mjs
+
+# Bake a gradient-background pack into a render-ready library (4K -> 1920, indexed).
+# Royalty-free to use, NOT to redistribute: assets/gradients is gitignored. SRC=<zip|folder>
+gradients: ## bake a gradient pack -> assets/gradients/ + index.json
+	node scripts/media/gradients.mjs
