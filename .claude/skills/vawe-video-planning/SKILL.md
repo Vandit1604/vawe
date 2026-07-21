@@ -1,6 +1,6 @@
 ---
 name: vawe-video-planning
-description: "PLAN BEFORE AUTHORING any video in this repo: collect the brief from the user, lock a per-brand style pack, storyboard, THEN write JSON. Use whenever the user asks to 'make a video' and the goal/platform/duration/tone aren't already pinned down."
+description: "PLAN BEFORE AUTHORING any video in this repo: collect the brief, lock a style pack (from a brand site, OR from a manufactured taste anchor when there is no site), storyboard, THEN write JSON. Use whenever the user asks to 'make a video' and the goal/platform/duration/tone aren't pinned down."
 ---
 
 # Video planning — brief first, JSON second
@@ -16,7 +16,10 @@ the plan is LOCKED and the user signs off.** Then execution is precise transcrip
 spec, not exploration. If you find yourself "trying things" in the JSON, the plan wasn't locked —
 go back and lock it.
 
-1. **Study + brief** (Steps 1–2): capture the site, derive the design language, fill the brief.
+1. **Study + brief**: WITH a brand site → Steps 1–2 (study it, derive the design language). WITHOUT
+   one → Step 0.5 (MANUFACTURE the four things a site gives: a taste anchor `profile`, real assets, a
+   story spine, real copy). Either way you arrive at a filled brief; a no-site video is not exempt
+   from having a design language, it just synthesizes one instead of reading it.
 2. **Storyboard** (Step 3): the beat table + per-beat archetype/copy/motion.
 3. **LOCK SHEET** (Step 3c): freeze the full spec — theme colours/fonts, per-beat copy (exact words),
    layout archetype, coordinates band, image/treatment per beat, motion personality, cuts/stings, CTA.
@@ -33,6 +36,45 @@ signature details, NEVERs). Do NOT re-derive what it already states; only study 
 is the per-brand memory that keeps every video for a brand consistent. If it's missing, do the full study
 below, then persist it with `make house-style NAME=<brand>` and sharpen the `<…>` judgment lines so the
 NEXT video is faster and on-brand. (See `docs/TASTE.md` → per-brand house style.)
+
+## Step 0.5 — NO brand site? MANUFACTURE the four things a site gives, before authoring
+
+Steps 1–2 assume a brand site to study. When there is none (a topic video, a from-scratch idea, an
+effects piece), the failure mode is exact and predictable: you invent everything and default to
+generic — centred, effect-soup, no through-line. A site silently hands you FOUR things at once, and
+without one you must MANUFACTURE all four before a single layer is authored. This is a hard gate: if
+the lock sheet is missing any of the four, the plan is not locked.
+
+1. **A taste anchor.** Do NOT invent a palette and motion feel. Pick ONE reference profile from
+   [`docs/CRAFT/SELECTION.md`](../../../docs/CRAFT/SELECTION.md) Part 2 — `linear` · `apple` · `stripe`
+   · `nike` · `a24` · `bloomberg` · `duolingo` · `vercel` — chosen for the topic's register, and set
+   the scene's `profile` field to it. That profile IS the design language a site would have given: it
+   fixes the face role, pace, easing, cut family, sting/look policy, accent, and the bounce rule
+   coherently. For exact colour, name a real reference site and `vawe_reflect` it (e.g. "feels like
+   Linear" → reflect linear.app for its true hexes + face), then apply the profile's motion policy on
+   top. Ask the user which reference if it is not obvious; a named target beats an adjective.
+
+2. **Real assets.** A video of bare rects and text reads as a placeholder. Before authoring, gather
+   real material: `vawe_logo` for any named product/company mark, `vawe_photo` for a CC0 subject the
+   story needs, `vawe_upload` for the user's own logo/screenshots. Name each in the lock sheet with a
+   treatment (`ken`/`radius`/a grade), never bare.
+
+3. **A story spine.** Pick ONE arc and commit its beat order, so the video is a film not a list:
+   hook → build → proof → payoff → CTA (the default), or pain→agitate→solve, or a demo loop. Every
+   beat gets a role. A showcase without a spine is the effect-soup failure; give it one even when it
+   is "just showing effects" (open → range → the one that wows → close).
+
+4. **Real copy.** Never invent claims, numbers, or names. Get the exact words and true figures from
+   the user. On-screen text is only what is true (the honesty rule). If the user has not given copy,
+   ASK for it before locking; do not fill with plausible filler.
+
+Then read [`docs/CRAFT/TASTE-RULES.md`](../../../docs/CRAFT/TASTE-RULES.md) (the failure-modes catalog
+and the prime directive) and [`SELECTION.md`](../../../docs/CRAFT/SELECTION.md) (intent→effect), and
+apply their continuity + restraint rules: shared elements travel across beats, one cut family, effects
+earned on 2–3 beats. `make direct D=<file>` will flag any pick that contradicts the chosen profile.
+
+Skip the site-specific Steps 1–2 (there is no site to study); go from here straight to Step 3
+(storyboard) with the profile as the locked Design Read. Everything else in the contract is unchanged.
 
 ## Step 1 — Study FIRST, then ask SITE-GROUNDED questions
 
@@ -191,12 +233,20 @@ row is a decision the JSON will transcribe, not reinterpret:
 | Field | Locked value |
 |---|---|
 | Orientation / duration / theme | e.g. landscape · 22s · `themes/creed.json` |
-| Palette + fonts | the exact hexes + face names from the study (used ONLY these) |
-| Motion personality | `{easing, bounce, settle, enter, stagger}` written into the theme |
-| Per beat (one row each) | `t-range · archetype · exact copy · image/treatment · cut-in · motion` |
-| Assets | which real captures / logos / photos, and their treatment |
+| **Taste anchor** (no-site videos) | the reference **`profile`** (`apple`/`linear`/…) + which real site was `vawe_reflect`ed for colour |
+| **Story spine** | the named arc + each beat's role (hook/build/proof/payoff/CTA) |
+| Palette + fonts | the exact hexes + face names (from the study OR the profile's reflected reference) |
+| Motion personality | `{easing, bounce, settle, enter, stagger}` — from the profile, written into the theme |
+| **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used |
+| Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in · motion · feeling` |
+| Assets | which real logos / photos / uploads (NOT bare rects), and their treatment |
 | Sound | `audio.auto` on? captions? |
 | CTA | the exact end action + url |
+
+For a no-site video, the first four rows ARE the four manufactured things from Step 0.5. If any is
+blank, the plan is not locked — you have not replaced what a site would have given, and the output
+will default to generic. Every per-beat row names its `feeling` (TASTE-RULES) so `make direct` can
+check the effect against the intent.
 
 **Image treatments** to name per beat (don't leave images bare): `ken` (slow zoom), **`edgeFade`**
 (white blur dissolving the LEFT+RIGHT edges into the bg — set `edgeFadeColor` to the bg on dark
