@@ -7,7 +7,7 @@
 //   make beats D=formats/scene/linear-30.json            (self check)
 //   make beats D=formats/scene/linear-30.json VS=linear  (fidelity vs captured sections)
 //
-// Beat boundaries: data.camera[].t keyframes if present, else data.captions[].start, else even ~5s slices.
+// Beat boundaries: authored cut times, else layer-start clusters (>1.2s gap), else camera/captions, else even chop.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
