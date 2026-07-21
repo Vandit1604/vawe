@@ -39,7 +39,33 @@ WCAG floors: **4.5:1** body · **3:1** large text (≥24px, or ≥18.7px bold) �
 - **Emphasis (`<b>`) on an accent-coloured background** must not be the accent (blue-on-blue vanishes) — the engine
   auto-falls-back to the layer colour; override with `emColor` if needed (see [../MISTAKES.md](../MISTAKES.md) #9).
 
-## 6. Cohesion
+## 6. Deploy the palette for a mood (intent → how you use it)
+The colours are fixed by the brand; the *mood* comes from how you deploy them. Same palette, different feeling:
+
+| The beat should feel… | Do this with the palette |
+|---|---|
+| calm, premium, spacious | mostly `bg`/`bg2`, accent held back to one appearance, high whitespace |
+| tense, dramatic | deep `bg` (dark-first), a single muted accent, big value contrast on the hero |
+| energetic, alive | more saturated accent, accent appears more often, light↔dark value flips between beats |
+| trustworthy, technical | flat neutrals, accent only on the one thing that matters (a number, a CTA) |
+| warm, human | tinted neutrals (a warm ink, cream `bg`), softer contrast, serif + accent low-sat |
+
+Value is the strongest mood lever: **dark-first = serious/cinematic, light-first = clean/confident.** Saturation
+is the energy dial. Accent *frequency* is the excitement dial (once = restrained, several times = lively).
+
+## 7. Gradient field vs flat — when to reach for a gradient
+Backgrounds are palette-driven presets (`core/backgrounds.js`). A gradient field adds atmosphere but competes
+with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md), [STORY.md](STORY.md)):
+
+- **Reach for a gradient/atmospheric bg** (`aurora` · `mesh` · `brandglow` · `spotlight` · `soft` · `constellation`)
+  on **low-copy vibe beats** — the hook, a CTA, a transition, an emotional beat. It sets register in the negative space.
+- **Go flat** (`plain` · `paper` · `dark` · `ink` · `deep` · `accentPlain`) on **high-copy and payoff beats** — a big
+  number, a bold line, a UI capture that must breathe. Never put a gradient behind the thing the beat exists to land.
+- **Only use a gradient the real site has.** A flat/minimal brand gets a flat field; inventing an `aurora` for a brand
+  that has none is off-brand (see [../MISTAKES.md](../MISTAKES.md)). The theme's 3 `gradient` stops feed these presets, so
+  a gradient always stays inside the brand's family.
+
+## 8. Cohesion
 One accent across the whole piece · vary **hue only within the brand's family**, flip **value** (light↔dark) for
 drama (a value flip is itself a transition) · patterns are seasoning, not wallpaper. Backgrounds pull from this
 same palette (`core/backgrounds.js` is palette-driven), so one pack reskins every bg.

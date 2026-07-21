@@ -11,14 +11,20 @@ Ladder, lightest first — go heavier only if it adds meaning, not decoration:
 A clean gradient beats a mismatched photo. If a beat reads fine on a plain field, don't add an image.
 
 ## 2. Treat every image so it feels intentional
-A raw, untreated, off-brand photo reads as slop and fails the beats fidelity gate. Give it a treatment tied to the brand:
-- **`edgeFade`** — dissolve the left+right edges into the bg (set `edgeFadeColor` to the bg on dark scenes).
-- **`ken`** — slow Ken-Burns zoom so a still isn't static.
-- **clip to a shape** + `radius` — a card, not a raw rectangle.
-- **scrim** — a 40-60% dark overlay under text on a photo so type stays legible.
-- **duotone / grade to the palette** — so the image belongs to the brand's colours.
-- **One grading recipe across the whole piece** (same duotone/grain/crop logic) or it fragments.
-- Pull the image's accent from the **brand's own colours** so it sits in the palette (see [COLOR.md](COLOR.md)).
+A raw, untreated, off-brand photo reads as slop and fails the beats fidelity gate. Pick the treatment by what the
+image needs to DO, not by habit:
+
+| The image needs to… | Treatment | Note |
+|---|---|---|
+| sit in the frame without a hard rectangle edge | **`edgeFade`** | dissolve L+R edges into the bg; set `edgeFadeColor` to the bg on dark scenes |
+| not be static (a held still) | **`ken`** | slow Ken-Burns zoom (3–8%); the default so nothing sits dead |
+| read as a UI card / product, not a photo | **clip to a shape** + `radius` | a card, not a raw rectangle |
+| carry text on top and stay legible | **scrim** | a 40–60% dark overlay under the type |
+| belong to the brand's colours | **duotone / grade to the palette** | pull the accent from the brand (see [COLOR.md](COLOR.md)) |
+| feel like one film, not a scrapbook | **one grading recipe across the whole piece** | same duotone/grain/crop logic everywhere, or it fragments |
+
+Reach for the **lightest** treatment that does the job (a clip + ken is enough for most UI captures); stack more
+only when the image genuinely needs it. An over-graded image is as off as a raw one.
 
 ## 3. Licensing — what's safe vs what triggers a claim
 - **Safe:** CC0 / public-domain photos (`make photos` records attribution; CC-BY needs a visible credit), your own

@@ -73,11 +73,39 @@ principles of animation: slow-in/slow-out, anticipation, follow-through.)
 
 ## 4. Composite looks / stings / shaders — the texture and era
 
-Reach for one only on the **2–3 earned beats** (hero reveal · act break · CTA). The era it evokes:
-`vhs`/`crt`/`super8` = analog nostalgia · `thermal`/`nightVision`/`cyberpunk` = sci-fi/data ·
-`filmNoir`/`letterpress`/`emboss` = editorial/print · `neon`/`glow` = energy · `chrome`/`iridescence`
-= premium product. Pick the era of the story, not the loudest effect. (See MOTION-CRAFT §Effect
-selection for the full effect→use index.)
+Reach for one only on the **2–3 earned beats** (hero reveal · act break · CTA). **Pick the era of the
+story, not the loudest effect.** Two registries: *looks* (`core/looks.js`, a held texture over a beat)
+and *stings* (`SHADER_FX` in `core/stings.js`, a shader that peaks AT a cut). Complete coverage below,
+grouped by the register each evokes — pick the group your story is in, then one member.
+
+**Looks — the held texture (register → the looks that carry it):**
+
+| Register / era | Looks (pick one) |
+|---|---|
+| analog nostalgia (warm, dated) | `vhs` · `crt` · `super8` · `lomo` · `fadedPolaroid` · `nostalgia` · `vintageAnamorphic` |
+| cinematic / film | `halationFilm` · `droneCinematic` · `filmNoir` · `dreamSequence` |
+| print / editorial | `letterpress` · `emboss` · `impact` |
+| sci-fi / data / digital | `thermal` · `nightVision` · `cyberpunk` · `hologram` · `glitchGlow` |
+| premium / glamour / energy | `chrome` · `angelic` · `edgeGlow` · `neon` |
+| dreamy / soft-focus | `dreamyHaze` · `watercolor` |
+| distortion / physical FX | `melt` · `glassWarp` · `heatWarp` · `rippleGlass` · `timeFreeze` · `fatten` |
+
+**Stings — the shader AT the seam (what the cut should MEAN → the stings that say it):**
+
+| The seam should read as… | Stings (pick one) |
+|---|---|
+| time passing / reflection | `dissolve` · `ink` · `leak` · `bokeh` |
+| energy, momentum | `whipPan` · `streak` · `cinematicZoom` · `warp` |
+| digital shock / rupture | `glitch` · `chromaticSplit` · `dispersion` · `pixel` · `gridPixelateWipe` · `scan` |
+| playful "notice the cut" (shape wipes) | `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `sdfIris` |
+| a heavy story turn | `vortex` · `burn` · `ridgedBurn` |
+| liquid / organic morph | `crossWarp` · `domainWarp` · `ripple` |
+| punctuation / a hit | `flash` · `grain` · `confetti` |
+| premium glamour / product | `lens` · `iridescence` · `thermal` |
+
+Match the sting's register to the look and the profile: an `apple` beat that earns one effect takes
+`lens`, never `glitch`; a `linear` reveal takes `chromaticSplit`, never `confetti`. (See MOTION-CRAFT
+§Effect selection for the effect→use index and per-effect knobs.)
 
 ---
 
