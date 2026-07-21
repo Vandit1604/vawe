@@ -50,9 +50,23 @@ if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 const meta = await page.evaluate(() => window.__engine.meta);
 const { duration, fps: F } = meta;
 
-// beat boundaries → [t0,t1) windows
-let bounds = (data.camera || []).map((k) => k.t).filter((t) => typeof t === 'number');
-if (bounds.length < 2) bounds = (data.captions || []).map((c) => c.start).filter((t) => typeof t === 'number');
+// beat boundaries → [t0,t1) windows.
+// A beat is a story unit, and the truest signal of one is the AUTHORED transition: a `cuts[]` time.
+// Next best is a CLUSTER of layer start-times (a new group of content entering after a gap) — the
+// same heuristic the motion director uses. camera/captions are weaker signals, and an even chop is
+// the last resort. Earlier this used ONLY camera→captions→even-split, so a cut-driven scene (the
+// reel) was chopped into arbitrary 5s chunks and undercounted its real beats.
+const near = (arr, t, eps = 0.35) => arr.some((x) => Math.abs(x - t) < eps);
+let bounds = [];
+// 1. explicit cut times — the strongest boundary
+for (const c of data.cuts || []) if (typeof c.t === 'number' && !near(bounds, c.t)) bounds.push(c.t);
+// 2. layer-start clusters: sort starts, a >1.2s gap opens a new beat (ignore the full-bleed base track 0)
+const starts = [...new Set((data.layers || []).filter((l) => l.track !== 0).map((l) => l.start ?? 0))].sort((a, b) => a - b);
+let last = -9;
+for (const t of starts) { if (t - last > 1.2 && !near(bounds, t)) { bounds.push(t); } last = t; }
+// 3. fallbacks only if the above found nothing
+if (bounds.length < 2) for (const k of data.camera || []) if (typeof k.t === 'number' && !near(bounds, k.t)) bounds.push(k.t);
+if (bounds.length < 2) for (const c of data.captions || []) if (typeof c.start === 'number' && !near(bounds, c.start)) bounds.push(c.start);
 if (bounds.length < 2) { const n = Math.max(2, Math.round(duration / 5)); bounds = Array.from({ length: n }, (_, i) => (i * duration) / n); }
 bounds = [...new Set(bounds.map((t) => Math.max(0, Math.min(duration, t))))].sort((a, b) => a - b);
 if (bounds[0] > 0.05) bounds.unshift(0);
@@ -110,4 +124,4 @@ const padded = rows.map((r, i) => {
 const sheet = '/tmp/beats.png';
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
 console.log(`✓ ${beats.length} beats · ${duration.toFixed(1)}s${vs ? ` · vs SITE ${vs}` : ''}  →  ${sheet}`);
-console.log('  Read /tmp/beats.png and check each row: is the beat clear, un-overlapped, and true to the site?');
+console.log('  Read the sheet, give a verdict PER numbered beat (keep / fix X / cut / too fast). Judge each against\n  docs/CRAFT/TASTE-RULES.md: does it read, earn its time, and connect to its neighbours?');
