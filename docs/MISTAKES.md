@@ -2335,3 +2335,24 @@ one that escapes the repo, and use that everywhere including the browser URL.
 valuable test I have is a real agent driving the product for a real outcome and reading every result,
 because it uses the outputs the way a customer will — and it found in one run a gate that had been
 dark for the whole life of the MCP.
+
+## #117 — a direction gate must measure beat-holds from real cut times, not start-clusters
+
+**What:** the first `make direct` beat-too-short check computed beat durations from layer-start
+clusters, then flagged any span under 0.6s. It fired on `creed` (which has NO cuts at all) and other
+clean films.
+
+**Root cause:** start-clusters are grouped with a >1.4s gap, so by construction no two interior beats
+are ever closer than 1.4s. The ONLY span that can read as "tiny" is the last cluster's distance to the
+video end (a late-entering CTA element) — a pure artifact, not a real short beat. The check could
+therefore only ever produce false positives.
+
+**Fix:** base beat-hold duration on real `cuts[].t` gaps (the true beat boundaries); skip the check
+when a scene has no cuts. Demoted to WARN, since a fast montage is a legitimate choice.
+
+**Which gate catches it now:** `make direct` itself — calibrated against every existing scene (55 pass
+/ 5 fail, and the 5 are genuine ≥3 cut-family soup), so a check that fires on clean films is caught by
+the calibration sweep, not shipped.
+
+**The lesson:** a heuristic that can only fire on an artifact of its own segmentation is worse than no
+check. Before trusting a new gate, run it across the whole corpus and confirm the clean cases pass.

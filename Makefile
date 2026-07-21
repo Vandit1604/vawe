@@ -372,7 +372,7 @@ blocks-scenes: ## per-block scene JSON + poster still for the site (no render ne
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
-direct: ## motion director: pick cuts/stings per transition (D=<file> [WRITE=1])
+direct: ## direction gate + motion director: audit direction, suggest cuts/stings (D=<file> [WRITE=1])
 	node scripts/author/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])

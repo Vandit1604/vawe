@@ -10,6 +10,7 @@
 // Usage: node scripts/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
 import fs from 'node:fs';
 import path from 'node:path';
+import { LOOK_NAMES } from '../../core/looks.js';
 
 const file = process.argv[2];
 if (!file) { console.error('usage: node scripts/motion-director.mjs <scene.json> [--write]'); process.exit(2); }
@@ -79,14 +80,86 @@ beats.forEach((t, i) => {
   picks.push({ t, cut, sting, reason });
 });
 
+// ---- DIRECTION AUDIT (the pre-render gate) --------------------------------------------------------
+// Source-decidable checks for the direction failure-modes in docs/CRAFT/TASTE-RULES.md. Like `make
+// slop` but for direction. Severity: FAIL = wrong by rule (blocks, exit 1); WARN = judgment (informs).
+// Effect budget flexes with purpose (TASTE-RULES), so busyness is WARN, not a fixed hard count.
+const findings = [];
+const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
+const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
+
+// one cut family per film. Group the cut vocabulary by edit-grammar meaning (SELECTION §1).
+const CUT_FAMILY = {
+  soft: ['none', 'fade', 'blur', 'riseBlur', 'softwipe', 'softiris'],       // dissolves — hide the seam
+  motion: ['whip', 'skewWhip', 'punch', 'zoom', 'slide', 'squeeze', 'drop', 'rise', 'jitter'], // directional pushes
+  shape: ['wipe', 'iris', 'clock', 'blinds', 'barn', 'letterbox'],          // matte reveals — notice the cut
+  spatial: ['cube', 'flip', 'spin', 'roll', 'collapse'],                    // 3D dimensional turns
+};
+const familyOf = (style) => Object.keys(CUT_FAMILY).find((f) => CUT_FAMILY[f].includes(style)) || 'other';
+const cutStyles = [...(d.cuts || []).map((c) => c.style), ...layers.map((l) => l.cut)].filter((s) => s && s !== 'none');
+const usedFamilies = [...new Set(cutStyles.map(familyOf))];
+if (usedFamilies.length >= 3) fail('cut-families', `${usedFamilies.length} cut families (${usedFamilies.join(', ')}) — one film, one family (TASTE-RULES: restraint)`);
+else if (usedFamilies.length === 2) warn('cut-families', `2 cut families (${usedFamilies.join(', ')}) — prefer one; the director rotates WITHIN a family`);
+
+// effect soup: heavy effects are a composite look (layer.filter), an ambient shader, a 3D toy, or a
+// sting. Effects are seasoning (2-3 earned moments), not a per-beat texture.
+const isLook = (s) => s && LOOK_NAMES.includes(String(s).split(':')[0].trim());
+const effectsPerBeat = beats.map((t) => {
+  const inBeat = (start) => start >= t - 0.05 && start < (beats[beats.indexOf(t) + 1] ?? 1e9);
+  const set = new Set();
+  for (const l of layers) if (inBeat(l.start ?? 0)) {
+    if (isLook(l.filter)) set.add(`look:${String(l.filter).split(':')[0]}`);
+    if (l.shader) set.add(`shader:${l.shader}`);
+    if (l.three) set.add('three'); if (l.raymarch) set.add('raymarch');
+  }
+  for (const s of d.stings || []) if (inBeat(s.t ?? -9)) set.add(`sting:${s.fx}`);
+  return set;
+});
+const distinctEffects = new Set(effectsPerBeat.flatMap((s) => [...s]));
+const effectBeats = effectsPerBeat.filter((s) => s.size).length;
+if (beats.length >= 3 && effectBeats / beats.length > 0.6)
+  warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats — most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`);
+else if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
+  warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats — a new look every beat is a demo reel, not a film`);
+
+// continuity: a shared element that travels (a motion track, or a layer spanning a beat boundary).
+const spansABeat = (l) => { const a = l.start ?? 0, b = a + (l.dur ?? l.enterDur ?? 0); return beats.some((t) => t > a + 0.05 && t < b - 0.05); };
+const travelers = layers.filter((l) => l.track !== 0 && (Array.isArray(l.motion) && l.motion.length > 1 || spansABeat(l)));
+if (beats.length >= 4 && travelers.length === 0)
+  warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity)`);
+
+// beats too short to read. Only real cut times give a true beat-hold duration (start-clusters are
+// ≥1.4s apart by construction, so they can't measure this). WARN, since a fast montage is legitimate.
+const duration = d.duration || 0;
+const cutTimes = [...new Set((d.cuts || []).map((c) => c.t).filter((t) => typeof t === 'number'))].sort((a, b) => a - b);
+if (cutTimes.length >= 2) {
+  const holds = cutTimes.map((t, i) => (cutTimes[i + 1] ?? (duration || t + 3)) - t);
+  const tiny = holds.filter((h) => h > 0 && h < 0.9).length;
+  const unreadable = holds.filter((h) => h > 0 && h < 0.5).length;
+  if (unreadable >= 2) warn('pacing', `${unreadable} cuts less than 0.5s apart — too fast to read unless a deliberate montage`);
+  else if (tiny / cutTimes.length > 0.5) warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s — chaotic pacing unless intentional`);
+}
+
+// dead final frame: the payoff should hold to the end, never fade out (TASTE-RULES).
+if (duration > 0 && layers.length) {
+  const holdsEnd = layers.some((l) => l.track !== 0 && (l.exitDur === 0 || (l.start ?? 0) + (l.dur ?? 1e9) >= duration - 0.15));
+  if (!holdsEnd) warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`);
+}
+
+// profile contradictions are wrong-by-rule → FAIL tier.
+for (const c of contradictions) fail('profile', c);
+
 // ---- report ----
 console.log(`\n  motion director · ${file}`);
 console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]`);
 if (profile) console.log(`  profile: ${d.profile}  (restraint ${profile.restraint}, face ${profile.face}, bounce ${profile.bounceOk})`);
-if (contradictions.length) {
-  console.log(`\n  ⚠ ${contradictions.length} contradiction(s) — a pick fighting the intent:`);
-  for (const c of contradictions) console.log(`    ✗ ${c}`);
-}
+
+const fails = findings.filter((f) => f.sev === 'FAIL');
+const warns = findings.filter((f) => f.sev === 'WARN');
+console.log(`\n  direction audit: ${fails.length} fail · ${warns.length} warn`);
+for (const f of fails) console.log(`    ✗ [${f.code}] ${f.msg}`);
+for (const w of warns) console.log(`    ~ [${w.code}] ${w.msg}`);
+if (!findings.length) console.log('    ✓ direction reads clean');
 console.log('');
 if (!picks.length) console.log('  only one beat — no transitions to direct.\n');
 for (const p of picks) {
@@ -105,7 +178,13 @@ if (WRITE) {
   fs.writeFileSync(out, JSON.stringify(d, null, 2));
   console.log(`\n  ✓ applied → ${out}  (${picks.length} cuts, ${picks.filter((p) => p.sting).length} stings)\n`);
 } else {
-  console.log(`\n  suggest-only. Re-run with WRITE=1 (or --write) to apply → <file>.directed.json\n`);
+  console.log(`\n  suggest-only. Re-run with WRITE=1 (or --write) to apply → <file>.directed.json`);
+  // pre-render gate: a rule violation blocks the render. WARN-tier informs but does not block.
+  if (fails.length) {
+    console.log(`\n  ✗ direction gate: ${fails.length} rule violation(s) — fix before rendering.\n`);
+    process.exit(1);
+  }
+  console.log(warns.length ? `\n  gate passed with ${warns.length} warning(s) to review.\n` : `\n  ✓ direction gate clean.\n`);
 }
 
 function r2(n) { return Math.round(n * 100) / 100; }
