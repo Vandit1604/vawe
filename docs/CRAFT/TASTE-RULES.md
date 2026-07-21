@@ -6,7 +6,7 @@ video "renders fine but feels cheap." Modelled on the another engine taste syste
 the source-decidable subset backstopped by a gate).
 
 Two things a from-scratch video lacks that a brand site hands you for free — a taste anchor and a
-story spine. This file is the anchor when there is no site. Read it before authoring, not after.
+story spine. This file is the anchor when there is no site. Its companion [`SELECTION.md`](SELECTION.md) turns an intent into the specific transition/font/effect to reach for. Read it before authoring, not after.
 
 ---
 

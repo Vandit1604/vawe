@@ -29,6 +29,37 @@ const FAMILY = {
   neutral: { cuts: ['fade', 'slide', 'wipe', 'blur'], stings: ['dissolve', 'flash'] },
 }[personality];
 
+// Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
+// A scene opts in with a top-level "profile":"apple". `bounceOk` and the banned lists are the
+// contradiction rules — a bounce preset on `apple` is wrong by rule, not by taste.
+const PROFILES = {
+  linear:   { cuts: ['none', 'blur'], stings: [], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'cube', 'roll'], face: 'mono' },
+  apple:    { cuts: ['fade', 'riseBlur'], stings: ['lens'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'punch', 'jitter'], face: 'sans' },
+  stripe:   { cuts: ['blur', 'fade'], stings: ['dissolve'], bounceOk: false, restraint: 'med', banCuts: ['whip', 'jitter'], face: 'sans' },
+  nike:     { cuts: ['whip', 'punch'], stings: ['flash', 'streak'], bounceOk: 'accent', restraint: 'low', banCuts: [], face: 'sans' },
+  a24:      { cuts: ['fade', 'letterbox'], stings: ['ink', 'leak'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'pop'], face: 'serif' },
+  bloomberg:{ cuts: ['collapse', 'punch'], stings: ['scan'], bounceOk: false, restraint: 'med', banCuts: ['whip', 'wipe', 'spin'], face: 'mono' },
+  duolingo: { cuts: ['wipe', 'iris'], stings: ['confetti', 'sdfIris'], bounceOk: true, restraint: 'low', banCuts: [], face: 'sans' },
+  vercel:   { cuts: ['none'], stings: ['glitch', 'chromaticSplit'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'cube', 'roll', 'bounce'], face: 'sans' },
+};
+const profile = PROFILES[d.profile] || null;
+if (profile) { FAMILY.cuts = profile.cuts.length ? profile.cuts : FAMILY.cuts; FAMILY.stings = profile.stings; }
+
+// Contradiction check: a choice that fights the named profile is flagged with the rule that caught it.
+const contradictions = [];
+if (profile) {
+  const bounceUsed = layers.some((l) => ['bounce', 'elastic'].includes(l.preset));
+  if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}" — cheap on a serious brand (SELECTION §contradictions)`);
+  for (const l of layers) {
+    if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}" — announces an edit this profile hides`);
+  }
+  for (const c of d.cuts || []) {
+    if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}" — wrong for this profile's restraint`);
+  }
+  const families = new Set((d.cuts || []).map((c) => c.style));
+  if (families.size > 2) contradictions.push(`${families.size} cut families in one film (${[...families].join(', ')}) — one film, one family`);
+}
+
 // beats = clusters of layer start-times (a >1.4s gap starts a new beat), same as critique.
 const s0 = (l) => l.start ?? 0;
 const starts = [...new Set(layers.filter((l) => l.track !== 0).map(s0))].sort((a, b) => a - b);
@@ -50,7 +81,13 @@ beats.forEach((t, i) => {
 
 // ---- report ----
 console.log(`\n  motion director · ${file}`);
-console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]\n`);
+console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]`);
+if (profile) console.log(`  profile: ${d.profile}  (restraint ${profile.restraint}, face ${profile.face}, bounce ${profile.bounceOk})`);
+if (contradictions.length) {
+  console.log(`\n  ⚠ ${contradictions.length} contradiction(s) — a pick fighting the intent:`);
+  for (const c of contradictions) console.log(`    ✗ ${c}`);
+}
+console.log('');
 if (!picks.length) console.log('  only one beat — no transitions to direct.\n');
 for (const p of picks) {
   console.log(`  @${p.t.toFixed(1)}s  cut: ${p.cut.padEnd(9)}${p.sting ? `sting: ${p.sting.padEnd(9)}` : ''.padEnd(16)}${p.reason}`);

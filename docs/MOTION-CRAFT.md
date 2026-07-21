@@ -1,6 +1,7 @@
 # MOTION-CRAFT — the stored rules of great motion animation
 
 > **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md) — the cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
+> **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md) — this file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
 
 Distilled July 2026 from motion-design craft literature (Disney's 12 principles applied to
 screen design, kinetic-typography practice, brand-film pacing) and from our own shipped-film
