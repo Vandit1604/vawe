@@ -2,13 +2,15 @@
 
 A working "design brain" for the video engine: given a **concept/beat**, look up which
 background, layout, motion, transition, colour and value to use. Grounded in UI/UX + motion-design
-research (Gestalt, 60-30-10, WCAG, Material-3 easing, 12 principles). Rows marked **✅** are built
-in this engine (`core/backgrounds.js` presets, `formats/brandfilm` scene types); others are the
-broader palette to add when a concept needs them.
+research (Gestalt, 60-30-10, WCAG, Material-3 easing, 12 principles). Backgrounds map to real
+`core/backgrounds.js` presets; the rest is the broader technique palette to reach for when a concept
+needs it. This file is the **technique catalog**; the narrative side (beat order, timing, what each
+beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 
-> **How to use:** find your beat in §9 (Concept → recipe). It names the background, layout, motion
-> character, transition and value. Then pull exact params from §2–§8. Hold the cohesion anchors
-> (§8) constant across a film; vary ≥3 axes between adjacent scenes (§10).
+> **How to use:** decide the beats in [`CRAFT/STORY.md`](CRAFT/STORY.md), then look up each beat's
+> techniques in §9 (Concept → recipe) here — background, motion character, transition. Pull exact
+> params from §2–§8. Hold the cohesion anchors (§8) constant across a film; vary ≥3 axes between
+> adjacent scenes (§10).
 
 ---
 
@@ -82,24 +84,20 @@ Hard-cut on the audio beat + a 2-frame accent flash = punchy and cheap.
 
 ---
 
-## 5. Layout patterns
+## 5. Layout patterns → moved to CRAFT/LAYOUT.md
 
-Left-aligned macro · centred statement · 3-up card row (flow) · 2-col feature grid · split (text | image) · lower-third · full-bleed number · quote block. **Rotate them** — never two identical layouts back-to-back. Margins ≥ 8% (~155px at 1920). 40–60% of the frame stays empty (premium = restraint).
+The archetypes (left-macro · centred statement · split · full-bleed number · 3-up flow · 2-col grid ·
+quote · card-over-board · lower-third) now live as an **archetype→intent** table in
+[`CRAFT/LAYOUT.md`](CRAFT/LAYOUT.md) §6 — pick by the beat's job, then rotate (never two alike in a row).
 
 ---
 
-## 6. Scene types (brandfilm)
+## 6. Scene types — retired (the engine has no scene types)
 
-| Type | Purpose | Best background |
-|---|---|---|
-| `title` | hook / name reveal | aurora, brandglow |
-| `statement` | one big idea, macro type | spotlight, aurora, dotmatrix(light) |
-| `steps` | process / how-it-works (cards + connectors) | dotmatrix(light), mesh |
-| `stats` | proof, count-up numbers | constellation |
-| `features` | capability grid | mesh, constellation |
-| `quote` | serif pull-quote | spotlight |
-| `split` | claim + hero image | mesh, aurora |
-| `cta` | close, logo + url | brandglow |
+The old `title`/`statement`/`steps`/`stats`/… types belonged to the removed `brandfilm` template.
+There is now **one module: `scene`**, an open canvas — no templates, no scene types. Compose each beat
+from the primitive vocabulary. For **beat roles** (hook/proof/payoff/…) and which technique each maps
+to, see [`CRAFT/STORY.md`](CRAFT/STORY.md) and §9 above.
 
 ---
 

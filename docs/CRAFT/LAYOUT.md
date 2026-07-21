@@ -41,10 +41,26 @@ how to place layers and compose an `html` layer with intent.
 - **Landscape 16:9:** hero on a thirds intersection, never hugging edges.
 - **Measure:** set text-layer `w` so lines are 45-75 chars (~66 ideal); full-bleed text loses the return sweep.
 
-## 6. Rotate archetypes (anti-monotony)
-No layout archetype twice in a row: split · centered-top with full-width artifact · full-bleed statement ·
-asymmetric card-over-board. The storyboard names each beat's archetype. (See [../MOTION-CRAFT.md](../MOTION-CRAFT.md)
-for the rhythm side; the `impeccable` skill flags centered-default tells.)
+## 6. Archetype → intent (pick by the beat's job, then rotate)
+
+No layout archetype twice in a row; the storyboard names each beat's archetype. Pick it by what the
+beat is *doing* (see [STORY.md](STORY.md) for the beat role), not by habit. Margins ≥ 8% (~155px at
+1920); 40–60% of the frame stays empty.
+
+| Archetype | Reach for it when the beat… | Note |
+|---|---|---|
+| **Left-aligned macro** | states one idea, wants tension | the anti-centered default; hero on the left third |
+| **Centered statement** | is a lone title / CTA / single hero line | only when genuinely symmetric (rule §2) |
+| **Split (text \| artifact)** | pairs a claim with a real UI capture / image | headline left, artifact right; the workhorse |
+| **Full-bleed number/statement** | is the payoff — one big stat or line | strip it bare; let it breathe |
+| **3-up card row / flow** | shows a process (how-it-works, ≤3 steps) | cards + connectors, staggered |
+| **2-col feature grid** | lists capabilities (a Build/FAB beat) | quick staggered fades; cut weak features |
+| **Quote block** | is a testimonial / pull-quote | serif, cite fades last |
+| **Asymmetric card-over-board** | wants depth — a card floating over context | anchor with intent, never random-float |
+| **Lower-third** | labels/annotates without stealing focus | over a running artifact |
+
+(See [../MOTION-CRAFT.md](../MOTION-CRAFT.md) for the rhythm side; the `impeccable` skill flags
+centered-default tells.)
 
 **Sources:** Refactoring UI (hierarchy, spacing, layout); Müller-Brockmann *Grid Systems in Graphic Design*;
 Gestalt principles (proximity, similarity, common region); Butterick (measure); broadcast title-safe standards.
