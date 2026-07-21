@@ -170,6 +170,12 @@ knobs-audit:
 coverage:
 	node scripts/gates/coverage.mjs
 
+# make craft-coverage  — keep the CRAFT decision docs honest: every look/sting in the engine is
+# classified in SELECTION.md, no doc names a removed effect, CRAFT cross-links resolve, no guide is
+# orphaned from the README index. FAIL tier (exits 1) so the docs can't silently rot.
+craft-coverage:
+	node scripts/gates/craft-coverage.mjs
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs

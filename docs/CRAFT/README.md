@@ -66,6 +66,8 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 - [`../MISTAKES.md`](../MISTAKES.md) = *what went wrong before* (mistake → fix log).
 - `.claude/skills/{taste-skill,impeccable}` = *enforcement* (the anti-slop detector + dials). CRAFT tells
   you what to do; impeccable checks you did it. Reach past what impeccable flags using these guides.
+- `make craft-coverage` = *doc integrity* — fails if a look/sting in the engine isn't classified in
+  SELECTION, a doc names a removed effect, a CRAFT cross-link breaks, or a guide is orphaned from this index.
 
 ## The engine facts these guides are grounded in (not generic advice)
 - **Theme contract** (`core/theme-contract.js`): a theme MUST define `palette.{bg,bg2,surface,surface2,
