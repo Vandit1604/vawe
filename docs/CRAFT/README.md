@@ -33,3 +33,4 @@ They are opinionated checklists, not textbooks: if a rule here wouldn't change w
   no em-dashes on screen; patterns are seasoning not wallpaper. See [`../MISTAKES.md`](../MISTAKES.md).
 - [TASTE-RULES.md](TASTE-RULES.md) — what not to do, and how each choice makes the viewer feel (the cause→feeling layer)
 - [SELECTION.md](SELECTION.md) — intent→effect: which transition/font/look for which feeling, cited to design theory, + named reference profiles
+- [SOUND.md](SOUND.md) — when to add audio and what: music-vs-silence, bed mood→feeling, sfx restraint, caption style→intent, per-profile policy
