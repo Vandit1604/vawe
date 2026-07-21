@@ -1246,6 +1246,115 @@
     "grain": {
       "type": "boolean",
       "label": "Opt in to the in-engine canvas grain (default off, matching the ffmpeg pass)"
+    },
+    "audio": {
+      "type": "object",
+      "label": "Audio bed. OPT-IN: silence is the DEFAULT — omit this block for a silent video. Mixed by internal/audio/audio.go under core/audio-select.js. All sound is SYNTHESIZED (core/audio-kit.mjs), never licensed.",
+      "fields": {
+        "music": {
+          "type": "string",
+          "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense → assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make validate` resolves it against assets/music/ and the scene dir and warns if it will not."
+        },
+        "auto": {
+          "type": "boolean",
+          "label": "Auto-pick a music bed AND auto-derive sfx cues from cuts/stings (core/audio-select.js). Same as music:\"auto\"."
+        },
+        "musicGain": {
+          "type": "number",
+          "label": "Music bed level (0 = muted, ~0.5 typical). Ducks automatically under VO.",
+          "min": 0
+        },
+        "musicFade": {
+          "type": "object",
+          "label": "Music fade envelope (seconds).",
+          "fields": {
+            "in": {
+              "type": "number",
+              "label": "Fade-in (s)",
+              "min": 0
+            },
+            "out": {
+              "type": "number",
+              "label": "Fade-out (s)",
+              "min": 0
+            }
+          }
+        },
+        "musicDuck": {
+          "type": "number",
+          "label": "Duck floor: how far the bed drops while VO plays (0..1, e.g. 0.15).",
+          "min": 0,
+          "max": 1
+        },
+        "loudness": {
+          "type": "number",
+          "label": "Integrated loudness target in LUFS (negative, e.g. -14 for social). Absent = peak-normalize only.",
+          "min": -60,
+          "max": 0
+        },
+        "vo": {
+          "type": "string",
+          "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make validate` (the mixer would silently drop it)."
+        },
+        "voWords": {
+          "type": "string",
+          "label": "VO word-timing sidecar JSON: [{ \"w\": \"hello\", \"t\": 1.2 }] — drives word captions."
+        },
+        "sfxGain": {
+          "type": "number",
+          "label": "Master multiplier over EVERY sfx cue (authored + auto-derived).",
+          "min": 0
+        },
+        "cues": {
+          "type": "array",
+          "label": "Sound-effect cues, each { t, name, gain }. THIS is where cues live (the engine reads `audio.cues`); there is no top-level `sfx`.",
+          "item": {
+            "t": {
+              "type": "number",
+              "label": "Cue time (s)",
+              "required": true
+            },
+            "name": {
+              "type": "string",
+              "label": "Cue name: a synthesized cue (core/audio-kit.mjs CUES) or a baked alias (whoosh/reveal/click/pop, see scripts/media/audio-bake.mjs). `make validate` guards this list against the live CUES registry.",
+              "required": true,
+              "enum": [
+                "chime",
+                "sparkle",
+                "droplet",
+                "bloom",
+                "whisper",
+                "tick",
+                "press",
+                "release",
+                "toggle",
+                "success",
+                "error",
+                "page",
+                "loading",
+                "ready",
+                "whoosh",
+                "reveal",
+                "click",
+                "pop"
+              ]
+            },
+            "gain": {
+              "type": "number",
+              "label": "Per-cue gain (default 0.6)",
+              "min": 0
+            }
+          }
+        },
+        "spectrum": {
+          "type": "string",
+          "label": "Precomputed spectrum sidecar JSON for audio-reactive layers (layer `react:{}`)."
+        },
+        "silent": {
+          "type": "boolean",
+          "label": "Force NO audio track at all. Silence is already the default; use this only to mute a scene that otherwise names audio."
+        }
+      }
     }
   }
 }

@@ -100,3 +100,32 @@ no captions; do not caption a video that has nothing being said.
 
 When there is no profile: **silent**, and let the visuals prove they carry it. Add a bed only if the
 video is one the viewer chose to play, and match its genre to the feeling above.
+
+## The knobs (the JSON, all optional, silence stays the default)
+
+Everything above is *when*; this is *how*. All of it lives in the scene's top-level `audio` block
+(`formats/scene/schema.json`), and every field is optional, so a scene that names no audio is silent.
+
+```jsonc
+"audio": {
+  "music":     "calm" | "warm" | "tense" | "auto",  // a baked bed (make audio), or "auto"
+  "musicGain":  0.4,                     // bed mix level, 0..1 (sits UNDER the type)
+  "musicFade": { "in": 1.0, "out": 1.5 },// seconds; fade the bed in/out, never a hard cut
+  "musicDuck":  0.15,                    // floor the bed ducks to under VO (0..1)
+  "loudness":  -14,                      // LUFS target for the final mix (socials); absent = peak-normalize
+  "auto":       true,                    // AUTO SOUND-DESIGN: derive cut/sting cues from the scene itself
+  "cues":     [{ "t": 3.2, "name": "chime", "gain": 0.6 }],  // hand-placed cues (this is where cues live)
+  "vo":        "voice.wav",
+  "voWords":   "voice.words.json"        // [{w,t}] → `make captions` builds timed caption layers
+}
+```
+
+- **`music:"auto"`** picks the bed from the scene's `profile` per the table above (`core/audio-select.js`).
+  Resolve it at authoring time: **`make audio-bed D=<file> WRITE=1`** (the render binary has no JS
+  pre-pass, so an unresolved `"auto"` reaching the mixer falls back to silence, and `make validate` warns).
+- **`audio.auto:true`** is a different switch: it auto-scores cuts/stings (a `whoosh` on each cut, a
+  `reveal` on each sting) so you don't hand-place every cue. Hand-placed `cues` always win.
+- **`voWords`** → **`make captions D=<file> STYLE=weightShift`** emits karaoke-timed captions from the VO
+  (no TTS; it reads the transcript). Pick the style per the caption table above.
+- Cue names: the 14 synthesized `CUES` plus baked aliases `whoosh·reveal·click·pop`. `make validate`
+  guards the set and flags a typo, a missing `vo`/bed file, or an unresolved `"auto"`.

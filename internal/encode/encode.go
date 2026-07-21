@@ -92,9 +92,16 @@ func Composite(bgVideo, overlayWebm string, w, h, fps int, out string) error {
 }
 
 // Mux combines a silent video with an audio WAV into out (AAC).
-func Mux(video, audioWav, out string) error {
-	return run("-y", "-i", video, "-i", audioWav, "-map", "0:v", "-map", "1:a",
-		"-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out)
+// Mux stitches the audio WAV onto the video. When loudnessLUFS is non-nil, ffmpeg's loudnorm
+// (gated BS.1770, the ITU/EBU standard) normalizes the track to that integrated target with a safe
+// -1.5 dBTP true-peak ceiling. Deterministic for a fixed input + ffmpeg build; absent = no change.
+func Mux(video, audioWav, out string, loudnessLUFS *float64) error {
+	args := []string{"-y", "-i", video, "-i", audioWav, "-map", "0:v", "-map", "1:a", "-c:v", "copy"}
+	if loudnessLUFS != nil {
+		args = append(args, "-af", fmt.Sprintf("loudnorm=I=%.1f:TP=-1.5:LRA=11", *loudnessLUFS))
+	}
+	args = append(args, "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out)
+	return run(args...)
 }
 
 // Copy remuxes video to out unchanged (no audio).

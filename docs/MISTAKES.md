@@ -2356,3 +2356,26 @@ the calibration sweep, not shipped.
 
 **The lesson:** a heuristic that can only fire on an artifact of its own segmentation is worse than no
 check. Before trusting a new gate, run it across the whole corpus and confirm the clean cases pass.
+
+## #118 — a loudness (LUFS) target is not an RMS gain; do it at the mux with ffmpeg loudnorm
+
+**What:** the first `audio.loudness` implementation normalized the mixed PCM to the target with a
+single broadband gain computed from the un-weighted mean square. A scene asking for -14 LUFS rendered
+at -7.2 (7 dB hot). Adding BS.1770 K-weighting closed it to -9, still 5 dB off.
+
+**Root cause:** integrated LUFS (ITU-R BS.1770) is K-weighted AND gated (it discards blocks below the
+absolute/relative gates). A short clip that is mostly fade-in/out has lots of quiet blocks; an ungated
+RMS includes them and reads far too quiet, so the gain overshoots. Matching a gated perceptual standard
+in the PCM domain needs K-weighting + 400 ms gated blocks — a lot of DSP to approximate a tool we
+already run.
+
+**Fix:** apply loudness at the MUX via ffmpeg `loudnorm=I=<target>:TP=-1.5:LRA=11` (encode.Mux), which
+implements gated BS.1770 correctly. The PCM mixer no longer touches loudness. Re-measured: -14.0 target
+→ -14.3 LUFS, -3.6 dBTP. Deterministic for a fixed input + ffmpeg build.
+
+**Which gate catches it now:** end-to-end measurement — render, then `ffmpeg -af loudnorm=print_format=summary`
+reads the true integrated LUFS. A self-estimate that says "on target" is not proof; a real meter is.
+
+**The lesson:** do not re-derive a perceptual standard (LUFS, K-weighting, gating) by hand when the
+encoder already implements it. And verify a loudness knob with a real meter end-to-end, never by the
+same formula that set it.

@@ -13,6 +13,18 @@ fonts:
 audio:
 	node scripts/media/audio-bake.mjs
 
+# make audio-bed D=<file> [WRITE=1]  — resolve `audio.music:"auto"` to a concrete bed from the scene's
+# profile (docs/CRAFT/SOUND.md via core/audio-select.js). Prints by default; WRITE bakes it in place,
+# because the render binary has no JS pre-pass and would read "auto" as a filename → silence.
+audio-bed:
+	node core/audio-select.js $(D) $(if $(filter 1,$(WRITE)),--write)
+
+# make vo-captions D=<file> [STYLE=weightShift] [WRITE=1]  — turn a VO word-timing sidecar (audio.voWords)
+# into timed karaoke captions. No TTS; reads the transcript only. Prints by default; WRITE → <file>.captioned.json.
+# (Distinct from `make captions`, which times captions from a plain SCRIPT string — scripts/author/captions.mjs.)
+vo-captions:
+	node scripts/media/vo-captions.mjs $(D) $(if $(STYLE),--style $(STYLE)) $(if $(filter 1,$(WRITE)),--write)
+
 # make music GENRE=ambient N=0 NAME=launch  — fetch a real soundtrack (Mixkit free stock music) into
 #   NOTE: SFX are synthesized (`make audio`); this MUSIC fetcher is the only remaining download.
 # the gitignored assets/music/ and record its provenance in credits.json. The MUSIC licence differs

@@ -115,7 +115,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	hasAudio := audio.Render(df.Audio, meta.Duration, meta.Stings, meta.SFX, formatDir, repoRoot, tmpAudio)
 	if hasAudio {
 		fmt.Println("▶ muxing audio…")
-		if err := encode.Mux(tmpVideo, tmpAudio, out); err != nil {
+		if err := encode.Mux(tmpVideo, tmpAudio, out, df.Audio.Loudness); err != nil {
 			return err
 		}
 	} else if err := encode.Copy(tmpVideo, out); err != nil {

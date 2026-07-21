@@ -270,6 +270,28 @@ if (isMain) {
   }
 
   let failed = 0;
+
+  // AUDIO registries, loaded live so the checks below cannot rot against the synth engine.
+  // CUES is the ONLY valid cue-name set (core/audio-kit.mjs). Beds are the .wav files the mixer
+  // resolves a `music` bed-name against (assets/music/). audio-kit imports node:fs, so this dynamic
+  // import stays in the CLI branch and never reaches the browser.
+  const { CUES } = await import('./audio-kit.mjs');
+  const CUE_NAMES = Object.keys(CUES);
+  let BEDS = [];
+  try { BEDS = fs.readdirSync(path.join(root, 'assets/music')).filter((n) => n.endsWith('.wav')).map((n) => n.replace(/\.wav$/, '')); } catch { }
+
+  // Anti-rot guard: the cue enum in schema.json is DISCOVERABILITY only (so authors + MCP can see the
+  // valid names); CUES is the source of truth. If they drift, the schema lies — fail loudly to resync.
+  try {
+    const ss = readJSON(path.join(root, 'formats/scene/schema.json'));
+    const el = ss?.fields?.audio?.fields?.cues?.item?.name?.enum || [];
+    // Superset guard: every live CUE must be documented. The enum MAY also carry baked ALIASES
+    // (whoosh/reveal/click/pop, scripts/media/audio-bake.mjs) that are not CUES keys, so only a CUE
+    // the enum OMITS is drift — extra alias names are legal.
+    const missing = CUE_NAMES.filter((n) => !el.includes(n));
+    if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}) — add them.`); failed++; }
+  } catch { }
+
   for (const file of targets) {
     let data, schema;
     try { data = readJSON(file); } catch (e) { console.error(`✗ ${file}: unreadable JSON — ${e.message}`); failed++; continue; }
@@ -344,6 +366,33 @@ if (isMain) {
       else { try { errors.push(...themeErrors(readJSON(tp)).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
         catch (e) { errors.push(`theme "${data.theme}" unreadable: ${e.message}`); } }
     }
+    // AUDIO. The Go mixer resolves music/vo/sfx at bake time and silently DROPS anything it cannot
+    // find or does not know (a typo'd cue, a missing VO). Silence is the worst failure, so name each
+    // problem here. Cue names + numeric ranges are enforced declaratively by the schema (its cue enum
+    // is held in sync with the live CUES registry by the drift guard above); this covers the one thing
+    // the schema cannot: files that must exist on disk.
+    const audioWarns = [];
+    if (isObj(data.audio)) {
+      const A = data.audio;
+      const bases = [path.dirname(file), root];
+      const resolves = (p) => !!p && bases.some((b) => fs.existsSync(path.isAbsolute(p) ? p : path.join(b, p)));
+      // music — a bed name or path must resolve or the bed drops to silence. A warning, not a failure:
+      //     a scene can name a bed baked on another machine. `music:"auto"` is resolved at authoring
+      //     time (`make audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
+      const m = A.music;
+      if (m === 'auto') {
+        audioWarns.push(`audio.music:"auto" is unresolved — run \`make audio-bed D=… WRITE=1\` to bake the profile's bed in, or the mixer falls back to SILENCE.`);
+      } else if (typeof m === 'string' && A.auto !== true) {
+        const ok = BEDS.includes(m) || resolves(m) || fs.existsSync(path.join(root, 'assets/music', m + '.wav'));
+        if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file — the mixer falls back to SILENCE. Use "auto", a bed (${BEDS.join(' / ') || 'run make audio'}), or a real .wav path.`);
+      }
+      // (c) VO + sidecars named but absent → the mixer skips them without a word. Fail instead.
+      for (const k of ['vo', 'voWords', 'spectrum']) {
+        if (typeof A[k] === 'string' && !resolves(A[k]))
+          errors.push(`audio.${k} "${A[k]}" not found (looked in ${path.relative(root, path.dirname(file)) || '.'}/ and repo root) — the mixer would silently drop it.`);
+      }
+    }
+
     if (errors.length) {
       failed++;
       console.error(`✗ ${path.relative(root, file)} (${mod || 'no module'})`);
@@ -352,7 +401,7 @@ if (isMain) {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
     // lint warnings (non-failing unless --strict) — authoring smells the schema can't express
-    const warns = lintData(data);
+    const warns = [...lintData(data), ...audioWarns];
     if (warns.length) {
       if (strict) failed++;
       for (const w of warns) console.error(`    ⚠ ${w}`);

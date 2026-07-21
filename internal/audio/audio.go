@@ -41,6 +41,18 @@ type Config struct {
 	// Silent renders the video with no audio track at all — skips the default
 	// music.wav/sting.wav auto-discovery. Use for motion-graphics overlays.
 	Silent bool `json:"silent,omitempty"`
+	// MusicFade fades the MUSIC bed in from t=0 and out to `duration`, in seconds. Zero/absent legs
+	// leave the bed at full level, so today's no-fade behaviour is the default.
+	MusicFade struct {
+		In  float64 `json:"in"`
+		Out float64 `json:"out"`
+	} `json:"musicFade"`
+	// MusicDuck is the floor the music ducks to under VO (0..1). It overrides the hardcoded duckGain
+	// so an author can choose how far the bed drops. Absent keeps the ~-18dB default.
+	MusicDuck *float64 `json:"musicDuck,omitempty"`
+	// Loudness is an integrated-loudness target in LUFS (negative, e.g. -14 for socials). Applied at
+	// the MUX by ffmpeg loudnorm (gated BS.1770), not here; render.go reads it. Absent = no normalization.
+	Loudness *float64 `json:"loudness,omitempty"`
 }
 
 type wav struct {
@@ -120,14 +132,21 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 	if cfg.MusicGain != nil {
 		mg = *cfg.MusicGain
 	}
+	// Author can pick how far the bed ducks under VO; else the ~-18dB default floor.
+	duckFloor := duckGain
+	if cfg.MusicDuck != nil {
+		duckFloor = *cfg.MusicDuck
+	}
+	fadeInN := int(math.Round(cfg.MusicFade.In * sr))
+	fadeOutN := int(math.Round(cfg.MusicFade.Out * sr))
 	for i := 0; i < total; i++ {
 		ducked := mg
 		if vo != nil {
-			ducked = math.Max(duckGain, mg*(1-math.Min(1, voEnv[i]*4)))
+			ducked = math.Max(duckFloor, mg*(1-math.Min(1, voEnv[i]*4)))
 		}
 		s := 0.0
 		if music != nil {
-			s += music[i] * ducked
+			s += music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN)
 		}
 		if vo != nil {
 			s += vo[i]
@@ -174,9 +193,31 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 		}
 	}
 
+	// Loudness normalization is NOT done here: hitting a true (gated BS.1770) LUFS target by hand needs
+	// K-weighting + gated blocks, and an un-weighted PCM gain shipped ~7 dB off. It is applied at the
+	// mux instead, where ffmpeg's `loudnorm` does the standard measurement (see encode.Mux + Config.Loudness).
 	writeWavStereo(outWav, left, right)
 	return true
 }
+
+// fadeGain is the pure per-sample level of the music bed: a linear ramp up over the first fadeInN
+// samples and down over the last fadeOutN before `total`. Depends only on the index, so the same
+// scene always fades identically. Zero-length legs return 1 (no fade).
+func fadeGain(i, total, fadeInN, fadeOutN int) float64 {
+	g := 1.0
+	if fadeInN > 0 && i < fadeInN {
+		g = float64(i) / float64(fadeInN)
+	}
+	if fadeOutN > 0 {
+		if rem := total - i; rem < fadeOutN {
+			if out := float64(rem) / float64(fadeOutN); out < g {
+				g = out
+			}
+		}
+	}
+	return g
+}
+
 
 func resolve(bases []string, p, fallback string) string {
 	for _, base := range bases {
