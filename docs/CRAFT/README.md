@@ -34,3 +34,4 @@ They are opinionated checklists, not textbooks: if a rule here wouldn't change w
 - [TASTE-RULES.md](TASTE-RULES.md) — what not to do, and how each choice makes the viewer feel (the cause→feeling layer)
 - [SELECTION.md](SELECTION.md) — intent→effect: which transition/font/look for which feeling, cited to design theory, + named reference profiles
 - [SOUND.md](SOUND.md) — when to add audio and what: music-vs-silence, bed mood→feeling, sfx restraint, caption style→intent, per-profile policy
+- [STORY.md](STORY.md) — why these beats, in this order: the spine, beat-role→persuasion→feeling lookup, named spines + timing, scene budget, product→beats

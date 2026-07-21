@@ -18,7 +18,7 @@ story; we have all three — here's where each lives.
 | **House-style** | *How should it look?* — face, palette, shape, imagery | [`CRAFT/`](CRAFT/README.md) → TYPOGRAPHY · COLOR · LAYOUT · IMAGERY |
 | **Composition** | *How do I fill a frame so it reads produced?* — density, hierarchy, metadata | [`CRAFT/DENSITY.md`](CRAFT/DENSITY.md) (hero + support + metadata triad) |
 | **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) |
-| **Story-spine** | *Why these beats, in this order?* | the [`vawe-video-planning`](../.claude/skills/vawe-video-planning/SKILL.md) skill — hook → suspense → payoff; never spoil; build to a shocker |
+| **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md) — the spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../.claude/skills/vawe-video-planning/SKILL.md) skill applies it. |
 
 Every design decision must trace to the **brand's real site**, not your defaults. Colours by eyedrop
 (`make palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because

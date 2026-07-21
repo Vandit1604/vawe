@@ -136,7 +136,9 @@ Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light 
 | **Testimonial / quote** | spotlight | quote block | dark | word-rise, cite fades last | dip |
 | **CTA / close** | brandglow | centred, logo + url button | dark | logo spring, url last | dip-to-brand |
 
-**Pacing arc:** hook → build → payoff. Trace it with value (dark→light break→dark climax) and motion character (calm → cascade → punchy). Scene length 2.5–4s (punchy) up to 5s (the climax holds longest).
+This table maps a beat role to its *techniques* (which bg engine, which transition). The narrative
+side — spine order, beat timing, what each beat DOES to the viewer, the pacing arc — lives in
+[`CRAFT/STORY.md`](CRAFT/STORY.md). Reach there first to decide the beats, here to build each one.
 
 ---
 
@@ -201,26 +203,12 @@ Ways to spotlight a word/element (pick per brand's personality; annotations suit
 
 These are *bespoke-design tools*, not a template — e.g. ThreadCite uses circle+arrow+highlighter+handwriting to feel like *annotating/citing*; a clean tech brand uses a color-wipe underline. **Design the focus treatment from the brand, don't reuse one.**
 
-## 15. Storyboard & narrative structure (brand/product ads)
+## 15. Storyboard & narrative structure → moved to CRAFT/STORY.md
 
-**Spine (any framework maps onto it):** Hook → Build → Proof → Payoff → CTA. **Hook must land in the first 3s.** Climax/best-stat at **80–90%** of runtime (never in the hook — tease it, pay it off at the end). CTA is the **shortest** scene (3–5s), one action.
-
-**Scene budget:** 30s → **5–7 scenes** (~3–6s each) · 60s → **8–12 scenes** (~4–7s). New beat every 5–7s. Vary scene length; accelerate toward the climax, then hold it a beat.
-
-**Narrative spines + beat timing (30s / 60s):**
-- **PAS** (pain-aware): Problem 0–6/0–10 · Agitate 6–14/10–28 · Solution 14–26/28–52 · CTA 26–30/52–60
-- **AIDA** (launch/unaware): Attention 0–2/0–3 · Interest 2–8/3–18 · Desire 8–25/18–52 · Action 25–30/52–60
-- **Hook·Story·Offer**: Hook 0–3 · Story 3–22/3–48 · Offer 22–30/48–60
-- **Golden Circle** (premium/mission): Why 0–8/0–15 · How 8–20/15–40 · What+CTA 20–30/40–60
-- **Before·After·Bridge**: Before(hook) · After(payoff) · Bridge(product)+CTA
-- **FAB** = a reusable proof block inside Build: feature (~1.5s) → does what (~1.5s) → benefit (~2s), chain 2–4.
-
-**Product info → beats:** tagline→**hook** (front-load strong word, open loop) · pain→problem · how-it-works→**build** (1 step/scene, **max 3**) · features→FAB blocks (2–4, cut low-differentiation) · **best stat→payoff** (save the shocker), others earlier · transformation→payoff · CTA→end.
-
-**PLAIN vs BUSY bg (the tasteful rule):** decorate *transitions and low-copy scenes*; **strip high-copy and payoff scenes bare.** Go **PLAIN** when a scene has one high-value payload (big number, bold line, logo, a UI mockup that must breathe) or it's the climax, or the brand is premium/confident. Go **BUSY** (shapes/dots/aurora) only on the hook, CTA, and connective/low-copy "vibe" beats. Never decorate a scene whose whole job is to make one thing land. Negative space is the silent character — 40–60% of the frame stays empty.
-
-**Brand DNA → motion/pacing (from `dna/<name>.json`):** *tempo* sets scene-count + clip length; *personality* sets easing + plain-vs-busy; *visual identity* supplies palette/type. Confident/premium → slow, few scenes, PLAIN. Playful/energetic → fast cuts, many scenes, BUSY. Precise/technical → steady, structured, semi-plain.
-
-*Sources: StudioBinder, Boords, Sinek (Golden Circle), AIDA/PAS/BAB copywriting canon, OpusClip/Cloudinary retention data, Tubik (negative space).*
+The spine, the named narrative frameworks with beat timing, scene budget, product→beats mapping, and
+the plain-vs-busy pacing rule now live in **[`CRAFT/STORY.md`](CRAFT/STORY.md)** (with the new
+beat-role→persuasion→feeling lookup that ties them to TASTE-RULES). It is the single story authority;
+this catalog keeps only the techniques each beat is built from. Plain-vs-busy per role is also in
+[`CRAFT/DENSITY.md`](CRAFT/DENSITY.md).
 
 *Companion machine-readable index: `docs/animation-db.json` (same data). Brand onboarding: `make brandkit URL=… NAME=…` → `themes/<name>.json` (colours pack) + `dna/<name>.json` (identity + storyboard).*
