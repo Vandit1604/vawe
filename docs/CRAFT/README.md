@@ -1,19 +1,63 @@
-# CRAFT — decision guides for hand-authoring
+# CRAFT — decision guides for authoring a video
 
-> **New here? Start at [`../TASTE.md`](../TASTE.md)** — the front door that ties the spines (house-style ·
-> composition · motion · story), the block registry, and the quality loop together. CRAFT is the
-> *house-style* spine it routes to.
+> **New here? Start at [`../TASTE.md`](../TASTE.md)** — the front door that ties the spines together.
+> CRAFT is where each decision actually gets made.
 
-**Load the relevant guide BEFORE you hand-write HTML or author a theme.** These answer *how to choose*
-(a face, a palette, a layout, an image) — the decisions that separate intentional design from AI slop.
-They are opinionated checklists, not textbooks: if a rule here wouldn't change what you build, it's cut.
+These guides answer *how to choose* — a beat order, a transition, a face, a palette, a layout, an
+image, a sound. They are opinionated checklists, not textbooks: if a rule wouldn't change what you
+build, it's cut. **Load the relevant guide before you author.**
+
+---
+
+## The layering order — decide in this sequence, hand off down the chain
+
+The single biggest reason a from-scratch video comes out as effect-soup is deciding effects *first*.
+Decide in this order instead. Each layer sets constraints the next one fills; a choice upstream makes
+the downstream choices for you.
+
+| # | Decide | Load | It hands the next layer… |
+|---|---|---|---|
+| 1 | **The beats** — why these, in what order, doing what | [STORY.md](STORY.md) | each beat's role + its persuasion + its feeling |
+| 2 | **The anchor** — one reference profile for the whole film | [SELECTION.md](SELECTION.md) Part 2 | the coordinated face/pace/cut-family/accent policy |
+| 3 | **Per beat, the effect** — the transition/look/sting for THIS beat's feeling | [SELECTION.md](SELECTION.md) Part 1 | which cut, which of the 31 looks / 35 stings, which face role |
+| 4 | **How each frame looks** — type · colour · layout · imagery | [TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md) · [IMAGERY](IMAGERY.md) | the composed frame, on the brand's palette + face |
+| 5 | **How full each frame is** — produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
+| 6 | **The restraint pass** — cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
+| 7 | **The sound** — silent by default, a bed/cue only if earned | [SOUND.md](SOUND.md) | the audio layer matched to the profile |
+
+**Why the order matters:** STORY (1) decides a beat is a *proof* beat → its role tells SELECTION (2–3)
+to reach for a demonstration, a hard cut, `weightShift` emphasis → COLOR/LAYOUT (4) go flat and
+full-bleed so the number lands → DENSITY (5) adds the supporting stat + a mono readout → TASTE-RULES
+(6) confirms no effect competes → SOUND (7) puts one `chime` on the number. One coherent beat, not
+seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-CRAFT.md](../MOTION-CRAFT.md).)
+
+---
+
+## The full index
+
+**What & why (the story layer):**
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines, spacing text | which face signals which personality · pairing · the size scale · weight/tracking/leading |
-| [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent, checking contrast | build a palette from one dominant · 60-30-10 · light/dark dominance · WCAG for big type |
-| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat, an `html` layer | grid · whitespace · hierarchy (one hero) · asymmetry vs centered · spacing scale · safe zones |
-| [IMAGERY.md](IMAGERY.md) | deciding image vs gradient vs card, treating a photo, picking icons | when to use what · treatments (edgeFade/ken/clip) · licensing · icon choice |
+| [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
+| [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles |
+| [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
+
+**How it looks (the house-style layer):**
+
+| Guide | Load it when you are… | Answers |
+|---|---|---|
+| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
+| [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
+| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
+| [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
+
+**How full · how it sounds:**
+
+| Guide | Load it when you are… | Answers |
+|---|---|---|
+| [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
+| [SOUND.md](SOUND.md) | deciding audio | music-vs-silence · bed mood→feeling · sfx restraint · caption style→intent · per-profile policy |
 
 ## How these relate to the rest of the docs (no overlap)
 - **CRAFT/** = *how to choose/build* (decisions). ← you are here
@@ -29,9 +73,7 @@ They are opinionated checklists, not textbooks: if a rule here wouldn't change w
   and 3 `gradient` stops. No fallback look — COLOR/TYPOGRAPHY map to exactly these keys.
 - **Bundled faces** (`core/tokens.css`): Inter, Inter Display, Space Grotesk, Instrument Serif, Geist,
   Geist Mono, Plus Jakarta Sans, JetBrains Mono, Hanken Grotesk, Caveat (Söhne is local/licensed).
+- **Real registries** the guides cover in full: 31 composite looks (`core/looks.js`), 35 shader stings
+  (`SHADER_FX` in `core/stings.js`), the palette-driven bg presets (`core/backgrounds.js`).
 - **Doctrine**: colours ONLY from the brand (eyedrop, `make palette`); dominance decided by LOOKING;
   no em-dashes on screen; patterns are seasoning not wallpaper. See [`../MISTAKES.md`](../MISTAKES.md).
-- [TASTE-RULES.md](TASTE-RULES.md) — what not to do, and how each choice makes the viewer feel (the cause→feeling layer)
-- [SELECTION.md](SELECTION.md) — intent→effect: which transition/font/look for which feeling, cited to design theory, + named reference profiles
-- [SOUND.md](SOUND.md) — when to add audio and what: music-vs-silence, bed mood→feeling, sfx restraint, caption style→intent, per-profile policy
-- [STORY.md](STORY.md) — why these beats, in this order: the spine, beat-role→persuasion→feeling lookup, named spines + timing, scene budget, product→beats
