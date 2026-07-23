@@ -1,0 +1,98 @@
+{
+  "name": "brew",
+  "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026 — WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#f3763b, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy — measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
+  "palette": {
+    "bg": "#fbf2e4",
+    "bg2": "#f7e9d6",
+    "surface": "#fffdf9",
+    "surface2": "#f7ecdd",
+    "line": "rgba(28,22,19,0.10)",
+    "lineStrong": "rgba(28,22,19,0.16)",
+    "text": "#1c1613",
+    "text2": "#6b5f57",
+    "dim": "#8a7d72",
+    "accent": "#f3763b",
+    "accentDim": "rgba(243,118,59,0.14)",
+    "accentGlow": "rgba(243,118,59,0.42)",
+    "up": "#1a9e57",
+    "down": "#e5484d",
+    "ink": "#1c1613"
+  },
+  "gradient": [
+    "#fdf6ec",
+    "#fbeede",
+    "#f7e2cf"
+  ],
+  "type": {
+    "sans": "Hanken Grotesk",
+    "mono": "Geist Mono",
+    "num": "Hanken Grotesk",
+    "serif": "Hanken Grotesk"
+  },
+  "motion": {
+    "easing": "easeOutBack",
+    "bounce": 0.14,
+    "settle": 0.4,
+    "enter": 44,
+    "durationScale": 0.9,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "243,118,59",
+    "tint": "232,190,150",
+    "tint2": "241,100,46",
+    "dotLight": "220,180,150",
+    "paperBase": [
+      "#fdf6ec",
+      "#f7e2cf"
+    ],
+    "softBase": [
+      "#fdeede",
+      "#fbe0cb"
+    ],
+    "accentBase": [
+      "#e85c28",
+      "#cf4712"
+    ],
+    "inkBase": [
+      "#120c09",
+      "#000000"
+    ],
+    "border": "#efe2d2",
+    "dark": [
+      "#120c09",
+      "#000000"
+    ],
+    "darkMesh": [
+      "#1a110b",
+      "#000000"
+    ],
+    "deep": [
+      "#0c0806",
+      "#000000"
+    ],
+    "light": [
+      "#fffdf9",
+      "#f7e2cf"
+    ],
+    "ink": [
+      "#120c09",
+      "#000000"
+    ],
+    "paper": "#fdf6ec"
+  },
+  "vars": {
+    "--ink": "#1c1613",
+    "--paper": "#fdf6ec",
+    "--muted": "#8a7d72",
+    "--em": "#f3763b",
+    "--accent-ink": "#b83a0f",
+    "--on-light": "#1c1613",
+    "--on-dark": "#ffffff",
+    "--border": "#efe2d2",
+    "--accent-soft": "rgba(243,118,59,0.14)"
+  },
+  "bgDefault": {
+    "preset": "paper"
+  }
+}
