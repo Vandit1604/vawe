@@ -2485,3 +2485,27 @@ copied enum can't drift). `make transition-preview FX=… TIMING=linear|smooth` 
 filmstrip so the easing is visible (where the motion bunches) before authoring. `make direct` now also
 suggests ONE eased seam at the payoff, applying the decision procedure (docs/CRAFT/TRANSITIONS.md)
 instead of leaving seams undiscovered.
+
+## #123 — neon bloomed a flat FLOOD colour, not the image's own colours (not how neon works)
+
+**What.** The luminance-bloom refactor (#112) thresholds luminance for the highlight mask (correct), but
+then FLOODED a single colour through that mask (`feFlood` + `feComposite operator=in`), throwing the
+source's colours away. So `neon` painted one uniform glow: its default `color: var(--accent)` could not
+encode into the SVG filter id (an id carries literal RGB, a CSS var can't), so it fell to WHITE — a
+white-glowing neon. A real neon bleeds the image's OWN colours: a red sign glows red, a cyan one cyan.
+
+**Root cause.** The bloom modelled the glow as "mask × tint", a stylised choice, and made it the only
+mode. `neon`/`glitchGlow` inherited a flood tint they never wanted; the accent default was dead weight
+(unencodable) that silently became white.
+
+**Fix (core/filters.js + core/looks.js).** `buildBloom` now masks the **SourceGraphic** by the highlight
+alpha when no colour is set (`SourceGraphic in mask` → the bright pixels keep their own colour → blur →
+a colour-true glow); the flood-tint path stays for looks that WANT a uniform colour (dreamyHaze white,
+halationFilm warm, cyberpunk magenta — all keep an explicit `glowColor`). Filter id encodes `src` for
+the self-coloured glow vs the RGB for a tint. Removed the dead `color: var(--accent)` from `neon` and
+`glitchGlow`; the `bloom` pass drops its `'#ffffff'` fallback so "no colour" means "source-coloured".
+Verified by rendering red/cyan/yellow squares under `neon`: each glows its own colour.
+
+**Known limit (open).** The highlight mask keys on Rec709 luminance, so a saturated-but-dark colour (pure
+red/blue) barely crosses the threshold and under-glows. A neon tube glows its colour at full strength
+regardless — a value/max-channel mask (HSV value) would fix it; deferred (it touches the shared bloom).

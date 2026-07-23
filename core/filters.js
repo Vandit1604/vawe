@@ -190,8 +190,16 @@ function buildBloom(f, { rgb, threshold, radius, intensity }) {
   ct.appendChild(el('feFuncA', { type: 'linear', slope: slope.toFixed(4), intercept: (-threshold * slope).toFixed(4) }));
   f.appendChild(ct);
 
-  f.appendChild(el('feFlood', { 'flood-color': `rgb(${rgb.join(',')})`, result: 'tint' }));
-  f.appendChild(el('feComposite', { in: 'tint', in2: 'mask', operator: 'in', result: 'lit' }));
+  // the LIT highlights that will bloom. Two colour models:
+  //   • rgb null (default) → keep the bright pixels' OWN colour: SourceGraphic masked by the highlight
+  //     alpha, so a red neon sign bleeds red and a blue one blue — how a real bloom works.
+  //   • rgb set → flood that single tint through the mask (a stylised, uniformly-coloured glow).
+  if (rgb) {
+    f.appendChild(el('feFlood', { 'flood-color': `rgb(${rgb.join(',')})`, result: 'tint' }));
+    f.appendChild(el('feComposite', { in: 'tint', in2: 'mask', operator: 'in', result: 'lit' }));
+  } else {
+    f.appendChild(el('feComposite', { in: 'SourceGraphic', in2: 'mask', operator: 'in', result: 'lit' }));
+  }
   f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: radius.toFixed(2), result: 'b1' }));
   f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: (radius * 2.6).toFixed(2), result: 'b2' }));
   // sum the two scales (arithmetic, not feMerge: merge composites OVER, and light adds)
@@ -299,7 +307,8 @@ export function ensureFilterDef(name, opts = {}) {
   const disp = preset.mode === 'displace'
     ? { freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4), scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1) } : null;
   const bloom = preset.mode === 'bloom' ? {
-    rgb: glowRGB(opts.color),
+    // no colour → the glow keeps the source's own colours (real neon); a colour → a uniform flood tint
+    rgb: opts.color ? glowRGB(opts.color) : null,
     threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
     radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
     intensity: Math.max(0, opts.intensity ?? 1),
@@ -322,7 +331,7 @@ export function ensureFilterDef(name, opts = {}) {
     : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
     : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
     : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
-    : bloom ? `f-bloom-${bloom.rgb.join('_')}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
+    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
     : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;

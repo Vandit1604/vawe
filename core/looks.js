@@ -87,7 +87,9 @@ const PASSES = {
   relief: (o, s) => ({ fns: [reliefFilter({ mode: o.mode || 'diffuse', azimuth: o.azimuth, elevation: o.elevation,
     surface: (o.surface ?? 2) * (0.5 + 0.8 * s), exponent: o.exponent, constant: o.constant, color: o.lightColor })] }),
   // -- glow --
-  bloom: (o, s) => ({ fns: [bloomStack(o.size ?? 1, o.glowColor || o.color || '#ffffff', s)] }),
+  // no glowColor/color → a source-coloured bloom (the glow keeps the image's own colours, real neon);
+  // an explicit colour floods a uniform tint (dreamyHaze/halationFilm/hologram set one on purpose).
+  bloom: (o, s) => ({ fns: [bloomStack(o.size ?? 1, o.glowColor || o.color, s)] }),
   hBloom: (o, s) => ({ fns: [hStreak(o.size ?? 1, o.streakColor || '#a9c8ff', s)] }),
   overexpose: (o) => ({ fns: [`brightness(${n2(1 + 0.3 * (o.amt ?? 1))})`] }),
   chromatic: (o, s) => ({ fns: [chromaPair((o.px ?? 2) * (0.5 + s), o.warm || 'rgba(255,60,60,0.75)', o.cool || 'rgba(40,120,255,0.75)')] }),
@@ -107,12 +109,12 @@ const PASSES = {
 // is a fixed palette (cyberpunk/nightVision/thermal), which set signature hexes but still take overrides.
 export const LOOKS = {
   // --- glow family ---
-  neon: { d: { strength: 0.8, color: 'var(--accent)' }, p: [['saturate', { k: 1.3 }], ['bloom', { size: 1.1 }], ['brightness', { k: 1.05 }]] },
+  neon: { d: { strength: 0.8 }, p: [['saturate', { k: 1.3 }], ['bloom', { size: 1.1 }], ['brightness', { k: 1.05 }]] },
   dreamyHaze: { d: { strength: 0.7, color: '#ffffff' }, p: [['blurSoft', { px: 0.5 }], ['bloom', { size: 1.4, glowColor: '#ffffff' }], ['brightness', { k: 1.05 }], ['wash', { color: '#ffe7c0', amt: 0.1 }]] },
   halationFilm: { d: { strength: 0.7, color: '#ffdcb0' }, p: [['contrast', { k: 1.05 }], ['bloom', { size: 1.2, glowColor: '#ffd0a0' }], ['grain', { grain: 0.25 }]] },
   angelic: { d: { strength: 0.8, color: '#ffffff' }, p: [['overexpose', { amt: 0.5 }], ['bloom', { size: 1.6, glowColor: '#ffffff' }], ['desaturate', { amt: 0.3 }], ['vignetteInvert', { vignette: 0.4 }]] },
   hologram: { d: { strength: 0.8, color: '#57ffe0' }, p: [['chromatic', { px: 2, warm: 'rgba(255,60,120,0.7)', cool: 'rgba(60,220,255,0.75)' }], ['bloom', { size: 0.8, glowColor: '#57ffe0' }], ['brightness', { k: 1.05 }], ['scanlines', { gap: 3, alpha: 0.3 }]] },
-  glitchGlow: { d: { strength: 0.85, color: 'var(--accent)' }, p: [['chromatic', { px: 3 }], ['bloom', { size: 0.9 }], ['brightness', { k: 1.04 }], ['scanlines', { gap: 5, alpha: 0.3 }]] },
+  glitchGlow: { d: { strength: 0.85 }, p: [['chromatic', { px: 3 }], ['bloom', { size: 0.9 }], ['brightness', { k: 1.04 }], ['scanlines', { gap: 5, alpha: 0.3 }]] },
   // --- analog / retro ---
   vhs: { d: { strength: 0.7 }, p: [['chromatic', { px: 3 }], ['saturate', { k: 1.2 }], ['blurSoft', { px: 0.4 }], ['scanlines', { gap: 4, alpha: 0.22 }], ['grain', { grain: 0.3 }]] },
   super8: { d: { strength: 0.7, color: '#ffcf9a' }, p: [['sepia', { a: 0.4 }], ['saturate', { k: 1.2 }], ['brightness', { k: 1.05 }], ['grain', { grain: 0.32 }], ['vignette', { vignette: 0.5 }]] },

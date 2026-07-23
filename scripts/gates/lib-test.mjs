@@ -607,13 +607,13 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: unknown name -> null', resolveComposite('nope') === null);
   ok('looks: isLook/lookName parse a spec', isLook('neon:0.9') && lookName('neon:0.9') === 'neon' && !isLook('duotone'));
   const neon = resolveComposite('neon');
-  // neon glows the LUMINANCE via an SVG bloom filter (url(#f-bloom-<r>_<g>_<b>-...)), not a CSS
-  // drop-shadow. The bloom id encodes literal RGB, so a concrete colour tints it but a CSS var cannot —
-  // the default var(--accent) falls to white luminance (see the note in the report / core/looks.js:52).
+  // neon glows the LUMINANCE via an SVG bloom filter (url(#f-bloom-...)), not a CSS drop-shadow. By
+  // default the glow keeps the SOURCE's own colours (id `f-bloom-src`) — a real neon bleeds the image's
+  // colours; an explicit colour override floods a uniform tint (encoded as RGB in the id).
   ok('looks: neon yields a filter with grade + bloom', neon.filter.includes('saturate(') && neon.filter.includes('url(#f-bloom'));
-  ok('looks: neon default glow is white luminance (an SVG bloom id can\'t carry a CSS var)', neon.filter.includes('f-bloom-255_255_255'));
+  ok('looks: neon default glows the source\'s own colours (no flood tint)', neon.filter.includes('f-bloom-src'));
   const neonRed = resolveComposite('neon', { color: '#ff0000' }).filter;
-  ok('looks: lookOpts colour overrides the default (encoded as RGB)', neonRed.includes('f-bloom-255_0_0') && !neonRed.includes('f-bloom-255_255_255'));
+  ok('looks: an explicit colour floods a uniform tint (encoded as RGB)', neonRed.includes('f-bloom-255_0_0') && !neonRed.includes('f-bloom-src'));
   // strength is a real master dial: the bloom radius (encoded -r<int>_<frac> in the filter id) grows with it
   const bloomR = (f) => { const m = f.match(/-r(\d+)_(\d+)/); return m ? parseFloat(`${m[1]}.${m[2]}`) : 0; };
   ok('looks: strength scales the look (bloom radii grow)', bloomR(resolveComposite('neon', {}, 1).filter) > bloomR(resolveComposite('neon', {}, 0.1).filter));
