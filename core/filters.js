@@ -170,7 +170,7 @@ export function glowRGB(color) {
 //   3. bloom = Σ blur(mask · tint, σᵢ)               → two scales, natural falloff
 //   4. out   = source + intensity · bloom            → feComposite arithmetic (additive)
 // Pure in the frame number: no clock, no feedback, one static def shared by every layer using it.
-function buildBloom(f, { rgb, threshold, radius, intensity }) {
+function buildBloom(f, { rgb, threshold, radius, intensity, key }) {
   const el = (tag, attrs) => {
     const n = document.createElementNS(SVG_NS, tag);
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
@@ -180,12 +180,27 @@ function buildBloom(f, { rgb, threshold, radius, intensity }) {
   // keeps the glow inside the picture rather than out on the page.
   for (const [k, v] of [['x', '-25%'], ['y', '-25%'], ['width', '150%'], ['height', '150%']]) f.setAttribute(k, v);
 
-  // luminance → alpha (RGB rows zeroed; only the A row carries the coefficients)
-  f.appendChild(el('feColorMatrix', {
-    in: 'SourceGraphic', type: 'matrix', result: 'luma',
-    values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0',
-  }));
-  const ct = el('feComponentTransfer', { in: 'luma', result: 'mask' });
+  // Highlight key → alpha: which pixels count as "lit" and get to bloom.
+  //   • luma  = 0.2126R+0.7152G+0.0722B (perceptual). A saturated red is dim → under-glows. Right for
+  //     photographic bloom (a bright sky blooms, a dark-but-vivid patch does not).
+  //   • value = max(R,G,B) (HSV value). A pure red is fully "on" → glows at full strength, the way a
+  //     neon tube emits its colour regardless of perceptual luminance. Used by neon/glitchGlow.
+  if (key === 'value') {
+    // isolate each channel into a grey image, then take the per-channel MAX via feBlend "lighten"
+    // (lighten = component-wise max); the result's R channel is max(R,G,B) = value → move it to alpha.
+    const chan = (m, result) => el('feColorMatrix', { in: 'SourceGraphic', type: 'matrix', values: m, result });
+    f.appendChild(chan('1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1', 'cR'));
+    f.appendChild(chan('0 1 0 0 0  0 1 0 0 0  0 1 0 0 0  0 0 0 0 1', 'cG'));
+    f.appendChild(chan('0 0 1 0 0  0 0 1 0 0  0 0 1 0 0  0 0 0 0 1', 'cB'));
+    f.appendChild(el('feBlend', { in: 'cR', in2: 'cG', mode: 'lighten', result: 'cRG' }));
+    f.appendChild(el('feBlend', { in: 'cRG', in2: 'cB', mode: 'lighten', result: 'val' }));
+    f.appendChild(el('feColorMatrix', { in: 'val', type: 'matrix', result: 'key',
+      values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0' })); // value (in R) → alpha
+  } else {
+    f.appendChild(el('feColorMatrix', { in: 'SourceGraphic', type: 'matrix', result: 'key',
+      values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0' })); // luminance → alpha
+  }
+  const ct = el('feComponentTransfer', { in: 'key', result: 'mask' });
   const slope = 1 / Math.max(0.001, 1 - threshold);
   ct.appendChild(el('feFuncA', { type: 'linear', slope: slope.toFixed(4), intercept: (-threshold * slope).toFixed(4) }));
   f.appendChild(ct);
@@ -213,8 +228,8 @@ function buildBloom(f, { rgb, threshold, radius, intensity }) {
 
 // bloomFilter — the CSS filter value for a luminance bloom. Injects the def on first use and returns
 // `url(#id)`, so it drops straight into a filter list beside saturate()/contrast().
-export function bloomFilter({ color, threshold, radius, intensity } = {}) {
-  return `url(#${ensureFilterDef('bloom', { color, threshold, radius, intensity })})`;
+export function bloomFilter({ color, threshold, radius, intensity, key } = {}) {
+  return `url(#${ensureFilterDef('bloom', { color, threshold, radius, intensity, key })})`;
 }
 
 // Named 3x3 kernels for feConvolveMatrix. A kernel is just "how much each neighbour contributes",
@@ -309,6 +324,7 @@ export function ensureFilterDef(name, opts = {}) {
   const bloom = preset.mode === 'bloom' ? {
     // no colour → the glow keeps the source's own colours (real neon); a colour → a uniform flood tint
     rgb: opts.color ? glowRGB(opts.color) : null,
+    key: opts.key === 'value' ? 'value' : 'luma', // value = max(R,G,B): saturated colours glow fully
     threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
     radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
     intensity: Math.max(0, opts.intensity ?? 1),
@@ -331,7 +347,7 @@ export function ensureFilterDef(name, opts = {}) {
     : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
     : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
     : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
-    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
+    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
     : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
