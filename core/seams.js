@@ -95,25 +95,27 @@ void main(){
     col = mix(getFrom(uv), getTo(tp), inr);
 
   } else if (fx == FX_PUSH) {
-    /* both beats move together: outgoing exits toward u_dir, incoming follows in behind it (gl-transitions
-       "directional"). fract() tiles the two frames edge-to-edge so it reads as one continuous shove. */
-    vec2 pp = uv + p * u_dir;
+    /* both beats move together toward u_dir: outgoing exits that way, incoming follows in behind it
+       (gl-transitions "directional"). fract() tiles the two frames edge-to-edge so it reads as one shove.
+       uv - p*u_dir shifts screen content toward u_dir (a pixel at uv samples what was at uv - p*u_dir). */
+    vec2 pp = uv - p * u_dir;
     vec2 f = fract(pp);
     float inr = step(0.0, pp.x) * step(pp.x, 1.0) * step(0.0, pp.y) * step(pp.y, 1.0);
-    col = mix(getTo(f), getFrom(f), inr);
+    col = mix(getTo(f), getFrom(f), inr);   /* in range → the outgoing (shifted); outside → the incoming */
 
   } else if (fx == FX_UNCOVER) {
     /* the outgoing beat slides OFF toward u_dir, revealing a static incoming underneath. */
-    vec2 fp = uv + p * u_dir;
+    vec2 fp = uv - p * u_dir;
     float inr = step(0.0, fp.x) * step(fp.x, 1.0) * step(0.0, fp.y) * step(fp.y, 1.0);
     col = mix(getTo(uv), getFrom(fp), inr);
 
   } else if (fx == FX_WIPE) {
-    /* a hard (soft-edged) line sweeps along u_dir, both beats sampled in place — the classic wipe. */
+    /* a hard (soft-edged) line sweeps toward u_dir; the incoming is revealed BEHIND the edge (on the
+       side the edge travelled from), matching where slide/push/uncover put the arriving beat. */
     float edge = sg < 0.0 ? (1.0 - p) : p;
     float soft = 0.015;
-    float m = sg < 0.0 ? (1.0 - smoothstep(edge - soft, edge + soft, ax))
-                       : smoothstep(edge - soft, edge + soft, ax);
+    float m = sg < 0.0 ? smoothstep(edge - soft, edge + soft, ax)
+                       : (1.0 - smoothstep(edge - soft, edge + soft, ax));
     col = mix(getFrom(uv), getTo(uv), m);
 
   } else if (fx == FX_CROSSWARP) {
@@ -223,7 +225,9 @@ function buildProgram(gl, fxIndex) {
   return prog;
 }
 
-const DIR_VEC = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+// The shader's uv.y is GL y-UP (uv.y=1 is the top of the frame), so "up" is +y and "down" is -y here.
+// (Screen-space y-down would invert the vertical seams — up would push down. MISTAKES: seam y-flip.)
+const DIR_VEC = { left: [-1, 0], right: [1, 0], up: [0, 1], down: [0, -1] };
 
 // createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
 // caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
