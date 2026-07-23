@@ -20,6 +20,10 @@ given transition is there.
 > canned two-beat A→B scene through one transition as a labelled filmstrip (`/tmp/transition-preview.png`).
 > The labels are eased progress, so `TIMING=linear` vs `smooth` shows as *where the motion bunches*.
 >
+> **MEASURE a real one: `make measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
+> from a video and names the **nearest engine preset** (a reference to reproduce, or `EXPECT=<preset>` to
+> verify our OWN render matches what we authored). See [MEASURE.md](MEASURE.md).
+>
 > **Easing is half the feel.** Both a `cut` and a `seam` shape their progress through `timing` (the
 > `TIMINGS` curves in core/cuts.js: `smooth`/`out`/`snappy`/`pop`/`rush`/`brake`/`ramp`/`linear`).
 > Seams default to `smooth` (ease-in-out) — a transition that MOVES content at constant speed reads

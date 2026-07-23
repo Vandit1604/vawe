@@ -42,6 +42,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
 | [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles |
 | [TRANSITIONS.md](TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
+| [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
 
 **How it looks (the house-style layer):**

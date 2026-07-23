@@ -201,6 +201,14 @@ transitions:
 transition-preview:
 	node scripts/author/transition-preview.mjs
 
+# make measure VIDEO=<file> FROM=<s> TO=<s> [EXPECT=<preset>]  — MEASURE a transition's real motion and
+# name it in OUR vocabulary: per-frame tracks the moving element and fits the progress curve against the
+# engine's own easings (core/motion.js + core/cuts.js), reporting the nearest preset + residual. Point it
+# at a reference video ("what transition is this?") or at our own render + EXPECT=<preset> ("did my cut
+# render as the curve I authored?"). Dependency-free (ffmpeg + Node). Notes/limits: docs/CRAFT/MEASURE.md.
+measure:
+	node scripts/author/measure-motion.mjs $(VIDEO) $(FROM) $(TO) $(EXPECT)
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs
