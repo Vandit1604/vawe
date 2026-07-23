@@ -22,7 +22,10 @@
 
 // The curated two-scene fx set (adapted from the MIT gl-transitions catalog into this two-sampler
 // model). `fade` is always available and is the fallback everything degrades to.
-export const SEAM_FX = ['fade', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom'];
+// Basics first (fade + the directional set every tool has), then the expressive shaders. Appended so
+// existing indices never shift. The directional five (slide/push/uncover/wipe + the grainy dissolve)
+// are the "cover the basics" set — real two-scene transitions, dir-aware via u_dir (left/right/up/down).
+export const SEAM_FX = ['fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom'];
 
 const VERT = 'attribute vec2 a; varying vec2 v_uv; void main(){ v_uv = a*0.5+0.5; gl_Position = vec4(a, 0.0, 1.0); }';
 
@@ -54,18 +57,64 @@ void main(){
   vec4 col;
 
   #define FX_FADE 0
-  #define FX_CROSSWARP 1
-  #define FX_WHIPPAN 2
-  #define FX_SDFIRIS 3
-  #define FX_DISPERSION 4
-  #define FX_LENS 5
-  #define FX_FLASHWHITE 6
-  #define FX_CINEZOOM 7
+  #define FX_DISSOLVE 1
+  #define FX_SLIDE 2
+  #define FX_PUSH 3
+  #define FX_UNCOVER 4
+  #define FX_WIPE 5
+  #define FX_CROSSWARP 6
+  #define FX_WHIPPAN 7
+  #define FX_SDFIRIS 8
+  #define FX_DISPERSION 9
+  #define FX_LENS 10
+  #define FX_FLASHWHITE 11
+  #define FX_CINEZOOM 12
 
   int fx = FX_INDEX;
 
+  /* travel axis helpers for the directional basics: u_dir is one of the 4 signs (left/right/up/down).
+     ax = the uv coordinate along the travel axis; sg = its sign (-1 for left/up, +1 for right/down). */
+  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;
+  float sg = u_dir.x + u_dir.y;
+
   if (fx == FX_FADE) {
     col = mix(getFrom(uv), getTo(uv), p);
+
+  } else if (fx == FX_DISSOLVE) {
+    /* grainy film dissolve: each pixel flips from→to when p passes its noise threshold (a soft front),
+       distinct from the flat opacity cross-fade of FX_FADE. */
+    float n = fbm(uv * 6.0 + u_seed);
+    float m = smoothstep(p - 0.14, p + 0.14, n);   /* 1 = still FROM, 0 = flipped to TO */
+    col = mix(getTo(uv), getFrom(uv), m);
+
+  } else if (fx == FX_SLIDE) {
+    /* the arriving beat slides IN over a static outgoing (a.k.a. cover). Its panel is rigid — it shows
+       its own content, entering from the u_dir edge. */
+    vec2 tp = uv + (1.0 - p) * u_dir;
+    float inr = step(0.0, tp.x) * step(tp.x, 1.0) * step(0.0, tp.y) * step(tp.y, 1.0);
+    col = mix(getFrom(uv), getTo(tp), inr);
+
+  } else if (fx == FX_PUSH) {
+    /* both beats move together: outgoing exits toward u_dir, incoming follows in behind it (gl-transitions
+       "directional"). fract() tiles the two frames edge-to-edge so it reads as one continuous shove. */
+    vec2 pp = uv + p * u_dir;
+    vec2 f = fract(pp);
+    float inr = step(0.0, pp.x) * step(pp.x, 1.0) * step(0.0, pp.y) * step(pp.y, 1.0);
+    col = mix(getTo(f), getFrom(f), inr);
+
+  } else if (fx == FX_UNCOVER) {
+    /* the outgoing beat slides OFF toward u_dir, revealing a static incoming underneath. */
+    vec2 fp = uv + p * u_dir;
+    float inr = step(0.0, fp.x) * step(fp.x, 1.0) * step(0.0, fp.y) * step(fp.y, 1.0);
+    col = mix(getTo(uv), getFrom(fp), inr);
+
+  } else if (fx == FX_WIPE) {
+    /* a hard (soft-edged) line sweeps along u_dir, both beats sampled in place — the classic wipe. */
+    float edge = sg < 0.0 ? (1.0 - p) : p;
+    float soft = 0.015;
+    float m = sg < 0.0 ? (1.0 - smoothstep(edge - soft, edge + soft, ax))
+                       : smoothstep(edge - soft, edge + soft, ax);
+    col = mix(getFrom(uv), getTo(uv), m);
 
   } else if (fx == FX_CROSSWARP) {
     /* gl-transitions: crosswarp — both beats drag toward the centre and swap through a soft front */

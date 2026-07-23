@@ -188,6 +188,11 @@ coverage:
 craft-coverage:
 	node scripts/gates/craft-coverage.mjs
 
+# make transitions [BASIC=1]  — print THE TRANSITION DATABASE (core/transitions.js): every transition
+# across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.
+transitions:
+	node scripts/gates/transitions-catalog.mjs
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs
