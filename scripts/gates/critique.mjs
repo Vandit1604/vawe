@@ -115,6 +115,43 @@ for (const b of beats) {
   }
 }
 
+// ---- 9. typing-cutoff: a typed line must finish AND hold a beat before the layer exits, or the cut
+//        lands mid-type. type-time = chars / cps (typing:true = 24/s); it must fit inside `duration`
+//        with a ~0.4s hold. The engine types halfway and cuts in silence otherwise (docs/MISTAKES.md).
+const MIN_TYPE_HOLD = 0.4;
+for (const l of layers) {
+  if (!l.typing || l.type !== 'text') continue;
+  const cps = l.typing === true ? 24 : +l.typing;
+  if (!(cps > 0)) continue;
+  const chars = String(l.text || '').replace(/<[^>]+>/g, '').length;
+  const typeTime = chars / cps;
+  const dur = l.duration ?? 0;
+  if (typeTime + MIN_TYPE_HOLD > dur + 1e-6) {
+    F('warn', 'typing-cutoff', `"${String(l.text).replace(/<[^>]+>/g, '').slice(0, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s — it cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
+  }
+}
+
+// ---- 10. transition-dip: the stage must never go EMPTY between beats. If the outgoing beat fully
+//        exits before the next enters, the cut is a jump-cut-with-a-dip (both another engine and another engine
+//        ban it — the transition should BE the exit: overlap outgoing + incoming). We merge every
+//        content layer's [start, end] interval and flag any blank gap in the middle. Persistent marks
+//        (a watermark spanning most of the film) and tiny captions are excluded so they can't mask a dip.
+const sceneDur = d.duration ?? 0;
+const contentIv = layers
+  .filter((l) => (l.track ?? 9) > 2 && (l.duration ?? 0) > 0 && (l.duration ?? 0) < sceneDur * 0.6 && (l.type !== 'text' || (l.size ?? 0) >= 22))
+  .map((l) => [s0(l), s0(l) + l.duration])
+  .sort((a, b) => a[0] - b[0]);
+if (contentIv.length > 1) {
+  let covEnd = contentIv[0][1];
+  for (let i = 1; i < contentIv.length; i++) {
+    const gap = contentIv[i][0] - covEnd;
+    if (gap > 0.12) {
+      F('warn', 'transition-dip', `the stage is EMPTY from ${covEnd.toFixed(1)}s to ${contentIv[i][0].toFixed(1)}s (${gap.toFixed(1)}s of blank) — the outgoing beat fully exits before the next enters (a jump-cut with a dip). Overlap them: start the next beat during this one's exit, so the transition IS the exit.`, covEnd);
+    }
+    covEnd = Math.max(covEnd, contentIv[i][1]);
+  }
+}
+
 // ---- report ----
 findings.sort((a, b) => a.t - b.t);
 const errs = findings.filter((f) => f.sev === 'error');

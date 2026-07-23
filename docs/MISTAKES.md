@@ -2379,3 +2379,49 @@ reads the true integrated LUFS. A self-estimate that says "on target" is not pro
 **The lesson:** do not re-derive a perceptual standard (LUFS, K-weighting, gating) by hand when the
 encoder already implements it. And verify a loudness knob with a real meter end-to-end, never by the
 same formula that set it.
+
+## #119 — a typed line cut off mid-type because its beat was too short
+
+**What:** a mono `{ "module": "scene", "layers": [ ... ] }` line (`typing: 30`, 40 chars) sat in a
+1.4s beat. At 30 chars/sec it takes 1.33s to type, so it finished at the exact frame the layer began
+fading — the next beat's cut landed while it still read as "being typed." No gate said anything.
+
+**Root cause:** `typing:N` types at N chars/sec, but nothing checked that the type-time fits inside the
+layer's `duration` with a hold. type-time + hold must be <= duration, or the cut always lands mid-type.
+Any author on any scene hits this — it is a framework gap, not one bad JSON.
+
+**Fix:** (authoring) raised the speed to 48/s and the duration to 1.6s so it finishes at ~0.8s and holds
+before the cut. (framework) `make critique` now has a `typing-cutoff` rule: it flags any typing layer
+where `chars/cps + 0.4s hold > duration`, naming the minimum duration needed.
+
+**Which gate catches it now:** `make critique` (rule `typing-cutoff`) — teeth-tested: it fires on the
+original (30/s, 1.4s) and passes the fix (48/s, 1.6s).
+
+**The lesson:** a time-based reveal (typing, count-up, draw, ken) must be given time to COMPLETE and
+hold before its beat ends. A reveal the cut interrupts reads as broken, and the engine will interrupt
+it silently unless a gate checks the arithmetic.
+
+## #120 — beat transitions dipped to an EMPTY stage (jump-cut with a dip)
+
+**What:** in a fast multi-beat film, every cut showed a ~0.4s frame of blank stage: the outgoing beat
+faded fully out before the incoming beat faded in. Seam screenshots were empty (only the persistent
+watermark). It read as a slideshow of dips, not transitions.
+
+**Root cause:** our transitions are PER-LAYER (each layer independently enters via `cut`/`anim` and
+exits via `out`), with nothing enforcing overlap. Authored back-to-back beats left a gap between one
+beat's `end` (start+duration) and the next beat's `start`, so the stage went to zero. Both another engine
+(`TransitionSeries` subtracts the transition from both neighbors and mounts both scenes at once) and
+another engine ("the transition IS the exit; exit-then-enter is BANNED") avoid this by construction.
+
+**Fix:** (authoring) overlap the beats — start each beat's entrance ~0.4-0.5s BEFORE the previous
+beat's content ends, with `out:"blur"` + the next `cut:"blur"`/`cutTiming:"brake"`, so the two
+cross-dissolve with no empty frame. (framework) `make critique` now has a `transition-dip` rule:
+merge every content layer's [start,end] interval and flag any blank gap > 0.12s in the middle
+(persistent watermarks and tiny captions excluded so they can't mask a dip).
+
+**Which gate catches it now:** `make critique` (rule `transition-dip`) — teeth-tested: it fires when
+beats are pulled apart into gaps and passes the overlapping timeline.
+
+**The lesson:** a transition is an OVERLAP, not a hand-off across a void. The outgoing content must
+still be on screen when the incoming arrives; the motion between them IS the transition. Deeper win
+(roadmap Seam D): true two-scene shader transitions that composite outgoing + incoming on the GPU.
