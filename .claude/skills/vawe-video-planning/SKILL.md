@@ -181,6 +181,14 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   most important element on each beat moves last or most — motion order = reading order.
 - **Easing = physics**: entrances decelerate (ease-out family), exits accelerate (rush), ambient
   loops sinusoidal. Never linear on visible moves.
+- **Choose every CUT by meaning, not habit** (`docs/CRAFT/TRANSITIONS.md`). Run the per-seam decision
+  procedure: name the RELATIONSHIP between the two beats (continuity · time · contrast · same-object ·
+  new act) and the FEELING across it, then pick the transition that serves both. **If a seam serves
+  neither, it is a hard cut.** Most seams are invisible (hard/soft cut, overlapped so the stage never
+  dips to empty). Earn 2-3 accents by meaning (whip = energy into a payoff, iris/sdfIris = focus,
+  fade = act break, smash = contrast); reserve the boldest for the hero/payoff; make the outro simplest.
+  ONE cut family. Spraying one effect (blur) on every cut is the failure in BOTH directions — monotone
+  and soup. The LOCK SHEET's per-beat row must name each cut's *relationship + transition + why*.
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
   or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
   named things are a missed layer of craft.
@@ -238,7 +246,7 @@ row is a decision the JSON will transcribe, not reinterpret:
 | Palette + fonts | the exact hexes + face names (from the study OR the profile's reflected reference) |
 | Motion personality | `{easing, bounce, settle, enter, stagger}` — from the profile, written into the theme |
 | **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used |
-| Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in · motion · feeling` |
+| Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in (relationship + transition + WHY, per TRANSITIONS.md) · motion · feeling` |
 | Assets | which real logos / photos / uploads (NOT bare rects), and their treatment |
 | Sound | `audio.auto` on? captions? |
 | CTA | the exact end action + url |

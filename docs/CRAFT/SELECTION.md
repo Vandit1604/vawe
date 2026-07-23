@@ -43,6 +43,10 @@ Two parts: **the decision procedures** (how to pick within one family) and **the
 **One cut family per film.** Mixing `whip` and `iris` in one piece is five fonts on a slide. The
 director rotates within a family; it does not mix families.
 
+> **Deep dive:** this table is the summary. [`TRANSITIONS.md`](TRANSITIONS.md) is the full theory —
+> the complete transition taxonomy, Murch's Rule of Six (emotion 51%), continuity-vs-montage, J/L cuts,
+> shared-element morph, and the ordered per-seam decision procedure. Read it when you can't say *why*.
+
 ## 2. Fonts — the register of the voice
 
 **The decision procedure:**
