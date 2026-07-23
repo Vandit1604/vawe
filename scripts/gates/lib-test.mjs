@@ -607,17 +607,21 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: unknown name -> null', resolveComposite('nope') === null);
   ok('looks: isLook/lookName parse a spec', isLook('neon:0.9') && lookName('neon:0.9') === 'neon' && !isLook('duotone'));
   const neon = resolveComposite('neon');
-  ok('looks: neon yields a filter with grade + bloom', neon.filter.includes('saturate(') && neon.filter.includes('drop-shadow('));
-  ok('looks: colour default reskins to theme token', neon.filter.includes('var(--accent)'));
-  ok('looks: lookOpts colour overrides the default', resolveComposite('neon', { color: '#ff0000' }).filter.includes('#ff0000') && !resolveComposite('neon', { color: '#ff0000' }).filter.includes('var(--accent)'));
-  // strength is a real master dial: bloom radii grow with it
-  const maxR = (f) => Math.max(...(f.match(/(\d+\.\d+)px/g) || ['0px']).map(parseFloat));
-  ok('looks: strength scales the look (bloom radii grow)', maxR(resolveComposite('neon', {}, 1).filter) > maxR(resolveComposite('neon', {}, 0.1).filter));
+  // neon glows the LUMINANCE via an SVG bloom filter (url(#f-bloom-<r>_<g>_<b>-...)), not a CSS
+  // drop-shadow. The bloom id encodes literal RGB, so a concrete colour tints it but a CSS var cannot —
+  // the default var(--accent) falls to white luminance (see the note in the report / core/looks.js:52).
+  ok('looks: neon yields a filter with grade + bloom', neon.filter.includes('saturate(') && neon.filter.includes('url(#f-bloom'));
+  ok('looks: neon default glow is white luminance (an SVG bloom id can\'t carry a CSS var)', neon.filter.includes('f-bloom-255_255_255'));
+  const neonRed = resolveComposite('neon', { color: '#ff0000' }).filter;
+  ok('looks: lookOpts colour overrides the default (encoded as RGB)', neonRed.includes('f-bloom-255_0_0') && !neonRed.includes('f-bloom-255_255_255'));
+  // strength is a real master dial: the bloom radius (encoded -r<int>_<frac> in the filter id) grows with it
+  const bloomR = (f) => { const m = f.match(/-r(\d+)_(\d+)/); return m ? parseFloat(`${m[1]}.${m[2]}`) : 0; };
+  ok('looks: strength scales the look (bloom radii grow)', bloomR(resolveComposite('neon', {}, 1).filter) > bloomR(resolveComposite('neon', {}, 0.1).filter));
   ok('looks: strength clamps to [0,1]', resolveComposite('neon', {}, 5).filter === resolveComposite('neon', {}, 1).filter);
   // overlays: crt stacks scanlines + vignette, in pipeline order (texture before vignette)
   const crt = resolveComposite('crt');
   ok('looks: crt returns >=2 overlays (scanlines + vignette)', crt.overlays.length >= 2);
-  ok('looks: pipeline order — grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('drop-shadow('));
+  ok('looks: pipeline order — grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('url(#f-bloom'));
   ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
   ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
 }
