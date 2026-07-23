@@ -25,6 +25,7 @@ import { lift } from '../../core/motion.js';
 import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
+import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
@@ -771,6 +772,28 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('ransom: rotation stays within ±6°', Math.abs(a.rot) <= 6.001);
   ok('ransom: torn:false yields no clip-path', ransomGlyph('READ', 3, { torn: false }).clip === null);
   ok('ransom: accent tile carries the passed accent', ransomSwatches('#0af').some((s) => s.bg === '#0af'));
+}
+
+// ---- unified transitions router + lowering (core/transitions-lower.js) ----
+{
+  const throws = (fn) => { try { fn(); return false; } catch { return true; } };
+  ok('transitions: seam-only name routes to seam', boundaryMechanism('whipPan') === 'seam');
+  ok('transitions: ambiguous basic defaults to cut', boundaryMechanism('fade') === 'cut' && boundaryMechanism('slide') === 'cut' && boundaryMechanism('wipe') === 'cut');
+  ok('transitions: dissolve (no cut) routes to seam', boundaryMechanism('dissolve') === 'seam');
+  ok('transitions: cut-only name routes to cut', boundaryMechanism('zoom') === 'cut');
+  ok('transitions: sting-only name routes to sting', boundaryMechanism('glitch') === 'sting');
+  ok('transitions: mech:seam upgrades an ambiguous basic', boundaryMechanism('fade', 'seam') === 'seam');
+  ok('transitions: layer-only anim rejected as a boundary', throws(() => boundaryMechanism('pop')));
+  ok('transitions: unknown fx rejected', throws(() => boundaryMechanism('definitely-not-a-fx')));
+  ok('transitions: mech mismatch rejected', throws(() => boundaryMechanism('whipPan', 'cut')));
+  // lowering expands + consumes the unified keys, in place, idempotently
+  const d = lowerScene({ layers: [{ text: 'A', transition: { in: 'rise', dur: 0.4 } }], transitions: [{ at: 2, fx: 'whipPan', dur: 0.6, timing: 'snappy' }] });
+  ok('transitions: boundary lowers to a seam', Array.isArray(d.seams) && d.seams[0].t === 2 && d.seams[0].fx === 'whipPan' && d.seams[0].timing === 'snappy');
+  ok('transitions: unified keys are consumed', !('transitions' in d) && !('transition' in d.layers[0]));
+  ok('transitions: layer transition lowers to anim/enterDur', d.layers[0].anim === 'rise' && d.layers[0].enterDur === 0.4);
+  ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
+  ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
+  ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

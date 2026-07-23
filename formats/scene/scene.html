@@ -71,12 +71,17 @@
       import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
+      import { lowerScene } from '/core/transitions-lower.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
       import { sampleAt } from '/core/spectrum.js';
       import { createRenderer } from '/core/layers/index.js';
       const $ = (id) => document.getElementById(id);
 
       boot((data, fps, theme, canvas) => {
+        // lower the unified `transitions`/`layers[].transition` surface into the raw cuts/stings/seams/
+        // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
+        // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
+        data = lowerScene(data);
         // canvas W,H come from boot (aspect-resolved). Fallback keeps standalone use working.
         const [W, H] = [canvas?.width || 1080, canvas?.height || 1920];
         const landscape = W > H;

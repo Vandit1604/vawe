@@ -80,6 +80,9 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
     { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
     { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
+    // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
+    // is the union of all four registries — the router in transitions-lower.js is the drift-proof guard).
+    { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
   ];
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {

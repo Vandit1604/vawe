@@ -64,13 +64,15 @@ const panel = (t, dur, color, extra) => ({ type: 'rect', x: 0, y: 0, w: W, h: H,
 const beatA = [panel(0, T, '#12233f', { exitDur: 0 }), label(0, 'A', '#fff', { duration: T, exitDur: 0 })];
 const beatB = [panel(T, END - T, '#f26b3a', { enterDur: 0 }), label(T, 'B', '#fff', { duration: END - T, enterDur: 0 })];
 
+// author the canned scene through the UNIFIED transition surface (core/transitions-lower.js) — the same
+// one an author writes — so the preview dogfoods the API. `mech` is passed explicitly so MECH=cut vs
+// MECH=seam previews the same ambiguous fx (slide/fade/wipe) as each mechanism.
 const scene = { module: 'scene', aspect: '16:9', duration: END, theme: 'linear', layers: [...beatA, ...beatB] };
-if (MECH === 'seam') scene.seams = [{ t: T, fx: FX, dur: DUR, dir: DIR, timing: TIMING }];
-else if (MECH === 'cut') scene.cuts = [{ t: T, style: FX, dur: DUR, dir: DIR, timing: TIMING }];
-else if (MECH === 'sting') scene.stings = [{ t: T, fx: FX, dur: DUR }];
-else if (MECH === 'anim') { // entrance/exit on the beats themselves; the window is enterDur/exitDur
-  beatA.forEach((l) => { l.out = FX; l.exitDur = DUR; l.duration = T + DUR; });
-  beatB.forEach((l) => { l.anim = FX; l.enterDur = DUR; l.start = T; });
+if (MECH === 'anim') { // a layer entrance/exit: sugar over anim/out, window = dur
+  beatA.forEach((l) => { l.transition = { out: FX, dur: DUR }; l.duration = T + DUR; });
+  beatB.forEach((l) => { l.transition = { in: FX, dur: DUR }; l.start = T; });
+} else { // a boundary transition: routed to seam/cut/sting by mech
+  scene.transitions = [{ at: T, fx: FX, dur: DUR, dir: DIR, timing: TIMING, mech: MECH }];
 }
 
 // the scene must be served from UNDER the repo root (scene.html fetches it by URL, and the browser

@@ -26,6 +26,29 @@ given transition is there.
 > mechanical; ease-in-out gives it velocity (accelerate, then settle). Use `linear` only for a
 > deliberately flat sweep. Match the curve to the beat: entrances decelerate, exits/whips accelerate.
 
+## One surface to author them: the unified `transitions`
+
+The four mechanisms are the *machinery*; you rarely pick one by hand. Author a transition through **one
+field** and let the engine route it (core/transitions-lower.js), driven by the same catalog:
+
+- **Boundary** (between two beats) — a top-level array:
+  ```json
+  "transitions": [{ "at": 9.7, "fx": "whipPan", "dur": 0.6, "dir": "left", "timing": "snappy" }]
+  ```
+  `fx` picks the mechanism: seam-only names (`whipPan`/`crossWarp`/`cinematicZoom`) → a two-scene
+  **seam**; `whip`/`punch`/`zoom` → a root **cut**; `glitch`/`chromaticSplit` → a **sting** overlay.
+  The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) resolve to a cheap root
+  **cut** by default; add `"mech": "seam"` to upgrade to the real GPU blend of both beats.
+- **Layer** entrance/exit — sugar over `anim`/`out`:
+  ```json
+  { "type": "text", "transition": { "in": "rise", "out": "slide-left", "dir": "left", "dur": 0.4 } }
+  ```
+
+This lowers to the raw `cuts`/`stings`/`seams`/`anim` fields at load, so everything above (easing,
+direction, the decision procedure) applies unchanged. The raw fields remain the low-level escape hatch;
+a raw value you also set on the same layer/beat wins. An `fx` that names nothing, or a layer-only anim
+used as a boundary (`pop`), is rejected at validate with the catalog — never silently coerced.
+
 ---
 
 ## The prime rule

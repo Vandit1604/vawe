@@ -339,6 +339,53 @@
         }
       }
     },
+    "transitions": {
+      "type": "array",
+      "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut · seam · sting) via core/transitions.js — ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
+      "item": {
+        "at": {
+          "type": "number",
+          "label": "Boundary time (s) — the transition plays over [at, at+dur]",
+          "required": true,
+          "min": 0
+        },
+        "fx": {
+          "type": "string",
+          "label": "Transition name (any from `make transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom → seam; whip/punch/zoom → cut; glitch/chromaticSplit → sting; fade/slide/wipe/dissolve → cut by default (add mech:\"seam\" for the two-scene blend).",
+          "required": true
+        },
+        "mech": {
+          "type": "string",
+          "label": "Force the mechanism (default = auto). seam = two-scene GPU blend; cut = transform the scene root; sting = generative overlay.",
+          "enum": ["cut", "seam", "sting"]
+        },
+        "dur": {
+          "type": "number",
+          "label": "Transition span (s)",
+          "min": 0.1,
+          "max": 3
+        },
+        "dir": {
+          "type": "string",
+          "label": "Travel direction (left|right|up|down)",
+          "enum": ["left", "right", "up", "down"]
+        },
+        "timing": {
+          "type": "string",
+          "label": "Easing of the transition progress (default smooth = ease-in-out; linear = constant). Same curves as a cut/seam timing.",
+          "enum": ["linear", "smooth", "out", "snappy", "pop", "rush", "brake", "ramp"]
+        },
+        "seed": {
+          "type": "number",
+          "label": "Noise/shape seed (seam/sting)"
+        },
+        "intensity": {
+          "type": "number",
+          "label": "Strength multiplier (seam/sting; 1 = default)",
+          "min": 0
+        }
+      }
+    },
     "camera": {
       "type": "array",
       "label": "Global camera keyframes",
@@ -646,6 +693,29 @@
         "track": {
           "type": "number",
           "label": "z-order track"
+        },
+        "transition": {
+          "type": "object",
+          "label": "UNIFIED layer transition (sugar over anim/out): { in, out, dir, dur }. Lowered to anim/out/dir/enterDur/exitDur at load. `in`/`out` are anim names (core/clips.js); a raw anim/out you also set wins.",
+          "fields": {
+            "in": {
+              "type": "string",
+              "label": "Enter anim (same names as `anim`)"
+            },
+            "out": {
+              "type": "string",
+              "label": "Exit anim (same names as `out`)"
+            },
+            "dir": {
+              "type": "string",
+              "label": "Travel direction where the anim reads one",
+              "enum": ["left", "right", "up", "down"]
+            },
+            "dur": {
+              "type": "number",
+              "label": "Enter/exit duration (s)"
+            }
+          }
         },
         "anim": {
           "type": "string",

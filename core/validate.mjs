@@ -16,6 +16,7 @@
 
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
+import { boundaryMechanism } from '../core/transitions-lower.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -96,6 +97,7 @@ export function validateData(schema, data) {
   noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
+  errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
   return errors;
 }
 
@@ -116,6 +118,21 @@ export function seamErrors(cfg) {
     if (!isFinite(t)) return; // schema reports the missing/NaN t
     if (t < 0) out.push(`seams[${i}] t must be ≥ 0 (got ${s.t})`);
     if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the video (${dur}s) — move it earlier or shorten dur`);
+  });
+  return out;
+}
+
+// UNIFIED TRANSITIONS: the fx must route to a real boundary mechanism (cut/seam/sting). The schema
+// checks shape (at/dur/timing); only the router knows whether a name is a boundary transition at all,
+// so a typo or a layer-only name (e.g. `pop`) used as a boundary is caught here, loudly, not silently.
+export function transitionErrors(cfg) {
+  const out = [];
+  const list = Array.isArray(cfg.transitions) ? cfg.transitions : [];
+  list.forEach((T, i) => {
+    if (!isObj(T)) { out.push(`transitions[${i}] must be an object`); return; }
+    if (T.fx == null) return; // the schema reports the missing required `fx`/`at`
+    try { boundaryMechanism(T.fx, T.mech); }
+    catch (e) { out.push(`transitions[${i}]: ${e.message}`); }
   });
   return out;
 }

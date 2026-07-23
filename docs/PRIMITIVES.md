@@ -96,11 +96,28 @@ them and stays order-independent — `make probe` + `make canvas-purity` pass on
   (prism channel-split across the seam) · `lens` (a moving optical centre bends both through one lens) ·
   `flashWhite` (leaving beat blows to white, then white resolves to the arriving beat) · `cinematicZoom`
   (dolly: leaving beat pushes in, arriving beat settles from a punched-in frame). `seed` varies the
-  noise/shape; `intensity` (1 = default) scales strength.
+  noise/shape; `intensity` (1 = default) scales strength; `timing` eases the progress (default `smooth`
+  ease-in-out — a seam that MOVES content reads mechanical at `linear`; same curves as a cut).
 - **Rasterisation**: in-browser SVG `<foreignObject>` of the stage DOM composited over the live 2D
   background canvas, with fonts + tokens.css + `:root` vars inlined (external CSS/fonts do not apply
   inside the isolated SVG render). **Limitation**: cross-origin `<img>` and captured components may
   render blank in the baked texture; a blank raster (or no WebGL) falls back to a plain cross-fade.
+
+## Unified transitions (`core/transitions-lower.js`) — one field, routed to the right mechanism
+
+The four mechanisms above (`anim` · `cut` · `sting` · `seam`) are the machinery; author through **one
+surface** and the engine routes by name (the catalog in `core/transitions.js`). Lowered to the raw
+fields at load, so it is pure sugar — determinism and every gate are unchanged.
+- **Boundary** `transitions: [{ at, fx, dur?, dir?, timing?, mech? }]` — a transition between two beats.
+  `fx` selects the mechanism: seam-only (`whipPan`/`crossWarp`/`cinematicZoom`) → **seam**; `whip`/
+  `punch`/`zoom` → **cut**; `glitch`/`chromaticSplit` → **sting**. The ambiguous basics (`fade`/`slide`/
+  `wipe`/`dissolve`/`push`/`uncover`) default to a cheap root **cut**; `mech: "seam"` upgrades to the
+  two-scene blend.
+- **Layer** `{ …, transition: { in, out, dir?, dur? } }` — sugar over `anim`/`out` on a single layer.
+- A raw `cuts`/`stings`/`seams`/`anim` value set on the same beat/layer wins; an unroutable `fx` (a
+  typo, or a layer-only anim like `pop` used as a boundary) is rejected at validate, never coerced.
+- **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
+  renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
 
 ## Ambient shader looks (`core/shaders-ambient.js`) — 17 continuous WebGL fields (the `shader` layer)
 
