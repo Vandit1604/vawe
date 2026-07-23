@@ -178,29 +178,62 @@ export function installVirtualClock() {
   // the renderer needs REAL frame callbacks to await paint before screenshots — keep a handle
   // to the native rAF before we virtualize it for scene code.
   window.__realRaf = window.requestAnimationFrame.bind(window);
+  // a REAL timer too — scene code sees a virtualized setTimeout (fires only on __vt.set), but the
+  // seam bake needs a wall-clock fallback to time-bound async work during boot (old --headless
+  // starves rAF before first paint, so nothing that awaits a real frame can be relied on there).
+  window.__realTimeout = window.setTimeout.bind(window);
+  const nativeRaf = window.requestAnimationFrame.bind(window);
+  const nativeCancelRaf = window.cancelAnimationFrame.bind(window);
+  const nativeSetTimeout = window.setTimeout.bind(window);
+  const nativeSetInterval = window.setInterval.bind(window);
+  const nativeClear = window.clearTimeout.bind(window);
   const RealDate = Date;
   const rafQ = new Map(); let rafId = 0;
   const timers = new Map(); let timerId = 0;
+  // Date / performance.now / Math.random are virtualized IMMEDIATELY: the seam bake renders frames at
+  // build time and MUST see seeded, frame-pure time+randomness so every worker bakes identical
+  // textures. These three never affect chromedp's rAF-driven readiness Poll, so it is safe to swap
+  // them up front.
   window.Date = class extends RealDate {
     constructor(...a) { if (a.length) super(...a); else super(vt.ms); }
     static now() { return vt.ms; }
   };
   performance.now = () => vt.ms;
-  window.requestAnimationFrame = (cb) => { rafQ.set(++rafId, cb); return rafId; };
-  window.cancelAnimationFrame = (id) => { rafQ.delete(id); };
-  window.setTimeout = (cb, delay = 0, ...a) => { if (typeof cb !== 'function') return 0; timers.set(++timerId, { at: vt.ms + Number(delay || 0), cb, a }); return timerId; };
-  window.setInterval = (cb, every = 1e9, ...a) => window.setTimeout(cb, every, ...a); // one-shot per pass — enough for chrome spinners
-  window.clearTimeout = window.clearInterval = (id) => { timers.delete(id); };
   let rnd = 0;
   Math.random = () => { rnd = (rnd + 0x6d2b79f5) | 0; let t = Math.imul(rnd ^ (rnd >>> 15), 1 | rnd); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  // Timers (rAF / setTimeout / setInterval) are virtualized LAZILY, on the first real render. chromedp
+  // waits for window.__engineReady in "raf" polling mode — it re-checks inside requestAnimationFrame.
+  // If rAF is virtualized during boot (queued, flushed only on __vt.set), that Poll starves and the
+  // render deadlocks whenever readiness is delayed (e.g. by the awaited seam bake). So page timers stay
+  // NATIVE through boot+bake — Poll ticks, readiness is observed — and only flip to virtual when the
+  // render loop actually begins, where scene rAF/timer code must be frame-pure. (MISTAKES: seam bake.)
+  let timersVirtual = false;
+  const virtualizeTimers = () => {
+    if (timersVirtual) return; timersVirtual = true;
+    window.requestAnimationFrame = (cb) => { rafQ.set(++rafId, cb); return rafId; };
+    window.cancelAnimationFrame = (id) => { rafQ.delete(id); };
+    window.setTimeout = (cb, delay = 0, ...a) => { if (typeof cb !== 'function') return 0; timers.set(++timerId, { at: vt.ms + Number(delay || 0), cb, a }); return timerId; };
+    window.setInterval = (cb, every = 1e9, ...a) => window.setTimeout(cb, every, ...a); // one-shot per pass — enough for chrome spinners
+    window.clearTimeout = window.clearInterval = (id) => { timers.delete(id); };
+  };
   window.__vt = {
+    // the RENDER path: virtualize timers (idempotent) then advance the clock and flush the queues.
     set(frame, fps) {
+      virtualizeTimers();
       vt.frame = frame; vt.ms = (frame / fps) * 1000;
       rnd = (frame * 2654435761) | 0; // reseed: same frame → same random sequence
       for (const [id, tm] of [...timers]) if (tm.at <= vt.ms) { timers.delete(id); tm.cb(...tm.a); }
       const q = [...rafQ.values()]; rafQ.clear(); for (const cb of q) cb(vt.ms);
     },
+    // the BAKE path: advance frame time + reseed RNG ONLY, WITHOUT virtualizing timers — so the
+    // readiness Poll's native rAF keeps ticking while the bake runs. No timer/rAF flush is needed:
+    // renderFrame is pure in the frame it is given and the bake never awaits a scene timer.
+    setBake(frame, fps) {
+      vt.frame = frame; vt.ms = (frame / fps) * 1000;
+      rnd = (frame * 2654435761) | 0;
+    },
     now: () => vt.ms,
+    nativeRaf, nativeCancelRaf, nativeSetTimeout, nativeSetInterval, nativeClear,
   };
   return window.__vt;
 }
@@ -312,6 +345,12 @@ export async function boot(build) {
     await preloadRansomSprites(data);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey });
+    // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
+    // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
+    // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.
+    if (typeof scene.bakeSeams === 'function') {
+      try { await scene.bakeSeams(); } catch (e) { console.warn('seam bake:', e); }
+    }
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
@@ -348,8 +387,12 @@ export async function boot(build) {
         return h.toString(36);
       };
     }
-    window.__engine.renderFrame(0);
+    // Signal readiness BEFORE the warm first frame. renderFrame() is what first virtualizes the page
+    // timers (via the clock), and chromedp observes __engineReady in rAF-polling mode — so readiness
+    // must be visible while rAF is still native. The warm renderFrame(0) then flips timers to virtual;
+    // the Poll's already-scheduled native rAF callback still fires and catches the flag.
     window.__engineReady = true;
+    window.__engine.renderFrame(0);
   } catch (e) {
     window.__engineError = String(e && e.stack ? e.stack : e);
     document.title = 'ENGINE_ERROR';

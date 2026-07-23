@@ -95,7 +95,29 @@ export function validateData(schema, data) {
   walk(schema.fields, data || {}, '', errors);
   noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
+  errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   return errors;
+}
+
+// SEAM D range check: fx-name and dur bounds are enforced by the schema (enum + min); what the schema
+// cannot express is that the window [t, t+dur] must fall INSIDE the video, else the outgoing/incoming
+// beats are baked from clamped edge frames and the transition blends the wrong thing silently.
+export function seamErrors(cfg) {
+  const out = [];
+  const seams = Array.isArray(cfg.seams) ? cfg.seams : [];
+  if (!seams.length) return out;
+  // effective duration: explicit, else the last layer's end (+0.4 tail) — mirrors scene.html.
+  let dur = typeof cfg.duration === 'number' ? cfg.duration : 0;
+  if (!dur) for (const L of cfg.layers || []) { if (isObj(L) && typeof L.start !== 'string') dur = Math.max(dur, (L.start ?? 0) + (L.duration ?? 2)); }
+  dur = +(dur + (typeof cfg.duration === 'number' ? 0 : 0.4)).toFixed(2);
+  seams.forEach((s, i) => {
+    if (!isObj(s)) return;
+    const t = +s.t, d = +(s.dur ?? 0.5);
+    if (!isFinite(t)) return; // schema reports the missing/NaN t
+    if (t < 0) out.push(`seams[${i}] t must be ≥ 0 (got ${s.t})`);
+    if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the video (${dur}s) — move it earlier or shorten dur`);
+  });
+  return out;
 }
 
 // Em-dashes are banned in all rendered text (brand voice rule). Checks every string VALUE in the

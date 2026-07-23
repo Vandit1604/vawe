@@ -2425,3 +2425,37 @@ beats are pulled apart into gaps and passes the overlapping timeline.
 **The lesson:** a transition is an OVERLAP, not a hand-off across a void. The outgoing content must
 still be on screen when the incoming arrives; the motion between them IS the transition. Deeper win
 (roadmap Seam D): true two-scene shader transitions that composite outgoing + incoming on the GPU.
+## #121 — Seam D whole-stage bake deadlocked the render: the virtual clock starved chromedp's readiness Poll
+
+Seam D (two-scene shader transitions) rasterises the two beats either side of a boundary into textures
+at build time, inside boot's awaited phase. The scene booted fine in isolation (puppeteer: ready in
+~1s, textures non-blank) but every REAL `bin/vawe` render hung at "capturing…" with zero frames
+written and no error. Four wrong guesses got killed by cheap tests before the real one: not the
+foreignObject bake (probe replicated it fine), not the second WebGL context (forcing the 2D fallback
+still hung), not old-headless rAF starvation of the bake itself (a chromedp probe reached
+`__engineReady===true` in 1s).
+
+**Root cause.** `internal/scene/scene.go` waits for `window.__engineReady` with `chromedp.Poll`, whose
+DEFAULT polling mode is `raf` — it re-evaluates the predicate inside `requestAnimationFrame`.
+`core/boot.js installVirtualClock()` virtualises `requestAnimationFrame` (callbacks are QUEUED, flushed
+only on `__vt.set`) the moment it runs, which is BEFORE the awaited bake. So Poll's first check ran
+while `__engineReady` was still false (bake in flight), and its rAF-driven re-check never fired again →
+deadlock. `sample.json` never hit this because it becomes ready in the same tick Poll first checks;
+the ~1s seam bake widened the not-ready window enough to lose the race. **Any** author adding awaited
+build-time work (Seam C's DOM bake, a heavier preload) would hit the identical wall — a framework bug,
+not an authoring one.
+
+**Fix (core/boot.js).** Split the virtual clock: `Date` / `performance.now` / `Math.random` are
+virtualised immediately (the bake needs seeded, frame-pure time so every worker bakes identical
+textures), but the TIMERS (`requestAnimationFrame` / `setTimeout` / `setInterval`) stay NATIVE through
+boot+bake and flip to virtual only on the first real `__vt.set` (the first rendered frame). Readiness is
+now signalled while rAF is still native, so Poll observes it. The bake uses a new `__vt.setBake` that
+seeds time WITHOUT virtualising timers. Existing scenes are unaffected — timers are virtual again the
+instant rendering starts — proven by `make probe` + `make canvas-purity` (byte-identical, order
+independent) on the sample scene.
+
+**Which gate catches it now.** `make probe` / `make canvas-purity` still guard purity; more to the
+point, the render simply completes now, and the seam scene passes both gates (3 canvases, order
+independent). The method note that finally worked: reproduce the exact Go/chromedp flow in a tiny
+`cmd` probe with a watchdog that prints the stuck action — it named `nav+poll` immediately, which no
+amount of puppeteer testing (different, non-starving headless) had revealed.

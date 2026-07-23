@@ -273,6 +273,53 @@
         }
       }
     },
+    "seams": {
+      "type": "array",
+      "label": "Two-scene shader transitions (blend the beats either side of a boundary, from core/seams.js)",
+      "item": {
+        "t": {
+          "type": "number",
+          "label": "Seam start time (s) — the window is [t, t+dur]",
+          "required": true,
+          "min": 0
+        },
+        "fx": {
+          "type": "string",
+          "label": "Transition (samples BOTH beats as textures)",
+          "required": true,
+          "enum": [
+            "fade",
+            "crossWarp",
+            "whipPan",
+            "sdfIris",
+            "dispersion",
+            "lens",
+            "flashWhite",
+            "cinematicZoom"
+          ]
+        },
+        "dur": {
+          "type": "number",
+          "label": "Seam span (s)",
+          "min": 0.1,
+          "max": 3
+        },
+        "dir": {
+          "type": "string",
+          "label": "Travel direction for whipPan (left|right|up|down)",
+          "enum": ["left", "right", "up", "down"]
+        },
+        "seed": {
+          "type": "number",
+          "label": "Noise/shape seed"
+        },
+        "intensity": {
+          "type": "number",
+          "label": "Strength multiplier (1 = default)",
+          "min": 0
+        }
+      }
+    },
     "camera": {
       "type": "array",
       "label": "Global camera keyframes",

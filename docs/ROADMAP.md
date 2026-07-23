@@ -268,6 +268,19 @@ Both cheap paths shipped:
   `whipPan` (10-tap directional blur on both), `sdfIris`, `flashThroughWhite` (dual smoothstep windows),
   `crossWarp`, `gravitationalLens`. This is the one thing the two reference engines have that we do not.
 
+**Seam D — two-scene shader transitions — NOW BUILT (`core/seams.js`).** The capability neither a sting
+(overlay on one beat) nor a cut (transform one root) could offer: sample the OUTGOING beat AND the
+INCOMING beat as textures and blend one INTO the other. The whole stage either side of a boundary is
+rasterised ONCE at build (in-browser `foreignObject` over the live bg canvas, fonts + CSS + `:root`
+vars inlined) into `u_from` / `u_to`, and a two-sampler fragment shader keyed on `u_progress` runs the
+blend: `crossWarp` · `whipPan` · `sdfIris` · `dispersion` · `lens` · `flashWhite` · `cinematicZoom`, plus
+a `fade` fallback. Determinism holds because both textures are pure functions of `n` (two fixed frames,
+baked once); no WebGL or a blank raster degrades to a plain cross-fade. Author API: top-level
+`seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This is the DOM-as-texture `foreignObject` bake that
+**Seam C** wanted — Seam C (sampling one arbitrary subtree as a `resample` source) can now follow the
+same path. Note the bake surfaced a real framework bug: the virtual clock starved chromedp's rAF
+readiness Poll during the awaited bake; fixed by virtualising page timers lazily (see MISTAKES #121).
+
 ~~**Genuinely cheap and still absent** (generative): nebula, iridescence, dot-crawl.~~ **All three
 shipped 2026-07-19**: `nebula` and `dotCrawl` in `AMBIENT_FX`, `iridescence` in `SHADER_FX`.
 

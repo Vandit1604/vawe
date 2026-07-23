@@ -80,6 +80,28 @@ Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
+## Seams (`core/seams.js`) — two-scene shader transitions (blend BOTH beats)
+
+A sting paints a generative overlay ON TOP of one beat; a cut transforms ONE root. A **seam** is the
+only transition that samples the OUTGOING and INCOMING beats as textures and blends one INTO the other.
+The two beats either side of the boundary are rasterised ONCE at build (whole stage → `u_from` / `u_to`)
+and a fragment shader keyed on `u_progress` smears / reveals / bends across them. Determinism is intact:
+both textures are pure functions of `n` (baked from two fixed frames), so `renderFrame(n)` only samples
+them and stays order-independent — `make probe` + `make canvas-purity` pass on a seam scene.
+- **JSON seam**: `{ t, fx, dur, dir?, seed?, intensity? }` in a top-level `seams: [...]`. The window is
+  `[t, t+dur]`; the leaving beat is baked from the frame just before it, the arriving beat from the
+  frame just after. `fx`: `fade` (cross-dissolve, always the fallback) · `crossWarp` (both beats drag to
+  centre and swap through a noise front) · `whipPan` (directional smear of BOTH; `dir` = left/right/up/
+  down) · `sdfIris` (arriving beat revealed through an expanding seeded polygon iris) · `dispersion`
+  (prism channel-split across the seam) · `lens` (a moving optical centre bends both through one lens) ·
+  `flashWhite` (leaving beat blows to white, then white resolves to the arriving beat) · `cinematicZoom`
+  (dolly: leaving beat pushes in, arriving beat settles from a punched-in frame). `seed` varies the
+  noise/shape; `intensity` (1 = default) scales strength.
+- **Rasterisation**: in-browser SVG `<foreignObject>` of the stage DOM composited over the live 2D
+  background canvas, with fonts + tokens.css + `:root` vars inlined (external CSS/fonts do not apply
+  inside the isolated SVG render). **Limitation**: cross-origin `<img>` and captured components may
+  render blank in the baked texture; a blank raster (or no WebGL) falls back to a plain cross-fade.
+
 ## Ambient shader looks (`core/shaders-ambient.js`) — 17 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.

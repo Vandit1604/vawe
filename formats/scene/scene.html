@@ -70,6 +70,7 @@
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
       import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
+      import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
       import { sampleAt } from '/core/spectrum.js';
       import { createRenderer } from '/core/layers/index.js';
@@ -236,6 +237,18 @@
         if (capStyle && !CAP_STYLES[capStyle])
           throw new Error(`unknown captionStyle "${capStyle}" — known: ${Object.keys(CAP_STYLES).join(', ')}`);
         const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
+
+        // ---- SEAMS: two-scene shader transitions (core/seams.js) ----
+        // [{t, fx, dur, dir?, seed?, intensity?}] — the two beats either side of the boundary are
+        // rasterised ONCE (bakeSeams, at build) into u_from/u_to; renderFrame only SAMPLES them, so
+        // the whole thing stays pure in n. The compositor is created ONLY when a scene declares seams,
+        // so a scene without them adds no DOM and renders byte-identical to before.
+        const seams = (data.seams || [])
+          .map((s) => ({ t: +s.t, fx: SEAM_FX.includes(s.fx) ? s.fx : 'fade', dur: +(s.dur ?? 0.5),
+            dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, _from: null, _to: null, _fallback: false }))
+          .filter((s) => s.dur > 0 && isFinite(s.t))
+          .sort((a, b) => a.t - b.t);
+        const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
 
         function renderFrame(f) {
           const t = f / fps;
@@ -404,7 +417,64 @@
             if (p > 0 && p < 1) { fxo.draw(s.fx, p, s.seed ?? 0, s._tint, s._intensity, s._pal); drew = true; }
           }
           if (!drew) fxo.clear();
+          // SEAMS: inside a seam window [t, t+dur] the compositor blends the two BAKED beats over the
+          // whole stage. The live DOM/canvas underneath is covered by the opaque full-frame composite.
+          // Outside every window the compositor is hidden, so normal frames render untouched.
+          if (seamCompositor) {
+            let inSeam = false;
+            for (const s of seams) {
+              if (t < s.t || t >= s.t + s.dur) continue;
+              const p = (t - s.t) / s.dur;
+              if (s._from && s._to) {
+                const fx = s._fallback ? 'fade' : s.fx; // blank raster → plain cross-fade
+                seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity });
+              } else {
+                seamCompositor.clear(); // never baked (e.g. bake threw) → show the live stage, no dip
+              }
+              inSeam = true; break;
+            }
+            if (!inSeam) seamCompositor.clear();
+          }
           seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
+        }
+
+        // bakeSeams(): rasterise the OUTGOING beat (frame just before the window) and the INCOMING beat
+        // (frame just after it) for every seam, into static textures. Runs ONCE, awaited in boot before
+        // the render loop — impure (async raster) is fine here; the per-frame path only samples the
+        // result, so renderFrame stays pure in n. Mirrors the bake-then-pure pattern of core/canvas-fx.js.
+        async function bakeSeams() {
+          if (!seams.length) return;
+          const useCanvasBg = bgWins.length > 0;
+          const total = Math.max(1, Math.round(duration * fps));
+          const root = $('root');
+          // NO rAF await here: old --headless Chrome starves requestAnimationFrame before first paint,
+          // so awaiting a real frame during boot would deadlock. renderFrame writes every inline style
+          // synchronously and serialisation reads attributes (not computed layout), so a forced sync
+          // reflow is all the settle we need.
+          const renderAt = (frame) => {
+            const fr = Math.max(0, Math.min(total - 1, frame));
+            // setBake: seed RNG + frame time WITHOUT virtualizing page timers, so chromedp's rAF-driven
+            // readiness Poll keeps ticking while the bake runs (else the render deadlocks).
+            if (window.__vt) (window.__vt.setBake || window.__vt.set)(fr, fps);
+            renderFrame(fr);
+            void root.offsetWidth; // force synchronous layout so fit/measure has resolved
+          };
+          for (let i = 0; i < seams.length; i++) {
+            const s = seams[i];
+            try {
+              renderAt(Math.round(s.t * fps) - 1);
+              s._from = await stageToCanvas({ w: W, h: H, cv, cam, root, useCanvasBg });
+              s._from.__seamId = 'from' + i;
+              renderAt(Math.round((s.t + s.dur) * fps) + 1);
+              s._to = await stageToCanvas({ w: W, h: H, cv, cam, root, useCanvasBg });
+              s._to.__seamId = 'to' + i;
+              if (isBlankRaster(s._from) || isBlankRaster(s._to)) s._fallback = true; // nothing rasterised → cross-fade
+            } catch (e) {
+              s._from = s._to = null; s._fallback = true;
+              try { console.warn('seam bake failed at t=' + s.t + ': ' + (e && e.message)); } catch (_) {}
+            }
+          }
+          seamCompositor && seamCompositor.clear();
         }
         // auto sound-design: derive SFX cues deterministically from the scene's own cuts + stings
         // (audio:{auto:true}). whoosh on each cut, a heavier hit on each sting; the Go mixer beds the
@@ -470,7 +540,7 @@
             sfx = sfx.concat(keys).sort((a, b) => a.t - b.t);
           }
         }
-        return { fps, duration, stings: stings.map((s) => s.t), sfx, renderFrame };
+        return { fps, duration, stings: stings.map((s) => s.t), sfx, renderFrame, bakeSeams };
       });
     </script>
   </body>

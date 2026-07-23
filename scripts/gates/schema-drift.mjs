@@ -16,6 +16,7 @@ import { PRESETS } from '../../core/type.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
+import { SEAM_FX } from '../../core/seams.js';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -77,6 +78,7 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
   { path: 'layers.item.type',   want: LAYER_TYPES,                             src: 'core/layers/index.js REGISTRY' },
     { path: 'cuts.item.style',    want: [...Object.keys(PRESENTATIONS), 'none'], src: 'core/cuts.js PRESENTATIONS' },
     { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
+    { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
   ];
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {
