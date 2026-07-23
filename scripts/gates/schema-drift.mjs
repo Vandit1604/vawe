@@ -14,7 +14,7 @@ import { THREE_FX } from '../../core/three-scenes.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { PRESETS } from '../../core/type.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
-import { PRESENTATIONS } from '../../core/cuts.js';
+import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { SEAM_FX } from '../../core/seams.js';
 import path from 'node:path';
@@ -79,6 +79,7 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     { path: 'cuts.item.style',    want: [...Object.keys(PRESENTATIONS), 'none'], src: 'core/cuts.js PRESENTATIONS' },
     { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
     { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
+    { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
   ];
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {

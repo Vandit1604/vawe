@@ -68,7 +68,7 @@
       import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
-      import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS } from '/core/cuts.js';
+      import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
@@ -243,9 +243,19 @@
         // rasterised ONCE (bakeSeams, at build) into u_from/u_to; renderFrame only SAMPLES them, so
         // the whole thing stays pure in n. The compositor is created ONLY when a scene declares seams,
         // so a scene without them adds no DOM and renders byte-identical to before.
+        // timing shapes how progress 0→1 evolves across the seam (core/cuts.js TIMINGS, shared with
+        // scene cuts). Default `smooth` (ease-in-out) — a transition that MOVES content reads mechanical
+        // at constant speed; ease-in-out gives it the accelerate-then-settle velocity (MOTION-CRAFT:
+        // "never linear on visible moves"). `linear` is opt-in for a deliberately constant sweep. An
+        // unknown timing is rejected loudly, not silently coerced (MISTAKES: silent substitution).
         const seams = (data.seams || [])
-          .map((s) => ({ t: +s.t, fx: SEAM_FX.includes(s.fx) ? s.fx : 'fade', dur: +(s.dur ?? 0.5),
-            dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, _from: null, _to: null, _fallback: false }))
+          .map((s) => {
+            if (s.timing != null && !CUT_TIMINGS[s.timing])
+              throw new Error(`unknown seam timing "${s.timing}" at t=${s.t} — known: ${Object.keys(CUT_TIMINGS).join(', ')}`);
+            return { t: +s.t, fx: SEAM_FX.includes(s.fx) ? s.fx : 'fade', dur: +(s.dur ?? 0.5),
+              dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, timing: s.timing || 'smooth',
+              _from: null, _to: null, _fallback: false };
+          })
           .filter((s) => s.dur > 0 && isFinite(s.t))
           .sort((a, b) => a.t - b.t);
         const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
@@ -424,7 +434,7 @@
             let inSeam = false;
             for (const s of seams) {
               if (t < s.t || t >= s.t + s.dur) continue;
-              const p = (t - s.t) / s.dur;
+              const p = CUT_TIMINGS[s.timing]((t - s.t) / s.dur); // ease the transition progress
               if (s._from && s._to) {
                 const fx = s._fallback ? 'fade' : s.fx; // blank raster → plain cross-fade
                 seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity });

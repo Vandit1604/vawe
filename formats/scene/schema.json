@@ -322,6 +322,20 @@
           "type": "number",
           "label": "Strength multiplier (1 = default)",
           "min": 0
+        },
+        "timing": {
+          "type": "string",
+          "label": "Easing of the transition progress (default smooth = ease-in-out). linear = constant-speed (mechanical); smooth/out/snappy/pop/rush/brake/ramp shape the blend's velocity. Same curves as a scene cut's timing (core/cuts.js).",
+          "enum": [
+            "linear",
+            "smooth",
+            "out",
+            "snappy",
+            "pop",
+            "rush",
+            "brake",
+            "ramp"
+          ]
         }
       }
     },

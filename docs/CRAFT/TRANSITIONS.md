@@ -15,6 +15,16 @@ given transition is there.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
 > (`seam` fx `slide · push · uncover · wipe · dissolve`, all dir-aware) are the fundamentals every tool
 > has, rendered as real blends of both beats — reach for those before the expressive shaders.
+>
+> **SEE it before you author it: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`** renders a
+> canned two-beat A→B scene through one transition as a labelled filmstrip (`/tmp/transition-preview.png`).
+> The labels are eased progress, so `TIMING=linear` vs `smooth` shows as *where the motion bunches*.
+>
+> **Easing is half the feel.** Both a `cut` and a `seam` shape their progress through `timing` (the
+> `TIMINGS` curves in core/cuts.js: `smooth`/`out`/`snappy`/`pop`/`rush`/`brake`/`ramp`/`linear`).
+> Seams default to `smooth` (ease-in-out) — a transition that MOVES content at constant speed reads
+> mechanical; ease-in-out gives it velocity (accelerate, then settle). Use `linear` only for a
+> deliberately flat sweep. Match the curve to the beat: entrances decelerate, exits/whips accelerate.
 
 ---
 
@@ -161,6 +171,10 @@ Same grammar, applied to elements not shots:
 Doctrine carries the taste; the gates backstop the source-decidable subset:
 
 - **one cut family** per film; ≥3 families = FAIL (`make direct`).
+- **the earned seam** — `make direct` suggests ONE two-scene seam at the payoff boundary (the transition
+  into the longest-held beat), matched to the brand personality (punchy → whipPan, calm → cinematicZoom),
+  and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
+  operational: straight cuts are the meat, the seam is the one seasoning reserved for the hero.
 - **no transition-dip** — the stage never goes empty between beats; the transition IS the exit
   (`make critique`, rule `transition-dip`, MISTAKES #120).
 - **no typing/reveal cut off** — a time-based reveal completes before its seam (`make critique`,

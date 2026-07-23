@@ -2459,3 +2459,29 @@ point, the render simply completes now, and the seam scene passes both gates (3 
 independent). The method note that finally worked: reproduce the exact Go/chromedp flow in a tiny
 `cmd` probe with a watchdog that prints the stuck action — it named `nav+poll` immediately, which no
 amount of puppeteer testing (different, non-starving headless) had revealed.
+
+## #122 — seams ran at LINEAR speed while cuts were eased: every two-scene transition felt mechanical
+
+**What.** A scene `cut` shapes its progress through `TIMINGS` (smooth / snappy / rush / brake …, core/cuts.js),
+so it accelerates and settles. A `seam` did NOT: `renderFrame` drove the compositor with raw
+`p = (t - s.t) / s.dur` — constant speed start to finish. A whipPan or slide that MOVES content at a
+flat rate reads robotic, exactly the "not smooth" complaint. This is a framework gap, not an authoring
+one: no author could fix it from the JSON (there was no field), and it hit every brand.
+
+**Root cause.** Seam D shipped the compositor and the bake but reused cuts' progress only as a raw
+ratio, never the easing half of cuts' two-axis model (timing × presentation). MOTION-CRAFT already says
+"never linear on visible moves"; the seam path silently broke that rule.
+
+**Fix.** Seams take a `timing` field (the same `TIMINGS` curves as cuts), applied in scene.html as
+`p = TIMINGS[s.timing]((t - s.t)/s.dur)`. Default `smooth` (ease-in-out) — the correct transition
+easing (Emil Kowalski: moving/morphing → ease-in-out), so seams are eased by default, `linear` opt-in
+for a deliberately constant sweep. An unknown timing throws (no silent coerce, unlike the fx path). No
+committed scene used seams, so the default change has zero baseline blast radius; purity is intact
+(easing is pure in p) — `make probe` still byte-identical, and the seam scene renders across 8
+out-of-order workers unchanged.
+
+**Which gate catches it now.** `make schema-drift` compares `seams.item.timing` against `TIMINGS` (a
+copied enum can't drift). `make transition-preview FX=… TIMING=linear|smooth` renders the window as a
+filmstrip so the easing is visible (where the motion bunches) before authoring. `make direct` now also
+suggests ONE eased seam at the payoff, applying the decision procedure (docs/CRAFT/TRANSITIONS.md)
+instead of leaving seams undiscovered.

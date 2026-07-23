@@ -24,10 +24,12 @@ try { motion = typeof d.theme === 'string' ? (JSON.parse(fs.readFileSync(path.jo
 const settle = motion.settle ?? 0.5, bounce = motion.bounce ?? 0;
 const personality = (bounce > 0.1 || settle < 0.4) ? 'punchy' : (settle >= 0.55 && bounce < 0.05) ? 'calm' : 'neutral';
 
+// seam = the ONE earned two-scene blend, reserved for the payoff (TRANSITIONS.md: sparse accents).
+// It matches the personality: punchy throws (whipPan, snappy), calm dollies (cinematicZoom, smooth).
 const FAMILY = {
-  punchy: { cuts: ['punch', 'whip', 'zoom', 'slide'], stings: ['flash', 'streak'] },
-  calm: { cuts: ['fade', 'blur', 'riseBlur', 'wipe'], stings: ['dissolve', 'ink', 'bokeh'] },
-  neutral: { cuts: ['fade', 'slide', 'wipe', 'blur'], stings: ['dissolve', 'flash'] },
+  punchy: { cuts: ['punch', 'whip', 'zoom', 'slide'], stings: ['flash', 'streak'], seam: 'whipPan', seamTiming: 'snappy' },
+  calm: { cuts: ['fade', 'blur', 'riseBlur', 'wipe'], stings: ['dissolve', 'ink', 'bokeh'], seam: 'cinematicZoom', seamTiming: 'smooth' },
+  neutral: { cuts: ['fade', 'slide', 'wipe', 'blur'], stings: ['dissolve', 'flash'], seam: 'crossWarp', seamTiming: 'smooth' },
 }[personality];
 
 // Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
@@ -146,13 +148,30 @@ if (duration > 0 && layers.length) {
   if (!holdsEnd) warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`);
 }
 
+// ---- THE ONE EARNED SEAM (the decision procedure, applied) ----------------------------------------
+// TRANSITIONS.md: straight cuts are the meat; a seam is seasoning reserved for the hero/payoff. So the
+// director suggests exactly ONE two-scene seam, at the payoff boundary — the transition INTO the
+// longest-held beat, the climax the film builds to. Everything else stays an invisible cut. A seam is a
+// real scene-to-scene blend; it needs a boundary where a beat lands and breathes, which the longest
+// hold identifies structurally (the script can't read emotion, but it can find where the film pauses).
+if (picks.length && !profile) {
+  const holdOf = (t) => { const i = beats.indexOf(t); return (beats[i + 1] ?? (duration || t + 3)) - t; };
+  let payoff = null, best = -1;
+  for (const p of picks) { const h = holdOf(p.t); if (h > best) { best = h; payoff = p; } }
+  if (payoff && best >= 1.2) { // a real hold, not a fast montage beat
+    payoff.seam = FAMILY.seam; payoff.seamTiming = FAMILY.seamTiming;
+    payoff.seamReason = `held ${best.toFixed(1)}s → the payoff. Earn ONE expressive seam here: ${FAMILY.seam} (${FAMILY.seamTiming}) blends BOTH beats so the reveal lands as a move, not a slideshow`;
+  }
+}
+
 // profile contradictions are wrong-by-rule → FAIL tier.
 for (const c of contradictions) fail('profile', c);
 
 // ---- report ----
 console.log(`\n  motion director · ${file}`);
-console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]`);
+console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]${profile ? '' : ` · payoff seam ${FAMILY.seam}`}`);
 if (profile) console.log(`  profile: ${d.profile}  (restraint ${profile.restraint}, face ${profile.face}, bounce ${profile.bounceOk})`);
+console.log(`  transitions: one invisible cut family carries ~all seams; the accents are stings on background jumps + ONE seam at the payoff. Theory: docs/CRAFT/TRANSITIONS.md`);
 
 const fails = findings.filter((f) => f.sev === 'FAIL');
 const warns = findings.filter((f) => f.sev === 'WARN');
@@ -164,6 +183,7 @@ console.log('');
 if (!picks.length) console.log('  only one beat — no transitions to direct.\n');
 for (const p of picks) {
   console.log(`  @${p.t.toFixed(1)}s  cut: ${p.cut.padEnd(9)}${p.sting ? `sting: ${p.sting.padEnd(9)}` : ''.padEnd(16)}${p.reason}`);
+  if (p.seam) console.log(`           ★ seam: ${p.seam} (${p.seamTiming}) — ${p.seamReason}`);
 }
 
 if (WRITE) {
@@ -174,9 +194,13 @@ if (WRITE) {
     if (p.sting && !stings.some((s) => Math.abs((s.t ?? 0) - p.t) < 0.2)) stings.push({ t: r2(p.t), fx: p.sting, dur: 0.6 });
   }
   if (stings.length) d.stings = stings.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
+  // the one earned seam at the payoff (skip if the author already placed a seam near that boundary)
+  const seamsOut = [...(d.seams || [])];
+  for (const p of picks) if (p.seam && !seamsOut.some((s) => Math.abs((s.t ?? 0) - p.t) < 0.2)) seamsOut.push({ t: r2(p.t), fx: p.seam, dur: 0.6, timing: p.seamTiming });
+  if (seamsOut.length) d.seams = seamsOut.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
   const out = file.replace(/\.json$/, '.directed.json');
   fs.writeFileSync(out, JSON.stringify(d, null, 2));
-  console.log(`\n  ✓ applied → ${out}  (${picks.length} cuts, ${picks.filter((p) => p.sting).length} stings)\n`);
+  console.log(`\n  ✓ applied → ${out}  (${picks.length} cuts, ${picks.filter((p) => p.sting).length} stings, ${picks.filter((p) => p.seam).length} seam)\n`);
 } else {
   console.log(`\n  suggest-only. Re-run with WRITE=1 (or --write) to apply → <file>.directed.json`);
   // pre-render gate: a rule violation blocks the render. WARN-tier informs but does not block.

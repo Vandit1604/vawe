@@ -193,6 +193,14 @@ craft-coverage:
 transitions:
 	node scripts/gates/transitions-catalog.mjs
 
+# make transition-preview FX=<name> [MECH=seam|cut|sting|anim] [DIR=left|right|up|down] [TIMING=smooth|linear] [DUR=0.7]
+# SEE one transition before authoring: renders a canned two-beat scene (blue A → orange B) through the
+# transition and lays the window out as a labelled filmstrip → /tmp/transition-preview.png. The labels are
+# EASED progress, so `TIMING=linear` vs `smooth` shows as where the motion bunches. Mechanism is inferred
+# from the name when unambiguous (default seam). Inventory: `make transitions`. Theory: docs/CRAFT/TRANSITIONS.md.
+transition-preview:
+	node scripts/author/transition-preview.mjs
+
 # make lib-test  — fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs
