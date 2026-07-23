@@ -2506,6 +2506,8 @@ the self-coloured glow vs the RGB for a tint. Removed the dead `color: var(--acc
 `glitchGlow`; the `bloom` pass drops its `'#ffffff'` fallback so "no colour" means "source-coloured".
 Verified by rendering red/cyan/yellow squares under `neon`: each glows its own colour.
 
-**Known limit (open).** The highlight mask keys on Rec709 luminance, so a saturated-but-dark colour (pure
-red/blue) barely crosses the threshold and under-glows. A neon tube glows its colour at full strength
-regardless — a value/max-channel mask (HSV value) would fix it; deferred (it touches the shared bloom).
+**Follow-up (fixed).** The highlight mask first kept keying on Rec709 luminance, so a saturated-but-dark
+colour (pure red/blue) barely crossed the threshold and under-glowed. `buildBloom` now takes a `key`
+option: `value` (max(R,G,B) via feBlend "lighten") keys on HSV value, so a neon tube glows its colour at
+full strength regardless of luminance. neon + glitchGlow use `value`; every other bloom look stays on
+`luma` (unchanged). Verified by render (red/cyan/blue squares all glow strongly in their own colour).
