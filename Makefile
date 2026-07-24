@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
+.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -36,6 +36,12 @@ music:
 # edit can be built ON the music. Reports confidence; an ambient pad has no beat and it says so.
 beatmap:
 	node scripts/media/beatmap.mjs $(MUSIC)
+
+# make beatsync D=formats/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.18]
+# [LAYERS=1] [WRITE=1]  — snap the scene's cuts/transitions/seams/stings onto the track's beat grid so
+# the edit lands ON the beat. Reports drift; WRITE writes <scene>.beatsync.json. Deterministic + idempotent.
+beatsync:
+	node scripts/media/beatsync.mjs $(D) --music $(MUSIC) $(if $(GRID),--grid $(GRID)) $(if $(SNAP),--snap $(SNAP)) $(if $(filter 1,$(LAYERS)),--layers) $(if $(filter 1,$(WRITE)),--write)
 
 # The sound library is SYNTHESIZED, not downloaded — `make audio` bakes every cue from the Cuelume
 # voicings in core/audio-kit.mjs (noise + biquad + envelope, seeded, deterministic, no licence).
