@@ -64,13 +64,39 @@ function microType(kit, el, L) {
 }
 
 // typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
+// HTML-SAFE: if the copy carries markup (an accent <span>, <b>…), the VISIBLE characters are revealed
+// while the tags are kept intact — so an accent word types IN its colour, exactly like the reference.
+// Plain text takes the cheap textContent path. Deterministic (output depends only on n = floor(t·cps)).
 export function frame(kit, el, L, t) {
   if (!L.typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
   const cps = L.typing === true ? 24 : L.typing;
   const full = L.text || '';
-  const n = Math.max(0, Math.min(full.length, Math.floor((t - start) * cps)));
-  const caretOn = L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0;
-  el.textContent = full.slice(0, n) + (caretOn && (n < full.length || L.caretHold) ? '▏' : '');
+  const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
+  const n = Math.max(0, Math.min(visLen, Math.floor((t - start) * cps)));
+  const caret = (L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0 && (n < visLen || L.caretHold)) ? '▏' : '';
+  if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
+  else el.textContent = full.slice(0, n) + caret;
+}
+// visible-character length of an HTML string (text content only, not tags)
+function stripLen(html) { const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').length; }
+// return the HTML with only the first `n` VISIBLE characters shown, tags preserved (empty tags kept —
+// harmless, and they keep the caret's colour context stable across frames).
+function revealHtml(html, n) {
+  const root = document.createElement('div');
+  root.innerHTML = html;
+  let count = 0;
+  const walk = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 3) {
+        const text = child.textContent;
+        if (count >= n) child.textContent = '';
+        else if (count + text.length <= n) count += text.length;
+        else { child.textContent = text.slice(0, n - count); count = n; }
+      } else if (child.nodeType === 1) walk(child);
+    }
+  };
+  walk(root);
+  return root.innerHTML;
 }
