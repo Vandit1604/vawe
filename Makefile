@@ -468,3 +468,10 @@ ransom-sprites: ## bake assets/ransom-src/ -> assets/ransom/ + manifest.json
 # Royalty-free to use, NOT to redistribute: assets/gradients is gitignored. SRC=<zip|folder>
 gradients: ## bake a gradient pack -> assets/gradients/ + index.json
 	node scripts/media/gradients.mjs
+
+# make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]  — SEE a whole video efficiently:
+# extract frames and pack them into a few dense timestamped contact sheets (the whole piece in a small
+# token budget vs reading 2000+ raw frames). DEDUP=1 keeps only changed keyframes; FROM/TO+FPS=12 zooms
+# a transition. Reports sheet count + token estimate. Reusable for any reference or our own renders.
+filmstrip:
+	node scripts/author/filmstrip.mjs $(VIDEO)
