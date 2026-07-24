@@ -475,3 +475,10 @@ gradients: ## bake a gradient pack -> assets/gradients/ + index.json
 # a transition. Reports sheet count + token estimate. Reusable for any reference or our own renders.
 filmstrip:
 	node scripts/author/filmstrip.mjs $(VIDEO)
+
+# make reveal D=<scene.json> [ENTER=0.7] [N=8]  — see how each beat ANIMATES IN, not where it lands.
+# `make beats` samples a beat's middle (the settled state) and hides the reveal motion; this renders,
+# per beat, the ENTER arc densely + the settled frame + the EXIT arc, from the scene's exact layer
+# start-times. The check that catches "judged the hold, missed the reveal". → /tmp/reveal.png
+reveal:
+	node scripts/author/reveal.mjs $(D) $(if $(ENTER),--enter $(ENTER)) $(if $(N),--n $(N))

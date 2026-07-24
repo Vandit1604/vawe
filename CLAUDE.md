@@ -106,6 +106,10 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
 2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats.png` (first/mid/last of every
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
+2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal.png` (per beat: the ENTER
+   arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
+   entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
+   when recreating a reference — judging the settled frame is how the dolly/gradient/colour-wave got missed.
 2b. **Anti-slop:** `make slop D=<file>` — impeccable detector on the rendered DOM (overused-font /
    gradient / card-in-card / centered tells). Reach past anything it flags before rendering.
 3. **Render:** `make video D=formats/scene/<topic>.json`.
