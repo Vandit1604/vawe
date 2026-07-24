@@ -3,6 +3,10 @@
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
 
+// mix two hex colours (for the inkflash colour-wave preset). Pure.
+const _hx = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const mixHex = (a, b, t) => { const pa = _hx(a), pb = _hx(b); return `rgb(${Math.round(pa[0] + (pb[0] - pa[0]) * t)},${Math.round(pa[1] + (pb[1] - pa[1]) * t)},${Math.round(pa[2] + (pb[2] - pa[2]) * t)})`; };
+
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.
 // Preserves spaces; 'word' keeps words unbreakable. Inline formatting (<em>/<b>/…) is PRESERVED:
@@ -109,6 +113,10 @@ export const PRESETS = {
   gradient: (u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
   // highlight: marker band grows behind the unit (emphasis mid-sentence)
   highlight: (u, { color = 'rgba(255,220,90,0.35)' } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% 78%`, backgroundPosition: '0 60%', transform: 'none' }; },
+  // inkflash: the unit appears in the ACCENT colour and settles to its base ink. Split by word with a
+  // stagger (or staggered per-layer), a wave of accent sweeps THROUGH the phrase word-by-word — the
+  // reference's "each word lights orange in turn" highlight. flash = accent, to = the resting colour.
+  inkflash: (u, { flash = '#ff742e', to = '#1c1613', hold = 0.5 } = {}) => { const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold))); return { opacity: clamp01(u * 4), color: mixHex(flash, to, e), transform: 'none' }; },
   // underline: draws left -> right beneath the unit
   underline: (u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
   // shadow: poster lift — long shadow collapses as the word settles
