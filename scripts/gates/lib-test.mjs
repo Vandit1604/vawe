@@ -26,6 +26,8 @@ import { opacityEnvelope } from '../../core/clips.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
 import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
+import { SEAM_FX } from '../../core/seams.js';
+import { SEAM_CUE } from '../../core/audio-cues.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
@@ -799,6 +801,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
+  // Auto sound-design must cue EVERY seam fx — a seam with no mapping falls back to a bare whoosh and
+  // reads wrong (a bloom-iris should not swoosh). This gate is why `data.seams` stopped rendering silent
+  // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
+  ok('audio: SEAM_CUE covers every SEAM_FX (no silent seam)', SEAM_FX.every((fx) => typeof SEAM_CUE[fx] === 'string'));
+  ok('audio: every SEAM_CUE voicing resolves to a baked wav', Object.values(SEAM_CUE).every((c) => c === 'whoosh' || c === 'reveal' || c in CUES));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

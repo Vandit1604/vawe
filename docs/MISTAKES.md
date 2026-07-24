@@ -2568,3 +2568,29 @@ per-element push, the another engine way) — the beat now measures `linear`, re
 **The lesson (in REFERENCE-STUDY.md).** For a smooth continuous zoom: ONE monotonic move, no reversals,
 `ease:"linear"` on interior keyframes (or a single 2-keyframe glide); per-beat push via per-layer
 `motion.scale`, not chained camera resets.
+
+## #126 — seams rendered DEAD SILENT under `audio.auto`: sound design derived cuts + stings but never seams
+
+**What.** With `audio:{auto:true}`, the scene builder derives an SFX cue per transition — a whoosh on
+each cut, a reveal on each sting. It read `layers[].cut`, `data.cuts`, and `stings`, but NOT `data.seams`.
+So every SEAM (the two-scene GPU blends: whipPan, cinematicZoom, crossWarp, sdfIris, dispersion, lens,
+flashWhite, …) played completely silent — and a whipPan is exactly the transition that most wants a
+whoosh. Worse, this hit the NEW unified `transitions` surface hardest: `transitions:[{fx:"whipPan"}]`
+lowers to a seam (core/transitions-lower.js), so an author using the headline API got a gorgeous,
+mute transition. `make direct` payoffs are all seams too — every one silent.
+
+**Root cause.** The cue-derivation loop simply had no seam branch, and there was no gate asserting
+sound-design covers every transition mechanism. Silence is the worst failure mode (MISTAKES passim):
+the engine accepted the seam, rendered it, and dropped its sound with no error.
+
+**Fix.** (1) Added `SEAM_CUE` (13 seam fx → Cuelume voicing, same logic as CUT_CUE: whip→whoosh,
+iris→bloom, zoom→droplet, flash→press) and a `data.seams` derivation branch in scene.html. (2) While
+there, found CUT_CUE had ALREADY drifted — audio-bake.mjs had `push:'whisper'`, scene.html's hand-mirror
+did not. Root-caused both to the same disease: the cue tables were duplicated by hand in two places.
+Extracted them to **core/audio-cues.js** (pure data), now imported by scene.html (render mix),
+audio-bake.mjs (bake catalogue) AND lib-test — one source of truth, drift impossible.
+
+**Gate that now catches it.** lib-test asserts `SEAM_CUE covers every SEAM_FX` and every voicing
+resolves to a baked wav. A new seam fx added to core/seams.js without a cue row fails the gate loudly
+instead of shipping mute. Blast radius: `vawe-identity.json` (seams + auto) gains its seam whooshes;
+frames byte-identical (`make probe` green — audio is meta, not renderFrame).

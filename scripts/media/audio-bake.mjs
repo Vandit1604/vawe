@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CUES, renderCue, musicBed, writeWav, normalize, SR } from '../../core/audio-kit.mjs';
+import { CUT_CUE, SEAM_CUE } from '../../core/audio-cues.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SFX = path.join(root, 'assets/sfx');
@@ -33,16 +34,9 @@ const ROLES = {
   click: 'press', pop: 'droplet',
 };
 
-// Cut style -> cue. Sound design is not one whoosh on everything: a punch should snap and a
-// softwipe should breathe. Consumed by the scene builder's auto sound-design.
-export const CUT_CUE = {
-  punch: 'press', whip: 'whisper', skewWhip: 'whisper', jitter: 'tick',
-  softwipe: 'whisper', wipe: 'whisper', softiris: 'bloom', iris: 'bloom',
-  rise: 'bloom', riseBlur: 'bloom', drop: 'droplet', zoom: 'droplet',
-  slide: 'whisper', push: 'whisper', fade: 'whisper', blur: 'whisper',
-  flip: 'toggle', spin: 'toggle', cube: 'toggle', roll: 'toggle',
-  clock: 'tick', blinds: 'tick', barn: 'tick', squeeze: 'press', collapse: 'press', letterbox: 'press',
-};
+// Cut/seam cue tables now live in core/audio-cues.js (pure data, shared by scene.html + lib-test) so
+// they cannot drift. Re-exported here for anything already importing them from the bake catalogue.
+export { CUT_CUE, SEAM_CUE };
 
 if (process.argv.includes('--list')) {
   console.log('cues:', Object.keys(CUES).join(', '));

@@ -72,6 +72,7 @@
       import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
       import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
       import { lowerScene } from '/core/transitions-lower.js';
+      import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
       import { cameraAt, motionAt } from '/core/sequence.js';
       import { sampleAt } from '/core/spectrum.js';
       import { createRenderer } from '/core/layers/index.js';
@@ -502,23 +503,17 @@
         // documented and nobody would guess (MISTAKES #70).
         const audioCfg = data.audio || {};
         {
-          // Cut style -> cue. One whoosh on everything is not sound design: a punch should snap and
-          // a softwipe should breathe. Mirrors CUT_CUE in scripts/media/audio-bake.mjs.
-          const CUT_CUE = {
-            punch: 'press', whip: 'whisper', skewWhip: 'whisper', jitter: 'tick',
-            softwipe: 'whisper', wipe: 'whisper', softiris: 'bloom', iris: 'bloom',
-            rise: 'bloom', riseBlur: 'bloom', drop: 'droplet', zoom: 'droplet',
-            slide: 'whisper', fade: 'whisper', blur: 'whisper',
-            flip: 'toggle', spin: 'toggle', cube: 'toggle', roll: 'toggle',
-            clock: 'tick', blinds: 'tick', barn: 'tick',
-            squeeze: 'press', collapse: 'press', letterbox: 'press',
-          };
+          // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) are imported from /core/audio-cues.js
+          // — one shared source of truth, so the render mix and the baked catalogue cannot drift.
           const cues = [];
           if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
           // TOP-LEVEL cuts were silently ignored — the `cuts` array is how a scene actually cuts
           // between beats, so an auto-scored film came out with no cut sound at all.
           if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
           if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
+          // SEAMS were silently dropped from sound design — a whipPan / cinematicZoom is exactly the
+          // transition that most wants a whoosh, and `make direct` payoffs are all seams.
+          if (audioCfg.auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
           // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
           for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
           cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
