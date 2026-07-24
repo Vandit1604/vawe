@@ -497,7 +497,7 @@
           "label": "clip: playback rate multiplier (1 = realtime; 0.5 = half speed)"
         },
         "typing": {
-          "type": "number",
+          "type": "number|boolean",
           "label": "text: type it out at N chars/sec (true = 24) with a blinking caret"
         },
         "caret": {
@@ -1209,7 +1209,7 @@
         },
         "keyCue": {
           "type": "string",
-          "label": "Which cue a `typing` layer clicks with (default 'press')"
+          "label": "Which cue a `typing` layer clicks with (default 'key')"
         },
         "aspects": {
           "type": "object",
@@ -1470,6 +1470,7 @@
                 "whisper",
                 "tick",
                 "press",
+                "key",
                 "release",
                 "toggle",
                 "success",

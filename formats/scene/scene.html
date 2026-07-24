@@ -536,7 +536,7 @@
               // into the engine. Variation is DYNAMICS, not a second sound: a keyboard varies in force,
               // not identity. Deterministic by index, so the same copy always sounds the same.
               const vary = 1 + ((i * 7919) % 5 - 2) * 0.06;   // +/-12%, pure function of the index
-              keyCues.push({ t: +kt.toFixed(3), name: L.keyCue || 'press',
+              keyCues.push({ t: +kt.toFixed(3), name: L.keyCue || 'key',
                 gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
             }
           }

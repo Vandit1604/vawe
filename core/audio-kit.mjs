@@ -164,6 +164,11 @@ export const CUES = {
   whisper: {"masterGain":0.5, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1200, "filterQ":0.7, "attack":0.04, "decay":0.16, "peak":0.05}]},
   tick: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":5400, "filterQ":1.8, "attack":0.001, "decay":0.018, "peak":0.14}, {"kind":"tone","waveform":"sine","frequency":2600, "attack":0.001, "decay":0.012, "peak":0.018}]},
   press: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":1700, "filterQ":1.4, "attack":0.001, "decay":0.02, "peak":0.13}]},
+  // `key` is the TYPING keystroke (distinct from `press`, which stays a sharp punch for cut/seam hits).
+  // A soft membrane tap: a low body that drops in pitch + a gentle low-passed click, highs rolled off so
+  // a fast train is unobtrusive under a headline/VO instead of a buzzy machine-gun. NOT a Cuelume voicing
+  // — designed here for this engine (the ported set had no keystroke that sounded good in a train).
+  key: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":180, "glideTo":130, "glideTime":0.035, "attack":0.0012, "decay":0.04, "peak":0.12}, {"kind":"noise","filterType":"lowpass","filterFrequency":2000, "filterQ":0.6, "attack":0.0006, "decay":0.012, "peak":0.05}]},
   release: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":4600, "filterQ":1.8, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"tone","waveform":"sine","frequency":3200, "offset":0.006, "attack":0.001, "decay":0.05, "peak":0.02}]},
   toggle: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":2200, "filterQ":1.6, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"noise","filterType":"bandpass","filterFrequency":3800, "filterQ":1.6, "offset":0.024, "attack":0.001, "decay":0.02, "peak":0.1}]},
   success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},

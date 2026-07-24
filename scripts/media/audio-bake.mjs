@@ -27,7 +27,7 @@ const ROLES = {
   reveal: 'chime',     // a sting — the thing that lands
   // Cuelume's own 14, available to an author by name
   chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
-  tick: 'tick', press: 'press', release: 'release', toggle: 'toggle',
+  tick: 'tick', press: 'press', key: 'key', release: 'release', toggle: 'toggle',
   success: 'success', error: 'error', page: 'page', loading: 'loading', ready: 'ready',
   // aliases onto the real cues — NOT new voicings. `click` and `pop` are names people reach for;
   // both resolve to Cuelume cues rather than to something invented alongside them.
