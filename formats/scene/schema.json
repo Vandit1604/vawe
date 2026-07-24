@@ -399,6 +399,10 @@
           "type": "number",
           "label": "Scale"
         },
+        "ease": {
+          "type": "string",
+          "label": "Easing INTO this keyframe (default easeInOutCubic). Use \"linear\" on interior keyframes for a velocity-continuous multi-keyframe push (a chained ease-in-out pulses/shakes because it zeroes velocity at each keyframe)."
+        },
         "x": {
           "type": "number",
           "label": "Pan X (px)"

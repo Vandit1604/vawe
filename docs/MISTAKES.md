@@ -2540,3 +2540,31 @@ Logged here as the next text-layer improvement.
 **Which gate catches it now.** `make slop` already flags dead-centre; `make measure` (self-verify)
 confirms our render's motion matches the reference's curve; REFERENCE-STUDY.md is the checklist so the
 habits are a deliberate reach, not a rediscovery.
+
+## #125 — the camera zoom "shook" / wasn't smooth: cameraAt eased EVERY segment, zeroing velocity at each keyframe
+
+**What.** A multi-keyframe camera push read as pulsing/shaking, not a smooth glide. Two compounding
+causes: (1) authored keyframes that REVERSED (zoom in to s1.08, then snap to s1.02 at the next keyframe
+0.05s later) — a visible in-out jerk at every beat; (2) the deeper engine cause — `cameraAt` hardcoded
+`easeInOutCubic` PER SEGMENT, which drives velocity to zero at the start and end of every segment. So even
+a monotonic chained push (kf1→kf2→kf3) decelerated to a stop at each interior keyframe and re-accelerated
+— accelerate·stop·accelerate·stop — which reads as a pulse/shake. (The text itself was fine: `#cam` is
+GPU-promoted with `will-change:transform`, so it scales its rasterised texture smoothly; the shake was the
+camera curve, not text re-rendering.)
+
+**How another engine/another engine avoid it.** One CONTINUOUS interpolation per shot — `interpolate(frame,
+[start,end], [from,to], {easing})` — a single curve across the whole move, never chained ease-in-out
+segments that reset velocity. A new shot is a new Sequence + a TransitionSeries, not a camera reset
+mid-shot. And they animate `transform:scale` (GPU, sub-pixel) on a promoted layer, never `font-size`
+(which reflows/re-hints and genuinely jitters).
+
+**Fix.** `cameraAt` now honours a per-keyframe `ease` (mirroring `motionAt`), default `easeInOutCubic` so
+every existing camera is byte-identical (`make probe` confirms). Set `ease:"linear"` on interior keyframes
+for a velocity-continuous multi-keyframe push (verified: constant per-frame delta across the interior
+keyframe = no velocity break). Added `camera[].ease` to the schema. In the authoring, the reversing
+keyframes were replaced by one smooth camera glide + per-layer `motion.scale` with `ease:"linear"` (the
+per-element push, the another engine way) — the beat now measures `linear`, residual 0.000 (perfectly smooth).
+
+**The lesson (in REFERENCE-STUDY.md).** For a smooth continuous zoom: ONE monotonic move, no reversals,
+`ease:"linear"` on interior keyframes (or a single 2-keyframe glide); per-beat push via per-layer
+`motion.scale`, not chained camera resets.

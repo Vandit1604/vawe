@@ -14,7 +14,11 @@ export function cameraAt(camKf, t) {
     if (t >= camKf[i].t && t <= camKf[i + 1].t) { a = camKf[i]; b = camKf[i + 1]; break; }
     if (t > camKf[i + 1].t) a = b = camKf[i + 1];
   }
-  const p = a === b ? 1 : easeInOutCubic(clamp01((t - a.t) / (b.t - a.t)));
+  // per-keyframe `ease` drives the segment INTO b (mirrors motionAt). Default easeInOutCubic keeps every
+  // existing camera byte-identical; set `ease:"linear"` on interior keyframes for a velocity-CONTINUOUS
+  // multi-keyframe push. The old hardcoded ease-in-out zeroed velocity at every keyframe, so a chained
+  // push pulsed (accelerate→stop→accelerate) — the "not smooth / shaking zoom" (docs/MISTAKES.md #125).
+  const p = a === b ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((t - a.t) / (b.t - a.t)));
   // rx/ry are a 3D TILT of the whole stage, and they belong to the camera rather than to a layer for a
   // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
   // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
