@@ -482,3 +482,9 @@ filmstrip:
 # start-times. The check that catches "judged the hold, missed the reveal". → /tmp/reveal.png
 reveal:
 	node scripts/author/reveal.mjs $(D) $(if $(ENTER),--enter $(ENTER)) $(if $(N),--n $(N)) $(if $(filter 1,$(LAYERS)),--layers)
+
+# make cinematic D=<scene.json> [WRITE=1]  — the CINEMATIC MOTION director: emit the camera-push +
+# per-hero dolly + motion-blur scaffold that makes a video alive-by-default, derived from the scene's
+# own beats (not a template). WRITE=1 → <file>.cinematic.json; then refine + `make reveal`.
+cinematic:
+	node scripts/author/cinematic.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
