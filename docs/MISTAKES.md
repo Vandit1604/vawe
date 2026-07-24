@@ -2594,3 +2594,24 @@ audio-bake.mjs (bake catalogue) AND lib-test — one source of truth, drift impo
 resolves to a baked wav. A new seam fx added to core/seams.js without a cue row fails the gate loudly
 instead of shipping mute. Blast radius: `vawe-identity.json` (seams + auto) gains its seam whooshes;
 frames byte-identical (`make probe` green — audio is meta, not renderFrame).
+
+## #127 — `dy`/`dx` set without `anchor` silently did nothing: two pin-centred lines rendered on top of each other
+
+**What.** Scoring the seam demo, two payoff lines ("every seam" / "is scored"), both `pin:"center"`
+with `dy:-105` / `dy:+105` to stack them, rendered ON TOP of each other — a garbled overlap. The `dy`
+was ignored. scene.html reads `L.dx`/`L.dy` ONLY inside the `if (L.anchor)` relative-placement block
+(scene.html:177-185); a `pin`/`x`/`y` layer never consults them. So `dy` on a non-anchored layer is dead
+config that READS as an intended offset and does nothing — the classic silent-substitution failure.
+
+**Root cause.** No gate. The validator flags an UNKNOWN prop ("will ignore it silently"), but `dx`/`dy`
+are KNOWN props that are only *conditionally* honoured, and nothing checked the condition. Accepted, ignored,
+no error — exactly what MISTAKES #70 says must never happen.
+
+**Fix (gate).** core/validate.mjs `check()` now hard-errors when a layer sets `dx`/`dy` without `anchor`,
+naming the three real ways to stack/offset (anchor+at · one text layer with `<br>` · pin/y). Verified: no
+tracked scene carried dead dx/dy (zero false positives), the negative case now fails loudly, tracked scenes
+still pass. The demo was fixed the `<br>` way (one layer, natural line stacking).
+
+**Lesson.** A prop that is honoured only under a companion prop is a silent-drop waiting to happen. When
+the engine reads an input conditionally, the validator must assert the condition — "works or fails loudly",
+never "accepted and ignored".

@@ -86,6 +86,11 @@ function check(L, label, out) {
       out.push(`${label}: ${how(kwx, 'x')} positions a box of width \`w\`, but \`w\` is unset (=0), so the layer's left edge lands on the ${kwx} line instead of the layer sitting on it. Set \`w\` (e.g. "88%") and \`align\`.`);
     if (kwy && NEEDS_SIZE.has(kwy) && L.h == null && !TEXTISH.has(L.type || 'text'))
       out.push(`${label}: ${how(kwy, 'y')} positions a box of height \`h\`, but \`h\` is unset (=0), so the layer's top edge lands on the ${kwy} line. Set \`h\`.`);
+    // `dx`/`dy` are RELATIVE offsets, read only when the layer is anchored to another (scene.html:177).
+    // Without `anchor` they are dead config that reads as an intended offset and silently does nothing —
+    // which is how two pin-centred lines land on top of each other (they both ignore dy). Fail loudly.
+    if ((L.dx != null || L.dy != null) && L.anchor == null)
+      out.push(`${label}: \`dx\`/\`dy\` are offsets from an anchored layer and are IGNORED without \`anchor\` (they will not nudge a \`pin\`ned/\`x\`/\`y\` layer). To stack or offset here: set \`anchor\` (+ \`at\`), or put the lines in one text layer with \`<br>\`, or use \`pin\`/\`y\`.`);
   }
 }
 
