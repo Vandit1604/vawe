@@ -481,4 +481,4 @@ filmstrip:
 # per beat, the ENTER arc densely + the settled frame + the EXIT arc, from the scene's exact layer
 # start-times. The check that catches "judged the hold, missed the reveal". → /tmp/reveal.png
 reveal:
-	node scripts/author/reveal.mjs $(D) $(if $(ENTER),--enter $(ENTER)) $(if $(N),--n $(N))
+	node scripts/author/reveal.mjs $(D) $(if $(ENTER),--enter $(ENTER)) $(if $(N),--n $(N)) $(if $(filter 1,$(LAYERS)),--layers)

@@ -76,27 +76,39 @@ const grab = async (t, file, tag, color) => {
   return file;
 };
 
+// --layers / LAYERS=1 : the "ALL reveals" mode — every DISTINCT entrance (unique layer start-time),
+// not just beat-starts, so a staggered sub-reveal mid-beat is captured too. Otherwise: beat-level arcs.
+const ALL = argv.includes('--layers') || process.env.LAYERS === '1';
+const desc = (l) => l.text ? `"${String(l.text).replace(/<[^>]+>/g, '').trim().slice(0, 16)}"` : (l.src ? l.src.split('/').pop().slice(0, 16) : l.type);
+
+let units;
+if (ALL) {
+  const ev = new Map();
+  for (const l of data.layers || []) { if (l.track === 0) continue; const t = +(l.start ?? 0).toFixed(2); (ev.get(t) || ev.set(t, []).get(t)).push(l); }
+  units = [...ev.entries()].sort((a, b) => a[0] - b[0]).map(([t, ls], i) => {
+    const win = Math.min(ENTER, Math.max(...ls.map((l) => l.enterDur ?? 0.4)) + 0.25);
+    return { i, label: `@${t.toFixed(2)}s`, tag: ls.map(desc).join(' '),
+      samples: Array.from({ length: NENTER }, (_, k) => { const at = t + (win * k) / (NENTER - 1); return { t: at, tag: `${i + 1} ${(at - t).toFixed(2)}s`, color: 'lime' }; }) };
+  });
+} else {
+  units = beats.map((b) => {
+    const span = b.t1 - b.t0, eWin = Math.min(ENTER, span * 0.55), xWin = Math.min(0.5, span * 0.4);
+    const s = [];
+    for (let k = 0; k < NENTER; k++) { const t = b.t0 + (eWin * k) / (NENTER - 1); s.push({ t, tag: `${b.i + 1} in ${(t - b.t0).toFixed(2)}s`, color: 'lime' }); }
+    s.push({ t: b.t0 + Math.min(span * 0.7, eWin + (span - eWin) * 0.5), tag: `${b.i + 1} SET`, color: 'white' });
+    for (let k = 0; k < NEXIT; k++) { const t = b.t1 - xWin + (xWin * k) / (NEXIT - 1); s.push({ t, tag: `${b.i + 1} out`, color: 'orange' }); }
+    return { i: b.i, label: `beat ${b.i + 1}`, samples: s };
+  });
+}
+
 const rows = [];
-for (const b of beats) {
-  const span = b.t1 - b.t0;
+for (const u of units) {
   const cells = [];
-  // ENTER arc — dense over the first ENTER seconds (capped at half the beat), the reveal itself
-  const eWin = Math.min(ENTER, span * 0.55);
-  for (let k = 0; k < NENTER; k++) {
-    const t = b.t0 + (eWin * k) / (NENTER - 1);
-    cells.push(await grab(t, path.join(tmp, `b${b.i}_e${k}.png`), `${b.i + 1} in ${(t - b.t0).toFixed(2)}s`, 'lime'));
-  }
-  // SETTLED — the hold
-  cells.push(await grab(b.t0 + Math.min(span * 0.7, eWin + (span - eWin) * 0.5), path.join(tmp, `b${b.i}_s.png`), `${b.i + 1} SET`, 'white'));
-  // EXIT arc — dense over the last ~0.5s
-  const xWin = Math.min(0.5, span * 0.4);
-  for (let k = 0; k < NEXIT; k++) {
-    const t = b.t1 - xWin + (xWin * k) / (NEXIT - 1);
-    cells.push(await grab(t, path.join(tmp, `b${b.i}_x${k}.png`), `${b.i + 1} out`, 'orange'));
-  }
-  const row = path.join(tmp, `row_${String(b.i).padStart(2, '0')}.png`);
+  for (let k = 0; k < u.samples.length; k++) { const sm = u.samples[k]; cells.push(await grab(sm.t, path.join(tmp, `u${u.i}_${k}.png`), sm.tag, sm.color)); }
+  const row = path.join(tmp, `row_${String(u.i).padStart(2, '0')}.png`);
   spawnSync('ffmpeg', ['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', row]);
   rows.push({ img: row, n: cells.length });
+  if (ALL) console.log(`  reveal @${u.label.slice(1)} · ${u.tag}`);
 }
 await browser.close(); server.close();
 
@@ -110,6 +122,7 @@ const padded = rows.map((r, i) => {
 });
 const sheet = '/tmp/reveal.png';
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
-console.log(`✓ reveal · ${beats.length} beats · each row = [green ENTER arc · white SETTLED · orange EXIT arc]  →  ${sheet}`);
-console.log('  Read the GREEN cells: how does each beat animate IN? (dolly direction, typing, a colour-wave, a collage assembling.)');
-console.log('  This is the check `make beats` cannot do — it samples the hold; this samples the reveal.');
+if (ALL) console.log(`✓ reveal (ALL layers) · ${units.length} distinct entrances · each row = one reveal event's ENTER arc  →  ${sheet}`);
+else console.log(`✓ reveal · ${beats.length} beats · each row = [green ENTER arc · white SETTLED · orange EXIT arc]  →  ${sheet}`);
+console.log('  Read the GREEN cells: how does each entrance animate IN? (dolly direction, typing, a colour-wave, a card assembling.)');
+console.log('  ' + (ALL ? 'Per-LAYER pass: every distinct entrance, so a staggered sub-reveal mid-beat is caught too.' : 'Beat-level. Add LAYERS=1 for every element own entrance.') + '  `make beats` samples the hold; this samples the reveal.');
