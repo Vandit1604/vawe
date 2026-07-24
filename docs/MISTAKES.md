@@ -2511,3 +2511,32 @@ colour (pure red/blue) barely crossed the threshold and under-glowed. `buildBloo
 option: `value` (max(R,G,B) via feBlend "lighten") keys on HSV value, so a neon tube glows its colour at
 full strength regardless of luminance. neon + glitchGlow use `value`; every other bloom look stays on
 `luma` (unchanged). Verified by render (red/cyan/blue squares all glow strongly in their own colour).
+
+## #124 — our videos read STATIC and small next to real motion-graphics references
+
+**What.** Recreating a real launch film (the Brew film, `twitter.mp4`), the first pass read as "inspired
+by," not a copy. Measuring the reference (`make measure`) and comparing frames named the gap precisely,
+and it was not one effect — it was a set of habits our defaults skip: (1) the reference camera never sits
+still (a continuous zoom push on every beat; UI beats dolly 34%→71% area in ~1s) while ours held static;
+(2) it transitions with zoom/punch that carry motion through the seam, ours hard-cut; (3) its hero words
+FILL the frame (letters cropped at the edges) and sit off-centre, ours were small and dead-centred (the
+`make slop` centred tell); (4) words punch-in and settle (easeOutBack), ours faded.
+
+**Root cause.** These are authoring habits, not engine gaps — the engine HAS `camera`, `transitions[]`,
+`motion` tracks, `cursor`, 3D. They just are not the default reach, and nothing documented the premium
+habits, so each author re-learns them (or doesn't).
+
+**Fix.** Captured the habits + the study pipeline (measure → catalog motifs → map to primitives) in
+**docs/CRAFT/REFERENCE-STUDY.md**, linked from CRAFT/README, with the reference-feel→primitive map and a
+worked before/after on the Brew film. Applied to the Act 1 proof: `camera` push per beat, `transitions`
+zoom/punch, `align:"left"` + low `y` for asymmetry, `preset:"scale"` entrances — motion went from
+slideshow to "reads like the same film."
+
+**Genuine engine gap found (open).** The text `size` caps at **260**, which blocks the frame-filling hero
+scale premium references use (the reference "Today." is ~2× ours). Reachable today by pushing the
+`camera` in on the beat; a cleaner fix is a fit-to-width or a higher hero-size cap on the text layer.
+Logged here as the next text-layer improvement.
+
+**Which gate catches it now.** `make slop` already flags dead-centre; `make measure` (self-verify)
+confirms our render's motion matches the reference's curve; REFERENCE-STUDY.md is the checklist so the
+habits are a deliberate reach, not a rediscovery.
