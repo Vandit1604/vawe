@@ -645,9 +645,9 @@
         },
         "size": {
           "type": "number",
-          "label": "Font size (px)",
+          "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame — scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
           "min": 18,
-          "max": 260
+          "max": 560
         },
         "weight": {
           "type": "number",

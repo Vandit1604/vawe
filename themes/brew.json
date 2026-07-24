@@ -1,6 +1,6 @@
 {
   "name": "brew",
-  "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026 — WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#f3763b, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy — measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
+  "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026 — WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#ff742e, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy — measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
   "palette": {
     "bg": "#fbf2e4",
     "bg2": "#f7e9d6",
@@ -11,9 +11,9 @@
     "text": "#1c1613",
     "text2": "#6b5f57",
     "dim": "#8a7d72",
-    "accent": "#f3763b",
-    "accentDim": "rgba(243,118,59,0.14)",
-    "accentGlow": "rgba(243,118,59,0.42)",
+    "accent": "#ff742e",
+    "accentDim": "rgba(255,116,46,0.14)",
+    "accentGlow": "rgba(255,116,46,0.42)",
     "up": "#1a9e57",
     "down": "#e5484d",
     "ink": "#1c1613"
@@ -38,7 +38,7 @@
     "stagger": 0.05
   },
   "bg": {
-    "accent": "243,118,59",
+    "accent": "255,116,46",
     "tint": "232,190,150",
     "tint2": "241,100,46",
     "dotLight": "220,180,150",
@@ -85,12 +85,12 @@
     "--ink": "#1c1613",
     "--paper": "#fdf6ec",
     "--muted": "#8a7d72",
-    "--em": "#f3763b",
+    "--em": "#ff742e",
     "--accent-ink": "#b83a0f",
     "--on-light": "#1c1613",
     "--on-dark": "#ffffff",
     "--border": "#efe2d2",
-    "--accent-soft": "rgba(243,118,59,0.14)"
+    "--accent-soft": "rgba(255,116,46,0.14)"
   },
   "bgDefault": {
     "preset": "paper"
