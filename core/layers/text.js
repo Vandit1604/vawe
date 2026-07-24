@@ -6,6 +6,7 @@ export function build(kit, el, L) {
   kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
   microType(kit, el, L); // pro-grade type refinements, on by default (opt out with raw:true)
+  gradientFill(el, L); // static gradient text fill (dark→light vertical, etc.), the premium display look
   if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
     kit.cam.appendChild(el); // needs to be in-DOM to measure
     const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
@@ -27,6 +28,20 @@ export function build(kit, el, L) {
     el.remove();
   }
 }
+// gradientFill: a STATIC gradient across the glyphs via background-clip:text (distinct from the animated
+// `gradient` PRESET, which sweeps a shimmer). The premium display treatment real motion-graphics use —
+// e.g. a dark-top→light-bottom fade on a hero word. `gradient: { from, to, angle? }` (angle 180 = ↓).
+// Applied to the container so it clips across the whole line (incl. split spans, which inherit).
+export function gradientFill(el, L) {
+  const g = L.gradient;
+  if (!g || typeof g !== 'object' || !g.from || !g.to) return;
+  el.style.backgroundImage = `linear-gradient(${g.angle ?? 180}deg, ${g.from}, ${g.to})`;
+  el.style.webkitBackgroundClip = 'text';
+  el.style.backgroundClip = 'text';
+  el.style.color = 'transparent';
+  el.style.webkitTextFillColor = 'transparent';
+}
+
 // microType: the micro-typography pass — refinements that separate produced from generated, applied to
 // every text/count layer by default. Static styles, measured once → deterministic. Skips mono (code)
 // where tracking/wrap/ligatures are wrong. Author opts out with raw:true, or overrides ls explicitly.

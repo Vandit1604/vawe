@@ -14,6 +14,12 @@ video starts ahead.
 
 1. **Map the beats.** `ffmpeg -vf "fps=3,scale=…,drawtext=…timestamp…,tile=…"` → a labelled contact
    sheet. Read it: one beat per idea, note the copy, the layout, the palette per beat.
+   **Then look at the RIGHT frames — this is where I went wrong first.** A beat-MIDDLE frame shows the
+   settled state and hides the motion. You MUST also sample: (a) the **entrance** at high fps
+   (`fps=12`, first ~0.5s) — is the word oversized/blurred and settling (a dolly-in)?; (b) the **exit**
+   (`fps=12`, last ~0.5s) — does it scale UP + blur to leave (a dolly-out)?; (c) a **hard-zoomed crop of
+   the text** (`crop=…,scale=up`) — is the fill a flat colour or a GRADIENT? Sampling only middles is
+   how I missed the dolly and the gradient fill on the first pass.
 2. **Measure the motion.** For each signature transition, `make measure VIDEO=ref.mp4 FROM=… TO=…` →
    duration + nearest engine preset. Tight fits are authorable numbers; loose fits are the tool telling
    you it is not one tween (typing, two stacked tweens, a mask — re-author by intent).
@@ -46,9 +52,14 @@ These are what a good reference does that our defaults do NOT. Reach for them on
 4. **Asymmetry — never dead-center.** Hero words sit low-left or offset, not centered. Dead-center is the
    AI-slop tell (`make slop` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
    centering for a deliberate brand lockup.
-5. **Scale-settle entrances (overshoot).** Words punch in slightly oversized and settle back
-   (easeOutBack / `pop` / `bounce`), or blur+scale in — they do NOT just fade. *(Brew "Today" measured
-   0.33s easeOutBack.)*
+5. **Dolly enter AND exit — the word "breathes" through scale.** The premium version: a word enters
+   OVERSIZED + motion-blurred and scales DOWN to settle (a dolly-in, not a scale-up-from-small — note the
+   direction), holds, then scales UP bigger + blurs to EXIT (a dolly-out / push-through-the-word). "It
+   gets bigger to exit." Author with a `motion` track: `scale 1.5→1.0` in, `1.0→1.9 opacity→0` out, plus
+   `motionBlur:true` (the engine auto-streaks fast scale changes). *(Brew: every hero word does this.)*
+6. **Gradient text fill.** Hero words are filled with a gradient (dark-top→lighter-bottom), not a flat
+   colour — a real display-type premium tell. `gradient:{ from, to, angle }` on the text layer (angle
+   180 = ↓). Distinct from `preset:"gradient"` (an animated shimmer sweep).
 6. **Motion blur on fast moves.** A whip or fast entrance streaks (directional blur peaking at speed).
    `whipPan` seam, or a `blur` preset. A crisp fast move looks cheap.
 7. **One accent word, treated.** A single word per line in the accent colour, often with a marker
@@ -97,6 +108,9 @@ scale** (the `size ≤ 260` cap — the reference "Today." is ~2× ours).
 | Always-zooming frame | `camera` keyframes (`s`) · layer `motion.scale` |
 | Zoom/punch/whip between beats | `transitions[{fx}]` → cut `zoom`/`punch`, seam `whipPan` |
 | Scale-settle word | `preset:"scale"`/`"bounce"`, or `motion` scale 1.15→1.0 easeOutBack |
+| Dolly enter/exit (oversized→settle→bigger-out) | `motion` scale 1.5→1.0 in, 1.0→1.9 opacity→0 out + `motionBlur:true` |
+| Gradient text fill (dark→light) | `gradient:{from,to,angle}` on the text layer (static; ≠ `preset:"gradient"` sweep) |
+| Typed word + caret | `typing:true` (any text layer; HTML spans not preserved — plain/mono beats) |
 | Typewriter + caret | `preset:"type"` |
 | Marker-highlighted accent word | inline `<span>` bg + `--accent-ink` colour |
 | Counter | `count` layer (`from`/`to`/`countDur`) |

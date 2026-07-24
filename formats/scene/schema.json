@@ -862,6 +862,10 @@
           "type": "object",
           "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
         },
+        "gradient": {
+          "type": "object",
+          "label": "STATIC gradient text fill via background-clip (distinct from preset:\"gradient\" which sweeps): { from, to, angle? }. angle 180 = top→bottom (a dark-top→light-bottom hero word). e.g. {\"from\":\"#1c1613\",\"to\":\"#f3763b\",\"angle\":180}"
+        },
         "lookOpts": {
           "type": "object",
           "label": "Composite-look knobs (core/looks.js): color \u00b7 color2 \u00b7 strength (0..1 master dial) \u00b7 grain \u00b7 vignette \u00b7 warmth. Defaults reskin to the theme."
