@@ -851,6 +851,10 @@
           "type": "boolean",
           "label": "Loop the kinetic preset"
         },
+        "circle": {
+          "type": "boolean|object",
+          "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."
+        },
         "phaseStep": {
           "type": "number",
           "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"

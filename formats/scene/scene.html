@@ -64,7 +64,7 @@
       import { boot } from '/core/boot.js';
       import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
       import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
-      import { splitText, animateUnits } from '/core/type.js';
+      import { splitText, animateUnits, circleText } from '/core/type.js';
       import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
@@ -225,9 +225,10 @@
           if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
           cam.appendChild(el);
           // ransom is a per-CHAR treatment, so it implies a char split when the author did not set one.
-          const splitMode = L.split || (L.ransom ? 'char' : null);
+          const splitMode = L.split || ((L.ransom || L.circle) ? 'char' : null);
           const units = splitMode ? splitText(el, splitMode) : null; // 'char' | 'word' | 'line'
           if (L.ransom && units) ransomStyle(units, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...(typeof L.ransom === 'object' ? L.ransom : {}) });
+          if (L.circle && units) circleText(el, units, typeof L.circle === 'object' ? L.circle : {});
           // decorate LAST, and that order is load-bearing. A composite look appends overlay divs
           // (scanlines/grain/vignette/lightLeak/washes) as children of the layer, and everything above
           // rewrites children: the primitive builder does `el.innerHTML = …` and splitText re-wraps the
@@ -295,7 +296,7 @@
             }
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+            if (units && !L.circle && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
             // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
             // place, every frame. Stateless and derived from t, so it stays pure in n.
             if (units && L.ransom && L.ransom.cycle && t >= start && t < end)
@@ -306,6 +307,9 @@
             // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
             // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
             if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
+            // spinning circular text: rotate the whole ring (chars are laid out on the circle at build).
+            // Overrides the layer transform (after driveClips), so pair with anim:"fade"/"none". Pure in t.
+            if (L.circle) { const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8; el.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; }
             // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
             // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
             // because there was no way to animate what the block actually DOES. A gauge cannot sweep

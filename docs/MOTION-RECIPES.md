@@ -67,6 +67,8 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   `{ "gradient": { "colors": ["#5e6ad2", "#ffffff"], "animate": "shimmer", "speed": 0.6 } }` · _text, loop, animated_
 - **`shimmer-wave`** — a 3D shimmer crest (lift + scale + rotateY + brighten) travels across the letters;
   a living headline. `{ "split": "char", "preset": "shimmerWave", "phaseStep": 0.12, "speed": 1.0 }` · _text, loop, 3d_
+- **`spinning-text`** — chars laid on a rotating circular path (badge / seal / "scroll for more"). Set
+  `w` = 2·radius so `pin` centres it. `{ "type": "text", "text": "· SPIN · SCROLL FOR MORE ", "circle": { "radius": 300, "period": 6 }, "w": 600, "align": "center", "anim": "fade" }` · _text, loop, badge_
 - **`inkflash`** — a per-word accent colour-wave; emphasis on a thesis line. `{ "split": "word", "preset": "inkflash" }` · _text, accent_
 - **`blur-sweep`** — a left-to-right defocus reveal; calm/premium opener.
   `{ "split": "word", "preset": "blur", "each": 0.75, "stagger": 0.06 }` · _text, calm_

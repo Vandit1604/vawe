@@ -190,6 +190,29 @@ export function decodeText(el, u, unitIndex) {
   if (el.textContent !== out) el.textContent = out;
 }
 
+// circleText(el, units, {radius}): lay split CHARS around a circle (motion-primitives SpinningText).
+// Each char sits at its angle on the ring, rotated to face outward (seal / badge). The container spins
+// via an inline transform driven per frame in scene.html (pure in t). Build-time layout only here.
+export function circleText(el, units, { radius = 220 } = {}) {
+  const n = units.length || 1;
+  el.style.width = radius * 2 + 'px';
+  el.style.height = radius * 2 + 'px';
+  el.style.overflow = 'visible';
+  el.style.textAlign = 'center';
+  // pin centred the box while its height was still 0 (this runs after positioning), so it sits `radius`
+  // too low — pull it back up so the ring is centred on the pin.
+  el.style.marginTop = -radius + 'px';
+  units.forEach((u, i) => {
+    const ang = (i / n) * 360;
+    u.style.position = 'absolute';
+    u.style.left = '50%'; u.style.top = '50%';
+    u.style.transformOrigin = '0 0';
+    // rotate to the char's slot, push out to the radius, then centre the glyph on that point
+    u.style.transform = `rotate(${ang.toFixed(2)}deg) translate(-50%, ${(-radius).toFixed(0)}px)`;
+    u.style.margin = '0';
+  });
+}
+
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
 export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
