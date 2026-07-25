@@ -44,6 +44,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [TRANSITIONS.md](TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
 | [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
+| [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this") | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · the honest 1:1 ceiling |
 | [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
 
 **How it looks (the house-style layer):**
