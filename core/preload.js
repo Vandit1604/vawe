@@ -119,5 +119,12 @@ export async function preloadLottie(data) {
   walkData(data, (o) => { if (o && typeof o === 'object' && o.type === 'lottie' && typeof o.src === 'string') srcs.add(o.src); });
   if (!srcs.size) return;
   if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
-  for (const p of srcs) { try { window.__lottie[p] = await (await fetch(p)).json(); } catch (e) {} }
+  // Key by the ORIGINAL src (build reads kit.lottie[L.src]) but fetch a ROOT-relative URL: a src like
+  // "assets/lottie/x.json" (no leading slash) resolved against the scene HTML at /formats/scene/ → 404 →
+  // an empty box with NO warning (the exact silent substitution the doctrine forbids). Normalise + warn.
+  for (const p of srcs) {
+    const url = /^(https?:)?\//.test(p) ? p : '/' + p;
+    try { const r = await fetch(url); if (r.ok) window.__lottie[p] = await r.json(); else console.warn(`lottie: ${url} → ${r.status} — layer renders EMPTY`); }
+    catch (e) { console.warn(`lottie: ${url} unreadable — layer renders EMPTY`); }
+  }
 }

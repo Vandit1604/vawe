@@ -2725,3 +2725,21 @@ profile — silence is the score — and "tense" was a retired synth drone), so 
 
 **Gate.** `make validate` now warns on any `audio.music` that will not resolve, on every scene including
 `auto:true` ones. The rule it checks is byte-for-byte the mixer's rule, so the two cannot drift again.
+
+## #133 — a `lottie` layer with a root-RELATIVE src silently rendered EMPTY (no warning)
+
+**What.** A `lottie` layer with `src:"assets/lottie/x.json"` (no leading slash) showed nothing — an empty
+box, no error. Same file with `src:"/assets/lottie/x.json"` rendered fine.
+
+**Root cause.** `preloadLottie` fetched the src verbatim. Without a leading slash the URL resolved against
+the scene HTML at `/formats/scene/` → `/formats/scene/assets/lottie/x.json` → 404, caught by a bare
+`catch (e) {}` that swallowed it. So the animation data was never loaded and `lottie.js` degraded to its
+"missing src → empty layer" path — silently. (The runtime global is fine: the vendored UMD exposes
+`window.lottie` via globalThis; that was a red herring.)
+
+**Fix.** `preloadLottie` now normalises a non-absolute src to root-relative (`'/' + p`) before fetching
+and WARNS on a non-OK status or throw instead of swallowing it. Keyed by the original src so the build
+lookup still matches. Mirrors how `preloadSpectrum` already normalised its sidecar path.
+
+**Gate.** Console warning on any lottie src that won't resolve. (A hand-authored Bodymovin JSON —
+assets/lottie/spinner-arc.json — now serves as a live proof that authoring + rendering both work.)
