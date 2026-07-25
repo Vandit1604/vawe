@@ -1279,6 +1279,10 @@
           "type": "boolean|object",
           "label": "Directional blur fog on the backdrop that ramps toward an edge. { dir: top|bottom|left|right, layers: 2-12, max: px }. Fades a dense grid/list into an edge."
         },
+        "borderTrail": {
+          "type": "boolean|object",
+          "label": "A glowing arc orbiting the layer border. { color, width: px, period: s/orbit, arc: deg }. CTA/end-card emphasis."
+        },
         "resample": {
           "label": "LAYER AS TEXTURE: re-sample this layer's own pixels through a shader. Raster layers only (image/paint/shader). String, or {fx, amount, speed, seed}. amount may be [from,to] to animate.",
           "enum": [

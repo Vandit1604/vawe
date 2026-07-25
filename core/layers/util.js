@@ -130,9 +130,41 @@ export function createKit(ctx) {
     el.style.pointerEvents = 'none';
   }
 
+  // borderTrail — a glowing arc orbits the layer's border (motion-primitives BorderTrail): a ring mask
+  // (padding + mask-composite:exclude) over a spinning conic wedge. The spin is a WAAPI animation, which
+  // seekAll(t) pauses and seeks every frame → deterministic. Great emphasis for a CTA / end card.
+  //   borderTrail: true | { color, width (px), period (s/orbit), arc (deg) }
+  function applyBorderTrail(el, L) {
+    const bt = L.borderTrail;
+    if (bt == null || bt === false) return;
+    const o = typeof bt === 'object' ? bt : {};
+    const color = o.color || 'var(--accent)';
+    const width = o.width ?? 3;
+    const period = (o.period ?? 4) * 1000;
+    const arc = o.arc ?? 40;
+    const radius = el.style.borderRadius || '0px';
+    const ring = document.createElement('div');
+    Object.assign(ring.style, { position: 'absolute', inset: '0', borderRadius: radius, padding: width + 'px',
+      pointerEvents: 'none', overflow: 'hidden' });
+    // ring mask: full box MINUS the content box = a border-width band (rounded with the layer)
+    const m = 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)';
+    ring.style.mask = m; ring.style.webkitMask = m;
+    ring.style.maskComposite = 'exclude'; ring.style.webkitMaskComposite = 'xor';
+    const spin = document.createElement('div');
+    Object.assign(spin.style, { position: 'absolute', inset: '-60%',
+      background: `conic-gradient(from 0deg, ${color} 0deg, transparent ${arc}deg, transparent 360deg)` });
+    // The spin is driven by an INLINE transform per frame (scene.html reads data-trail), NOT a WAAPI
+    // animation: an animation's computed state does not serialise into the frame signature, so the dedup
+    // pass saw two visually-different frames as identical and failed. An inline transform is in the DOM.
+    spin.dataset.trail = '1';
+    spin.dataset.trailPeriod = String(period / 1000);
+    ring.appendChild(spin); el.appendChild(ring);
+  }
+
   function decorate(el, L) {
     applyGlass(el, L);
     applyProgressiveBlur(el, L);
+    applyBorderTrail(el, L);
     if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;

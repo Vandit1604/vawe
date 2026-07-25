@@ -303,6 +303,9 @@
             // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
             // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
             renderer.frame(el, L, t);
+            // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
+            // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
+            if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
             // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
             // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
             // because there was no way to animate what the block actually DOES. A gauge cannot sweep

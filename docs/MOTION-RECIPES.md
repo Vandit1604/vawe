@@ -31,6 +31,8 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   `{ "anim": "fade", "out": "defocus", "exitDur": 0.35 }` · _entrance, exit, blur_
 - **`progressive-blur`** — a directional blur fog over a full-frame rect fades a dense grid/list/feed
   into an edge (backs the "blur out dense content" rule). `{ "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "track": 50, "bg": "transparent", "progressiveBlur": { "dir": "bottom", "max": 22, "start": 0.15 } }` · _overlay, blur, density_
+- **`border-trail`** — a glowing arc orbits a card/CTA border; emphasis on an end card or button.
+  `{ "type": "rect", "x": 610, "y": 390, "w": 700, "h": 300, "radius": 28, "borderTrail": { "color": "#c2f23b", "width": 4, "period": 2.5, "arc": 50 } }` · _overlay, cta, loop_
 - **`bar-grow`** — a bar/underline grows from its baseline; use for charts and reveal underlines.
   `{ "anim": "wipe-up", "enterDur": 0.4 }` · _entrance, data_
 
