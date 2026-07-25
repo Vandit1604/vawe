@@ -101,7 +101,17 @@ export const EASINGS = {
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
   spring: (t) => spring(t), springStiff: (t) => springStiff(t),
 };
-export const resolveEasing = (e) => (typeof e === 'function' ? e : EASINGS[e] || easeOutCubic);
+// resolveEasing — an easing name or a function → a pure easing function. An unknown name used to fall
+// back to easeOutCubic SILENTLY, so a typo (`ease:"eastOutQuart"`) rendered the wrong curve with no
+// error — the silent-substitution the doctrine forbids. Now it WARNS once per bad name, then falls back.
+const _easeWarned = new Set();
+export const resolveEasing = (e) => {
+  if (typeof e === 'function') return e;
+  if (e == null || e === '') return easeOutCubic;
+  if (EASINGS[e]) return EASINGS[e];
+  if (!_easeWarned.has(e)) { _easeWarned.add(e); console.warn(`ease: unknown easing "${e}" — using easeOutCubic. Valid names: ${Object.keys(EASINGS).join(', ')}.`); }
+  return easeOutCubic;
+};
 
 // ---------- motion primitives — all PURE in their input (no state); safe for the purity probe ----------
 

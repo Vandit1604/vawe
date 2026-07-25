@@ -73,6 +73,51 @@ This is not a new capability — the engine ships it — it just has to be USED.
 - **Keep it premium, not toy.** Bounce is deliberately modest (0.14-0.16). A big visible bounce on every
   word reads as a children's app. Overshoot should be felt, not counted.
 
+## Easing — which curve, and what it FEELS like (the vocabulary, in our names)
+
+An easing curve is the *acceleration* of a move: how it starts and stops. It is the single biggest
+difference between motion that feels alive and motion that feels cheap, and it is chosen by INTENT, not
+by taste. The one law under everything below: **an entrance decelerates, an exit accelerates, and a
+visible position move is NEVER linear.** Linear on a moving object is the tell of amateur motion — real
+things have mass, so they ease. (Linear is correct only for *continuous* motion with no start/stop: a
+looping marquee, a steady rotation.)
+
+Names below are the strings you put in `ease` / `motion.easing` / a keyframe `ease` / cut timing. All are
+pure and land exactly at rest. Reach into this table by the FEELING you want, then read across.
+
+| Feeling you want | Use | What the curve does | Where |
+|---|---|---|---|
+| **Default entrance — premium, calm** | `settle` | decelerate with a whisper of overshoot; glides to rest, no wobble | any layer, split-text (default) |
+| **Directed entrance — visible snap** | `snap` | carries slightly PAST rest and settles back (the "this was directed" tell) | headlines, hero cards (`rise` uses it) |
+| **Clean decelerate, zero overshoot** | `easeOutQuart` / `easeOutQuint` | fast in, long smooth settle, never passes the target | restrained brands, dense grids |
+| **Dramatic arrival** | `easeOutExpo` | very fast then a long tail; feels weighty and cinematic | a single hero statement |
+| **Anticipation / spring** | `spring` · `spring-bouncy` · `spring-stiff` | overshoots and rings to rest; bouncy = playful, stiff = no overshoot | payoffs, count/`motion[]`/camera keyframes |
+| **Alive object (card/avatar/chip)** | `easeOutBack` (via `pop`/`lift`) | dips-then-launches / launches-then-settles past 1 | things that should feel physical |
+| **Ambient loop — breathing, drifting** | `easeInOutSine` | gentlest curve, no hard stop at either end | pulses, glows, background drift (tiny amplitude) |
+| **Mechanical / geometric** | `easeOutCirc` · `easeInCirc` | stops or starts very HARD (near-vertical at one end) | wipes, bars, technical/UI reveals |
+| **Exit — launch away** | mirror of the entrance (automatic), or `rush` / `easeInCubic` | accelerates out; departures leave fast | any `out:` (the engine mirrors by default) |
+| **Speed ramp inside one move** | `ramp` (slow→fast→slow) · `rush` (accel) · `brake` (decel) | remaps progress so a camera/counter reads as intentional, not a lerp | camera moves, counters, velocity contrast |
+| **Rebound (ball drop)** | `easeOutBounce` | rebounds inside [0,1]; never overshoots, bounces down to rest | rare; a literal drop, a playful accent |
+
+### Reading the tells — good vs bad, at the easing level
+
+| Good | Bad (and why) |
+|---|---|
+| Entrance on `settle`/`snap` (ease-OUT) | Entrance on `easeInOutQuad` — starts slow, so it feels sluggish and never snaps |
+| A visible slide on `easeOutQuart` | A visible slide on `linear` — robotic, weightless, the amateur tell |
+| Overshoot ONLY on things that then hold still | Overshoot (`snap`/`spring`) on text held for reading — it wobbles = looks like shaking |
+| Modest bounce (0.14-0.20) felt once | Big bounce on every word — reads as a toy / children's app |
+| Curve + duration VARIED by intent (Rule 1) | One curve + one duration on everything — monotone, no hierarchy |
+| Exit accelerates away (mirror / `rush`) | Exit on the same ease-out as the entrance — the layer "arrives" while leaving, reads backwards |
+
+**How to pick, in one line:** entrances → `settle` (calm) or `snap` (directed); exits → leave them to the
+engine's mirror, or `rush` for a hard launch; ambient → `easeInOutSine`; a value that should feel physical
+(number, bar, camera) → `spring`. Everything else is a deviation you should be able to justify by intent.
+
+> A name the registry does not know now **warns** (`resolveEasing`) instead of silently rendering
+> `easeOutCubic`, so a typo'd or imagined ease (including GSAP names like `power3.out` — we don't use that
+> vocabulary; the equivalent is `easeOutQuart`) fails loud instead of looking right while doing the wrong thing.
+
 ## Genre pacing tables
 
 | Genre | Beat length | Entry pace | Cuts | Stings |

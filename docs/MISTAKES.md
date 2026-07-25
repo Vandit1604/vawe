@@ -2763,3 +2763,25 @@ now fails LOUD before any frame renders.
 
 **Gate.** `make validate` (and boot-time `validateData`) reject unknown/conflicting fx names. The effect
 lists are derived from the code, so a new effect is instantly both usable and validatable.
+
+## 83. resolveEasing swallowed unknown easing names
+
+**What.** `resolveEasing(e)` was `EASINGS[e] || easeOutCubic` — any name it didn't recognise SILENTLY
+became `easeOutCubic`. So a typo (`"eastOutQuart"`), or a GSAP-style name an author assumed worked
+(`"power3.out"`), rendered a different curve than asked, with no error. The move still looked plausible,
+which is the worst kind of wrong: you can't see that the easing you specified was ignored.
+
+**Root cause.** The registry lookup had no "not found" branch — the `||` fallback doubled as both the
+empty-input default and the unknown-name default, so the two cases were indistinguishable and neither warned.
+
+**Fix.** `resolveEasing` now checks membership explicitly and WARNS once per unknown name (listing the
+valid ones) before falling back. Empty/absent input still defaults quietly. No pixel change — the fallback
+curve is unchanged; the only new behaviour is the warning.
+
+**Doctrine.** We decided NOT to adopt GSAP's easing vocabulary: our curves are the same math (GSAP
+`power2.out` = our `easeOutCubic`, `back.out` = `easeOutBack`), so aliasing its names would just be a
+second vocabulary for identical curves. The easing reference in docs/MOTION-CRAFT.md ("which curve, what
+it feels like") is written in OUR names; the warn points a GSAP name at its native equivalent.
+
+**Gate.** `resolveEasing` warns on any unknown ease; `make lib-test` already asserts every registry curve
+holds f(0)=0 / f(1)=1.
