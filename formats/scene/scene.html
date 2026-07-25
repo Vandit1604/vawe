@@ -194,6 +194,78 @@
           }
         }
         const extra = []; // group children (any depth), animated on their root group's window
+
+        // applyGsapHooks — the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
+        // gsap.globalTimeline at build; seekAll(t) seeks them per frame (runs AFTER driveClips, so GSAP
+        // owns the transform), and fromTo/immediateRender pin the start values so a frame is pure in t
+        // regardless of render order. Split layers target the per-unit `units` (staggered); else the layer.
+        function applyGsapHooks(el, L, units) {
+          // declarative tween: `gsap:{from,to,dur,ease}` → the whole GSAP easing library (elastic/back/…).
+          if (L.gsap && window.gsap) {
+            const g = L.gsap;
+            window.gsap.fromTo(el, { ...(g.from || {}) },
+              { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
+          }
+          // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
+          if (L.morph && window.gsap) buildMorph(el, L, window.gsap);
+          // NAMED GSAP effects (core/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
+          if (L.fx && window.gsap) {
+            const targets = (units && units.length) ? units : el; // split → per unit (staggered), else the layer
+            for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
+              const spec = typeof item === 'string' ? { name: item } : (item || {});
+              const fn = window.gsap.effects[spec.name];
+              if (!fn) { console.warn(`fx: unknown GSAP effect "${spec.name}"`); continue; }
+              const { name, dur, ease, delay, stagger, ...rest } = spec;
+              fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
+                ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
+            }
+          }
+          // NAMED GSAP EXIT (`fxOut`): anchored so the exit ENDS exactly at the layer's end (delay = end - dur).
+          // immediateRender:false (set at registration) holds the layer until then. Exclusive with `out` (validate).
+          if (L.fxOut && window.gsap) {
+            const spec = typeof L.fxOut === 'string' ? { name: L.fxOut } : (L.fxOut || {});
+            const fn = window.gsap.effects[spec.name];
+            if (!fn) console.warn(`fxOut: unknown GSAP effect "${spec.name}"`);
+            else {
+              const { name, dur, ease, stagger, ...rest } = spec;
+              const d = dur ?? FX_DUR[spec.name] ?? 0.5;
+              const end = (L.start ?? 0) + (L.duration ?? 2);
+              const targets = (units && units.length) ? units : el;
+              fn(targets, { delay: Math.max(0, end - d), duration: d, stagger: stagger ?? 0,
+                ...(ease ? { ease } : {}), ...rest });
+            }
+          }
+          // MOTION PATH (MotionPathPlugin): fly the layer along an SVG path. Closed-form position → pure in n.
+          if (L.motionPath && window.gsap && window.MotionPathPlugin) {
+            const mp = L.motionPath;
+            window.gsap.to(el, {
+              motionPath: { path: mp.path, align: mp.align, alignOrigin: mp.alignOrigin, autoRotate: mp.autoRotate ?? false, curviness: mp.curviness },
+              duration: mp.dur ?? (L.duration ?? 2), ease: mp.ease || 'power1.inOut',
+              delay: (L.start ?? 0) + (mp.delay || 0), immediateRender: true });
+          }
+          // PHYSICS 2D (Physics2DPlugin): velocity/gravity/friction scatter. On a split layer each unit gets an
+          // index-based angle spread (deterministic, no random) so a word explodes outward. Closed-form → pure in n.
+          if (L.physics && window.gsap && window.Physics2DPlugin) {
+            const p = L.physics, tg = (units && units.length) ? units : [el];
+            tg.forEach((u, i) => {
+              const angle = (p.angle ?? -90) + (tg.length > 1 ? (i - (tg.length - 1) / 2) * (p.spread ?? 0) : 0);
+              window.gsap.to(u, { physics2D: { velocity: p.velocity ?? 300, angle, gravity: p.gravity ?? 400, friction: p.friction ?? 0 },
+                duration: p.dur ?? (L.duration ?? 2), ease: 'none', delay: (L.start ?? 0) + (p.delay || 0), immediateRender: true });
+            });
+          }
+          // SPLIT TEXT (SplitText) — LINE level ONLY (char/word stay with the engine's own `split`): masked line
+          // reveals, each line clipped so it slides up from behind. Do NOT combine with `split` on the same layer.
+          if (L.splitText && window.gsap && window.SplitText) {
+            const st = L.splitText;
+            const parts = new window.SplitText(el, { type: 'lines', mask: st.mask === false ? undefined : 'lines', linesClass: 'sline' });
+            parts.lines.forEach((ln, i) => {
+              window.gsap.fromTo(ln, { yPercent: 120, opacity: st.mask === false ? 0 : 1 },
+                { yPercent: 0, opacity: 1, duration: st.dur ?? 0.7, ease: st.ease || 'power3.out',
+                  delay: (L.start ?? 0) + i * (st.stagger ?? 0.09), immediateRender: true });
+            });
+          }
+        }
+
         // the layer registry (core/layers/*) — one primitive per file; scene.html just dispatches.
         const renderer = createRenderer({ theme, W, H, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
           splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
@@ -242,80 +314,7 @@
           // half, with no error. Group children (core/layers/util.js:187) always built-then-decorated,
           // which is why the same look was correct inside a group and broken outside one.
           renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
-          // GSAP tween (declarative): `gsap:{from,to,dur,ease}` builds a PAUSED tween on gsap.globalTimeline
-          // at the layer's start; seekAll(t) seeks the timeline per frame (runs AFTER driveClips, so GSAP
-          // owns the transform). fromTo pins the start values so a frame is pure in t regardless of render
-          // order. This gives the whole GSAP easing library (elastic/back/bounce/custom) declaratively.
-          if (L.gsap && window.gsap) {
-            const g = L.gsap;
-            window.gsap.fromTo(el, { ...(g.from || {}) },
-              { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
-          }
-          // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
-          if (L.morph && window.gsap) buildMorph(el, L, window.gsap);
-          // NAMED GSAP effects (core/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
-          // Reference a stored effect by name; the engine runs it on the paused timeline (seeked per frame).
-          if (L.fx && window.gsap) {
-            // split layers apply the effect PER UNIT with a stagger (each letter/word pops in turn);
-            // otherwise the whole layer is the target.
-            const targets = (units && units.length) ? units : el;
-            for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
-              const spec = typeof item === 'string' ? { name: item } : (item || {});
-              const fn = window.gsap.effects[spec.name];
-              if (!fn) { console.warn(`fx: unknown GSAP effect "${spec.name}"`); continue; }
-              const { name, dur, ease, delay, stagger, ...rest } = spec;
-              fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
-                ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
-            }
-          }
-          // NAMED GSAP EXIT (`fxOut:"blurOut"` | `{name,dur,ease}`): anchored so the exit ENDS exactly at
-          // the layer's end (delay = end - dur). immediateRender:false is set at registration so the layer
-          // holds its natural state until the exit begins. Mutually exclusive with `out` (validate enforces).
-          if (L.fxOut && window.gsap) {
-            const spec = typeof L.fxOut === 'string' ? { name: L.fxOut } : (L.fxOut || {});
-            const fn = window.gsap.effects[spec.name];
-            if (!fn) console.warn(`fxOut: unknown GSAP effect "${spec.name}"`);
-            else {
-              const { name, dur, ease, stagger, ...rest } = spec;
-              const d = dur ?? FX_DUR[spec.name] ?? 0.5;
-              const end = (L.start ?? 0) + (L.duration ?? 2);
-              const targets = (units && units.length) ? units : el;
-              fn(targets, { delay: Math.max(0, end - d), duration: d, stagger: stagger ?? 0,
-                ...(ease ? { ease } : {}), ...rest });
-            }
-          }
-          // MOTION PATH (MotionPathPlugin): fly the layer along an SVG path. `motionPath:{path,align,
-          // autoRotate,dur,ease}`. A closed-form position at each t → pure in n (seeked timeline).
-          if (L.motionPath && window.gsap && window.MotionPathPlugin) {
-            const mp = L.motionPath;
-            window.gsap.to(el, {
-              motionPath: { path: mp.path, align: mp.align, alignOrigin: mp.alignOrigin, autoRotate: mp.autoRotate ?? false, curviness: mp.curviness },
-              duration: mp.dur ?? (L.duration ?? 2), ease: mp.ease || 'power1.inOut',
-              delay: (L.start ?? 0) + (mp.delay || 0), immediateRender: true });
-          }
-          // PHYSICS 2D (Physics2DPlugin): velocity/gravity/friction scatter. `physics:{velocity,angle,
-          // gravity,friction,spread,dur}`. On a split layer each unit gets an index-based angle spread
-          // (deterministic, no random) so a word explodes outward. Closed-form in t → pure in n.
-          if (L.physics && window.gsap && window.Physics2DPlugin) {
-            const p = L.physics, tg = (units && units.length) ? units : [el];
-            tg.forEach((u, i) => {
-              const angle = (p.angle ?? -90) + (tg.length > 1 ? (i - (tg.length - 1) / 2) * (p.spread ?? 0) : 0);
-              window.gsap.to(u, { physics2D: { velocity: p.velocity ?? 300, angle, gravity: p.gravity ?? 400, friction: p.friction ?? 0 },
-                duration: p.dur ?? (L.duration ?? 2), ease: 'none', delay: (L.start ?? 0) + (p.delay || 0), immediateRender: true });
-            });
-          }
-          // SPLIT TEXT (SplitText) — LINE level ONLY (char/word stay with the engine's own `split`). Its
-          // one non-redundant win is masked line reveals: each line clipped so it slides up from behind.
-          // `splitText:{mask,stagger,dur,ease}`. Do NOT combine with `split` on the same layer.
-          if (L.splitText && window.gsap && window.SplitText) {
-            const st = L.splitText;
-            const parts = new window.SplitText(el, { type: 'lines', mask: st.mask === false ? undefined : 'lines', linesClass: 'sline' });
-            parts.lines.forEach((ln, i) => {
-              window.gsap.fromTo(ln, { yPercent: 120, opacity: st.mask === false ? 0 : 1 },
-                { yPercent: 0, opacity: 1, duration: st.dur ?? 0.7, ease: st.ease || 'power3.out',
-                  delay: (L.start ?? 0) + i * (st.stagger ?? 0.09), immediateRender: true });
-            });
-          }
+          applyGsapHooks(el, L, units);   // gsap / morph / fx / fxOut / motionPath / physics / splitText (all pure, seeked per frame)
           return { L, el, units };
         });
 
@@ -354,106 +353,122 @@
           .sort((a, b) => a.t - b.t);
         const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
 
+        // drawBg — the theme bg on canvas (last matching window wins) + a continuous slow breathe.
+        function drawBg(t) {
+          if (!bgWins.length) return;
+          let spec = bgWins[0].spec;
+          for (const w of bgWins) if (t >= w.from && t < w.to) spec = w.spec;
+          renderBg(ctx, W, H, t, spec);
+          cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
+        }
+
+        // updateLayer — everything a single layer does at time t that isn't its primitive's own frame():
+        // the cut kit, kinetic split-text, ransom cycle, borderTrail/circle spins, animated CSS vars,
+        // audio-react, and the motion track (+ motion blur). Each is a pure function of t (and f for the
+        // spectrum table), composed onto what driveClips already wrote — so the frame stays pure in n.
+        function updateLayer(el, L, units, t, f) {
+          const start = L.start ?? 0, end = start + (L.duration ?? 2);
+          // cut kit: a declared cut owns this layer's enter/exit styling (over driveClips's fade)
+          if (L.cut && t >= start && t < end) {
+            const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;
+            const enter = enD > 0 ? clamp01((t - start) / enD) : 1;
+            const exit = exD > 0 ? clamp01((t - (end - exD)) / exD) : 0;
+            Object.assign(el.style, cutStyle(L.cut, { enter, exit }, { dir: L.dir, dist: L.dist ?? 110, timing: L.cutTiming, cx: L.cx, cy: L.cy }));
+          }
+          // kinetic split-text on its local clock (clip appears instantly, units reveal).
+          // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
+          if (units && !L.circle && !L.fx && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+          // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
+          // place, every frame. Stateless and derived from t, so it stays pure in n.
+          if (units && L.ransom && L.ransom.cycle && t >= start && t < end)
+            ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...L.ransom });
+          // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
+          // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
+          renderer.frame(el, L, t);
+          // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
+          // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
+          if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
+          // spinning circular text: rotate the whole ring (chars are laid out on the circle at build).
+          // Overrides the layer transform (after driveClips), so pair with anim:"fade"/"none". Pure in t.
+          if (L.circle) { const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8; el.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; }
+          // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
+          // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
+          // because there was no way to animate what the block actually DOES. A gauge cannot sweep
+          // to its reading, a bar cannot grow, a line cannot draw on. Interpolating a custom property
+          // fixes the whole class at once: the block writes `var(--p)` into its own CSS or SVG and
+          // the engine drives the number. Pure in n — the value is a function of t and nothing else.
+          //   vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic'
+          if (L.vars && t >= start) {
+            const vd = L.varsDur ?? 1.0, v0 = start + (L.varsDelay ?? 0);
+            const u = vd > 0 ? clamp01((t - v0) / vd) : 1;
+            const e = resolveEasing(L.varsEase || 'easeOutCubic')(u);
+            for (const [name, range] of Object.entries(L.vars)) {
+              const [a, b] = Array.isArray(range) ? range : [0, range];
+              el.style.setProperty(name, (a + (b - a) * e).toFixed(4));
+            }
+          }
+          // AUDIO REACT: modulate a property from the baked per-frame band energy. Composed BEFORE
+          // the motion track so an authored choreography still wins the outer transform, and read
+          // from a table indexed by n — the frame never analyses audio, so purity is untouched.
+          if (L.react && window.__spectrum && t >= start && t < end) {
+            const rs = Array.isArray(L.react) ? L.react : [L.react];
+            for (const r of rs) {
+              const v = sampleAt(window.__spectrum, f, r.band || 'low');   // f IS the frame index
+              const [lo, hi] = r.range || [0, 1];
+              const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
+              if (r.prop === 'opacity') el.style.opacity = ((parseFloat(el.style.opacity) || 1) * val).toFixed(3);
+              else if (r.prop === 'blur') {
+                const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+                el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
+              } else { // default: scale
+                const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
+                el.style.transform = `scale(${val.toFixed(4)})${base}`;
+              }
+            }
+          }
+          // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which
+          // driveClips/cutStyle already wrote to el.style), and multiply into the composed opacity.
+          if (L.motion && L.motion.length && t >= start && t < end) {
+            const m = motionAt(L.motion, t - start);
+            const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
+            el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
+            el.style.opacity = ((parseFloat(el.style.opacity) || 1) * m.opacity).toFixed(3);
+            // TWO blur materials, summed into one blur():
+            //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
+            //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
+            //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
+            //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
+            let blurPx = m.blur > 0.01 ? m.blur : 0;
+            if (L.motionBlur) {
+              const shutter = L.motionBlur === true ? 0.5 : +L.motionBlur;
+              const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
+              const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
+              blurPx += Math.min(24, shutter * speed * 0.5);      // half-shutter, capped so text never dissolves
+            }
+            // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
+            // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
+            const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+            el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
+          }
+        }
+
         function renderFrame(f) {
           const t = f / fps;
-          // theme bg on canvas (last matching window wins) + a continuous slow breathe
-          if (bgWins.length) {
-            let spec = bgWins[0].spec;
-            for (const w of bgWins) if (t >= w.from && t < w.to) spec = w.spec;
-            renderBg(ctx, W, H, t, spec);
-            cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
-          }
+          drawBg(t);
           driveClips(cam, t); // declarative clip timing + enter/exit + z-order
-          for (const { L, el, units } of layers) {
-            const start = L.start ?? 0, end = start + (L.duration ?? 2);
-            // cut kit: a declared cut owns this layer's enter/exit styling (over driveClips's fade)
-            if (L.cut && t >= start && t < end) {
-              const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;
-              const enter = enD > 0 ? clamp01((t - start) / enD) : 1;
-              const exit = exD > 0 ? clamp01((t - (end - exD)) / exD) : 0;
-              Object.assign(el.style, cutStyle(L.cut, { enter, exit }, { dir: L.dir, dist: L.dist ?? 110, timing: L.cutTiming, cx: L.cx, cy: L.cy }));
-            }
-            // kinetic split-text on its local clock (clip appears instantly, units reveal).
-            // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-            if (units && !L.circle && !L.fx && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
-            // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
-            // place, every frame. Stateless and derived from t, so it stays pure in n.
-            if (units && L.ransom && L.ransom.cycle && t >= start && t < end)
-              ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...L.ransom });
-            // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
-            // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
-            renderer.frame(el, L, t);
-            // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
-            // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
-            if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
-            // spinning circular text: rotate the whole ring (chars are laid out on the circle at build).
-            // Overrides the layer transform (after driveClips), so pair with anim:"fade"/"none". Pure in t.
-            if (L.circle) { const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8; el.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; }
-            // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
-            // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
-            // because there was no way to animate what the block actually DOES. A gauge cannot sweep
-            // to its reading, a bar cannot grow, a line cannot draw on. Interpolating a custom property
-            // fixes the whole class at once: the block writes `var(--p)` into its own CSS or SVG and
-            // the engine drives the number. Pure in n — the value is a function of t and nothing else.
-            //   vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic'
-            if (L.vars && t >= start) {
-              const vd = L.varsDur ?? 1.0, v0 = start + (L.varsDelay ?? 0);
-              const u = vd > 0 ? clamp01((t - v0) / vd) : 1;
-              const e = resolveEasing(L.varsEase || 'easeOutCubic')(u);
-              for (const [name, range] of Object.entries(L.vars)) {
-                const [a, b] = Array.isArray(range) ? range : [0, range];
-                el.style.setProperty(name, (a + (b - a) * e).toFixed(4));
-              }
-            }
-            // AUDIO REACT: modulate a property from the baked per-frame band energy. Composed BEFORE
-            // the motion track so an authored choreography still wins the outer transform, and read
-            // from a table indexed by n — the frame never analyses audio, so purity is untouched.
-            if (L.react && window.__spectrum && t >= start && t < end) {
-              const rs = Array.isArray(L.react) ? L.react : [L.react];
-              for (const r of rs) {
-                const v = sampleAt(window.__spectrum, f, r.band || 'low');   // f IS the frame index
-                const [lo, hi] = r.range || [0, 1];
-                const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
-                if (r.prop === 'opacity') el.style.opacity = ((parseFloat(el.style.opacity) || 1) * val).toFixed(3);
-                else if (r.prop === 'blur') {
-                  const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
-                  el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
-                } else { // default: scale
-                  const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-                  el.style.transform = `scale(${val.toFixed(4)})${base}`;
-                }
-              }
-            }
-            // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which
-            // driveClips/cutStyle already wrote to el.style), and multiply into the composed opacity.
-            if (L.motion && L.motion.length && t >= start && t < end) {
-              const m = motionAt(L.motion, t - start);
-              const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-              el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
-              el.style.opacity = ((parseFloat(el.style.opacity) || 1) * m.opacity).toFixed(3);
-              // TWO blur materials, summed into one blur():
-              //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
-              //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
-              //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
-              //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
-              let blurPx = m.blur > 0.01 ? m.blur : 0;
-              if (L.motionBlur) {
-                const shutter = L.motionBlur === true ? 0.5 : +L.motionBlur;
-                const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
-                const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
-                blurPx += Math.min(24, shutter * speed * 0.5);      // half-shutter, capped so text never dissolves
-              }
-              // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
-              // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
-              const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
-              el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
-            }
-          }
-          // captions: show the caption whose window contains t. `captionStyle` layers a word-timed
-          // treatment on the pop layout. DOM is rebuilt only when the LINE changes — the memo key is
-          // a pure function of t (which caption owns t), so seeks stay order-independent — and then
-          // every style prop is rewritten every frame (authoritative writes, like the motion-blur
-          // recompose above), so a cold seek renders byte-identical to a warm one.
+          for (const { L, el, units } of layers) updateLayer(el, L, units, t, f);
+          drawCaptions(t);
+          drawCameraAndCut(t);
+          drawStings(t);
+          drawSeams(t);
+          seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
+        }
+
+        // drawCaptions — show the caption whose window contains t. `captionStyle` layers a word-timed
+        // treatment on the pop layout. DOM is rebuilt only when the LINE changes (the memo key is a pure
+        // function of t), then every style prop is rewritten every frame (authoritative writes), so a cold
+        // seek renders byte-identical to a warm one.
+        function drawCaptions(t) {
           const cap = caps.find((c) => t >= c.t0 && t < c.t1);
           const capEl = $('cap');
           capEl.className = 'hs-cap ' + (capStyle ? 'styled ' + capStyle
@@ -486,28 +501,23 @@
               });
             }
           } else { capEl.style.opacity = '0'; capEl.__key = null; }
-          // global camera
+        }
+
+        // drawCameraAndCut — the global camera transform, plus any SCENE CUT (a transition between beats
+        // applied to the camera root so the whole beat moves as one). cutStyle ALWAYS returns the full
+        // style set (identity in steady state) so a cut property can never stick into a later frame,
+        // whatever order frames render in. See MISTAKES #29 (the top-level `cuts` array was once inert).
+        function drawCameraAndCut(t) {
           const c = cameraAt(camKf, t);
-          // perspective() must lead the transform list, and is emitted ONLY when a tilt is actually
-          // asked for — a perspective function with no rotation still promotes the layer into a 3D
-          // rendering context and changes rasterisation, so scenes that never tilt stay byte-identical.
+          // perspective() must lead the transform list, and is emitted ONLY when a tilt is actually asked
+          // for — a perspective function with no rotation still promotes the layer into a 3D rendering
+          // context and changes rasterisation, so scenes that never tilt stay byte-identical.
           const tilt = c && (Math.abs(c.rx) > 0.001 || Math.abs(c.ry) > 0.001)
             ? `perspective(${c.persp.toFixed(0)}px) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg) ` : '';
           const camTf = c ? `${tilt}scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
-          // SCENE CUTS. `cuts` declares a transition between beats and, until now, rendered nothing:
-          // cutStyle() was only ever wired to the layer-level `L.cut`, so the whole cut vocabulary was
-          // inert in every scene that used the top-level array (MISTAKES #29). A scene cut treats the
-          // beat leaving as an EXIT and the beat arriving as an ENTER, applied to the camera root so
-          // the entire beat moves as one. `dur` is the TOTAL window, split evenly around `t`.
-          // Kept SHORT by default (0.36s): a beat's layers already animate themselves out and in, so
-          // a long scene cut stacks on top of that and the frame dips to empty for a noticeable beat.
-          // Authors who want a slow dissolve set `dur` explicitly.
-          // Purity: cutStyle ALWAYS returns the full style set (identity in steady state), and the
-          // no-cut branch asks for that identity explicitly — so a property written during a cut can
-          // never stick into a later frame, whatever order frames are rendered in.
           let cutS = null;
           for (const cu of sceneCuts) {
-            const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;
+            const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;   // `dur` is the TOTAL window, split around t
             if (t <= ct - half || t >= ct + half) continue;
             const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
             cutS = t < ct
@@ -519,7 +529,10 @@
           const { transform: cutTf, ...cutRest } = cutS;
           Object.assign(cam.style, cutRest);
           cam.style.transform = [camTf, cutTf && cutTf !== 'none' ? cutTf : ''].filter(Boolean).join(' ') || 'none';
-          // shader stings (each spans its dur centered on t)
+        }
+
+        // drawStings — the WebGL shader stings (single-scene boundary FX), each spanning its dur centered on t.
+        function drawStings(t) {
           let drew = false;
           for (const s of stings) {
             const d = s.dur ?? 1.0;
@@ -527,25 +540,26 @@
             if (p > 0 && p < 1) { fxo.draw(s.fx, p, s.seed ?? 0, s._tint, s._intensity, s._pal); drew = true; }
           }
           if (!drew) fxo.clear();
-          // SEAMS: inside a seam window [t, t+dur] the compositor blends the two BAKED beats over the
-          // whole stage. The live DOM/canvas underneath is covered by the opaque full-frame composite.
-          // Outside every window the compositor is hidden, so normal frames render untouched.
-          if (seamCompositor) {
-            let inSeam = false;
-            for (const s of seams) {
-              if (t < s.t || t >= s.t + s.dur) continue;
-              const p = CUT_TIMINGS[s.timing]((t - s.t) / s.dur); // ease the transition progress
-              if (s._from && s._to) {
-                const fx = s._fallback ? 'fade' : s.fx; // blank raster → plain cross-fade
-                seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity });
-              } else {
-                seamCompositor.clear(); // never baked (e.g. bake threw) → show the live stage, no dip
-              }
-              inSeam = true; break;
+        }
+
+        // drawSeams — inside a seam window [t, t+dur] the compositor blends the two BAKED beats over the
+        // whole stage (the live DOM/canvas underneath is covered by the opaque composite). Outside every
+        // window the compositor is hidden, so normal frames render untouched.
+        function drawSeams(t) {
+          if (!seamCompositor) return;
+          let inSeam = false;
+          for (const s of seams) {
+            if (t < s.t || t >= s.t + s.dur) continue;
+            const p = CUT_TIMINGS[s.timing]((t - s.t) / s.dur); // ease the transition progress
+            if (s._from && s._to) {
+              const fx = s._fallback ? 'fade' : s.fx; // blank raster → plain cross-fade
+              seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity });
+            } else {
+              seamCompositor.clear(); // never baked (e.g. bake threw) → show the live stage, no dip
             }
-            if (!inSeam) seamCompositor.clear();
+            inSeam = true; break;
           }
-          seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
+          if (!inSeam) seamCompositor.clear();
         }
 
         // bakeSeams(): rasterise the OUTGOING beat (frame just before the window) and the INCOMING beat
