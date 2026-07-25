@@ -84,6 +84,8 @@ must state a relationship (time/place/this-becomes-that).
 - **`dissolve`** — passage of time / location change / montage. `{ "seams": [{ "t": 5.0, "fx": "dissolve", "dur": 0.5 }] }` · _transition, time_
 - **`whip-pan`** — momentum cut when the layout also moves sideways. `{ "seams": [{ "t": 5.0, "fx": "whipPan", "dur": 0.5 }] }` · _transition, momentum_
 - **`dive-in`** — dynamic zoom into a sub-framed element/screen. `{ "seams": [{ "t": 5.0, "fx": "cinematicZoom", "dur": 0.55 }] }` · _transition, camera_
+- **`portal-reveal`** — a glowing portal opens from centre with a torn chromatic edge and swallows the
+  frame into the next beat; a sci-fi / big-reveal moment (use once). `{ "seams": [{ "t": 5.0, "fx": "portal", "dur": 0.9, "intensity": 1.0, "seed": 3 }] }` · _transition, reveal, energy_
 - **`flash-cut`** — a white flash on an energy pivot; use at an act break, sparingly.
   `{ "seams": [{ "t": 5.0, "fx": "flashWhite", "dur": 0.4 }] }` · _transition, energy_
 - **`sting-accent`** — a full-frame shader accent on a reveal (warm brands: `leak`/`burn`; tech: `glitch`).

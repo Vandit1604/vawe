@@ -24,5 +24,5 @@ export const CUT_CUE = {
 export const SEAM_CUE = {
   fade: 'whisper', dissolve: 'whisper', slide: 'whisper', uncover: 'whisper', wipe: 'whisper',
   crossWarp: 'whisper', push: 'press', whipPan: 'whoosh', sdfIris: 'bloom', dispersion: 'sparkle',
-  lens: 'droplet', flashWhite: 'press', cinematicZoom: 'droplet',
+  lens: 'droplet', flashWhite: 'press', cinematicZoom: 'droplet', portal: 'bloom',
 };

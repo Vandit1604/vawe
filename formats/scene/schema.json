@@ -285,7 +285,7 @@
         },
         "fx": {
           "type": "string",
-          "label": "Transition (samples BOTH beats as textures). Basics: fade · dissolve · slide · push · uncover · wipe (dir-aware). Expressive: crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom.",
+          "label": "Transition (samples BOTH beats as textures). Basics: fade · dissolve · slide · push · uncover · wipe (dir-aware). Expressive: crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal.",
           "required": true,
           "enum": [
             "fade",
@@ -300,7 +300,8 @@
             "dispersion",
             "lens",
             "flashWhite",
-            "cinematicZoom"
+            "cinematicZoom",
+            "portal"
           ]
         },
         "dur": {

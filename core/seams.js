@@ -25,7 +25,7 @@
 // Basics first (fade + the directional set every tool has), then the expressive shaders. Appended so
 // existing indices never shift. The directional five (slide/push/uncover/wipe + the grainy dissolve)
 // are the "cover the basics" set — real two-scene transitions, dir-aware via u_dir (left/right/up/down).
-export const SEAM_FX = ['fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom'];
+export const SEAM_FX = ['fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom', 'portal'];
 
 const VERT = 'attribute vec2 a; varying vec2 v_uv; void main(){ v_uv = a*0.5+0.5; gl_Position = vec4(a, 0.0, 1.0); }';
 
@@ -69,6 +69,7 @@ void main(){
   #define FX_LENS 10
   #define FX_FLASHWHITE 11
   #define FX_CINEZOOM 12
+  #define FX_PORTAL 13
 
   int fx = FX_INDEX;
 
@@ -200,6 +201,34 @@ void main(){
     vec4 cf = getFrom(dd / sFrom + 0.5);
     vec4 ct = getTo(dd / sTo + 0.5);
     col = mix(cf, ct, e);
+
+  } else if (fx == FX_PORTAL) {
+    /* a glowing portal opens from the centre and swallows the frame: an expanding disc with an ORGANIC
+       torn edge (angular fbm) reveals the arriving beat, content near the rim is sucked inward, and a
+       chromatic energy ring burns brightest mid-seam. A shaped reveal like sdfIris, but with the warp +
+       glow that reads as "stepping through" rather than a flat wipe. */
+    vec2 dd = (uv - 0.5) * aspect;
+    float r = length(dd);
+    float ang = atan(dd.y, dd.x);
+    float maxR = length(aspect) * 0.5 + 0.2;                 /* enough to clear the corners by p=1 */
+    float edgeN = (fbm(vec2(ang * 3.0, u_seed * 7.0)) - 0.5) * 0.12 * u_intensity;   /* torn edge */
+    float portalR = p * (maxR + 0.15) + edgeN;
+    float ring = abs(r - portalR);
+    float soft = 0.02 + 0.03 * (1.0 - p);
+    /* radial suck: bend uvs toward the centre near the ring so the frame appears to pour in */
+    float warp = 0.14 * u_intensity * exp(-ring * ring * 26.0);
+    vec2 wuv = (dd - normalize(dd + 1e-4) * warp) / aspect + 0.5;
+    float m = smoothstep(portalR + soft, portalR - soft, r);  /* 1 inside → the arriving beat */
+    col = mix(getFrom(wuv), getTo(wuv), m);
+    /* chromatic aberration across the rim: split the channels radially where the energy is */
+    float rim = smoothstep(soft * 3.0, 0.0, ring);
+    float ca = rim * 0.02 * u_intensity;
+    vec2 rdir = normalize(dd + 1e-4) / aspect;
+    col.r = mix(col.r, mix(getFrom(wuv + rdir * ca), getTo(wuv + rdir * ca), m).r, rim);
+    col.b = mix(col.b, mix(getFrom(wuv - rdir * ca), getTo(wuv - rdir * ca), m).b, rim);
+    /* glowing energy edge: a two-tone ring that pulses brightest mid-seam */
+    vec3 glow = mix(vec3(0.35, 0.7, 1.0), vec3(1.0, 0.4, 0.9), 0.5 + 0.5 * sin(ang * 4.0 + u_seed * 6.2831));
+    col.rgb += glow * rim * (0.5 + 0.9 * sin(PI * p)) * u_intensity;
 
   } else {
     col = mix(getFrom(uv), getTo(uv), p);
