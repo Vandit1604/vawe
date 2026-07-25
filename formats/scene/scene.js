@@ -17,6 +17,50 @@ import { sampleAt } from '/core/spectrum.js';
 import { createRenderer } from '/core/layers/index.js';
 const $ = (id) => document.getElementById(id);
 
+// resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
+// stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
+// arithmetic. Multi-pass (a target may itself be relative); an unresolvable/circular ref fails loud.
+// Pure in `data` — mutates the layers' start fields in place before any DOM exists.
+function resolveRelativeStarts(data) {
+  const byId = {};
+  for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+  const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
+  for (let pass = 0; pass < 8; pass++) {
+    let pending = 0;
+    for (const L of data.layers || []) {
+      if (typeof L.start !== 'string') continue;
+      const m = RX.exec(L.start.trim());
+      if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}": unknown reference`);
+      const T = byId[m[1]];
+      if (typeof T.start === 'string') { pending++; continue; } // resolve target first
+      L.start = (T.start ?? 0) + (m[2] ? (T.duration ?? 2) : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
+    }
+    if (!pending) break;
+    if (pass === 7) throw new Error('relative starts: circular reference');
+  }
+}
+
+// resolveAnchors — position a layer RELATIVE to another (`anchor` id → `at`/`dx`/`dy`), so annotations,
+// chips and badges point at what they annotate by declared relationship, not eyeballed coordinates.
+// Resolved purely from the JSON geometry before any DOM exists (targets need w; h falls back to size*1.2).
+function resolveAnchors(data) {
+  const byId = {};
+  for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+  for (const L of data.layers || []) {
+    const T = L.anchor && byId[L.anchor];
+    if (!T) continue;
+    const tw = T.w ?? 0, th = T.h ?? ((T.size ?? 96) * 1.2);
+    const dx = L.dx ?? 0, dy = L.dy ?? 12, at = L.at || 'below';
+    if (at.startsWith('below')) L.y = (T.y ?? 0) + th + dy;
+    else if (at.startsWith('above')) L.y = (T.y ?? 0) - ((L.h ?? (L.size ?? 96) * 1.2) + dy);
+    else L.y = (T.y ?? 0) + (L.dy ?? 0);
+    if (at === 'right') L.x = (T.x ?? 0) + tw + (L.dx ?? 12);
+    else if (at === 'left') L.x = (T.x ?? 0) - ((L.w ?? 300) + (L.dx ?? 12));
+    else if (at.endsWith('center') && L.w != null) L.x = (T.x ?? 0) + tw / 2 - L.w / 2 + dx;
+    else L.x = (T.x ?? 0) + dx;
+  }
+}
+
 boot((data, fps, theme, canvas) => {
   // lower the unified `transitions`/`layers[].transition` surface into the raw cuts/stings/seams/
   // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
@@ -88,48 +132,8 @@ boot((data, fps, theme, canvas) => {
     })
     .sort((a, b) => +a.t - +b.t);
 
-  // ---- relative TIMING: start may be "otherId+0.5" or "otherId.end-0.2" ----
-  // Stagger chains become declared relationships instead of hand-added arithmetic
-  // (the temporal twin of `anchor`). Multi-pass resolve; unresolvable → loud failure.
-  {
-    const byId = {};
-    for (const L of data.layers || []) if (L.id) byId[L.id] = L;
-    const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
-    for (let pass = 0; pass < 8; pass++) {
-      let pending = 0;
-      for (const L of data.layers || []) {
-        if (typeof L.start !== 'string') continue;
-        const m = RX.exec(L.start.trim());
-        if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}": unknown reference`);
-        const T = byId[m[1]];
-        if (typeof T.start === 'string') { pending++; continue; } // resolve target first
-        L.start = (T.start ?? 0) + (m[2] ? (T.duration ?? 2) : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
-      }
-      if (!pending) break;
-      if (pass === 7) throw new Error('relative starts: circular reference');
-    }
-  }
-  // ---- anchoring: position a layer RELATIVE to another (id → anchor/at/dx/dy) ----
-  // Annotations, chips and badges point at what they annotate by declared relationship
-  // instead of eyeballed coordinates. Resolved purely from the JSON geometry before any
-  // DOM exists (targets need w; h falls back to size*1.2 for text).
-  {
-    const byId = {};
-    for (const L of data.layers || []) if (L.id) byId[L.id] = L;
-    for (const L of data.layers || []) {
-      const T = L.anchor && byId[L.anchor];
-      if (!T) continue;
-      const tw = T.w ?? 0, th = T.h ?? ((T.size ?? 96) * 1.2);
-      const dx = L.dx ?? 0, dy = L.dy ?? 12, at = L.at || 'below';
-      if (at.startsWith('below')) L.y = (T.y ?? 0) + th + dy;
-      else if (at.startsWith('above')) L.y = (T.y ?? 0) - ((L.h ?? (L.size ?? 96) * 1.2) + dy);
-      else L.y = (T.y ?? 0) + (L.dy ?? 0);
-      if (at === 'right') L.x = (T.x ?? 0) + tw + (L.dx ?? 12);
-      else if (at === 'left') L.x = (T.x ?? 0) - ((L.w ?? 300) + (L.dx ?? 12));
-      else if (at.endsWith('center') && L.w != null) L.x = (T.x ?? 0) + tw / 2 - L.w / 2 + dx;
-      else L.x = (T.x ?? 0) + dx;
-    }
-  }
+  resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
+  resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
   const extra = []; // group children (any depth), animated on their root group's window
 
   // applyGsapHooks — the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
@@ -207,33 +211,35 @@ boot((data, fps, theme, canvas) => {
   const renderer = createRenderer({ theme, W, H, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
     splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
     extra, components: window.__components, clips: window.__clips, lottie: window.__lottie });
-  const layers = (data.layers || []).map((L, idx) => {
-    const el = document.createElement('div');
-    el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : L.type === 'rect' ? 'hs-rect' : L.type === 'component' ? 'hs-comp-wrap' : L.type === 'group' ? 'hs-group' : 'hs-text');
-    const isCount = L.type === 'count'; // number that counts from→to (timer, stats) — styled as text
-    el.style.left = (L.x ?? 60) + 'px';
-    el.style.top = (L.y ?? 240) + 'px';
-    if (L.w != null) el.style.width = L.w + 'px';
-    if (L.align) el.style.textAlign = L.align;
-    if (L.filter) el.style.filter = L.filter;
-    // timing → data-attributes consumed by compose.driveClips
+  // setLayerTiming — write the data-* attributes driveClips reads (start/duration/track/anim/enter/exit).
+  // Enter/exit default to the base snap durations scaled by the theme's durationScale; a split layer
+  // enters instantly (units reveal themselves), and fxOut zeroes the fade so GSAP owns the exit alone.
+  function setLayerTiming(el, L, idx) {
     el.dataset.start = String(L.start ?? 0);
     if (L.duration != null) el.dataset.duration = String(L.duration);
     el.dataset.track = String(L.track ?? idx);
     el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
     if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
     if (L.split) el.dataset.enter = '0';
-    // rhythm: per-layer entry pace. Default = the base snap duration scaled by the theme's
-    // durationScale (a calm brand stretches it, a punchy one tightens it). durationScale 1 lands
-    // exactly on the clips.js base, so default-motion themes render byte-identical.
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
     if (L.out) el.dataset.out = L.out;
-    // fxOut lets GSAP own the exit (opacity + transform). Zero out driveClips's own fade window so
-    // the two don't both drive opacity through the exit; the layer holds full until GSAP takes it out.
     if (L.fxOut) el.dataset.exitDur = '0';
     else if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
     else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale).toFixed(3));
+  }
 
+  // buildLayer — turn one layer's JSON into its DOM element (position + class + timing), dispatch to the
+  // primitive builder, apply split/ransom/circle, decorate, and wire the GSAP hooks. Returns the tuple
+  // the per-frame loop drives: { L, el, units }. Order is load-bearing (see the decorate note below).
+  function buildLayer(L, idx) {
+    const el = document.createElement('div');
+    el.className = 'hs-layer ' + (L.type === 'image' ? 'hs-img-wrap' : L.type === 'rect' ? 'hs-rect' : L.type === 'component' ? 'hs-comp-wrap' : L.type === 'group' ? 'hs-group' : 'hs-text');
+    el.style.left = (L.x ?? 60) + 'px';
+    el.style.top = (L.y ?? 240) + 'px';
+    if (L.w != null) el.style.width = L.w + 'px';
+    if (L.align) el.style.textAlign = L.align;
+    if (L.filter) el.style.filter = L.filter;
+    setLayerTiming(el, L, idx);
     renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
     // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
     if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
@@ -253,7 +259,9 @@ boot((data, fps, theme, canvas) => {
     renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
     applyGsapHooks(el, L, units);   // gsap / morph / fx / fxOut / motionPath / physics / splitText (all pure, seeked per frame)
     return { L, el, units };
-  });
+  }
+
+  const layers = (data.layers || []).map(buildLayer);
 
   layers.push(...extra); // group children join the per-frame animation loop
   // duration: explicit, else the last clip's end (+0.4 tail)
