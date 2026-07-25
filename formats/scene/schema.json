@@ -867,6 +867,18 @@
           "type": "object",
           "label": "Declarative GSAP tween: { from:{x,y,scale,rotation,opacity,...}, to:{...}, dur, ease }. Gives the full GSAP easing library (elastic/back/bounce/expo/custom). Deterministic (seeked per frame)."
         },
+        "motionPath": {
+          "type": "object",
+          "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
+        },
+        "physics": {
+          "type": "object",
+          "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
+        },
+        "splitText": {
+          "type": "object",
+          "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease } — each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
+        },
         "circle": {
           "type": "boolean|object",
           "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."

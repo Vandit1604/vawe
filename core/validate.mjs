@@ -131,6 +131,9 @@ export function fxErrors(cfg) {
       else if (!EXIT_FX.includes(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
       if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut" — they both own the exit. Keep one.`);
     }
+    // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did — the two
+    // splitters fight. splitText is line-level only; char/word stay with `split`.
+    if (L.splitText != null && L.split != null) out.push(`layers[${i}] declares both "split" and "splitText" — they both re-wrap the text. Use "split" for char/word, "splitText" for masked lines.`);
   });
   return out;
 }

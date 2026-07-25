@@ -2743,3 +2743,23 @@ lookup still matches. Mirrors how `preloadSpectrum` already normalised its sidec
 
 **Gate.** Console warning on any lottie src that won't resolve. (A hand-authored Bodymovin JSON —
 assets/lottie/spinner-arc.json — now serves as a live proof that authoring + rendering both work.)
+
+## 82. Named GSAP fx typos degraded silently; two splitters could fight
+
+**What.** A layer `fx`/`fxOut` name that didn't match a registered effect only produced a
+`console.warn` at render time — a warning the batch render swallows. So a typo (`"poprIn"`) shipped an
+unanimated layer with no failure, the exact silent-substitution the doctrine forbids. Related: `fxOut`
+and a motion `out` both drive the exit transform, and `splitText` (GSAP line reveal) re-wraps a layer
+AFTER the engine's own `split` already did — either pairing fights itself, again with no error.
+
+**Root cause.** Layer `fx` names are a free-form string in the schema (not an enum, because the list
+lives in `core/gsap-effects.js`), so schema validation couldn't catch a bad name, and nothing else did.
+The conflict pairs were simply never checked.
+
+**Fix.** `validate.mjs` gained `fxErrors(cfg)`: it checks every `fx`/`fxOut` name against the real
+`GSAP_FX`/`EXIT_FX` exports (with a `nearest()` "did you mean" pointer), and rejects a layer that
+declares `out`+`fxOut` or `split`+`splitText` together. Boot + `make validate` both run it, so a typo
+now fails LOUD before any frame renders.
+
+**Gate.** `make validate` (and boot-time `validateData`) reject unknown/conflicting fx names. The effect
+lists are derived from the code, so a new effect is instantly both usable and validatable.

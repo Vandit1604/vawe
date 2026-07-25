@@ -113,10 +113,29 @@ export async function preloadRansomSprites(data) {
 // Load GSAP (the tween engine) ONLY when a scene uses it — a `gsap` layer field or a `morph`. Loaded
 // before the virtual clock like the other runtimes; seekAll(t) pauses gsap.globalTimeline and seeks it
 // per frame, so tweens stay pure in n. The ticker is stopped so GSAP never self-advances (we drive it).
+const loadScript = (src) => new Promise((res) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+
+// The formerly-paid bonus plugins (free since GSAP 3.13). Each is loaded + registered ONLY when a scene
+// declares its field, so a text-only render never parses them. A plugin file exposes a UMD global that
+// gsap.registerPlugin() then wires in. A missing/failed file warns (the layer degrades) — never silent.
+const GSAP_PLUGINS = {
+  motionPath: { file: 'MotionPathPlugin.min.js', global: 'MotionPathPlugin' },
+  physics:    { file: 'Physics2DPlugin.min.js', global: 'Physics2DPlugin' },
+  splitText:  { file: 'SplitText.min.js', global: 'SplitText' },
+};
+
 export async function preloadGsap(data) {
-  if (!/"(gsap|morph|fx)"\s*:/.test(JSON.stringify(data))) return;
-  if (!window.gsap) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/gsap.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
-  if (window.gsap) { try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); registerGsapEffects(window.gsap); } catch (e) {} }
+  const json = JSON.stringify(data);
+  if (!/"(gsap|morph|fx|fxOut|motionPath|physics|splitText)"\s*:/.test(json)) return;
+  if (!window.gsap) await loadScript('/assets/vendor/gsap.min.js');
+  if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load — gsap/fx/morph layers render unanimated'); return; }
+  try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); registerGsapEffects(window.gsap); } catch (e) {}
+  for (const [field, p] of Object.entries(GSAP_PLUGINS)) {
+    if (!new RegExp(`"${field}"\\s*:`).test(json)) continue;
+    if (!window[p.global]) await loadScript('/assets/vendor/' + p.file);
+    if (window[p.global]) { try { window.gsap.registerPlugin(window[p.global]); } catch (e) {} }
+    else console.warn(`gsap: /assets/vendor/${p.file} failed to load — "${field}" layers render unanimated`);
+  }
 }
 
 // Preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its src;

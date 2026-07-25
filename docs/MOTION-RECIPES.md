@@ -59,10 +59,24 @@ UNIT with a stagger. Deterministic (seeked per frame). Add a row to the library 
 - **`fx-tuned`** — with params. `{ "anim": "none", "fx": { "name": "popIn", "dur": 0.5, "ease": "back.out(2)" } }` · _gsap_
 - **`fx-stack`** — an entrance + a loop. `{ "anim": "none", "fx": ["blurIn", "float"] }` · _gsap, loop_
 - **`fx-stagger`** — per-letter. `{ "split": "char", "anim": "none", "fx": "popIn" }` · _gsap, text, stagger_
+- **`fx-out`** — a named EXIT, anchored to the layer's end. `{ "anim": "none", "fx": "blurIn", "fxOut": "flyOutLeft" }` · _gsap, exit_
 
 Entrances: `fadeIn · fadeUp · fadeDown · flyLeft · flyRight · popIn · zoomIn · zoomBlur · blurIn ·
-elasticIn · bounceIn · backIn · dropIn · spinIn · rollIn · skewIn · flipInX · flipInY`.
+elasticIn · bounceIn · backIn · dropIn · spinIn · rollIn · skewIn · flipInX · flipInY · clipUp ·
+maskReveal · revealUp · expandIn · tiltIn · driftIn · glitchIn · foldIn`.
+Per-letter text (on a `split` layer): `charFold · charTilt · charBlurCascade · charOvershoot`.
 Loops (emphasis): `float · pulse · breathe · wobble · swing · drift · heartbeat`.
+Exits (`fxOut`, mutually exclusive with `out`): `fadeOut · fadeOutUp · fadeOutDown · flyOutLeft ·
+flyOutRight · popOut · zoomOut · blurOut · dropOut · collapseOut · spinOut`.
+
+## Advanced GSAP plugins — `motionPath` · `physics` · `splitText`
+
+The formerly-paid GSAP bonus plugins (free since 3.13), each loaded ONLY when its field appears. All
+deterministic (seeked per frame; proven by `make probe` + `make canvas-purity`).
+
+- **`motion-path`** — fly a layer along an SVG curve. `{ "anim": "none", "motionPath": { "path": "M0,0 C120,-160 380,-160 500,0", "autoRotate": true, "dur": 3.0 } }` · _gsap, path_
+- **`physics-scatter`** — explode a word outward (velocity/gravity/friction). On a `split` layer each letter gets an index-based angle spread. `{ "split": "char", "anim": "none", "physics": { "velocity": 520, "angle": -90, "gravity": 700, "spread": 26, "dur": 2.4 } }` · _gsap, physics, text_
+- **`split-lines`** — masked LINE reveal (each line slides up from behind a clip). Line-level only; do NOT combine with `split`. `{ "anim": "none", "w": 840, "splitText": { "mask": true, "stagger": 0.12, "dur": 0.8 } }` · _gsap, text, lines_
 
 ## Split-text reveals — `split` + `preset` (per-unit motion)
 

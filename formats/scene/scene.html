@@ -284,6 +284,38 @@
                 ...(ease ? { ease } : {}), ...rest });
             }
           }
+          // MOTION PATH (MotionPathPlugin): fly the layer along an SVG path. `motionPath:{path,align,
+          // autoRotate,dur,ease}`. A closed-form position at each t → pure in n (seeked timeline).
+          if (L.motionPath && window.gsap && window.MotionPathPlugin) {
+            const mp = L.motionPath;
+            window.gsap.to(el, {
+              motionPath: { path: mp.path, align: mp.align, alignOrigin: mp.alignOrigin, autoRotate: mp.autoRotate ?? false, curviness: mp.curviness },
+              duration: mp.dur ?? (L.duration ?? 2), ease: mp.ease || 'power1.inOut',
+              delay: (L.start ?? 0) + (mp.delay || 0), immediateRender: true });
+          }
+          // PHYSICS 2D (Physics2DPlugin): velocity/gravity/friction scatter. `physics:{velocity,angle,
+          // gravity,friction,spread,dur}`. On a split layer each unit gets an index-based angle spread
+          // (deterministic, no random) so a word explodes outward. Closed-form in t → pure in n.
+          if (L.physics && window.gsap && window.Physics2DPlugin) {
+            const p = L.physics, tg = (units && units.length) ? units : [el];
+            tg.forEach((u, i) => {
+              const angle = (p.angle ?? -90) + (tg.length > 1 ? (i - (tg.length - 1) / 2) * (p.spread ?? 0) : 0);
+              window.gsap.to(u, { physics2D: { velocity: p.velocity ?? 300, angle, gravity: p.gravity ?? 400, friction: p.friction ?? 0 },
+                duration: p.dur ?? (L.duration ?? 2), ease: 'none', delay: (L.start ?? 0) + (p.delay || 0), immediateRender: true });
+            });
+          }
+          // SPLIT TEXT (SplitText) — LINE level ONLY (char/word stay with the engine's own `split`). Its
+          // one non-redundant win is masked line reveals: each line clipped so it slides up from behind.
+          // `splitText:{mask,stagger,dur,ease}`. Do NOT combine with `split` on the same layer.
+          if (L.splitText && window.gsap && window.SplitText) {
+            const st = L.splitText;
+            const parts = new window.SplitText(el, { type: 'lines', mask: st.mask === false ? undefined : 'lines', linesClass: 'sline' });
+            parts.lines.forEach((ln, i) => {
+              window.gsap.fromTo(ln, { yPercent: 120, opacity: st.mask === false ? 0 : 1 },
+                { yPercent: 0, opacity: 1, duration: st.dur ?? 0.7, ease: st.ease || 'power3.out',
+                  delay: (L.start ?? 0) + i * (st.stagger ?? 0.09), immediateRender: true });
+            });
+          }
           return { L, el, units };
         });
 
