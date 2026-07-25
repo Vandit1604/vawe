@@ -2633,3 +2633,28 @@ last is a punch left 0.13s off, under no tolerance). Idempotent and regression-c
 
 **Lesson.** A grid derived from an asset file is not the grid heard in the render when the engine
 transforms that asset (loops it, time-stretches it). Sync tools must model the transform, not the file.
+
+## #129 — built a sparse TYPE-TEASER when the brief wanted a dense PRODUCT DEMO (told, didn't show)
+
+**What.** Asked for a launch film with the density of a real reference, I shipped 6 big-type-on-black
+beats in 21s ("On brand.", "in minutes.") and used ONE of 15 captured product surfaces. It read as
+empty and slogan-y next to the reference, which SHOWS the product working (prompt → generate → on-brand
+→ canvas → send → results) across a longer runtime.
+
+**Root cause (not what it looks like).** It was NOT too few cuts — ours cut MORE often than the reference
+(0.29 vs 0.20 beats/sec). Three real causes: (1) FRAME EMPTINESS — one word on a black field carries a
+fraction of the information a full product frame does; (2) TELLING not SHOWING — "On brand. Every time."
+is a claim with zero on-screen proof, the exact anti-pattern the value gate forbids ("never claim
+on-screen what the video doesn't show"); (3) UNDER-USING REAL ASSETS — 15 sections captured, 1 used, so
+the film substituted type for the product. Plus too short to walk a product journey.
+
+**Fix / rule.** A product launch film SHOWS the product. Every claim beat must be backed by the real
+surface that proves it (revenue claim → the revenue UI; on-brand → the collage; integrates → the ESP
+grid). Big-type-on-black is a TRANSITION or a hook, never the whole film. Density = information per
+frame (a real surface + a hero line + support), not cuts per second. Use the real captures you have;
+if you captured 15 surfaces, the film should draw on most of them. Longer is fine if every beat earns
+its time (the value gate). This lesson now lives in docs/CRAFT/RECREATION.md ("Density: show it").
+
+**Gate.** No static gate can score "shows vs tells" — this is a judged property. `make judge D=… VS=brew`
++ the value gate in the vawe-video-planning lock sheet (every beat names the artifact that earns it) are
+the checks; run them before shipping a launch film.

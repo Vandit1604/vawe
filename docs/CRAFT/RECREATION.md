@@ -43,6 +43,20 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
 - **True `<canvas>`/WebGL sections can't DOM-capture** → use the section screenshot as a clipped `image`
   layer with `ken`, and animate it OUR way (window / cut / camera / staggered parts).
 
+### 2b. Density: SHOW the product, don't state slogans (the biggest trap)
+The failure that reads as "ours shows so little" is almost never too few cuts (measure it — a teaser
+often cuts MORE than the reference). It is three things: (1) FRAME EMPTINESS — one word on a black field
+carries a fraction of a full product frame; (2) TELLING not SHOWING — a claim beat ("On brand. Every
+time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured. Rules:
+- **Every claim beat is backed by the surface that proves it.** Revenue → the revenue UI; integrates →
+  the ESP grid; on-brand → the collage. A claim with no artifact fails the value gate (MISTAKES #129).
+- **Big-type-on-black is a hook or a transition, never the whole film.** A launch film SHOWS the product.
+- **Density = information per frame** (a real surface + a hero line + support), not cuts per second.
+- **Use most of what you captured.** 15 surfaces captured and 1 used means the film substituted type for
+  the product. Walk the product journey (prompt → generate → edit → send → integrate → results).
+- **Longer is fine if every beat earns its time.** A dense 45s beats a hollow 20s; a boring 45s beats
+  nothing. The bar is the value gate, per beat.
+
 ### 3. Build it (the aliveness the reference has, our primitives)
 - **Centered + constant motion — NOT asymmetry.** The reference settles centered and stays in motion
   the whole time; the motion gives the dynamism, not an off-centre layout (MISTAKES #124/#125). Reach
