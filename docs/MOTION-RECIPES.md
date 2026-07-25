@@ -49,6 +49,21 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   custom/steps) — deterministic, seeked per frame. Pair with `anim:"none"` so GSAP owns the transform.
   `{ "anim": "none", "gsap": { "from": { "x": -500, "scale": 0.4, "opacity": 0 }, "to": { "x": 0, "scale": 1, "opacity": 1 }, "dur": 1.4, "ease": "elastic.out(1,0.45)" } }` · _entrance, easing, gsap_
 
+## Named GSAP effects — `fx` (reference a stored effect by name)
+
+A library of GSAP effects (`core/gsap-effects.js`, registered via `gsap.registerEffect`) you call by name
+from JSON. Pair with `anim:"none"` so GSAP owns the transform. On a `split` layer the effect runs PER
+UNIT with a stagger. Deterministic (seeked per frame). Add a row to the library → instantly referenceable.
+
+- **`fx-name`** — one named effect. `{ "anim": "none", "fx": "elasticIn" }` · _gsap, entrance_
+- **`fx-tuned`** — with params. `{ "anim": "none", "fx": { "name": "popIn", "dur": 0.5, "ease": "back.out(2)" } }` · _gsap_
+- **`fx-stack`** — an entrance + a loop. `{ "anim": "none", "fx": ["blurIn", "float"] }` · _gsap, loop_
+- **`fx-stagger`** — per-letter. `{ "split": "char", "anim": "none", "fx": "popIn" }` · _gsap, text, stagger_
+
+Entrances: `fadeIn · fadeUp · fadeDown · flyLeft · flyRight · popIn · zoomIn · zoomBlur · blurIn ·
+elasticIn · bounceIn · backIn · dropIn · spinIn · rollIn · skewIn · flipInX · flipInY`.
+Loops (emphasis): `float · pulse · breathe · wobble · swing · drift · heartbeat`.
+
 ## Split-text reveals — `split` + `preset` (per-unit motion)
 
 - **`words-rise`** — words rise in as a wave; the default kinetic headline.

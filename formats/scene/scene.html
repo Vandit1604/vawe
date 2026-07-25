@@ -249,6 +249,21 @@
           }
           // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
           if (L.morph && window.gsap) buildMorph(el, L, window.gsap);
+          // NAMED GSAP effects (core/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
+          // Reference a stored effect by name; the engine runs it on the paused timeline (seeked per frame).
+          if (L.fx && window.gsap) {
+            // split layers apply the effect PER UNIT with a stagger (each letter/word pops in turn);
+            // otherwise the whole layer is the target.
+            const targets = (units && units.length) ? units : el;
+            for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
+              const spec = typeof item === 'string' ? { name: item } : (item || {});
+              const fn = window.gsap.effects[spec.name];
+              if (!fn) { console.warn(`fx: unknown GSAP effect "${spec.name}"`); continue; }
+              const { name, dur, ease, delay, stagger, ...rest } = spec;
+              fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
+                ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
+            }
+          }
           return { L, el, units };
         });
 
@@ -308,7 +323,7 @@
             }
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-            if (units && !L.circle && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+            if (units && !L.circle && !L.fx && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
             // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
             // place, every frame. Stateless and derived from t, so it stays pure in n.
             if (units && L.ransom && L.ransom.cycle && t >= start && t < end)

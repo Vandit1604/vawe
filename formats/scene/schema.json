@@ -855,6 +855,10 @@
           "type": "object",
           "label": "TextMorph: letters migrate from `text` to another word. { to, dur, ease }. Shared letters glide, others crossfade. Needs w + align:center. GSAP-driven, deterministic."
         },
+        "fx": {
+          "type": "string|object|array",
+          "label": "Named GSAP effect(s) from core/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/...) + loops (float/pulse/breathe/wobble). Pair with anim:none."
+        },
         "gsap": {
           "type": "object",
           "label": "Declarative GSAP tween: { from:{x,y,scale,rotation,opacity,...}, to:{...}, dur, ease }. Gives the full GSAP easing library (elastic/back/bounce/expo/custom). Deterministic (seeked per frame)."

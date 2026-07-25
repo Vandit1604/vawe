@@ -5,6 +5,7 @@
 // Extracted from boot() so each concern reads on its own, and so the tree-walk that finds each asset
 // kind lives in ONE place (walkData) instead of five hand-copied recursive scanners.
 import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
+import { registerGsapEffects } from './gsap-effects.js';
 
 // Visit every node of the scene JSON (objects, arrays, and string leaves), pre-order. Each preloader
 // passes a `visit` that picks out the nodes it cares about. One walker, five callers.
@@ -113,9 +114,9 @@ export async function preloadRansomSprites(data) {
 // before the virtual clock like the other runtimes; seekAll(t) pauses gsap.globalTimeline and seeks it
 // per frame, so tweens stay pure in n. The ticker is stopped so GSAP never self-advances (we drive it).
 export async function preloadGsap(data) {
-  if (!/"(gsap|morph)"\s*:/.test(JSON.stringify(data))) return;
+  if (!/"(gsap|morph|fx)"\s*:/.test(JSON.stringify(data))) return;
   if (!window.gsap) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/gsap.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
-  if (window.gsap) { try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); } catch (e) {} }
+  if (window.gsap) { try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); registerGsapEffects(window.gsap); } catch (e) {} }
 }
 
 // Preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its src;
