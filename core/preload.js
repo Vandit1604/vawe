@@ -76,7 +76,9 @@ export async function preloadComponents(data) {
   window.__components = {};
   const paths = new Set();
   walkData(data, (o) => { if (typeof o === 'string' && /\/(components|scenes)\/[^/]+\.json$/.test(o)) paths.add(o); });
-  for (const p of paths) { try { window.__components[p] = await (await fetch(p)).json(); } catch (e) {} }
+  // A component that fails to load leaves its `component` layer EMPTY. Warn (matches lottie/gsap) so a
+  // moved/mistyped capture path is visible, not a silently blank box.
+  for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status} — layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable — layer renders EMPTY`); } }
 }
 
 // Preload generated CLIPS (scripts/gen-clip.mjs): any "/…/manifest.json" string is a frame-sequence
@@ -88,10 +90,12 @@ export async function preloadClips(data) {
   walkData(data, (o) => { if (typeof o === 'string' && /\/manifest\.json$/.test(o)) paths.add(o); });
   for (const p of paths) {
     try {
-      const man = await (await fetch(p)).json();
+      const r = await fetch(p);
+      if (!r.ok) { console.warn(`clip: ${p} → ${r.status} — layer renders EMPTY`); continue; }
+      const man = await r.json();
       window.__clips[p] = man;
       await Promise.all((man.frames || []).map((src) => decodeImage(src).catch(() => {})));
-    } catch (e) {}
+    } catch (e) { console.warn(`clip: ${p} unreadable — layer renders EMPTY`); }
   }
 }
 
