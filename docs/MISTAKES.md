@@ -2615,3 +2615,21 @@ still pass. The demo was fixed the `<br>` way (one layer, natural line stacking)
 **Lesson.** A prop that is honoured only under a companion prop is a silent-drop waiting to happen. When
 the engine reads an input conditionally, the validator must assert the condition — "works or fails loudly",
 never "accepted and ignored".
+
+## #128 — beatsync couldn't snap cuts past the music LOOP: a short bed left most of a film off-grid
+
+**What.** `make beatsync` snapped only 2 of 5 cuts in a 21s film. The bed (warm.wav) is an 8s loop; the
+Go mixer repeats it to fill the film, but the beatmap only covers the 8s track file — so there are no
+beats past 7.7s, and every cut after the first loop (11s, 14s, 17s) had nothing to snap to and was left
+off-grid. A beat-synced film that desyncs after 8 seconds is worse than not syncing.
+
+**Root cause.** beatsync read the beat grid verbatim from the beatmap without accounting for the bed
+looping in the render. The grid described one loop; the film played several.
+
+**Fix.** beatsync now UNROLLS a looping grid: a seamless bed keeps its beat phase across the loop seam,
+so beat b recurs at b + k·period (period = the track's `seconds`). It replicates the grid across the
+scene duration before snapping. On the 21s film: +33 beats → 4 of 5 cuts now land on the beat (the
+last is a punch left 0.13s off, under no tolerance). Idempotent and regression-checked on the seam demo.
+
+**Lesson.** A grid derived from an asset file is not the grid heard in the render when the engine
+transforms that asset (loops it, time-stretches it). Sync tools must model the transform, not the file.

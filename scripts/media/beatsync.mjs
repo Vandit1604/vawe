@@ -41,9 +41,23 @@ if (!fs.existsSync(beatsFile)) {
   if (r.status !== 0 || !fs.existsSync(beatsFile)) { console.error('✗ beatmap failed — cannot sync'); process.exit(1); }
 }
 const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));
-const grid = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
+const data = JSON.parse(fs.readFileSync(D, 'utf8'));
+let grid = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
 if (!grid.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat) — nothing to snap to`); process.exit(1); }
 const beatInt = 60 / (bm.bpm || 120);
+
+// A short bed LOOPS to fill the film (the Go mixer repeats music.wav), but the beatmap only covers the
+// track file — so beats past the loop length don't exist and later cuts had nothing to snap to. Unroll
+// the grid across the scene: a seamless bed keeps its beat phase, so beat b recurs at b + k·period.
+let sceneDur = data.duration || 0;
+if (!sceneDur) for (const L of data.layers || []) sceneDur = Math.max(sceneDur, (L.start ?? 0) + (L.duration ?? 2));
+const period = bm.seconds || 0;
+let unrolled = 0;
+if (period > 0.5 && sceneDur > period + 0.1) {
+  const base = grid.slice();
+  for (let k = 1; k * period < sceneDur; k++) for (const b of base) { const t = +(b + k * period).toFixed(4); if (t <= sceneDur) { grid.push(t); unrolled++; } }
+  grid.sort((a, b) => a - b);
+}
 // default tolerance = half a beat, capped so a snap never drags an edit implausibly far
 const TOL = +(flag('--snap') || process.env.SNAP || Math.min(0.18, beatInt * 0.5));
 
@@ -53,7 +67,6 @@ const snap = (t) => {
   return bd <= TOL ? { to: +best.toFixed(3), drift: +bd.toFixed(3) } : null;
 };
 
-const data = JSON.parse(fs.readFileSync(D, 'utf8'));
 const moves = [];
 // each edit kind: [array, key, label]
 const kinds = [
@@ -83,6 +96,7 @@ if (SNAP_LAYERS && Array.isArray(data.layers)) {
 const snapped = moves.filter((m) => !m.onbeat && m.drift > 0.0005);
 const already = moves.filter((m) => m.onbeat);
 console.log(`\n  beatsync · ${path.basename(D)}  ×  ${bm.track} (${bm.bpm.toFixed(1)} BPM, ${GRID} grid, conf ${bm.confidence.toFixed(2)})`);
+if (unrolled) console.log(`  bed loops every ${period}s → unrolled the grid across ${sceneDur.toFixed(1)}s (+${unrolled} beats) so later cuts can snap`);
 console.log(`  tolerance ${TOL.toFixed(3)}s (half-beat ${(beatInt / 2).toFixed(3)}s) · ${snapped.length} edit(s) moved onto the beat · ${already.length} already on-beat`);
 for (const m of snapped) console.log(`    ${m.label.padEnd(11)} ${m.from.toFixed(3)}s → ${m.to.toFixed(3)}s  (${(m.drift * 1000).toFixed(0)}ms)`);
 const offgrid = [];
