@@ -25,6 +25,11 @@ const ANIM = {
 // and therefore silently resolved to fade (MISTAKES #21).
 export const ANIM_NAMES = Object.keys(ANIM);
 
+// Base enter/exit durations, in seconds. Snap band (0.2-0.3s): a default entrance that lands in ~a
+// third of a second reads as directed; the old 0.45/0.4 read as floaty. Exported so scene.html can
+// scale them by the theme's motion.durationScale from ONE source (no duplicated literal).
+export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
+
 /**
  * The opacity envelope every layer fades through. Eased, and MIRRORED: the exit curve is the
  * complement of the entrance curve, so two layers handing over the same pixels sum to exactly 1.
@@ -52,8 +57,8 @@ export function driveClips(root, t) {
     const start = parseFloat(el.dataset.start) || 0;
     const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
     const end = start + dur;
-    const enterDur = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
-    const exitDur = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : 0.4;
+    const enterDur = el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER;
+    const exitDur = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : BASE_EXIT;
     if (el.dataset.track != null) el.style.zIndex = el.dataset.track;
 
     if (t < start || t >= end) { el.style.opacity = '0'; el.style.pointerEvents = 'none'; continue; }

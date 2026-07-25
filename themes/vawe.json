@@ -27,11 +27,11 @@
   },
   "motion": {
     "easing": "easeOutExpo",
-    "bounce": 0.02,
+    "bounce": 0.08,
     "settle": 0.5,
     "enter": 36,
-    "durationScale": 0.95,
-    "stagger": 0.055
+    "durationScale": 0.88,
+    "stagger": 0.045
   },
   "bg": {
     "accent": "37,99,235",

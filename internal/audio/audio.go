@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -78,7 +79,17 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 	// video authored without thinking about audio. A music track is now opt-in: name it, or get silence.
 	musicFile := ""
 	if cfg.Music != "" {
-		musicFile = resolve(bases, cfg.Music, "")
+		// A bare bed NAME (no path separator, no extension — e.g. "tense") resolves to
+		// assets/music/<name>.wav, the same place `make audio`/`make music-pack` write and the same
+		// rule core/validate.mjs checks. Without this, a named bed matched nothing and dropped to
+		// silence with no error — a silent substitution the validator wrongly reported as fine
+		// (docs/MISTAKES.md #132). A real path ("assets/music/lofi.wav") resolves directly and never
+		// hits the fallback.
+		fallback := ""
+		if !strings.ContainsAny(cfg.Music, "/\\") && filepath.Ext(cfg.Music) == "" {
+			fallback = filepath.Join("music", cfg.Music+".wav")
+		}
+		musicFile = resolve(bases, cfg.Music, fallback)
 	}
 	voFile := resolve(bases, cfg.VO, "")
 	// `Sting` was resolved here and then used ONLY in the emptiness guard below — its samples never

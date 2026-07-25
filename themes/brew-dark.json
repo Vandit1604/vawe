@@ -31,11 +31,11 @@
   },
   "motion": {
     "easing": "easeOutBack",
-    "bounce": 0.14,
-    "settle": 0.4,
+    "bounce": 0.16,
+    "settle": 0.38,
     "enter": 44,
-    "durationScale": 0.9,
-    "stagger": 0.05
+    "durationScale": 0.85,
+    "stagger": 0.045
   },
   "bg": {
     "accent": "255,116,46",

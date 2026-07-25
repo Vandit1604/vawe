@@ -62,8 +62,8 @@
     </div>
     <script type="module">
       import { boot } from '/core/boot.js';
-      import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed } from '/core/motion.js';
-      import { driveClips, seekAll } from '/core/clips.js';
+      import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
+      import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
       import { splitText, animateUnits } from '/core/type.js';
       import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
@@ -89,6 +89,10 @@
         const cam = $('cam'), cv = $('cv');
         cv.width = W; cv.height = H;
         const ctx = cv.getContext('2d');
+        // motion personality: the theme's {durationScale, stagger, ...}, resolved ONCE. This is what
+        // makes a brand's snap real at render time (it was defined but never applied before). Layers
+        // that set their own enterDur/exitDur/stagger still win; this only supplies the default.
+        const M = motionDefaults(theme);
 
         // ---- bg windows: [{preset, from, to, value}] drawn on canvas from the THEME's palette ----
         // bg seed: default = hash(theme name + preset) so the SAME preset looks different across brands;
@@ -208,9 +212,13 @@
           el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
           if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
           if (L.split) el.dataset.enter = '0';
-          else if (L.enterDur != null && !L.cut) el.dataset.enter = String(L.enterDur); // rhythm: per-layer entry pace
+          // rhythm: per-layer entry pace. Default = the base snap duration scaled by the theme's
+          // durationScale (a calm brand stretches it, a punchy one tightens it). durationScale 1 lands
+          // exactly on the clips.js base, so default-motion themes render byte-identical.
+          else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
           if (L.out) el.dataset.out = L.out;
           if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
+          else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale).toFixed(3));
 
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
           // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
@@ -287,7 +295,7 @@
             }
             // kinetic split-text on its local clock (clip appears instantly, units reveal).
             // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : 0.06), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
+            if (units && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, ...(L.presetOpts || {}) });
             // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
             // place, every frame. Stateless and derived from t, so it stays pure in n.
             if (units && L.ransom && L.ransom.cycle && t >= start && t < end)

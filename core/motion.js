@@ -147,6 +147,13 @@ Object.assign(EASINGS, {
 // state sits at true rest — no sub-pixel residual that would blur text on hold.
 export const easeOutSettle = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.08, settle: 0.7 }));
 EASINGS.settle = easeOutSettle;
+// easeOutSnap — the default LAYER entrance feel: a touch more overshoot than easeOutSettle so a card
+// or headline visibly snaps-past-and-settles (the single most recognizable motion-graphics tell)
+// instead of gliding in floaty. Bounce stays modest (0.16) so it reads premium, not toy, and it is
+// used ONLY by the layer-level `rise` — the per-unit type presets keep easeOutSettle so a whole line
+// of words does not wobble. Endpoints snapped exactly (true rest on hold, no sub-pixel text blur).
+export const easeOutSnap = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.2, settle: 0.58 }));
+EASINGS.snap = easeOutSnap;
 // springSettle(opts) — seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {
   const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
@@ -168,7 +175,10 @@ export function track(n, fps, beats) {
 }
 
 // transition helpers → {opacity, transform} (compositor-friendly only). Object.assign onto el.style.
-export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${(1 - easeOutSettle(clamp01(t))) * dist}px)` });
+// rise uses easeOutSnap (not easeOutSettle): the modest overshoot carries the translate slightly
+// PAST its rest point and settles back, which is what makes a default entrance read as directed
+// rather than floaty. The overshoot is deterministic and lands exactly at rest by t=1.
+export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${((1 - easeOutSnap(clamp01(t))) * dist).toFixed(2)}px)` });
 export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
 export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
 // lift — the entrance for things that should feel ALIVE arriving (faces, cards, chips) rather than
@@ -407,7 +417,7 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // escape hatch. A theme missing required keys (core/theme-contract.js) throws at boot, so a video
 // can never render with fallback CSS. Motion personality alone keeps engine defaults — it tunes
 // HOW primitives move, not what the video looks like.
-export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.06 };
+export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045 };
 
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),

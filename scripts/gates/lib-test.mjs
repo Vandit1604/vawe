@@ -264,7 +264,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // past 1 before settling. The f(0)=0 / f(1)=1 checks below still apply to them — overshooting is
   // character, not arriving is a bug (see the spring-bouncy f(1)=0.96 fix).
   const OVERSHOOT = new Set(['easeOutBack', 'easeInBack', 'easeInOutBack', 'easeOutElastic', 'easeInElastic',
-    'easeInOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle']);
+    'easeInOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle', 'snap']);
   let bad = [];
   for (const [name, fn] of Object.entries(EASINGS)) {
     if (Math.abs(fn(0)) > 1e-6) bad.push(`${name}(0)!=0`);

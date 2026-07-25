@@ -73,9 +73,10 @@ for (const [name, opts] of Object.entries(BEDS)) {
   const dur = writeWav(path.join(MUSIC, `${name}.wav`), normalize(musicBed(opts), 0.34));
   total += dur; n++;
 }
-// default music.wav the Go mixer auto-discovers when a scene names no bed
-fs.copyFileSync(path.join(MUSIC, 'calm.wav'), path.join(root, 'assets/music.wav'));
+// NOTE: no assets/music.wav default is written. The synth beds read as a drone, so silence is the
+// default (internal/audio/audio.go) and the real-loop pack (`make music-pack`) is the opt-in bed.
+// These synth beds stay available for anyone who names one explicitly, but nothing auto-selects them.
 
 console.log(`✓ baked ${n} file(s), ${total.toFixed(1)}s of audio @ ${SR}Hz — synthesized, deterministic, no licence`);
 console.log(`  sfx   → assets/sfx/     (${n} written, ${kept} kept — --force to re-bake)`);
-console.log(`  music → assets/music/   (${Object.keys(BEDS).join(', ')}) + assets/music.wav default`);
+console.log(`  music → assets/music/   (${Object.keys(BEDS).join(', ')}) — synth beds, opt-in only (real loops: make music-pack)`);

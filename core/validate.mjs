@@ -321,8 +321,6 @@ if (isMain) {
   // import stays in the CLI branch and never reaches the browser.
   const { CUES } = await import('./audio-kit.mjs');
   const CUE_NAMES = Object.keys(CUES);
-  let BEDS = [];
-  try { BEDS = fs.readdirSync(path.join(root, 'assets/music')).filter((n) => n.endsWith('.wav')).map((n) => n.replace(/\.wav$/, '')); } catch { }
 
   // Anti-rot guard: the cue enum in schema.json is DISCOVERABILITY only (so authors + MCP can see the
   // valid names); CUES is the source of truth. If they drift, the schema lies — fail loudly to resync.
@@ -426,9 +424,13 @@ if (isMain) {
       const m = A.music;
       if (m === 'auto') {
         audioWarns.push(`audio.music:"auto" is unresolved — run \`make audio-bed D=… WRITE=1\` to bake the profile's bed in, or the mixer falls back to SILENCE.`);
-      } else if (typeof m === 'string' && A.auto !== true) {
-        const ok = BEDS.includes(m) || resolves(m) || fs.existsSync(path.join(root, 'assets/music', m + '.wav'));
-        if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file — the mixer falls back to SILENCE. Use "auto", a bed (${BEDS.join(' / ') || 'run make audio'}), or a real .wav path.`);
+      } else if (typeof m === 'string') {
+        // `auto` is the auto-SOUND-DESIGN flag (derives SFX cues); it has NOTHING to do with music
+        // resolution. Skipping the music check when auto:true is how vawe-identity's bare "tense" bed
+        // shipped SILENT for so long (docs/MISTAKES.md #132). The mixer now resolves a bare bed name
+        // to assets/music/<name>.wav, so mirror EXACTLY that here — the two must agree.
+        const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
+        if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file — the mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
       }
       // (c) VO + sidecars named but absent → the mixer skips them without a word. Fail instead.
       for (const k of ['vo', 'voWords', 'spectrum']) {

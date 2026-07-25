@@ -2658,3 +2658,70 @@ its time (the value gate). This lesson now lives in docs/CRAFT/RECREATION.md ("D
 **Gate.** No static gate can score "shows vs tells" — this is a judged property. `make judge D=… VS=brew`
 + the value gate in the vawe-video-planning lock sheet (every beat names the artifact that earns it) are
 the checks; run them before shipping a launch film.
+
+## #130 — our motion read FLOATY, not because we lacked snap but because the snap was never wired or defaulted
+
+**What.** Videos looked soft next to real motion graphics. The instinct was "we need spring/overshoot
+easing." We already HAD it — `core/motion.js` ships `easeOutBack`, elastic, bounce, an analytic
+`spring()`, `springEase`, and a per-brand `motion` personality object. It just never reached the pixels.
+
+**Root cause.** Two silent gaps. (1) `motionDefaults(theme)` — the `{easing,bounce,settle,enter,
+durationScale,stagger}` personality — was defined, validated by lib-test, and consumed by NOTHING at
+render time: `formats/scene/scene.html` never imported it, so a brand's declared snap did nothing. (2)
+The default timing was floaty: `enterDur 0.45 / exitDur 0.4` (a half-second move reads soft) and the
+default `rise` used `easeOutSettle` at bounce 0.08 — essentially no overshoot. So every default-authored
+layer glided in. Having the capability in the library is not the same as applying it.
+
+**Fix.** Wired `motionDefaults(theme)` into scene.html (durationScale scales enter/exit, stagger feeds
+split-text, applied as the fallback only — a layer's own values still win). Tightened the global defaults:
+`BASE_ENTER 0.32 / BASE_EXIT 0.28` (exported from core/clips.js so scene.html scales from ONE source).
+Added `easeOutSnap` (spring, bounce 0.16) and pointed the default `rise` at it so entrances overshoot-and-
+settle. `pop`/`scale` already used `easeOutBack`. This re-baselines every scene's motion (accepted).
+
+**Gate.** `make lib-test` holds the easing contract (f(0)=0, f(1)=1; overshoot curves allow-listed incl.
+`snap`). `make probe`/`make snap` re-baseline the DOM signatures; diff them to see which scenes changed.
+The judged quality is the before/after clip (`formats/scene/motion-test.json`).
+
+## #131 — the music bed BUZZED because it was synthesized oscillators, and it was auto-selected
+
+**What.** The default soundtrack read as a drone/buzz. The bed (`warm`/`calm`/`tense`) is not a recording
+— it is stacked sine oscillators summed by `musicBed()` (core/audio-kit.mjs), with no percussion or real
+instrument. Worse, `core/audio-select.js` auto-selected one of these synth beds for several profiles, so
+a scene got the drone without asking.
+
+**Root cause.** A synthesized pad has no beat and no timbre variation; summed sines ring as a buzz. It was
+the wrong instrument for a bed, and nothing routed around it because the profile→bed map pointed straight
+at it. Silence was already the engine default, but `music:"auto"` (and the `calm→music.wav` copy) reached
+for the synth.
+
+**Fix.** Nothing auto-selects a synth bed anymore. `core/audio-select.js` maps music moods onto REAL
+royalty-free loops (`make music-pack` → assets/music/{lofi,chill,beat}.wav, Mixkit, no-attribution,
+provenance in credits.json); restraint profiles map to silence. Dropped the `calm→music.wav` default so
+no synth bed is ever the implicit soundtrack. Silence + crisp SFX is the default; a real beat is an opt-in
+asset (and a real loop has a real beat, so `make beatsync` can finally snap cuts to it). The synth beds
+stay available for anyone who names one explicitly, but they are no longer the default.
+
+**Gate.** `make sfx-check` still holds the SFX duration classes. Music is gitignored/re-fetched, so the
+repo redistributes nothing; `credits.json` records every source + licence (confirm music licence before
+commercial release — it differs from the SFX licence).
+
+## #132 — a bare bed NAME in `audio.music` shipped SILENT: the Go mixer and the validator disagreed on resolution
+
+**What.** `vawe-identity.json` set `"music": "tense"` (a bare bed name) and played nothing — silent, with
+no error. The validator reported it fine. Two independent resolution rules had drifted apart.
+
+**Root cause.** (1) The Go mixer's `resolve()` joins `base + p` literally and appends NO extension, so the
+bare name "tense" matched no file and dropped to silence. (2) `core/validate.mjs` DID accept it — it
+checks `assets/music/<name>.wav` — but only when `audio.auto !== true`, and vawe-identity had `auto:true`
+(the auto-SOUND-DESIGN flag, which has nothing to do with music). So the validator skipped the check that
+would have caught it. Two resolvers, two different answers, and the gate abstained on the one scene that
+needed it. Classic silent substitution — the failure mode the audio doctrine explicitly forbids.
+
+**Fix.** Made the two agree. The Go mixer now resolves a bare bed name (no separator, no extension) to
+`assets/music/<name>.wav` via the existing `resolve` fallback arg (internal/audio/audio.go) — a named bed
+works, a real path still resolves directly. The validator no longer skips the music check on `auto:true`
+and mirrors the mixer's rule exactly. Separately, vawe-identity was pointed at silence (it is the `linear`
+profile — silence is the score — and "tense" was a retired synth drone), so the fix does not resurface a buzz.
+
+**Gate.** `make validate` now warns on any `audio.music` that will not resolve, on every scene including
+`auto:true` ones. The rule it checks is byte-for-byte the mixer's rule, so the two cannot drift again.

@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit
+.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -31,6 +31,11 @@ vo-captions:
 # from the sfx one and is not machine-readable — confirm before commercial release.
 music:
 	node scripts/media/music.mjs $(if $(ID),--id $(ID)) $(GENRE) $(N) $(NAME)
+
+# make music-pack  — fetch the curated real-loop pack (lofi/chill/beat) the engine ships as its
+# default sound, replacing the synthesized drone beds. core/audio-select.js maps profiles onto these.
+music-pack:
+	node scripts/media/music.mjs --pack
 
 # make beatmap MUSIC=assets/music/launch.wav  — detect tempo + beat grid -> <name>.beats.json, so an
 # edit can be built ON the music. Reports confidence; an ambient pad has no beat and it says so.

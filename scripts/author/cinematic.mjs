@@ -34,11 +34,13 @@ const isHero = (l) => l.type === 'text' && (l.size ?? 96) >= 180 && wordCount(l.
 // PHRASE = a multi-word text line (candidate for typing / inkflash colour-wave)
 const isPhrase = (l) => l.type === 'text' && wordCount(l.text) >= 2 && !l.typing && l.preset == null && l.text != null;
 
-// the dolly: enter oversized → settle → drift → exit bigger (with motion-blur streak). Pure motion track.
+// the dolly: enter oversized → SNAP to rest (spring settle, slight overshoot) → drift → exit bigger
+// (with motion-blur streak). Pure motion track. The settle uses `spring` and lands in ~0.34s so a
+// hero arrives directed, not floaty — the same snap the default entrances now carry.
 const dolly = (du) => [
-  { t: 0, scale: 1.45, opacity: 0, ease: 'easeOutCubic' },
-  { t: 0.42, scale: 1.0, opacity: 1, ease: 'easeOutCubic' },
-  { t: +Math.max(0.55, du - 0.3).toFixed(2), scale: 1.04, ease: 'linear' },
+  { t: 0, scale: 1.5, opacity: 0, ease: 'easeOutCubic' },
+  { t: 0.34, scale: 1.0, opacity: 1, ease: 'spring' },
+  { t: +Math.max(0.5, du - 0.3).toFixed(2), scale: 1.04, ease: 'linear' },
   { t: +du.toFixed(2), scale: 1.8, opacity: 0, ease: 'easeInCubic' },
 ];
 

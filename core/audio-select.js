@@ -5,34 +5,36 @@
 // get the right bed from its `profile`. Pure + deterministic: same profile -> same bed, no clock,
 // no randomness, no I/O (the CLI at the bottom only reads+prints).
 //
-// The engine bakes exactly THREE beds (scripts/media/audio-bake.mjs BEDS): calm, warm, tense.
-// SOUND.md names richer moods (ambient pad, soft electronic, driving drop, drone…); each collapses
-// onto the closest of those three, or to SILENCE where SOUND.md says space IS the score. Silence is
-// the engine default (internal/audio/audio.go), so an unmapped/absent profile stays silent.
+// The synthesized beds (calm/warm/tense) are NO LONGER auto-selected — stacked oscillators read as a
+// drone/buzz, so nothing here points at them. A music mood now maps to a REAL royalty-free loop from
+// the curated pack (`make music-pack` → assets/music/{lofi,chill,beat}.wav; provenance in
+// credits.json). Silence stays the engine default (internal/audio/audio.go), so an unmapped/absent
+// profile — and every "space IS the score" profile below — renders silent. If the pack hasn't been
+// fetched the mixer simply finds no file and plays silence: a real loop is always an opt-in asset.
 //
 // Gains are on the `musicGain` scale (0..1 mix level; engine default 0.6), NOT the internal
-// synthesis gain (~0.05). A bed sits UNDER the type, so these stay below the 0.6 default — quietest
-// for premium-calm, loudest for the energetic drop.
+// synthesis gain. A bed sits UNDER the type, so these stay below the 0.6 default — quietest for
+// premium-calm, loudest for the energetic drop.
 
 const FADE = { in: 1.0, out: 1.5 }; // a short lift in / longer settle out — never a hard cut
 
-// Profile -> bed, with the SOUND.md rationale for each row inline. `bed:null` means silence.
+// Profile -> real loop, with the SOUND.md rationale inline. `bed:null` means silence.
 export const PROFILE_BED = {
-  // "silence or a warm sparse pad" (§5). Take the pad, keep it quiet — restraint is the point.
-  apple:     { bed: 'calm',  gain: 0.38, fade: FADE },
+  // "silence or a warm sparse pad" (§5). Restraint is the point — silence, not a loop under the type.
+  apple:     { bed: null },
   // "silence or a cold pulse; no bed under text" (§5). Silence — the type carries a technical read.
   linear:    { bed: null },
   vercel:    { bed: null },
-  // "soft electronic bed, forward but calm" (§2, mid energy). warm gives body without a pulse.
-  stripe:    { bed: 'warm',  gain: 0.5,  fade: FADE },
-  // "a driving bed with a drop, cuts on the beat" (§5). tense is the only bed with a pulse -> loudest.
-  nike:      { bed: 'tense', gain: 0.6,  fade: FADE },
+  // "soft electronic bed, forward but calm" (§2, mid energy). The jazzy lo-fi loop gives body, calm.
+  stripe:    { bed: 'assets/music/lofi.wav',  gain: 0.42, fade: FADE },
+  // "a driving bed with a drop, cuts on the beat" (§5). The hip-hop loop has real drums -> loudest.
+  nike:      { bed: 'assets/music/beat.wav',  gain: 0.55, fade: FADE },
   // "silence is the score; maybe one drone" (§5). Silence — a bed cheapens the tension.
   a24:       { bed: null },
   // "no bed or a tick pulse; functional" (§2). Silence — the data, not a mood, does the work.
   bloomberg: { bed: null },
-  // "bright bouncy bed, major-key" (§2, high/sunny). warm reads warmest of the three -> a touch louder.
-  duolingo:  { bed: 'warm',  gain: 0.55, fade: FADE },
+  // "bright bouncy bed, major-key" (§2, high/sunny). The chillout loop reads sunniest of the pack.
+  duolingo:  { bed: 'assets/music/chill.wav', gain: 0.5,  fade: FADE },
 };
 
 // selectBed(profile) -> {bed, gain, fade} for a real bed, or {bed:null} for silence.

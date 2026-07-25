@@ -54,6 +54,8 @@ formats/scene/*.json
 !formats/scene/hero-site.json
 !formats/scene/showcase-*.json
 !formats/scene/site-backdrop.json
+# motion-test: the before/after snap demo — a permanent engine demo AND a motion regression fixture.
+!formats/scene/motion-test.json
 assets/music/
 # music.wav is BAKED by `make audio` (core/audio-kit.mjs) — generated, never committed.
 assets/music.wav

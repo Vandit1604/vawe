@@ -49,6 +49,29 @@ more letters on screen, the more total churn per second at the same cycle.
 Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blur"` with `each` 0.75 and
 `stagger` 0.06 gives a left-to-right defocus sweep that resolves over ~0.7s (see ransom-internal.json).
 
+## Snap — the overshoot-and-settle (what separates ours from real motion graphics)
+
+The single most recognizable "this was directed" tell in professional motion graphics is **overshoot**:
+an element moves fast, passes slightly beyond its rest point, and settles back. A curve that only
+decelerates to its target (easeOutCubic) reads floaty; a curve that overshoots and settles reads alive.
+This is not a new capability — the engine ships it — it just has to be USED.
+
+- **Entrances overshoot; the default now does it for you.** The layer-level `rise`/`up` entrance uses
+  `easeOutSnap` (a modest spring, bounce 0.20): the translate carries past rest and settles. `pop`/`scale`
+  use `easeOutBack`. You get snap for free on any `anim:"rise"`/`"pop"` layer — reach for a flat curve
+  only when you deliberately want calm.
+- **Snap lands in the 0.2-0.3s band.** Default enter is now **0.30s** (was 0.45), exit **0.26s** (was 0.4).
+  A move that takes half a second reads floaty; a third of a second reads confident. Stretch only with intent.
+- **Overshoot on ANY keyframe track.** On a `motion[]`/count/camera keyframe, set `ease:"spring"` (or
+  `"spring-bouncy"`/`"spring-stiff"`) and the value overshoots-and-settles instead of gliding. Same for
+  cut timing `pop`. This is how a card, a bar, or a number arrives with weight.
+- **The theme owns the personality — and it now applies.** `theme.motion`
+  `{easing,bounce,settle,enter,durationScale,stagger}` scales every default at render time (a punchy brand
+  tightens `durationScale`/`stagger`; a calm one stretches them). It was defined-but-unwired before; it is
+  live now, so set it per brand rather than hand-tuning every layer.
+- **Keep it premium, not toy.** Bounce is deliberately modest (0.14-0.16). A big visible bounce on every
+  word reads as a children's app. Overshoot should be felt, not counted.
+
 ## Genre pacing tables
 
 | Genre | Beat length | Entry pace | Cuts | Stings |
@@ -65,6 +88,33 @@ Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blu
 - DO stagger board cards 60–90ms. DON'T pop a whole board at once (reads as a screenshot).
 - DO end on a held frame (exitDur 0). DON'T fade the CTA (the holdLast bug class).
 - DO scale travel to element size (22px for UI text, 40–70px for heroes). DON'T fling small text far.
+
+## Cut, or transition? (the boundary between two beats)
+
+Before reaching for a seam/sting, ask whether the beat wants a plain CUT. Grounded in School of Motion's
+six essential transitions (https://schoolofmotion.com/blog/six-essential-motion-design-transitions-tutorial):
+*"Simplicity is the ultimate sophistication"* — the hard cut is the professional default, and a transition
+has to EARN its place. Map the editorial intent to the mechanism:
+
+| Intent between two beats | Use | In the engine |
+|---|---|---|
+| Fast pace / on the beat / raw impact | **Hard cut** (no transition) | just adjacent beats; `cut:"none"`; `make beatsync` puts it on the beat |
+| Passage of time · location change · montage | **Dissolve** | `seam:"dissolve"` / `fade` |
+| Punch / launch / hide-then-reveal (matched action) | **Cut on action** | a hard cut placed ON the motion (e.g. at a click's impact frame) |
+| Visual continuity — a shape/object carries over | **Match cut** | align the two beats' hero shape + `seam:"fade"`, or a `morph` when a real shape tweens |
+| Element is sub-framed / diving into a screen | **Dynamic zoom** | `seam:"cinematicZoom"` / camera push into the artifact |
+| Logo / icon / "awe" flourish | **Morph** | reserve it (the article calls it "the most complicated") — logos and one hero moment only |
+
+Rules of thumb from the article, as engine doctrine:
+- **Default to the hard cut.** If a transition would overcomplicate the boundary, cut. A film is mostly cuts
+  with a few earned transitions, not a transition on every seam (that reads as a template, and the ledger
+  flags it).
+- **Cut TO the beat.** A hard cut re-times a boundary to the music — this is exactly what `make beatsync`
+  automates now that beds have a real beat. On-beat cuts read directed; off-beat ones read sloppy.
+- **A transition states a relationship** (time passed, place changed, this-becomes-that). If there is no
+  relationship to state, the cut is the honest choice.
+- **Master a few.** fade/dissolve · one momentum move (whip/push) · one zoom · a rare morph. Don't spread
+  across the whole `SEAM_FX`/`SHADER_FX` menu in one film.
 
 ## Effect selection guide (when to use what)
 
