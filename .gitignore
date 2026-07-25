@@ -56,6 +56,9 @@ formats/scene/*.json
 !formats/scene/site-backdrop.json
 # motion-test: the before/after snap demo — a permanent engine demo AND a motion regression fixture.
 !formats/scene/motion-test.json
+# flagship examples + their registry — the showcase the repo ships (make gallery).
+!formats/scene/example-*.json
+!formats/scene/examples.json
 assets/music/
 # music.wav is BAKED by `make audio` (core/audio-kit.mjs) — generated, never committed.
 assets/music.wav
@@ -87,3 +90,6 @@ assets/ransom-src/*
 
 # the baked draft watermark sheet (make watermark)
 assets/watermark/
+
+# generated per-render derivatives (regenerate with make beatsync / make examples)
+formats/scene/*.beatsync.json

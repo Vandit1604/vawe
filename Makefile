@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack
+.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -36,6 +36,16 @@ music:
 # default sound, replacing the synthesized drone beds. core/audio-select.js maps profiles onto these.
 music-pack:
 	node scripts/media/music.mjs --pack
+
+# make gallery  — build the hover-to-play example showcase (out/gallery/index.html) from the flagship
+# registry (formats/scene/examples.json). Render the examples first (make video / beatsync).
+gallery:
+	node scripts/site/examples-gallery.mjs
+
+# make examples  — rebuild the whole flagship showcase from committed sources (beatsync + render each,
+# then the gallery). Reproducible fixtures. Run `make music-pack` first for the beat-synced ones.
+examples: build
+	node scripts/site/examples-build.mjs
 
 # make beatmap MUSIC=assets/music/launch.wav  — detect tempo + beat grid -> <name>.beats.json, so an
 # edit can be built ON the music. Reports confidence; an ambient pad has no beat and it says so.

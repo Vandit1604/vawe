@@ -1,0 +1,39 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "9:16",
+  "destination": "tiktok",
+  "duration": 12.5,
+  "audio": {
+    "auto": true,
+    "music": "assets/music/beat.wav",
+    "musicGain": 0.5,
+    "musicFade": { "in": 0.4, "out": 1.5 },
+    "sfxGain": 0.8
+  },
+  "cuts": [
+    { "t": 2.2, "style": "punch", "dur": 0.2 },
+    { "t": 4.1, "style": "punch", "dur": 0.2 },
+    { "t": 6.0, "style": "punch", "dur": 0.2 },
+    { "t": 8.6, "style": "punch", "dur": 0.2 },
+    { "t": 10.4, "style": "punch", "dur": 0.2 }
+  ],
+  "layers": [
+    { "type": "text", "text": "MAKE", "start": 0.3, "duration": 2.0, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#c2f23b", "split": "char", "preset": "scale", "each": 0.35, "stagger": 0.05, "out": "defocus", "exitDur": 0.25 },
+
+    { "type": "text", "text": "THEM", "start": 2.3, "duration": 1.9, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#f4f5f2", "split": "char", "preset": "up", "each": 0.35, "stagger": 0.05, "out": "defocus", "exitDur": 0.25 },
+
+    { "type": "rect", "x": 90, "y": 720, "w": 900, "h": 480, "bg": "#c2f23b", "radius": 24, "start": 4.2, "duration": 1.9, "anim": "pop", "enterDur": 0.28, "out": "defocus", "exitDur": 0.25 },
+    { "type": "text", "text": "STOP", "start": 4.35, "duration": 1.75, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#0a0a0c", "split": "char", "preset": "scale", "each": 0.3, "stagger": 0.04 },
+
+    { "type": "text", "text": "SCROLLING", "start": 6.2, "duration": 2.5, "pin": "center", "y": 840, "w": 1040, "align": "center", "size": 210, "weight": 800, "color": "#f4f5f2", "gradient": { "from": "#f4f5f2", "to": "#c2f23b", "angle": 150 }, "motionBlur": true, "motion": [ { "t": 0, "scale": 1.18, "opacity": 0, "ease": "easeOutCubic" }, { "t": 0.34, "scale": 1.0, "opacity": 1, "ease": "spring" }, { "t": 2.1, "scale": 1.03, "ease": "linear" }, { "t": 2.5, "scale": 1.5, "opacity": 0, "ease": "easeInCubic" } ] },
+
+    { "type": "text", "text": "bold.", "start": 8.7, "duration": 1.8, "pin": "center", "y": 640, "w": 1000, "align": "center", "size": 170, "weight": 800, "color": "#f4f5f2", "anim": "rise", "enterDur": 0.28, "out": "fade", "exitDur": 0.25 },
+    { "type": "text", "text": "fast.", "start": 8.85, "duration": 1.65, "pin": "center", "y": 900, "w": 1000, "align": "center", "size": 170, "weight": 800, "color": "#c2f23b", "anim": "rise", "enterDur": 0.28, "out": "fade", "exitDur": 0.25 },
+    { "type": "text", "text": "on the beat.", "start": 9.0, "duration": 1.5, "pin": "center", "y": 1160, "w": 1000, "align": "center", "size": 100, "weight": 700, "font": "mono", "color": "#8a8f80", "anim": "rise", "enterDur": 0.3, "out": "fade", "exitDur": 0.25 },
+
+    { "type": "text", "text": "KINETIC", "start": 10.5, "duration": 2.0, "pin": "center", "y": 820, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#f4f5f2", "anim": "rise", "enterDur": 0.3 },
+    { "type": "text", "text": "TYPE.", "start": 10.7, "duration": 1.8, "pin": "center", "y": 1030, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#c2f23b", "anim": "rise", "enterDur": 0.3 },
+    { "type": "text", "text": "vawe · scene engine", "start": 11.0, "duration": 1.5, "pin": "center", "y": 1280, "w": 1000, "align": "center", "size": 46, "weight": 600, "font": "mono", "color": "#8a8f80", "anim": "fade", "enterDur": 0.5 }
+  ]
+}
