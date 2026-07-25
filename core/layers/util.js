@@ -105,8 +105,34 @@ export function createKit(ctx) {
     el.style.webkitBackdropFilter = f;
   }
 
+  // progressiveBlur — a DIRECTIONAL blur fog on the backdrop that ramps toward an edge (motion-primitives
+  // ProgressiveBlur). Fades a dense grid / list / feed into an edge far more cleanly than one flat blur
+  // or a vignette. Built on the SAME structure as glass (backdrop-filter on the layer itself, which the
+  // compositor honours; nested transparent child divs get skipped) plus a directional MASK: where the
+  // mask alpha is partial the blurred backdrop blends with the sharp one, so a single blur reads as a
+  // smooth ramp from sharp → blurred. Static → pure in n. `progressiveBlur: true | { dir, max, start }`.
+  //   dir   = the edge the blur intensifies toward (top|bottom|left|right)
+  //   max   = blur px at the strong edge
+  //   start = 0..1 fraction of the span that stays sharp before the ramp begins
+  function applyProgressiveBlur(el, L) {
+    const pb = L.progressiveBlur;
+    if (pb == null || pb === false) return;
+    const o = typeof pb === 'object' ? pb : {};
+    const dir = o.dir || 'bottom';
+    const maxBlur = o.max ?? 16;
+    const start = Math.max(0, Math.min(0.95, o.start ?? 0));
+    const f = `blur(${maxBlur}px)`;
+    el.style.backdropFilter = f; el.style.webkitBackdropFilter = f;
+    // a background is required for the compositor to run the backdrop-filter (glass rects always have one)
+    if (!el.style.background && !el.style.backgroundColor) el.style.background = 'rgba(0,0,0,0.001)';
+    const g = `linear-gradient(to ${dir}, transparent ${(start * 100).toFixed(0)}%, black 100%)`;
+    el.style.maskImage = g; el.style.webkitMaskImage = g;
+    el.style.pointerEvents = 'none';
+  }
+
   function decorate(el, L) {
     applyGlass(el, L);
+    applyProgressiveBlur(el, L);
     if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;

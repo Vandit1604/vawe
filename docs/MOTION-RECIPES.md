@@ -29,6 +29,8 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   `{ "anim": "slide-right", "enterDur": 0.32, "out": "slide-left" }` · _entrance, exit, directional_
 - **`focus-in`** — arrives through focus, not space; correct for faces/cards where sliding reads as chaos.
   `{ "anim": "fade", "out": "defocus", "exitDur": 0.35 }` · _entrance, exit, blur_
+- **`progressive-blur`** — a directional blur fog over a full-frame rect fades a dense grid/list/feed
+  into an edge (backs the "blur out dense content" rule). `{ "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "track": 50, "bg": "transparent", "progressiveBlur": { "dir": "bottom", "max": 22, "start": 0.15 } }` · _overlay, blur, density_
 - **`bar-grow`** — a bar/underline grows from its baseline; use for charts and reveal underlines.
   `{ "anim": "wipe-up", "enterDur": 0.4 }` · _entrance, data_
 
