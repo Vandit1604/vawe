@@ -851,6 +851,10 @@
           "type": "boolean",
           "label": "Loop the kinetic preset"
         },
+        "gsap": {
+          "type": "object",
+          "label": "Declarative GSAP tween: { from:{x,y,scale,rotation,opacity,...}, to:{...}, dur, ease }. Gives the full GSAP easing library (elastic/back/bounce/expo/custom). Deterministic (seeked per frame)."
+        },
         "circle": {
           "type": "boolean|object",
           "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."

@@ -109,6 +109,15 @@ export async function preloadRansomSprites(data) {
   window.__ransomSprites = { base, manifest };
 }
 
+// Load GSAP (the tween engine) ONLY when a scene uses it — a `gsap` layer field or a `morph`. Loaded
+// before the virtual clock like the other runtimes; seekAll(t) pauses gsap.globalTimeline and seeks it
+// per frame, so tweens stay pure in n. The ticker is stopped so GSAP never self-advances (we drive it).
+export async function preloadGsap(data) {
+  if (!/"(gsap|morph)"\s*:/.test(JSON.stringify(data))) return;
+  if (!window.gsap) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/gsap.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+  if (window.gsap) { try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); } catch (e) {} }
+}
+
 // Preload LOTTIE animation data (After Effects / Bodymovin JSON). A `lottie` layer references its src;
 // fetch each once so build() can init the runtime synchronously and seek it per frame. The runtime is
 // loaded ONLY when a scene uses it (no 168KB parse tax on text-only renders), before the virtual clock

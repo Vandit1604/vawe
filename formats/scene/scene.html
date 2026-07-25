@@ -237,6 +237,15 @@
           // half, with no error. Group children (core/layers/util.js:187) always built-then-decorated,
           // which is why the same look was correct inside a group and broken outside one.
           renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
+          // GSAP tween (declarative): `gsap:{from,to,dur,ease}` builds a PAUSED tween on gsap.globalTimeline
+          // at the layer's start; seekAll(t) seeks the timeline per frame (runs AFTER driveClips, so GSAP
+          // owns the transform). fromTo pins the start values so a frame is pure in t regardless of render
+          // order. This gives the whole GSAP easing library (elastic/back/bounce/custom) declaratively.
+          if (L.gsap && window.gsap) {
+            const g = L.gsap;
+            window.gsap.fromTo(el, { ...(g.from || {}) },
+              { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
+          }
           return { L, el, units };
         });
 

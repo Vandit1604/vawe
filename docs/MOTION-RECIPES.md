@@ -45,6 +45,9 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
 - **`snap-ease`** — the default layer settle, usable by name on a keyframe. `"ease": "snap"` · _overshoot_
 - **`back-out`** — a classic tactile overshoot (like `back.out`); good on a scale keyframe. `"ease": "easeOutBack"` · _overshoot_
 - **`rush-out`** — a value that accelerates away (exit velocity). `"ease": "easeInCubic"` · _exit_
+- **`gsap-tween`** — a declarative GSAP tween with the FULL GSAP easing library (elastic/back/bounce/expo/
+  custom/steps) — deterministic, seeked per frame. Pair with `anim:"none"` so GSAP owns the transform.
+  `{ "anim": "none", "gsap": { "from": { "x": -500, "scale": 0.4, "opacity": 0 }, "to": { "x": 0, "scale": 1, "opacity": 1 }, "dur": 1.4, "ease": "elastic.out(1,0.45)" } }` · _entrance, easing, gsap_
 
 ## Split-text reveals — `split` + `preset` (per-unit motion)
 
