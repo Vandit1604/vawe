@@ -1,0 +1,44 @@
+/* scene — the OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
+   video. No per-topic code, no sealed scenes — layers (text/image/component/rect) + timed
+   windows + kinetic splits + the cut kit (core/cuts.js) + shader stings
+   (core/stings.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
+.chrome { display: none; }
+.stage { background: none !important; }
+.stage::before, .stage::after { display: none !important; }
+/* stage fallback = the theme gradient (g0..g2) when no data.bg windows are declared */
+.hs-stage { position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(82% 60% at 66% 42%, var(--g2) 0%, var(--g1) 46%, var(--g0) 100%); }
+#cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; transform-origin: 50% 45%; }
+#cam { position: absolute; inset: 0; will-change: transform; transform-origin: 50% 50%; }
+.hs-layer { position: absolute; will-change: transform, opacity, filter; }
+.hs-text { color: var(--text); line-height: 1.04; }
+/* <b> is ACCENT EMPHASIS (recolour), not "bolder": inherit the layer weight so emphasis never
+   jumps to UA bold 700 and sits heavier than its own line. Opt into a heavier emphasis explicitly. */
+.hs-text b { color: var(--em, var(--accent)); font-weight: inherit; }
+.hs-text em { font-style: italic; font-family: var(--font-serif); }
+.hs-img { display: block; object-fit: contain; }
+.hs-rect { box-sizing: border-box; }
+.hs-group { display: flex; box-sizing: border-box; }
+.hs-group > .hs-text, .hs-group > .hs-img-wrap { position: relative; }
+.hs-comp { transform-origin: 0 0; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 100px rgba(20,20,30,0.16); }
+/* caption bar */
+.hs-cap { position: absolute; left: 60px; right: 180px; bottom: 300px; z-index: 90; text-align: center;
+  font: 700 46px var(--font-sans), sans-serif; color: var(--text); text-shadow: 0 3px 24px rgba(0,0,0,0.7);
+  opacity: 0; }
+.hs-cap.word { font-weight: 800; }
+/* pop: muted-social burned-in subtitle — big, bottom-third safe zone, high-contrast, accent emphasis */
+.hs-cap.pop { left: 8%; right: 8%; bottom: 12%; font: 800 64px var(--font-sans), sans-serif;
+  letter-spacing: -0.01em; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.95); }
+.hs-cap.pop b, .hs-cap.pop em { color: var(--accent); font-style: normal; }
+/* caption STYLES (wave 1) — word-timed treatments on the pop layout (core/captions.js drives
+   the per-word progress). All look values are theme tokens; the .styled scrim plate exists so
+   contrast is computable — the video content behind a caption is unknown, a plate is not. */
+.hs-cap.styled { left: 8%; right: 8%; bottom: 12%; font: 700 64px var(--font-sans), sans-serif;
+  letter-spacing: -0.01em; color: var(--text); text-shadow: none;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-radius: 18px; padding: 14px 30px; }
+.hs-cap.styled b, .hs-cap.styled em { color: var(--accent); font-style: normal; }
+.hs-cap.pillKaraoke .ku { padding: 3px 16px; margin: 3px 3px; border-radius: 999px;
+  background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
+.hs-cap.clipWipe .cw.base { color: color-mix(in srgb, var(--text) 76%, var(--bg)); }
+.hs-cap.clipWipe .cw.over { position: absolute; inset: 14px 30px; color: var(--accent); }
