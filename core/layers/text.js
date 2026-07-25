@@ -49,6 +49,13 @@ export function gradientCss(g, t = 0) {
     const pos = (((t * speed * 100) % 100) + 100) % 100;
     return { backgroundImage: `linear-gradient(${g.angle ?? 100}deg, ${[...cols, ...cols].join(', ')})`, backgroundSize: '200% 100%', backgroundPosition: `${pos.toFixed(2)}% 0` };
   }
+  if (g.animate === 'shimmer') {
+    // a bright sheen band sweeps across a solid base fill (the "AI loading" shimmer). colors = [base,
+    // highlight]; the base holds the word's colour and a narrow highlight travels through it.
+    const base = cols[0], bright = cols[1] || '#ffffff';
+    const pos = 100 - (((t * speed * 100) % 100) + 100) % 100;
+    return { backgroundImage: `linear-gradient(${g.angle ?? 100}deg, ${base} 0%, ${base} 38%, ${bright} 50%, ${base} 62%, ${base} 100%)`, backgroundSize: '260% 100%', backgroundPosition: `${pos.toFixed(2)}% 0` };
+  }
   return { backgroundImage: `linear-gradient(${g.angle ?? 180}deg, ${cols.join(', ')})`, backgroundSize: '100% 100%', backgroundPosition: '0 0' };
 }
 

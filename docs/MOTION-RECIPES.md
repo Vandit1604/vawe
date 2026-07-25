@@ -59,6 +59,10 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
 - **`gradient-flow`** — the same colours sliding sideways along an angle (a flowing sweep).
   `{ "gradient": { "colors": ["#5e6ad2", "#22d3ee", "#5e6ad2"], "animate": "flow", "angle": 100, "speed": 0.25 } }` · _text, animated_
   (`speed` is turns/sec; the fill stays pure in t, so it is render-order safe.)
+- **`text-shimmer`** — a bright sheen band sweeps across a solid word (the "AI loading" sheen); loops.
+  `{ "gradient": { "colors": ["#5e6ad2", "#ffffff"], "animate": "shimmer", "speed": 0.6 } }` · _text, loop, animated_
+- **`shimmer-wave`** — a 3D shimmer crest (lift + scale + rotateY + brighten) travels across the letters;
+  a living headline. `{ "split": "char", "preset": "shimmerWave", "phaseStep": 0.12, "speed": 1.0 }` · _text, loop, 3d_
 - **`inkflash`** — a per-word accent colour-wave; emphasis on a thesis line. `{ "split": "word", "preset": "inkflash" }` · _text, accent_
 - **`blur-sweep`** — a left-to-right defocus reveal; calm/premium opener.
   `{ "split": "word", "preset": "blur", "each": 0.75, "stagger": 0.06 }` · _text, calm_

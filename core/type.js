@@ -83,6 +83,16 @@ export const PRESETS = {
   slide: (u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
   // persistent sinusoidal wave (u is used as raw phase, not a one-shot) — pass loop:true in animateUnits
   wave: (u, { amp = 14, phase = 0 } = {}) => ({ opacity: 1, transform: `translateY(${(Math.sin(u * Math.PI * 2 + phase) * amp).toFixed(2)}px)` }),
+  // shimmerWave — a 3D traveling shimmer over live text (motion-primitives TextShimmerWave). Each glyph
+  // rides a bump (translate + scale + rotateY + brightness) and the bump travels across the word via the
+  // per-unit phase offset. Looping (u is raw phase); pair with a small `phaseStep` (~0.12) so the wave
+  // reads as one crest moving, not every letter pulsing together. Pure in the phase → pure in n.
+  shimmerWave: (u, { amp = 1 } = {}) => {
+    const b = (1 - Math.cos(u * Math.PI * 2)) / 2;   // 0..1..0 bump over one cycle
+    return { opacity: 1,
+      transform: `perspective(600px) translateY(${(-8 * b * amp).toFixed(2)}px) translateZ(${(24 * b * amp).toFixed(1)}px) rotateY(${(12 * b * amp).toFixed(2)}deg) scale(${(1 + 0.12 * b * amp).toFixed(3)})`,
+      filter: `brightness(${(1 + 0.5 * b).toFixed(3)})` };
+  },
   // 3D flip-up per unit (cards/letters somersault into place)
   // a 3D card flip in. `axis` picks the hinge (x = top-over, y = door-swing) and `deg` the start
   // angle (bigger = more severe). Defaults reproduce the old fixed behaviour exactly.
@@ -185,7 +195,7 @@ export function decodeText(el, u, unitIndex) {
 export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
   const fn = PRESETS[preset] || PRESETS.up;
   units.forEach((el, i) => {
-    if (loop || preset === 'wave') {
+    if (loop || preset === 'wave' || preset === 'shimmerWave') {
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
     } else {
       const u = unitProgress(t, i, units.length, { each, stagger });

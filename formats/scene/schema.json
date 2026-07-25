@@ -851,6 +851,10 @@
           "type": "boolean",
           "label": "Loop the kinetic preset"
         },
+        "phaseStep": {
+          "type": "number",
+          "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"
+        },
         "ransom": {
           "type": "boolean|object",
           "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { palette: 'paper'|'color', sprites, accent, faces, swatches, cycle, stagger }. `sprites:true` uses REAL cut-out letter photos baked by `make ransom-sprites` instead of CSS tiles. `cycle` (s) re-rolls each letter into a different cutout of the SAME glyph in place"
