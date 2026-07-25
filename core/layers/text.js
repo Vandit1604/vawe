@@ -28,14 +28,45 @@ export function build(kit, el, L) {
     el.remove();
   }
 }
-// gradientFill: a STATIC gradient across the glyphs via background-clip:text (distinct from the animated
-// `gradient` PRESET, which sweeps a shimmer). The premium display treatment real motion-graphics use —
-// e.g. a dark-top→light-bottom fade on a hero word. `gradient: { from, to, angle? }` (angle 180 = ↓).
-// Applied to the container so it clips across the whole line (incl. split spans, which inherit).
+// gradientCss(g, t): the gradient's CSS at time t (seconds), PURE in t. Supports 2 colours (`from`/`to`)
+// or a `colors` array (3+), and three modes via `animate`:
+//   • (none)  — a static linear gradient (`angle` deg, 180 = ↓). The premium display fill.
+//   • "spin"  — a conic gradient whose start angle rotates, so the colours travel in a CIRCLE around the
+//               glyphs (`speed` = turns/sec, default 0.2). This is the "3-colour gradient moving in a circle".
+//   • "flow"  — a linear gradient that slides sideways along `angle` (a flowing sweep).
+// The trailing colour repeat makes the loop seamless. Because it depends only on t, every frame is
+// reproducible regardless of render order (canvas-purity / probe safe).
+export function gradientCss(g, t = 0) {
+  if (!g || typeof g !== 'object') return null;
+  const cols = (Array.isArray(g.colors) && g.colors.length >= 2) ? g.colors : (g.from && g.to ? [g.from, g.to] : null);
+  if (!cols) return null;
+  const speed = g.speed ?? 0.2; // turns per second
+  if (g.animate === 'spin' || g.animate === true) {
+    const deg = (((t * speed * 360) % 360) + 360) % 360;
+    return { backgroundImage: `conic-gradient(from ${deg.toFixed(2)}deg at 50% 50%, ${[...cols, cols[0]].join(', ')})`, backgroundSize: '100% 100%', backgroundPosition: '0 0' };
+  }
+  if (g.animate === 'flow') {
+    const pos = (((t * speed * 100) % 100) + 100) % 100;
+    return { backgroundImage: `linear-gradient(${g.angle ?? 100}deg, ${[...cols, ...cols].join(', ')})`, backgroundSize: '200% 100%', backgroundPosition: `${pos.toFixed(2)}% 0` };
+  }
+  return { backgroundImage: `linear-gradient(${g.angle ?? 180}deg, ${cols.join(', ')})`, backgroundSize: '100% 100%', backgroundPosition: '0 0' };
+}
+
+// gradientFill: the gradient text fill via background-clip:text. Applied to the container so it clips
+// across the whole line (incl. split spans, which inherit). Animated modes are re-applied per frame in
+// frame() below; the build only establishes the clip + the t=0 image.
 export function gradientFill(el, L) {
   const g = L.gradient;
-  if (!g || typeof g !== 'object' || !g.from || !g.to) return;
-  el.style.backgroundImage = `linear-gradient(${g.angle ?? 180}deg, ${g.from}, ${g.to})`;
+  const css = gradientCss(g, 0);
+  if (!css) return;
+  el.style.backgroundImage = css.backgroundImage;
+  // Only animated fills need the size/position/repeat scaffolding; a static gradient stays byte-identical
+  // to before (image + clip only), so existing scenes don't re-baseline.
+  if (g.animate) {
+    el.style.backgroundSize = css.backgroundSize;
+    el.style.backgroundPosition = css.backgroundPosition;
+    el.style.backgroundRepeat = 'no-repeat';
+  }
   el.style.webkitBackgroundClip = 'text';
   el.style.backgroundClip = 'text';
   el.style.color = 'transparent';
@@ -68,6 +99,12 @@ function microType(kit, el, L) {
 // while the tags are kept intact — so an accent word types IN its colour, exactly like the reference.
 // Plain text takes the cheap textContent path. Deterministic (output depends only on n = floor(t·cps)).
 export function frame(kit, el, L, t) {
+  // animated gradient fill (spin/flow) — recompute the moving image from t. Pure in t; the clip + colour
+  // were established at build. Runs every frame the layer is on screen (opacity gates it when off).
+  if (L.gradient && L.gradient.animate) {
+    const css = gradientCss(L.gradient, t);
+    if (css) { el.style.backgroundImage = css.backgroundImage; el.style.backgroundPosition = css.backgroundPosition; }
+  }
   if (!L.typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;

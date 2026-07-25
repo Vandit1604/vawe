@@ -52,8 +52,13 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   `{ "type": "text", "typing": 22, "font": "mono" }` · _text, value, sound_
 - **`decode`** — glyphs scramble then resolve; ONE hero word, tech brands, sparingly.
   `{ "split": "char", "preset": "decode", "each": 0.6 }` · _text, tech_
-- **`gradient-hero`** — one hero word with a gradient fill; max one per film.
+- **`gradient-hero`** — one hero word with a static gradient fill; max one per film.
   `{ "gradient": { "from": "#ffffff", "to": "#ff742e", "angle": 165 }, "motionBlur": true }` · _text, hero_
+- **`gradient-spin`** — a 3-colour gradient that travels in a CIRCLE around the glyphs (rotating conic
+  fill); a living hero word. `{ "gradient": { "colors": ["#ff5f6d", "#ffc371", "#5e6ad2"], "animate": "spin", "speed": 0.3 } }` · _text, hero, animated_
+- **`gradient-flow`** — the same colours sliding sideways along an angle (a flowing sweep).
+  `{ "gradient": { "colors": ["#5e6ad2", "#22d3ee", "#5e6ad2"], "animate": "flow", "angle": 100, "speed": 0.25 } }` · _text, animated_
+  (`speed` is turns/sec; the fill stays pure in t, so it is render-order safe.)
 - **`inkflash`** — a per-word accent colour-wave; emphasis on a thesis line. `{ "split": "word", "preset": "inkflash" }` · _text, accent_
 - **`blur-sweep`** — a left-to-right defocus reveal; calm/premium opener.
   `{ "split": "word", "preset": "blur", "each": 0.75, "stagger": 0.06 }` · _text, calm_
