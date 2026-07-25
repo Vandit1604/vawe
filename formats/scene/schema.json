@@ -857,7 +857,11 @@
         },
         "fx": {
           "type": "string|object|array",
-          "label": "Named GSAP effect(s) from core/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/...) + loops (float/pulse/breathe/wobble). Pair with anim:none."
+          "label": "Named GSAP effect(s) from core/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none."
+        },
+        "fxOut": {
+          "type": "string|object",
+          "label": "Named GSAP EXIT from core/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
         },
         "gsap": {
           "type": "object",

@@ -66,6 +66,7 @@
       import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
       import { splitText, animateUnits, circleText } from '/core/type.js';
       import { buildMorph } from '/core/morph.js';
+      import { FX_DUR } from '/core/gsap-effects.js';
       import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
@@ -218,7 +219,10 @@
           // exactly on the clips.js base, so default-motion themes render byte-identical.
           else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
           if (L.out) el.dataset.out = L.out;
-          if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
+          // fxOut lets GSAP own the exit (opacity + transform). Zero out driveClips's own fade window so
+          // the two don't both drive opacity through the exit; the layer holds full until GSAP takes it out.
+          if (L.fxOut) el.dataset.exitDur = '0';
+          else if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
           else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale).toFixed(3));
 
           renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
@@ -262,6 +266,22 @@
               const { name, dur, ease, delay, stagger, ...rest } = spec;
               fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
                 ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
+            }
+          }
+          // NAMED GSAP EXIT (`fxOut:"blurOut"` | `{name,dur,ease}`): anchored so the exit ENDS exactly at
+          // the layer's end (delay = end - dur). immediateRender:false is set at registration so the layer
+          // holds its natural state until the exit begins. Mutually exclusive with `out` (validate enforces).
+          if (L.fxOut && window.gsap) {
+            const spec = typeof L.fxOut === 'string' ? { name: L.fxOut } : (L.fxOut || {});
+            const fn = window.gsap.effects[spec.name];
+            if (!fn) console.warn(`fxOut: unknown GSAP effect "${spec.name}"`);
+            else {
+              const { name, dur, ease, stagger, ...rest } = spec;
+              const d = dur ?? FX_DUR[spec.name] ?? 0.5;
+              const end = (L.start ?? 0) + (L.duration ?? 2);
+              const targets = (units && units.length) ? units : el;
+              fn(targets, { delay: Math.max(0, end - d), duration: d, stagger: stagger ?? 0,
+                ...(ease ? { ease } : {}), ...rest });
             }
           }
           return { L, el, units };

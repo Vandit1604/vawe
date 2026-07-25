@@ -17,6 +17,7 @@
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
+import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -103,7 +104,35 @@ export function validateData(schema, data) {
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
+  errors.push(...fxErrors(data || {}));     // named GSAP fx/fxOut must be real effects; no fxOut+out clash
   return errors;
+}
+
+// NAMED GSAP EFFECTS: `fx` (entrance/loop/text) and `fxOut` (exit) reference stored effects by name.
+// scene.html only console.warns on a typo (a warn the render swallows), so an unknown name shipped an
+// unanimated layer silently. Catch it here, loudly, with a "did you mean" pointer. Also: `fxOut` and a
+// motion `out` both drive the exit transform — a layer may declare only one, else they fight.
+export function fxErrors(cfg) {
+  const out = [];
+  const layers = Array.isArray(cfg.layers) ? cfg.layers : [];
+  const nameOf = (item) => (typeof item === 'string' ? item : (isObj(item) ? item.name : undefined));
+  layers.forEach((L, i) => {
+    if (!isObj(L)) return;
+    if (L.fx != null) {
+      for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
+        const nm = nameOf(item);
+        if (nm == null) { out.push(`layers[${i}].fx entry needs a name (string or {name})`); continue; }
+        if (!GSAP_FX.includes(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect.${nearest(nm, GSAP_FX)}`);
+      }
+    }
+    if (L.fxOut != null) {
+      const nm = nameOf(L.fxOut);
+      if (nm == null) out.push(`layers[${i}].fxOut needs a name (string or {name})`);
+      else if (!EXIT_FX.includes(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
+      if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut" — they both own the exit. Keep one.`);
+    }
+  });
+  return out;
 }
 
 // SEAM D range check: fx-name and dur bounds are enforced by the schema (enum + min); what the schema
