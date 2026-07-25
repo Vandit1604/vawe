@@ -65,6 +65,7 @@
       import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
       import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
       import { splitText, animateUnits, circleText } from '/core/type.js';
+      import { buildMorph } from '/core/morph.js';
       import { ransomStyle, ransomTick } from '/core/ransom.js';
       import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
       import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
@@ -246,6 +247,8 @@
             window.gsap.fromTo(el, { ...(g.from || {}) },
               { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
           }
+          // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
+          if (L.morph && window.gsap) buildMorph(el, L, window.gsap);
           return { L, el, units };
         });
 

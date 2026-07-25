@@ -851,6 +851,10 @@
           "type": "boolean",
           "label": "Loop the kinetic preset"
         },
+        "morph": {
+          "type": "object",
+          "label": "TextMorph: letters migrate from `text` to another word. { to, dur, ease }. Shared letters glide, others crossfade. Needs w + align:center. GSAP-driven, deterministic."
+        },
         "gsap": {
           "type": "object",
           "label": "Declarative GSAP tween: { from:{x,y,scale,rotation,opacity,...}, to:{...}, dur, ease }. Gives the full GSAP easing library (elastic/back/bounce/expo/custom). Deterministic (seeked per frame)."

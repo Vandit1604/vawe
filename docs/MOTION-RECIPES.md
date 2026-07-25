@@ -72,6 +72,8 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
   a living headline. `{ "split": "char", "preset": "shimmerWave", "phaseStep": 0.12, "speed": 1.0 }` · _text, loop, 3d_
 - **`spinning-text`** — chars laid on a rotating circular path (badge / seal / "scroll for more"). Set
   `w` = 2·radius so `pin` centres it. `{ "type": "text", "text": "· SPIN · SCROLL FOR MORE ", "circle": { "radius": 300, "period": 6 }, "w": 600, "align": "center", "anim": "fade" }` · _text, loop, badge_
+- **`text-morph`** — letters migrate from one word to the next (shared letters glide, others crossfade);
+  GSAP-driven. Set `w` + `align:"center"` and `anim:"none"`. `{ "type": "text", "text": "IDEAS", "w": 1000, "align": "center", "anim": "none", "morph": { "to": "INBOX", "dur": 1.3, "ease": "power3.inOut" } }` · _text, morph, gsap_
 - **`inkflash`** — a per-word accent colour-wave; emphasis on a thesis line. `{ "split": "word", "preset": "inkflash" }` · _text, accent_
 - **`blur-sweep`** — a left-to-right defocus reveal; calm/premium opener.
   `{ "split": "word", "preset": "blur", "each": 0.75, "stagger": 0.06 }` · _text, calm_
