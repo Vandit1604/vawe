@@ -2,6 +2,7 @@
 
 > **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md) — the cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
 > **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md) — this file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
+> **Just want the copy-paste JSON?** See [`MOTION-RECIPES.md`](MOTION-RECIPES.md) — the atomic recipe index (one line per motion pattern: slug · exact JSON · tags). This file is the rules; that one applies them.
 
 Distilled July 2026 from motion-design craft literature (Disney's 12 principles applied to
 screen design, kinetic-typography practice, brand-film pacing) and from our own shipped-film
