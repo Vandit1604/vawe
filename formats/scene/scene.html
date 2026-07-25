@@ -600,36 +600,30 @@
           }
           seamCompositor && seamCompositor.clear();
         }
-        // auto sound-design: derive SFX cues deterministically from the scene's own cuts + stings
-        // (audio:{auto:true}). whoosh on each cut, a heavier hit on each sting; the Go mixer beds the
-        // music.wav under it. Pure — cue times are a function of the JSON, so the mix is reproducible.
-        // Does NOT touch renderFrame, so frames stay byte-identical (audio is a separate track).
-        let sfx = [];
-        // `auto` gates the DERIVED cues (cut/sting) only. It used to wrap the author-placed cues and
-        // the keystroke train as well, so a scene that hand-placed a cue, or set keyGain on a typing
-        // layer, got silence unless it also opted into automatic sound design — a dependency nothing
-        // documented and nobody would guess (MISTAKES #70).
-        const audioCfg = data.audio || {};
-        {
-          // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) are imported from /core/audio-cues.js
-          // — one shared source of truth, so the render mix and the baked catalogue cannot drift.
+        // buildSfx — derive SFX cues deterministically from the scene's own cuts/stings/seams (when
+        // audio:{auto:true}), plus author-placed cues and the per-keystroke click train. Pure: cue times
+        // are a function of the JSON, so the mix is reproducible; it does NOT touch renderFrame, so frames
+        // stay byte-identical (audio is a separate track). `auto` gates only the DERIVED cues — author
+        // cues and keystrokes always fire (MISTAKES #70, where `auto` used to gate everything).
+        function buildSfx() {
+          let sfx = [];
+          const audioCfg = data.audio || {};
+          // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js — one
+          // shared source of truth, so the render mix and the baked catalogue cannot drift.
           const cues = [];
           if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
-          // TOP-LEVEL cuts were silently ignored — the `cuts` array is how a scene actually cuts
-          // between beats, so an auto-scored film came out with no cut sound at all.
+          // TOP-LEVEL cuts / seams were once silently dropped from sound design — they are how a scene
+          // actually cuts between beats, so an auto-scored film came out with no transition sound at all.
           if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
           if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
-          // SEAMS were silently dropped from sound design — a whipPan / cinematicZoom is exactly the
-          // transition that most wants a whoosh, and `make direct` payoffs are all seams.
           if (audioCfg.auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
           // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
           for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
           cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
           for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
-          // KEYSTROKES. core/layers/text.js reveals character i at exactly start + (i+1)/cps, so the
-          // click for that character is that same expression — the sound is derived from the formula
-          // that draws the picture rather than dialled in by hand, which is the only way a typing
-          // sound stays in sync when the copy or the speed changes.
+          // KEYSTROKES. core/layers/text.js reveals character i at exactly start + (i+1)/cps, so the click
+          // for that character is that same expression — the sound is derived from the formula that draws
+          // the picture, the only way a typing sound stays in sync when the copy or the speed changes.
           const keyCues = [];
           for (const { L } of layers) {
             if (!L.typing || L.keyClicks === false) continue;
@@ -639,26 +633,25 @@
             for (let i = 0; i < full.length; i++) {
               const kt = st + (i + 1) / cps;
               if (kt >= end) break;                       // never sound a character the window never reveals
-              // Cuelume's `press` IS the key-press cue, so that is the default — but which cue and how
-              // loud is a TASTE decision, so it is authorable (`keyCue`, `keyGain`) rather than welded
-              // into the engine. Variation is DYNAMICS, not a second sound: a keyboard varies in force,
-              // not identity. Deterministic by index, so the same copy always sounds the same.
+              // Cuelume's `press` IS the key cue (the default), but which cue and how loud is a TASTE
+              // decision, so it is authorable (`keyCue`, `keyGain`). Variation is DYNAMICS not a second
+              // sound: a keyboard varies in force, not identity. Deterministic by index → always the same.
               const vary = 1 + ((i * 7919) % 5 - 2) * 0.06;   // +/-12%, pure function of the index
               keyCues.push({ t: +kt.toFixed(3), name: L.keyCue || 'key',
                 gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
             }
           }
-          // A key train is legitimately dense, so it gets its own tighter floor. The 0.09 merge above
-          // is there to stop two STRUCTURAL cues stacking on one instant; applied to keystrokes it
-          // would silently drop every other letter at any realistic typing speed.
+          // A key train is legitimately dense, so it gets its own tighter floor — the 0.09 structural
+          // merge above, applied to keystrokes, would silently drop every other letter at real typing speed.
           if (keyCues.length) {
             keyCues.sort((a, b) => a.t - b.t);
             const keys = [];
             for (const c of keyCues) if (!keys.length || c.t - keys[keys.length - 1].t > 0.03) keys.push(c);
             sfx = sfx.concat(keys).sort((a, b) => a.t - b.t);
           }
+          return sfx;
         }
-        return { fps, duration, stings: stings.map((s) => s.t), sfx, renderFrame, bakeSeams };
+        return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(), renderFrame, bakeSeams };
       });
     </script>
   </body>
