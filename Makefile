@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -154,6 +154,12 @@ audit-test:
 # DOM signature (bbox/transform/opacity/font/text). Baseline a refactor, then prove frames unchanged.
 snap:
 	node scripts/gates/scene-snap.mjs $(M) $(if $(SAVE),--save)
+
+# make snap-all [SAVE=1] [SCENE=<name>]  — the WHOLE-LIBRARY net: sweep every shipped scene, quarantine
+# any that render order-dependently (non-deterministic), and baseline/diff the rest. Run before/after any
+# engine-wide change (a refactor, a version bump) to prove all scenes are byte-identical or see what moved.
+snap-all:
+	node scripts/gates/snap-scenes.mjs $(SCENE) $(if $(SAVE),--save)
 
 # make motion [M=<format>] [D=<file.json>] [STRIDE=2]  — animation-over-time audit: renders every frame
 # headless (no video) and asserts the motion contract (final frame holds, reveals monotonic, payoffs

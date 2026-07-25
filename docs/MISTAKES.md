@@ -2785,3 +2785,23 @@ it feels like") is written in OUR names; the warn points a GSAP name at its nati
 
 **Gate.** `resolveEasing` warns on any unknown ease; `make lib-test` already asserts every registry curve
 holds f(0)=0 / f(1)=1.
+
+## 84. The validator's TYPE pass policed block layers it was meant to exempt
+
+**What.** `showcase-spot.json` and `showcase-flight.json` — committed, block-based scenes — could not
+boot: `layers[6].to must be a number (got object)`, `layers[15].items must be a string (got array)`.
+A `pointer` block's `to:{x,y}` and a `kpiRow` block's `items:[…]` are correct BLOCK props, but they were
+being checked against the base LAYER schema (where `to` is a number, `items` a string), so valid scenes
+failed validation and the render aborted. Surfaced by the new whole-library `snap-all` sweep, which boots
+every scene (`make validate` only checks one sample per format, so it never saw these).
+
+**Root cause.** Two validation passes disagreed. The unknown-prop pass already skipped `type:"block"|"comp"`
+(they carry the block's own props — blocks-audit owns them). The field-TYPE pass (`walk` over the layers
+array) had no such guard, so it validated a block's props against the base layer schema. The intent was
+documented ("blocks ... this schema does not describe and must not police") but only half-enforced.
+
+**Fix.** `walk`'s array-item recursion now skips an element whose `type` is `block`/`comp`, matching the
+unknown-prop pass. Both showcase scenes boot and render again; the full validate suite stayed green.
+
+**Gate.** `make snap-all` boots EVERY scene, so a scene that fails validation shows up as `errored` in the
+sweep instead of hiding until someone happens to render it.

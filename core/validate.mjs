@@ -269,7 +269,15 @@ function checkField(spec, val, at, errors) {
     case 'array':
       if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})`);
       if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} allows ≤ ${spec.maxItems} item(s) (got ${val.length})`);
-      if (isObj(spec.item)) val.forEach((el, i) => walk(spec.item, el, `${at}[${i}].`, errors));
+      // A block/comp layer carries the BLOCK's props (a pointer's `to:{x,y}`, a kpiRow's `items:[…]`),
+      // NOT the base layer schema — blocks-audit owns those. The unknown-prop pass already exempts
+      // block/comp; this TYPE pass must too, or a valid block prop (`to` object vs the layer's `to`
+      // number) fails and the scene cannot boot (this silently broke showcase-spot/flight). Same intent
+      // as the note at the layers checkLayer pass below.
+      if (isObj(spec.item)) val.forEach((el, i) => {
+        if (isObj(el) && (el.type === 'block' || el.type === 'comp')) return;
+        walk(spec.item, el, `${at}[${i}].`, errors);
+      });
       break;
     case 'object':
       if (isObj(spec.fields)) walk(spec.fields, val, `${at}.`, errors);
