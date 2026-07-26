@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LAYER_TYPES } from '../../core/layers/index.js';
+import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
@@ -48,8 +49,8 @@ for (const t of LAYER_TYPES) {
 const AUTHORING = new Set(['type', 'block', 'ref', 'comps', 'id', 'note', 'comment', 'children', 'dur']);
 
 const targets = process.argv.slice(2).length ? process.argv.slice(2)
-  : fs.readdirSync(path.join(repoRoot, 'formats/scene')).filter((f) => f.endsWith('.json') && f !== 'schema.json')
-      .map((f) => path.join('formats/scene', f));
+  : fs.readdirSync(path.join(repoRoot, SCENE_DIR)).filter((f) => f.endsWith('.json') && f !== 'schema.json')
+      .map((f) => path.join(SCENE_DIR, f));
 
 let issues = 0, checked = 0;
 for (const rel of targets) {

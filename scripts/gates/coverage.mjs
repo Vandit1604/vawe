@@ -21,9 +21,10 @@ import { LOOK_NAMES } from '../../core/looks.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
+import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const dir = path.join(repoRoot, 'formats/scene');
+const dir = path.join(repoRoot, SCENE_DIR);
 const scenes = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !['schema.json'].includes(f))
   .map((f) => { try { return { f, j: JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) }; } catch { return null; } })
   .filter((x) => x && x.j.module === 'scene');

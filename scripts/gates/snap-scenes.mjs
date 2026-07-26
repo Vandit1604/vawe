@@ -20,6 +20,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
@@ -31,7 +32,7 @@ const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one 
 // Every shipped SCENE: formats/scene/*.json with module:"scene", except the schema and _-prefixed
 // scratch. A file without module:"scene" (the examples registry, a *.intent storyboard partial) is not
 // a renderable scene and is skipped — not errored.
-const dir = path.join(repoRoot, 'formats', 'scene');
+const dir = path.join(repoRoot, SCENE_DIR);
 const isScene = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).module === 'scene'; } catch { return false; } };
 const scenes = fs.readdirSync(dir)
   .filter((f) => f.endsWith('.json') && f !== 'schema.json' && !f.startsWith('_'))
@@ -91,14 +92,14 @@ const diffSig = (base, sig) => {
 const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [];
 for (const scene of scenes) {
   const name = scene.replace(/\.json$/, '');
-  const dataPath = `/formats/scene/${scene}`;
+  const dataPath = `/${SCENE_DIR}/${scene}`;
   let cfg = {};
   try { cfg = JSON.parse(fs.readFileSync(path.join(dir, scene), 'utf8')); } catch {}
   const [w, h] = sceneDims(cfg);
   const page = await browser.newPage();
   try {
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${dataPath}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/${SCENE_DIR}/scene.html?data=${dataPath}&fps=30`, { waitUntil: 'load' });
     await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
     const err = await page.evaluate(() => window.__engineError || null);
     if (err) { errored.push(`${name}: ${String(err).slice(0, 80)}`); await page.close(); continue; }

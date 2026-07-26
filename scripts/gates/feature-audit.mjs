@@ -10,8 +10,9 @@ import path from 'path';
 import { PRESETS } from '../../core/type.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
+import { SCENE_DIR } from './paths.mjs';
 
-const DIR = 'formats/scene';
+const DIR = SCENE_DIR;
 const SKIP = new Set(['sample.json', 'schema.json']);
 const isReel = (f) => /demo|reel/.test(f); // showcase reels exercise the whole vocab by design
 
