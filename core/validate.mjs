@@ -203,6 +203,18 @@ export function lintData(data) {
     if (isObj(L) && L.typing && typeof L.text === 'string' && /<(b|em)\b/i.test(L.text)) warns.push(`${name(L, i)} uses "typing" with <b>/<em> markup — typing renders tags literally.`);
   });
 
+  // (2b) countStart is LOCAL to the layer's own `start` (count.js: interpolate(t - start, [cs, cs+cd])),
+  //      NOT an absolute scene time. Setting it to the wall-clock second the count should fire is the
+  //      classic footgun: the animation window falls outside the layer's visible span, so the number
+  //      freezes on its `from` value and the render is silently wrong (docs/MISTAKES.md #147). If
+  //      countStart alone already meets/exceeds the layer's duration, the count can never animate.
+  layers.forEach((L, i) => {
+    if (!isObj(L) || L.type !== 'count') return;
+    const dur = L.duration ?? 2, cs = L.countStart ?? 0, cd = L.countDur ?? 1.2;
+    if (cs >= dur) warns.push(`${name(L, i)} has countStart ${cs} ≥ its duration ${dur}. countStart is LOCAL to the layer's start (t - start), not an absolute scene time — the count never animates and freezes at "from". Use a small local offset (e.g. countStart 0.2) and set the layer's own start to when it appears.`);
+    else if (cs + cd > dur + 0.05) warns.push(`${name(L, i)} count window (countStart ${cs} + countDur ${cd} = ${(cs + cd).toFixed(1)}) runs past its duration ${dur} — the count-up gets cut off before it lands. Shorten countDur or lengthen duration.`);
+  });
+
   // (3) SCENE COLLISION — two CONTENT layers overlapping in BOTH space and time, not in a
   //     containment/group/anchor relationship = one scene bleeding into the next (the Preferences↔agents
   //     overlap). Pure geometry; needs an explicit w to bound a box (numeric starts only).

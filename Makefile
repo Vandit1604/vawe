@@ -311,6 +311,12 @@ tts:
 storyboard-check:
 	node scripts/gates/storyboard-check.mjs $(SB)
 
+# make storyboard-draft NAME=<brand> [MSG="one sentence" DUR=30 FORMAT=landscape] — auto-draft a
+# STORYBOARD.md skeleton from a captured sections.json (one beat per real section, in the site's order,
+# pre-wired with type + capture command + suggested blueprint). Fill the <…> fields, then storyboard-check.
+storyboard-draft:
+	node scripts/brand/storyboard-draft.mjs
+
 # make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
 # black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
