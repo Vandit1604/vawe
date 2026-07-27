@@ -39,6 +39,19 @@
       "bestFor": "A Shorts / Reels / TikTok hook.",
       "tags": ["kinetic", "portrait", "gradient", "cut-to-beat", "punchy"],
       "poster": 4.9
+    },
+    {
+      "source": "example-metallic-bg.json",
+      "video": "example-metallic-bg.mp4",
+      "title": "Metallic Shimmer",
+      "description": "A dramatic dark backdrop: a curtain of vertical light rods with a shimmer that sweeps across (brushed metal / a lit equaliser), coloured by the brand accent, with a clean white wordmark reveal.",
+      "aspect": "16:9",
+      "orientation": "landscape",
+      "duration": 6.0,
+      "category": "Background",
+      "bestFor": "A bold title card or a dramatic backdrop beat.",
+      "tags": ["metallic", "shimmer", "dark", "background", "brand-coloured"],
+      "poster": 3.0
     }
   ]
 }

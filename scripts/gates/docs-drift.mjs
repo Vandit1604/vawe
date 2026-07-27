@@ -15,6 +15,7 @@ import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
+import { BG_NAMES } from '../../core/backgrounds.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
@@ -85,8 +86,21 @@ for (const { re, reg } of HEADING_COUNTS) {
   }
 }
 
+// 3. The docs-site backgrounds page hand-lists the bg presets ("There are N presets:" + a
+//    `preset` · `preset` · … line). It silently went stale (16 vs a real 17) when `metallic` shipped,
+//    because the list is copied, not derived. Check the count AND that every BG_NAME appears.
+const BG_MDX = path.join(repoRoot, 'docs-site', 'content', 'docs', 'backgrounds-and-images.mdx');
+if (fs.existsSync(BG_MDX)) {
+  const mdx = fs.readFileSync(BG_MDX, 'utf8');
+  const cm = /There are (\d+) presets:/.exec(mdx);
+  if (!cm) findings.push(`docs-site backgrounds-and-images.mdx has no "There are N presets:" line — the bg count check silently stopped running`);
+  else if (+cm[1] !== BG_NAMES.length) findings.push(`docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
+  const missing = BG_NAMES.filter((n) => !mdx.includes('`' + n + '`'));
+  if (missing.length) findings.push(`docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
+}
+
 if (!findings.length) {
-  console.log(`✓ docs in sync — no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES)`);
+  console.log(`✓ docs in sync — no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + bg presets)`);
   process.exit(0);
 }
 console.log(`DOCS DRIFT (${findings.length})\n`);
