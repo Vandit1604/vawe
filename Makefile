@@ -317,6 +317,12 @@ storyboard-check:
 storyboard-draft:
 	node scripts/brand/storyboard-draft.mjs
 
+# make studio D=formats/scene/<file>.json [PORT=8799] — LIVE scrubbable preview (no mp4 render). Serves
+# the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Dev
+# tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.
+studio:
+	node scripts/dev/studio.mjs $(D)
+
 # make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
 # black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
