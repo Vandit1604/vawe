@@ -55,6 +55,9 @@ const sig = {
   paint: flat.filter((l) => l.type === 'paint').length,
   glowFlash: flat.filter((l) => l.type === 'glow' && l.flash).length,
   svgMotion: flat.filter((l) => l.type === 'svg' && (l.draw || l.morph)).length,
+  // a `composition` layer is a bespoke hand-authored per-beat GSAP timeline — directed by construction
+  // (a multi-tween motion-graphics beat), so it counts as its own technique. compositions/index.js.
+  composition: flat.filter((l) => l.type === 'composition').length,
 };
 // distinct expressive TECHNIQUES in play (a beat counts, since it emits several).
 const vocab = Object.entries(sig).filter(([, v]) => v > 0).map(([k]) => k);

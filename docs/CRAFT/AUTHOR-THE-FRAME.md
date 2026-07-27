@@ -56,5 +56,28 @@ this way by default** — a static figure that lands in one frame is the flat te
 
 Still layer-level when you want it: `anim`/`motion`/`fx`/`split`+`preset` for the whole layer or its text.
 
+## The full ceiling — a hand-authored timeline per beat via `composition`
+
+`parts` staggers a figure's children; when a beat needs MORE than that — overlapping tweens, cross-timed
+hand-offs, a token travelling a path while a counter ticks and a check draws — reach for a **composition**.
+This is another engine' "one worker writes a GSAP timeline per beat" model, made safe: the bespoke timeline is
+a FIRST-PARTY builder in [`core/compositions/index.js`](../../core/compositions/index.js); the scene only
+NAMES it and passes DATA.
+
+```json
+{ "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 440, "w": 1200,
+  "start": 3.0, "duration": 4.6, "out": "defocus",
+  "props": { "stages": ["Capture", "Compose", "Render"] } }
+```
+
+The JSON carries only `comp` (a registry name) + `props` (DATA — labels, numbers), never code, so untrusted
+input can name a comp and fill labels but cannot inject script (the inline-`<script>` boundary the html
+layer defends). To ADD a comp, write a builder in `core/compositions/index.js` that: (1) builds the beat's
+static DOM into `el` (any `props` string as `textContent`/attr, never innerHTML); (2) authors PAUSED tweens
+via `ctx.gsap` with `delay` offset by `ctx.start` and `immediateRender:true`, no `Date.now`/`Math.random`.
+`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #148): every
+tween is a `fromTo` (never `gsap.to(...immediateRender:false)` — it sticks the end value on backward seek);
+a travelling element uses ONE keyframed `fromTo`; never tween between two `var()` colour strings.
+
 Effects: [EFFECTS.md](../EFFECTS.md) · camera: `vawe-camera` · the storyboard/spec discipline that makes a
 frame worth authoring: [FRAME-SPEC.md](FRAME-SPEC.md).

@@ -366,5 +366,13 @@
 | `slowPush` | gentle continuous zoom in (the frame stays alive) |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
 
+## Compositions (bespoke per-beat timeline)  `[composition]`
+
+`{ "type":"composition", "comp":"<name>", "props":{…} }` — a FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
+
+| name | what / when |
+|---|---|
+| `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
+
 ---
-_240 effects across 15 families. Regenerate: `make effects`._
+_241 effects across 16 families. Regenerate: `make effects`._

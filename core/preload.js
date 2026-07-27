@@ -130,7 +130,12 @@ const GSAP_PLUGINS = {
 
 export async function preloadGsap(data) {
   const json = JSON.stringify(data);
-  if (!/"(gsap|morph|fx|fxOut|motionPath|physics|splitText)"\s*:/.test(json)) return;
+  // Every field whose motion is authored on the seeked GSAP timeline MUST trigger the load, or the
+  // engine accepts the input and renders it UNANIMATED — the silent-substitution failure. `parts`
+  // (per-child choreography) and `comp` (a composition's hand-authored timeline) both live on GSAP
+  // exactly like fx/morph, so they belong here; leaving them out shipped a static figure with no error
+  // (docs/MISTAKES.md #148). Keep this list in lockstep with applyGsapHooks + core/layers/composition.js.
+  if (!/"(gsap|morph|fx|fxOut|motionPath|physics|splitText|parts|comp)"\s*:/.test(json)) return;
   if (!window.gsap) await loadScript('/assets/vendor/gsap.min.js');
   if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load — gsap/fx/morph layers render unanimated'); return; }
   try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); registerGsapEffects(window.gsap); } catch (e) {}

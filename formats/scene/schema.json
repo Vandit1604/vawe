@@ -468,7 +468,8 @@
             "lottie",
             "paint",
             "raymarch",
-            "three"
+            "three",
+            "composition"
           ]
         },
         "shader": {
@@ -883,6 +884,14 @@
         "parts": {
           "label": "Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards) so a figure animates piece by piece. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease } OR an array of them (bars, then line, then dots). Pure (seeked GSAP)."
         },
+        "comp": {
+          "type": "string",
+          "label": "Composition name (type:\"composition\") — a FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
+        },
+        "props": {
+          "type": "object",
+          "label": "DATA passed to a `composition` comp (labels, numbers, accent) — treated as textContent/attr, never markup. e.g. { stages:[\"Input\",\"Engine\",\"Render\"] }."
+        },
         "splitText": {
           "type": "object",
           "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease } — each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
@@ -1051,7 +1060,8 @@
                 "lottie",
                 "paint",
                 "raymarch",
-                "three"
+                "three",
+                "composition"
               ]
             },
             "x": {

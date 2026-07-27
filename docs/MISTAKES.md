@@ -3116,3 +3116,37 @@ direction-floor now warns `static-figure` when a 3+-child group or multi-shape S
 nudge two-sided verified; the Lumen demo's chart builds piece by piece. Small authoring gotcha logged in
 passing: `countStart` is LOCAL to a layer's `start` (`t - start`), not absolute — a count scheduled at an
 absolute time never fires.
+
+## #148 — the composition path (per-beat GSAP timeline), and TWO framework bugs it surfaced
+
+**What.** Adopted another engine' "one worker hand-writes a GSAP timeline per beat" model — but SAFELY. A
+`composition` layer names a FIRST-PARTY builder in `core/compositions/index.js` (`{type:"composition",
+comp:"pipelineFlow", props:{…}}`); the builder authors a bespoke multi-tween timeline (cards pop in,
+connectors DRAW, a token TRAVELS each link, a check draws on) that `parts`/blueprints can't express. The
+JSON carries only a NAME + DATA `props`; the code lives first-party, so untrusted MCP input can name a comp
+and fill labels but cannot inject script (the inline-`<script>` exploit boundary holds). `seekAll` drives
+the paused global timeline → pure in n (probe green). Every tween is a `fromTo` with `immediateRender:true`
+(start values pinned; a `gsap.to(...immediateRender:false)` leaves the END value stuck on backward seek —
+a render-order impurity); the travelling token appears/moves/vanishes in ONE keyframed `fromTo`; no colour
+tween between two `var()` strings (GSAP can't interpolate them).
+
+**Framework bug #1 (a REGRESSION, blast radius = every parts/comp scene).** `preloadGsap`
+(core/preload.js) loads GSAP only when the scene JSON matches a trigger regex — and the boot→preload.js
+extraction had dropped `parts` from that list (and my new `comp` was never in it). So a `parts`-only scene
+loaded NO gsap and rendered UNANIMATED with no error — the silent-substitution failure. A figure that was
+confirmed animating earlier had gone static. Root cause: the trigger list is a hand-copied second source of
+truth that drifts from applyGsapHooks. Fix: added `parts|comp` to the regex + a comment tying it to
+applyGsapHooks + composition.js. Verified: lumen's bars now scaleY in a stagger again (0.99→0.0).
+
+**Framework bug #2 (served-prefix allowlist).** `internal/scene/scene.go` serves ONLY `core/ themes/
+formats/ assets/` to the render page (a deliberate SSRF-ish boundary). A new top-level `compositions/` dir
+404'd → the layer's module import threw → boot never signalled ready → the Go renderer timed out on EVERY
+scene (while a plain static server booted fine, which is what isolated it). Fix: compositions are
+browser-loaded ENGINE code, so they live under `core/compositions/` — inside the allowlist, no new served
+prefix, boundary unchanged.
+
+**Gate.** `make probe` (comp pure); `schema-drift` (new `composition` type + `comp`/`props` props);
+direction-floor credits a `composition` as a directed technique; EFFECTS.md lists it; the
+showcase-composition demo renders clean (seam-check clean, audit clean). The lesson worth keeping: the
+gsap-trigger list and the served-prefix allowlist are both hand-maintained lists that a new feature must be
+added to, and BOTH fail SILENTLY (unanimated render / boot timeout) rather than naming the cause.
