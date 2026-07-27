@@ -127,6 +127,43 @@ export function spotlight(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
+// ---- metallic: a curtain of vertical light RODS with a travelling SHIMMER — a bright band sweeps
+// horizontally across the bars (a sine wave in the per-bar brightness, advanced by t). Reads as brushed
+// metal / a lit equaliser. Deterministic (pure in t). Colour from the brand accent; a soft glow pools at
+// the light source (default lower-centre) so the top falls to black, like the reference. `speed` = shimmer
+// travel, `waves` = how many bright bands are on screen at once, `count` = number of rods.
+export function metallic(ctx, w, h, t, o = {}) {
+  const col = o.color || '46,224,160';
+  const count = o.count ?? 70, bw = w / count;
+  const speed = o.speed ?? 0.9, waves = o.waves ?? 2.2;
+  const gx = (o.gx ?? 0.5) * w, gy = (o.gy ?? 0.78) * h, gI = o.glow ?? 0.5;
+  // 1. glow pool: a soft radial brightening at the light source; the frame falls to black away from it.
+  const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.max(w, h) * 0.95);
+  glow.addColorStop(0, `rgba(${col},${gI.toFixed(3)})`);
+  glow.addColorStop(0.5, `rgba(${col},${(gI * 0.3).toFixed(3)})`);
+  glow.addColorStop(1, `rgba(${col},0)`);
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+  // 2. vertical rods, brightness modulated by a travelling sine → a shimmer sweeps across. 'lighter' so
+  // the bright bands add to the glow (metallic pop); a thin white core sells the sheen on the hottest rods.
+  ctx.globalCompositeOperation = 'lighter';
+  const alpha = o.alpha ?? 0.20;
+  for (let i = 0; i < count; i++) {
+    const x = i * bw;
+    const sheen = 0.5 + 0.5 * Math.sin((i / count) * Math.PI * 2 * waves - t * speed); // 0..1, travels
+    const a = alpha * (0.12 + 0.88 * sheen);
+    const g = ctx.createLinearGradient(x, 0, x + bw, 0);
+    g.addColorStop(0, `rgba(${col},0)`);
+    g.addColorStop(0.5, `rgba(${col},${a.toFixed(3)})`);
+    g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.fillRect(x, 0, bw + 0.5, h);
+    if (sheen > 0.82) { // a bright white sheen line down the hottest rods
+      ctx.fillStyle = `rgba(255,255,255,${((sheen - 0.82) * 0.9).toFixed(3)})`;
+      ctx.fillRect(x + bw * 0.44, 0, bw * 0.12, h);
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 // ---- deterministic grain: sparse tinted specks seeded per (frame,index). Kills banding, filmic feel.
 export function grain(ctx, w, h, t, o = {}) {
   // hold each grain pattern for `every` frames (default 2) instead of reseeding every frame: full
@@ -161,7 +198,7 @@ export const PAL = PAL_PLINTH; // back-compat
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
-  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink'];
+  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink', 'metallic'];
 export function bgPreset(name, value, P = PAL_PLINTH) {
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };
@@ -198,6 +235,8 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
       { type: 'dots', mode: 'pulse', color: P.tint2, baseAlpha: 0.06, peakAlpha: 0.22, spacing: 64, period: 5, driftX: 9, driftY: 5 }, { type: 'spotlight', intensity: 0.12, period: 8 }, grain ] };
     case 'mesh': return { base: { kind: 'radial', from: P.darkMesh[0], to: P.darkMesh[1], cx: 0.4, cy: 0.5 }, fx: [
       { type: 'aurora', intensity: 0.42, blobs: [ { color: P.tint, x: 0.3, y: 0.4, r: 680, ax: 140, ay: 96, px: 14, py: 19, ph: 0 }, { color: P.accent, x: 0.72, y: 0.55, r: 600, ax: 160, ay: 116, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.55, y: 0.3, r: 500, ax: 110, ay: 76, px: 12, py: 21, ph: 4 } ] }, grain ] };
+    case 'metallic': return { base: { kind: 'solid', color: '#05070a' }, fx: [
+      { type: 'metallic', color: P.accent, count: 70, speed: 0.9, waves: 2.2, glow: 0.5, alpha: 0.2, gx: 0.5, gy: 0.78 }, { type: 'grain', alpha: 0.04 } ] };
     case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
   }
@@ -236,6 +275,7 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'particles') particles(ctx, w, h, t, fx);
     else if (fx.type === 'spotlight') spotlight(ctx, w, h, t, fx);
     else if (fx.type === 'shapes') shapes(ctx, w, h, t, fx);
+    else if (fx.type === 'metallic') metallic(ctx, w, h, t, fx);
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
   }
 }

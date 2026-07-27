@@ -40,6 +40,7 @@ const DESC = {
   aurora: 'drifting colour aurora (moves)', mesh: 'soft gradient mesh (dark/saturated — check contrast)',
   constellation: 'drifting connected nodes (moves) — telemetry/data feel', spotlight: 'radial spotlight glow',
   brandglow: 'breathing accent glow', paperShapes: 'faint drifting geometric shapes (light, subtle)',
+  metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured',
   paperDots: 'faint drifting dot grid (light)', plain: 'flat theme field', dotmatrix: 'dot matrix grid',
   // stings / transitions
   whipPan: 'momentum swipe between beats', cinematicZoom: 'dive-in zoom into a screen', dissolve: 'time/place change',
