@@ -18,6 +18,10 @@ import fs from 'node:fs';
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene.json> [--strict]'); process.exit(2); }
+// The floor coaches on the RAW AUTHORED scene (what you wrote), NOT the produced one — the engine injects
+// the baseline at render (core/produce.js), so these WARNs read as "author this deliberately instead of
+// leaning on the injected default." Judging the produced scene would mask the very conditions this gate
+// exists to surface (and defeat gate-mutation's ability to prove the gate can fire).
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 

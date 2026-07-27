@@ -340,6 +340,10 @@
         }
       }
     },
+    "produced": {
+      "type": "boolean",
+      "label": "Set false to OPT OUT of the produced baseline the engine injects by default (core/produce.js): a living/brand-appropriate background, a gentle camera push, and sceneUnits on cut films. Additive only (never rewrites your layers). Absent = produced (rich by default); false = render exactly what the JSON declares. Any field you set explicitly (bg, cameraMove, sceneUnits) already overrides its part of the baseline."
+    },
     "sceneUnits": {
       "type": "boolean",
       "label": "Make `cuts` move each BEAT as a WHOLE UNIT (the outgoing beat slides/pushes out while the incoming slides in, as separate scenes) instead of transforming the whole camera at once. Turns beat boundaries from a per-layer-fade slideshow into real scene swaps. Beats are the intervals between cut times; layers are grouped by their start. Opt-in; a scene without it renders byte-identical. See core/cuts.js PRESENTATIONS for the styles."

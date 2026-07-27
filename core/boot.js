@@ -5,6 +5,7 @@
 import { FPS } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
+import { produceBaseline } from './produce.js';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
 import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites } from './preload.js';
@@ -307,6 +308,9 @@ export async function boot(build) {
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
     resolveCoords(data, width, height, safe); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
+    produceBaseline(data, theme); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
+    // scene that didn't specify it — absent-only, theme-aware, additive (never rewrites an authored layer),
+    // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a
     // scene might use — so a brand's face is never silently swapped for the generic fallback. This is

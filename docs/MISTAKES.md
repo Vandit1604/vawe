@@ -3190,3 +3190,32 @@ extended through the slide) so the scene slides as ONE, not slide+fade-per-layer
 as before. `make snap-all`: 72 scenes IDENTICAL, 0 changed. Probe pure; seam-check clean; the demo
 (showcase-scenecut) visibly swaps beats as units. The continuity gate (motion-director) now CREDITS
 sceneUnits — the scene itself travels every cut, the strongest continuity there is.
+
+## #151 — the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like another engine)
+
+**What.** The engine was capability-oriented (composition/parts/sceneUnits/camera all opt-in) so authors
+defaulted to thin videos. Flipped it: `core/produce.js` `produceBaseline(data, theme)` runs once at BUILD
+(core/boot.js, after theme resolve, before build) and INJECTS the universal produced motion into any scene
+that didn't specify it — a living/brand-appropriate background (light brand → paperShapes, dark → aurora),
+a gentle camera slowPush, and `sceneUnits` on cut films. Pure (mutates data once, pre-first-frame →
+renderFrame stays deterministic). THEME-AWARE, ABSENT-ONLY (an explicit field is the opt-out), and
+`"produced":false` disables the whole pass. Every video is now rich by default.
+
+**Three hard-won constraints the render taught (each was a real break, caught by snap/probe/gate-mutation):**
+1. **Never REWRITE an authored layer — only ADD.** The first version also auto-split bare headlines into
+   kinetic word-reveals. That MUTATED layer structure and (a) broke a layer carrying a `motion` track
+   (non-deterministic x→garbage) and (b) MASKED the audit's weak-headline contrast check (it measures the
+   whole layer, not per-word units) — gate-mutation went red. Dropped it. Kinetic type is nudged by the
+   floor, authored per-headline. The baseline is now strictly additive.
+2. **Directed injections (camera, sceneUnits) SKIP already-choreographed scenes.** Injecting a camera or
+   `sceneUnits` into a scene with per-layer `motion` tracks (which span beats, use absolute times) fought
+   the tracks and the beat-wrapper model → non-determinism (motion-reel-v2). Guard: `choreographed` = any
+   layer with a `motion` track → skip camera + sceneUnits.
+3. **Gates judge the RAW scene, the engine produces at render.** Wiring produceBaseline INTO the gates
+   masked the exact conditions they test (a "no-camera" mutation can't fire once the gate injects a camera)
+   — gate-mutation red. Reverted. The gate coaches on what you WROTE; the engine fills the baseline. Two
+   different jobs.
+
+**Blast radius (accepted, engine-level forcing).** snap-all: 51 of 77 scenes now render richer (was
+byte-identical); re-baselined. 0 quarantined, probe pure, gate-mutation 50/50, lib-test 421. Any scene
+opts out per-field or with `"produced":false`.
