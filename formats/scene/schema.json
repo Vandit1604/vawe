@@ -340,6 +340,10 @@
         }
       }
     },
+    "sceneUnits": {
+      "type": "boolean",
+      "label": "Make `cuts` move each BEAT as a WHOLE UNIT (the outgoing beat slides/pushes out while the incoming slides in, as separate scenes) instead of transforming the whole camera at once. Turns beat boundaries from a per-layer-fade slideshow into real scene swaps. Beats are the intervals between cut times; layers are grouped by their start. Opt-in; a scene without it renders byte-identical. See core/cuts.js PRESENTATIONS for the styles."
+    },
     "transitions": {
       "type": "array",
       "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut · seam · sting) via core/transitions.js — ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",

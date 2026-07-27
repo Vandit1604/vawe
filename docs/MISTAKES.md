@@ -3164,3 +3164,29 @@ changes scale/position (from!==to, or a tx/ty target) counts as the `camera` tec
 (a scene with a slowPush shows `camera×1` + no nag; a scene with no camera still nags). The lesson: a gate
 that reads a POST-expand field must also recognize the PRE-expand sugar that produces it, or it fails the
 author for doing the right thing.
+
+## #150 — first-class scene-unit transitions (A slides out, B slides in) — the missing scene swap
+
+**What.** Our beat boundaries read as a slideshow because the default `cuts` transform the WHOLE `cam` at
+once (a camera bump), and beats were not units — layers attach flat to `cam`, so a boundary was 20 layers
+independently fading, never "scene A leaves as B arrives." (another engine' best transitions are exactly this:
+the whole outgoing scene slides off while the incoming slides in, as units.) We HAD real two-scene GPU
+seams (core/seams.js) but doctrine reserved them for one payoff.
+
+**Fix.** Opt-in `"sceneUnits": true`: partition layers into BEATS by the `cuts` times, wrap each beat's
+layers in a `.hs-beat` div, and at each boundary move the OUTGOING wrapper (exit) against the INCOMING
+wrapper (enter) as separate units — reusing the cutStyle PRESENTATIONS (slide/push/riseBlur/…), pure in n,
+cheap CSS transform (no GPU). The wrapper owns the exit (per-layer exit fade suppressed, layer life
+extended through the slide) so the scene slides as ONE, not slide+fade-per-layer.
+
+**Two design learnings the render taught (via eyeballing, not a gate):**
+1. **Window sits AFTER the cut** `[ct, ct+dur]`, not straddling it. Straddling meant the incoming beat's
+   layers (which start at the beat boundary) weren't present yet, so an EMPTY beat slid in. Placing the
+   window at/after ct makes the incoming beat's own start supply its content as it slides in.
+2. **Whole-scene travel is the viewport width**, not the cut presets' ~220px per-layer nudge — else the two
+   beats overlap in the centre instead of clearing the frame. `dist` defaults to `W` for scene units.
+
+**Non-breaking (the whole risk).** Strictly opt-in: without the flag, layers attach flat to `cam` exactly
+as before. `make snap-all`: 72 scenes IDENTICAL, 0 changed. Probe pure; seam-check clean; the demo
+(showcase-scenecut) visibly swaps beats as units. The continuity gate (motion-director) now CREDITS
+sceneUnits — the scene itself travels every cut, the strongest continuity there is.

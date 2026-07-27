@@ -129,8 +129,10 @@ else if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
 // continuity: a shared element that travels (a motion track, or a layer spanning a beat boundary).
 const spansABeat = (l) => { const a = l.start ?? 0, b = a + (l.dur ?? l.enterDur ?? 0); return beats.some((t) => t > a + 0.05 && t < b - 0.05); };
 const travelers = layers.filter((l) => l.track !== 0 && (Array.isArray(l.motion) && l.motion.length > 1 || spansABeat(l)));
-if (beats.length >= 4 && travelers.length === 0)
-  warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity)`);
+// sceneUnits carries continuity BY CONSTRUCTION: every boundary moves the whole outgoing beat out and the
+// incoming beat in as units, so the scene itself travels across each cut (the strongest continuity there is).
+if (beats.length >= 4 && travelers.length === 0 && d.sceneUnits !== true)
+  warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`);
 
 // beats too short to read. Only real cut times give a true beat-hold duration (start-clusters are
 // ≥1.4s apart by construction, so they can't measure this). WARN, since a fast montage is legitimate.

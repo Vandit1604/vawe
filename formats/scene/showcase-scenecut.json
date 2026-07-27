@@ -1,0 +1,26 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "sceneUnits": true,
+  "cuts": [
+    { "t": 3, "style": "slide", "dir": "left", "dur": 0.6, "timing": "smooth" },
+    { "t": 6, "style": "riseBlur", "dir": "left", "dur": 0.6, "timing": "smooth" }
+  ],
+  "cameraMove": [
+    { "move": "slowPush", "start": 0, "dur": 9, "from": 1, "to": 1.03 }
+  ],
+  "bg": [{ "t": 0, "preset": "plain" }],
+  "layers": [
+    { "type": "text", "text": "SCENE UNITS", "x": 160, "y": 300, "w": 900, "size": 30, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.1em", "anim": "fade", "enterDur": 0.5, "start": 0.2, "duration": 2.6 },
+    { "type": "text", "text": "Scenes move", "x": 160, "y": 390, "w": 1500, "size": 130, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 0.5, "duration": 2.5 },
+    { "type": "text", "text": "as one unit.", "x": 160, "y": 540, "w": 1500, "size": 130, "weight": 800, "color": "var(--accent)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 1.3, "duration": 1.7 },
+
+    { "type": "text", "text": "Not layer by layer.", "x": 160, "y": 400, "w": 1600, "size": 120, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.36, "stagger": 0.05, "start": 3.0, "duration": 2.5 },
+    { "type": "text", "text": "The whole beat travels the cut.", "x": 160, "y": 560, "w": 1600, "size": 42, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 4.0, "duration": 2.0 },
+
+    { "type": "text", "text": "One deliberate move.", "x": 160, "y": 410, "w": 1600, "align": "center", "size": 110, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.34, "stagger": 0.04, "start": 6.0, "duration": 2.7 },
+    { "type": "text", "text": "sceneUnits: true", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 6.9, "duration": 2.1 }
+  ]
+}

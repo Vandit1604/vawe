@@ -132,6 +132,36 @@ boot((data, fps, theme, canvas) => {
     })
     .sort((a, b) => +a.t - +b.t);
 
+  // ---- SCENE UNITS (opt-in): beats that transition as WHOLE units (A slides out, B slides in) ----
+  // The default `cuts` transform the whole `cam` at once (a camera bump). With `sceneUnits:true` each
+  // BEAT (the interval between cut times) becomes its own wrapper, and a boundary moves the OUTGOING
+  // wrapper (exit) against the INCOMING wrapper (enter) as separate units — a real scene swap, not a
+  // pile of independent layer fades. Reuses the cutStyle PRESENTATIONS (slide/push/slideBlur/…), pure in
+  // n. STRICTLY OPT-IN: without the flag, layers attach flat to `cam` exactly as before (snap-identical).
+  const sceneUnits = data.sceneUnits === true && sceneCuts.length > 0;
+  const beatBounds = [], beatWrap = [];
+  if (sceneUnits) {
+    const ts = [...new Set(sceneCuts.map((c) => +c.t))].sort((a, b) => a - b);
+    const edges = [0, ...ts];
+    for (let i = 0; i < edges.length; i++) {
+      const end = i < ts.length ? ts[i] : Infinity; // last beat runs to the end (no exit cut)
+      beatBounds.push({ start: edges[i], end });
+      const w = document.createElement('div');
+      w.className = 'hs-beat';
+      w.style.cssText = 'position:absolute;inset:0;transform-origin:50% 50%;will-change:transform,opacity';
+      cam.appendChild(w);
+      beatWrap.push(w);
+    }
+  }
+  // which beat a top-level layer belongs to (by its start time). Group children ride their parent's beat.
+  const beatIndexOf = (L) => {
+    if (!sceneUnits) return null;
+    const s = L.start ?? 0;
+    for (let i = 0; i < beatBounds.length; i++) if (s >= beatBounds[i].start && s < beatBounds[i].end) return i;
+    return beatBounds.length - 1;
+  };
+  const beatExitEnd = (i, half) => (beatBounds[i] && isFinite(beatBounds[i].end) ? beatBounds[i].end + half : null);
+
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
   const extra = []; // group children (any depth), animated on their root group's window
@@ -258,6 +288,19 @@ boot((data, fps, theme, canvas) => {
     if (L.fxOut) el.dataset.exitDur = '0';
     else if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
     else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale).toFixed(3));
+    // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
+    // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
+    // last beat has no exit cut). The incoming ENTER stays per-layer, so contents still stagger in.
+    if (sceneUnits) {
+      const bi = beatIndexOf(L);
+      if (bi != null && bi < beatBounds.length - 1) {
+        const be = beatBounds[bi].end;                    // this beat's exit cut time
+        const cut = sceneCuts.find((c) => +c.t === be);
+        const dur = cut && cut.dur != null ? +cut.dur : 0.4;
+        el.dataset.exitDur = '0';                          // wrapper owns the exit slide (no per-layer fade)
+        el.dataset.duration = String(+(be + dur - (L.start ?? 0)).toFixed(3)); // live through the slide-out
+      }
+    }
   }
 
   // buildLayer — turn one layer's JSON into its DOM element (position + class + timing), dispatch to the
@@ -275,7 +318,10 @@ boot((data, fps, theme, canvas) => {
     renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
     // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
     if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
-    cam.appendChild(el);
+    // scene units: a top-level layer lives inside its beat's wrapper (which owns the scene transform);
+    // otherwise it attaches flat to cam exactly as before.
+    const bi = beatIndexOf(L);
+    (bi != null ? beatWrap[bi] : cam).appendChild(el);
     // ransom is a per-CHAR treatment, so it implies a char split when the author did not set one.
     const splitMode = L.split || ((L.ransom || L.circle) ? 'char' : null);
     const units = splitMode ? splitText(el, splitMode) : null; // 'char' | 'word' | 'line'
@@ -433,6 +479,7 @@ boot((data, fps, theme, canvas) => {
     const t = f / fps;
     drawBg(t);
     driveClips(cam, t); // declarative clip timing + enter/exit + z-order
+    driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits) — no-op otherwise
     for (const { L, el, units } of layers) updateLayer(el, L, units, t, f);
     drawCaptions(t);
     drawCameraAndCut(t);
@@ -493,7 +540,9 @@ boot((data, fps, theme, canvas) => {
       ? `perspective(${c.persp.toFixed(0)}px) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg) ` : '';
     const camTf = c ? `${tilt}scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
     let cutS = null;
-    for (const cu of sceneCuts) {
+    // sceneUnits mode drives the transition on the per-beat WRAPPERS (driveSceneUnits), not the whole
+    // cam — so skip the cam-level cut entirely and let the wrappers swap the two beats as units.
+    if (!sceneUnits) for (const cu of sceneCuts) {
       const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;   // `dur` is the TOTAL window, split around t
       if (t <= ct - half || t >= ct + half) continue;
       const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
@@ -506,6 +555,28 @@ boot((data, fps, theme, canvas) => {
     const { transform: cutTf, ...cutRest } = cutS;
     Object.assign(cam.style, cutRest);
     cam.style.transform = [camTf, cutTf && cutTf !== 'none' ? cutTf : ''].filter(Boolean).join(' ') || 'none';
+  }
+
+  // driveSceneUnits — move each BEAT WRAPPER as one unit across a cut boundary: the outgoing beat plays
+  // the cut's EXIT, the incoming beat its ENTER, using the same cutStyle vocabulary. A real A-out/B-in
+  // scene swap (vs the cam-level bump). Pure in t (cutStyle is closed-form). No-op unless sceneUnits.
+  function driveSceneUnits(t) {
+    if (!sceneUnits) return;
+    // steady state: identity + fully visible (each beat's own layers handle their in-window visibility)
+    for (const w of beatWrap) { w.style.transform = 'none'; w.style.opacity = '1'; w.style.filter = 'none'; w.style.clipPath = 'none'; }
+    for (let k = 0; k < sceneCuts.length; k++) {
+      // window runs [ct, ct+dur] — the cut time is when the SWAP STARTS. The incoming beat's own layers
+      // start at ct (its beat boundary), so they are present and slide IN as the outgoing slides OUT.
+      const cu = sceneCuts[k], ct = +cu.t, dur = cu.dur ?? 0.4;
+      if (t < ct || t >= ct + dur) continue;
+      const p = (t - ct) / dur;                              // 0→1 across the whole window
+      // a WHOLE-SCENE slide must clear the frame, so the default travel is the viewport (not the small
+      // per-layer nudge the cut presets use). The opacity fade covers the presets' <1.0 travel factor.
+      const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
+      const apply = (w, s) => { if (!w) return; const { transform, ...rest } = s; Object.assign(w.style, rest); w.style.transform = transform || 'none'; };
+      apply(beatWrap[k], cutStyle(cu.style, { exit: p, enter: 1 }, o));     // beat k (outgoing) leaves
+      apply(beatWrap[k + 1], cutStyle(cu.style, { exit: 0, enter: p }, o)); // beat k+1 (incoming) arrives
+    }
   }
 
   // drawStings — the WebGL shader stings (single-scene boundary FX), each spanning its dur centered on t.
