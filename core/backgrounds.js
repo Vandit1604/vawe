@@ -118,26 +118,41 @@ export function aurora(ctx, w, h, t, o = {}) {
 // gradient WASH — orange-into-white / green-into-white, the "mesh gradient" look. Blobs drift on slow
 // sine paths (pure in t). Unlike aurora it does NOT use 'lighter', so on a LIGHT base it reads as colour
 // pooling into white (not blowing out). `grid` overlays a faint technical line grid (the blueprint look).
+// A pool needs a CORE and a TAIL. A single 0→transparent stop spreads the colour evenly over the whole
+// radius, and three of those on one frame average out into flat haze — which is exactly how the first cut
+// of gradientWash/blobs rendered: pale, and near-indistinguishable from each other. Holding most of the
+// alpha inside the first third gives each pool a readable centre, and the long tail still blends.
+const WASH_CORE = 0.34;
 export function softwash(ctx, w, h, t, o = {}) {
+  // Sizes and drifts are FRACTIONS of the frame diagonal, not pixels. Absolute radii meant a preset that
+  // composed on 1920x1080 turned to mush on 1080x1920 (the same 800px pool covers a very different share
+  // of the frame), so the backdrop silently changed character with the aspect.
+  const d = Math.hypot(w, h);
   const blobs = o.blobs || [
-    { color: o.color || '46,224,160', x: 0.22, y: 0.28, r: 760, ax: 90, ay: 70, px: 22, py: 27, ph: 0, a: 0.5 },
-    { color: o.color2 || o.color || '46,224,160', x: 0.82, y: 0.7, r: 820, ax: 110, ay: 80, px: 26, py: 20, ph: 2, a: 0.42 },
-    { color: o.color3 || o.color || '46,224,160', x: 0.6, y: 0.15, r: 560, ax: 70, ay: 60, px: 18, py: 24, ph: 4, a: 0.3 },
+    { color: o.color || '46,224,160', x: 0.17, y: 0.24, rf: 0.30, ax: 0.04, ay: 0.035, px: 22, py: 27, ph: 0, a: 0.62 },
+    { color: o.color2 || o.color || '46,224,160', x: 0.85, y: 0.76, rf: 0.34, ax: 0.05, ay: 0.04, px: 26, py: 20, ph: 2, a: 0.54 },
+    { color: o.color3 || o.color || '46,224,160', x: 0.6, y: 0.1, rf: 0.21, ax: 0.032, ay: 0.03, px: 18, py: 24, ph: 4, a: 0.4 },
   ];
   const so = o.seed ?? 0;
   blobs.forEach((b, i) => {
     const jx = Math.sin(so * 6.1 + i * 2.3) * 0.08, jy = Math.cos(so * 4.9 + i * 1.9) * 0.08;
-    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph) * b.ax;
-    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph) * b.ay;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
-    g.addColorStop(0, `rgba(${b.color},${((b.a ?? 0.45) * (o.intensity ?? 1)).toFixed(3)})`);
+    const r = b.rf != null ? b.rf * d : b.r;                       // `r` (px) still honoured if given
+    const ax = b.ax <= 1 ? b.ax * d : b.ax, ay = b.ay <= 1 ? b.ay * d : b.ay;
+    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph) * ax;
+    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph) * ay;
+    const a = (b.a ?? 0.45) * (o.intensity ?? 1);
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(${b.color},${a.toFixed(3)})`);
+    g.addColorStop(WASH_CORE, `rgba(${b.color},${(a * 0.58).toFixed(3)})`);
     g.addColorStop(1, `rgba(${b.color},0)`);
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, b.r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
   });
-  if (o.grid) { // a faint technical line grid drifting slowly under the wash (the blueprint feel)
+  if (o.grid) { // a technical line grid drifting slowly under the wash (the blueprint feel)
     const sp = o.gridSpacing ?? 96, gc = o.gridColor || o.color || '46,224,160', ga = o.gridAlpha ?? 0.10;
     const ox = (Math.sin(t * 0.12) * 10) % sp, oy = (Math.cos(t * 0.1) * 8) % sp;
-    ctx.strokeStyle = `rgba(${gc},${ga})`; ctx.lineWidth = 1; ctx.beginPath();
+    // A 1px hairline at low alpha is below the noise floor of the wash under it — the grid was there and
+    // you could not see it. Scale the line with the frame so it survives both the wash and the encoder.
+    ctx.strokeStyle = `rgba(${gc},${ga})`; ctx.lineWidth = Math.max(1, Math.round(d / 1400)); ctx.beginPath();
     for (let x = ox; x < w; x += sp) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
     for (let y = oy; y < h; y += sp) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
     ctx.stroke();
@@ -281,10 +296,22 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
       { type: 'metallic', color: P.accent, count: 70, speed: 0.9, waves: 2.2, glow: 0.5, alpha: 0.2, gx: 0.5, gy: 0.78 }, { type: 'grain', alpha: 0.04 } ] };
     case 'metallicSheen': return { base: { kind: 'solid', color: '#040806' }, fx: [
       { type: 'metallic', color: P.accent, count: 58, speed: 0.7, waves: 1.8, glow: 0.42, alpha: 0.16, gx: 0.78, gy: 0.6, sweep: 0.16, sweepSpeed: 0.1 }, { type: 'grain', alpha: 0.07 } ] };
+    // gradientWash — one big saturated pool bleeding off a corner into white. A MESH GRADIENT, so the
+    // colour has somewhere to come from and somewhere to go; three even pools just average to haze.
     case 'gradientWash': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'softwash', color: P.accent, color2: P.tint2, color3: P.accent, intensity: 1 }, { type: 'grain', alpha: 0.03 } ] };
+      { type: 'softwash', intensity: 1, blobs: [
+        { color: P.accent, x: 0.14, y: 0.82, rf: 0.46, ax: 0.035, ay: 0.03, px: 24, py: 29, ph: 0, a: 0.78 },
+        { color: P.tint2, x: 0.72, y: 0.16, rf: 0.32, ax: 0.045, ay: 0.038, px: 19, py: 23, ph: 2, a: 0.5 },
+        { color: P.accent, x: 0.94, y: 0.62, rf: 0.2, ax: 0.03, ay: 0.026, px: 27, py: 17, ph: 4, a: 0.34 } ] },
+      { type: 'grain', alpha: 0.03 } ] };
+    // blobs — the OTHER light look: airier and more open, with the technical grid as the actual motif.
+    // Smaller, better-separated pools leave white space for the grid to read through.
     case 'blobs': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'softwash', color: P.accent, color2: P.accent, color3: P.tint2, intensity: 0.8, grid: true, gridColor: P.accent, gridAlpha: 0.09, gridSpacing: 104 }, { type: 'grain', alpha: 0.03 } ] };
+      { type: 'softwash', intensity: 1, grid: true, gridColor: P.accent, gridAlpha: 0.16, gridSpacing: 104, blobs: [
+        { color: P.accent, x: 0.2, y: 0.26, rf: 0.24, ax: 0.04, ay: 0.034, px: 21, py: 26, ph: 0, a: 0.5 },
+        { color: P.tint2, x: 0.8, y: 0.72, rf: 0.26, ax: 0.045, ay: 0.038, px: 25, py: 19, ph: 2.4, a: 0.44 },
+        { color: P.accent, x: 0.52, y: 0.9, rf: 0.18, ax: 0.03, ay: 0.028, px: 17, py: 23, ph: 4.2, a: 0.3 } ] },
+      { type: 'grain', alpha: 0.03 } ] };
     case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
   }
