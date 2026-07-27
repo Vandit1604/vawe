@@ -77,6 +77,7 @@ make author-check D=<file> [VS=<brand>]   # THE MANDATORY LADDER — chains the 
 Then the eyeball + memory rungs (not chained — you must look):
 
 ```bash
+make studio   D=<file>              # LIVE scrubbable preview (no mp4) — scrub/step, edit JSON, reload
 make beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
 make reveal   D=<file>              # the ENTER + settled + EXIT arc per beat (how it animates IN)
 make audit                          # overlap / clipped text / safe-zone / WCAG contrast

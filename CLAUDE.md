@@ -106,6 +106,8 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
 2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats.png` (first/mid/last of every
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
+   **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
+   space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render.
 2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal.png` (per beat: the ENTER
    arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
    entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
@@ -118,8 +120,12 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
    aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
    shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves
-   (`"cameraMove":{"move":"diveIn",…}`, `core/camera-moves.js`). Skills: **`vawe-effects`** (pick from the
-   arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
+   (`"cameraMove":{"move":"diveIn",…}`, `core/camera-moves.js`). For a HERO beat whose choreography
+   `parts`/blueprints can't express (overlapping tweens, a token travelling a path while a counter ticks
+   and a check draws), author a bespoke **`composition`** — a first-party hand-authored per-beat GSAP
+   timeline in `core/compositions/index.js`, named from the JSON (`{type:"composition","comp":…,"props":…}`)
+   so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
+   the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
 2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
    whole static quality loop (validate · critique · direct · **direction-floor** · slop · inspect).
    It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·

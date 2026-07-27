@@ -31,8 +31,11 @@ contrast-checked `themes/<brand>.json`. Don't hand-author a theme unless a mappi
 **Gate:** `themes/<brand>.json` exists and validates.
 
 ## Step 3 — Storyboard proposal (user-gated)
-Copy `docs/CRAFT/STORYBOARD-TEMPLATE.md`, fill one beat block per beat (type · blueprint with Reproduce/
-Adapt · onscreen cues · mechanism · **why** · emotion · duration · transition_in). Then
+Start from the real sections, not a blank page: `make storyboard-draft NAME=<brand> [MSG="…" DUR=30]`
+skeletons one beat per captured section (in site order, pre-wired with type + capture command + a suggested
+blueprint) → `assets/brands/<brand>/STORYBOARD.md`. Then **sharpen** it: fill the `<…>` fields — the
+`message` and each beat's **why** — using `docs/CRAFT/STORYBOARD-TEMPLATE.md` (Reproduce/Adapt · mechanism ·
+emotion · transition_in). No site? Copy the template and write beats by hand. Then
 `make storyboard-check SB=<file>`. Present it: open with **"This video tells <audience> that <message>"**,
 then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off.
 **Gate:** storyboard-check passes AND the user approved (autonomous: post it as a heads-up).
@@ -46,8 +49,14 @@ then the beat table. Weight cues into the back ~50% (the reveal model). Get sign
 ## Step 4 — Author from blueprints (obey the spec)
 Compose the scene JSON from `{type:"beat"}` blueprints (`make blueprints`) + brand content, on the remixed
 theme, transcribing the storyboard exactly. Reach for the arsenal (`make effects` → `docs/EFFECTS.md`):
-kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`. Load `vawe-creative` +
-`vawe-effects` + `vawe-animation` + `vawe-camera`. `make expand` to lower beats/cameraMove into layers.
+kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`, dense per-child figures via
+`parts`. For a **hero beat** whose choreography `parts`/blueprints can't express (overlapping tweens, a
+token travelling a path while a counter ticks and a check draws), author a bespoke **`composition`** —
+a first-party hand-authored per-beat GSAP timeline in `core/compositions/index.js`, named from the JSON
+(`{type:"composition",comp:"…",props:{…}}`); see [AUTHOR-THE-FRAME.md](../../../docs/CRAFT/AUTHOR-THE-FRAME.md).
+Load `vawe-creative` + `vawe-effects` + `vawe-animation` + `vawe-camera`. `make expand` to lower
+beats/cameraMove into layers. **Iterate live** without rendering: `make studio D=<file>` serves the scene
+with a frame scrubber — scrub/step, edit the JSON, reload, before you ever render an mp4.
 **Gate:** every storyboard beat is authored; `make validate` passes.
 
 ## Step 5 — Build (optionally parallel, one sub-agent per beat)
