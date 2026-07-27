@@ -19,6 +19,7 @@ story; we have all three — here's where each lives.
 | **Composition** | *How do I fill a frame so it reads produced?* — density, hierarchy, metadata | [`CRAFT/DENSITY.md`](CRAFT/DENSITY.md) (hero + support + metadata triad) |
 | **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) · [`MOTION-RECIPES.md`](MOTION-RECIPES.md) (copy-paste recipe index) |
 | **Direction** | *Why does it read amateur when every layer renders fine?* — pacing, restraint, story placement | [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) — the spine that turns effects into a directed film; every rule sourced to its book + tagged by which gate enforces it |
+| **Continuous action** | *Why does my plan read as three unrelated cards?* | [`vawe-continuous-action`](../.claude/skills/vawe-continuous-action/SKILL.md) · for any film under ~15s, plan ONE object that transforms across every cut instead of a sequence of beats. Diegetic motion (the product doing its job), the measured 5-second budget, and the anti-slop checks you run before a frame renders. Worked from `higgsfield.mp4`. |
 | **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md) — the spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../.claude/skills/vawe-video-planning/SKILL.md) skill applies it. |
 
 > **Never authored one from scratch (no brand site)?** Follow [`CRAFT/AUTHORING-WALKTHROUGH.md`](CRAFT/AUTHORING-WALKTHROUGH.md)

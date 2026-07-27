@@ -3365,3 +3365,33 @@ exit half survived across out-of-order frames. `none` now writes `transform: 'no
 **Lesson.** A silent fallback is load-bearing by the time you find it. Deleting one is not a no-op: other
 code has been leaning on its side effects, and here it was leaning on them for determinism. Expect a
 "pure removal" of a fallback to change output, and diff the whole library rather than assuming it cannot.
+
+## #159 — a gate went blind in a refactor and spent months shouting at everything
+
+**What.** `layer-props` exists to catch the most expensive bug class in this repo: a prop the engine
+accepts and then ignores, so the JSON looks right and the render is wrong. It built its "shared path"
+prop set by regex-scanning a hardcoded file list whose first entry was `formats/scene/scene.html`.
+
+Commit `fd397e1` split `scene.html` into `scene.html` + `scene.css` + `scene.js` and moved the whole
+layer loop into the `.js`. The gate kept scanning the 20-line HTML shell, found no `L.foo` reads, and
+its shared set collapsed to near-empty. From then on it reported `start`, `duration`, `motion`, `anim`,
+`out`, `x`, `y` as dead on every layer in the repo: **1938 flagged props across 75 of 87 scenes.**
+`core/clips.js` did not rescue it because clips reads DOM data-attributes, never `L.start`.
+
+**Why nobody noticed.** `layer-props` is not in `author-check`, so nothing ran it in the normal loop.
+And a gate that fails everything is indistinguishable from a gate nobody trusts: the output was pure
+noise, so it got ignored rather than investigated. It was found only because one real question ("why
+does it flag 21 props on a scene whose motion visibly works?") got followed instead of waved off.
+
+**Fix.** The shared path is now named by DIRECTORY, not by file, so a future split cannot blind it. A
+missing or empty shared source now exits 2 with "layer-props is blind" instead of blaming the scenes.
+A sentinel self-check asserts `start`/`duration`/`motion`/`anim`/`out` were found in real source, and
+the gate declares itself broken if they were not. Per-type delegation is derived from each builder's
+own imports instead of a hand-kept table (which had also gone stale for `three`). 0 failures across 87
+scenes, and proven still to fire on genuinely dead props.
+
+**Two lessons.** A gate can fail by being too LOUD as easily as by being too quiet, and the loud
+failure is worse, because it trains everyone to ignore it. And a gate that reads source by path is
+coupled to the file layout: it must either be told the layout is gone, or derive it. The mutation
+harness now carries a case that renames every `L.` in `scene.js` and asserts the gate reports itself
+broken, which would have caught `fd397e1` the day it landed.

@@ -19,27 +19,54 @@ import { SCENE_DIR } from './paths.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
 
-// Props read by the SHARED path for every layer, wherever they live: scene.html's layer loop, the
-// clip driver, and the shared kit helpers. A prop honoured here is honoured for every type.
-const SHARED_SRC = ['formats/scene/scene.html', 'core/clips.js', 'core/layers/util.js', 'core/boot.js']
-  .map((f) => read(path.join(repoRoot, f))).join('\n');
-// `L.foo` / `C.foo` / `L['foo']` reads, plus destructured `const { a, b } = L`
+// Props read by the SHARED path for every layer, wherever they live: the scene format's layer loop,
+// the clip driver, and the shared kit helpers. A prop honoured here is honoured for every type.
+//
+// The format's driver is taken as "every .js in the format directory", not a named file. It used to be
+// named — `formats/scene/scene.html` — and when that file was split into scene.html + scene.css +
+// scene.js (fd397e1) the gate kept scanning the 20-line HTML shell, found nothing, and reported ~1900
+// live props as dropped. Naming the directory instead of the file means the next split cannot blind it.
+const SHARED_FILES = [
+  ...fs.readdirSync(path.join(repoRoot, SCENE_DIR)).filter((f) => f.endsWith('.js')).sort().map((f) => path.join(SCENE_DIR, f)),
+  'core/clips.js', 'core/layers/util.js', 'core/boot.js',
+];
+const SHARED_SRC = SHARED_FILES.map((f) => {
+  const src = read(path.join(repoRoot, f));
+  // A shared source that has moved or emptied out makes the gate blind, and a blind silent-ignore gate
+  // reports every shared prop in the repo as dead. Say so instead of shouting false positives.
+  if (!src.trim()) { console.error(`✗ layer-props is blind: shared source \`${f}\` is missing or empty. Fix the file list in this gate.`); process.exit(2); }
+  return src;
+}).join('\n');
+// `L.foo` / `C.foo` / `L['foo']` reads, plus destructured `const { a, b } = L`. `LL` is the same
+// object under an inner name where `L` is already taken (core/three-fx.js does this).
+const LAYER_VAR = String.raw`(?:LL?|C)`;
 const readsIn = (src) => {
   const out = new Set();
-  for (const m of src.matchAll(/\b[LC]\.([A-Za-z_$][\w$]*)/g)) out.add(m[1]);
-  for (const m of src.matchAll(/\b[LC]\[['"]([^'"]+)['"]\]/g)) out.add(m[1]);
-  for (const m of src.matchAll(/\{([^}]{0,400}?)\}\s*=\s*[LC]\b/g)) m[1].split(',').forEach((t) => { const k = t.split(/[:=]/)[0].trim(); if (k) out.add(k); });
+  for (const m of src.matchAll(new RegExp(String.raw`\b${LAYER_VAR}\.([A-Za-z_$][\w$]*)`, 'g'))) out.add(m[1]);
+  for (const m of src.matchAll(new RegExp(String.raw`\b${LAYER_VAR}\[['"]([^'"]+)['"]\]`, 'g'))) out.add(m[1]);
+  for (const m of src.matchAll(new RegExp(String.raw`\{([^}]{0,400}?)\}\s*=\s*${LAYER_VAR}\b`, 'g'))) m[1].split(',').forEach((t) => { const k = t.split(/[:=]/)[0].trim(); if (k) out.add(k); });
   return out;
 };
 const SHARED = readsIn(SHARED_SRC);
+// Self-check, not an allowlist: these are the props the shared path is DEFINED by (timing + the motion
+// track every layer can ride). They are not granted — they must be found in the scanned source. If the
+// scan stops finding them the scan is broken, and the gate must say that rather than blame the scenes.
+for (const k of ['start', 'duration', 'motion', 'anim', 'out']) {
+  if (!SHARED.has(k)) { console.error(`✗ layer-props is blind: the shared scan no longer finds \`${k}\`. Its file list or read patterns have drifted from the engine.`); process.exit(2); }
+}
 // Some builders hand the whole layer to a registry one file over — `paint` passes L into a PAINT_FX
 // function as its options bag, `shader` into the ambient shader. Scanning only core/layers/<type>.js
 // reported those props as dropped when they are read, just elsewhere: a gate for silent-ignore that
 // itself ignores where the reading happens is no better than the bug.
-const ALSO = { paint: ['core/paint-fx.js'], shader: ['core/shaders-ambient.js'], count: ['core/layers/text.js'] };
+// A hand-kept list of those hand-offs drifts (it missed `three` → core/three-fx.js, which reported
+// `pointSize`/`bodyColor`/`dolly` as dead while the render honoured them). So follow the builder's own
+// relative imports, one hop: whatever core module a layer builder pulls in is where its props may land.
+const ALSO = { count: ['core/layers/text.js'] };   // delegation that is not an import
+const delegatesOf = (src) => [...src.matchAll(/from\s+'\.\.\/([\w-]+\.js)'/g)].map((m) => path.join('core', m[1]));
 const perType = {};
 for (const t of LAYER_TYPES) {
-  const src = [path.join('core/layers', `${t}.js`), ...(ALSO[t] || [])].map((f) => read(path.join(repoRoot, f))).join('\n');
+  const own = read(path.join(repoRoot, 'core/layers', `${t}.js`));
+  const src = [own, ...[...delegatesOf(own), ...(ALSO[t] || [])].map((f) => read(path.join(repoRoot, f)))].join('\n');
   perType[t] = readsIn(src);
   // an fx registry reads its options as `o.foo`, not `L.foo`
   for (const m of src.matchAll(/\bo\.([A-Za-z_$][\w$]*)/g)) perType[t].add(m[1]);

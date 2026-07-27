@@ -16,6 +16,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { sourceHash } from '../sim/provenance.mjs';
+import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIX = path.join(repoRoot, 'verify/fixtures');
@@ -117,6 +118,17 @@ const CASES = [
     scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })]) },
   { gate: 'beatcheck', name: 'ends-on-nothing · the film closes on a bare backdrop', expect: 'fail', match: /ends-on-nothing/,
     scene: scene([TXT({ duration: 1 })]) },
+
+  // ---- layer-props. The must-fail half is a source mutation (below); this is the must-pass half, and
+  // it is the one that was missing. The gate scanned a NAMED file for the shared path, that file was
+  // split, and the shared set collapsed to nothing: ~1900 live props across the repo were reported dead
+  // while the renders honoured every one of them. `start`/`duration`/`motion` on a non-text type is the
+  // exact shape that broke, so it is pinned on its own (#25: sensitivity bought with noise is not free).
+  { gate: 'layerprops', name: 'shared-path props on a non-text layer are NOT dead', expect: 'pass',
+    scene: scene([{ type: 'html', html: '<b>hi</b>', w: 300, x: 200, y: 400, start: 0, duration: 2,
+                    anim: 'slide-right', out: 'slide-left', motion: [{ to: { x: 400 }, dur: 1 }] }]) },
+  { gate: 'layerprops', name: 'a prop no layer type reads is still caught', expect: 'fail',
+    match: /nothing reads it/, scene: scene([TXT({ notARealProp: 7 })]) },
 ];
 
 const run = (cmd, args) => {
@@ -128,6 +140,7 @@ const GATE_CMD = {
   audit: (f) => ['node', ['verify/audit.mjs', f]],
   validate: (f) => ['node', ['core/validate.mjs', f]],
   beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
+  layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
 };
 
 let pass = 0; const broken = [];
@@ -213,14 +226,25 @@ const srcCases = [
     // fixture SKIPS, which reads as "fine" in the summary while proving nothing.
     mutate: (s) => s.replace("const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0);", ""),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
+  // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
+  // that read. So the case turns on the mutation: it used to pin a prop (`r`) that no build of the
+  // engine reads, which made it pass whether or not the mutation applied, and a case that cannot
+  // distinguish the two states proves nothing. Deleting a real read is the defect being simulated.
   { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
-    mutate: (s) => s.replace('export function build', 'const UNUSED_MARKER = 1;\nexport function build'),
-    cmd: ['node', ['scripts/gates/layer-props.mjs', 'formats/scene/_lp-fixture.json']], match: /accepted and dropped|is set and nothing reads it/,
+    mutate: (s) => s.replace('L.pulseAmp', 'undefined'),
+    cmd: ['node', ['scripts/gates/layer-props.mjs', 'formats/scene/_lp-fixture.json']], match: /`pulseAmp` is set and nothing reads it/,
     before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), JSON.stringify({
       module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
       bg: [{ preset: 'plain', from: 0, to: 2 }],
-      layers: [{ type: 'glow', x: 200, y: 200, w: 400, h: 400, r: 620, start: 0, duration: 2 }] })),
+      layers: [{ type: 'glow', x: 200, y: 200, w: 400, h: 400, pulse: 2, pulseAmp: 0.4, start: 0, duration: 2 }] })),
     after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), { force: true }) },
+  // ...and the other direction: layer-props must NOTICE when its own shared-path scan goes blind.
+  // Renaming every `L.` read in the format's driver is what a file split did in effect, and the gate
+  // answered by calling ~1900 live props dead instead of saying it could no longer see. It must now
+  // report itself broken rather than blame the scenes.
+  { name: 'layer-props · the shared-path scan goes blind', file: `${SCENE_DIR}/scene.js`,
+    mutate: (s) => s.replace(/\bL\./g, 'Q.'),
+    cmd: ['node', ['scripts/gates/layer-props.mjs', `${SCENE_DIR}/higgsfield-recreation.json`]], match: /layer-props is blind/ },
   { name: 'dead-branch · a ternary whose arms are identical', file: 'core/layers/rect.js',
     mutate: (s) => s.replace('export function build', 'const DEAD = 1 === 1 ? 2 : 2;\nexport function build'),
     cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /both arms are/ },

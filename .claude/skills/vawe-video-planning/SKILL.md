@@ -163,6 +163,13 @@ different output — this breaks the author's own habits.
 
 ## Step 3 — Storyboard on paper before JSON
 
+> **Film under ~15 seconds? Load [`vawe-continuous-action`](../vawe-continuous-action/SKILL.md)
+> instead of the beat table below.** A short film is ONE continuous action, not a sequence of
+> beats: one object is on screen from the first frame and every cut is that object changing state
+> (the reference `higgsfield.mp4` presses a generate button and the button becomes the loading
+> dot). Planning short films as independent beats is what produces a competent slideshow. That
+> skill also gives the measured second-by-second budget and emits the same storyboard shape.
+
 Beat table first (in the reply, not a file): Hook (≤3s, no name-drop if teasing) → Build →
 Proof (real UI capture / true stat) → Payoff → CTA (3–5s). One idea per beat. Budget seconds
 per beat to the target duration.
