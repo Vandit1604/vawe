@@ -7,7 +7,7 @@
   "layers": [
     { "type": "text", "text": "Hand-authored", "start": 0.4, "duration": 2.4, "pin": "center", "y": 420, "w": 1400, "align": "center", "size": 150, "weight": 800, "color": "#0f1620", "anim": "rise", "enterDur": 0.4, "out": "defocus", "exitDur": 0.3 },
     { "type": "text", "text": "backgrounds.", "start": 0.6, "duration": 2.2, "pin": "center", "y": 580, "w": 1400, "align": "center", "size": 150, "weight": 800, "color": "#2563eb", "anim": "rise", "enterDur": 0.4, "out": "defocus", "exitDur": 0.3 },
-    { "type": "text", "text": "Your CSS. Our determinism.", "start": 3.2, "duration": 2.4, "pin": "center", "y": 500, "w": 1400, "align": "center", "size": 82, "weight": 700, "font": "mono", "color": "#0f1620", "anim": "fade", "enterDur": 0.5 }
+    { "type": "text", "text": "Your CSS. Our determinism.", "start": 2.7, "duration": 3.3, "pin": "center", "y": 500, "w": 1400, "align": "center", "size": 82, "weight": 700, "font": "mono", "color": "#0f1620", "anim": "fade", "enterDur": 0.5 }
   ],
   "bg": [
     {
