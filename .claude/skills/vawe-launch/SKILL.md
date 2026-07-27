@@ -37,7 +37,9 @@ blueprint) → `assets/brands/<brand>/STORYBOARD.md`. Then **sharpen** it: fill 
 `message` and each beat's **why** — using `docs/CRAFT/STORYBOARD-TEMPLATE.md` (Reproduce/Adapt · mechanism ·
 emotion · transition_in). No site? Copy the template and write beats by hand. Then
 `make storyboard-check SB=<file>`. Present it: open with **"This video tells <audience> that <message>"**,
-then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off.
+then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off. Once approved, export
+the value contract: `make intent SB=<file> D=formats/scene/<topic>.json` writes `<topic>.intent.json` from
+the beats' whys, so Step 6's `inspect` VERIFIES the render delivers each beat's on-screen copy + motion.
 **Gate:** storyboard-check passes AND the user approved (autonomous: post it as a heads-up).
 
 ## Step 3.1 — Narration (local, optional — skip if silent)
@@ -66,7 +68,8 @@ For a normal video, author inline. Either way the output is one expanded scene J
 **Gate:** the scene JSON is complete and expanded.
 
 ## Step 6 — Finalize (user-gated)
-`make author-check D=<file>` (validate · critique · direct · **floor: front-load + monotony** · slop) →
+`make author-check D=<file>` (validate · critique · direct · **floor: front-load + monotony** · slop ·
+**designspec** (off-palette colours / non-role fonts) · **inspect** (the intent contract from Step 3)) →
 `make video D=<file>` (renders; author-check runs first) → `make audit` (layout/contrast) →
 **`make seam-check D=<file>`** (sample the transition overlaps for flashes — the class the other gates miss) →
 `make judge D=<file> VS=<brand>` (read the sheet, score every frame; a flaw you notice is a FIX) →

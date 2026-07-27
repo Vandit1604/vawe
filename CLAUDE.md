@@ -127,7 +127,10 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
 2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
-   whole static quality loop (validate · critique · direct · **direction-floor** · slop · inspect).
+   whole static quality loop (validate · critique · direct · **direction-floor** · slop · **designspec** · inspect).
+   The **designspec lock** flags off-palette colours / non-role fonts (the theme is the locked look, the visual
+   twin of the storyboard). The **inspect** step verifies a `.intent.json` value contract — generate one from
+   the storyboard with `make intent SB=<storyboard.md> D=<file>` so "every beat earns its frame" is checked.
    It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·
    `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), AND the **ambition floor**
    (`plain-slideshow` — too little motion). Two-sided: `effect-soup` is the ceiling, the floor is the

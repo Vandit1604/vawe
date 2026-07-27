@@ -1,0 +1,32 @@
+{
+  "beats": [
+    {
+      "at": 1.55,
+      "name": "Hook",
+      "mustShow": [
+        "Hand-authored motion."
+      ],
+      "mustAnimate": true,
+      "artifact": "states the promise the pipeline pays off"
+    },
+    {
+      "at": 5.3,
+      "name": "Thesis + pipeline",
+      "mustShow": [
+        "A composition is a bespoke timeline."
+      ],
+      "mustAnimate": true,
+      "artifact": "shows a real multi-tween timeline building, not a slide"
+    },
+    {
+      "at": 8.95,
+      "name": "Payoff",
+      "mustShow": [
+        "Motion `parts` can't reach.",
+        "compositions/index.js"
+      ],
+      "mustAnimate": true,
+      "artifact": "names the ceiling + where the code lives"
+    }
+  ]
+}

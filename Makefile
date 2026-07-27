@@ -317,6 +317,18 @@ storyboard-check:
 storyboard-draft:
 	node scripts/brand/storyboard-draft.mjs
 
+# make intent SB=<storyboard.md> [D=formats/scene/<topic>.json] — export the storyboard's per-beat whys
+# into a <topic>.intent.json sidecar, so author-check's `inspect` VERIFIES the render delivers each beat's
+# on-screen copy + motion (turns "every beat earns its frame" from doctrine into a checked contract).
+intent:
+	node scripts/brand/intent-from-storyboard.mjs
+
+# make designspec-check D=<scene.json> [STRICT=1] — THE DESIGN-SPEC LOCK: the theme is the locked visual
+# system; flag any layer using an off-palette chromatic colour or a non-role font. The look twin of the
+# storyboard gate. Advisory in author-check; STRICT=1 blocks. Optional radii/shadow lock via scene "spec".
+designspec-check:
+	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
+
 # make studio D=formats/scene/<file>.json [PORT=8799] — LIVE scrubbable preview (no mp4 render). Serves
 # the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Dev
 # tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.

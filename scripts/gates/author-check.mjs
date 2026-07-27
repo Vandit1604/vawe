@@ -13,6 +13,7 @@
 //   floor     — the AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
 //   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM (advisory here)
+//   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme (advisory here)
 //   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
 //
 // The vision judge (docs/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
@@ -73,6 +74,9 @@ record('direct', runGate('direct (direction gate)', 'scripts/author/motion-direc
 record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : []), { waivable: true });
 // 4. slop — advisory here (exit code surfaced, not blocking unless --strict). Hand-written HTML tells.
 { const r = runGate('slop (anti-slop detector)', 'scripts/gates/slop.mjs', []); record('slop', r, { waivable: true, exitMeansFail: strict }); }
+// 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts.
+//     Advisory here (surfaced, blocks only under --strict), same as slop. The theme is the locked spec.
+{ const r = runGate('design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : []); record('designspec', r, { waivable: true, exitMeansFail: strict }); }
 
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.
