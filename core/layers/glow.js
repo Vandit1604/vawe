@@ -181,22 +181,28 @@ export function build(kit, el, L) {
 export function frame(kit, el, L, t) {
   const cycling = L.preset === 'chromaCycle';
   if ((!L.pulse && !cycling && !L.flash) || !el.__glowInner) return;
+  // Set the inner DETERMINISTICALLY for EVERY t — never early-return and leave a STALE value. Outside the
+  // layer's own window driveClips normally hides the layer, so a stale inner used to be invisible; but
+  // sceneUnits can EXTEND the visible window past L.duration, and then the stale inner shows AND becomes
+  // render-order-dependent (a latent purity break sceneUnits exposed — MISTAKES). So compute a resting
+  // value outside the window instead of skipping.
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  if (!(t >= start && t < end)) return;
+  const inWindow = t >= start && t < end;
   if (L.flash) {
     // a one-shot bloom that swells then settles (attack-decay); flash may be `true` or {attack,decay,peak}.
-    const o = flashEnvelope(t - start, L.flash === true ? {} : L.flash);
+    // flashEnvelope is already 0 before/after the swell, so it rests at 0 outside the window too.
+    const o = inWindow ? flashEnvelope(t - start, L.flash === true ? {} : L.flash) : 0;
     el.__glowInner.style.opacity = o.toFixed(3);
     el.dataset.gf = o.toFixed(3);
   } else if (L.pulse) {
-    const o = pulseOpacity(t - start, +L.pulse, L.pulseAmp);
+    const o = inWindow ? pulseOpacity(t - start, +L.pulse, L.pulseAmp) : 1; // rest at full opacity outside
     el.__glowInner.style.opacity = o.toFixed(3);
     el.dataset.gp = o.toFixed(3);
   }
   if (cycling) {
     // hue sweeps the spectrum over time; pure in local t → deterministic, seek-safe. Stamp dataset so
     // a hue-only frame changes the DOM signature (same rationale as pulse / shader.js).
-    const h = cycleHue(t - start, L.cycle != null ? +L.cycle : 6);
+    const h = inWindow ? cycleHue(t - start, L.cycle != null ? +L.cycle : 6) : 0; // rest at 0deg outside
     el.__glowInner.style.filter = `hue-rotate(${h.toFixed(1)}deg)`;
     el.dataset.gh = h.toFixed(1);
   }

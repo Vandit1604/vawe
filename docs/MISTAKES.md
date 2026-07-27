@@ -3219,3 +3219,24 @@ renderFrame stays deterministic). THEME-AWARE, ABSENT-ONLY (an explicit field is
 **Blast radius (accepted, engine-level forcing).** snap-all: 51 of 77 scenes now render richer (was
 byte-identical); re-baselined. 0 quarantined, probe pure, gate-mutation 50/50, lib-test 421. Any scene
 opts out per-field or with `"produced":false`.
+
+## #152 — glow.frame() left a STALE inner value outside its window; sceneUnits exposed it as non-determinism
+
+**What.** A `glow` layer with `flash`/`pulse`/`chromaCycle` inside a `sceneUnits` scene made 1/25 frames
+render-order-dependent (probe red) — right at a scene-unit boundary. Root cause: `core/layers/glow.js`
+`frame()` early-returned when `t` was outside `[start, start+L.duration)` and left `__glowInner`'s
+opacity/filter at whatever the last frame set. Normally harmless — driveClips hides the layer outside its
+window, so the stale inner is invisible. But sceneUnits EXTENDS a beat layer's visible window past
+L.duration (it suppresses the per-layer exit so the WRAPPER can slide it out), so the layer is still shown
+while glow.frame has stopped updating the inner → the stale value shows AND depends on which frame rendered
+last → non-deterministic.
+
+**Fix.** glow.frame() now sets the inner DETERMINISTICALLY for every t — no early return. Outside the
+window it writes a fixed resting value (flash → 0, pulse → 1, chromaCycle → 0deg). Pure in t regardless of
+render order or window extension. Pixels are unchanged (the layer is still hidden by driveClips where it
+should be); only the DOM signature outside the window changes, so glow scenes re-baseline (snap).
+
+**Lesson (general).** A `frame(el, L, t)` hook must set EVERY property it owns, every frame, as a pure
+function of t — never early-return and leave state, because another feature (here sceneUnits' window
+extension) can make "outside my window" visible. Isolated tests (glow alone, glow+sceneUnits with matching
+windows) BOTH passed; only the extended-window combination triggered it. Reproduce with the exact interaction.
