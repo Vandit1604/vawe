@@ -153,7 +153,13 @@ if (SAVE) {
   process.exit(quarantined.length || errored.length ? 1 : 0);
 }
 console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ quarantined: ${quarantined.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}`);
-if (nobaseline.length && !quarantined.length && !changed.length) console.log(`  (${nobaseline.length} scene(s) determinism-checked but not yet baselined — run \`make snap-all SAVE=1\` to enable regression diff)`);
+// NAME them, always. A scene with no baseline has no regression net at all, which is worse than one that
+// merely changed — and the old line both withheld the names and suppressed itself whenever anything else
+// was off, so the very runs where you most need to know were the runs that said nothing.
+if (nobaseline.length) {
+  console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against — run \`make snap-all SAVE=1\`):`);
+  for (const n of nobaseline) console.log(`  ${n}`);
+}
 if (quarantined.length) { console.log(`\n✗ NON-DETERMINISTIC (quarantined):`); for (const q of quarantined) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 12)) console.log(`    ${d}`); if (c.diffs.length > 12) console.log(`    … +${c.diffs.length - 12} more`); }
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
