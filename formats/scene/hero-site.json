@@ -89,5 +89,6 @@
       "anim": "none",
       "exitDur": 0
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

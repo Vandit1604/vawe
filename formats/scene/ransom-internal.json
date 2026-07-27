@@ -23,5 +23,6 @@
       "ransomSeed": "internally",
       "preset": "blur", "presetOpts": { "px": 22 }, "each": 0.75, "stagger": 0.06,
       "start": 7.7, "duration": 3.6 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

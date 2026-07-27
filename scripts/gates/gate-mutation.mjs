@@ -279,6 +279,13 @@ const srcCases = [
   { name: 'schema-drift · a NON-anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"kaleidoscope",', '"kaleidoscop",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
+  // The backdrop is a REQUIRED authoring choice now that the baseline no longer injects one. Without this
+  // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,
+  // and nothing proves it still fires. Anchored on the top-level key (a layer `bg` is a colour string, so
+  // the array match cannot catch one by accident).
+  { name: 'validate · a scene that declares no background at all', file: 'formats/scene/sample.json',
+    mutate: (s) => s.replace(/,\s*"bg": \[[^\]]*\]/, ''),
+    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
 ];
 console.log('');
 for (const c of srcCases) {

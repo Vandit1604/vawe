@@ -1,16 +1,18 @@
 // core/produce.js — PRODUCE THE BASELINE. The engine's "go all-in" default: inject the universal produced
 // motion into a scene that didn't specify it, so EVERY video is rich by default (a moving camera · scene-unit
-// transitions · a living-or-brand-appropriate background) — the another engine posture, forced at BUILD time.
-// ADDITIVE ONLY: it adds bg/camera/sceneUnits fields; it NEVER rewrites a layer the author wrote (auto-
+// transitions) — the another engine posture, forced at BUILD time.
+// ADDITIVE ONLY: it adds camera/sceneUnits fields; it NEVER rewrites a layer the author wrote (auto-
 // splitting text for kinetic reveals mutated structure and broke motion-track layers + the contrast audit,
 // so kinetic type is nudged by the direction floor instead — MISTAKES).
 //
+// The BACKGROUND is deliberately NOT here. It used to be injected (light brand → dotmatrix, dark → aurora),
+// which meant the backdrop — the single largest area of the frame — was the one design decision no author
+// ever made. `bg` is now a required field (core/validate.mjs); this pass supplies motion, not taste.
+//
 // Determinism: it only mutates the scene DATA once, before the first frame — renderFrame(n) stays pure.
-// ABSENT-ONLY: an explicitly set field is the author's opt-out (set `bg`/`cameraMove` yourself to override,
-// or `bg:[{preset:"plain"}]` for a deliberately flat field). `"produced": false` disables the whole pass.
-// THEME-AWARE: a light/white-first brand gets a subtle light texture, not a jarring dark aurora (restraint
-// where the brand wants it). Applies to the `scene` module only. Pure JS → runs in the browser AND in node
-// gates, so the gates evaluate the SAME produced scene the renderer does.
+// ABSENT-ONLY: an explicitly set field is the author's opt-out (set `cameraMove` yourself to override).
+// `"produced": false` disables the whole pass. Applies to the `scene` module only. Pure JS → runs in the
+// browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
 
 // relative luminance of a #rrggbb bg → is the brand light (white-first) or dark?
 function bgIsLight(bg) {
@@ -24,16 +26,9 @@ export function produceBaseline(data, theme) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
   if (data.produced === false) return data;                  // explicit opt-out of the whole pass
-  const palette = (theme && theme.palette) || {};
-  const light = bgIsLight(palette.bg);
-
-  // 1. LIVING BACKGROUND — only if none declared. Light brand → a subtle tech DOT-GRID with a drifting
-  //    wave (dotmatrix): it actually moves and reads modern, unlike the near-static soft circles of
-  //    paperShapes (a weak default — real-video feedback). Dark brand → an aurora field. An explicit `bg`
-  //    (incl. `plain`) opts out.
-  if (!Array.isArray(data.bg) || data.bg.length === 0) {
-    data.bg = [{ t: 0, preset: light ? 'dotmatrix' : 'aurora' }];
-  }
+  // NOTE — the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
+  // (core/validate.mjs): the author must declare a preset or an explicit `plain`, so the backdrop is
+  // always a deliberate choice, never a silent default that can be brand-wrong (the paperShapes lesson).
 
   // A scene that already choreographs layers with `motion` tracks is ALREADY directed — and its tracks often
   // span beats and use absolute times, which fight the injected camera and the beat-wrapper model. So the

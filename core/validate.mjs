@@ -9,9 +9,11 @@
 //
 // Schema vocabulary (the authoring schema):
 //   { type: string|number|boolean|array|object, label, default,
-//     required?, min?, max?, enum?, minLength?, pattern?,        // scalars
+//     required?, hint?, min?, max?, enum?, minLength?, pattern?,  // scalars
 //     minItems?, maxItems?, item?,                               // arrays (item = field map)
 //     fields? }                                                  // objects (nested field map)
+// `hint` is appended to the required/minItems error. "bg is required" tells an author a field is missing;
+// it does not tell them what a good answer looks like, and a required field they cannot answer is a wall.
 // Only fields PRESENT in the schema are checked; unknown data keys (module, audio, theme, …) pass.
 
 import { themeErrors } from '../core/theme-contract.js';
@@ -249,7 +251,7 @@ function walk(fields, obj, path, errors) {
     const val = obj?.[key];
     const at = `${path}${key}`;
     if (val == null) {
-      if (spec.required) errors.push(`${at} is required`);
+      if (spec.required) errors.push(`${at} is required${spec.hint ? ` — ${spec.hint}` : ''}`);
       continue;
     }
     // `type` may be a union like "number|string" (relative coords: 40 or "50%"). Any member matches.
@@ -279,7 +281,7 @@ function checkField(spec, val, at, errors) {
       if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} must match /${spec.pattern}/ (got "${val}")`);
       break;
     case 'array':
-      if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})`);
+      if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})${spec.hint ? ` — ${spec.hint}` : ''}`);
       if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} allows ≤ ${spec.maxItems} item(s) (got ${val.length})`);
       // A block/comp layer carries the BLOCK's props (a pointer's `to:{x,y}`, a kpiRow's `items:[…]`),
       // NOT the base layer schema — blocks-audit owns those. The unknown-prop pass already exempts

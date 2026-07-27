@@ -6,5 +6,6 @@
     { "type": "rect", "x": 0, "y": 0, "w": 1080, "h": 1920, "bg": "#f7f6f2", "start": 0, "duration": 4 },
     { "type": "text", "text": "be KIND", "pin": "center", "w": 900, "align": "center", "size": 180,
       "ransom": { "palette": "color" }, "start": 0.2, "duration": 3.6 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

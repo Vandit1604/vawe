@@ -47,5 +47,6 @@
 
     { "type": "text", "text": "Start shipping.", "start": 14.5, "duration": 3.0, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 150, "weight": 800, "color": "#f7f8f8", "anim": "rise", "enterDur": 0.32 },
     { "type": "text", "text": "free at <em>your.app</em>", "start": 15.0, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 56, "weight": 600, "color": "#5e6ad2", "anim": "fade", "enterDur": 0.5 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "aurora" }]
 }

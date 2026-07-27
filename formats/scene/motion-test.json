@@ -23,5 +23,6 @@
 
     { "type": "rect", "x": 1060, "y": 380, "w": 560, "h": 150, "bg": "#241a12", "radius": 22, "border": "1.5px solid rgba(255,116,46,0.45)", "start": 3.0, "duration": 2.1, "anim": "none", "enterDur": 0, "exitDur": 0, "motion": [ { "t": 0, "dy": 90, "opacity": 0, "ease": "spring" }, { "t": 0.30, "dy": 0, "opacity": 1, "ease": "spring" }, { "t": 1.7, "dy": 0, "opacity": 1, "ease": "linear" }, { "t": 2.1, "dy": 24, "opacity": 0, "ease": "easeInCubic" } ] },
     { "type": "rect", "x": 1060, "y": 600, "w": 560, "h": 150, "bg": "#241a12", "radius": 22, "border": "1.5px solid rgba(255,116,46,0.45)", "start": 3.06, "duration": 2.04, "anim": "none", "enterDur": 0, "exitDur": 0, "motion": [ { "t": 0, "dy": 90, "opacity": 0, "ease": "spring" }, { "t": 0.30, "dy": 0, "opacity": 1, "ease": "spring" }, { "t": 1.6, "dy": 0, "opacity": 1, "ease": "linear" }, { "t": 2.04, "dy": 24, "opacity": 0, "ease": "easeInCubic" } ] }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "aurora" }]
 }

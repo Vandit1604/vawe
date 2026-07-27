@@ -170,5 +170,6 @@
       "start": 0.9,
       "duration": 9.4
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

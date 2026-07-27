@@ -297,5 +297,6 @@
       "t": 7.35,
       "style": "riseBlur"
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

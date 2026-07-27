@@ -35,5 +35,6 @@
     { "type": "text", "text": "KINETIC", "start": 10.5, "duration": 2.0, "pin": "center", "y": 820, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#f4f5f2", "anim": "rise", "enterDur": 0.3 },
     { "type": "text", "text": "TYPE.", "start": 10.7, "duration": 1.8, "pin": "center", "y": 1030, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#c2f23b", "anim": "rise", "enterDur": 0.3 },
     { "type": "text", "text": "vawe · scene engine", "start": 11.0, "duration": 1.5, "pin": "center", "y": 1280, "w": 1000, "align": "center", "size": 46, "weight": 600, "font": "mono", "color": "#8a8f80", "anim": "fade", "enterDur": 0.5 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "aurora" }]
 }

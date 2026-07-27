@@ -44,5 +44,6 @@
       "enterDur": 0.5,
       "exitDur": 0
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

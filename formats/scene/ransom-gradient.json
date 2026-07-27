@@ -16,5 +16,6 @@
       "ransom": { "cycle": 1.35, "stagger": 0.17 }, "ransomSeed": "achieved",
       "preset": "blur", "presetOpts": { "px": 22 }, "each": 0.75, "stagger": 0.06,
       "start": 4.0, "duration": 3.6 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

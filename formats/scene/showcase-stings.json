@@ -112,5 +112,6 @@
       ],
       "intensity": 0.35
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

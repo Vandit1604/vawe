@@ -100,5 +100,6 @@
       "t": 6.45,
       "style": "riseBlur"
     }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

@@ -36,5 +36,6 @@
     { "type": "text", "text": "Structure is the", "start": 11.2, "duration": 4.3, "x": 160, "y": 380, "w": 1600, "align": "left", "size": 110, "weight": 700, "color": "#0a2540", "anim": "rise", "enterDur": 0.35 },
     { "type": "text", "text": "message.", "start": 11.5, "duration": 4.0, "x": 160, "y": 540, "w": 1600, "align": "left", "size": 200, "weight": 800, "color": "#635bff", "anim": "rise", "enterDur": 0.32 },
     { "type": "text", "text": "STRIPE-STYLE · SWISS GRID", "start": 11.6, "duration": 3.9, "x": 160, "y": 820, "w": 1000, "align": "left", "size": 30, "weight": 600, "font": "mono", "color": "#5a6b82", "anim": "fade", "enterDur": 0.5 }
-  ]
+  ],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }]
 }

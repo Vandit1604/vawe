@@ -83,5 +83,6 @@
  ],
  "audio": {
   "silent": true
- }
+ },
+  "bg": [{ "t": 0, "preset": "aurora" }]
 }

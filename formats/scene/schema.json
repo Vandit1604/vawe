@@ -71,6 +71,9 @@
     "bg": {
       "type": "array",
       "label": "Background windows (canvas, theme palette)",
+      "required": true,
+      "minItems": 1,
+      "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix · gradientWash · blobs · metallic · metallicSheen · aurora · …). See docs backgrounds-and-images.",
       "item": {
         "preset": {
           "type": "string",
