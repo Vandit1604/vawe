@@ -27,10 +27,12 @@ export function produceBaseline(data, theme) {
   const palette = (theme && theme.palette) || {};
   const light = bgIsLight(palette.bg);
 
-  // 1. LIVING BACKGROUND — only if none declared. Light brand → a subtle light drift (paperShapes) that
-  //    respects white-first restraint; dark brand → an aurora field. An explicit `bg` (incl. `plain`) opts out.
+  // 1. LIVING BACKGROUND — only if none declared. Light brand → a subtle tech DOT-GRID with a drifting
+  //    wave (dotmatrix): it actually moves and reads modern, unlike the near-static soft circles of
+  //    paperShapes (a weak default — real-video feedback). Dark brand → an aurora field. An explicit `bg`
+  //    (incl. `plain`) opts out.
   if (!Array.isArray(data.bg) || data.bg.length === 0) {
-    data.bg = [{ t: 0, preset: light ? 'paperShapes' : 'aurora' }];
+    data.bg = [{ t: 0, preset: light ? 'dotmatrix' : 'aurora' }];
   }
 
   // A scene that already choreographs layers with `motion` tracks is ALREADY directed — and its tracks often

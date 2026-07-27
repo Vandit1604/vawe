@@ -16,7 +16,7 @@
   "cameraMove": [
     { "move": "slowPush", "start": 0, "dur": 15, "from": 1, "to": 1.035 }
   ],
-  "bg": [{ "t": 0, "preset": "paperShapes" }],
+  "bg": [{ "t": 0, "preset": "dotmatrix" }],
   "layers": [
     { "type": "svg", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "viewBox": "0 0 47 24", "x": 160, "y": 300, "w": 320, "stroke": "var(--accent)", "draw": { "weight": 2 }, "start": 0.1, "duration": 1.5 },
     { "type": "text", "text": "vawe", "x": 160, "y": 360, "w": 1200, "size": 220, "weight": 800, "color": "var(--text)", "split": "char", "preset": "scale", "each": 0.3, "stagger": 0.05, "start": 0.35, "duration": 1.25 },
