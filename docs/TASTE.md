@@ -18,7 +18,12 @@ story; we have all three — here's where each lives.
 | **House-style** | *How should it look?* — face, palette, shape, imagery | [`CRAFT/`](CRAFT/README.md) → TYPOGRAPHY · COLOR · LAYOUT · IMAGERY |
 | **Composition** | *How do I fill a frame so it reads produced?* — density, hierarchy, metadata | [`CRAFT/DENSITY.md`](CRAFT/DENSITY.md) (hero + support + metadata triad) |
 | **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) · [`MOTION-RECIPES.md`](MOTION-RECIPES.md) (copy-paste recipe index) |
+| **Direction** | *Why does it read amateur when every layer renders fine?* — pacing, restraint, story placement | [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) — the spine that turns effects into a directed film; every rule sourced to its book + tagged by which gate enforces it |
 | **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md) — the spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../.claude/skills/vawe-video-planning/SKILL.md) skill applies it. |
+
+> **Never authored one from scratch (no brand site)?** Follow [`CRAFT/AUTHORING-WALKTHROUGH.md`](CRAFT/AUTHORING-WALKTHROUGH.md)
+> — the one narrative that carries a single video from a blank page to shipped, chaining the whole
+> arsenal in the order you actually use it. It's the front-to-back companion to the reference docs below.
 
 Every design decision must trace to the **brand's real site**, not your defaults. Colours by eyedrop
 (`make palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
@@ -56,22 +61,33 @@ A block earns its place only if it makes a beat *demonstrate* something. Decorat
 ## The quality loop (author → gate → render, never skip the gate)
 
 Planning and generating are two phases with a hard gate between them. Author against a **locked**
-plan (the planning skill's lock sheet), then run the ladder — each rung catches a failure mode a
-human would otherwise catch per-scene:
+plan (the planning skill's lock sheet), then run the mandatory ladder. **One command runs the whole
+static loop** — and `make video` runs it for you (skip only with an explicit `NOCHECK=1`), so an
+effect-soup video can no longer ship silently:
 
 ```bash
-make critique D=<file>       # VALUE GATE — placeholder words, unbacked claims, thin/lonely beats
-make slop     D=<file>       # anti-slop detector (overused font / gradient / card-in-card / centered)
-make inspect  D=<file>       # does the scene actually show what its .intent.json promises?
+make author-check D=<file> [VS=<brand>]   # THE MANDATORY LADDER — chains the four below + inspect:
+                                          #   validate · critique (value) · direct (direction) · slop
+                                          # blocks on schema/em-dash, hollow beats, and the direction
+                                          # tells (linear-motion · monotone-timing · enter-and-retreat ·
+                                          # effect-soup · ≥3 cut families). Waive a deliberate break with
+                                          # {"authoring":{"allow":[...]}}. STRICT=1 makes warnings block.
+```
+
+Then the eyeball + memory rungs (not chained — you must look):
+
+```bash
 make beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
-make audit                   # overlap / clipped text / safe-zone / WCAG contrast
-make ledger   D=<file>       # cross-video sameness — fails if it repeats a shipped design
+make reveal   D=<file>              # the ENTER + settled + EXIT arc per beat (how it animates IN)
+make audit                          # overlap / clipped text / safe-zone / WCAG contrast
+make ledger   D=<file>              # cross-video sameness — fails if it repeats a shipped design
 make judge    D=<file> VS=<brand>   # THE GATE THAT SEES — vision rubric on the near-final cut (JUDGE.md)
 ```
 
-The static gates can't see composition, centering, or asset fidelity — `make judge` ([`JUDGE.md`](JUDGE.md))
-preps the key frames + brand house-style + a rubric and the agent scores them. If your eye catches a flaw,
-it's a FIX; never rationalize one you noticed ([`MISTAKES.md`](MISTAKES.md) #15).
+`make author-check` is necessary but **not sufficient**: the static gates can't see composition,
+centering, or asset fidelity. After rendering you must run `make judge` ([`JUDGE.md`](JUDGE.md)) — it
+preps the key frames + brand house-style + a rubric and the agent scores them. If your eye catches a
+flaw, it's a FIX; never rationalize one you noticed ([`MISTAKES.md`](MISTAKES.md) #15).
 
 If you find yourself *trying things* in the JSON, the plan wasn't locked. Go lock it. If a beat needs
 a decision the plan didn't make, that's a plan gap — amend the plan, don't improvise in the JSON.

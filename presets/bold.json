@@ -1,0 +1,9 @@
+{
+  "name": "bold",
+  "dominance": "light",
+  "desc": "Bold poster: huge sans, hard edges, high contrast, one loud accent. Confident and punchy, for a launch that shouts.",
+  "base": { "bg": "#ffffff", "accent": "#ff4d2e", "up": "#1a7f4b", "down": "#c81e1e" },
+  "type": { "sans": "Archivo", "serif": "Archivo", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutBack", "bounce": 0.16, "settle": 0.55, "enter": 48, "durationScale": 0.8, "stagger": 0.05 },
+  "bgDefault": "plain"
+}

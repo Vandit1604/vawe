@@ -1,5 +1,6 @@
 {
   "module": "scene",
+  "authoring": { "allow": ["cut-families"] },
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 8.2,

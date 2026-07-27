@@ -1,0 +1,9 @@
+{
+  "name": "editorial",
+  "dominance": "light",
+  "desc": "Editorial / investment-research: warm-light ground, a serif display, one restrained accent, generous whitespace. Calm, authoritative, executive-readable.",
+  "base": { "bg": "#faf8f4", "accent": "#1f4fd8", "up": "#2f7d55", "down": "#a3282d" },
+  "type": { "sans": "Hanken Grotesk", "serif": "Fraunces", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.05, "settle": 0.75, "enter": 40, "durationScale": 1.05, "stagger": 0.06 },
+  "bgDefault": "paper"
+}

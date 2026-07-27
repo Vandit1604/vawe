@@ -24,6 +24,7 @@ const FONTS = [
   ['JetBrainsMono.woff2',            `${CDN}/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2`,'OFL 1.1'],
   ['PlusJakartaSans.woff2',          `${CDN}/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2`, 'OFL 1.1'],
   ['HankenGrotesk.woff2',            `${CDN}/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2`,'OFL 1.1'],
+  ['BricolageGrotesque.woff2',       `${CDN}/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2`, 'OFL 1.1'],
   ['Archivo.woff2',                  `${CDN}/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2`,             'OFL 1.1'],
   ['Caveat.woff2',                   `${CDN}/@fontsource-variable/caveat/files/caveat-latin-wght-normal.woff2`,               'OFL 1.1'],
   ['space-500.woff2',                `${CDN}/@fontsource/space-grotesk/files/space-grotesk-latin-500-normal.woff2`,           'OFL 1.1'],

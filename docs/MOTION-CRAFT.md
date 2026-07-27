@@ -4,11 +4,15 @@
 > **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md) — this file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
 > **Just want the copy-paste JSON?** See [`MOTION-RECIPES.md`](MOTION-RECIPES.md) — the atomic recipe index (one line per motion pattern: slug · exact JSON · tags). This file is the rules; that one applies them.
 
-Distilled July 2026 from motion-design craft literature (Disney's 12 principles applied to
-screen design, kinetic-typography practice, brand-film pacing) and from our own shipped-film
-findings. **Consult before storyboarding** (the planning skill points here). The right column
-says which of our gates enforces each rule — everything else is judgment the ledger can't save
-you from.
+Distilled July 2026 from motion-design craft literature and from our own shipped-film findings.
+**Consult before storyboarding** (the planning skill points here). The right column says which of our
+gates enforces each rule — everything else is judgment the ledger can't save you from.
+
+> **The principles behind these rules, with sources:** see [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) —
+> the direction spine (pacing · restraint · story placement), each rule traced to its book: Disney's 12
+> (Thomas & Johnston, _The Illusion of Life_), Murch's Rule of Six (_In the Blink of an Eye_), Shaw
+> (_Design for Motion_), Google Material Motion, McKee (_Story_), Ogilvy, Loewenstein's curiosity gap.
+> This file is the mechanics; DIRECTION.md is *why*, and tags which rules `make author-check` enforces.
 
 ## The 10 rules
 

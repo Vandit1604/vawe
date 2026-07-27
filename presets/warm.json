@@ -1,0 +1,9 @@
+{
+  "name": "warm",
+  "dominance": "dark",
+  "desc": "Analog-warm: a warm dark ground, a single amber-family accent as scarce voltage, long-tail settles. Crafted and human, numerals in mono.",
+  "base": { "bg": "#211913", "accent": "#e0922f", "up": "#4fb584", "down": "#e0655c" },
+  "type": { "sans": "Bricolage Grotesque", "serif": "Bricolage Grotesque", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.04, "settle": 0.8, "enter": 34, "durationScale": 1.0, "stagger": 0.055 },
+  "bgDefault": "dark"
+}

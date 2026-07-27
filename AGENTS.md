@@ -10,6 +10,8 @@ for which task. **Skills are vendored in `.claude/skills/` — a fresh clone has
 |---|---|---|
 | Author / edit a scene JSON or `scene.html` | **vawe-scene-authoring** | purity, tokens, motion primitives, capture + QA loop |
 | Plan a new video (brief → storyboard) | **vawe-video-planning** | site-derived design language, storyboard, ledger |
+| Author a video **from scratch** (no brand site) | **vawe-video-planning** + read [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md) | manufacture the four things a site gives; run the chain end-to-end |
+| Fix a video that's "lots of effects, not directed" | read [`docs/CRAFT/DIRECTION.md`](docs/CRAFT/DIRECTION.md) | pacing · restraint · story placement, sourced; then `make author-check` |
 | **Hand-write any HTML** (a hook, CTA, card, hero) | **taste-skill** → then **impeccable** | design read + 3 dials, then production craft |
 | Judge / fix a design that "looks AI-generated" | **impeccable** (`critique`, `bolder`, `quieter`) | 41-rule detector + register craft |
 
@@ -32,4 +34,7 @@ card grid). **Before writing HTML by hand:**
 5. **Distinctive type** — for a real brand, the captured brand font; for anything else, never Inter/Space Grotesk.
 
 ## Gates (see CLAUDE.md / Makefile)
-`make validate` → `make slop` → `make probe` → `make audit` → `make motion` → `make beats` → `make ledger`.
+Authoring quality, one command: **`make author-check D=<file>`** (chains validate · critique · direct ·
+slop · inspect — mandatory; `make video` runs it unless `NOCHECK=1`). Then the eye rungs:
+`make probe` → `make audit` → `make beats` → `make ledger` → **`make judge`** (the gate that SEES —
+required post-render; [`docs/JUDGE.md`](docs/JUDGE.md)).

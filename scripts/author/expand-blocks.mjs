@@ -18,6 +18,8 @@
 import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { BEATS } from '../../blueprints/index.mjs';
+import { buildCameraMove } from '../../core/camera-moves.js';
 
 const inp = process.argv[2];
 if (!inp) { console.error('usage: node scripts/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
@@ -25,7 +27,7 @@ const out = process.argv[3] || inp.replace(/\.json$/, '.expanded.json');
 const d = JSON.parse(fs.readFileSync(inp, 'utf8'));
 
 const comps = d.comps || {};
-let nBlocks = 0, nComps = 0;
+let nBlocks = 0, nComps = 0, nBeats = 0;
 const warnings = [];
 
 // offset a comp's authored-at-origin layer by the instance's x/y/start (group children flow, untouched).
@@ -62,6 +64,22 @@ function expand(layer, stack) {
     nBlocks++;
     return f(opts).flatMap((l) => expand(l, stack)); // a block could emit comps in theory — stay recursive
   }
+  // BEAT — a directed-motion blueprint from blueprints/index.mjs. Same expansion contract as a block,
+  // but it emits a whole BEAT's richly-animated layers (kinetic reveals, count-ups, cascades, ken push),
+  // so the good motion is the default rather than re-derived (docs/CRAFT/BLUEPRINTS.md).
+  if (layer.type === 'beat') {
+    const f = BEATS[layer.beat];
+    if (!f) throw new Error(`unknown beat "${layer.beat}". known: ${Object.keys(BEATS).join(', ')}`);
+    const { type, beat, ...opts } = layer;
+    const sig = /\(\s*\{([^}]*)\}/.exec(f.toString());
+    if (sig) {
+      const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
+      const unknown = Object.keys(opts).filter((k) => !known.has(k) && k !== 'note');
+      if (unknown.length) warnings.push(`beat "${layer.beat}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')} — not a prop it accepts (known: ${[...known].join(', ')})`);
+    }
+    nBeats++;
+    return f(opts).flatMap((l) => expand(l, stack));
+  }
   if (layer.type === 'comp') {
     const c = comps[layer.ref];
     if (!c) throw new Error(`unknown comp "${layer.ref}". defined: ${Object.keys(comps).join(', ') || '(none)'}`);
@@ -88,7 +106,17 @@ function expand(layer, stack) {
 }
 
 d.layers = (d.layers || []).flatMap((l) => expand(l, []));
+
+// cameraMove sugar → data.camera. A calculated move (slowPush/diveIn/panFollow/orbit/…) beats hand-typed
+// keyframes and emits interior ease:"linear" for a smooth, velocity-continuous path (docs/MISTAKES.md #125).
+let nCam = 0;
+if (d.cameraMove) {
+  const specs = Array.isArray(d.cameraMove) ? d.cameraMove : [d.cameraMove];
+  d.camera = specs.flatMap((s) => buildCameraMove(s));
+  delete d.cameraMove;
+  nCam = specs.length;
+}
 delete d.comps;
 fs.writeFileSync(out, JSON.stringify(d, null, 2));
-console.log(`expanded ${nBlocks} block + ${nComps} comp instance(s) → ${out} (${d.layers.length} total layers)`);
+console.log(`expanded ${nBlocks} block + ${nBeats} beat + ${nComps} comp instance(s)${nCam ? ` + ${nCam} cameraMove` : ''} → ${out} (${d.layers.length} total layers)`);
 for (const w of warnings) console.error(`  ⚠ ${w}`);

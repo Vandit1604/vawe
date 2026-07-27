@@ -2805,3 +2805,275 @@ unknown-prop pass. Both showcase scenes boot and render again; the full validate
 
 **Gate.** `make snap-all` boots EVERY scene, so a scene that fails validation shows up as `errored` in the
 sweep instead of hiding until someone happens to render it.
+
+## #134 — every authoring-QUALITY gate was opt-in and WARN-tier, so effect-soup passed everything that ran
+
+**What.** An author could ship a maximal "lots of effects, no direction" video and pass every gate the
+render flow actually ran. The only MANDATORY gates were framework-integrity (schema + purity); `make video`
+auto-ran only `verify/audit.mjs`. The quality gates that catch weak direction — `critique` (8 of 10 rules
+WARN), `motion-director` (effect-soup/continuity/pacing all WARN, exit 0), `judge` (opt-in, last) — were
+never in an automatic ladder. This is the structural cause behind #15/#80: "the static gates can't SEE
+composition, so my eye was the only gate and it blinked" — the eye was ALSO the only thing invoking the
+gates.
+
+**Root cause.** The gates existed but nothing chained them or required them. Doctrine (MOTION-CRAFT,
+TASTE-RULES, the planning skill) told the author to run them; running them was optional, so under time
+pressure they were skipped and the doctrine did nothing.
+
+**Fix.** `scripts/gates/author-check.mjs` (`make author-check`) chains validate · critique · direct · slop ·
+inspect into one command, and `make video` runs it before rendering unless `NOCHECK=1` (mirroring the
+`NOAUDIT=1` escape). It blocks on the pre-existing hard fails PLUS four book-grounded motion tells added to
+`motion-director.mjs` (`linear-motion`, `monotone-timing`, `enter-and-retreat`, and the surfaced
+`effect-soup`). Deliberate breaks are waivable per-scene via `{"authoring":{"allow":[...]}}`. Principles +
+sources now live in `docs/CRAFT/DIRECTION.md`; the from-scratch narrative in
+`docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
+
+**Gate.** `make author-check` (mandatory via `make video`). The vision `make judge` step remains
+agent-in-the-loop — a script cannot force an honest read — but it is now a NUMBERED mandatory step in
+CLAUDE.md's "After writing a JSON", not a trailing "consult if needed".
+
+## #135 — no from-scratch "author a good video" walkthrough existed, so a blank page regressed to priors
+
+**What.** The taste knowledge was rich but scattered and index-linked. There was no single narrative that
+carried one video from a bare brief to shipped, so authoring with no brand site (the hardest case) meant
+inventing everything — which defaults to centered Inter on a blue gradient.
+
+**Root cause.** The plan half of the from-scratch flow was canonical (planning skill Step 0.5); the
+authoring-craft half was deliberately distributed across CRAFT/ with only TASTE.md as an index — good for
+reference, bad for "do this, in this order" under a blank page.
+
+**Fix.** `docs/CRAFT/AUTHORING-WALKTHROUGH.md` — the one front-to-back narrative, chaining the arsenal in
+use-order (manufacture the four things → lock sheet → JSON in layering order → `make author-check` →
+`make judge` → ledger → harvest). Routed from TASTE.md, CRAFT/README, AGENTS.md, and the planning skill.
+
+**Gate.** `make craft-coverage` fails if a CRAFT guide is orphaned from the README index, so the two new
+docs can't silently fall out of the routing.
+
+## #136 — `make inspect` silently passed when no `.intent.json` sidecar existed
+
+**What.** The per-beat value contract (inspect vs a `.intent.json` sidecar) printed "nothing to verify" and
+exited 0 whenever the sidecar was absent — which is almost always. So the value gate was invisible: not
+declaring a contract looked identical to passing one.
+
+**Root cause.** Absence of an optional input was treated as success rather than as a missing check.
+
+**Fix.** Within `make author-check`, a missing sidecar is surfaced as a visible WARN ("this scene declares
+no per-beat value contract"), and `--strict`/`STRICT=1` treats it as a failure. Standalone `make inspect`
+behavior is unchanged for scripted use.
+
+**Gate.** `make author-check` (the WARN is part of its report).
+
+## #137 — enforcement only gated the DOWNSIDE (slop); nothing forced ambition, so authoring stayed plain
+
+**What.** With the full arsenal in hand (kinetic presets, GSAP char fx, camera, seams, dolly) AND the
+anti-slop/direction gates, the first two passes at the TokenJam launch were a plain `rise`+`fade`
+slideshow — and every gate passed them. The gates caught effect-soup (too much) and hollow beats, but
+nothing caught "too plain / under-directed." An agent authoring from a blank JSON satisfices with the
+safe default and never reaches for the range it has. The user had to push twice to get kinetic motion.
+
+**Root cause.** The quality system had only an upper bound (`effect-soup`) and correctness/value gates.
+There was no LOWER bound on ambition, and no codified "good beat" to start from — so directed motion was
+re-derived each video and under-reached.
+
+**Fix.** Two-part forcing function: (1) `blueprints/` — directed-motion BEAT factories (`{type:"beat"}`,
+expanded by `make expand`) so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT,
+not re-derived; (2) `scripts/gates/direction-floor.mjs` (`make direction-floor`, in `author-check`) — the
+inverse of effect-soup: reads the motion vocabulary and FAILS a plain slideshow. Directed now lives
+between the soup ceiling and the ambition floor. Doctrine: `docs/CRAFT/BLUEPRINTS.md` + DIRECTION.md.
+
+**Gate.** `make direction-floor` (mandatory via `author-check`); `make blueprints` primes the author.
+Covered by `lint-test` (plain fixture FAILS, directed fixture PASSES; a beat emits kinetic layers).
+
+## #138 — seams flashed BLACK on every white-first scene without an explicit bg window
+
+**What.** The TokenJam launch flashed full black (measured luma 0) at every seam boundary — dissolve,
+whipPan, cinematicZoom, flashWhite. The stage is white; the flash was pure black.
+
+**Root cause.** A seam blends two rasterised stage snapshots. `stageToCanvas` only composited the bg
+canvas when `useCanvasBg` was true, i.e. when the scene declared a `bg` window. A scene that relies on the
+theme's `.hs-stage` CSS background (no `bg` array — `bgWins=[]`) rasterised `root` ALONE → a transparent
+snapshot → the seam's WebGL composited transparent as BLACK. Invisible on dark themes (black ≈ bg), a hard
+black flash on white-first ones. Silent: no gate looked at seam pixels.
+
+**Fix.** `core/seams.js stageToCanvas` — in the no-canvas-bg branch, fill the theme base bg (read `--bg`
+off `.hs-stage`, fall back to computed background-color, then `#fff`) BEFORE drawing the DOM, so the
+snapshot matches the live frame. Pure (bake path, runs once). Fixes every white-first scene with seams,
+not just this one; dark themes are unaffected (the fill is their dark `--bg`). `make probe` stays green.
+
+**Gate.** Verified by frame-luminance at seam boundaries (was 0, now 255). A future seam-pixel gate could
+assert no all-black frame appears where the theme bg is light; for now the fix is behavioural + logged.
+
+## #139 — the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
+
+**What.** Videos read flat next to real motion-graphics because the premium web-motion vocabulary simply
+did not exist in the engine: a light travelling a border, a drifting colour-mesh background, meteor
+streaks, a one-shot glow swell. Authors defaulted to `rise`+`fade` because there was nothing else to reach
+for, and EFFECTS.md (the arsenal catalog) had nothing to advertise.
+
+**Root cause.** Not a bug — a coverage gap. The determinism model was (wrongly) assumed to be the blocker.
+It is not: every one of these is a closed-form function of local time `t` (border-beam = conic angle
+`f(t)`; aurora = sum-of-sines blob centres; meteor = ballistic progress `((offset + t/period) mod 1)`;
+flash = an attack-decay envelope). No CSS `@keyframes`, no state, no `Math.random`/`Date` — so
+`renderFrame(n)` stays pure and seek-safe. another engine (the reference) is itself fully deterministic and
+gets all of these *because of* that model, not despite it.
+
+**Fix.** `core/layers/beam.js` (new: border-beam + shine, DOM conic ring masked to the border, re-emitted
+each frame + dataset-stamped). `core/paint-fx.js` +`aurora` (additive `lighter` radial blobs drifting on
+detuned sines) +`meteor` (gradient-tail streaks, closed-form progress, echo drawn behind the head each
+frame — never accumulated). `core/layers/glow.js` +`flashEnvelope()` and an `L.flash` mode (finite
+attack→decay bloom, peak capped ≤0.45 per HF doctrine — a swell, not a strobe). All added to the schema
+(paint enum + `flash`/`hues`/`headColor`/`length` props) and to the generated EFFECTS.md.
+
+**Gate.** `make canvas-purity D=<scene>` proves aurora/meteor pixels are order-independent; `schema-drift`
+(13 enums + 117 props) proves the schema paint enum tracks `PAINT_FX_NAMES` and the new props are all
+defined; `make effects-check` proves EFFECTS.md lists them; `make lib-test` covers the pure helpers.
+
+**Gate seam noted (not a regression).** `make probe M=<mod> D=<file>` silently IGNORES `D=` — it probes
+the module's sample scene, never the passed file, so a specific scene's DOM-layer purity (beam/glow) is
+not testable through `probe`. `canvas-purity` DOES honour `D`. beam/glow DOM purity is structurally safe
+(pure in `t`, dataset-stamped, same contract as the shipped `glow.pulse`). A future `probe` could accept
+`D` to close the seam; for now it is logged so the next author knows `probe`'s `D` is a no-op.
+
+## #140 — `morph` was assumed to be TextMorph for EVERY layer type (svg shape-morph rendered as text)
+
+**What.** A new `svg` layer with `morph:{to:"<path d>"}` (a true shape-morph) rendered the target path
+STRING as on-screen text, and the shape never melted. The path `d` literally appeared as words in the
+corner of the frame.
+
+**Root cause.** `formats/scene/scene.js:151` ran `if (L.morph && window.gsap) buildMorph(el, L, ...)`
+unconditionally. `buildMorph` (core/morph.js) is TextMorph: it rebuilds the element's children as glyph
+spans of `morph.to`. So ANY layer carrying `morph` was hijacked into text, regardless of `L.type`. The
+svg layer's own shape-morph in `svg.js frame()` then had nothing left to drive. Classic silent
+substitution — the engine accepted the input and did the wrong thing without a word (CLAUDE.md: "silence
+is the worst failure").
+
+**Fix.** Type-guard the dispatch: `if (L.morph && L.type !== 'svg' && window.gsap) buildMorph(...)`. Text
+and count layers still get TextMorph; svg owns its shape-morph. Pure (build-time routing), so
+`renderFrame(n)` stays seek-safe; `make probe` green.
+
+**Gate.** `make lib-test` covers the shape-morph maths (lerp endpoints, spin-returns-to-identity, closed
+`d` output). The silent-substitution class itself has no static gate yet — it was caught by the mandatory
+eyeball of a rendered frame (docs/JUDGE.md), which is exactly the backstop the static ladder can't be.
+
+## #141 — camera library + logoReveal: two authoring traps found building the demo (fixed at the source)
+
+**What.** Building the motion-showcase demo surfaced two ways an author gets a silently-wrong render:
+1. `kineticHook` hardcoded the hero `word` at size 300 — a long word ("MOTION") overflowed the portrait
+   canvas edge with no warning. **Fix (framework):** added a `wordSize` prop (default 300) so the beat
+   scales to the word/canvas. Every author benefits.
+2. `logoReveal`'s `mark`/`morphFrom` paths are in the layer's `viewBox` space (default "0 0 100 100"), NOT
+   stage pixels. Authoring them in 1080-scale coords rendered the shape far outside its box → invisible,
+   no error. **Fix (docs, until a gate exists):** the beat comment now states the coord space loudly and
+   shows a fitting example; the `svg` layer silently accepting off-viewBox coords is a latent gate gap
+   (a future check could warn when a path's bbox falls wholly outside its viewBox).
+
+**Also cleaned:** `vawe-creative` referenced `formats/scene/tokenjam-launch.json`, deleted in this overhaul's
+Phase 0 — repointed to `creed-launch.json` (a dangling doc ref trains authors to distrust the guidance).
+
+**Verified.** motion-showcase renders the full new stack — aurora bg, kinetic hook, border-beam card,
+logoReveal (shape-morph + bloom + wordmark), diveIn camera, ctaEnd — and passes `make author-check`
+(validate·critique·direct·floor·slop all green).
+
+## #142 — sleek surface library (Phase 5): two gate interactions worth knowing
+
+**What.** Adding `blocks/sleek.mjs` (glassCard · meshPanel · spotlightCard · borderBeamCard · grainOverlay
+· bento) surfaced two gate behaviours, both handled at the source:
+1. `blocks-audit` read `grainOverlay`'s feTurbulence data-URI `width='100%25'` (URL-encoded "100%") as a
+   BAKED STAT ("a figure no caller stood behind"). A true-positive-shaped false positive. **Fix:** the
+   grain SVG uses explicit `140` px dims (its tile size), so there is no `%` literal to misread. Cleaner anyway.
+2. A new grid block MUST have a generated poster+scene or `lib-test`'s registry check fails
+   (`make blocks-scenes`). This is by design — the block site derives from the manifest — but it means
+   adding a catalog row is a two-step: row + `make blocks-sync` (docs · json · scenes).
+
+**Design rule enforced.** Sleek blocks hold only STATIC CSS; the one that MOVES (`borderBeamCard`) composes
+the Phase-2 `beam` layer, not a CSS keyframe (which the determinism reset would freeze). `glassCard` needs a
+living background (aurora/mesh/paint) to blur — documented in docs/CRAFT/SURFACES.md, where the build-HTML-first
+loop and the design-spec + 8-visual-styles picker also live.
+
+## #143 — a new valid prop (`fill`) silently disarmed a meta-gate that used it as its "unknown prop"
+
+**What.** After adding `fill` as a real `svg`-layer prop, `gate-mutation`'s self-test "validate catches an
+unknown prop" went red: it injected `fill` as its example of an obviously-bogus prop and asserted validate
+flags `unknown prop "fill"`. Now that `fill` is legitimate, validate (correctly) accepts it, so the
+must-fail mutation no longer fired — the meta-gate "stayed silent."
+
+**Root cause.** A meta-test hardcoded a specific prop name as its stand-in for "any unknown prop." That name
+was one edit away from becoming valid. `validate` itself was never weakened (a genuinely-unknown prop is
+still rejected — verified directly).
+
+**Fix.** Point the mutation at `notARealProp` — a name no layer will ever accept — and match on it. Added a
+comment so the next person who adds a prop doesn't re-collide.
+
+**Lesson.** When a gate uses a concrete token as a proxy for a whole class, pick one that cannot join the
+class. Blast-radius of adding a schema prop includes the meta-gates that assume that prop is invalid.
+
+## #144 — ported the another engine craft: seam-QA, anti-front-load floor, author-the-frame, the spec contract
+
+**What.** Studied a real another engine-built promo (its storyboard, `frame.md` design spec, per-beat
+HTML+GSAP compositions, rendered frames, and the build session trace) to find what set its output apart,
+then ported the transferable lessons into our engine. Four concrete changes:
+
+1. **Seam-aware QA gate** — `scripts/gates/seam-snap.mjs` (`make seam-check D=<file>`). Their hardest-won
+   lesson: the worst render bugs (a black flash, a morph that reads as a collision) live INSIDE the
+   transition overlap, where `make beats`/`make audit`/`make probe` all step over them. The gate pulls the
+   frames straddling every transition out of the rendered mp4 and flags a luminance dip present at the seam
+   but absent just outside it (theme-agnostic — compares to local neighbours). Would have caught #138
+   automatically. Two-sided proof: fires on a synthetic black-flash mp4 (luma 0.000 vs 0.961), clean on the
+   showcase. **Note:** they hit the exact same black-transition-flash bug we fixed as #138 — independent
+   confirmation it is a real, easy-to-miss class.
+2. **Anti-front-load + no-two-beats-alike floor checks** — `scripts/gates/direction-floor.mjs` now WARNs
+   `front-loaded` (≥80% of reveals in the first 30% with a frozen back half — the "slideshow" failure they
+   ban by name) and `motion-monotony` (≥5 kinetic lines all on one preset — "no two beats move alike").
+   Beat-composed scenes spread reveals and mix presets, so they clear; a hand-authored front-load trips it.
+3. **author-the-frame** (`docs/CRAFT/AUTHOR-THE-FRAME.md`) — their expressiveness edge is a beat authored as
+   a bespoke HTML+SVG+GSAP file. Key finding: **our `seekAll` already seeks `window.__timelines`, the exact
+   mechanism theirs uses** — we are not behind on the seek model. And a bespoke inline `<svg>` dataviz
+   already renders as an `html` layer (static SVG survives sanitization) and stays pure. The one real gap is
+   per-CHILD inline choreography; documented honestly, with why we do NOT open `<script>` in the untrusted
+   html layer (a real past exploit read private files into a draft).
+4. **The spec contract** (`docs/CRAFT/FRAME-SPEC.md`) — their `frame.md` (per-video design system) +
+   `STORYBOARD.md` (scene-by-scene, each beat naming its blueprint with Reproduce/Adapt, its mechanism, its
+   persuasion, and its emotion). Mapped every storyboard field to our vocabulary (themes · BEATS · EFFECTS.md
+   · cuts), plus their reveal model (each cue its own window, back-50%) which #2 now enforces.
+
+**Gate.** `make seam-check` (new, two-sided verified) · the floor's two new WARNs (verified fire + no
+false-positive on beats) · `craft-coverage` (both new docs linked) · full battery green.
+
+**The honest scorecard.** We now match another engine on MECHANISM (seeked-GSAP determinism, camera
+coordinate-target-zoom, path-draw, count-up, morph, bespoke SVG). What set them apart was never the
+engine — it was the CONTRACTS (spec + storyboard), the EDITING (held reads, bookends, cut rhythm), and
+QAing the seams. Those are now ported as doctrine + gates, not just admired.
+
+## #145 — ported the full another engine pipeline (Steps 0-6) as local-model tooling
+
+**What.** Studied the authoritative another engine `product-launch-video` skill (its gated Step 0-6 pipeline)
+and built our own version of all five adoptable pieces, offline / local-model only:
+
+1. **Design-preset library + brand remix** (their Step 2) — `presets/*.json` (editorial · technical · bold ·
+   warm) + `scripts/brand/theme-remix.mjs` (`make theme-remix PRESET=… BRAND=… BG=… ACCENT=…`). Maps a
+   brand's base+accent onto the preset's roles and DERIVES the full 15-key palette (surfaces, line ladder,
+   text ramp, accent tints) with contrast checks. Good coherent design in one command instead of hand-
+   authoring every theme from pixels. Verified: remix → valid theme → coherent render.
+2. **Local narration TTS** (their Step 3.1) — `scripts/media/tts.mjs` (`make tts`) on macOS `say` (on-device,
+   offline, no key). Emits `<name>.vo.wav` + `<name>.vo.words.json`. KEY finding: the engine ALREADY mixes
+   VO (audio.go `vo`/`voWords`, ducks music under speech) — only generation was missing. Verified: audible
+   VO track (mean -21 dB) in the render.
+3. **Storyboard-as-proposal gate** (their Step 3) — `scripts/gates/storyboard-check.mjs` (`make
+   storyboard-check`) + `docs/CRAFT/STORYBOARD-TEMPLATE.md`. Enforces a one-sentence message + per-beat
+   type/onscreen/WHY before any JSON. Two-sided verified.
+4. **Gated orchestrator skill** — `.claude/skills/vawe-launch/SKILL.md`: the Step 0-6 flow adapted to our
+   tools (capture → theme-remix → storyboard-check → tts → blueprints → seam-check/judge), user-gated at 0/3/6.
+5. **Parallel per-beat authoring** (their Step 5) — `.claude/workflows/beats-parallel.mjs`: fan out one
+   sub-agent per storyboard beat, each authors its layer fragment against the shared spec, merge into one
+   scene. Opt-in (Workflow tool). Delivered as a ready capability.
+
+**Framework fix found.** `make theme-remix BG=#hex` — the `#` was eaten as a shell comment, so the remix
+silently fell back to preset base colours. Fixed by quoting the values in the Makefile recipe (`"$(BG)"`).
+The kind of silent substitution the repo warns about — caught by reading the remix's echoed colours.
+
+**Gate.** `theme-remix` self-validates against the theme contract; `storyboard-check` two-sided; `tts` output
+verified in a render; full battery green; both new CRAFT docs linked (craft-coverage).
+
+**The takeaway.** another engine' quality was never one magic feature — it was a *pipeline* (pick a vetted
+design system, remix the brand in, storyboard with a why per beat, narrate, QA the seams). We now have that
+pipeline end to end, local-only.

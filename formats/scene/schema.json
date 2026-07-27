@@ -387,6 +387,9 @@
         }
       }
     },
+    "cameraMove": {
+      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase (core/camera-moves.js)."
+    },
     "camera": {
       "type": "array",
       "label": "Global camera keyframes",
@@ -454,6 +457,8 @@
             "count",
             "group",
             "glow",
+            "beam",
+            "svg",
             "board",
             "doc",
             "html",
@@ -853,7 +858,7 @@
         },
         "morph": {
           "type": "object",
-          "label": "TextMorph: letters migrate from `text` to another word. { to, dur, ease }. Shared letters glide, others crossfade. Needs w + align:center. GSAP-driven, deterministic."
+          "label": "text layer TextMorph: letters migrate `text`->word { to, dur, ease } (needs w+align:center, GSAP). svg layer shape-morph: one path melts into another { to, dur, spin, points, closed }."
         },
         "fx": {
           "type": "string|object|array",
@@ -1031,6 +1036,8 @@
                 "group",
                 "rect",
                 "glow",
+                "beam",
+                "svg",
                 "cursor",
                 "clip",
                 "html",
@@ -1184,6 +1191,45 @@
             "down"
           ]
         },
+        "mode": {
+          "type": "string",
+          "label": "beam layer: 'border' (a light travelling the border) or 'shine' (a sheen sweep)",
+          "enum": [
+            "border",
+            "shine"
+          ]
+        },
+        "thickness": {
+          "type": "number",
+          "label": "beam layer: border-beam ring thickness in px"
+        },
+        "tail": {
+          "type": "number",
+          "label": "beam layer: length of the travelling light arc, in degrees"
+        },
+        "period": {
+          "type": "number",
+          "label": "beam layer (shine): seconds per sheen sweep"
+        },
+        "viewBox": {
+          "type": "string",
+          "label": "svg layer: the path coordinate system (default '0 0 100 100')"
+        },
+        "d": {
+          "type": "string",
+          "label": "svg layer: the path `d` string (the from-shape when morphing)"
+        },
+        "fill": {
+          "type": "string",
+          "label": "svg layer: fill colour (default var(--accent); 'none' for draw-on)"
+        },
+        "stroke": {
+          "type": "string",
+          "label": "svg layer: stroke colour (default var(--accent) for draw-on)"
+        },
+        "draw": {
+          "label": "svg layer: stroke draws itself on. {dur, weight}"
+        },
         "fade": {
           "type": "string",
           "label": "Static edge fade (exclusive with cut)",
@@ -1220,6 +1266,21 @@
           "label": "glow: pulse amplitude 0-0.15 (default 0.12)",
           "min": 0,
           "max": 0.15
+        },
+        "flash": {
+          "label": "glow: one-shot attack-decay bloom. true, or {attack,decay,peak} seconds/peak<=0.45"
+        },
+        "hues": {
+          "type": "array",
+          "label": "paint aurora: per-blob hue list (degrees)"
+        },
+        "headColor": {
+          "type": "string",
+          "label": "paint: bright head colour (matrix/meteor)"
+        },
+        "length": {
+          "type": "number",
+          "label": "paint meteor: streak length in px"
         },
         "angle": {
           "type": "number",
@@ -1258,7 +1319,9 @@
           "enum": [
             "matrix",
             "starfield",
-            "waves"
+            "waves",
+            "aurora",
+            "meteor"
           ]
         },
         "count": {

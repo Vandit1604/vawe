@@ -72,6 +72,25 @@ export const easeInOutExpo = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.po
 // Complements the existing overshooting spring() below. Pure, terminal at t≥1 → safe for renderFrame(n).
 export const springStiff = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.exp(-6.5 * t) * (1 + 6.5 * t));
 
+// springEase({response, dampingFraction}) — the iOS/SwiftUI spring as a closed-form EASING FACTORY: a
+// damped harmonic oscillator over normalised progress u∈[0,1]. `response` sets snappiness (lower = faster,
+// more frequency); `dampingFraction` (ζ) sets bounce. another engine doctrine: ζ=1.0 house default (no
+// overshoot), 0.8-0.85 "alive" (a whisper of overshoot), <0.55 don't (visible bounce). Returns a pure
+// function of u → seek-safe. This is "the iOS feel" without hand-tuning cubic-beziers.
+export function springEase({ response = 0.5, dampingFraction = 1 } = {}) {
+  const zeta = Math.max(0.05, dampingFraction);
+  const omega = (2 * Math.PI) / Math.max(0.05, response);   // natural frequency over the unit interval
+  return (u) => {
+    if (u <= 0) return 0;
+    if (u >= 1) return 1;
+    if (zeta < 1) {                                          // underdamped → settles with overshoot
+      const wd = omega * Math.sqrt(1 - zeta * zeta);
+      return 1 - Math.exp(-zeta * omega * u) * (Math.cos(wd * u) + ((zeta * omega) / wd) * Math.sin(wd * u));
+    }
+    return 1 - Math.exp(-omega * u) * (1 + omega * u);       // critically/over-damped → no overshoot
+  };
+}
+
 // ---------- velocity ramping ----------
 // accel/decel: pure power curves — k is the acceleration exponent (k=1 linear, k=3 hard launch/brake).
 export const accel = (t, k = 2.4) => Math.pow(clamp01(t), k);
@@ -145,11 +164,16 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
 // it never actually reached its keyframe (breaking MOTION-CRAFT rule 5, "settle and hold"). Map t
 // onto each spring's own settle window so the ring completes inside [0,1], and snap the endpoints
 // exactly the way easeOutSettle does. Guarded by the easing-registry contract in lib-test.
-const springEase = (o) => { const T = springSettle(o); return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(clamp01(t) * T, o)); };
+// springWindow — maps the seconds-based spring() into its own settle window so the ring completes inside
+// [0,1] (distinct from the exported springEase({response,dampingFraction}) factory above, which is the
+// iOS-parameterised spring). Renamed off `springEase` to free that name for the public API.
+const springWindow = (o) => { const T = springSettle(o); return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(clamp01(t) * T, o)); };
 Object.assign(EASINGS, {
-  spring: springEase({ bounce: 0.35, settle: 0.92 }),
-  'spring-bouncy': springEase({ bounce: 0.55, settle: 0.94 }),
-  'spring-stiff': springEase({ bounce: 0.12, settle: 0.72 }),
+  spring: springWindow({ bounce: 0.35, settle: 0.92 }),
+  'spring-bouncy': springWindow({ bounce: 0.55, settle: 0.94 }),
+  'spring-stiff': springWindow({ bounce: 0.12, settle: 0.72 }),
+  // iOS-parameterised spring, house default (ζ=1, no overshoot) — usable by name in any `ease:` slot.
+  springEase: springEase(),
 });
 // easeOutSettle — the DEFAULT entrance feel: a SMOOTH decelerate with just a whisper of settle (premium,
 // not bouncy). Low bounce (0.08) so type glides to rest instead of overshooting/wobbling — a visible

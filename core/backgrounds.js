@@ -157,6 +157,11 @@ export const PAL_PLINTH = {
   light: ['#ffffff', '#f4f4f1'], ink: ['#2f37a8', '#242a72'], paper: '#ffffff',
 };
 export const PAL = PAL_PLINTH; // back-compat
+// BG_NAMES — the background presets bgPreset() understands. Keep in sync with the switch below (there's
+// no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
+// list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
+export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
+  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink'];
 export function bgPreset(name, value, P = PAL_PLINTH) {
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };

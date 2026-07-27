@@ -148,7 +148,10 @@ boot((data, fps, theme, canvas) => {
         { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
     }
     // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
-    if (L.morph && window.gsap) buildMorph(el, L, window.gsap);
+    // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame() — without
+    // this, buildMorph would rebuild the svg as text glyphs and render the target path `d` string as words
+    // (docs/MISTAKES.md #140: the engine silently doing the wrong thing on an accepted input).
+    if (L.morph && L.type !== 'svg' && window.gsap) buildMorph(el, L, window.gsap);
     // NAMED GSAP effects (core/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
     if (L.fx && window.gsap) {
       const targets = (units && units.length) ? units : el; // split → per unit (staggered), else the layer

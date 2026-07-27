@@ -1,0 +1,5 @@
+{ "module":"scene","theme": "default","aspect":"16:9","duration":12,"audio":{"silent":true},
+  "layers":[
+    { "type":"text","text":"A plain title","x":160,"y":300,"w":1600,"align":"center","size":80,"weight":700,"anim":"rise","enterDur":0.5,"out":"fade","exitDur":0.4,"start":0.3,"duration":5 },
+    { "type":"text","text":"A second plain title","x":160,"y":300,"w":1600,"align":"center","size":80,"weight":700,"anim":"fade","enterDur":0.5,"out":"fade","exitDur":0.4,"start":6,"duration":5 }
+  ] }

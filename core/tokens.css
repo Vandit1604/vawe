@@ -89,6 +89,9 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 /* Hanken Grotesk (free, open) — a distinctive neo-grotesque; stand-in for brands on licensed faces
    (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
 @font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
+/* Bricolage Grotesque (free, open) — tokenjam.dev's real DISPLAY face: a characterful variable
+   grotesque (opsz+wght). Vendored for the tokenjam theme's headlines. */
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/BricolageGrotesque.woff2') format('woff2'); }
 /* Sohne (Stripe's licensed Klim face) — the file lives in assets/fonts/local/ which is GITIGNORED.
    Never commit it.
    The second src IS the fallback, and it has to live here rather than in a font stack: a theme names

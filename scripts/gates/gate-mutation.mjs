@@ -172,18 +172,22 @@ const srcCases = [
   { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
     mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
     cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-component/ },
-  { name: 'blocks-audit · a factory ships an invented statistic', file: 'blocks/index.mjs',
+  // Factories were extracted from blocks/index.mjs into family siblings; re-anchored on the sibling that
+  // now holds each one (loadingBar→dev.mjs, browserFrame + the swatch fill→ui.mjs).
+  { name: 'blocks-audit · a factory ships an invented statistic', file: 'blocks/dev.mjs',
     mutate: (s) => s.replace("export function loadingBar({", "export function loadingBar({ note = 'Ready in 1.2s',"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /claim-default|baked-claim/ },
-  { name: 'blocks-audit · unreadable text on a hardcoded fill', file: 'blocks/index.mjs',
+  { name: 'blocks-audit · unreadable text on a hardcoded fill', file: 'blocks/ui.mjs',
     mutate: (s) => s.replace("bg: '#3A3A38', radius: 8", "bg: '#F6A417', radius: 8"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /contrast/ },
-  { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/index.mjs',
+  { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/ui.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
   { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
-    mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "fill": "#000" },'),
-    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "fill"/ },
+    // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
+    // svg-layer prop (docs/MISTAKES.md #143) — pick a prop that can never be legitimised.
+    mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
+    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/three-fx.js',
     mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },

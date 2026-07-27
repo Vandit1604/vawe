@@ -491,6 +491,16 @@ export async function stageToCanvas({ w, h, cv, cam, root, useCanvasBg }) {
     const dom = await domToCanvas(cam, w, h, css);
     octx.drawImage(dom, 0, 0);
   } else {
+    // No canvas bg window: the live frame's background comes from the .hs-stage CSS (the theme --bg
+    // fallback). Rasterising `root` ALONE yields a TRANSPARENT snapshot, which the seam's WebGL then
+    // composites as BLACK — a black flash on every seam of a white-first scene (docs/MISTAKES.md #138).
+    // Fill the theme base bg first so the snapshot matches what the viewer actually sees.
+    const stage = (root.closest && root.closest('.hs-stage')) || document.body;
+    const cs = getComputedStyle(stage);
+    let bg = (cs.getPropertyValue('--bg') || '').trim();
+    if (!bg || bg === 'transparent') { const bc = cs.backgroundColor; bg = (bc && bc !== 'rgba(0, 0, 0, 0)' && bc !== 'transparent') ? bc : '#ffffff'; }
+    octx.fillStyle = bg;
+    octx.fillRect(0, 0, w, h);
     const dom = await domToCanvas(root, w, h, css);
     octx.drawImage(dom, 0, 0);
   }

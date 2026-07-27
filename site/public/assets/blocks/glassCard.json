@@ -1,0 +1,75 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 560,
+      "h": 300,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 14,
+      "pad": 40,
+      "bg": "rgba(255,255,255,0.06)",
+      "radius": 22,
+      "border": "1.5px solid rgba(255,255,255,0.14)",
+      "glass": 16,
+      "shadow": true,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "rect",
+          "w": 480,
+          "h": 2,
+          "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+          "radius": 2
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "GLASS",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--accent)",
+          "ls": "0.08em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Backdrop blur",
+          "size": 52,
+          "color": "#fff",
+          "ls": "-0.02em"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "It blurs whatever moves behind it.",
+          "font": "serif",
+          "size": 28,
+          "color": "rgba(255,255,255,0.72)",
+          "w": 480
+        }
+      ]
+    }
+  ]
+}

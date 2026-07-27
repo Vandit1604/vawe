@@ -17,6 +17,8 @@ if (!file) { console.error('usage: node scripts/motion-director.mjs <scene.json>
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];
+// flatten nested children so the mechanical motion tells see every layer, not just the top level.
+const allLayers = (() => { const out = []; const rec = (ls) => { for (const l of ls || []) if (l && typeof l === 'object') { out.push(l); if (l.children) rec(l.children); } }; rec(layers); return out; })();
 
 // resolve the brand's motion personality from its theme (string name → themes/<name>.json, or inline).
 let motion = {};
@@ -147,6 +149,34 @@ if (duration > 0 && layers.length) {
   const holdsEnd = layers.some((l) => l.track !== 0 && (l.exitDur === 0 || (l.start ?? 0) + (l.dur ?? 1e9) >= duration - 0.15));
   if (!holdsEnd) warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`);
 }
+
+// ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ------------------
+// linear-motion: a visible move on a linear/none curve. Real motion accelerates in and decelerates
+// out (Disney slow-in/slow-out; Material asymmetric easing). Author-set ease:"linear" anywhere — on a
+// layer, a motion track keyframe, or an animated value — is the tell. We walk the whole layer tree.
+const linearHits = [];
+const scanEase = (o, where) => {
+  if (!o || typeof o !== 'object') return;
+  if (typeof o.ease === 'string' && /^(linear|none)$/i.test(o.ease.trim())) linearHits.push(where);
+  for (const k of Object.keys(o)) { const v = o[k];
+    if (Array.isArray(v)) v.forEach((it, i) => scanEase(it, `${where}.${k}[${i}]`));
+    else if (v && typeof v === 'object') scanEase(v, `${where}.${k}`); }
+};
+layers.forEach((l, i) => scanEase(l, `layer[${i}]`));
+if (linearHits.length) warn('linear-motion', `${linearHits.length} move(s) use ease "linear"/"none" — a visible move must decelerate in / accelerate out, never run flat (DIRECTION.md: slow-in/slow-out). At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`);
+
+// monotone-timing: fires ONLY when the author took manual control of tempo and made it uniform.
+// A default-timed scene is fine (the engine default IS one deliberate snap band); this needs ≥6 layers
+// EXPLICITLY setting enterDur to one identical value — hand-set monotony (Murch: rhythm variety).
+const explicitDurs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number');
+if (explicitDurs.length >= 6 && new Set(explicitDurs).size === 1)
+  warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]} — uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`);
+
+// enter-and-retreat: a layer that enters from a side and leaves back the SAME side. Pro motion travels
+// one continuous direction (enter right → exit left) — the launch rule + staging continuity.
+const DIR = /^slide-(left|right|up|down)$/;
+const retreats = allLayers.filter((l) => DIR.test(l.anim || '') && DIR.test(l.out || '') && l.anim.split('-')[1] === l.out.split('-')[1]);
+if (retreats.length) warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}") — travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`);
 
 // ---- THE ONE EARNED SEAM (the decision procedure, applied) ----------------------------------------
 // TRANSITIONS.md: straight cuts are the meat; a seam is seasoning reserved for the hero/payoff. So the

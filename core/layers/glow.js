@@ -123,6 +123,18 @@ export function pulseOpacity(lt, p, amp = 0.12) {
   return 1 - a + a * Math.sin((2 * Math.PI * lt) / Math.max(0.1, p));
 }
 
+// pure FLASH envelope: a finite attack→decay bloom (a light SWELLING once, then settling), unlike the
+// continuous breathe of pulseOpacity. Rises 0→peak over `attack`s, decays peak→0 over `decay`s, then
+// holds 0. Peak capped ≤0.45 (HF doctrine: a swell, not a strobe). Absolute opacity, not a multiplier —
+// the caller adds it to a base. Pure in lt → seek-safe.
+export function flashEnvelope(lt, { attack = 0.35, decay = 0.9, peak = 0.4 } = {}) {
+  const pk = Math.min(0.45, Math.max(0, peak));
+  if (lt < 0) return 0;
+  if (lt < attack) { const u = lt / Math.max(0.01, attack); return pk * (1 - (1 - u) * (1 - u)); }
+  const u = (lt - attack) / Math.max(0.01, decay);
+  return u >= 1 ? 0 : pk * (1 - u) * (1 - u);
+}
+
 // ---- layer builder -------------------------------------------------------------------------------
 
 export function build(kit, el, L) {
@@ -134,7 +146,7 @@ export function build(kit, el, L) {
     color: L.color && L.color !== true ? L.color : undefined,
   }) : null;
 
-  if (!spec && !L.pulse) {
+  if (!spec && !L.pulse && !L.flash) {
     // ORIGINAL path, untouched: no preset, no pulse → identical output to the pre-preset builder
     const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
     const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
@@ -168,10 +180,15 @@ export function build(kit, el, L) {
 // static-frame dedup could wrongly reuse a frame.
 export function frame(kit, el, L, t) {
   const cycling = L.preset === 'chromaCycle';
-  if ((!L.pulse && !cycling) || !el.__glowInner) return;
+  if ((!L.pulse && !cycling && !L.flash) || !el.__glowInner) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
-  if (L.pulse) {
+  if (L.flash) {
+    // a one-shot bloom that swells then settles (attack-decay); flash may be `true` or {attack,decay,peak}.
+    const o = flashEnvelope(t - start, L.flash === true ? {} : L.flash);
+    el.__glowInner.style.opacity = o.toFixed(3);
+    el.dataset.gf = o.toFixed(3);
+  } else if (L.pulse) {
     const o = pulseOpacity(t - start, +L.pulse, L.pulseAmp);
     el.__glowInner.style.opacity = o.toFixed(3);
     el.dataset.gp = o.toFixed(3);

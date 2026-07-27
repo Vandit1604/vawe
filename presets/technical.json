@@ -1,0 +1,9 @@
+{
+  "name": "technical",
+  "dominance": "dark",
+  "desc": "Technical / developer: dark ground, mono chrome and numerals, a precise grid, snappy motion. Reads as a terminal, not a brochure.",
+  "base": { "bg": "#0e1116", "accent": "#4fd1c5", "up": "#4fb584", "down": "#e0655c" },
+  "type": { "sans": "Geist", "serif": "Geist", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutExpo", "bounce": 0.1, "settle": 0.45, "enter": 30, "durationScale": 0.85, "stagger": 0.04 },
+  "bgDefault": "dotmatrix"
+}

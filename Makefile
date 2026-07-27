@@ -104,10 +104,14 @@ build: fonts
 	go build -o bin/vawe ./cmd/render
 
 # make video D=path/to/video.json  — one self-describing JSON → out/<name>.mp4
-# Runs the layout/contrast/size audit by default (set NOAUDIT=1 to skip during rapid iteration).
+# Runs the mandatory authoring-quality ladder first (set NOCHECK=1 to skip during rapid iteration), then
+# renders, then the layout/contrast/size audit (set NOAUDIT=1 to skip). The ladder is what stops an
+# effect-soup video shipping silently; NOCHECK=1 is the explicit, logged waiver.
 video: build
+	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (value · direction · anti-slop) …" && node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)))
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
+	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)) — then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build
@@ -288,6 +292,32 @@ sheet:
 slop:
 	node scripts/gates/slop.mjs $(D) $(if $(AT),--at $(AT))
 
+# make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex]  — pick a design-system
+# PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
+# another engine "pick a preset, paint the brand into it" move: good coherent design in one command, not
+# hand-authored per pixel. Reads assets/brands/<brand>/palette.json when BG/ACCENT are omitted.
+theme-remix:
+	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
+
+# make tts (SCRIPT=narration.txt | TEXT="…") OUT=formats/scene/<name>.vo [VOICE=Samantha]  — LOCAL narration:
+# synthesize a voiceover WAV + word-timing sidecar offline with macOS `say` (no cloud, no key). Writes
+# <OUT>.wav + <OUT>.words.json; wire them into the scene's audio block: { "vo":…, "voWords":… }.
+tts:
+	node scripts/media/tts.mjs $(if $(SCRIPT),--script $(SCRIPT)) $(if $(TEXT),--text "$(TEXT)") --out $(OUT) $(if $(VOICE),--voice $(VOICE))
+
+# make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
+# message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
+# decisions that make a video good were made and written down BEFORE the JSON. Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
+storyboard-check:
+	node scripts/gates/storyboard-check.mjs $(SB)
+
+# make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
+# (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
+# black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
+# Requires out/<name>.mp4 (render first). Sheet → /tmp/seams.png (read it — the eye is the backstop).
+seam-check:
+	node scripts/gates/seam-snap.mjs $(D)
+
 # make similar [D="a.json b.json"]  — sameness audit: score authored videos pairwise (motion vocab
 # + beat structure + layout). Cross-brand SAME (>0.75) fails; the anti-template gate.
 similar:
@@ -390,6 +420,27 @@ install-hooks:
 
 clean:
 	rm -rf bin out/*.mp4
+
+author-check: ## MANDATORY authoring ladder: validate+critique+direct+slop+inspect (D=<file> [STRICT=1] [VS=<brand>])
+	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(VS),--vs $(VS))
+
+direction-floor: ## ambition floor: fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
+	node scripts/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
+# make impeccable D="a.html b.html"  — the bundled impeccable anti-slop detector on raw HTML fragments
+# (local, no network, token-efficient). `make slop` runs the same detector on the RENDERED scene DOM;
+# this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
+impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
+	node .claude/skills/impeccable/scripts/detect.mjs --json $(D)
+
+blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs)
+	node scripts/site/blueprints-catalog.mjs
+
+effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from the registries)
+	node scripts/site/effects-catalog.mjs
+
+effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
+	node scripts/site/effects-catalog.mjs --check
 
 critique: ## value-gate: flag hollow/low-value beats (D=<file>)
 	node scripts/gates/critique.mjs $(D)

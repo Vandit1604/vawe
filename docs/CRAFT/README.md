@@ -2,6 +2,11 @@
 
 > **New here? Start at [`../TASTE.md`](../TASTE.md)** — the front door that ties the spines together.
 > CRAFT is where each decision actually gets made.
+>
+> **Never authored from scratch? Read [`AUTHORING-WALKTHROUGH.md`](AUTHORING-WALKTHROUGH.md) first** —
+> the one narrative that carries a single video from a blank page to shipped, chaining every guide below
+> in order. And [`DIRECTION.md`](DIRECTION.md) is the cross-cutting spine (pacing · restraint · story
+> placement) these decisions all serve.
 
 These guides answer *how to choose* — a beat order, a transition, a face, a palette, a layout, an
 image, a sound. They are opinionated checklists, not textbooks: if a rule wouldn't change what you
@@ -35,6 +40,14 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 ## The full index
 
+**Front-to-back & cross-cutting:**
+
+| Guide | Load it when you are… | Answers |
+|---|---|---|
+| [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
+| [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
+| [BLUEPRINTS.md](BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
+
 **What & why (the story layer):**
 
 | Guide | Load it when you are… | Answers |
@@ -55,6 +68,9 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
 | [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
 | [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
+| [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
+| [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) (gate: `make storyboard-check`). |
+| [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
 
 **How full · how it sounds:**
 

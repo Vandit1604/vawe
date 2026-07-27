@@ -2,7 +2,7 @@
 // No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor } from '../../core/motion.js';
+  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
@@ -11,7 +11,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js';
-import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue } from '../../core/layers/glow.js';
+import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
+import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
+import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
+import { slowPush, diveIn, panFollow, orbit, multiPhase, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -806,6 +809,71 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
   ok('audio: SEAM_CUE covers every SEAM_FX (no silent seam)', SEAM_FX.every((fx) => typeof SEAM_CUE[fx] === 'string'));
   ok('audio: every SEAM_CUE voicing resolves to a baked wav', Object.values(SEAM_CUE).every((c) => c === 'whoosh' || c === 'reveal' || c in CUES));
+}
+
+// ---- springEase (iOS-parameterised spring easing) ------------------------------------------------
+{
+  const house = springEase({ response: 0.5, dampingFraction: 1 });
+  ok('springEase: 0 at u=0', house(0) === 0);
+  ok('springEase: 1 at u=1', house(1) === 1);
+  ok('springEase: critically damped never overshoots', [0, 0.2, 0.4, 0.6, 0.8, 0.99].every((u) => house(u) <= 1 + 1e-9));
+  ok('springEase: critically damped is monotonic up', (() => { let prev = -1; for (let u = 0; u <= 1; u += 0.05) { const v = house(u); if (v < prev - 1e-9) return false; prev = v; } return true; })());
+  ok('springEase: deterministic', house(0.37) === house(0.37));
+  const bouncy = springEase({ response: 0.5, dampingFraction: 0.4 });
+  ok('springEase: underdamped overshoots past 1 somewhere', (() => { for (let u = 0.1; u < 1; u += 0.02) if (bouncy(u) > 1.001) return true; return false; })());
+  ok('springEase: default factory works', typeof springEase() === 'function' && springEase()(1) === 1);
+}
+// ---- path-morph (true shape morph) — pure maths, no DOM ------------------------------------------
+{
+  const A = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  const B = [{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 20, y: 20 }, { x: 0, y: 20 }];
+  ok('morph: u=0 equals A', lerpPoints(A, B, 0).every((p, i) => approx(p.x, A[i].x) && approx(p.y, A[i].y)));
+  ok('morph: u=1 equals B', lerpPoints(A, B, 1).every((p, i) => approx(p.x, B[i].x) && approx(p.y, B[i].y)));
+  ok('morph: u=0.5 is the midpoint', lerpPoints(A, B, 0.5).every((p, i) => approx(p.x, (A[i].x + B[i].x) / 2) && approx(p.y, (A[i].y + B[i].y) / 2)));
+  ok('morph: deterministic (same u → same points)', JSON.stringify(lerpPoints(A, B, 0.37)) === JSON.stringify(lerpPoints(A, B, 0.37)));
+  ok('morph: spin returns to identity at u=1 (no rotation at the end)', lerpPoints(A, B, 1, Math.PI).every((p, i) => approx(p.x, B[i].x, 1e-6) && approx(p.y, B[i].y, 1e-6)));
+  ok('pointsToD closed appends Z', pointsToD(A, true).endsWith('Z'));
+  ok('pointsToD open has no Z', !pointsToD(A, false).includes('Z'));
+  ok('pointsToD starts with M', pointsToD(A).startsWith('M'));
+  ok('rotatePoints wraps by k', (() => { const r = rotatePoints(A, 1); return r[0] === A[1] && r[3] === A[0]; })());
+  ok('bestRotation of identical arrays is 0', bestRotation(A, A, 1) === 0);
+  ok('morphD is a valid d string', /^M[-0-9.]/.test(morphD(A, B, 0.5)));
+}
+// ---- glow flash envelope (finite attack-decay) ---------------------------------------------------
+ok('flash: 0 before start', flashEnvelope(-0.1) === 0);
+ok('flash: 0 at t=0', approx(flashEnvelope(0, { attack: 0.3, decay: 1 }), 0));
+ok('flash: peaks near the attack end', approx(flashEnvelope(0.3, { attack: 0.3, decay: 1, peak: 0.4 }), 0.4, 1e-6));
+ok('flash: decays back to 0', flashEnvelope(1.3, { attack: 0.3, decay: 1, peak: 0.4 }) <= 1e-6);
+ok('flash: peak capped at 0.45', flashEnvelope(0.3, { attack: 0.3, decay: 1, peak: 5 }) <= 0.45 + 1e-9);
+ok('flash: never negative', [0, 0.1, 0.3, 0.7, 1.2, 2].every((t) => flashEnvelope(t) >= 0));
+// ---- border-beam (pure angle / sheen position) ---------------------------------------------------
+ok('beamAngle wraps 0..360', beamAngle(10, 0.5) >= 0 && beamAngle(10, 0.5) < 360);
+ok('beamAngle deterministic', beamAngle(1.23, 0.7) === beamAngle(1.23, 0.7));
+ok('shinePos travels -20..120', (() => { const p = shinePos(0.8, 1.6); return p >= -20 && p <= 120; })());
+ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-gradient(from 45.0deg'));
+// ---- camera moves (pure keyframe generators, checked through cameraAt) ----------------------------
+{
+  const push = slowPush({ start: 1, dur: 4, from: 1, to: 1.2 });
+  ok('slowPush: 2 keyframes', push.length === 2);
+  ok('slowPush: cameraAt start = from', approx(cameraAt(push, 1).s, 1));
+  ok('slowPush: cameraAt end = to', approx(cameraAt(push, 5).s, 1.2));
+  const dive = diveIn({ start: 0, dur: 2, tx: 1920, ty: 0, to: 1.5, canvasW: 1920, canvasH: 1080 });
+  ok('diveIn: ends at target scale', approx(cameraAt(dive, 2).s, 1.5));
+  ok('diveIn: pan centres the target (x = W/2 - tx)', approx(cameraAt(dive, 2).x, 1920 / 2 - 1920));
+  ok('diveIn: pan y = H/2 - ty', approx(cameraAt(dive, 2).y, 1080 / 2 - 0));
+  ok('diveIn: starts at identity', approx(cameraAt(dive, 0).s, 1) && approx(cameraAt(dive, 0).x, 0));
+  const pan = panFollow({ start: 0, dur: 5, dy: -300 });
+  ok('panFollow: interior ease is linear (constant velocity)', pan[1].ease === 'linear');
+  ok('panFollow: cameraAt midpoint is halfway (linear)', approx(cameraAt(pan, 2.5).y, -150));
+  const orb = orbit({ start: 0, dur: 6, deg: 12 });
+  ok('orbit: 3 keyframes with a linear interior', orb.length === 3 && orb[1].ease === 'linear');
+  ok('orbit: swings ry through 0', approx(cameraAt(orb, 3).ry, 0, 1e-3));
+  const mp = multiPhase({ start: 0, legs: [{ dur: 1, s: 1.3 }, { dur: 2, s: 1.3 }, { dur: 1, s: 1 }] });
+  ok('multiPhase: interior legs are linear, last eases out', mp[1].ease === 'linear' && mp[mp.length - 1].ease !== 'linear');
+  ok('multiPhase: deterministic', JSON.stringify(multiPhase({ start: 0, legs: [{ dur: 1, s: 1.2 }] })) === JSON.stringify(multiPhase({ start: 0, legs: [{ dur: 1, s: 1.2 }] })));
+  ok('buildCameraMove resolves by name', buildCameraMove({ move: 'slowPush', start: 0, dur: 2 }).length === 2);
+  ok('buildCameraMove throws on unknown', (() => { try { buildCameraMove({ move: 'nope' }); return false; } catch { return true; } })());
+  ok('CAMERA_MOVE_NAMES lists the generators', CAMERA_MOVE_NAMES.includes('diveIn') && CAMERA_MOVE_NAMES.includes('panFollow'));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

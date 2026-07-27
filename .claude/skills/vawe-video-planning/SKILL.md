@@ -39,6 +39,11 @@ NEXT video is faster and on-brand. (See `docs/TASTE.md` → per-brand house styl
 
 ## Step 0.5 — NO brand site? MANUFACTURE the four things a site gives, before authoring
 
+> **The full narrative for this path is [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](../../../docs/CRAFT/AUTHORING-WALKTHROUGH.md)**
+> — one video carried blank-page → shipped, chaining the whole arsenal (including the mandatory
+> `make author-check` ladder and the `make judge` step). Read it alongside this step; the four things
+> below are its Step 1.
+
 Steps 1–2 assume a brand site to study. When there is none (a topic video, a from-scratch idea, an
 effects piece), the failure mode is exact and predictable: you invent everything and default to
 generic — centred, effect-soup, no through-line. A site silently hands you FOUR things at once, and
@@ -165,6 +170,13 @@ per beat to the target duration.
 There is ONE module: **scene** (the open canvas — layers/cuts/stings/bg windows/camera;
 `formats/scene/schema.json` is the contract). No templates. You compose every video from the
 primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
+
+**Compose beats from BLUEPRINTS, not blank JSON.** `make blueprints` lists directed-motion beat
+blueprints (`{type:"beat"}`, [`docs/CRAFT/BLUEPRINTS.md`](../../../docs/CRAFT/BLUEPRINTS.md)) — kineticHook,
+statReveal, cardCascade, screenDive, terminalReveal, verdictProof, ctaEnd, … Each bakes in kinetic
+reveals / count-ups / cascades / a dashboard dive so good motion is the DEFAULT. Authoring plain
+`rise`+`fade` from scratch is the #1 failure and `make direction-floor` (in `author-check`) now FAILS it
+as a `plain-slideshow`. Reach for a blueprint per beat, then fill brand content.
 
 ## Step 3b — Choreography rules (anti-monotony)
 

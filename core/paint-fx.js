@@ -65,6 +65,65 @@ export const PAINT_FX = {
     ctx.globalAlpha = 1;
   },
 
+  // aurora — soft colour blobs drifting through a sum of sines. Each blob's centre is f(lt) (two
+  // detuned sines per axis, so the path never simply repeats), its radius breathes on a third sine,
+  // and its hue is seeded per blob. Drawn as additive radial gradients (lighter blend) so overlaps
+  // bloom to white the way real aurora does. Closed-form → seek-safe; nothing reads the prior frame.
+  aurora(ctx, w, h, lt, seed, o = {}) {
+    const n = o.count ?? 5, sp = o.speed ?? 1, base = o.opacity ?? 0.5;
+    const hues = o.hues || [265, 200, 320, 150, 220];
+    const prev = ctx.globalCompositeOperation;
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < n; i++) {
+      const px = 0.5 + 0.42 * Math.sin(lt * sp * (0.17 + hash01(i, seed) * 0.12) + hash01(i + 5, seed) * 6.28)
+                     + 0.10 * Math.sin(lt * sp * 0.31 + i);
+      const py = 0.5 + 0.40 * Math.sin(lt * sp * (0.13 + hash01(i + 9, seed) * 0.10) + hash01(i + 3, seed) * 6.28)
+                     + 0.08 * Math.cos(lt * sp * 0.23 + i * 1.7);
+      const cx = px * w, cy = py * h;
+      const rad = (0.32 + 0.10 * Math.sin(lt * sp * 0.4 + i)) * Math.max(w, h);
+      const hue = o.hue != null ? o.hue : hues[i % hues.length];
+      const a = base * (0.5 + 0.5 * Math.sin(lt * sp * 0.35 + i * 2.1));
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      g.addColorStop(0, `hsla(${hue},85%,62%,${(a * 0.9).toFixed(3)})`);
+      g.addColorStop(0.5, `hsla(${hue},85%,55%,${(a * 0.35).toFixed(3)})`);
+      g.addColorStop(1, `hsla(${hue},85%,50%,0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.globalCompositeOperation = prev;
+  },
+
+  // meteor — index-seeded ballistic streaks falling on a shared diagonal. Each meteor's progress along
+  // its path is ((offset + lt/period) mod 1), so the head position is computed directly from lt (no
+  // integration). The tail is a gradient stroke drawn BEHIND the head each frame — a deterministic echo,
+  // not accumulated pixels. Head fades in/out at the path ends so streaks don't pop at the wrap.
+  meteor(ctx, w, h, lt, seed, o = {}) {
+    const n = o.count ?? 14, sp = o.speed ?? 1, color = o.color || '#eaf2ff';
+    const ang = ((o.angle ?? 28) * Math.PI) / 180, dx = Math.cos(ang), dy = Math.sin(ang);
+    const span = Math.hypot(w, h) * 1.3, len = o.length ?? 220;
+    for (let i = 0; i < n; i++) {
+      const period = 2.2 + hash01(i, seed) * 3.2;
+      const u = ((hash01(i + 41, seed) + lt / (period / sp)) % 1 + 1) % 1;
+      // start point spread across the top-left edge, offset back along the travel direction
+      const sx = (hash01(i + 7, seed) * 1.4 - 0.2) * w - dx * span * 0.15;
+      const sy = (hash01(i + 19, seed) * 0.5 - 0.35) * h - dy * span * 0.15;
+      const hx = sx + dx * span * u, hy = sy + dy * span * u;
+      const tx = hx - dx * len, ty = hy - dy * len;
+      const edge = Math.min(1, u * 6) * Math.min(1, (1 - u) * 6); // fade at both ends
+      const g = ctx.createLinearGradient(tx, ty, hx, hy);
+      g.addColorStop(0, `${color}00`);
+      g.addColorStop(1, color);
+      ctx.strokeStyle = g;
+      ctx.lineWidth = o.weight ?? 2;
+      ctx.globalAlpha = (o.opacity ?? 0.9) * edge;
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
+      ctx.globalAlpha = edge;
+      ctx.fillStyle = o.headColor || '#ffffff';
+      ctx.beginPath(); ctx.arc(hx, hy, (o.weight ?? 2) * 0.9, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
   // wave field — stacked contour lines travelling through a sum of sines. Closed form by definition.
   waves(ctx, w, h, lt, seed, o = {}) {
     const lines = o.count ?? 26, amp = o.amp ?? 26, sp = o.speed ?? 1;

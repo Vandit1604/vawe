@@ -407,4 +407,21 @@ export const CATALOG = [
     props: { w: 560, gap: 24, leftTitle: 'Before', rightTitle: 'After',
       leftScreen: { block: 'emptyState', props: { icon: '☐', title: 'No drafts', body: 'Nothing has been saved to this list.' } },
       rightScreen: { block: 'listRow', props: { icon: '✓', title: 'Draft saved', sub: 'Fieldwork', meta: 'now' } } } },
+
+  // SLEEK SURFACES (blocks/sleek.mjs) — glassy/mesh/spotlit/grain/bento. Static CSS; movement comes from a
+  // Phase-2 engine effect (a beam layer, an aurora paint behind the glass). Put a living bg behind glass.
+  { name: 'glassCard', family: 'glassCard', blurb: 'frosted glass panel (blurs the moving bg behind it) + sheen',
+    props: { w: 560, h: 300, kicker: 'GLASS', title: 'Backdrop blur', desc: 'It blurs whatever moves behind it.' } },
+  { name: 'meshPanel', family: 'meshPanel', blurb: 'soft mesh-gradient surface (stacked accent blobs)',
+    props: { w: 560, h: 320, title: 'Mesh gradient', desc: 'A calm branded surface behind copy.' } },
+  { name: 'spotlightCard', family: 'spotlightCard', blurb: 'dark card with a soft spotlight glow washing from a corner',
+    props: { w: 560, h: 300, from: 'top', title: 'Spotlight', desc: 'The light directs the eye.' } },
+  { name: 'borderBeamCard', family: 'borderBeamCard', blurb: 'glass card with a light TRAVELLING its border (animated beam)',
+    props: { w: 560, h: 260, title: 'Border beam', desc: 'A light travels the border.' } },
+  { name: 'grainOverlay', family: 'grainOverlay', blurb: 'fine film-grain texture over the frame (feTurbulence)', overlay: true,
+    props: { w: 560, h: 320, opacity: 0.12 } },
+  { name: 'bento', family: 'bento', blurb: 'asymmetric bento grid: one hero cell + supporting cells (scale contrast)',
+    props: { w: 760, h: 420, cells: [
+      { kind: 'mesh', title: 'Hero', desc: 'The big one.' }, { kind: 'glass', title: 'Cell', desc: 'Support.' },
+      { kind: 'spotlight', title: 'Cell', desc: 'Support.' }] } },
 ];

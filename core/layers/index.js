@@ -8,6 +8,8 @@ import * as image from './image.js';
 import * as group from './group.js';
 import * as rect from './rect.js';
 import * as glow from './glow.js';
+import * as beam from './beam.js';
+import * as svg from './svg.js';
 import * as cursor from './cursor.js';
 import * as clip from './clip.js';
 import * as html from './html.js';
@@ -20,7 +22,7 @@ import * as paint from './paint.js';
 import * as raymarch from './raymarch.js';
 import * as three from './three.js';
 
-const REGISTRY = { text, count, image, group, rect, glow, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three };
+const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the

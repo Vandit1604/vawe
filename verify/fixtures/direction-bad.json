@@ -1,0 +1,17 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "duration": 20,
+  "cuts": [
+    { "t": 4, "style": "fade" },
+    { "t": 8, "style": "fade" }
+  ],
+  "layers": [
+    { "type": "text", "text": "one", "start": 0, "duration": 3, "enterDur": 0.45, "ease": "linear" },
+    { "type": "text", "text": "two", "start": 3, "duration": 3, "enterDur": 0.45, "anim": "slide-right", "out": "slide-right" },
+    { "type": "text", "text": "three", "start": 6, "duration": 3, "enterDur": 0.45 },
+    { "type": "text", "text": "four", "start": 9, "duration": 3, "enterDur": 0.45 },
+    { "type": "text", "text": "five", "start": 12, "duration": 3, "enterDur": 0.45 },
+    { "type": "text", "text": "six", "start": 15, "duration": 3, "enterDur": 0.45 }
+  ]
+}

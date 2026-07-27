@@ -55,7 +55,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_149 entries across 64 families._
+_155 entries across 70 families._
 
 | Block | For |
 |---|---|
@@ -208,6 +208,12 @@ _149 entries across 64 families._
 | `screenSwap.slide` | screen change that reads as travel · enters right, leaves left |
 | `socialProof` | avatar stack + the line it proves (caption owned by the block) |
 | `installCard` | app-store row · stars sweep to the rating, then install |
+| `glassCard` | frosted glass panel (blurs the moving bg behind it) + sheen |
+| `meshPanel` | soft mesh-gradient surface (stacked accent blobs) |
+| `spotlightCard` | dark card with a soft spotlight glow washing from a corner |
+| `borderBeamCard` | glass card with a light TRAVELLING its border (animated beam) |
+| `grainOverlay` | fine film-grain texture over the frame (feTurbulence) |
+| `bento` | asymmetric bento grid: one hero cell + supporting cells (scale contrast) |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

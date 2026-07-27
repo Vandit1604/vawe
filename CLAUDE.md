@@ -110,9 +110,24 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
    entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
    when recreating a reference — judging the settled frame is how the dolly/gradient/colour-wave got missed.
-2b. **Anti-slop:** `make slop D=<file>` — impeccable detector on the rendered DOM (overused-font /
-   gradient / card-in-card / centered tells). Reach past anything it flags before rendering.
-3. **Render:** `make video D=formats/scene/<topic>.json`.
+0. **Compose from blueprints (don't re-derive motion):** `make blueprints` lists directed-motion beats
+   (`{type:"beat","beat":"kineticHook",…}`, `docs/CRAFT/BLUEPRINTS.md`). Drop one per beat + fill brand
+   content so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT, then `make expand`.
+   Authoring plain `rise`+`fade` from a blank JSON is the #1 failure — blueprints + the floor prevent it.
+0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (240 effects, 15 families,
+   generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
+   aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
+   shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves
+   (`"cameraMove":{"move":"diveIn",…}`, `core/camera-moves.js`). Skills: **`vawe-effects`** (pick from the
+   arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
+2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
+   whole static quality loop (validate · critique · direct · **direction-floor** · slop · inspect).
+   It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·
+   `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), AND the **ambition floor**
+   (`plain-slideshow` — too little motion). Two-sided: `effect-soup` is the ceiling, the floor is the
+   floor; directed lives between. Reach past every WARN; waive a *deliberate* break with
+   `{"authoring":{"allow":[...]}}`. Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
+3. **Render:** `make video D=formats/scene/<topic>.json` (runs author-check first unless `NOCHECK=1`).
 4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
    **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
    A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text
@@ -125,10 +140,19 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    destination is what keeps content out from under the chrome. One definition: `core/safe.js`.
 5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
    Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
-6. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
-7. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
+5a. **QA THE SEAMS, not the centers:** `make seam-check D=<file>` — pulls the frames straddling every
+   transition (cut/seam/sting/beat boundary) out of the rendered mp4 and flags a luminance FLASH in the
+   overlap (the black-flash / collision class every center-sampling gate misses, `docs/MISTAKES.md` #138).
+   Read `/tmp/seams.png`. This is the cheapest catch for the worst bugs (another engine' hardest-won lesson).
+6. **THE GATE THAT SEES — mandatory post-render:** `make judge D=<file> [VS=<brand>]` preps
+   `/tmp/judge/sheet.png` + a rubric. READ the sheet and score every frame (readability · hierarchy ·
+   composition · brand + asset fidelity · produced · value). `make author-check` is necessary but NOT
+   sufficient — the static gates can't see composition or fidelity; this is the backstop. If your eye
+   catches a flaw, it's a FIX, never a rationalization (`docs/JUDGE.md`, `docs/MISTAKES.md` #15).
+7. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
+8. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
    `make ledger-add D=<file>` after the user approves it.
-8. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
+9. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
 
 ## The framework harvest (do this EVERY render — the engine must compound)
 

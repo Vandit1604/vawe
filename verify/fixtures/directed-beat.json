@@ -1,0 +1,4 @@
+{ "module":"scene","theme": "default","aspect":"16:9","duration":6,"audio":{"silent":true},
+  "camera":[{"t":0,"s":1.0},{"t":6,"s":1.05,"ease":"linear"}],
+  "seams":[{"t":0.3,"fx":"dissolve","dur":0.4}],
+  "layers":[ { "type":"beat","beat":"kineticHook","start":0.3,"dur":5.5,"eyebrow":"e","to":94,"unit":"%","sub":"a real subline here" } ] }

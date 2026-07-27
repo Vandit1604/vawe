@@ -585,6 +585,7 @@ const FACTORIES = { ...APP, ...CHARTS, ...DEV, ...SOCIAL, ...UI,
 
 export const BLOCKS = { ...FACTORIES };
 import * as INTERACT from './interact.mjs'; export * from './interact.mjs'; Object.assign(FACTORIES, INTERACT); Object.assign(BLOCKS, INTERACT); // interaction family: pointer · tap · keyboard · press (blocks/interact.mjs)
+import * as SLEEK from './sleek.mjs'; export * from './sleek.mjs'; Object.assign(FACTORIES, SLEEK); Object.assign(BLOCKS, SLEEK); // sleek surfaces: glassCard · meshPanel · spotlightCard · borderBeamCard · grainOverlay · bento (blocks/sleek.mjs)
 for (const e of CATALOG) {
   if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
   const fam = FACTORIES[e.family];

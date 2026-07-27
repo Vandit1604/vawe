@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { lintData, fxErrors, validateData } from '../../core/validate.mjs';
 import { resolveEasing, easeOutCubic } from '../../core/motion.js';
 
@@ -49,6 +50,27 @@ const blockScene = { module: 'scene', theme: 'default', duration: 3, layers: [
 ] };
 const blockErrs = validateData(sceneSchema, blockScene).filter((e) => /\.to must be|\.items must be/.test(e));
 ok(blockErrs.length === 0, `block props exempt from base-layer type checks (got ${blockErrs.join('; ') || 'none'})`);
+
+// --- direction gate: the book-grounded motion tells still fire, and a clean scene stays silent (#134) ---
+const direct = (rel) => { try { return execFileSync('node', [path.join(root, 'scripts/author/motion-director.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
+const badDir = direct('verify/fixtures/direction-bad.json');
+ok(/\[linear-motion\]/.test(badDir), 'direct: linear-motion tell fires (ease:"linear" on a move)');
+ok(/\[monotone-timing\]/.test(badDir), 'direct: monotone-timing tell fires (6 identical enterDur)');
+ok(/\[enter-and-retreat\]/.test(badDir), 'direct: enter-and-retreat tell fires (anim+out same side)');
+const cleanDir = direct('formats/scene/sample.json');
+ok(!/\[(linear-motion|monotone-timing|enter-and-retreat)\]/.test(cleanDir), 'direct: clean sample.json trips none of the new tells');
+
+// --- direction floor: fails a plain slideshow, passes a directed (blueprint) scene (the ambition floor) ---
+const floor = (rel) => { try { execFileSync('node', [path.join(root, 'scripts/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); return 0; } catch (e) { return e.status ?? 1; } };
+const floorOut = (rel) => { try { return execFileSync('node', [path.join(root, 'scripts/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
+ok(floor('verify/fixtures/plain-slideshow.json') === 1 && /\[plain-slideshow\]/.test(floorOut('verify/fixtures/plain-slideshow.json')), 'direction-floor: FAILS a plain slideshow (rise/fade only)');
+ok(floor('verify/fixtures/directed-beat.json') === 0, 'direction-floor: PASSES a directed blueprint scene');
+
+// --- blueprints: a beat expands into richly-animated layers (kinetic reveal present), pure ---
+const { BEATS } = await import('../../blueprints/index.mjs');
+const hookLayers = BEATS.kineticHook({ eyebrow: 'e', to: 94, unit: '%', sub: 'a subline', start: 0, dur: 5 });
+ok(Array.isArray(hookLayers) && hookLayers.some((l) => l.split && l.preset), 'blueprints: kineticHook emits a kinetic (split+preset) reveal');
+ok(hookLayers.some((l) => l.type === 'count'), 'blueprints: kineticHook emits a count-up hero number');
 
 console.log(fail ? `\nlint-test: ${fail} failed` : '\nlint-test: all pass');
 process.exit(fail ? 1 : 0);
