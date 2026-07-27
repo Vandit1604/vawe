@@ -286,6 +286,14 @@ const srcCases = [
   { name: 'validate · a scene that declares no background at all', file: 'formats/scene/sample.json',
     mutate: (s) => s.replace(/,\s*"bg": \[[^\]]*\]/, ''),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
+  // A hand-authored backdrop that animates in a browser and renders a dead still is the exact failure
+  // the message exists to prevent; if the check stops firing, nothing else in the pipeline notices.
+  { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',
+    mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
+    cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /DEAD STILL/ },
+  { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'formats/scene/example-html-bg.json',
+    mutate: (s) => s.replace('"tone": "light",', ''),
+    cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /declares no `tone`/ },
 ];
 console.log('');
 for (const c of srcCases) {

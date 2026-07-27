@@ -6,11 +6,13 @@ icon: Image
 
 ## Backgrounds
 
-The backdrop is painted by the top-level `bg` array in windows of time. Each window names a preset, and every preset reads the brand palette, so the same preset looks different for every theme.
+The backdrop is painted by the top-level `bg` array in windows of time. Each window names one backdrop, and every preset reads the brand palette, so the same preset looks different for every theme.
 
 ```json
 { "bg": [{ "preset": "soft", "from": 0, "to": 6 }] }
 ```
+
+`bg` is **required**. The engine used to pick one for you (a light brand got `dotmatrix`, a dark one `aurora`), which left the largest area of the frame as the single design decision no author ever made. Choose a preset, or say `[{ "preset": "plain" }]` for a deliberately flat field.
 
 There are 21 presets:
 
@@ -28,6 +30,30 @@ The backdrop should exist on the real site. A plain, flat brand gets a plain fie
 </Callout>
 
 Each preset varies by `seed` (defaulting to a hash of the theme and preset name), so the same preset differs across brands. A theme can also author its own backdrop and a video pulls it in with `{ "use": "theme" }`. See [Themes](/docs/themes#using-the-brands-backdrop).
+
+### Hand-authoring one
+
+The preset vocabulary is good and it is finite. When a backdrop falls outside it, most often when you are reflecting a real site whose hero background is hand-written CSS, write the CSS instead of adding a preset:
+
+```json
+{ "bg": [{
+  "html": "<style>.fan i{transform:rotate(calc(var(--t) * 12deg))}</style><div class=\"fan\"><i></i></div>",
+  "tone": "light"
+}] }
+```
+
+`tone` says whether your backdrop is light or dark. It is required, because the engine cannot read lightness out of your CSS, and without it a layer that sets no `color` falls back to the theme's ink and can land white-on-white.
+
+Animate it with two custom properties the engine writes onto the element every frame, both usable inside `calc()`:
+
+- `var(--t)` — seconds into the video.
+- `var(--p)` — 0 to 1 across this window's own span.
+
+<Callout type="warn" title="CSS animation and transition do not run">
+A frame here is seeked, not played, across eight parallel workers, so nothing may depend on elapsed wall-clock. `core/tokens.css` disables both engine-wide. A CSS animation would not error, it would render a dead still, so the validator rejects `animation`, `@keyframes` and `transition` by name and points you at `var(--t)`. The same applies to the `html` layer.
+</Callout>
+
+Markup is sanitised the same way as the `html` layer (`core/sanitize-html.js`): scripts and embedding elements are stripped, and so is any URL that leaves the fragment. A worked example lives in `formats/scene/example-html-bg.json`.
 
 ## Images, in order of preference
 

@@ -7,6 +7,7 @@ import { FX_DUR } from '/core/gsap-effects.js';
 import { ransomStyle, ransomTick } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
+import { createBgHtml } from '/core/bg-html.js';
 import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
@@ -86,6 +87,9 @@ boot((data, fps, theme, canvas) => {
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
     if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
     const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
+    // a HAND-AUTHORED window (core/bg-html.js) paints in the DOM, not on the canvas: no preset spec,
+    // and the canvas is hidden while it is on screen.
+    if (b.html != null) return { from: b.from ?? 0, to: b.to ?? 1e9, html: b.html, tone: b.tone, spec: null };
     const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined), b.opts);
     // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
@@ -95,6 +99,9 @@ boot((data, fps, theme, canvas) => {
     return { from: b.from ?? 0, to: b.to ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
   });
   if (!bgWins.length) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
+  // hand-authored backdrops: built once here, shown/hidden per frame by drawBg (null if none declared,
+  // so a scene using only presets adds no DOM and renders byte-identical to before).
+  const bgHtml = createBgHtml($('root'), bgWins);
   // ink-aware default text color: a layer with no explicit color gets dark ink over light
   // bg windows and light text over dark ones (looked up at the layer's midpoint) — otherwise
   // a light-text theme (plinth) silently renders white-on-paper.
@@ -110,6 +117,11 @@ boot((data, fps, theme, canvas) => {
   const inkAt = (t) => {
     const w = bgWinAt(t);
     if (!w) return null; // theme-gradient stage: keep the theme's own text color
+    // A hand-authored backdrop is opaque to the engine — it cannot read the lightness out of somebody's
+    // CSS. Guessing here would silently pick a text colour, and a wrong guess is invisible until the
+    // frame is white-on-white. The author declares `tone`; without it we defer to the theme rather than
+    // invent an answer.
+    if (w.html != null) return w.tone === 'light' ? 'var(--ink)' : w.tone === 'dark' ? 'var(--text)' : null;
     const light = LIGHT_BGS.includes(w.preset) && w.value !== 'dark';
     return light ? 'var(--ink)' : 'var(--text)';
   };
@@ -377,11 +389,14 @@ boot((data, fps, theme, canvas) => {
   const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
 
   // drawBg — the theme bg on canvas (last matching window wins) + a continuous slow breathe.
+  // A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden for its span.
   function drawBg(t) {
     if (!bgWins.length) return;
-    let spec = bgWins[0].spec;
-    for (const w of bgWins) if (t >= w.from && t < w.to) spec = w.spec;
-    renderBg(ctx, W, H, t, spec);
+    const w = bgWinAt(t);
+    const authored = bgHtml ? bgHtml.frame(t, w) : false;
+    cv.style.display = authored ? 'none' : '';
+    if (authored) return;
+    renderBg(ctx, W, H, t, w.spec);
     cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
   }
 

@@ -200,6 +200,19 @@ override any layer's emphasis colour with `emColor`.
   as `bgDefault: { preset, value?, opts?, seed? }`; a video then says `bg: [{ use: "theme", from, to }]` and
   gets the brand's authored bg instead of a shared global preset name. Fails loud if the theme never authored
   one (same no-fallback contract as colours/fonts). Clean dark backdrops: `deep` / `dark` presets (no dots).
+- **`bg` is REQUIRED.** The engine used to inject one (light brand → `dotmatrix`, dark → `aurora`), which
+  made the largest area of the frame the one decision nobody made. Declare a preset, or
+  `[{ "preset": "plain" }]` for a deliberately flat field. A window names exactly ONE backdrop.
+- **Hand-authored living background**: `{ html: "<style>…</style><div>…</div>", tone: "light"|"dark" }`
+  paints raw HTML/CSS as the backdrop instead of a canvas preset — for the backgrounds the preset
+  vocabulary can't express (reflecting a real site's hand-written hero CSS). `tone` is required: the
+  engine can't read lightness out of your CSS, and without it a layer with no explicit `color` can land
+  white-on-white. Markup is sanitised (`core/sanitize-html.js`), same rules as the `html` layer.
+  **Animate it with `var(--t)` (seconds) and `var(--p)` (0→1 across the window)**, both written every
+  frame and usable inside `calc()`: `transform: rotate(calc(var(--t) * 12deg))`. CSS `animation` and
+  `transition` are disabled engine-wide (`core/tokens.css`) because a frame is seeked, not played — the
+  validator rejects them by name rather than let them render a dead still. Example:
+  `formats/scene/example-html-bg.json`.
 
 ### Customization knobs (added July 2026 — most primitives take overrides now)
 The primitives ship rich defaults but expose their knobs to the JSON; reach for these instead of

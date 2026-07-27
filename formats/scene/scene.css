@@ -9,6 +9,9 @@
 .hs-stage { position: absolute; inset: 0; overflow: hidden;
   background: radial-gradient(82% 60% at 66% 42%, var(--g2) 0%, var(--g1) 46%, var(--g0) 100%); }
 #cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; transform-origin: 50% 45%; }
+/* a hand-authored living background (core/bg-html.js): full-bleed, behind the canvas and the camera.
+   `overflow: hidden` so an oversized blob the author animates off-frame cannot grow the stage. */
+.hs-bghtml { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 #cam { position: absolute; inset: 0; will-change: transform; transform-origin: 50% 50%; }
 .hs-layer { position: absolute; will-change: transform, opacity, filter; }
 .hs-text { color: var(--text); line-height: 1.04; }

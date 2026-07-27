@@ -1,0 +1,58 @@
+// core/bg-html.js — a HAND-AUTHORED living background: raw HTML/CSS as the backdrop, instead of a
+// canvas preset.
+//
+// WHY this exists alongside the presets. `bgPreset` paints on canvas from a fixed vocabulary (gradients ·
+// dots · aurora · metallic · softwash). That vocabulary is good and it is finite, and a backdrop the
+// vocabulary cannot express had exactly one escape hatch: add another preset to the engine. Reflecting a
+// real site — where the hero background IS hand-written CSS — hit that wall every time. This is the
+// escape hatch, with the engine's contracts kept intact.
+//
+// DETERMINISM, which is the whole question for a hand-authored backdrop. A frame here is SEEKED, not
+// played, across 8 parallel workers, so nothing may depend on elapsed wall-clock. That rules out CSS
+// transition and animation, which core/tokens.css already disables engine-wide.
+//
+// What replaces them: `--t` (seconds into the video) and `--p` (0→1 across this bg's own window),
+// written onto the element every frame and usable anywhere calc() is — transforms, gradient angles,
+// colour mixes, offsets:
+//   transform: rotate(calc(var(--t) * 12deg));
+//   background: radial-gradient(40% 30% at calc(20% + var(--p) * 60%) 50%, …);
+// Both are pure functions of t, so the same frame number always paints the same pixels.
+//
+// A CSS animation here would not error, it would silently render a still — so the authoring gate
+// rejects it by name and points at `--t` (timeCssUsed() in core/sanitize-html.js).
+import { sanitizeHtml } from './sanitize-html.js';
+
+// createBgHtml(root, windows) → a controller, or null when no window is hand-authored.
+// One element per html window, built ONCE at build time and only shown/hidden per frame: rebuilding
+// markup per frame would restart every CSS animation on it, which is the same class of bug as a
+// frame() hook that leaves state behind.
+export function createBgHtml(root, windows) {
+  const html = windows.filter((w) => w.html != null);
+  if (!html.length) return null;
+  const els = new Map();
+  for (const w of html) {
+    const el = document.createElement('div');
+    el.className = 'hs-bghtml';
+    el.innerHTML = sanitizeHtml(w.html);
+    root.insertBefore(el, root.firstChild); // behind the canvas and the camera
+    els.set(w, el);
+  }
+  return {
+    // Returns true when a hand-authored window owns time t, so the caller knows to hide the canvas.
+    frame(t, active) {
+      // EVERY element is written EVERY frame, including the inactive ones. An early return that leaves
+      // a stale display/opacity on a window we are no longer in is precisely the glow×sceneUnits bug
+      // (MISTAKES #152): pixels that depend on which frames were rendered before this one.
+      for (const [w, el] of els) {
+        const on = w === active;
+        el.style.display = on ? 'block' : 'none';
+        if (!on) continue;
+        const span = (w.to ?? 1e9) - (w.from ?? 0);
+        const p = span > 0 && span < 1e9 ? Math.min(1, Math.max(0, (t - (w.from ?? 0)) / span)) : 0;
+        el.style.setProperty('--t', t.toFixed(4));
+        el.style.setProperty('--p', p.toFixed(4));
+      }
+      return active != null && els.has(active);
+    },
+  };
+}

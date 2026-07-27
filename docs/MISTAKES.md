@@ -3240,3 +3240,48 @@ should be); only the DOM signature outside the window changes, so glow scenes re
 function of t — never early-return and leave state, because another feature (here sceneUnits' window
 extension) can make "outside my window" visible. Isolated tests (glow alone, glow+sceneUnits with matching
 windows) BOTH passed; only the extended-window combination triggered it. Reproduce with the exact interaction.
+
+## #153 — the engine PICKED the background, so nobody ever designed one
+
+**What.** `produceBaseline` injected a bg whenever a scene declared none: light brand → `dotmatrix`, dark
+→ `aurora`. It shipped as a "rich by default" win, and it made the largest area of every frame the one
+design decision no author ever made. It surfaced as "that is the worst bg I have ever seen" on a reel that
+had simply inherited `paperShapes` — a preset whose 17-25s drift periods read as dead still in a 15s cut.
+Nobody chose it, so nobody reviewed it.
+
+**Fix.** `bg` is now required in `formats/scene/schema.json` (`required` + `minItems: 1`), and the
+injection is gone from `core/produce.js`. The baseline still supplies MOTION (camera, sceneUnits); it no
+longer supplies taste. Schema fields can now carry a `hint`, appended to the required/minItems error —
+"bg is required" tells an author a field is missing without telling them what a good answer looks like,
+and a required field you cannot answer is a wall.
+
+**Migration lesson (separate, and the more reusable one).** The first pass migrated the 19 affected scenes
+by `JSON.parse` → `JSON.stringify(…, 2)`, which reformatted every file: a 6-line change arrived as a
+269-line diff that destroyed deliberate compact one-line layer formatting. It also wrote `plain` into all
+19, silently stripping the living background those scenes had actually been rendering. Redone as a text
+insert writing the value the injector WOULD have produced: 38 lines total, and all 78 scenes still snap
+byte-identical. **A migration for a policy change should change policy, not bytes** — if the whole library
+re-renders differently, the migration is a second, unreviewed change riding along with the first.
+
+**Gate.** `gate-mutation` now proves the rule fires (a scene with `bg` removed must fail validate).
+
+## #154 — hand-authored CSS animation renders a DEAD STILL, and said nothing
+
+**What.** Building the hand-authored (`html`) background, the plan was to let authors write ordinary CSS
+`@keyframes` on the grounds that `seekAll(t)` pauses and seeks every WAAPI animation each frame. The first
+render came back with all six rays stacked at one angle and not moving. `core/tokens.css:28` disables
+`animation` and `transition` globally with `!important` — correctly, since both run on wall-clock and a
+frame here is seeked across 8 parallel workers, not played.
+
+The bug is not the rule, it is the silence. This has been true for the `html` LAYER since it shipped: a
+hand-authored fragment animates perfectly in a browser, renders as a still in the mp4, and the author has
+no way to find out why.
+
+**Fix.** `timeCssUsed()` in the new shared `core/sanitize-html.js` detects `animation` / `@keyframes` /
+`transition`; validate rejects them by name in BOTH a bg window and an `html` layer, and the message names
+what does work — `var(--t)` (seconds) and `var(--p)` (0→1 across the window), written every frame and
+usable inside `calc()`. Two mutation fixtures.
+
+**Lesson.** Verify the mechanism, do not reason about it. `seekAll` genuinely does seek WAAPI animations,
+the reasoning was sound, and a global `!important` three files away made it irrelevant. One render answered
+what an hour of reading the animation code would not have.

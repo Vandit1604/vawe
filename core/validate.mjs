@@ -20,6 +20,7 @@ import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
 import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
+import { timeCssUsed } from '../core/sanitize-html.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -107,7 +108,48 @@ export function validateData(schema, data) {
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
   errors.push(...fxErrors(data || {}));     // named GSAP fx/fxOut must be real effects; no fxOut+out clash
+  errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
+  errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
   return errors;
+}
+
+// The `html` LAYER has always had the same trap as the `html` background: CSS transition/animation is
+// disabled engine-wide, so a hand-authored fragment that animates in the browser renders as a still and
+// says nothing about it. Same check, same message, both places.
+export function htmlLayerErrors(cfg) {
+  const out = [];
+  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => {
+    if (!isObj(L) || L.type !== 'html' || L.html == null) return;
+    const timeCss = timeCssUsed(L.html);
+    if (timeCss) out.push(`layer[${i}] (html) uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Animate the layer with the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or drive your CSS from a \`vars\` custom property.`);
+  });
+  return out;
+}
+
+// BACKGROUND WINDOWS. Two rules the schema walk cannot express, both about the hand-authored (`html`)
+// backdrop introduced alongside the canvas presets.
+export function bgErrors(cfg) {
+  const out = [];
+  (Array.isArray(cfg.bg) ? cfg.bg : []).forEach((b, i) => {
+    if (!isObj(b)) return;
+    const at = `bg[${i}]`;
+    // ONE source per window. `html` paints in the DOM and `preset` paints on canvas; a window naming
+    // both looks like a layered backdrop and is not one — the html wins and the preset is silently
+    // dropped, which is the silent-substitution failure this codebase keeps paying for.
+    const sources = ['html', 'preset', 'use'].filter((k) => b[k] != null);
+    if (sources.length > 1)
+      out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. \`html\` paints in the DOM and \`preset\` paints on canvas; they do not layer. Split them into two windows (with \`from\`/\`to\`) if you want both in one video.`);
+    if (b.html == null) {
+      if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\` — tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
+      return;
+    }
+    const timeCss = timeCssUsed(b.html);
+    if (timeCss)
+      out.push(`${at} uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`. Both are written every frame.`);
+    if (b.tone == null)
+      out.push(`${at} is hand-authored but declares no \`tone\` ("light" or "dark") — the engine cannot read the lightness out of your CSS, so a layer with no explicit \`color\` falls back to the theme's ink and may land white-on-white. Say which it is.`);
+  });
+  return out;
 }
 
 // NAMED GSAP EFFECTS: `fx` (entrance/loop/text) and `fxOut` (exit) reference stored effects by name.

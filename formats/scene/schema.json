@@ -73,8 +73,17 @@
       "label": "Background windows (canvas, theme palette)",
       "required": true,
       "minItems": 1,
-      "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix · gradientWash · blobs · metallic · metallicSheen · aurora · …). See docs backgrounds-and-images.",
+      "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix · gradientWash · blobs · metallic · metallicSheen · aurora · …), or `{ \"html\": \"…\" }` to hand-author one. See docs backgrounds-and-images.",
       "item": {
+        "html": {
+          "type": "string",
+          "label": "Hand-authored living background (raw HTML/CSS instead of a preset)"
+        },
+        "tone": {
+          "type": "string",
+          "label": "Is the hand-authored backdrop light or dark? (picks the default text ink)",
+          "enum": ["light", "dark"]
+        },
         "preset": {
           "type": "string",
           "label": "bgPreset name",
