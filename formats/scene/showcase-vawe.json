@@ -1,0 +1,26 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 14,
+  "cameraMove": [
+    { "move": "slowPush", "start": 0, "dur": 14, "from": 1, "to": 1.04 }
+  ],
+  "bg": [{ "t": 0, "preset": "plain" }],
+  "layers": [
+    { "type": "text", "text": "DETERMINISTIC VIDEO ENGINE", "x": 160, "y": 210, "w": 1000, "size": 30, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.1em", "anim": "fade", "enterDur": 0.5, "start": 0.2, "duration": 2.7, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "One JSON.", "x": 160, "y": 300, "w": 1500, "size": 150, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 0.5, "duration": 2.7, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "One video.", "x": 160, "y": 470, "w": 1500, "size": 150, "weight": 800, "color": "var(--accent)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 1.4, "duration": 1.8, "out": "fade", "exitDur": 0.4 },
+
+    { "type": "text", "text": "The engine seeks every frame.", "x": 160, "y": 300, "w": 1600, "align": "center", "size": 44, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 3.4, "duration": 4.5, "out": "fade", "exitDur": 0.4 },
+    { "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 430, "w": 1200, "start": 3.9, "duration": 4.0, "out": "defocus", "exitDur": 0.4,
+      "props": { "stages": ["JSON", "Frames", "Video"] } },
+
+    { "type": "text", "text": "Every frame is a pure function of n.", "x": 160, "y": 250, "w": 1600, "align": "center", "size": 60, "weight": 700, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.34, "stagger": 0.04, "start": 8.4, "duration": 2.7, "out": "fade", "exitDur": 0.4 },
+    { "type": "count", "from": 0, "to": 420, "x": 160, "y": 400, "w": 1600, "align": "center", "size": 150, "weight": 800, "font": "mono", "color": "var(--accent)", "countStart": 0.2, "countDur": 1.4, "ease": "easeOutExpo", "anim": "none", "start": 9.3, "duration": 1.8, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "frames, byte-identical.", "x": 160, "y": 640, "w": 1600, "align": "center", "size": 40, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 9.7, "duration": 1.4, "out": "fade", "exitDur": 0.4 },
+
+    { "type": "text", "text": "one scene, one mp4.", "x": 160, "y": 410, "w": 1600, "align": "center", "size": 96, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.34, "stagger": 0.04, "start": 11.4, "duration": 2.6, "exitDur": 0 },
+    { "type": "text", "text": "make video D=scene.json", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 11.9, "duration": 2.1, "exitDur": 0 }
+  ]
+}
