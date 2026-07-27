@@ -329,6 +329,23 @@ intent:
 designspec-check:
 	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
 
+# make copy-check D=<scene.json> [STRICT=1] — THE COPY GATE: on-screen writing tells (hook >12 words /
+# weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The
+# words are the video's voice. Advisory in author-check; STRICT=1 blocks.
+copy-check:
+	node scripts/gates/copy-check.mjs $(D) $(if $(STRICT),--strict,)
+
+# make asset-check D=<scene.json> [STRICT=1] — ASSET-READINESS PREFLIGHT: confirm every referenced image /
+# icon / captured component / VO file exists on disk before you render (a missing one = a broken image or
+# silent gap). Prints how to fetch each. Advisory in author-check; STRICT=1 blocks.
+asset-check:
+	node scripts/gates/asset-check.mjs $(D) $(if $(STRICT),--strict,)
+
+# make pace-from-vo VO=<file>.words.json [BEATS=n] — SCRIPT-FIRST PACING: propose beat start/durations
+# timed to the narration (from a voWords sidecar) so the reveals land on the voice. Proposes; never mutates.
+pace-from-vo:
+	node scripts/media/pace-from-vo.mjs
+
 # make studio D=formats/scene/<file>.json [PORT=8799] — LIVE scrubbable preview (no mp4 render). Serves
 # the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Dev
 # tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.

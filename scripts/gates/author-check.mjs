@@ -14,6 +14,8 @@
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
 //   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM (advisory here)
 //   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme (advisory here)
+//   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text (advisory)
+//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (advisory)
 //   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
 //
 // The vision judge (docs/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
@@ -77,6 +79,10 @@ record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-f
 // 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts.
 //     Advisory here (surfaced, blocks only under --strict), same as slop. The theme is the locked spec.
 { const r = runGate('design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : []); record('designspec', r, { waivable: true, exitMeansFail: strict }); }
+// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
+{ const r = runGate('copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : []); record('copy', r, { waivable: true, exitMeansFail: strict }); }
+// 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
+{ const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.

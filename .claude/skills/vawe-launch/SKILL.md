@@ -45,7 +45,9 @@ the beats' whys, so Step 6's `inspect` VERIFIES the render delivers each beat's 
 ## Step 3.1 — Narration (local, optional — skip if silent)
 `make tts SCRIPT=<narration.txt> OUT=formats/scene/<topic>.vo [VOICE=<name>]` — offline macOS-`say` TTS →
 `<topic>.vo.wav` + `<topic>.vo.words.json`. Wire into the scene: `"audio": { "vo": "<topic>.vo.wav",
-"voWords": "<topic>.vo.words.json", "music": "auto" }`.
+"voWords": "<topic>.vo.words.json", "music": "auto" }`. **Pace to the voice:** `make pace-from-vo
+VO=<topic>.vo.words.json` proposes each beat's start + duration from the narration — transcribe those onto
+the beats in Step 4 so the reveals land on the words.
 **Gate:** VO generated, or the video is silent.
 
 ## Step 4 — Author from blueprints (obey the spec)
@@ -69,7 +71,8 @@ For a normal video, author inline. Either way the output is one expanded scene J
 
 ## Step 6 — Finalize (user-gated)
 `make author-check D=<file>` (validate · critique · direct · **floor: front-load + monotony** · slop ·
-**designspec** (off-palette colours / non-role fonts) · **inspect** (the intent contract from Step 3)) →
+**designspec** (off-palette colours / non-role fonts) · **copy** (hook/jargon/restatement tells) ·
+**assets** (referenced files exist) · **inspect** (the intent contract from Step 3)) →
 `make video D=<file>` (renders; author-check runs first) → `make audit` (layout/contrast) →
 **`make seam-check D=<file>`** (sample the transition overlaps for flashes — the class the other gates miss) →
 `make judge D=<file> VS=<brand>` (read the sheet, score every frame; a flaw you notice is a FIX) →
