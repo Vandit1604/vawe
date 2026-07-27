@@ -220,6 +220,64 @@ export function metallic(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
+// ---- liquid: a domain-warped colour field — smooth folds of a single hue against pure black, the
+// "liquid light" / blurred-mesh look. What separates it from `aurora` and `softwash` is the RAMP:
+// overlapping soft blobs average into haze, whereas pushing one warped field through two smoothsteps
+// keeps the valleys at true black and the peaks saturated, so the folds read as folds.
+//
+// It renders into a small offscreen buffer and is drawn up to full size with smoothing on. That is the
+// blur: an honest bilinear upscale of a low-res field, not a filter pass over a big one. 160x90 costs
+// ~14k pixels a frame instead of 2M, so a per-pixel field is affordable at all, and the interpolation
+// gives exactly the soft gradient the look needs. Pure in t (no state, no randomness) — the buffer is
+// cached on the ctx only to avoid reallocating it every frame.
+export function liquid(ctx, w, h, t, o = {}) {
+  const [lr, lg, lb] = rgbTriple(o.color || '200,255,30');
+  const [hr, hg, hb] = rgbTriple(o.highlight || '235,255,150');
+  const res = Math.max(24, Math.min(320, o.res ?? 150));
+  const bh = Math.max(1, Math.round(res * (h / w)));
+  const buf = (ctx.__liquidBuf && ctx.__liquidBuf.width === res && ctx.__liquidBuf.height === bh)
+    ? ctx.__liquidBuf
+    : (ctx.__liquidBuf = Object.assign(document.createElement('canvas'), { width: res, height: bh }));
+  const bctx = buf.getContext('2d');
+  const img = bctx.createImageData(res, bh);
+  const d = img.data;
+  const sp = (o.speed ?? 0.42) * t, sc = o.scale ?? 1.25, wrp = o.warp ?? 0.7;
+  const lo = o.edge0 ?? 0.52, hi = o.edge1 ?? 0.93, gl = o.gloss ?? 0.99;
+  const sd = (o.seed ?? 0) * 0.37;
+  const ar = w / h;
+  for (let y = 0; y < bh; y++) {
+    const v = (y / bh) * sc;
+    for (let x = 0; x < res; x++) {
+      const u = (x / res) * sc * ar;
+      // two warp passes: the field is displaced by a field, which is what folds a smooth gradient into
+      // ribbons. One pass alone only ripples it.
+      const qx = u + wrp * Math.sin(v * 1.9 + sp * 0.51 + sd) + wrp * 0.7 * Math.cos(v * 0.9 - sp * 0.23);
+      const qy = v + wrp * Math.cos(u * 1.6 - sp * 0.43 + sd) + wrp * 0.7 * Math.sin(u * 1.1 + sp * 0.19);
+      const rx = qx + 0.52 * Math.sin(qy * 2.3 - sp * 0.37);
+      const ry = qy + 0.52 * Math.cos(qx * 1.8 + sp * 0.29);
+      // Two crossed waves, not one. A single sin(ax+by) is a plane wave, so every fold runs the same
+      // diagonal and the field reads as ribbons; crossing two axes puts the crests at intersections and
+      // the folds come out as rounded lobes, which is what a real fluid gradient looks like.
+      const g1 = Math.sin(rx * 1.42 + sp * 0.31), g2 = Math.cos(ry * 1.18 - sp * 0.24);
+      const f = 0.5 + 0.5 * (0.58 * g1 + 0.58 * g2 + 0.34 * g1 * g2);
+      const k = smoothstep(lo, hi, f);          // black → colour
+      const s = smoothstep(gl, 1, f);           // colour → highlight (the bright crest of a fold)
+      const i = (y * res + x) * 4;
+      d[i] = (lr * k + (hr - lr) * s) | 0;
+      d[i + 1] = (lg * k + (hg - lg) * s) | 0;
+      d[i + 2] = (lb * k + (hb - lb) * s) | 0;
+      d[i + 3] = 255;
+    }
+  }
+  bctx.putImageData(img, 0, 0);
+  const sm = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(buf, 0, 0, w, h);
+  ctx.imageSmoothingEnabled = sm;
+}
+function smoothstep(a, b, x) { const u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u * u * (3 - 2 * u); }
+function rgbTriple(c) { return String(c).split(',').map((n) => +n); }
+
 // ---- deterministic grain: sparse tinted specks seeded per (frame,index). Kills banding, filmic feel.
 export function grain(ctx, w, h, t, o = {}) {
   // hold each grain pattern for `every` frames (default 2) instead of reseeding every frame: full
@@ -255,7 +313,7 @@ export const PAL = PAL_PLINTH; // back-compat
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
   'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
-  'metallic', 'metallicSheen', 'gradientWash', 'blobs'];
+  'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
 export function bgPreset(name, value, P = PAL_PLINTH) {
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };
@@ -312,6 +370,10 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
         { color: P.tint2, x: 0.8, y: 0.72, rf: 0.26, ax: 0.045, ay: 0.038, px: 25, py: 19, ph: 2.4, a: 0.44 },
         { color: P.accent, x: 0.52, y: 0.9, rf: 0.18, ax: 0.03, ay: 0.028, px: 17, py: 23, ph: 4.2, a: 0.3 } ] },
       { type: 'grain', alpha: 0.03 } ] };
+    // liquid — folds of the brand hue against true black (the "liquid light" backdrop). Dramatic and
+    // full-bleed by design: it OWNS the frame, so put quiet type on it, nothing else.
+    case 'liquid': return { base: { kind: 'solid', color: '#000000' }, fx: [
+      { type: 'liquid', color: P.accent }, { type: 'grain', alpha: 0.03 } ] };
     case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
   }
@@ -352,6 +414,7 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'shapes') shapes(ctx, w, h, t, fx);
     else if (fx.type === 'metallic') metallic(ctx, w, h, t, fx);
     else if (fx.type === 'softwash') softwash(ctx, w, h, t, fx);
+    else if (fx.type === 'liquid') liquid(ctx, w, h, t, fx);
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
   }
 }

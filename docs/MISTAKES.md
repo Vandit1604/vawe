@@ -3285,3 +3285,23 @@ usable inside `calc()`. Two mutation fixtures.
 **Lesson.** Verify the mechanism, do not reason about it. `seekAll` genuinely does seek WAAPI animations,
 the reasoning was sound, and a global `!important` three files away made it irrelevant. One render answered
 what an hour of reading the animation code would not have.
+
+## #155 — judged a moving background on ONE still, and got the motion twice too fast
+
+**What.** Recreating the first 5s of a reference film, the signature is a lime-on-black liquid field. I
+built a `liquid` bg fx, compared ONE frame against ONE reference frame, saw folds and black valleys, and
+called it a match. The user asked whether I had checked how the background *animates*. Pulling the same
+four timestamps from both as a strip showed three things a still cannot: the motion was ~2.5x too fast,
+the folds were about half the size they should be, and the field read as directional ribbons where the
+reference has rounded lobes (a single `sin(ax+by)` is a plane wave; crossing two axes puts the crests at
+intersections and gives lobes).
+
+**Fix.** Retuned against the strip, not the still (speed 1 → 0.42, scale 2.4 → 1.25, crossed-wave field,
+ramp rebalanced for the new distribution). Rule written into CLAUDE.md step 2a0: the background must be
+deliberately animated, and its motion judged across 4+ frames side by side with the reference, before
+any colour work.
+
+**Lesson.** A still frame carries composition and colour and NOTHING about time. For anything that moves
+continuously and fills the frame, the still is the least informative test available: it is exactly the
+frame where a wrong speed looks right. Sample a strip. This generalises past backgrounds to any
+continuous effect (shimmer, drift, grain crawl, camera).

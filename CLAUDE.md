@@ -108,6 +108,14 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
    space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render.
+2a0. **THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE.** `bg` is a required field, so the backdrop
+   is always your decision. Make it a living one, a preset or hand-authored (`{"html":…}` driven by
+   `var(--t)`); a static field is not a default, it is a choice you have to justify. Then **judge it across
+   frames, never on one still**: pull the same 4+ timestamps and compare them as a strip. A still hides
+   speed, scale and direction of the motion. Recreating a reference? Strip the reference and your render
+   side by side and match the pace and the size of the shapes before touching colour. This is written down
+   because a background was "matched" on one frame and was, in motion, twice too fast with folds half the
+   size (docs/MISTAKES.md #155).
 2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal.png` (per beat: the ENTER
    arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
    entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory

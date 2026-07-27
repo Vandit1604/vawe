@@ -1,7 +1,7 @@
 {
   "title": "Hyperscene (open canvas)",
-  "description": "Generic data-driven composition \u2014 the JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
-  "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080\u00d71920 portrait, 1920\u00d71080 landscape).",
+  "description": "Generic data-driven composition — the JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
+  "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080×1920 portrait, 1920×1080 landscape).",
   "fields": {
     "orientation": {
       "type": "string",
@@ -82,7 +82,10 @@
         "tone": {
           "type": "string",
           "label": "Is the hand-authored backdrop light or dark? (picks the default text ink)",
-          "enum": ["light", "dark"]
+          "enum": [
+            "light",
+            "dark"
+          ]
         },
         "preset": {
           "type": "string",
@@ -107,7 +110,8 @@
             "metallic",
             "metallicSheen",
             "gradientWash",
-            "blobs"
+            "blobs",
+            "liquid"
           ]
         },
         "from": {
@@ -136,7 +140,7 @@
         },
         "use": {
           "type": "string",
-          "label": "use:\"theme\" \u2192 pull the brand\u2019s own authored backdrop (themes/<name>.json bgDefault)"
+          "label": "use:\"theme\" → pull the brand’s own authored backdrop (themes/<name>.json bgDefault)"
         }
       }
     },
@@ -329,7 +333,12 @@
         "dir": {
           "type": "string",
           "label": "Travel direction for whipPan (left|right|up|down)",
-          "enum": ["left", "right", "up", "down"]
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ]
         },
         "seed": {
           "type": "number",
@@ -382,7 +391,11 @@
         "mech": {
           "type": "string",
           "label": "Force the mechanism (default = auto). seam = two-scene GPU blend; cut = transform the scene root; sting = generative overlay.",
-          "enum": ["cut", "seam", "sting"]
+          "enum": [
+            "cut",
+            "seam",
+            "sting"
+          ]
         },
         "dur": {
           "type": "number",
@@ -393,12 +406,26 @@
         "dir": {
           "type": "string",
           "label": "Travel direction (left|right|up|down)",
-          "enum": ["left", "right", "up", "down"]
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ]
         },
         "timing": {
           "type": "string",
           "label": "Easing of the transition progress (default smooth = ease-in-out; linear = constant). Same curves as a cut/seam timing.",
-          "enum": ["linear", "smooth", "out", "snappy", "pop", "rush", "brake", "ramp"]
+          "enum": [
+            "linear",
+            "smooth",
+            "out",
+            "snappy",
+            "pop",
+            "rush",
+            "brake",
+            "ramp"
+          ]
         },
         "seed": {
           "type": "number",
@@ -498,7 +525,7 @@
         },
         "shader": {
           "type": "string",
-          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist/matrixDecode. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
+          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist/matrixDecode. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed · intensity · colors · seed",
           "enum": [
             "flow",
             "aurora",
@@ -545,7 +572,7 @@
         },
         "clicks": {
           "type": "array",
-          "label": "cursor: [t, \u2026] local times to fire a click (dip + ripple)"
+          "label": "cursor: [t, …] local times to fire a click (dip + ripple)"
         },
         "rippleColor": {
           "type": "string",
@@ -561,7 +588,7 @@
         },
         "blocks": {
           "type": "array",
-          "label": "doc: content blocks \u2014 {h,accent} heading \u00b7 {body} mono lines \u00b7 {code} \u00b7 {bullets:[]}"
+          "label": "doc: content blocks — {h,accent} heading · {body} mono lines · {code} · {bullets:[]}"
         },
         "nameSize": {
           "type": "number",
@@ -628,11 +655,11 @@
         },
         "col": {
           "type": "number|string",
-          "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) \u2192 sets x + w"
+          "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) → sets x + w"
         },
         "cols": {
           "type": "array",
-          "label": "Board columns (\u22644): {title, count, cards:[{id,title,labels:[{t,c}]}] \u22645}",
+          "label": "Board columns (≤4): {title, count, cards:[{id,title,labels:[{t,c}]}] ≤5}",
           "item": {
             "title": {
               "type": "string",
@@ -744,7 +771,12 @@
             "dir": {
               "type": "string",
               "label": "Travel direction where the anim reads one",
-              "enum": ["left", "right", "up", "down"]
+              "enum": [
+                "left",
+                "right",
+                "up",
+                "down"
+              ]
             },
             "dur": {
               "type": "number",
@@ -754,7 +786,7 @@
         },
         "anim": {
           "type": "string",
-          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | slide-left | slide-right | slide-up | slide-down | wipe | wipe-right | iris | clock. Unknown names fall back to fade silently \u2014 there is no 'slide', and direction is part of the name, not a separate prop.",
+          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | slide-left | slide-right | slide-up | slide-down | wipe | wipe-right | iris | clock. Unknown names fall back to fade silently — there is no 'slide', and direction is part of the name, not a separate prop.",
           "enum": [
             "fade",
             "up",
@@ -946,11 +978,11 @@
         },
         "lookOpts": {
           "type": "object",
-          "label": "Composite-look knobs (core/looks.js): color \u00b7 color2 \u00b7 strength (0..1 master dial) \u00b7 grain \u00b7 vignette \u00b7 warmth. Defaults reskin to the theme."
+          "label": "Composite-look knobs (core/looks.js): color · color2 · strength (0..1 master dial) · grain · vignette · warmth. Defaults reskin to the theme."
         },
         "filter": {
           "type": "string",
-          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/\u2026 core/looks.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
+          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/… core/looks.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
         },
         "mask": {
           "type": "string",
@@ -997,7 +1029,7 @@
         },
         "unit": {
           "type": "string",
-          "label": "Count unit appended after the number (e.g. %, k, $B); raw \u22651e6 auto-compacts (2.5B) when no unit"
+          "label": "Count unit appended after the number (e.g. %, k, $B); raw ≥1e6 auto-compacts (2.5B) when no unit"
         },
         "countStart": {
           "type": "number",
@@ -1052,7 +1084,7 @@
           "label": "Group gap (px)"
         },
         "pad": {
-          "label": "Padding (px or CSS string) \u2014 groups and text chips"
+          "label": "Padding (px or CSS string) — groups and text chips"
         },
         "justify": {
           "type": "string",
@@ -1060,7 +1092,7 @@
         },
         "children": {
           "type": "array",
-          "label": "Group children \u2014 text/image/count, or a nested group (layout by flow)",
+          "label": "Group children — text/image/count, or a nested group (layout by flow)",
           "item": {
             "type": {
               "type": "string",
@@ -1125,7 +1157,7 @@
         },
         "fitH": {
           "type": "number",
-          "label": "Max height (px) for multi-line auto-fit (with fit+w) \u2014 binary-search font to fit"
+          "label": "Max height (px) for multi-line auto-fit (with fit+w) — binary-search font to fit"
         },
         "maxLines": {
           "type": "number",
@@ -1137,7 +1169,7 @@
         },
         "align2": {
           "type": "string",
-          "label": "DEPRECATED alias of `items` (align-items) \u2014 use `items`"
+          "label": "DEPRECATED alias of `items` (align-items) — use `items`"
         },
         "wrap": {
           "type": "boolean",
@@ -1160,7 +1192,7 @@
         },
         "motion": {
           "type": "array",
-          "label": "Keyframe track \u2014 element choreography (pure in t). Offsets on the base position.",
+          "label": "Keyframe track — element choreography (pure in t). Offsets on the base position.",
           "item": {
             "t": {
               "type": "number",
@@ -1197,7 +1229,7 @@
         },
         "elevation": {
           "type": "number",
-          "label": "Physical depth 1\u20134 (ring + lit edge + stacked shadows)",
+          "label": "Physical depth 1–4 (ring + lit edge + stacked shadows)",
           "min": 1,
           "max": 4
         },
@@ -1214,7 +1246,7 @@
         },
         "intensity": {
           "type": "number",
-          "label": "Effect strength: glow opacity (0.05-0.6) \u00b7 shader visibility (up to 1)",
+          "label": "Effect strength: glow opacity (0.05-0.6) · shader visibility (up to 1)",
           "min": 0.05,
           "max": 1
         },
@@ -1242,7 +1274,7 @@
         },
         "tail": {
           "type": "number",
-          "label": "beam layer: length of the travelling light arc, in degrees"
+          "label": "Trail length in cells (paint matrix)"
         },
         "period": {
           "type": "number",
@@ -1279,7 +1311,7 @@
           ]
         },
         "reflect": {
-          "label": "Floor reflection: true or opacity 0.05\u20130.3"
+          "label": "Floor reflection: true or opacity 0.05–0.3"
         },
         "headSize": {
           "type": "number",
@@ -1313,7 +1345,7 @@
         },
         "headColor": {
           "type": "string",
-          "label": "paint: bright head colour (matrix/meteor)"
+          "label": "Leading-character colour (paint matrix)"
         },
         "length": {
           "type": "number",
@@ -1330,7 +1362,7 @@
         },
         "logotype": {
           "type": "boolean",
-          "label": "Text is part of a logo/brand mark \u2014 exempt from the CONTRAST bar only (WCAG 1.4.3)"
+          "label": "Text is part of a logo/brand mark — exempt from the CONTRAST bar only (WCAG 1.4.3)"
         },
         "keyClicks": {
           "type": "boolean",
@@ -1348,7 +1380,7 @@
         },
         "aspects": {
           "type": "object",
-          "label": "Per-aspect overrides: { \"9:16\": { \u2026props\u2026 } } merged over this layer at that canvas only"
+          "label": "Per-aspect overrides: { \"9:16\": { …props… } } merged over this layer at that canvas only"
         },
         "paint": {
           "type": "string",
@@ -1369,21 +1401,13 @@
           "type": "number",
           "label": "Wave amplitude (paint)"
         },
-        "tail": {
-          "type": "number",
-          "label": "Trail length in cells (paint matrix)"
-        },
         "rate": {
           "type": "number",
           "label": "Glyph changes per second (paint matrix)"
         },
-        "headColor": {
-          "type": "string",
-          "label": "Leading-character colour (paint matrix)"
-        },
         "react": {
           "type": "object|array",
-          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] } \u2014 needs audio.spectrum"
+          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] } — needs audio.spectrum"
         },
         "vars": {
           "type": "object",

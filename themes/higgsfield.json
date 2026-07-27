@@ -1,0 +1,98 @@
+{
+  "name": "higgsfield",
+  "note": "Recreation reference theme, sampled from the higgsfield.mp4 reference in the repo root. Pure black field with a single acid-lime accent (peaks sampled at #d4ff3f, core #c8f71e, crest highlight #e9fea3). Everything is black or lime: there is no third colour and no mid-grey surface except the app chrome. Geometric sans (Plus Jakarta Sans, the closest vendored match to the reference face), near-white type. Motion is fast and mechanical, cursor-and-typing led.",
+  "palette": {
+    "bg": "#000000",
+    "bg2": "#050505",
+    "surface": "#17191c",
+    "surface2": "#212429",
+    "line": "rgba(255,255,255,0.08)",
+    "lineStrong": "rgba(255,255,255,0.16)",
+    "text": "#f4f5f0",
+    "text2": "#9a9d96",
+    "dim": "#6b6e68",
+    "accent": "#d4ff3f",
+    "accentDim": "rgba(212,255,63,0.16)",
+    "accentGlow": "rgba(212,255,63,0.55)",
+    "up": "#c8f71e",
+    "down": "#e5484d",
+    "ink": "#f4f5f0"
+  },
+  "gradient": [
+    "#0a0c05",
+    "#050602",
+    "#000000"
+  ],
+  "type": {
+    "sans": "Plus Jakarta Sans",
+    "mono": "Geist Mono",
+    "num": "Plus Jakarta Sans",
+    "serif": "Plus Jakarta Sans"
+  },
+  "motion": {
+    "easing": "easeOutCubic",
+    "bounce": 0.1,
+    "settle": 0.3,
+    "enter": 36,
+    "durationScale": 0.8,
+    "stagger": 0.035
+  },
+  "bg": {
+    "accent": "212,255,63",
+    "tint": "150,192,0",
+    "tint2": "233,254,163",
+    "dotLight": "60,70,20",
+    "paperBase": [
+      "#0a0c05",
+      "#000000"
+    ],
+    "softBase": [
+      "#0d1006",
+      "#000000"
+    ],
+    "accentBase": [
+      "#c8f71e",
+      "#96c000"
+    ],
+    "inkBase": [
+      "#060802",
+      "#000000"
+    ],
+    "border": "#1d2114",
+    "dark": [
+      "#0a0c05",
+      "#000000"
+    ],
+    "darkMesh": [
+      "#0d1006",
+      "#000000"
+    ],
+    "deep": [
+      "#050602",
+      "#000000"
+    ],
+    "light": [
+      "#17191c",
+      "#000000"
+    ],
+    "ink": [
+      "#060802",
+      "#000000"
+    ],
+    "paper": "#000000"
+  },
+  "vars": {
+    "--ink": "#f4f5f0",
+    "--paper": "#000000",
+    "--muted": "#9a9d96",
+    "--em": "#d4ff3f",
+    "--accent-ink": "#d4ff3f",
+    "--on-light": "#0a0c05",
+    "--on-dark": "#f4f5f0",
+    "--border": "#1d2114",
+    "--accent-soft": "rgba(212,255,63,0.16)"
+  },
+  "bgDefault": {
+    "preset": "liquid"
+  }
+}
