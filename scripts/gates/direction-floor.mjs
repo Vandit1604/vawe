@@ -36,7 +36,12 @@ const hasBgMotion = (d.bg || []).some((b) => b && MOVING_BG.test(String(b.preset
 
 // camera actually MOVES (s/x/y changes across keyframes), not a static [{s:1},{s:1}].
 const cam = d.camera || [];
-const camMoves = cam.length > 1 && cam.some((k) => (k.s ?? 1) !== (cam[0].s ?? 1) || (k.x ?? 0) !== (cam[0].x ?? 0) || (k.y ?? 0) !== (cam[0].y ?? 0));
+const camKf = cam.length > 1 && cam.some((k) => (k.s ?? 1) !== (cam[0].s ?? 1) || (k.x ?? 0) !== (cam[0].x ?? 0) || (k.y ?? 0) !== (cam[0].y ?? 0));
+// the `cameraMove` sugar (core/camera-moves.js) IS a camera move — it just expands to d.camera at
+// `make expand`, and the floor runs PRE-expand, so without this it nags "no-camera" on a scene that
+// already has a push/dive. Credit a cameraMove that names a move or actually changes scale/position.
+const camSugar = Array.isArray(d.cameraMove) && d.cameraMove.some((m) => m && (m.move || (m.from != null && m.to != null && m.from !== m.to) || (m.tx != null) || (m.ty != null)));
+const camMoves = camKf || camSugar;
 
 const sig = {
   beats: flat.filter((l) => l.type === 'beat').length,

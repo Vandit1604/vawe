@@ -3150,3 +3150,17 @@ direction-floor credits a `composition` as a directed technique; EFFECTS.md list
 showcase-composition demo renders clean (seam-check clean, audit clean). The lesson worth keeping: the
 gsap-trigger list and the served-prefix allowlist are both hand-maintained lists that a new feature must be
 added to, and BOTH fail SILENTLY (unanimated render / boot timeout) rather than naming the cause.
+
+## #149 — direction-floor nagged "no-camera" on scenes that HAVE a cameraMove (pre-expand blind spot)
+
+**What.** The ambition floor credits a camera move by reading `d.camera` (the expanded keyframes), but the
+floor runs PRE-expand (inside author-check, before `make expand`). A scene that adds a camera the sanctioned
+way — the `cameraMove` sugar (core/camera-moves.js), e.g. `{"move":"slowPush","from":1,"to":1.04}` — still
+tripped `[no-camera]` because the sugar hadn't been lowered to `d.camera` yet. So the gate asked for the
+exact thing the author had already added. Hit twice (showcase-composition, tpot-launch).
+
+**Fix.** direction-floor now also credits `d.cameraMove` directly: a cameraMove that names a `move` or
+changes scale/position (from!==to, or a tx/ty target) counts as the `camera` technique. Two-sided verified
+(a scene with a slowPush shows `camera×1` + no nag; a scene with no camera still nags). The lesson: a gate
+that reads a POST-expand field must also recognize the PRE-expand sugar that produces it, or it fails the
+author for doing the right thing.
