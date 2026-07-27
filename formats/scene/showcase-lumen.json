@@ -1,0 +1,36 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "lumen",
+  "duration": 13,
+  "cameraMove": [
+    { "move": "slowPush", "start": 0, "dur": 5.5, "from": 1, "to": 1.06 },
+    { "move": "slowPush", "start": 5.5, "dur": 2.5, "from": 1.06, "to": 1.24 }
+  ],
+  "bg": [{ "t": 0, "preset": "spotlight" }],
+  "layers": [
+    { "type": "paint", "paint": "aurora", "x": 0, "y": 0, "w": 1920, "h": 1080, "start": 0, "duration": 5.4, "speed": 0.9, "opacity": 0.4, "out": "fade", "exitDur": 0.5 },
+
+    { "type": "text", "text": "LUMEN · SPEND OBSERVABILITY", "x": 150, "y": 210, "w": 900, "size": 30, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.08em", "start": 0.2, "duration": 5.1, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "Usage up.", "x": 150, "y": 320, "w": 820, "size": 128, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 0.6, "duration": 4.7, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "Cost hidden.", "x": 150, "y": 470, "w": 820, "size": 128, "weight": 800, "color": "var(--accent)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 2.6, "duration": 2.7, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "Most tools stop at the invoice.", "x": 150, "y": 660, "w": 820, "size": 40, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 3.6, "duration": 1.7, "out": "fade", "exitDur": 0.4 },
+
+    { "type": "html", "x": 1040, "y": 300, "w": 740, "start": 1.0, "duration": 4.3, "anim": "fade", "enterDur": 0.4, "out": "defocus", "exitDur": 0.4,
+      "parts": [
+        { "select": "rect", "anim": "growUp", "each": 0.5, "stagger": 0.09, "delay": 0.3 },
+        { "select": "polyline", "anim": "drawOn", "each": 1.1, "delay": 1.3, "ease": "power2.inOut" },
+        { "select": "circle", "anim": "popIn", "each": 0.3, "stagger": 0.12, "delay": 1.5 }
+      ],
+      "html": "<svg viewBox='0 0 300 190' width='740'><g opacity='0.9'><rect x='18' y='96' width='30' height='78' rx='2' fill='color-mix(in srgb, var(--text) 22%, transparent)'/><rect x='63' y='84' width='30' height='90' rx='2' fill='color-mix(in srgb, var(--text) 24%, transparent)'/><rect x='108' y='70' width='30' height='104' rx='2' fill='color-mix(in srgb, var(--text) 26%, transparent)'/><rect x='153' y='58' width='30' height='116' rx='2' fill='color-mix(in srgb, var(--text) 28%, transparent)'/><rect x='198' y='44' width='30' height='130' rx='2' fill='color-mix(in srgb, var(--text) 30%, transparent)'/><rect x='243' y='30' width='30' height='144' rx='2' fill='color-mix(in srgb, var(--text) 32%, transparent)'/></g><polyline points='33,150 78,140 123,142 168,146 213,150 258,156' fill='none' stroke='var(--accent)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/><circle cx='33' cy='150' r='4' fill='var(--bg)' stroke='var(--accent)' stroke-width='2.5'/><circle cx='258' cy='156' r='4' fill='var(--bg)' stroke='var(--accent)' stroke-width='2.5'/></svg>" },
+
+    { "type": "rect", "x": 610, "y": 420, "w": 700, "h": 250, "bg": "rgba(255,255,255,0.04)", "radius": 24, "border": "1.5px solid rgba(255,255,255,0.14)", "glass": 14, "start": 5.9, "duration": 4.4, "anim": "pop", "enterDur": 0.55, "out": "defocus", "exitDur": 0.4 },
+    { "type": "text", "text": "RECOVERED / MONTH", "x": 610, "y": 462, "w": 700, "align": "center", "size": 28, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.1em", "anim": "fade", "enterDur": 0.5, "start": 6.1, "duration": 4.2, "out": "defocus", "exitDur": 0.4 },
+    { "type": "count", "from": 0, "to": 14200, "prefix": "$", "x": 610, "y": 486, "w": 700, "align": "center", "size": 128, "weight": 800, "font": "mono", "color": "var(--text)", "countStart": 0.2, "countDur": 1.6, "ease": "easeOutExpo", "anim": "none", "start": 6.2, "duration": 4.1, "out": "defocus", "exitDur": 0.4 },
+    { "type": "text", "text": "every finding is a specific change", "x": 610, "y": 672, "w": 700, "align": "center", "size": 30, "weight": 500, "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 6.6, "duration": 3.7, "out": "defocus", "exitDur": 0.4 },
+    { "type": "beam", "x": 610, "y": 420, "w": 700, "h": 250, "radius": 24, "thickness": 2.5, "tail": 90, "speed": 0.55, "glow": 0.6, "start": 6.1, "duration": 4.0 },
+
+    { "type": "text", "text": "See your real cost.", "x": 160, "y": 430, "w": 1600, "align": "center", "size": 96, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.36, "stagger": 0.04, "start": 10.7, "duration": 2.3, "exitDur": 0 },
+    { "type": "text", "text": "lumen.dev", "x": 160, "y": 590, "w": 1600, "align": "center", "size": 52, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "rgba(94,224,200,0.10)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 11.3, "duration": 1.7, "exitDur": 0 }
+  ]
+}
