@@ -26,7 +26,7 @@
     { "type": "text", "text": "JSON.", "x": 160, "y": 590, "w": 1500, "size": 240, "weight": 800, "color": "var(--accent)", "split": "char", "preset": "decode", "each": 0.3, "stagger": 0.04, "start": 2.1, "duration": 1.1 },
 
     { "type": "text", "text": "It seeks every frame.", "x": 160, "y": 220, "w": 1600, "align": "center", "size": 46, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.4, "start": 3.35, "duration": 1.65 },
-    { "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 430, "w": 1200, "start": 3.5, "duration": 1.5, "props": { "stages": ["JSON", "Frames", "Video"] } },
+    { "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 430, "w": 1200, "start": 3.4, "duration": 1.6, "props": { "stages": ["JSON", "Frames", "Video"], "rate": 0.62 } },
 
     { "type": "count", "from": 0, "to": 240, "x": 160, "y": 330, "w": 1600, "align": "center", "size": 260, "weight": 800, "font": "mono", "color": "var(--accent)", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "anim": "none", "start": 5.05, "duration": 1.75 },
     { "type": "text", "text": "effects, one arsenal.", "x": 160, "y": 640, "w": 1600, "align": "center", "size": 48, "weight": 600, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.3, "stagger": 0.04, "start": 5.6, "duration": 1.2 },

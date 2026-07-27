@@ -33,6 +33,8 @@ function pipelineFlow(ctx) {
   const { el, gsap, start } = ctx;
   const labels = (Array.isArray(ctx.stages) && ctx.stages.length ? ctx.stages : ['Input', 'Engine', 'Render']).slice(0, 3);
   const accent = ctx.accent || 'var(--accent)';
+  // `rate` compresses the whole timeline so it fits a PUNCHY beat (rate 0.6 ≈ 40% faster). Default 1.
+  const R = ctx.rate != null ? +ctx.rate : 1;
   const W = 600, H = 200, cardW = 150, cardH = 84, gap = (W - cardW * labels.length) / (labels.length - 1);
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: (el.style.width ? '' : W), style: 'width:100%;height:auto;overflow:visible' });
@@ -73,23 +75,23 @@ function pipelineFlow(ctx) {
   // exists to catch. The travelling token appears/moves/vanishes in ONE keyframed fromTo for the same
   // reason. No colour tween between two `var()` strings — GSAP can't interpolate them (it snaps/NaNs).
   cards.forEach((g, i) => {
-    gsap.fromTo(g, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)', delay: start + i * 0.55, immediateRender: true });
+    gsap.fromTo(g, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 * R, ease: 'back.out(1.7)', delay: start + i * 0.55 * R, immediateRender: true });
   });
   links.forEach((ln, i) => {
-    const at = start + 0.5 + i * 0.55;
-    gsap.fromTo(ln, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: 'power2.inOut', delay: at, immediateRender: true });
+    const at = start + (0.5 + i * 0.55) * R;
+    gsap.fromTo(ln, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35 * R, ease: 'power2.inOut', delay: at, immediateRender: true });
     const tk = tokens[i], a = centers[i], b = centers[i + 1];
     gsap.fromTo(tk, { attr: { cx: a.x + cardW / 2 }, opacity: 0 }, {
       keyframes: [
-        { opacity: 1, duration: 0.06 },
-        { attr: { cx: b.x - cardW / 2 }, duration: 0.4, ease: 'power1.in' },
-        { opacity: 0, duration: 0.14 },
+        { opacity: 1, duration: 0.06 * R },
+        { attr: { cx: b.x - cardW / 2 }, duration: 0.4 * R, ease: 'power1.in' },
+        { opacity: 0, duration: 0.14 * R },
       ],
-      delay: at + 0.1, immediateRender: true,
+      delay: at + 0.1 * R, immediateRender: true,
     });
   });
-  const checkAt = start + 0.5 + (links.length) * 0.55 + 0.2;
-  gsap.fromTo(check, { strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out', delay: checkAt, immediateRender: true });
+  const checkAt = start + (0.5 + (links.length) * 0.55 + 0.2) * R;
+  gsap.fromTo(check, { strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, duration: 0.4 * R, ease: 'power2.out', delay: checkAt, immediateRender: true });
   // emphasise the final card with a stroke-width pulse on its RECT (a child not otherwise tweened, so
   // no immediateRender start-value conflict with the card <g>'s entrance) — numeric attr, deterministic.
   gsap.fromTo(cards[cards.length - 1].querySelector('rect'), { attr: { 'stroke-width': 1.5 } },
