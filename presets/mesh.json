@@ -1,0 +1,9 @@
+{
+  "name": "mesh",
+  "dominance": "light",
+  "desc": "Mesh / consumer: a soft light ground, rounded and luminous, a friendly accent, gentle motion. For a product a human is meant to feel warm about, not audited by.",
+  "base": { "bg": "#f7f6fb", "accent": "#7c5cff", "up": "#1a9d6b", "down": "#e0655c" },
+  "type": { "sans": "Plus Jakarta Sans", "serif": "Plus Jakarta Sans", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.08, "settle": 0.65, "enter": 38, "durationScale": 1.0, "stagger": 0.055 },
+  "bgDefault": "soft"
+}

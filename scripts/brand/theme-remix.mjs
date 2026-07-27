@@ -100,10 +100,25 @@ const theme = {
   gradient,
   type,
   motion: preset.motion,
-  bg: {
-    accent: rgbStr(palette.accent), tint: rgbStr(mix(palette.bg, palette.accent, 0.12)), tint2: rgbStr(mix(palette.bg, palette.accent, 0.2)),
-    dotLight: rgbStr(palette.line), dotDark: rgbStr(palette.lineStrong),
-  },
+  // the full bg block every bg preset reads (core/backgrounds.js): rgb accents + a LIGHT and a DARK
+  // ground pair, mapped onto every *Base/deep/dark/ink/light/darkMesh key. Both grounds always exist so a
+  // scene can pick ANY bg preset regardless of the theme's dominance (else e.g. `spotlight` reads
+  // P.deep[0] of undefined and the render crashes — the gap that shipped before this was derived).
+  bg: (() => {
+    const lightGround = light ? [palette.bg, palette.bg2] : ['#ffffff', '#f4f5f8'];
+    const darkA = light ? '#0f1620' : palette.bg;
+    const darkGround = [darkA, darken(darkA, 0.35)];
+    return {
+      accent: rgbStr(palette.accent), tint: rgbStr(mix(palette.bg, palette.accent, 0.12)), tint2: rgbStr(mix(palette.bg, palette.accent, 0.22)),
+      dotLight: rgbStr(palette.line),
+      paperBase: lightGround, light: lightGround, paper: lightGround[0],
+      softBase: [lighten(lightGround[0], 0.0), darken(lightGround[1], 0.02)],
+      accentBase: [mix(lightGround[0], palette.accent, 0.08), lightGround[1]],
+      border: palette.line,
+      dark: darkGround, deep: [darkGround[0], darken(darkGround[0], 0.5)], ink: [darken(darkGround[0], 0.2), darken(darkGround[0], 0.6)],
+      inkBase: darkGround, darkMesh: [mix(darkGround[0], palette.accent, 0.1), darkGround[1]],
+    };
+  })(),
   bgDefault: preset.bgDefault || (light ? 'plain' : 'dark'),
 };
 

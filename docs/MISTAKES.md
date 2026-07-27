@@ -3077,3 +3077,20 @@ verified in a render; full battery green; both new CRAFT docs linked (craft-cove
 **The takeaway.** another engine' quality was never one magic feature — it was a *pipeline* (pick a vetted
 design system, remix the brand in, storyboard with a why per beat, narrate, QA the seams). We now have that
 pipeline end to end, local-only.
+
+## #146 — theme-remix emitted an incomplete `bg` block; dark bg presets crashed the render
+
+**What.** A theme from `make theme-remix` rendered fine on a plain ground but crashed the moment a scene
+used a radial/aurora bg preset (`spotlight`, `constellation`, `mesh`, `deep`, …): `bgPreset` read
+`P.deep[0]` of undefined. The remix only wrote `accent/tint/tint2/dotLight`; every bg preset also reads a
+LIGHT and a DARK ground PAIR (`light`/`dark`/`deep`/`ink`/`darkMesh`/`paperBase`/`softBase`/`accentBase`).
+
+**Root cause.** The remix's `bg` block was hand-listed, not derived to completeness — a silent gap that only
+surfaced when a scene picked a preset needing the missing keys. Same class as an incomplete theme.
+
+**Fix.** Derive the whole block: a light ground pair + a dark ground pair (both always present, so a scene
+can pick ANY bg preset regardless of the theme's dominance), mapped onto every `*Base`/deep/dark/ink/
+darkMesh/light key. Verified: the `glass` preset on a `spotlight` bg now renders (was a crash).
+
+**Gate.** Caught by rendering a remixed theme with a dark bg preset (exactly the author-the-frame eyeball
+step). A cheap future guard: `make theme-remix` could self-render a one-frame probe on a dark bg preset.

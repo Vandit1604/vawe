@@ -1,0 +1,9 @@
+{
+  "name": "glass",
+  "dominance": "dark",
+  "desc": "Glass / depth: a cool dark ground, an ice-blue accent, frosted surfaces over a living gradient. Premium and modern — pairs with the glassCard / borderBeamCard blocks and an aurora bg.",
+  "base": { "bg": "#0c1220", "accent": "#7cc5ff", "up": "#4fb584", "down": "#e0655c" },
+  "type": { "sans": "Geist", "serif": "Geist", "mono": "JetBrains Mono", "num": "JetBrains Mono" },
+  "motion": { "easing": "easeOutExpo", "bounce": 0.06, "settle": 0.6, "enter": 34, "durationScale": 0.95, "stagger": 0.05 },
+  "bgDefault": "spotlight"
+}

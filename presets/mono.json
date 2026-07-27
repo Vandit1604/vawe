@@ -1,0 +1,9 @@
+{
+  "name": "mono",
+  "dominance": "light",
+  "desc": "Swiss / monochrome: a stark white ground, near-black type, one small accent used almost never, a hard grid. Maximum restraint — the design gets out of the content's way.",
+  "base": { "bg": "#ffffff", "accent": "#111111", "up": "#1a7f4b", "down": "#c81e1e" },
+  "type": { "sans": "Geist", "serif": "Geist", "mono": "Geist Mono", "num": "Geist Mono" },
+  "motion": { "easing": "easeOutQuart", "bounce": 0.03, "settle": 0.7, "enter": 32, "durationScale": 0.92, "stagger": 0.05 },
+  "bgDefault": "plain"
+}
