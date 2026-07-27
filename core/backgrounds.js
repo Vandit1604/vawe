@@ -114,6 +114,36 @@ export function aurora(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
+// ---- softwash: big soft colour blobs that TINT the base (source-over, moderate alpha) into a smooth
+// gradient WASH — orange-into-white / green-into-white, the "mesh gradient" look. Blobs drift on slow
+// sine paths (pure in t). Unlike aurora it does NOT use 'lighter', so on a LIGHT base it reads as colour
+// pooling into white (not blowing out). `grid` overlays a faint technical line grid (the blueprint look).
+export function softwash(ctx, w, h, t, o = {}) {
+  const blobs = o.blobs || [
+    { color: o.color || '46,224,160', x: 0.22, y: 0.28, r: 760, ax: 90, ay: 70, px: 22, py: 27, ph: 0, a: 0.5 },
+    { color: o.color2 || o.color || '46,224,160', x: 0.82, y: 0.7, r: 820, ax: 110, ay: 80, px: 26, py: 20, ph: 2, a: 0.42 },
+    { color: o.color3 || o.color || '46,224,160', x: 0.6, y: 0.15, r: 560, ax: 70, ay: 60, px: 18, py: 24, ph: 4, a: 0.3 },
+  ];
+  const so = o.seed ?? 0;
+  blobs.forEach((b, i) => {
+    const jx = Math.sin(so * 6.1 + i * 2.3) * 0.08, jy = Math.cos(so * 4.9 + i * 1.9) * 0.08;
+    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph) * b.ax;
+    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph) * b.ay;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
+    g.addColorStop(0, `rgba(${b.color},${((b.a ?? 0.45) * (o.intensity ?? 1)).toFixed(3)})`);
+    g.addColorStop(1, `rgba(${b.color},0)`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, b.r, 0, Math.PI * 2); ctx.fill();
+  });
+  if (o.grid) { // a faint technical line grid drifting slowly under the wash (the blueprint feel)
+    const sp = o.gridSpacing ?? 96, gc = o.gridColor || o.color || '46,224,160', ga = o.gridAlpha ?? 0.10;
+    const ox = (Math.sin(t * 0.12) * 10) % sp, oy = (Math.cos(t * 0.1) * 8) % sp;
+    ctx.strokeStyle = `rgba(${gc},${ga})`; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = ox; x < w; x += sp) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+    for (let y = oy; y < h; y += sp) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+    ctx.stroke();
+  }
+}
+
 // ---- spotlight sweep: a soft highlight travelling across the frame (focuses the eye mid-scene).
 export function spotlight(ctx, w, h, t, o = {}) {
   const period = o.period ?? 7, color = o.color ?? '255,255,255';
@@ -161,6 +191,17 @@ export function metallic(ctx, w, h, t, o = {}) {
       ctx.fillRect(x + bw * 0.44, 0, bw * 0.12, h);
     }
   }
+  // 3. optional DIAGONAL light sweep raking across (image-2 look): a soft bright band travelling corner
+  //    to corner, wrapping. `sweep` is true or an alpha (0..1); `sweepSpeed` sets its travel.
+  if (o.sweep) {
+    const p = ((t * (o.sweepSpeed ?? 0.11)) % 1.5) - 0.25; // -0.25..1.25, wraps
+    const cx = p * w, band = w * 0.34, sa = o.sweep === true ? 0.14 : +o.sweep;
+    const g = ctx.createLinearGradient(cx - band, 0, cx + band, h);
+    g.addColorStop(0, `rgba(${col},0)`);
+    g.addColorStop(0.5, `rgba(255,255,255,${sa})`);
+    g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  }
   ctx.globalCompositeOperation = 'source-over';
 }
 
@@ -198,7 +239,8 @@ export const PAL = PAL_PLINTH; // back-compat
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
-  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink', 'metallic'];
+  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
+  'metallic', 'metallicSheen', 'gradientWash', 'blobs'];
 export function bgPreset(name, value, P = PAL_PLINTH) {
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };
@@ -237,6 +279,12 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
       { type: 'aurora', intensity: 0.42, blobs: [ { color: P.tint, x: 0.3, y: 0.4, r: 680, ax: 140, ay: 96, px: 14, py: 19, ph: 0 }, { color: P.accent, x: 0.72, y: 0.55, r: 600, ax: 160, ay: 116, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.55, y: 0.3, r: 500, ax: 110, ay: 76, px: 12, py: 21, ph: 4 } ] }, grain ] };
     case 'metallic': return { base: { kind: 'solid', color: '#05070a' }, fx: [
       { type: 'metallic', color: P.accent, count: 70, speed: 0.9, waves: 2.2, glow: 0.5, alpha: 0.2, gx: 0.5, gy: 0.78 }, { type: 'grain', alpha: 0.04 } ] };
+    case 'metallicSheen': return { base: { kind: 'solid', color: '#040806' }, fx: [
+      { type: 'metallic', color: P.accent, count: 58, speed: 0.7, waves: 1.8, glow: 0.42, alpha: 0.16, gx: 0.78, gy: 0.6, sweep: 0.16, sweepSpeed: 0.1 }, { type: 'grain', alpha: 0.07 } ] };
+    case 'gradientWash': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
+      { type: 'softwash', color: P.accent, color2: P.tint2, color3: P.accent, intensity: 1 }, { type: 'grain', alpha: 0.03 } ] };
+    case 'blobs': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
+      { type: 'softwash', color: P.accent, color2: P.accent, color3: P.tint2, intensity: 0.8, grid: true, gridColor: P.accent, gridAlpha: 0.09, gridSpacing: 104 }, { type: 'grain', alpha: 0.03 } ] };
     case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
   }
@@ -276,6 +324,7 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'spotlight') spotlight(ctx, w, h, t, fx);
     else if (fx.type === 'shapes') shapes(ctx, w, h, t, fx);
     else if (fx.type === 'metallic') metallic(ctx, w, h, t, fx);
+    else if (fx.type === 'softwash') softwash(ctx, w, h, t, fx);
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
   }
 }

@@ -303,14 +303,17 @@
 | `accent` | — |
 | `accentPlain` | — |
 | `aurora` | drifting colour aurora (moves) |
+| `blobs` | — |
 | `brandglow` | breathing accent glow |
 | `constellation` | drifting connected nodes (moves) — telemetry/data feel |
 | `dark` | — |
 | `deep` | — |
 | `dotmatrix` | dot matrix grid |
+| `gradientWash` | — |
 | `ink` | — |
 | `mesh` | soft gradient mesh (dark/saturated — check contrast) |
 | `metallic` | vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured |
+| `metallicSheen` | — |
 | `paper` | — |
 | `paperDots` | faint drifting dot grid (light) |
 | `paperShapes` | faint drifting geometric shapes (light, subtle) |
@@ -376,4 +379,4 @@
 | `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
 
 ---
-_242 effects across 16 families. Regenerate: `make effects`._
+_245 effects across 16 families. Regenerate: `make effects`._

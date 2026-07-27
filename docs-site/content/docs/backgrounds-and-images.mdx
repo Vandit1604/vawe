@@ -12,11 +12,16 @@ The backdrop is painted by the top-level `bg` array in windows of time. Each win
 { "bg": [{ "preset": "soft", "from": 0, "to": 6 }] }
 ```
 
-There are 18 presets:
+There are 21 presets:
 
-`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `shapes` · `deep` · `dark` · `metallic`
+`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `shapes` · `deep` · `dark` · `metallic` · `metallicSheen` · `gradientWash` · `blobs`
 
-`metallic` is a dramatic dark backdrop: a curtain of vertical light rods with a **shimmer** that sweeps across (brushed metal / a lit equaliser), coloured by the brand accent.
+The newest four all read the brand accent:
+
+- `metallic` — a dramatic dark backdrop: a curtain of vertical light rods with a **shimmer** sweeping across (brushed metal / a lit equaliser).
+- `metallicSheen` — the same rods, darker and grainier, with a **diagonal light sweep** raking across.
+- `gradientWash` — a soft **mesh gradient** wash, colour pooling into white (light, premium).
+- `blobs` — soft organic gradient **blobs** over a faint technical grid (light, airy).
 
 <Callout title="A pattern is a seasoning, not the wallpaper">
 The backdrop should exist on the real site. A plain, flat brand gets a plain field (`plain`, `paper`, `accentPlain`), never invented dots or shapes. Even when a site is textured, use a patterned preset on at most a beat or two, never throughout. Content beats stay plain so the content reads.

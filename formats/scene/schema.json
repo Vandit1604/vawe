@@ -92,7 +92,10 @@
             "accentPlain",
             "deep",
             "dark",
-            "metallic"
+            "metallic",
+            "metallicSheen",
+            "gradientWash",
+            "blobs"
           ]
         },
         "from": {
