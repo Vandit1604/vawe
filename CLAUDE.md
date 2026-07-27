@@ -116,6 +116,15 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
    space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render.
+2a000. **SLIDESHOWS ARE BANNED, NOT DISCOURAGED.** A film under 15s with cuts must carry a CONTINUOUS
+   OBJECT: one content layer that survives a cut and CHANGES across it. If every beat is an island, born
+   and dying inside its own window, the cuts are jumps between unrelated shots and `direction-floor` blocks
+   on `no-continuous-object`. Planning is gated too: `storyboard-check` FAILS a short storyboard that names
+   no `object:` in frontmatter, and fails any beat that never says where that object is. Name the object
+   before you write a line of JSON. How: **[`vawe-continuous-action`](.claude/skills/vawe-continuous-action/SKILL.md)**.
+   Every one of the 18 eligible short films in this library trips this and carries a waiver: that is debt to
+   rebuild, not a pattern to copy.
+
 2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats.png`, then READ it and
    fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two
    ways. The mechanical half is a blocking gate (`make beat-check`, also step `beats` inside `author-check`):

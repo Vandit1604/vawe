@@ -29,6 +29,34 @@ const scene = (layers, extra = {}) => JSON.stringify({
 
 const TXT = (o = {}) => ({ type: 'text', text: 'Gate mutation fixture', x: 200, y: 400, w: 1100, align: 'left', size: 90, weight: 600, start: 0, duration: 2, ...o });
 
+/** A minimal STORYBOARD.md, knobs for the two halves of the object-spine rule. */
+const SB = ({ object = true, beatObject = true, duration = '5s' } = {}) => [
+  '---',
+  'message: "The record pill turns a voice note into a structured note."',
+  'audience: "People who take notes on a phone."',
+  'arc: "one continuous action: the record pill is pressed and becomes a finished note"',
+  ...(object ? ['object: "the record pill"', 'object_t0: "a dark pill on the note list"',
+    'object_states: "pressed, swollen, flattened into a row"', 'object_last: "a note card, mid-unfold"'] : []),
+  'format: 1920x1080',
+  `duration: ${duration}`,
+  '---',
+  '',
+  '## Beat 1: Record (0s-1.6s)',
+  '- type: product_surface',
+  ...(beatObject ? ['- object: the pill is pressed and swells, a waveform running inside it'] : []),
+  '- onscreen: "Recording"',
+  '- mechanism: vars morph on the pill width, cursor press',
+  '- why: show the act, not a claim about the act',
+  '',
+  '## Beat 2: Structure (1.6s-5s)',
+  '- type: payoff_withheld',
+  ...(beatObject ? ['- object: the pill flattens into a row, then unfolds into a note card'] : []),
+  '- onscreen: "Weekly sync"',
+  '- mechanism: match cut, height track on the card, typed bullets',
+  '- why: the recording becomes the thing you keep',
+  '',
+].join('\n');
+
 // Each case: a fixture, the command, and what the gate must (or must not) say.
 const CASES = [
   // ---- layout audit: must FAIL ----
@@ -129,6 +157,42 @@ const CASES = [
                     anim: 'slide-right', out: 'slide-left', motion: [{ to: { x: 400 }, dur: 1 }] }]) },
   { gate: 'layerprops', name: 'a prop no layer type reads is still caught', expect: 'fail',
     match: /nothing reads it/, scene: scene([TXT({ notARealProp: 7 })]) },
+
+  // ---- direction-floor · no-continuous-object. A SLIDESHOW is a film where every beat is an island:
+  // nothing survives a cut, so each seam is a jump between unrelated shots instead of a state change of
+  // one thing. All three directions are pinned, because the rule has two halves (survives AND changes)
+  // and either half can rot on its own while the other keeps the gate looking alive.
+  { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
+    match: /no-continuous-object/,   // blocking tier: must exit non-zero
+    scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // The strong half: a persistent element that never CHANGES at the cut is a watermark, not a spine.
+  // Without this case the rule quietly degrades to "put a logo on every frame".
+  { gate: 'directionfloor', name: 'no-continuous-object · a static layer riding the cut is not a spine', expect: 'fail',
+    match: /none of them CHANGE there/,
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6 },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // ...and the mirror (#25): a real continuous-object film must stay green, or the tell buys its
+  // sensitivity by calling every short film a slideshow, which trains everyone to ignore it (#159).
+  { gate: 'directionfloor', name: 'a continuous object that transforms across the cut is NOT a slideshow', expect: 'pass',
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
+                    motion: [{ t: 0, x: 0, scale: 1 }, { t: 2.6, x: -420, scale: 0.4, ease: 'easeInOutCubic' }, { t: 4.6, x: -420, scale: 0.4 }],
+                    vars: { '--p': [0, 1] }, varsDelay: 1.6, varsDur: 0.6 },
+                  TXT({ text: 'Generating', start: 3, duration: 2, size: 64, split: 'word', preset: 'up' })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+
+  // ---- storyboard-check · the object spine, enforced at PLANNING time. The scene tell can only speak
+  // once the JSON exists; by then the plan is already a slideshow. Both directions pinned.
+  { gate: 'storyboard', name: 'spine · a short film that names no object', expect: 'fail', ext: 'md',
+    match: /NAME THE OBJECT FIRST/, scene: SB({ object: false }) },
+  { gate: 'storyboard', name: 'spine · a short film whose beats never say where the object is', expect: 'fail', ext: 'md',
+    match: /is missing `object:`/, scene: SB({ beatObject: false }) },
+  { gate: 'storyboard', name: 'a short film with a full object spine passes', expect: 'pass', ext: 'md',
+    scene: SB() },
+  { gate: 'storyboard', name: 'a 45s film is not held to the spine (chapters are legitimate)', expect: 'pass', ext: 'md',
+    scene: SB({ object: false, beatObject: false, duration: '45s' }) },
 ];
 
 const run = (cmd, args) => {
@@ -141,12 +205,15 @@ const GATE_CMD = {
   validate: (f) => ['node', ['core/validate.mjs', f]],
   beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
   layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
+  directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
+  storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
 };
 
 let pass = 0; const broken = [];
 console.log('── gate mutation: does each gate actually fire?\n');
 for (const c of CASES) {
-  const f = path.join(FIX, `mut-${c.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.json`);
+  // `ext` lets a case feed a gate something that is not a scene (storyboard-check eats markdown).
+  const f = path.join(FIX, `mut-${c.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.${c.ext || 'json'}`);
   fs.writeFileSync(f, c.scene);
   const rel = path.relative(repoRoot, f);
   const [cmd, args] = GATE_CMD[c.gate](rel);

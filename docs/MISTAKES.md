@@ -3395,3 +3395,25 @@ failure is worse, because it trains everyone to ignore it. And a gate that reads
 coupled to the file layout: it must either be told the layout is gone, or derive it. The mutation
 harness now carries a case that renames every `L.` in `scene.js` and asserts the gate reports itself
 broken, which would have caught `fd397e1` the day it landed.
+
+## #160 — every short film in the library was a slideshow, and nothing said so
+
+**What.** Adding a structural test for slideshows (a film under 15s with cuts where no content layer both
+survives a cut and changes across it) found that **18 of 18 eligible scenes trip it.** Not one short
+cut-bearing film in `formats/scene/` has an object that carries through a cut. The grammar the
+`vawe-continuous-action` skill teaches was, in practice, followed by nothing in the repo.
+
+**Why it went unseen.** `direction-floor` measured how MUCH motion a scene had, never whether the motion
+was CONNECTED. A film of six unrelated beats, each with a snappy entrance, clears an ambition floor
+easily. Quantity of motion is not continuity of motion, and only the second makes a film read as one
+thing happening.
+
+**Fix.** The tell blocks, and the 18 carry explicit waivers so the gate holds new work without breaking
+`make video` for scenes it did not cause. A waiver there means known and unfixed. Planning is gated at
+the same time: a short storyboard that names no object in frontmatter fails outright, because the failure
+starts in the plan, not the JSON.
+
+**The honest limit.** This bans a STRUCTURE, not a mood. A film can carry a continuous object perfectly
+and still be dull. And the tell is blind to a short film that declares no cuts at all: three fade-in
+islands with no `cuts` array never becomes eligible. Widening it to infer boundaries from layer starts
+fired on nearly every short scene including the good ones, so it was left out rather than smuggled in.

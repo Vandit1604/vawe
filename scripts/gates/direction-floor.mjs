@@ -11,9 +11,16 @@
 // uses almost none of it. A scene composed from blueprints (`{type:"beat"}`) is directed by construction.
 //
 //   node scripts/gates/direction-floor.mjs <scene.json> [--strict]   ·   make direction-floor D=<file>
-// FAIL (blocks): `plain-slideshow`. WARN (coaching): no-kinetic-type · no-camera · no-transition ·
+// It also reads the scene as a CONTINUITY: on a short film, one content object must survive each cut
+// and CHANGE there (`no-continuous-object`). A film whose every beat is an island is a slideshow no
+// matter how much motion each island contains.
+// FAIL (blocks): `plain-slideshow` · `no-continuous-object`. WARN (coaching): no-kinetic-type · no-camera · no-transition ·
 // no-bg-motion · low-vocab. Waive a deliberate minimal film with {"authoring":{"allow":["plain-slideshow"]}}.
 import fs from 'node:fs';
+import { motionAt } from '../../core/sequence.js';
+import { typedLen } from '../../core/layers/text.js';
+import { clamp01 } from '../../core/motion.js';
+import { sceneDims } from '../../core/safe.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -98,6 +105,89 @@ if (!directedByBeats && vocab.length < 3) warn('low-vocab', `only ${vocab.length
 // slideshow even when each line is kinetic. Beat-composed scenes spread starts across the film, so they
 // clear this; a hand-authored front-load trips it.
 const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.duration ?? 0)), 0) || 1;
+
+// ── NO CONTINUOUS OBJECT ─────────────────────────────────────────────────────────────────────────
+// A SLIDESHOW is a film where every beat is an ISLAND: no content object survives a cut, so each
+// seam is a jump between unrelated shots rather than a state change of one thing. The opposite (the
+// `vawe-continuous-action` skill) is a CONTINUOUS OBJECT: one thing on screen across the cut, and it
+// TRANSFORMS there. Both halves are required — a fixed logo or a watermark riding every cut is not a
+// spine, it is furniture. Short films only: a 60s explainer legitimately has chapters.
+const CONTINUITY_MAX_DUR = 15;   // seconds — above this, chaptered structure is legitimate
+const EPS = 0.15;                // ~4 frames either side: a layer must genuinely survive, not graze
+const round3 = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
+
+// Boundaries: a hard cut, a two-scene seam blend, or a unified transition. `sceneUnits` only changes
+// how `cuts` are PRESENTED (whole-beat swaps), so its boundaries are the cut times already counted.
+const boundaries = [];
+for (const c of d.cuts || []) if (c && typeof c.t === 'number') boundaries.push(c.t);
+for (const s of d.seams || []) if (s && typeof s.t === 'number') boundaries.push(s.t + (s.dur ?? 0.6) / 2);
+for (const tr of d.transitions || []) if (tr && typeof tr.at === 'number') boundaries.push(tr.at + (tr.dur ?? 0.6) / 2);
+const bounds = [...new Set(boundaries)].filter((t) => t > EPS && t < dur - EPS).sort((a, b) => a - b);
+
+const [CW, CH] = sceneDims(d);
+// A backdrop cannot be the spine. `track:0` is the declared backdrop lane; a full-bleed rect/glow/
+// paint/beam is one by construction (the skill's "the background never cuts" carries a seam, it does
+// not carry the film). An `image` is never treated as a scrim — a full-frame shot IS content.
+const SCRIM_TYPES = new Set(['rect', 'glow', 'paint', 'beam']);
+const isBackdrop = (l) => l.track === 0
+  || (SCRIM_TYPES.has(l.type) && (l.w ?? 0) >= CW * 0.9 && (l.h ?? 0) >= CH * 0.9);
+// Only TOP-LEVEL layers are candidate spines: a group child may omit `start`, which would read as
+// "visible for the whole film" and hand the gate a free pass it did not earn. The group itself carries
+// the timing, so nothing real is lost.
+const spineCandidates = (d.layers || []).filter((l) => l && typeof l === 'object' && !isBackdrop(l));
+const visible = (l) => { const s = l.start ?? 0; return [s, l.duration != null ? s + l.duration : dur]; };
+
+// Machinery whose internal clock this gate cannot read (a blueprint beat, a bespoke composition, a
+// parts build, a morph, a motion path, a playing video). Assume it transforms — a gate must not
+// invent a failure out of something it cannot see (MISTAKES #25).
+const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.type === 'clip'
+  || l.parts || l.morph || l.motionPath || l.gsap || l.physics
+  || (l.type === 'group' && l.each)          // per-child build. On a TEXT layer `each` is the split
+  || (l.type === 'cursor' && l.path);        // reveal's per-char duration — an entrance, not a transform.
+
+// The layer's pose at absolute time t, from every authored track this gate can evaluate exactly.
+const poseAt = (l, t) => {
+  const s = l.start ?? 0, lt = t - s;
+  const p = {};
+  if (Array.isArray(l.motion) && l.motion.length) {
+    const m = motionAt(l.motion, lt);
+    p.m = [m.dx, m.dy, m.scale, m.rot, m.opacity, m.blur].map(round3).join(',');
+  }
+  if (l.vars) { const vd = l.varsDur ?? 1.0; p.v = round3(vd > 0 ? clamp01((lt - (l.varsDelay ?? 0)) / vd) : 1); }
+  if (l.ken) {
+    const k = l.ken === true ? {} : l.ken;
+    const from = k.from ?? 1, to = k.to ?? 1.08, span = l.duration ?? (dur - s);
+    p.k = round3(from + (to - from) * (span > 0 ? clamp01(lt / span) : 0));
+  }
+  if (l.typing && typeof l.text === 'string') {
+    const visLen = l.text.replace(/<[^>]*>/g, '').length;
+    p.t = typedLen(lt, { cps: l.typing === true ? 24 : +l.typing, visLen, untype: l.untype, untypeRate: l.untypeRate });
+  }
+  return JSON.stringify(p);
+};
+
+if (bounds.length && dur < CONTINUITY_MAX_DUR) {
+  const spanning = [], transforming = [];
+  for (const b of bounds) {
+    for (const l of spineCandidates) {
+      const [s, e] = visible(l);
+      if (!(s < b - EPS && e > b + EPS)) continue;
+      spanning.push(l);
+      if (opaqueMotion(l) || poseAt(l, b - EPS) !== poseAt(l, b + EPS)) transforming.push(l);
+    }
+  }
+  if (!transforming.length) {
+    const label = (l) => `${l.type || 'text'}${l.text ? ` "${String(l.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+    const carried = spanning.length
+      ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there — a fixed logo or watermark riding the cut is furniture, not a spine.`
+      : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`;
+    // BLOCKS. A WARN here let every NEW slideshow through, which is the one thing this tell exists to
+    // stop. The 18 pre-existing short cut-bearing scenes in formats/scene/ carry an explicit
+    // {"authoring":{"allow":["no-continuous-object"]}} waiver, so the gate holds new work without
+    // breaking `make video` for scenes it did not cause — the same trade beat-check's `dead-air` made.
+    fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carried} Fix: name ONE object (the button, the card, the row, the token), keep it alive across the cut, and make the cut a state change of it (a \`motion\` track through the seam, a \`vars\` morph, a ken push, a typing line that keeps typing). Every cut answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.`);
+  }
+}
 const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
 if (reveals.length >= 4) {
   const early = reveals.filter((t) => t < dur * 0.3).length / reveals.length;
