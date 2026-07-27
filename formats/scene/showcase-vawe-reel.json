@@ -1,0 +1,49 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 15,
+  "sceneUnits": true,
+  "cuts": [
+    { "t": 1.6, "style": "slide", "dir": "left", "dur": 0.42, "timing": "snappy" },
+    { "t": 3.2, "style": "slide", "dir": "left", "dur": 0.42, "timing": "snappy" },
+    { "t": 5.0, "style": "slide", "dir": "left", "dur": 0.42, "timing": "snappy" },
+    { "t": 6.8, "style": "slide", "dir": "up", "dur": 0.46, "timing": "snappy" },
+    { "t": 8.8, "style": "slide", "dir": "left", "dur": 0.42, "timing": "snappy" },
+    { "t": 10.6, "style": "slide", "dir": "left", "dur": 0.42, "timing": "snappy" },
+    { "t": 12.4, "style": "slide", "dir": "up", "dur": 0.5, "timing": "snappy" }
+  ],
+  "cameraMove": [
+    { "move": "slowPush", "start": 0, "dur": 15, "from": 1, "to": 1.035 }
+  ],
+  "bg": [{ "t": 0, "preset": "paperShapes" }],
+  "layers": [
+    { "type": "svg", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "viewBox": "0 0 47 24", "x": 160, "y": 300, "w": 320, "stroke": "var(--accent)", "draw": { "weight": 2 }, "start": 0.1, "duration": 1.5 },
+    { "type": "text", "text": "vawe", "x": 160, "y": 360, "w": 1200, "size": 220, "weight": 800, "color": "var(--text)", "split": "char", "preset": "scale", "each": 0.3, "stagger": 0.05, "start": 0.35, "duration": 1.25 },
+    { "type": "text", "text": "VIDEO AS CODE", "x": 168, "y": 620, "w": 900, "size": 30, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.2em", "anim": "fade", "enterDur": 0.4, "start": 0.7, "duration": 0.9 },
+
+    { "type": "text", "text": "One", "x": 160, "y": 340, "w": 1500, "size": 240, "weight": 800, "color": "var(--text)", "split": "char", "preset": "up", "each": 0.28, "stagger": 0.04, "start": 1.65, "duration": 1.55 },
+    { "type": "text", "text": "JSON.", "x": 160, "y": 590, "w": 1500, "size": 240, "weight": 800, "color": "var(--accent)", "split": "char", "preset": "decode", "each": 0.3, "stagger": 0.04, "start": 2.1, "duration": 1.1 },
+
+    { "type": "text", "text": "It seeks every frame.", "x": 160, "y": 220, "w": 1600, "align": "center", "size": 46, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.4, "start": 3.35, "duration": 1.65 },
+    { "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 430, "w": 1200, "start": 3.5, "duration": 1.5, "props": { "stages": ["JSON", "Frames", "Video"] } },
+
+    { "type": "count", "from": 0, "to": 240, "x": 160, "y": 330, "w": 1600, "align": "center", "size": 260, "weight": 800, "font": "mono", "color": "var(--accent)", "countStart": 0.1, "countDur": 1.2, "ease": "easeOutExpo", "anim": "none", "start": 5.05, "duration": 1.75 },
+    { "type": "text", "text": "effects, one arsenal.", "x": 160, "y": 640, "w": 1600, "align": "center", "size": 48, "weight": 600, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.3, "stagger": 0.04, "start": 5.6, "duration": 1.2 },
+
+    { "type": "rect", "x": 360, "y": 300, "w": 1200, "h": 480, "bg": "var(--ink)", "radius": 28, "anim": "pop", "enterDur": 0.4, "start": 6.9, "duration": 1.9 },
+    { "type": "paint", "paint": "meteor", "x": 360, "y": 300, "w": 1200, "h": 480, "start": 7.0, "duration": 1.8, "opacity": 0.6, "speed": 1.1 },
+    { "type": "beam", "x": 360, "y": 300, "w": 1200, "h": 480, "radius": 28, "thickness": 3, "tail": 100, "speed": 0.7, "glow": 0.7, "start": 7.05, "duration": 1.75 },
+    { "type": "text", "text": "Per-frame effects.", "x": 360, "y": 490, "w": 1200, "align": "center", "size": 88, "weight": 800, "color": "#ffffff", "split": "word", "preset": "up", "each": 0.3, "stagger": 0.04, "start": 7.3, "duration": 1.5 },
+
+    { "type": "text", "text": "Kinetic type.", "x": 160, "y": 300, "w": 1500, "size": 120, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.24, "stagger": 0.03, "start": 8.85, "duration": 1.75 },
+    { "type": "text", "text": "Scene cuts.", "x": 160, "y": 450, "w": 1500, "size": 120, "weight": 800, "color": "var(--accent)", "split": "word", "preset": "up", "each": 0.24, "stagger": 0.03, "start": 9.15, "duration": 1.45 },
+    { "type": "text", "text": "Compositions.", "x": 160, "y": 600, "w": 1500, "size": 120, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.24, "stagger": 0.03, "start": 9.45, "duration": 1.15 },
+
+    { "type": "text", "text": "Every frame,", "x": 160, "y": 340, "w": 1600, "align": "center", "size": 96, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.28, "stagger": 0.04, "start": 10.65, "duration": 1.75 },
+    { "type": "text", "text": "pure in n.", "x": 160, "y": 500, "w": 1600, "align": "center", "size": 140, "weight": 800, "color": "var(--accent)", "split": "char", "preset": "up", "each": 0.24, "stagger": 0.05, "start": 11.1, "duration": 1.3 },
+
+    { "type": "text", "text": "one scene, one mp4.", "x": 160, "y": 380, "w": 1600, "align": "center", "size": 104, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.3, "stagger": 0.04, "start": 12.5, "duration": 2.5, "exitDur": 0 },
+    { "type": "text", "text": "make video D=scene.json", "x": 160, "y": 560, "w": 1600, "align": "center", "size": 46, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 13.1, "duration": 1.9, "exitDur": 0 }
+  ]
+}
