@@ -566,6 +566,14 @@
           "type": "boolean",
           "label": "typing: keep the caret after the text finishes"
         },
+        "untype": {
+          "type": "number",
+          "label": "typing: seconds into the layer at which the text starts DELETING backwards (backspace). Omit for forward-only typing."
+        },
+        "untypeRate": {
+          "type": "number",
+          "label": "untype: delete speed in chars/sec (default = the `typing` rate)"
+        },
         "path": {
           "type": "array",
           "label": "cursor: [{t,x,y,ease}] keyframes the pointer follows (x,y = absolute screen px when no layer x/y is set; relative to x/y if it is)"

@@ -13,6 +13,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
@@ -20,6 +21,19 @@ import { sceneDims } from '../../core/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
+
+// writeSeenReceipt(scene, sheet, tool) — record that a contact sheet was produced for this exact scene
+// content. scripts/gates/beat-check.mjs reads verify/beats-seen/<scene>.json and nags when the hash has
+// moved on. Kept identical in scripts/author/beats.mjs; the two are the only writers.
+function writeSeenReceipt(scene, sheet, tool) {
+  try {
+    const dir = path.join(ROOT, 'verify', 'beats-seen');
+    fs.mkdirSync(dir, { recursive: true });
+    const hash = crypto.createHash('sha256').update(fs.readFileSync(scene)).digest('hex');
+    fs.writeFileSync(path.join(dir, `${path.basename(scene, '.json')}.json`),
+      JSON.stringify({ hash, sheet, tool }, null, 2) + '\n');
+  } catch (e) { console.warn(`  (could not write the review receipt: ${e.message})`); }
+}
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? +argv[i + 1] : d; };
 const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]'); process.exit(1); }
@@ -122,6 +136,8 @@ const padded = rows.map((r, i) => {
 });
 const sheet = '/tmp/reveal.png';
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
+// REVIEW RECEIPT — the same stamp `make beats` writes: proof that a sheet exists for THIS scene content.
+writeSeenReceipt(dataArg, sheet, 'reveal');
 if (ALL) console.log(`✓ reveal (ALL layers) · ${units.length} distinct entrances · each row = one reveal event's ENTER arc  →  ${sheet}`);
 else console.log(`✓ reveal · ${beats.length} beats · each row = [green ENTER arc · white SETTLED · orange EXIT arc]  →  ${sheet}`);
 console.log('  Read the GREEN cells: how does each entrance animate IN? (dolly direction, typing, a colour-wave, a card assembling.)');

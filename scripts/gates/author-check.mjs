@@ -7,6 +7,7 @@
 //
 // The ladder (all PRE-render, so it can gate the render):
 //   validate  — schema + em-dash (correctness; never waivable)
+//   beats     — the TIMELINE gate: dead air, an empty last frame, an empty cut/seam window, a dead backdrop
 //   critique  — the value gate: hollow/placeholder/unbacked/thin/mis-centre beats
 //   direct    — the direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
@@ -68,6 +69,10 @@ const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true }) 
 
 // 1. validate — correctness, never waivable.
 record('validate', runGate('validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
+// 1b. beats — the TIMELINE gate: dead air, an empty closing plate, a transition window with nothing in it,
+//     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
+//     one walks the clock. Blocking, waivable by code.
+record('beats', runGate('beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
 // 2. critique — value gate; errors block, waivable by rule code.
 record('critique', runGate('critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : []), { waivable: true });
 // 3. direct — direction gate; FAILs block, waivable by code.

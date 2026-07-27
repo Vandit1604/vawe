@@ -101,6 +101,23 @@ function microType(kit, el, L) {
   if (!mono) el.style.fontFeatureSettings = '"kern" 1, "liga" 1, "calt" 1';
 }
 
+// typedLen: how many characters are visible at local second `lt`. EXPORTED because the rule was
+// inline in frame(), which needs a DOM — so the one part of typing that can actually be wrong (the
+// count) could not be proven by any test, and only its wiring was checked. Out here `make lib-test`
+// asserts the real behaviour with no browser. There is exactly one definition; frame() calls this.
+//
+// BACKSPACE (`untype`): the line types in, holds, then DELETES itself character by character — the
+// "wrote it, thought better of it" beat. Faking it with a fade is the tell, because a fade removes
+// the whole line at once and the caret stops meaning anything. Opt-in: `untype` is the local second
+// deletion starts, `untypeRate` its speed (defaults to the typing rate — most lines delete as fast
+// as they arrived). Still a PURE function of lt: the count is forward-progress minus delete-progress,
+// never a running total, so any frame can be rendered on its own out of order.
+export function typedLen(lt, { cps, visLen, untype, untypeRate }) {
+  let n = Math.floor(lt * cps);
+  if (untype != null && lt >= untype) n = Math.min(n, visLen) - Math.floor((lt - untype) * (untypeRate ?? cps));
+  return Math.max(0, Math.min(visLen, n));
+}
+
 // typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
 // HTML-SAFE: if the copy carries markup (an accent <span>, <b>…), the VISIBLE characters are revealed
 // while the tags are kept intact — so an accent word types IN its colour, exactly like the reference.
@@ -118,7 +135,8 @@ export function frame(kit, el, L, t) {
   const cps = L.typing === true ? 24 : L.typing;
   const full = L.text || '';
   const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
-  const n = Math.max(0, Math.min(visLen, Math.floor((t - start) * cps)));
+  const lt = t - start;
+  const n = typedLen(lt, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
   const caret = (L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0 && (n < visLen || L.caretHold)) ? '▏' : '';
   if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
   else el.textContent = full.slice(0, n) + caret;

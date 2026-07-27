@@ -3305,3 +3305,63 @@ any colour work.
 continuously and fills the frame, the still is the least informative test available: it is exactly the
 frame where a wrong speed looks right. Sample a strip. This generalises past backgrounds to any
 continuous effect (shimmer, drift, grain crawl, camera).
+
+## #156 — "check the beats" was a step in a list, so it got skipped
+
+**What.** `make beats` has always been step 2 of the authoring ladder, and it is the step that catches the
+things no static gate can see. It was also the easiest step to skip, because nothing failed when you did.
+Two defects shipped through it in one week: `example-html-bg` had 0.4s of dead air mid-scene and ended on
+an empty frame, and a recreated background was tuned against a single still.
+
+**Fix, in two halves, because the check has two halves.**
+- The part a machine can decide is now a blocking gate, `scripts/gates/beat-check.mjs`, wired into
+  `author-check` as step `beats`: `dead-air`, `ends-on-nothing`, `empty-beat`, and a hand-authored `html`
+  background whose markup names neither `var(--t)` nor `var(--p)` and therefore cannot move.
+- The part only eyes can decide is enforced by a RECEIPT. `make beats` and `make reveal` record the
+  scene's content hash in `verify/beats-seen/`; the gate warns (fails under `STRICT=1`) when the hash has
+  moved since. It cannot make you look, but it can make not looking visible.
+
+**Thresholds, honestly.** `dead-air` fires at 0.4s, not the 0.25s first tried: at 0.25s, 46 of 83 scenes
+failed, because the house style uses a ~0.3s breath at beat boundaries and a ~0.3s cold open. 0.4s is the
+line where a breath stops reading as deliberate, and it still catches the motivating case. A span already
+owned by a declared cut/seam/sting is exempt. The whole-film `static-bg` rule is a WARN, not a FAIL:
+blocking it failed 28 scenes including every white-first launch film, where a flat paper field is the
+correct answer and the motion lives in the content.
+
+**Debt, recorded rather than hidden.** Turning the gate on found 18 pre-existing true positives. They
+carry an explicit `authoring.allow` waiver so the gate can block new work without breaking `make video`
+for scenes it did not cause. A waiver there means "known, unfixed", not "fine".
+
+## #157 — `anim: "none"` was a valid schema value the engine did not have
+
+**What.** `"none"` is in the `anim` and `out` enums in `formats/scene/schema.json`, but it was never a key
+in `ANIM` in `core/clips.js`, so `resolveAnim` fell through to `fade`. An author who wrote `out:"none"` to
+stop a layer fading got a fade, silently. Found while recreating a reference where the headline had to
+backspace away without fading; the workaround was `exitDur: 0`, which is a symptom, not a fix.
+
+**Fix.** `"none"` is a real no-op entry in `ANIM` now.
+
+**Lesson.** `schema-drift` compares the schema against the registries it copies, and it reported this enum
+as in sync while it carried a value the engine could not honour. A gate that checks two lists agree does
+not check that either list is true. The enum is the promise; the map is the delivery.
+
+## #158 — four shipped scenes had been cross-fading against their own instructions
+
+**What.** Fixing #157 (`anim:"none"` was a schema value the engine did not have) changed the output of
+four tracked scenes: `showcase-cuts`, `brew-launch-act1`, `showcase-vawe`, `showcase-vawe-reel`. Every
+diff is an `opacity` value, no transforms. These are the four scenes that actually AUTHORED `anim:"none"`,
+and they had been getting the `fade` fallback all along. `showcase-cuts` says `anim:"none"` on 17 panels
+precisely so the CUT does the transition, and it was cross-fading underneath the cut the whole time.
+
+**The subtle half.** A style-only no-op was not enough. Opacity is written by `driveClips` OUTSIDE the
+`ANIM` registry, so returning an empty style removed the MOVE and kept the FADE, which is the exact thing
+the author asked to stop. `none` had to opt out of the opacity envelope too.
+
+**And it broke purity first.** The first version returned `{}`, which quarantined two scenes as
+non-deterministic. Cause: `fade(1)` returns `transform: 'none'`, so the old silent fallback had ALSO been
+quietly satisfying the resting-key contract (#41). Remove the fallback and a transform written by the
+exit half survived across out-of-order frames. `none` now writes `transform: 'none'` explicitly.
+
+**Lesson.** A silent fallback is load-bearing by the time you find it. Deleting one is not a no-op: other
+code has been leaning on its side effects, and here it was leaning on them for determinism. Expect a
+"pure removal" of a fallback to change output, and diff the whole library rather than assuming it cannot.

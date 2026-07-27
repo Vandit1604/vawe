@@ -1,5 +1,7 @@
 {
   "module": "scene",
+  "authoring": { "allow": ["ends-on-nothing"] },
+  "authoringNote": "PRE-EXISTING empty closing plate, not a design choice: this scene was authored before beat-check existed and ends on a bare backdrop. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "theme": "vawe",
   "aspect": "16:9",
   "duration": 14,

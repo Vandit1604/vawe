@@ -27,6 +27,14 @@ Every JSON **must** start with `"module": "scene"`. Save new videos as
 video (e.g. `linear-30.json`) first as working references, then compose — never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
+> **Shipping a real video? USE DEDICATED SUBAGENTS.** Authoring well needs several different kinds of
+> judgement, and one agent doing all of them in one context does all of them worse: it grades its own
+> work, and its reading of six sheets crowds out the room to fix anything. Give each critic ONE job, ONE
+> input path and a fixed verdict shape, and launch them in PARALLEL in a single message. Critics report,
+> the main thread fixes; a critic is evidence, never a ruling. The standing roster (beat · bg-motion ·
+> reveal · fidelity · copy · seam) is **[`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md)**. Overkill for
+> a one-line tweak; required for a full pass, a recreation, or anything you intend to ship.
+
 > **Making something good?** Read **[`docs/TASTE.md`](docs/TASTE.md)** first — the front door to the
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
@@ -108,6 +116,15 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
    space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render.
+2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats.png`, then READ it and
+   fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two
+   ways. The mechanical half is a blocking gate (`make beat-check`, also step `beats` inside `author-check`):
+   it fails `dead-air` (a hole where the frame holds only the backdrop), `ends-on-nothing`, `empty-beat` and
+   a hand-authored `html` bg that cannot animate. The half only eyes can do is enforced by a RECEIPT:
+   `make beats`/`make reveal` record the scene's content hash, and the gate warns (fails under `STRICT=1`)
+   when the scene has changed since you last looked. Editing a scene and skipping the sheet is therefore
+   visible. A `dead-air` waiver is for a deliberate held frame, never for "I did not look".
+
 2a0. **THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE.** `bg` is a required field, so the backdrop
    is always your decision. Make it a living one, a preset or hand-authored (`{"html":…}` driven by
    `var(--t)`); a static field is not a default, it is a choice you have to justify. Then **judge it across

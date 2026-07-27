@@ -1,5 +1,7 @@
 {
   "module": "scene",
+  "authoring": { "allow": ["dead-air"] },
+  "authoringNote": "PRE-EXISTING dead air, not a design choice: this scene was authored before beat-check existed and has a hole in its timeline. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 19.6,

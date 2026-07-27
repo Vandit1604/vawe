@@ -18,6 +18,10 @@ verify/frames/
 # transient DOM snapshot baselines (make snap)
 verify/snap/
 
+# review receipts: proof a beats/reveal sheet was rendered for a given scene content hash
+# (make beats / make reveal write them, scripts/gates/beat-check.mjs reads them). Local, per-machine.
+verify/beats-seen/
+
 # kie.ai secret + generated assets
 .kie.key
 assets/gen

@@ -19,6 +19,15 @@ const ANIM = {
   // `wipe-up` grows upward from the bottom — the one a bar chart wants.
   'wipe-down': (t) => wipe(t, 'up'), 'wipe-up': (t) => wipe(t, 'down'),
   iris: circleWipe, clock: clockWipe,
+  // `none` is a REAL entry, not a hole. The schema has always listed it for `anim`/`out`, but the
+  // registry had no key for it, so resolveAnim fell through to fade: an author writing out:"none" to
+  // stop a layer fading got the fade anyway, with nothing said. That is the silent-substitution class
+  // this engine keeps paying for (MISTAKES #21). It is a no-op on BOTH halves — no transform here, and
+  // no opacity ramp in driveClips below — so the layer simply appears and disappears at its window edges.
+  // It still writes `transform: 'none'` because every anim owes the resting-key contract further down:
+  // an entry that writes nothing leaves a transform from the OTHER half of the animation on the element,
+  // and frames render out of order, so the leftover shows up as a render-order dependence (MISTAKES #41).
+  none: () => ({ transform: 'none' }),
 };
 // Exported so the schema and the conformance sweep can DERIVE the valid names instead of restating
 // them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
@@ -102,7 +111,12 @@ export function driveClips(root, t) {
     // multiply in the authored base opacity, so `opacity: 0.4` dims the layer for its whole life
     // without fighting the entrance/exit fade that shares this property
     const base = el.dataset.opacity != null ? parseFloat(el.dataset.opacity) : 1;
-    el.style.opacity = String((opacityEnvelope(enterT, exitT) * base).toFixed(3));
+    // The `none` half opts OUT of the envelope, not just out of the transform. Opacity is written here,
+    // outside the anim registry, so a style-only no-op would still have faded — the author would have
+    // removed the move and kept the very thing they asked to stop.
+    const fadeInT = el.dataset.anim === 'none' ? 1 : enterT;
+    const fadeOutT = el.dataset.out === 'none' ? 0 : exitT;
+    el.style.opacity = String((opacityEnvelope(fadeInT, fadeOutT) * base).toFixed(3));
   }
 }
 

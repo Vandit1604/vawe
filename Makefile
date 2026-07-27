@@ -468,6 +468,9 @@ author-check: ## MANDATORY authoring ladder: validate+critique+direct+slop+inspe
 direction-floor: ## ambition floor: fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
 	node scripts/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
+beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead backdrop (D=<file> [STRICT=1])
+	node scripts/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
 # make impeccable D="a.html b.html"  — the bundled impeccable anti-slop detector on raw HTML fragments
 # (local, no network, token-efficient). `make slop` runs the same detector on the RENDERED scene DOM;
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.

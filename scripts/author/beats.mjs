@@ -11,6 +11,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
@@ -18,6 +19,19 @@ import { sceneDims } from '../../core/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
+
+// writeSeenReceipt(scene, sheet, tool) — record that a contact sheet was produced for this exact scene
+// content. scripts/gates/beat-check.mjs reads verify/beats-seen/<scene>.json and nags when the hash has
+// moved on. Kept identical in scripts/author/reveal.mjs; the two are the only writers.
+function writeSeenReceipt(scene, sheet, tool) {
+  try {
+    const dir = path.join(ROOT, 'verify', 'beats-seen');
+    fs.mkdirSync(dir, { recursive: true });
+    const hash = crypto.createHash('sha256').update(fs.readFileSync(scene)).digest('hex');
+    fs.writeFileSync(path.join(dir, `${path.basename(scene, '.json')}.json`),
+      JSON.stringify({ hash, sheet, tool }, null, 2) + '\n');
+  } catch (e) { console.warn(`  (could not write the review receipt: ${e.message})`); }
+}
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 const vs = flag('--vs', null);
@@ -123,5 +137,9 @@ const padded = rows.map((r, i) => {
 });
 const sheet = '/tmp/beats.png';
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
+// REVIEW RECEIPT. The sheet is an image, so no gate can score it; the only checkable fact is whether
+// anyone rendered one for THIS version of the scene. Stamp the scene's content hash next to the sheet and
+// beat-check reads it back: a hash that no longer matches means the scene changed since it was looked at.
+writeSeenReceipt(dataArg, sheet, 'beats');
 console.log(`✓ ${beats.length} beats · ${duration.toFixed(1)}s${vs ? ` · vs SITE ${vs}` : ''}  →  ${sheet}`);
 console.log('  Read the sheet, give a verdict PER numbered beat (keep / fix X / cut / too fast). Judge each against\n  docs/CRAFT/TASTE-RULES.md: does it read, earn its time, and connect to its neighbours?');

@@ -14,6 +14,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
+import { typedLen } from '../../core/layers/text.js';
 import { slowPush, diveIn, panFollow, orbit, multiPhase, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
@@ -851,6 +852,43 @@ ok('beamAngle wraps 0..360', beamAngle(10, 0.5) >= 0 && beamAngle(10, 0.5) < 360
 ok('beamAngle deterministic', beamAngle(1.23, 0.7) === beamAngle(1.23, 0.7));
 ok('shinePos travels -20..120', (() => { const p = shinePos(0.8, 1.6); return p >= -20 && p <= 120; })());
 ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-gradient(from 45.0deg'));
+// ---- typing / untype character count (core/layers/text.js, pure in local t) -----------------------
+{
+  const VIS = 20;
+  const fwd = (lt) => typedLen(lt, { cps: 10, visLen: VIS });
+  ok('typedLen: starts at 0', fwd(0) === 0);
+  ok('typedLen: rises with time', fwd(0.5) === 5 && fwd(1) === 10);
+  ok('typedLen: reaches visLen', fwd(VIS / 10) === VIS);
+  ok('typedLen: never exceeds visLen', (() => { for (let lt = 0; lt < 12; lt += 0.01) if (fwd(lt) > VIS) return false; return true; })());
+  ok('typedLen: never below 0', (() => { for (let lt = -3; lt < 12; lt += 0.01) if (fwd(lt) < 0) return false; return true; })());
+  ok('typedLen: forward count is non-decreasing', (() => { let prev = -1; for (let lt = 0; lt < 4; lt += 0.01) { const n = fwd(lt); if (n < prev) return false; prev = n; } return true; })());
+
+  const un = (lt) => typedLen(lt, { cps: 10, visLen: VIS, untype: 2.5 });
+  ok('untype: full line at the untype moment', un(2.5) === VIS);
+  ok('untype: non-increasing after the untype time', (() => { let prev = Infinity; for (let lt = 2.5; lt < 8; lt += 0.01) { const n = un(lt); if (n > prev) return false; prev = n; } return true; })());
+  ok('untype: deletes back to 0', un(2.5 + VIS / 10 + 0.05) === 0 && un(20) === 0);
+  ok('untype: stays 0 once emptied', (() => { for (let lt = 6; lt < 30; lt += 0.05) if (un(lt) !== 0) return false; return true; })());
+  ok('untypeRate changes the delete speed', (() => {
+    const slow = typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 4 });
+    const fast = typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 40 });
+    return slow === VIS - 2 && fast === 0 && slow > fast;
+  })());
+  ok('untypeRate defaults to the typing rate', typedLen(3, { cps: 10, visLen: VIS, untype: 2.5 })
+    === typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 10 }));
+  ok('no untype: unaffected by untypeRate (regression guard)', (() => {
+    for (let lt = 0; lt < 4; lt += 0.01) if (typedLen(lt, { cps: 10, visLen: VIS }) !== typedLen(lt, { cps: 10, visLen: VIS, untypeRate: 3 })) return false;
+    return true;
+  })());
+  // PURITY: parallel seek renders evaluate frames out of order. Shuffled must equal ascending.
+  ok('typedLen pure in lt (shuffled order = ascending order)', (() => {
+    const args = { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 7 };
+    const times = [0, 0.37, 1.9, 2.5, 2.51, 3.3, 4.75, 6.2, 9, 0.04, 2.499, 5.5];
+    const asc = [...times].sort((a, b) => a - b).map((lt) => [lt, typedLen(lt, args)]);
+    const shuffled = [11, 3, 0, 7, 5, 1, 9, 2, 10, 4, 8, 6].map((i) => times[i]);
+    const got = new Map(shuffled.map((lt) => [lt, typedLen(lt, args)]));
+    return asc.every(([lt, n]) => got.get(lt) === n);
+  })());
+}
 // ---- camera moves (pure keyframe generators, checked through cameraAt) ----------------------------
 {
   const push = slowPush({ start: 1, dur: 4, from: 1, to: 1.2 });

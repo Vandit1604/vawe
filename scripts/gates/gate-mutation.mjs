@@ -109,6 +109,14 @@ const CASES = [
     scene: scene([TXT()], { cuts: [{ t: 1, style: 'teleport' }] }) },
   { gate: 'validate', name: 'valid scene passes', expect: 'pass',
     scene: scene([TXT({ anim: 'lift' })], { cuts: [{ t: 1, style: 'softwipe' }] }) },
+
+  // ---- beat-check: the only gate that reads the scene as a TIMELINE rather than a bag of layers.
+  // Both tells are pinned, because they are measured off different edges of the clock (an interior
+  // hole vs the closing plate) and one can rot while the other keeps firing.
+  { gate: 'beatcheck', name: 'dead-air · a hole between two beats', expect: 'fail', match: /dead-air/,
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })]) },
+  { gate: 'beatcheck', name: 'ends-on-nothing · the film closes on a bare backdrop', expect: 'fail', match: /ends-on-nothing/,
+    scene: scene([TXT({ duration: 1 })]) },
 ];
 
 const run = (cmd, args) => {
@@ -119,6 +127,7 @@ const run = (cmd, args) => {
 const GATE_CMD = {
   audit: (f) => ['node', ['verify/audit.mjs', f]],
   validate: (f) => ['node', ['core/validate.mjs', f]],
+  beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
 };
 
 let pass = 0; const broken = [];
@@ -288,6 +297,15 @@ const srcCases = [
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
   // A hand-authored backdrop that animates in a browser and renders a dead still is the exact failure
   // the message exists to prevent; if the check stops firing, nothing else in the pipeline notices.
+  // `untype` (reverse typing) used to be checked only for WIRING — that the engine reads the prop the
+  // schema advertises. That proved the props were not no-ops and nothing more: the count itself, the
+  // part that can actually be wrong, was untestable while it lived inside frame() (which needs a DOM).
+  // It is now the exported pure typedLen(), so this case drops the delete term and demands lib-test
+  // notice the line never shrinks.
+  { name: 'text · untype reverses the typing', file: 'core/layers/text.js',
+    mutate: (s) => s.replace('  if (untype != null && lt >= untype) n = Math.min(n, visLen) - Math.floor((lt - untype) * (untypeRate ?? cps));\n', ''),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /untype: deletes back to 0/ },
+
   { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',
     mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /DEAD STILL/ },

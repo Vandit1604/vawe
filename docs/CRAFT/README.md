@@ -47,6 +47,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
 | [BLUEPRINTS.md](BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
+| [SUBAGENTS.md](SUBAGENTS.md) | judging your own render (a full pass, a recreation, anything you'll ship) | why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message |
 
 **What & why (the story layer):**
 
