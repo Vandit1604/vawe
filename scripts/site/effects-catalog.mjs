@@ -106,6 +106,7 @@ out.push('| A living background | a moving `bg` preset (aurora/constellation/pap
 out.push('| A whole beat, directed | a `{type:"beat"}` blueprint |');
 out.push('| A border to glow / a sheen to sweep | the per-frame effects (border-beam / shine) |');
 out.push('| A logo to appear | the `logoReveal` beat / path draw-on / shape-morph |');
+out.push('| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |');
 out.push('');
 let total = 0;
 for (const [title, intro, list, tag] of sections) {

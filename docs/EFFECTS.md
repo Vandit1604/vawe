@@ -19,6 +19,7 @@
 | A whole beat, directed | a `{type:"beat"}` blueprint |
 | A border to glow / a sheen to sweep | the per-frame effects (border-beam / shine) |
 | A logo to appear | the `logoReveal` beat / path draw-on / shape-morph |
+| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |
 
 ## Kinetic text presets  `[text]`
 

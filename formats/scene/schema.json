@@ -880,6 +880,9 @@
           "type": "object",
           "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
         },
+        "parts": {
+          "label": "Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards) so a figure animates piece by piece. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease } OR an array of them (bars, then line, then dots). Pure (seeked GSAP)."
+        },
         "splitText": {
           "type": "object",
           "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease } — each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."

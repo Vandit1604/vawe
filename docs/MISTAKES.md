@@ -3094,3 +3094,25 @@ darkMesh/light key. Verified: the `glass` preset on a `spotlight` bg now renders
 
 **Gate.** Caught by rendering a remixed theme with a dark bg preset (exactly the author-the-frame eyeball
 step). A cheap future guard: `make theme-remix` could self-render a one-frame probe on a dark bg preset.
+
+## #147 — dense per-child choreography (`parts`), so figures animate piece by piece by default
+
+**What.** Our motion read flatter than another engine because a figure (a chart, a diagram) arrived as ONE
+block — we animated at the layer level, they choreograph every child on a timeline (bar 1 grows, then bar
+2, the line draws, dots pop). Added `parts`: a declarative per-child entrance stagger on ANY layer's
+children (`html` inline-SVG, `group`, `svg`).
+
+`{ "parts": [ {select:"rect",anim:"growUp",stagger:0.09}, {select:"polyline",anim:"drawOn",delay:1.3},
+{select:"circle",anim:"popIn",delay:1.5} ] }` — one spec or an array (bars, THEN line, THEN dots).
+Entrances: growUp/widen/popIn/fadeUp/riseIn/drawOn. Built as a paused GSAP tween that `seekAll` drives —
+same mechanism as `fx`, so pure in n (probe green). NOT `<script>` in the untrusted html layer (that was a
+real exploit surface); `parts` is the safe, declarative path that closes the density gap.
+
+**Made it the DEFAULT, three ways:** the capability (dense is now a one-liner), the doctrine
+(AUTHOR-THE-FRAME.md + the EFFECTS mechanism table say author figures this way), and the gate — the
+direction-floor now warns `static-figure` when a 3+-child group or multi-shape SVG animates as one block.
+
+**Gate.** `make probe` (parts are pure); `schema-drift` (new `parts` prop); the floor's `static-figure`
+nudge two-sided verified; the Lumen demo's chart builds piece by piece. Small authoring gotcha logged in
+passing: `countStart` is LOCAL to a layer's `start` (`t - start`), not absolute — a count scheduled at an
+absolute time never fires.

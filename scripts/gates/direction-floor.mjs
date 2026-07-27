@@ -98,6 +98,15 @@ const presets = flat.filter((l) => l.preset).map((l) => l.preset);
 if (presets.length >= 5 && new Set(presets).size === 1) {
   warn('motion-monotony', `all ${presets.length} kinetic lines use the same reveal preset "${presets[0]}" — the film moves monotonously. Vary it so no two beats move alike (up / scale / blur / decode / riseClip): docs/EFFECTS.md kinetic presets.`);
 }
+// DENSE FIGURES BY DEFAULT (parts): a multi-part figure that lands as ONE block reads flat next to real
+// motion graphics. A group of 3+ cards, or an inline SVG with 3+ shapes, should animate PIECE BY PIECE.
+const staticFigures = flat.filter((l) => {
+  if (l.parts || l.split) return false;
+  if (l.type === 'group' && Array.isArray(l.children) && l.children.length >= 3 && l.each == null) return true;
+  if (l.type === 'html' && typeof l.html === 'string' && (l.html.match(/<(rect|circle|path|polyline|line)\b/g) || []).length >= 3) return true;
+  return false;
+});
+if (staticFigures.length) warn('static-figure', `${staticFigures.length} figure(s) (a 3+-child group or a multi-shape SVG) animate as one block — add \`parts\` (or a group \`each\`) so they build piece by piece: bars grow, the line draws, dots pop. docs/CRAFT/AUTHOR-THE-FRAME.md.`);
 
 // ---- report ----
 const score = vocab.length + (directedByBeats ? 3 : 0);

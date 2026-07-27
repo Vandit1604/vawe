@@ -199,6 +199,35 @@ boot((data, fps, theme, canvas) => {
     }
     // SPLIT TEXT (SplitText) — LINE level ONLY (char/word stay with the engine's own `split`): masked line
     // reveals, each line clipped so it slides up from behind. Do NOT combine with `split` on the same layer.
+    // PARTS — dense per-CHILD choreography: stagger a named entrance across a layer's own child elements
+    // (a bespoke SVG's bars/dots/paths, a group's cards), so a single figure animates piece by piece
+    // instead of arriving as one block. This is the another engine density move (tl.fromTo on child elements
+    // with a stagger), built on our seeked GSAP so it stays pure in n. Applies to any layer with children
+    // (html inline-SVG, group, svg). `parts: { select, anim, each, stagger, delay, ease }`.
+    if (L.parts && window.gsap) {
+      // named part entrances: [staticSetup(t), fromVars, toVars]. Kept tiny + local — the vocabulary an
+      // author reaches for on a figure; every one is a compositor-friendly transform/opacity/dashoffset.
+      const PARTS = {
+        growUp: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 100%'; }, { scaleY: 0 }, { scaleY: 1 }],
+        widen: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '0% 50%'; }, { scaleX: 0 }, { scaleX: 1 }],
+        popIn: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 50%'; }, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }],
+        fadeUp: [null, { y: 24, opacity: 0 }, { y: 0, opacity: 1 }],
+        riseIn: [null, { y: 48, opacity: 0 }, { y: 0, opacity: 1 }],
+        drawOn: [(t) => { try { t.setAttribute('pathLength', '1'); } catch (e) {} t.style.strokeDasharray = '1 1'; }, { strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+      };
+      // one spec or an ARRAY of specs — a figure can grow its bars, THEN draw its line, THEN pop its dots.
+      for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
+        const sel = p.select || 'rect, circle, path, polyline, line, [data-part]';
+        const targets = [...el.querySelectorAll(sel)];
+        if (!targets.length) continue;
+        const spec = PARTS[p.anim] || PARTS.fadeUp;
+        if (spec[0]) targets.forEach(spec[0]);
+        window.gsap.fromTo(targets, { ...spec[1] }, {
+          ...spec[2], duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07,
+          ease: p.ease || 'power3.out', delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
+        });
+      }
+    }
     if (L.splitText && window.gsap && window.SplitText) {
       const st = L.splitText;
       const parts = new window.SplitText(el, { type: 'lines', mask: st.mask === false ? undefined : 'lines', linesClass: 'sline' });
