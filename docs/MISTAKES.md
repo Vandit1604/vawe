@@ -3474,3 +3474,32 @@ boundary.
 **Lesson.** Doctrine has bugs like code does, and they only surface when somebody follows it literally on
 a brief it was not written against. Two briefs found two: a missing hook rule and a self-contradicting
 ellipsis. Neither was visible by reading the skill.
+
+## #163 — the slideshow ban never evaluated a single one of the three test films
+
+**What.** A three-arm test on one brief: no skill and no gates, no skill with gates, and the skill. The
+three-way read was clear and useful. The unconstrained arm produced five typographic cards, a number as
+flat text and a wordmark end card, with no artifact on screen at any point. The gated arm produced a
+quote card that persists and counts down. The skill arm produced a quote sheet that flies into a `Fwd:`
+row and comes back out of a `Re:` revised, which is the only one of the three that shows the MECHANISM
+of the service rather than asserting its result.
+
+**The finding that matters more.** All three films declare `cuts: 0`, `seams: 0`, `transitions: 0`. The
+`no-continuous-object` tell requires at least one declared boundary to become eligible, so it never
+evaluated ANY of them. The ban shipped in #160 as "slideshows are banned by default" did not fire once
+across three films, one of which is a textbook slideshow.
+
+**Two corrections to the record.** The claim that the gate "forced the control to keep a layer alive"
+holds only for the earlier shotcode brief, where that control did declare cuts and did say so. On this
+brief the gate was silent, so the control's travelling card was its own doing, and what separated the
+unconstrained arm from it was the REST of `author-check`, not the continuity tell.
+
+**The hole is not theoretical.** It was already recorded as the honest limit of #160, and this test shows
+an agent with no continuity pressure naturally lands in exactly the shape the gate cannot see. A film of
+cross-faded islands never declares a cut. So the tell catches an author who cuts badly and misses an
+author who never cuts at all, which is the more common way to write a slideshow.
+
+**Lesson.** A gate's ELIGIBILITY condition is part of its coverage and deserves the same blast-radius
+scrutiny as its firing condition. "18 of 18 eligible scenes trip it" says nothing about how many scenes
+are eligible. The next version must infer boundaries from layer windows, and that needs its own
+blast-radius pass, since the first attempt at inferring them fired on nearly every short scene.
