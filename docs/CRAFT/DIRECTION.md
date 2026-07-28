@@ -131,3 +131,22 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 - Blake Snyder — _Save the Cat!_ — hook-first, escalation.
 - George Loewenstein — "The Psychology of Curiosity" (1994) — the open loop / curiosity gap.
 - David Ogilvy — _Ogilvy on Advertising_ — front-loading the strong element, honesty.
+
+## no-continuous-object (and its inferred twin)
+
+A short film (under 15s) with cuts must carry a **continuous object**: one content layer that both spans a
+cut and CHANGES across it. Pose either side of the boundary is read with the engine's own pure functions, so
+a static watermark riding the cut buys nothing. A layer whose internal clock the gate cannot read is assumed
+to transform, because a gate must not invent a failure out of something it cannot see. **Blocks.**
+
+`no-continuous-object-inferred` is the same test where the author declared no cuts at all. An island
+boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the
+layers standing through it do not outnumber either side. It exists because three films authored on one brief
+declared zero cuts between them, so the blocking tell evaluated none of them, including a textbook slideshow
+(MISTAKES #163). It **warns**, and blocks under `STRICT=1`: failing a build over a boundary the author never
+wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the slideshow is a
+single integer validated against four films.
+
+**What neither tell can see.** Both measure that a prop survives a junction and moves. Neither can tell a
+card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films
+pass on that technicality. For the real thing, plan with `vawe-continuous-action`.

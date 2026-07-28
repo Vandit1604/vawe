@@ -183,6 +183,48 @@ const CASES = [
                   TXT({ text: 'Generating', start: 3, duration: 2, size: 64, split: 'word', preset: 'up' })],
       { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
 
+  // ---- direction-floor · no-continuous-object, INFERRED half. The declared half above only wakes up
+  // when the scene says `cuts`/`seams`/`transitions`; a film of cross-faded islands says none of those
+  // and was invisible to it (MISTAKES #163). Boundaries are now inferred from the layer windows: a
+  // moment where ≥2 content layers leave and ≥2 unrelated ones arrive. All three directions pinned,
+  // because this half's whole risk is crying wolf, and a WARN-tier false positive is invisible to an
+  // exit code (#25, #159) — hence `notMatch` on the mirrors.
+  { gate: 'directionfloor', name: 'no-continuous-object · cross-faded islands with no declared cut', expect: 'fail',
+    match: /no-continuous-object-inferred/, outputOnly: true,   // WARN tier: assert it SPOKE
+    scene: scene([TXT({ text: 'First island', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
+                  TXT({ text: 'Second island', y: 300, start: 1.9, duration: 1.6, split: 'word', preset: 'scale' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 1.6 }),
+                  TXT({ text: 'Third island', y: 300, start: 3.7, duration: 2.0, split: 'word', preset: 'blur' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 3.7, duration: 2.0 })],
+      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
+  // The mirror: identical island structure, but a card rides every junction and MOVES through it.
+  { gate: 'directionfloor', name: 'an object carried through an undeclared junction is NOT a slideshow', expect: 'pass',
+    notMatch: /no-continuous-object/,
+    scene: scene([{ type: 'rect', x: 700, y: 700, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 6,
+                    motion: [{ t: 0, x: 0, scale: 1 }, { t: 1.8, x: -300, scale: 0.6, ease: 'easeInOutCubic' },
+                             { t: 3.6, x: 300, scale: 1.2, ease: 'easeInOutCubic' }, { t: 6, x: 0, scale: 1 }] },
+                  TXT({ text: 'First island', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
+                  TXT({ text: 'Second island', y: 300, start: 1.9, duration: 1.6, split: 'word', preset: 'scale' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 1.6 }),
+                  TXT({ text: 'Third island', y: 300, start: 3.7, duration: 2.0, split: 'word', preset: 'blur' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 3.7, duration: 2.0 })],
+      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
+  // The second mirror, pinning the clause that keeps the inference narrow: a junction the STANDING SET
+  // outnumbers is a busy overlap, not an island break. Three elements hold the frame while one pair of
+  // lines swaps for another — a persistent set, so no boundary is inferred and nothing is said.
+  { gate: 'directionfloor', name: 'a standing set outnumbering the swap is not an island junction', expect: 'pass',
+    notMatch: /no-continuous-object/,
+    scene: scene([{ type: 'rect', x: 140, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
+                  { type: 'rect', x: 500, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
+                  { type: 'rect', x: 860, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
+                  TXT({ text: 'First line', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
+                  TXT({ text: 'Second line', y: 300, start: 1.9, duration: 3.8, split: 'word', preset: 'scale' }),
+                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 3.8 })],
+      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
+
   // ---- storyboard-check · the object spine, enforced at PLANNING time. The scene tell can only speak
   // once the JSON exists; by then the plan is already a slideshow. Both directions pinned.
   { gate: 'storyboard', name: 'spine · a short film that names no object', expect: 'fail', ext: 'md',
@@ -225,8 +267,11 @@ for (const c of CASES) {
     ok = (c.outputOnly ? true : failed) && (!c.match || c.match.test(r.out));
     why = !failed && !c.outputOnly ? 'gate stayed SILENT on a fixture built to break it' : 'gate failed but for the wrong reason';
   } else {
-    ok = !failed;
-    why = 'gate FIRED on a fixture that is correct (false positive)';
+    // notMatch: the must-pass mirror of a WARN-tier rule. Exit code alone cannot see a warning, so a
+    // clean exit would "pass" even while the gate cried wolf in its output. Name the tell that must
+    // NOT appear and the false positive is caught.
+    ok = !failed && (!c.notMatch || !c.notMatch.test(r.out));
+    why = failed ? 'gate FIRED on a fixture that is correct (false positive)' : 'gate WARNED on a fixture that is correct (false positive)';
   }
   console.log(`   ${ok ? '✓' : '✗'} ${c.gate.padEnd(9)} ${c.expect === 'fail' ? 'must-fail' : 'must-pass'}  ${c.name}`);
   if (ok) pass++; else broken.push({ ...c, why, out: r.out.split('\n').filter(Boolean).slice(-4).join(' | ').slice(0, 220) });

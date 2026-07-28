@@ -119,7 +119,12 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 2a000. **SLIDESHOWS ARE BANNED, NOT DISCOURAGED.** A film under 15s with cuts must carry a CONTINUOUS
    OBJECT: one content layer that survives a cut and CHANGES across it. If every beat is an island, born
    and dying inside its own window, the cuts are jumps between unrelated shots and `direction-floor` blocks
-   on `no-continuous-object`. Planning is gated too: `storyboard-check` FAILS a short storyboard that names
+   on `no-continuous-object`. If the film declares NO cuts, boundaries are INFERRED from where the visible
+   content set turns over wholesale, and that half warns rather than blocks (`no-continuous-object-inferred`,
+   promoted to a block under `STRICT=1`): a build should not fail over a cut the author never wrote. Know the
+   limit, it is measured, not guessed: the gate can see that a prop survives a junction and moves. It cannot
+   see whether that prop BECOMES the next thing, which is the difference between a travelling card and a
+   subject. Only the skill buys that. Planning is gated too: `storyboard-check` FAILS a short storyboard that names
    no `object:` in frontmatter, and fails any beat that never says where that object is. Name the object
    before you write a line of JSON. How: **[`vawe-continuous-action`](.claude/skills/vawe-continuous-action/SKILL.md)**.
    Every one of the 18 eligible short films in this library trips this and carries a waiver: that is debt to

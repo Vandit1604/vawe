@@ -13,9 +13,12 @@
 //   node scripts/gates/direction-floor.mjs <scene.json> [--strict]   ·   make direction-floor D=<file>
 // It also reads the scene as a CONTINUITY: on a short film, one content object must survive each cut
 // and CHANGE there (`no-continuous-object`). A film whose every beat is an island is a slideshow no
-// matter how much motion each island contains.
-// FAIL (blocks): `plain-slideshow` · `no-continuous-object`. WARN (coaching): no-kinetic-type · no-camera · no-transition ·
-// no-bg-motion · low-vocab. Waive a deliberate minimal film with {"authoring":{"allow":["plain-slideshow"]}}.
+// matter how much motion each island contains. Boundaries come from two places — DECLARED (`cuts` /
+// `seams` / `transitions`, blocking) and INFERRED from the layer windows when the scene declares none
+// (`no-continuous-object-inferred`, coaching), because a film of cross-faded islands never cuts.
+// FAIL (blocks): `plain-slideshow` · `no-continuous-object`. WARN (coaching): no-continuous-object-inferred ·
+// no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
+// film with {"authoring":{"allow":["plain-slideshow"]}}.
 import fs from 'node:fs';
 import { motionAt } from '../../core/sequence.js';
 import { typedLen } from '../../core/layers/text.js';
@@ -166,9 +169,12 @@ const poseAt = (l, t) => {
   return JSON.stringify(p);
 };
 
-if (bounds.length && dur < CONTINUITY_MAX_DUR) {
+// The spans-and-changes test, run over a list of boundary times. One object must be visible on both
+// sides of SOME boundary and be in a different pose there. Returns the two layer sets so the message
+// can tell "nothing crossed" apart from "something crossed but it was furniture".
+const continuity = (bs) => {
   const spanning = [], transforming = [];
-  for (const b of bounds) {
+  for (const b of bs) {
     for (const l of spineCandidates) {
       const [s, e] = visible(l);
       if (!(s < b - EPS && e > b + EPS)) continue;
@@ -176,16 +182,68 @@ if (bounds.length && dur < CONTINUITY_MAX_DUR) {
       if (opaqueMotion(l) || poseAt(l, b - EPS) !== poseAt(l, b + EPS)) transforming.push(l);
     }
   }
+  return { spanning, transforming };
+};
+const label = (l) => `${l.type || 'text'}${l.text ? ` "${String(l.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+const carriedMsg = (spanning) => (spanning.length
+  ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there — a fixed logo or watermark riding the cut is furniture, not a spine.`
+  : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`);
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.';
+
+if (bounds.length && dur < CONTINUITY_MAX_DUR) {
+  const { spanning, transforming } = continuity(bounds);
   if (!transforming.length) {
-    const label = (l) => `${l.type || 'text'}${l.text ? ` "${String(l.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
-    const carried = spanning.length
-      ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there — a fixed logo or watermark riding the cut is furniture, not a spine.`
-      : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`;
     // BLOCKS. A WARN here let every NEW slideshow through, which is the one thing this tell exists to
     // stop. The 18 pre-existing short cut-bearing scenes in formats/scene/ carry an explicit
     // {"authoring":{"allow":["no-continuous-object"]}} waiver, so the gate holds new work without
     // breaking `make video` for scenes it did not cause — the same trade beat-check's `dead-air` made.
-    fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carried} Fix: name ONE object (the button, the card, the row, the token), keep it alive across the cut, and make the cut a state change of it (a \`motion\` track through the seam, a \`vars\` morph, a ken push, a typing line that keeps typing). Every cut answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.`);
+    fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carriedMsg(spanning)} ${FIX_MSG}`);
+  }
+}
+
+// ── INFERRED ISLAND BOUNDARIES ───────────────────────────────────────────────────────────────────
+// A slideshow does not have to declare a cut, and the commoner shape does not: a card of lines fades
+// out, an unrelated card fades in, `cuts`/`seams`/`transitions` are all empty, and the test above is
+// never even eligible. Three A/B films were authored on one brief, all three declared zero boundaries,
+// and the tell evaluated none of them — including a textbook slideshow (MISTAKES #163).
+//
+// So infer the junctions from the layer windows. An ISLAND BOUNDARY is a moment where the visible
+// CONTENT set turns over: at least two content layers end just before it and at least two unrelated
+// ones begin just after, counting only layers that do NOT bridge it. That is what a card swap looks
+// like. A film that hands its subject off one element at a time (a headline becomes a prompt box
+// becomes a button becomes a loading dot) never presents two-out-and-two-in at the same instant, so
+// it stays invisible here — which is the point. An earlier attempt that inferred a boundary from any
+// start-cluster fired on nearly every short scene including the good ones (#163); this one is
+// deliberately narrow, because a gate that cries wolf is worse than no gate at all (#25, #159).
+const TURNOVER_MIN = 2;   // layers leaving AND arriving — a CARD swaps, not a line
+const STEP = 1 / 30;      // one frame
+const visAt = (t) => spineCandidates.filter((l) => { const [s, e] = visible(l); return s <= t && e > t; });
+const inferBounds = () => {
+  const runs = [];
+  let run = null;
+  for (let t = EPS + STEP; t < dur - EPS; t += STEP) {
+    const before = visAt(t - EPS), after = visAt(t + EPS);
+    const bridge = before.filter((l) => after.includes(l));
+    const exiting = before.length - bridge.length, entering = after.length - bridge.length;
+    const score = Math.min(exiting, entering);
+    // A junction the bridge outnumbers is a busy overlap, not an island break.
+    const isBoundary = score >= TURNOVER_MIN && bridge.length < Math.max(exiting, entering);
+    if (isBoundary) { if (!run) runs.push(run = { t, score }); else if (score > run.score) { run.t = t; run.score = score; } }
+    else run = null;
+  }
+  // Drop anything already covered by a DECLARED boundary — that half has its own (blocking) verdict.
+  return runs.map((r) => round3(r.t)).filter((t) => !bounds.some((b) => Math.abs(b - t) <= EPS * 2));
+};
+if (dur < CONTINUITY_MAX_DUR) {
+  const inferred = inferBounds();
+  if (inferred.length) {
+    const { spanning, transforming } = continuity(inferred);
+    if (!transforming.length) {
+      // WARN, not FAIL, and deliberately so. These boundaries were INFERRED, not authored: the scene
+      // never said "cut here", so a wrong inference blames an author for something they did not write.
+      // The declared half stays blocking. Waived by either code — it is one tell, two ways of seeing it.
+      warn('no-continuous-object-inferred', `SLIDESHOW BY CONSTRUCTION (inferred): ${dur}s with no declared cut, but the visible content set turns over wholesale at ${inferred.map((t) => `${t}s`).join(', ')} — cross-faded islands are still islands. ${carriedMsg(spanning)} ${FIX_MSG}`);
+    }
   }
 }
 const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
@@ -215,9 +273,12 @@ const score = vocab.length + (directedByBeats ? 3 : 0);
 console.log(`\n  direction floor · ${file}`);
 console.log(`  motion vocabulary: ${vocab.map((k) => `${k}×${sig[k]}`).join(' · ') || '(none)'}${directedByBeats ? '  [composed from blueprints]' : ''}`);
 console.log(`  directedness score: ${score}   (floor: not a plain slideshow · reach ≥3 techniques)`);
-const fails = findings.filter((f) => f.sev === 'FAIL' && !allow.has(f.code));
-const waived = findings.filter((f) => f.sev === 'FAIL' && allow.has(f.code));
-const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
+// The declared and inferred halves of the continuity tell are one rule seen two ways, so a scene that
+// waived the declared one has already declared the break deliberate; don't re-raise it as the other.
+const waivedBy = (code) => allow.has(code) || (code === 'no-continuous-object-inferred' && allow.has('no-continuous-object'));
+const fails = findings.filter((f) => f.sev === 'FAIL' && !waivedBy(f.code));
+const waived = findings.filter((f) => f.sev === 'FAIL' && waivedBy(f.code));
+const warns = findings.filter((f) => f.sev === 'WARN' && !waivedBy(f.code));
 console.log(`\n  ${fails.length} fail · ${warns.length} warn${waived.length ? ` · ${waived.length} waived` : ''}`);
 for (const f of fails) console.log(`    ✗ [${f.code}] ${f.msg}`);
 for (const w of warns) console.log(`    ~ [${w.code}] ${w.msg}`);

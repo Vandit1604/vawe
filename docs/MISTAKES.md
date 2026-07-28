@@ -3503,3 +3503,27 @@ author who never cuts at all, which is the more common way to write a slideshow.
 scrutiny as its firing condition. "18 of 18 eligible scenes trip it" says nothing about how many scenes
 are eligible. The next version must infer boundaries from layer windows, and that needs its own
 blast-radius pass, since the first attempt at inferring them fired on nearly every short scene.
+
+## #164 — closing #163: boundaries are inferred now, and the ban is honestly scoped
+
+**Fix.** `no-continuous-object-inferred` catches a short film that declares no cuts at all. An island
+boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and
+the layers standing through the junction do not outnumber either side. The existing spans-and-changes
+logic then runs unchanged at those inferred times.
+
+**The threshold is the whole rule, and it was measured.** At two-out-and-two-in: 4 scenes eligible, 1
+trips, and it is the labelled slideshow. At one-out-and-one-in: 11 eligible, 6 trip, INCLUDING
+`higgsfield-recreation`, the exemplar. At three: nothing is caught at all. Two is the only value that
+catches the slideshow without failing the film the grammar was derived from. A rule resting on one integer
+validated against four films is thin, which is why the inferred half WARNS rather than blocks (it does
+block under `STRICT=1`). Failing a build over a cut the author never wrote is a bad error to be wrong about.
+
+**What the tell still cannot see, stated so nobody trusts it further than it goes.** It measures that a
+prop survives a junction and moves. It cannot tell a card that TRAVELS from a card that BECOMES the next
+thing, and that difference is the actual grammar. Two of the four A/B films pass on exactly that
+technicality: their object persists and moves without ever transforming into anything. The gate buys
+continuity of a prop; only planning with the skill buys a subject.
+
+**Method note worth keeping.** This was tunable at all because the A/B runs left a LABELLED SET behind:
+two films known to have the grammar and two known to lack it. Threshold work without labelled examples is
+guessing, and the earlier attempt that "fired on nearly every short scene" was exactly that.
