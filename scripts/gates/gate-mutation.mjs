@@ -475,7 +475,9 @@ const srcCases = [
   // Proves the accepted-key list is DERIVED, not hand-copied: rename the property `liquid` reads and the
   // vocabulary must follow it. A hand-kept list would still advertise `scale` and this would stay green.
   { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds.js',
-    mutate: (s) => s.replace('const sp = (o.speed ?? 0.42) * t, sc = o.scale ?? 1.25', 'const sp = (o.speed ?? 0.42) * t, sc = o.scaleX ?? 1.25'),
+    // Anchored on the property NAME alone, not on the default beside it: pinning the literal made this
+    // fixture go stale the moment `liquid`'s speed was retuned, and a stale fixture is an unproven gate.
+    mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
   { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',

@@ -241,7 +241,12 @@ export function liquid(ctx, w, h, t, o = {}) {
   const bctx = buf.getContext('2d');
   const img = bctx.createImageData(res, bh);
   const d = img.data;
-  const sp = (o.speed ?? 0.42) * t, sc = o.scale ?? 1.25, wrp = o.warp ?? 0.7;
+  // speed and scale are NOT independent knobs to tune in one step: bigger folds (lower `scale`) already
+  // read as slower, so cutting both at once double-reduces the apparent motion. Retuning the fold SIZE
+  // from 2.4 to 1.25 and the speed from 1 to 0.42 together is exactly that mistake, and left the field
+  // almost frozen. The fold size was right; the speed was not. 1.2 is what matched the reference's rate
+  // of change on two separate 1.5s strips (docs/MISTAKES.md #155).
+  const sp = (o.speed ?? 1.2) * t, sc = o.scale ?? 1.25, wrp = o.warp ?? 0.7;
   const lo = o.edge0 ?? 0.52, hi = o.edge1 ?? 0.93, gl = o.gloss ?? 0.99;
   const sd = (o.seed ?? 0) * 0.37;
   const ar = w / h;
