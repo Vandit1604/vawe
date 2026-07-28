@@ -256,7 +256,10 @@ const REGEX_ANALYZERS = [
   // Numbered section markers (01 / 02 / 03 ...)
   (content, filePath) => {
     const text = stripHtmlToText(content);
-    const re = /\b(0[1-9]|1[0-2])\b/g;
+    // The number has to stand ALONE to be a section marker. `\b` is not enough: in `2026-03-01` the
+    // `01` sits between a hyphen and a comma, both word boundaries, so every ISO date in a document
+    // read as an `01 / 02 / 03` scaffold. Times (`12:05`), versions (`v1.02.3`) and decimals did too.
+    const re = /(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])/g;
     const seen = new Set();
     let m;
     while ((m = re.exec(text)) !== null) seen.add(m[1]);

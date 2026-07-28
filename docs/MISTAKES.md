@@ -3690,3 +3690,28 @@ fixture-writing site records the hazard.
 **Lesson.** A mutation harness proves a gate can fire only if its assertion is on something ONLY the gate
 can emit. This is the same failure as #86 (a self-fulfilling check reports success forever), one level
 up: the harness that exists to prove gates work had a hole in the same shape as the holes it hunts.
+
+## #169 — the anti-slop detector read every ISO date as an `01 / 02 / 03` section scaffold
+
+**What.** `make slop` failed `ab4-a-ledgerline` with `numbered-section-markers · Sequence: 01, 02, 03,
+05, 06, 08`. The scene has no section markers. Those are the day fragments of the CSV rows it renders:
+`2026-03-01,DD ACH TFR STRIPE PAYOUTS,...`.
+
+**Root cause.** The rule matched `/\b(0[1-9]|1[0-2])\b/g` against the stripped text. `\b` is not enough
+to say a number stands alone: in `2026-03-01` the `01` sits between a hyphen and a comma, and both are
+word boundaries. Times (`12:05`), semver (`v1.02.3`) and decimals had the same hole. Any document about
+dates or money tripped a rule about editorial scaffolding.
+
+**Fix.** `(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])` in
+`.claude/skills/impeccable/scripts/detector/engines/regex/detect-text.mjs`. Verified both directions on
+the same input: a real `01 About / 02 Process / 03 Pricing / 04 Contact` scaffold still yields
+`01,02,03,04`; the CSV rows now yield nothing.
+
+**Why it mattered more than one warning.** `make slop` has no waiver, and CLAUDE.md requires it clean
+before a render. So a false positive is not noise, it is a wall: the only ways past it were to stop
+rendering dates or to stop believing the gate. The second is what actually happens, and a gate people
+have learned to ignore is worse than no gate.
+
+**Lesson.** A rule that detects a PATTERN has to test that the pattern stands alone, not merely that its
+characters appear. `\b` answers "is this a token" and never "is this token the whole thing". Any rule
+keyed on bare small integers will meet dates, prices, versions and times before it meets a scaffold.
