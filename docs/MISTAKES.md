@@ -3618,3 +3618,75 @@ layer across the cut, so the gate must stay quiet.
 gracefully; it degrades into nothing, and nothing looks exactly like a black frame. And a gate exemption
 written as a belief about the engine ("a transition fills its time") is a guess. Model what the engine
 actually does, then there is nothing left to forgive.
+
+## #167 — the storyboard promised a change, the film never built one, and every gate stayed green
+
+**What.** The A/B test on the `becomes:` field returned a negative result, and the way it lost is the
+finding. A blind judge picked the CONTROL arm: more demonstrations (7 to 4), higher information per
+second, same underlying move on both sides (a crossfade inside a fixed box), so requiring the field
+bought no technique. The treatment film's worst defect was a middle beat where the frame does not
+change. Its storyboard carried a correct `becomes:` on exactly that beat. The author wrote the change
+down, correctly, and then did not build it.
+
+**Root cause.** Two documents, and nothing compared them. `storyboard-check` grades the plan against
+ITSELF: are the beats timed, does each name what it becomes, does the last end on a change. Every one of
+those passes on a plan for a film nobody built. `inspect` reads the scene, but at ONE instant per beat,
+and only for copy and for "some layer here animates" — a beat that stalls for five seconds satisfies it
+at the instant it samples. So a plan could promise a transformation at 5.8s, the JSON could put nothing
+there, and the whole ladder was green.
+
+**Fix.** `scripts/gates/plan-vs-render.mjs`, wired into `author-check` after `inspect` (it reads the same
+`.intent.json` sidecar, which already carried `span` and `becomes`) and standalone as `make plan-check`.
+It lines the plan's beat spans up against the film's clock. FAIL: `plan-overruns-render` (the plan
+budgets a different length than the film runs, so every span below points at the wrong seconds),
+`junction-is-static` (the plan promises a `becomes:` at a boundary and the render has no layer arriving
+or leaving, no cut/seam/sting, no motion key within 0.5s of it). WARN: `held-through-the-change`,
+`beat-holds-still`, `unplanned-junction`, `plan-has-no-spans`.
+
+**The sharp tell.** `held-through-the-change` reads a hold the author WROTE rather than inferring one
+from an absence: two consecutive motion keyframes carrying identical values. `{t:3.46, y:-82}` followed
+by `{t:8.6, y:-82}` says in the author's own hand that this object does not move for 5.14 seconds. On the
+A/B pair it flags the treatment film's stalled beat and passes the control, reproducing the blind judge's
+verdict from static JSON.
+
+**Two bugs in the gate's own first draft, both caught by running it on the film it was written for.**
+(1) It treated "has a `motion` track" as continuous motion and exempted it. A track is keyframes with
+HOLDS between them; both of that film's surfaces carry a 6-key track and both sit frozen inside it, so
+the exemption swallowed the entire film and the gate passed it. (2) Once fixed it fired five times on
+BOTH arms, including the control the judge praised for never sitting still, because ONE layer holding is
+not the frame holding. The hold now only counts across the stretch of it where nothing else arrives or
+leaves either. A gate that shouts at the good film is not a stricter gate, it is a broken one.
+
+**Blast radius, and the model that made it safe.** `beat-check` had modelled the engine's timing rewrite
+(`produce.js`'s `sceneUnits` injection, `scene.js`'s `beatEnd + cutDur` extension) inline. Rather than
+fork it, that model moved to `scripts/gates/scene-timing.mjs` and both gates import it. Proven
+behaviour-preserving: `beat-check`'s output is byte-identical on all 100 scenes.
+
+**Which gate now catches it.** `gate-mutation` pins seven cases, one per tell plus the mirror (a film
+that does what its plan said stays green), 101/101.
+
+**Lesson.** A field that makes an author state their intent does not make them deliver it. Writing the
+change down is not building it, and the gate that reads only the writing will say so approvingly. When
+you add a planning artefact, the question is not whether the plan is well-formed; it is what compares
+the plan to the thing it planned.
+
+## #168 — six gate fixtures were passing on the fixture's own filename
+
+**What.** Found while adding fixtures for #167. `gate-mutation` slugifies a case's name into the
+fixture's filename, and every gate echoes the path it read. So a case named `plan-has-no-spans · …`
+matching on `/plan-has-no-spans/` was satisfied by the echoed path alone. With the gate completely
+silenced, all six new cases still ticked.
+
+**Root cause.** The assertion matched a string the harness itself puts in the output, so it tested the
+harness, not the gate. It bites hardest on `outputOnly` cases, where the exit code gives no independent
+signal.
+
+**Fix.** Anchor on the printed FINDING shape (`[plan-has-no-spans]`, `stub-why —`), which a filename
+cannot produce. Six pre-existing cases sat on the same trap: audit `tiny-text` and `top-heavy`,
+storyboard `becomes-is-a-preset`, `held-state-too-long`, `stub-why`, `partial-timeline`. All six still
+pass once re-anchored, so those rules were genuinely firing. They were simply unprovable. A note at the
+fixture-writing site records the hazard.
+
+**Lesson.** A mutation harness proves a gate can fire only if its assertion is on something ONLY the gate
+can emit. This is the same failure as #86 (a self-fulfilling check reports success forever), one level
+up: the harness that exists to prove gates work had a hole in the same shape as the holes it hunts.

@@ -31,6 +31,21 @@ duration: 29s
   something travelled. Under 15s the gate FAILS a beat with no `becomes:`, and warns when the value
   is animation vocabulary with no change-verb in it.
 
+  WHAT `becomes:` IS ACTUALLY WORTH. We tested it: two 12s films from one brief, one storyboarded
+  with `becomes:` on every beat, one without. A blind judge picked the film WITHOUT it. That film
+  carried more demonstrations (7 against 4) and more information per second, and both films changed
+  their object the same way (a crossfade inside a fixed box), so the field bought no technique.
+  Then the sharp part: the losing film's worst defect is a stretch in the middle where the frame does
+  not move at all, and its storyboard carries a correct `becomes:` on that exact beat. The author
+  wrote the change down and did not build it, and every gate stayed green.
+
+  So keep the field and hold it to its real job. It feeds the intent sidecar, and it lets a failure
+  name what was supposed to happen. It does not make a film better, and a storyboard full of them is
+  not evidence about anything but the storyboard. Writing the change down is not building it. The
+  gate that checks the film is `make plan-check D=<file>` (scripts/gates/plan-vs-render.mjs): it lays
+  these beat spans over the render's clock and fails a junction the plan promised and the JSON left
+  empty. Run it, and read what it says about the beats you were surest of.
+
   THE TIMES ARE READ NOW. The `(0s-1.53s)` range in each heading is parsed. A gap between two beats,
   or a last beat that stops short of the frontmatter `duration`, fails as `timeline-hole`.
   Field reference: docs/CRAFT/FRAME-SPEC.md. Effects to name: docs/EFFECTS.md. Shot shapes: make blueprints.

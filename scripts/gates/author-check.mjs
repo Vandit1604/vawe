@@ -94,6 +94,10 @@ record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-f
 const sidecar = file.replace(/\.json$/, '.intent.json');
 if (fs.existsSync(sidecar)) {
   record('inspect', runGate('inspect (per-beat value contract)', 'scripts/gates/inspect.mjs', strict ? ['--strict'] : []), { waivable: true });
+  // 5b. plan vs render — inspect reads the scene at ONE instant per beat, so it cannot see a beat that
+  //     stalls. This one lines the plan's beat spans up against the film's clock: a promised junction
+  //     with no event at it, and a beat the author froze while the plan says it turns.
+  record('plan', runGate('plan vs render (does the film do what the plan said)', 'scripts/gates/plan-vs-render.mjs', strict ? ['--strict'] : []), { waivable: true });
 } else {
   process.stdout.write(`\n──────── inspect (per-beat value contract) ────────\n`);
   process.stdout.write(`  ⚠ no .intent.json sidecar — this scene declares no per-beat value contract.\n` +

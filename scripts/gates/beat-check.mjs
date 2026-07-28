@@ -55,7 +55,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { sceneDims } from '../../core/safe.js';
+import { sceneTiming, num, SPECK } from './scene-timing.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
@@ -73,63 +73,13 @@ if (d.module !== 'scene') { console.log(`  beat check · ${file}: not a scene mo
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // ---------- the clock ----------
+// SCENE UNITS extend a layer's life, so the gate has to model them or it reads holes that are not there
+// (and misses ones that are). That model is shared with plan-vs-render and lives in ONE place:
+// scripts/gates/scene-timing.mjs. What it corrects for, and why, is documented there.
 const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
 const TAIL = 0.2;       // the closing plate: it must hold something
-const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
-// a beat blueprint layer carries `dur`, a primitive carries `duration`; both mean the same window.
-const spanOf = (L) => {
-  const start = num(L.start, 0);
-  return [start, start + num(L.duration, num(L.dur, 2))];
-};
-const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
-
-// SCENE UNITS extend a layer's life, so the gate has to model them or it reads holes that are not there.
-// core/produce.js turns `sceneUnits` on for any cut film that is not already choreographed, and then
-// formats/scene/scene.js (setLayerTiming) runs every non-last-beat layer to `beatEnd + cutDur` so the
-// beat wrapper can slide it out as one unit. That extension is REAL coverage: those layers are on screen
-// across the whole cut window. Mirrored here rather than approximated with a blanket exemption.
-const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
-  .filter((c) => c && typeof c === 'object' && c.style && c.style !== 'none' && num(c.t, null) !== null)
-  .map((c) => num(c.t, 0)))].sort((a, b) => a - b);
-const choreographed = layers.some(function has(L) {
-  return L && typeof L === 'object' && ((Array.isArray(L.motion) && L.motion.length > 1) || (L.children || []).some(has));
-});
-const sceneUnits = d.sceneUnits === true
-  || (d.sceneUnits == null && d.produced !== false && cutTimes.length > 0 && !choreographed);
-// the cut window that closes beat i (index into cutTimes), matching scene.js's `dur ?? 0.4`.
-const cutDurAt = (t) => {
-  const c = (Array.isArray(d.cuts) ? d.cuts : []).find((x) => x && num(x.t, null) === t);
-  return c && c.dur != null ? num(c.dur, 0.4) : 0.4;
-};
-// beat i covers [edges[i], cutTimes[i]); the last beat runs to the end and has no exit cut.
-const unitEnd = (L) => {
-  if (!sceneUnits || !cutTimes.length) return null;
-  const start = num(L.start, 0);
-  const edges = [0, ...cutTimes];
-  for (let i = 0; i < edges.length - 1; i++) {            // non-last beats only
-    if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i] + cutDurAt(cutTimes[i]);
-  }
-  return null;                                            // last beat: no exit cut, no extension
-};
-// a blackout and a speck both keep a window open without putting anything in the frame. See the header.
-const [CANVAS_W, CANVAS_H] = sceneDims(d);
-const SPECK = 0.08;                                    // share of each canvas axis a garnish stays under
-const OPAQUE_FILL = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i; // a bare hex: no alpha channel, no gradient stops
-const blackout = (L) => L.type === 'rect' && num(L.w, 0) >= CANVAS_W && num(L.h, 0) >= CANVAS_H
-  && typeof L.bg === 'string' && OPAQUE_FILL.test(L.bg.trim()) && num(L.opacity, 1) >= 1;
-// an undeclared box is an unknown size, not a small one, so it counts. `h` falls back to `w` because a
-// fragment sized to a narrow width (an html dot, an icon) is narrow in both directions.
-const speck = (L) => num(L.w, Infinity) < CANVAS_W * SPECK && num(L.h, num(L.w, Infinity)) < CANVAS_H * SPECK;
-// top-level only: a group's window already covers its children, and a child's own `start` is read against
-// the same clock, so counting children as well would only widen a window the parent already holds.
-const content = layers.filter((L) => L.track !== 0 && !blackout(L) && !speck(L));
-// scene.js REPLACES a non-last-beat layer's duration with the run to `beatEnd + cutDur` (it does not
-// take a max), so a layer can be shortened as well as lengthened. Mirror that exactly.
-const spans = content.map((L) => { const [a, b] = spanOf(L); const u = unitEnd(L); return [a, u == null ? b : u]; })
-  .sort((a, b) => a[0] - b[0]);
-const lastEnd = spans.reduce((m, [, b]) => Math.max(m, b), 0);
-// same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
-const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
+const T = sceneTiming(d);
+const { layers, content, spans, duration, cutTimes, sceneUnits } = T;
 
 // windows a declared transition owns. A cut/seam/sting IS the content of its span, it just is not a layer.
 const owned = [];

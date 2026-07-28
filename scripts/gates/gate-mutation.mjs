@@ -74,6 +74,29 @@ const SB = ({ object = true, beatObject = true, duration = '5s', becomes = true,
   '',
 ].join('\n');
 
+/** A `.intent.json` sidecar, the shape `make intent` writes. plan-vs-render reads exactly two fields off
+ *  each beat — the `span` and the `becomes:` — so those are what the cases vary; the rest is carried so a
+ *  fixture stays a plausible sidecar rather than a stub shaped to one gate. */
+const B = (name, span, becomes) => ({
+  at: span ? +((span[0] + span[1]) / 2).toFixed(2) : 0, ...(span ? { span } : {}), name,
+  mustShow: [], mustAnimate: true, artifact: 'the beat earns its frame',
+  ...(becomes ? { becomes } : {}),
+});
+const PLAN = (beats) => JSON.stringify({ spine: { object: 'the record pill' }, beats }, null, 1);
+
+// A layer whose CONTENT moves every frame (`var(--t)` in the html), which is what tells plan-vs-render a
+// stretch with no events is still not a still frame. Used to hold `beat-holds-still` quiet in the fixture
+// that is about the AUTHORED hold, so the two tells cannot stand in for each other.
+const MOVER = (o = {}) => ({ type: 'html', w: 800, x: 200, y: 700, start: 0, duration: 2,
+  html: '<div style="width:100%;height:200px;background:#c2f23b;opacity:calc(0.4 + var(--t) * 0.6)"></div>', ...o });
+
+/** The clean film both plan-vs-render mirrors are cut from: two beats around a cut on the boundary, every
+ *  planned junction carrying an arrival, no stretch long enough to read as a hold. */
+const PVR_CLEAN = scene([TXT({ text: 'First', start: 0.2, duration: 1.4 }),
+                         TXT({ text: 'Middle', start: 1.5, duration: 1.3 }),
+                         TXT({ text: 'Second', start: 3.2, duration: 2.4 })],
+  { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }], cuts: [{ t: 3, style: 'punch', dur: 0.4 }] });
+
 // Each case: a fixture, the command, and what the gate must (or must not) say.
 const CASES = [
   // ---- layout audit: must FAIL ----
@@ -107,7 +130,7 @@ const CASES = [
                     children: [{ type: 'text', text: 'o', size: 104, weight: 700, color: '#FBBC05' }] }]) },
   { gate: 'audit', name: 'logotype · undeclared low-contrast display text still fails', expect: 'fail', match: /contrast|weak-headline/,
     scene: scene([TXT({ text: 'o', size: 104, weight: 700, color: '#FBBC05' })]) },
-  { gate: 'audit', name: 'logotype · exemption does NOT cover the tiny-text floor', expect: 'fail', match: /tiny-text/, outputOnly: true,
+  { gate: 'audit', name: 'logotype · exemption does NOT cover the tiny-text floor', expect: 'fail', match: /\[tiny-text\]/, outputOnly: true,
     scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', logotype: true, start: 0, duration: 2,
                     children: [{ type: 'text', text: 'unreadably small mark', size: 9, color: '#FBBC05' }] }]) },
 
@@ -141,7 +164,7 @@ const CASES = [
                   { type: 'text', text: 'on the card', x: 300, y: 440, w: 600, size: 40, start: 0, duration: 2 }]) },
 
   // Composition: warn-tier, so assert it SPOKE rather than that it exited non-zero.
-  { gate: 'audit', name: 'top-heavy · a beat that abandons the bottom of the frame', expect: 'fail', match: /top-heavy/, outputOnly: true,
+  { gate: 'audit', name: 'top-heavy · a beat that abandons the bottom of the frame', expect: 'fail', match: /\[top-heavy\]/, outputOnly: true,
     scene: scene([{ type: 'text', text: 'All the way up here', x: 200, y: 90, w: 1200, size: 80, weight: 600, start: 0, duration: 2 },
                   { type: 'text', text: 'and nothing below', x: 200, y: 210, w: 1200, size: 30, start: 0, duration: 2 }]) },
   { gate: 'audit', name: 'a beat that uses the frame is NOT top-heavy', expect: 'pass',
@@ -311,11 +334,11 @@ const CASES = [
   { gate: 'storyboard', name: 'becomes · a short film whose beats name no transformation', expect: 'fail', ext: 'md',
     match: /is missing `becomes:`/, scene: SB({ becomes: false }) },
   { gate: 'storyboard', name: 'becomes-is-a-preset · the change written as the animation', expect: 'fail', ext: 'md',
-    match: /becomes-is-a-preset/, outputOnly: true, scene: SB({ presetBecomes: true }) },
+    match: /becomes-is-a-preset —/, outputOnly: true, scene: SB({ presetBecomes: true }) },
   { gate: 'storyboard', name: 'held-state-too-long · a 3s+ beat carrying one change', expect: 'fail', ext: 'md',
-    match: /held-state-too-long/, outputOnly: true, scene: SB({ held: true }) },
+    match: /held-state-too-long —/, outputOnly: true, scene: SB({ held: true }) },
   { gate: 'storyboard', name: 'stub-why · a why that restates the beat category', expect: 'fail', ext: 'md',
-    match: /stub-why/, outputOnly: true, scene: SB({ stubWhy: true }) },
+    match: /stub-why —/, outputOnly: true, scene: SB({ stubWhy: true }) },
 
   // ---- storyboard-check · ends-on-a-claim. The surviving defect behind all three recreations: the film
   // closes on a typed sentence naming a capability, and the seconds that would demonstrate it are not
@@ -335,11 +358,64 @@ const CASES = [
   { gate: 'storyboard', name: 'timeline-hole · the beats run out before the film does', expect: 'fail', ext: 'md',
     match: /of the film is unplanned/, scene: SB({ t2: '1.6s-3.2s' }) },
   { gate: 'storyboard', name: 'partial-timeline · only some beats declare a range', expect: 'fail', ext: 'md',
-    match: /partial-timeline/, outputOnly: true, scene: SB({ t2: '' }) },
+    match: /partial-timeline —/, outputOnly: true, scene: SB({ t2: '' }) },
   // ...and the mirror: a storyboard with NO ranges at all is the world before this rule existed, and
   // must stay silent. A gate that retro-fails every plan written before it is a gate nobody keeps.
   { gate: 'storyboard', name: 'a storyboard that declares no times at all is not judged on the clock', expect: 'pass', ext: 'md',
     notMatch: /timeline-hole|partial-timeline/, scene: SB({ t1: '', t2: '' }) },
+
+  // ---- plan-vs-render · the only gate that reads TWO documents, so it is the only one that can catch a
+  // plan and a film disagreeing. Every case below carries an `intent` sidecar beside its scene. Each
+  // fixture is cut so exactly ONE tell speaks: a tell that only ever fires alongside another is a tell
+  // nobody can trust on its own, and the gate's four thresholds are tunable, so every case anchors on the
+  // finding CODE and never on a number the next tuning pass will move.
+  //   The codes are matched BRACKETED (`[junction-is-static]`), which is not decoration. A case name is
+  //   slugified into the fixture's filename, and a gate echoes the path it read, so a bare `/code/` match
+  //   is satisfied by the filename alone: silence the gate entirely and every one of these still ticked.
+  //   The brackets are the printed finding and nothing else can produce them.
+  { gate: 'planrender', name: 'plan-overruns-render · the plan budgets time the film does not have', expect: 'fail',
+    match: /\[plan-overruns-render\]/, scene: PVR_CLEAN,
+    intent: PLAN([B('Record', [0, 3], 'the pill becomes a capsule'), B('Structure', [3, 6.8], 'the capsule becomes a note card')]) },
+  // The junction the plan marks with a transformation, where the JSON builds no moment at all: no layer
+  // arrives or leaves, no cut fires, no key lands. This is the defect the whole gate was written for.
+  { gate: 'planrender', name: 'junction-is-static · a promised transformation with nothing in the render', expect: 'fail',
+    match: /\[junction-is-static\]/,
+    scene: scene([TXT({ text: 'First', start: 0.2, duration: 2.0 }), TXT({ text: 'Second', start: 2.2, duration: 3.6 })],
+      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }),
+    intent: PLAN([B('Record', [0, 4]), B('Structure', [4, 6], 'the capsule becomes a note card')]) },
+  // WARN tier, so assert it SPOKE rather than that it exited non-zero.
+  { gate: 'planrender', name: 'beat-holds-still · a planned beat spent on one unchanging frame', expect: 'fail',
+    match: /\[beat-holds-still\]/, outputOnly: true,
+    scene: scene([TXT({ text: 'First', start: 0.2, duration: 3.4 }), TXT({ text: 'Second', start: 3.6, duration: 4.0 }),
+                  TXT({ text: 'Third', start: 5.4, duration: 2.2 })],
+      { duration: 8, bg: [{ preset: 'gradient', from: 0, to: 8 }] }),
+    intent: PLAN([B('Record', [0, 3.6]), B('Structure', [3.6, 8], 'the capsule becomes a note card')]) },
+  // The AUTHORED hold: two consecutive motion keys carrying identical values across the beat the plan says
+  // is where something turns. A `MOVER` covers the same seconds, so `beat-holds-still` is held quiet and
+  // this case can only pass on the tell it is named for.
+  { gate: 'planrender', name: 'held-through-the-change · identical keys across the beat that should turn', expect: 'fail',
+    match: /\[held-through-the-change\]/, outputOnly: true,
+    scene: scene([TXT({ text: 'Pinned', start: 1.0, duration: 6.5, motion: [{ t: 0, y: -80 }, { t: 4.5, y: -80 }] }),
+                  MOVER({ start: 1.0, duration: 6.5 })],
+      { duration: 8, bg: [{ preset: 'gradient', from: 0, to: 8 }] }),
+    intent: PLAN([B('Record', [0, 1]), B('Structure', [1, 8], 'the capsule becomes a note card')]) },
+  { gate: 'planrender', name: 'unplanned-junction · the film cuts where the plan has no boundary', expect: 'fail',
+    match: /\[unplanned-junction\]/, outputOnly: true,
+    scene: scene([TXT({ text: 'First', start: 0.2, duration: 1.5 }), TXT({ text: 'Second', start: 2.6, duration: 1.6 }),
+                  TXT({ text: 'Third', start: 3.9, duration: 2.0 })],
+      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }], cuts: [{ t: 2.5, style: 'punch', dur: 0.4 }] }),
+    intent: PLAN([B('Record', [0, 4]), B('Structure', [4, 6], 'the capsule becomes a note card')]) },
+  // An untimed plan cannot be lined up against a film, and the gate must SAY so rather than tick. Without
+  // this case the gate could silently do nothing on every sidecar written from an untimed storyboard.
+  { gate: 'planrender', name: 'plan-has-no-spans · a sidecar whose beats carry no times', expect: 'fail',
+    match: /\[plan-has-no-spans\]/, outputOnly: true, scene: PVR_CLEAN,
+    intent: PLAN([B('Record', null, 'the pill becomes a capsule'), B('Structure', null, 'a note card')]) },
+  // ...and the mirror (#25): the same film with a plan that describes it. All five tells are named, so a
+  // gate that starts crying wolf on a correct pairing is caught here rather than trained away by authors.
+  { gate: 'planrender', name: 'a film that does what its plan said is green', expect: 'pass',
+    notMatch: /\[(?:plan-overruns-render|junction-is-static|beat-holds-still|held-through-the-change|unplanned-junction|plan-has-no-spans)\]/,
+    scene: PVR_CLEAN,
+    intent: PLAN([B('Record', [0, 3], 'the pill becomes a capsule'), B('Structure', [3, 6], 'the capsule becomes a note card')]) },
 ];
 
 const run = (cmd, args) => {
@@ -354,16 +430,26 @@ const GATE_CMD = {
   layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
+  // the one gate that reads a second document: the scene and the plan it claims to deliver.
+  planrender: (f, intent) => ['node', ['scripts/gates/plan-vs-render.mjs', f, '--intent', intent]],
 };
 
 let pass = 0; const broken = [];
 console.log('── gate mutation: does each gate actually fire?\n');
 for (const c of CASES) {
   // `ext` lets a case feed a gate something that is not a scene (storyboard-check eats markdown).
+  // NB the fixture is named after the case, and every gate prints the path it read, so a case whose name
+  // contains its own finding code can be satisfied by the FILENAME. Anchor `match` on the printed shape
+  // of the finding (`[tiny-text]`, `stub-why —`), never on the bare code, or the case proves nothing.
   const f = path.join(FIX, `mut-${c.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.${c.ext || 'json'}`);
   fs.writeFileSync(f, c.scene);
   const rel = path.relative(repoRoot, f);
-  const [cmd, args] = GATE_CMD[c.gate](rel);
+  // `intent` is the second document a case may need (plan-vs-render reads a plan alongside the scene). It
+  // is handed over with --intent rather than left to the gate's `.json` → `.intent.json` guess, so the
+  // pair lives in the fixture dir like every other case.
+  const ip = c.intent ? f.replace(/\.json$/, '.intent.json') : null;
+  if (ip) fs.writeFileSync(ip, c.intent);
+  const [cmd, args] = GATE_CMD[c.gate](rel, ip && path.relative(repoRoot, ip));
   const r = run(cmd, args);
   const failed = r.code !== 0;
   let ok, why;
@@ -381,6 +467,7 @@ for (const c of CASES) {
   console.log(`   ${ok ? '✓' : '✗'} ${c.gate.padEnd(9)} ${c.expect === 'fail' ? 'must-fail' : 'must-pass'}  ${c.name}`);
   if (ok) pass++; else broken.push({ ...c, why, out: r.out.split('\n').filter(Boolean).slice(-4).join(' | ').slice(0, 220) });
   fs.unlinkSync(f);
+  if (ip) fs.unlinkSync(ip);
 }
 
 /** A minimal, CURRENT bake of `sim` under assets/baked/<name>/ — the fixture the sim cases mutate. */

@@ -170,12 +170,23 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
 2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
    whole static quality loop (validate · critique · direct · **direction-floor** · slop · **designspec** ·
-   **copy** · **assets** · inspect). The **designspec lock** flags off-palette colours / non-role fonts (the
+   **copy** · **assets** · inspect · **plan-vs-render**). The **designspec lock** flags off-palette colours / non-role fonts (the
    theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
    restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
    icon / capture / VO exists before you render. The **inspect** step verifies a `.intent.json` value
    contract — generate one from the storyboard with `make intent SB=<storyboard.md> D=<file>` so "every beat
-   earns its frame" is checked. Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
+   earns its frame" is checked. **plan-vs-render** runs next, off the same sidecar (skip the sidecar and you
+   skip both): it lays the plan's beat spans over the film's clock and asks whether anything happens where the
+   plan said something turns. It FAILS `junction-is-static` (a beat opens on a promised change and the render
+   puts no event there) and `plan-overruns-render`; it WARNS `held-through-the-change` (two consecutive motion
+   keys carry the same values across seconds the plan says something turns, with nothing else arriving or
+   leaving), plus `beat-holds-still`, `unplanned-junction` and `plan-has-no-spans`. Every warning blocks
+   under `STRICT=1`. On its own:
+   `make plan-check D=<file>`. **A green `storyboard-check` proves nothing about the film.** It grades the plan
+   against itself, and in the A/B test the losing film named the change correctly on the very beat whose frame
+   never moves. Every gate stayed green until this one existed. Even plan-vs-render only proves the film is not
+   empty where it promised to be full, never that it kept the promise: that is `make judge` and your eyes.
+   Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
    It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·
    `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), AND the **ambition floor**
    (`plain-slideshow` — too little motion). Two-sided: `effect-soup` is the ceiling, the floor is the

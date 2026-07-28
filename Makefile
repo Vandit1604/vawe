@@ -538,6 +538,9 @@ judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file>
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/gates/inspect.mjs $(D)
 
+plan-check: ## plan vs render: does the film change where the storyboard promised it would (D=<file>)
+	node scripts/gates/plan-vs-render.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
 scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 	node scripts/author/scrub.mjs $(F)
 
