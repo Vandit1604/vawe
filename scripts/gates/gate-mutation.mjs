@@ -313,6 +313,18 @@ const srcCases = [
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
                              '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
     cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true },
+  // The snap signature was DOM-only and recorded no clip-path, so a wipe / iris / clock reveal was
+  // invisible to it: `wipe-right` pointed the wrong way for months and snap said "identical" every run.
+  // showcase-count opens on a rect wiped rightward, so flipping the registry entry must now be seen.
+  { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/clips.js',
+    mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
+    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count']], match: /clip-path/ },
+  // The other half of the same blindness: the background is painted into <canvas>, which no DOM
+  // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
+  // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.
+  { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds.js',
+    mutate: (s) => s.replace("{ type: 'aurora', intensity: 0.46,", "{ type: 'aurora', intensity: 0.9,"),
+    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /__bg\.canvas/, outputOnly: true },
   { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
     mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
     cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-component/ },

@@ -1,5 +1,6 @@
 // scripts/scene-snap.mjs — check scenes WITHOUT rendering video. Captures a per-frame DOM signature
-// (bbox + transform + opacity + font-size + color + text of every id'd / critical element) headless,
+// (bbox + transform + opacity + font-size + color + text + clip-path of every id'd / critical element,
+// plus a fingerprint of the background canvas) headless,
 // with NO encode and NO screenshot. Save a baseline before a refactor, then diff after to prove the
 // rendered frames are unchanged (or see exactly what moved).
 //   node scripts/scene-snap.mjs <format> --save     # write baseline → verify/snap/<format>.json
@@ -11,6 +12,10 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+// ONE shared signature definition (capture + diff), also used by snap-scenes.mjs. Both gates used to
+// keep their own hand-copied version; that duplication is how a field gets added to one and not the
+// other, and how a gate goes blind without saying so (MISTAKES #159).
+import { captureSig, diffSig } from './snap-signature.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap');
@@ -73,24 +78,7 @@ const frames = [...new Set([
   ...Array.from({ length: 20 }, (_, i) => Math.round(((i + 0.5) / 20) * total)),
 ])].filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
 
-const sig = await page.evaluate((frames) => {
-  const round = (v) => Math.round(v * 10) / 10;
-  const snap = {};
-  for (const f of frames) {
-    window.__engine.renderFrame(f);
-    const els = {};
-    for (const el of document.querySelectorAll('[id], [data-layer="critical"]')) {
-      const b = el.getBoundingClientRect(); if (b.width < 1 && b.height < 1) continue;
-      const s = getComputedStyle(el); if (s.visibility === 'hidden' || +s.opacity === 0) continue;
-      const key = el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName);
-      els[key] = { x: round(b.left), y: round(b.top), w: round(b.width), h: round(b.height),
-        tf: s.transform === 'none' ? '' : s.transform, op: Math.round(+s.opacity * 1000) / 1000, fs: s.fontSize, c: s.color,
-        t: (el.textContent || '').trim().slice(0, 24) };
-    }
-    snap[f] = els;
-  }
-  return snap;
-}, frames);
+const sig = await captureSig(page, frames);
 await browser.close(); server.close();
 
 const file = path.join(SNAP, `${m}.json`);
@@ -98,23 +86,7 @@ if (SAVE) { fs.writeFileSync(file, JSON.stringify(sig)); console.log(`✓ baseli
 
 if (!fs.existsSync(file)) { console.error(`no baseline for ${m} — run with --save first`); process.exit(2); }
 const base = JSON.parse(fs.readFileSync(file, 'utf8'));
-const diffs = [];
-const fields = { x: 'x', y: 'y', w: 'w', h: 'h', tf: 'transform', op: 'opacity', fs: 'font', c: 'color', t: 'text' };
-for (const f of Object.keys(sig)) {
-  const a = base[f] || {}, b = sig[f];
-  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
-    if (!a[k]) { diffs.push(`f${f} +${k} (new)`); continue; }
-    if (!b[k]) { diffs.push(`f${f} -${k} (gone)`); continue; }
-    for (const fld of Object.keys(fields)) {
-      const av = a[k][fld], bv = b[k][fld];
-      // Tolerance is PER FIELD. A shared 0.6 threshold is sane for a pixel box and meaningless for
-      // opacity, which lives on 0..1 — it took a >60% opacity change to register, which is why
-      // re-easing every fade in the engine diffed as nothing at all.
-      const tol = fld === 'op' ? 0.02 : 0.6;
-      if ((typeof av === 'number' ? Math.abs(av - bv) > tol : av !== bv)) diffs.push(`f${f} ${k}.${fields[fld]}: ${JSON.stringify(av)} → ${JSON.stringify(bv)}`);
-    }
-  }
-}
+const diffs = diffSig(base, sig);
 console.log(`\n==== SNAP DIFF · ${m} (${frames.length} frames vs baseline) ====`);
 if (!diffs.length) { console.log('✓ IDENTICAL — no DOM/layout change across sampled frames'); process.exit(0); }
 for (const d of diffs.slice(0, 60)) console.log('  ' + d);

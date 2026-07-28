@@ -21,6 +21,9 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { SCENE_DIR } from './paths.mjs';
+// ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
+// for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
+import { captureSig, diffSig } from './snap-signature.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
@@ -45,49 +48,6 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/jav
 const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
-
-// capture the DOM signature for a set of frames, rendered in the given order (pure → order-independent).
-const captureSig = (page, frames) => page.evaluate((frames) => {
-  const round = (v) => Math.round(v * 10) / 10;
-  const snap = {};
-  for (const f of frames) {
-    window.__engine.renderFrame(f);
-    const els = {};
-    for (const el of document.querySelectorAll('[id], [data-layer="critical"]')) {
-      const b = el.getBoundingClientRect(); if (b.width < 1 && b.height < 1) continue;
-      const s = getComputedStyle(el); if (s.visibility === 'hidden' || +s.opacity === 0) continue;
-      const key = el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName);
-      // Record text ONLY for LEAF content. A scaffold wrapper (root/cam/stage, a group) concatenates all
-      // descendant text, so a typing/decode layer mid-reveal makes the wrapper's aggregate text look
-      // order-dependent even when every leaf is pure — a false non-determinism signal. Skip it for any
-      // element that contains another captured element; leaf text layers keep their text.
-      const isWrapper = !!el.querySelector('[id], [data-layer="critical"]');
-      els[key] = { x: round(b.left), y: round(b.top), w: round(b.width), h: round(b.height),
-        tf: s.transform === 'none' ? '' : s.transform, op: Math.round(+s.opacity * 1000) / 1000, fs: s.fontSize, c: s.color,
-        t: isWrapper ? '' : (el.textContent || '').trim().slice(0, 24) };
-    }
-    snap[f] = els;
-  }
-  return snap;
-}, frames);
-
-const fields = { x: 'x', y: 'y', w: 'w', h: 'h', tf: 'transform', op: 'opacity', fs: 'font', c: 'color', t: 'text' };
-const diffSig = (base, sig) => {
-  const diffs = [];
-  for (const f of Object.keys(sig)) {
-    const a = base[f] || {}, b = sig[f];
-    for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
-      if (!a[k]) { diffs.push(`f${f} +${k}`); continue; }
-      if (!b[k]) { diffs.push(`f${f} -${k}`); continue; }
-      for (const fld of Object.keys(fields)) {
-        const av = a[k][fld], bv = b[k][fld];
-        const tol = fld === 'op' ? 0.02 : 0.6;
-        if ((typeof av === 'number' ? Math.abs(av - bv) > tol : av !== bv)) diffs.push(`f${f} ${k}.${fields[fld]}: ${JSON.stringify(av)} → ${JSON.stringify(bv)}`);
-      }
-    }
-  }
-  return diffs;
-};
 
 const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [];
 for (const scene of scenes) {
