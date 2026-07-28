@@ -191,8 +191,16 @@ full-bleed field (grain only, no dots/spotlight) — for plain sites whose hero 
 Over an accent-coloured bg, `<b>` emphasis auto-falls-back to the layer's own colour (no blue-on-blue);
 override any layer's emphasis colour with `emColor`.
 - **JSON bg window**: `{ preset, from, to, value?, opts? }`. `value: "dark"|"light"` forces the treatment.
-  `opts` tunes the preset's baked numbers per video: `{ intensity, dotAlpha, spacing, drift, grain }`
-  (palette still owns colour). `ink` draws accent-tinted dots — for a clean flat dark, use `plain` + `value:"dark"`.
+  `opts` tunes the preset's baked numbers per video. Four **meta knobs** scale what the preset baked in:
+  `{ intensity, dotAlpha, drift, grain }`. Every other key is **passed straight to the fx that reads it**,
+  so an fx's own parameters work by name: `liquid` takes `scale` `speed` `warp` `edge0` `edge1` `gloss`
+  `res`; dot presets take `spacing` `period` `k` `driftX` `driftY`; `metallic` takes `count` `waves`
+  `glow` `sweep`; `particles` takes `count` `speed` `connectDist`. The vocabulary is therefore PER
+  PRESET, and a key this preset's fx do not read is an **error** naming the keys they do (it used to be
+  accepted and dropped: correct-looking JSON, unchanged render). The accepted set is read out of the fx
+  implementations themselves (`FX_PARAMS` in `core/backgrounds.js`), so it cannot go stale.
+  Palette still owns colour by default, though `color` is a real fx parameter and may be overridden.
+  `ink` draws accent-tinted dots — for a clean flat dark, use `plain` + `value:"dark"`.
 - **Seed variation (July 2026):** every preset now takes a `seed` (default = hash of theme name + preset),
   so the SAME preset renders **differently across brands** — aurora/mesh/shapes blobs reposition,
   dot grids shift phase/registration. Kills the "every video's backdrop looks the same" problem. Override per window with `seed`.
@@ -223,7 +231,7 @@ accepting the default:
 | Cut | `cutTiming` (8 curves) · `cx`/`cy` (iris centre) |
 | Kinetic | `presetOpts` `{}` — per-preset colours / px / deg / amp / spring |
 | Shader sting | `color` (tint to a brand accent) · `intensity` |
-| Background | `opts` `{ intensity, dotAlpha, spacing, drift, grain }` |
+| Background | `opts` — meta `{ intensity, dotAlpha, drift, grain }` + every parameter of the preset's own fx, by name |
 | Count / motion / camera / ken | fully exposed already (from/to/ease · keyframes · s/x/y · from/to) |
 
 Defaults are unchanged, so omitting a knob renders exactly as before. If a look feels generic, a

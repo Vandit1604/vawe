@@ -139,6 +139,16 @@ const CASES = [
   { gate: 'validate', name: 'valid scene passes', expect: 'pass',
     scene: scene([TXT({ anim: 'lift' })], { cuts: [{ t: 1, style: 'softwipe' }] }) },
 
+  // A bg window's `opts` are the fx knobs of THAT preset. Liquid's knobs on a dot preset used to be
+  // accepted by the schema and dropped by the engine: correct-looking JSON, unchanged render. Both
+  // halves are pinned, because the fix is only worth anything if the legal spelling still renders.
+  { gate: 'validate', name: 'bg opts · a knob this preset has no fx for', expect: 'fail', match: /is not a knob this background has/,
+    scene: scene([TXT()], { bg: [{ preset: 'paperDots', from: 0, to: 2, opts: { scale: 1.6, speed: 0.3, edge0: 0.4 } }] }) },
+  { gate: 'validate', name: 'bg opts · the preset\'s own fx knobs are legal', expect: 'pass',
+    scene: scene([TXT()], { bg: [{ preset: 'liquid', from: 0, to: 2, opts: { scale: 1.6, speed: 0.3, edge0: 0.4 } }] }) },
+  { gate: 'validate', name: 'bg opts · on a hand-authored html backdrop nothing reads them', expect: 'fail', match: /paints no fx/,
+    scene: scene([TXT()], { bg: [{ html: '<div style="background:#fff;width:100%;height:100%"></div>', tone: 'light', from: 0, to: 2, opts: { grain: 0.2 } }] }) },
+
   // ---- beat-check: the only gate that reads the scene as a TIMELINE rather than a bag of layers.
   // Both tells are pinned, because they are measured off different edges of the clock (an interior
   // hole vs the closing plate) and one can rot while the other keeps firing.
@@ -441,6 +451,20 @@ const srcCases = [
   { name: 'text · untype reverses the typing', file: 'core/layers/text.js',
     mutate: (s) => s.replace('  if (untype != null && lt >= untype) n = Math.min(n, visLen) - Math.floor((lt - untype) * (untypeRate ?? cps));\n', ''),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /untype: deletes back to 0/ },
+
+  // The two silent-wrongness fixes of this pass. Both are invisible to any gate that counts names, so
+  // the contract lives in lib-test as a pure assertion and these prove lib-test can see it break.
+  { name: 'wipe-right · reveal direction flipped back to right-to-left', file: 'core/clips.js',
+    mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /wipe-right grows rightward/ },
+  { name: 'bg opts · pass-through removed, so a declared knob is silently dropped', file: 'core/backgrounds.js',
+    mutate: (s) => s.replace("    for (const [k, v] of Object.entries(over)) if (!(k in META) && (FX_PARAMS[fx.type] || []).includes(k)) fx[k] = v;\n", ''),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /bg opts reach the fx/ },
+  // Proves the accepted-key list is DERIVED, not hand-copied: rename the property `liquid` reads and the
+  // vocabulary must follow it. A hand-kept list would still advertise `scale` and this would stay green.
+  { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds.js',
+    mutate: (s) => s.replace('const sp = (o.speed ?? 0.42) * t, sc = o.scale ?? 1.25', 'const sp = (o.speed ?? 0.42) * t, sc = o.scaleX ?? 1.25'),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
   { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',
     mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),

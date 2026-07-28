@@ -132,7 +132,7 @@
         },
         "opts": {
           "type": "object",
-          "label": "Per-video tuning: { intensity, dotAlpha, spacing, drift, grain }"
+          "label": "Per-video tuning of THIS preset's fx. Meta knobs scale what the preset baked in: { intensity, dotAlpha, drift, grain }. Every other key is passed straight to the fx that reads it, so the fx's own parameters work by name (liquid: scale, speed, warp, edge0, edge1, gloss, res · dots: spacing, period, k, driftX, driftY · metallic: count, waves, glow, sweep · particles: count, speed, connectDist). A key this preset's fx do not read is an ERROR, and the message lists the ones they do."
         },
         "seed": {
           "type": "number",
@@ -795,7 +795,7 @@
         },
         "anim": {
           "type": "string",
-          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | slide-left | slide-right | slide-up | slide-down | wipe | wipe-right | iris | clock. Unknown names fall back to fade silently — there is no 'slide', and direction is part of the name, not a separate prop.",
+          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently — there is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
           "enum": [
             "fade",
             "up",
@@ -810,6 +810,7 @@
             "slide-down",
             "wipe",
             "wipe-right",
+            "wipe-left",
             "iris",
             "clock",
             "none",
@@ -819,7 +820,7 @@
         },
         "out": {
           "type": "string",
-          "label": "driveClips exit anim"
+          "label": "driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\", anim:\"wipe-right\" + out:\"wipe-left\"."
         },
         "exitDur": {
           "type": "number",

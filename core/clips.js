@@ -7,16 +7,28 @@
 import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
-const ANIM = {
+// Exported so `make lib-test` can hold the DIRECTION contract of each name as a pure assertion — a
+// registry entry whose motion contradicts its own name is invisible to every gate that only counts
+// names, and that is exactly how `wipe-right` revealed right-to-left for as long as it did.
+export const ANIM = {
   fade, up: rise, rise, pop, scale: pop, lift, defocus,
   'slide-left': (t) => slide(t, 'left'), 'slide-right': (t) => slide(t, 'right'),
   'slide-up': (t) => slide(t, 'up'), 'slide-down': (t) => slide(t, 'down'),
-  wipe: (t) => wipe(t, 'left'), 'wipe-right': (t) => wipe(t, 'right'),
-  // core/motion.js `wipe()` has implemented all four directions since it was written; only the two
-  // horizontal ones were ever registered here, so a bar could not grow from its baseline by name and
-  // blocks reached for a hand-rolled mask instead. Named for the edge the reveal TRAVELS TOWARD, which
-  // is how `wipe`/`wipe-right` already read: `wipe-down` grows downward from the top edge,
-  // `wipe-up` grows upward from the bottom — the one a bar chart wants.
+  // WIPES ARE NAMED FOR THE EDGE THE REVEAL TRAVELS TOWARD. `wipe-right` grows rightward from the left
+  // edge, `wipe-down` grows downward from the top, `wipe-up` grows upward from the bottom (the one a bar
+  // chart wants). Plain `wipe` is the default direction, rightward — the same function as `wipe-right`.
+  //
+  // core/motion.js `wipe(dir)` names its argument for the OPPOSITE thing: the edge the content is pinned
+  // to while hidden, i.e. the edge it grows FROM. So every name here maps to the opposite direction, and
+  // that is deliberate, not a typo. `wipe-right` used to be registered as `wipe(t,'right')` and therefore
+  // revealed right-to-left, contradicting both its name and the comment that stood here — a layer wiped
+  // the wrong way and nothing said so. The horizontal pair now follows the same rule as the vertical one.
+  //
+  // Pairing an exit: `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the
+  // OPPOSITELY named one, exactly as with slide (`anim:"slide-right"` + `out:"slide-left"`):
+  // `anim:"wipe-right"` + `out:"wipe-left"` reveals rightward, then erases rightward.
+  wipe: (t) => wipe(t, 'left'),
+  'wipe-right': (t) => wipe(t, 'left'), 'wipe-left': (t) => wipe(t, 'right'),
   'wipe-down': (t) => wipe(t, 'up'), 'wipe-up': (t) => wipe(t, 'down'),
   iris: circleWipe, clock: clockWipe,
   // `none` is a REAL entry, not a hole. The schema has always listed it for `anim`/`out`, but the

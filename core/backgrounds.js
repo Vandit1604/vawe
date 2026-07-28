@@ -379,24 +379,82 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
   }
 }
 
-// applyBgOver(spec, over): per-video tuning of a preset's baked numbers (the palette still owns colour).
-// over = { intensity, dotAlpha, spacing, drift, grain } — scales/overrides the matching fx params.
+// ---------- bg `opts`: what a window may actually tune ----------
+// The fx implementations above are the ONLY authority on which knobs exist, so the accepted-key list is
+// READ OUT OF THEM rather than restated here. A hand-kept list is the bug it is trying to prevent: it
+// goes stale the moment an fx grows a parameter, and the stale half fails silently (docs/MISTAKES.md
+// #159). Each fx takes its options as its LAST parameter and reads them as `bag.<key>`, so the keys are
+// exactly the property reads on that parameter.
+const FX_IMPL = { shapes, dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain };
+function paramsOf(fn) {
+  const src = String(fn);
+  const sig = src.slice(src.indexOf('(') + 1, src.indexOf(')'));
+  const bag = sig.split(',').pop().split('=')[0].trim();
+  const keys = new Set();
+  for (const m of src.matchAll(new RegExp(`\\b${bag}\\.([A-Za-z_$][\\w$]*)`, 'g'))) keys.add(m[1]);
+  return keys;
+}
+export const FX_PARAMS = Object.fromEntries(Object.entries(FX_IMPL).map(([k, fn]) => [k, [...paramsOf(fn)].sort()]));
+// If the derivation ever stops working (a bundler rewrote the source, an fx changed shape) it must say
+// so at load, not quietly accept nothing: an empty key set would reject every legal opt.
+for (const [k, v] of Object.entries(FX_PARAMS))
+  if (v.length < 2) throw new Error(`backgrounds.js: cannot derive the option keys of fx "${k}" from its implementation (got ${v.length}). The bg \`opts\` contract is read from the fx source; fix paramsOf() rather than hand-listing keys.`);
+
+// META knobs are NOT fx parameters: they scale/derive what the preset baked in, across whichever fx are
+// present. Each maps to the fx types it can act on; a window naming one with no such fx is an error, the
+// same as naming a knob that does not exist.
+const META = {
+  intensity: ['dots', 'aurora', 'spotlight', 'shapes', 'softwash'],
+  dotAlpha: ['dots'], drift: ['dots'], grain: ['grain'],
+};
+
+// bgOptKeys(spec) → every key THIS window's fx set accepts, sorted. The vocabulary is per-preset: a
+// `liquid` window takes scale/speed/warp/edge0…, a `paperDots` window takes spacing/period/driftX…
+export function bgOptKeys(spec) {
+  const types = new Set((spec?.fx || []).map((f) => f.type));
+  const keys = new Set();
+  for (const t of types) for (const k of FX_PARAMS[t] || []) keys.add(k);
+  for (const [k, on] of Object.entries(META)) if (on.some((t) => types.has(t))) keys.add(k);
+  return [...keys].sort();
+}
+
+// bgOverErrors(spec, over, at) → one message per key this window cannot act on, naming the ones it can.
+// Shared by core/validate.mjs (pre-render, with a `bg[i]` label) and applyBgOver below (the backstop).
+export function bgOverErrors(spec, over, at = 'bg opts') {
+  if (!over || !spec) return [];
+  const ok = bgOptKeys(spec);
+  const types = (spec.fx || []).map((f) => f.type).join(' + ') || 'none';
+  return Object.keys(over).filter((k) => !ok.includes(k)).map((k) =>
+    `${at}: \`${k}\` is not a knob this background has, so it would be read by nothing. This window's fx are ${types}; it accepts ${ok.join(', ')}.`);
+}
+
+// applyBgOver(spec, over): per-video tuning of a preset's baked numbers (the palette still owns colour
+// by default, though `color` is a real fx parameter and may be overridden deliberately).
+//   • META keys (intensity · dotAlpha · drift · grain) SCALE the preset's baked values.
+//   • every other key is written straight through to each fx in this window that reads it, so the
+//     documented fx parameters (scale, speed, warp, edge0/edge1, gloss, res, count, waves, glow,
+//     sweep, spacing, period, …) work by name instead of being accepted and dropped.
+// A key no fx here reads THROWS: it was accepted and ignored before, which is how a `liquid` window
+// carrying scale/speed/edge0 rendered completely unchanged with nothing said (docs/MISTAKES.md #157).
 // Mutates the freshly-built spec (each bg window builds its own), so no shared state. over falsy = no-op.
 export function applyBgOver(spec, over) {
   if (!over || !spec) return spec;
+  const bad = bgOverErrors(spec, over);
+  if (bad.length) throw new Error(bad.join('\n'));
   for (const fx of spec.fx || []) {
     if (fx.type === 'dots') {
-      if (over.spacing != null) fx.spacing = over.spacing;
       if (over.dotAlpha != null) { fx.peakAlpha = over.dotAlpha; fx.baseAlpha = +(over.dotAlpha * 0.3).toFixed(3); }
       else if (over.intensity != null) fx.peakAlpha = +((fx.peakAlpha ?? 0.2) * over.intensity).toFixed(3);
       if (over.drift != null) { fx.driftX = (fx.driftX ?? 0) * over.drift; fx.driftY = (fx.driftY ?? 0) * over.drift; }
-    } else if (fx.type === 'aurora' || fx.type === 'spotlight') {
-      if (over.intensity != null) fx.intensity = +((fx.intensity ?? 0.5) * over.intensity).toFixed(3);
+    } else if (fx.type === 'aurora' || fx.type === 'spotlight' || fx.type === 'softwash') {
+      if (over.intensity != null) fx.intensity = +((fx.intensity ?? (fx.type === 'softwash' ? 1 : 0.5)) * over.intensity).toFixed(3);
     } else if (fx.type === 'shapes') {
       if (over.intensity != null) fx.alpha = +((fx.alpha ?? 0.1) * over.intensity).toFixed(3);
     } else if (fx.type === 'grain') {
       if (over.grain != null) fx.alpha = over.grain;
     }
+    // pass-through: the real fx parameters, by their own names.
+    for (const [k, v] of Object.entries(over)) if (!(k in META) && (FX_PARAMS[fx.type] || []).includes(k)) fx[k] = v;
   }
   return spec;
 }

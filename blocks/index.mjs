@@ -532,7 +532,7 @@ export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', s
 // bezel. `slide` is offered for a swap that is meant to read as travel, and it pairs its directions
 // (enter from the right, leave to the left) rather than entering and retreating.
 const SWAP = {
-  wipe: { anim: 'wipe', out: 'wipe-right' },
+  wipe: { anim: 'wipe', out: 'wipe-left' },
   slide: { anim: 'slide-right', out: 'slide-left' },
   fade: { anim: 'fade', out: 'fade' },
   defocus: { anim: 'defocus', out: 'defocus' },

@@ -26,7 +26,8 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { lift } from '../../core/motion.js';
-import { opacityEnvelope } from '../../core/clips.js';
+import { opacityEnvelope, ANIM } from '../../core/clips.js';
+import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
 import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
@@ -133,6 +134,28 @@ ok('circleWipe at 0 is zero-radius', circleWipe(0).clipPath.startsWith('circle(0
 ok('clockWipe is polygon', clockWipe(0.5).clipPath.startsWith('polygon('));
 ok('clockWipe full at 1 has all corners', (() => { const p = clockWipe(1).clipPath; return p.includes('100.0% 0.0%') && p.includes('100.0% 100.0%') && p.includes('0.0% 100.0%'); })());
 ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipPath);
+
+// The DIRECTION of every named wipe in the layer registry (core/clips.js ANIM). Counting names cannot
+// see this: `wipe-right` was registered as wipe(t,'right') and therefore revealed right-to-left, against
+// its own name and the comment beside it, and no gate could tell. A wipe is named for the edge its
+// reveal TRAVELS TOWARD; motion.js `wipe(dir)` names the edge it grows FROM, so each pair is crossed.
+// inset(top right bottom left) — the side whose inset SHRINKS is the side the reveal moves toward.
+ok('wipe-right grows rightward from the left edge', ANIM['wipe-right'](0.5).clipPath === 'inset(0 50% 0 0)');
+ok('wipe-left grows leftward from the right edge', ANIM['wipe-left'](0.5).clipPath === 'inset(0 0 0 50%)');
+ok('wipe-down grows downward from the top edge', ANIM['wipe-down'](0.5).clipPath === 'inset(0 0 50% 0)');
+ok('wipe-up grows upward from the bottom edge', ANIM['wipe-up'](0.5).clipPath === 'inset(50% 0 0 0)');
+ok('plain wipe is the default direction, rightward', ANIM.wipe(0.5).clipPath === ANIM['wipe-right'](0.5).clipPath);
+ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-right', 'wipe-up', 'wipe-down'].map((n) => ANIM[n](0.5).clipPath)).size === 4);
+
+// ---- background `opts`: a knob a window declares must be READ, or refused by name (MISTAKES #157).
+// The accepted set is derived from the fx implementations, so these also pin that the derivation is
+// live: rename the property an fx reads and the vocabulary must follow it.
+ok('bg opts vocabulary is derived from the fx implementation (liquid)', ['scale', 'speed', 'warp', 'edge0', 'edge1', 'gloss', 'res'].every((k) => FX_PARAMS.liquid.includes(k)));
+ok('bg opts vocabulary is per preset (a dots preset has no `scale`)', !bgOptKeys(bgPreset('paperDots')).includes('scale') && bgOptKeys(bgPreset('paperDots')).includes('spacing'));
+const bgOver = (preset, over) => { try { return applyBgOver(bgPreset(preset), over); } catch { return null; } };
+ok('bg opts reach the fx (liquid scale/speed/edge0)', (() => { const s = bgOver('liquid', { scale: 1.6, speed: 0.3, edge0: 0.4 }); const fx = s && s.fx.find((f) => f.type === 'liquid'); return !!fx && fx.scale === 1.6 && fx.speed === 0.3 && fx.edge0 === 0.4; })());
+ok('bg opts meta knobs still scale the baked numbers', (() => { const s = bgOver('paperDots', { dotAlpha: 0.5, grain: 0.2 }); const d = s && s.fx.find((f) => f.type === 'dots'), g = s && s.fx.find((f) => f.type === 'grain'); return !!d && d.peakAlpha === 0.5 && g.alpha === 0.2; })());
+ok('a bg opt no fx here reads is REFUSED, not dropped', bgOverErrors(bgPreset('liquid'), { dotAlpha: 0.2 }, 'bg[0]').length === 1 && bgOver('liquid', { dotAlpha: 0.2 }) === null);
 
 // kinetic typography — unitProgress staggering + presets (pure)
 ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));

@@ -21,6 +21,7 @@ import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
 import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
+import { bgPreset, bgOverErrors } from '../core/backgrounds.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -141,8 +142,18 @@ export function bgErrors(cfg) {
       out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. \`html\` paints in the DOM and \`preset\` paints on canvas; they do not layer. Split them into two windows (with \`from\`/\`to\`) if you want both in one video.`);
     if (b.html == null) {
       if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\` — tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
+      // `opts` tunes the fx a preset is made of, so the vocabulary is PER PRESET: `liquid` takes
+      // scale/speed/warp/edge0…, `paperDots` takes spacing/period/drift…. Anything else used to be
+      // accepted by the schema, dropped by applyBgOver and never read — correct-looking JSON, unchanged
+      // render (docs/MISTAKES.md #157). Say which keys this preset actually has.
+      // A `use:"theme"` window names no preset here (it comes from themes/<name>.json), so it cannot be
+      // resolved without the theme; applyBgOver throws on it at build time instead.
+      if (isObj(b.opts) && b.use == null)
+        out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
       return;
     }
+    if (b.opts != null)
+      out.push(`${at} sets \`opts\` on a hand-authored (\`html\`) backdrop — \`opts\` tunes the canvas fx a PRESET is built from, and an html window paints no fx, so nothing would read it. Style the fragment itself.`);
     const timeCss = timeCssUsed(b.html);
     if (timeCss)
       out.push(`${at} uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`. Both are written every frame.`);

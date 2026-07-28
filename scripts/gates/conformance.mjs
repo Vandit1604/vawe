@@ -188,6 +188,7 @@ const EXPECTED_ALIAS = {
   'layer anim': {
     'rise=up': '`up` and `rise` are the same entry in the ANIM registry — one spelling names the direction, the other the gesture',
     'scale=pop': '`scale` and `pop` are the same entry in the ANIM registry — same reason',
+    'wipe-right=wipe': '`wipe` is the DEFAULT direction of the wipe family and the family is named for the edge the reveal travels toward, so the default IS `wipe-right`; `wipe-left`/`wipe-up`/`wipe-down` are the other three',
   },
 };
 

@@ -83,9 +83,15 @@ Every one of these renders without an error and looks wrong.
 ## Enter anims
 
 `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down`
-`wipe` `wipe-right` `wipe-up` `wipe-down` `iris` `clock` `none`
+`wipe` `wipe-left` `wipe-right` `wipe-up` `wipe-down` `iris` `clock` `none`
 
-Pair an entrance with its exit **directionally**: `anim:"slide-right"` leaves with `out:"slide-left"`.
+A **slide** is named for the edge it comes FROM. A **wipe** is named for the edge its reveal TRAVELS
+TOWARD: `wipe-right` grows rightward from the left edge, `wipe-up` grows upward from the bottom (what a
+bar chart wants). Plain `wipe` is the default direction, rightward, i.e. the same as `wipe-right`.
+
+Pair an entrance with its exit **directionally**: `anim:"slide-right"` leaves with `out:"slide-left"`;
+`anim:"wipe-right"` leaves with `out:"wipe-left"` (`out` plays an entrance backwards, so the exit that
+continues the travel is the oppositely named one).
 Never enter-and-retreat. Use `out:"defocus"` for faces, cards and dense grids, where sliding fifty
 elements reads as chaos.
 
