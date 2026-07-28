@@ -589,6 +589,8 @@ for (const spec of modules) {
   if (sample.startsWith('..') || !fs.existsSync(absPath)) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
   const cfg = (() => { try { return JSON.parse(fs.readFileSync(absPath, 'utf8')); } catch { return {}; } })();
   const m = isData ? (cfg.module || spec) : spec;
+  // the scene's own waiver list, read the same way every other gate reads it.
+  const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
 
   // source checks are aspect-independent (they're about the JSON, not a canvas) — report them once
   const si = sourceIssues(cfg);
@@ -674,8 +676,16 @@ for (const aspectKey of askedAspects) {
     if (hard > worst.n) worst = { f, n: hard };
     for (const i of issues) { if (i.kind === 'safe' && camMoving(f)) continue; all.push({ f, ...i }); }
   }
-  const hard = all.filter((i) => HARD.has(i.kind));
-  const warn = all.filter((i) => !HARD.has(i.kind));
+  // WAIVERS. Every other gate in this repo honours {"authoring":{"allow":[...]}}; this one did not, so
+  // a DELIBERATE composition had no way past it and the only options were to contort the scene or to
+  // stop running the audit. ledgerline-neon marks its selected row with a bloom instead of a card, and
+  // the row is composited into a gap the wall reserves for it: the boxes overlap by design, the content
+  // never does, and with no card there is no opaque surface for the overlap check's own exemption to
+  // find. A waived issue is still PRINTED, tagged, and counted separately, so waiving stays visible.
+  const waived = all.filter((i) => allow.has(i.kind));
+  const hard = all.filter((i) => HARD.has(i.kind) && !allow.has(i.kind));
+  const warn = all.filter((i) => !HARD.has(i.kind) && !allow.has(i.kind));
+  for (const i of waived) i.waived = true;
   // De-dup repeated issues to the first frame they appear on: the SAME element failing on 12 sampled
   // frames is one bug, not twelve. Identity is the layer index (`li`) where we have it, because the
   // label is a class name — `hs-text` for every text layer — so keying on it merged unrelated layers
@@ -683,9 +693,9 @@ for (const aspectKey of askedAspects) {
   // index (the critical-element checks, whose `a`/`b` are already per-element ids).
   const key = (i) => `${i.kind}|${i.li ?? `${i.a}|${i.t || ''}`}|${i.b || ''}`;
   const uniq = (list) => { const seen = new Set(), out = []; for (const i of list) { const k = key(i); if (!seen.has(k)) { seen.add(k); out.push(i); } } return out; };
-  const hu = uniq(hard), wu = uniq(warn);
+  const hu = uniq(hard), wu = uniq(warn), vu = uniq(waived);
   const label = `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`;
-  rows.push({ m: label, hard: hu.length, warn: wu.length, crit: critMax, items: [...hu, ...wu] });
+  rows.push({ m: label, hard: hu.length, warn: wu.length, waived: vu.length, crit: critMax, items: [...hu, ...wu, ...vu] });
 
   await page.evaluate(overlayFn, worst.f, safe);
   // one overlay per audited canvas — the whole point is comparing where the SAME scene breaks per ratio
@@ -701,11 +711,12 @@ let hardTotal = 0, warnTotal = 0;
 for (const r of rows) {
   hardTotal += r.hard; warnTotal += r.warn || 0;
   const tag = r.hard ? '✗ FAIL' : r.warn ? '~ warn' : '✓ ok';
-  console.log(`\n${tag}  ${r.m}  (${r.crit ?? 0} critical elems · ${r.hard} hard · ${r.warn || 0} warn)`);
+  console.log(`\n${tag}  ${r.m}  (${r.crit ?? 0} critical elems · ${r.hard} hard · ${r.warn || 0} warn${r.waived ? ` · ${r.waived} waived` : ''})`);
   if (r.note) console.log(`    ${r.note}`);
   for (const i of (r.items || [])) {
     const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
-    console.log(`    [${i.kind}] ${i.f == null ? '' : `f${i.f} `}${who} — ${i.detail}`);
+    // a waived issue still prints. A gate that goes silent when waived teaches you to waive.
+    console.log(`    ${i.waived ? '○' : ' '}[${i.kind}]${i.waived ? ' (waived)' : ''} ${i.f == null ? '' : `f${i.f} `}${who} — ${i.detail}`);
   }
 }
 console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);

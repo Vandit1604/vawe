@@ -3715,3 +3715,29 @@ have learned to ignore is worse than no gate.
 **Lesson.** A rule that detects a PATTERN has to test that the pattern stands alone, not merely that its
 characters appear. `\b` answers "is this a token" and never "is this token the whole thing". Any rule
 keyed on bare small integers will meet dates, prices, versions and times before it meets a scaffold.
+
+## #170 — the layout audit was the one gate you could not waive, so a deliberate composition failed it
+
+**What.** `ledgerline-neon` marks its selected transaction row with a bloom instead of a card, which is
+the whole point of the look: on a near-black ground a filled rectangle reads as a hole punched in the
+screen, not as a highlight. `make audit` failed it HARD on `overlap`, 809x121px, between the row layer
+and the CSV wall behind it.
+
+**Root cause, in two parts.** The overlap check exempts a pair when an opaque surface is painted above
+the lower one. Removing the card removed that surface, so the exemption had nothing to find, even though
+the row's TEXT lands inside a 42px gap the wall reserves for it and nothing visible collides. Verified by
+pulling frames at 0.00s, 0.43s, 1.00s and 1.90s and looking at them, not by reasoning about boxes.
+
+The second part is the real bug. Every other gate in this repo honours `{"authoring":{"allow":[...]}}`.
+`verify/audit.mjs` had no waiver mechanism at all, so this had exactly two outcomes: contort the scene
+to satisfy a box check, or stop running the audit. Both are worse than the finding.
+
+**Fix.** `verify/audit.mjs` reads `authoring.allow` the same way every other gate does. A waived issue is
+still printed, tagged `○ (waived)`, and counted in its own column, because a gate that goes silent when
+waived teaches you to waive. Checked across the library: no existing scene lists an audit kind in its
+`allow`, so nothing else changes behaviour.
+
+**Lesson.** An unwaivable gate is not a stricter gate. Every gate here encodes a rule with exceptions
+that were not imagined when it was written, and the waiver is what keeps a real exception from turning
+into either a mangled design or an abandoned gate. If a check can block, it needs a documented way to be
+overruled, and the overruling needs to stay visible.
