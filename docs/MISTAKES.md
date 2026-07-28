@@ -3446,3 +3446,31 @@ run the thing and compare against a control. And note the control was already co
 `no-continuous-object` gate forced it to keep one layer alive across every cut, so this measured
 skill-plus-gate against gate-alone. The gate alone bought continuity of a PROP. Only the skill bought a
 subject that transforms.
+
+## #162 — second A/B, the hard case: no product, no UI, nothing to capture
+
+**What.** The continuity skill was tested again on the case built to break it: a service with NO app and
+NO dashboard (humans negotiate your software contracts, you forward a quote and get a lower price).
+"Show the product working" has nothing to point at. Same protocol: one agent following the skill, one
+forbidden from reading it.
+
+**The skill held, and Step 3b paid off.** Its object is the quote sheet itself: full size while the total
+counts UP to the vendor's ask, shrunk into a `Fwd:` compose row as the attachment, then reopened at full
+size out of a `Re:` from Tenor with a "Negotiated adjustment" line and the total counting DOWN. The
+honest reinterpretation of step 4 was that the product's only real surface is the email thread, so it
+showed that and refused to draw a dashboard for a product that has none. It opened on "Never sign the
+first renewal quote.", six words, and the agent volunteered that its first instinct had been a wordless
+opening frame: the fix from #161 caught exactly the failure it was written for.
+
+**The control was decent and lost on two familiar counts:** it closed on a wordmark end card again, and
+its opening headline was CLIPPED by the frame, a defect its own author missed while eyeballing frames.
+
+**The skill's own advice was wrong in one place.** It recommends a carried background plus a hard cut as
+the ellipsis. Followed literally, a root `blur` cut hid the object for six frames, which is the object
+dying and being replaced: the skill breaking its own law. Now corrected in the skill, put the cut on
+something else in the frame and let the object ride through it, and verify by stepping frames across the
+boundary.
+
+**Lesson.** Doctrine has bugs like code does, and they only surface when somebody follows it literally on
+a brief it was not written against. Two briefs found two: a missing hook rule and a self-contradicting
+ellipsis. Neither was visible by reading the skill.

@@ -18,8 +18,11 @@ export function createKit(ctx) {
   const extra = ctx.extra;
 
   function styleText(el, L, midT) {
-    const serif = L.font === 'serif', mono = L.font === 'mono';
-    el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : 'sans'})`;
+    const serif = L.font === 'serif', mono = L.font === 'mono', num = L.font === 'num';
+    // `num` is the theme's TABULAR face (theme.type.num, --font-num). It was declared by every theme and
+    // reachable only through the .num CSS class, so an author asking for it on a text/count layer got
+    // sans instead. A face a theme declares must be nameable.
+    el.style.fontFamily = `var(--font-${serif ? 'serif' : mono ? 'mono' : num ? 'num' : 'sans'})`;
     // serif defaults to italic (elegant display default); `italic:false` opts a serif upright (or
     // `italic:true` slants any face). Non-breaking: omitted → current behaviour.
     el.style.fontStyle = (L.italic != null ? L.italic : serif) ? 'italic' : 'normal';

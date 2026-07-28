@@ -120,6 +120,14 @@ twelve words or fewer, strong word first. Two ways to pay it without breaking th
 Test it the honest way: show frame 1 to somebody who has never heard of the product. If they cannot say
 what this is, the spine is fine and the hook is missing. Fix the hook, keep the spine.
 
+### A carried background is not a licence to hide the object
+
+The ellipsis this skill recommends, hold the background and hard-cut, was tried on a real brief and broke
+its own law: a root `blur` cut hid the object for six frames, which is the object dying and being replaced.
+If a transition covers the whole stage, the spine is broken for exactly as long as the cover lasts. Put the
+cut on something ELSE in the frame, a mail row, a panel, a chip, and let the object ride through it. Check
+it: step the frames across the boundary and confirm the object is visible in every one.
+
 ## Step 4 - Show the product working
 
 The UI is the star. Plan the real surfaces first and fit copy around them, never the reverse.

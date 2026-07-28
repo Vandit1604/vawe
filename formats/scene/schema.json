@@ -702,7 +702,8 @@
           "enum": [
             "sans",
             "serif",
-            "mono"
+            "mono",
+            "num"
           ]
         },
         "italic": {
