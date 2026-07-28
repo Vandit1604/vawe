@@ -18,6 +18,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: offscreen. The stage is being cleared for it.
 - onscreen: "Meet higgsfield.ai"
 - mechanism: types at 33 cps, untypes at 60 cps from 1.14s, caret held. One `liquid` bg window runs under the whole film and never cuts.
+- becomes: the name types itself in, then untypes to nothing, and the cleared black becomes the prompt bar.
 - why: name the thing in one line, then get out of the product's way. Twelve seconds cannot afford a second text card.
 - transition_out: hard cut at 1.53s, carried by the background, which does not cut.
 
@@ -27,6 +28,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: born. A lime pill sitting at the right edge of the prompt bar.
 - onscreen: "Generate an image of an astronaut holding glowing green puzzle pieces"
 - mechanism: `rect` scrim plus a hand-built `html` app bar, prompt types at 110 cps, one shared pan track on every layer of the surface so the camera follows the text past the field. A pure pan, no push.
+- becomes: the empty bar becomes a written prompt, and the lime pill at its edge leaves the bar and becomes a thing in flight.
 - why: show the act of using it, not a claim about using it. The prompt is a prop, not copy.
 - transition_out: no cut. The button keeps travelling.
 
@@ -36,6 +38,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: thrown left, tumbling under motion blur, bounced, then its label fades, its width collapses and its radius blows out. It is a dot.
 - onscreen: nothing. The button is the only thing in frame.
 - mechanism: `motion` track with `motionBlur:0.16`, then `vars:{"--p":[0,1]}` over 0.4s driving width, height, radius and label opacity in CSS. A `rect` ring pulses off it and dies.
+- becomes: the flying pill becomes a dot. The label goes, the width collapses, the radius blows out.
 - why: the press has to have a consequence you can watch, or the product is a screenshot.
 - transition_out: no cut. The dot is the spinner.
 
@@ -45,6 +48,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: the dot is now the spinner beside the word Generating, then it slips its label and flies up and left alone.
 - onscreen: "Generating"
 - mechanism: word and spinner drift right together on paired `motion` tracks, the word fades at 6.1s, the dot keeps its velocity and leaves under motion blur.
+- becomes: the dot becomes the spinner beside Generating, then the word goes and the spinner becomes a dot again, still moving.
 - why: the wait is the honest part of the product. It also buys the only quiet second in the film.
 - transition_out: no cut. The dot is still on screen and still moving.
 
@@ -54,6 +58,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: the dot smears sideways and stretches into a lime bar, and the bar writes the prompt back out one line at a time.
 - onscreen: "A futuristic astronaut in a white space suit floating in deep dark space, holding glowing neongreen translucent puzzle pieces emitting green particles, cinematic lighting, volumetric glow, high detail, sci-fi atmosphere, 4K."
 - mechanism: the dot's `motion` track ends in a scaleX blowout into a `rect` bar. Four stacked bars arrive 0.16s apart, each replaced in place by its line of text. Camera begins a slow push at 7.6s.
+- becomes: the dot becomes a lime bar, and each bar becomes the line of prompt it was holding.
 - why: the machine reads back exactly what you asked for, which is the frame that earns the picture below it.
 - transition_out: no cut. The last bar is directly above the picture as it arrives.
 
@@ -63,6 +68,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: the last bar hands off to the picture it made. The picture then folds through white and shrinks.
 - onscreen: the generated frame, an astronaut holding glowing green puzzle pieces
 - mechanism: `image` layer fading up out of a white haze under a continuing camera push, then a rotateY fold to a white back and a scale collapse to a portrait thumbnail.
+- becomes: the last bar becomes the picture it made, and the picture folds to a white card and becomes a thumbnail.
 - why: one product surface, one result, shown for long enough to read and no longer.
 - transition_out: no cut. The thumbnail keeps falling.
 
@@ -72,6 +78,7 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: reborn. The thumbnail lands in a new prompt bar and a bigger lime generate button grows beside it.
 - onscreen: "Turn it into a moving visual" · "GENERATE" · "Image" · "Video"
 - mechanism: a lime bar grows under the falling thumbnail and darkens into the app bar, the mode rail slides in from the left, chips and thumbnail fade in, the new prompt types at 26 cps.
+- becomes: the falling thumbnail becomes the attachment on a new prompt bar, and the lime bar under it becomes the app bar with a bigger generate button on its end.
 - why: the result is the next input. That is the loop the whole film exists to show, and it lands in the frame the viewer already understands.
 - transition_out: hard match cut at 11.67s, same UI, same place, punched in.
 
@@ -81,4 +88,5 @@ source: "higgsfield.mp4, first 12s, 1280x720. Every position below is measured o
 - object: the same generate button, punched in and armed, with Video lighting lime beside it.
 - onscreen: "Turn it into a moving visual" · "Video"
 - mechanism: match cut to the identical panel at 1.75x with the camera already inside it, then the Video tile fills lime over 0.2s.
+- becomes: the panel becomes the same panel seen from inside it, and the dark Video tile becomes lime.
 - why: the film ends one press before the video exists. That is the moment the viewer is most curious.

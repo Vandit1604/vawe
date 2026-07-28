@@ -17,6 +17,16 @@
 // default start 0). Exits run INSIDE that window, so the window is the whole truth. `track:0` layers are
 // backdrops, not content, so they never keep the frame alive.
 //
+// WHAT COUNTS AS CONTENT, and why the layer list is not the answer. An open window is not the same as
+// something in the frame, and two kinds of layer prove it. A BLACKOUT (a rect the size of the canvas,
+// filled with an opaque colour) is a backdrop by function, not a subject: it does not add to the frame,
+// it paints over everything behind it. `track:0` is how the schema says "backdrop", but a scrim is
+// authored as an ordinary layer, so the gate has to read the shape. A SPECK (a box under 8% of the
+// canvas on both axes, so under two thousandths of the frame's area) is a garnish: a loading dot, a
+// spinner, a cursor. Neither carries a frame on its own. rec1-nogate.json held 6.38s to 6.86s open with
+// exactly one of each, a black scrim over a 60px dot, and the rendered frame there is empty. Removing
+// either rule alone leaves that hole covered, which is what let it ship.
+//
 // THRESHOLD, and why it is 0.4s and not 0.25s. A beat boundary in this repo routinely leaves a ~0.3s
 // breath between the outgoing layer's end and the incoming layer's start: 46 of 83 shipped scenes do it,
 // and it reads as a beat of rest, not as a hole. 0.4s is the line where the breath stops reading as
@@ -40,6 +50,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { sceneDims } from '../../core/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
@@ -66,9 +77,18 @@ const spanOf = (L) => {
   return [start, start + num(L.duration, num(L.dur, 2))];
 };
 const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
+// a blackout and a speck both keep a window open without putting anything in the frame. See the header.
+const [CANVAS_W, CANVAS_H] = sceneDims(d);
+const SPECK = 0.08;                                    // share of each canvas axis a garnish stays under
+const OPAQUE_FILL = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i; // a bare hex: no alpha channel, no gradient stops
+const blackout = (L) => L.type === 'rect' && num(L.w, 0) >= CANVAS_W && num(L.h, 0) >= CANVAS_H
+  && typeof L.bg === 'string' && OPAQUE_FILL.test(L.bg.trim()) && num(L.opacity, 1) >= 1;
+// an undeclared box is an unknown size, not a small one, so it counts. `h` falls back to `w` because a
+// fragment sized to a narrow width (an html dot, an icon) is narrow in both directions.
+const speck = (L) => num(L.w, Infinity) < CANVAS_W * SPECK && num(L.h, num(L.w, Infinity)) < CANVAS_H * SPECK;
 // top-level only: a group's window already covers its children, and a child's own `start` is read against
 // the same clock, so counting children as well would only widen a window the parent already holds.
-const content = layers.filter((L) => L.track !== 0);
+const content = layers.filter((L) => L.track !== 0 && !blackout(L) && !speck(L));
 const spans = content.map(spanOf).sort((a, b) => a[0] - b[0]);
 const lastEnd = spans.reduce((m, [, b]) => Math.max(m, b), 0);
 // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
@@ -111,7 +131,7 @@ const s = (n) => `${(+n).toFixed(2)}s`;
 const deadAir = holes.filter(([a, b]) => b < duration - 1e-9 && b - a >= DEAD_AIR - 1e-9 && !ownedBy(a, b));
 if (deadAir.length) {
   const list = deadAir.map(([a, b]) => `${s(a)} to ${s(b)} (${s(b - a)})`).join(' · ');
-  fail('dead-air', `${deadAir.length} span(s) hold NO content layer: ${list}. The frame sits on the backdrop and the film stalls there, which reads as a stutter or a broken render, not as a beat of rest. Fix it by extending the outgoing layer's \`duration\` (or pulling the next layer's \`start\` earlier) so the windows touch, or by declaring a cut/seam across the gap so a transition owns it. Anything under ${s(DEAD_AIR)} is treated as a breath and passes.`);
+  fail('dead-air', `${deadAir.length} span(s) hold NO content layer: ${list}. The frame sits on the backdrop and the film stalls there, which reads as a stutter or a broken render, not as a beat of rest. Fix it by extending the outgoing layer's \`duration\` (or pulling the next layer's \`start\` earlier) so the windows touch, or by declaring a cut/seam across the gap so a transition owns it. Anything under ${s(DEAD_AIR)} is treated as a breath and passes. A full-canvas opaque rect (a blackout) and a box under ${Math.round(SPECK * 100)}% of the canvas (a dot, a spinner) do NOT close a gap: neither carries the frame.`);
 }
 
 // ---------- 2. ends-on-nothing ----------

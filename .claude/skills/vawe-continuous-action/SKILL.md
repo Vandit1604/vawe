@@ -252,11 +252,21 @@ make intent SB=<storyboard.md> D=formats/scene/<topic>.json   # writes <topic>.i
 make author-check D=formats/scene/<topic>.json    # inspect verifies the render against that contract
 ```
 
-The shape below is verified against both tools. Three things matter:
+The shape below is verified against both tools. Four things matter:
 `message`/`audience`/`arc`/`format`/`duration` in the frontmatter, a `type` + quoted `onscreen` +
-`why` on every beat, and a `(0s-1.53s)` range in each heading, which is what `make intent` reads
-to place its check. **The object spine goes in the frontmatter**, because anything under a `##`
-heading is parsed as a beat and will fail the gate.
+`why` on every beat, a `becomes:` on every beat, and a `(0s-1.53s)` range in each heading, which is
+what `make intent` reads to place its check. **The object spine goes in the frontmatter**, because
+anything under a `##` heading is parsed as a beat and will fail the gate.
+
+Two of those the gate now BLOCKS on, so write them first, not at the end:
+
+- **`becomes:`** is the change at this junction, written as "the X becomes the Y". Under 15s a beat
+  without one fails. `object:` says where the thing is; `becomes:` says what it turned into.
+  `mechanism:` is neither, it is how the frame moves, and answering with presets ("fade, slide up")
+  earns a `becomes-is-a-preset` warning. A preset is not a change.
+- **The times are read.** A gap between two beats, or a last beat that stops before the frontmatter
+  `duration`, fails as `timeline-hole`. Our three recreations all ended three seconds early on a
+  typed claim and demonstrated none of it; nothing caught that, and now something does.
 
 ```markdown
 ---
@@ -277,6 +287,7 @@ duration: 5s
 - object: offscreen. The stage is being cleared for it.
 - onscreen: "Meet higgsfield.ai"
 - mechanism: types at 33 cps, untypes at 60 cps, caret held; background never cuts
+- becomes: the empty stage becomes the name, then the name becomes an empty stage again
 - why: name the thing, then get out of the product's way
 - transition_out: hard cut, carried by the continuous background
 
@@ -285,6 +296,7 @@ duration: 5s
 - object: the button rides the prompt bar as the camera pans to it
 - onscreen: "Generate an image of an astronaut holding glowing green puzzle pieces"
 - mechanism: real UI, prompt types at 110 cps, shared pan track on every layer
+- becomes: the empty prompt bar becomes a written prompt, and its right edge becomes the generate button
 - why: show the actual act of using it, not a claim about using it
 - transition_out: no cut. The button keeps moving.
 
@@ -293,8 +305,13 @@ duration: 5s
 - object: thrown, bounced, morphed to a dot, ringed, resolved into a spinner
 - onscreen: "Generating"
 - mechanism: motion track with motionBlur, CSS var morph over 0.4s, ring pulse
+- becomes: the pressed button becomes a thrown pill, the pill becomes a ringed dot, the dot becomes a spinner
 - why: the press has a consequence, and the consequence is the last thing you see
 ```
+
+Read the three `becomes:` lines on their own: prompt bar → prompt → button → pill → dot → spinner.
+That chain is the film. If yours reads as three unrelated sentences, you have three shots and no
+action, whatever the `mechanism:` lines promise.
 
 `object:` is an extra field the gates ignore and the next author needs. Keep it.
 

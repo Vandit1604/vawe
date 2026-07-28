@@ -1,5 +1,5 @@
 ---
-message: "One sentence — the single thing this video must communicate."
+message: "One sentence, the single thing this video must communicate."
 audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
 object: "the one noun that survives every cut (the button, the prompt box, the row, the token)"
@@ -8,14 +8,14 @@ object_states: "what it becomes at each cut, in order"
 object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
-duration: 45s
+duration: 29s
 ---
 
 <!--
   This is the STORYBOARD contract (another engine Step 3, adapted). Copy it, fill it, then run
   `make storyboard-check SB=<file>` and present it for sign-off BEFORE writing any scene JSON:
   open with "This video tells <audience> that <message>", then the beat table. Every beat states its
-  JOB — a beat with no `why` is decoration. Reveal model: weight each cue into the back ~50% of its beat
+  JOB. A beat with no `why` is decoration. Reveal model: weight each cue into the back ~50% of its beat
   (the direction-floor's `front-loaded` check enforces the floor of this). No two beats move alike.
 
   THE OBJECT SPINE. One noun stays on screen across the cuts and every cut is a state change of it.
@@ -24,60 +24,108 @@ duration: 45s
   chapters, so a film of islands is a slideshow); above ~15s it is still how a film holds together.
   Doctrine: .claude/skills/vawe-continuous-action/SKILL.md. The scene-side mirror of this rule is the
   direction-floor's `no-continuous-object` tell.
+
+  TWO FIELDS, TWO QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
+  `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the
+  first question and never the second: "fade · slide · zoom" says nothing changed, only that
+  something travelled. Under 15s the gate FAILS a beat with no `becomes:`, and warns when the value
+  is animation vocabulary with no change-verb in it.
+
+  THE TIMES ARE READ NOW. The `(0s-1.53s)` range in each heading is parsed. A gap between two beats,
+  or a last beat that stops short of the frontmatter `duration`, fails as `timeline-hole`.
   Field reference: docs/CRAFT/FRAME-SPEC.md. Effects to name: docs/EFFECTS.md. Shot shapes: make blueprints.
 -->
 
-## Beat 1 — Hook
+## Beat 1: Hook (0s-6s)
 - type: hook
 - object: not born yet. The stage is being cleared for it.
 - blueprint: kineticHook (Adapt: keep the open-loop question; change the hero word to the brand's stat)
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
-- why: open loop — pose the question the payoff answers (curiosity before any claim)
+- becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
+- why: open loop, pose the question the payoff answers (curiosity before any claim)
 - emotion: curiosity
 - duration: 6s
 - transition_in: cut
 
-## Beat 2 — Build
+## Beat 2: Build (6s-12s)
 - type: product_intro
 - object: it arrives, in its resting state
 - blueprint: logoReveal (Adapt: mark draws on, wordmark cascades)
 - onscreen: "what it is" / "the category line"
 - mechanism: svg draw-on · glow flash · per-word reveal
-- why: name the thing — give the hook a cause with a name
+- becomes: the number becomes the thing that produced it, and the drawn mark becomes the wordmark
+- why: name the thing, give the hook a cause with a name
 - emotion: clarity
 - duration: 6s
 - transition_in: zoom-through
 
-## Beat 3 — Proof
+## Beat 3: Proof (12s-19s)
 - type: feature_showcase
 - object: acted on. It is doing the thing the claim asserts.
 - blueprint: screenDive (Reproduce: dive into the real UI)
 - onscreen: "the claim" / "the number that backs it"
 - mechanism: diveIn camera · count-up · border-beam card
-- why: show-don't-tell — the product doing the thing, not a slogan about it
+- becomes: the resting product becomes a product mid-use, and the empty field becomes a filled row
+- why: show-don't-tell, the product doing the thing, not a slogan about it
 - emotion: trust
 - duration: 7s
 - transition_in: cinematicZoom
 
-## Beat 4 — Payoff
+## Beat 4: Payoff (19s-25s)
 - type: benefit_highlight
 - object: transformed by that act into the result
 - blueprint: statReveal (Adapt: the hero number the hook set up)
 - onscreen: "the shocker line" / "the payoff figure"
 - mechanism: hero count-up · kinetic label · a single accent rule
-- why: land the counterintuitive result — pay off the open loop from Beat 1 (the bookend)
+- becomes: the filled row becomes the finished result, and the open loop becomes an answer
+- why: land the counterintuitive result, pay off the open loop from Beat 1 (the bookend)
 - emotion: inevitability
 - duration: 6s
 - transition_in: crossfade
 
-## Beat 5 — CTA
+## Beat 5: CTA (25s-29s)
 - type: cta
 - object: held on the last frame, still the same thing you watched change
 - blueprint: ctaEnd (held to the last frame)
 - onscreen: "the action" / "the url" / "the offer"
 - mechanism: mark pop · install chip · held still (no exit)
+- becomes: the result becomes an address you can type, and the mark becomes the last frame
 - why: one clear next step; remove the risk
 - emotion: urgency
 - duration: 4s
 - transition_in: zoom-through
+
+### Budget the demonstrations, not just the claims
+
+<!-- Guidance, not a beat. It stays a `###` so the gate does not parse it as one. Delete it when you
+     copy this file. -->
+
+Go through the film a second at a time and label what a first-time viewer learns in each one. There
+are only four labels. A NEW-FACT is a claim. A NEW-STATE is the same object, changed. A RE-STATE
+says again what was already said. DECORATION carries nothing.
+
+Do this by hand, on your own film, and hold the result loosely. We ran it on our three recreations
+against the reference they copy, and it read them as landing claims at about the reference's rate
+and changes at roughly two thirds of it. That matches what the films look like. It is also a
+judgement call about every single second, so treat it as a way of looking rather than a score. When
+we checked the sharper conclusions drawn from that same pass, two of them were wrong: the "dead
+tail" was the window being longer than the film, and the "ends on a claim" was a line that lands in
+the last beat next to a real change.
+
+**One finding did survive, because frames were pulled and looked at.** From 5.0s to 7.0s all three
+of ours change nothing but the backdrop, and at 6.5s two of them are a black plate with a single
+dot on it. The reference's emptiest second still has the carried object turning in frame. That hole
+is now a blocking gate (`dead-air`, MISTAKES #165). It went unseen for a whole render cycle because
+the gate asked whether a layer window was open, not whether anything was in the frame.
+
+The lesson is the method, not the numbers. A count over a whole film is a hypothesis. Pull the
+frame and look at it before you believe any of it, or write it down.
+
+So budget both. A claim is a sentence. A demonstration is a state-change. **If a beat names a
+capability and no state-change sits under it, cut the beat or add the change.** And count the film
+backwards from its payoff, so you do not spend your seconds before you reach the thing you promised.
+
+**The background is decoration. It is never information.** It is on screen for all 15 seconds of
+the reference and carries none of them. A beat whose only change is the backdrop has changed
+nothing.

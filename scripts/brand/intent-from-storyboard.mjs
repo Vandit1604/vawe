@@ -6,9 +6,16 @@
 // is on screen and (if mustAnimate) something is moving.
 //
 //   make intent SB=<storyboard.md> [D=formats/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
-// It reads the storyboard's beat time ranges for `at`, the quoted copy in `onscreen:` for `mustShow`, and
-// `why:` for the artifact note. A beat whose onscreen is still a <fill:…> placeholder is emitted WITHOUT
-// mustShow (nothing to verify yet) and flagged — sharpen the storyboard first for a real contract.
+// It reads the storyboard's beat time ranges for `at` + `span`, the quoted copy in `onscreen:` for
+// `mustShow`, and `why:` for the artifact note. A beat whose onscreen is still a <fill:…> placeholder is
+// emitted WITHOUT mustShow (nothing to verify yet) and flagged — sharpen the storyboard first for a real
+// contract.
+//
+// THE SPINE. A storyboard teaches three things: which OBJECT persists, which TRANSFORMATION happens at
+// each junction (`becomes:`), and WHY the beat lands. Only the third used to survive into the intent, so
+// the contract could be satisfied by nine unrelated islands. The top-level `spine` and the per-beat
+// `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked —
+// see the honesty note in scripts/gates/inspect.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -26,6 +33,17 @@ const quotes = (s) => {
 };
 const fieldIn = (block, k) => { const m = new RegExp(`(?:^|\\n)\\s*[-*]?\\s*${k}\\s*:\\s*(.+)`, 'i').exec(block); return m ? m[1].trim() : null; };
 
+const unquote = (s) => s.replace(/^["']|["']$/g, '').trim();
+
+// frontmatter (everything above the first `## ` heading) names the film's spine: the object that persists,
+// where it stands at t0, and what it is at the end.
+const front = src.split(/^##\s+/m)[0] || '';
+const spine = {};
+for (const k of ['object', 'object_t0', 'object_states', 'object_last']) {
+  const v = fieldIn(front, k);
+  if (v) spine[k] = unquote(v);
+}
+
 const blocks = src.split(/^##\s+/m).slice(1);
 const beats = [], warns = [];
 for (const b of blocks) {
@@ -35,6 +53,7 @@ for (const b of blocks) {
   const name = head.replace(/^Beat\s+\d+\s*[—:-]\s*/i, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
   if (!tr) { warns.push(`beat "${name}": no (start s–end s) range in the heading — skipped (add one so intent can place the check).`); continue; }
   const at = +(( +tr[1] + +tr[2]) / 2).toFixed(2);
+  const span = [+(+tr[1]).toFixed(2), +(+tr[2]).toFixed(2)];
   const onscreen = fieldIn(b, 'onscreen') || '';
   const why = fieldIn(b, 'why') || '';
   const type = fieldIn(b, 'type') || '';
@@ -46,11 +65,21 @@ for (const b of blocks) {
   // a directed beat moves; only a beat that literally says static/freeze opts out.
   const mustAnimate = !/\b(static|freeze|frozen|still hold)\b/i.test(type + ' ' + onscreen + ' ' + blueprint);
   const artifact = (why && !/<fill[:\s]/i.test(why)) ? why : [type, blueprint].filter(Boolean).join(' · ') || 'the beat\'s earning artifact';
-  beats.push({ at, name, mustShow, mustAnimate, artifact });
+  // the spine, per beat: where the continuous object stands here, and what it turns into at this junction.
+  // `becomes:` is newer than most storyboards, so both keys are omitted rather than emitted empty.
+  const object = fieldIn(b, 'object');
+  const becomes = fieldIn(b, 'becomes');
+  if (!becomes) warns.push(`beat "${name}": no becomes: line — the transformation at this junction is not recorded. Name what this beat's object turns into.`);
+  beats.push({
+    at, span, name, mustShow, mustAnimate, artifact,
+    ...(object ? { object: unquote(object) } : {}),
+    ...(becomes ? { becomes: unquote(becomes) } : {}),
+  });
 }
 
 if (!beats.length) { console.error('✗ no beats with a time range found — is this a storyboard from make storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
-const out = JSON.stringify({ beats }, null, 2) + '\n';
+if (!spine.object) warns.push('frontmatter has no object: — the intent records no spine, so nothing states what the film is about.');
+const out = JSON.stringify({ ...(Object.keys(spine).length ? { spine } : {}), beats }, null, 2) + '\n';
 
 let dest = process.env.OUT || null;
 if (!dest && D) dest = D.replace(/\.json$/, '') + '.intent.json';

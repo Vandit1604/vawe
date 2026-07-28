@@ -17,6 +17,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { sourceHash } from '../sim/provenance.mjs';
 import { SCENE_DIR } from './paths.mjs';
+import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIX = path.join(repoRoot, 'verify/fixtures');
@@ -27,10 +28,17 @@ const scene = (layers, extra = {}) => JSON.stringify({
   bg: [{ preset: 'plain', from: 0, to: 2 }], layers, ...extra,
 }, null, 1);
 
+// the canvas every fixture scene renders at, so a size case reads "canvas-sized" / "a fraction of the
+// canvas" rather than a bare pixel count that goes stale the day the base aspect changes.
+const [CANVAS_W, CANVAS_H] = sceneDims({ aspect: '16:9' });
+
 const TXT = (o = {}) => ({ type: 'text', text: 'Gate mutation fixture', x: 200, y: 400, w: 1100, align: 'left', size: 90, weight: 600, start: 0, duration: 2, ...o });
 
-/** A minimal STORYBOARD.md, knobs for the two halves of the object-spine rule. */
-const SB = ({ object = true, beatObject = true, duration = '5s' } = {}) => [
+/** A minimal STORYBOARD.md. Each knob turns off exactly ONE thing the gate is meant to notice, so a
+ *  case cannot pass on the strength of some other tell firing in its place. */
+const SB = ({ object = true, beatObject = true, duration = '5s', becomes = true,
+  presetBecomes = false, held = false, stubWhy = false, endsOnClaim = false,
+  t1 = '0s-1.6s', t2 = '1.6s-5s' } = {}) => [
   '---',
   'message: "The record pill turns a voice note into a structured note."',
   'audience: "People who take notes on a phone."',
@@ -41,16 +49,25 @@ const SB = ({ object = true, beatObject = true, duration = '5s' } = {}) => [
   `duration: ${duration}`,
   '---',
   '',
-  '## Beat 1: Record (0s-1.6s)',
+  `## Beat 1: Record${t1 ? ` (${t1})` : ''}`,
   '- type: product_surface',
   ...(beatObject ? ['- object: the pill is pressed and swells, a waveform running inside it'] : []),
+  ...(becomes ? [presetBecomes ? '- becomes: it fades out, then slides up and scales'
+    : '- becomes: the dark pill becomes a swollen recording capsule'] : []),
   '- onscreen: "Recording"',
   '- mechanism: vars morph on the pill width, cursor press',
-  '- why: show the act, not a claim about the act',
+  ...(stubWhy ? ['- why: hook'] : ['- why: show the act, not a claim about the act']),
   '',
-  '## Beat 2: Structure (1.6s-5s)',
+  `## Beat 2: Structure${t2 ? ` (${t2})` : ''}`,
   '- type: payoff_withheld',
   ...(beatObject ? ['- object: the pill flattens into a row, then unfolds into a note card'] : []),
+  // two named changes by default, so the long second beat is a build and not a hold
+  // endsOnClaim: a final becomes that names no change at all, while `onscreen:` still puts copy up —
+  // the closing sentence is the whole last act. Worded clear of animation vocabulary so this knob
+  // trips ends-on-a-claim and nothing else.
+  ...(becomes ? [endsOnClaim ? '- becomes: the note card, holding still under the headline'
+    : held ? '- becomes: the capsule becomes a note card'
+      : '- becomes: the capsule becomes a flat row, then unfolds into a note card'] : []),
   '- onscreen: "Weekly sync"',
   '- mechanism: match cut, height track on the card, typed bullets',
   '- why: the recording becomes the thing you keep',
@@ -157,6 +174,29 @@ const CASES = [
   { gate: 'beatcheck', name: 'ends-on-nothing · the film closes on a bare backdrop', expect: 'fail', match: /ends-on-nothing/,
     scene: scene([TXT({ duration: 1 })]) },
 
+  // dead-air asked "is a window open?", not "is anything in the frame?", so two layer kinds could hold a
+  // hole open while rendering nothing: a BLACKOUT (a canvas-sized opaque rect, a backdrop by function)
+  // and a SPECK (a dot or spinner). rec1-nogate.json shipped a black frame at 6.5s propped up by exactly
+  // one of each, and the gate stayed green. All four directions are pinned: each offender on the SAME
+  // hole the base case uses, so the delta is purely "does this layer close a gap", plus the two mirrors,
+  // or the rule degrades into "rects never count" and "small things never count" (#25).
+  { gate: 'beatcheck', name: 'dead-air · a full-canvas black scrim does not close a gap', expect: 'fail', match: /dead-air/,
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 }),
+                  { type: 'rect', x: 0, y: 0, w: CANVAS_W, h: CANVAS_H, bg: '#000000', radius: 0, start: 0.5, duration: 1 }]) },
+  { gate: 'beatcheck', name: 'dead-air · a speck does not close a gap', expect: 'fail', match: /dead-air/,
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 }),
+                  { type: 'html', html: '<div style="width:100%;aspect-ratio:1;border-radius:50%;background:#c2f23b"></div>',
+                    x: 900, y: 500, w: Math.round(CANVAS_W * 0.03), start: 0.5, duration: 1 }]) },
+  { gate: 'beatcheck', name: 'a rect big enough to read DOES close a gap', expect: 'pass',
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 }),
+                  { type: 'rect', x: 300, y: 380, w: Math.round(CANVAS_W * 0.5), h: Math.round(CANVAS_H * 0.25),
+                    bg: '#c2f23b', radius: 24, start: 0.5, duration: 1 }]) },
+  // a canvas-sized rect is only a blackout when it is OPAQUE. A translucent scrim leaves the frame
+  // readable through it, so it is a treatment on real content, not a substitute for it.
+  { gate: 'beatcheck', name: 'a translucent full-canvas scrim is not a blackout', expect: 'pass',
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 }),
+                  { type: 'rect', x: 0, y: 0, w: CANVAS_W, h: CANVAS_H, bg: 'rgba(0,0,0,0.35)', radius: 0, start: 0.5, duration: 1 }]) },
+
   // ---- layer-props. The must-fail half is a source mutation (below); this is the must-pass half, and
   // it is the one that was missing. The gate scanned a NAMED file for the shared path, that file was
   // split, and the shared set collapsed to nothing: ~1900 live props across the repo were reported dead
@@ -244,7 +284,45 @@ const CASES = [
   { gate: 'storyboard', name: 'a short film with a full object spine passes', expect: 'pass', ext: 'md',
     scene: SB() },
   { gate: 'storyboard', name: 'a 45s film is not held to the spine (chapters are legitimate)', expect: 'pass', ext: 'md',
-    scene: SB({ object: false, beatObject: false, duration: '45s' }) },
+    // no ranges: this case is about the spine, and a 2-beat stub of a 45s film would otherwise trip
+    // the clock rule too, which would let it "pass" for a reason it was never meant to test.
+    scene: SB({ object: false, beatObject: false, duration: '45s', t1: '', t2: '' }) },
+
+  // ---- storyboard-check · the TRANSFORMATION. `object:` says where the thing is; `becomes:` says what
+  // it turned into. Our three recreations landed state-changes at half the reference film's rate, and
+  // every one of them was planned by beats that named a preset and never named a change.
+  { gate: 'storyboard', name: 'becomes · a short film whose beats name no transformation', expect: 'fail', ext: 'md',
+    match: /is missing `becomes:`/, scene: SB({ becomes: false }) },
+  { gate: 'storyboard', name: 'becomes-is-a-preset · the change written as the animation', expect: 'fail', ext: 'md',
+    match: /becomes-is-a-preset/, outputOnly: true, scene: SB({ presetBecomes: true }) },
+  { gate: 'storyboard', name: 'held-state-too-long · a 3s+ beat carrying one change', expect: 'fail', ext: 'md',
+    match: /held-state-too-long/, outputOnly: true, scene: SB({ held: true }) },
+  { gate: 'storyboard', name: 'stub-why · a why that restates the beat category', expect: 'fail', ext: 'md',
+    match: /stub-why/, outputOnly: true, scene: SB({ stubWhy: true }) },
+
+  // ---- storyboard-check · ends-on-a-claim. The surviving defect behind all three recreations: the film
+  // closes on a typed sentence naming a capability, and the seconds that would demonstrate it are not
+  // planned. Both directions pinned; the timings are trimmed to 4.4s on both so the pair differs ONLY
+  // in the final `becomes:` and neither can pass on some other tell firing in its place.
+  { gate: 'storyboard', name: 'ends-on-a-claim · the last act is a sentence appearing', expect: 'fail', ext: 'md',
+    match: /ends-on-a-claim/, scene: SB({ endsOnClaim: true, t2: '1.6s-4.4s', duration: '4.4s' }) },
+  { gate: 'storyboard', name: 'a final beat that names a change does NOT end on a claim', expect: 'pass', ext: 'md',
+    notMatch: /ends-on-a-claim/, scene: SB({ t2: '1.6s-4.4s', duration: '4.4s' }) },
+
+  // ---- storyboard-check · the CLOCK. The beat headings have carried "(0s-1.6s)" all along and nothing
+  // parsed them, so a plan could stop short of its own duration and every gate reported green. Both
+  // edges are pinned separately (an interior gap vs the closing seconds), and the partial case too,
+  // because a storyboard that half-declares its times must be told, not silently half-checked.
+  { gate: 'storyboard', name: 'timeline-hole · a gap between two beats', expect: 'fail', ext: 'md',
+    match: /timeline-hole/, scene: SB({ t2: '2.6s-5s' }) },
+  { gate: 'storyboard', name: 'timeline-hole · the beats run out before the film does', expect: 'fail', ext: 'md',
+    match: /of the film is unplanned/, scene: SB({ t2: '1.6s-3.2s' }) },
+  { gate: 'storyboard', name: 'partial-timeline · only some beats declare a range', expect: 'fail', ext: 'md',
+    match: /partial-timeline/, outputOnly: true, scene: SB({ t2: '' }) },
+  // ...and the mirror: a storyboard with NO ranges at all is the world before this rule existed, and
+  // must stay silent. A gate that retro-fails every plan written before it is a gate nobody keeps.
+  { gate: 'storyboard', name: 'a storyboard that declares no times at all is not judged on the clock', expect: 'pass', ext: 'md',
+    notMatch: /timeline-hole|partial-timeline/, scene: SB({ t1: '', t2: '' }) },
 ];
 
 const run = (cmd, args) => {

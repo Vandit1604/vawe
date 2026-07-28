@@ -3527,3 +3527,39 @@ continuity of a prop; only planning with the skill buys a subject.
 **Method note worth keeping.** This was tunable at all because the A/B runs left a LABELLED SET behind:
 two films known to have the grammar and two known to lack it. Threshold work without labelled examples is
 guessing, and the earlier attempt that "fired on nearly every short scene" was exactly that.
+
+## #165 — dead-air counted a black scrim and a 60px dot as "content on screen"
+
+**Symptom.** `out/rec1-nogate.mp4` and `out/rec2-gates.mp4` hold a black frame at 6.5s with at most a
+single dot on it. `beat-check`'s `dead-air` tell exists to fail exactly that, and both scenes passed.
+
+**Root cause.** `dead-air` merged the `[start, start+duration)` window of every layer with `track !== 0`
+and called any covered instant "content on screen". An open window is not the same as something in the
+frame. Two layer kinds broke the equivalence and both were sitting in that gap:
+
+- a **blackout** — `{"type":"rect","w":1920,"h":1080,"bg":"#000000"}` — which is a backdrop by function.
+  It adds nothing to the frame; it paints over everything behind it. `track:0` is how the schema says
+  "backdrop", but a scrim is authored as an ordinary layer, so the gate has to read the shape.
+- a **speck** — a 60px loading dot, a 78px spinner — a garnish that cannot carry a 1920x1080 frame.
+
+Removing either rule alone still leaves the hole covered, which is how it shipped: rec1's 6.38s-6.86s
+gap was propped up by exactly one of each.
+
+**Fix.** `content` now drops both. A blackout is a rect at or over the canvas on both axes with an opaque
+bare-hex fill; a speck is a declared box under 8% of the canvas on both axes (under two thousandths of
+its area). An undeclared box is an unknown size, not a small one, so it still counts.
+
+**Blast radius, measured.** Across all 96 scenes in `formats/scene/`, exactly two verdicts change:
+`rec1-nogate` (6.38s-6.86s) and `rec2-gates` (6.12s-6.85s). Both frames were pulled from the mp4 and
+looked at: both are black plates with one dot. No shipped scene regresses.
+
+**What it still cannot see.** `rec3-skill` renders the same empty plate at 6.5s and still passes: its
+real gap is 0.27s, under the documented 0.4s breath threshold. That threshold was measured against 46
+shipped scenes and was not loosened to catch one film.
+
+**Gate.** Four cases in `make gate-test`: the blackout and the speck each failing on the SAME hole the
+base `dead-air` case uses, plus the two mirrors (a readable rect DOES close a gap; a translucent
+full-canvas scrim is not a blackout), so the rule cannot degrade into "rects never count" (#25).
+
+**Lesson.** A timeline gate that counts windows is measuring the author's intent, not the render. Ask
+what a layer PUTS in the frame, and remember that some layers subtract.
