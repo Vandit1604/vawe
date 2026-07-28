@@ -347,8 +347,10 @@ pace-from-vo:
 	node scripts/media/pace-from-vo.mjs
 
 # make studio D=formats/scene/<file>.json [PORT=8799] — LIVE scrubbable preview (no mp4 render). Serves
-# the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Dev
-# tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.
+# the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Under
+# it, a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, enter/exit
+# ramps shaded off the settled middle, and every dead-air hole (beat-check) painted as a hazard band.
+# Drag the timeline to seek. Dev tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.
 studio:
 	node scripts/dev/studio.mjs $(D)
 

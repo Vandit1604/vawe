@@ -115,7 +115,10 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats.png` (first/mid/last of every
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
-   space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render.
+   space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render. Under the
+   scrubber is a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, the
+   enter/exit ramps shaded off the settled middle, and every dead-air hole painted as a hazard band. Drag
+   it to seek. It is where you SEE the structure the contact sheets can only sample.
 2a000. **SLIDESHOWS ARE BANNED, NOT DISCOURAGED.** A film under 15s with cuts must carry a CONTINUOUS
    OBJECT: one content layer that survives a cut and CHANGES across it. If every beat is an island, born
    and dying inside its own window, the cuts are jumps between unrelated shots and `direction-floor` blocks

@@ -157,6 +157,36 @@ export const PRESENTATIONS = {
   },
 };
 
+// ---- SOLO MODE: a cut applied to ONE root that carries the whole frame ----
+// The A/B model above assumes two elements: the outgoing plays exit while the incoming plays enter,
+// so the frame is always covered. Drive the SAME sequential pair onto a single root and the two
+// halves stack in time instead of in space — the root dims/masks itself to nothing at the midpoint
+// and the frame goes empty (MISTAKES #166). Solo mode holds every VISIBILITY channel at identity and
+// lets the transition ride on transform + filter alone, so anything on screen stays on screen.
+const HIDE_CHANNELS = ['opacity', 'clipPath', 'WebkitClipPath', 'maskImage', 'WebkitMaskImage', 'maskSize', 'maskPosition', 'WebkitMaskPosition'];
+const KEEP_CHANNELS = ['transform', 'filter'];
+
+// SOLO_BLIND — presentations whose whole transition lives in the visibility channels: strip those and
+// nothing moves, so on a single root they are a silent no-op. DERIVED by probing the presentations,
+// never hand-listed, so a newly added style classifies itself. Callers must refuse the combination
+// loudly rather than render an invisible transition.
+export const SOLO_BLIND = new Set(Object.keys(PRESENTATIONS).filter((name) => {
+  const P = PRESENTATIONS[name], o = { dir: 'left', dist: 90, cx: 50, cy: 50 };
+  const ident = KEEP_CHANNELS.map((k) => IDENT[k]).join('|');
+  for (let i = 1; i < 10; i++) {
+    const p = i / 10;
+    for (const s of [P.enter(p, o), P.exit(p, o)]) if (KEEP_CHANNELS.map((k) => s[k]).join('|') !== ident) return false;
+  }
+  return true;
+}));
+
+// soloCutStyle — cutStyle for the single-root path. Same closed-form styles, visibility pinned open.
+export function soloCutStyle(name, seqState, opts) {
+  const s = { ...cutStyle(name, seqState, opts) };
+  for (const k of HIDE_CHANNELS) s[k] = IDENT[k];
+  return s;
+}
+
 // cutStyle(name, seqState, opts) → style object for the ACTIVE scene root at this frame.
 // seqState is the return of sequence(); opts: {timing, dir, dist, cx, cy}.
 export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist = 90, cx = 50, cy = 50 } = {}) {

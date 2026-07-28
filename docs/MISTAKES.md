@@ -3563,3 +3563,58 @@ full-canvas scrim is not a blackout), so the rule cannot degrade into "rects nev
 
 **Lesson.** A timeline gate that counts windows is measuring the author's intent, not the render. Ask
 what a layer PUTS in the frame, and remember that some layers subtract.
+
+---
+
+## #166 — a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
+
+**What.** `out/brew-launch.mp4` holds five consecutive empty frames across the punch cut at t=14.1, and
+in `example-kinetic-type` the headline "MAKE" vanishes for four frames on every one of its five cuts.
+Nothing was on screen but the backdrop. Every gate was green, including the one gate whose whole job is
+"is there something on screen, all the way through".
+
+**Root cause, part 1 — the engine.** `core/cuts.js` models a cut as A/B: the outgoing element plays
+`exit`, the incoming plays `enter`, and `cutStyle` is strictly sequential (exit runs to completion, THEN
+enter starts) because the two phases belong to two different elements. `formats/scene/scene.js`
+`drawCameraAndCut` drove that same sequential pair onto ONE element, the camera root. On one root the two
+halves stack in time instead of in space: opacity ramps 1 to 0 across the first half of the window and 0
+to 1 across the second, and every layer is a child of that root. 18 of the 26 presentations bottom out at
+`opacity: 0`, and the mask/clip ones (`wipe`, `iris`, `barn`, `letterbox`, …) hide the frame just as
+completely through `clipPath`. `sceneUnits` (the two-wrapper path, `driveSceneUnits`) was always correct;
+`core/produce.js` injects it for any cut film that is not already choreographed, which is why only the 8
+choreographed cut films were affected and why this survived so long.
+
+**Root cause, part 2 — the gate.** `scripts/gates/beat-check.mjs` exempted any `dead-air` hole a declared
+cut/seam window touched, on the reading that "a transition is content, it just is not a layer". A
+transition is a TREATMENT of what is already on screen. Over an empty frame it produces an empty frame.
+The exemption was covering for a real modelling gap: under `sceneUnits` the engine DOES extend every
+non-last-beat layer to `beatEnd + cutDur` (`setLayerTiming`), so those layers really are on screen across
+the window, and the gate could not see it because it read the JSON spans instead of the renderer's.
+
+**Fix.** `core/cuts.js` gains `soloCutStyle` for the single-root path: same closed-form styles, every
+VISIBILITY channel (opacity, clip, mask) pinned at identity, so the transition rides on transform and
+filter alone. A punch still punches (scale 1.12 + 10px blur), a blur dissolve still defocuses and
+refocuses; the frame never empties. A style whose whole transition lives in the visibility channels would
+then be a silent no-op, so `SOLO_BLIND` classifies them BY PROBING the presentations (not by a hand-list,
+so a new style classifies itself) and `scene.js` refuses the combination loudly at boot, naming the two
+ways out: `"sceneUnits": true`, or a style that moves. 10 of 26 styles are blind on this path (`fade` and
+the 8 mask/clip reveals, plus `none`); none of the 8 shipped single-root films uses one.
+
+`beat-check.mjs`: only a STING can close a hole now. Cuts and seams no longer exempt anything, and the
+`sceneUnits` extension is modelled exactly instead. Removing the exemption alone produced two false
+positives on `app-showcase` (content the wrapper really was holding); modelling the extension removed
+both, and left 7 files across 4 films failing `dead-air` on genuine black frames, each verified by pulling
+the frame at the flagged timestamp: `brew-launch` 21.1s, `brew-native` 17.45s, `example-product-promo`
+6.9s / 10.7s / 13.9s, `example-swiss-grid` 10.8s. Those are real defects the gate had been forgiving; they
+are not waived.
+
+**Which gate now catches it.** `lib-test` asserts `soloCutStyle` never hides the frame, for every style
+and every phase, and that `SOLO_BLIND` agrees with what actually moves. `gate-mutation` pins three cases:
+a source mutation that stops `soloCutStyle` pinning the channels open (lib-test must speak), a cut over a
+hole on the single-root path (`dead-air` must fire), and the mirror — `sceneUnits` really does carry a
+layer across the cut, so the gate must stay quiet.
+
+**Lesson.** A model that assumes two elements cannot be pointed at one element and expected to degrade
+gracefully; it degrades into nothing, and nothing looks exactly like a black frame. And a gate exemption
+written as a belief about the engine ("a transition fills its time") is a guess. Model what the engine
+actually does, then there is nothing left to forgive.

@@ -4,7 +4,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS } from '../../core/type.js';
-import { PRESENTATIONS, cutStyle } from '../../core/cuts.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -251,6 +251,33 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('cutStyle steady opaque', approx(+steady.opacity, 1, 0.01));
   ok('cutStyle exit fades', +cutStyle('fade', { enter: 1, exit: 0.9 }, opts).opacity < 0.2);
   ok('cutStyle deterministic', JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)) === JSON.stringify(cutStyle('jitter', { enter: 0.4, exit: 0 }, opts)));
+
+  // SOLO MODE (MISTAKES #166). A cut driven onto ONE root runs exit to completion and only THEN enter,
+  // so any visibility channel it touches empties the whole frame at the midpoint. soloCutStyle must hold
+  // every such channel at identity across the entire window, for every style and every phase.
+  const HIDE = ['opacity', 'clipPath', 'WebkitClipPath', 'maskImage', 'WebkitMaskImage'];
+  const visible = (s) => +s.opacity === 1 && HIDE.slice(1).every((k) => s[k] === 'none');
+  for (const name of Object.keys(PRESENTATIONS)) {
+    let held = true, moved = false;
+    for (let i = 0; i <= 10; i++) {
+      const p = i / 10;
+      for (const st of [soloCutStyle(name, { exit: p, enter: 1 }, opts), soloCutStyle(name, { exit: 0, enter: p }, opts)]) {
+        if (!visible(st)) held = false;
+        if (st.transform !== 'none' || st.filter !== 'none') moved = true;
+      }
+    }
+    ok(`solo ${name} never hides the frame`, held);
+    // and the classification must agree with what actually moves, or the loud refusal in
+    // formats/scene/scene.js is guarding the wrong set.
+    ok(`solo ${name} SOLO_BLIND matches what moves`, SOLO_BLIND.has(name) !== moved);
+  }
+  ok('SOLO_BLIND is derived, not empty and not everything', SOLO_BLIND.size > 0 && SOLO_BLIND.size < Object.keys(PRESENTATIONS).length);
+  ok('solo: a pure-opacity style is blind', SOLO_BLIND.has('fade'));
+  ok('solo: transform/filter styles are usable', !SOLO_BLIND.has('punch') && !SOLO_BLIND.has('blur'));
+  ok('soloCutStyle keeps the style character', soloCutStyle('punch', { exit: 0.5, enter: 1 }, opts).transform !== 'none');
+  ok('soloCutStyle deterministic', JSON.stringify(soloCutStyle('punch', { exit: 0.5, enter: 1 }, opts)) === JSON.stringify(soloCutStyle('punch', { exit: 0.5, enter: 1 }, opts)));
+  ok('soloCutStyle steady state is visually identity', visible(soloCutStyle('punch', { enter: 1, exit: 0 }, opts))
+    && soloCutStyle('punch', { enter: 1, exit: 0 }, opts).filter === 'none');
 }
 
 // timeline evaluators (core/sequence.js) — pure math lifted out of scene.html

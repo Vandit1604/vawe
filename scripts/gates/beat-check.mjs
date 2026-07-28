@@ -30,8 +30,13 @@
 // THRESHOLD, and why it is 0.4s and not 0.25s. A beat boundary in this repo routinely leaves a ~0.3s
 // breath between the outgoing layer's end and the incoming layer's start: 46 of 83 shipped scenes do it,
 // and it reads as a beat of rest, not as a hole. 0.4s is the line where the breath stops reading as
-// deliberate. A gap a declared cut / seam / sting already owns is exempt at any length: a transition is
-// content, it just is not a layer.
+// deliberate. A gap a declared STING owns is exempt at any length: a shader sting paints its own pixels,
+// so it really is content for its span. A CUT or a SEAM is not. Both are treatments of what is already on
+// screen (a cut transforms the scene root or cross-fades two beat wrappers, a seam blends two baked
+// frames), and over an empty frame both produce an empty frame. brew-launch shipped five black frames
+// inside a 0.28s punch on exactly that exemption (#166). What a cut DOES buy is modelled instead: under
+// `sceneUnits` the engine runs every non-last-beat layer to `beatEnd + cutDur`, and this gate computes the
+// same spans, so the coverage it credits is the coverage the renderer actually produces.
 //
 // STATIC BACKGROUNDS, and why this is not measured. core/backgrounds.js paints on a canvas, so it cannot
 // be sampled from node. So the test is structural, not pixel-based, and it comes in two tiers.
@@ -77,6 +82,35 @@ const spanOf = (L) => {
   return [start, start + num(L.duration, num(L.dur, 2))];
 };
 const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
+
+// SCENE UNITS extend a layer's life, so the gate has to model them or it reads holes that are not there.
+// core/produce.js turns `sceneUnits` on for any cut film that is not already choreographed, and then
+// formats/scene/scene.js (setLayerTiming) runs every non-last-beat layer to `beatEnd + cutDur` so the
+// beat wrapper can slide it out as one unit. That extension is REAL coverage: those layers are on screen
+// across the whole cut window. Mirrored here rather than approximated with a blanket exemption.
+const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
+  .filter((c) => c && typeof c === 'object' && c.style && c.style !== 'none' && num(c.t, null) !== null)
+  .map((c) => num(c.t, 0)))].sort((a, b) => a - b);
+const choreographed = layers.some(function has(L) {
+  return L && typeof L === 'object' && ((Array.isArray(L.motion) && L.motion.length > 1) || (L.children || []).some(has));
+});
+const sceneUnits = d.sceneUnits === true
+  || (d.sceneUnits == null && d.produced !== false && cutTimes.length > 0 && !choreographed);
+// the cut window that closes beat i (index into cutTimes), matching scene.js's `dur ?? 0.4`.
+const cutDurAt = (t) => {
+  const c = (Array.isArray(d.cuts) ? d.cuts : []).find((x) => x && num(x.t, null) === t);
+  return c && c.dur != null ? num(c.dur, 0.4) : 0.4;
+};
+// beat i covers [edges[i], cutTimes[i]); the last beat runs to the end and has no exit cut.
+const unitEnd = (L) => {
+  if (!sceneUnits || !cutTimes.length) return null;
+  const start = num(L.start, 0);
+  const edges = [0, ...cutTimes];
+  for (let i = 0; i < edges.length - 1; i++) {            // non-last beats only
+    if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i] + cutDurAt(cutTimes[i]);
+  }
+  return null;                                            // last beat: no exit cut, no extension
+};
 // a blackout and a speck both keep a window open without putting anything in the frame. See the header.
 const [CANVAS_W, CANVAS_H] = sceneDims(d);
 const SPECK = 0.08;                                    // share of each canvas axis a garnish stays under
@@ -89,7 +123,10 @@ const speck = (L) => num(L.w, Infinity) < CANVAS_W * SPECK && num(L.h, num(L.w, 
 // top-level only: a group's window already covers its children, and a child's own `start` is read against
 // the same clock, so counting children as well would only widen a window the parent already holds.
 const content = layers.filter((L) => L.track !== 0 && !blackout(L) && !speck(L));
-const spans = content.map(spanOf).sort((a, b) => a[0] - b[0]);
+// scene.js REPLACES a non-last-beat layer's duration with the run to `beatEnd + cutDur` (it does not
+// take a max), so a layer can be shortened as well as lengthened. Mirror that exactly.
+const spans = content.map((L) => { const [a, b] = spanOf(L); const u = unitEnd(L); return [a, u == null ? b : u]; })
+  .sort((a, b) => a[0] - b[0]);
 const lastEnd = spans.reduce((m, [, b]) => Math.max(m, b), 0);
 // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
 const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
@@ -104,7 +141,11 @@ for (const key of ['cuts', 'seams', 'stings']) {
     owned.push([t, t + num(c.dur, 0.5), key]);
   }
 }
-const ownedBy = (a, b) => owned.find(([s, e]) => s <= b + 1e-9 && e >= a - 1e-9);
+// A STING paints its own pixels (a WebGL shader over the stage), so it really is content for its span.
+// A CUT or a SEAM is a TREATMENT of whatever is already there: a cut transforms the scene root (or
+// cross-fades two beat wrappers), a seam blends two baked frames. Over an empty frame both produce an
+// empty frame. So only stings can close a hole. See MISTAKES #166.
+const ownedBy = (a, b) => owned.find(([s, e, key]) => key === 'stings' && s <= b + 1e-9 && e >= a - 1e-9);
 
 // merge the visible spans into a coverage map, then read the holes out of it.
 const merged = [];

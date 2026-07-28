@@ -197,6 +197,23 @@ const CASES = [
     scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 }),
                   { type: 'rect', x: 0, y: 0, w: CANVAS_W, h: CANVAS_H, bg: 'rgba(0,0,0,0.35)', radius: 0, start: 0.5, duration: 1 }]) },
 
+  // A DECLARED CUT IS NOT CONTENT (MISTAKES #166). dead-air used to exempt any hole a cut/seam window
+  // touched, on the reading that a transition fills its time. A transition is a TREATMENT of whatever is
+  // already on screen: over an empty frame it produces an empty frame. Both sides are pinned, because the
+  // two paths differ in the engine and the difference is the whole point.
+  //   SINGLE ROOT (a `motion` track makes the scene choreographed, so core/produce.js withholds
+  //   sceneUnits): the cut only transforms the camera root. Nothing is extended, the hole stays a hole.
+  { gate: 'beatcheck', name: 'dead-air · a cut over a hole does not fill it (single-root path)', expect: 'fail', match: /dead-air/,
+    scene: scene([TXT({ duration: 0.6, motion: [{ t: 0, x: 200 }, { t: 0.6, x: 240 }] }),
+                  TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
+                 { cuts: [{ t: 0.8, style: 'punch', dur: 0.5 }] }) },
+  //   SCENE UNITS (no motion track → produce.js injects them): scene.js runs every non-last-beat layer
+  //   to `beatEnd + cutDur`, so the outgoing beat really is on screen across the window. That is coverage
+  //   the raw JSON spans do not show, and the gate has to model it or it invents holes.
+  { gate: 'beatcheck', name: 'scene units really do carry a layer across the cut', expect: 'pass',
+    scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
+                 { cuts: [{ t: 0.6, style: 'punch', dur: 0.8 }] }) },
+
   // ---- layer-props. The must-fail half is a source mutation (below); this is the must-pass half, and
   // it is the one that was missing. The gate scanned a NAMED file for the shared path, that file was
   // split, and the shared set collapsed to nothing: ~1900 live props across the repo were reported dead
@@ -538,6 +555,13 @@ const srcCases = [
   // part that can actually be wrong, was untestable while it lived inside frame() (which needs a DOM).
   // It is now the exported pure typedLen(), so this case drops the delete term and demands lib-test
   // notice the line never shrinks.
+  // A cut on the single-root path may only move the frame, never hide it: exit runs to completion before
+  // enter starts, so one root fading itself out empties the whole picture (MISTAKES #166). Anchored on
+  // the identifiers, not on the channel list, so adding a channel does not go stale.
+  { name: 'cuts · solo mode stops pinning the visibility channels open', file: 'core/cuts.js',
+    mutate: (s) => s.replace('  for (const k of HIDE_CHANNELS) s[k] = IDENT[k];\n', ''),
+    cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /solo .* never hides the frame/ },
+
   { name: 'text · untype reverses the typing', file: 'core/layers/text.js',
     mutate: (s) => s.replace('  if (untype != null && lt >= untype) n = Math.min(n, visLen) - Math.floor((lt - untype) * (untypeRate ?? cps));\n', ''),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /untype: deletes back to 0/ },

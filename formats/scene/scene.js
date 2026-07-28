@@ -8,7 +8,7 @@ import { ransomStyle, ransomTick } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
-import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
+import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene } from '/core/transitions-lower.js';
@@ -151,6 +151,16 @@ boot((data, fps, theme, canvas) => {
   // pile of independent layer fades. Reuses the cutStyle PRESENTATIONS (slide/push/slideBlur/…), pure in
   // n. STRICTLY OPT-IN: without the flag, layers attach flat to `cam` exactly as before (snap-identical).
   const sceneUnits = data.sceneUnits === true && sceneCuts.length > 0;
+  // Without sceneUnits a cut drives ONE root (drawCameraAndCut), so it can only transition through
+  // transform/filter — the visibility channels are pinned open or the frame empties. A style whose
+  // whole transition IS a visibility channel would therefore be silently inert here, so refuse it.
+  if (!sceneUnits) for (const cu of sceneCuts) {
+    if (!SOLO_BLIND.has(cu.style)) continue;
+    throw new Error(`cut style "${cu.style}" at t=${cu.t} transitions only by fading/masking, which a `
+      + `whole-frame cut cannot do (there is nothing underneath — the frame would go empty). Either set `
+      + `"sceneUnits": true so the two beats cross-fade as units, or use a style that moves: `
+      + `${Object.keys(CUT_PRESENTATIONS).filter((k) => !SOLO_BLIND.has(k)).join(', ')}.`);
+  }
   const beatBounds = [], beatWrap = [];
   if (sceneUnits) {
     const ts = [...new Set(sceneCuts.map((c) => +c.t))].sort((a, b) => a - b);
@@ -561,9 +571,12 @@ boot((data, fps, theme, canvas) => {
       const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;   // `dur` is the TOTAL window, split around t
       if (t <= ct - half || t >= ct + half) continue;
       const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
+      // SOLO: one root carries the whole frame, so exit-then-enter must not touch opacity/clip/mask —
+      // sequencing those two halves on a single element blanks the frame at the midpoint. soloCutStyle
+      // keeps the transform/filter character (a punch still punches) and holds visibility open.
       cutS = t < ct
-        ? cutStyle(cu.style, { exit: (t - (ct - half)) / half, enter: 1 }, o)   // beat leaving
-        : cutStyle(cu.style, { exit: 0, enter: (t - ct) / half }, o);            // beat arriving
+        ? soloCutStyle(cu.style, { exit: (t - (ct - half)) / half, enter: 1 }, o)   // beat leaving
+        : soloCutStyle(cu.style, { exit: 0, enter: (t - ct) / half }, o);            // beat arriving
       break;
     }
     if (!cutS) cutS = cutStyle('fade', { enter: 1, exit: 0 }, {}); // full identity reset
