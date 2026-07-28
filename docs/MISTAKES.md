@@ -3417,3 +3417,32 @@ starts in the plan, not the JSON.
 and still be dull. And the tell is blind to a short film that declares no cuts at all: three fade-in
 islands with no `cuts` array never becomes eligible. Widening it to infer boundaries from layer starts
 fired on nearly every short scene including the good ones, so it was left out rather than smuggled in.
+
+## #161 — the continuity skill was A/B tested, won on structure, and lost the hook
+
+**What.** Rather than assume the new `vawe-continuous-action` skill worked, it was tested: same blank
+brief ("a 6s launch film for a CLI that turns a screenshot into front-end code"), two agents, one
+following the skill and one forbidden from reading it.
+
+**Result on structure: the skill won clearly.** Its film makes the screenshot the SUBJECT. It is
+captured, shrinks into the command line as the literal argument to `$ shotcode`, then unfolds into a
+code editor whose typed JSX names the same headline the screenshot showed. It ends on the product
+working. The control produced a sequence with a recurring prop: the pricing card persists across cuts,
+but it is carried between shots rather than transforming, and the film closes on a wordmark end card.
+
+**Result on the first second: the skill LOST.** Its opening frame is a bare screenshot with no words on
+it, so a viewer does not know what they are looking at until the command line appears a second later.
+The control opened on "Screenshot any UI." and won that second outright. CLAUDE.md has always required a
+first-frame hook of twelve words or fewer; the continuous-object doctrine crowded it out, because the
+skill said what the object must DO and never said the object still owes you a sentence.
+
+**Fix.** Step 3b added to the skill: the continuity rule sits UNDER the house hook rule, not in place of
+it. Either put the line on the object, or let the object be the sentence, and only when its t0 state is
+self-evident to the audience.
+
+**Two lessons.** A new rule competes with the existing rules for the author's attention, and the loudest
+new rule wins; adding doctrine can therefore REMOVE craft elsewhere, and the only way to see that is to
+run the thing and compare against a control. And note the control was already contaminated: the
+`no-continuous-object` gate forced it to keep one layer alive across every cut, so this measured
+skill-plus-gate against gate-alone. The gate alone bought continuity of a PROP. Only the skill bought a
+subject that transforms.

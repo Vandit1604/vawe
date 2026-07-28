@@ -101,6 +101,25 @@ background.
 
 ---
 
+## Step 3b - The object still owes you a hook
+
+Naming an object does not excuse an unreadable first second. This skill was A/B tested against a control
+on the same brief, and the plan built with it opened on a bare screenshot with no words on it: a viewer
+had no idea what they were looking at until the command line appeared a second later. The control, with
+no object spine at all, opened on "Screenshot any UI." and won that second outright.
+
+So the continuity rule sits UNDER the house rule, it does not replace it. CLAUDE.md: a first-frame hook,
+twelve words or fewer, strong word first. Two ways to pay it without breaking the spine:
+
+- **Put the line on the object.** The hook overlays or labels the thing that is about to transform, so
+  the words and the subject are the same shot. Best option.
+- **Let the object BE the sentence.** Only when its state at t0 is self-evident to the audience you are
+  aiming at. A terminal prompt reads instantly to a developer. A screenshot of an unfamiliar product
+  does not.
+
+Test it the honest way: show frame 1 to somebody who has never heard of the product. If they cannot say
+what this is, the spine is fine and the hook is missing. Fix the hook, keep the spine.
+
 ## Step 4 - Show the product working
 
 The UI is the star. Plan the real surfaces first and fit copy around them, never the reverse.
