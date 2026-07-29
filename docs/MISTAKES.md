@@ -4169,3 +4169,29 @@ overlay. Every doc, Makefile recipe and gate message that quoted the old path no
 
 **Lesson.** A tool that writes one global path is single-author by construction, and nothing says so.
 The cost was invisible while one agent worked at a time and became a wrong answer the moment two did.
+
+## #186 — the continuity gate printed an instruction that throws
+
+#183 added `beats-wrapped-as-units`, which tells an author whose film wraps beats as units to set
+`"sceneUnits": false`. For some films that instruction does not compile.
+
+**Root cause.** `formats/scene/scene.js:157` REFUSES a cut whose whole transition lives in the
+visibility channels (`iris`, `wipe`, everything in `core/cuts.js` `SOLO_BLIND`) unless `sceneUnits` is
+true: one root can only transition through transform and filter, so a fade-or-mask cut would empty the
+frame. Those films therefore MUST wrap beats, which means no continuous object is expressible in them
+at all, and the gate's one piece of advice was the one thing they cannot do. An author following it
+gets a thrown render.
+
+**Fix.** The gate imports `SOLO_BLIND` from the renderer's own module rather than restating the list,
+and when the film's cuts contain one it names the two routes that exist: move those seams to a style
+that MOVES and then opt out, or waive deliberately. Three separate authors hit this trap in one
+campaign, which is what made it visible.
+
+**Lesson.** A gate that tells you what to do is making a claim about the renderer, and that claim needs
+the same import discipline as any other. Advice restated from memory rots exactly like a duplicated
+constant, except it fails at the author's desk instead of in a test.
+
+**Still open.** The root cause is untouched: a layer cannot opt out of beat wrapping. The fix is a
+layer-level flag that attaches to `cam` instead of its beat wrapper, which would unblock continuity for
+every cut-heavy film. It changes shared render behaviour, so it needs `make probe` and a full `make
+snap` sweep before it ships.
