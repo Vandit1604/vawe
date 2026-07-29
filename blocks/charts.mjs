@@ -29,12 +29,17 @@ const CHART_GAP_Y = 8;    // between a bar and its captions
 const CHART_ROW = 18;     // a caption row's font size, which is what it costs in height
 
 // barChart — labeled bars with values. `data` = [{label, value}]. Scales to the max.
-export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0], start = 0, dur = 4 } = {}) {
+// `label` is the card's own caption. lineChart and donutChart have always taken one and barChart did
+// not, which left every bar chart's value captions bare: "620" with no way to say 620 of what. An author
+// can only reach for a chart if the chart can state its own units.
+export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0], label = '', start = 0, dur = 4 } = {}) {
   const max = Math.max(...data.map((d) => d.value), 1);
   // The plot height is what is LEFT after the card's own furniture: its pad, plus the value caption
   // above each bar and the label below it with their gaps. It used to be `h - 90`, a guess that went
   // NEGATIVE below h ≈ 90 and inverted every bar.
-  const plot = Math.max(0, h - 2 * CHART_PAD - 2 * (CHART_ROW + CHART_GAP_Y));
+  // `cardInsetY` already knows what a label costs, so adding one shrinks the plot instead of pushing the
+  // bars out of the card. With no label it is exactly `2 * CHART_PAD`, i.e. byte-identical to before.
+  const plot = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label }) - 2 * (CHART_ROW + CHART_GAP_Y));
   const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 22 });
   // THE BARS GROW FROM THE BASELINE — the motion a bar chart is FOR — and the value caption rides up
   // on top of its own bar. `html` rather than native boxes because a bar's height has to be a
@@ -46,7 +51,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
     + `<div style="font:600 ${CHART_ROW}px var(--font-sans);color:${T.ink}">${dp.value}</div>`
     + `<div style="width:${r2(bw)}px;height:calc(${Math.round(plot * dp.value / max) + 6}px * var(--p, 1));border-radius:6px;background:${color}"></div>`
     + `<div style="font:400 ${CHART_ROW}px var(--font-mono);color:${T.dim}">${dp.label}</div></div>`;
-  const html = htmlCard({ w, pad: CHART_PAD, body: () =>
+  const html = htmlCard({ w, pad: CHART_PAD, label, body: () =>
     `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:${CHART_GAP}px;height:${rowH}px">`
     + data.map(col).join('') + '</div>' });
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];

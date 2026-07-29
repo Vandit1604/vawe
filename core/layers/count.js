@@ -24,8 +24,13 @@ function fmtCount(v, L) {
     const dec = L.decimals ?? ((L.to ?? 0) % 1 !== 0 && Math.abs(L.to ?? 0) < 100 ? 1 : 0);
     return v.toFixed(dec);
   }
-  const a = Math.abs(v);
-  if (a >= 1e9) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-  if (a >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-  return v.toFixed((L.to ?? 0) % 1 !== 0 && a < 100 ? 1 : 0);
+  // The scale comes from the TARGET, not from the value on screen this frame. Picking it per-frame made a
+  // count to 2.5M spend most of its run as a churning 6-digit wall ("486887") and then snap to "2.4M": the
+  // format, the digit count and the layer's width all changed mid-animation, which reads as a glitch. The
+  // target is fixed for the whole run, so the unit is stable and only the digits move. Settled frames were
+  // always right, which is exactly why nothing caught it.
+  const scale = Math.abs(L.to ?? 0);
+  if (scale >= 1e9) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (scale >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  return v.toFixed((L.to ?? 0) % 1 !== 0 && Math.abs(v) < 100 ? 1 : 0);
 }

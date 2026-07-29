@@ -19,7 +19,7 @@
     { "t": 14.2, "fx": "flashWhite", "dur": 0.4 }
   ],
   "layers": [
-    { "type": "text", "text": "Ship faster.", "start": 0.3, "duration": 3.0, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 210, "weight": 800, "color": "#f7f8f8", "gradient": { "from": "#f7f8f8", "to": "#5e6ad2", "angle": 160 }, "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.35 },
+    { "type": "text", "text": "Ship faster.", "start": 0.3, "duration": 3.0, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 210, "weight": 800, "color": "#f7f8f8", "gradient": { "from": "#f7f8f8", "to": "#5e6ad2", "angle": 160 }, "split": "word", "preset": "riseClip", "stagger": 0.07, "each": 0.5, "anim": "none", "out": "defocus", "exitDur": 0.35 },
     { "type": "text", "text": "from prompt to production", "start": 0.8, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 54, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
     { "type": "text", "text": "Just describe the change.", "start": 3.5, "duration": 3.2, "x": 160, "y": 230, "w": 1600, "align": "center", "size": 60, "weight": 600, "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
@@ -28,25 +28,25 @@
     { "type": "rect", "x": 1380, "y": 500, "w": 60, "h": 60, "bg": "#5e6ad2", "radius": 14, "start": 3.9, "duration": 2.8, "anim": "pop", "enterDur": 0.35, "out": "fade", "exitDur": 0.3, "glow": 0.5 },
     { "type": "cursor", "size": 38, "start": 5.4, "duration": 1.5, "path": [ { "t": 0, "x": 980, "y": 760 }, { "t": 0.8, "x": 1410, "y": 530 } ], "clicks": [ 0.95 ] },
 
-    { "type": "text", "text": "Everything you ship, handled.", "start": 7.3, "duration": 3.4, "x": 160, "y": 175, "w": 1600, "align": "center", "size": 78, "weight": 800, "color": "#f7f8f8", "anim": "rise", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+    { "type": "text", "text": "Everything you ship, handled.", "start": 7.25, "duration": 3.9, "x": 160, "y": 175, "w": 1600, "align": "center", "size": 78, "weight": 800, "color": "#f7f8f8", "split": "word", "preset": "up", "stagger": 0.05, "each": 0.42, "anim": "none", "out": "fade", "exitDur": 0.3 },
 
-    { "type": "rect", "x": 175, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(255,255,255,0.10)", "start": 7.5, "duration": 3.2, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35 },
+    { "type": "rect", "x": 175, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(255,255,255,0.10)", "start": 7.5, "duration": 3.52, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35 },
     { "type": "text", "text": "Instant preview", "start": 7.7, "duration": 3.0, "x": 215, "y": 620, "w": 430, "align": "left", "size": 46, "weight": 700, "color": "#f7f8f8", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "every branch, live", "start": 7.78, "duration": 2.9, "x": 215, "y": 678, "w": 430, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4 },
 
-    { "type": "rect", "x": 710, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(255,255,255,0.10)", "start": 7.6, "duration": 3.1, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35 },
+    { "type": "rect", "x": 710, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(255,255,255,0.10)", "start": 7.6, "duration": 3.42, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35 },
     { "type": "text", "text": "Zero config", "start": 7.8, "duration": 2.9, "x": 750, "y": 620, "w": 430, "align": "left", "size": 46, "weight": 700, "color": "#f7f8f8", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "it just detects", "start": 7.88, "duration": 2.8, "x": 750, "y": 678, "w": 430, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4 },
 
-    { "type": "rect", "x": 1245, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(94,106,210,0.4)", "start": 7.7, "duration": 3.0, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35, "glow": 0.3 },
+    { "type": "rect", "x": 1245, "y": 430, "w": 500, "h": 300, "bg": "#131417", "radius": 22, "border": "1.5px solid rgba(94,106,210,0.4)", "start": 7.7, "duration": 3.32, "anim": "lift", "enterDur": 0.36, "out": "defocus", "exitDur": 0.35, "glow": 0.3 },
     { "type": "text", "text": "1-click rollback", "start": 7.9, "duration": 2.8, "x": 1285, "y": 620, "w": 430, "align": "left", "size": 46, "weight": 700, "color": "#f7f8f8", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "undo any deploy", "start": 7.98, "duration": 2.7, "x": 1285, "y": 678, "w": 430, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4 },
 
-    { "type": "block", "block": "lineChart", "x": 130, "y": 330, "w": 1130, "h": 430, "area": true, "color": "#5e6ad2", "label": "cumulative builds · four weeks", "data": [ { "label": "W1", "value": 620 }, { "label": "W2", "value": 1180 }, { "label": "W3", "value": 1900 }, { "label": "W4", "value": 2500 } ], "start": 11.3, "dur": 2.7 },
-    { "type": "count", "from": 0, "to": 2500000, "start": 11.6, "duration": 2.4, "x": 1350, "y": 400, "w": 460, "align": "left", "size": 150, "weight": 800, "color": "#f7f8f8", "ease": "easeOutExpo", "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.35 },
-    { "type": "text", "text": "builds shipped this month", "start": 11.9, "duration": 2.1, "x": 1350, "y": 612, "w": 420, "align": "left", "size": 34, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+    { "type": "block", "block": "barChart", "x": 120, "y": 285, "w": 1090, "h": 520, "color": "#5e6ad2", "label": "builds per week · thousands", "data": [ { "label": "W1", "value": 620 }, { "label": "W2", "value": 560 }, { "label": "W3", "value": 720 }, { "label": "W4", "value": 600 } ], "start": 11.05, "dur": 3.17 },
+    { "type": "count", "from": 0, "to": 2500000, "start": 11.35, "duration": 2.87, "x": 1300, "y": 400, "w": 520, "align": "left", "size": 148, "weight": 800, "color": "#f7f8f8", "ease": "easeOutExpo", "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.35 },
+    { "type": "text", "text": "builds shipped this month", "start": 11.65, "duration": 2.57, "x": 1302, "y": 596, "w": 500, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
-    { "type": "text", "text": "Start shipping.", "start": 14.5, "duration": 3.0, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 150, "weight": 800, "color": "#f7f8f8", "anim": "rise", "enterDur": 0.32 },
+    { "type": "text", "text": "Start shipping.", "start": 14.25, "duration": 3.25, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 150, "weight": 800, "color": "#f7f8f8", "split": "word", "preset": "riseClip", "stagger": 0.07, "each": 0.5, "anim": "none" },
     { "type": "text", "text": "free at <em>your.app</em>", "start": 15.0, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 56, "weight": 600, "color": "#5e6ad2", "anim": "fade", "enterDur": 0.5 }
   ],
   "bg": [{ "t": 0, "preset": "aurora" }]

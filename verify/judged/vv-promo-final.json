@@ -1,0 +1,260 @@
+{
+  "name": "vv-promo-final",
+  "seed": "0",
+  "claim": "builds shipped this month",
+  "brand": null,
+  "gatesTree": "8cc1acc4163c31f7664a564df1913da202498c6d",
+  "rows": 6,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/example-product-promo.mp4",
+      "mp4": "out/example-product-promo.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.4583333333333333,
+        4.375,
+        7.291666666666667,
+        10.208333333333334,
+        13.125,
+        16.041666666666668
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "out/example-product-promo.before.mp4",
+      "mp4": "out/example-product-promo.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.4583333333333333,
+        4.375,
+        7.291666666666667,
+        10.208333333333334,
+        13.125,
+        16.041666666666668
+      ]
+    }
+  ],
+  "result": {
+    "winner": "LEFT",
+    "winnerArm": "out/example-product-promo.mp4",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 3,
+      "RIGHT": 0,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "LEFT",
+      "says": "Weekly build volume across four weeks, in thousands (620, 560, 720, 600), with the bar lengths carrying the rise and dip so you can see the trend and see the four weeks adding up to the 2.5M headline beside it. Everything else in both cuts is decoration: the glow field, the fake prompt bar and the three feature cards carry no quantity, only labels."
+    },
+    {
+      "judge": "2",
+      "side": "LEFT",
+      "says": "Four weekly build counts in thousands (620, 560, 720, 600) drawn as bars sharing a baseline, so you see the week-to-week shape behind the headline total: a dip in week 2, a peak in week 3, and roughly 2.5M summed over the month. It shows the number is a running rate, not a one-off. RIGHT has no picture anywhere in the film; every frame is type with a glow behind it."
+    },
+    {
+      "judge": "3",
+      "side": "LEFT",
+      "says": "Weekly build volume across one month: four zero-baselined bars, roughly 620k, 560k, 720k and 600k, whose heights are honestly proportional to their labels and whose total is the 2.5M sitting beside them. It shows both the size of the claim and its shape over time, that output dipped in week two, peaked in week three and holds around 600k a week, which the headline number alone cannot say. It is the only picture in either cut. Everything else on both sides is type on a gradient, so for the other five beats the answer is: nothing, it is decoration."
+    }
+  ],
+  "wouldShip": {
+    "out/example-product-promo.mp4": [
+      "yes",
+      "yes",
+      "no"
+    ],
+    "out/example-product-promo.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "composition",
+          "why": "RIGHT lands a settled centered lockup with the kicker sitting under the whole line, while LEFT shows only 'Ship' with the kicker hanging off to its right, mis-anchored and left of the glow."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Both are the same prompt-bar frame with the same focal point and the same legible mono line; the only difference is a marginally wider box on LEFT."
+        },
+        {
+          "beat": 3,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "RIGHT's headline is near-white and crisp against the murk, LEFT's is a mid-grey that sits close to the background it is over."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Identical three-card row under the headline, evenly spaced and centered on both sides, with the same card copy and contrast."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "value",
+          "why": "LEFT pairs the number with a four-week bar chart that shows where 2.5M comes from and that it is climbing; RIGHT is the number alone on empty space."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same end card, same scale contrast between the line and the URL, and the URL is equally dim and hard to read on both."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "Weekly build volume across four weeks, in thousands (620, 560, 720, 600), with the bar lengths carrying the rise and dip so you can see the trend and see the four weeks adding up to the 2.5M headline beside it. Everything else in both cuts is decoration: the glow field, the fake prompt bar and the three feature cards carry no quantity, only labels."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Four of six beats are the same film, so the verdict turns on beat 5, where LEFT is the only frame in either cut that shows a picture doing work the words cannot, and that is worth more than the two frames RIGHT wins on brightness and phase."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 5,
+        "flaw": "A big number and a caption floating on an empty gradient. Nothing proves or shades the claim, so the frame is a slide, not a shot, and the strongest data in the film is spent as flat type."
+      },
+      "wouldShip": {
+        "LEFT": "yes",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "composition",
+          "why": "RIGHT lands the full hook 'Ship faster.' centered with its subline tucked under it, while LEFT shows only 'Ship' with the subline hanging off to the right of empty space, so the two lines read as unrelated."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "The prompt bar is the same size, position and contrast on both sides; nothing separates them."
+        },
+        {
+          "beat": 3,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "Both frames are four-fifths empty backdrop, but RIGHT's line is brighter and horizontally centered whereas LEFT's is dimmer, half-faded on 'handled.' and shoved into the bottom-left corner."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical headline plus three cards; both share the same flaw of card copy pinned to the bottom with a hollow top two-thirds."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "value",
+          "why": "LEFT pairs the 2.5M with a real weekly bar chart (620/560/720/600) so the number is built from something, while RIGHT is the bare number on empty space."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same end card on both, and both bury 'free at your.app' in a blue so close to the backdrop it nearly disappears."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "Four weekly build counts in thousands (620, 560, 720, 600) drawn as bars sharing a baseline, so you see the week-to-week shape behind the headline total: a dip in week 2, a peak in week 3, and roughly 2.5M summed over the month. It shows the number is a running rate, not a one-off. RIGHT has no picture anywhere in the film; every frame is type with a glow behind it."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Four of six beats are the same film. LEFT is the only cut that ever puts a picture on screen doing work the words cannot, and that one beat is worth more than the two frames RIGHT wins, both of which are reveal-timing artefacts rather than design choices. It is narrow because LEFT pays for it with a broken-looking hook frame and a chart-plus-number group that leaves the whole right half of beat 5 empty."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 3,
+        "flaw": "Near-dead frame: grey-on-dark copy sitting low-left with 'handled.' still half-faded, no focal point, and the top four-fifths carrying only a blur. Nothing is being shown or taught."
+      },
+      "wouldShip": {
+        "LEFT": "yes",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "composition",
+          "why": "RIGHT's headline is complete and the mono subline centres cleanly under it, while LEFT shows only \"Ship\" with the subline hanging off to the right of the word it belongs to, so the annotation is mis-anchored."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "The same prompt bar, the same headline, the same alignment on both sides, and both leave two thirds of a very wide input empty with one tiny word in it."
+        },
+        {
+          "beat": 3,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "Identical layout, but LEFT's line is a muddy grey against the gradient while RIGHT's sits at full opacity and reads instantly; both frames are still 80 percent empty."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "produced-not-generated",
+          "why": "The same three cards at the same size and spacing on both sides, and on both the cards are 60 percent void with the text jammed to the bottom edge."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "does the graphic encode the claim",
+          "why": "LEFT breaks 2.5M into four weekly bars that sum to it and vary in height, so the number is proven; RIGHT sets the same number as large type with nothing behind it."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "The same end card on both sides, and both put the CTA in blue italic on near-black where it barely holds."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "Weekly build volume across one month: four zero-baselined bars, roughly 620k, 560k, 720k and 600k, whose heights are honestly proportional to their labels and whose total is the 2.5M sitting beside them. It shows both the size of the claim and its shape over time, that output dipped in week two, peaked in week three and holds around 600k a week, which the headline number alone cannot say. It is the only picture in either cut. Everything else on both sides is type on a gradient, so for the other five beats the answer is: nothing, it is decoration."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Four of six beats are indistinguishable, and RIGHT takes two frames on cleaner type and a properly anchored subhead. LEFT wins because it is the only cut that ever puts a picture on screen doing work the words cannot, and on the dimension that matters most that outweighs two soft frames. It is narrow, not clear: LEFT pays for the chart with a split focal point at beat 5 and gains nothing anywhere else."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 3,
+        "flaw": "A single dim grey line pinned near the bottom of an otherwise empty gradient. The contrast is too low to read at a glance and there is no second element, so the frame teaches nothing and reads as dead air."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    }
+  ],
+  "id": "1c58bb3bb2c8"
+}

@@ -46,12 +46,28 @@ try { scene = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.e
 const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : []);
 const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 
+// Blocks and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every gate
+// that walks layers sees `{type:"block"}` as one opaque thing rather than the chart it becomes. So a scene
+// written with the repo's own vocabulary could not pass its own mandatory ladder: the source failed
+// validate, and the `.expanded.json` is a derivative that `visual-vocabulary` skips. Neither file could be
+// green. Expand to a temp that keeps the BASENAME (receipts and theme resolution key off it) and is not
+// named `.expanded` (so nothing skips it), then gate that.
+let target = file;
+const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (l.type === 'block' || l.type === 'comp' || hasSugar(l.children)));
+if (hasSugar(scene.layers)) {
+  const dir = path.join('/tmp/.author-check', String(process.pid));
+  fs.mkdirSync(dir, { recursive: true });
+  target = path.join(dir, path.basename(file));
+  execFileSync('node', [path.join(repoRoot, 'scripts/author/expand-blocks.mjs'), file, target], { cwd: repoRoot, stdio: 'ignore' });
+  console.log(`  (block/comp sugar expanded for the gates → ${target}; findings refer to ${path.basename(file)})`);
+}
+
 // run one gate as a child; stream its output; return {code, blockCodes}. A "blocking" finding is a line
 // the gate marks with ✗ and a [code] tag (critique errors, direct FAILs use exactly this format).
 const runGate = (label, script, args) => {
   process.stdout.write(`\n──────── ${label} ────────\n`);
   let out = '', code = 0;
-  try { out = execFileSync('node', [path.join(repoRoot, script), file, ...args], { encoding: 'utf8', cwd: repoRoot }); }
+  try { out = execFileSync("node", [path.join(repoRoot, script), target, ...args], { encoding: 'utf8', cwd: repoRoot }); }
   catch (e) { code = e.status ?? 1; out = `${e.stdout || ''}${e.stderr || ''}`; }
   process.stdout.write(out.endsWith('\n') ? out : out + '\n');
   const blockCodes = [...out.matchAll(/✗\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
@@ -130,7 +146,7 @@ if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the s
 // ---- the required post-render step the static ladder structurally cannot be ----
 console.log(`\n  ▶ REQUIRED after render (the ladder is not complete without it):`);
 console.log(`      make judge D=${file}${vs ? ` VS=${vs}` : ''}`);
-console.log(`      then READ /tmp/judge/sheet.png against /tmp/judge/rubric.md and score every frame`);
+console.log(`      then READ /tmp/judge/${path.basename(file, '.json')}/sheet.png against its rubric.md and score every frame`);
 console.log(`      (readability · hierarchy · composition · brand + asset fidelity · produced · value).`);
 console.log(`      If your eye catches a flaw, it is a FIX — never ship one you noticed. See docs/JUDGE.md.`);
 
