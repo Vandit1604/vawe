@@ -28,9 +28,10 @@
 // the same variable, so at every instant one side of the edge is fully legible before and the other
 // fully legible after. An element under a `clip-path` is exempt, because that is the correct pattern.
 //
-// WHAT IT CANNOT DO. It reads markup, not pixels. Two strings that overlap but never at readable
-// opacity, or two IDENTICAL strings crossfading (which is invisible and harmless), are both flagged.
-// It also cannot see a dissolve authored between two separate LAYERS rather than inside one.
+// WHAT IT CANNOT DO. It reads markup, not pixels, so two strings that overlap only where a transform
+// has already moved one of them apart are still flagged. It cannot see a dissolve authored between two
+// separate LAYERS rather than inside one. It says nothing about a pair whose opacities move the SAME
+// way (both fading out, or both in): that is a group fade, not one state replacing another.
 //
 //   node scripts/gates/dissolve-check.mjs <scene.json> [--strict]   ·   make dissolve D=<file>
 // FAIL: crossfade-mud.   Waive with {"authoring":{"allow":["crossfade-mud"]}}.
@@ -165,6 +166,13 @@ for (const L of layers) {
       // green on the thing it failed to look at, so it is counted and named instead.
       if (!ok) { unreadable.push({ layer: L.id || L.type, oa: oa.slice(0, 48), ob: ob.slice(0, 48) }); continue; }
       pairsChecked++;
+      // A CROSSFADE NEEDS ONE RISING AND ONE FALLING. Two elements that fade out together, or in
+      // together, are a group fade: they are both meant to be there and neither is replacing the other.
+      // Flagging those made the gate wrong on two real scenes, including one where the pair carried the
+      // IDENTICAL expression, which cannot be a transition between two states by construction.
+      const dirA = (evalCss(oa, { [v]: 1 }) ?? 0) - (evalCss(oa, { [v]: 0 }) ?? 0);
+      const dirB = (evalCss(ob, { [v]: 1 }) ?? 0) - (evalCss(ob, { [v]: 0 }) ?? 0);
+      if (dirA * dirB >= 0) continue;
       const share = both / STEPS;
       if (share < MUDDY) continue;
       const blur = /filter\s*:\s*blur/i.test(a.style) || /filter\s*:\s*blur/i.test(b.style);

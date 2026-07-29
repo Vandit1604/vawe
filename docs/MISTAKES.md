@@ -3902,3 +3902,16 @@ does not get bored, does not fix the obvious instance and stop, and does not tru
 Every instance here was visible to anyone who pulled the right frame; six of them shipped anyway. And
 the second lesson, from the gate's own bug: when a check cannot evaluate an input, that is a finding
 about the check, not a pass for the input.
+
+**Two false-positive classes found by running it on the library, both fixed.** It flagged pairs whose
+opacities move the SAME way: two elements fading out together (`app-showcase.expanded`) and, in one
+case, a pair carrying the IDENTICAL expression (`ab2-skill-tenor`), which cannot be a transition between
+two states by construction. A crossfade needs one rising and one falling, so the check now requires the
+two directions to have opposite sign. `app-showcase.json` was clean while `app-showcase.expanded.json`
+was not, which places that one in block expansion rather than in any author's hand.
+
+**All of it is now fixed rather than logged as debt.** Merchant resolves in `ab4-a-ledgerline` and
+`ledgerline-neon` are wipes; amounts and the mostly-identical strings in `ab2-skill-tenor` are threshold
+swaps, which is the right answer when only a word or a figure changes and a wipe would drag an edge
+across characters that are not changing. Across 102 scenes: zero mud, zero unjudged pairs.
+
