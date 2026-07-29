@@ -1,0 +1,260 @@
+{
+  "name": "vv-kt-final",
+  "seed": "0",
+  "claim": "on the beat.",
+  "brand": null,
+  "gatesTree": "733364b1b0e5ed809c4a25f0fab4efa07362ca42",
+  "rows": 6,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/example-kinetic-type.mp4",
+      "mp4": "out/example-kinetic-type.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.0416666666666667,
+        3.125,
+        5.208333333333333,
+        7.291666666666667,
+        9.375,
+        11.458333333333334
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "out/example-kinetic-type.before.mp4",
+      "mp4": "out/example-kinetic-type.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.0416666666666667,
+        3.125,
+        5.208333333333333,
+        7.291666666666667,
+        9.375,
+        11.458333333333334
+      ]
+    }
+  ],
+  "result": {
+    "winner": "LEFT",
+    "winnerArm": "out/example-kinetic-type.mp4",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 3,
+      "RIGHT": 0,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "LEFT",
+      "says": "An audio waveform of the film's own soundtrack, with five tall lime bars picked out of the grey amplitude bars and a white playhead line among them. It shows WHERE the cuts fall relative to the audio: five cuts sitting on five transient peaks, evenly spaced. It encodes timing alignment, a quantity (5) and a proportion (which peaks are cut points versus which are just loud), and it proves the claim 'on the beat' rather than asserting it. RIGHT's frame at the same moment encodes nothing; it is type on a gradient."
+    },
+    {
+      "judge": "2",
+      "side": "LEFT",
+      "says": "An audio waveform of the film's own soundtrack with five loud onsets picked out in lime and a playhead riding one of them, labelled beat.wav and '5 cuts, 5 beats'. It shows a count and an alignment: the film contains exactly five cuts, and each one sits on a peak in the audio rather than on an arbitrary frame. The quieter grey bars around the marked ones give the claim its evidence, because you can see the marked spikes are the tall ones. RIGHT's version of this beat encodes nothing; it is the assertion in type with a glow behind it."
+    },
+    {
+      "judge": "3",
+      "side": "LEFT",
+      "says": "An audio waveform with five tall bright markers standing above the noise floor: it shows that five cuts in the film sit exactly on five loud beats of the track, so the timing claim 'on the beat' is measured rather than asserted. The one thin white marker reads as the current playhead against those five hits. RIGHT has no picture at all in any beat, only type on a gradient."
+    }
+  ],
+  "wouldShip": {
+    "out/example-kinetic-type.mp4": [
+      "yes",
+      "no",
+      "yes"
+    ],
+    "out/example-kinetic-type.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Identical lime MAKE on the same blue field; RIGHT is a hair larger but nothing separates them."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Single white word, one focal point, same treatment on both sides."
+        },
+        {
+          "beat": 3,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "Both set STOP low in the chip with thin padding, but RIGHT's letters run right up to the chip's left and right edges while LEFT keeps a margin."
+        },
+        {
+          "beat": 4,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "RIGHT's final G touches and is shaved by the frame edge; LEFT holds a small margin on both sides of the same full-bleed word."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "does the graphic encode the claim",
+          "why": "LEFT backs 'on the beat' with a real waveform whose five lime spikes mark the five cuts against a playhead; RIGHT states the claim and leaves the lower half of the frame empty."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "produced-not-generated",
+          "why": "Same end card, same indent quirk under KINETIC, same footer; RIGHT is marginally larger and neither is better made."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "An audio waveform of the film's own soundtrack, with five tall lime bars picked out of the grey amplitude bars and a white playhead line among them. It shows WHERE the cuts fall relative to the audio: five cuts sitting on five transient peaks, evenly spaced. It encodes timing alignment, a quantity (5) and a proportion (which peaks are cut points versus which are just loud), and it proves the claim 'on the beat' rather than asserting it. RIGHT's frame at the same moment encodes nothing; it is type on a gradient."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Five of six beats are the same frame at slightly different scale, so the film is decided by beat 5 and by two edge faults. LEFT wins beat 5 outright because it is the only frame in either cut that shows anything, and it avoids RIGHT's clipped G on beat 4 and tighter chip on beat 3. Narrow, because LEFT's advantage is one frame deep, not a different film."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 5,
+        "flaw": "Three lines of type stacked in the upper two-thirds with the entire lower third left empty; the strongest claim in the film, 'on the beat', is made in the smallest, lowest-contrast grey text and nothing on screen demonstrates it."
+      },
+      "wouldShip": {
+        "LEFT": "yes",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Identical frame on both sides: same lime word, same scale, same glow backdrop, nothing separates them."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Both are the single white word THEM on the same field, with no difference in weight, position or contrast."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Both put STOP in the same lime slab at the same place; the inversion reads equally well on each."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Both set SCROLLING edge to edge with the same gradient fill and the same mild letter clipping at the frame edges."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "does-the-graphic-encode-the-claim",
+          "why": "LEFT adds a waveform with five onsets marked and a playhead, so the claim 'on the beat' is shown and counted; RIGHT leaves the same words floating over empty blue."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same end card, same two-colour stack and the same small mono signature under it."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "An audio waveform of the film's own soundtrack with five loud onsets picked out in lime and a playhead riding one of them, labelled beat.wav and '5 cuts, 5 beats'. It shows a count and an alignment: the film contains exactly five cuts, and each one sits on a peak in the audio rather than on an arbitrary frame. The quieter grey bars around the marked ones give the claim its evidence, because you can see the marked spikes are the tall ones. RIGHT's version of this beat encodes nothing; it is the assertion in type with a glow behind it."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Five of six beats are indistinguishable. LEFT wins on the one beat that differs, and it differs in the right direction: it is the only frame in either cut where a picture proves something the words only assert. That is a real gain but it is one frame out of six, so the margin is narrow."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 5,
+        "flaw": "Three lines of type stacked mid-frame with the bottom two-fifths of the canvas empty, and the smallest line ('on the beat.') is grey-on-blue at low contrast. It claims rhythm while showing none, and the vacant lower half makes it read as a slide, not a shot."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical single-word hook on the same gradient; RIGHT is a hair larger but nothing separates them."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same white word, same contrast, same placement on both sides."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Both put STOP in a lime chip with the word sitting low and tight in the box rather than optically centred, so both share the same flaw."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "SCROLLING runs edge to edge on both; the same word at the same weight with no distinguishing craft."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "does the graphic encode the claim",
+          "why": "LEFT backs the words with a waveform whose five tall markers land on five peaks, so the claim is proved on screen; RIGHT states it and leaves the lower half empty."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same two-line lockup with the same right-aligned rag and the same small caption underneath."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "An audio waveform with five tall bright markers standing above the noise floor: it shows that five cuts in the film sit exactly on five loud beats of the track, so the timing claim 'on the beat' is measured rather than asserted. The one thin white marker reads as the current playhead against those five hits. RIGHT has no picture at all in any beat, only type on a gradient."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Five of six beats are indistinguishable, so the whole gap is beat 5, but that is the one frame where either cut tries to prove something instead of announce it, and only LEFT does."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 5,
+        "flaw": "It claims 'on the beat' with three lines of type and nothing else; the bottom third of the frame is empty gradient, which is exactly where the proof belonged, and the caption is grey-on-blue at low contrast."
+      },
+      "wouldShip": {
+        "LEFT": "yes",
+        "RIGHT": "no"
+      }
+    }
+  ],
+  "id": "2a7458a2b650"
+}

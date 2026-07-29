@@ -1,0 +1,260 @@
+{
+  "name": "vv-kinetic-type",
+  "seed": "0",
+  "claim": "on the beat.",
+  "brand": null,
+  "gatesTree": "733364b1b0e5ed809c4a25f0fab4efa07362ca42",
+  "rows": 6,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/example-kinetic-type.before.mp4",
+      "mp4": "out/example-kinetic-type.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.0416666666666667,
+        3.125,
+        5.208333333333333,
+        7.291666666666667,
+        9.375,
+        11.458333333333334
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "out/example-kinetic-type.mp4",
+      "mp4": "out/example-kinetic-type.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.0416666666666667,
+        3.125,
+        5.208333333333333,
+        7.291666666666667,
+        9.375,
+        11.458333333333334
+      ]
+    }
+  ],
+  "result": {
+    "winner": "RIGHT",
+    "winnerArm": "out/example-kinetic-type.mp4",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 0,
+      "RIGHT": 3,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "RIGHT",
+      "says": "An audio waveform: a row of grey bars of varying height reading as loudness over time, with six of them raised and turned lime. Those spikes read as the accented beats in the track, and the caption pins them to the film's cuts. So the picture encodes WHERE in the audio the cuts land, which is the timing claim the words only assert. LEFT shows nothing at all; every one of its six frames is type on a gradient."
+    },
+    {
+      "judge": "2",
+      "side": "RIGHT",
+      "says": "An audio waveform: grey bars are the amplitude of a track over time, and the tall lime spikes standing above them are the beat onsets, so the picture shows WHERE in the sound the hits fall and, with the caption, claims each cut is placed on one of them. It encodes timing and rhythm, a quantity the words 'on the beat' only assert. LEFT has nothing but a glow, which is decoration."
+    },
+    {
+      "judge": "3",
+      "side": "RIGHT",
+      "says": "An audio waveform over time: a row of grey amplitude bars with a handful of tall lime spikes standing above them, labelled beat.wav on one end and 'every cut on a beat' on the other. It reads as the soundtrack's envelope with the cut points marked on it, so the eye can see that the edit lands on the loud transients rather than being told so. The spacing of the lime spikes is the rhythm itself, and it is uneven in the way real music is, which is what makes it read as a measurement instead of an ornament. LEFT has no picture anywhere in the six beats."
+    }
+  ],
+  "wouldShip": {
+    "out/example-kinetic-type.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "out/example-kinetic-type.mp4": [
+      "no",
+      "no",
+      "yes"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical frames: one huge lime word on the blue glow, single focal point, nothing separates the two cuts."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same white THEM at the same size and weight; contrast is strong on both and no difference is visible."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Both put the black-on-lime STOP slab dead centre with equal margins; the deliberate centring reads the same on each."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "SCROLLING runs edge to edge on both and touches the frame margins identically, so both share the same tightness."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "RIGHT pairs the copy with a waveform whose tall lime spikes mark the cut points, so the claim is shown; LEFT is three lines of type over an empty lower half."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same KINETIC/TYPE. lockup with the same small mono footer; the end card is indistinguishable."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "An audio waveform: a row of grey bars of varying height reading as loudness over time, with six of them raised and turned lime. Those spikes read as the accented beats in the track, and the caption pins them to the film's cuts. So the picture encodes WHERE in the audio the cuts land, which is the timing claim the words only assert. LEFT shows nothing at all; every one of its six frames is type on a gradient."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "Five of six beats are pixel-for-pixel arguments to a draw. RIGHT wins on the one beat that differs, and it wins it on the dimension that matters most: it is the only frame in either cut that is a picture rather than a sentence, and it fills a lower third LEFT leaves empty. Narrow, because one beat of difference cannot carry a whole film."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "The bottom 40% of the frame is bare gradient. Three stacked lines shrink down the page (bold. / fast. / on the beat.) and then stop, so the composition has no floor and the mono third line reads as an orphan, not a kicker. It is the word-on-empty-space slide, and it is the beat that most needed proof."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Both frames are the identical single lime word MAKE on the same blue field, with no difference I can see."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical white THEM set at the same size and position on both sides."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same black-on-lime STOP slab, same weight and placement in both cuts."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "SCROLLING runs edge to edge identically on both sides, tight to the frame in the same way."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "RIGHT backs the words with a labelled waveform whose lime spikes mark the cut points, while LEFT leaves the bottom half of the frame empty."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same KINETIC / TYPE. lockup and same mono sub-line; RIGHT sits a few pixels wider but nothing reads better or worse."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "An audio waveform: grey bars are the amplitude of a track over time, and the tall lime spikes standing above them are the beat onsets, so the picture shows WHERE in the sound the hits fall and, with the caption, claims each cut is placed on one of them. It encodes timing and rhythm, a quantity the words 'on the beat' only assert. LEFT has nothing but a glow, which is decoration."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "Five of six beats are indistinguishable, so the whole difference is beat 5, where RIGHT turns a bare claim into a picture that proves it and fills a frame LEFT leaves half empty. Real but small: one beat out of six."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "Three stacked lines float in the upper two-thirds with the bottom third of a portrait frame completely empty, and the grey 'on the beat.' line is the lowest-contrast text in either cut. It is a word-on-empty-space slide asserting rhythm while showing none."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Identical frames: lime MAKE on the blue field, same size, same position, nothing separates them."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Both are the single word THEM in white at the same weight and placement, with no other element competing."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Same lime slab with black STOP knocked out of it, same centering, same optical weight on both sides."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "SCROLLING runs edge to edge identically on both, tight to the margins in each case."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "RIGHT backs the words with a waveform whose lime spikes mark where the cuts fall, while LEFT states 'on the beat' over an empty lower half."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical end card: KINETIC / TYPE. lockup over the same mono byline, with the same large dead area beneath."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "An audio waveform over time: a row of grey amplitude bars with a handful of tall lime spikes standing above them, labelled beat.wav on one end and 'every cut on a beat' on the other. It reads as the soundtrack's envelope with the cut points marked on it, so the eye can see that the edit lands on the loud transients rather than being told so. The spacing of the lime spikes is the rhythm itself, and it is uneven in the way real music is, which is what makes it read as a measurement instead of an ornament. LEFT has no picture anywhere in the six beats."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "Five of six beats are pixel-for-pixel the same, so the whole difference is beat 5, where RIGHT proves its claim with a waveform and LEFT only asserts it. That is a real gain and the only gain."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "The claim beat carries the least. Three stacked lines, the last of them grey mono at the lowest contrast in the film, and the bottom third of the frame is empty. It says 'on the beat' and shows nothing beating."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    }
+  ],
+  "id": "cf46b8e5472f"
+}

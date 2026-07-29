@@ -4007,3 +4007,40 @@ chart factories emit no height and `boxOf` falls back to squaring the width: a 1
 ~41% of frame when the truth is ~24%. Over-crediting, not under. And because the overlap lint reads
 `w`/`h`, an html layer with no `h` is invisible to it, which is why the grid diagram was allowed to
 collide with its own headline until a human looked.
+
+## #179 — `var(--t)` worked on the background and did nothing on a layer
+
+`core/bg-html.js:52` wrote `--t` every frame. Nothing wrote it on an html LAYER. So a hand-authored
+fragment in a layer using `var(--t, 0)` fell back to its default and rendered a permanently dead still,
+while `core/sanitize-html.js` — the file SHARED by the layer and the background, whose whole comment is a
+warning about silent no-ops — told the author that `var(--t)` was the thing that works.
+
+Documented input, silently ignored. **12 html layers across the library were already sitting on it**,
+including `ledgerline-cyber`, `ledgerline-shown`, `showcase-lumen`, `app-showcase` and the frozen
+`ab4-b-ledgerline`. Every one of them has been rendering a still where its author wrote motion.
+
+**Fix.** `core/layers/html.js` now exports a `frame()` that sets `--t`. Pure in t, so `make probe` stays
+green (25 sampled frames, identical DOM in any render order). Those 12 layers will animate on their next
+render; that is the intended behaviour arriving late, not a regression, but it does mean their output
+changes and should be looked at.
+
+**Lesson.** A shared doc comment is a promise made on behalf of every caller of the shared code. This one
+was true for one caller and false for the other, and the false half was the one an author would reach for.
+
+## #180 — the fake waveform three judges believed
+
+The beat-grid drawn under "on the beat." used `abs(sin(i * 1.7))` for its background bars, as filler
+behind the real cut marks. Three blind judges each described it as the track's own amplitude envelope,
+and one wrote that it "is uneven in the way real music is, which is what makes it read as a measurement
+instead of an ornament."
+
+It was measuring nothing. The bars are now the real RMS envelope of the first 12.5s of
+`assets/music/beat.wav` in 60 buckets, and the marked buckets are the nearest bucket to each of the
+film's five actual cut times, one per cut (a +/- window matched two adjacent buckets for the cut at 10.4s
+and drew six marks for five cuts).
+
+**Lesson, and it is the sharpest one in this campaign.** A decorative graphic that *looks* like data is
+worse than no graphic at all: it does not merely fail to inform, it actively misinforms, and it passes
+`visual-vocabulary` because that gate measures size and never truth. **A picture that will be believed
+has to be true.** The only reason this was caught is that the blind judge is asked what the picture MEANS
+rather than whether it looks good.

@@ -1,42 +1,284 @@
 {
-  "module": "scene",
-  "authoring": { "allow": ["no-continuous-object"] },
-  "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
-  "theme": "default",
-  "aspect": "9:16",
-  "destination": "tiktok",
-  "duration": 12.5,
-  "audio": {
-    "auto": true,
-    "music": "assets/music/beat.wav",
-    "musicGain": 0.5,
-    "musicFade": { "in": 0.4, "out": 1.5 },
-    "sfxGain": 0.8
+ "module": "scene",
+ "authoring": {
+  "allow": [
+   "no-continuous-object"
+  ]
+ },
+ "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
+ "theme": "default",
+ "aspect": "9:16",
+ "destination": "tiktok",
+ "duration": 12.5,
+ "audio": {
+  "auto": true,
+  "music": "assets/music/beat.wav",
+  "musicGain": 0.5,
+  "musicFade": {
+   "in": 0.4,
+   "out": 1.5
   },
-  "cuts": [
-    { "t": 2.2, "style": "punch", "dur": 0.2 },
-    { "t": 4.1, "style": "punch", "dur": 0.2 },
-    { "t": 6.0, "style": "punch", "dur": 0.2 },
-    { "t": 8.6, "style": "punch", "dur": 0.2 },
-    { "t": 10.4, "style": "punch", "dur": 0.2 }
-  ],
-  "layers": [
-    { "type": "text", "text": "MAKE", "start": 0.3, "duration": 2.0, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#c2f23b", "split": "char", "preset": "scale", "each": 0.35, "stagger": 0.05, "out": "defocus", "exitDur": 0.25 },
-
-    { "type": "text", "text": "THEM", "start": 2.3, "duration": 1.9, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#f4f5f2", "split": "char", "preset": "up", "each": 0.35, "stagger": 0.05, "out": "defocus", "exitDur": 0.25 },
-
-    { "type": "rect", "x": 90, "y": 720, "w": 900, "h": 480, "bg": "#c2f23b", "radius": 24, "start": 4.2, "duration": 1.9, "anim": "pop", "enterDur": 0.28, "out": "defocus", "exitDur": 0.25 },
-    { "type": "text", "text": "STOP", "start": 4.35, "duration": 1.75, "pin": "center", "y": 860, "w": 1000, "align": "center", "size": 300, "weight": 800, "color": "#0a0a0c", "split": "char", "preset": "scale", "each": 0.3, "stagger": 0.04 },
-
-    { "type": "text", "text": "SCROLLING", "start": 6.2, "duration": 2.5, "pin": "center", "y": 840, "w": 1040, "align": "center", "size": 210, "weight": 800, "color": "#f4f5f2", "gradient": { "from": "#f4f5f2", "to": "#c2f23b", "angle": 150 }, "motionBlur": true, "motion": [ { "t": 0, "scale": 1.18, "opacity": 0, "ease": "easeOutCubic" }, { "t": 0.34, "scale": 1.0, "opacity": 1, "ease": "spring" }, { "t": 2.1, "scale": 1.03, "ease": "linear" }, { "t": 2.5, "scale": 1.5, "opacity": 0, "ease": "easeInCubic" } ] },
-
-    { "type": "text", "text": "bold.", "start": 8.7, "duration": 1.8, "pin": "center", "y": 640, "w": 1000, "align": "center", "size": 170, "weight": 800, "color": "#f4f5f2", "anim": "rise", "enterDur": 0.28, "out": "fade", "exitDur": 0.25 },
-    { "type": "text", "text": "fast.", "start": 8.85, "duration": 1.65, "pin": "center", "y": 900, "w": 1000, "align": "center", "size": 170, "weight": 800, "color": "#c2f23b", "anim": "rise", "enterDur": 0.28, "out": "fade", "exitDur": 0.25 },
-    { "type": "text", "text": "on the beat.", "start": 9.0, "duration": 1.5, "pin": "center", "y": 1160, "w": 1000, "align": "center", "size": 100, "weight": 700, "font": "mono", "color": "#8a8f80", "anim": "rise", "enterDur": 0.3, "out": "fade", "exitDur": 0.25 },
-
-    { "type": "text", "text": "KINETIC", "start": 10.5, "duration": 2.0, "pin": "center", "y": 820, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#f4f5f2", "anim": "rise", "enterDur": 0.3 },
-    { "type": "text", "text": "TYPE.", "start": 10.7, "duration": 1.8, "pin": "center", "y": 1030, "w": 1040, "align": "center", "size": 200, "weight": 800, "color": "#c2f23b", "anim": "rise", "enterDur": 0.3 },
-    { "type": "text", "text": "vawe · scene engine", "start": 11.0, "duration": 1.5, "pin": "center", "y": 1280, "w": 1000, "align": "center", "size": 46, "weight": 600, "font": "mono", "color": "#8a8f80", "anim": "fade", "enterDur": 0.5 }
-  ],
-  "bg": [{ "t": 0, "preset": "aurora" }]
+  "sfxGain": 0.8
+ },
+ "cuts": [
+  {
+   "t": 2.2,
+   "style": "punch",
+   "dur": 0.2
+  },
+  {
+   "t": 4.1,
+   "style": "punch",
+   "dur": 0.2
+  },
+  {
+   "t": 6.0,
+   "style": "punch",
+   "dur": 0.2
+  },
+  {
+   "t": 8.6,
+   "style": "punch",
+   "dur": 0.2
+  },
+  {
+   "t": 10.4,
+   "style": "punch",
+   "dur": 0.2
+  }
+ ],
+ "layers": [
+  {
+   "type": "text",
+   "text": "MAKE",
+   "start": 0.3,
+   "duration": 2.0,
+   "pin": "center",
+   "y": 860,
+   "w": 1000,
+   "align": "center",
+   "size": 300,
+   "weight": 800,
+   "color": "#c2f23b",
+   "split": "char",
+   "preset": "scale",
+   "each": 0.35,
+   "stagger": 0.05,
+   "out": "defocus",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "THEM",
+   "start": 2.3,
+   "duration": 1.9,
+   "pin": "center",
+   "y": 860,
+   "w": 1000,
+   "align": "center",
+   "size": 300,
+   "weight": 800,
+   "color": "#f4f5f2",
+   "split": "char",
+   "preset": "up",
+   "each": 0.35,
+   "stagger": 0.05,
+   "out": "defocus",
+   "exitDur": 0.25
+  },
+  {
+   "type": "rect",
+   "x": 90,
+   "y": 720,
+   "w": 900,
+   "h": 480,
+   "bg": "#c2f23b",
+   "radius": 24,
+   "start": 4.2,
+   "duration": 1.9,
+   "anim": "pop",
+   "enterDur": 0.28,
+   "out": "defocus",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "STOP",
+   "start": 4.35,
+   "duration": 1.75,
+   "pin": "center",
+   "y": 860,
+   "w": 1000,
+   "align": "center",
+   "size": 300,
+   "weight": 800,
+   "color": "#0a0a0c",
+   "split": "char",
+   "preset": "scale",
+   "each": 0.3,
+   "stagger": 0.04
+  },
+  {
+   "type": "text",
+   "text": "SCROLLING",
+   "start": 6.2,
+   "duration": 2.5,
+   "pin": "center",
+   "y": 840,
+   "w": 1040,
+   "align": "center",
+   "size": 210,
+   "weight": 800,
+   "color": "#f4f5f2",
+   "gradient": {
+    "from": "#f4f5f2",
+    "to": "#c2f23b",
+    "angle": 150
+   },
+   "motionBlur": true,
+   "motion": [
+    {
+     "t": 0,
+     "scale": 1.18,
+     "opacity": 0,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 0.34,
+     "scale": 1.0,
+     "opacity": 1,
+     "ease": "spring"
+    },
+    {
+     "t": 2.1,
+     "scale": 1.03,
+     "ease": "linear"
+    },
+    {
+     "t": 2.5,
+     "scale": 1.5,
+     "opacity": 0,
+     "ease": "easeInCubic"
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "text": "bold.",
+   "start": 8.7,
+   "duration": 1.8,
+   "pin": "center",
+   "y": 640,
+   "w": 1000,
+   "align": "center",
+   "size": 170,
+   "weight": 800,
+   "color": "#f4f5f2",
+   "anim": "rise",
+   "enterDur": 0.28,
+   "out": "fade",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "fast.",
+   "start": 8.85,
+   "duration": 1.65,
+   "pin": "center",
+   "y": 900,
+   "w": 1000,
+   "align": "center",
+   "size": 170,
+   "weight": 800,
+   "color": "#c2f23b",
+   "anim": "rise",
+   "enterDur": 0.28,
+   "out": "fade",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "on the beat.",
+   "start": 9.0,
+   "duration": 1.5,
+   "pin": "center",
+   "y": 1120,
+   "w": 1000,
+   "align": "center",
+   "size": 88,
+   "weight": 700,
+   "font": "mono",
+   "color": "#8a8f80",
+   "anim": "rise",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.25
+  },
+  {
+   "type": "html",
+   "x": 90,
+   "y": 1265,
+   "w": 900,
+   "h": 420,
+   "html": "<svg viewBox=\"0 0 900 420\" width=\"900\" height=\"420\" style=\"display:block;overflow:visible\"><line x1=\"0\" y1=\"340\" x2=\"900\" y2=\"340\" stroke=\"rgba(244,245,242,0.22)\" stroke-width=\"2\"/><rect x=\"2.0\" y=\"214.1\" width=\"10.0\" height=\"125.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"17.0\" y=\"256.9\" width=\"10.0\" height=\"83.1\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"32.0\" y=\"276.8\" width=\"10.0\" height=\"63.2\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"47.0\" y=\"229.1\" width=\"10.0\" height=\"110.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"62.0\" y=\"286.9\" width=\"10.0\" height=\"53.1\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"77.0\" y=\"285.0\" width=\"10.0\" height=\"55.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"92.0\" y=\"316.3\" width=\"10.0\" height=\"23.7\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"107.0\" y=\"287.1\" width=\"10.0\" height=\"52.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"122.0\" y=\"293.1\" width=\"10.0\" height=\"46.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"137.0\" y=\"237.0\" width=\"10.0\" height=\"103.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"152.0\" y=\"40.0\" width=\"10.0\" height=\"300.0\" rx=\"3\" fill=\"#c2f23b\"/><rect x=\"167.0\" y=\"268.0\" width=\"10.0\" height=\"72.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"182.0\" y=\"225.9\" width=\"10.0\" height=\"114.1\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"197.0\" y=\"218.5\" width=\"10.0\" height=\"121.5\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"212.0\" y=\"273.7\" width=\"10.0\" height=\"66.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"227.0\" y=\"244.6\" width=\"10.0\" height=\"95.4\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"242.0\" y=\"294.0\" width=\"10.0\" height=\"46.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"257.0\" y=\"323.2\" width=\"10.0\" height=\"16.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"272.0\" y=\"300.6\" width=\"10.0\" height=\"39.4\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"287.0\" y=\"40.0\" width=\"10.0\" height=\"300.0\" rx=\"3\" fill=\"#c2f23b\"/><rect x=\"302.0\" y=\"299.9\" width=\"10.0\" height=\"40.1\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"317.0\" y=\"235.7\" width=\"10.0\" height=\"104.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"332.0\" y=\"214.0\" width=\"10.0\" height=\"126.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"347.0\" y=\"235.1\" width=\"10.0\" height=\"104.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"362.0\" y=\"235.2\" width=\"10.0\" height=\"104.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"377.0\" y=\"286.2\" width=\"10.0\" height=\"53.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"392.0\" y=\"272.4\" width=\"10.0\" height=\"67.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"407.0\" y=\"253.5\" width=\"10.0\" height=\"86.5\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"422.0\" y=\"40.0\" width=\"10.0\" height=\"300.0\" rx=\"3\" fill=\"#c2f23b\"/><rect x=\"437.0\" y=\"289.4\" width=\"10.0\" height=\"50.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"452.0\" y=\"315.6\" width=\"10.0\" height=\"24.4\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"467.0\" y=\"293.1\" width=\"10.0\" height=\"46.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"482.0\" y=\"256.2\" width=\"10.0\" height=\"83.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"497.0\" y=\"263.0\" width=\"10.0\" height=\"77.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"512.0\" y=\"219.4\" width=\"10.0\" height=\"120.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"527.0\" y=\"254.3\" width=\"10.0\" height=\"85.7\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"542.0\" y=\"249.1\" width=\"10.0\" height=\"90.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"557.0\" y=\"218.7\" width=\"10.0\" height=\"121.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"572.0\" y=\"230.8\" width=\"10.0\" height=\"109.2\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"587.0\" y=\"276.7\" width=\"10.0\" height=\"63.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"602.0\" y=\"276.3\" width=\"10.0\" height=\"63.7\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"617.0\" y=\"40.0\" width=\"10.0\" height=\"300.0\" rx=\"3\" fill=\"#c2f23b\"/><rect x=\"632.0\" y=\"249.7\" width=\"10.0\" height=\"90.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"647.0\" y=\"265.2\" width=\"10.0\" height=\"74.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"662.0\" y=\"245.7\" width=\"10.0\" height=\"94.3\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"677.0\" y=\"227.4\" width=\"10.0\" height=\"112.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"692.0\" y=\"246.5\" width=\"10.0\" height=\"93.5\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"707.0\" y=\"220.1\" width=\"10.0\" height=\"119.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"722.0\" y=\"277.2\" width=\"10.0\" height=\"62.8\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"737.0\" y=\"40.0\" width=\"10.0\" height=\"300.0\" rx=\"3\" fill=\"#c2f23b\"/><rect x=\"752.0\" y=\"248.5\" width=\"10.0\" height=\"91.5\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"767.0\" y=\"285.8\" width=\"10.0\" height=\"54.2\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"782.0\" y=\"300.4\" width=\"10.0\" height=\"39.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"797.0\" y=\"291.1\" width=\"10.0\" height=\"48.9\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"812.0\" y=\"315.4\" width=\"10.0\" height=\"24.6\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"827.0\" y=\"282.3\" width=\"10.0\" height=\"57.7\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"842.0\" y=\"241.6\" width=\"10.0\" height=\"98.4\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"857.0\" y=\"228.0\" width=\"10.0\" height=\"112.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"872.0\" y=\"256.8\" width=\"10.0\" height=\"83.2\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect x=\"887.0\" y=\"222.0\" width=\"10.0\" height=\"118.0\" rx=\"3\" fill=\"rgba(244,245,242,0.34)\"/><rect width=\"5\" height=\"360\" y=\"-20\" rx=\"2\" fill=\"#ffffff\" opacity=\"0.92\" style=\"x:calc(900px * (var(--t, 0) / 12.5))\"/><text x=\"0\" y=\"398\" font-family=\"var(--font-mono)\" font-size=\"26\" fill=\"rgba(244,245,242,0.55)\">beat.wav</text><text x=\"900\" y=\"398\" font-family=\"var(--font-mono)\" font-size=\"26\" fill=\"rgba(244,245,242,0.55)\" text-anchor=\"end\">5 cuts, 5 beats</text></svg>",
+   "start": 9.1,
+   "duration": 1.4,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "KINETIC",
+   "start": 10.5,
+   "duration": 2.0,
+   "pin": "center",
+   "y": 820,
+   "w": 1040,
+   "align": "center",
+   "size": 200,
+   "weight": 800,
+   "color": "#f4f5f2",
+   "anim": "rise",
+   "enterDur": 0.3
+  },
+  {
+   "type": "text",
+   "text": "TYPE.",
+   "start": 10.7,
+   "duration": 1.8,
+   "pin": "center",
+   "y": 1030,
+   "w": 1040,
+   "align": "center",
+   "size": 200,
+   "weight": 800,
+   "color": "#c2f23b",
+   "anim": "rise",
+   "enterDur": 0.3
+  },
+  {
+   "type": "text",
+   "text": "vawe · scene engine",
+   "start": 11.0,
+   "duration": 1.5,
+   "pin": "center",
+   "y": 1280,
+   "w": 1000,
+   "align": "center",
+   "size": 46,
+   "weight": 600,
+   "font": "mono",
+   "color": "#8a8f80",
+   "anim": "fade",
+   "enterDur": 0.5
+  }
+ ],
+ "bg": [
+  {
+   "t": 0,
+   "preset": "aurora"
+  }
+ ]
 }
