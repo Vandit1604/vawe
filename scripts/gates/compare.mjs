@@ -9,6 +9,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { frameTile, tileGrid } from './tile.mjs';
 
 const args = process.argv.slice(2);
 const at = (() => { const i = args.indexOf('--at'); return i >= 0 ? args[i + 1] : '3'; })();
@@ -17,7 +18,7 @@ const inputs = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--a
 if (inputs.length < 2) { console.error('need ≥2 inputs. usage: compare.mjs a.json b.json [--at 3] [--out sheet.png]'); process.exit(2); }
 
 const tmp = '/tmp/_cmp'; fs.mkdirSync(tmp, { recursive: true });
-const ff = (a) => execFileSync('ffmpeg', a, { stdio: ['ignore', 'ignore', 'ignore'] });
+const TW = 620, TH = 349;
 const tiles = [];
 
 inputs.forEach((inp, i) => {
@@ -27,26 +28,12 @@ inputs.forEach((inp, i) => {
     execFileSync('./bin/vawe', [inp], { stdio: 'inherit' });
     src = path.join('out', path.basename(inp).replace(/\.json$/, '.mp4'));
   }
-  const tile = path.join(tmp, `t${i}.png`);
-  if (src.endsWith('.png')) ff(['-y', '-i', src, '-vf', 'scale=620:349', tile]);
-  else ff(['-y', '-ss', String(at), '-i', src, '-frames:v', '1', '-vf', 'scale=620:349', tile]);
-  tiles.push(tile);
+  tiles.push(frameTile(src, at, path.join(tmp, `t${i}.png`), { tw: TW, th: TH }));
   console.log(`  tile ${i + 1}: ${path.basename(inp)}`);
 });
 
-// tile into a row (≤3) or a grid (xstack), on a light backdrop with a gap
+// a row while they still fit side by side, a square-ish grid past that
 const n = tiles.length;
-const inArgs = tiles.flatMap((t) => ['-i', t]);
-let filter;
-if (n <= 3) {
-  filter = tiles.map((_, i) => `[${i}:v]pad=640:389:10:20:white[p${i}]`).join(';') + ';' +
-    tiles.map((_, i) => `[p${i}]`).join('') + `hstack=inputs=${n}`;
-} else {
-  const cols = Math.ceil(Math.sqrt(n));
-  const lay = tiles.map((_, i) => `${(i % cols) * 640}_${Math.floor(i / cols) * 389}`).join('|');
-  filter = tiles.map((_, i) => `[${i}:v]pad=640:389:10:20:white[p${i}]`).join(';') + ';' +
-    tiles.map((_, i) => `[p${i}]`).join('') + `xstack=inputs=${n}:layout=${lay}:fill=white`;
-}
-ff(['-y', ...inArgs, '-filter_complex', filter, out]);
+tileGrid(tiles, { cols: n <= 3 ? n : Math.ceil(Math.sqrt(n)), tw: TW, th: TH, gap: 10, out });
 console.log(`\n  sheet → ${out}  (tiles left→right${n > 3 ? ', then top→bottom' : ''}: ${inputs.map((i) => path.basename(i)).join(', ')})`);
 console.log('  Read the sheet and pick the strongest variant.\n');
