@@ -96,6 +96,19 @@ const MOVER = (o = {}) => ({ type: 'html', w: 800, x: 200, y: 700, start: 0, dur
 const GFX = (o = {}) => ({ type: 'image', src: '/assets/icons/ui/search.svg',
   x: 300, y: 260, w: Math.round(CANVAS_W * 0.42), h: Math.round(CANVAS_H * 0.42), start: 0, duration: 2, ...o });
 
+/** One html layer holding two strings at the SAME point with their opacities on the same variable — the
+ *  exact shape dissolve-check reads. `clip` wraps each string in a clip-path wrapper, which is the WIPE
+ *  the gate exempts on purpose; nothing else about the pair changes, so the mirror differs from the
+ *  must-fail case in the one thing the exemption turns on and cannot pass for some other reason. */
+const XFADE = (oa, ob, { clip = false } = {}) => {
+  const AT = 'position:absolute;left:120px;top:60px';
+  const el = (o, t) => `<div style="${AT};opacity:${o}">${t}</div>`;
+  const wipe = (inner, side) => `<div style="${AT};clip-path:inset(0 ${side} 0 0)">${inner}</div>`;
+  const [a, b] = [el(oa, 'Before'), el(ob, 'After')];
+  return { type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2,
+    html: clip ? wipe(a, 'calc(var(--n) * 100%)') + wipe(b, 'calc((1 - var(--n)) * 100%)') : a + b };
+};
+
 /** The clean film both plan-vs-render mirrors are cut from: two beats around a cut on the boundary, every
  *  planned junction carrying an arrival, no stretch long enough to read as a hold. */
 const PVR_CLEAN = scene([TXT({ text: 'First', start: 0.2, duration: 1.4 }),
@@ -472,6 +485,32 @@ const CASES = [
                   TXT({ text: 'The third beat', y: 800, start: 8.2, duration: 3.6 })],
       { duration: 12, bg: [{ preset: 'gradient', from: 0, to: 12 }],
         cuts: [{ t: 4, style: 'punch', dur: 0.2 }, { t: 8, style: 'punch', dur: 0.2 }] }) },
+
+  // ---- dissolve-check · two text states cross-dissolving in place, which is a double exposure and not
+  // a transition. Its two constants (the opacity at which a glyph muddies the one behind it, and the
+  // share of the range they may share) are tunable, so every case anchors on the printed finding CODE,
+  // BRACKETED: the case name is slugified into the fixture's filename and the gate echoes the path it
+  // read, so a bare `/crossfade-mud/` match is satisfied by the filename with the gate fully silenced.
+  { gate: 'dissolve', name: 'two strings dissolving into each other on one variable', expect: 'fail',
+    match: /\[crossfade-mud\]/, scene: scene([XFADE('var(--n)', 'calc(1 - var(--n))')]) },
+  // ...and the mirror that matters most (#25): the CORRECT fix. The same two opacity expressions, each
+  // inside a clip-path wrapper, which is the wipe the gate exempts. A gate that flags the fix it names
+  // in its own message is worse than no gate, because it teaches authors to waive it.
+  { gate: 'dissolve', name: 'the same pair wiped from opposite sides is the fix, not the defect', expect: 'pass',
+    notMatch: /\[crossfade-mud\]/, scene: scene([XFADE('var(--n)', 'calc(1 - var(--n))', { clip: true })]) },
+  // The other correct answer for a few glyphs: a swap steep enough that the two are never both legible.
+  // NB the gate cannot currently EVALUATE this form — its clamp reader gives up once a var sits inside a
+  // calc inside the clamp, and an unparseable pair is passed over in silence — so this case pins the
+  // right verdict while the case below pins it for the right reason. See the report on dissolve-check.
+  { gate: 'dissolve', name: 'a clamped threshold swap crosses too fast to be mud', expect: 'pass',
+    notMatch: /\[crossfade-mud\]/,
+    scene: scene([XFADE('clamp(0,calc((var(--n) - 0.5) * 40),1)', 'clamp(0,calc((0.5 - var(--n)) * 40),1)')]) },
+  // The same threshold swap written so the gate can read it end to end (the browser clamps opacity to
+  // 0..1 itself). This one is quiet because both sides are measured and the crossing takes a fortieth of
+  // the range, which is the claim the gate's header actually makes.
+  { gate: 'dissolve', name: 'a measured threshold swap is quiet on the arithmetic, not on a parse failure', expect: 'pass',
+    notMatch: /\[crossfade-mud\]/,
+    scene: scene([XFADE('calc(var(--n) * 40 - 19.5)', 'calc(20.5 - var(--n) * 40)')]) },
 ];
 
 const run = (cmd, args) => {
@@ -487,6 +526,7 @@ const GATE_CMD = {
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
   visuals: (f) => ['node', ['scripts/gates/visual-vocabulary.mjs', f]],
+  dissolve: (f) => ['node', ['scripts/gates/dissolve-check.mjs', f]],
   // the one gate that reads a second document: the scene and the plan it claims to deliver.
   planrender: (f, intent) => ['node', ['scripts/gates/plan-vs-render.mjs', f, '--intent', intent]],
 };

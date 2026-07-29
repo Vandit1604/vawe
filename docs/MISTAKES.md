@@ -3858,3 +3858,47 @@ known-detectable defect to human vigilance is now measured: one repeat per two c
 **Lesson.** A MISTAKES entry is a record, not a control. When an entry names a mechanical signature and
 the fix is a gate, writing the entry and skipping the gate buys nothing but the illusion of having
 handled it. Build the check or expect the repeat.
+
+## #175 — the mud detector, and the sixth instance it found immediately
+
+**What.** #171 named a mechanically detectable defect and said the fix was a gate. #174 recorded that
+skipping the gate cost one repeat within two commits. This is the gate.
+
+`scripts/gates/dissolve-check.mjs`, blocking, wired into `author-check` and standalone as
+`make dissolve`. For every pair of absolutely-positioned elements sitting at the SAME point inside one
+html layer whose opacities are driven by the SAME variable, it evaluates both expressions across that
+variable's whole range and measures for how much of it BOTH stay above 0.15 opacity. That is the defect
+stated as a number rather than as a pattern to recognise: a linear pair overlaps for about 70% of the
+range and is mud; a threshold swap crosses in a fortieth of it and is fine. The gate does not care which
+form you wrote, only how long both are on screen.
+
+**Why it is stated as a measurement and not a pattern match.** A pattern match on `1 - var(--x)` would
+flag the correct threshold-swap fix and miss any dissolve written a slightly different way. Measuring
+the overlap catches every spelling and clears every correct one. An element under a `clip-path` ancestor
+is exempt outright, because a wipe is the fix and a gate that flags the fix teaches people to waive it.
+
+**It found a sixth instance in its first run.** `ab4-a-ledgerline`, the paper cut, had the identical
+blur-dissolve on its merchant resolve, 70% overlap. That film had a full craft pass done on it by eye,
+frame by frame, and the defect was not seen. Two further scenes turned up in the sweep,
+`ab2-skill-tenor` and `app-showcase.expanded`. Five of 102 scenes.
+
+**And it found one I had just written.** `ledgerline-cyber` was flagged after I had already fixed its
+merchant with a wipe: the AMOUNT was still a dissolve, `-6.75` against `-$6.75`, both visible for 70% of
+the range. I fixed the conspicuous half of a defect and shipped the other half in the same edit.
+
+**And the gate itself shipped the same class of bug.** Its CSS evaluator found `clamp()` with a regex
+that allowed one level of nested parentheses. Substituting a variable adds a level, so
+`clamp(0,calc((var(--n) - 0.5) * 40),1)`, the exact threshold-swap form the gate's own message
+RECOMMENDS as the fix, could not be evaluated. Every clamped pair fell through to "unparseable" and was
+passed over in silence. The gate was right about them by accident, and a clamped pair that WAS mud would
+have been invisible. Found by the fixture agent, which noticed the recommended fix and the measured fix
+were being cleared for different reasons. `clamp()` is now located by balancing parentheses, and a pair
+the evaluator cannot read is COUNTED AND NAMED as unjudged rather than skipped, because a gate that goes
+quiet about what it failed to look at is reporting green on its own blind spot. Across 102 scenes there
+are now zero unjudged pairs.
+
+**Lesson.** The value of a mechanical check is not that it knows something you do not. It is that it
+does not get bored, does not fix the obvious instance and stop, and does not trust the pass it just did.
+Every instance here was visible to anyone who pulled the right frame; six of them shipped anyway. And
+the second lesson, from the gate's own bug: when a check cannot evaluate an input, that is a finding
+about the check, not a pass for the input.

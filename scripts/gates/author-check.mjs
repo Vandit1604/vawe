@@ -84,6 +84,11 @@ record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-f
 //     asks whether it SHOWS anything, or whether every layer carrying information is type. 52 of 93
 //     shipped scenes had no large pictorial layer at all when this landed, which was nobody's decision.
 record('visuals', runGate('visual vocabulary (show, do not only tell)', 'scripts/gates/visual-vocabulary.mjs', strict ? ['--strict'] : []), { waivable: true });
+
+// 4c. dissolve — the TRANSITION gate. Everything else here samples settled frames by construction, so a
+//     crossfade between two text states (a double exposure: both strings at half strength through the
+//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
+record('dissolve', runGate('dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : []), { waivable: true });
 // 4. slop — advisory here (exit code surfaced, not blocking unless --strict). Hand-written HTML tells.
 { const r = runGate('slop (anti-slop detector)', 'scripts/gates/slop.mjs', []); record('slop', r, { waivable: true, exitMeansFail: strict }); }
 // 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts.
