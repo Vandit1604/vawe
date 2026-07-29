@@ -1,0 +1,75 @@
+{
+  "name": "ledgerline-cyber",
+  "note": "Console cowboy, not a city. Cyberpunk here is SOFTWARE: a vector terminal on near-black, thin 1px rules, corner ticks, and type as the only image. No photorealism, no haze, no chrome bevel. Two hues carry the whole argument and they are never decorative: acid lime is the parsed and filed state, hot magenta is the raw, the unresolved, and the amount you owe. Everything the machine has understood emits lime; everything it has not is magenta and unsteady. Restrained by instruction: bloom stays on emitting type only, scanlines sit under a quarter, and there is exactly ONE glitch in the film, on the raw merchant code at the instant before it resolves, which is the one moment where the meaning literally is 'this was unreadable'. JetBrains Mono carries every figure and every raw CSV character. Bricolage Grotesque carries the few spoken lines.",
+  "palette": {
+    "bg": "#04060a",
+    "bg2": "#080c12",
+    "surface": "#0a0f15",
+    "surface2": "#0e141b",
+    "line": "rgba(184,255,60,0.16)",
+    "lineStrong": "rgba(184,255,60,0.34)",
+    "text": "#e4f3ea",
+    "text2": "#8ba296",
+    "dim": "#5a6d64",
+    "ink": "#e4f3ea",
+    "accent": "#b8ff3c",
+    "accentDim": "rgba(184,255,60,0.12)",
+    "accentGlow": "rgba(184,255,60,0.42)",
+    "up": "#b8ff3c",
+    "down": "#ff2e6d",
+    "raw": "#ff2e6d",
+    "rawDim": "rgba(255,46,109,0.14)",
+    "limeDim": "#7fae2a"
+  },
+  "gradient": ["#080c12", "#04060a", "#020305"],
+  "type": {
+    "sans": "Bricolage Grotesque",
+    "num": "JetBrains Mono",
+    "mono": "JetBrains Mono",
+    "serif": "Instrument Serif",
+    "optical": true
+  },
+  "motion": {
+    "easing": "easeOutQuart",
+    "bounce": 0.02,
+    "settle": 0.3,
+    "enter": 26,
+    "durationScale": 0.9,
+    "stagger": 0.04
+  },
+  "bg": {
+    "accent": "184,255,60",
+    "tint": "255,46,109",
+    "tint2": "184,255,60",
+    "dotLight": "184,255,60",
+    "paperBase": ["#080c12", "#020305"],
+    "softBase": ["#0a0f15", "#04060a"],
+    "accentBase": ["#7fae2a", "#33480f"],
+    "inkBase": ["#04060a", "#020305"],
+    "border": "rgba(184,255,60,0.22)",
+    "dark": ["#080c12", "#020305"],
+    "darkMesh": ["#08120c", "#020305"],
+    "deep": ["#06090d", "#010203"],
+    "light": ["#0a0f15", "#04060a"],
+    "ink": ["#04060a", "#020305"],
+    "paper": "#04060a"
+  },
+  "vars": {
+    "--ink": "#e4f3ea",
+    "--paper": "#04060a",
+    "--surface": "#0a0f15",
+    "--muted": "#8ba296",
+    "--dim": "#5a6d64",
+    "--em": "#b8ff3c",
+    "--raw": "#ff2e6d",
+    "--on-light": "#04060a",
+    "--on-dark": "#e4f3ea",
+    "--border": "rgba(184,255,60,0.22)",
+    "--accent-soft": "rgba(184,255,60,0.12)",
+    "--raw-soft": "rgba(255,46,109,0.14)"
+  },
+  "bgDefault": {
+    "preset": "gradientWash",
+    "value": "dark"
+  }
+}

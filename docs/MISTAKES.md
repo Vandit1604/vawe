@@ -3741,3 +3741,38 @@ waived teaches you to waive. Checked across the library: no existing scene lists
 that were not imagined when it was written, and the waiver is what keeps a real exception from turning
 into either a mangled design or an abandoned gate. If a check can block, it needs a documented way to be
 overruled, and the overruling needs to stay visible.
+
+## #171 — a dissolve between two text states is illegible at its midpoint, and nothing checks it
+
+**What.** Raised by the user as "settled states are good but during the animation things can be
+calibrated better". Chasing it turned up the same defect in three separate places across two films:
+`ledgerline-neon` at 5.75s (the merchant code resolving), `ab4-b-ledgerline` at 3.4s (the raw CSV line
+handing off to the meta line) and again at ~9.0s (every row of the ledger cascade). In each case a
+before-string and an after-string were cross-dissolved in place, so at the midpoint BOTH sat at roughly
+half opacity, in two cases under 3.5px of blur, on top of each other. Legible before. Legible after.
+Mush through the middle.
+
+**Root cause.** A crossfade is the reflex for "A becomes B" and it is the wrong move for TEXT. Two
+strings at 50% are not a transition, they are a double exposure. It survived because every gate and
+every contact sheet samples SETTLED frames: `make beats` takes first/mid/last of a beat, `inspect` reads
+one instant, and the judge sheet picks one frame per beat. All of them are at their best exactly where
+this defect is at its least visible.
+
+**Fix, in the films.** Replace the dissolve with a travelling WIPE: one box, both strings, clipped from
+opposite sides by the same variable, with a read head at the seam. At every instant one side of the edge
+is fully legible raw and the other is fully legible resolved, so no frame is ever mush. It is also
+better as meaning: "reads every line" has a direction and a crossfade does not. In `ab4-b` the two
+non-hero cases were fixed by sequencing instead of overlapping, the outgoing clearing before the
+incoming starts.
+
+**Which gate catches it. NONE, and that is the finding.** `make reveal` shows enter/exit arcs but samples
+from layer starts, so a transition INSIDE an html layer driven by a CSS variable is invisible to it. The
+signature is mechanical and cheap to detect in markup: two elements at the same position whose opacities
+are complementary (`var(--x)` against `calc(1 - var(--x))`) where either also carries a `filter:blur`.
+That is a real check and it is not built. Written down here so the next person does not rediscover it by
+eye for a fourth time.
+
+**Lesson.** Verify a TRANSITION at a frame where it is mid-flight. This repo already learned that once
+(#77, a stagger that was inert and shipped because only settled frames were checked) and every sampling
+tool it has still lands on settled frames by construction. A gate that samples where the motion is at
+rest is a gate that cannot see motion.
