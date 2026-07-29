@@ -79,6 +79,11 @@ record('critique', runGate('critique (value gate)', 'scripts/gates/critique.mjs'
 record('direct', runGate('direct (direction gate)', 'scripts/author/motion-director.mjs', []), { waivable: true });
 // 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
 record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : []), { waivable: true });
+
+// 4b. visual vocabulary — the OTHER floor. `direction-floor` asks whether the film MOVES enough; this
+//     asks whether it SHOWS anything, or whether every layer carrying information is type. 52 of 93
+//     shipped scenes had no large pictorial layer at all when this landed, which was nobody's decision.
+record('visuals', runGate('visual vocabulary (show, do not only tell)', 'scripts/gates/visual-vocabulary.mjs', strict ? ['--strict'] : []), { waivable: true });
 // 4. slop — advisory here (exit code surfaced, not blocking unless --strict). Hand-written HTML tells.
 { const r = runGate('slop (anti-slop detector)', 'scripts/gates/slop.mjs', []); record('slop', r, { waivable: true, exitMeansFail: strict }); }
 // 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts.

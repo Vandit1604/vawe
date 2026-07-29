@@ -541,6 +541,9 @@ inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 plan-check: ## plan vs render: does the film change where the storyboard promised it would (D=<file>)
 	node scripts/gates/plan-vs-render.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
+visuals: ## show-do-not-tell gate: does anything in the film SHOW, or is it all type (D=<file>)
+	node scripts/gates/visual-vocabulary.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
 scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 	node scripts/author/scrub.mjs $(F)
 

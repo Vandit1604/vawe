@@ -119,6 +119,24 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    scrubber is a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, the
    enter/exit ramps shaded off the settled middle, and every dead-air hole painted as a hazard band. Drag
    it to seek. It is where you SEE the structure the contact sheets can only sample.
+2a0000. **SHOW, DO NOT ONLY TELL. A FILM OF PURE TYPE IS A FAILED FILM.** Every beat that makes a claim
+   must be asked what it could SHOW instead of set in type: a bar whose length IS the number, a ring whose
+   arc IS the share, a captured real product surface, a diagram of the flow, a map, a photo, an svg that
+   draws on or morphs. This is the same split CLAUDE.md already makes about backgrounds, applied to the
+   content: **DECORATION** dresses the frame and carries no information (a glow, a gradient, a hairline
+   rule, a corner tick, a scanline, a logo mark beside a wordmark); **EXPLANATION** does work the words
+   cannot. A film can be drowning in the first and have none of the second, and all three Ledgerline cuts
+   were. The gate is `make visuals D=<file>` (step `visuals` inside `author-check`): it FAILS
+   `no-visual-vocabulary` when nothing in the film is a picture big enough to be the subject, and WARNS
+   `graphics-thin` · `text-only-beat`. Size is the whole point of the measurement: `creed-launch` carries 19
+   pictorial layers and every one is a small logo, so a graphic only counts at 8% of the canvas or more.
+   Know the limit: the gate proves a picture is on screen and is large. It CANNOT prove it explains
+   anything, so a big decorative photograph passes and deserves to fail a human. Green means the film is
+   not pure typography, nothing more; the rest is `make judge` and your eyes. How to decide what to show
+   and how: **[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md)**. 52 of the 93 scenes in this
+   library carried no large picture at all when the gate landed. That was nobody's decision, and it is debt,
+   not a pattern to copy.
+
 2a000. **SLIDESHOWS ARE BANNED, NOT DISCOURAGED.** A film under 15s with cuts must carry a CONTINUOUS
    OBJECT: one content layer that survives a cut and CHANGES across it. If every beat is an island, born
    and dying inside its own window, the cuts are jumps between unrelated shots and `direction-floor` blocks
@@ -169,8 +187,8 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
 2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
-   whole static quality loop (validate · critique · direct · **direction-floor** · slop · **designspec** ·
-   **copy** · **assets** · inspect · **plan-vs-render**). The **designspec lock** flags off-palette colours / non-role fonts (the
+   whole static quality loop (validate · critique · direct · **direction-floor** · **visual-vocabulary** ·
+   slop · **designspec** · **copy** · **assets** · inspect · **plan-vs-render**). The **designspec lock** flags off-palette colours / non-role fonts (the
    theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
    restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
    icon / capture / VO exists before you render. The **inspect** step verifies a `.intent.json` value
@@ -189,7 +207,8 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
    It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·
    `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), AND the **ambition floor**
-   (`plain-slideshow` — too little motion). Two-sided: `effect-soup` is the ceiling, the floor is the
+   (`plain-slideshow` — too little motion) AND the **show floor** (`no-visual-vocabulary`: all type, no
+   picture). Two-sided: `effect-soup` is the ceiling, the floor is the
    floor; directed lives between. Reach past every WARN; waive a *deliberate* break with
    `{"authoring":{"allow":[...]}}`. Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
 3. **Render:** `make video D=formats/scene/<topic>.json` (runs author-check first unless `NOCHECK=1`).

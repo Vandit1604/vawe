@@ -27,6 +27,7 @@ the downstream choices for you.
 | 3 | **Per beat, the effect** — the transition/look/sting for THIS beat's feeling | [SELECTION.md](SELECTION.md) Part 1 | which cut, which of the 31 looks / 35 stings, which face role |
 | 4 | **How each frame looks** — type · colour · layout · imagery | [TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md) · [IMAGERY](IMAGERY.md) | the composed frame, on the brand's palette + face |
 | 5 | **How full each frame is** — produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
+| 5b | **Whether the frame SHOWS or only tells** | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | a quantity, proportion or real surface drawn as a graphic, not set in type |
 | 6 | **The restraint pass** — cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
 | 7 | **The sound** — silent by default, a bed/cue only if earned | [SOUND.md](SOUND.md) | the audio layer matched to the profile |
 
@@ -79,6 +80,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | Guide | Load it when you are… | Answers |
 |---|---|---|
 | [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
+| [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · `make visuals` |
 | [SOUND.md](SOUND.md) | deciding audio | music-vs-silence · bed mood→feeling · sfx restraint · caption style→intent · per-profile policy |
 
 ## How these relate to the rest of the docs (no overlap)

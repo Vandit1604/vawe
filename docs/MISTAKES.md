@@ -3776,3 +3776,61 @@ eye for a fourth time.
 (#77, a stagger that was inert and shipped because only settled frames were checked) and every sampling
 tool it has still lands on settled frames by construction. A gate that samples where the motion is at
 rest is a gate that cannot see motion.
+
+## #172 — every film was type in a box, and no gate had an opinion about it
+
+**What.** Raised by the user: "the another engine motion was using graphics to portray and explain
+something. we are currently doing everything text in some data fillable thing." Measured across the
+library: **52 of 93 shipped scenes carry no large pictorial layer at all.** `creed-launch` carries 19
+pictorial layers and not one is large, because all 19 are logos. So the house pattern was shipping
+icons and never shipping explanations, and it was nobody's decision.
+
+All three Ledgerline cuts failed it. They state `-$18,431.06` and never show its shape, and a shape is
+exactly what type cannot carry: you cannot read six numbers and see that rent is more than a third.
+
+**Root cause.** The ladder had a gate for the words, the palette, the motion, the plan and the timeline,
+and none for whether the film SHOWS anything. Worse, the cuts were dense with DECORATION (bloom,
+scanlines, hairline rules, corner ticks, a glowing logo mark), which reads as visual richness while
+carrying zero information. A film can be drowning in decoration and be showing the viewer nothing. That
+is the same distinction CLAUDE.md already makes about backgrounds ("the background is decoration, it is
+never information"), unnoticed one level up.
+
+**Fix.** `scripts/gates/visual-vocabulary.mjs`, blocking, wired into `author-check` beside the ambition
+floor and standalone as `make visuals`. FAIL `no-visual-vocabulary`. WARN `graphics-thin` and
+`text-only-beat`. The load-bearing rule is SIZE: a pictorial layer type is necessary and nowhere near
+sufficient, so a graphic only counts as carrying a beat at 8% of canvas or more, which is what separates
+"there is an icon on screen" from "the picture is the point". Doctrine in
+`docs/CRAFT/SHOW-DONT-TELL.md`, rule locked in CLAUDE.md.
+
+**Three bugs in the gate, all found by using it rather than by reasoning about it.**
+(1) It failed the very stacked bar written to satisfy it, because its bar detector matched only
+`width:calc(...var())` and the chart animated with `transform:scaleX()`, which is the form an animator
+reaches for first since it does not relayout. (2) It reported `no-visual-vocabulary` on
+`{"type":"block","block":"lineChart"}`, a genuine chart, because blocks are sugar and the gate reads raw
+JSON before `make expand`. That is worse than a missed finding: it pushes authors off the one route that
+turns a number into a shape in a single line. The chart vocabulary is now DERIVED from
+`blocks/charts.mjs` rather than retyped, because a gate that restates a vocabulary is the copy that goes
+wrong. (3) `graphics-thin` strictly implied `text-only-beat`, so an author saw two findings for one
+defect; they are now mutually exclusive.
+
+**Lesson.** Decoration is not explanation, and a gate that counts pictorial LAYERS rather than pictorial
+SUBJECTS cannot tell them apart. Ask of every beat what it would look like if the viewer could not read.
+
+## #173 — the mutation harness edits tracked source in place with no lock
+
+**What.** `gate-mutation` reported `conformance` failures that changed count between two identical runs
+(2, then 1), which I had been carrying as a known intermittent flake. It is not a flake.
+
+**Root cause.** The harness proves a gate can fire by MUTATING tracked source files in place, running the
+gate, then restoring them. With two agents running the harness concurrently, one run restores the other
+run's mutation as if it were the original. Both then see a file that does not match what they wrote.
+`scripts/gates/conformance.mjs` and `core/clips.js` were both left transiently mutated during this
+session before being restored with `git checkout`.
+
+**Not fixed, and named so.** A single run with nothing else touching the repo is 105/105 clean. The
+harness needs a lockfile, or it needs to mutate a copy rather than the tracked file. Neither is built.
+Recorded so the next person does not spend the time re-diagnosing it as flakiness.
+
+**Lesson.** "Intermittent" is a description of a symptom, never a diagnosis. A test that edits the
+working tree is a shared mutable resource, and shared mutable resources do not fail randomly, they fail
+concurrently.
