@@ -1,4 +1,5 @@
 {
+  "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "isolates a hand-authored {html} bg driven by var(--t). Same blindness as site-backdrop: the subject is the field." } },
   "module": "scene",
   "theme": "vawe",
   "aspect": "16:9",

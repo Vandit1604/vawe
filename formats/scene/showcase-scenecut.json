@@ -1,6 +1,6 @@
 {
   "module": "scene",
-  "authoring": { "allow": ["no-continuous-object"] },
+  "authoring": { "_why": { "no-visual-vocabulary": "probe: sceneUnits, i.e. whether a beat travels a cut as one unit. The subject is the movement of the whole frame." }, "allow": ["no-visual-vocabulary","no-continuous-object"] },
   "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
   "aspect": "16:9",
   "theme": "vawe",

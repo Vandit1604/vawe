@@ -1,4 +1,5 @@
 {
+  "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "probe: the ransom type effect over a longer run." } },
   "module": "scene",
   "theme": "vawe",
   "aspect": "16:9",

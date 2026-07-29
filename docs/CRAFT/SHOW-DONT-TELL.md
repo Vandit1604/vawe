@@ -108,3 +108,39 @@ one".
 Density is the neighbouring rule, not the same one: [DENSITY.md](DENSITY.md) asks whether the frame is
 full enough to look produced. This one asks whether anything in it is doing the explaining. A frame can
 pass density on three text elements and still show nothing.
+
+---
+
+## The backlog (triaged 2026-07-29)
+
+The gate landed on a library that was already built, and 48 scenes failed it. That number is not 48
+mistakes. It was triaged once, and the buckets are recorded here so nobody re-derives them.
+
+| bucket | n | disposition |
+|---|---|---|
+| generated derivatives (`*.expanded`, `*.beatsync`) | 6 | skipped by the gate; they inherit their source's verdict |
+| frozen A/B evidence (`ab-`, `ab2-`, `ab3-`, `ab4-`) | 6 | **waived, do not edit.** Editing them destroys the experiments `MISTAKES.md` #161-163 are written about |
+| the moving field IS the subject | 3 | waived: the gate reads `layers` and never `bg`, so it is structurally blind to a film whose subject is the backdrop |
+| single-capability probes | 18 | waived, each naming the one effect it isolates |
+| recreation evidence | 1 | waived: every position is dictated by the reference film |
+| **real authoring debt** | **19** | author |
+
+Every waiver carries its reason in `authoring._why`. **A waiver with no reason is indistinguishable from
+not having looked**, and the campaign is judged on how many reasoned waivers it produced as much as on
+how many charts.
+
+**The 19, in campaign order.** Gallery flagships first (highest exposure, and the reference set every
+future author copies, so these go strict-clean), then the most self-indicting failure, then site assets:
+
+1. `example-product-promo` · `example-swiss-grid` · `example-kinetic-type` — the gallery flagships.
+2. `showcase-vocabulary` — its own on-screen text reads *"17.8M looks from one file · 832 x 33 x 26 x 25"*
+   and it draws no combinatorics at all. The most self-indicting film in the library.
+3. `hero-site` · `ransom-intro` · `showcase-cuts` · `showcase-type` · `showcase-stings` ·
+   `showcase-aspect` · `creed-launch` · `stripe` — shipped site assets. **These do not get the probe
+   waiver**: a public showcase of a capability is a film a stranger watches.
+4. `app-showcase` · `northwind` · `threadcite-3s` · `vawe-identity` · `showcase-intro` ·
+   `showcase-flight` · `ledgerline-neon` — everything else, taken opportunistically when touched.
+
+**A note on `creed-launch`.** It carries 19 pictorial layers and fails anyway, because every one of them
+is a small logo. Size is the whole point of the measurement: a mark next to a headline reads as
+punctuation, not as the subject.

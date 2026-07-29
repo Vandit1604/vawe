@@ -1,6 +1,6 @@
 {
   "module": "scene",
-  "authoring": { "allow": ["ends-on-nothing"] },
+  "authoring": { "_why": { "no-visual-vocabulary": "deliberately contentless: one ambient shader field, blurred to 30px behind the site hero. The subject IS the backdrop, and this gate measures layers and never bg, so it is structurally blind to this film." }, "allow": ["no-visual-vocabulary","ends-on-nothing"] },
   "authoringNote": "PRE-EXISTING empty closing plate, not a design choice: this scene was authored before beat-check existed and ends on a bare backdrop. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "theme": "vawe",
   "aspect": "16:9",

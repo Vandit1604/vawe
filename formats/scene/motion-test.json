@@ -1,4 +1,5 @@
 {
+  "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "probe: the motion primitives, one per beat." } },
   "module": "scene",
   "theme": "brew-dark",
   "aspect": "16:9",
