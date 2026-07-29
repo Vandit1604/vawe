@@ -31,21 +31,39 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sceneTiming, num, spanOf } from './scene-timing.mjs';
+import { sceneTiming, num, spanOf, canvasShare } from './scene-timing.mjs';
+import { BLOCKS } from '../../blocks/index.mjs';
 
-// BLOCKS ARE SUGAR, and this gate reads the raw JSON before `make expand` runs. So a genuine chart
-// authored the fastest way, `{"type":"block","block":"lineChart"}`, looked like nothing at all and got
-// a false `no-visual-vocabulary`. That is worse than a missed finding: it pushes authors off the one
-// route that turns a number into a shape in a single line.
-// The chart vocabulary is DERIVED from blocks/charts.mjs rather than retyped here, because a gate that
-// restates a vocabulary eventually disagrees with it, and the gate is the copy that goes wrong.
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const CHART_BLOCKS = new Set((() => {
+// BLOCKS ARE SUGAR and this gate reads raw JSON, so a chart authored the fast way looked like nothing.
+// The first fix derived a chart NAME LIST by regexing the exports of blocks/charts.mjs, which was wrong
+// in both directions: it missed every pictorial non-chart block (phoneFrame, browserFrame, table), and
+// it admitted `statBig`, which blocks/charts.mjs:12-19 shows emits a `count` layer plus a text label.
+// That is a number set in type wearing a chart's name, i.e. the exact thing this gate exists to catch,
+// and it would have bought a scene a pass. So: call the factory and MEASURE WHAT IT EMITS. A block earns
+// its place by what it draws, never by what it is called, and `statBig` now fails on its own merits.
+const expand = (L) => {
+  const f = BLOCKS[L.block];
+  if (typeof f !== 'function') return [];
+  try { const { type, block, ...opts } = L; return (f(opts) || []).filter(Boolean); } catch { return []; }
+};
+
+// The blocks worth SUGGESTING are the ones that actually draw something, so the list is derived the same
+// way the check is: call each factory and see whether it emits a pictorial layer. `statBig` drops out of
+// its own accord, which is the point. Advisory text and the check can no longer disagree.
+const drawsSomething = (name) => {
   try {
-    const src = fs.readFileSync(path.join(ROOT, 'blocks', 'charts.mjs'), 'utf8');
-    return [...src.matchAll(/^export\s+(?:function|const)\s+([A-Za-z0-9_]+)/gm)].map((m) => m[1]);
-  } catch { return []; }
-})());
+    // sample data, because a data-driven block called with none of it correctly draws nothing and
+    // would drop out of its own suggestion list.
+    const out = (BLOCKS[name]({
+      data: [{ label: 'a', value: 3 }, { label: 'b', value: 2 }, { label: 'c', value: 1 }],
+      segments: [{ label: 'a', value: 3 }, { label: 'b', value: 1 }],
+      series: [{ label: 'a' }, { label: 'b' }], value: 50, max: 100,
+    }) || []).filter(Boolean);
+    return out.some(function has(L) {
+      return L && (PICTORIAL.has(L.type) || (L.type === 'html' && htmlGraphic(L.html)) || (L.children || []).some(has));
+    });
+  } catch { return false; }
+};
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -54,6 +72,15 @@ if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process
 let d;
 try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
 if (d.module !== 'scene') { console.log(`  visual vocabulary · ${file}: not a scene module, nothing to check.`); process.exit(0); }
+// A GENERATED DERIVATIVE IS NOT SEPARATE DEBT. `<name>.expanded.json` and `<name>.beatsync.json` are
+// machine output; fixing the source fixes them, and reporting both doubles the apparent size of a
+// backlog, which is how a campaign gets abandoned partway. Same reasoning as the line above: say which
+// and pass, rather than inventing a finding nobody can act on independently.
+const derived = file.match(/^(.*)\.(expanded|beatsync)\.json$/);
+if (derived && fs.existsSync(`${derived[1]}.json`)) {
+  console.log(`  visual vocabulary · ${file}: generated from ${path.basename(derived[1])}.json — check the source, not the output.`);
+  process.exit(0);
+}
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // types that DEPICT something. `rect` is deliberately absent: a rect is a divider or a scrim far more
@@ -85,20 +112,28 @@ const htmlGraphic = (h) => {
 
 const carriers = [];   // graphics big enough to be the subject of a beat
 const garnish = [];    // real graphics, too small to carry
-const walk = (L, depth = 0) => {
+const unmeasured = []; // pictorial layers whose size cannot be established at all
+const pictorialWhy = (L) => {
+  if (PICTORIAL.has(L.type)) return L.type;
+  if (L.type === 'html') return htmlGraphic(L.html);
+  return null;
+};
+const walk = (L, span = null) => {
   if (!L || typeof L !== 'object') return;
-  const area = num(L.w, 0) * num(L.h, num(L.w, 0));
-  const share = CANVAS ? area / CANVAS : 0;
-  let why = null;
-  if (PICTORIAL.has(L.type)) why = L.type;
-  else if (L.type === 'block' && CHART_BLOCKS.has(L.block)) why = `block:${L.block}`;
-  else if (L.type === 'html') { const g = htmlGraphic(L.html); if (g) why = g; }
-  if (why && L.track !== 0) {
-    const [a, b] = spanOf(L);
-    const rec = { id: L.id || L.type, why, share, span: [a, b] };
-    (share >= SUBJECT_AREA ? carriers : garnish).push(rec);
+  const at = span || spanOf(L);
+  if (L.type === 'block') {                       // measure what the factory actually draws
+    for (const e of expand(L)) walk(e, at);
+    (L.children || []).forEach((c) => walk(c, at));
+    return;
   }
-  (L.children || []).forEach((c) => walk(c, depth + 1));
+  const why = pictorialWhy(L);
+  if (why && L.track !== 0) {
+    const { share, how } = canvasShare(L, CW, CH);
+    const rec = { id: L.id || L.type, why, share, how, span: at };
+    if (how === 'unknown') unmeasured.push(rec);
+    else (share >= SUBJECT_AREA ? carriers : garnish).push(rec);
+  }
+  (L.children || []).forEach((c) => walk(c, at));
 };
 (Array.isArray(d.layers) ? d.layers : []).forEach((L) => walk(L));
 
@@ -123,13 +158,15 @@ const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
 
 console.log(`\n  visual vocabulary · ${file}`);
 console.log(`  ${carriers.length} carrying graphic(s) · ${garnish.length} too small to carry · ${windows.length} beat window(s), ${covered.length} covered\n`);
-for (const c of carriers) console.log(`    ✓ ${c.id}: ${c.why}, ${Math.round(c.share * 100)}% of frame, ${s(c.span[0])}-${s(c.span[1])}`);
-for (const g of garnish) console.log(`    · ${g.id}: ${g.why}, only ${(g.share * 100).toFixed(1)}% of frame — a mark, not a subject`);
-if (carriers.length || garnish.length) console.log('');
+for (const c of carriers) console.log(`    ✓ ${c.id}: ${c.why}, ${c.how === 'proxy' ? '~' : ''}${Math.round(c.share * 100)}% of frame, ${s(c.span[0])}-${s(c.span[1])}`);
+for (const g of garnish) console.log(`    · ${g.id}: ${g.why}, only ${g.how === 'proxy' ? '~' : ''}${(g.share * 100).toFixed(1)}% of frame — a mark, not a subject`);
+for (const u of unmeasured) console.log(`    ? ${u.id}: ${u.why}, size undeclared — UNMEASURED, not cleared`);
+if (carriers.length || garnish.length || unmeasured.length) console.log('');
 
+const SUGGEST = [...new Set(Object.keys(BLOCKS).filter(drawsSomething))].slice(0, 8);
 const HOW = `Ways to SHOW instead of set in type: a bar or column whose length IS the figure · a ring whose arc IS the share `
   + `· a real captured product surface (\`make capture\`) · a diagram of the flow · a map, a photo `
-  + `· an svg that draws on or morphs. The one-line route is a chart block: ${[...CHART_BLOCKS].join(' / ') || 'see blocks/charts.mjs'}. `
+  + `· an svg that draws on or morphs. The one-line route is a block that draws: ${SUGGEST.join(' / ') || 'see blocks/charts.mjs'}. `
   + `Doctrine: docs/CRAFT/SHOW-DONT-TELL.md. Vocabulary: docs/EFFECTS.md and \`make blueprints\`.`;
 
 if (!carriers.length) {
@@ -146,6 +183,12 @@ if (!carriers.length) {
 // `graphics-thin` strictly IMPLIES a bare window, so reporting both showed an author two findings for
 // one defect. They are now mutually exclusive: below the share it is a whole-film problem, above it the
 // specific bare beats are the useful thing to name.
+if (unmeasured.length) {
+  warn('unmeasured-graphic', `${unmeasured.length} pictorial layer(s) declare no size this gate can resolve `
+    + `(${unmeasured.map((u) => `"${u.id}"`).join(', ')}), so they are UNJUDGED rather than cleared. `
+    + `An undeclared box is an unknown size, not a large one, so crediting it would let a bare \`src\` buy a pass. `
+    + `Give the layer a \`w\`/\`h\`/\`size\`, or point \`src\` at a local asset whose header states its aspect.`);
+}
 if (carriers.length && bare.length && covered.length / windows.length >= THIN) {
   warn('text-only-beat', `${bare.length} beat window(s) hold nothing but type: ${bare.map(([a, b]) => `${s(a)}-${s(b)}`).join(', ')}. `
     + `A beat that names a quantity and does not show it is asking the viewer to do the picturing.`);

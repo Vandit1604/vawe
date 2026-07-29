@@ -20,6 +20,9 @@
 //   T.sceneUnits   // whether the engine will wrap beats as units
 //   T.edges        // [0, ...cutTimes] — the start of each beat
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/safe.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
@@ -33,6 +36,85 @@ export const spanOf = (L) => {
   const start = num(L.start, 0);
   return [start, start + num(L.duration, num(L.dur, 2))];
 };
+
+// ---------------------------------------------------------------------------------------------------
+// HOW BIG IS A LAYER, and why `w * h` was the wrong answer.
+//
+// Layers are not all sized by `w`/`h`. A `cursor` and a `progressRing` take `size`; an image routinely
+// declares one axis and lets the other follow the asset's own aspect. A gate that multiplies `w` by `h`
+// therefore reads 0 for those and reports it with total confidence, which is how `plinth-ad`'s hero
+// figure (h:1440, no w, i.e. 67% of the frame) came to be dismissed as "a mark, not a subject".
+//
+// The tiers below are ordered by how much they KNOW, and the last two are the honest ones: `proxy`
+// marks a guess as a guess, and `unknown` returns zero rather than inventing a size. An undeclared box
+// is an unknown size, not a large one, so crediting it would let `{"type":"image","src":"x.png"}` buy a
+// pass off nothing. Callers are expected to surface `how === 'unknown'` rather than silently skip it.
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const _aspect = new Map();
+
+// width/height ratio of a local asset, read from its own header. PNG/JPEG/SVG, no dependencies.
+export function intrinsicAspect(src, root = ROOT) {
+  if (typeof src !== 'string' || !src) return null;
+  if (/^(https?:|data:)/i.test(src)) return null;
+  const rel = src.replace(/^\/+/, '');
+  if (_aspect.has(rel)) return _aspect.get(rel);
+  let ar = null;
+  try {
+    const file = path.join(root, rel);
+    if (fs.existsSync(file)) {
+      const ext = path.extname(file).toLowerCase();
+      if (ext === '.svg') {
+        const s = fs.readFileSync(file, 'utf8').slice(0, 2000);
+        const vb = s.match(/viewBox\s*=\s*"[\s\d.+-]*?([\d.]+)[\s,]+([\d.]+)\s*"/i);
+        if (vb) ar = +vb[1] / +vb[2];
+        else {
+          const w = s.match(/\bwidth\s*=\s*"([\d.]+)/i), h = s.match(/\bheight\s*=\s*"([\d.]+)/i);
+          if (w && h && +h[1]) ar = +w[1] / +h[1];
+        }
+      } else {
+        const b = fs.readFileSync(file);
+        if (b.length > 24 && b.readUInt32BE(0) === 0x89504e47) {          // PNG: IHDR w,h at 16,20
+          ar = b.readUInt32BE(16) / b.readUInt32BE(20);
+        } else if (b.length > 4 && b[0] === 0xff && b[1] === 0xd8) {      // JPEG: first SOFn frame header
+          for (let i = 2; i + 9 < b.length;) {
+            if (b[i] !== 0xff) { i++; continue; }
+            const mk = b[i + 1];
+            if (mk >= 0xc0 && mk <= 0xcf && mk !== 0xc4 && mk !== 0xc8 && mk !== 0xcc) {
+              ar = b.readUInt16BE(i + 7) / b.readUInt16BE(i + 5); break;  // width / height
+            }
+            i += 2 + (b.readUInt16BE(i + 2) || 0);
+          }
+        }
+      }
+    }
+  } catch { ar = null; }
+  if (!Number.isFinite(ar) || ar <= 0) ar = null;
+  _aspect.set(rel, ar);
+  return ar;
+}
+
+export function boxOf(L, root = ROOT) {
+  const w0 = num(L.w, null), h0 = num(L.h, null), sz = num(L.size, null);
+  if (w0 != null && h0 != null) return { w: w0, h: h0, how: 'explicit' };
+  const w = w0 ?? sz, h = h0 ?? sz;
+  if (w != null && h != null) return { w, h, how: 'size' };
+  const known = w ?? h;
+  if (known == null) return { w: 0, h: 0, how: 'unknown' };
+  const ar = intrinsicAspect(L.src, root);
+  if (ar) return w != null ? { w, h: w / ar, how: 'intrinsic' } : { w: h * ar, h, how: 'intrinsic' };
+  return { w: known, h: known, how: 'proxy' };
+}
+
+// the share of the canvas a layer actually covers. Clipped to the frame first: off-canvas pixels are
+// not the subject, and clipping is what makes the `proxy` guess above safe to act on.
+export function canvasShare(L, CW, CH, root = ROOT) {
+  const b = boxOf(L, root);
+  if (!b.w || !b.h) return { share: 0, how: b.how };
+  const x = num(L.x, (CW - b.w) / 2), y = num(L.y, (CH - b.h) / 2);
+  const vw = Math.max(0, Math.min(x + b.w, CW) - Math.max(x, 0));
+  const vh = Math.max(0, Math.min(y + b.h, CH) - Math.max(y, 0));
+  return { share: Math.min(1, (vw * vh) / (CW * CH)), how: b.how };
+}
 
 export function sceneTiming(d) {
   const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');

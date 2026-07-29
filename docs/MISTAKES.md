@@ -3915,3 +3915,38 @@ was not, which places that one in block expansion rather than in any author's ha
 swaps, which is the right answer when only a word or a figure changes and a wipe would drag an edge
 across characters that are not changing. Across 102 scenes: zero mud, zero unjudged pairs.
 
+
+## #176 — the gate measured area as `w * h` and reported 0% with total confidence
+
+**What.** `visual-vocabulary.mjs` decided whether a graphic was the SUBJECT of a beat by computing
+`num(L.w,0) * num(L.h, num(L.w,0))`. Layers are not all sized by `w`/`h`: a `cursor` and a
+`progressRing` take `size`, and an image routinely declares one axis and lets the other follow the
+asset's own aspect. Every one of those measured 0% of frame and was printed as "a mark, not a subject".
+`plinth-ad`'s hero figure is 67% of the canvas before clipping and was dismissed on exactly that line.
+
+**Root cause, and why it is worth an entry for one flipped scene.** The wrong answer was stable,
+deterministic, and stated with a percentage next to it. That is the same class as a gate reporting green
+on a rule it never evaluated: the output looks like a measurement and is a guess. One scene flipping is
+the blast radius, not the severity.
+
+**Fix.** `boxOf(L)` in `scripts/gates/scene-timing.mjs` resolves size in five honest tiers: `explicit`,
+`size`, `intrinsic` (read the asset's own header, PNG IHDR / JPEG SOFn / SVG viewBox, no dependencies),
+`proxy` (one axis known, asset unresolvable, assume square and PRINT IT WITH A `~` so the guess is
+visibly a guess), and `unknown` (area 0 plus a new `unmeasured-graphic` WARN naming the layer). The
+unknown tier must never credit area, or a bare `{"type":"image","src":"x.png"}` buys a pass off nothing.
+`canvasShare()` then clips the box to the frame before taking the share, because off-canvas pixels are
+not the subject, and clipping is what makes the `proxy` guess safe to act on.
+
+**A second bug, found while fixing the first, and worse.** The gate identified chart blocks by regexing
+the exports of `blocks/charts.mjs` into a name list. That was wrong in both directions. It missed every
+pictorial non-chart block (`phoneFrame`, `browserFrame`, `table`, `comparison`), and it admitted
+`statBig`, which `blocks/charts.mjs:12-19` shows emits a `count` layer plus a text label. `statBig` is a
+number set in type wearing a chart's name, i.e. precisely what this gate exists to catch, and naming it
+in the allow-list would have let a scene pass on a big number. The name list is gone: the gate now CALLS
+the factory and measures what it emits. A block earns its place by what it draws, never by what it is
+called, and `statBig` now fails on its own merits. The advisory "try one of these blocks" list is
+derived the same way, so the suggestion and the check can no longer disagree.
+
+**Lesson.** Deriving a vocabulary from a registry beats hand-listing it (that part was right), but a
+DERIVED NAME LIST is still a name list. The registry's own membership is not the property you care
+about; what the thing does is. When a check can call the code instead of reading its label, call it.
