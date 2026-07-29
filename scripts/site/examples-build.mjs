@@ -25,6 +25,26 @@ for (const it of reg.examples || []) {
       target = source.replace(/\.json$/, '.beatsync.json');
     }
   }
+  // Blocks are build-time sugar: the renderer rejects an un-expanded `{type:"block"}` layer outright.
+  // Without this step a flagship example could not use the repo's own charting vocabulary at all, which
+  // became load-bearing the moment `visual-vocabulary` started requiring a picture. Expanded IN PLACE so
+  // the artefact keeps the name the registry asks for (`<name>.beatsync.mp4`); the target is already a
+  // generated derivative by this point, or the source itself when there is nothing to expand.
+  const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (l.type === 'block' || l.type === 'comp' || hasSugar(l.children)));
+  if (hasSugar(JSON.parse(fs.readFileSync(path.join(repoRoot, target), 'utf8')).layers)) {
+    if (target === source) {
+      // never expand a COMMITTED source in place: that would strip the sugar the author wrote and leave
+      // the raw layers behind. Build a copy under the same BASENAME, since the renderer names the mp4
+      // after it and the registry expects that exact name.
+      const build = path.join('build/examples', path.basename(source));
+      fs.mkdirSync(path.join(repoRoot, 'build/examples'), { recursive: true });
+      fs.copyFileSync(path.join(repoRoot, source), path.join(repoRoot, build));
+      target = build;
+    }
+    console.log(`▶ ${it.title}: expand blocks → ${target}`);
+    run('node', ['scripts/author/expand-blocks.mjs', target, target]);
+  }
+
   console.log(`▶ ${it.title}: render ${target}`);
   run('./bin/vawe', [target]);
 }

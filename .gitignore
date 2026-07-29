@@ -97,3 +97,4 @@ assets/watermark/
 
 # generated per-render derivatives (regenerate with make beatsync / make examples)
 formats/scene/*.beatsync.json
+build/

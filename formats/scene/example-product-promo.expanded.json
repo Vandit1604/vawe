@@ -1,0 +1,431 @@
+{
+  "module": "scene",
+  "theme": "linear",
+  "aspect": "16:9",
+  "destination": "web",
+  "duration": 17.5,
+  "audio": {
+    "auto": true,
+    "music": "assets/music/lofi.wav",
+    "musicGain": 0.4,
+    "musicFade": {
+      "in": 0.8,
+      "out": 1.8
+    },
+    "sfxGain": 0.85
+  },
+  "camera": [
+    {
+      "t": 0,
+      "s": 1
+    },
+    {
+      "t": 17.5,
+      "s": 1.05,
+      "ease": "linear"
+    }
+  ],
+  "seams": [
+    {
+      "t": 3.3,
+      "fx": "whipPan",
+      "dur": 0.5
+    },
+    {
+      "t": 7,
+      "fx": "cinematicZoom",
+      "dur": 0.55
+    },
+    {
+      "t": 11,
+      "fx": "whipPan",
+      "dur": 0.5
+    },
+    {
+      "t": 14.2,
+      "fx": "flashWhite",
+      "dur": 0.4
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Ship faster.",
+      "start": 0.3,
+      "duration": 3,
+      "pin": "center",
+      "y": 420,
+      "w": 1600,
+      "align": "center",
+      "size": 210,
+      "weight": 800,
+      "color": "#f7f8f8",
+      "gradient": {
+        "from": "#f7f8f8",
+        "to": "#5e6ad2",
+        "angle": 160
+      },
+      "anim": "rise",
+      "enterDur": 0.3,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "from prompt to production",
+      "start": 0.8,
+      "duration": 2.5,
+      "x": 160,
+      "y": 640,
+      "w": 1600,
+      "align": "center",
+      "size": 54,
+      "weight": 500,
+      "font": "mono",
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Just describe the change.",
+      "start": 3.5,
+      "duration": 3.2,
+      "x": 160,
+      "y": 230,
+      "w": 1600,
+      "align": "center",
+      "size": 60,
+      "weight": 600,
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 440,
+      "y": 430,
+      "w": 1040,
+      "h": 220,
+      "bg": "#131417",
+      "radius": 20,
+      "border": "1.5px solid rgba(255,255,255,0.10)",
+      "start": 3.6,
+      "duration": 3.1,
+      "anim": "pop",
+      "enterDur": 0.32,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "deploy the payments api to production",
+      "start": 4.1,
+      "duration": 2.6,
+      "x": 490,
+      "y": 480,
+      "w": 900,
+      "align": "left",
+      "size": 42,
+      "weight": 500,
+      "font": "mono",
+      "color": "#f7f8f8",
+      "typing": 24,
+      "keyGain": 0.15
+    },
+    {
+      "type": "rect",
+      "x": 1380,
+      "y": 500,
+      "w": 60,
+      "h": 60,
+      "bg": "#5e6ad2",
+      "radius": 14,
+      "start": 3.9,
+      "duration": 2.8,
+      "anim": "pop",
+      "enterDur": 0.35,
+      "out": "fade",
+      "exitDur": 0.3,
+      "glow": 0.5
+    },
+    {
+      "type": "cursor",
+      "size": 38,
+      "start": 5.4,
+      "duration": 1.5,
+      "path": [
+        {
+          "t": 0,
+          "x": 980,
+          "y": 760
+        },
+        {
+          "t": 0.8,
+          "x": 1410,
+          "y": 530
+        }
+      ],
+      "clicks": [
+        0.95
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Everything you ship, handled.",
+      "start": 7.3,
+      "duration": 3.4,
+      "x": 160,
+      "y": 175,
+      "w": 1600,
+      "align": "center",
+      "size": 78,
+      "weight": 800,
+      "color": "#f7f8f8",
+      "anim": "rise",
+      "enterDur": 0.3,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "rect",
+      "x": 175,
+      "y": 430,
+      "w": 500,
+      "h": 300,
+      "bg": "#131417",
+      "radius": 22,
+      "border": "1.5px solid rgba(255,255,255,0.10)",
+      "start": 7.5,
+      "duration": 3.2,
+      "anim": "lift",
+      "enterDur": 0.36,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Instant preview",
+      "start": 7.7,
+      "duration": 3,
+      "x": 215,
+      "y": 620,
+      "w": 430,
+      "align": "left",
+      "size": 46,
+      "weight": 700,
+      "color": "#f7f8f8",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "every branch, live",
+      "start": 7.78,
+      "duration": 2.9,
+      "x": 215,
+      "y": 678,
+      "w": 430,
+      "align": "left",
+      "size": 30,
+      "weight": 500,
+      "font": "mono",
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 710,
+      "y": 430,
+      "w": 500,
+      "h": 300,
+      "bg": "#131417",
+      "radius": 22,
+      "border": "1.5px solid rgba(255,255,255,0.10)",
+      "start": 7.6,
+      "duration": 3.1,
+      "anim": "lift",
+      "enterDur": 0.36,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Zero config",
+      "start": 7.8,
+      "duration": 2.9,
+      "x": 750,
+      "y": 620,
+      "w": 430,
+      "align": "left",
+      "size": 46,
+      "weight": 700,
+      "color": "#f7f8f8",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "it just detects",
+      "start": 7.88,
+      "duration": 2.8,
+      "x": 750,
+      "y": 678,
+      "w": 430,
+      "align": "left",
+      "size": 30,
+      "weight": 500,
+      "font": "mono",
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "rect",
+      "x": 1245,
+      "y": 430,
+      "w": 500,
+      "h": 300,
+      "bg": "#131417",
+      "radius": 22,
+      "border": "1.5px solid rgba(94,106,210,0.4)",
+      "start": 7.7,
+      "duration": 3,
+      "anim": "lift",
+      "enterDur": 0.36,
+      "out": "defocus",
+      "exitDur": 0.35,
+      "glow": 0.3
+    },
+    {
+      "type": "text",
+      "text": "1-click rollback",
+      "start": 7.9,
+      "duration": 2.8,
+      "x": 1285,
+      "y": 620,
+      "w": 430,
+      "align": "left",
+      "size": 46,
+      "weight": 700,
+      "color": "#f7f8f8",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "undo any deploy",
+      "start": 7.98,
+      "duration": 2.7,
+      "x": 1285,
+      "y": 678,
+      "w": 430,
+      "align": "left",
+      "size": 30,
+      "weight": 500,
+      "font": "mono",
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4
+    },
+    {
+      "type": "html",
+      "x": 130,
+      "y": 330,
+      "w": 1130,
+      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:1130px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">cumulative builds · four weeks</div><svg viewBox=\"0 0 1086 356\" width=\"100%\" height=\"356\" style=\"display:block;overflow:visible\"><polygon points=\"8,348 8.0,263.7 364.7,187.5 721.3,89.6 1078.0,8.0 1078,348\" fill=\"#5e6ad2\" opacity=\"0.12\"/><polyline points=\"8.0,263.7 364.7,187.5 721.3,89.6 1078.0,8.0\" fill=\"none\" stroke=\"#5e6ad2\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-dasharray=\"1100.5\" stroke-dashoffset=\"calc(1100.5 * (1 - var(--p, 1)))\"/><circle cx=\"8.0\" cy=\"263.7\" r=\"2.6\" fill=\"#5e6ad2\"/><circle cx=\"364.7\" cy=\"187.5\" r=\"2.6\" fill=\"#5e6ad2\"/><circle cx=\"721.3\" cy=\"89.6\" r=\"2.6\" fill=\"#5e6ad2\"/><circle cx=\"1078.0\" cy=\"8.0\" r=\"2.6\" fill=\"#5e6ad2\"/></svg></div>",
+      "start": 11.3,
+      "duration": 2.7,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.3,
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDur": 1.2,
+      "varsDelay": 0.15,
+      "varsEase": "easeOutCubic"
+    },
+    {
+      "type": "count",
+      "from": 0,
+      "to": 2500000,
+      "start": 11.6,
+      "duration": 2.4,
+      "x": 1350,
+      "y": 400,
+      "w": 460,
+      "align": "left",
+      "size": 150,
+      "weight": 800,
+      "color": "#f7f8f8",
+      "ease": "easeOutExpo",
+      "anim": "rise",
+      "enterDur": 0.3,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "builds shipped this month",
+      "start": 11.9,
+      "duration": 2.1,
+      "x": 1350,
+      "y": 612,
+      "w": 420,
+      "align": "left",
+      "size": 34,
+      "weight": 500,
+      "font": "mono",
+      "color": "#8a8f98",
+      "anim": "fade",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Start shipping.",
+      "start": 14.5,
+      "duration": 3,
+      "pin": "center",
+      "y": 420,
+      "w": 1600,
+      "align": "center",
+      "size": 150,
+      "weight": 800,
+      "color": "#f7f8f8",
+      "anim": "rise",
+      "enterDur": 0.32
+    },
+    {
+      "type": "text",
+      "text": "free at <em>your.app</em>",
+      "start": 15,
+      "duration": 2.5,
+      "x": 160,
+      "y": 640,
+      "w": 1600,
+      "align": "center",
+      "size": 56,
+      "weight": 600,
+      "color": "#5e6ad2",
+      "anim": "fade",
+      "enterDur": 0.5
+    }
+  ],
+  "bg": [
+    {
+      "t": 0,
+      "preset": "aurora"
+    }
+  ]
+}

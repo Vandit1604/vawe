@@ -42,8 +42,9 @@
     { "type": "text", "text": "1-click rollback", "start": 7.9, "duration": 2.8, "x": 1285, "y": 620, "w": 430, "align": "left", "size": 46, "weight": 700, "color": "#f7f8f8", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "undo any deploy", "start": 7.98, "duration": 2.7, "x": 1285, "y": 678, "w": 430, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4 },
 
-    { "type": "count", "from": 0, "to": 2500000, "start": 11.3, "duration": 2.6, "pin": "center", "y": 400, "w": 1600, "align": "center", "size": 240, "weight": 800, "color": "#f7f8f8", "ease": "easeOutExpo", "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.35 },
-    { "type": "text", "text": "builds shipped this month", "start": 11.7, "duration": 2.2, "x": 160, "y": 660, "w": 1600, "align": "center", "size": 48, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+    { "type": "block", "block": "lineChart", "x": 130, "y": 330, "w": 1130, "h": 430, "area": true, "color": "#5e6ad2", "label": "cumulative builds · four weeks", "data": [ { "label": "W1", "value": 620 }, { "label": "W2", "value": 1180 }, { "label": "W3", "value": 1900 }, { "label": "W4", "value": 2500 } ], "start": 11.3, "dur": 2.7 },
+    { "type": "count", "from": 0, "to": 2500000, "start": 11.6, "duration": 2.4, "x": 1350, "y": 400, "w": 460, "align": "left", "size": 150, "weight": 800, "color": "#f7f8f8", "ease": "easeOutExpo", "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.35 },
+    { "type": "text", "text": "builds shipped this month", "start": 11.9, "duration": 2.1, "x": 1350, "y": 612, "w": 420, "align": "left", "size": 34, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
     { "type": "text", "text": "Start shipping.", "start": 14.5, "duration": 3.0, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 150, "weight": 800, "color": "#f7f8f8", "anim": "rise", "enterDur": 0.32 },
     { "type": "text", "text": "free at <em>your.app</em>", "start": 15.0, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 56, "weight": 600, "color": "#5e6ad2", "anim": "fade", "enterDur": 0.5 }
