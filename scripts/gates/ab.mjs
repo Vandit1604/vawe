@@ -77,9 +77,19 @@ const dimsOf = (m) => probe(m, 'stream=width,height', ['-select_streams', 'v:0']
 // `out/<name>.before.mp4` against the edited scene JSON, which would otherwise put beat clustering on one
 // arm and even spacing on the other. Two arms sampled differently are not comparable, and the difference
 // would read to a judge as a difference in pace: an artefact of the instrument, scored as a quality.
-const bothScenes = LEFT.scene && RIGHT.scene;
-if (!bothScenes) console.log('  note: one arm is a bare mp4, so BOTH arms are sampled at even spacing (beat clustering needs a scene).');
-const tableOf = (arm) => { const d = durOf(arm.mp4); return bothScenes ? beatsOf(arm.scene, d) : evenSamples(d); };
+// BOTH arms are sampled by the SAME model or neither is. Two arms sampled differently are not
+// comparable, and the difference reads to a judge as a difference in pace: an artefact of the
+// instrument, scored as a quality.
+//
+// When only ONE arm has a scene (the usual before/after case, where the control is a kept mp4), use that
+// scene's beat table for BOTH. That is one model applied twice, not two models. It matters because the
+// even-spacing fallback samples at fixed fractions of the clock and lands wherever it lands: on a film
+// full of kinetic type it caught a staggered word reveal half-drawn, and all three judges scored the
+// still as broken layout. `beatsOf` samples 55% into each beat, which is past the entrance by design.
+const model = LEFT.scene || RIGHT.scene;
+if (!model) console.log('  note: neither arm has a scene, so both are sampled at even spacing — a sample may land mid-entrance.');
+else if (!(LEFT.scene && RIGHT.scene)) console.log('  note: one arm is a bare mp4; both arms are sampled on the other arm\'s beat table (one model, applied twice).');
+const tableOf = (arm) => { const d = durOf(arm.mp4); return model ? beatsOf(model, d) : evenSamples(d); };
 const tl = tableOf(LEFT), tr = tableOf(RIGHT);
 const [CW, CH] = dimsOf(LEFT.mp4);
 const landscape = CW >= CH;

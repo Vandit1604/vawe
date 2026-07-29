@@ -1,0 +1,260 @@
+{
+  "name": "vv-vocab",
+  "seed": "0",
+  "claim": "One JSON. Any brand.",
+  "brand": null,
+  "gatesTree": "733364b1b0e5ed809c4a25f0fab4efa07362ca42",
+  "rows": 6,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/showcase-vocabulary.mp4",
+      "mp4": "out/showcase-vocabulary.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.5,
+        4.5,
+        7.5,
+        10.5,
+        13.5,
+        16.5
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "out/showcase-vocabulary.before.mp4",
+      "mp4": "out/showcase-vocabulary.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.5,
+        4.5,
+        7.5,
+        10.5,
+        13.5,
+        16.5
+      ]
+    }
+  ],
+  "result": {
+    "winner": "LEFT",
+    "winnerArm": "out/showcase-vocabulary.mp4",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 3,
+      "RIGHT": 0,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "LEFT",
+      "says": "Five small dot-grids, each with as many dots as the label under it (31 themes, 22 backgrounds, 31 looks, 26 cuts, 35 stings), strung together with multiplication signs and resolving to 19.2M. The picture shows a combinatorial explosion: five modest, countable sets of choices whose product is an enormous number of possible outputs from one file. The point of drawing it is that the ingredient counts are small enough to take in at a glance, which is what makes the 19.2M land. RIGHT has no graphic at all on this or any beat; its equivalent claim is a line of type, so for RIGHT the honest answer is 'nothing, it is decoration' and there is not even decoration."
+    },
+    {
+      "judge": "2",
+      "side": "LEFT",
+      "says": "A combinatorial explosion made countable. Five small dot matrices stand for five independent choices in the system (31 themes, 22 backgrounds, 31 looks, 26 cuts, 35 stings), each grid holding roughly as many dots as its label, joined by multiplication signs and resolving to 19.2M. The picture shows WHY the number is large: a handful of small menus, multiplied, not one big menu. The dots also do a second job, they make five modest numbers feel small next to the huge one, which is the whole point. RIGHT's frame encodes nothing, it is the same arithmetic written out as a caption."
+    },
+    {
+      "judge": "3",
+      "side": "LEFT",
+      "says": "Combinatorial size, shown by counting rather than asserting. Five blue dot arrays stand for the parts of the system, and each array holds exactly as many dots as its label says: 31 themes (six across, five down, plus one), 22 backgrounds, 31 looks, 26 cuts, 35 stings. Multiplication signs sit between them, so the eye can see five small piles of dots turning into 19.2M at the end of the row. The picture makes the point the words cannot, that the number is not a marketing figure but a product of five small, countable inventories. RIGHT has no graphic at all in any beat: its equivalent claim is a line of type, so for RIGHT the answer is 'nothing, it is decoration' and there is not even decoration."
+    }
+  ],
+  "wouldShip": {
+    "out/showcase-vocabulary.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "out/showcase-vocabulary.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "The two frames are indistinguishable: same eyebrow, same headline, same deck, same left-inset stack on white."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical frames; the headline is the single focal point on both and nothing separates them."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same dark-navy theme swap on both sides, white headline holds contrast equally well in each."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Same cream theme, same left-aligned stack, same generous but equal dead space to the right."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "RIGHT shows a settled, fully legible 'One JSON.' while LEFT is caught mid-stagger with 'One' and a half-clipped 'JSON' sitting on two different baselines."
+        },
+        {
+          "beat": 6,
+          "winner": "LEFT",
+          "dimension": "graphic encodes the claim",
+          "why": "LEFT builds the big number out of five counted dot-grids multiplied together, so the frame proves the combinatorial claim; RIGHT states the same arithmetic as one line of small mono type and proves nothing."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "Five small dot-grids, each with as many dots as the label under it (31 themes, 22 backgrounds, 31 looks, 26 cuts, 35 stings), strung together with multiplication signs and resolving to 19.2M. The picture shows a combinatorial explosion: five modest, countable sets of choices whose product is an enormous number of possible outputs from one file. The point of drawing it is that the ingredient counts are small enough to take in at a glance, which is what makes the 19.2M land. RIGHT has no graphic at all on this or any beat; its equivalent claim is a line of type, so for RIGHT the honest answer is 'nothing, it is decoration' and there is not even decoration."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Four of six beats are pixel-equal, so the comparison rests on two frames. LEFT loses beat 5 on a mid-motion frame that reads as broken type, but wins the closing beat on the dimension that carries the most weight: it is the only frame in either cut where a picture does work the words cannot. A payoff that is shown beats a payoff that is asserted, so LEFT takes it, but only just."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "'One' has landed and 'JSON.' is still arriving, clipped mid-glyph by an invisible mask and sitting below the baseline of the word beside it. Read as a still it is not a staged reveal, it is broken word spacing and a mis-anchored second word."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical frames: same eyebrow, same headline, same sub, same left-aligned block on white."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Indistinguishable; both hold the same type block a touch lower in the frame."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same dark card, same white headline and slate sub, both comfortably legible."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "produced-not-generated",
+          "why": "Same cream recolour of the same slide; neither adds anything the other does not."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "LEFT lands mid-reveal with JSON sliced off at the baseline and the two words colliding, while RIGHT reads cleanly as One JSON."
+        },
+        {
+          "beat": 6,
+          "winner": "LEFT",
+          "dimension": "does the graphic encode the claim",
+          "why": "LEFT builds the number out of five countable dot grids multiplied together; RIGHT asserts the same idea in one grey monospace line and leaves the right two thirds of the frame empty."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "A combinatorial explosion made countable. Five small dot matrices stand for five independent choices in the system (31 themes, 22 backgrounds, 31 looks, 26 cuts, 35 stings), each grid holding roughly as many dots as its label, joined by multiplication signs and resolving to 19.2M. The picture shows WHY the number is large: a handful of small menus, multiplied, not one big menu. The dots also do a second job, they make five modest numbers feel small next to the huge one, which is the whole point. RIGHT's frame encodes nothing, it is the same arithmetic written out as a caption."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "clear",
+        "why": "Four of six beats are the same frame in both cuts, so the film is decided on beats 5 and 6. RIGHT wins beat 5, but only because the sampler caught LEFT in a transition. Beat 6 is the payoff, the one place the film has to prove its claim, and only LEFT puts a picture there. That is a decision, not an accident of sampling, so it carries more weight."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "Half-drawn word reveal: JSON is clipped through the middle by its mask and overlaps the tail of One, so the line is unreadable and the two words look like a rendering fault rather than motion."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "The two frames are indistinguishable: same eyebrow, same headline, same deck, same left-column anchor and same contrast."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical again, and identical to beat 1, so neither side gains or loses anything here."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Same dark-ground restatement of the same headline on both sides, cleanly aligned on both."
+        },
+        {
+          "beat": 4,
+          "winner": "TIE",
+          "dimension": "value",
+          "why": "Same cream-ground restatement on both; the palette flip is the only new information and both get it equally."
+        },
+        {
+          "beat": 5,
+          "winner": "RIGHT",
+          "dimension": "readability",
+          "why": "RIGHT sits settled and fully legible while LEFT is caught mid-entrance with 'JSON' sheared off at the baseline and the two words on different lines, so the frame reads as broken type."
+        },
+        {
+          "beat": 6,
+          "winner": "LEFT",
+          "dimension": "does the graphic encode the claim",
+          "why": "LEFT builds the payoff out of five counted dot arrays that multiply into 19.2M and fills the right half with that number, while RIGHT states the same class of claim as one line of small grey monospace and leaves two thirds of the frame empty."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "LEFT",
+        "whatItEncodes": "Combinatorial size, shown by counting rather than asserting. Five blue dot arrays stand for the parts of the system, and each array holds exactly as many dots as its label says: 31 themes (six across, five down, plus one), 22 backgrounds, 31 looks, 26 cuts, 35 stings. Multiplication signs sit between them, so the eye can see five small piles of dots turning into 19.2M at the end of the row. The picture makes the point the words cannot, that the number is not a marketing figure but a product of five small, countable inventories. RIGHT has no graphic at all in any beat: its equivalent claim is a line of type, so for RIGHT the answer is 'nothing, it is decoration' and there is not even decoration."
+      },
+      "overall": {
+        "winner": "LEFT",
+        "margin": "narrow",
+        "why": "Four of the six beats are the same frame on both sides, so the whole comparison rests on the last two. LEFT loses beat 5 to a mangled entrance frame but wins the payoff outright, and the payoff is where the film either proves its claim or asserts it. A picture that counts beats a sentence that states."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 5,
+        "flaw": "The words are clipped mid-glyph: 'One' sits on one baseline and 'JSON' is cut off below it by a hard mask edge, so the frame reads as broken layout rather than motion. The rest of the canvas is empty white."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    }
+  ],
+  "id": "b61a96eec0ba"
+}

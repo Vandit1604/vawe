@@ -4044,3 +4044,27 @@ worse than no graphic at all: it does not merely fail to inform, it actively mis
 `visual-vocabulary` because that gate measures size and never truth. **A picture that will be believed
 has to be true.** The only reason this was caught is that the blind judge is asked what the picture MEANS
 rather than whether it looks good.
+
+## #181 — the A/B sampler landed mid-entrance and three judges scored the still as broken
+
+`showcase-vocabulary`'s A/B came back 3-0 for the new cut and `wouldShip: no` on BOTH arms, and all three
+judges named the same worst frame: "'One' has landed and 'JSON.' is still arriving, clipped mid-glyph by
+an invisible mask", "reads as broken layout rather than motion". One judge saw through it and wrote that
+it lost that beat "only because the sampler caught LEFT in a transition".
+
+That is a `riseClip` word reveal doing exactly what it is supposed to do, photographed halfway through.
+
+**Root cause in the instrument.** `ab.mjs` used `beatsOf` only when BOTH arms carried a scene, and fell
+back to even spacing otherwise. The campaign's own working cycle compares a kept `<name>.before.mp4`
+against an edited scene, so the fallback was the normal path, and even spacing samples at fixed fractions
+of the clock with no idea where a beat starts. `beatsOf` samples 55% into each beat precisely to clear
+the entrance.
+
+**Fix.** When only one arm has a scene, that scene's beat table is used for BOTH arms. One model applied
+twice is not the same mistake as two models applied once, and the comment now says which is which.
+
+**The standing limit, worth stating plainly.** Any still of a staggered reveal looks broken. A judge
+scoring frames cannot always tell a mid-entrance sample from a defect, and the difference between
+MISTAKES #178's real ghost and this false alarm is only visible by pulling several frames across the
+entrance. `make reveal` exists for exactly that and should be read before trusting a beat-level verdict
+about type.
