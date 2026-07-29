@@ -1,0 +1,180 @@
+{
+  "name": "vv-ransom-intro-2",
+  "seed": "1",
+  "claim": "RANSOM NOTES",
+  "brand": null,
+  "gatesTree": "6ff806803441d69a3f89e8449b13cce8b001a4a5",
+  "rows": 2,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/ransom-intro.before.mp4",
+      "mp4": "out/ransom-intro.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        0.35,
+        3.6
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "formats/scene/ransom-intro.json",
+      "mp4": "out/ransom-intro.mp4",
+      "sceneHash": "e1a84052d8e24e21289cff48dac3111bd97b059dcfa3e2a404043d73d0003592",
+      "allow": [],
+      "beats": [
+        0.35,
+        3.6
+      ]
+    }
+  ],
+  "result": {
+    "winner": "RIGHT",
+    "winnerArm": "formats/scene/ransom-intro.json",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 0,
+      "RIGHT": 3,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "RIGHT",
+      "says": "A sheet of alphabet specimens, each letter set in a different found face, acting as the stock the headline is cut from. Between the two beats the cells for A, M, N, O, R, S empty out and the words RANSOM NOTES appear above, so the picture encodes a one-to-one accounting: these six letters were removed from the supply and are now in the title. It shows the making of the word, which the word alone cannot show, and it is the one object that survives the cut and changes across it."
+    },
+    {
+      "judge": "2",
+      "side": "RIGHT",
+      "says": "A sheet of alphabet specimens, each cell a differently cut letter, is the stock the title is torn from. Between beat 1 and beat 2 the cells holding A, M, N, O, R and S empty out, and those are exactly the distinct letters of RANSOM standing above. The picture shows a supply being consumed: which letters were taken, from where, and that the wordmark is assembled rather than typed. LEFT has no picture at all, only type on a flat field."
+    },
+    {
+      "judge": "3",
+      "side": "RIGHT",
+      "says": "A grid of every available letter, an alphabet specimen sheet, used as a source inventory. Between the two beats the exact letters spelling the title are physically removed from it: the A, M, N, O, R and S slots go blank while every other cell stays intact. The picture encodes supply and depletion, the wordmark was cut out of this sheet, and the count of missing cells matches the letters in the name. It also gives the film one object that survives the cut and changes across it. Small flaw: beat 1 boxes only four of the six letters it later removes, so the promise does not tally exactly with the payoff. LEFT has no picture at all, only type."
+    }
+  ],
+  "wouldShip": {
+    "out/ransom-intro.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "formats/scene/ransom-intro.json": [
+      "yes",
+      "yes",
+      "yes"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "LEFT is one word floating in an otherwise empty frame, while RIGHT pairs the same word with a found-type specimen tray that fills the lower third and flags the letters about to be taken."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "value",
+          "why": "RIGHT's tray now has holes exactly where A, M, N, O, R, S used to sit, so the frame proves where the headline's letters came from; LEFT just enlarges the lockup and says nothing new."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A sheet of alphabet specimens, each letter set in a different found face, acting as the stock the headline is cut from. Between the two beats the cells for A, M, N, O, R, S empty out and the words RANSOM NOTES appear above, so the picture encodes a one-to-one accounting: these six letters were removed from the supply and are now in the title. It shows the making of the word, which the word alone cannot show, and it is the one object that survives the cut and changes across it."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Both cuts share the same headline treatment, so the whole difference is that RIGHT adds a second element that does work: it gives the frame density, a second read after the headline, and a change between beats that the viewer can follow. LEFT is two centered type slides with nothing else in the frame."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 1,
+        "flaw": "One word on empty space. The headline occupies roughly a quarter of the width and the other three quarters carry nothing, so there is no second read, no density, and no picture encoding anything."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "Produced-not-generated",
+          "why": "LEFT is one word floating in an otherwise empty field with roughly four fifths of the frame dead, while RIGHT pairs the same wordmark with a specimen tray of letterforms that fills the lower half and gives the frame craft and a second read."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "Value",
+          "why": "RIGHT changes: the tray cells for A, M, N, O, R and S are now blank, so the frame proves the title was cut out of that sheet, whereas LEFT only restates the title in a two-line stack and teaches nothing the first beat did not."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A sheet of alphabet specimens, each cell a differently cut letter, is the stock the title is torn from. Between beat 1 and beat 2 the cells holding A, M, N, O, R and S empty out, and those are exactly the distinct letters of RANSOM standing above. The picture shows a supply being consumed: which letters were taken, from where, and that the wordmark is assembled rather than typed. LEFT has no picture at all, only type on a flat field."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Same typography, same legibility, but RIGHT carries a second element that does real work and changes across the cut, so the two beats form a cause and its effect. LEFT is two type slides on an empty ground with no continuity between them and enormous unused frame in a landscape canvas."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 1,
+        "flaw": "A single word on an empty field. The band above and below is bare, nothing anchors the word to the canvas, and the frame carries no information beyond one word that the next beat repeats."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "LEFT is one word floating in an otherwise empty landscape frame, while RIGHT balances the same word against a letter-specimen tray that fills the lower third and sets up what happens next."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "value",
+          "why": "Both show the wordmark, but RIGHT keeps the tray on screen with six slots now punched out, so the frame proves where the cut-out letters came from instead of just displaying the result."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A grid of every available letter, an alphabet specimen sheet, used as a source inventory. Between the two beats the exact letters spelling the title are physically removed from it: the A, M, N, O, R and S slots go blank while every other cell stays intact. The picture encodes supply and depletion, the wordmark was cut out of this sheet, and the count of missing cells matches the letters in the name. It also gives the film one object that survives the cut and changes across it. Small flaw: beat 1 boxes only four of the six letters it later removes, so the promise does not tally exactly with the payoff. LEFT has no picture at all, only type."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Same typography, same readability, but RIGHT gives the frame a second element that carries information and a change between beats; LEFT is two type slides with two thirds of a wide frame left empty."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 1,
+        "flaw": "A single short word sitting high in a 16:9 frame with the whole lower half blank. Nothing anchors the composition, nothing is being shown, and the emptiness reads as unfinished rather than as breathing room."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    }
+  ],
+  "id": "33e28f8f52c3"
+}

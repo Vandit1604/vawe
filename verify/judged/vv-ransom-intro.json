@@ -1,0 +1,180 @@
+{
+  "name": "vv-ransom-intro",
+  "seed": "0",
+  "claim": "RANSOM NOTES",
+  "brand": null,
+  "gatesTree": "6ff806803441d69a3f89e8449b13cce8b001a4a5",
+  "rows": 2,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/ransom-intro.before.mp4",
+      "mp4": "out/ransom-intro.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        0.35,
+        3.6
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "formats/scene/ransom-intro.json",
+      "mp4": "out/ransom-intro.mp4",
+      "sceneHash": "a6e26fa08cbc56425ad8509bde7d1881256bc30d07b394193f8d661a3d79bf8d",
+      "allow": [],
+      "beats": [
+        0.35,
+        3.6
+      ]
+    }
+  ],
+  "result": {
+    "winner": "RIGHT",
+    "winnerArm": "formats/scene/ransom-intro.json",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 0,
+      "RIGHT": 3,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "RIGHT",
+      "says": "A sheet of alphabet tiles that is visibly being harvested: in beat 1 six cells are ringed in red, and in beat 2 those exact cells are empty holes. It shows the letters of the title being physically cut out of a specimen sheet, so the picture states the mechanism the words only name. LEFT's frames encode nothing beyond the word itself."
+    },
+    {
+      "judge": "2",
+      "side": "RIGHT",
+      "says": "A specimen sheet of every available letter, with the ones the title needs boxed in red in beat 1 and then gone (blank tan slots) in beat 2. It encodes supply and depletion: these specific glyphs were physically cut out of the sheet and pasted into the word above, so the tray shows the source and the cost of building the wordmark. It is the only picture in either cut doing work the type cannot."
+    },
+    {
+      "judge": "3",
+      "side": "RIGHT",
+      "says": "A full alphabet specimen sheet acting as the donor for the collage: in the first beat certain cells (A, M, R, S, plus the O) carry red cut-marks, and in the second beat those exact cells are empty holes. The picture shows which glyphs were physically taken out of the sheet and carried up into the word above, so it encodes provenance and the running cost of building the wordmark, letter by letter. The empty squares are a tally of what has been used."
+    }
+  ],
+  "wouldShip": {
+    "out/ransom-intro.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "formats/scene/ransom-intro.json": [
+      "no",
+      "no",
+      "no"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "LEFT is one word floating in an empty landscape frame with two thirds of the canvas dead, while RIGHT pairs the same headline with a letter-specimen tray that fills the lower band and marks the letters about to be used."
+        },
+        {
+          "beat": 2,
+          "winner": "LEFT",
+          "dimension": "readability",
+          "why": "RIGHT's tray sits on top of the wordmark and swallows the entire second line, so the payoff reads as 'RANSOM' with a row of cropped shapes under it, whereas LEFT shows RANSOM NOTES complete and legible."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A sheet of alphabet tiles that is visibly being harvested: in beat 1 six cells are ringed in red, and in beat 2 those exact cells are empty holes. It shows the letters of the title being physically cut out of a specimen sheet, so the picture states the mechanism the words only name. LEFT's frames encode nothing beyond the word itself."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "RIGHT is the only cut with an idea in the frame and the only one with crafted density, but it wins narrowly because it breaks its own payoff: the tray overlaps the wordmark in beat 2 and hides half the title. LEFT is clean and completely inert."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 2,
+        "flaw": "The letter tray collides with the two-line wordmark, occluding the whole 'NOTES' line so only letter tops show above the tray edge, and the missing-tile holes it is meant to reveal are half hidden behind the headline."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "LEFT is one cut-out word floating on an empty field with the bottom two-thirds dead, while RIGHT adds a letter-specimen tray that fills the frame and shows where the pasted letters came from."
+        },
+        {
+          "beat": 2,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "LEFT shows the full two-line RANSOM NOTES wordmark clean and centered, while RIGHT's tray sits on top of the second line and hides it, so the title itself is occluded."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A specimen sheet of every available letter, with the ones the title needs boxed in red in beat 1 and then gone (blank tan slots) in beat 2. It encodes supply and depletion: these specific glyphs were physically cut out of the sheet and pasted into the word above, so the tray shows the source and the cost of building the wordmark. It is the only picture in either cut doing work the type cannot."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "RIGHT is the only cut with a graphic that means something, and it carries frame density LEFT never attempts; the margin is narrow only because RIGHT lets that graphic cover the film's own title on beat 2, which LEFT reads cleanly."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 2,
+        "flaw": "The letter tray overlaps the second line of the wordmark, clipping NOTES to a row of coloured stubs peeking above the tray edge, so the payoff title is unreadable."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "LEFT is one word floating in an empty frame with two-thirds dead space, while RIGHT sets the same word larger and anchors it to an alphabet specimen sheet with cells marked for cutting, which fills the frame and states where the letters come from."
+        },
+        {
+          "beat": 2,
+          "winner": "LEFT",
+          "dimension": "readability",
+          "why": "LEFT stacks RANSOM / NOTES cleanly on two centered lines, whereas RIGHT lets the specimen sheet sit on top of the second line so only fragments of NOTES peek above it and the title cannot be read."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A full alphabet specimen sheet acting as the donor for the collage: in the first beat certain cells (A, M, R, S, plus the O) carry red cut-marks, and in the second beat those exact cells are empty holes. The picture shows which glyphs were physically taken out of the sheet and carried up into the word above, so it encodes provenance and the running cost of building the wordmark, letter by letter. The empty squares are a tally of what has been used."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "RIGHT is the only cut with an idea in it: a continuous object that survives the cut and changes across it, doing work the type cannot, against LEFT's two type-only slides. The margin is narrow only because RIGHT pays for it with a collision that hides half its own title."
+      },
+      "worstFrame": {
+        "side": "RIGHT",
+        "beat": 2,
+        "flaw": "The specimen sheet overlaps and clips the second line of the title. RANSOM reads, NOTES is buried behind the sheet with only the tops of a few letters showing, so the wordmark is broken at the exact moment it is meant to land."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    }
+  ],
+  "id": "efbed818f86d"
+}
