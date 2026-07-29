@@ -5,6 +5,7 @@
 //   • safe-zone — element outside the SAFE box            (HARD fail)
 //   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
+//   • buried    — >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
 //   • tight     — sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
@@ -339,6 +340,55 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (oy > 0) gap = Math.min(gap, -ox);
     if (gap !== Infinity && gap >= 0 && gap < MIN_GAP) issues.push({ kind: 'tight', a: A.id, b: B.id, detail: `${gap | 0}px` });
   }
+  // BURIED. The pair loop above forgives an overlap the moment an opaque surface is painted on top of
+  // the lower layer: a card over a board is a layered composition, not a collision. That forgiveness
+  // assumes anything you cannot see was meant to be hidden, and for the film's own headline the
+  // assumption is exactly backwards. Three blind judges independently called a title unreadable on a
+  // scene this audit passed clean: the thing covering it was an `html` layer, which neither selector
+  // feeding `info` matches, and even inside the pair loop the opaque-surface escape would have
+  // swallowed it. Two holes, one symptom.
+  //
+  // So ask the question directly and per-layer rather than per-pair, which also makes the answer
+  // independent of what type the covering layer happens to be: how much of this text is under paint?
+  // Scoped to `critical` (>=60px display text) because that is the copy the viewer MUST read, and no
+  // composition deliberately buries two fifths of its own headline.
+  // "Does this element paint something solid?" An HTML box answers with `background-color`; an SVG
+  // shape answers with `fill`, and asking it the HTML question returns transparent. That single blind
+  // spot is why an inline <svg> could sit on a headline and measure as thin air.
+  const opaqueAt = (node) => {
+    const s2 = getComputedStyle(node);
+    const m = /rgba?\(([^)]+)\)/.exec((node.ownerSVGElement ? s2.fill : s2.backgroundColor) || '');
+    if (!m) return false;
+    const parts = m[1].split(',');
+    let a = parts[3] !== undefined ? parseFloat(parts[3]) : 1;
+    if (node.ownerSVGElement) a *= parseFloat(s2.fillOpacity || '1');
+    // opacity is inherited down the paint tree, so a faded <g> makes its children see-through too
+    for (let p = node; p && p !== document.body; p = p.parentElement) a *= (+getComputedStyle(p).opacity || 0);
+    return a > 0.85;
+  };
+  const OCCLUDE_MAX = 0.4;
+  for (const el of document.querySelectorAll('[data-layer="critical"]')) {
+    if (!vis(el) || midMove(el)) continue;
+    const r = inkRect(el) || el.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) continue;
+    // 9x9, not 9x5: a coarse grid quantises the answer to fifths, and the case this check exists for
+    // measured 46% of the headline covered and sampled as exactly 40%, one point under its own bar.
+    let covered = 0, total = 0;
+    for (let gy = 0; gy < 9; gy++) for (let gx = 0; gx < 9; gx++) {
+      const px = r.left + r.width * (gx + 0.5) / 9, py = r.top + r.height * (gy + 0.5) / 9;
+      if (px < 0 || py < 0 || px >= FW || py >= FH) continue;
+      const stack = document.elementsFromPoint(px, py);
+      const mine = stack.findIndex((e) => e === el || el.contains(e) || e.contains(el));
+      if (mine < 0) continue;                        // not painted here at all: outside the ink, not buried
+      total++;
+      for (let k = 0; k < mine; k++) if (opaqueAt(stack[k])) { covered++; break; }
+    }
+    if (total && covered / total > OCCLUDE_MAX)
+      // a ransom/sprite headline has no textContent and no id, so neither can name it; the ink's top
+      // edge can, and it keeps two headlines in one film from de-duping into a single reported finding
+      issues.push({ kind: 'buried', a: el.id || `headline@y${r.top | 0}`, t: (el.textContent || '').trim().slice(0, 18),
+        detail: `${Math.round(covered / total * 100)}% of this headline sits under an opaque layer` });
+  }
   // contrast (WCAG-ish) on critical TEXT: effective bg = nearest ancestor solid background-color,
   // else sampled from the bg <canvas> under the element's box, else the body/stage color.
   const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
@@ -570,7 +620,7 @@ function sourceIssues(cfg) {
   return out;
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component']);
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'buried', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });

@@ -4121,3 +4121,30 @@ fires. 110/110.
 **Lesson.** The gate graded a film on a property the renderer had already made impossible, and the
 message sent the author to go author harder. `scene-timing.mjs` exists so gates stop modelling the
 renderer from memory; a gate that reasons about time and does not import it is a bug waiting.
+
+## #184 — the layout audit forgave a headline it could not see
+
+`ransom-intro` shipped a cut where the specimen sheet sat on the second line of `RANSOM NOTES`. Three
+blind judges, independently, all named it: "the payoff title is unreadable". `make audit` said
+`0 hard`, and `make video` exited 0 on the strength of that.
+
+**Root cause, two holes with one symptom.** The overlap check compares
+`[data-layer="critical"], .hs-layer.hs-text`, so an `html` layer is in neither set and no pair ever
+existed. And even inside the pair loop the occlusion escape would have swallowed it: that escape reads
+"an opaque surface is painted above the lower layer, therefore the lower layer was MEANT to be hidden",
+which is right for a card over a board and exactly backwards for a film's own title. The escape's alpha
+test also asked every element for its `background-color`; an SVG shape answers that question with
+transparent, because it paints through `fill`. An inline `<svg>` covering a headline measured as air.
+
+**Fix.** A new HARD finding, **`buried`**: for each `[data-layer="critical"]` layer (>=60px display
+text), sample a 9x9 grid over its ink and hit-test each point; if more than 40% of it sits under opaque
+paint, fail. Per-layer, not per-pair, so the answer does not depend on what type the covering layer
+happens to be, and the paint test now reads `fill` on SVG nodes and `background-color` everywhere else.
+The grid is 9x9 rather than 9x5 because the case that produced this measured 46% covered and a coarse
+grid quantised it to exactly 40%, one point under its own bar. Findings are labelled by the ink's top
+edge: a ransom headline has neither `id` nor `textContent`, so nothing else can name it, and two
+headlines in one film would otherwise de-dupe into one.
+
+**Lesson.** Every static gate in the ladder passed this frame and three judges failed it in one line.
+A gate that treats "cannot be seen" as "meant to be hidden" cannot tell composition from collision;
+ask instead what is covered, and whether the thing covered is the one the viewer must read.

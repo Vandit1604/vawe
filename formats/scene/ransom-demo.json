@@ -2,6 +2,7 @@
   "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "probe: the ransom type effect." } },
   "module": "scene",
   "theme": "vawe-site",
+  "aspect": "16:9",
   "duration": 4,
   "layers": [
     { "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "bg": "#141414", "start": 0, "duration": 4 },
