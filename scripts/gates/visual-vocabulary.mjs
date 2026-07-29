@@ -31,7 +31,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sceneTiming, num, spanOf, canvasShare } from './scene-timing.mjs';
+import { sceneTiming, num, spanOf, canvasShare, PICTORIAL, CHROME, htmlGraphic } from './scene-timing.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
 
 // BLOCKS ARE SUGAR and this gate reads raw JSON, so a chart authored the fast way looked like nothing.
@@ -83,32 +83,12 @@ if (derived && fs.existsSync(`${derived[1]}.json`)) {
 }
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
-// types that DEPICT something. `rect` is deliberately absent: a rect is a divider or a scrim far more
-// often than it is a bar, and counting it would let any film buy a pass with a hairline.
-const PICTORIAL = new Set(['svg', 'image', 'component', 'board', 'doc', 'clip', 'three', 'raymarch', 'paint', 'composition', 'cursor', 'lottie']);
-// types that DECORATE. Listed so the gate cannot be satisfied by adding more light.
-const CHROME = new Set(['glow', 'beam', 'shader', 'rect']);
 const SUBJECT_AREA = 0.08;   // share of the canvas a graphic must cover to be the subject, not a garnish
 const THIN = 1 / 3;          // share of beats that must carry one before the film stops reading as typeset
 
 const T = sceneTiming(d);
 const [CW, CH] = T.canvas;
 const CANVAS = CW * CH;
-
-// an html layer earns pictorial status by CONTAINING a graphic, not by being an html layer: an inline
-// <svg>, a conic-gradient (the donut/ring idiom), or three-or-more boxes whose length is driven by a
-// variable, which is what a bar chart looks like in markup.
-const htmlGraphic = (h) => {
-  if (typeof h !== 'string') return null;
-  if (/<svg[\s>]/i.test(h)) return 'inline <svg>';
-  if (/conic-gradient\(/i.test(h)) return 'conic-gradient (a ring/donut)';
-  // a bar's length can be driven by `width`/`height` OR by `transform:scaleX/Y`, and the second is the
-  // one an animator reaches for first because it does not relayout. Matching only the first was this
-  // gate failing a real stacked bar chart on the day it was written.
-  const bars = h.match(/(?:(?:width|height)\s*:\s*calc\([^;"]*var\(--|transform\s*:\s*scale[XY]\([^;"]*var\(--)/g);
-  if (bars && bars.length >= 3) return `${bars.length} variable-length bars`;
-  return null;
-};
 
 const carriers = [];   // graphics big enough to be the subject of a beat
 const garnish = [];    // real graphics, too small to carry

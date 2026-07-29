@@ -24,6 +24,7 @@ import { motionAt } from '../../core/sequence.js';
 import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
+import { sceneTiming } from './scene-timing.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -146,7 +147,13 @@ const visible = (l) => { const s = l.start ?? 0; return [s, l.duration != null ?
 const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.type === 'clip'
   || l.parts || l.morph || l.motionPath || l.gsap || l.physics
   || (l.type === 'group' && l.each)          // per-child build. On a TEXT layer `each` is the split
-  || (l.type === 'cursor' && l.path);        // reveal's per-char duration — an entrance, not a transform.
+  || (l.type === 'cursor' && l.path)         // reveal's per-char duration — an entrance, not a transform.
+  // Hand-authored html whose CSS is a function of `var(--t)` (the scene clock). Its whole appearance is
+  // time-driven and no amount of reading the markup will say what it looks like at a given second. The
+  // limit, stated plainly: this proves the layer changes CONTINUOUSLY, not that it changes AT the
+  // boundary. A strip that morphs from numbers to bars across the cut and a clock ticking in a corner
+  // are indistinguishable here. Only your eyes and `make reveal` tell those apart.
+  || (l.type === 'html' && /var\(\s*--t\b/.test(String(l.html ?? '')));
 
 // The layer's pose at absolute time t, from every authored track this gate can evaluate exactly.
 const poseAt = (l, t) => {
@@ -190,7 +197,16 @@ const carriedMsg = (spanning) => (spanning.length
   : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`);
 const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.';
 
-if (bounds.length && dur < CONTINUITY_MAX_DUR) {
+// SCENE UNITS MAKE A SPINE IMPOSSIBLE, so say that instead of grading the film on one. When the engine
+// wraps beats as units (core/produce.js turns it on for any cut film that is not already choreographed)
+// it rewrites every non-last-beat layer to end with its beat and slides the whole beat out as one block.
+// A layer authored across the cut is truncated at it. This gate read the raw `start`/`duration`, saw a
+// crosser, and passed a film whose spine the renderer had already cut in half. The author needs the one
+// fact that fixes it, not a verdict on motion they cannot express.
+const wrapsBeats = sceneTiming(d).sceneUnits;
+if (bounds.length && dur < CONTINUITY_MAX_DUR && wrapsBeats) {
+  fail('beats-wrapped-as-units', `this film wraps each beat as a UNIT (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its beat's end and slid out with it. No object can survive a cut, which means no continuous object is possible here at all. Set \`"sceneUnits": false\` at the top of the scene, then keep ONE object alive across the boundary and make the boundary a state change of it. ${FIX_MSG}`);
+} else if (bounds.length && dur < CONTINUITY_MAX_DUR) {
   const { spanning, transforming } = continuity(bounds);
   if (!transforming.length) {
     // BLOCKS. A WARN here let every NEW slideshow through, which is the one thing this tell exists to
@@ -263,7 +279,14 @@ if (presets.length >= 5 && new Set(presets).size === 1) {
 const staticFigures = flat.filter((l) => {
   if (l.parts || l.split) return false;
   if (l.type === 'group' && Array.isArray(l.children) && l.children.length >= 3 && l.each == null) return true;
-  if (l.type === 'html' && typeof l.html === 'string' && (l.html.match(/<(rect|circle|path|polyline|line)\b/g) || []).length >= 3) return true;
+  // Markup whose shapes carry their OWN per-shape delay off the clock or the window variable is already
+  // building piece by piece; the stagger is in the CSS, where `parts` cannot reach. Two or more distinct
+  // offsets is the tell, since one shared expression on every shape is still one block.
+  if (l.type === 'html' && typeof l.html === 'string') {
+    if ((l.html.match(/<(rect|circle|path|polyline|line)\b/g) || []).length < 3) return false;
+    const staggered = new Set(l.html.match(/var\(\s*--[tp]\b[^)]*\)\s*-\s*[\d.]+/g) || []);
+    return staggered.size < 2;
+  }
   return false;
 });
 if (staticFigures.length) warn('static-figure', `${staticFigures.length} figure(s) (a 3+-child group or a multi-shape SVG) animate as one block — add \`parts\` (or a group \`each\`) so they build piece by piece: bars grow, the line draws, dots pop. docs/CRAFT/AUTHOR-THE-FRAME.md.`);
@@ -275,7 +298,10 @@ console.log(`  motion vocabulary: ${vocab.map((k) => `${k}×${sig[k]}`).join(' �
 console.log(`  directedness score: ${score}   (floor: not a plain slideshow · reach ≥3 techniques)`);
 // The declared and inferred halves of the continuity tell are one rule seen two ways, so a scene that
 // waived the declared one has already declared the break deliberate; don't re-raise it as the other.
-const waivedBy = (code) => allow.has(code) || (code === 'no-continuous-object-inferred' && allow.has('no-continuous-object'));
+// The two variants are the same finding named more precisely, so the standing waiver covers them. A
+// sharper diagnosis must not turn every already-waived scene red.
+const CONTINUITY_ALIASES = new Set(['no-continuous-object-inferred', 'beats-wrapped-as-units']);
+const waivedBy = (code) => allow.has(code) || (CONTINUITY_ALIASES.has(code) && allow.has('no-continuous-object'));
 const fails = findings.filter((f) => f.sev === 'FAIL' && !waivedBy(f.code));
 const waived = findings.filter((f) => f.sev === 'FAIL' && waivedBy(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !waivedBy(f.code));

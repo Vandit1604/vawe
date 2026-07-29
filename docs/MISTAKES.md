@@ -4068,3 +4068,56 @@ scoring frames cannot always tell a mid-entrance sample from a defect, and the d
 MISTAKES #178's real ghost and this false alarm is only visible by pulling several frames across the
 entrance. `make reveal` exists for exactly that and should be read before trusting a beat-level verdict
 about type.
+
+## #182 — three gates were blind to motion authored in CSS, and one of them demanded it
+
+`hero-site`'s new graphic is an inline `<svg>` whose every shape is a function of `var(--t)`: eighteen
+bars, each with its own delay, that hold as raw numbers through beat 1 and grow into an easing curve
+across the cut. Three gates read the markup and each drew a wrong conclusion from it.
+
+- `direction-floor`'s **`no-continuous-object`** saw a layer crossing the cut and said none of the
+  crossers "CHANGE there", because `poseAt` can only evaluate `motion` / `vars` / `ken` / typing. The
+  layer changes more across that boundary than anything else in the film.
+- `direction-floor`'s **`static-figure`** counted three-or-more SVG shapes and called them one block,
+  when each shape carries its own offset in its own style attribute.
+- `critique`'s **`transition-dip`** excluded any layer spanning most of the film as a watermark, so the
+  one object holding the frame across the junction did not count as content, and the gate reported the
+  stage EMPTY at the exact moment the spine was carrying it. **Two gates in the same ladder, one
+  demanding a continuous object and the other refusing to see one.**
+
+**Fixes.** `opaqueMotion` now admits an `html` layer whose markup references `var(--t)`, the same way it
+already admits a `composition` whose clock it cannot read. `static-figure` clears markup carrying two or
+more distinct `var(--t)`/`var(--p)` offsets, since one shared expression on every shape is still one
+block. `transition-dip`'s persistence exclusion now keeps a spanning layer that DEPICTS something (the
+shared `PICTORIAL` set) and covers 8%-90% of the canvas: big enough to be the subject, not big enough to
+be wallpaper. Library-wide sweep: exactly the three scenes authored this campaign change verdict, and
+nothing else moves.
+
+`PICTORIAL`, `CHROME` and `htmlGraphic` moved from `visual-vocabulary.mjs` into `scene-timing.mjs`, the
+shared model, because two gates now need one answer to "is this a picture".
+
+**Lesson.** A gate that reads markup cannot see behaviour authored in CSS, and the honest response is to
+credit what is declared and name the limit, not to fail what cannot be read. The new comment says it: a
+strip that morphs across the cut and a clock ticking in a corner are indistinguishable to this check.
+
+## #183 — the continuity gate passed a spine the renderer had already cut in half
+
+Same film, worse failure. `hero-site` shipped its first render with the strip visible in beat 1 and gone
+in beat 2, while `no-continuous-object` reported clean.
+
+**Root cause.** `core/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion`
+track, and `formats/scene/scene.js` then rewrites every non-last-beat layer to end with its beat so the
+wrapper can slide the whole beat out as one unit. A layer authored across the cut is truncated at it.
+Under beat wrapping **no continuous object is expressible at all**. `direction-floor` read the raw
+`start`/`duration` (it never imported `scene-timing.mjs`, which models this exactly), saw a crosser, and
+passed.
+
+**Fix.** A cut film that wraps beats as units now fails **`beats-wrapped-as-units`** and is told the one
+fact that unblocks it: set `"sceneUnits": false`. The existing `no-continuous-object` waivers cover the
+new code, so no already-waived scene turns red. Two mutation cases pin it: the spine cases now declare
+`sceneUnits: false` (they must be films that COULD have a spine), and a new case proves the precondition
+fires. 110/110.
+
+**Lesson.** The gate graded a film on a property the renderer had already made impossible, and the
+message sent the author to go author harder. `scene-timing.mjs` exists so gates stop modelling the
+renderer from memory; a gate that reasons about time and does not import it is a bug waiting.

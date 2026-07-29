@@ -5,6 +5,7 @@
 //
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
+import { canvasShare, sceneTiming, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -137,8 +138,27 @@ for (const l of layers) {
 //        content layer's [start, end] interval and flag any blank gap in the middle. Persistent marks
 //        (a watermark spanning most of the film) and tiny captions are excluded so they can't mask a dip.
 const sceneDur = d.duration ?? 0;
+// The persistence exclusion is aimed at a WATERMARK, and it was written as "spans most of the film",
+// which also excluded the one thing the continuity doctrine demands: a subject that survives the cuts.
+// A film built on a continuous object was told its stage was empty at the very junction its spine was
+// carrying. So a spanning layer is still content when it is big enough to BE the subject: the same 8%
+// of canvas `visual-vocabulary` uses to separate a mark from a picture, one threshold, one meaning.
+// A full-bleed slab or a scrim also spans the film, and letting THAT count would hand every scene a way
+// to hide a dip behind wallpaper. So the exemption needs both halves: the layer must DEPICT something
+// (the shared PICTORIAL vocabulary, which excludes `rect` for exactly this reason) and be large.
+const [CW, CH] = sceneTiming(d).canvas;
+// And it must not fill the frame. A full-bleed plate held for the whole film is a BACKDROP wearing a
+// layer's clothes (a gradient image, a paint field), and the two scenes in this library that do it are
+// both exactly that. A beat's subject sits IN the frame; it is not the frame.
+const carries = (l) => {
+  if (!(PICTORIAL.has(l.type) || (l.type === 'html' && htmlGraphic(l.html)))) return false;
+  const { share } = canvasShare(l, CW, CH);
+  return share >= 0.08 && share < 0.9;
+};
 const contentIv = layers
-  .filter((l) => (l.track ?? 9) > 2 && (l.duration ?? 0) > 0 && (l.duration ?? 0) < sceneDur * 0.6 && (l.type !== 'text' || (l.size ?? 0) >= 22))
+  .filter((l) => (l.track ?? 9) > 2 && (l.duration ?? 0) > 0
+    && ((l.duration ?? 0) < sceneDur * 0.6 || carries(l))
+    && (l.type !== 'text' || (l.size ?? 0) >= 22))
   .map((l) => [s0(l), s0(l) + l.duration])
   .sort((a, b) => a[0] - b[0]);
 if (contentIv.length > 1) {

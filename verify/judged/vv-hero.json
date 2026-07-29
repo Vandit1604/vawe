@@ -1,0 +1,180 @@
+{
+  "name": "vv-hero",
+  "seed": "0",
+  "claim": "Every frame, a function of n.",
+  "brand": null,
+  "gatesTree": "920d4bdb245c8ddd1c9e53d973ac8dacd1bb02a9",
+  "rows": 2,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/hero-site.before.mp4",
+      "mp4": "out/hero-site.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        0.35,
+        4
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "formats/scene/hero-site.json",
+      "mp4": "out/hero-site.mp4",
+      "sceneHash": "3ff6ecebfca60572eb35a4f82c49697f6aa58db60867e680e7504cc3a0848db2",
+      "allow": [],
+      "beats": [
+        0.35,
+        4
+      ]
+    }
+  ],
+  "result": {
+    "winner": "RIGHT",
+    "winnerArm": "formats/scene/hero-site.json",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 0,
+      "RIGHT": 3,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "RIGHT",
+      "says": "The shape of an easing curve sampled once per frame. Eighteen bars, one for each frame n = 0 to n = 17, and each bar's height is that frame's output value. You can read the motion off it directly: a near-zero first bar, three or four fast-growing bars, then a long flat tail where every value is pinned at 1.00. That is the curve's story, most of the distance covered early and the end crawling in. Beat 1 shows the same series as literal numbers (.00 .33 .56 .71 .80 ... 1.00 1.00) and beat 2 redraws those numbers as length, so the graphic and the headline say the same thing in two languages. The thin vertical rule is the playhead, marking which n the film itself is sitting on, which makes the chart a picture of the very frame you are watching."
+    },
+    {
+      "judge": "2",
+      "side": "RIGHT",
+      "says": "One bar per animation frame, n = 0 to 17, bar height = the eased value at that frame (0 up to 1). The steep early rise and long flat tail read as an ease-out curve, and the vertical rule is the playhead showing which frame is on screen right now. In beat 1 the same series is shown as its raw numbers (.00 .33 .56 .71 .80 .87 ... 1.00) before it becomes bars in beat 2, so the pair reads as numbers turning into motion. LEFT encodes nothing; its soft oval vignette is decoration."
+    },
+    {
+      "judge": "3",
+      "side": "RIGHT",
+      "says": "An easing curve sampled per frame: 18 frame indices (n = 0 to 17) each carrying a value from 0.00 to 1.00, shown first as the literal numbers and then as bar heights, with a vertical playhead marking the current frame. You can read the shape of easeOutExpo straight off it, fast rise then a long flatten into 1.00, so the picture shows what 'every frame is a function of n' actually means. LEFT has no picture at all: a soft radial wash behind the type, which is decoration."
+    }
+  ],
+  "wouldShip": {
+    "out/hero-site.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "formats/scene/hero-site.json": [
+      "yes",
+      "yes",
+      "yes"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "Does the graphic encode the claim",
+          "why": "Same headline both sides, but RIGHT backs the words with a real readout (a row of eased values from .00 to 1.00 across n = 0..17 with a playhead on the current frame) while LEFT is the sentence alone on empty white."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "Produced-not-generated",
+          "why": "RIGHT turns the claim into a picture, a bar per frame whose height is the eased value, so the bottom half of the canvas does work; LEFT leaves the same half of the frame blank."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "The shape of an easing curve sampled once per frame. Eighteen bars, one for each frame n = 0 to n = 17, and each bar's height is that frame's output value. You can read the motion off it directly: a near-zero first bar, three or four fast-growing bars, then a long flat tail where every value is pinned at 1.00. That is the curve's story, most of the distance covered early and the end crawling in. Beat 1 shows the same series as literal numbers (.00 .33 .56 .71 .80 ... 1.00 1.00) and beat 2 redraws those numbers as length, so the graphic and the headline say the same thing in two languages. The thin vertical rule is the playhead, marking which n the film itself is sitting on, which makes the chart a picture of the very frame you are watching."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Both cuts set identical copy in the same face at similar weight, so readability and hierarchy are near-parity, and the whole difference is whether anything on screen proves the sentence. RIGHT does, twice and in two forms, and it fills the lower two-thirds with content instead of vignette; LEFT is a title card with a soft glow behind it and nothing to look at after two seconds."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 2,
+        "flaw": "Word-on-empty-space slide: two lines of type sit high-centre and the entire lower half is a blank wash, so the frame has no focal competition, no evidence, and no reason to exist next to beat 1, which is the same layout with different words."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "produced-not-generated",
+          "why": "RIGHT fills the lower third with a real readout (a row of eased values .00 .33 .56 ... 1.00 under a playhead) so the claim 'from pure data' is on screen, while LEFT is the same headline floating on empty gradient."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "graphic-encodes-the-claim",
+          "why": "RIGHT's bar chart literally is f(n) for n = 0..17 with a playhead marking the current frame, proving the line 'a function of n'; LEFT states it and shows nothing."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "One bar per animation frame, n = 0 to 17, bar height = the eased value at that frame (0 up to 1). The steep early rise and long flat tail read as an ease-out curve, and the vertical rule is the playhead showing which frame is on screen right now. In beat 1 the same series is shown as its raw numbers (.00 .33 .56 .71 .80 .87 ... 1.00) before it becomes bars in beat 2, so the pair reads as numbers turning into motion. LEFT encodes nothing; its soft oval vignette is decoration."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Both cuts share the same copy and type treatment, so the whole difference is that RIGHT shows the thing the words describe and LEFT does not. RIGHT also uses its canvas: headline on the upper third, data on the lower third, a deliberate split against a dotted grid, versus LEFT's centered block with two-thirds of the frame dead. RIGHT's only cost is small grey micro-labels."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 2,
+        "flaw": "Five words on a near-white field. It claims every frame is a function of n and offers no picture of that function, and the vignette behind it is off-centre from the text block so the balance reads accidental rather than composed."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "RIGHT",
+          "dimension": "Does the graphic encode the claim",
+          "why": "RIGHT backs \"from pure data\" with an actual row of eased values (.00 .33 .56 ... 1.00) indexed n=0..17 under a playhead, while LEFT is the same sentence floating over an empty lower half."
+        },
+        {
+          "beat": 2,
+          "winner": "RIGHT",
+          "dimension": "Value",
+          "why": "RIGHT turns the number row into a bar chart whose heights ARE f(n), so the frame proves the claim it makes; LEFT repeats beat 1's layout verbatim with new words and teaches nothing new."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "An easing curve sampled per frame: 18 frame indices (n = 0 to 17) each carrying a value from 0.00 to 1.00, shown first as the literal numbers and then as bar heights, with a vertical playhead marking the current frame. You can read the shape of easeOutExpo straight off it, fast rise then a long flatten into 1.00, so the picture shows what 'every frame is a function of n' actually means. LEFT has no picture at all: a soft radial wash behind the type, which is decoration."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Same copy, same face, same palette, but RIGHT builds a two-part frame (headline up top, data strip along the bottom) where the graphic carries information the words cannot, and it changes across the cut from numbers to bars so the two beats are one continuous idea rather than two slides. LEFT is a single centered text block twice over with roughly half the canvas empty."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 2,
+        "flaw": "Identical composition to beat 1 with only the words swapped, text stranded above a large empty band, and the background wash off-centre relative to the type so the balance reads accidental rather than chosen."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    }
+  ],
+  "id": "e953e1da56af"
+}

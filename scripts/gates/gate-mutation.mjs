@@ -275,12 +275,25 @@ const CASES = [
     match: /no-continuous-object/,   // blocking tier: must exit non-zero
     scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
                   TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
-      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // `sceneUnits: false` on both fail cases is not decoration: with beat-wrapping left on, the engine
+  // truncates every layer at its own beat and no spine is expressible at all, which is a different
+  // finding (below). These two pin the spine rule itself, so they must be films that could have one.
   // The strong half: a persistent element that never CHANGES at the cut is a watermark, not a spine.
   // Without this case the rule quietly degrades to "put a logo on every frame".
   { gate: 'directionfloor', name: 'no-continuous-object · a static layer riding the cut is not a spine', expect: 'fail',
     match: /none of them CHANGE there/,
     scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6 },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // The precondition, which cost a wasted render before it existed: a cut film with no choreographed
+  // `motion` gets beat-wrapping by default, so the renderer slides each beat out whole and truncates
+  // any layer authored across the cut. The gate used to read the raw `start`/`duration`, see a crosser,
+  // and pass a film whose spine had already been cut in half.
+  { gate: 'directionfloor', name: 'beats-wrapped-as-units · a spine cannot survive beat wrapping', expect: 'fail',
+    match: /sceneUnits/,
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
+                    ken: { from: 1, to: 1.4 } },
                   TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
       { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
   // ...and the mirror (#25): a real continuous-object film must stay green, or the tell buys its

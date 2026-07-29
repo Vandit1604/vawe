@@ -93,6 +93,32 @@ export function intrinsicAspect(src, root = ROOT) {
   return ar;
 }
 
+// THE PICTORIAL VOCABULARY — which layer types DEPICT and which merely DECORATE. It lives here, beside
+// the geometry, because more than one gate needs it: `visual-vocabulary` asks whether a film shows
+// anything, and `critique` asks whether a layer spanning the film is its subject or just wallpaper. Two
+// copies of this list would eventually disagree about what a picture is.
+//
+// `rect` is deliberately absent: a rect is a divider or a scrim far more often than it is a bar, and
+// counting it would let any film buy a pass with a hairline.
+export const PICTORIAL = new Set(['svg', 'image', 'component', 'board', 'doc', 'clip', 'three', 'raymarch', 'paint', 'composition', 'cursor', 'lottie']);
+// types that DECORATE. Listed so a gate cannot be satisfied by adding more light.
+export const CHROME = new Set(['glow', 'beam', 'shader', 'rect']);
+
+// an html layer earns pictorial status by CONTAINING a graphic, not by being an html layer: an inline
+// <svg>, a conic-gradient (the donut/ring idiom), or three-or-more boxes whose length is driven by a
+// variable, which is what a bar chart looks like in markup.
+export const htmlGraphic = (h) => {
+  if (typeof h !== 'string') return null;
+  if (/<svg[\s>]/i.test(h)) return 'inline <svg>';
+  if (/conic-gradient\(/i.test(h)) return 'conic-gradient (a ring/donut)';
+  // a bar's length can be driven by `width`/`height` OR by `transform:scaleX/Y`, and the second is the
+  // one an animator reaches for first because it does not relayout. Matching only the first was this
+  // gate failing a real stacked bar chart on the day it was written.
+  const bars = h.match(/(?:(?:width|height)\s*:\s*calc\([^;"]*var\(--|transform\s*:\s*scale[XY]\([^;"]*var\(--)/g);
+  if (bars && bars.length >= 3) return `${bars.length} variable-length bars`;
+  return null;
+};
+
 export function boxOf(L, root = ROOT) {
   const w0 = num(L.w, null), h0 = num(L.h, null), sz = num(L.size, null);
   if (w0 != null && h0 != null) return { w: w0, h: h0, how: 'explicit' };
