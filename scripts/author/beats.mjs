@@ -1,5 +1,5 @@
 // beats.mjs — verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of
-// every beat into one labeled contact sheet (/tmp/beats.png) so one image tells you if a beat is murky,
+// every beat into one labeled contact sheet (/tmp/beats/<name>.png) so one image tells you if a beat is murky,
 // overlapping, or off. With --vs <brand> it stacks each beat beside its source-section screenshot (from
 // `make sections`) — a side-by-side taste diff: does our beat actually reflect the real section?
 //
@@ -93,7 +93,12 @@ if (vs) {
   catch { console.warn(`  ⚠ --vs ${vs}: no sections.json (run: make sections URL=… NAME=${vs}) — skipping fidelity column`); }
 }
 
-const tmp = '/tmp/beats_frames'; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
+// PER SCENE, not one global path. Two authors working at once wrote the same `/tmp/beats.png` and wiped
+// the same `/tmp/beats_frames`, so each read a contact sheet of the other's film and the receipt swore
+// they had looked at their own. `judge.mjs` was moved off a shared directory for exactly this; the rest
+// of the sheet-writers were not, and a campaign is when that stops being theoretical.
+const SLUG = path.basename(dataArg, '.json');
+const tmp = `/tmp/beats/${SLUG}.frames`; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const grab = async (t, file) => { await page.evaluate((n) => window.__engine.renderFrame(n), Math.round(t * F)); await page.screenshot({ path: file, clip: { x: 0, y: 0, width: VW, height: VH } }); };
 const tileW = 300, tileH = Math.round((tileW * VH) / VW);
 const rows = [];
@@ -135,7 +140,7 @@ const padded = rows.map((r, i) => {
   spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', r.img, '-vf', `pad=${full}:ih:0:0:color=0x0a0a0c`, p]);
   return p;
 });
-const sheet = '/tmp/beats.png';
+const sheet = `/tmp/beats/${SLUG}.png`;
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
 // REVIEW RECEIPT. The sheet is an image, so no gate can score it; the only checkable fact is whether
 // anyone rendered one for THIS version of the scene. Stamp the scene's content hash next to the sheet and

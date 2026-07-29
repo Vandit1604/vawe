@@ -12,7 +12,7 @@
 //
 // It reads the real rendered pixels (not renderFrame) because a seam is composited during the render
 // (core/seams.js), so it only exists in the mp4 — which is the whole reason a DOM-signature gate can't
-// see it. Requires out/<name>.mp4 (render first). Writes /tmp/seams.png so the eye gets the seams too.
+// see it. Requires out/<name>.mp4 (render first). Writes /tmp/seams/<name>.png so the eye gets the seams too.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -78,7 +78,10 @@ for (const nt of seams) {
 }
 
 // ── contact sheet at the seams (the eye is the backstop the numbers can't be) ─────────────────────
-const tmp = '/tmp/seams_frames'; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
+// per scene, so two authors running at once cannot read each other's seams (same reason as beats.mjs)
+const SLUG = path.basename(dataArg, '.json');
+const SHEET = `/tmp/seams/${SLUG}.png`;
+const tmp = `/tmp/seams/${SLUG}.frames`; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const tiles = [];
 for (const nt of sheetFrames) {
   const raw = path.join(tmp, `s${nt}.png`);
@@ -91,12 +94,12 @@ for (const nt of sheetFrames) {
 }
 if (tiles.length) {
   spawnSync('ffmpeg', ['-v', 'error', '-y', ...tiles.flatMap((t) => ['-i', t]),
-    '-filter_complex', `hstack=inputs=${tiles.length}`, '-frames:v', '1', '/tmp/seams.png']);
+    '-filter_complex', `hstack=inputs=${tiles.length}`, '-frames:v', '1', SHEET]);
 }
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
-console.log(`  seam-snap · ${seams.length} transition boundary(ies) sampled · sheet → /tmp/seams.png`);
-if (!findings.length) { console.log(`✓ seam-snap clean — no luminance flash at any transition (read /tmp/seams.png to confirm the eye agrees)`); process.exit(0); }
+console.log(`  seam-snap · ${seams.length} transition boundary(ies) sampled · sheet → ${SHEET}`);
+if (!findings.length) { console.log(`✓ seam-snap clean — no luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`); process.exit(0); }
 for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside — a black/dark flash in the transition overlap (docs/MISTAKES.md #138).`);
 console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these — fix the seam compositing or the clip timing, then re-render.`);
 process.exit(1);

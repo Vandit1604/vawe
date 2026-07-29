@@ -96,7 +96,7 @@ explicit `NOCHECK=1`).
 
 Then see it move, not just the settled frames:
 ```bash
-make beats  D=<file>        # first/mid/last of every beat → /tmp/beats.png
+make beats  D=<file>        # first/mid/last of every beat → /tmp/beats/<name>.png
 make reveal D=<file>        # the ENTER arc + settled + EXIT arc → catches how each beat animates IN
 ```
 

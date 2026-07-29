@@ -276,7 +276,7 @@ preview:
 	node scripts/author/preview-fragment.mjs $(HTML) $(if $(THEME),--theme $(THEME)) $(if $(BG),--bg $(BG)) $(if $(W),--w $(W)) $(if $(SERVE),--serve)
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
-# sheet → /tmp/beats.png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
 beats:
 	node scripts/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
 
@@ -357,7 +357,7 @@ studio:
 # make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
 # black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
-# Requires out/<name>.mp4 (render first). Sheet → /tmp/seams.png (read it — the eye is the backstop).
+# Requires out/<name>.mp4 (render first). Sheet → /tmp/seams/$(notdir $(basename $(D))).png (read it — the eye is the backstop).
 seam-check:
 	node scripts/gates/seam-snap.mjs $(D)
 
@@ -618,7 +618,7 @@ filmstrip:
 # make reveal D=<scene.json> [ENTER=0.7] [N=8]  — see how each beat ANIMATES IN, not where it lands.
 # `make beats` samples a beat's middle (the settled state) and hides the reveal motion; this renders,
 # per beat, the ENTER arc densely + the settled frame + the EXIT arc, from the scene's exact layer
-# start-times. The check that catches "judged the hold, missed the reveal". → /tmp/reveal.png
+# start-times. The check that catches "judged the hold, missed the reveal". → /tmp/reveal/$(notdir $(basename $(D))).png
 reveal:
 	node scripts/author/reveal.mjs $(D) $(if $(ENTER),--enter $(ENTER)) $(if $(N),--n $(N)) $(if $(filter 1,$(LAYERS)),--layers)
 

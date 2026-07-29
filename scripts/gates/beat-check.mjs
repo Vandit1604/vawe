@@ -181,7 +181,7 @@ let receipt = null;
 try { receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8')); } catch { /* no receipt is the common case */ }
 if (!receipt || receipt.hash !== hash) {
   warn('beats-unseen', receipt
-    ? `the scene has CHANGED since its beats were last looked at (receipt ${path.relative(ROOT, receiptPath)} holds an older hash, sheet ${receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read /tmp/beats.png.`
+    ? `the scene has CHANGED since its beats were last looked at (receipt ${path.relative(ROOT, receiptPath)} holds an older hash, sheet ${receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read the sheet it prints.`
     : `nobody has looked at this scene's beats: no receipt in ${path.relative(ROOT, RECEIPTS)}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) and read the sheet.`);
 }
 

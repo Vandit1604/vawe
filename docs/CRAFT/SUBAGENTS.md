@@ -10,7 +10,7 @@ parallel, each returning a verdict in a fixed shape.** This is a rule, not a sug
 **A self-grading agent grades kindly.** The thread that wrote the scene has already anchored on its own
 choices. It picked that easing, that crop, that headline, and every look at the render is a look at a
 decision it already defended. Ask it "is beat 4 good?" and it answers "yes, because I chose it." A fresh
-agent handed nothing but "read `/tmp/beats.png` and score each beat" has no stake in the answer. That
+agent handed nothing but "read `/tmp/beats/<name>.png` and score each beat" has no stake in the answer. That
 absence of stake is the whole product.
 
 **Context is the other half.** A critic burns thousands of tokens looking at a sheet of frames and
@@ -26,12 +26,12 @@ handed.
 
 | Critic | Job | Input it is handed | Verdict shape |
 |---|---|---|---|
-| **beat** | does each beat read at a glance | `/tmp/beats.png` from `make beats D=<file> [VS=<brand>]` | per beat: `{beat, reads: yes/no, flaw, fix}` |
+| **beat** | does each beat read at a glance | `/tmp/beats/<name>.png` from `make beats D=<file> [VS=<brand>]` | per beat: `{beat, reads: yes/no, flaw, fix}` |
 | **bg-motion** | speed · scale · direction of anything that moves continuously | a 4+ frame strip, reference and render at matched timestamps | per axis: `{axis: speed/scale/direction, ours, reference, delta, fix}` |
-| **reveal** | how each beat enters and exits, never the settled frame | `/tmp/reveal.png` from `make reveal D=<file>` | per beat: `{beat, enter, exit, paired: yes/no, flaw, fix}` |
+| **reveal** | how each beat enters and exits, never the settled frame | `/tmp/reveal/<name>.png` from `make reveal D=<file>` | per beat: `{beat, enter, exit, paired: yes/no, flaw, fix}` |
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
-| **seam** | flash or collision at transitions | `/tmp/seams.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
+| **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
 | **ab** | which of two cuts is better, and does the graphic explain anything | `/tmp/ab/<name>/brief.md` from `make ab A=… B=… NAME=… CLAIM="…"` | the JSON in [`AB-JUDGE.md`](AB-JUDGE.md), every field naming a POSITION, never a file |
 
 Notes that matter per critic:

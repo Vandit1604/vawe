@@ -4,7 +4,7 @@
 // the settled frame + the EXIT arc, so the reveal is always visible. The recurring failure it kills:
 // judging a beat by its hold and missing the reveal (docs/MISTAKES.md — the "settled not reveal" trap).
 //
-//   make reveal D=formats/scene/x.json                 → /tmp/reveal.png (one row per beat: enter | set | exit)
+//   make reveal D=formats/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
 //   node scripts/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]
 //
 // Deterministic: reads the scene's exact layer start-times to place each beat's enter window precisely
@@ -78,7 +78,9 @@ bounds = [...new Set(bounds.map((t) => Math.max(0, Math.min(duration, t))))].sor
 if (!bounds.length || bounds[0] > 0.05) bounds.unshift(0);
 const beats = bounds.map((t0, i) => ({ i, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration })).filter((b) => b.t1 - b.t0 > 0.15);
 
-const tmp = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'reveal');
+// per scene, so two authors running at once cannot read each other's reveal (same reason as beats.mjs)
+const SLUG = path.basename(dataArg, '.json');
+const tmp = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'reveal', `${SLUG}.frames`);
 fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const tileW = 200, tileH = Math.round((tileW * VH) / VW);
 const grab = async (t, file, tag, color) => {
@@ -134,7 +136,7 @@ const padded = rows.map((r, i) => {
   spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', r.img, '-vf', `pad=${full}:ih:0:0:color=0x0a0a0c`, p]);
   return p;
 });
-const sheet = '/tmp/reveal.png';
+const sheet = `/tmp/reveal/${SLUG}.png`;
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
 // REVIEW RECEIPT — the same stamp `make beats` writes: proof that a sheet exists for THIS scene content.
 writeSeenReceipt(dataArg, sheet, 'reveal');

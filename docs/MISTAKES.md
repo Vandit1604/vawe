@@ -4148,3 +4148,24 @@ headlines in one film would otherwise de-dupe into one.
 **Lesson.** Every static gate in the ladder passed this frame and three judges failed it in one line.
 A gate that treats "cannot be seen" as "meant to be hidden" cannot tell composition from collision;
 ask instead what is covered, and whether the thing covered is the one the viewer must read.
+
+## #185 — four contact-sheet writers shared one filename
+
+`make beats`, `make reveal`, `seam-snap` and the layout audit each wrote a single fixed path and wiped
+a single fixed scratch directory: `/tmp/beats.png`, `/tmp/reveal.png`, `/tmp/seams.png`,
+`/tmp/audit/scene.png`. Every scene in the library audits as module `scene`, so that last one was one
+file for all 101 of them.
+
+**Why it matters now.** Two authors working at once each read a contact sheet of the other's film, and
+the beats RECEIPT recorded that they had looked at their own. The gate designed to prove somebody looked
+would confirm a look that never happened, which is the silent-substitution class this repo hates most.
+`judge.mjs` was moved to `/tmp/judge/<scene>/` in this same campaign for exactly this reason; nobody
+checked whether it had siblings. It had three.
+
+**Fix.** Every sheet is named for its scene: `/tmp/beats/<name>.png`, `/tmp/reveal/<name>.png`,
+`/tmp/seams/<name>.png`, `/tmp/audit/<name>.png`, each with its own scratch directory. The audit no
+longer `rmSync`s its output directory on startup, so auditing a second scene stops destroying the first
+overlay. Every doc, Makefile recipe and gate message that quoted the old path now quotes the new one.
+
+**Lesson.** A tool that writes one global path is single-author by construction, and nothing says so.
+The cost was invisible while one agent worked at a time and became a wrong answer the moment two did.

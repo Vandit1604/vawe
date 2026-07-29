@@ -379,7 +379,7 @@ logos and dense real UI. So the default for any hero surface is **capture, then 
 **Look before you render** (answers "is my HTML doing what I want?"):
 - `make preview HTML=frag.html THEME=b` → one hand fragment (or a captured component JSON) rendered
   STANDALONE on the theme bg → `/tmp/preview.png`. Read it; fix; repeat — before the 900-frame render.
-- `make beats D=video.json [VS=b]` → first/mid/last frame of every beat in one sheet → `/tmp/beats.png`.
+- `make beats D=video.json [VS=b]` → first/mid/last frame of every beat in one sheet → `/tmp/beats/<name>.png`.
   `VS=b` stacks each beat beside its source-section shot: a side-by-side fidelity diff. Read it every render.
 
 Then the gates: `make validate` (schema + no-emdash) → `make probe` (purity) → `make audit`

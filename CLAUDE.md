@@ -112,7 +112,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 ## After writing a JSON
 
 1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
-2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats.png` (first/mid/last of every
+2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats/<name>.png` (first/mid/last of every
    beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
    space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render. Under the
@@ -151,7 +151,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    Every one of the 18 eligible short films in this library trips this and carries a waiver: that is debt to
    rebuild, not a pattern to copy.
 
-2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats.png`, then READ it and
+2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats/<name>.png`, then READ it and
    fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two
    ways. The mechanical half is a blocking gate (`make beat-check`, also step `beats` inside `author-check`):
    it fails `dead-air` (a hole where the frame holds only the backdrop), `ends-on-nothing`, `empty-beat` and
@@ -168,7 +168,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    side by side and match the pace and the size of the shapes before touching colour. This is written down
    because a background was "matched" on one frame and was, in motion, twice too fast with folds half the
    size (docs/MISTAKES.md #155).
-2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal.png` (per beat: the ENTER
+2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal/<name>.png` (per beat: the ENTER
    arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
    entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
    when recreating a reference — judging the settled frame is how the dolly/gradient/colour-wave got missed.
@@ -227,7 +227,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 5a. **QA THE SEAMS, not the centers:** `make seam-check D=<file>` — pulls the frames straddling every
    transition (cut/seam/sting/beat boundary) out of the rendered mp4 and flags a luminance FLASH in the
    overlap (the black-flash / collision class every center-sampling gate misses, `docs/MISTAKES.md` #138).
-   Read `/tmp/seams.png`. This is the cheapest catch for the worst bugs (another engine' hardest-won lesson).
+   Read `/tmp/seams/<name>.png`. This is the cheapest catch for the worst bugs (another engine' hardest-won lesson).
 6. **THE GATE THAT SEES — mandatory post-render:** `make judge D=<file> [VS=<brand>]` preps
    `/tmp/judge/sheet.png` + a rubric. READ the sheet and score every frame (readability · hierarchy ·
    composition · brand + asset fidelity · produced · value). `make author-check` is necessary but NOT

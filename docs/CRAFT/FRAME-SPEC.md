@@ -71,7 +71,7 @@ preset ("no two beats move alike"). Reach past both.
 The highest-value render bugs (a black flash, a morph that reads as a collision) hide inside the transition
 overlap, where every center-sampling gate steps over them. After rendering, run **`make seam-check D=<file>`**
 — it pulls the frames straddling every transition out of the mp4 and flags a luminance flash, and writes
-`/tmp/seams.png` for the eye. Sample the seams, always.
+`/tmp/seams/<name>.png` for the eye. Sample the seams, always.
 
 ---
 

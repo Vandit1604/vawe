@@ -26,7 +26,9 @@ import { layoutErrors } from '../core/validate.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
 const OUT = '/tmp/audit';
-fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
+// Do NOT wipe the directory: two authors auditing at once would delete each other's overlay, and one
+// author auditing a second scene would lose the first. Each run overwrites only its own file.
+fs.mkdirSync(OUT, { recursive: true });
 
 const MIN_GAP = 8;                                     // px; tighter than this between siblings = warn (cramped)
 const SAMPLES = 14;                                    // frames sampled across the timeline
@@ -749,7 +751,9 @@ for (const aspectKey of askedAspects) {
 
   await page.evaluate(overlayFn, worst.f, safe);
   // one overlay per audited canvas — the whole point is comparing where the SAME scene breaks per ratio
-  const shot = `${m}${aspectKey ? `.${aspectKey.replace(':', 'x')}` : ''}.png`;
+  // named for the SCENE, not the module: every scene audits as module `scene`, so `scene.png` was one
+  // file thirteen films deep and the overlay never belonged to the run that just printed its verdict.
+  const shot = `${isData ? path.basename(sample, '.json') : m}${aspectKey ? `.${aspectKey.replace(':', 'x')}` : ''}.png`;
   await page.screenshot({ path: path.join(OUT, shot) });
   await page.close();
 }
