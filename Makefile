@@ -535,6 +535,12 @@ direct: ## direction gate + motion director: audit direction, suggest cuts/sting
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
 	node scripts/gates/judge.mjs $(D) $(if $(VS),--vs $(VS))
 
+ab: ## blind A/B: pair two cuts beat-by-beat for 3 judges (A=… B=… NAME=… CLAIM="…" [SEED=0] [VS=…])
+	node scripts/gates/ab.mjs --a $(A) --b $(B) --name $(NAME) --claim "$(CLAIM)" $(if $(SEED),--seed $(SEED)) $(if $(VS),--vs $(VS))
+
+ab-record: ## validate + aggregate the A/B verdicts, reveal the arms, persist (NAME=…)
+	node scripts/gates/ab-record.mjs --name $(NAME)
+
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/gates/inspect.mjs $(D)
 

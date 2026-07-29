@@ -3950,3 +3950,27 @@ derived the same way, so the suggestion and the check can no longer disagree.
 **Lesson.** Deriving a vocabulary from a registry beats hand-listing it (that part was right), but a
 DERIVED NAME LIST is still a name list. The registry's own membership is not the property you care
 about; what the thing does is. When a check can call the code instead of reading its label, call it.
+
+## #177 — the tool for comparing two cuts could not hold two cuts
+
+`judge.mjs` wrote its contact sheet and rubric to a bare `/tmp/judge`, and wiped that directory
+unconditionally on every run. So judging a second film destroyed the first. Judging two cuts of one film,
+which is the whole reason to run a vision judge during an edit, was impossible: by the time the second
+sheet existed the first was gone, and the only way to compare was to remember.
+
+**Root cause.** A single-shot tool written for a single-shot use, then relied on for a workflow. Nothing
+about it failed loudly; it produced a correct sheet every time. The loss was silent and looked like
+forgetfulness rather than like a bug, which is why it survived this long.
+
+**Fix.** `/tmp/judge/<basename>/`. Every path the tool prints now names the film.
+
+**The related duplication, fixed at the same time.** The beat clustering, the ffmpeg tiling graph, and
+the craft rubric each existed twice (`judge.mjs` and `compare.mjs`) with small differences that were
+accidents, not decisions. Extracted to `scripts/gates/beats-of.mjs`, `tile.mjs`, `rubric.mjs` before a
+third caller (`ab.mjs`) could become a fourth copy. This matters more than tidiness: two arms of a
+comparison sampled by two different beat models are not comparable, and the divergence would read as a
+quality difference. `ab.mjs` accordingly refuses to mix models — if either arm is a bare mp4, BOTH arms
+fall back to even spacing.
+
+**Lesson.** An instrument used to compare two things must be able to hold two things at once. Check that
+before trusting a comparison it produced.
