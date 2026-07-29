@@ -40,8 +40,12 @@ export function sanitizeHtml(src) {
 // The failure that makes this worth a named check: hand-authored CSS animation does not error, it does
 // nothing. The fragment animates perfectly in a browser, renders as a dead still in the mp4, and the
 // author has no way to find out why. Silent substitution is the worst failure mode this codebase has
-// (docs/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds)
-// and `var(--p)` (0→1 across the window), written every frame and safe inside calc().
+// (docs/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds),
+// written every frame, and `var(--p)`, 0→1 across the window — but ONLY if the layer DECLARES it:
+//   "vars": { "--p": [0, 1] }, "varsDur": 1.5, "varsDelay": 0.12, "varsEase": "easeOutQuart"
+// Without that declaration `--p` is simply undefined, `var(--p, 1)` falls back to 1, and the fragment
+// renders permanently settled: the same silent no-op this comment exists to warn about, one level down.
+// `blocks/kit.mjs`'s `sweep()` exists to stamp exactly those four fields onto a block's html layer.
 const TIME_CSS = /(?:^|[;{\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
 export function timeCssUsed(src) {
   const m = TIME_CSS.exec(String(src || ''));

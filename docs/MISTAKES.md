@@ -3974,3 +3974,36 @@ fall back to even spacing.
 
 **Lesson.** An instrument used to compare two things must be able to hold two things at once. Check that
 before trusting a comparison it produced.
+
+## #178 — three ways to make a picture that isn't there, found in one afternoon
+
+The show-don't-tell campaign's first two scenes each shipped a graphic that was, at some point, silently
+not drawing. All three failures were invisible on a settled frame.
+
+**1. `--p` exists only if the layer declares it.** A hand-authored svg drove six columns off
+`clamp(0, calc((var(--p, 1) - i*0.08) * 4), 1)`. Every column rendered at full height from the first
+frame. `--p` is not ambient: a layer must carry `vars`/`varsDur`/`varsDelay`/`varsEase`, which is exactly
+what `blocks/kit.mjs`'s `sweep()` stamps on. Without them the fallback in `var(--p, 1)` wins and the
+build renders permanently settled. `core/sanitize-html.js` said `--p` was "written every frame", which is
+the sentence that cost the hour; it now says what actually writes it. The comment warning about silent
+no-ops contained one.
+
+**2. A seam blends two BAKED frames.** Closing a `dead-air` hole by pulling the next beat back across a
+seam put one layer on both sides, so the seam blended it with itself at two camera scales: a ghost
+duplicate headline that three blind judges independently named as the worst frame in the film. Every beat
+must open just AFTER its seam does. `beat-check` was right (see #166) and I worked around it instead of
+reading it.
+
+**3. `count` chose its format from the value on screen.** A count to 2.5M spent most of its run as a
+churning six-digit wall and then snapped to `2.4M`. The scale now comes from the target, which is fixed
+for the whole run. Also fixes `motion-reel` and `showcase-count`.
+
+**The pattern.** Every sampling tool in this repo lands on settled frames by construction, and all three
+of these are invisible there. Two were found by a blind A/B judge and one by pulling four deliberate
+mid-animation frames. Neither is optional any more for a beat that animates.
+
+**Two gaps left open, named so they are not rediscovered.** An `html` layer ignores `h` at render, so
+chart factories emit no height and `boxOf` falls back to squaring the width: a 1130-wide chart measured
+~41% of frame when the truth is ~24%. Over-crediting, not under. And because the overlap lint reads
+`w`/`h`, an html layer with no `h` is invisible to it, which is why the grid diagram was allowed to
+collide with its own headline until a human looked.

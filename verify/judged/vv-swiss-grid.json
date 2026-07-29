@@ -1,0 +1,260 @@
+{
+  "name": "vv-swiss-grid",
+  "seed": "0",
+  "claim": "Measured, not guessed.",
+  "brand": null,
+  "gatesTree": "733364b1b0e5ed809c4a25f0fab4efa07362ca42",
+  "rows": 6,
+  "arms": [
+    {
+      "position": "LEFT",
+      "input": "out/example-swiss-grid.before.mp4",
+      "mp4": "out/example-swiss-grid.before.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.2916666666666667,
+        3.875,
+        6.458333333333333,
+        9.041666666666666,
+        11.625,
+        14.208333333333334
+      ]
+    },
+    {
+      "position": "RIGHT",
+      "input": "out/example-swiss-grid.mp4",
+      "mp4": "out/example-swiss-grid.mp4",
+      "sceneHash": null,
+      "allow": [],
+      "beats": [
+        1.2916666666666667,
+        3.875,
+        6.458333333333333,
+        9.041666666666666,
+        11.625,
+        14.208333333333334
+      ]
+    }
+  ],
+  "result": {
+    "winner": "RIGHT",
+    "winnerArm": "out/example-swiss-grid.mp4",
+    "confidence": "DECISIVE",
+    "tally": {
+      "LEFT": 0,
+      "RIGHT": 3,
+      "TIE": 0
+    },
+    "dissent": []
+  },
+  "graphicEarnsIt": [
+    {
+      "judge": "1",
+      "side": "RIGHT",
+      "says": "A measured drawing of the layout the frame itself sits on: six equal columns, each 250 wide, separated by 30 gutters, held off the canvas edge by a 160 margin, with the third column filled to mark the one element being placed. The rulers under the strip carry real quantities, so the picture states the widths and spacings rather than describing them. LEFT's version of the same beat encodes nothing: 100% and an infinity glyph are not measurements of anything, and 8px is a word set large, not a size shown."
+    },
+    {
+      "judge": "2",
+      "side": "RIGHT",
+      "says": "The measurements of the layout the frame itself sits on: six columns drawn to width, with tick-and-arrow dimension lines calling out a 160 margin, a 30 gutter and a 250 column, and one column filled blue to mark the unit being measured. The picture is the grid, at its real proportions, so the widths on screen are the numbers. LEFT's version of the same beat encodes nothing: '100%', '8px' and an infinity sign are type, and the infinity is pure decoration."
+    },
+    {
+      "judge": "3",
+      "side": "RIGHT",
+      "says": "A six-column page grid drawn at its true proportions, with dimension lines measuring the parts: a 160-unit outer margin, a 30-unit gutter between columns, a 250-unit column, one column filled to show a single element occupying exactly one column. It is showing the frame's own construction, so the width of every shape on screen IS the number being claimed. LEFT's version of the same beat encodes nothing: 100%, 8px and an infinity sign are words about measurement, not a measurement."
+    }
+  ],
+  "wouldShip": {
+    "out/example-swiss-grid.before.mp4": [
+      "no",
+      "no",
+      "no"
+    ],
+    "out/example-swiss-grid.mp4": [
+      "yes",
+      "yes",
+      "no"
+    ]
+  },
+  "verdicts": [
+    {
+      "judge": "1",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "The two frames are the same title card, same weights, same rule under the second line, with no difference I can find at full resolution."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Both are the same mid-transition frame with the headline half-arrived and clipped at the left edge, so neither side is better or worse here."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical six-column strip with the third cell filled in blue under the same headline; nothing separates them."
+        },
+        {
+          "beat": 4,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "RIGHT dimensions the actual column strip with 160 / 30 / 250 measure marks so the picture proves the headline, while LEFT sets three unbacked figures (100%, 8px, infinity) as flat type."
+        },
+        {
+          "beat": 5,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "Same end card, same two-line lockup and same small caps footer on both sides."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "value",
+          "why": "Both hold the identical end card a second beat; the repetition costs both sides equally."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A measured drawing of the layout the frame itself sits on: six equal columns, each 250 wide, separated by 30 gutters, held off the canvas edge by a 160 margin, with the third column filled to mark the one element being placed. The rulers under the strip carry real quantities, so the picture states the widths and spacings rather than describing them. LEFT's version of the same beat encodes nothing: 100% and an infinity glyph are not measurements of anything, and 8px is a word set large, not a size shown."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "Five of six beats are indistinguishable, so the whole comparison rests on beat 4, and there RIGHT does the thing the headline promises: it measures the grid on screen and keeps the column strip from beat 3 alive across the cut instead of throwing it away for a fresh slab of statistics."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 4,
+        "flaw": "Under a headline reading 'Measured, not guessed' the frame guesses: 100% and an infinity symbol are unfalsifiable filler, 8px is a number about type rather than a picture of it, and the infinity glyph sits in the third slot at a fraction of the optical weight of the two numerals beside it, so the row reads as two stats and an orphan."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "2",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical hook in both: eyebrow, two-line headline with the second line in blue, one rule under it, and the eye lands in the same place on each."
+        },
+        {
+          "beat": 2,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Both sample a word cascade mid-flight and both read as clipped ('ent on a grid.'), LEFT sitting flat and RIGHT with 'grid.' still dropped off the baseline, so neither frame is legible on its own."
+        },
+        {
+          "beat": 3,
+          "winner": "TIE",
+          "dimension": "composition",
+          "why": "The same six-cell strip with the third cell filled blue, same headline, same alignment on both sides."
+        },
+        {
+          "beat": 4,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "Under a headline promising measurement, RIGHT draws the actual column grid with dimension callouts (160 margin, 30 gutter, 250 column) while LEFT sets three unbacked figures as type and closes with an infinity glyph that measures nothing."
+        },
+        {
+          "beat": 5,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Same end card, same scale jump from dark line to blue line, same faint footer."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "value",
+          "why": "Both repeat beat 5 almost exactly, so both waste the last beat equally."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "The measurements of the layout the frame itself sits on: six columns drawn to width, with tick-and-arrow dimension lines calling out a 160 margin, a 30 gutter and a 250 column, and one column filled blue to mark the unit being measured. The picture is the grid, at its real proportions, so the widths on screen are the numbers. LEFT's version of the same beat encodes nothing: '100%', '8px' and an infinity sign are type, and the infinity is pure decoration."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "clear",
+        "why": "Five of six beats are indistinguishable, so the film is decided by beat 4, and there RIGHT pays off the headline 'Measured, not guessed.' with a drawn, dimensioned grid while LEFT answers it with three numbers on empty space. That is the difference between showing and asserting, and it is the frame the whole piece is about."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 4,
+        "flaw": "A claim of measurement backed by nothing measurable: '100% on the grid' is unfalsifiable, '8px base unit' contradicts the 30/250 spacing the film actually uses, and the infinity glyph under 'layouts' is a decorative stand-in for a fact. Three items also drift left of centre with a wide dead gap at the right, so the row reads unbalanced rather than deliberately ranged."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "yes"
+      }
+    },
+    {
+      "judge": "3",
+      "perBeat": [
+        {
+          "beat": 1,
+          "winner": "TIE",
+          "dimension": "hierarchy",
+          "why": "Identical two-line hook, same weight and colour break, same eyebrow and rule; nothing separates them."
+        },
+        {
+          "beat": 2,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "Both sample a transition with the line clipped to 'ent on a grid.', but RIGHT additionally drops 'grid.' off the baseline with a stub underline anchored to nothing."
+        },
+        {
+          "beat": 3,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "Same six-cell row with the third cell lit, but LEFT keeps a right margin while RIGHT's last cell is cut by the frame edge."
+        },
+        {
+          "beat": 4,
+          "winner": "RIGHT",
+          "dimension": "does the graphic encode the claim",
+          "why": "RIGHT proves 'measured, not guessed' with dimensioned columns (160 margin, 30 gutter, 250 column) while LEFT sets three unfalsifiable stats as flat type with a tiny infinity glyph pretending to be a number."
+        },
+        {
+          "beat": 5,
+          "winner": "LEFT",
+          "dimension": "composition",
+          "why": "RIGHT's 'STRIPE-STYLE · SWISS GRID' footer collides with the descender of the g in 'message.'; LEFT clears it."
+        },
+        {
+          "beat": 6,
+          "winner": "TIE",
+          "dimension": "readability",
+          "why": "Same end card in both, and in both it repeats beat 5 without adding anything."
+        }
+      ],
+      "graphicEarnsIt": {
+        "side": "RIGHT",
+        "whatItEncodes": "A six-column page grid drawn at its true proportions, with dimension lines measuring the parts: a 160-unit outer margin, a 30-unit gutter between columns, a 250-unit column, one column filled to show a single element occupying exactly one column. It is showing the frame's own construction, so the width of every shape on screen IS the number being claimed. LEFT's version of the same beat encodes nothing: 100%, 8px and an infinity sign are words about measurement, not a measurement."
+      },
+      "overall": {
+        "winner": "RIGHT",
+        "margin": "narrow",
+        "why": "Five of six beats are the same film, and where they differ on craft LEFT is marginally tidier (contained grid row, no footer collision). But the only beat that carries an argument is beat 4, and RIGHT turns it into a diagram that proves the claim while LEFT leaves it as three big numerals that assert it. One real picture outweighs three small alignment wins."
+      },
+      "worstFrame": {
+        "side": "LEFT",
+        "beat": 4,
+        "flaw": "A frame about measurement with nothing measured in it: 100% and 8px are set huge, the third 'stat' is an infinity glyph at a fraction of their size so the row has no consistent scale, the three items sit at arbitrary intervals with no grid relationship in a film whose subject is the grid, and the right half of the frame is empty."
+      },
+      "wouldShip": {
+        "LEFT": "no",
+        "RIGHT": "no"
+      }
+    }
+  ],
+  "id": "007c50c04c00"
+}
