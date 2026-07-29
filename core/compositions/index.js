@@ -98,5 +98,106 @@ function pipelineFlow(ctx) {
     { attr: { 'stroke-width': 3.5 }, duration: 0.24, yoyo: true, repeat: 1, ease: 'power2.inOut', delay: checkAt, immediateRender: true });
 }
 
-export const COMPOSITIONS = { pipelineFlow };
+// ---- commaSplit -----------------------------------------------------------------------------------
+// THE SENTENCE THIS REPLACES: "The commas were always columns."
+//
+// A delimited line pulls itself apart into a table, and the commas are not thrown away: each one SHRINKS
+// to a point and a column rule GROWS out of that same point, so the delimiter visibly becomes the
+// structure it always was. The fields slide from their crammed positions to their column origins at the
+// same time. A viewer who reads no words still learns the claim, which is the entire reason this exists
+// rather than a caption saying so.
+//
+// Why this is a composition and not `parts` or a `--p` window: the glyphs travel independently, the
+// comma's exit and its rule's entrance are two tweens that must overlap on the same point, and the
+// field slides are staggered against both. That is cross-timed hand-off, which is the thing `clamp()`
+// staging on a single variable cannot express.
+//
+// props: { fields:[string], targets:[number|null], rules:[number], size?, rowY?, ruleH?, accent?,
+//          dim?, ink?, rate? }
+//   targets[i] === null drops that field (a trailing `,USD` the table has no column for).
+//   rules[i] is where comma i's rule lands. Fewer rules than commas is fine: the extras just leave.
+function commaSplit(ctx) {
+  const { el, gsap, start } = ctx;
+  const fields = (Array.isArray(ctx.fields) && ctx.fields.length ? ctx.fields : ['a', 'b']).map(String);
+  const targets = Array.isArray(ctx.targets) ? ctx.targets : fields.map((_, i) => i * 220);
+  const rules = Array.isArray(ctx.rules) ? ctx.rules : [];
+  const R = ctx.rate != null ? +ctx.rate : 1;
+  const FS = ctx.size != null ? +ctx.size : 29;
+  const ADV = FS * 0.6;                       // JetBrains Mono advances 0.6em, as everywhere else here
+  const ROW = ctx.rowY != null ? +ctx.rowY : 70;
+  const RH = ctx.ruleH != null ? +ctx.ruleH : 60;
+  const accent = ctx.accent || 'var(--accent)';
+  const dim = ctx.dim || 'var(--dim)';
+  const ink = ctx.ink || 'var(--text)';
+  const W = ctx.w != null ? +ctx.w : 808, H = ctx.h != null ? +ctx.h : 150;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, style: 'width:100%;height:auto;overflow:visible' });
+
+  // RAW LAYOUT: fields laid end to end with a comma between each, exactly as the file has them.
+  const rawX = [], commaX = [];
+  let cursor = 0;
+  fields.forEach((f, i) => {
+    rawX.push(cursor);
+    cursor += f.length * ADV;
+    if (i < fields.length - 1) { commaX.push(cursor); cursor += ADV; }
+  });
+
+  const texts = fields.map((f, i) => {
+    const t = svgEl('text', { x: rawX[i], y: ROW, fill: ink, 'font-size': FS, 'font-family': 'var(--font-mono)', 'xml:space': 'preserve' });
+    t.textContent = f;                                                // DATA, never markup
+    svg.appendChild(t); return t;
+  });
+  const commas = commaX.map((x) => {
+    const t = svgEl('text', { x, y: ROW, fill: dim, 'font-size': FS, 'font-family': 'var(--font-mono)' });
+    t.textContent = ',';
+    t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 50%';
+    svg.appendChild(t); return t;
+  });
+  // one rule per comma that has somewhere to land. It grows from the comma's own point.
+  const bars = rules.map((rx) => {
+    const r = svgEl('rect', { x: rx, y: ROW - RH + 12, width: 1, height: RH, fill: accent, opacity: 0.55 });
+    r.style.transformBox = 'fill-box'; r.style.transformOrigin = '50% 50%';
+    svg.appendChild(r); return r;
+  });
+  el.appendChild(svg);
+
+  // ---- the timeline ----
+  // Every tween is a fromTo with immediateRender:true, so seeking to any t gives the same DOM whatever
+  // rendered before it. See the pipelineFlow note above: a bare `.to()` leaves the end value stuck when
+  // the paused global timeline is seeked backwards, which is the render-order impurity `make probe` catches.
+  const HOLD = 0.35 * R;          // let the viewer read the raw line before it moves
+  fields.forEach((_, i) => {
+    const to = targets[i];
+    if (to == null) {             // a field the table has no column for: it leaves rather than lands
+      gsap.fromTo(texts[i], { opacity: 1 }, { opacity: 0, duration: 0.3 * R, ease: 'power2.in', delay: start + HOLD, immediateRender: true });
+      return;
+    }
+    gsap.fromTo(texts[i], { attr: { x: rawX[i] } }, {
+      attr: { x: to }, duration: 0.62 * R, ease: 'power3.inOut',
+      delay: start + HOLD + i * 0.05 * R, immediateRender: true,
+    });
+  });
+  // THE HAND-OFF: the comma collapses to a point and the rule grows out of that same point. The two
+  // overlap deliberately, so there is a moment where the delimiter and the structure are the same mark.
+  commas.forEach((c, i) => {
+    const bar = bars[i];
+    if (!bar) {                   // a comma with no column to become: it just leaves
+      gsap.fromTo(c, { scale: 1, opacity: 1 }, { scale: 0.18, opacity: 0, duration: 0.3 * R, ease: 'power2.in', delay: start + HOLD + 0.06 * R, immediateRender: true });
+      return;
+    }
+    // The comma FLIES to the gutter and shrinks to nothing there, then the rule grows out of that exact
+    // point. Linking them in SPACE and not merely in time is what makes the delimiter read as becoming
+    // the structure. The rule waits for the comma to land, so it never crosses a field still in motion.
+    gsap.fromTo(c, { attr: { x: commaX[i] }, scale: 1, opacity: 1 }, {
+      attr: { x: rules[i] }, scale: 0.2, opacity: 0, duration: 0.44 * R, ease: 'power3.inOut',
+      delay: start + HOLD, immediateRender: true,
+    });
+    gsap.fromTo(bar, { scaleY: 0, opacity: 0 }, {
+      scaleY: 1, opacity: 0.55, duration: 0.32 * R, ease: 'power3.out',
+      delay: start + HOLD + 0.34 * R, immediateRender: true,
+    });
+  });
+}
+
+export const COMPOSITIONS = { pipelineFlow, commaSplit };
 export const COMPOSITION_NAMES = Object.keys(COMPOSITIONS);

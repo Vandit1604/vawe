@@ -3834,3 +3834,27 @@ Recorded so the next person does not spend the time re-diagnosing it as flakines
 **Lesson.** "Intermittent" is a description of a symptom, never a diagnosis. A test that edits the
 working tree is a shared mutable resource, and shared mutable resources do not fail randomly, they fail
 concurrently.
+
+## #174 — the crossfade-to-mud defect came straight back, in the film written to fix everything else
+
+**What.** `ledgerline-shown` was built to replace explanatory sentences with visuals. Its merchant
+resolve and its twenty cascade rows both cross-dissolved a before-string over an after-string in place,
+so the midpoint of every one of them was two half-opacity strings on top of each other. That is #171,
+verbatim, reintroduced by the same person who wrote #171, two commits later.
+
+**Root cause.** Opacity is the reflex for "A becomes B" and the reflex does not read the changelog. #171
+fixed three SITES; it did not change what a hand reaches for when writing the fourth. Writing the lesson
+down demonstrably did not prevent the repeat, which is the actual finding here.
+
+**Fix.** Both are wipes now: one box, two strings, clipped from opposite sides by the same variable,
+with a read head at the seam. The amount, being five glyphs, swaps at a threshold instead, which is
+never mud either.
+
+**Which gate catches it. STILL NONE.** #171 already recorded that no gate sees this and named the
+detectable signature (two elements at the same position with complementary opacities, one carrying a
+blur). That check was not built, and the very next film shipped the defect twice. The cost of leaving a
+known-detectable defect to human vigilance is now measured: one repeat per two commits.
+
+**Lesson.** A MISTAKES entry is a record, not a control. When an entry names a mechanical signature and
+the fix is a gate, writing the entry and skipping the gate buys nothing but the illusion of having
+handled it. Build the check or expect the repeat.
