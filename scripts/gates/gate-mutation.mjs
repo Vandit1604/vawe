@@ -284,6 +284,14 @@ const CASES = [
     scene: scene([{ type: 'html', x: 200, y: 300, w: 900, h: 400, start: 0.3, duration: 2.4,
                     html: '<svg viewBox="0 0 900 400" width="900" style="--rung:14px"><rect x="0" y="0" width="900" height="400" fill="none" stroke="var(--line)" style="stroke-width:var(--rung)"/></svg>' }],
       { duration: 3, theme: 'vawe' }) },
+  // The renderer dispatched `REGISTRY[L.type] || text`, so an un-expanded `block` ran the TEXT builder,
+  // painted nothing, and shipped a blank film at exit 0 while `validate` refused the same scene. The
+  // gate looked pedantic and the renderer looked lenient; the renderer was wrong (MISTAKES #189).
+  { gate: 'validate', name: 'un-expanded build-time sugar is not a renderable layer', expect: 'fail',
+    match: /expand/,
+    scene: scene([{ type: 'block', block: 'kpiRow', x: 200, y: 400, w: 1500, start: 0.3, duration: 4.4,
+                    items: [{ label: 'Routes', value: '120' }] }],
+      { duration: 5 }) },
   { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
     match: /no-continuous-object/,   // blocking tier: must exit non-zero
     scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
@@ -632,9 +640,11 @@ const srcCases = [
   // The snap signature was DOM-only and recorded no clip-path, so a wipe / iris / clock reveal was
   // invisible to it: `wipe-right` pointed the wrong way for months and snap said "identical" every run.
   // showcase-count opens on a rect wiped rightward, so flipping the registry entry must now be seen.
+  // Pointed at the EXPANDED sibling, which is what actually ships: the source carries un-expanded block
+  // sugar, which the renderer now refuses instead of painting nothing, so snap skips it (MISTAKES #189).
   { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
-    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count']], match: /clip-path/ },
+    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded']], match: /clip-path/ },
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
   // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.

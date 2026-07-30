@@ -30,18 +30,43 @@ const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, cli
 // schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);
 
+// `REGISTRY[L.type] || text` was the dispatch, so ANY type the registry does not know quietly ran the
+// text builder, which paints nothing when there is no `text` prop. A scene whose only layer was an
+// un-expanded `block` therefore rendered a BLANK film, exit 0, no warning: `validate` refuses that scene
+// and the renderer accepted it, so the two disagreed and the renderer looked like the lenient one. It
+// was the wrong one. An author reading that mp4 concludes the gate is pedantic; the frame is empty.
+//
+// A missing `type` still means text (documented default). A type that is present and unknown is a bug.
+// `block`, `comp` and `beat` are BUILD-TIME sugar, expanded by `make expand` (scripts/author/expand-blocks.mjs),
+// so they get the message that names the actual next step rather than the generic one.
+const pick = (L) => {
+  const t = L.type;
+  if (t == null || t === '' || t === 'text') return text;
+  if (REGISTRY[t]) return REGISTRY[t];
+  if (t === 'block' || t === 'comp' || t === 'beat') {
+    // Deliberately does not name WHICH block/beat/comp this was. schema-drift guards the set of layer
+    // props the ENGINE reads, and those three are author-facing build-time sugar the schema omits on
+    // purpose, so reading one here would widen what the renderer claims to consume for a nicer string.
+    throw new Error(`layer type "${t}" is build-time sugar, not a renderable primitive — `
+      + `run \`make expand D=<scene.json>\` and render the .expanded.json. Rendering it directly would `
+      + `silently draw nothing.`);
+  }
+  throw new Error(`unknown layer type "${t}" — known: ${LAYER_TYPES.join(', ')}. `
+    + `An unknown type used to fall back to the text builder, which paints nothing.`);
+};
+
 export function createRenderer(ctx) {
   const kit = createKit(ctx);
   // Injected AFTER the kit exists (util.js cannot import this file — that would be circular). This is
   // what lets a group child run the same builder as a top-level layer instead of a re-implemented
   // subset of it (docs/MISTAKES.md #70).
-  kit.buildLeaf = (el, L) => (REGISTRY[L.type] || text).build(kit, el, L);
+  kit.buildLeaf = (el, L) => pick(L).build(kit, el, L);
   return {
     kit,
     // construct a layer's DOM (default primitive = text; count reuses the text build)
-    build(el, L) { (REGISTRY[L.type] || text).build(kit, el, L); },
+    build(el, L) { pick(L).build(kit, el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) stay in scene.html's loop; those compose around this call.
-    frame(el, L, t) { const m = REGISTRY[L.type] || text; if (m.frame) m.frame(kit, el, L, t); },
+    frame(el, L, t) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t); },
   };
 }

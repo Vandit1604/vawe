@@ -37,11 +37,34 @@ const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one 
 // a renderable scene and is skipped — not errored.
 const dir = path.join(repoRoot, SCENE_DIR);
 const isScene = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).module === 'scene'; } catch { return false; } };
+// A source carrying un-expanded build-time sugar (`block` / `beat` / `comp`) is not renderable: those
+// are expanded by `make expand` into a `.expanded.json` sibling, and THAT is what ships. The renderer
+// used to run such a layer through the text builder and paint nothing, so this harness was quietly
+// baselining films with holes in them. Now it refuses, so snapshot the expanded sibling where one
+// exists and skip the source with a printed reason, the way a non-scene file is skipped rather than
+// errored. Silently snapshotting a lie was the actual bug; erroring is only the symptom.
+const SUGAR = new Set(['block', 'beat', 'comp']);
+const hasSugar = (f) => {
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    let found = false;
+    (function rec(ls) { for (const l of ls || []) { if (!l || typeof l !== 'object') continue; if (SUGAR.has(l.type)) found = true; if (l.children) rec(l.children); } })(d.layers);
+    return found;
+  } catch { return false; }
+};
+const skippedSugar = [];
 const scenes = fs.readdirSync(dir)
   .filter((f) => f.endsWith('.json') && f !== 'schema.json' && !f.startsWith('_'))
   .filter((f) => !ONLY || f === ONLY || f === `${ONLY}.json`)
   .filter(isScene)
+  .filter((f) => {
+    if (!hasSugar(f)) return true;
+    const expanded = f.replace(/\.json$/, '.expanded.json');
+    skippedSugar.push(`${f} → ${fs.existsSync(path.join(dir, expanded)) ? `snapshotted as ${expanded}` : 'NO expanded sibling: run `make expand`'}`);
+    return false;
+  })
   .sort();
+for (const s of skippedSugar) console.log(`  · skipping un-expanded source: ${s}`);
 if (!scenes.length) { console.error('no scenes found'); process.exit(1); }
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };

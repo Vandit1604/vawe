@@ -4253,3 +4253,36 @@ for a fragment that declares its own property. 113/113.
 token list would have been a second thing to keep right. And a defect inside a generator is not one bug,
 it is one bug per future invocation, so the first question about any repeated typo is which tool is
 typing it.
+
+## #189 — the renderer painted nothing rather than refusing, and looked like the lenient one
+
+An authoring agent reported this as a gate bug: "`validate` fails any scene containing an un-expanded
+block, but the renderer expands blocks itself, so the gate and the engine disagree." It removed the
+blocks to get a green build and said plainly that this was a workaround.
+
+The report was backwards, and only the pixels said so. `./bin/vawe` on a scene whose single layer was
+`{"type":"block","block":"kpiRow",…}` exited 0 and produced an mp4 whose frames contained exactly ONE
+distinct grey level. It had not expanded anything. `core/layers/index.js` dispatched
+`REGISTRY[L.type] || text`, so any unknown type ran the TEXT builder, which paints nothing without a
+`text` prop. `validate` was right; the renderer was wrong; and because the renderer was the one that
+exited 0, it read as the reasonable one.
+
+**Fix.** Dispatch goes through `pick(L)`. A missing `type` still means text, the documented default. A
+type that is present and unknown throws and lists the registry. `block`, `comp` and `beat` are
+build-time sugar (`scripts/author/expand-blocks.mjs`) and throw with the step that actually unblocks
+you. The message deliberately does not name WHICH block it was: `schema-drift` guards the set of layer
+props the engine reads, and those three are author-facing sugar the schema omits on purpose, so reading
+one would widen the renderer's claimed surface for a nicer string. Watch the comments too: the drift
+scanner does not strip them, so prose containing `L.` plus a prop name trips it.
+
+**Blast radius, and what it exposed.** Six sources carry sugar. Five had a `.expanded.json` sibling
+already, which is what ships; `motion-showcase` had none and an mp4 rendered from source, so three of
+its six layers had been silently dropped and its shipped film was half a film. `make expand` gave it
+one. `snap-scenes.mjs` was also snapshotting those sources directly, which means its baselines recorded
+films with holes; it now snapshots the expanded sibling and skips the source with a printed reason. The
+mutation fixture that named `showcase-count` was repointed at `showcase-count.expanded`.
+
+**Two lessons.** A subagent's framework report is evidence, not a ruling: this one was confidently
+inverted, and the only thing that settled it was counting grey levels in a frame. And of two components
+that disagree, the one that exits 0 is not thereby the correct one; silence is the cheapest way to look
+right.
