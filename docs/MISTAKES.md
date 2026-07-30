@@ -4195,3 +4195,33 @@ constant, except it fails at the author's desk instead of in a test.
 layer-level flag that attaches to `cam` instead of its beat wrapper, which would unblock continuity for
 every cut-heavy film. It changes shared render behaviour, so it needs `make probe` and a full `make
 snap` sweep before it ships.
+
+## #187 — a layer could not opt out of beat wrapping, so the doctrine's central rule was unauthorable
+
+#183 and #186 both circled this without fixing it. Under `sceneUnits`, `formats/scene/scene.js` puts
+every top-level layer inside its beat's wrapper and rewrites its duration to end at that beat's cut, so
+the wrapper can slide the whole beat out as one unit. Nothing could survive a cut. The engine turns
+`sceneUnits` on by default for any cut film with no choreographed `motion` track, and refuses to turn it
+off for a film whose cuts include `iris` or `wipe`. So in a large class of films the continuous object
+that `direction-floor` demands could not be written at all.
+
+Three authors hit it in one campaign. One re-declared the same 6KB of SVG seven times, once per beat,
+driven off the shared clock, to fake one persistent picture.
+
+**Fix.** `"acrossBeats": true` on a layer. `beatIndexOf` returns null for it, which the two existing
+call sites already handle: the layer attaches to `cam` rather than a wrapper, and `setLayerTiming`
+leaves its authored duration and its own exit alone. Two lines of behaviour, because the seam was
+already in the right place.
+
+Proven by pixels, not by reading: the same scene rendered with and without the flag, sampling the
+spine's box at 3.9s, 4.5s and 7.0s across a cut at 4.0s. Without it, 191744 lit pixels before the cut
+and 0 after. With it, 191745 at all three.
+
+`scene-timing.mjs` learned the flag too, or every gate reasoning about time would keep insisting the
+layer had been truncated. `direction-floor` now names it as the fix, which let the SOLO_BLIND special
+case from #186 be deleted: one answer, no exceptions. A mutation case pins the escape hatch open
+(`acrossBeats lets a spine out of the beat wrapper`, must-pass), 111/111.
+
+**Lesson.** Two gates had already been sharpened to describe this trap precisely, and both stopped at
+describing it. A gate that can only say "you cannot do this here" is a bug report addressed to the
+author instead of to the engine.

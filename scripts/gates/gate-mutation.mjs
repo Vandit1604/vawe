@@ -291,11 +291,21 @@ const CASES = [
   // any layer authored across the cut. The gate used to read the raw `start`/`duration`, see a crosser,
   // and pass a film whose spine had already been cut in half.
   { gate: 'directionfloor', name: 'beats-wrapped-as-units · a spine cannot survive beat wrapping', expect: 'fail',
-    match: /sceneUnits/,
+    match: /acrossBeats/,
     scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
                     ken: { from: 1, to: 1.4 } },
                   TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
       { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // ...and the escape hatch must actually open. Same wrapped film, same cut, but the spine declares
+  // `acrossBeats`, so the renderer attaches it to the camera and leaves its window alone. If this case
+  // ever fails, the gate is demanding a continuous object and refusing to recognise the only way to
+  // author one, which is the contradiction that cost three authors a workaround each (MISTAKES #186).
+  { gate: 'directionfloor', name: 'acrossBeats lets a spine out of the beat wrapper', expect: 'pass',
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
+                    acrossBeats: true,
+                    motion: [{ t: 0, dx: 0, scale: 1 }, { t: 1.8, dx: 0, scale: 1 }, { t: 2.2, dx: -420, scale: 0.4 }, { t: 4.6, dx: -420, scale: 0.4 }] },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { sceneUnits: true, duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
   // ...and the mirror (#25): a real continuous-object film must stay green, or the tell buys its
   // sensitivity by calling every short film a slideshow, which trains everyone to ignore it (#159).
   { gate: 'directionfloor', name: 'a continuous object that transforms across the cut is NOT a slideshow', expect: 'pass',

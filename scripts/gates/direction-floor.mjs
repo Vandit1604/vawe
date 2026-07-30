@@ -24,9 +24,6 @@ import { motionAt } from '../../core/sequence.js';
 import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
-// the renderer's own list of cut styles that cannot work without beat wrapping, imported rather than
-// restated, so the gate's advice can never drift from what formats/scene/scene.js will actually accept
-import { SOLO_BLIND } from '../../core/cuts.js';
 import { sceneTiming } from './scene-timing.mjs';
 
 const file = process.argv[2];
@@ -207,17 +204,15 @@ const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token)
 // crosser, and passed a film whose spine the renderer had already cut in half. The author needs the one
 // fact that fixes it, not a verdict on motion they cannot express.
 const wrapsBeats = sceneTiming(d).sceneUnits;
-// ...and "set sceneUnits: false" is not always available advice. A cut whose whole transition lives in
-// the visibility channels (`iris`, `wipe`, anything in cuts.js SOLO_BLIND) REQUIRES beat wrapping:
-// formats/scene/scene.js throws without it, because a single root can only transition through
-// transform/filter and the frame would go empty. So for those films the fix named above does not
-// compile, and a gate that prints an instruction which throws is worse than one that says nothing.
-// Name the two routes that do exist instead.
-const blindCuts = [...new Set((d.cuts || []).map((c) => c.style).filter((s) => s && SOLO_BLIND.has(s)))];
-if (bounds.length && dur < CONTINUITY_MAX_DUR && wrapsBeats && blindCuts.length) {
-  fail('beats-wrapped-as-units', `this film wraps each beat as a UNIT, so every layer is truncated at its beat's end and no object can survive a cut. It cannot simply opt out: the cut style(s) ${blindCuts.map((s) => `"${s}"`).join(', ')} transition only by fading or masking, which needs the two beats to be separate units, so \`"sceneUnits": false\` would throw. Either move those seams to a style that MOVES (slide/push/whip/flip and the rest of cuts.js PRESENTATIONS) and then set \`"sceneUnits": false\`, or waive this deliberately. ${FIX_MSG}`);
-} else if (bounds.length && dur < CONTINUITY_MAX_DUR && wrapsBeats) {
-  fail('beats-wrapped-as-units', `this film wraps each beat as a UNIT (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its beat's end and slid out with it. No object can survive a cut, which means no continuous object is possible here at all. Set \`"sceneUnits": false\` at the top of the scene, then keep ONE object alive across the boundary and make the boundary a state change of it. ${FIX_MSG}`);
+// ...and the film can now say so. `acrossBeats: true` attaches a layer to the camera instead of its
+// beat wrapper, keeping its authored window, so a spine is expressible whatever the cut style. This
+// replaces the advice that used to live here, which told the author to set `"sceneUnits": false` and
+// therefore threw on any film whose cuts include `iris` or `wipe` (those REQUIRE wrapping: one root
+// can only transition through transform and filter, so the frame would go empty). One fix, no
+// exceptions, is why the special case that used to stand here is gone.
+const hasSpine = (d.layers || []).some((l) => l && l.acrossBeats === true);
+if (bounds.length && dur < CONTINUITY_MAX_DUR && wrapsBeats && !hasSpine) {
+  fail('beats-wrapped-as-units', `this film wraps each beat as a UNIT (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its beat's end and slid out with it. Nothing can survive a cut until one layer opts out. Mark the object that should carry the film \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored duration; then make each boundary a state change of it. ${FIX_MSG}`);
 } else if (bounds.length && dur < CONTINUITY_MAX_DUR) {
   const { spanning, transforming } = continuity(bounds);
   if (!transforming.length) {

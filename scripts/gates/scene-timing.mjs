@@ -162,6 +162,10 @@ export function sceneTiming(d) {
   // beat i covers [edges[i], cutTimes[i]); the last beat runs to the end and has no exit cut.
   const unitEnd = (L) => {
     if (!sceneUnits || !cutTimes.length) return null;
+    // `acrossBeats` opts a layer out of the wrapper (formats/scene/scene.js beatIndexOf), so the engine
+    // leaves its authored window alone. Modelling it as truncated would make every gate that reasons
+    // about time deny the existence of the one thing they ask for.
+    if (L.acrossBeats === true) return null;
     const start = num(L.start, 0);
     for (let i = 0; i < edges.length - 1; i++) {            // non-last beats only
       if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i] + cutDurAt(cutTimes[i]);

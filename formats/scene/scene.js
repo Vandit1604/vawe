@@ -176,8 +176,18 @@ boot((data, fps, theme, canvas) => {
     }
   }
   // which beat a top-level layer belongs to (by its start time). Group children ride their parent's beat.
+  // `acrossBeats: true` opts a layer OUT: it belongs to the film, not to any one beat, so it attaches
+  // flat to `cam` and keeps its authored duration and its own exit. That is the whole mechanism by
+  // which a continuous object can exist in a cut film. Until this flag, beat wrapping truncated every
+  // non-last-beat layer at its beat's end, so no object could survive a cut and the doctrine's central
+  // rule was unexpressible in exactly the films it was written for. Three authors in one campaign hit it
+  // and each worked around it differently, one by re-declaring the same 6KB of SVG seven times.
+  //
+  // Stacking: `cam` children are the beat wrappers (z auto) plus any across-beats layers, whose z-index
+  // is `track ?? array index`, so a spine paints ABOVE beat content by default. Author `"track": -1` to
+  // put it behind. Said out loud because a silent stacking change is worse than a documented one.
   const beatIndexOf = (L) => {
-    if (!sceneUnits) return null;
+    if (!sceneUnits || L.acrossBeats === true) return null;
     const s = L.start ?? 0;
     for (let i = 0; i < beatBounds.length; i++) if (s >= beatBounds[i].start && s < beatBounds[i].end) return i;
     return beatBounds.length - 1;
