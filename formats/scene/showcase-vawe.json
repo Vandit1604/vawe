@@ -23,6 +23,6 @@
     { "type": "text", "text": "frames, byte-identical.", "x": 160, "y": 640, "w": 1600, "align": "center", "size": 40, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 9.7, "duration": 1.4, "out": "fade", "exitDur": 0.4 },
 
     { "type": "text", "text": "one scene, one mp4.", "x": 160, "y": 410, "w": 1600, "align": "center", "size": 96, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.34, "stagger": 0.04, "start": 11.4, "duration": 2.6, "exitDur": 0 },
-    { "type": "text", "text": "make video D=scene.json", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 11.9, "duration": 2.1, "exitDur": 0 }
+    { "type": "text", "text": "make video D=scene.json", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface-2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 11.9, "duration": 2.1, "exitDur": 0 }
   ]
 }

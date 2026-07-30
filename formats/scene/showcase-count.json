@@ -32,7 +32,7 @@
       "start": 0.5, "duration": 2.5, "anim": "none", "exitDur": 0.28 },
 
     { "type": "text", "text": "The first year, in three numbers.",
-      "x": 150, "y": 300, "w": 1200, "align": "left", "size": 46, "weight": 600, "color": "var(--text2)",
+      "x": 150, "y": 300, "w": 1200, "align": "left", "size": 46, "weight": 600, "color": "var(--text-2)",
       "start": 3.25, "duration": 3.05, "anim": "rise", "enterDur": 0.5, "exitDur": 0.3 },
     { "type": "block", "block": "statBig", "x": 190, "y": 470, "to": 4, "label": "shops open",
       "size": 150, "start": 3.5, "dur": 2.8 },
@@ -42,7 +42,7 @@
       "size": 150, "start": 4.1, "dur": 2.2 },
 
     { "type": "text", "text": "It arrives in pieces.",
-      "x": 150, "y": 215, "w": 1000, "align": "left", "size": 48, "weight": 600, "color": "var(--text2)",
+      "x": 150, "y": 215, "w": 1000, "align": "left", "size": 48, "weight": 600, "color": "var(--text-2)",
       "start": 6.65, "duration": 3.25, "anim": "fade", "enterDur": 0.5, "exitDur": 0.3 },
     { "type": "block", "block": "lineChart", "x": 150, "y": 330, "w": 840, "h": 440, "area": true,
       "color": "var(--up)", "label": "revenue by quarter · $K",

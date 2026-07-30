@@ -34,7 +34,7 @@ export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], col
   start = 0, dur = 8 } = {}) {
   const card = (c) => colGroup([
     { type: 'text', text: c.name, size: 36, weight: 700, color: ACCENT },
-    c.desc && { type: 'text', text: c.desc, font: 'serif', w: cardW - 56, size: 26, weight: 500, color: 'var(--text2)' },
+    c.desc && { type: 'text', text: c.desc, font: 'serif', w: cardW - 56, size: 26, weight: 500, color: 'var(--text-2)' },
     c.detail && { type: 'text', text: c.detail, w: cardW - 56, font: 'mono', size: 22, weight: 500, color: DIM },
   ].filter(Boolean), 12);
   const rows = [];

@@ -120,7 +120,7 @@ beat, never the wallpaper.
 
 `argus` · `creed-launch` · `creed` · `default` · `ditherkit` · `linear` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `vawe-creed` · `vawe-site` · `vawe`
 
-Colours come from the theme, never hardcoded: `var(--text)` `var(--text2)` `var(--dim)`
+Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.
 
 ## Hard rules

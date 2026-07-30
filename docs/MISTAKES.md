@@ -4225,3 +4225,31 @@ case from #186 be deleted: one answer, no exceptions. A mutation case pins the e
 **Lesson.** Two gates had already been sharpened to describe this trap precisely, and both stopped at
 describing it. A gate that can only say "you cannot do this here" is a bug report addressed to the
 author instead of to the engine.
+
+## #188 — 37 references to a custom property nothing defines
+
+`core/boot.js` writes `--text-2`. Twenty-two files asked for `var(--text2)`. CSS answers an undefined
+custom property by INHERITING, so every one of them painted whatever the parent happened to be, with no
+error and no warning, and the design-spec lock passed them clean because a `var()` reference is not a
+literal colour.
+
+**Why it spread.** Three of the twenty-two were GENERATORS: `blueprints/beats.mjs`,
+`scripts/author/showcase-build.mjs` and `scripts/site/rules-build.mjs`. Every blueprint dropped and every
+showcase rebuilt minted the typo again. Fixing the scenes alone would have refilled the library on the
+next `make blueprints`.
+
+**Fix.** All 37 repointed, generators included. A new `dead-token` finding in the design-spec lock reads
+every `var(--x)` in a scene and checks it against the tokens the ENGINE actually defines, derived rather
+than restated: the `set('--x', …)` literals in `core/boot.js`, the declarations in `core/tokens.css`, the
+resolved theme file's `vars` passthrough, per-layer `vars`, the per-frame `--t`/`--p`, and any property
+the fragment declares inline itself. It names the nearest known token, so the message is the fix.
+
+The sweep it enabled then found two more of the same shape, both camelCase against a kebab-case engine:
+`var(--surface2)` in five files and `var(--lineStrong)` in two, one of them in `blueprints/kit.mjs`,
+another generator. Library now reports zero. Two mutation cases pin it, one must-fail and one must-pass
+for a fragment that declares its own property. 113/113.
+
+**Two lessons.** Deriving the legal set from the engine is what made this checkable at all; a hand-copied
+token list would have been a second thing to keep right. And a defect inside a generator is not one bug,
+it is one bug per future invocation, so the first question about any repeated typo is which tool is
+typing it.

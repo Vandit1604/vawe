@@ -72,6 +72,63 @@ const specShadows = data.spec && Array.isArray(data.spec.shadows) ? new Set(data
 const findings = [];
 const label = (l, i) => `${l.type || 'text'}${l.text ? ` "${String(l.text).slice(0, 22)}"` : l.comp ? ` (${l.comp})` : ''}`;
 
+// ---- the token lock: a `var(--x)` the engine never defines ----
+// CSS answers an undefined custom property by inheriting, so `var(--text2)` (the engine defines
+// `--text-2`) renders as whatever the parent happened to be. No error, no warning, and this lock passed
+// it clean because the reference is not a literal colour. 37 references across 22 files were sitting on
+// it, three of them inside the GENERATORS (blueprints/beats.mjs, showcase-build.mjs, rules-build.mjs),
+// so every new blueprint minted the typo again. Documented input, silently ignored: the worst failure
+// mode in this codebase.
+//
+// The legal set is DERIVED from the engine, never restated here, for the same reason the continuity gate
+// imports SOLO_BLIND: a hand-copied list is a second source of truth that rots without telling anyone.
+const KNOWN_VARS = (() => {
+  const set = new Set();
+  try {                                                   // whatever core/boot.js writes onto :root
+    const boot = fs.readFileSync(path.join(ROOT, 'core/boot.js'), 'utf8');
+    for (const m of boot.matchAll(/set\(\s*'(--[a-z0-9-]+)'/gi)) set.add(m[1]);
+    if (/--g\$\{i\}|`--g\$\{i\}`/.test(boot)) for (let i = 0; i < 10; i++) set.add(`--g${i}`);
+  } catch { /* unreadable: fall through, the css pass below still contributes */ }
+  try {                                                   // ...and whatever core/tokens.css declares
+    const css = fs.readFileSync(path.join(ROOT, 'core/tokens.css'), 'utf8');
+    for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) set.add(m[1]);
+  } catch { /* ditto */ }
+  return set;
+})();
+// ...plus the ones this scene defines for itself. `theme.vars` is a documented raw passthrough
+// (core/boot.js: `for (const [k, v] of Object.entries(theme.vars)) set(k, v)`), and it is where the vawe
+// theme defines --em, --paper, --muted, --border and --accent-soft. Reading only an INLINE theme object
+// missed all of them, because `data.theme` is normally the theme's NAME; the resolved theme file is what
+// has to be asked. Getting this wrong turns the lock into noise on five tokens that are perfectly real.
+const sceneVars = new Set();
+for (const k of Object.keys((theme && theme.vars) || {})) sceneVars.add(k);
+for (const l of flat) for (const k of Object.keys((l && l.vars) || {})) sceneVars.add(k);
+// `--t` and `--p` are written per frame by the html layer and background, not by the theme.
+for (const k of ['--t', '--p']) sceneVars.add(k);
+if (KNOWN_VARS.size > 8) {   // only run when the derivation actually found the engine's tokens
+  const seenVar = new Set();
+  for (const l of scanTargets) {
+    const kv = []; strings(l, '', kv);
+    // A hand-authored fragment routinely declares its own custom properties inline
+    // (`style="--a:12px"` … `stroke-width:var(--a)`), which is self-contained CSS and correct. Collect
+    // every `--name:` DEFINED anywhere in this layer before judging what it reads, or the lock fires on
+    // exactly the careful authoring it should leave alone: the first draft of this check reported 13
+    // such definitions in one SVG as dead tokens.
+    const selfDefined = new Set();
+    for (const [, v] of kv) for (const m of String(v).matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) selfDefined.add(m[1]);
+    for (const [k, v] of kv) {
+      for (const m of String(v).matchAll(/var\(\s*(--[a-zA-Z0-9-]+)/g)) {
+        const name = m[1];
+        if (KNOWN_VARS.has(name) || sceneVars.has(name) || selfDefined.has(name) || seenVar.has(name)) continue;
+        seenVar.add(name);
+        // nearest known token, so the message names the fix rather than the problem
+        const near = [...KNOWN_VARS].filter((n) => n.replace(/-/g, '') === name.replace(/-/g, ''));
+        findings.push({ sev: 'dead-token', msg: `${label(l)} · \`${k}\` reads var(${name}), which nothing defines — CSS answers an undefined custom property by INHERITING, so this renders as whatever the parent was, silently.${near.length ? ` Did you mean var(${near[0]})?` : ' Define it in the theme\'s `vars`, or use a token the engine sets.'}` });
+      }
+    }
+  }
+}
+
 scanTargets.forEach((l, i) => {
   // colours
   const seen = new Set();

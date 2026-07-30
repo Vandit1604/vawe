@@ -23,6 +23,6 @@
     { "type": "text", "text": "The whole beat travels the cut.", "x": 160, "y": 560, "w": 1600, "size": 42, "weight": 500, "font": "mono", "color": "var(--dim)", "anim": "fade", "enterDur": 0.5, "start": 4.0, "duration": 2.0 },
 
     { "type": "text", "text": "One deliberate move.", "x": 160, "y": 410, "w": 1600, "align": "center", "size": 110, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.34, "stagger": 0.04, "start": 6.0, "duration": 2.7 },
-    { "type": "text", "text": "sceneUnits: true", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 6.9, "duration": 2.1 }
+    { "type": "text", "text": "sceneUnits: true", "x": 160, "y": 570, "w": 1600, "align": "center", "size": 44, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "var(--surface-2)", "border": "1.5px solid var(--line)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 6.9, "duration": 2.1 }
   ]
 }

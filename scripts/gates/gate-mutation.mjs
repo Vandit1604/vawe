@@ -271,6 +271,19 @@ const CASES = [
   // nothing survives a cut, so each seam is a jump between unrelated shots instead of a state change of
   // one thing. All three directions are pinned, because the rule has two halves (survives AND changes)
   // and either half can rot on its own while the other keeps the gate looking alive.
+  // A `var(--x)` nothing defines does not error, it INHERITS, so the wrong colour ships looking
+  // deliberate. 37 references across 22 files sat on `var(--text2)` (the engine defines `--text-2`),
+  // three of them inside generators that minted the typo again on every build (MISTAKES #188).
+  { gate: 'designspec', name: 'dead-token · a var() the engine never defines', expect: 'fail',
+    match: /INHERITING/,
+    scene: scene([TXT({ text: 'Inherited', start: 0.3, duration: 2.4, color: 'var(--text2)' })],
+      { duration: 3, theme: 'vawe' }) },
+  // ...and the mirror: a fragment that DECLARES its own custom property is self-contained CSS and must
+  // stay quiet, or the lock fires on exactly the careful authoring it exists to protect.
+  { gate: 'designspec', name: 'a self-declared custom property is not a dead token', expect: 'pass',
+    scene: scene([{ type: 'html', x: 200, y: 300, w: 900, h: 400, start: 0.3, duration: 2.4,
+                    html: '<svg viewBox="0 0 900 400" width="900" style="--rung:14px"><rect x="0" y="0" width="900" height="400" fill="none" stroke="var(--line)" style="stroke-width:var(--rung)"/></svg>' }],
+      { duration: 3, theme: 'vawe' }) },
   { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
     match: /no-continuous-object/,   // blocking tier: must exit non-zero
     scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
@@ -547,6 +560,7 @@ const GATE_CMD = {
   beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
   layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
+  designspec: (f) => ['node', ['scripts/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
   visuals: (f) => ['node', ['scripts/gates/visual-vocabulary.mjs', f]],
   dissolve: (f) => ['node', ['scripts/gates/dissolve-check.mjs', f]],

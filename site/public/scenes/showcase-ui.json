@@ -265,7 +265,7 @@
       "align": "center",
       "size": 88,
       "weight": 500,
-      "color": "var(--text2)",
+      "color": "var(--text-2)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,

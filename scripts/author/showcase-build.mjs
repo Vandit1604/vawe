@@ -35,7 +35,7 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
 /* ── 2. CUTS ── it must actually CUT. The old clip had cuts:0 and drew labels reading "fade". ─── */
 {
   const card = (label, value, start, dur) => [
-    { type: 'rect', x: 460, y: 300, w: 1000, h: 420, bg: 'var(--surface)', border: '1px solid var(--lineStrong)', radius: 16, elevation: 1, start, duration: dur, anim: 'none', exitDur: 0.01 },
+    { type: 'rect', x: 460, y: 300, w: 1000, h: 420, bg: 'var(--surface)', border: '1px solid var(--line-strong)', radius: 16, elevation: 1, start, duration: dur, anim: 'none', exitDur: 0.01 },
     txt({ text: value, x: 460, y: 392, w: 1000, align: 'center', size: 132, weight: 700, color: 'var(--text)', start: start + 0.05, duration: dur - 0.06, anim: 'none', exitDur: 0.01 }),
     txt({ text: label, x: 460, y: 600, w: 1000, align: 'center', size: 26, font: 'mono', color: 'var(--dim)', start: start + 0.05, duration: dur - 0.06, anim: 'none', exitDur: 0.01 }),
   ];
@@ -57,7 +57,7 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
 /* ── 3. STINGS ── a sting is punctuation: it lands ON the reveal, and is never named. ─────────── */
 {
   const L = [
-    txt({ text: 'Every claim needs', x: 210, y: 360, w: 1500, align: 'center', size: 78, weight: 500, color: 'var(--text2)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 0.3, duration: 3.2, anim: 'none', exitDur: 0.25 }),
+    txt({ text: 'Every claim needs', x: 210, y: 360, w: 1500, align: 'center', size: 78, weight: 500, color: 'var(--text-2)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 0.3, duration: 3.2, anim: 'none', exitDur: 0.25 }),
     txt({ text: 'a <b>moment</b> it lands.', x: 210, y: 470, w: 1500, align: 'center', size: 122, weight: 700, color: 'var(--text)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 1.1, duration: 2.4, anim: 'none', exitDur: 0.25 }),
     txt({ text: 'proof.', x: 210, y: 400, w: 1500, align: 'center', size: 210, weight: 700, color: 'var(--accent)', split: 'char', preset: 'stretch', stagger: 0.03, each: 0.4, start: 3.75, duration: 2.05, anim: 'none', exitDur: 0.22 }),
     txt({ text: 'Punctuation, not decoration.', x: 210, y: 460, w: 1500, align: 'center', size: 86, weight: 700, color: 'var(--text)', split: 'word', preset: 'up', stagger: 0.07, each: 0.5, start: 6.1, duration: 2.3, anim: 'none', exitDur: 0 }),
@@ -78,7 +78,7 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
         { label: '5', value: 169 }, { label: '6', value: 169 }, { label: '7', value: 169 }, { label: '8', value: 169 }],
       start: 1.0, dur: 3.3,
     }),
-    txt({ text: 'Render it again.', x: 210, y: 330, w: 1500, align: 'center', size: 92, weight: 500, color: 'var(--text2)', split: 'word', preset: 'up', stagger: 0.07, each: 0.44, start: 4.5, duration: 3.9, anim: 'none', exitDur: 0 }),
+    txt({ text: 'Render it again.', x: 210, y: 330, w: 1500, align: 'center', size: 92, weight: 500, color: 'var(--text-2)', split: 'word', preset: 'up', stagger: 0.07, each: 0.44, start: 4.5, duration: 3.9, anim: 'none', exitDur: 0 }),
     txt({ text: 'Byte for byte, <b>the same</b>.', x: 210, y: 450, w: 1500, align: 'center', size: 118, weight: 700, color: 'var(--text)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 5.3, duration: 3.1, anim: 'none', exitDur: 0 }),
     txt({ text: 'renderFrame(n) is pure in n', x: 210, y: 660, w: 1500, align: 'center', size: 30, font: 'mono', color: 'var(--dim)', start: 6.4, duration: 2.0, anim: 'fade', enterDur: 0.5, exitDur: 0 }),
   ];
@@ -99,7 +99,7 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
     { type: 'cursor', x: fx + fw - 200, y: fy + fh - 96, size: 44, start: 2.4, duration: 3.45, clicks: [1.5],
       path: [{ t: 0, x: -520, y: -280 }, { t: 1.4, x: 0, y: 0, ease: 'easeOutExpo' }, { t: 3.45, x: 0, y: 0 }] },
     ...BLOCKS.toast({ x: fx + fw - 470, y: fy + fh - 140, w: 430, message: 'Video rendered to out.mp4', action: 'Open', start: 4.05, dur: 1.8 }),
-    txt({ text: 'No screen recording.', x: 210, y: 350, w: 1500, align: 'center', size: 88, weight: 500, color: 'var(--text2)', split: 'word', preset: 'up', stagger: 0.07, each: 0.44, start: 6.05, duration: 2.35, anim: 'none', exitDur: 0 }),
+    txt({ text: 'No screen recording.', x: 210, y: 350, w: 1500, align: 'center', size: 88, weight: 500, color: 'var(--text-2)', split: 'word', preset: 'up', stagger: 0.07, each: 0.44, start: 6.05, duration: 2.35, anim: 'none', exitDur: 0 }),
     txt({ text: 'This is <b>JSON</b>.', x: 210, y: 470, w: 1500, align: 'center', size: 132, weight: 700, color: 'var(--text)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 6.75, duration: 1.65, anim: 'none', exitDur: 0 }),
   ];
   write('showcase-ui', { ...base(8.4), layers: L,

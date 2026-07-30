@@ -11,7 +11,7 @@
 // stage; every factory takes {x,y,w,start,dur} so the author places and paces it.
 
 export const INK = 'var(--text)', DIM = 'var(--dim)', ACCENT = 'var(--accent)',
-  LINE = 'var(--line)', SURF2 = 'var(--surface2)', SURF = 'var(--surface)';
+  LINE = 'var(--line)', SURF2 = 'var(--surface-2)', SURF = 'var(--surface)';
 
 // kineticHeadline — the DEFAULT directed headline: words rise/scale in sequence, never a flat fade.
 // This is the single biggest thing plain videos miss (docs/CRAFT/DIRECTION.md §1 staging, §5 tell 1).

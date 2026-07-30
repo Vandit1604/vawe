@@ -49,7 +49,7 @@
       "align": "center",
       "size": 92,
       "weight": 500,
-      "color": "var(--text2)",
+      "color": "var(--text-2)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,

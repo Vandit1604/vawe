@@ -133,7 +133,7 @@ beat, never the wallpaper.
 
 \`${THEMES.join('` · `')}\`
 
-Colours come from the theme, never hardcoded: \`var(--text)\` \`var(--text2)\` \`var(--dim)\`
+Colours come from the theme, never hardcoded: \`var(--text)\` \`var(--text-2)\` \`var(--dim)\`
 \`var(--accent)\` \`var(--surface)\` \`var(--line)\`. \`<b>\` inside \`text\` renders in the accent.
 
 ## Hard rules

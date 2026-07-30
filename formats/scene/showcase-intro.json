@@ -271,7 +271,7 @@
       "align": "left",
       "size": 28,
       "font": "mono",
-      "color": "var(--text2)",
+      "color": "var(--text-2)",
       "start": 10.7,
       "duration": 1.6,
       "anim": "fade",
