@@ -4325,3 +4325,26 @@ skip it, which is worse than not having one.
 **Lesson.** Every gate here reads the plan or the DOM, and this class of defect lives in neither. The
 only instrument that found it was rendering twice and comparing, and the only reason anyone looked was
 that a human watched the video.
+
+## #191 — a card scaled about a box that did not exist yet
+
+A viewer watching `showcase-composition` said the 3-6s stretch looked wrong. It did: each pipeline card
+grew from small at a position it never occupies at rest, swinging left into place while its connector
+had already drawn a stub into empty space. For about a second and a half the diagram read as broken.
+
+**Root cause.** `pipelineFlow` entered each card with `scale: 0 → 1` about
+`transform-box: fill-box; transform-origin: 50% 50%`. `fill-box` resolves against the element's own
+bounding box, and this file's own header states the constraint that breaks it: **the layer is not in the
+document at `build()` time**, because `formats/scene/scene.js` appends AFTER `renderer.build`. No box, no
+origin — and `immediateRender: true` pins the tween's start value at exactly that moment. The comment
+even cites this constraint two lines earlier as the reason the draw-on uses the `pathLength=1` trick
+instead of `getTotalLength`. The same fact invalidated the scale origin and nobody joined them up.
+
+**Fix.** Scale about the card's own centre stated in user units (`transform-box: view-box` plus an
+explicit `transform-origin` in px). Both numbers are already computed at build time for the connector
+geometry, so nothing needs a box. The same pattern appeared twice more in `numberFlow` and was fixed the
+same way.
+
+**Lesson.** Purity gates cannot help here: `make probe` passes, because the DOM is a pure function of t
+either way. It is the wrong pure function. And a constraint written down in a file header protects only
+the line that quotes it; the second place that depends on it fails silently.

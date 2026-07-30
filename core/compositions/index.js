@@ -43,7 +43,14 @@ function pipelineFlow(ctx) {
     const x = i * (cardW + gap), cy = H / 2;
     centers.push({ x: x + cardW / 2, y: cy });
     const g = svgEl('g', { 'data-part': 'card' });
-    g.style.transformBox = 'fill-box'; g.style.transformOrigin = '50% 50%';
+    // Scale about the card's OWN centre, stated in user units, not `fill-box` + `50% 50%`. fill-box
+    // resolves against the element's bounding box, and at build() time this layer is not in the document
+    // yet (see the note at the top of this file), so it has no box to resolve against — while
+    // `immediateRender: true` pins the tween's start value at exactly that moment. The card therefore
+    // scaled about the wrong point and swung in from a position it never occupies at rest, dragging a
+    // connector stub into empty space behind it. Both numbers here are known at build time.
+    g.style.transformBox = 'view-box';
+    g.style.transformOrigin = `${x + cardW / 2}px ${cy}px`;
     g.appendChild(svgEl('rect', { x, y: cy - cardH / 2, width: cardW, height: cardH, rx: 14, fill: 'var(--surface)', stroke: 'var(--line-strong)', 'stroke-width': 1.5 }));
     const t = svgEl('text', { x: x + cardW / 2, y: cy + 6, 'text-anchor': 'middle', fill: 'var(--text)', 'font-size': 22, 'font-family': 'var(--font-sans)', 'font-weight': 600 });
     t.textContent = String(label);                                   // DATA, not markup
@@ -150,13 +157,15 @@ function commaSplit(ctx) {
   const commas = commaX.map((x) => {
     const t = svgEl('text', { x, y: ROW, fill: dim, 'font-size': FS, 'font-family': 'var(--font-mono)' });
     t.textContent = ',';
-    t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 50%';
+    // same fix as pipelineFlow's cards: fill-box needs a bounding box, and at build() time this layer is
+    // not in the document, while immediateRender pins the tween's start value right then
+    t.style.transformBox = 'view-box'; t.style.transformOrigin = `${x}px ${ROW}px`;
     svg.appendChild(t); return t;
   });
   // one rule per comma that has somewhere to land. It grows from the comma's own point.
   const bars = rules.map((rx) => {
     const r = svgEl('rect', { x: rx, y: ROW - RH + 12, width: 1, height: RH, fill: accent, opacity: 0.55 });
-    r.style.transformBox = 'fill-box'; r.style.transformOrigin = '50% 50%';
+    r.style.transformBox = 'view-box'; r.style.transformOrigin = `${rx}px ${ROW - RH / 2 + 12}px`;
     svg.appendChild(r); return r;
   });
   el.appendChild(svg);
