@@ -354,6 +354,13 @@ pace-from-vo:
 studio:
 	node scripts/dev/studio.mjs $(D)
 
+# make flicker-check D=formats/scene/<name>.json — DIAGNOSTIC, not a gate, and deliberately not in the
+# ladder: it finds one-frame dips in ink/light, which is what a dropped paint looks like AND what a
+# flash sting or a crossing shape looks like. Confirm a hit by re-rendering with fewer workers and
+# seeing whether it moves (docs/MISTAKES.md #190).
+flicker-check:
+	node scripts/gates/flicker-check.mjs $(D)
+
 # make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
 # black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).

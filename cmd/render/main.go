@@ -27,7 +27,18 @@ func main() {
 	out := flag.String("out", "", "output mp4 (optional — defaults to out/<json-name>.mp4)")
 	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
 	fps := flag.Int("fps", 0, "frames per second (0 = use the scene's fps, else 30)")
-	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 8)), "parallel capture browsers")
+	// CAP AT 4, NOT 8. Each worker is a full browser capturing at ss× supersample, and past about four
+	// of them raster cannot keep up with the draw: frames come back with the most raster-expensive
+	// region (large text) partially painted, fading off left to right in tile order. It is invisible to
+	// every gate we had. `make probe` compares the DOM and this happens downstream of it; the DOM is
+	// order-independent and correct on exactly the frames that ship wrong.
+	//
+	// Measured on showcase-flight, the heaviest film in the library (588 frames, eight text layers over
+	// a full-frame inline SVG): 8 workers gave 8-11 corrupted frames per run and a DIFFERENT set each
+	// run, 4 workers gave zero. Compositor determinism flags, doubling the rAF settle wait, and
+	// capture-until-stable all left it untouched, which is what ruled out the capture path and pointed
+	// at raster starvation. See docs/MISTAKES.md #190 and `make flicker-check`.
+	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 4)), "parallel capture browsers")
 	draft := flag.Bool("draft", false, "fast encode, no grain")
 	noGrain := flag.Bool("no-grain", false, "skip the film-grain pass")
 	all := flag.Bool("all", false, "render every format's sample.json")

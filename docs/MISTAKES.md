@@ -4286,3 +4286,42 @@ mutation fixture that named `showcase-count` was repointed at `showcase-count.ex
 inverted, and the only thing that settled it was counting grey levels in a frame. And of two components
 that disagree, the one that exits 0 is not thereby the correct one; silence is the cheapest way to look
 right.
+
+## #190 — eight render workers starved raster, and words blinked out
+
+A user watching `showcase-flight` said "words are flickering". Nothing in the ladder could see it.
+
+**What it was.** One frame in roughly eight, the text band came back with the later columns missing and
+the hook line falling off left to right. The DOM for those frames is correct: `make probe` passes on
+this scene, including its out-of-order check. `make audit`, `seam-check` and the rest read JSON or DOM,
+so all of them were structurally blind. The corruption is in RASTER, downstream of everything measured.
+
+**How it was found.** Only by rendering the same scene twice: the bad frames MOVED, which proved
+non-determinism. Then the shape of it: bad frames are near-identical to EACH OTHER (mean delta 0.2)
+while differing from their neighbours by 8, and they recur every ~8 frames. The renderer runs
+`min(NumCPU-1, 8)` capture browsers and hands frame *k* to worker *k mod N*, so an ~8-frame period is a
+per-worker fingerprint.
+
+**Four fixes that did not work**, all reverted, because a workaround that does not fix the thing is
+worse than nothing: compositor determinism flags (`run-all-compositor-stages-before-draw`,
+`disable-new-content-rendering-timeout`, `disable-checker-imaging`, `disable-threaded-animation`);
+doubling the rAF settle wait from 2 frames to 4; capture-until-stable (read the surface twice, accept
+only on agreement) — which failed informatively, because the two reads AGREE on the broken state, so
+the compositor is holding it rather than the reader catching it mid-paint. `HeadlessExperimental.
+beginFrame`, the API that would settle this at the source, does not exist in the new headless mode
+Chrome 150 ships.
+
+**The fix.** Render at 4 workers, not 8. Measured on `showcase-flight`: 8 gave 8-11 corrupted frames and
+a different set each run, 4 gives zero, 1 gives zero. Each worker is a full browser capturing at ss×
+supersample, and past about four of them raster cannot keep up with the draw.
+
+**On the gate.** `make flicker-check` reads the encoded mp4 and finds frames that lose content both
+their neighbours carry. It separates this defect perfectly on the film it was built from, and swept over
+the library it flagged 39 films, of which the first checked (`showcase-aspect`) produced the SAME five
+frames at 4 workers as at 8: content, not corruption. So it is shipped as a diagnostic and deliberately
+kept OUT of the ladder. A blocking gate that cries wolf on a third of the library teaches everyone to
+skip it, which is worse than not having one.
+
+**Lesson.** Every gate here reads the plan or the DOM, and this class of defect lives in neither. The
+only instrument that found it was rendering twice and comparing, and the only reason anyone looked was
+that a human watched the video.
