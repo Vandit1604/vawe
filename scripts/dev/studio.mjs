@@ -78,8 +78,8 @@ const timelineModel = (file) => {
 const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><title>vawe studio · ${path.basename(dataArg)}</title>
 <style>
  :root{color-scheme:dark} body{margin:0;background:#0b0d12;color:#e6e9ef;font:14px/1.4 ui-monospace,Menlo,monospace;display:flex;flex-direction:column;height:100vh}
- #stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#05060a}
- iframe{border:0;background:#000;box-shadow:0 8px 40px #000a}
+ #stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#05060a}
+ iframe{border:0;background:#000;box-shadow:0 8px 40px #000a;flex:none}
  #bar{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#11141b;border-top:1px solid #222}
  #scrub{flex:1;accent-color:#5ee0c8} button{background:#1b2130;color:#e6e9ef;border:1px solid #333;border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}
  button:hover{background:#232b3d} #read{min-width:150px;font-variant-numeric:tabular-nums;color:#9aa4b2} b{color:#5ee0c8}
@@ -147,12 +147,17 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
  // that frame. Everything else an editor eventually needs (curves, paths, onion skin) sits on top of
  // this loop, and none of it matters until this loop is trustworthy.
- let FITS=1, keyMode=false, selIdx=-1, selStart=0, dragging=null;
+ let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null;
  const dragEl=document.getElementById('drag'), keyBtn=document.getElementById('key'), selOut=document.getElementById('sel');
  function setSel(i){ selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
-   selStart=L?L.start:0;
-   selOut.textContent=L?('▸ '+L.type+' '+(L.label||'')+'  ·  local t '+(n/fps-selStart).toFixed(2)+'s'):'';
+   selStart=L?L.start:0; selLabel=L?(L.type+' '+(L.label||'')):'';
+   selReadout();
    [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
+ // a key lands at the layer's LOCAL time, so that is the number the readout has to show, live. Before
+ // this it froze at whatever it was when you clicked, which is the one moment it does not matter.
+ function selReadout(){ if(selIdx<0){ selOut.textContent=''; return; }
+   const lt=n/fps-selStart;
+   selOut.textContent='▸ '+selLabel+'  ·  key at '+lt.toFixed(2)+'s'+(lt<0?'  (before it starts)':''); }
  keyBtn.addEventListener('click',()=>{ keyMode=!keyMode; keyBtn.classList.toggle('on',keyMode);
    keyBtn.textContent='◇ key: '+(keyMode?'on':'off'); dragEl.classList.toggle('on',keyMode); });
  document.getElementById('undo').addEventListener('click',async()=>{
@@ -189,9 +194,12 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
    sc.style.width=W+'px';sc.style.height=H+'px';sc.style.transform='scale('+s+')';sc.style.transformOrigin='center';
    FITS=s;
  }
- function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n; ph.style.left='calc(16px + '+pc(n/fps)+')'; }
+ function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n; ph.style.left='calc(16px + '+pc(n/fps)+')'; if(selIdx>=0&&!dragging)selReadout(); }
  function ready(){ const w=sc.contentWindow; if(!w.__engineReady||!w.__engine){return setTimeout(ready,80);} const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
  sc.addEventListener('load',ready); window.addEventListener('resize',fit);
+ // the stage resizes without the WINDOW resizing (the timeline expands, a hazard band wraps), and a
+ // scale computed against the old height overflows and clips the frame
+ if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe(document.getElementById('stage'));
  scrub.addEventListener('input',()=>{ n=+scrub.value; draw(); });
  function loop(){ if(!playing)return; n=(n+1)%(total+1); draw(); setTimeout(()=>requestAnimationFrame(loop),1000/fps); }
  play.addEventListener('click',()=>{ playing=!playing; play.textContent=playing?'⏸ pause':'▶ play'; if(playing)loop(); });
@@ -268,10 +276,14 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  }
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
  const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
- rows.addEventListener('click',e=>{ const bar=e.target.closest('.bar'); if(!bar) return;
-   const i=+bar.dataset.i; if(i<0){ selOut.textContent='⚠ that bar has no JSON layer (the produced baseline added it)'; return; }
-   setSel(i); });
- lanes.addEventListener('pointerdown',e=>{ lanes.setPointerCapture(e.pointerId); seek(e); });
+ lanes.addEventListener('pointerdown',e=>{
+   // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
+   // a click handler on the bar never sees its own bar and selection silently did nothing.
+   const bar=e.target&&e.target.closest&&e.target.closest('.bar');
+   if(bar){ const i=+bar.dataset.i;
+     if(i<0) selOut.textContent='⚠ that bar has no JSON layer (the produced baseline added it)';
+     else setSel(i); }
+   lanes.setPointerCapture(e.pointerId); seek(e); });
  lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
  document.getElementById('tgl').addEventListener('click',()=>document.getElementById('tl').classList.toggle('off'));
 </script></body></html>`;
