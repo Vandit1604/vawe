@@ -164,6 +164,21 @@ surface except the app chrome."* The restraint is written into the theme so it c
 
 ---
 
+## Authoring these without typing numbers
+
+`make studio D=<scene.json>` now **writes**. Turn on `key` mode, click a layer's bar in the timeline,
+scrub to a frame, and drag the layer on the stage: that writes a motion keyframe at that frame. Existing
+keys show as ticks on the bar. `undo` walks back through the session.
+
+Why it works on tracked files: edits are **surgical text patches**, never a re-serialise
+(`scripts/author/patch-motion.mjs`). A save that changes nothing is a zero-byte diff, moving one key
+changes one line, and the file's hand formatting — including which of the three keyframe layouts it
+uses — survives. `lib-test` holds that invariant across four scenes.
+
+The honest limit: this is one interaction. There is no curve editor, no motion path, no onion skin, and
+no key deletion in the UI yet. It makes dense keys cheap to place, which is the thing that was stopping
+anyone from placing them.
+
 ## The checklist
 
 When a film has the right spine and still feels cheap, in order of how often it is the answer:

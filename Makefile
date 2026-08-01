@@ -351,6 +351,10 @@ pace-from-vo:
 # it, a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, enter/exit
 # ramps shaded off the settled middle, and every dead-air hole (beat-check) painted as a hazard band.
 # Drag the timeline to seek. Dev tooling only (drives the engine's own renderFrame(n)); Ctrl-C to stop.
+# EDITING, not just viewing: turn on `key` mode, click a layer's bar, scrub to a frame, drag it on the
+# stage. That writes a motion keyframe into the scene at that frame, surgically — the file's hand
+# formatting survives and a save that changes nothing is a zero-byte diff (scripts/author/patch-motion.mjs).
+# `undo` walks back through the session. docs/CRAFT/KEYED-MOTION.md is what you are authoring toward.
 studio:
 	node scripts/dev/studio.mjs $(D)
 

@@ -6,6 +6,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
+import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -962,6 +963,60 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('buildCameraMove resolves by name', buildCameraMove({ move: 'slowPush', start: 0, dur: 2 }).length === 2);
   ok('buildCameraMove throws on unknown', (() => { try { buildCameraMove({ move: 'nope' }); return false; } catch { return true; } })());
   ok('CAMERA_MOVE_NAMES lists the generators', CAMERA_MOVE_NAMES.includes('diveIn') && CAMERA_MOVE_NAMES.includes('panFollow'));
+}
+
+
+// ---- patch-motion: the editor writes back into HAND-FORMATTED files -------------------------------
+// The invariant that makes an editor safe to point at a tracked repo: saving without changing anything
+// must be a zero-byte diff, in every formatting style the library actually uses. Everything else about
+// the editor can be redone; silently reformatting 104 scenes cannot be undone from a diff.
+{
+  for (const name of ['higgsfield-recreation', 'showcase', 'ledgerline-neon', 'demo-interactions']) {
+    const f = path.join(repoRoot, 'formats/scene', `${name}.json`);
+    if (!fs.existsSync(f)) continue;
+    const src = fs.readFileSync(f, 'utf8');
+    const d = JSON.parse(src);
+    const withTrack = d.layers.map((l, i) => [l, i]).filter(([l]) => Array.isArray(l.motion) && l.motion.length);
+    ok(`patch-motion no-op is byte-identical (${name})`,
+      withTrack.every(([l, i]) => patchMotion(src, i, l.motion) === src));
+    if (withTrack.length) {
+      const [layer, idx] = withTrack.find(([l]) => l.motion.length > 2) || withTrack[0];
+      const keys = JSON.parse(JSON.stringify(layer.motion));
+      keys[1].x = (keys[1].x ?? 0) + 7;
+      const out = patchMotion(src, idx, keys);
+      ok(`patch-motion edit still parses (${name})`, JSON.parse(out).layers[idx].motion[1].x === keys[1].x);
+      // Measured as a MULTISET difference, not by line index. Comparing index-by-index counts every
+      // line that merely SHIFTED, and adding one property to a key legitimately adds a line, so an
+      // otherwise perfect patch scored 431. What matters is how many lines are genuinely new or gone.
+      const bag = (t) => t.split('\n').reduce((mm, l) => mm.set(l, (mm.get(l) || 0) + 1), new Map());
+      const A = bag(src), B = bag(out);
+      let churn = 0;
+      for (const [l, n] of B) churn += Math.max(0, n - (A.get(l) || 0));
+      for (const [l, n] of A) churn += Math.max(0, n - (B.get(l) || 0));
+      // one moved keyframe must not rewrite the file: collapsing a property-per-line key onto one line
+      // churned hundreds of lines before the key layout was preserved
+      ok(`patch-motion one key = a small diff (${name}, ${churn} lines)`, churn <= 8);
+    }
+  }
+  const hf = path.join(repoRoot, 'formats/scene/higgsfield-recreation.json');
+  if (fs.existsSync(hf)) {
+    const src = fs.readFileSync(hf, 'utf8'), d = JSON.parse(src);
+    const btn = d.layers.findIndex((l) => l.id === 'btn');
+    const sp = layerSpan(src, btn);
+    ok('patch-motion scanner survives CSS braces in a string', JSON.parse(src.slice(sp.start, sp.end)).id === 'btn');
+    const hook = d.layers.findIndex((l) => l.id === 'hook');
+    const ins = JSON.parse(patchMotion(src, hook, [{ t: 0, x: 0 }, { t: 0.5, x: 40 }]));
+    ok('patch-motion inserts into a layer with no track', ins.layers[hook].motion.length === 2);
+    ok('patch-motion insert leaves every other layer identical',
+      JSON.stringify(ins.layers.filter((_, i) => i !== hook)) === JSON.stringify(d.layers.filter((_, i) => i !== hook)));
+    ok('patch-motion removes a track', JSON.parse(patchMotion(src, btn, [])).layers[btn].motion === undefined);
+  }
+  ok('matchBracket ignores brackets inside strings', matchBracket('{"a":"}]"}', 0) === 9);
+  const up = upsertKey([{ t: 0, x: 0 }, { t: 1, x: 10 }], { t: 0.5, x: 5 });
+  ok('upsertKey inserts sorted', up.length === 3 && up[1].t === 0.5);
+  const re = upsertKey(up, { t: 0.5, x: 99 });
+  ok('upsertKey updates rather than stacking', re.length === 3 && re[1].x === 99);
+  ok('upsertKey merges onto the existing key', upsertKey([{ t: 0, x: 1, ease: 'linear' }], { t: 0, x: 2 })[0].ease === 'linear');
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

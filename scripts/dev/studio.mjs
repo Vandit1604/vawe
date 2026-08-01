@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { patchMotion, upsertKey } from '../author/patch-motion.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.env.D || process.argv[2];
@@ -54,6 +55,11 @@ const beatCheck = (file) => {
 // against (the DOM knows the real timing, the JSON knows what each layer IS).
 const label = (L) => L.id || (L.text && String(L.text).replace(/<[^>]*>/g, '').trim())
   || (L.src && path.basename(String(L.src))) || L.comp || L.capture || L.preset || '';
+// UNDO is a stack of whole previous file contents. A scene is a few kilobytes and an editing session is
+// tens of edits, so keeping the bytes is simpler and more honest than replaying inverse operations —
+// there is no way for it to drift from what is on disk.
+const undoStack = [];
+
 const timelineModel = (file) => {
   const d = JSON.parse(fs.readFileSync(file, 'utf8'));
   const marks = (key) => (Array.isArray(d[key]) ? d[key] : []).filter((c) => c && typeof c.t === 'number')
@@ -63,7 +69,8 @@ const timelineModel = (file) => {
     duration: d.duration || null,
     marks: [...marks('cuts'), ...marks('seams'), ...marks('stings')].sort((a, b) => a.t - b.t),
     layers: (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object')
-      .map((L) => ({ type: L.type || 'text', label: label(L), start: L.start ?? 0, dur: L.duration ?? L.dur ?? 2 })),
+      .map((L, i) => ({ i, type: L.type || 'text', label: label(L), start: L.start ?? 0, dur: L.duration ?? L.dur ?? 2,
+        keys: Array.isArray(L.motion) ? L.motion.map((k) => k.t ?? 0) : [] })),
     gate: beatCheck(file),
   };
 };
@@ -109,14 +116,22 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  .hz.disputed{background:repeating-linear-gradient(135deg,#8a93a333 0 6px,#8a93a30d 6px 12px);border-color:#8a93a3aa}
  .hz b{position:absolute;top:2px;left:3px;color:#ff8b95;font-size:10px;white-space:nowrap;background:#12060a;padding:0 3px;border-radius:2px}
  .hz.beat b{color:#ffc46a;background:#120c04} .hz.disputed b{color:#aab3c2;background:#0e1117}
+ #drag{position:absolute;inset:0;display:none;cursor:grab}
+ #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:#5ee0c81a}
+ .bar.sel{outline:2px solid #fff;outline-offset:1px}
+ .bar u{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.85}
+ #key.on{background:#1d4b41;border-color:#5ee0c8;color:#5ee0c8}
  #ph{position:absolute;top:0;bottom:0;width:1px;background:#ff4d6d;z-index:5;pointer-events:none;box-shadow:0 0 6px #ff4d6d}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid #ff4d6d}
 </style></head><body>
- <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe></div>
+ <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div></div>
  <div id=bar>
   <button id=play>▶ play</button>
   <input id=scrub type=range min=0 max=100 value=0 step=1>
   <span id=read>frame 0 / 0 · 0.00s</span>
+  <button id=key>◇ key: off</button>
+  <button id=undo>⤺ undo</button>
+  <span id=sel style="color:#7c8797;min-width:170px"></span>
   <button id=tgl>timeline</button>
  </div>
  <div id=tl>
@@ -128,9 +143,51 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  const sc=document.getElementById('sc'),scrub=document.getElementById('scrub'),read=document.getElementById('read'),play=document.getElementById('play');
  const lanes=document.getElementById('lanes'),ruler=document.getElementById('ruler'),rows=document.getElementById('rows'),ph=document.getElementById('ph');
  let fps=30,total=0,n=0,playing=false,W=1920,H=1080,dur=1,model=null;
+ // ---------- keyframing ----------
+ // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
+ // that frame. Everything else an editor eventually needs (curves, paths, onion skin) sits on top of
+ // this loop, and none of it matters until this loop is trustworthy.
+ let FITS=1, keyMode=false, selIdx=-1, selStart=0, dragging=null;
+ const dragEl=document.getElementById('drag'), keyBtn=document.getElementById('key'), selOut=document.getElementById('sel');
+ function setSel(i){ selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
+   selStart=L?L.start:0;
+   selOut.textContent=L?('▸ '+L.type+' '+(L.label||'')+'  ·  local t '+(n/fps-selStart).toFixed(2)+'s'):'';
+   [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
+ keyBtn.addEventListener('click',()=>{ keyMode=!keyMode; keyBtn.classList.toggle('on',keyMode);
+   keyBtn.textContent='◇ key: '+(keyMode?'on':'off'); dragEl.classList.toggle('on',keyMode); });
+ document.getElementById('undo').addEventListener('click',async()=>{
+   const r=await fetch('/api/undo',{method:'POST'}).then(x=>x.json());
+   if(r.ok) reloadScene(); else selOut.textContent='⚠ '+r.error; });
+ function reloadScene(){ const keep=n; sc.src=sc.src; sc.addEventListener('load',()=>{ ready(); setTimeout(()=>{ n=Math.min(keep,total); draw(); },120); },{once:true}); }
+ dragEl.addEventListener('pointerdown',e=>{
+   if(!keyMode) return;
+   if(selIdx<0){ selOut.textContent='⚠ click a layer bar first'; return; }
+   dragEl.setPointerCapture(e.pointerId); dragEl.classList.add('dragging');
+   dragging={x0:e.clientX,y0:e.clientY,dx:0,dy:0}; });
+ dragEl.addEventListener('pointermove',e=>{
+   if(!dragging) return;
+   dragging.dx=(e.clientX-dragging.x0)/FITS; dragging.dy=(e.clientY-dragging.y0)/FITS;
+   selOut.textContent='▸ drag  '+Math.round(dragging.dx)+', '+Math.round(dragging.dy)+' px'; });
+ dragEl.addEventListener('pointerup',async e=>{
+   if(!dragging) return;
+   const d=dragging; dragging=null; dragEl.classList.remove('dragging');
+   if(Math.abs(d.dx)<1&&Math.abs(d.dy)<1) return;
+   // the key carries the layer's CURRENT offset at this frame plus the drag, so dragging a layer that
+   // already has a track nudges from where it is rather than snapping back to the origin
+   const cur=offsetAt(selIdx,n/fps-selStart);
+   const body={layer:selIdx,t:n/fps-selStart,x:cur.x+d.dx,y:cur.y+d.dy};
+   const r=await fetch('/api/key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(x=>x.json());
+   selOut.textContent=r.ok?('✓ key @'+body.t.toFixed(2)+'s · '+r.keys+' keys'):('⚠ '+r.error);
+   if(r.ok&&r.changed) reloadScene(); });
+ // where the layer already is at local time lt, read from the engine's own interpolator via the iframe
+ function offsetAt(i,lt){ try{ const e=sc.contentWindow.__engine; const L=(e&&e.data&&e.data.layers)||[];
+   const m=L[i]&&L[i].motion; if(!m||!m.length) return {x:0,y:0};
+   let a=m[0]; for(const k of m){ if((k.t??0)<=lt) a=k; }
+   return {x:a.x??0,y:a.y??0}; }catch(_){ return {x:0,y:0}; } }
  function fit(){ // scale the iframe to fit the stage, preserving the canvas aspect
    const st=document.getElementById('stage'),pad=32; const s=Math.min((st.clientWidth-pad)/W,(st.clientHeight-pad)/H);
    sc.style.width=W+'px';sc.style.height=H+'px';sc.style.transform='scale('+s+')';sc.style.transformOrigin='center';
+   FITS=s;
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n; ph.style.left='calc(16px + '+pc(n/fps)+')'; }
  function ready(){ const w=sc.contentWindow; if(!w.__engineReady||!w.__engine){return setTimeout(ready,80);} const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
@@ -169,6 +226,9 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
    const pool=m.layers.slice();
    for(const b of bars){ const i=pool.findIndex(L=>Math.abs(L.start-b.s)<1e-3); const L=i>=0?pool.splice(i,1)[0]:null;
      b.type=L?L.type:(CLS[b.cls]||'text'); b.name=(L&&L.label)||b.txt||'';
+     // the JSON index, when this bar could be paired with a declared layer. A bar the produced baseline
+     // invented has none, and must not be selectable: there is nothing on disk to write a key into.
+     b.i=L?L.i:-1; b.keys=(L&&L.keys)||[];
      // the engine can hold a layer open past its declared window (produceBaseline turns sceneUnits on for
      // any scene with cuts, and a beat's layers then live through the beat's exit slide). beat-check reads
      // the JSON, so it cannot see that — and would report a hole the rendered film does not have.
@@ -185,8 +245,9 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
    ruler.innerHTML=r;
    let h='';
    for(const b of bars){ const c=COLOR[b.type]||'#7d8799', wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
-     h+='<div class=row><div class=bar data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+c+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s → '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' → '+b.out:''))+'">'
+     h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+c+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s → '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' → '+b.out:''))+'">'
        +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
+       +(b.keys||[]).map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
        +'<span style="left:calc('+inp+'% + 4px)">'+esc(b.type)+' <em>'+esc(b.name)+'</em></span></div></div>'; }
    // the hazard bands stretch the whole track stack, so a hole is impossible to miss
    const holes=[...m.gate.deadAir.map(x=>[x[0],x[1],'dead air','']),
@@ -207,6 +268,9 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  }
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
  const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
+ rows.addEventListener('click',e=>{ const bar=e.target.closest('.bar'); if(!bar) return;
+   const i=+bar.dataset.i; if(i<0){ selOut.textContent='⚠ that bar has no JSON layer (the produced baseline added it)'; return; }
+   setSel(i); });
  lanes.addEventListener('pointerdown',e=>{ lanes.setPointerCapture(e.pointerId); seek(e); });
  lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
  document.getElementById('tgl').addEventListener('click',()=>document.getElementById('tl').classList.toggle('off'));
@@ -216,6 +280,38 @@ const server = http.createServer((req, res) => {
   const url = req.url.split('?')[0];
   if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(studioPage('scene')); }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
+  // ---- the WRITE side: a drag in the browser becomes a keyframe on disk --------------------------
+  // Studio was read-only, so every one of the exemplar's 73 keys was a number typed into JSON by hand,
+  // and the library has exactly one film with dense keys as a result. These two endpoints are the whole
+  // difference between viewing motion and authoring it.
+  if (req.method === 'POST' && (url === '/api/key' || url === '/api/undo')) {
+    let body = '';
+    req.on('data', (c) => { body += c; if (body.length > 1e6) req.destroy(); });
+    req.on('end', () => {
+      const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o)); };
+      try {
+        const src = fs.readFileSync(dataArg, 'utf8');
+        if (url === '/api/undo') {
+          if (!undoStack.length) return reply({ ok: false, error: 'nothing to undo' });
+          fs.writeFileSync(dataArg, undoStack.pop());
+          return reply({ ok: true, left: undoStack.length });
+        }
+        const { layer, t, x, y } = JSON.parse(body || '{}');
+        const d = JSON.parse(src);
+        const L = d.layers?.[layer];
+        if (!L) return reply({ ok: false, error: `no layer at index ${layer}` }, 400);
+        // A key is only meaningful at a time the layer is actually on screen, and `motion` t is LOCAL to
+        // the layer's start — the single easiest thing to get wrong when writing these by hand.
+        const keys = upsertKey(Array.isArray(L.motion) ? L.motion : [], {
+          t: +(+t).toFixed(3), x: Math.round(x), y: Math.round(y),
+        });
+        const out = patchMotion(src, layer, keys);
+        if (out !== src) { undoStack.push(src); fs.writeFileSync(dataArg, out); }
+        return reply({ ok: true, keys: keys.length, changed: out !== src, undo: undoStack.length });
+      } catch (e) { return reply({ ok: false, error: String(e.message) }, 500); }
+    });
+    return;
+  }
   if (url === '/api/timeline') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     try { return res.end(JSON.stringify(timelineModel(dataArg))); }
