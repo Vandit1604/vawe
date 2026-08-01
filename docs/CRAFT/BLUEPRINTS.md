@@ -33,6 +33,8 @@ blocks use). Browse the set first: **`make blueprints`**.
 | `logoLockup` | brand | mark pops + wordmark travels + kinetic headline + sub |
 | `verdictProof` | claim proven | typing command + note + a tone verdict chip that pops |
 | `ctaEnd` | held end card | mark + install chip + sub + url (exitDur 0) |
+| `typedHook` | a hook that erases itself | types in, un-types ~2x faster, caret throughout, never fades ([KEYED-MOTION.md](KEYED-MOTION.md)) |
+| `morphButton` | the object that BECOMES the next thing | a labelled button shrinks, rounds and sheds its label until it is a dot — one `--p` clock, a different power per property |
 
 Each takes `{ x?, y?, w?, start, dur, ...content }`. Defaults target the 1920×1080 stage; override to place.
 A beat emits LAYER motion; pair it with the scene-level transition it wants (a `cinematicZoom` seam into a

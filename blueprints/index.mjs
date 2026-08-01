@@ -21,4 +21,6 @@ export const BEATS = {
   logoReveal: Beats.logoReveal,         // brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade
   verdictProof: Beats.verdictProof,     // claim proven: typing command + note + tone verdict chip
   ctaEnd: Beats.ctaEnd,                 // held end card: mark + install chip + sub + url (exitDur 0)
+  typedHook: Beats.typedHook,           // hook that ERASES itself: types in, un-types ~2x faster, never fades
+  morphButton: Beats.morphButton,       // the object that BECOMES the next thing: button shrinks/rounds to a dot
 };
