@@ -1002,6 +1002,10 @@
           "type": "boolean",
           "label": "Force include/exclude from layout audit"
         },
+        "panWith": {
+          "type": "string",
+          "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: docs/CRAFT/KEYED-MOTION.md."
+        },
         "acrossBeats": {
           "type": "boolean",
           "label": "This layer belongs to the FILM, not to one beat. Only meaningful under `sceneUnits`, where every other layer is wrapped with its beat and truncated at that beat's cut. Set true and the layer attaches flat to the camera instead, keeping its authored duration and its own exit, so it can survive a cut and change across it. This is how you author a continuous object in a cut film. It paints ABOVE beat content by default (its z-index is `track` or its array index, against wrappers at auto); give it `\"track\": -1` to sit behind."

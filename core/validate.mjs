@@ -63,6 +63,22 @@ const TEXTISH = new Set(['text', 'count']);
 
 export function layoutErrors(cfg) {
   const out = [];
+  // `panWith` names another layer's `id`, and the engine throws on a bad reference at BUILD time. That
+  // is loud but late: the author has already rendered. Same class as a bad relative `start`, and cheap
+  // to answer here, so the gate answers it. A pan source with no motion is the other half — the layer
+  // would silently stop panning, which is exactly the failure the feature exists to remove.
+  const ids = new Set((cfg.layers || []).filter((L) => isObj(L) && L.id).map((L) => L.id));
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L) || typeof L.panWith !== 'string') return;
+    const label = `layers[${i}] (${L.type || 'text'})`;
+    if (!ids.has(L.panWith)) out.push(`${label}: panWith "${L.panWith}" — no layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none — give the pan source an \`id\`)'}.`);
+    else {
+      const src = (cfg.layers || []).find((x) => isObj(x) && x.id === L.panWith);
+      if (src === L) out.push(`${label}: panWith "${L.panWith}" is this layer itself.`);
+      else if (typeof src.panWith === 'string') out.push(`${label}: panWith "${L.panWith}", which itself pans with "${src.panWith}". Point both at the ORIGIN so one track stays the source of truth.`);
+      else if (!Array.isArray(src.motion) || !src.motion.length) out.push(`${label}: panWith "${L.panWith}", but that layer has no \`motion\` track to share.`);
+    }
+  });
   (cfg.layers || []).forEach((L0, i) => {
     if (!isObj(L0)) return;
     if (L0.anchor) return;                      // anchor overwrites x/y downstream

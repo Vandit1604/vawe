@@ -292,6 +292,12 @@ const CASES = [
     scene: scene([{ type: 'block', block: 'kpiRow', x: 200, y: 400, w: 1500, start: 0.3, duration: 4.4,
                     items: [{ label: 'Routes', value: '120' }] }],
       { duration: 5 }) },
+  // panWith copies another layer's motion on the same wall clock. A dangling reference used to be a
+  // silent no-op, which is the shape of bug where a layer just quietly stops panning with the page.
+  { gate: 'validate', name: 'panWith naming a layer that does not exist', expect: 'fail',
+    match: /panWith|unknown/,
+    scene: scene([TXT({ text: 'Rides along', start: 0.3, duration: 2.4, panWith: 'nope' })],
+      { duration: 3 }) },
   { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
     match: /no-continuous-object/,   // blocking tier: must exit non-zero
     scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
