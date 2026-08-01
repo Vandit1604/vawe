@@ -4348,3 +4348,38 @@ same way.
 **Lesson.** Purity gates cannot help here: `make probe` passes, because the DOM is a pure function of t
 either way. It is the wrong pure function. And a constraint written down in a file header protects only
 the line that quotes it; the second place that depends on it fails silently.
+
+## #192 — three craft decisions were opt-in, so the library never made them
+
+`higgsfield-recreation` is the exemplar and the rest of the library does not move like it. Reading its
+JSON against everyone else's, three of the differences were not taste at all — they were defaults
+pointing the wrong way, and the evidence is the usage count.
+
+**1. `easeInOutCubic` between every pair of motion keys.** That curve zeroes velocity at BOTH ends of a
+segment, so a chain of closely-spaced keys accelerates and stops once per key and the move pulses. This
+was already diagnosed and fixed for the CAMERA in #125; the per-layer default was left standing.
+`motionAt` now interpolates linearly below `DENSE_KEY_SEC` (0.14s, ~4 frames) unless an `ease` is named.
+Dense keys are a traced path, not a span with a shape. Two scenes change.
+
+**2. `motionBlur` was opt-in, and across the entire library exactly ONE layer set it.** A default nobody
+reaches for is not a default. Blur is physics: something crossing the frame in a few frames smears
+whether or not the author remembered. It now applies itself above `AUTO_BLUR_FLOOR` (16px/frame).
+13 scenes, 49 layers change.
+
+**The first version of this was too strong and measurement caught it.** Auto mode reused the opt-in
+shutter of 0.5, which peaked at the 24px cap on five `creed-launch` rects and put 18.3px on a moving
+headline: dissolved, not smeared. Computed across the library BEFORE rendering anything, which cost
+nothing. `AUTO_SHUTTER` is now 0.16, the value the exemplar's own author picked by eye for its fastest
+layer, and the worst text case is 5.9px.
+
+**3. Exits ran at the same speed as entrances**, because one symmetric constant was the only knob. An
+entrance is an introduction; an exit is over. `theme.motion.exitRatio` moves that to the theme where a
+brand's snap belongs. Defaults to `1`, so nothing changes until a theme opts in; `higgsfield` sets 0.45.
+
+**What is NOT a default, stated so nobody tries.** Traced timings come from measuring a video. 73
+hand-written keys per five seconds cost hours. Two-colours-and-no-third is a decision made once in a
+theme. Turning any of those into an automatic behaviour would be cargo-culting the artefact instead of
+the cause.
+
+**Lesson.** "It is available, authors can use it" is how a capability stays unused. Before defending an
+opt-in default, count the uses: one, in a hundred-film library, is the whole argument.

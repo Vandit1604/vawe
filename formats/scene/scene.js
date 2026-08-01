@@ -17,6 +17,10 @@ import { cameraAt, motionAt } from '/core/sequence.js';
 import { sampleAt } from '/core/spectrum.js';
 import { createRenderer } from '/core/layers/index.js';
 const $ = (id) => document.getElementById(id);
+// px travelled in ONE frame before motion blur switches itself on. 16px/frame is ~480px/s at 30fps,
+// about a quarter of a 1920 frame per second — fast enough that a real camera would smear it.
+const AUTO_BLUR_FLOOR = 16;
+const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value for its fastest layer
 
 // resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
 // stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
@@ -377,7 +381,7 @@ boot((data, fps, theme, canvas) => {
     if (L.out) el.dataset.out = L.out;
     if (L.fxOut) el.dataset.exitDur = '0';
     else if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
-    else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale).toFixed(3));
+    else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
     // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
     // last beat has no exit cut). The incoming ENTER stays per-layer, so contents still stagger in.
@@ -554,12 +558,27 @@ boot((data, fps, theme, canvas) => {
       //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
       //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
       //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
+      //      Opt-in was the whole policy, and across this entire library exactly ONE layer ever set it,
+      //      so every fast move in every other film is a hard-edged slide. Blur is physics: a thing
+      //      crossing the frame in a few frames smears whether or not the author remembered. So it is
+      //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable —
+      //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
       let blurPx = m.blur > 0.01 ? m.blur : 0;
-      if (L.motionBlur) {
-        const shutter = L.motionBlur === true ? 0.5 : +L.motionBlur;
+      if (L.motionBlur !== false) {
         const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
         const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
-        blurPx += Math.min(24, shutter * speed * 0.5);      // half-shutter, capped so text never dissolves
+        // AUTO_BLUR_FLOOR is ~a quarter of the frame per second at 30fps: below it nothing smears in
+        // life either, and a floor is what keeps this from softening every gentle drift in the library.
+        const auto = speed >= AUTO_BLUR_FLOOR;
+        if (L.motionBlur || auto) {
+          // A GENTLER shutter when nobody asked. 0.5 is the right default for a layer whose author
+          // reached for blur deliberately; applied automatically it peaked at the 24px cap on five
+          // creed-launch rects and put 18px on a moving headline, which is dissolved, not smeared.
+          // AUTO_SHUTTER is the value the exemplar's own author chose by eye for its fastest layer.
+          const shutter = L.motionBlur == null ? AUTO_SHUTTER
+            : L.motionBlur === true ? 0.5 : +L.motionBlur;
+          blurPx += Math.min(24, shutter * speed * 0.5);    // half-shutter, capped so text never dissolves
+        }
       }
       // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
       // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.

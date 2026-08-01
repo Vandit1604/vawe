@@ -466,5 +466,12 @@ export function motionDefaults(theme) {
     enter: m.enter ?? DEFAULT_MOTION.enter,
     durationScale: m.durationScale ?? 1,
     stagger: m.stagger ?? DEFAULT_MOTION.stagger,
+    // THINGS SHOULD LEAVE FASTER THAN THEY ARRIVE. An entrance is an introduction and deserves its
+    // time; an exit is over. The exemplar states this per layer (a scrim that fades in over 0.32 and
+    // out over 0.07, a hook that types at 33cps and erases at 60), and every other film in this library
+    // leaves everything at the same speed it arrived because a single symmetric constant is the
+    // default. `exitRatio` moves that decision to the theme, where a brand's snap belongs.
+    // Defaults to 1 so no existing theme changes until it opts in (docs/CRAFT/KEYED-MOTION.md).
+    exitRatio: m.exitRatio ?? 1,
   };
 }

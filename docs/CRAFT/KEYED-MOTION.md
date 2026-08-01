@@ -13,6 +13,20 @@ reference and cannot work out why yours drifts while the original snaps.
 > carries 73 hand-written motion keys. Most films should not pay that. Choose it deliberately, for a
 > hero beat or a recreation, and know what you are buying. Nothing here is gated and nothing should be.
 
+**Three of these are now DEFAULTS — you get them without asking:**
+
+| mechanic | how it became automatic |
+|---|---|
+| linear between dense keys | `motionAt` interpolates a segment shorter than `DENSE_KEY_SEC` (0.14s, ~4 frames) linearly unless you name an `ease`. Dense keys mean mechanical. |
+| motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16 — the exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
+| exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Defaults to `1` so no theme changes until it opts in; `themes/higgsfield.json` sets `0.45`. |
+
+**Two more are one line away:** `panWith` (below) and the `typedHook` / `morphButton` blueprints.
+
+**The rest cannot be defaults and pretending otherwise would be dishonest.** Traced timings come from
+measuring a video; 73 hand-written keys cost hours per five seconds; two-colours-no-third is a decision
+you make once in a theme. Those stay yours.
+
 ---
 
 ## The shape of the file
@@ -48,8 +62,11 @@ them. Easing appears only where the motion genuinely settles — `easeOutCubic` 
 `ring` is the deliberate opposite: 5 keys, zero linear, all cubic. It is a physical bloom, not a
 mechanical move, so it gets curves.
 
-**The failure this prevents.** Two keys plus `easeInOutCubic` is the default reach, and it produces a
-glide. Glide is right for a card arriving and wrong for anything a hand or a machine is doing.
+**The failure this prevents.** Two keys plus `easeInOutCubic` produces a glide. Glide is right for a
+card arriving and wrong for anything a hand or a machine is doing. `easeInOutCubic` also zeroes velocity
+at BOTH ends of every segment, so a dense chain accelerates and stops once per key and the move pulses —
+the same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #125 and left standing as the
+per-layer default until now. **This is automatic below 0.14s per segment.**
 
 ---
 

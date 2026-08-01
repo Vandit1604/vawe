@@ -1,6 +1,6 @@
 {
   "name": "higgsfield",
-  "note": "Recreation reference theme, sampled from the higgsfield.mp4 reference in the repo root. Pure black field with a single acid-lime accent (peaks sampled at #d4ff3f, core #c8f71e, crest highlight #e9fea3). Everything is black or lime: there is no third colour and no mid-grey surface except the app chrome. Geometric sans (Plus Jakarta Sans, the closest vendored match to the reference face), near-white type. Motion is fast and mechanical, cursor-and-typing led.",
+  "note": "Recreation reference theme, sampled from the higgsfield.mp4 reference in the repo root. Pure black field with a single acid-lime accent (peaks sampled at #d4ff3f, core #c8f71e, crest highlight #e9fea3). Everything is black or lime: there is no third colour and no mid-grey surface except the app chrome. Geometric sans (Plus Jakarta Sans, the closest vendored match to the reference face), near-white type. Motion is fast and mechanical, cursor-and-typing led. Exits are faster than entrances (exitRatio 0.45), matching the reference's asymmetric scrim and self-erasing hook.",
   "palette": {
     "bg": "#000000",
     "bg2": "#050505",
@@ -35,7 +35,8 @@
     "settle": 0.3,
     "enter": 36,
     "durationScale": 0.8,
-    "stagger": 0.035
+    "stagger": 0.035,
+    "exitRatio": 0.45
   },
   "bg": {
     "accent": "212,255,63",

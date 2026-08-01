@@ -33,6 +33,9 @@ export function cameraAt(camKf, t) {
 // SECONDS from the layer's start; x/y are OFFSETS added onto the layer's base position, and
 // scale/rot/opacity are composed onto the enter/cut transform. Per-keyframe `ease` (any named
 // easing incl. spring) drives the segment into that keyframe. Holds the endpoints outside range.
+// ~4 frames at 30fps. Below this a segment is not a span with a shape, it is one step of a traced path.
+export const DENSE_KEY_SEC = 0.14;
+
 export function motionAt(kfs, lt) {
   const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0 });
   if (lt <= kfs[0].t) return norm(kfs[0]);
@@ -41,7 +44,15 @@ export function motionAt(kfs, lt) {
   for (let i = 0; i < kfs.length - 1; i++) {
     const a = kfs[i], b = kfs[i + 1];
     if (lt >= a.t && lt <= b.t) {
-      const p = a.t === b.t ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((lt - a.t) / (b.t - a.t)));
+      // DENSE KEYS MEAN MECHANICAL, so interpolate them linearly unless told otherwise. easeInOutCubic
+      // zeroes velocity at BOTH ends of every segment, so a chain of closely-spaced keys accelerates and
+      // stops once per key and the move pulses — the same defect fixed for the camera in #125, left
+      // standing as the per-layer default. A hand-keyed cursor or drag lands keys every 2-4 frames and
+      // its shape comes from WHERE the keys are, not from a curve fitted over each gap. Above the
+      // threshold the old default stands, because a sparse key really is a span with a shape.
+      const seg = b.t - a.t;
+      const p = a.t === b.t ? 1
+        : resolveEasing(b.ease || (seg < DENSE_KEY_SEC ? 'linear' : 'easeInOutCubic'))(clamp01((lt - a.t) / seg));
       return { dx: lerp(a.x ?? 0, b.x ?? 0, p), dy: lerp(a.y ?? 0, b.y ?? 0, p),
         scale: lerp(a.scale ?? 1, b.scale ?? 1, p), rot: lerp(a.rot ?? 0, b.rot ?? 0, p),
         opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p), blur: lerp(a.blur ?? 0, b.blur ?? 0, p) };
