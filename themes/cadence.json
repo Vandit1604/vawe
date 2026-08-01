@@ -1,0 +1,28 @@
+{
+  "name": "cadence",
+  "note": "Made-up product theme for the Cadence launch clip, built in the higgsfield register: near-black field, ONE amber accent, and no third colour except the app chrome's greys. Faces are tracked free files (Bricolage Grotesque + Geist Mono), never Sohne — that one is paid and lives in the gitignored local/ folder, so a clean clone would silently fall back to the body face. exitRatio 0.4: things leave faster than they arrive.",
+  "palette": {
+    "bg": "#07080a", "bg2": "#0b0d10", "surface": "#14161b", "surface2": "#1c1f26",
+    "line": "rgba(255,255,255,0.07)", "lineStrong": "rgba(255,255,255,0.16)",
+    "text": "#f4f1ea", "text2": "#a49e92", "dim": "#6e695f",
+    "accent": "#ffb020", "accentDim": "rgba(255,176,32,0.16)", "accentGlow": "rgba(255,176,32,0.5)",
+    "up": "#ffb020", "down": "#e05a3a", "ink": "#f4f1ea"
+  },
+  "gradient": ["#0c0a06", "#08080a", "#000000"],
+  "type": { "sans": "Bricolage Grotesque", "serif": "Bricolage Grotesque", "mono": "Geist Mono", "num": "Geist Mono" },
+  "motion": { "easing": "easeOutCubic", "bounce": 0.08, "settle": 0.3, "enter": 34, "durationScale": 0.82, "stagger": 0.032, "exitRatio": 0.4 },
+  "bg": {
+    "accent": "255,176,32", "tint": "120,96,40", "tint2": "255,214,140", "dotLight": "70,58,28",
+    "paperBase": ["#0c0a06", "#000000"], "softBase": ["#0e0c08", "#000000"],
+    "accentBase": ["#ffb020", "#a06f10"], "inkBase": ["#08080a", "#000000"],
+    "border": "#1e1a12", "dark": ["#0c0a06", "#000000"], "darkMesh": ["#0e0c08", "#000000"],
+    "deep": ["#08080a", "#000000"], "light": ["#14161b", "#000000"], "ink": ["#08080a", "#000000"],
+    "paper": "#07080a"
+  },
+  "vars": {
+    "--ink": "#f4f1ea", "--paper": "#07080a", "--muted": "#a49e92", "--em": "#ffb020",
+    "--on-light": "#0c0a06", "--on-dark": "#f4f1ea", "--border": "#1e1a12",
+    "--accent-soft": "rgba(255,176,32,0.16)"
+  },
+  "bgDefault": { "preset": "plain" }
+}
