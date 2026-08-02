@@ -129,8 +129,27 @@ const scene = {
     T({ text: 'cadence.audio', x: 1240, y: 372, w: 480, size: 34, weight: 500, align: 'right',
       color: 'var(--text-2)', font: 'mono', anim: 'fade', enterDur: 0.6, start: 12.1, duration: 2.9, exitDur: 0 }),
   ],
-  // one moving field the whole way, on the accent, low enough to stay a texture rather than a pattern
-  bg: [{ t: 0, preset: 'dotmatrix', mode: 'wave', period: 9, spacing: 64, peakAlpha: 0.16, baseAlpha: 0.04, from: 0, to: 15 }],
+  // A HAND-AUTHORED backdrop, because `dotmatrix` was chosen to clear a `no-bg-motion` warning and a
+  // dot field means nothing for a product that writes music. This is the grid the music sits on: beat
+  // lines every 120px and a brighter bar line every fourth, scrolling left at 240px/s. At that rate one
+  // beat crosses every 0.5s, so the field is keeping 120bpm — the backdrop is a metronome rather than a
+  // texture. Plus the zero-line the waveform is drawn against, and a vignette so the centre reads.
+  // No CSS animation anywhere (the sanitiser rejects it by name): everything is a function of var(--t),
+  // so a seeked frame is pure in n.
+  bg: [{ t: 0, from: 0, to: 15, tone: 'dark', html:
+    `<div style="position:absolute;inset:0;background:#07080a"></div>`
+    // TRANSFORM, because it is the path core/bg-html.js documents and the DOM confirms it: at t=7.0 this
+    // element computes matrix(1,0,0,1,-1680,0), exactly 7.0 x -240. I first blamed background-position
+    // for not moving, on a pixel test that was too crude to tell — at alpha 0.05 under a vignette the
+    // flat backdrop dominates and a zero shift wins by default. That was a bad measurement, not a
+    // finding; whether background-position also works is untested.
+    + `<div style="position:absolute;top:0;bottom:0;left:0;width:5600px;`
+    + `background-image:repeating-linear-gradient(90deg,rgba(255,176,32,0.20) 0 2px,transparent 2px 480px),`
+    + `repeating-linear-gradient(90deg,rgba(255,176,32,0.085) 0 1px,transparent 1px 120px);`
+    + `transform:translateX(calc(var(--t,0) * -240px))"></div>`
+    + `<div style="position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,176,32,0.07)"></div>`
+    + `<div style="position:absolute;inset:0;background:radial-gradient(72% 58% at 50% 46%,`
+    + `rgba(0,0,0,0) 0%,rgba(0,0,0,0.42) 74%,rgba(0,0,0,0.78) 100%)"></div>` }],
   // a 15s film with a locked-off camera reads as a slideshow of stills however much moves inside it
   cameraMove: { move: 'slowPush', start: 0, dur: 15, from: 1, to: 1.06, ease: 'easeInOutCubic' },
 };

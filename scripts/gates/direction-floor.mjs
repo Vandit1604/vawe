@@ -50,8 +50,13 @@ const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 // this library. A window that names a mode, period or drift is animating whatever it is called, so ask
 // the window rather than only its name.
 const MOVING_BG = /gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i;
+// ...and a HAND-AUTHORED backdrop (core/bg-html.js) animates by being a function of `var(--t)`, the one
+// thing it is allowed to move by — CSS animation is disabled engine-wide and the sanitiser rejects it.
+// Without this the escape hatch for a backdrop the preset vocabulary cannot express was told it was a
+// flat field, which pushes the author back onto the presets: the opposite of what it exists for.
 const animatedWin = (b) => b && (MOVING_BG.test(String(b.preset || b.value || ''))
-  || b.mode != null || b.period != null || b.driftX != null || b.driftY != null);
+  || b.mode != null || b.period != null || b.driftX != null || b.driftY != null
+  || (typeof b.html === 'string' && /var\(\s*--[tp]\b/.test(b.html)));
 const hasBgMotion = (d.bg || []).some(animatedWin)
   || flat.some((l) => l.shader || l.canvasFx || l.three || l.raymarch || l.type === 'paint');
 
