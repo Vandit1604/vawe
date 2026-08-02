@@ -7,7 +7,7 @@
 //   FAIL  (iii) settle before exit— payoffs reach steady state ≥0.5s before the exit transition
 //   FAIL  (iv)  count-up sane     — counters are non-decreasing and stable at the end
 //   FAIL  (v)   typing completes  — typewriter text reaches its full length before the exit
-//   WARN  (vi)  frozen span       — >2s where nothing tracked changes (dead time)
+//   WARN  (vi)  frozen span       — nothing tracked changes for >15% of the runtime (capped 0.6-2s)
 //   WARN  (vii) velocity spike    — >80px/frame jumps outside segment boundaries
 //
 // Exemptions are declarative: elements (or ancestors) with data-motion="loop" (carets, spinners,
@@ -62,6 +62,7 @@ async function audit(format) {
   if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames;
+  const TOTAL_SEC = total / FPS;   // runtime in seconds — the frozen-span budget scales with it
 
   // ---- capture: per-element time series across every (strided) frame ----
   const series = await page.evaluate(async (total, stride) => {
@@ -80,7 +81,17 @@ async function audit(format) {
         for (const node of chains[i]) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; } eop *= +s.opacity; }
         if (hidden) { out.rows[i].push(null); return; }
         const t = (el.textContent || '').trim();
-        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32)]);
+        // A layer can be busy inside its own box: an svg whose bars scale on var(--t) animates hard while
+        // its bounding rect, opacity and text all sit perfectly still. Measuring only the outside made
+        // `cadence`'s waveform read as frozen through the exact seconds it was drawing itself on. So a
+        // cheap fingerprint of descendant transforms rides along, capped so a 90-layer film stays cheap.
+        let sig = 0, seen = 0;
+        for (const kid of el.querySelectorAll('*')) {
+          if (seen++ >= 24) break;
+          const tr = getComputedStyle(kid).transform;
+          if (tr && tr !== 'none') for (let c = 0; c < tr.length; c++) sig = (sig * 31 + tr.charCodeAt(c)) | 0;
+        }
+        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), sig]);
       });
     }
     return out;
@@ -224,10 +235,15 @@ async function audit(format) {
         if (!content[i]) continue;
         const a = series.rows[i][j - 1], b = series.rows[i][j];
         if (!!a !== !!b) { changed = true; break; }
-        if (a && b && (Math.abs(a[0] - b[0]) > 0.3 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.005 || a[3] !== b[3])) { changed = true; break; }
+        if (a && b && (Math.abs(a[0] - b[0]) > 0.3 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.005 || a[3] !== b[3] || a[5] !== b[5])) { changed = true; break; }
       }
       if (changed) lastChange = j;
-      else if (F[j] - F[lastChange] > 2 * FPS) { add('WARN', 'vi:frozen', w, '', `nothing moves ${(F[lastChange] / FPS).toFixed(1)}s → ${(F[j] / FPS).toFixed(1)}s`); lastChange = j; }
+      // A flat 2s misses the whole short-film end of the library, and "how long is too long to be still"
+      // is a fraction of the runtime, not an absolute. `cadence` held a perfectly frozen frame for 0.9s
+      // out of 5s — a fifth of the film — and sat under this threshold while `beat-check` called the
+      // span covered because the layers were still present. A short dead tail fell between the two
+      // gates, and only a person watching found it (docs/MISTAKES.md #196, #200).
+      else if (F[j] - F[lastChange] > Math.min(2, Math.max(0.6, TOTAL_SEC * 0.15)) * FPS) { add('WARN', 'vi:frozen', w, '', `nothing moves ${(F[lastChange] / FPS).toFixed(1)}s → ${(F[j] / FPS).toFixed(1)}s (${((F[j] - F[lastChange]) / FPS / TOTAL_SEC * 100).toFixed(0)}% of a ${TOTAL_SEC.toFixed(1)}s film)`); lastChange = j; }
     }
   }
 

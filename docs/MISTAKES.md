@@ -4612,3 +4612,86 @@ So `lintData` now simply prints the arithmetic for every panning layer: *"pans w
 where it STARTS (932, 520) — it comes to rest +246px across, at (1178, 520)."* The number was always
 computable and appeared nowhere: not in the layer, not in the source, not in any error. Two bugs from
 guessing it is enough evidence that people will keep guessing it.
+
+---
+
+## #199 — the silent-prop sweep: four conditionals that swallow an author's input
+
+**Class E of the predicted-bug hunt.** A prop read only INSIDE a conditional on another prop does nothing
+when that other prop is absent, and does it in silence. CLAUDE.md already described two of these as
+things that "render silently" rather than treating them as bugs. Four found, all now spoken:
+
+| what | was | now |
+|---|---|---|
+| `anchor` naming a layer that does not exist | skipped, layer stays at its own x/y | **hard error**, with the known ids listed |
+| `at` without `anchor` | ignored | lint |
+| `at: "…center"` with `anchor` but no `w` | silently falls back to a plain left offset | lint |
+| `align: center/right` without `w` | box shrink-wraps, alignment does nothing | lint |
+
+The `anchor` one is the sharp one. `resolveAnchors` does `const T = L.anchor && byId[L.anchor]; if (!T)
+continue;` — the identical shape `panWith` had. `panWith` was given a hard error for it; `anchor`, three
+lines away in the same file, kept the silent skip. Fixing one instance of a class and leaving its twin
+untouched is how a class survives.
+
+**What counting first saved.** The obvious `at`-without-`anchor` check would have fired on
+`app-showcase.json`, where `tapRipple` takes `at: 2.1` as a TIME. The prop is overloaded, and a check
+written from the anchor code alone would have called an innocent scene broken on its first run. Scoped
+to anchor-vocabulary strings on non-block layers. Library sweep after: 2845 layers, 0 new hard failures,
+1 new warning (`stripe.json`, a real `align: center` with no `w`).
+
+---
+
+## #200 — a frozen span is a fraction of the runtime, and the gate could not see inside a layer
+
+**Class D: the gap between two gates' thresholds.** `motion-audit` warned on a frozen span over a flat
+2s. `beat-check` sees a hole only where the frame holds nothing but the backdrop. `cadence` held a
+perfectly still frame for 0.9s of 5s — a fifth of the film — and fell between them (#196). "Too long to
+be still" is a proportion, not a constant, so the budget is now `15% of runtime, clamped to 0.6-2s`.
+
+**And then the tighter threshold immediately produced a false positive**, which is the more useful half.
+It flagged `cadence` as frozen from 3.1s to 3.9s — the exact seconds its waveform is drawing itself on,
+bar by bar. The audit measured each element's bounding box, opacity and text, and an svg whose bars
+scale on `var(--t)` changes none of the three. A layer can be busy inside its own box, and the gate was
+blind to it.
+
+So the row now carries a cheap fingerprint of descendant transforms (capped at 24 nodes, so a 90-layer
+film stays affordable). Both directions were then proven: quiet on the fixed `cadence`, and firing on a
+synthetic 5s film with a genuinely dead tail.
+
+**Lesson.** Tightening a threshold without checking what the gate can actually SEE converts a miss into a
+false alarm, and a gate that cries wolf gets waived and then protects nothing (#190). The threshold and
+the measurement have to move together.
+
+---
+
+## Class B and Class C: what the hunt did NOT find
+
+Recorded because a negative result from a systematic sweep is worth as much as a hit, and because the
+next person to have this idea should know the yield.
+
+**Class C (identity-vs-absent defaults)** has exactly two sites in the engine: `motionAt` and `cameraAt`,
+both in `core/sequence.js`. `motionAt`'s contract is deliberate and load-bearing. `cameraAt` carries the
+same shape, and **0 of 34** multi-key camera tracks in the library have a partial key, so it is a trap
+nobody has stepped in. Splitting the semantics so camera and layer tracks behaved differently would be a
+worse trap than either, so neither was changed — instead `lintData` now says out loud when a track drops
+a property it had moved off identity. That warning found one real defect on its first run:
+`rec3-skill`'s spinner reaches `rot: 1310` and its next key omits `rot`, so it whirls SIX FULL ROTATIONS
+BACKWARDS in seven frames. Left in place: the scene is cited evidence in earlier entries.
+
+**Class B (composed transforms)** produced one confirmed non-bug worth writing down, because the
+reasoning looked airtight and was wrong. `resolveBecomes` reads the outgoing layer's last keyframe as a
+raw object (`num(lastA.x, 0)`), which looked like #195 exactly: a fade-out key stating only `opacity`
+would report x=0 and scale=1 instead of where the layer really ended. It is not a bug, because
+`motionAt` at that same instant returns `norm(last)` — literally `last.x ?? 0`. The two agree BY
+CONSTRUCTION. The layer genuinely does snap home there, the handover matches what is drawn, and the real
+problem is the snap itself, which the #199 lint now reports. A probe comparing raw against resolved can
+never fail; writing it is what showed that.
+
+The one real `becomes` finding is a silent discard: keys the incoming layer declares inside the handover
+window are dropped, correctly, and without a word. Now a lint.
+
+**Yield of the whole hunt: 4 classes, 172 automated probes plus targeted checks, 3 real bugs
+(`multiPhase` #197, the `anchor` silent skip, `rec3-skill`'s reversing spinner), 4 silent-input fixes,
+1 gate blind spot, and 2 confidently-predicted bugs that did not exist.** The miss rate is the honest
+headline: predicting bug shapes finds bugs of shapes already known, and every user-visible defect this
+session still came from someone watching the video.

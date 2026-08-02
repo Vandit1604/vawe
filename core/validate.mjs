@@ -81,6 +81,16 @@ export function layoutErrors(cfg) {
       else if (!Array.isArray(src.motion) || !src.motion.length) out.push(`${label}: panWith "${L.panWith}", but that layer has no \`motion\` track to share.`);
     }
   });
+  // `anchor` names another layer's `id`, and a name that matches nothing is skipped in SILENCE —
+  // `resolveAnchors` does `const T = L.anchor && byId[L.anchor]; if (!T) continue;`, so a typo leaves the
+  // layer at whatever x/y it happened to carry and the annotation quietly stops pointing at anything.
+  // This is the identical shape `panWith` had, and `panWith` got a hard error for it while `anchor`,
+  // three lines away in the same file, kept the silent skip (docs/MISTAKES.md #199).
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L) || typeof L.anchor !== 'string' || ids.has(L.anchor)) return;
+    out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}" — no layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none — give the target an `id`)'}.`);
+  });
+
   // A motion track that REVERSES at speed is a snap, and no easing hides it: the layer is travelling one
   // way and the next frame throws it back the other. Measured on the RESOLVED track (pans merged in) by
   // SAMPLING AT 30fps, because neither of the cheaper tests works. Key-to-key average velocity calls an
@@ -324,6 +334,79 @@ function noEmdash(v, path, errors) {
 // every existing gate. Pure. Scene layers only.
 export function lintData(data) {
   const warns = [];
+  // `becomes` overwrites the incoming layer's opening keys: during the handover the layer is not itself
+  // yet, so `resolveBecomes` replaces everything it declared inside the window with the computed
+  // open/settle pair. That is right, and it is DATA THE AUTHOR WROTE BEING DISCARDED, which has to be
+  // said out loud rather than inferred from a source comment nobody reads while authoring.
+  for (const [i, A] of (data.layers || []).entries()) {
+    if (!isObj(A) || typeof A.becomes !== 'string') continue;
+    const B = (data.layers || []).find((x) => isObj(x) && x.id === A.becomes);
+    if (!isObj(B) || !Array.isArray(B.motion)) continue;
+    const dur = Math.max(0.05, typeof A.becomesDur === 'number' ? A.becomesDur : 0.42);
+    const lost = B.motion.filter((k) => isObj(k) && (typeof k.t === 'number' ? k.t : 0) <= dur + 1e-6);
+    if (lost.length) {
+      warns.push(`layers[${i}]${A.id ? ` #${A.id}` : ''}: becomes "${B.id}", and the handover takes ${dur}s — so ${lost.length} of "${B.id}"'s own motion key(s) at t≤${dur} (${lost.map((k) => `t=${k.t ?? 0}`).join(', ')}) are DROPPED and replaced by the computed match. Move them past ${dur}s, or shorten \`becomesDur\`.`);
+    }
+  }
+
+  // A key states what changes and says nothing about the rest, and `motionAt`/`cameraAt` read that
+  // silence as IDENTITY, not as "unchanged" (core/sequence.js). That contract is deliberate and scenes
+  // depend on it — a layer whose only `opacity` key sits at the end fades over the last segment precisely
+  // because the keys before it read as opacity 1. But it means a track that declares a property, moves it
+  // somewhere, and then stops mentioning it SNAPS it home, and nothing about the JSON looks wrong.
+  //
+  // So it is warned about rather than changed. Changing the reader was tried and measured: per-property
+  // interpolation altered 19 scenes and made one film's button invisible throughout (#195). Splitting the
+  // semantics so camera and layer tracks behave differently would be a worse trap than either. One
+  // contract, stated out loud when it is about to bite. Only when the reset actually MOVES something —
+  // a property dropped while it already sat at identity changes nothing and is not worth a word.
+  {
+    const IDENT = { x: 0, y: 0, scale: 1, rot: 0, opacity: 1, blur: 0, s: 1, rx: 0, ry: 0, p: 1600 };
+    const scan = (keys, props, label) => {
+      if (!Array.isArray(keys) || keys.length < 2) return;
+      for (const pr of props) {
+        const first = keys.findIndex((k) => isObj(k) && k[pr] != null);
+        if (first < 0) continue;
+        for (let i = first + 1; i < keys.length; i++) {
+          if (!isObj(keys[i]) || keys[i][pr] != null) continue;
+          const prior = keys.slice(0, i).reverse().find((k) => isObj(k) && k[pr] != null);
+          if (prior && Math.abs(prior[pr] - IDENT[pr]) > 1e-9) {
+            warns.push(`${label}: \`${pr}\` is ${prior[pr]} at t=${prior.t}, and the key at t=${keys[i].t} does not mention it — a key that omits a property RESETS it to ${IDENT[pr]}, it does not hold it. Restate \`${pr}\` on that key (and every later one) unless you mean it to snap back.`);
+          }
+          break;
+        }
+      }
+    };
+    const cam = Array.isArray(data.camera) ? data.camera : Array.isArray(data.cam) ? data.cam : null;
+    if (cam) scan(cam, ['s', 'x', 'y', 'rx', 'ry', 'p'], 'camera');
+    const walk = (ls) => (ls || []).forEach((L, i) => {
+      if (!isObj(L)) return;
+      scan(L.motion, ['x', 'y', 'scale', 'rot', 'opacity', 'blur'], `layers[${i}]${L.id ? ` #${L.id}` : ''}`);
+      if (Array.isArray(L.children)) walk(L.children);
+    });
+    walk(data.layers);
+  }
+
+  // A prop that is read only INSIDE a conditional on another prop does nothing when that other prop is
+  // absent — and does it silently, which is the failure class this repo hates most. Three of them live
+  // in the anchor/align code, and CLAUDE.md already describes two as things that "render silently"
+  // rather than fixing them (docs/MISTAKES.md #199). `at` is skipped for blocks, where it is an
+  // unrelated block param (`tapRipple` uses `at: 2.1` as a time) — the prop is overloaded, and a check
+  // that did not know that would have fired on innocent scenes.
+  for (const [i, L] of (data.layers || []).entries()) {
+    if (!isObj(L)) continue;
+    const label = `layers[${i}]${L.id ? ` #${L.id}` : ''}`;
+    if (typeof L.at === 'string' && !L.anchor && L.type !== 'block') {
+      warns.push(`${label}: \`at: "${L.at}"\` positions a layer against its \`anchor\`, and there is no \`anchor\` — so it is IGNORED and the layer sits at its own x/y. Add \`anchor: "<id>"\`, or drop \`at\`.`);
+    }
+    if (typeof L.at === 'string' && L.anchor && L.at.endsWith('center') && L.w == null) {
+      warns.push(`${label}: \`at: "${L.at}"\` centres this layer on its anchor by subtracting half its OWN width, and it has no \`w\` — so it silently falls back to a plain left offset. Give it \`w\`.`);
+    }
+    if ((L.align === 'center' || L.align === 'right') && L.w == null && L.type !== 'block') {
+      warns.push(`${label}: \`align: "${L.align}"\` aligns text inside the layer's box, and without \`w\` that box shrink-wraps the text — so the alignment does nothing. Give it \`w\`, or drop \`align\`.`);
+    }
+  }
+
   // `panWith` copies a track as DELTAS, so the x/y an author writes is where the layer STARTS and the
   // pan carries it somewhere else. That total is computable and appears nowhere: not in the layer, not
   // in the source, not in any error. Two separate bugs came from guessing it — the button snapping
