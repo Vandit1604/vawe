@@ -4383,3 +4383,39 @@ the cause.
 
 **Lesson.** "It is available, authors can use it" is how a capability stays unused. Before defending an
 opt-in default, count the uses: one, in a hundred-film library, is the whole argument.
+
+## #193 — a layer flashed back to solid on the last frames of its own fade
+
+A viewer reported a flicker around 5s in `cadence-film`. Reading the opacity out of the DOM frame by
+frame:
+
+```
+ 4.80s  0.057      fading correctly
+ 4.90s  0.007      nearly gone
+ 4.97s  1.000   ← full opacity, one frame
+ 5.00s  0
+```
+
+**Root cause, and it is one falsy zero.** `core/clips.js` writes opacity with `.toFixed(3)`, so a layer
+at the tail of its fade holds the STRING `"0.000"`. Two places in `formats/scene/scene.js` then composed
+a motion or prop track's opacity onto it with `(parseFloat(el.style.opacity) || 1) * m.opacity`.
+`parseFloat("0.000")` is `0`, which is falsy, so `|| 1` read it as "nothing set here" and handed back
+FULL opacity. The layer became solid again for exactly the frames where its own fade had rounded to
+zero, then vanished when the window closed.
+
+**Fix.** `baseOpacity(el)` returns the parsed value whenever it is finite and only defaults to 1 when it
+is not. Opacity through the same window is now monotonic: 0.057, 0.007, 0.002, 0, 0.
+
+**Blast radius: 34 scenes** have a layer with a motion or `vars` track and a fading exit, which is the
+whole exposed set. The fix can only make those frames darker, never brighter, so nothing that read
+correctly changes.
+
+**Why nothing caught it.** `make probe` compares the DOM across render orders and this was identical in
+every order — deterministically wrong. `seam-check` looks for a luminance FLASH in a transition overlap
+and this was a flash of one layer inside its own window, not at a declared boundary. `flicker-check`
+measures whole-frame ink against both neighbours, and one faint bar returning at 4% of frame did not
+clear its floor. A human watching the video found it.
+
+**Lesson.** `x || default` is wrong for any quantity whose valid range includes zero, and opacity is the
+canonical case. The bug survived because it only fires in a window three frames wide, at the end of a
+fade, where nobody looks.

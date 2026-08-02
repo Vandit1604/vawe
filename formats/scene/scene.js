@@ -19,6 +19,13 @@ import { createRenderer } from '/core/layers/index.js';
 const $ = (id) => document.getElementById(id);
 // px travelled in ONE frame before motion blur switches itself on. 16px/frame is ~480px/s at 30fps,
 // about a quarter of a 1920 frame per second — fast enough that a real camera would smear it.
+// The opacity already on the element, where ZERO IS A REAL VALUE. `parseFloat(x) || 1` was the idiom,
+// and core/clips.js writes opacity with .toFixed(3) — so a layer at the tail of its fade becomes the
+// string "0.000", parseFloat gives 0, `|| 1` reads that as "nothing set" and hands back FULL opacity.
+// The layer flashes back to solid for the last frames of its own exit. Measured on cadence-film's app
+// chrome: 0.057 at 4.80s, 0.007 at 4.90s, then 1.000 at 4.97s, one bright frame before it vanished.
+// Every layer with a motion or prop track and a fade exit was exposed to it.
+const baseOpacity = (el) => { const v = parseFloat(el.style.opacity); return Number.isFinite(v) ? v : 1; };
 const AUTO_BLUR_FLOOR = 16;
 const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value for its fastest layer
 
@@ -582,7 +589,7 @@ boot((data, fps, theme, canvas) => {
         const v = sampleAt(window.__spectrum, f, r.band || 'low');   // f IS the frame index
         const [lo, hi] = r.range || [0, 1];
         const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
-        if (r.prop === 'opacity') el.style.opacity = ((parseFloat(el.style.opacity) || 1) * val).toFixed(3);
+        if (r.prop === 'opacity') el.style.opacity = (baseOpacity(el) * val).toFixed(3);
         else if (r.prop === 'blur') {
           const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
           el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
@@ -598,7 +605,7 @@ boot((data, fps, theme, canvas) => {
       const m = motionAt(L.motion, t - start);
       const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
       el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
-      el.style.opacity = ((parseFloat(el.style.opacity) || 1) * m.opacity).toFixed(3);
+      el.style.opacity = (baseOpacity(el) * m.opacity).toFixed(3);
       // TWO blur materials, summed into one blur():
       //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
       //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled

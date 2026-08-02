@@ -117,8 +117,16 @@ const scene = {
     T({ text: 'Written, arranged and mixed while you watch.', x: 200, y: 356, w: 1020, size: 40,
       weight: 400, color: 'var(--text-2)', anim: 'rise', enterDur: 0.55, start: 5.95, duration: 3.7, out: 'fade',
       motion: [{ t: 0, y: 16 }, { t: 0.5, y: 0, ease: 'easeOutCubic' }] }),
-    T({ text: '00:00 / 01:30', x: 1310, y: 356, w: 410, size: 34, weight: 500, align: 'right',
+    // A readout stuck at 00:00 while the playhead sweeps for four seconds is a lie in the frame, and
+    // CSS cannot format mm:ss. So show the elapsed instead of stating it: the track length is a true
+    // static fact, and a bar that fills with the playhead carries the position.
+    T({ text: '01:30', x: 1400, y: 348, w: 320, size: 32, weight: 500, align: 'right',
       color: 'var(--text-2)', font: 'mono', anim: 'fade', enterDur: 0.5, start: 6.2, duration: 3.45, out: 'fade' }),
+    { type: 'html', id: 'elapsed', x: 1180, y: 402, w: 540, h: 6, start: 6.2, duration: 3.45,
+      anim: 'fade', enterDur: 0.5, out: 'fade',
+      html: `<div style="position:relative;width:540px;height:6px;border-radius:3px;background:var(--accent-dim)">`
+        + `<div style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent);`
+        + `width:calc(540px * clamp(0,(var(--t,0) - ${CUT1 + 0.1}) / 4.2,1))"></div></div>` },
 
     // ---- beat 3: the payoff ----
     T({ text: 'Ninety seconds of music.', x: 200, y: 214, w: 1500, size: 104,
