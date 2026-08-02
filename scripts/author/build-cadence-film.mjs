@@ -91,7 +91,8 @@ const scene = {
       font: 'mono', ls: '0.22em', start: 0.08,  duration: 4.72, anim: 'fade', enterDur: 0.5 }),
     T({ text: 'Every scene needs a score.', x: 200, y: 214, w: 1500, size: 104,
       split: 'word', preset: 'up', each: 0.5, stagger: 0.05, start: 0.32, duration: 4.48, out: 'fade' }),
-    { type: 'html', id: 'chrome', x: 0, y: 0, w: 1920, html: chrome(), start: 1.65, duration: 3.1,
+    { type: 'html', id: 'chrome', x: 0, y: 0, w: 1920, h: 1080, html: chrome(), becomes: 'stems',
+      becomesDur: 0.5, start: 1.65, duration: 3.35,
       anim: 'fade', enterDur: 0.35, out: 'fade',
       motion: [{ t: 0, y: 26 }, { t: 0.46, y: 0, ease: 'easeOutCubic' }] },
     T({ id: 'prompt', panWith: 'chrome', text: 'Score a chase through Tokyo rain', x: 246, y: 414,
@@ -101,6 +102,9 @@ const scene = {
     // ---- the spine: one form across all three beats ----
     { type: 'html', id: 'form', x: FORM.x, y: FORM.y, w: FORM.w, h: FORM.h, html: form(),
       start: 0.4, duration: 14.6, anim: 'fade', enterDur: 0.5, exitDur: 0 },
+
+    { type: 'rect', id: 'stems', x: 176, y: 528, w: 1568, h: 444, radius: 26, bg: 'rgba(255,255,255,0.02)',
+      border: '1px solid var(--line)', start: 5.0, duration: 4.8, anim: 'fade', enterDur: 0.3, out: 'fade' },
 
     // ---- beat 2: the work ----
     T({ text: 'Four stems. One take.', x: 200, y: 214, w: 1500, size: 104,

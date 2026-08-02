@@ -294,6 +294,20 @@ const CASES = [
       { duration: 5 }) },
   // panWith copies another layer's motion on the same wall clock. A dangling reference used to be a
   // silent no-op, which is the shape of bug where a layer just quietly stops panning with the page.
+  // `becomes` is a claim about a boundary. If the two layers do not meet there the handover happens over
+  // a gap (empty frame) or an overlap (both on screen), and the match silently stops reading — the exact
+  // failure the feature exists to remove, so it is checked rather than trusted.
+  { gate: 'validate', name: 'becomes across a gap instead of a boundary', expect: 'fail',
+    match: /handover|becomes/,
+    scene: scene([
+      { type: 'rect', id: 'card', x: 300, y: 200, w: 640, h: 380, bg: '#c2f23b', start: 0.2, duration: 1.4, becomes: 'dot' },
+      { type: 'rect', id: 'dot', x: 900, y: 460, w: 90, h: 90, radius: 45, bg: '#c2f23b', start: 3.4, duration: 1.2 },
+    ], { duration: 5 }) },
+  { gate: 'validate', name: 'becomes that meets its boundary is fine', expect: 'pass',
+    scene: scene([
+      { type: 'rect', id: 'card', x: 300, y: 200, w: 640, h: 380, bg: '#c2f23b', start: 0.2, duration: 1.4, becomes: 'dot' },
+      { type: 'rect', id: 'dot', x: 900, y: 460, w: 90, h: 90, radius: 45, bg: '#c2f23b', start: 1.6, duration: 1.2 },
+    ], { duration: 5 }) },
   { gate: 'validate', name: 'panWith naming a layer that does not exist', expect: 'fail',
     match: /panWith|unknown/,
     scene: scene([TXT({ text: 'Rides along', start: 0.3, duration: 2.4, panWith: 'nope' })],

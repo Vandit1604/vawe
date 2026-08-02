@@ -1002,6 +1002,12 @@
           "type": "boolean",
           "label": "Force include/exclude from layout audit"
         },
+        "becomes": {
+          "type": "string",
+          "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.42) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
+        },
+        "becomesDur": { "type": "number", "label": "Seconds the incoming layer takes to settle from the handed-over pose into its own (default 0.42)." },
+        "becomesEase": { "type": "string", "label": "Easing for the handover settle (default easeOutCubic)." },
         "panWith": {
           "type": "string",
           "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: docs/CRAFT/KEYED-MOTION.md."

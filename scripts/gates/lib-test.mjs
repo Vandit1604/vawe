@@ -1019,5 +1019,44 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('upsertKey merges onto the existing key', upsertKey([{ t: 0, x: 1, ease: 'linear' }], { t: 0, x: 2 })[0].ease === 'linear');
 }
 
+
+// ---- becomes: the handover must be EXACT, or a match cut silently stops reading ---------------------
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'formats/scene/scene.js'), 'utf8');
+  const body = src.slice(src.indexOf('function resolveBecomes'), src.indexOf('// resolveAnchors'));
+  const num = (v, d2) => (typeof v === 'number' && Number.isFinite(v) ? v : d2);
+  // eslint-disable-next-line no-new-func
+  const resolveBecomes = new Function('num', `${body}; return resolveBecomes;`)(num);
+  const centre = (L, k) => [L.x + num(k.x, 0) + L.w / 2, L.y + num(k.y, 0) + L.h / 2];
+
+  const A = { id: 'card', type: 'rect', x: 300, y: 200, w: 640, h: 380, start: 1, duration: 2, becomes: 'dot',
+    motion: [{ t: 0 }, { t: 1.4, x: 120, y: -40, scale: 0.5, rot: 6 }] };
+  const B = { id: 'dot', type: 'rect', x: 1500, y: 800, w: 80, h: 80, start: 3, duration: 2 };
+  resolveBecomes({ layers: [A, B] });
+  const [acx, acy] = centre(A, A.motion[A.motion.length - 1]);
+  const [bcx, bcy] = centre(B, B.motion[0]);
+  // CSS scales about the element's own centre, so scaling must NOT move the centre. Using the scaled
+  // half-width put this 160px out and it looked almost right, the worst kind of wrong for a match cut.
+  ok('becomes hands over on the exact centre', acx === bcx && acy === bcy);
+  ok('becomes covers the outgoing form', B.w * B.motion[0].scale >= A.w * 0.5);
+  ok('becomes carries rotation and then releases it', B.motion[0].rot === 6 && B.motion[1].rot === 0);
+  ok('becomes settles into the layer own pose', B.motion[1].x === 0 && B.motion[1].y === 0 && B.motion[1].scale === 1);
+
+  // an incoming layer's own keys resume after the handover; keys inside it are dropped
+  const C = { id: 'c', type: 'rect', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1, becomes: 'd' };
+  const D = { id: 'd', type: 'rect', x: 500, y: 500, w: 100, h: 100, start: 1, duration: 2,
+    motion: [{ t: 0.1, x: 999 }, { t: 1.2, x: 40 }] };
+  resolveBecomes({ layers: [C, D] });
+  ok('becomes drops incoming keys inside the handover', !D.motion.some((k) => k.x === 999));
+  ok('becomes keeps incoming keys after the handover', D.motion.some((k) => k.t === 1.2 && k.x === 40));
+
+  let threw = '';
+  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'nope' }] }); } catch (e) { threw = e.message; }
+  ok('becomes throws on a dangling reference', /no layer with id/.test(threw));
+  threw = '';
+  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'x' }] }); } catch (e) { threw = e.message; }
+  ok('becomes throws on a self reference', /becomes itself/.test(threw));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

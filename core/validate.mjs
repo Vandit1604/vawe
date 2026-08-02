@@ -79,6 +79,27 @@ export function layoutErrors(cfg) {
       else if (!Array.isArray(src.motion) || !src.motion.length) out.push(`${label}: panWith "${L.panWith}", but that layer has no \`motion\` track to share.`);
     }
   });
+  // `becomes` is a claim about a BOUNDARY: this form ends and that one takes it over. If the incoming
+  // layer does not start where the outgoing one ends, the handover happens over a gap or an overlap and
+  // the match silently stops reading — which is the whole failure the feature exists to remove, so it is
+  // checked rather than trusted.
+  (cfg.layers || []).forEach((A, i) => {
+    if (!isObj(A) || typeof A.becomes !== 'string') return;
+    const label = `layers[${i}] (${A.type || 'text'}${A.id ? ` #${A.id}` : ''})`;
+    if (!ids.has(A.becomes)) {
+      out.push(`${label}: becomes "${A.becomes}" — no layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none)'}.`);
+      return;
+    }
+    const B = (cfg.layers || []).find((x) => isObj(x) && x.id === A.becomes);
+    if (B === A) { out.push(`${label}: becomes itself.`); return; }
+    if (isObj(B) && B.becomes === A.id) { out.push(`${label}: becomes "${B.id}", which becomes "${A.id}" back. One of them has to be the origin.`); return; }
+    const aEnd = (typeof A.start === 'number' ? A.start : 0) + (typeof A.duration === 'number' ? A.duration : 0);
+    const bStart = typeof B.start === 'number' ? B.start : 0;
+    const gap = bStart - aEnd;
+    if (Math.abs(gap) > 0.5) {
+      out.push(`${label}: becomes "${B.id}", but "${B.id}" starts ${gap > 0 ? `${gap.toFixed(2)}s AFTER` : `${(-gap).toFixed(2)}s BEFORE`} this layer ends (${aEnd.toFixed(2)}s vs ${bStart.toFixed(2)}s). A handover reads as one form continuing only when the two meet; ${gap > 0 ? 'the frame is empty in between' : 'both are on screen at once'}. Line them up, or drop \`becomes\` and treat them as two shots.`);
+    }
+  });
   (cfg.layers || []).forEach((L0, i) => {
     if (!isObj(L0)) return;
     if (L0.anchor) return;                      // anchor overwrites x/y downstream

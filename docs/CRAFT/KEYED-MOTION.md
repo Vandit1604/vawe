@@ -179,6 +179,37 @@ The honest limit: this is one interaction. There is no curve editor, no motion p
 no key deletion in the UI yet. It makes dense keys cheap to place, which is the thing that was stopping
 anyone from placing them.
 
+## Connecting two scenes, rather than putting a video between them
+
+Worth being precise about what the boundary machinery actually does:
+
+| | what it does | what it does not |
+|---|---|---|
+| `cuts` | transforms ONE root — the frame slides, blurs, punches | the two scenes never touch |
+| `seams` | genuinely samples both scenes as textures and blends in a shader | bakes ONE frame either side, so it blends two **frozen stills** |
+
+So a seam is a real merge of two photographs. Neither joins the *content*, and the thing that actually
+makes a boundary disappear is a form the eye can follow across it.
+
+`becomes: "<layerId>"`, declared on the OUTGOING layer, is how you say so:
+
+```json
+{ "id": "card", "w": 640, "h": 380, "becomes": "dot", "becomesDur": 0.5 },
+{ "id": "dot",  "w": 80,  "h": 80 }
+```
+
+The incoming layer opens on the outgoing one's **final pose** — centres matched, size matched by scale,
+rotation carried — then animates away into its own geometry. Exact by construction instead of two sets
+of coordinates you aligned by hand and hoped stayed aligned.
+
+Centres, not corners: two boxes of different sizes sharing a top-left corner visibly jump. And the
+centre uses the UNSCALED half-width, because CSS scales about the element's own centre so scaling does
+not move it. Getting that wrong put a handover 160px out and it still looked *almost* right, which is
+the worst kind of wrong for a match cut.
+
+`validate` fails a `becomes` whose two layers do not meet at the boundary, naming the gap in seconds. A
+match that drifts is exactly the failure this exists to remove, so it is checked rather than trusted.
+
 ## The checklist
 
 When a film has the right spine and still feels cheap, in order of how often it is the answer:

@@ -102,6 +102,51 @@ function resolvePans(data) {
 }
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 
+// resolveBecomes — `becomes: "<layerId>"` on the OUTGOING layer declares that it CONTINUES as the
+// incoming one. A cut transforms one root and a seam blends two frozen stills; neither connects the
+// CONTENT, so the only thing that truly joins two scenes is a form that persists across the boundary.
+// The engine could not express that: you hand-aligned coordinates either side and hoped, and when they
+// drifted twenty pixels the match quietly stopped working with nothing to tell you.
+//
+// It resolves the incoming layer's OPENING pose from the outgoing layer's FINAL pose — centres matched,
+// size matched by scale — then hands control back so the incoming layer animates away into its own
+// geometry. Centres rather than corners, because two boxes of different sizes sharing a top-left corner
+// visibly jump; sharing a centre does not. Pure geometry on the JSON, before any DOM exists.
+function resolveBecomes(data) {
+  const byId = {};
+  for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+  for (const A of data.layers || []) {
+    if (typeof A.becomes !== 'string') continue;
+    const B = byId[A.becomes];
+    if (!B) throw new Error(`layer "${A.id || '?'}" becomes: no layer with id "${A.becomes}"`);
+    if (B === A) throw new Error(`layer "${A.id}" becomes itself`);
+    if (typeof B.becomes === 'string' && byId[B.becomes] === A) throw new Error(`layers "${A.id}" and "${B.id}" become each other`);
+    const lastA = Array.isArray(A.motion) && A.motion.length ? A.motion[A.motion.length - 1] : {};
+    const aS = num(lastA.scale, 1);
+    const aw = num(A.w, 0) * aS, ah = num(A.h, 0) * aS;
+    const bw = num(B.w, 0), bh = num(B.h, 0);
+    // Centre of the outgoing layer on its last frame, and of the incoming layer where it is authored.
+    // The UNSCALED half-width, deliberately: CSS scales about the element's own centre, so scaling does
+    // not move the centre. Using the scaled half here put the handover 160px off and it looked almost
+    // right, which is the worst kind of wrong for a match cut.
+    const acx = num(A.x, 0) + num(lastA.x, 0) + num(A.w, 0) / 2;
+    const acy = num(A.y, 0) + num(lastA.y, 0) + num(A.h, 0) / 2;
+    const bcx = num(B.x, 0) + bw / 2, bcy = num(B.y, 0) + bh / 2;
+    // match the LARGER axis ratio so the incoming form covers the outgoing one rather than sitting inside it
+    const s0 = (bw > 0 && aw > 0) ? Math.max(aw / bw, bh > 0 && ah > 0 ? ah / bh : 0) : 1;
+    const rot = num(lastA.rot, 0);
+    const dur = Math.max(0.05, num(A.becomesDur, 0.42));
+    const own = Array.isArray(B.motion) ? B.motion : [];
+    const r3 = (v) => +(+v).toFixed(3);
+    const open = { t: 0, x: r3(acx - bcx), y: r3(acy - bcy), scale: r3(s0) };
+    const settle = { t: r3(dur), x: 0, y: 0, scale: 1, ease: A.becomesEase || 'easeOutCubic' };
+    if (rot) { open.rot = r3(rot); settle.rot = 0; }
+    // the incoming layer's own keys resume once the handover is done; anything it declared inside the
+    // handover window is dropped, because during it the layer is not itself yet.
+    B.motion = [open, settle].concat(own.filter((k) => num(k.t, 0) > dur + 1e-6));
+  }
+}
+
 // resolveAnchors — position a layer RELATIVE to another (`anchor` id → `at`/`dx`/`dy`), so annotations,
 // chips and badges point at what they annotate by declared relationship, not eyeballed coordinates.
 // Resolved purely from the JSON geometry before any DOM exists (targets need w; h falls back to size*1.2).
@@ -257,6 +302,7 @@ boot((data, fps, theme, canvas) => {
 
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
+  resolveBecomes(data);        // becomes:"<id>" → the incoming layer opens on the outgoing one's last pose
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
   const extra = []; // group children (any depth), animated on their root group's window
 
