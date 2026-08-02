@@ -83,17 +83,21 @@ const scene = {
     + 'The sound-form is the spine: a flat bar, then four stems, then one merged waveform, all one SVG '
     + 'driven by var(--t), so it survives both transitions and CHANGES at each. Built by '
     + 'scripts/author/build-cadence-film.mjs; the cut easings are verified with `make measure`.',
-  cuts: [{ t: CUT1, style: 'riseBlur', dur: 0.44, timing: 'snappy' }],
-  seams: [{ t: CUT2, fx: 'cinematicZoom', dur: 0.6 }],
+  // NO cuts and NO seams, deliberately. A cut transforms one root and never touches the second scene;
+  // a seam blends two frozen stills. Both are something laid OVER a boundary. Here the boundary is
+  // BUILT: at 5s the input bar hands its pose to the stem panel (`becomes`) while the form opens from
+  // one line into four, and at 10s the four fold back into one. Nothing crosses that is not already on
+  // screen, so there is no transition to look at — only the content changing state.
   layers: [
     // ---- beat 1: the ask ----
     T({ text: 'CADENCE', x: 200, y: 150, w: 900, size: 26, weight: 500, color: 'var(--text-2)',
       font: 'mono', ls: '0.22em', start: 0.08,  duration: 4.72, anim: 'fade', enterDur: 0.5 }),
     T({ text: 'Every scene needs a score.', x: 200, y: 214, w: 1500, size: 104,
-      split: 'word', preset: 'up', each: 0.5, stagger: 0.05, start: 0.32, duration: 4.48, out: 'fade' }),
+      split: 'word', preset: 'up', each: 0.5, stagger: 0.05, start: 0.32, duration: 4.62,
+      out: 'up', exitDur: 0.42 }),
     { type: 'html', id: 'chrome', x: 0, y: 0, w: 1920, h: 1080, html: chrome(), becomes: 'stems',
       becomesDur: 0.5, start: 1.65, duration: 3.35,
-      anim: 'fade', enterDur: 0.35, out: 'fade',
+      anim: 'fade', enterDur: 0.35, out: 'down', exitDur: 0.52,
       motion: [{ t: 0, y: 26 }, { t: 0.46, y: 0, ease: 'easeOutCubic' }] },
     T({ id: 'prompt', panWith: 'chrome', text: 'Score a chase through Tokyo rain', x: 246, y: 414,
       w: 1300, size: 42, weight: 400, typing: 84, caret: true, caretHold: true,
@@ -104,11 +108,12 @@ const scene = {
       start: 0.4, duration: 14.6, anim: 'fade', enterDur: 0.5, exitDur: 0 },
 
     { type: 'rect', id: 'stems', x: 176, y: 528, w: 1568, h: 444, radius: 26, bg: 'rgba(255,255,255,0.02)',
-      border: '1px solid var(--line)', start: 5.0, duration: 4.8, anim: 'fade', enterDur: 0.3, out: 'fade' },
+      border: '1px solid var(--line)', start: 4.72, duration: 5.08, anim: 'fade', enterDur: 0.56, out: 'fade' },
 
     // ---- beat 2: the work ----
     T({ text: 'Four stems. One take.', x: 200, y: 214, w: 1500, size: 104,
-      split: 'word', preset: 'up', each: 0.46, stagger: 0.05, start: 5.35, duration: 4.3, out: 'fade' }),
+      split: 'word', preset: 'up', each: 0.46, stagger: 0.05, start: 4.94, duration: 4.9,
+      out: 'up', exitDur: 0.42 }),
     T({ text: 'Written, arranged and mixed while you watch.', x: 200, y: 356, w: 1020, size: 40,
       weight: 400, color: 'var(--text-2)', anim: 'rise', enterDur: 0.55, start: 5.95, duration: 3.7, out: 'fade',
       motion: [{ t: 0, y: 16 }, { t: 0.5, y: 0, ease: 'easeOutCubic' }] }),
@@ -117,7 +122,7 @@ const scene = {
 
     // ---- beat 3: the payoff ----
     T({ text: 'Ninety seconds of music.', x: 200, y: 214, w: 1500, size: 104,
-      split: 'word', preset: 'up', each: 0.48, stagger: 0.05, start: 10.35, duration: 4.65, exitDur: 0 }),
+      split: 'word', preset: 'up', each: 0.48, stagger: 0.05, start: 9.92, duration: 5.08, exitDur: 0 }),
     T({ text: 'Eleven seconds of work.', x: 200, y: 348, w: 980, size: 66, weight: 700,
       color: 'var(--accent)', split: 'word', preset: 'up', each: 0.44, stagger: 0.05,
       start: 11.05, duration: 3.95, exitDur: 0 }),
@@ -131,4 +136,4 @@ const scene = {
 };
 
 fs.writeFileSync('formats/scene/cadence-film.json', JSON.stringify(scene, null, 2) + '\n');
-console.log(`wrote formats/scene/cadence-film.json · ${scene.layers.length} layers · 1 cut + 1 seam · ${scene.duration}s`);
+console.log(`wrote formats/scene/cadence-film.json · ${scene.layers.length} layers · no cuts, no seams · ${scene.duration}s`);
