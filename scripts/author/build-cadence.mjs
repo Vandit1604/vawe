@@ -106,7 +106,13 @@ const wave = () => {
     const env = Math.sin(u * Math.PI) * (0.55 + 0.45 * Math.sin(u * 9.1 + 0.6)) * (0.62 + 0.38 * Math.sin(u * 21.7));
     const hgt = Math.max(6, Math.round(Math.abs(env) * WAVE.h * 0.92));
     const x = +(i * (bw + gap)).toFixed(1), y = +((WAVE.h - hgt) / 2).toFixed(1);
-    const at = +(WAVE.at + 0.0068 * i).toFixed(3);   // fully drawn by ~4.08s, so it HOLDS
+    // Bars land until ~4.6s, then the frame settles for 0.4s. At the original 0.0068 the waveform
+    // finished at 4.08 and the last 0.9s of the film was perfectly still — the loading spinner had been
+    // the only thing moving there, and cutting it left the hold exposed. Drawing the bars across that
+    // span fills it with the thing the film is actually about: the music being written, one bar at a
+    // time. No gate catches this. beat-check sees both layers present and calls the span covered;
+    // motion-audit's frozen-span warning needs 2s. A short dead tail falls between them.
+    const at = +(WAVE.at + 0.0146 * i).toFixed(3);
     out.push(`<rect x="${x}" y="${y}" width="${bw.toFixed(1)}" height="${hgt}" rx="${(bw / 2).toFixed(1)}" fill="var(--accent)"`
       + ` style="transform-box:view-box;transform-origin:${(x + bw / 2).toFixed(1)}px ${WAVE.h / 2}px;`
       + `transform:scaleY(clamp(0,(var(--t,0) - ${at}) * 9,1));opacity:clamp(0,(var(--t,0) - ${at}) * 9,1)"/>`);
@@ -157,12 +163,11 @@ const scene = {
         { t: 0.34, x: -66, ease: 'linear' }, { t: 0.44, x: -24, ease: 'linear' }, { t: 0.58, x: 0, ease: 'easeOutCubic' }] },
     { type: 'html', id: 'wave', x: WAVE.x, y: WAVE.y, w: WAVE.w, h: WAVE.h, html: wave(),
       start: 3.5, duration: 1.5, anim: 'fade', enterDur: 0.22, exitDur: 0 },
-    { type: 'html', id: 'spin', panWith: 'gen', x: 1190, y: 502, w: 74,
-      html: '<div style="width:66px;height:66px;border:4px solid rgba(255,176,32,0.12);'
-        + 'border-top-color:var(--accent);border-left-color:var(--accent);border-radius:50%"></div>',
-      anim: 'fade', enterDur: 0.16, start: 3.9, duration: 1.1, exitDur: 0,
-      motion: [{ t: 0, x: 0, rot: 0 }, { t: 0.34, rot: 214, ease: 'linear' }, { t: 0.44, rot: 286, ease: 'linear' },
-        { t: 0.54, rot: 352, ease: 'linear' }, { t: 0.64, rot: 424, ease: 'linear' }, { t: 0.78, rot: 522, ease: 'linear' }] },
+    // No loading spinner here, deliberately. There was one beside "Composing", and for the 12 frames it
+    // overlapped the pulse ring the frame carried TWO expanding circles and read as a mistake. It was
+    // also the third thing saying the same word: the ring is the object's own pulse, the waveform IS the
+    // work happening, and a spinner is the generic stand-in you reach for when you have neither. Cutting
+    // the redundant one is the fix; moving it later would only have hidden the collision.
   ],
   bg: [{ t: 0, preset: 'plain', from: 0, to: 5 }],
 };

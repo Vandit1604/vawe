@@ -6,6 +6,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
 import { cameraAt, motionAt } from '../../core/sequence.js';
+import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -308,6 +309,38 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('motionAt linear ease at .25', approx(lin, 25));
   ok('motionAt spring ease differs from linear', Math.abs(spr - 25) > 1);
   ok('motionAt deterministic', JSON.stringify(motionAt(kf, 0.3)) === JSON.stringify(motionAt(kf, 0.3)));
+}
+
+// ---- mergePan: every fabricated key must state the WHOLE pose (MISTAKES #194, #195) ------------
+// motionAt reads a track key to key, so an omitted property is identity, not "unchanged". mergePan
+// interleaves two tracks, so each key it produces is missing whatever the OTHER track declared unless
+// it fills it in. Both directions failed at once and neither is visible in the JSON: the pan's keys
+// carried a constant `rot:0` that fought the author's rotation, and the author's rot-only keys carried
+// no x so the layer snapped back to its origin between them. The scene that caught it (`cadence`'s
+// spinner) has since been cut, so these are the only thing holding the fix down.
+{
+  const src = { id: 'page', start: 0, motion: [{ t: 0, x: 0 }, { t: 0.5, x: -300, ease: 'linear' }, { t: 1, x: -600, ease: 'linear' }] };
+  // a layer that TURNS while it rides: rot-only keys, interleaved between the pan's x-only keys
+  const rider = { id: 'spin', panWith: 'page', start: 0, motion: [{ t: 0, x: 0, rot: 0 }, { t: 0.4, rot: 180, ease: 'linear' }, { t: 0.8, rot: 360, ease: 'linear' }] };
+  const merged = mergePan(rider, src);
+  const sample = (t) => motionAt(merged, t);
+  let xMono = true, rotMono = true;
+  for (let n = 1; n <= 30; n++) {
+    const a = sample((n - 1) / 30), b = sample(n / 30);
+    if (b.dx > a.dx + 1e-6) xMono = false;        // the page only ever moves left
+    if (b.rot < a.rot - 1e-6) rotMono = false;    // the spinner only ever turns forward
+  }
+  ok('mergePan · travel never reverses between the rider\'s own keys', xMono);
+  ok('mergePan · rotation is never reset by the pan\'s keys', rotMono);
+  ok('mergePan · rot-only keys do not end the pan', approx(sample(1).dx, -600, 1));
+  ok('mergePan · the rider still reaches its own final rotation', approx(sample(0.8).rot, 360, 1));
+
+  // ...and a layer that states a POSITION of its own has left the page: the pan stops contributing,
+  // so the source's later keys cannot drag it back onto a path it already left.
+  const peeler = { id: 'btn', panWith: 'page', start: 0, motion: [{ t: 0, x: 0, y: 0 }, { t: 0.6, x: -320, y: -80, ease: 'linear' }] };
+  const pm = mergePan(peeler, src);
+  ok('mergePan · peeling drops the source keys past the break', pm.every((k) => k.t <= 0.6 + 1e-6));
+  ok('mergePan · the peeled layer holds its own destination', approx(motionAt(pm, 1).dx, -320, 1));
 }
 
 // ---- easing registry contract ----------------------------------------------------------------

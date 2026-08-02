@@ -4509,3 +4509,33 @@ before rendering anything, and the blast-radius measurement is the only reason i
 reader to accommodate bad keys would have been a much larger blast radius for a smaller fix — and
 "obviously correct semantics" that contradict an established idiom break more than they repair. Measure
 the blast radius before believing the elegant fix.
+
+---
+
+## #196 — two elements that mean the same thing, and the dead tail under both gates
+
+**What.** `cadence`'s tail carried a pulse ring blooming out of the vanishing button AND a loading
+spinner beside "Composing". For the twelve frames they overlapped, the frame held two expanding circles
+and read as a duplicate. The user found it by watching; no gate said anything.
+
+**Why no gate.** This is not a geometry problem. The two never meaningfully overlapped in space, so
+`audit`'s overlap check had nothing to fire on. They collided in MEANING: the ring is the object's own
+pulse, the waveform IS the work happening, and a spinner is the generic stand-in you reach for when you
+have neither. Three things saying one word. No static gate can measure that, and this entry is not
+proposing one — it is recording that the class exists and belongs to eyes.
+
+**The second bug, created by the fix.** Cutting the spinner left the last 0.9s completely still: the
+spinner had been the only moving thing there. Neither gate caught THAT either, and the reason is a real
+gap worth naming. `beat-check` sees both remaining layers present and calls the span covered — it
+detects a hole where the frame holds only the backdrop, not a span where everything present is frozen.
+`motion-audit` does have a frozen-span check, but its threshold is 2s and this tail is 0.9s. A short
+dead tail falls between the two, and a 5s film cannot afford 0.9s of it.
+
+**Fix.** The waveform now draws until ~4.6s instead of ~4.08s, then settles for 0.4s. That fills the tail
+with the thing the film is about — the music being written, one bar at a time — rather than with a
+spinner that meant nothing. A held ending is right; a held ending that is a fifth of the runtime is not.
+
+**Lesson.** Removing a redundant element can expose a hold that the element was hiding. When you cut
+something, re-ask what was moving in the frames it occupied. And the honest note on coverage: both of
+the defects here were found by a person watching the video, which is now true of every visual defect in
+this session.
