@@ -4539,3 +4539,42 @@ spinner that meant nothing. A held ending is right; a held ending that is a fift
 something, re-ask what was moving in the frames it occupied. And the honest note on coverage: both of
 the defects here were found by a person watching the video, which is now true of every visual defect in
 this session.
+
+---
+
+## #197 — multiPhase's "hold" leg panned the camera home
+
+**Found by prediction, not by watching.** The method: take the bug shapes from #193-#196, enumerate every
+site in the engine that has the same shape, and probe each one. First site checked, first hit.
+
+**What.** `multiPhase` chains camera legs into one journey. Its own docstring describes the intended use
+as "push → hold-with-drift → settle" and promises a hold leg "still creeps (never a dead freeze)". Given
+exactly that input, the hold leg panned the camera 180px back to centre over 2 seconds — a move as large
+as the push it was supposed to be holding after.
+
+**Root cause.** `core/camera-moves.js:65`, one object literal:
+
+```js
+kf.push({ t, s: leg.s ?? kf[kf.length - 1].s, x: leg.x ?? 0, y: leg.y ?? 0, … });
+```
+
+`s` carries forward from the previous keyframe. `x` and `y` reset to identity. The correct idiom was
+known and applied to one axis of three, which is the same tell as the `L.peak ?? 0.1` line in #193.
+
+**Why nothing caught it.** No scene uses `multiPhase` — it is in `schema.json`, so it is author-facing,
+but nothing in the library exercises it, and unused code cannot be caught by rendering. `lib-test` did
+cover it, and the coverage is the interesting part: it asserted easing and determinism, and passed `s`
+on every leg with no position at all. It tested the one input shape that works. A test written from the
+same mental model as the code inherits its blind spot.
+
+**Second face of #195.** The shape has two forms and looking for only one is how the first probe missed
+this: (a) the generated key OMITS a property and the READER resets it — `mergePan`; (b) the generated key
+STATES identity and the GENERATOR reset it — this. (b) is invisible to any structural check, because the
+key is complete and well-formed and only the meaning is wrong. Probes must drive a generator with an
+input whose correct answer is known independently ("a leg that mentions nothing changes nothing") and
+check the behaviour, not the shape.
+
+**The sweep around it.** 172 probes across every camera generator and every block factory: 1 hit, 165
+clean, 6 skipped for needing props. That ratio is the honest result — the prediction method paid for
+itself once and found nothing else in this class. `scripts/dev/predict.mjs` keeps the probes rerunnable,
+and it was checked against a deliberately reintroduced bug to prove it fires.
