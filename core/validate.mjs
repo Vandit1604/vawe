@@ -22,6 +22,8 @@ import { boundaryMechanism } from '../core/transitions-lower.js';
 import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
 import { bgPreset, bgOverErrors } from '../core/backgrounds.js';
+import { mergePan } from './pan-resolve.mjs';
+import { motionAt } from './sequence.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -79,6 +81,49 @@ export function layoutErrors(cfg) {
       else if (!Array.isArray(src.motion) || !src.motion.length) out.push(`${label}: panWith "${L.panWith}", but that layer has no \`motion\` track to share.`);
     }
   });
+  // A motion track that REVERSES at speed is a snap, and no easing hides it: the layer is travelling one
+  // way and the next frame throws it back the other. Measured on the RESOLVED track (pans merged in) by
+  // SAMPLING AT 30fps, because neither of the cheaper tests works. Key-to-key average velocity calls an
+  // eased arc a reversal — `rec2-gates`' dot swings 777px out and 525px back with easeInOutCubic on both
+  // sides, so its velocity passes through zero at the turn and it is perfectly smooth. Peak acceleration
+  // alone is no better: `creed-launch` hits 134 px/frame^2 accelerating in a straight line, harder than
+  // the defect this exists to catch. Only direction-change AND magnitude together separate them.
+  //
+  // The defect: `cadence`'s button rode a shared pan to -512 while its own next key said -318, so it
+  // jumped 194px right in two frames — 126 px/frame^2 against the travel — and every gate stayed green
+  // (docs/MISTAKES.md #194). The author cannot see the pan's accumulated value, so the arithmetic has to
+  // be done for them.
+  const FPS = 30, REV_ACCEL = 60;
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L)) return;
+    let track = Array.isArray(L.motion) ? L.motion : null;
+    if (typeof L.panWith === 'string') {
+      const src = (cfg.layers || []).find((x) => isObj(x) && x.id === L.panWith);
+      if (!isObj(src) || typeof src.panWith === 'string' || !Array.isArray(src.motion) || !src.motion.length) return;
+      try { track = mergePan(L, src); } catch { return; }
+    }
+    if (!track || track.length < 3 || !track.every((k) => isObj(k))) return;
+    const ts = track.map((k) => (typeof k.t === 'number' ? k.t : 0));
+    const t0 = Math.min(...ts), t1 = Math.max(...ts);
+    if (!(t1 - t0 > 2 / FPS)) return;
+    const pts = [];
+    for (let n = 0; n <= Math.ceil((t1 - t0) * FPS); n++) {
+      const m = motionAt(track, t0 + n / FPS);
+      pts.push([m.dx || 0, m.dy || 0]);
+    }
+    for (let n = 2; n < pts.length; n++) {
+      const v1 = [pts[n - 1][0] - pts[n - 2][0], pts[n - 1][1] - pts[n - 2][1]];
+      const v2 = [pts[n][0] - pts[n - 1][0], pts[n][1] - pts[n - 1][1]];
+      if (v1[0] * v2[0] + v1[1] * v2[1] >= 0) continue;                  // same direction — accelerating, not snapping
+      const accel = Math.hypot(v2[0] - v1[0], v2[1] - v1[1]);
+      if (accel < REV_ACCEL) continue;                                   // a settle reverses gently; let it
+      const at = (t0 + n / FPS).toFixed(2);
+      const label = `layers[${i}] (${L.type || 'text'}${L.id ? ` #${L.id}` : ''})`;
+      out.push(`${label}: motion reverses at t=${at}s — moving (${v1[0].toFixed(0)}, ${v1[1].toFixed(0)})px/frame, then (${v2[0].toFixed(0)}, ${v2[1].toFixed(0)})px/frame the other way (${accel.toFixed(0)} px/frame\u00b2). That is a snap, not a move.${typeof L.panWith === 'string' ? ` This layer pans with "${L.panWith}", which has already carried it somewhere by then — your own keys continue from THERE, not from the layer's origin. Peel off before the pan passes your destination.` : ' A settle should reverse gently; check the key before it.'}`);
+      break;                                                             // one report per layer; the first is the cause
+    }
+  });
+
   // `becomes` is a claim about a BOUNDARY: this form ends and that one takes it over. If the incoming
   // layer does not start where the outgoing one ends, the handover happens over a gap or an overlap and
   // the match silently stops reading — which is the whole failure the feature exists to remove, so it is

@@ -14,6 +14,7 @@ import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/co
 import { lowerScene } from '/core/transitions-lower.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
 import { cameraAt, motionAt } from '/core/sequence.js';
+import { resolvePans } from '/core/pan-resolve.mjs';
 import { sampleAt } from '/core/spectrum.js';
 import { createRenderer } from '/core/layers/index.js';
 const $ = (id) => document.getElementById(id);
@@ -52,61 +53,6 @@ function resolveRelativeStarts(data) {
   }
 }
 
-// resolvePans — `panWith: "<layerId>"` copies another layer's motion track onto this one, keeping the
-// SAME wall clock and this layer's OWN origin. A pan of the page is not a camera move: a camera
-// transforms the whole frame, scrim included, so a film that wants the page to slide under a fixed
-// frame has to move the chosen layers together. Doing that by hand means writing the same deltas once
-// per layer and time-shifting each by its own start, which is what the exemplar does — twice, across
-// five of its six moving layers (docs/CRAFT/KEYED-MOTION.md). Six identical delta lists kept in sync by
-// hand, where a one-key drift is invisible in the JSON and obvious on screen.
-//
-// Copied as DELTAS, not absolute values, because each layer sits at its own x/y; and shifted by the
-// difference in `start`, because a `motion` t is local to its layer. A layer may carry its own extra
-// keys after the shared ones (the exemplar's button pans with the page, then leaves and does its own
-// thing): keys already declared past the source's last shared time are kept.
-function resolvePans(data) {
-  const byId = {};
-  for (const L of data.layers || []) if (L.id) byId[L.id] = L;
-  for (const L of data.layers || []) {
-    if (typeof L.panWith !== 'string') continue;
-    const src = byId[L.panWith];
-    if (!src) throw new Error(`layer "${L.id || '?'}" panWith: no layer with id "${L.panWith}"`);
-    if (src === L) throw new Error(`layer "${L.id}" panWith: a layer cannot pan with itself`);
-    if (typeof src.panWith === 'string') throw new Error(`layer "${L.id}" panWith "${src.id}", which itself pans with another layer — chain them off the ORIGIN so one track stays the source of truth`);
-    if (!Array.isArray(src.motion) || !src.motion.length) throw new Error(`layer "${L.id}" panWith "${src.id}", but "${src.id}" has no motion track to share`);
-    const shift = (src.start ?? 0) - (L.start ?? 0);         // src-local t → this layer's local t
-    const own = Array.isArray(L.motion) ? L.motion : [];
-    const base = src.motion;
-    const PAN = ['x', 'y'];                                   // the only properties a pan supplies
-    const bx = num(base[0].x, 0), by = num(base[0].y, 0);     // deltas from the source's first key
-    const ox = num(own[0]?.x, 0), oy = num(own[0]?.y, 0);     // ...applied from THIS layer's own origin
-    // A property the layer states once and never animates (the exemplar's button holds y:82 through the
-    // whole pan) must survive every shared key. Copying only key 0 dropped it and the button flew.
-    const sticky = {};
-    if (own.length) for (const k of Object.keys(own[0])) if (k !== 't' && k !== 'ease' && !PAN.includes(k)) sticky[k] = own[0][k];
-    const near = (a, b) => Math.abs(a - b) < 1e-6;
-    const shared = base.map((k) => {
-      const t = +(num(k.t, 0) + shift).toFixed(4);
-      const out = { ...sticky, ...k, t };
-      if (k.x != null) out.x = +(ox + (num(k.x, 0) - bx)).toFixed(3);
-      if (k.y != null) out.y = +(oy + (num(k.y, 0) - by)).toFixed(3);
-      else if (sticky.y == null && oy) out.y = oy;
-      // ...and the layer may declare its OWN key at a shared time: the spinner rotates while it travels,
-      // and the button states its own x/y at t=1.25, the moment it peels off the page. What the author
-      // writes WINS, x and y included — the pan only supplies what the layer did not state. Letting the
-      // pan win on position instead put the button back on the page at the exact key where it leaves.
-      const mine = own.find((o) => near(num(o.t, 0), t));
-      if (mine) for (const p of Object.keys(mine)) if (p !== 't') out[p] = mine[p];
-      return out;
-    });
-    // ...and any key of its own at a time the pan does not cover, WHEREVER it falls. Restricting these
-    // to times after the pan ended silently dropped the exemplar button's key at t=1.18, which sits
-    // between two shared keys and is where it peels away from the page. Keys are then sorted, because
-    // motionAt walks the track in order.
-    const extra = own.filter((o) => !shared.some((sh) => near(sh.t, num(o.t, 0))));
-    L.motion = shared.concat(extra).sort((a, b) => num(a.t, 0) - num(b.t, 0));
-  }
-}
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 
 // resolveBecomes — `becomes: "<layerId>"` on the OUTGOING layer declares that it CONTINUES as the

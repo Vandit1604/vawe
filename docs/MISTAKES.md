@@ -4438,3 +4438,74 @@ Both now use `??`.
 guards to catch one bug, which is the `flicker-check` mistake (#190) again: a check that cries wolf gets
 skipped, and then it protects nothing.
 
+
+---
+
+## #194 — a layer that peels off a shared pan continues from where the PAN left it
+
+**What.** In `cadence`, the COMPOSE button rides the page via `panWith: "chrome"`, then peels off and
+lifts to centre. On screen it snapped: for two frames at t=2.87s it jumped 194px back to the RIGHT after
+travelling left for 0.7s. The user saw it as "not smooth". Every gate was green.
+
+**Root cause.** `panWith` copies the source's track as deltas from the layer's own origin, and the
+author's own keys are measured from that same origin. The resolved track read:
+
+| local t | x |
+|---|---|
+| 1.38 | **-512** (last pan key) |
+| 1.44 | **-318** (first own key) |
+
+194px of backwards travel in 60ms, at 3244 px/s. The number `-318` was picked by reading the button's
+position on screen; by then the pan had carried it to -512. Both numbers are in the same coordinate
+system, but the pan's accumulated value appears NOWHERE in the JSON, so the author cannot see what
+continues smoothly. Nothing about `-318` looks wrong when you read the file.
+
+**Fix.** Two parts. The film peels at t=1.05 instead of 1.44, before the pan crosses its destination, so
+the travel stays monotonic and decelerates 877 → 834 → 601 → 556 → 362 → 200 → 100 → 40. And
+`peelTime()` in the new `core/pan-resolve.mjs` stops the source contributing once the layer states an
+x/y of its own — a thing that has peeled off cannot still be dragged along by what it peeled off from.
+Only x/y count as leaving, because x/y are the only properties a pan supplies; a `rot`-only key is the
+layer doing its own thing WHILE it rides.
+
+**Gate.** `layoutErrors` now samples every resolved track at 30fps and fails on a velocity REVERSAL of
+≥60 px/frame². Two cheaper tests were tried and both are wrong: key-to-key average velocity calls an
+eased arc a reversal (`rec2-gates`' dot swings 777px out and 525px back on easeInOutCubic, so its
+velocity passes through zero at the turn and it is smooth), and peak acceleration alone is worse still
+(`creed-launch` hits 134 px/frame² accelerating in a straight line, harder than the defect). Only
+direction-change AND magnitude together separate them. One hit across 102 scenes, and it was real.
+
+**Lesson.** A feature that composes two coordinate contributions must either show the author the sum or
+do the arithmetic for them. `panWith` did neither, and the failure is invisible in review because the
+JSON reads exactly as intended.
+
+---
+
+## #195 — a merged motion track must state the whole pose at every key it fabricates
+
+**What.** Found while fixing #194, and worse than it: `cadence`'s spinner shuddered for 27 frames. Its
+x ran 89 → 49 → 40 → 140 → 90 → 49 → 173 and its rotation ran 0 → 214 → 0 → 286 → 0 → 352.
+
+**Root cause.** `motionAt` reads a track KEY TO KEY, so an omitted property is not "unchanged" — it is
+identity (`k.x ?? 0`, `k.rot ?? 0`). That is a coherent contract, and scenes depend on it: the button's
+only `opacity` key is at t=2.64, and it fades over the last segment precisely because the keys before it
+are read as opacity 1. But `mergePan` interleaves two tracks, so every key it produces is missing
+whatever the other track declared, and each one snapped that property to identity. Both halves were
+wrong: the pan's keys carried `rot:0` (stamped from a `sticky` map built off `own[0]`), and the spinner's
+own `rot`-only keys carried no x. The rotation and the travel fought each other from opposite ends.
+
+**Fix.** Every key the merge produces now states the full pose. Fabricated pan keys take scale/rot/
+opacity/blur from `motionAt(own, t)` — the layer's own track AT THAT INSTANT, not a constant. Spliced
+own keys take x/y from the pan at that instant. The `sticky` map is deleted: it was a workaround for
+this same bug that only ever worked because it was tested on a property that never animates.
+
+**The fix I nearly shipped instead.** I first made `motionAt` interpolate PER PROPERTY, which is what
+CSS and GSAP do and reads like the obviously-correct semantics. Sampling old against new across all 147
+tracks said 19 scenes would change, and the worst was `higgsfield-recreation`'s button going INVISIBLE
+for the entire film: with opacity declared only at t=2.64, "hold before the first declaration" pins it
+at 0 from the start. The library's idiom is key-to-key and several scenes encode fades that way. Reverted
+before rendering anything, and the blast-radius measurement is the only reason it was caught.
+
+**Lesson.** The bug was in the code that FABRICATES keys, not in the code that reads them. Changing the
+reader to accommodate bad keys would have been a much larger blast radius for a smaller fix — and
+"obviously correct semantics" that contradict an established idiom break more than they repair. Measure
+the blast radius before believing the elegant fix.

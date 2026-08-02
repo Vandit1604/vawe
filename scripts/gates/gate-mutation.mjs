@@ -312,6 +312,27 @@ const CASES = [
     match: /panWith|unknown/,
     scene: scene([TXT({ text: 'Rides along', start: 0.3, duration: 2.4, panWith: 'nope' })],
       { duration: 3 }) },
+  // A layer that rides a pan and then states its own position continues from where the PAN left it, not
+  // from its own origin — and the pan's accumulated value appears nowhere in the JSON, so the number is
+  // unguessable by eye. Getting it wrong reverses the travel for one or two frames. Both cases below are
+  // the same film with one number changed, which is the whole point: nothing else distinguishes them.
+  { gate: 'validate', name: 'a peel key that fights the pan it rode in on', expect: 'fail',
+    match: /reverses|snap, not a move/,
+    scene: scene([
+      { type: 'rect', id: 'page', x: 0, y: 300, w: 1600, h: 420, bg: '#1b1e26', start: 0.2, duration: 1.6,
+        motion: [{ t: 0, x: 0 }, { t: 0.6, x: -300, ease: 'linear' }, { t: 1.2, x: -620, ease: 'easeOutCubic' }] },
+      { type: 'rect', id: 'chip', panWith: 'page', x: 1180, y: 400, w: 300, h: 120, radius: 60, bg: '#ffb020',
+        start: 0.2, duration: 1.6,
+        motion: [{ t: 0, x: 0, y: 0 }, { t: 1.26, x: -240, y: -40, ease: 'linear' }] },
+    ], { duration: 2.4 }) },
+  { gate: 'validate', name: 'the same peel, continuing from where the pan left it', expect: 'pass',
+    scene: scene([
+      { type: 'rect', id: 'page', x: 0, y: 300, w: 1600, h: 420, bg: '#1b1e26', start: 0.2, duration: 1.6,
+        motion: [{ t: 0, x: 0 }, { t: 0.6, x: -300, ease: 'linear' }, { t: 1.2, x: -620, ease: 'easeOutCubic' }] },
+      { type: 'rect', id: 'chip', panWith: 'page', x: 1180, y: 400, w: 300, h: 120, radius: 60, bg: '#ffb020',
+        start: 0.2, duration: 1.6,
+        motion: [{ t: 0, x: 0, y: 0 }, { t: 0.7, x: -380, y: -40, ease: 'linear' }, { t: 1.2, x: -470, y: -96, ease: 'easeOutCubic' }] },
+    ], { duration: 2.4 }) },
   { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
     match: /no-continuous-object/,   // blocking tier: must exit non-zero
     scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),

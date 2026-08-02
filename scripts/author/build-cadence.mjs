@@ -70,15 +70,23 @@ btn.id = 'btn';
 btn.panWith = 'chrome';
 // -382 lands the button's centre on 960, where the ring blooms and the waveform is centred. The first
 // cut ended at -600, so the dot sat 218px left of its own pulse and the hand-off read as two objects.
+//
+// The button MUST break away before the pan carries it past -382, and the pan crosses -382 at t≈1.115.
+// Peeling later means travelling left past the destination and coming back, and a reversal is a snap no
+// easing can hide: the previous cut peeled at 1.44, by which time the pan sat at -512, so the first own
+// key threw the button 194px RIGHT in two frames at 3244 px/s (docs/MISTAKES.md #194). So it leaves at
+// 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc —
+// 825 → 601 → 555 → 362 → 183 — while the page keeps sliding out from under it. The break reads as the
+// button refusing to leave with the page, which is the whole point of it being the object.
 btn.motion = [
   { t: 0, x: 0, y: 0 },                                   // origin for the shared pan
-  { t: 1.44, x: -318, y: -16, rot: -3, ease: 'linear' },  // peels away as the page settles
-  { t: 1.52, x: -344, y: -52, rot: -5, ease: 'linear' },
-  { t: 1.59, x: -366, y: -98, rot: -3, ease: 'linear' },
-  { t: 1.66, x: -377, y: -132, rot: -1, ease: 'linear' },
-  { t: 1.74, x: -382, y: -152, rot: 0, ease: 'easeOutCubic' },
-  { t: 1.92, x: -382, y: -134, ease: 'easeInOutCubic' },
-  { t: 2.0, x: -382, y: -138, ease: 'easeOutCubic' },
+  { t: 1.05, x: -330, y: -10, rot: -2, ease: 'linear' },  // peels away, matching the page's speed
+  { t: 1.13, x: -364, y: -44, rot: -4, ease: 'linear' },
+  { t: 1.22, x: -378, y: -92, rot: -3, ease: 'linear' },
+  { t: 1.32, x: -382, y: -128, rot: -1, ease: 'linear' },
+  { t: 1.44, x: -382, y: -152, rot: 0, ease: 'easeOutCubic' },
+  { t: 1.62, x: -382, y: -134, ease: 'easeInOutCubic' },
+  { t: 1.72, x: -382, y: -138, ease: 'easeOutCubic' },
   { t: 2.42, x: -382, y: -138, scale: 0.5, ease: 'easeInOutCubic' },
   { t: 2.54, x: -382, y: -138, scale: 0.2, ease: 'linear' },
   { t: 2.64, x: -382, y: -138, scale: 0.05, opacity: 0, ease: 'easeInCubic' },
