@@ -106,13 +106,11 @@ const wave = () => {
     const env = Math.sin(u * Math.PI) * (0.55 + 0.45 * Math.sin(u * 9.1 + 0.6)) * (0.62 + 0.38 * Math.sin(u * 21.7));
     const hgt = Math.max(6, Math.round(Math.abs(env) * WAVE.h * 0.92));
     const x = +(i * (bw + gap)).toFixed(1), y = +((WAVE.h - hgt) / 2).toFixed(1);
-    // Bars land until ~4.6s, then the frame settles for 0.4s. At the original 0.0068 the waveform
-    // finished at 4.08 and the last 0.9s of the film was perfectly still — the loading spinner had been
-    // the only thing moving there, and cutting it left the hold exposed. Drawing the bars across that
-    // span fills it with the thing the film is actually about: the music being written, one bar at a
-    // time. No gate catches this. beat-check sees both layers present and calls the span covered;
-    // motion-audit's frozen-span warning needs 2s. A short dead tail falls between them.
-    const at = +(WAVE.at + 0.0146 * i).toFixed(3);
+    // Fully drawn by ~4.08s, so the last 0.9s HOLDS and the finished waveform can actually be read. It
+    // was briefly stretched to 4.6s to cover a dead tail, but that tail only existed because the status
+    // indicator had been cut: the fix was to restore the indicator, not to keep the payoff moving so
+    // nothing looked still. A settle is not dead air when something on the frame is alive.
+    const at = +(WAVE.at + 0.0068 * i).toFixed(3);
     out.push(`<rect x="${x}" y="${y}" width="${bw.toFixed(1)}" height="${hgt}" rx="${(bw / 2).toFixed(1)}" fill="var(--accent)"`
       + ` style="transform-box:view-box;transform-origin:${(x + bw / 2).toFixed(1)}px ${WAVE.h / 2}px;`
       + `transform:scaleY(clamp(0,(var(--t,0) - ${at}) * 9,1));opacity:clamp(0,(var(--t,0) - ${at}) * 9,1)"/>`);
@@ -163,11 +161,32 @@ const scene = {
         { t: 0.34, x: -66, ease: 'linear' }, { t: 0.44, x: -24, ease: 'linear' }, { t: 0.58, x: 0, ease: 'easeOutCubic' }] },
     { type: 'html', id: 'wave', x: WAVE.x, y: WAVE.y, w: WAVE.w, h: WAVE.h, html: wave(),
       start: 3.5, duration: 1.5, anim: 'fade', enterDur: 0.22, exitDur: 0 },
-    // No loading spinner here, deliberately. There was one beside "Composing", and for the 12 frames it
-    // overlapped the pulse ring the frame carried TWO expanding circles and read as a mistake. It was
-    // also the third thing saying the same word: the ring is the object's own pulse, the waveform IS the
-    // work happening, and a spinner is the generic stand-in you reach for when you have neither. Cutting
-    // the redundant one is the fix; moving it later would only have hidden the collision.
+    // The status line needs a companion or "Composing" is a label rather than a state. It used to be a
+    // rotating ring, which for 12 frames sat beside the pulse ring blooming out of the dot and read as
+    // two spinners. The collision was in the FORM, not in the element: what it contributed (this is
+    // live, it is still going) the beat genuinely needs. So the affordance stays and the circle goes.
+    //
+    // Three dots, pulsing in sequence, are literally the ellipsis of "Composing…" — the one indicator
+    // that cannot be mistaken for the ring because it is not round, and the only one that reads as part
+    // of the sentence instead of as furniture parked next to it. Separate layers rather than one html
+    // block: a single layer's scale would throb all three together, and a sequence is what says
+    // "working" while a throb just says "here". Each rides `gen` so the line travels as one, and each
+    // states only opacity/scale, so the pan carries them (core/pan-resolve.mjs).
+    ...[0, 1, 2].map((i) => ({
+      // 932, not 1178: `gen` travels +246 across its entrance, and a panWith layer's authored x is where
+      // it STARTS, not where it settles. Placing these by their resting position parked them 274px off
+      // the end of the word. That is #194 exactly, walked into again by the author who had just fixed it
+      // — the pan's total delta still appears nowhere near the layer that has to account for it.
+      type: 'rect', id: `dot${i}`, panWith: 'gen', x: 932 + i * 30, y: 520, w: 14, h: 14, radius: 7,
+      bg: 'var(--accent)', start: +(4.0 + i * 0.13).toFixed(2), duration: +(1.0 - i * 0.13).toFixed(2),
+      exitDur: 0,
+      motion: [
+        { t: 0, opacity: 0.22, scale: 0.7 },
+        { t: 0.23, opacity: 1, scale: 1, ease: 'easeOutCubic' },
+        { t: 0.46, opacity: 0.22, scale: 0.7, ease: 'easeInOutSine' },
+        { t: 0.69, opacity: 1, scale: 1, ease: 'easeOutCubic' },
+      ],
+    })),
   ],
   bg: [{ t: 0, preset: 'plain', from: 0, to: 5 }],
 };

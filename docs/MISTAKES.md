@@ -4578,3 +4578,37 @@ check the behaviour, not the shape.
 clean, 6 skipped for needing props. That ratio is the honest result — the prediction method paid for
 itself once and found nothing else in this class. `scripts/dev/predict.mjs` keeps the probes rerunnable,
 and it was checked against a deliberately reintroduced bug to prove it fires.
+
+---
+
+## #198 — removing an element is not the same as replacing what it did
+
+**What.** #196 cut a loading spinner from `cadence` because it collided with the pulse ring, then filled
+the resulting still tail by stretching the waveform's draw-on. The user's verdict: "without the spinner
+the video feels half baked. you cant just remove some element without thinking what it contributed."
+
+Correct, and the distinction is worth writing down. The spinner contributed two separable things: a FORM
+(a rotating circle, which collided) and a FUNCTION (the status line is live, this is still going).
+Only the form was the problem. Cutting the element threw away the function, and stretching the waveform
+replaced neither — it made sure nothing looked frozen, which is not the same as the line being alive.
+"Composing" with nothing beside it is a label, not a state.
+
+**Fix.** Keep the function, drop the form: three dots pulsing in sequence, which cannot be mistaken for
+the ring because they are not round, and which read as the ellipsis of "Composing…" rather than as an
+indicator parked next to it. The waveform went back to finishing at 4.08s, because a 0.9s settle on the
+payoff is right when something else on the frame is alive — the stretch had only ever been compensation.
+
+**Lesson.** Before removing anything, name what it contributed as FORM and as FUNCTION separately. If
+only the form is at fault, the fix is a different form, not a deletion. And a hole filled with motion is
+not a hole filled with meaning: "nothing looks frozen" is a much weaker property than "the frame still
+says what it needs to".
+
+**A second bug, in the fix.** The three dots were placed by where they should REST — and `panWith` means
+the authored x is where a layer STARTS. They landed 274px off the end of the word. That is #194 exactly,
+walked into by the author who had fixed #194 forty minutes earlier, on a feature whose trap he had just
+written a gate for. The gate catches a reversal; it says nothing about resting position.
+
+So `lintData` now simply prints the arithmetic for every panning layer: *"pans with 'gen', so its x/y is
+where it STARTS (932, 520) — it comes to rest +246px across, at (1178, 520)."* The number was always
+computable and appeared nowhere: not in the layer, not in the source, not in any error. Two bugs from
+guessing it is enough evidence that people will keep guessing it.

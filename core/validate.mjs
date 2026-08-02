@@ -324,6 +324,30 @@ function noEmdash(v, path, errors) {
 // every existing gate. Pure. Scene layers only.
 export function lintData(data) {
   const warns = [];
+  // `panWith` copies a track as DELTAS, so the x/y an author writes is where the layer STARTS and the
+  // pan carries it somewhere else. That total is computable and appears nowhere: not in the layer, not
+  // in the source, not in any error. Two separate bugs came from guessing it — the button snapping
+  // 194px backwards (#194) and, in the very next edit, three dots parked 274px off the end of the word
+  // they belong to. Both times the file read as intended. So the arithmetic is simply printed.
+  // Only when the shift is big enough to matter: a pan that moves a layer a few px needs no announcing.
+  {
+    const REST_MIN = 24;
+    for (const [i, L] of (data.layers || []).entries()) {
+      if (!isObj(L) || typeof L.panWith !== 'string') continue;
+      const src = (data.layers || []).find((x) => isObj(x) && x.id === L.panWith);
+      if (!isObj(src) || typeof src.panWith === 'string' || !Array.isArray(src.motion) || !src.motion.length) continue;
+      let track; try { track = mergePan(L, src); } catch { continue; }
+      const end = Math.max(...track.map((k) => (typeof k.t === 'number' ? k.t : 0)));
+      const at = motionAt(track, end);
+      const dx = Math.round(at.dx || 0), dy = Math.round(at.dy || 0);
+      if (Math.hypot(dx, dy) < REST_MIN) continue;
+      const bx = typeof L.x === 'number' ? L.x : null, by = typeof L.y === 'number' ? L.y : null;
+      warns.push(`layers[${i}]${L.id ? ` #${L.id}` : ''}: pans with "${L.panWith}", so its x/y is where it STARTS`
+        + `${bx != null ? ` (${bx}${by != null ? `, ${by}` : ''})` : ''} — it comes to rest ${dx ? `${dx > 0 ? '+' : ''}${dx}px across` : ''}`
+        + `${dx && dy ? ' and ' : ''}${dy ? `${dy > 0 ? '+' : ''}${dy}px down` : ''}`
+        + `${bx != null ? `, at (${bx + dx}${by != null ? `, ${by + dy}` : ''})` : ''}. Place it by where it STARTS, not where you want it to land.`);
+    }
+  }
   const layers = Array.isArray(data?.layers) ? data.layers : [];
   const name = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${L.text.replace(/<[^>]+>/g, '').slice(0, 24)}"` : ''})`;
 
