@@ -4419,3 +4419,22 @@ clear its floor. A human watching the video found it.
 **Lesson.** `x || default` is wrong for any quantity whose valid range includes zero, and opacity is the
 canonical case. The bug survived because it only fires in a window three frames wide, at the end of a
 fade, where nobody looks.
+
+**Swept afterwards for the same class.** Every `x || <non-zero>` in `core/` and the scene renderer, and
+every read-back off `dataset` / `style` / `getAttribute`. The result is worth recording because it is
+mostly GOOD news: about fifteen hits and nearly all are correct guards against a degenerate value, not
+falsy-zero bugs — `units.length || 1` and `rawMax || 1` guard a divide, `(seed >>> 0) || 1` guards an LCG
+that degenerates at zero, `man.fps || 30` and `data.duration || 12` guard nonsense inputs. Every DOM
+read-back is `|| ''` on a string, where empty is the right fallback. And layer props are read with `??`
+throughout, which is why `opacity: 0` on a LAYER always worked; only the recomposition of an already
+written style had the bug.
+
+Two real ones, both in `core/audio-kit.mjs` and both internal rather than author-facing: `L.glideTime ||
+0.1` turned "snap to the target" into a 100ms slide, and `L.decay || 0.1` overrode a zero decay. The
+same line already read `L.peak ?? 0.1` correctly, so the distinction was known and applied unevenly.
+Both now use `??`.
+
+**No gate was added for this.** A source rule flagging `|| <non-zero>` would fire on all fifteen legitimate
+guards to catch one bug, which is the `flicker-check` mistake (#190) again: a check that cries wolf gets
+skipped, and then it protects nothing.
+

@@ -86,12 +86,15 @@ export function renderCue(spec, seed = 1) {
       else {
         // glide + detune are frequency-domain; integrate phase so a sweep stays continuous.
         let f = L.frequency || 440;
-        if (L.glideTo != null) { const g = clamp(t / Math.max(1e-4, L.glideTime || 0.1), 0, 1); f = f + (L.glideTo - f) * g; }
+        // `?? ` not `|| `: a glideTime of 0 means SNAP to the target, and `|| 0.1` turned that into a
+        // 100ms slide. Same falsy-zero class as the opacity bug (docs/MISTAKES.md #193), and the very
+        // next line already had it right for `peak`.
+        if (L.glideTo != null) { const g = clamp(t / Math.max(1e-4, L.glideTime ?? 0.1), 0, 1); f = f + (L.glideTo - f) * g; }
         if (L.detune) f *= Math.pow(2, L.detune / 1200);
         phase += TAU * f / SR;
         v = osc(L.waveform || 'sine', 0, 0, phase);
       }
-      out[off + i] += v * env(t, L.attack || 0, L.decay || 0.1, L.peak ?? 0.1);
+      out[off + i] += v * env(t, L.attack ?? 0, L.decay ?? 0.1, L.peak ?? 0.1);
     }
   });
 
