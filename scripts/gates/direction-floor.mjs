@@ -45,8 +45,14 @@ const isExpressiveText = (l) => !!(l.split || l.preset || l.fx || Array.isArray(
 const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 
 // background motion: a bg WINDOW on a moving preset, or a shader / canvasFx / three layer.
-const MOVING_BG = /gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither/i;
-const hasBgMotion = (d.bg || []).some((b) => b && MOVING_BG.test(String(b.preset || b.value || '')))
+// Matching on the preset NAME misses presets that animate by nature: `dotmatrix` is a dot field with a
+// mode (pulse/wave/ripple) and a period, it is never still, and it is one of the most-used backdrops in
+// this library. A window that names a mode, period or drift is animating whatever it is called, so ask
+// the window rather than only its name.
+const MOVING_BG = /gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i;
+const animatedWin = (b) => b && (MOVING_BG.test(String(b.preset || b.value || ''))
+  || b.mode != null || b.period != null || b.driftX != null || b.driftY != null);
+const hasBgMotion = (d.bg || []).some(animatedWin)
   || flat.some((l) => l.shader || l.canvasFx || l.three || l.raymarch || l.type === 'paint');
 
 // camera actually MOVES (s/x/y changes across keyframes), not a static [{s:1},{s:1}].
@@ -55,7 +61,11 @@ const camKf = cam.length > 1 && cam.some((k) => (k.s ?? 1) !== (cam[0].s ?? 1) |
 // the `cameraMove` sugar (core/camera-moves.js) IS a camera move — it just expands to d.camera at
 // `make expand`, and the floor runs PRE-expand, so without this it nags "no-camera" on a scene that
 // already has a push/dive. Credit a cameraMove that names a move or actually changes scale/position.
-const camSugar = Array.isArray(d.cameraMove) && d.cameraMove.some((m) => m && (m.move || (m.from != null && m.to != null && m.from !== m.to) || (m.tx != null) || (m.ty != null)));
+// ...and the sugar is documented as an OBJECT (`"cameraMove": { "move":"diveIn" }`, core/camera-moves.js),
+// which scripts/author/expand-blocks.mjs accepts alongside an array. Only crediting the array meant a
+// film using the documented form was told its camera never moves while the camera was moving.
+const camSpecs = Array.isArray(d.cameraMove) ? d.cameraMove : (d.cameraMove ? [d.cameraMove] : []);
+const camSugar = camSpecs.some((m) => m && (m.move || (m.from != null && m.to != null && m.from !== m.to) || (m.tx != null) || (m.ty != null)));
 const camMoves = camKf || camSugar;
 
 const sig = {
