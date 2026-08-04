@@ -39,12 +39,23 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	} else {
 		return fmt.Errorf("read data: %w", err)
 	}
-	// fps resolution: explicit CLI flag wins; else the scene's own "fps"; else 30.
+	// fps resolution: explicit CLI flag wins; else the scene's own "fps"; else the DRAFT SPLIT.
+	//
+	// A final render ships at 60 and an iteration pass runs at 30. The two rates are not a preference,
+	// they are two different jobs: while authoring you re-render constantly and want the loop short,
+	// and 30fps halves both the capture and the encode. What ships wants the smoothness, and product
+	// and UI motion in particular reads noticeably better at 60 (the Arc reference films are 60).
+	//
+	// This is safe to make automatic only because the per-frame budget is now expressed per SECOND
+	// rather than per frame. Until #204 the same scene rendered at 60 silently lost its auto motion
+	// blur entirely, so a "smoother" final was quietly worse than the draft it was signed off from.
 	if o.FPS == 0 {
 		if df.FPS > 0 {
 			o.FPS = int(df.FPS)
-		} else {
+		} else if o.Draft {
 			o.FPS = 30
+		} else {
+			o.FPS = 60
 		}
 	}
 

@@ -36,6 +36,19 @@ if (!fs.existsSync(mp4)) {
   process.exit(2);
 }
 
+// The rate comes from the FILE, not from a constant. Finals render at 60 and drafts at 30, so a fixed
+// divisor here would report every timestamp at double or half its real value and send whoever reads the
+// finding to the wrong second of the film (docs/MISTAKES.md #205).
+const FPS_IN = (() => {
+  try {
+    const out = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
+      'stream=r_frame_rate', '-of', 'default=noprint_wrappers=1:nokey=1', mp4], { encoding: 'utf8' });
+    const m = /^(\d+)(?:\/(\d+))?/.exec(out.trim());
+    const v = m ? (+m[1] / (m[2] ? +m[2] : 1)) : 0;
+    return v > 0 ? Math.round(v) : 30;
+  } catch { return 30; }
+})();
+
 // Downscale hard: a dropped paint removes a whole REGION, so it survives any reasonable downsample, and
 // working at 160x90 keeps a 20s film to a few megabytes of greyscale instead of gigabytes.
 const W = 160, H = 90, FRAME = W * H;
@@ -68,7 +81,7 @@ const FLOOR = Math.max(40, med * 8);
 const hits = [];
 for (let i = 1; i < n - 1; i++) {
   const drop = Math.min(series[i - 1], series[i + 1]) - series[i];
-  if (drop > FLOOR) hits.push({ f: i, t: i / 30, drop });
+  if (drop > FLOOR) hits.push({ f: i, t: i / FPS_IN, drop });
 }
 
 console.log(`\n  flicker check · ${name}.mp4 · ${n} frames · measuring ${polarity} (typical frame-to-frame change ${med})`);

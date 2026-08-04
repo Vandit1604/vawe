@@ -5,7 +5,8 @@
 //	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out out/q.mp4
 //	go run ./cmd/render --all
 //
-// flags: --fps 30  --workers N  --draft  --no-grain  --concurrency 1 (for --all)
+// flags: --fps N  --workers N  --draft  --no-grain  --concurrency 1 (for --all)
+// fps: unset = 60 for a final render, 30 with --draft (iteration). A scene may pin its own "fps".
 package main
 
 import (
@@ -26,7 +27,7 @@ func main() {
 	data := flag.String("data", "", "data JSON file (also accepted as a positional arg)")
 	out := flag.String("out", "", "output mp4 (optional — defaults to out/<json-name>.mp4)")
 	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
-	fps := flag.Int("fps", 0, "frames per second (0 = use the scene's fps, else 30)")
+	fps := flag.Int("fps", 0, "frames per second (0 = the scene's fps, else 60 final / 30 --draft)")
 	// CAP AT 4, NOT 8. Each worker is a full browser capturing at ss× supersample, and past about four
 	// of them raster cannot keep up with the draw: frames come back with the most raster-expensive
 	// region (large text) partially painted, fading off left to right in tile order. It is invisible to

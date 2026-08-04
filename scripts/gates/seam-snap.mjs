@@ -22,10 +22,21 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
-const fps = 30;
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at out/${name}.mp4 — render first (make video D=${dataArg})`); process.exit(2); }
+
+// READ the rate from the file rather than assuming it. Finals now render at 60 and drafts at 30, and
+// every use of `fps` below converts a TIME into a FRAME NUMBER — so an assumed 30 seeks to half the
+// intended timestamp on a 60fps final and checks frames that have nothing to do with the seam. Silent,
+// and it would have reported a clean seam by looking at the wrong side of it (docs/MISTAKES.md #205).
+const probeFps = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
+  'stream=r_frame_rate', '-of', 'default=noprint_wrappers=1:nokey=1', mp4], { encoding: 'utf8' });
+const fps = (() => {
+  const m = /^(\d+)(?:\/(\d+))?/.exec(String(probeFps.stdout).trim());
+  const v = m ? (+m[1] / (m[2] ? +m[2] : 1)) : 0;
+  return v > 0 ? Math.round(v) : 30;
+})();
 
 // mean luminance of one frame, cheaply: scale the frame to 1×1 and read its single RGB pixel. That 1×1
 // average IS the frame's mean colour; Rec.601 luma of it is the frame brightness in [0,1].

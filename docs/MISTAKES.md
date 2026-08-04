@@ -4888,3 +4888,35 @@ treating zero as absent (#193). Units and identity values are where this engine'
 A gate that only ever tests the default cannot find a defect in the non-default, and this is the whole
 class: `multiPhase` was broken for its entire life because no scene used it, and this was broken for
 every 60fps render because nothing renders at 60.
+
+---
+
+## #205 — the 60fps default, and the two gates that would have read it wrong
+
+**The policy.** A final render is 60fps, an iteration render is 30. They are two different jobs: while
+authoring you re-render constantly and want the loop short, and 30 halves both capture and encode; what
+ships wants the smoothness, and product/UI motion in particular reads noticeably better at 60 (the Arc
+reference films are 60). Implemented in `internal/render/render.go` rather than the Makefile, so it is
+true for anyone running `./bin/vawe` directly and not only for people who go through `make`. Precedence
+is unchanged: an explicit `-fps` wins, then the scene's own `fps`, then the draft split.
+
+This was only safe to automate because #204 landed first. Until the auto-blur floor was expressed per
+SECOND, the same scene rendered at 60 silently lost its motion blur entirely — so a "smoother" final
+would have been quietly worse than the draft it was signed off from, in a way nobody could have traced.
+
+**What changing the default exposed.** Two gates read the encoded mp4 and assumed 30fps:
+
+- `seam-snap.mjs` had `const fps = 30`, and every use of it converts a TIME into a FRAME NUMBER. On a
+  60fps final it would seek to **half the intended timestamp** and inspect frames with no relationship
+  to the seam — then report the seam clean, having looked at the wrong side of it. Silent, and worse
+  than no check at all, because a green seam-check is the cheapest reassurance in the ladder.
+- `flicker-check.mjs` used `i / 30` to label findings, which would have sent whoever read one to the
+  wrong second of the film.
+
+Both now read `r_frame_rate` from the file. Verified against the same scene encoded at both rates.
+
+**The pattern, stated once because it has now happened three times in a day.** A constant that encodes
+an assumption about the environment rather than about the thing being measured: `AUTO_BLUR_FLOOR = 16`
+(px per frame), `const fps = 30`, `i / 30`. Each was correct when there was only one frame rate, and
+each became a silent lie the moment there were two. The general rule this repo should hold: **if a
+number's meaning depends on a setting, read the setting; do not hard-code the value it usually has.**
