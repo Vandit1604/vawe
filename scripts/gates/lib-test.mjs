@@ -5,7 +5,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
-import { cameraAt, motionAt, resolveBoxes } from '../../core/sequence.js';
+import { cameraAt, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
@@ -311,22 +311,34 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('motionAt deterministic', JSON.stringify(motionAt(kf, 0.3)) === JSON.stringify(motionAt(kf, 0.3)));
 
   // ---- the BOX track (w/h) -----------------------------------------------------------------------
-  // w has no identity constant the way x has 0, so it gets ONE rule and resolveBoxes is what makes the
+  // w has no identity constant the way x has 0, so it gets ONE rule and resolveKeyedProps is what makes the
   // rule true: both endpoints carry a number, or the track does not animate the box. Anything softer
   // (hold the neighbour, fall back to a guess) is the second interpretation that #195 was made of.
   ok('motionAt no box keys → null', motionAt(kf, 0.5).w === null && motionAt(kf, 0.5).h === null);
-  const box = resolveBoxes([{ w: 300, h: 200, motion: [{ t: 0 }, { t: 1, w: 900 }] }])[0].motion;
-  ok('resolveBoxes fills the untouched key from the layer', box[0].w === 300 && box[0].h == null);
-  ok('resolveBoxes leaves h alone when no key mentions it', box[1].h == null);
+  const box = resolveKeyedProps([{ w: 300, h: 200, motion: [{ t: 0 }, { t: 1, w: 900 }] }])[0].motion;
+  ok('resolveKeyedProps fills the untouched key from the layer', box[0].w === 300 && box[0].h == null);
+  ok('resolveKeyedProps leaves h alone when no key mentions it', box[1].h == null);
   ok('box lerps once filled', approx(motionAt(box, 0.5).w, 600) && motionAt(box, 0.5).h === null);
   ok('box clamps at the endpoints', motionAt(box, -1).w === 300 && motionAt(box, 9).w === 900);
   let threw = '';
-  try { resolveBoxes([{ id: 'nobase', motion: [{ t: 0, w: 100 }] }]); } catch (e) { threw = e.message; }
-  ok('resolveBoxes throws when there is no base box', /declares no w/.test(threw));
-  // resolveBoxes must be idempotent: scene.js runs it once per boot, but a re-boot on the same data
+  try { resolveKeyedProps([{ id: 'nobase', motion: [{ t: 0, w: 100 }] }]); } catch (e) { threw = e.message; }
+  ok('resolveKeyedProps throws when there is no base box', /declares no w/.test(threw));
+  // resolveKeyedProps must be idempotent: scene.js runs it once per boot, but a re-boot on the same data
   // object (studio reload, a gate that validates then renders) must not shift the answer.
-  const twice = resolveBoxes(resolveBoxes([{ w: 300, motion: [{ t: 0 }, { t: 1, w: 900 }] }]))[0].motion;
-  ok('resolveBoxes idempotent', twice[0].w === 300 && twice[1].w === 900);
+  const twice = resolveKeyedProps(resolveKeyedProps([{ w: 300, motion: [{ t: 0 }, { t: 1, w: 900 }] }]))[0].motion;
+  ok('resolveKeyedProps idempotent', twice[0].w === 300 && twice[1].w === 900);
+
+  // ---- keyed DEPTH -------------------------------------------------------------------------------
+  // `track` is the third layer-owned property, and the one that differs: it always HAS an identity,
+  // because scene.js already defaults a layer's z-order to its index. So keying depth on a layer that
+  // never declared it is ordinary rather than an error, and the fill has to come from the index.
+  ok('motionAt no track keys → null', motionAt(kf, 0.5).track === null);
+  const dep = resolveKeyedProps([{ id: 'a', motion: [{ t: 0 }] }, { id: 'ribbon', motion: [{ t: 0 }, { t: 1, track: 9 }] }])[1].motion;
+  ok('keyed depth fills from the layer INDEX when undeclared', dep[0].track === 1);
+  ok('keyed depth lerps', approx(motionAt(dep, 0.5).track, 5));
+  const dep2 = resolveKeyedProps([{ track: 4, motion: [{ t: 0 }, { t: 1, track: 0 }] }])[0].motion;
+  ok('an explicit track wins over the index', dep2[0].track === 4);
+  ok('keyed depth clamps at the endpoints', motionAt(dep2, 9).track === 0);
 }
 
 // ---- mergePan: every fabricated key must state the WHOLE pose (MISTAKES #194, #195) ------------

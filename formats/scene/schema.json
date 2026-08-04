@@ -1250,6 +1250,10 @@
               "type": "number",
               "label": "Height (px) at this key. Same rule as `w`."
             },
+            "track": {
+              "type": "number",
+              "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
+            },
             "ease": {
               "type": "string",
               "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"
@@ -1327,6 +1331,10 @@
         "stroke": {
           "type": "string",
           "label": "svg layer: stroke colour (default var(--accent) for draw-on)"
+        },
+        "strokeWidth": {
+          "type": "number",
+          "label": "svg layer: stroke thickness in viewBox units. Works on any stroked path, not just a draw-on one (`draw.weight` still wins when both are set)."
         },
         "draw": {
           "label": "svg layer: stroke draws itself on. {dur, weight}"

@@ -32,10 +32,16 @@ export function build(kit, el, L) {
   p.setAttribute('stroke', stroke);
   p.setAttribute('stroke-linecap', 'round');
   p.setAttribute('stroke-linejoin', 'round');
+  // Stroke WIDTH used to be reachable only through `draw.weight`, so a stroked path that was not also
+  // drawing itself on took the browser default of 1px and said nothing. The only way to get a thick
+  // static stroke was `draw:{weight:30}` for the side effect — a hack written to route around the
+  // engine, which CLAUDE.md calls a bug report rather than an answer. `strokeWidth` is the honest
+  // spelling; `draw.weight` still wins when present so no existing scene moves.
+  if (L.strokeWidth != null) p.setAttribute('stroke-width', L.strokeWidth);
   if (L.draw) {
     p.setAttribute('fill', 'none');
     p.setAttribute('stroke', stroke === 'none' ? (fill !== 'none' ? fill : 'var(--accent)') : stroke);
-    p.setAttribute('stroke-width', L.draw.weight ?? 3);
+    p.setAttribute('stroke-width', L.draw.weight ?? L.strokeWidth ?? 3);
     p.setAttribute('pathLength', '1');       // normalise so the offset is a pure function of u, no measuring
     p.style.strokeDasharray = '1 1';
     p.style.strokeDashoffset = '1';          // hidden at t=0

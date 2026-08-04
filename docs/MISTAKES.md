@@ -4983,3 +4983,37 @@ measured shape ("short ramp, long decay, that is `settle`") and was visibly wron
 fits the curve against every easing the engine has and answers `brake` (residual 0.032). The tool
 existed, `docs/CRAFT/RECREATION.md` step 1 says to run it, and reasoning about the numbers felt enough.
 It was not. **Fit the curve; do not name it.**
+
+## #207 — depth was a number, not a track, so nothing could pass behind anything
+
+**What.** Studying a reference (a ribbon sweeping around a photograph, in front on the near side of its
+arc and behind on the far side) found the same shape as #206 one property over. `track` is the z-order,
+`core/clips.js:83` writes `zIndex` from it on every frame, and it was read from a `data-track` attribute
+stamped once at build. A layer could be entirely in front of another or entirely behind it, forever.
+
+**Why it matters.** Occlusion crossing mid-shot is what makes a flat composite read as space. Without
+it the only ways to fake the shot are to cut on the crossing (which the reference does not do, and
+which throws away the continuity) or to draw two copies and cross-fade them.
+
+**Fix.** `track` is keyable, on the same contract as `w`/`h` (#206) — `resolveKeyedProps` fills a keyed
+property from the layer once, up front, so `motionAt` keeps ONE interpretation rule. `resolveBoxes` was
+renamed to `resolveKeyedProps` since it no longer only does boxes; `LAYER_OWNED` names the three.
+
+One difference, and it is the reason to write the fill per-property rather than generically: `track`
+ALWAYS has an identity, because scene.js already defaults a layer's z-order to its index in the array.
+So keying depth on a layer that never declared `track` is ordinary and fills from the index, whereas
+keying `w` on a layer with no `w` has nothing to animate from and throws. Applied rounded, because
+z-index is an integer, and after driveClips, which rewrites zIndex from the static attribute每 frame.
+
+**The test was wrong before the feature was.** The first proof render put the ring at radius 390 around
+a 620x400 photo, so the two shapes barely grazed at the corners and there was nothing to occlude. Both
+frames looked identical and the feature looked broken. Tightening the ring to radius 300 — so it
+genuinely passes through the photo's area — showed the crossing immediately. A test that cannot fail
+tells you nothing when it passes and lies to you when it does not.
+
+**Found on the way, and it is the workaround-is-a-bug-report class.** `core/layers/svg.js` set
+`stroke-width` ONLY inside `if (L.draw)`, so a stroked path that was not also drawing itself on took
+the browser default of 1px silently. The only way to get a thick static stroke was `draw:{weight:30}`
+for the side effect — structurally identical to the `ken:{from:1,to:1}`-for-a-border-radius hack
+CLAUDE.md names. `strokeWidth` now works on any stroked path; `draw.weight` still wins when both are
+set, so no existing scene moves. Blast radius: zero scenes used either.
