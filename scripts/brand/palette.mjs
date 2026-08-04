@@ -26,7 +26,9 @@ const result = await page.evaluate(async (uris) => {
   const q = (v) => Math.round(v / 24) * 24;
   for (const uri of uris) {
     const img = new Image(); img.src = uri; await img.decode();
-    const S = 130, H = Math.round(S * (img.height / img.width));
+    // 130px wide rendered a button 6px across and blended it into the white beside it. A brand's accent
+    // often lives on nothing bigger than a button, so the sample has to be able to hold one.
+    const S = 260, H = Math.round(S * (img.height / img.width));
     const c = document.createElement('canvas'); c.width = S; c.height = H;
     const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, S, H);
     const d = ctx.getImageData(0, 0, S, H).data;
@@ -39,7 +41,10 @@ const result = await page.evaluate(async (uris) => {
     }
   }
   const cols = [...bins.values()].map((e) => ({ r: Math.round(e.r / e.c), g: Math.round(e.g / e.c), b: Math.round(e.b / e.c), c: e.c })).sort((a, b) => b.c - a.c);
-  return { cols: cols.slice(0, 16), total: n, avgLum: lumSum / n };
+  // 16 was the real reason a sparse accent could never be found: the accent pass ran over the sixteen
+  // MOST FREQUENT bins, which on any white-first site are sixteen neutrals. Ranking could not fix what
+  // was never in the list. The extra bins cost nothing — they are counted either way.
+  return { cols: cols.slice(0, 400), total: n, avgLum: lumSum / n };
 }, uris);
 await browser.close();
 
@@ -55,7 +60,18 @@ const bg = cols.filter((c) => sat(c) < 0.2 && (light ? lum(c) > 0.7 : lum(c) < 0
 // that's actually present. Pick that among colours above a tiny presence floor.
 const textCands = cols.filter((c) => sat(c) < 0.28 && c.c > result.total * 0.001);
 const text = (light ? textCands.sort((a, b) => lum(a) - lum(b)) : textCands.sort((a, b) => lum(b) - lum(a)))[0] || cols[cols.length - 1];
-const accents = cols.filter((c) => sat(c) > 0.4).sort((a, b) => b.c - a.c).slice(0, 3);
+// An accent is the colour a brand SPENDS sparingly, so ranking candidates by how much of the page they
+// cover finds the opposite of one. Ramp's lime lives on two buttons — well under 1% of the pixels — and
+// frequency-ranking handed back #111605 instead: near-black antialiasing noise that is technically
+// saturated and completely invisible. Two changes: an accent must be VISIBLE (not near-black, not
+// near-white, or it is a shadow or a highlight), and candidates rank by vividness weighted by presence
+// rather than by presence alone, so a small vivid colour beats a large dull one. Good design uses
+// accents sparingly, so the old ranking failed hardest on exactly the brands worth reflecting
+// (docs/MISTAKES.md #201).
+const accents = cols
+  .filter((c) => sat(c) > 0.4 && lum(c) > 0.12 && lum(c) < 0.95 && c.c > result.total * 0.0002)
+  .sort((a, b) => (sat(b) * Math.sqrt(b.c)) - (sat(a) * Math.sqrt(a.c)))
+  .slice(0, 3);
 
 console.log(`\nEYEDROP · ${files.length} image(s) · ${path.basename(arg)}`);
 console.log(`  DOMINANCE : ${light ? 'LIGHT / white-first' : 'DARK-first'}  (whole-page avg luminance ${result.avgLum.toFixed(2)})`);

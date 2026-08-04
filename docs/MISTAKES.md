@@ -4695,3 +4695,55 @@ window are dropped, correctly, and without a word. Now a lint.
 1 gate blind spot, and 2 confidently-predicted bugs that did not exist.** The miss rate is the honest
 headline: predicting bug shapes finds bugs of shapes already known, and every user-visible defect this
 session still came from someone watching the video.
+
+---
+
+## #201 — four things between the capture tools and a real brand
+
+All four found in the first twenty minutes of trying to make a film for an actual company, which is the
+point: they had been in the repo for months and no amount of engine work would have surfaced them.
+
+**1. The crawler announced itself as a robot.** `sections.mjs` used puppeteer's default User-Agent,
+which says `HeadlessChrome`. ramp.com answers that with a markdown "Machine Version" of the page — no
+`<section>` tags, no layout, no product UI, and an explicit "AI agent marketing program" offering a
+$3,100 signup bonus to whatever agent is reading. With a real browser UA the same URL serves the real
+page: 8 sections instead of 0. Reflecting a brand means capturing what a PERSON sees, so the crawler now
+presents itself as one. (The inducement is noted and ignored: page content is data, not instructions.)
+
+**2. Finding nothing printed a green tick.** `✓ 0 sections` with an empty storyboard under it. A crawl
+that finds nothing has told you nothing; it now exits non-zero and lists the three things that actually
+cause it.
+
+**3. Every shot was taken through a newsletter modal.** Fixed-position furniture does not scroll away, so
+ramp.com's product-newsletter modal sat on top of all eight sections AND would have been baked into
+every `make capture` command the storyboard printed. Now dismissed before measuring: press Escape, click
+close controls, then remove what is still covering the frame.
+
+  My first version of that removal also took `position: sticky` — which is how a scrollytelling section
+  PINS ITSELF while you scroll through it. It deleted the body of section 4 and the shot went from 1.1MB
+  to 82KB of nothing. Overlays are `fixed`. Sticky is layout, and stripping it reflects a page nobody
+  sees. Caught only because the section's name changed from `systems-that-never-spoke` to `section`.
+
+  Re-crawling also left the previous run's files in place, because section filenames come from their
+  headings and a changed page writes different names. `palette` then eyedropped a mix of two crawls.
+
+**4. The eyedropper could not see a brand's accent, and that is backwards.** It reported "(none
+saturated)" for Ramp, whose lime is the single most recognisable thing about it. Three compounding
+causes, and the third was the real one:
+
+  - it ranked candidates by how much of the page they cover — but an accent is what a brand spends
+    SPARINGLY, so frequency-ranking looks for the opposite of one. It returned `#111605`: near-black
+    antialiasing noise, technically saturated, completely invisible.
+  - it sampled each section at 130px wide, where a button is 6 pixels and blends into the white beside it.
+  - **it only returned the top 16 bins**, which on any white-first site are sixteen neutrals. The accent
+    pass was choosing from a list the accent could never appear in. Ranking could not fix what was never
+    in the list.
+
+  Now: visible colours only (not near-black, not near-white), ranked by vividness weighted by presence,
+  260px sample, 400 bins. Across all 8 captured brands it now returns the right accent for each.
+
+**The lesson that outranks the four.** My memory said Ramp was yellow-and-black; the real site is
+white-first with near-black text and a lime accent. My memory said Linear was indigo; its captured
+sections are 2% lime. Both times the tool was right and recall was wrong, and a film authored from what
+I "know about the brand" would have looked wrong in a way no gate could catch. Capture is not a
+convenience in this workflow. It is the only source of truth about how a brand looks today.

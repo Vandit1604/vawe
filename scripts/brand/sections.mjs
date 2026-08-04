@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
+import { dismissOverlays } from './dismiss-overlays.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const argv = process.argv.slice(2);
@@ -21,13 +22,26 @@ if (!url || !brand) { console.error('usage: node scripts/sections.mjs <url> <bra
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'sections');
+// Clear the directory first. Section names come from their headings, so a re-crawl of a changed page
+// writes DIFFERENT filenames and the old shots survive beside the new ones — `palette` then eyedrops a
+// mix of two crawls and the storyboard shows sections that are no longer on the site.
+if (fs.existsSync(dir)) for (const f of fs.readdirSync(dir)) if (/\.(png|json)$/.test(f)) fs.rmSync(path.join(dir, f));
 fs.mkdirSync(dir, { recursive: true });
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
+// A real browser's User-Agent, because a growing number of marketing sites CONTENT-NEGOTIATE on it and
+// serve automated clients something else entirely. ramp.com answers puppeteer's default (which says
+// "HeadlessChrome") with a markdown "Machine Version" written for AI agents — no <section> tags, no
+// layout, no product UI, and therefore nothing to reflect. With this line it serves the real page: 8
+// sections instead of 0. Reflecting a brand means capturing what a PERSON sees (docs/MISTAKES.md #201).
+await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36');
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
 catch (e) { console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
+// clear newsletter modals / cookie walls / chat bubbles BEFORE measuring, or every section shot is
+// taken through them and every capture command below inherits the same furniture.
+await dismissOverlays(page);
 // mount lazy sections + settle fonts, then return to top for consistent coordinates
 await page.evaluate(async () => {
   await document.fonts.ready;
@@ -112,6 +126,18 @@ await browser.close();
 
 const manPath = path.join(dir, 'sections.json');
 fs.writeFileSync(manPath, JSON.stringify({ url, brand, viewport: `${VW}x${VH}`, sections: manifest }, null, 2) + '\n');
+// Zero sections is a FAILURE, not a quiet success. It printed a green tick and an empty storyboard, and
+// the only reason it was caught is that a human asked why the inventory was blank. A crawl that finds
+// nothing has told you nothing (docs/MISTAKES.md #201).
+if (!manifest.length) {
+  console.error(`✗ 0 sections found at ${url}`);
+  console.error('  The page rendered but nothing matched. Usually one of:');
+  console.error('   · the site served a non-HTML version (some sites answer automated clients with a');
+  console.error('     markdown "machine" page — check by opening the URL in a real browser and comparing)');
+  console.error('   · the content is behind a consent wall or bot check that did not clear');
+  console.error('   · the layout uses no <section>/landmark elements — try --viewport, or target a subpage');
+  process.exit(1);
+}
 console.log(`✓ ${manifest.length} sections → ${path.relative(ROOT, dir)}/  (NN-*.png + sections.json)`);
 console.log('  storyboard = one beat per section, in this order. capture the real thing, animate OUR way:\n');
 for (const m of manifest) {
