@@ -5003,7 +5003,7 @@ One difference, and it is the reason to write the fill per-property rather than 
 ALWAYS has an identity, because scene.js already defaults a layer's z-order to its index in the array.
 So keying depth on a layer that never declared `track` is ordinary and fills from the index, whereas
 keying `w` on a layer with no `w` has nothing to animate from and throws. Applied rounded, because
-z-index is an integer, and after driveClips, which rewrites zIndex from the static attribute每 frame.
+z-index is an integer, and after driveClips, which rewrites zIndex from the static attribute on every frame.
 
 **The test was wrong before the feature was.** The first proof render put the ring at radius 390 around
 a 620x400 photo, so the two shapes barely grazed at the corners and there was nothing to occlude. Both
