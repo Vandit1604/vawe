@@ -4747,3 +4747,58 @@ white-first with near-black text and a lime accent. My memory said Linear was in
 sections are 2% lime. Both times the tool was right and recall was wrong, and a film authored from what
 I "know about the brand" would have looked wrong in a way no gate could catch. Capture is not a
 convenience in this workflow. It is the only source of truth about how a brand looks today.
+
+---
+
+## #202 — the rules audit: nine of thirty-four rules are not doing what they claim
+
+`scripts/dev/rules-audit.mjs` asks every gate finding the three questions the gates ask films: does it
+FIRE on real work, is it FIXED or waived when it does, and does anyone write down WHY. Run over 102
+scenes and five static gates it found 34 findings and two distinct pathologies.
+
+**DECORATIVE — engaged, then waved through more often than obeyed.**
+
+| finding | waived | with a reason |
+|---|---|---|
+| `no-continuous-object` | 82% | **0 / 14** |
+| `dead-air` | 100% | **0 / 12** |
+| `ends-on-nothing` | 100% | **0 / 6** |
+| `overlap` | 100% | 1 / 4 |
+| `cut-families` | 100% | **0 / 4** |
+
+Thirty-eight waivers between them and **one** written reason. The doctrine says a waiver is a deliberate
+exception with a stated cause; in practice it is a keyword that makes a gate stop talking.
+
+**IGNORED — the pathology hiding behind a clean waiver count.** A waiver is a decision someone had to
+type. A WARNING is free to skip, so a warning nobody acts on accumulates in silence and looks healthy in
+every count:
+
+| finding | fires on |
+|---|---|
+| `no-camera` | **63 / 102 scenes (62%)** |
+| `no-transition` | 45 (44%) |
+| `low-vocab` | 36 (35%) |
+| `no-bg-motion` | 34 (33%) |
+
+A warning that fires on nearly two thirds of the library is not a signal, it is wallpaper. The real cost
+is not the films it failed to improve, it is that it trains every author to scroll past warnings, which
+is exactly how the ones that matter get missed.
+
+**The one genuine correction to an earlier claim.** I said `no-visual-vocabulary` was the repo's #1 rule
+"waived 29 times and therefore decorative". It is waived 29 times, and **29 of 29 carry a written
+reason** — the only finding in the library where every waiver was justified. It is the healthiest rule
+here, not the sickest, and the earlier framing was wrong.
+
+**Zero SILENT findings.** Nothing in the ruleset is dead. Every rule fires or is waived somewhere, which
+is a genuinely good result and worth saying next to the bad ones.
+
+**A gate bug found on the way.** `slop.mjs` waits for `__engineReady === true || __engineError` and then
+assumes ready, so a scene that fails to boot produced `Cannot read properties of undefined (reading
+'renderFrame')` — true, useless, and hiding a perfectly good engine message underneath
+(`layer type "block" is build-time sugar, run make expand`). It exits non-zero, so it fails loudly
+rather than silently, but the message named the symptom instead of the cause. Now it surfaces the
+engine's own error.
+
+**What this does not measure.** Whether a rule is TRUE. It measures whether a rule is ALIVE. Truth needs
+the A/B judge, and `becomes:` remains the precedent: tested, beaten by its own control, and kept with an
+honest note about what it does not buy.

@@ -38,6 +38,16 @@ const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+// The wait resolves on ready OR error, and the code below assumed ready. When the engine failed to
+// boot, the next line threw `Cannot read properties of undefined (reading 'renderFrame')` — which is
+// true, useless, and hides the actual reason the scene did not load. Surface the engine's own error.
+const bootErr = await page.evaluate(() => window.__engineError && String(window.__engineError));
+if (bootErr) {
+  console.error(`✗ slop · ${path.basename(dataArg)} — the scene did not boot, so nothing could be checked:`);
+  console.error(`    ${bootErr}`);
+  await browser.close(); server.close();
+  process.exit(1);
+}
 await page.evaluate((n) => window.__engine.renderFrame(n), Math.round(at * 30));
 // inline the computed font/color/background onto every element so the static-HTML detector can see them
 const html = await page.evaluate(() => {
