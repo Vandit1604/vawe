@@ -2,6 +2,7 @@
 message: "One sentence, the single thing this video must communicate."
 audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
+framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution — CHOSEN, with a reason, not defaulted"
 object: "the one noun that survives every cut (the button, the prompt box, the row, the token)"
 object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
@@ -46,14 +47,40 @@ duration: 29s
   these beat spans over the render's clock and fails a junction the plan promised and the JSON left
   empty. Run it, and read what it says about the beats you were surest of.
 
+  THE SHOT, THE CAMERA, AND THE TWO CHANNELS. Professional storyboard panels carry shot size, angle,
+  camera movement, action, dialogue, duration and narrative purpose. This template had purpose (which
+  most do not) and no shot vocabulary at all, which was a strange gap: the ENGINE already implements
+  the camera (`slowPush · diveIn · panFollow · workspaceZoomOut · orbit · multiPhase`,
+  core/camera-moves.js), so the plan simply did not speak the language the renderer already had, and
+  camera work got invented at JSON time or not at all. Name `shot:` and `camera:` per beat.
+
+  `picture:` is the other half, and it is the one that matters most here. Short-form advertising
+  research is blunt about it: the visual and copy channels must carry a beat SIMULTANEOUSLY, not
+  sequentially, because that is the only way to fit a whole beat into three seconds. A beat with copy
+  and no picture is one channel doing all the work in series. That is not a style preference — it is
+  the mechanical reason 29 films in this library waive `no-visual-vocabulary`. State what the frame
+  SHOWS, separately from what it SAYS, and if you cannot, you have found the beat's real problem while
+  it is still a line of markdown.
+
   THE TIMES ARE READ NOW. The `(0s-1.53s)` range in each heading is parsed. A gap between two beats,
   or a last beat that stops short of the frontmatter `duration`, fails as `timeline-hole`.
+  THEN PLAY IT: `make animatic SB=<this file>`. A storyboard shows WHAT happens; an animatic shows
+  whether the things you planned have the TIME to happen, which is the one question no amount of
+  re-reading the plan can answer and the one this repo keeps getting wrong. It renders grey slots and
+  your real copy at your real durations, deliberately ugly so that pacing is the only thing left to
+  judge. Beats that named no `picture:` show up as empty labelled boxes. Watch it before you write a
+  line of scene JSON. `storyboard-check` grades the plan against itself; the animatic grades it
+  against a clock.
+
   Field reference: docs/CRAFT/FRAME-SPEC.md. Effects to name: docs/EFFECTS.md. Shot shapes: make blueprints.
 -->
 
 ## Beat 1: Hook (0s-6s)
 - type: hook
 - object: not born yet. The stage is being cleared for it.
+- shot: wide (establishing, the frame is mostly empty)
+- camera: slowPush
+- picture: the empty stage with one hairline rule where the number will land
 - blueprint: kineticHook (Adapt: keep the open-loop question; change the hero word to the brand's stat)
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
@@ -66,6 +93,9 @@ duration: 29s
 ## Beat 2: Build (6s-12s)
 - type: product_intro
 - object: it arrives, in its resting state
+- shot: medium (the object arrives and owns the middle third)
+- camera: hold
+- picture: the mark drawing on, stroke by stroke, at 40% of frame height
 - blueprint: logoReveal (Adapt: mark draws on, wordmark cascades)
 - onscreen: "what it is" / "the category line"
 - mechanism: svg draw-on · glow flash · per-word reveal

@@ -266,6 +266,14 @@ brandspec:
 # make sections URL=https://site.com NAME=brand  — inventory the page as SECTIONS: one screenshot per
 # major block + sections.json (stable selector + ready-to-paste `make capture` command per section).
 # The doctrine step: capture the real sections, don't rewrite them. Storyboard = one beat per section.
+# make animatic SB=<storyboard.md>  — PLAY the storyboard before building the film. Generates a
+# deliberately unstyled timed scene (grey slots + the real copy at the real durations) and renders it
+# draft. A storyboard shows what happens; an animatic shows whether it has TIME to happen.
+animatic:
+	node scripts/author/animatic.mjs $(SB) $(if $(OUT),--out $(OUT))
+	@f=$${OUT:-formats/scene/$$(basename $(SB) .md | tr 'A-Z' 'a-z' | tr -c 'a-z0-9-' '-').animatic.json}; \
+	 ./bin/vawe $$f --draft --workers 2
+
 sections:
 	node scripts/brand/sections.mjs $(URL) $(NAME) $(if $(VIEWPORT),--viewport $(VIEWPORT))
 

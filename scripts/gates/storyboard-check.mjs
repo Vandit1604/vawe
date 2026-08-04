@@ -13,6 +13,9 @@
 //   node scripts/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
 //   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
 import fs from 'node:fs';
+// ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
+// drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
+import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE } from '../author/storyboard-parse.mjs';
 
 const f = process.argv[2];
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
@@ -36,12 +39,7 @@ for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warns.
 // frontmatter (anything under a `##` heading is parsed as a beat), plus an `object:` line per beat.
 const SPINE_MAX_S = 15;
 const durRaw = field('duration');
-const durSec = (() => {
-  if (!durRaw) return null;
-  const m = /^\s*(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds|m|min|mins|minutes)?\s*$/i.exec(durRaw);
-  if (!m) return null;
-  return /^m/i.test(m[2] || 's') ? parseFloat(m[1]) * 60 : parseFloat(m[1]);
-})();
+const durSec = parseDur(durRaw);
 const shortFilm = durSec != null && durSec < SPINE_MAX_S;
 if (shortFilm && !field('object')) {
   errs.push(`this is a ${durRaw} film and the frontmatter names no \`object:\` — NAME THE OBJECT FIRST. One noun the viewer acts on (the button, the prompt box, the row, the token) that stays on screen across every cut and transforms at each one. Add \`object:\`, \`object_t0:\`, \`object_states:\`, \`object_last:\` before storyboarding a single beat. Under ${SPINE_MAX_S}s there is no room for chapters: a film whose beats are islands is a slideshow. See .claude/skills/vawe-continuous-action/SKILL.md.`);
@@ -52,7 +50,7 @@ if (shortFilm) for (const k of ['object_t0', 'object_states', 'object_last']) {
 
 // ── beats: each must state its job ────────────────────────────────────────────────────────────────
 const beats = [...src.matchAll(/^##\s+(?:Beat\s+)?(\d+|[A-Za-z].*?)\s*[—:-].*$/gmi)];
-const blocks = src.split(/^##\s+/m).slice(1);
+const blocks = blocksOf(src);
 if (blocks.length < 2) errs.push('fewer than 2 beats — a video is a sequence of beats; storyboard each one as `## Beat N — title`.');
 const REQ = ['type', 'onscreen', 'why'];
 
@@ -66,9 +64,9 @@ const ANIM_VOCAB = /\b(fades?|slides?|wipes?|cuts?|dissolves?|zooms?|blurs?|scal
 // that held-state-too-long reads, so a 4s beat saying "the card is blurred" would escape both tells.
 // A change verb has to name a thing on the far side of it.
 const CHANGE_VERB = /(becomes?|turns? into|opens? into|collapses?|morphs?|splits?|unfolds?|folds?|resolves? into|hardens? into|→)/gi;
-const fieldIn = (b, k) => { const m = new RegExp(`(?:^|\\n)\\s*[-*]?\\s*${k}\\s*:\\s*(.+)`, 'i').exec(b); return m ? m[1].trim() : null; };
+
 // The time range the beat headings already carry — the SAME shape intent-from-storyboard reads.
-const RANGE = /\(([\d.]+)\s*s\s*[–—-]\s*([\d.]+)\s*s\)/;
+const RANGE = SB_RANGE;
 const spans = [];
 
 let n = 0;
