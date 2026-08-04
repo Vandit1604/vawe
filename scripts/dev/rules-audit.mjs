@@ -45,8 +45,16 @@ const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : n
 const GATES = (flag('--gates') || 'direction-floor,visual-vocabulary,copy-check,designspec-check,slop')
   .split(',').filter(Boolean);
 
+// TRACKED SCENES ONLY, by default. `.gitignore:49` ignores `formats/scene/*.json` with an explicit
+// allowlist, and the comment says why: "Video/data instances are NOT the framework". So most of what
+// sits in that directory is local scratch that no clone has ever seen, and auditing it measures one
+// laptop rather than the project. The first run of this tool swept 102 scenes; 68 of them were not in
+// the repo at all, and the waiver statistics were dominated by files that do not ship (#203).
 const DIR = 'formats/scene';
+const TRACKED = args.includes('--all') ? null : new Set(
+  (await run('git', ['ls-files', 'formats/scene'])).stdout.split('\n').map((p) => p.split('/').pop()).filter(Boolean));
 const scenes = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'schema.json')
+  .filter((f) => !TRACKED || TRACKED.has(f))
   .filter((f) => { try { return JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')).module === 'scene'; } catch { return false; } });
 
 // waivers, and whether anyone wrote down why
@@ -117,7 +125,7 @@ if (JSON_OUT) { console.log(JSON.stringify({ scenes: scenes.length, gates: GATES
 
 const ORDER = { DECORATIVE: 0, IGNORED: 1, WORKING: 2, RARE: 3, SILENT: 4 };
 rows.sort((a, b) => ORDER[a.verdict] - ORDER[b.verdict] || b.engaged - a.engaged);
-console.log(`\n  RULES AUDIT · ${scenes.length} scenes · gates: ${GATES.join(', ')}\n`);
+console.log(`\n  RULES AUDIT · ${scenes.length} ${TRACKED ? 'TRACKED' : 'total'} scenes · gates: ${GATES.join(', ')}\n`);
 console.log('  verdict      finding                          fired  waived  reasoned  waive-rate');
 let last = '';
 for (const r of rows) {

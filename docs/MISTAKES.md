@@ -4802,3 +4802,50 @@ engine's own error.
 **What this does not measure.** Whether a rule is TRUE. It measures whether a rule is ALIVE. Truth needs
 the A/B judge, and `becomes:` remains the precedent: tested, beaten by its own control, and kept with an
 honest note about what it does not buy.
+
+---
+
+## #203 — the library was already disposable, and I nearly deleted it permanently
+
+**What happened.** Asked to clear out the scene library so the rules stop being calibrated against it,
+I triaged 108 scenes into keep/drop and said, in as many words, that deletion was safe because "git
+history keeps every one of them, so this is one `git revert` away from undone."
+
+Then `git rm` refused most of the list. **68 of 109 scene files are UNTRACKED.** For those, deletion
+would have been permanent, and the only thing that stopped it was a tool declining a bad argument. I
+asserted recoverability and checked it afterwards, which is the wrong order for the one property that
+makes a destructive action safe.
+
+Nineteen tracked files were staged for deletion before the error surfaced; all restored, tree clean.
+
+**What the failure revealed, which was worth more than the task.** `.gitignore:49` already ignores
+`formats/scene/*.json` behind an explicit allowlist, and says why:
+
+> Video/data instances are NOT the framework (framework = scene.html + schema.json + sample.json).
+
+The repo had already made this decision. There is a deliberate, documented split between the ~41
+allowlisted scenes that ARE the project and the rest, which is local scratch no clone has ever seen.
+"Delete the library" was mostly a request to clear a directory that was never in the repository.
+
+**It also invalidates the numbers in #202, in the direction that matters.** That audit swept 102
+scenes and reported waiver rates over all of them. Rescoped to tracked scenes only, the picture is
+sharper and worse:
+
+| finding | over 102 scenes | over 37 TRACKED scenes |
+|---|---|---|
+| `no-camera` | 62% | **78%** |
+| `no-continuous-object` waived | 82%, 0/14 reasoned | 86%, **0/6** reasoned |
+| `dead-air` waived | 100%, 0/12 | 100%, **0/3** |
+| `no-visual-vocabulary` waived | 46%, 29/29 reasoned | 50%, **9/9** reasoned |
+
+The tool now defaults to tracked scenes (`--all` for the old behaviour). Auditing untracked scratch
+measures one laptop, not the project.
+
+**The fix that came out of it.** `author-check` now FAILS a waiver with no written reason. Nothing
+judges whether the reason is good — it cannot. It makes waiving cost one sentence, and the cost is the
+whole mechanism: it turns a reflex back into a decision, and a bad reason written down is reviewable in
+a way that silence is not. Ten tracked scenes fail on this alone, which is the intended consequence.
+
+**Lesson.** Verify reversibility BEFORE promising it, not after. And read `.gitignore` before proposing
+to delete anything: it is the file where a repo records which of its contents it considers disposable,
+and this one had the answer written down the whole time.

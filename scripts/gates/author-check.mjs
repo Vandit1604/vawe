@@ -44,6 +44,31 @@ if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process
 let scene = {};
 try { scene = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
 const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : []);
+// A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver is a deliberate exception with
+// a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
+// waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carries a
+// reason on every single one — and that difference is exactly the difference between a rule people
+// argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #203).
+//
+// Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
+// which is the whole mechanism: the cost is what turns a reflex back into a decision, and a bad reason
+// written down is reviewable in a way that silence never is.
+{
+  const why = (scene.authoring && (scene.authoring._why || scene.authoring.why || scene.authoring.reason)) || {};
+  const bare = [...allow].filter((k) => !(typeof why[k] === 'string' && why[k].trim().length >= 12));
+  if (bare.length) {
+    console.error(`\n✗ author-check · ${bare.length} waiver(s) with no stated reason: ${bare.join(', ')}`);
+    console.error('  A waiver is a deliberate exception, and a deliberate exception has a cause someone can read.');
+    console.error('  Add one line each under `authoring._why`, naming what the rule would have you do and why');
+    console.error('  this film is right not to:\n');
+    console.error('    "authoring": {');
+    console.error(`      "allow": [${[...allow].map((k) => `"${k}"`).join(', ')}],`);
+    console.error('      "_why": {');
+    console.error(bare.map((k) => `        "${k}": "why this film is the exception"`).join(',\n'));
+    console.error('      }\n    }\n');
+    process.exit(1);
+  }
+}
 const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 
 // Blocks and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every gate
