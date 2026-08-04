@@ -36,8 +36,35 @@ export function cameraAt(camKf, t) {
 // ~4 frames at 30fps. Below this a segment is not a span with a shape, it is one step of a traced path.
 export const DENSE_KEY_SEC = 0.14;
 
+// resolveBoxes — give every key on a box-animating track an explicit w/h before anything reads it.
+//
+// This exists because `w` breaks the contract every other keyed property obeys. For x, an omitted
+// property means 0, and 0 is identity: the layer sits where it was authored. There is no such constant
+// for a WIDTH. Identity for w is the layer's own authored w, which the pure evaluator has no way to
+// know, so an omitted w inside motionAt could only ever mean "hold the neighbour" — a second, different
+// rule for one property, in the one file where a second rule has already cost this repo a day
+// (docs/MISTAKES.md #195, the per-property motionAt that would have made a button invisible).
+//
+// So the fill happens HERE, once, with the layer in hand, and motionAt keeps exactly one rule: both
+// endpoints state the value, or neither does. A track that mentions no w is untouched and returns null
+// for it, which is how a layer opts out of paying for any of this.
+export function resolveBoxes(layers) {
+  for (const L of layers || []) {
+    if (!Array.isArray(L.motion) || !L.motion.length) continue;
+    for (const prop of ['w', 'h']) {
+      if (!L.motion.some((k) => k[prop] != null)) continue;
+      const base = L[prop];
+      // A key that animates a box the layer never declared has no size to animate FROM. Filling it with
+      // a guess is the silent substitution this repo treats as the worst failure, so it throws.
+      if (base == null) throw new Error(`layer "${L.id || L.type || '?'}" keys ${prop} but declares no ${prop}, so there is no box to animate from`);
+      for (const k of L.motion) if (k[prop] == null) k[prop] = base;
+    }
+  }
+  return layers;
+}
+
 export function motionAt(kfs, lt) {
-  const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0 });
+  const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0, w: k.w ?? null, h: k.h ?? null });
   if (lt <= kfs[0].t) return norm(kfs[0]);
   const last = kfs[kfs.length - 1];
   if (lt >= last.t) return norm(last);
@@ -53,9 +80,13 @@ export function motionAt(kfs, lt) {
       const seg = b.t - a.t;
       const p = a.t === b.t ? 1
         : resolveEasing(b.ease || (seg < DENSE_KEY_SEC ? 'linear' : 'easeInOutCubic'))(clamp01((lt - a.t) / seg));
+      // w/h: one rule, no fallback. Both endpoints carry a number (resolveBoxes saw to that) or the
+      // track does not animate the box at all and the caller must leave the element's size alone.
+      const box = (prop) => (a[prop] == null || b[prop] == null ? null : lerp(a[prop], b[prop], p));
       return { dx: lerp(a.x ?? 0, b.x ?? 0, p), dy: lerp(a.y ?? 0, b.y ?? 0, p),
         scale: lerp(a.scale ?? 1, b.scale ?? 1, p), rot: lerp(a.rot ?? 0, b.rot ?? 0, p),
-        opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p), blur: lerp(a.blur ?? 0, b.blur ?? 0, p) };
+        opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p), blur: lerp(a.blur ?? 0, b.blur ?? 0, p),
+        w: box('w'), h: box('h') };
     }
   }
   return norm(last);

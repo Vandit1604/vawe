@@ -226,3 +226,30 @@ When a film has the right spine and still feels cheap, in order of how often it 
 - [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md) — which curve, which cut, when
 - [`DIRECTION.md`](DIRECTION.md) — pacing and restraint, and the gates that enforce them
 - [`../MISTAKES.md`](../MISTAKES.md) #164 — this film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate
+
+## The box track (`w` / `h`) — resizing is not scaling
+
+`scale` magnifies a layer and everything drawn in it. A **box track** changes the frame the content
+lives in and lets the content re-fit. That is the difference between zooming a photo grid and
+reflowing one, and it is what a collapsing sidebar, an expanding card and every FLIP transition are
+made of. Before it existed the only ways to attempt those were to scale (the picture stretches) or to
+cross-fade two layouts (a slideshow across a cut). See `docs/MISTAKES.md` #206.
+
+```json
+{ "type": "image", "src": "…", "x": 540, "y": 150, "w": 374, "h": 250, "radius": 6,
+  "motion": [
+    { "t": 0,    "x": 0,   "y": 0,   "w": 374, "h": 250 },
+    { "t": 0.35, "x": -314, "y": -16, "w": 480, "h": 261, "ease": "brake" }
+  ] }
+```
+
+Three rules, all enforced:
+
+1. **The layer needs a resting `w`/`h`.** A width has no identity constant the way `x` has 0, so a key
+   that animates a box the layer never declared has nothing to animate from. Hard error.
+2. **State it on one key and every key inherits it.** `resolveBoxes` fills the rest from the layer, so
+   `motionAt` keeps one interpretation rule: both endpoints carry the value or neither does.
+3. **An image needs `radius` or `ken`** or the photograph stretches with the box instead of re-cropping
+   inside it. `radius: 0` is enough; it is what switches the `<img>` to cover-fit. Flagged at validate.
+
+Working example: `scripts/author/build-zerochrome.mjs` → `formats/scene/zerochrome.json`.

@@ -120,7 +120,19 @@ export const htmlGraphic = (h) => {
 };
 
 export function boxOf(L, root = ROOT) {
-  const w0 = num(L.w, null), h0 = num(L.h, null), sz = num(L.size, null);
+  // A KEYED BOX IS THE BIGGEST BOX IT EVER IS. `w`/`h` motion keys let a layer change size over the
+  // film, and every gate downstream of this asks a question the authored resting size cannot answer:
+  // does this cover the safe area, does it overlap its neighbour, is it big enough to be the subject.
+  // Reading the resting value called each tile of a reflowing photo grid "a mark, not a subject" while
+  // it was filling a third of the frame. Largest, not first, because these gates all ask about the
+  // worst case; a gate wanting the box AT a moment should call motionAt.
+  const kw = [], kh = [];
+  if (Array.isArray(L.motion)) for (const k of L.motion) {
+    if (k && typeof k === 'object') { if (num(k.w, null) != null) kw.push(k.w); if (num(k.h, null) != null) kh.push(k.h); }
+  }
+  const w0 = kw.length ? Math.max(num(L.w, 0), ...kw) : num(L.w, null);
+  const h0 = kh.length ? Math.max(num(L.h, 0), ...kh) : num(L.h, null);
+  const sz = num(L.size, null);
   if (w0 != null && h0 != null) return { w: w0, h: h0, how: 'explicit' };
   const w = w0 ?? sz, h = h0 ?? sz;
   if (w != null && h != null) return { w, h, how: 'size' };

@@ -13,7 +13,7 @@ import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene } from '/core/transitions-lower.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
-import { cameraAt, motionAt } from '/core/sequence.js';
+import { cameraAt, motionAt, resolveBoxes } from '/core/sequence.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
 import { sampleAt } from '/core/spectrum.js';
 import { createRenderer } from '/core/layers/index.js';
@@ -262,6 +262,7 @@ boot((data, fps, theme, canvas) => {
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
   resolveBecomes(data);        // becomes:"<id>" → the incoming layer opens on the outgoing one's last pose
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
+  resolveBoxes(data.layers);   // a key that states w/h → every key on that track states it (see core/sequence.js)
   const extra = []; // group children (any depth), animated on their root group's window
 
   // applyGsapHooks — the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
@@ -548,6 +549,31 @@ boot((data, fps, theme, canvas) => {
           const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
           el.style.transform = `scale(${val.toFixed(4)})${base}`;
         }
+      }
+    }
+    // BOX track (w/h) — the layer's SIZE over time, which is a different material from `scale`. Scale
+    // magnifies a layer and everything drawn in it; a box track changes the frame the content lives in
+    // and lets the content re-fit. That is the difference between zooming a photo grid and reflowing
+    // one, and it is the move every collapsing sidebar, expanding card and FLIP transition is made of.
+    //
+    // Written on EVERY frame, not only inside the layer's window. The transform below can live inside
+    // the window because driveClips rewrites it from scratch each frame; width is a layout property
+    // nothing else touches, so a value left behind by a later frame would survive a seek backwards and
+    // a warm render would disagree with a cold one. renderFrame(n) has to be pure in n.
+    if (L.motion && L.motion.length && (L.motion[0].w != null || L.motion[0].h != null)) {
+      const inWin = t >= start && t < end;
+      const b = inWin ? motionAt(L.motion, t - start) : null;
+      const bw = inWin && b.w != null ? b.w : L.w;
+      const bh = inWin && b.h != null ? b.h : L.h;
+      if (bw != null) el.style.width = bw.toFixed(2) + 'px';
+      if (bh != null) el.style.height = bh.toFixed(2) + 'px';
+      // core/layers/image.js sizes the <img> itself in px unless the layer opted into cover-fit (via
+      // `radius` or `ken`), in which case the img is already 100%/100% and rides the wrapper. Resizing
+      // only the wrapper in that first case would move nothing on screen and say nothing about it.
+      const im = el.querySelector('img.hs-img');
+      if (im && im.style.width && im.style.width.endsWith('px')) {
+        if (bw != null) im.style.width = bw.toFixed(2) + 'px';
+        if (bh != null) im.style.height = bh.toFixed(2) + 'px';
       }
     }
     // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which

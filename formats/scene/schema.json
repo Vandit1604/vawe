@@ -1242,6 +1242,14 @@
               "type": "number",
               "label": "Opacity multiplier"
             },
+            "w": {
+              "type": "number",
+              "label": "Width (px) at this key. The layer's BOX, not a scale: content re-fits instead of magnifying, which is how a sidebar collapses or a grid reflows. Needs a base `w` on the layer; state it on one key and every key inherits it."
+            },
+            "h": {
+              "type": "number",
+              "label": "Height (px) at this key. Same rule as `w`."
+            },
             "ease": {
               "type": "string",
               "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"

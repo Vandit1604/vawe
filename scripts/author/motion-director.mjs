@@ -157,10 +157,27 @@ if (duration > 0 && layers.length) {
 // out (Disney slow-in/slow-out; Material asymmetric easing). Author-set ease:"linear" anywhere — on a
 // layer, a motion track keyframe, or an animated value — is the tell. We walk the whole layer tree.
 const linearHits = [];
+const LINEAR = (e) => typeof e === 'string' && /^(linear|none)$/i.test(e.trim());
+// A HOLD IS NOT A MOVE. The rule is about a visible move running flat, and a motion track states
+// stillness the same way it states travel: two keys carrying identical values, with `linear` between
+// them precisely so nothing drifts across the pause. Reading those as 27 flat moves is the gate being
+// confidently wrong about the one film in the library that holds deliberately, and telling an author
+// to ease a hold would put a drift into a frame that is supposed to be locked.
+const KEYED = ['x', 'y', 'scale', 'rot', 'opacity', 'blur', 'w', 'h'];
+const scanTrack = (kfs, where) => {
+  for (let i = 0; i < kfs.length; i++) {
+    const k = kfs[i]; if (!k || typeof k !== 'object' || !LINEAR(k.ease)) continue;
+    const prev = kfs[i - 1];
+    // The first key defines the opening pose and eases nothing, so it can never be a flat move.
+    if (!prev) continue;
+    if (KEYED.some((p) => (k[p] ?? null) !== (prev[p] ?? null))) linearHits.push(`${where}[${i}]`);
+  }
+};
 const scanEase = (o, where) => {
   if (!o || typeof o !== 'object') return;
-  if (typeof o.ease === 'string' && /^(linear|none)$/i.test(o.ease.trim())) linearHits.push(where);
+  if (LINEAR(o.ease)) linearHits.push(where);
   for (const k of Object.keys(o)) { const v = o[k];
+    if (k === 'motion' && Array.isArray(v)) { scanTrack(v, `${where}.motion`); continue; }
     if (Array.isArray(v)) v.forEach((it, i) => scanEase(it, `${where}.${k}[${i}]`));
     else if (v && typeof v === 'object') scanEase(v, `${where}.${k}`); }
 };

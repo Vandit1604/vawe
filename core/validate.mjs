@@ -91,6 +91,26 @@ export function layoutErrors(cfg) {
     out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}" — no layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none — give the target an `id`)'}.`);
   });
 
+  // A `w`/`h` key animates the layer's BOX, and there are exactly two ways it can be authored so that
+  // it moves nothing at all. Both are answered here rather than at render, because both render clean.
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L) || !Array.isArray(L.motion)) return;
+    const label = `layers[${i}] (${L.type || 'text'})${L.id ? ` #${L.id}` : ''}`;
+    for (const p of ['w', 'h']) {
+      if (!L.motion.some((k) => isObj(k) && k[p] != null)) continue;
+      // (1) no base to animate FROM. The engine throws on this; saying it here means the author hears
+      // it before spending a render, which is the whole job of this file.
+      if (L[p] == null) out.push(`${label}: a motion key sets \`${p}\` but the layer declares no \`${p}\`, so there is no box to animate from. Give the layer its resting ${p === 'w' ? 'width' : 'height'}.`);
+    }
+    // (2) an IMAGE resized without cover-fit. core/layers/image.js only makes the <img> fill its
+    // wrapper when the layer opted in via `radius` or `ken`; otherwise the img is sized in px and
+    // stretching that box distorts the photograph. It renders, it just renders wrong.
+    const boxed = L.motion.some((k) => isObj(k) && (k.w != null || k.h != null));
+    if (boxed && L.type === 'image' && L.radius == null && !L.ken) {
+      out.push(`${label}: animates its box but is an image with no \`radius\` and no \`ken\`, so the picture STRETCHES with the box instead of re-cropping inside it. Add \`radius\` (0 is fine) to switch it to cover-fit.`);
+    }
+  });
+
   // A motion track that REVERSES at speed is a snap, and no easing hides it: the layer is travelling one
   // way and the next frame throws it back the other. Measured on the RESOLVED track (pans merged in) by
   // SAMPLING AT 30fps, because neither of the cheaper tests works. Key-to-key average velocity calls an

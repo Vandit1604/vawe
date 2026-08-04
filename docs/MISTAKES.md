@@ -4920,3 +4920,66 @@ an assumption about the environment rather than about the thing being measured: 
 (px per frame), `const fps = 30`, `i / 30`. Each was correct when there was only one frame rate, and
 each became a silent lie the moment there were two. The general rule this repo should hold: **if a
 number's meaning depends on a setting, read the setting; do not hard-code the value it usually has.**
+
+## #206 — the engine could move a box and scale a box, but never resize one
+
+**What.** Recreating `refs/arc-zero-chrome.mp4` (a browser whose chrome dissolves while the photo grid
+underneath reflows to fill the space it gave up) turned out to be impossible, not hard. The per-layer
+motion track interpolates `x, y, scale, rot, opacity, blur` and nothing else, and
+`formats/scene/scene.js:412` — `if (L.w != null) el.style.width = L.w + 'px'` — was the ONLY place a
+layer's width was ever written, once, at build time. A layer's box was fixed for the film's whole life.
+
+**Root cause.** Never decided; never noticed. Nothing in the vocabulary named the difference between
+magnifying a layer (`scale`, which enlarges everything drawn inside it) and resizing the frame its
+content lives in (which lets the content re-fit). Only the first existed, so the second read as covered.
+
+**Why it matters more than one reference.** A collapsing sidebar, an expanding card, a reflowing grid,
+any FLIP transition: all of them are box changes, and all of them are ordinary product motion design.
+An author hitting this had two outs and both are failures the doctrine already bans — scale the layer
+(the photographs stretch) or cross-fade two layouts (a slideshow across a cut). The gap did not produce
+a bug report, it produced films that quietly did not attempt the move.
+
+**Fix.** `w`/`h` are keyable. `core/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
+
+The contract is the whole design, and it is where #195 nearly repeated. Every other keyed property has
+a constant identity (an omitted `x` means 0, and 0 means "where it was authored"). A WIDTH has no such
+constant: identity for `w` is the layer's own `w`, which a pure evaluator cannot know. Left inside
+`motionAt`, an omitted `w` could only mean "hold the neighbour" — a second, different interpretation
+rule, in the exact file where a second rule already cost a day. So `resolveBoxes()` fills every key on
+a box-animating track from the layer, ONCE, with the layer in hand, and `motionAt` keeps one rule: both
+endpoints state the value or neither does. A track that never mentions `w` is untouched.
+
+Applied on EVERY frame, not only inside the layer's window. The transform can live inside the window
+because `driveClips` rewrites it from scratch each frame; width is a layout property nothing else
+touches, so a value left behind by a later frame would survive a seek backwards and a warm render would
+disagree with a cold one. Verified: `probe-purity scene formats/scene/zerochrome.json` clean.
+
+**Two ways it can silently do nothing, both answered at validate rather than at render:**
+- a key sets `w` on a layer with no base `w` — no box to animate from (the engine throws; the gate says
+  it first, before a render is spent).
+- an `image` resized without cover-fit: `core/layers/image.js` only makes the `<img>` fill its wrapper
+  when the layer opted in via `radius` or `ken`. Otherwise the photograph STRETCHES with the box. It
+  renders, it just renders wrong, which is the silent-substitution class this repo hates most.
+
+**Gate gaps the feature exposed — three gates were confidently wrong about a film they passed.**
+- `linear-motion` flagged 27 flat moves. All 27 were HOLD keys: two identical keyframes with `linear`
+  between them, written that way precisely so nothing drifts across the pause. The rule was a blind
+  recursive walk for `ease:"linear"` that never asked whether the key changes anything. Fixed in
+  `scripts/author/motion-director.mjs`: a motion-track key counts only if it differs from its
+  predecessor. Telling an author to ease a hold would put a drift into a frame meant to be locked.
+- `boxOf` (`scripts/gates/scene-timing.mjs`) read the authored resting size, so every gate downstream
+  called each tile of a reflowing grid "a mark, not a subject" while it filled a third of the frame.
+  Now takes the LARGEST box the track ever states, because every question downstream (safe area,
+  overlap, is it the subject) is a worst-case question.
+- `direction-floor` still cannot see a box track at all: it reported `front-loaded`, "the back half is
+  frozen", about a half containing the film's second-largest motion, and `plain-slideshow` needed a
+  waiver for a film with no cuts and one continuous object — the exact thing the doctrine asks for.
+  NOT fixed, waived with that reason written down. The floor counts presets and cuts; a film whose
+  motion is entirely keyed is invisible to it. That is the next gate to fix, and it is a real one.
+
+**Also caught, and it is the older lesson.** The first cut picked the easing by reasoning about the
+measured shape ("short ramp, long decay, that is `settle`") and was visibly wrong: it spent the whole
+0.35s budget in the first 40% and then held still. `make measure refs/arc-zero-chrome.mp4 0.467 0.817`
+fits the curve against every easing the engine has and answers `brake` (residual 0.032). The tool
+existed, `docs/CRAFT/RECREATION.md` step 1 says to run it, and reasoning about the numbers felt enough.
+It was not. **Fit the curve; do not name it.**
