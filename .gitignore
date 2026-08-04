@@ -98,3 +98,8 @@ assets/watermark/
 # generated per-render derivatives (regenerate with make beatsync / make examples)
 formats/scene/*.beatsync.json
 build/
+
+# reference films: third-party marketing videos downloaded for LOCAL STUDY ONLY (measure timings,
+# easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel — a
+# recreation reproduces INTENT with our own assets (docs/CRAFT/RECREATION.md).
+refs/

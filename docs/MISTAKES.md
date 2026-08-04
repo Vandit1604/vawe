@@ -4849,3 +4849,42 @@ a way that silence is not. Ten tracked scenes fail on this alone, which is the i
 **Lesson.** Verify reversibility BEFORE promising it, not after. And read `.gitignore` before proposing
 to delete anything: it is the file where a repo records which of its contents it considers disposable,
 and this one had the answer written down the whole time.
+
+---
+
+## #204 — rendering at 60fps silently threw away motion blur
+
+**Found by a question, not a gate.** Asked whether we can render at 60fps, I checked instead of
+answering. We can: `-fps 60` produces `r_frame_rate=60/1`, 300 frames for a 5s film, duration exactly
+5.000s, and the `FPS = 30` in `core/motion.js` is only a fallback for when the renderer passes no
+`fps` param. That part was already right.
+
+**What was not.** Auto motion blur measures how far a layer moves in ONE FRAME (`motionAt(t) -
+motionAt(t - 1/fps)`), which is correctly fps-aware, and then compares it against
+`AUTO_BLUR_FLOOR = 16`. Sixteen WHAT. Pixels per frame — a unit that sounds frame-rate-neutral and is
+the opposite of it:
+
+| | peak motion | floor | frames blurred |
+|---|---|---|---|
+| 30fps | 29.2 px/frame | 16 | 15 |
+| 60fps | 14.6 px/frame | 16, **never reached** | **0** |
+| 60fps, fixed | 14.6 px/frame | 8.0 | 33 |
+
+The same physical motion covers half the pixels per frame at 60fps, drops under a floor expressed in
+per-frame units, and auto blur stops engaging entirely. `cadence`'s button peel — the fastest move in
+the film, the one the blur exists for — would have rendered completely unblurred, and nothing would
+have said a word. Rendering at 60 for smoothness threw away the thing that makes fast motion read.
+
+**Fix.** The floor is now `AUTO_BLUR_FLOOR_PER_SEC = 480`, divided by the frame rate at use. 33 frames
+at 60fps is the same half-second of wall clock as 15 at 30, so the rule now means the same thing at any
+frame rate instead of accidentally meaning "twice as strict at 60".
+
+**Lesson, and it is the third instance this session.** A constant whose NAME omits its unit invites
+exactly this: `AUTO_BLUR_FLOOR = 16` reads as a property of motion and is a property of a frame rate.
+The same shape as `x: leg.x ?? 0` carrying forward on one axis of three (#197), and `L.glideTime || 0.1`
+treating zero as absent (#193). Units and identity values are where this engine's silent bugs live.
+
+**Why no gate catches it.** Every gate runs at 30fps, which is the one rate where the bug is invisible.
+A gate that only ever tests the default cannot find a defect in the non-default, and this is the whole
+class: `multiPhase` was broken for its entire life because no scene used it, and this was broken for
+every 60fps render because nothing renders at 60.
