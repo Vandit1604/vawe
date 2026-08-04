@@ -91,6 +91,20 @@ export function layoutErrors(cfg) {
     out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}" — no layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none — give the target an `id`)'}.`);
   });
 
+  // `gsap:{from,to}` was accepted for as long as it existed and never interpolated — it rendered a
+  // layer flickering between its start and end poses. Removed, not repaired, because `motion` is a
+  // real keyframe track and strictly stronger. A hard error rather than silence: an author reaching
+  // for it has a moving layer in mind and deserves to be pointed at the thing that moves it (#208).
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L) || !isObj(L.gsap)) return;
+    // GSAP's property names are not ours, so translate rather than echoing them back — a message that
+    // suggests `"width":…` inside a motion key is telling the author to write the next silent no-op.
+    const RENAME = { width: 'w', height: 'h', rotation: 'rot', rotate: 'rot', autoAlpha: 'opacity' };
+    const g = L.gsap;
+    const keys = [...new Set([...Object.keys(g.from || {}), ...Object.keys(g.to || {})])].map((k) => RENAME[k] || k);
+    out.push(`layers[${i}] (${L.type || 'text'}): \`gsap\` is no longer a layer prop — it never interpolated under the seek model and rendered flicker. Use a \`motion\` track instead: "motion": [{"t":0,${keys.map((k) => `"${k}":…`).join(',')}}, {"t":${(L.duration ?? 2).toFixed(2)},${keys.map((k) => `"${k}":…`).join(',')},"ease":"easeOutCubic"}]. Keys take x, y, scale, rot, opacity, blur, w, h, track.`);
+  });
+
   // A `w`/`h` key animates the layer's BOX, and there are exactly two ways it can be authored so that
   // it moves nothing at all. Both are answered here rather than at render, because both render clean.
   (cfg.layers || []).forEach((L, i) => {

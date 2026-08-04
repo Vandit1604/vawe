@@ -270,12 +270,14 @@ boot((data, fps, theme, canvas) => {
   // owns the transform), and fromTo/immediateRender pin the start values so a frame is pure in t
   // regardless of render order. Split layers target the per-unit `units` (staggered); else the layer.
   function applyGsapHooks(el, L, units) {
-    // declarative tween: `gsap:{from,to,dur,ease}` → the whole GSAP easing library (elastic/back/…).
-    if (L.gsap && window.gsap) {
-      const g = L.gsap;
-      window.gsap.fromTo(el, { ...(g.from || {}) },
-        { ...(g.to || {}), duration: g.dur ?? (L.duration ?? 2), ease: g.ease || 'power2.out', delay: L.start ?? 0, immediateRender: true });
-    }
+    // `gsap:{from,to,dur,ease}` USED TO LIVE HERE and never worked. Under the seek model it did not
+    // interpolate: sampled every 0.1s a layer tweening x from 0 to 1500 read 100, then -4 (off frame)
+    // for most of a second, then alternated 1556 / 100 / 1592 / 100 / 1600 frame to frame. It rendered
+    // flicker and said nothing, for as long as it has existed, because no scene in the library ever
+    // used it — a feature with the SILENT verdict the rules audit gives a rule nobody trips.
+    // Removed rather than repaired: `motion` does everything it claimed and more (a real keyframe
+    // track, holds, reversals, per-key easing), deterministically. Rejected loudly at validate so an
+    // author who reaches for it is redirected instead of shipping a flickering layer. (MISTAKES #208.)
     // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
     // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame() — without
     // this, buildMorph would rebuild the svg as text glyphs and render the target path `d` string as words

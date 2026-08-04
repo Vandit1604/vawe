@@ -5017,3 +5017,37 @@ the browser default of 1px silently. The only way to get a thick static stroke w
 for the side effect — structurally identical to the `ken:{from:1,to:1}`-for-a-border-radius hack
 CLAUDE.md names. `strokeWidth` now works on any stroked path; `draw.weight` still wins when both are
 set, so no existing scene moves. Blast radius: zero scenes used either.
+
+## #208 — a documented layer feature that never once worked, and I claimed the gap it left was a wall
+
+**What.** I wrote in #206 that reflowing a grid was "impossible, not hard". Challenged on it, I checked
+instead of arguing, and the truth is worse than the claim. `gsap:{from,to,dur,ease}` WAS a documented
+layer prop, the schema called it "Deterministic (seeked per frame)", and it accepted `width` happily.
+So a path existed. It just produced garbage.
+
+Sampled every 0.1s, a layer tweening `x` from 0 to 1500 over 1.6s rendered:
+
+    t=0.00 x=100   t=0.10..0.90 x=-4 (off frame)   t=1.00 x=100
+    t=1.10 x=1556  t=1.20 x=100   t=1.30 x=1592    t=1.40 x=100   t=1.50 x=1600
+
+Not an interpolation. Flicker between unrelated poses, alternating frame to frame, with no error.
+
+**Why nobody knew.** Zero scenes in the library use it. It is the SILENT verdict `rules-audit.mjs`
+gives a rule that never fires: perfect prevention and dead weight look identical from outside, and here
+it was the second. A feature can rot exactly like a rule, and nothing in the ladder was watching.
+
+**Fix: removed, not repaired.** `motion` does everything it claimed and strictly more — a real
+keyframe track with holds, reversals and per-key easing, evaluated by a pure function of t. Keeping a
+second, weaker, broken way to do the same thing is worse than having one. Rejected at validate with a
+message that translates the author's GSAP property names into ours (`width`→`w`, `rotation`→`rot`),
+because a suggestion telling them to write `"width"` inside a motion key is the next silent no-op.
+
+**The claim, corrected.** Not "impossible". The accurate statement about #206 is: **there was no way to
+EXPRESS a reflow as motion, and the one escape hatch that accepted it rendered it wrong in silence.**
+That is a worse defect than an honest gap, and stating it as a wall made the engine sound better than
+it was. The `{html}` layer driven by `var(--t)` genuinely could have done it, at the cost of leaving
+the layer system entirely — no cover-fit, no geometry for the audit, invisible to every gate.
+
+**The lesson is about how I checked.** I inferred "no primitive" from reading `motionAt` and stated it
+as "no way". Reading the evaluator proves what the evaluator does, never what the engine accepts. The
+question "can a user get this today?" is answered by trying it, and trying it took one render.

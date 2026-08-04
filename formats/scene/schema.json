@@ -935,10 +935,6 @@
           "type": "string|object",
           "label": "Named GSAP EXIT from core/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
         },
-        "gsap": {
-          "type": "object",
-          "label": "Declarative GSAP tween: { from:{x,y,scale,rotation,opacity,...}, to:{...}, dur, ease }. Gives the full GSAP easing library (elastic/back/bounce/expo/custom). Deterministic (seeked per frame)."
-        },
         "motionPath": {
           "type": "object",
           "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
