@@ -253,3 +253,25 @@ Three rules, all enforced:
    inside it. `radius: 0` is enough; it is what switches the `<img>` to cover-fit. Flagged at validate.
 
 Working example: `scripts/author/build-zerochrome.mjs` → `formats/scene/zerochrome.json`.
+
+### A reflow has a speed floor
+
+`w`/`h` are **layout** properties, and the browser compositor snaps layout to whole device pixels while
+transforms (`x`, `y`, `scale`, `rot`) interpolate sub-pixel. So a box track that moves less than about
+one device pixel per frame does not crawl, it **holds for several frames and then jumps**.
+
+Measured on this engine: a rect widening 40px over 4s at 60fps (0.167 px/frame) produced 81 distinct
+edge positions across 240 frames, against 155 for an identical `x` tween. Steps of 0, 0, 0, then 0.5px.
+
+Two things follow:
+
+- **Keep a reflow brisk.** The `zerochrome` and `onefile` reflows move ~4.8 px/frame, thirty times the
+  quantum, and are perfectly smooth. A slow, luxurious box settle is the case that stutters. If you want
+  a slow size change on something whose contents may distort, use `scale` instead and accept that the
+  contents scale with it; if the contents must re-fit, the box must move quickly.
+- **The steps are 0.5px, not 1px, and that is `ss=2` doing a second job.** Supersampling halves the
+  layout-snap quantum as well as anti-aliasing edges. It was documented as only doing the second.
+
+The rule this borrows from is another engine', which forbids animating layout properties outright and lints
+for it. vawe does not need the lint: `motionAt` returns transforms, so 91% of the library's motion keys
+are transforms by construction. The box track is the deliberate exception, and this is its cost.
