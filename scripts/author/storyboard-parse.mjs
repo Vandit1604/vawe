@@ -37,7 +37,10 @@ export function durSec(raw) {
 export function onscreenLines(v) {
   if (!v) return [];
   const quoted = [...v.matchAll(/["“]([^"”]+)["”]/g)].map((m) => m[1].trim());
-  const parts = quoted.length ? quoted : v.split(/\s+\/\s+/).map((s) => s.trim().replace(/^["']|["']$/g, ''));
+  // Split on ` | ` as well as ` / `. A pipe never appears inside real on-screen copy, where a slash
+  // does ("24/7", "and/or"), so the pipe is the safer separator to reach for and an author who reaches
+  // for it should not get one line with a stray glyph in the middle of it.
+  const parts = quoted.length ? quoted : v.split(/\s+[/|]\s+/).map((s) => s.trim().replace(/^["']|["']$/g, ''));
   return parts.filter(Boolean);
 }
 
@@ -63,6 +66,10 @@ export function parseStoryboard(src) {
       // the shot vocabulary — see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),
+      // narration: what is SPOKEN over this beat. Optional, and separate from `onscreen` because the
+      // two are different channels: a line can be said and not shown, or shown and not said. The
+      // animatic reads this when present and falls back to the on-screen copy as a reading-time proxy.
+      narration: f('narration'),
     };
   });
   return {

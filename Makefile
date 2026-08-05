@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: animatic beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -301,6 +301,16 @@ theme-remix:
 # <OUT>.wav + <OUT>.words.json; wire them into the scene's audio block: { "vo":…, "voWords":… }.
 tts:
 	node scripts/media/tts.mjs $(if $(SCRIPT),--script $(SCRIPT)) $(if $(TEXT),--text "$(TEXT)") --out $(OUT) $(if $(VOICE),--voice $(VOICE))
+
+# make animatic SB=<storyboard.md> [VOICE=Samantha]  — CUT THE PICTURE TO THE SOUND before building the
+# film. Synthesizes a scratch read of each beat's `narration:` and measures it; beats with no narration
+# are timed by READING speed instead. Then it lays grey slots on that clock and renders draft, so the
+# question "does this beat have room for its own copy" is answered by the copy rather than by the
+# author's estimate of it. A storyboard grades itself; this grades it against a clock.
+animatic:
+	node scripts/author/animatic.mjs $(SB) $(if $(VOICE),--voice $(VOICE)) $(if $(OUT),--out $(OUT))
+	@f=$${OUT:-formats/scene/$$(basename $(SB) .md | tr 'A-Z' 'a-z' | tr -c 'a-z0-9-' '-').animatic.json}; \
+	 ./bin/vawe $$f --draft --workers 2
 
 # make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
