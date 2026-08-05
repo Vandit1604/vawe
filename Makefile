@@ -263,17 +263,6 @@ palette:
 brandspec:
 	node scripts/brand/brandspec.mjs $(URL)
 
-# make sections URL=https://site.com NAME=brand  — inventory the page as SECTIONS: one screenshot per
-# major block + sections.json (stable selector + ready-to-paste `make capture` command per section).
-# The doctrine step: capture the real sections, don't rewrite them. Storyboard = one beat per section.
-# make animatic SB=<storyboard.md>  — PLAY the storyboard before building the film. Generates a
-# deliberately unstyled timed scene (grey slots + the real copy at the real durations) and renders it
-# draft. A storyboard shows what happens; an animatic shows whether it has TIME to happen.
-animatic:
-	node scripts/author/animatic.mjs $(SB) $(if $(OUT),--out $(OUT))
-	@f=$${OUT:-formats/scene/$$(basename $(SB) .md | tr 'A-Z' 'a-z' | tr -c 'a-z0-9-' '-').animatic.json}; \
-	 ./bin/vawe $$f --draft --workers 2
-
 sections:
 	node scripts/brand/sections.mjs $(URL) $(NAME) $(if $(VIEWPORT),--viewport $(VIEWPORT))
 
@@ -365,13 +354,6 @@ pace-from-vo:
 # `undo` walks back through the session. docs/CRAFT/KEYED-MOTION.md is what you are authoring toward.
 studio:
 	node scripts/dev/studio.mjs $(D)
-
-# make flicker-check D=formats/scene/<name>.json — DIAGNOSTIC, not a gate, and deliberately not in the
-# ladder: it finds one-frame dips in ink/light, which is what a dropped paint looks like AND what a
-# flash sting or a crossing shape looks like. Confirm a hit by re-rendering with fewer workers and
-# seeing whether it moves (docs/MISTAKES.md #190).
-flicker-check:
-	node scripts/gates/flicker-check.mjs $(D)
 
 # make seam-check D=formats/x/video.json  — SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap — the
@@ -553,12 +535,6 @@ direct: ## direction gate + motion director: audit direction, suggest cuts/sting
 
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
 	node scripts/gates/judge.mjs $(D) $(if $(VS),--vs $(VS))
-
-ab: ## blind A/B: pair two cuts beat-by-beat for 3 judges (A=… B=… NAME=… CLAIM="…" [SEED=0] [VS=…])
-	node scripts/gates/ab.mjs --a $(A) --b $(B) --name $(NAME) --claim "$(CLAIM)" $(if $(SEED),--seed $(SEED)) $(if $(VS),--vs $(VS))
-
-ab-record: ## validate + aggregate the A/B verdicts, reveal the arms, persist (NAME=…)
-	node scripts/gates/ab-record.mjs --name $(NAME)
 
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	node scripts/gates/inspect.mjs $(D)
