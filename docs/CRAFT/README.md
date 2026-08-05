@@ -28,6 +28,7 @@ the downstream choices for you.
 | 4 | **How each frame looks** — type · colour · layout · imagery | [TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md) · [IMAGERY](IMAGERY.md) | the composed frame, on the brand's palette + face |
 | 5 | **How full each frame is** — produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
 | 5b | **Whether the frame SHOWS or only tells** | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | a quantity, proportion or real surface drawn as a graphic, not set in type |
+| 5c | **What holds the film together across its cuts** | [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | a thread that is a sentence, a match cut or a rhythm, not only a resizing prop |
 | 6 | **The restraint pass** — cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
 | 7 | **The sound** — silent by default, a bed/cue only if earned | [SOUND.md](SOUND.md) | the audio layer matched to the profile |
 

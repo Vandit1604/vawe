@@ -5152,3 +5152,26 @@ ring. Zero regressions.
 defects, it manufactures them, and the author pays by deforming a good design until the number moves. The
 tell was that the only fix available was to make the film worse. When satisfying a gate requires that,
 suspect the gate.
+
+## #212 — the script gate called kinetic typography an echo
+
+**What.** A film whose on-screen words ARE the spoken line failed `channels-echo` on 4 of its 5 beats.
+The gate was reading a deliberate form as a defect, and the only way to satisfy it was to stop making
+that kind of film.
+
+**Root cause.** `channels-echo` assumes the two word channels do different jobs: narration explains, cards
+label. That is true of most films here and false of kinetic typography, where the type IS the read and the
+craft lives in how the spoken line lands on screen. The rule was applied per beat, so it could not tell a
+beat that forgot to say something from a film whose whole form is saying it.
+
+**Fix.** The distinction is frequency, and it is the one a human makes without thinking. ONE beat echoing
+its card is a mistake; EVERY beat echoing is a form. `scripts/author/script.mjs` now detects the kinetic
+case (>=60% of beats near-identical, >=3 beats) and switches the question instead of dropping it: when the
+type carries the read, the picture is the only other channel the film has, so it checks
+`picture-restates-words` — the beat's picture may not simply be a drawing of its own sentence. Verified
+both ways: one echoing beat among distinct ones still fails; a wholly kinetic film passes and is asked the
+harder question. `gate-mutation` 119/119.
+
+**Class.** Gate gap, same shape as #211. The tell was identical: satisfying the gate required abandoning
+something known to be good. A rule that is right for the common case and silent about the existence of
+others will punish exactly the films that are trying something.

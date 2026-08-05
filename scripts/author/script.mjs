@@ -95,10 +95,38 @@ for (const r of rows) {
 
 // ── the checks ─────────────────────────────────────────────────────────────────────────────────────
 const fail = [], warn = [];
+
+// KINETIC TYPOGRAPHY IS NOT AN ECHO. `channels-echo` assumes the two channels do different jobs: the
+// narration explains, the card labels. In a kinetic-type film the card IS the read, deliberately, and
+// the whole craft is in how the spoken line lands on screen. Firing per beat flagged 4 of 5 beats of a
+// film whose form was the point.
+//
+// The distinction is frequency, and it is the same one a human makes. ONE beat whose narration repeats
+// its card is a beat that forgot to say something; EVERY beat doing it is a form. So: if most beats are
+// near-identical, this is kinetic type, and the question changes. It is no longer "do the two word
+// channels differ" (they are one channel on purpose) but "does the PICTURE carry anything the words do
+// not" — which is the show-don't-tell question, asked where it still costs nothing to answer.
+const ECHOING = rows.filter((r) => r.nar && r.cards.length && r.echo >= 0.7);
+const KINETIC = rows.length >= 3 && ECHOING.length / rows.filter((r) => r.nar && r.cards.length).length >= 0.6;
+if (KINETIC) {
+  console.log(`  · kinetic type: ${ECHOING.length}/${rows.length} beats speak their card verbatim. Treating the\n`
+    + '    type AS the read, so channels-echo is not the question; whether the PICTURE adds anything is.\n');
+  for (const r of rows) {
+    const pic = strip(r.b.picture);
+    if (!pic) { fail.push(`[picture-missing] beat ${r.b.i + 1} "${r.b.name}": the words are the read, so the picture is the only other channel this film has, and this beat does not name one.`); continue; }
+    const pw = new Set(content(pic));
+    const words_ = content(r.nar + ' ' + r.cards.join(' '));
+    const shared = words_.filter((w) => pw.has(w)).length;
+    if (words_.length >= 2 && shared / words_.length >= 0.6) {
+      fail.push(`[picture-restates-words] beat ${r.b.i + 1} "${r.b.name}": the picture is a drawing of the sentence (${Math.round(shared / words_.length * 100)}% of the words appear in it). When the type carries the read, the picture is the only channel left, so it has to show what the words cannot.`);
+    }
+  }
+}
+
 for (const r of rows) {
   // THE ONE THIS FILE EXISTS FOR. A narration that restates the card is the dual-channel rule broken in
   // the only place it can still be fixed cheaply.
-  if (r.nar && r.cards.length && r.echo >= 0.7 && content(r.nar).length >= 2) {
+  if (!KINETIC && r.nar && r.cards.length && r.echo >= 0.7 && content(r.nar).length >= 2) {
     fail.push(`[channels-echo] beat ${r.b.i + 1} "${r.b.name}": the narration restates the screen (${Math.round(r.echo * 100)}% of its content words are already on the card). Two channels carrying one message is one channel and an echo. Say what the picture cannot show, or drop the line.`);
   }
   for (const c of r.longCards) {
