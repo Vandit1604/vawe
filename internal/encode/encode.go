@@ -21,8 +21,16 @@ func run(args ...string) error {
 // watermark is a transparent PNG (assets/watermark/draft.png, baked by `make watermark`) laid over
 // every frame; empty means none. It is deliberately INDEPENDENT of `draft`: a free preview still has
 // to be good enough to judge composition and colour, so quality and postability are separate dials.
-func Video(framesDir string, fps int, grain, draft bool, watermark, out string) error {
-	seq := filepath.Join(framesDir, "%05d.png")
+// Video encodes the captured frame sequence. `ext` is the captured format (".jpg" normally, ".png" for
+// the alpha path) and w/h are the FINAL frame size: when frames were captured supersampled, ffmpeg does
+// the ss×ss box resolve here via scale=flags=area, which is the same box filter scene.downsample() ran
+// in Go at 838 ms/frame against ffmpeg's 12.6 ms for decode+scale+encode combined. w/h of 0 means the
+// frames are already at native size and no scale is inserted.
+func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext string, w, h int) error {
+	if ext == "" {
+		ext = ".png"
+	}
+	seq := filepath.Join(framesDir, "%05d"+ext)
 	r := strconv.Itoa(fps)
 	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq}
 	if watermark != "" {
@@ -34,6 +42,18 @@ func Video(framesDir string, fps int, grain, draft bool, watermark, out string) 
 	grainFx := ""
 	if !draft && grain {
 		grainFx = "noise=c0s=3:c0f=t"
+	}
+	// The supersample resolve. `area` is a box filter — the exact ss×ss average the Go resolve did — so
+	// this is the same operation, not an approximation of it. Placed first in the chain so grain and the
+	// watermark apply at final size, exactly as they did when Go resolved before encoding.
+	scaleFx := ""
+	if w > 0 && h > 0 {
+		scaleFx = fmt.Sprintf("scale=%d:%d:flags=area", w, h)
+	}
+	if scaleFx != "" && grainFx != "" {
+		grainFx = scaleFx + "," + grainFx
+	} else if scaleFx != "" {
+		grainFx = scaleFx
 	}
 	switch {
 	case watermark != "":

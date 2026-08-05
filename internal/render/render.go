@@ -120,7 +120,16 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	defer os.Remove(tmpAudio)
 
 	fmt.Println("▶ encoding…")
-	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, o.Watermark, tmpVideo); err != nil {
+	// The supersample resolve happens in ffmpeg for the JPEG path and happened in Go for the PNG one,
+	// so only pass a target size when Go did not already resolve.
+	sw, sh := 0, 0
+	if ss > 1 && !scene.ResolvedInGo(transparent) {
+		sw, sh = meta.Width, meta.Height
+		if sw == 0 || sh == 0 {
+			sw, sh = 1080, 1920
+		}
+	}
+	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, o.Watermark, tmpVideo, scene.CaptureExt(transparent), sw, sh); err != nil {
 		return err
 	}
 

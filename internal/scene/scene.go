@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/chromedp/cdproto/runtime"
 	"image"
+	_ "image/jpeg"
 	"image/png"
 	"net"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/cdproto/emulation"
+	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"vawe/internal/audio"
 )
@@ -139,11 +141,11 @@ func newTab(parent context.Context, url string, ss int) (context.Context, contex
 // pngDiffRatio: fraction of pixels whose any-channel delta exceeds a small epsilon.
 // Distinguishes cross-tab raster noise (a few hundredths of a percent) from real motion.
 func pngDiffRatio(a, b []byte) (float64, error) {
-	ia, err := png.Decode(bytes.NewReader(a))
+	ia, _, err := image.Decode(bytes.NewReader(a))
 	if err != nil {
 		return 1, err
 	}
-	ib, err := png.Decode(bytes.NewReader(b))
+	ib, _, err := image.Decode(bytes.NewReader(b))
 	if err != nil {
 		return 1, err
 	}
@@ -223,6 +225,53 @@ func (p *profile) report(wall time.Duration, workers int) {
 	fmt.Printf("    captured %.0f MB raw → %.0f MB on disk (%.1f MB/frame raw)\n",
 		float64(p.rawBytes)/1e6, float64(p.outBytes)/1e6, float64(p.rawBytes)/1e6/float64(p.frames))
 	fmt.Printf("    downsample path: %d fast / %d slow\n\n", atomic.LoadInt64(&downsampleFast), atomic.LoadInt64(&downsampleSlow))
+}
+
+// CaptureExt is the file extension frames are written with, and it is EXPORTED so the encoder asks the
+// capturer what it produced instead of re-deriving it. Two copies of this condition that disagree is
+// how the encoder would silently look for %05d.png in a directory of .jpg and fail at the last step of
+// a ten-minute render.
+func CaptureExt(transparent bool) string {
+	if transparent || os.Getenv("VAWE_CAPTURE") == "png" {
+		return ".png"
+	}
+	return ".jpg"
+}
+
+// ResolvedInGo reports whether the Go side already did the supersample resolve. It did for PNG (the
+// alpha path); for JPEG the frames are still supersampled and ffmpeg must resolve them.
+func ResolvedInGo(transparent bool) bool { return CaptureExt(transparent) == ".png" }
+
+// capture builds the screenshot action for a format. chromedp.CaptureScreenshot is PNG-only, so the
+// jpeg path drops to the CDP call it wraps.
+func capture(format string, buf *[]byte) chromedp.Action {
+	if format == "png" {
+		return chromedp.CaptureScreenshot(buf)
+	}
+	return chromedp.ActionFunc(func(ctx context.Context) error {
+		b, err := page.CaptureScreenshot().WithFormat(page.CaptureScreenshotFormatJpeg).WithQuality(95).Do(ctx)
+		if err != nil {
+			return err
+		}
+		*buf = b
+		return nil
+	})
+}
+
+// resolve turns a captured frame into the bytes written to disk.
+//
+// For JPEG it does NOTHING, deliberately. The ss×ss box resolve is now ffmpeg's `scale=flags=area`,
+// which IS a box filter — the same operation, in SIMD C instead of a Go loop over image.At(). Measured:
+// 838 ms/frame in Go against 12.6 ms/frame in ffmpeg for decode + scale + h264 together. Re-encoding
+// here would also mean a second lossy generation for no reason.
+//
+// The PNG path (alpha export) keeps the Go resolve, because encode.VideoAlpha's VP9 stream is built
+// from those files directly and its alpha must survive untouched.
+func resolve(buf []byte, ss int, format string) ([]byte, error) {
+	if format != "png" {
+		return buf, nil
+	}
+	return downsample(buf, ss)
 }
 
 // Which downsample path each frame took. Counted, and printed by the profile, because the first
@@ -322,6 +371,20 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	if ss < 1 {
 		ss = 1
 	}
+	// CAPTURE FORMAT. PNG costs 526 ms/frame at 3840x2160 and JPEG q95 costs 80 ms — 6.6x — because a
+	// lossless compressor is being asked to encode 8.3 megapixels that end up in a lossy h264 anyway.
+	// Verified byte-stable across repeats AND across separate browser instances, which is what dedup's
+	// anchor equality and renderFrame(n) purity both depend on.
+	//
+	// ALPHA STAYS PNG. JPEG has no alpha channel, and the transparent export is the one path whose
+	// whole point is the alpha channel — exactly the kind of silent substitution this repo keeps
+	// logging. VAWE_CAPTURE=png forces the old path for everything.
+	capExt := CaptureExt(transparent)
+	capFmt := "jpeg"
+	if capExt == ".png" {
+		capFmt = "png"
+	}
+
 	// VAWE_PROFILE=1 splits the capture into timed phases (see type profile). Off by default because
 	// timing it costs three CDP round trips per frame instead of one.
 	var prof *profile
@@ -396,7 +459,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		// mean equal pixels in one instance), not cross-instance raster identity, which differs
 		// at baseline for saturated text and always has across adjacent frames.
 	}
-	framePath := func(f int) string { return filepath.Join(framesDir, fmt.Sprintf("%05d.png", f)) }
+	framePath := func(f int) string { return filepath.Join(framesDir, fmt.Sprintf("%05d%s", f, capExt)) }
 	anchorFor := map[int]int{} // rep frame → mid-run anchor frame (runs ≥10)
 	for f := 0; f < total; {
 		r := rep[f]
@@ -453,12 +516,12 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				err := chromedp.Run(ctx,
 					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
 					chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
-					chromedp.CaptureScreenshot(&buf),
+					capture(capFmt, &buf),
 				)
 				if err != nil {
 					return nil, err
 				}
-				return downsample(buf, ss)
+				return resolve(buf, ss, capFmt)
 			}
 			t0 := time.Now()
 			if err := chromedp.Run(ctx, chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil)); err != nil {
@@ -469,11 +532,11 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				return nil, err
 			}
 			t2 := time.Now()
-			if err := chromedp.Run(ctx, chromedp.CaptureScreenshot(&buf)); err != nil {
+			if err := chromedp.Run(ctx, capture(capFmt, &buf)); err != nil {
 				return nil, err
 			}
 			t3 := time.Now()
-			out, derr := downsample(buf, ss)
+			out, derr := resolve(buf, ss, capFmt)
 			t4 := time.Now()
 			prof.add(t1.Sub(t0), t2.Sub(t1), t3.Sub(t2), t4.Sub(t3), 0, len(buf), len(out))
 			return out, derr
@@ -498,9 +561,9 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				if !bytes.Equal(buf, abuf) {
 					ratio, derr := pngDiffRatio(buf, abuf)
 					if derr != nil || ratio > 0.0005 {
-						os.WriteFile("/tmp/dedup_rep.png", buf, 0644)
-						os.WriteFile("/tmp/dedup_anchor.png", abuf, 0644)
-						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with VAWE_NO_DEDUP=1 and report (pair in /tmp/dedup_*.png)", j.frame, j.anchor, ratio*100)
+						os.WriteFile("/tmp/dedup_rep"+capExt, buf, 0644)
+						os.WriteFile("/tmp/dedup_anchor"+capExt, abuf, 0644)
+						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with VAWE_NO_DEDUP=1 and report (pair in /tmp/dedup_*)", j.frame, j.anchor, ratio*100)
 					}
 				}
 			}

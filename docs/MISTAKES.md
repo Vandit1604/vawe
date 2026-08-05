@@ -5051,3 +5051,52 @@ the layer system entirely — no cover-fit, no geometry for the audit, invisible
 **The lesson is about how I checked.** I inferred "no primitive" from reading `motionAt` and stated it
 as "no way". Reading the evaluator proves what the evaluator does, never what the engine accepts. The
 question "can a user get this today?" is answered by trying it, and trying it took one render.
+
+## #209 — four lossless compressions per frame, for a lossy file
+
+**What.** A 14.6s film took 434s to render and nobody knew where the time went. Profiling it
+(`VAWE_PROFILE=1`, added for this) gave the answer in one table:
+
+    renderFrame (paint)      1.3 ms/frame   0.1%
+    rAF settle wait         17.7 ms/frame   0.8%
+    screenshot + transfer  1103.8 ms/frame  52.5%
+    downsample (Go)         978.8 ms/frame  46.6%
+    write to disk            0.7 ms/frame   0.0%
+
+**Drawing the frame was 0.1% of the render. Getting it out was 99%.** And both dominant phases were the
+same work: Chrome PNG-encoded 8.3 megapixels, Go PNG-decoded them, box-averaged, PNG-encoded again, and
+ffmpeg PNG-decoded a fourth time — four lossless compressions per frame, on data whose destination is a
+3MB lossy h264.
+
+**Root cause.** Never decided. PNG is the obvious screenshot format and `image/png` is the obvious way
+to read one, and each choice was locally reasonable. Nothing measured the pipeline end to end, so the
+cost compounded silently across four independent stages.
+
+**Fix.** Capture JPEG q95 (526 → 80 ms/frame at 3840x2160, 6.6x) and hand the supersample resolve to
+ffmpeg's `scale=flags=area` — which IS the ss×ss box filter the Go loop implemented, so it is the same
+operation rather than an approximation of it. Go now never touches a pixel.
+
+    434s → 45s wall (9.6x) · 1721s → 131s CPU (13x, so much cooler) · 2.6GB → 556MB intermediate
+
+Quality held where it counts, and the temporal test is the one that mattered: on `showcase-flight`
+(eight text layers over a full-frame SVG) shimmer is **1.02x** the old pipeline, where dropping
+supersampling to ss=1 — the obvious "just make it faster" move — measured **1.60x**. So the new
+pipeline is not a speed-for-quality trade; it is strictly better than the trade it replaces.
+
+**Gated on a determinism test, before any of it was written.** Chrome's JPEG output is byte-identical
+across repeats AND across separate browser instances. Had it not been, `renderFrame(n)` purity and
+dedup's anchor byte-equality would both have needed weakening, and that would have been a reason not to
+do this rather than a detail to paper over.
+
+**Alpha stays PNG,** because JPEG has no alpha channel and the transparent export exists for the alpha
+channel. `CaptureExt()` is exported so the encoder asks the capturer what it produced instead of
+re-deriving the condition — two copies that can disagree is how the encoder ends up looking for
+`%05d.png` in a directory of `.jpg` at the last step of a ten-minute render.
+
+**The lesson is about the three wrong guesses that preceded the profiler.** I blamed PNG-vs-JPEG
+(partly right, unmeasured), then the `At()` interface call in the downsample loop (right that it was
+hot, wrong that it dominated — it was 14%), and I "verified" that second fix with a byte-identical mp4
+hash. The hash was identical because the code **never ran**: the fast path guarded on `*image.NRGBA`
+and Chrome produces `*image.RGBA`. An identical output proved non-execution and I read it as proof of
+correctness. The profile now prints a fast/slow path count so that cannot happen silently again.
+**Profile before optimising, and make every fix able to report that it fired.**
