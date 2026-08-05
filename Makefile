@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -301,6 +301,14 @@ theme-remix:
 # <OUT>.wav + <OUT>.words.json; wire them into the scene's audio block: { "vo":…, "voWords":… }.
 tts:
 	node scripts/media/tts.mjs $(if $(SCRIPT),--script $(SCRIPT)) $(if $(TEXT),--text "$(TEXT)") --out $(OUT) $(if $(VOICE),--voice $(VOICE))
+
+# make script SB=<storyboard.md> [STRICT=1] — THE WORDS, as a two-column AV script, before a picture
+# exists. Lays AUDIO beside VISUAL because the layout is the check: a narration that restates the card
+# is one channel and an echo, not two channels, and that is invisible in a list and obvious in columns.
+# Timing here is a 150wpm ESTIMATE on purpose, so it stays instant while you write; `make animatic`
+# owns the measured clock.
+script:
+	node scripts/author/script.mjs $(SB) $(if $(STRICT),--strict)
 
 # make animatic SB=<storyboard.md> [VOICE=Samantha]  — CUT THE PICTURE TO THE SOUND before building the
 # film. Synthesizes a scratch read of each beat's `narration:` and measures it; beats with no narration
