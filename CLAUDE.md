@@ -151,6 +151,23 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    Every one of the 18 eligible short films in this library trips this and carries a waiver: that is debt to
    rebuild, not a pattern to copy.
 
+2a001. **CONTINUITY IS A FLOOR, NOT A STYLE. Do not let it eat the invention.** The rule above bans the
+   slideshow; it does not prescribe "one card that resizes four times". Read what it actually asks for: a
+   subject the film STAYS WITH. A subject can be stayed with while the film does almost anything, and the
+   references we admire do exactly that. Continuity is carried by a shared world, a match cut on shape or
+   motion, a camera that travels between two places, a colour or a rhythm that survives the junction, a
+   thing that transforms into a different thing. A box whose w and h are keyed is the CHEAPEST way to
+   satisfy the gate and usually the least interesting, and reaching for it by reflex is how a film ends up
+   technically continuous and visually inert. Three consecutive films in this library were one rectangle
+   changing size, and each passed every gate.
+   The test to apply before you author: **name three ways this film could hold its subject, and reject the
+   first one you thought of.** If the answer to "what carries the continuity" is always "the layer resizes",
+   you are writing the gate's minimum, not a film. `make blueprints` and `docs/EFFECTS.md` exist so the
+   other answers are one command away; a match cut, a camera move through a space, a morph, an object that
+   becomes its own output all satisfy `no-continuous-object` and none of them are a resizing box.
+   Where the two rules meet: satisfying continuity is necessary and proves nothing about whether the film
+   is worth watching. Ambition is graded separately, by `direction-floor` and by your eyes.
+
 2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats/<name>.png`, then READ it and
    fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two
    ways. The mechanical half is a blocking gate (`make beat-check`, also step `beats` inside `author-check`):
@@ -262,6 +279,22 @@ Rules that make this real, not ceremonial:
   and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
 - **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into
   a scene file.
+- **FINISH THE FIX. Reverting is not a resolution.** Having found an engine or gate bug, you fix it in
+  this pass. "I could not get it working so I put it back and logged it" is the one outcome that is
+  never acceptable: the next author inherits the same wall plus a note saying it is known. If a first
+  attempt does not fire, DEBUG IT — instrument the thing, print what the code actually sees, and find
+  out why. Every fix in this file that looked impossible was one measurement away (#211 took three
+  distinct root causes, and stopping after the first two would have shipped half a fix that changed
+  nothing). Abandon only when you can state what makes it genuinely infeasible, and then say so to the
+  user in plain words rather than quietly restoring the old behaviour.
+- **When satisfying a gate requires making the film worse, suspect the gate.** A gate that measures the
+  wrong thing does not merely miss defects, it manufactures them, and the author pays by deforming a
+  good design until the number moves. Before you shrink, recentre or delete something you know is right,
+  go and read what the gate actually measures (#211).
+- **A gate change must never invent findings.** Run the whole scene library before and after and diff the
+  counts. The only acceptable shapes are "no scene changes" and "these N changed, FAIL to PASS, here is
+  why each was a false positive". A single scene going PASS to FAIL is a regression, not a discovery,
+  until you have proven otherwise — an unclamped bound in #211 turned one clean scene into 7 failures.
 
 > **Editing `scene.html`?** Read the `vawe-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image/capture system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

@@ -5100,3 +5100,55 @@ hash. The hash was identical because the code **never ran**: the fast path guard
 and Chrome produces `*image.RGBA`. An identical output proved non-execution and I read it as proof of
 correctness. The profile now prints a fast/slow path count so that cannot happen silently again.
 **Profile before optimising, and make every fix able to report that it fired.**
+
+## #210 — an html layer's `h` was accepted, set, and then ignored by everything inside it
+
+**What.** `{"type":"html","h":580}` rendered a 310px card. The layer element really was 580 tall, so
+nothing looked broken from the outside; the content inside it was 310. Twenty-one scenes in this library
+declare `h` on an html layer and every one of them had been quietly getting content height instead.
+
+**Root cause.** `core/layers/html.js` set `width` from `L.w` and never set `height` from `L.h`, and the
+`.hs-html` wrapper it injects between the layer and the author's markup had no height of its own. So
+hand-authored CSS saying `height:100%` resolved against an auto-height parent, which in CSS computes to
+`auto`, and collapsed to its own content height. Both halves were needed; fixing either alone does
+nothing.
+
+**Fix.** `build()` now sets `height` from `L.h` alongside `width`, and the wrapper carries
+`height:100%`. That is deliberately a no-op when the layer declares no height (100% of auto is auto), so
+it changes the render only for layers that DID state a box, which is exactly the broken case. `make
+probe` clean, `scene-snap` identical.
+
+**Class.** Silent substitution, the one this file keeps coming back to. Documented input accepted and
+discarded. The gate that would have caught it does not exist: nothing compares what a layer asked its box
+to be against what its contents actually occupy.
+
+## #211 — the layout audit measured a rotating layer's empty corners, not the ink it draws
+
+**What.** A ribbon layer, an arc inscribed in a square box, failed the safe-zone audit at every rotation.
+Nothing visible ever came near the frame edge. Satisfying the gate meant shrinking the ring by 40%, past
+the hero it was supposed to orbit and across the wordmark, so the film got visibly worse to make a
+measurement happy.
+
+**Root cause, in three parts, and only fixing all three worked.**
+1. `inkRect()` returned `null` for anything containing an `<svg>`, on the stated assumption that
+   "replaced content: the element box IS the ink". True of an `<img>`; false of an inline `<svg>`, whose
+   geometry is usually inscribed in the box. Empty corners still rotate: a 1000px square turned 45
+   degrees sweeps 1414px while nothing visible moves.
+2. The safe check used ink HORIZONTALLY and the border box VERTICALLY. That policy is justified entirely
+   by text metrics (vertical text ink includes half-leading, which is not glyphs). A path's vertical
+   extent is real ink, so for geometry the justification evaporates and the box discarded half the fix.
+3. `getBBox()`+`getScreenCTM()` and `getBoundingClientRect()` both return the AABB of the shape's
+   bounding RECTANGLE once rotated, which over-bounds a curve badly: a semicircle whose ink stopped 255px
+   from the top measured 139px ABOVE it, a 394px error. Only sampling the outline
+   (`getPointAtLength`, fixed count, deterministic) gives the real bound.
+
+**Fix.** `verify/audit.mjs` samples SVG outlines for a true rotated bound, uses geometry ink on both
+axes, and CLAMPS the result to the border box. The clamp is not optional: unclamped, an svg whose stroke
+spills past its element GREW the measured rect and turned `showcase-cuts` from 0 hard failures into 7.
+Verified across the whole scene library: exactly two scenes change, both FAIL to PASS, both the rotating
+ring. Zero regressions.
+
+**Class.** Gate gap, and the expensive kind. A gate that measures the wrong thing does not merely miss
+defects, it manufactures them, and the author pays by deforming a good design until the number moves. The
+tell was that the only fix available was to make the film worse. When satisfying a gate requires that,
+suspect the gate.

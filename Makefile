@@ -317,7 +317,7 @@ script:
 # author's estimate of it. A storyboard grades itself; this grades it against a clock.
 animatic:
 	node scripts/author/animatic.mjs $(SB) $(if $(VOICE),--voice $(VOICE)) $(if $(OUT),--out $(OUT))
-	@f=$${OUT:-formats/scene/$$(basename $(SB) .md | tr 'A-Z' 'a-z' | tr -c 'a-z0-9-' '-').animatic.json}; \
+	@f=$$(node scripts/author/animatic.mjs $(SB) $(if $(OUT),--out $(OUT)) --path); \
 	 ./bin/vawe $$f --draft --workers 2
 
 # make styleframes D=<scene.json> [N=4] — THE LOOK, BEFORE THE MOTION IS TRUSTED. Renders the few most

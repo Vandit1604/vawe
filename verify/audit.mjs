@@ -155,8 +155,67 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       parseFloat(s.borderTopWidth) > 0 || parseFloat(s.borderLeftWidth) > 0 ||
       parseFloat(s.borderRightWidth) > 0 || parseFloat(s.borderBottomWidth) > 0;
   };
+  // An inline <svg>'s ink is whatever its paths actually draw, and that is usually INSCRIBED in the
+  // element box rather than filling it. A ring of radius 370 in a 1000-unit viewBox leaves 244 units of
+  // empty square on every side, and empty square still rotates: turn the layer 45 degrees and its border
+  // box sweeps a 1414px diagonal while nothing visible moves at all. That failed a ring which never came
+  // near the frame edge, and the only way to satisfy it was to shrink the ring until the design was worse.
+  // getBBox() is the union of the drawn geometry in user units; getScreenCTM() carries the viewBox scale
+  // AND the layer's rotation, so transforming its four corners gives the true screen AABB of the ink.
+  // Ink is a subset of the box, so this can only relax a finding, never invent one. <img> keeps the old
+  // rule: for a raster the box really is the ink.
+  // A rotated curve has no cheap tight bound. getBBox() gives the shape's own AABB in user units, and
+  // both getScreenCTM() math and getBoundingClientRect() then return the AABB of that RECTANGLE once
+  // rotated, which over-bounds badly: a semicircle whose ink stops 255px from the top measured as 139px
+  // ABOVE it, a 394px error, purely from the empty corners of a box that is not the shape.
+  // So sample the outline. SVGGeometryElement exposes getTotalLength/getPointAtLength for every shape
+  // we draw, the sampling is fixed-count (no clock, no randomness) so the audit stays deterministic, and
+  // the stroke is added back as half its scaled width. 96 samples holds a 1000px arc to well under a
+  // pixel, which is far finer than a safe-zone bound needs.
+  const SAMPLES_PER_PATH = 96;
+  const shapeInk = (g) => {
+    const m = g.getScreenCTM();
+    if (!m || typeof g.getPointAtLength !== 'function') return null;
+    let len; try { len = g.getTotalLength(); } catch { return null; }
+    if (!Number.isFinite(len) || len <= 0) return null;
+    const xs = [], ys = [];
+    for (let i = 0; i <= SAMPLES_PER_PATH; i++) {
+      let pt; try { pt = g.getPointAtLength((len * i) / SAMPLES_PER_PATH); } catch { return null; }
+      xs.push(m.a * pt.x + m.c * pt.y + m.e);
+      ys.push(m.b * pt.x + m.d * pt.y + m.f);
+    }
+    // half the stroke sticks out past the centreline, scaled the same way the geometry is
+    const scale = Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)) || 1;
+    const sw = (parseFloat(getComputedStyle(g).strokeWidth) || 0) / 2 * scale;
+    return { left: Math.min(...xs) - sw, right: Math.max(...xs) + sw,
+      top: Math.min(...ys) - sw, bottom: Math.max(...ys) + sw };
+  };
+  const DRAWABLE = 'path, circle, ellipse, rect, line, polyline, polygon';
+  const svgInk = (svg) => {
+    const shapes = [...svg.querySelectorAll(DRAWABLE)].map(shapeInk).filter(Boolean)
+      .filter((r) => Number.isFinite(r.left) && Number.isFinite(r.top));
+    // text/image inside an svg have no outline to sample; fall back to the box for those
+    const others = [...svg.querySelectorAll('text, image, use')].map((g) => g.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.height > 0);
+    const all = [...shapes, ...others];
+    if (!all.length) return null;
+    const left = Math.min(...all.map((r) => r.left)), right = Math.max(...all.map((r) => r.right));
+    const top = Math.min(...all.map((r) => r.top)), bottom = Math.max(...all.map((r) => r.bottom));
+    return { left, top, right, bottom, width: right - left, height: bottom - top, geometry: true };
+  };
   const inkRect = (el) => {
-    if (el.querySelector('img, svg')) return null;      // replaced content: the element box IS the ink
+    if (el.querySelector('img')) return null;            // raster: the element box IS the ink
+    const svgs = [...el.querySelectorAll('svg')];
+    if (svgs.length) {
+      const rects = svgs.map(svgInk).filter(Boolean);
+      if (!rects.length) return null;
+      const left = Math.min(...rects.map((r) => r.left)), right = Math.max(...rects.map((r) => r.right));
+      const top = Math.min(...rects.map((r) => r.top)), bottom = Math.max(...rects.map((r) => r.bottom));
+      // width/height are NOT decorative: downstream checks (buried, tight) read them and feed the centre
+      // to elementsFromPoint, which throws on a non-finite value. A DOMRect carries them; a bare literal
+      // standing in for one has to as well.
+      return { left, top, right, bottom, width: right - left, height: bottom - top, geometry: true };
+    }
     const r = document.createRange();
     r.selectNodeContents(el);
     const b = r.getBoundingClientRect();
@@ -190,8 +249,23 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     //     font's natural metrics) the ink overhangs the box by ~4px at size 30, scaling with size. That
     //     overhang is half-leading, not glyphs, so measuring it would fail a layer sitting exactly on
     //     the safe line for content the viewer cannot see.
+    //   GEOMETRY (an inline <svg>) — use the ink on BOTH axes. The half-leading argument above is a fact
+    //     about text metrics, not about drawings: a path's vertical extent is real ink, and its box is
+    //     often mostly empty. Taking the box vertically discarded exactly half of the svg ink fix and
+    //     kept failing a rotating ring on a bound nothing visible ever crossed.
     const ink = !paintsBox(s) && inkRect(el);
-    const sb = ink ? { left: ink.left, right: ink.right, top: b.top, bottom: b.bottom } : b;
+    // CLAMPED TO THE BORDER BOX, always. The ink bound exists to stop measuring empty space, so it may
+    // only ever shrink the rect. Unclamped it can also GROW one (an svg whose stroke or scale spills past
+    // its element), and that turned showcase-cuts from 0 hard failures into 7 — a gate change that
+    // invents findings is worse than the gap it closed.
+    const clamp = (r) => {
+      const left = Math.max(r.left, b.left), right = Math.min(r.right, b.right);
+      const top = Math.max(r.top, b.top), bottom = Math.min(r.bottom, b.bottom);
+      return (right > left && bottom > top) ? { left, top, right, bottom } : b;
+    };
+    const sb = !ink ? b
+      : ink.geometry ? clamp(ink)
+      : clamp({ left: ink.left, right: ink.right, top: b.top, bottom: b.bottom });
     if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
       issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
   });

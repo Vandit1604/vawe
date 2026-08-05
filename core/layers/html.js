@@ -4,9 +4,18 @@
 // background so the layer and the backdrop cannot drift to different rules.
 import { sanitizeHtml } from '../sanitize-html.js';
 
+// `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
+// had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
+// parent and collapsed to its own content height. A layer declaring a 580px box rendered 310px of card
+// and no gate said anything — the silent-substitution class again (docs/MISTAKES.md #210).
+//
+// `height:100%` on the wrapper is deliberately a no-op when the layer declares no height: 100% against
+// an auto-height parent computes to auto, which is exactly today's behaviour. It changes the render only
+// for layers that DID state a box, which is the broken case.
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
-  el.innerHTML = `<div class="hs-html">${sanitizeHtml(L.html)}</div>`;
+  if (L.h != null) el.style.height = L.h + 'px';
+  el.innerHTML = `<div class="hs-html" style="height:100%">${sanitizeHtml(L.html)}</div>`;
 }
 
 // `--t` is the scene clock in seconds, the one thing hand-authored CSS can be a function of. It was
