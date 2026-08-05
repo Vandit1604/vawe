@@ -139,7 +139,7 @@ const scene = {
   layers,
   // A living backdrop, not a flat field: the rings drift for the whole film so the frame is never
   // dead even while the object is holding still between shape changes.
-  bg: [{ t: 0, preset: 'gradientWash', from: 0, to: DUR }],
+  bg: [{ t: 0, preset: 'gradientWash', opts: { intensity: 0.35 }, from: 0, to: DUR }],
   audio: { silent: true },
 };
 

@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: animatic beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -311,6 +311,14 @@ animatic:
 	node scripts/author/animatic.mjs $(SB) $(if $(VOICE),--voice $(VOICE)) $(if $(OUT),--out $(OUT))
 	@f=$${OUT:-formats/scene/$$(basename $(SB) .md | tr 'A-Z' 'a-z' | tr -c 'a-z0-9-' '-').animatic.json}; \
 	 ./bin/vawe $$f --draft --workers 2
+
+# make styleframes D=<scene.json> [N=4] — THE LOOK, BEFORE THE MOTION IS TRUSTED. Renders the few most
+# visually DISTINCT settled moments at full scale as individual stills, plus a sheet, and runs only the
+# LOOK gates (slop, designspec). Answers "is this the right-looking film at all", which no static gate
+# can: `onefile` passed every gate with a backdrop that rendered as loud blue blooms, and one still
+# showed it in three seconds. Approve these, then animate.
+styleframes:
+	node scripts/author/styleframes.mjs $(D) $(if $(N),--n $(N))
 
 # make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
