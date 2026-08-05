@@ -22,6 +22,7 @@ type Options struct {
 	Transparent bool   // alpha export: transparent capture → VP9/yuva420p .webm (no audio, no grain)
 	BgVideo     string // composite the (alpha) graphics over this background video → out.mp4
 	Aspect      string // render aspect ("16:9"/"9:16"/"1:1"/"4:5"); empty = the scene's own
+	SS          int    // supersample factor; 0 = the default for the mode (2 final, 1 draft)
 	Watermark   string // transparent PNG laid over every frame (free previews); empty = clean export
 }
 
@@ -72,9 +73,12 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 
 	fmt.Printf("▶ %s : capturing across %d workers…\n", module, o.Workers)
 	transparent := o.Transparent || o.BgVideo != "" // compositing needs a transparent graphics layer
-	ss := 2                                          // 2× supersample → crisp text under motion (see scene.downsample)
+	ss := 2                                         // 2× supersample → crisp text under motion (see scene.downsample)
 	if o.Draft {
 		ss = 1 // draft: skip supersample for fast previews
+	}
+	if o.SS > 0 {
+		ss = o.SS // explicit -ss wins, so the cost of supersampling can be measured against its benefit
 	}
 	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss, o.Aspect)
 	if err != nil {

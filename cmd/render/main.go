@@ -41,6 +41,10 @@ func main() {
 	// at raster starvation. See docs/MISTAKES.md #190 and `make flicker-check`.
 	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 4)), "parallel capture browsers")
 	draft := flag.Bool("draft", false, "fast encode, no grain")
+	// SUPERSAMPLE override. ss=2 costs 4x the pixels of every expensive stage and exists to stop text
+	// shimmering under motion; whether it survives the h264 encode had never been tested, and a flag is
+	// what makes testing it possible. 0 = the default for this render mode (2 final, 1 draft).
+	ssFlag := flag.Int("ss", 0, "supersample factor (0 = 2 final / 1 --draft)")
 	noGrain := flag.Bool("no-grain", false, "skip the film-grain pass")
 	all := flag.Bool("all", false, "render every format's sample.json")
 	concurrency := flag.Int("concurrency", 1, "formats rendered at once (--all)")
@@ -51,7 +55,7 @@ func main() {
 	flag.Parse()
 
 	repoRoot := repoRoot()
-	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark}
+	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark}
 
 	if *list {
 		listFormats(repoRoot)
@@ -101,7 +105,7 @@ func main() {
 			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: vawe foo.json --draft --out x.mp4
 		}
 	}
-	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark} // rebuild after any trailing flags
+	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark} // rebuild after any trailing flags
 	if dataPath == "" {
 		fmt.Fprintln(os.Stderr, "usage: vawe <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)

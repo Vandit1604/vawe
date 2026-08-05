@@ -6,17 +6,18 @@ package scene
 import (
 	"bytes"
 
+	"context"
+	"fmt"
 	"github.com/chromedp/cdproto/runtime"
 	"image"
 	"image/png"
-	"context"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/chromedp/cdproto/cdp"
@@ -172,6 +173,62 @@ func absd(a, b uint32) uint32 {
 	return b - a
 }
 
+// profile — per-phase wall time across every capture worker, behind VAWE_PROFILE=1.
+//
+// It exists because the render's cost had never been attributed. A 14.6s film costs 2.13s of CPU per
+// frame; a synthetic browser benchmark explained about a quarter of that, and the remainder was
+// guessed at twice and wrong both times (once at the Go downsample, which turned out to cost nothing
+// measurable). Phases are summed, not averaged per worker, so the numbers add up to the wall time
+// times the worker count and the biggest one is unambiguous.
+type profile struct {
+	mu                             sync.Mutex
+	render, raf, shot, down, write time.Duration
+	frames                         int
+	rawBytes, outBytes             int64
+}
+
+func (p *profile) add(render, raf, shot, down, write time.Duration, raw, out int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.render += render
+	p.raf += raf
+	p.shot += shot
+	p.down += down
+	p.write += write
+	if raw > 0 || out > 0 {
+		p.frames++
+		p.rawBytes += int64(raw)
+		p.outBytes += int64(out)
+	}
+}
+
+func (p *profile) report(wall time.Duration, workers int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	tot := p.render + p.raf + p.shot + p.down + p.write
+	if tot == 0 || p.frames == 0 {
+		return
+	}
+	row := func(name string, d time.Duration) {
+		fmt.Printf("    %-22s %8.1fs  %5.1f%%   %7.1f ms/frame\n",
+			name, d.Seconds(), float64(d)/float64(tot)*100, float64(d.Milliseconds())/float64(p.frames))
+	}
+	fmt.Printf("\n  ▶ profile · %d frames · %d workers · %.1fs wall\n", p.frames, workers, wall.Seconds())
+	row("renderFrame (paint)", p.render)
+	row("rAF settle wait", p.raf)
+	row("screenshot+transfer", p.shot)
+	row("downsample (Go)", p.down)
+	row("write to disk", p.write)
+	fmt.Printf("    %-22s %8.1fs\n", "TOTAL (all workers)", tot.Seconds())
+	fmt.Printf("    captured %.0f MB raw → %.0f MB on disk (%.1f MB/frame raw)\n",
+		float64(p.rawBytes)/1e6, float64(p.outBytes)/1e6, float64(p.rawBytes)/1e6/float64(p.frames))
+	fmt.Printf("    downsample path: %d fast / %d slow\n\n", atomic.LoadInt64(&downsampleFast), atomic.LoadInt64(&downsampleSlow))
+}
+
+// Which downsample path each frame took. Counted, and printed by the profile, because the first
+// attempt at the fast path silently never ran and the identical output was mistaken for proof.
+var downsampleFast, downsampleSlow int64
+
 // downsample resolves an ss×-supersampled PNG to native size by averaging each ss×ss block — the
 // exact SSAA resolve. Sub-pixel jitter from animated transforms averages out, so text stays crisp
 // instead of shimmering frame-to-frame. Averages alpha-premultiplied channels (correct over the
@@ -188,6 +245,53 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 	ow, oh := b.Dx()/ss, b.Dy()/ss
 	dst := image.NewRGBA(image.Rect(0, 0, ow, oh))
 	n := uint32(ss * ss)
+
+	// FAST PATH — index Pix instead of calling At().
+	//
+	// `src.At(x, y).RGBA()` is an interface call returning a boxed color.Color, run once per SUBPIXEL:
+	// at ss=2 into 1920x1080 that is 8.3M interface calls and 8.3M allocations per frame. Profiling
+	// (VAWE_PROFILE=1) put this loop at 979 ms/frame, 46.6% of a final render — second only to the
+	// screenshot itself.
+	//
+	// EXACT, not approximate. Chrome's screenshots decode to *image.RGBA, whose Pix is already
+	// alpha-premultiplied, and color.RGBA.RGBA() returns each channel as pix*0x101. So the old loop
+	// computed ((0x101 * Σpix) / n) >> 8, and so does this one, in integer arithmetic, for every pixel
+	// including translucent ones. Any other concrete type falls through to the original loop.
+	//
+	// A previous attempt at this guarded on *image.NRGBA, which Chrome never produces. It fell through
+	// to the slow loop, produced a byte-identical mp4, and saved nothing — and the byte-identical hash
+	// was read as proof of correctness when it was proof of nothing. Hence downsampleFast: the profile
+	// prints how many frames took which path, so "never ran" cannot masquerade as "correct".
+	if rgba, ok := src.(*image.RGBA); ok {
+		atomic.AddInt64(&downsampleFast, 1)
+		for y := 0; y < oh; y++ {
+			for x := 0; x < ow; x++ {
+				var r, g, bl, a uint32
+				for dy := 0; dy < ss; dy++ {
+					row := (b.Min.Y+y*ss+dy-rgba.Rect.Min.Y)*rgba.Stride - rgba.Rect.Min.X*4
+					for dx := 0; dx < ss; dx++ {
+						i := row + (b.Min.X+x*ss+dx)*4
+						r += uint32(rgba.Pix[i+0])
+						g += uint32(rgba.Pix[i+1])
+						bl += uint32(rgba.Pix[i+2])
+						a += uint32(rgba.Pix[i+3])
+					}
+				}
+				o := dst.PixOffset(x, y)
+				dst.Pix[o+0] = uint8((r * 0x101 / n) >> 8)
+				dst.Pix[o+1] = uint8((g * 0x101 / n) >> 8)
+				dst.Pix[o+2] = uint8((bl * 0x101 / n) >> 8)
+				dst.Pix[o+3] = uint8((a * 0x101 / n) >> 8)
+			}
+		}
+		var out bytes.Buffer
+		if err := png.Encode(&out, dst); err != nil {
+			return nil, err
+		}
+		return out.Bytes(), nil
+	}
+	atomic.AddInt64(&downsampleSlow, 1)
+
 	for y := 0; y < oh; y++ {
 		for x := 0; x < ow; x++ {
 			var r, g, bl, a uint32
@@ -217,6 +321,15 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int, aspect string) (Meta, error) {
 	if ss < 1 {
 		ss = 1
+	}
+	// VAWE_PROFILE=1 splits the capture into timed phases (see type profile). Off by default because
+	// timing it costs three CDP round trips per frame instead of one.
+	var prof *profile
+	var profStart time.Time
+	if os.Getenv("VAWE_PROFILE") == "1" {
+		prof = &profile{}
+		profStart = time.Now()
+		defer func() { prof.report(time.Since(profStart), workers) }()
 	}
 	var meta Meta
 	srv, port, err := Serve(repoRoot)
@@ -332,26 +445,50 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		}
 		shoot := func(f int) ([]byte, error) {
 			var buf []byte
-			// await two REAL animation frames after renderFrame so the compositor has committed
-			// this frame's paint before the screenshot (rAF is virtualized for scene code; the
-			// renderer keeps the native one as __realRaf).
-			err := chromedp.Run(ctx,
-				chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
-				chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
-				chromedp.CaptureScreenshot(&buf),
-			)
-			if err != nil {
+			// The three steps are run SEPARATELY under VAWE_PROFILE so each can be timed. Batched into
+			// one chromedp.Run they are one number, and one number is what let a 2.13s-per-frame cost
+			// go unexplained: a synthetic bench accounted for ~500ms of it and the rest was guessed at
+			// twice, wrongly. Unprofiled, the batched call is kept — it is one round trip, not three.
+			if prof == nil {
+				err := chromedp.Run(ctx,
+					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
+					chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
+					chromedp.CaptureScreenshot(&buf),
+				)
+				if err != nil {
+					return nil, err
+				}
+				return downsample(buf, ss)
+			}
+			t0 := time.Now()
+			if err := chromedp.Run(ctx, chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil)); err != nil {
 				return nil, err
 			}
-			return downsample(buf, ss) // ss× supersample → native size (crisp text under motion)
+			t1 := time.Now()
+			if err := chromedp.Run(ctx, chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+				return nil, err
+			}
+			t2 := time.Now()
+			if err := chromedp.Run(ctx, chromedp.CaptureScreenshot(&buf)); err != nil {
+				return nil, err
+			}
+			t3 := time.Now()
+			out, derr := downsample(buf, ss)
+			t4 := time.Now()
+			prof.add(t1.Sub(t0), t2.Sub(t1), t3.Sub(t2), t4.Sub(t3), 0, len(buf), len(out))
+			return out, derr
 		}
 		for j := range frames {
 			buf, err := shoot(j.frame)
 			if err != nil {
 				return fmt.Errorf("frame %d: %w", j.frame, err)
 			}
+			tw := time.Now()
 			if err := os.WriteFile(j.path, buf, 0644); err != nil {
 				return err
+			}
+			if prof != nil {
+				prof.add(0, 0, 0, 0, time.Since(tw), 0, 0)
 			}
 			if j.anchor >= 0 { // same-instance signature honesty check
 				abuf, err := shoot(j.anchor)
