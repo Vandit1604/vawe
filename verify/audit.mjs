@@ -85,8 +85,45 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // inside it, and the audit said 0 hard (docs/MISTAKES.md #77).
   // The rule that holds: two TEXT boxes overlapping is a defect; text over a SHAPE is design (a chip
   // on a rect, a label on a card). So the set is every visible text layer, not every critical one.
+  // textContent INCLUDES <style> and <script> source. A hand-authored `html` layer carries its CSS inline,
+  // so a card with a stylesheet in it registered as a text layer whose "text" was the stylesheet, and then
+  // collided with every label deliberately placed on top of it. The layer is a surface, not a text box.
+  // Only rendered text counts, so read the ink, not the source.
+  // The paint is often one or two levels DOWN: an `html` layer renders as
+  // .hs-layer > .hs-html > <the author's card>, and the background lives on the innermost div. Testing
+  // only the layer element returned transparent every time, which is why the card kept counting as a
+  // text box. So look for any descendant that fills the layer and paints.
+  const paintsOwnBox = (el) => {
+    const box = el.getBoundingClientRect();
+    if (!(box.width > 1 && box.height > 1)) return false;
+    const painted = (n) => {
+      const s = getComputedStyle(n), bg = s.backgroundColor || '';
+      const opaque = !(bg === 'transparent' || /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(bg));
+      return opaque || s.backgroundImage !== 'none';
+    };
+    if (painted(el)) return true;
+    for (const n of el.querySelectorAll('*')) {
+      const b = n.getBoundingClientRect();
+      if (b.width * b.height >= box.width * box.height * 0.85 && painted(n)) return true;
+    }
+    return false;
+  };
+  const inkText = (el) => {
+    let out = '';
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest('style, script'))
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
+    while (w.nextNode()) out += w.currentNode.nodeValue;
+    return out;
+  };
   const els = [...document.querySelectorAll('[data-layer="critical"], .hs-layer.hs-text')].filter((el) => {
-    if (!el.textContent || !el.textContent.trim()) return false;   // shapes and empty wrappers are not the subject
+    if (!inkText(el).trim()) return false;   // shapes and empty wrappers are not the subject
+    // A layer that paints its own background is a SURFACE, and this check's own rule is that text over a
+    // shape is design, not collision: a chip on a rect, a label on a card. `html` layers are classed
+    // hs-text, so a hand-authored card counted as a text box the size of the whole card and collided with
+    // every row deliberately placed on it. Compare the labels to each other, not to the thing they sit on.
+    if (el.classList.contains('hs-layer') && paintsOwnBox(el)) return false;
     const b = el.getBoundingClientRect(); return b.width > 1 && b.height > 1 && vis(el);
   });
   const info = els.map((el) => {
@@ -101,7 +138,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     // overflow only CLIPS (a real bug) when overflow isn't 'visible'; tight line-heights spill
     // visibly and harmlessly, so don't flag those.
     const clipX = s.overflowX !== 'visible', clipY = s.overflowY !== 'visible';
-    return { el, id: el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName), t: (el.textContent || '').trim().slice(0, 18),
+    return { el, id: el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName), t: inkText(el).trim().slice(0, 18),
       x: b.left, y: b.top, r: b.right, btm: b.bottom, clip: (clipX && el.scrollWidth > el.clientWidth + 1) || (clipY && el.scrollHeight > el.clientHeight + 1),
       sw: el.scrollWidth, cw: el.clientWidth, sh: el.scrollHeight, ch: el.clientHeight };
   });

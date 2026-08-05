@@ -5175,3 +5175,50 @@ harder question. `gate-mutation` 119/119.
 **Class.** Gate gap, same shape as #211. The tell was identical: satisfying the gate required abandoning
 something known to be good. A rule that is right for the common case and silent about the existence of
 others will punish exactly the films that are trying something.
+
+## #213 — a rect's `fill` was accepted and thrown away, because the unknown-prop check is type-agnostic
+
+**What.** `{"type":"rect","fill":"#d33"}` rendered white. The colour was simply discarded, and a pushpin
+meant to be red came out as a white square.
+
+**Root cause, two layers deep.** `core/layers/rect.js` reads `L.bg`; nothing reads `L.fill`. That alone
+would be caught, because `core/validate.mjs` DOES have an unknown-prop check with did-you-mean. It did not
+fire, because that check tests keys against ONE flat list of every layer prop in the schema rather than
+against the props of THIS layer's type. `fill` is real on `svg`, so it counts as known everywhere, and a
+prop that is meaningful on one type passes silently on a type that ignores it.
+
+**Fix.** `rect` now honours `fill` as an alias for `bg`. Where an input is unambiguous, making it work
+beats adding an error: `fill` is the obvious name for the colour inside a shape and it is the real name on
+`svg`, so authors will keep reaching for it. `scene-snap` identical, `make probe` clean.
+
+**Still open, and worth naming.** The type-agnostic unknown-prop check remains. Every prop that is valid on
+some layer type is silently accepted on all of them, so this class can recur with any of them
+(`stroke` on a rect, `radius` on a text, `ken` on an svg). The fix is a per-type known-list, which needs
+the schema to carry per-type props; it was not attempted here because it would touch every layer type at
+the tail of a long session.
+
+## #214 — the layout audit called a label on a card a collision
+
+**What.** A hand-authored card with three rows placed on it failed `overlap` on every frame. The rows were
+exactly where they were meant to be.
+
+**Root cause.** The overlap check compares TEXT inks, and its own comment states the rule it means to
+enforce: "two TEXT boxes overlapping is a defect; text over a SHAPE is design (a chip on a rect, a label on
+a card)". But `html` layers are classed `hs-text`, so a card counted as a text box the size of the whole
+card and collided with every label deliberately placed on it. The first attempt to exclude painted
+surfaces did not fire either, because an `html` layer renders as
+`.hs-layer > .hs-html > <the author's card>` and the background lives on the innermost div, so testing the
+layer element returned transparent every time.
+
+**Fix.** `verify/audit.mjs` now treats a layer as a SURFACE when it, or any descendant filling at least 85%
+of it, paints a background, and excludes surfaces from the text-overlap set. It also stops counting
+`<style>` and `<script>` source as an element's text, which is what made a stylesheet-carrying card look
+like a text layer in the first place.
+
+**Verified per the doctrine.** Diffed across the whole library: five scenes change, every one of them
+DOWN by exactly one finding, none up. Spot-checked `ab2-skill-tenor` independently: the removed finding was
+a 680x500 painted card against the `$349k` label on it, overlap 592x61. A label on a card.
+
+**Class.** Gate gap. Note the shape it shares with #211 and #212: in all three the rule was right and the
+MEASUREMENT did not match it, and in all three the tell was that satisfying the gate meant making the film
+worse. Three of the last four framework findings are the gate measuring the wrong unit.

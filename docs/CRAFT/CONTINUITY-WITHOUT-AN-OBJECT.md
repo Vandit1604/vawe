@@ -5,10 +5,27 @@ question the same way eighteen times: keep one rectangle alive and key its `w` a
 gate. It is also the cheapest answer available, and three consecutive films built on it passed every gate
 while being visually inert.
 
-This page exists because a reference film in `refs/` does the opposite and is plainly better. Nothing in it
-survives a cut. Every beat is a new world: a 3D bulb, a noir figure on black, a white field, a pinned index
-card, a cream field with a keyboard, a black disc. Props change, palette flips light to dark and back, the
-type restyles. By the letter of the rule it is a slideshow. It is not one, and the reason is worth naming.
+This page exists because a reference film in `refs/` holds together across ten cuts in eighteen seconds
+without keeping one prop alive through them, and is plainly better than what we build.
+
+MEASURE IT BEFORE YOU COPY IT, and I did not, the first time. My first read of that film was "nothing
+survives a cut", and it was wrong. Pulling frames across the light section shows a large grey band curving
+through shot after shot: it is there at 5.7s, 6.3s, 9.0s, 9.7s and 10.4s, drops out for a black interlude,
+and comes back. Props sit along it and it shifts between shots, so it reads as a camera travelling one
+continuous curved surface. The film is MORE continuous than a first look suggests, not less.
+
+What it actually runs is TWO THREADS AT ONCE:
+  - a grammatical one, one clause per shot, none of them finishing;
+  - a spatial one, a path the camera moves along, which the black shots deliberately break for emphasis.
+
+That is the lesson, and it is a stronger one than "you can skip continuity". Continuity is not something the
+good films do less of. It is something they carry in more than one register at the same time, so no single
+register has to be literal. The prop does not need to survive the cut when the sentence and the space
+already do.
+
+The pace is worth measuring too: shot lengths run 0.76s to 3.2s with a MEDIAN OF 1.52s. Our films sit at
+2.5-4s a beat, which is roughly half the cut rate, and no amount of good composition reads as energetic at
+half the cut rate.
 
 ## The thread was a sentence, not a thing
 
@@ -40,12 +57,18 @@ resizes", you are writing the gate's minimum.
 | **Rhythm** | cuts landing on a steady beat | a fixed cadence |
 | **Question** | an open loop the film has not answered | the payoff must actually answer it |
 
-Mix them. The reference runs the sentence thread and a rhythm thread at once, which is why it can afford to
-change absolutely everything else.
+MIX THEM, AND EXPECT THE GOOD FILMS TO. The reference runs three at once: the unfinished sentence, a
+travelling path through the light section, and a steady cut rhythm around 1.5s. That redundancy is what
+lets it change props, palette and type wholesale without coming apart. A film carrying ONE thread has to
+make that thread literal and obvious, which is how we ended up resizing boxes; a film carrying three can
+let every one of them be subtle.
 
-## What the freedom buys, in that reference
+So the question to ask of your own film is not "does it have a thread" but "how many, and in which
+registers". One is fragile. Two is usually enough. None of them then has to be a box.
 
-Once the thread is grammatical, every frame is free. That film spends the freedom on:
+## What the redundancy buys, in that reference
+
+Because three threads are carrying continuity, no single frame has to. That film spends the freedom on:
 
 - **Word-level emphasis.** One word inside a line carries the colour, the rest sits grey. Emphasis lives on
   the word, not the line. Our films colour whole lines and lose the stress.
@@ -70,3 +93,16 @@ can change everything else and still hold.
 The gate can only see a prop that survives and moves. It cannot see an unfinished sentence, so a film built
 this way needs a waiver and a `_why` that names the thread. That is a limit of the measurement, not a
 verdict on the film.
+
+But do not reach for the waiver first. The correction above is the point: a film that reads as free is
+usually carrying MORE continuity than it appears to, in registers the gate cannot count. If your only
+thread is one the gate cannot see, you have not out-thought the rule, you have taken the riskiest version
+of it. Add a second thread the gate CAN see, keep it subtle, and you will not need the waiver at all.
+
+## Measure the reference, do not remember it
+
+The first read of this film recorded here was "nothing survives a cut", written from a contact sheet, and
+it was wrong: a grey path runs through half the film and a frame-by-frame pull found it in a minute. A
+contact sheet samples; it does not measure. Before drawing a rule from a reference, pull the cut list
+(`ffmpeg select='gt(scene,0.25)'`), get the shot-length distribution, and sample INSIDE the shots that
+look empty. The conclusion changed completely, and it changed toward more rigour, not less.
