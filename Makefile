@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -112,6 +112,29 @@ video: build
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)) — then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
+
+# make dev D=<file>  — THE ITERATION LOOP. Build, draft-render, open. No gates, no audit, no ladder.
+# This exists because the fast path was already reachable (NOCHECK=1 NOAUDIT=1) and nobody would ever
+# find it. Measured on a 15s film: the whole static ladder is ~1s against an 8.4s draft render, so the
+# gates were never the cost — being interrupted mid-thought was. Iterate here; prove it with `make ship`.
+dev: build
+	./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
+	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
+
+# make check D=<file>  — every gate, every finding, ZERO consequence. Same information `make ship`
+# blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
+check:
+	@MODE=iterate node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS))
+
+# make ship D=<file>  — the ladder with its teeth in: full author-check, render, audit, seams.
+# `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
+# need real pixels, so it is the one command that says a film is actually done.
+ship: build
+	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(STRICT)),--strict)
+	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	node verify/audit.mjs $(D)
+	node scripts/gates/seam-snap.mjs $(D)
+	@echo "" && echo "▶ LAST STEP, and no gate can do it: make judge D=$(D)$(if $(VS), VS=$(VS)) — then READ the sheet."
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
 list: build

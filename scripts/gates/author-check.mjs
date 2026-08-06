@@ -37,6 +37,12 @@ import { execFileSync } from 'node:child_process';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
+// ITERATE MODE: same gates, same findings, no consequence. While a film is still being explored, a
+// blocking gate does not save time, it breaks the loop — you stop to fix or waive something you were
+// about to rewrite anyway. Measured, the whole static ladder costs about a second against an 8s draft
+// render, so the cost was never the runtime; it was being interrupted. So iterate reports everything
+// and exits 0, and says plainly what WOULD block, while ship keeps the teeth.
+const iterate = process.argv.includes('--iterate') || process.env.MODE === 'iterate';
 const vsArg = (() => { const i = process.argv.indexOf('--vs'); return i >= 0 ? process.argv[i + 1] : null; })();
 if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--vs <brand>]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
@@ -176,6 +182,11 @@ console.log(`      (readability · hierarchy · composition · brand + asset fid
 console.log(`      If your eye catches a flaw, it is a FIX — never ship one you noticed. See docs/JUDGE.md.`);
 
 if (failed.length) {
+  if (iterate) {
+    console.log(`\n~ iterating: ${failed.map((r) => r.name).join(', ')} WOULD block at ship. Nothing stopped here.`);
+    console.log(`  Run \`make ship D=${file}\` when you want the ladder to mean something.\n`);
+    process.exit(0);
+  }
   console.log(`\n✗ author-check FAILED: ${failed.map((r) => r.name).join(', ')}. Fix, or waive a deliberate break via {"authoring":{"allow":[...]}}. ${strict ? '(--strict: warnings also block.)' : ''}\n`);
   process.exit(1);
 }
