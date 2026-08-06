@@ -21,6 +21,7 @@ verify/snap/
 # review receipts: proof a beats/reveal sheet was rendered for a given scene content hash
 # (make beats / make reveal write them, scripts/gates/beat-check.mjs reads them). Local, per-machine.
 verify/beats-seen/
+verify/approved/
 
 # kie.ai secret + generated assets
 .kie.key

@@ -5222,3 +5222,22 @@ a 680x500 painted card against the `$349k` label on it, overlap 592x61. A label 
 **Class.** Gate gap. Note the shape it shares with #211 and #212: in all three the rule was right and the
 MEASUREMENT did not match it, and in all three the tell was that satisfying the gate meant making the film
 worse. Three of the last four framework findings are the gate measuring the wrong unit.
+
+## #215 — a single `--aspect` silently overwrote the render it was not asked to replace
+
+**What.** `./bin/vawe scene.json --aspect 9:16` on a 16:9 scene wrote `out/<name>.mp4` — the same
+path the scene's own-aspect render uses. The 16:9 film was replaced by a 9:16 one under an identical
+filename, with a success line that looked completely normal. The only way to notice was to open it.
+
+**Root cause.** `cmd/render/main.go` gated the aspect tag on `len(aspects) > 1`. Rendering several
+aspects at once obviously needs distinct names, so that case was handled; rendering exactly one
+non-native aspect looked like "just a render" and inherited the plain name. The flag that changes the
+shape of the output did not change the name of the output.
+
+**Fix.** Tag whenever `--aspect` is passed at all. An explicit `--out` still wins, because naming the
+file is the author's call.
+
+**Class.** Silent substitution, and the most expensive variety: the destructive kind. Elsewhere this
+class discards input (#210 an html layer's `h`, #213 a rect's `fill`). Here it discarded a
+previously-rendered deliverable. Worth stating as a rule: **a flag that changes what the output IS
+must change what the output is CALLED.**

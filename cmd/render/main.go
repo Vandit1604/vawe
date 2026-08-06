@@ -145,8 +145,14 @@ func main() {
 		o.Aspect = strings.TrimSpace(asp)
 		outPath := *out
 		if outPath == "" || len(aspects) > 1 {
+			// TAG ON ANY EXPLICIT --aspect, not only when several were asked for. The tag used to be
+			// gated on `len(aspects) > 1`, so rendering a 16:9 scene with `--aspect 9:16` wrote
+			// out/<name>.mp4 — silently REPLACING the scene's own-aspect render with a
+			// differently-shaped film under the identical filename. Nothing said anything, and the
+			// only way to notice was to open the file (docs/MISTAKES.md #215).
+			// An explicit --out still wins: naming the file is the author's call.
 			tag := ""
-			if len(aspects) > 1 && o.Aspect != "" {
+			if o.Aspect != "" {
 				tag = "." + strings.ReplaceAll(o.Aspect, ":", "x")
 			}
 			base := name

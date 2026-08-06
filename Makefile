@@ -274,6 +274,12 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make approve STAGE=<stage> D=<file> — SIGN OFF a stage for this exact file. Records a content hash, so
+# editing the file silently withdraws its own approval; an approval that outlives what it approved is
+# worse than none, because it reads as verified. Stages: beats · concept · treatment · draft.
+approve:
+	@node -e "import('./scripts/lib/receipt.mjs').then(({writeReceipt})=>{const r=writeReceipt(process.argv[1],process.argv[2],{by:'make approve'});console.log(r?'  ✓ '+process.argv[1]+' approved for '+process.argv[2]:'  ✗ could not read '+process.argv[2]);})" "$(STAGE)" "$(D)"
+
 beats:
 	node scripts/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
 

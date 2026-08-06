@@ -53,9 +53,9 @@
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming, num, SPECK } from './scene-timing.mjs';
+import { readReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
@@ -174,15 +174,14 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
 // `make beats` and `make reveal` render a contact sheet a human or agent has to LOOK at. No gate can score
 // that image, so the only checkable fact is whether anyone looked at THIS version. Both tools write a
 // receipt carrying the scene's content hash; a hash that no longer matches means the scene moved on.
-const RECEIPTS = path.join(ROOT, 'verify', 'beats-seen');
-const hash = crypto.createHash('sha256').update(raw).digest('hex');
-const receiptPath = path.join(RECEIPTS, `${path.basename(file, '.json')}.json`);
-let receipt = null;
-try { receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8')); } catch { /* no receipt is the common case */ }
-if (!receipt || receipt.hash !== hash) {
-  warn('beats-unseen', receipt
-    ? `the scene has CHANGED since its beats were last looked at (receipt ${path.relative(ROOT, receiptPath)} holds an older hash, sheet ${receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read the sheet it prints.`
-    : `nobody has looked at this scene's beats: no receipt in ${path.relative(ROOT, RECEIPTS)}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) and read the sheet.`);
+// The hashing and the path live in scripts/lib/receipt.mjs now, so every stage can be signed off the
+// same way. This reader is unchanged in behaviour: same code, same severity, same two wordings for the
+// two genuinely different states (nobody looked at all, versus somebody looked at an older version).
+const seen = readReceipt('beats', file);
+if (!seen.exists || seen.stale) {
+  warn('beats-unseen', seen.exists
+    ? `the scene has CHANGED since its beats were last looked at (receipt ${seen.rel} holds an older hash, sheet ${seen.receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read the sheet it prints.`
+    : `nobody has looked at this scene's beats: no receipt at ${seen.rel}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) and read the sheet.`);
 }
 
 // ---------- report ----------
