@@ -84,6 +84,57 @@ order — verified by `make probe` (renders sampled frames in scrambled order an
 
 ## Architecture
 
+Two halves. Go orchestrates and knows nothing about design; the browser owns everything about how a
+frame looks. They meet at exactly one function.
+
+```
+  formats/scene/<name>.json          one self-describing file: layers · timing · theme · bg · audio
+          │
+          ▼
+  cmd/render (Go)                    parse flags · resolve scene · plan the shard
+          │                          --workers (capped at 4) · --fps · --draft · --ss · --alpha
+          ▼
+  internal/scene (Go) ──► chromedp ──► N headless Chrome tabs, each seeking a DIFFERENT part
+          │                            of the timeline at the same time
+          │                                    │
+          │                                    ▼
+          │                            formats/scene/scene.html + core/*
+          │                            window.__engine.renderFrame(n) → screenshot
+          │                            ── layers built · motion tracks evaluated
+          │                            ── clips driven · transitions composited
+          │                                    │
+          ▼                                    │
+  frame sequence  ◄───────────────────────────┘
+          │
+          ▼
+  internal/encode (Go)               ffmpeg: frames → H.264 (+ film grain, box-filter downsample)
+          │
+          ▼
+  internal/audio (Go)                PCM mixer: music bed · sfx cues · VO ducking · limiter
+          │                          (silent by default — audio is opt-in per scene)
+          ▼
+  encode.Mux ──► out/<name>.mp4
+```
+
+**Parallel capture is only correct because `renderFrame(n)` is pure in `n`** — frame 400 is
+byte-identical whether it is rendered first or last, and whether frame 399 was ever rendered at all.
+That single invariant is what every gate ultimately protects. See
+[Determinism](#determinism) below, and [`docs/architecture.html`](docs/architecture.html) for the
+long-form walkthrough (layer vocabulary, the gate ladder, the render cost model, and the known-weak
+places worth pushing on).
+
+The quality ladder wraps the render rather than living inside it:
+
+```
+  storyboard ─► script ─► animatic ─► style frames ─► JSON ─► author-check ─► RENDER ─► seam-check ─► judge
+   plan the     words in   does it    is this the      the     11 static      mp4      flash at a      a human
+   beats        two cols   FIT the    film you want    scene   checks                  transition      reads it
+                           clock?     to have made?
+```
+
+Each stage catches something the next cannot, so a green ladder is **necessary and not sufficient**:
+the static gates cannot see composition or fidelity, which is what `make judge` and your eyes are for.
+
 ```
 core/            THE ENGINE — pure, browser+node, self-contained (imports nothing outside core/):
                  motion.js (math + 39 easings), boot.js (runtime + virtual clock), type.js (kinetic
