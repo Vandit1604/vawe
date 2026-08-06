@@ -297,6 +297,14 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make treatment SB=<storyboard.md> — WHY this film looks like this, written while the answer is known.
+# A treatment's real content is what was TURNED DOWN and on what grounds, and that exists for exactly one
+# moment: while the concept set is still on the table. `make concept-pick` records the rejected
+# directions into a receipt so this stage can read them back. Regenerating refreshes only the MEASURED
+# block; your prose is never touched, because a tool that overwrites what you wrote is one you stop running.
+treatment:
+	node scripts/author/treatment.mjs $(SB) $(if $(THEME),--theme $(THEME))
+
 # make concept SB=<storyboard.md> [N=3] — N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 # The missing first stage: every other stage refines a single idea and nothing ever produced a second
 # one. Each direction commits to a thread, a pace and a look at once — the three decisions that actually

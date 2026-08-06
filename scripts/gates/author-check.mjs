@@ -32,6 +32,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync } from 'node:child_process';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -145,6 +146,27 @@ record('dissolve', runGate('dissolve check (crossfade mud)', 'scripts/gates/diss
 { const r = runGate('copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : []); record('copy', r, { waivable: true, exitMeansFail: strict }); }
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
+
+// 4e. treatment — the film's own rationale. ADVISORY, always: a treatment is an argument a person
+//     makes, so a gate can only check that one exists and still describes THIS storyboard. It goes
+//     stale the moment the plan moves, and a stale rationale is worse than none because it reads as
+//     current. Silent when there is no storyboard to have a treatment for.
+{
+  const sbPath = file.replace(/\.json$/, '.storyboard.md');
+  if (fs.existsSync(sbPath)) {
+    const t = readReceipt('treatment', sbPath);
+    console.log(`\n──────── treatment (why this film looks like this) ────────`);
+    if (!t.exists) {
+      console.log(`  ~ no treatment for ${path.basename(sbPath)}. The argument for this direction, and against`);
+      console.log(`    the ones you turned down, is not written anywhere. \`make treatment SB=${sbPath}\``);
+    } else if (t.stale) {
+      console.log(`  ~ the treatment is STALE: ${path.basename(sbPath)} has changed since ${t.rel} was written.`);
+      console.log(`    Re-run \`make treatment SB=${sbPath}\` — it refreshes the measured block and leaves your prose.`);
+    } else {
+      console.log(`  ✓ treatment current (${t.receipt.treatment || 'recorded'}).`);
+    }
+  }
+}
 
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.
