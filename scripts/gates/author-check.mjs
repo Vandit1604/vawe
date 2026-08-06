@@ -168,6 +168,13 @@ record('dissolve', runGate('dissolve check (crossfade mud)', 'scripts/gates/diss
   }
 }
 
+// 4f. waiver drift — is this waiver a decision or a habit? ADVISORY, and never blocking, because a gate
+//     that blocked on this would itself be waived. It reads the whole library and reports how many other
+//     films excuse the same rule, which is the only level at which "we keep letting ourselves off" is
+//     visible. Written after visual-vocabulary correctly blocked two films on the same day and the second
+//     one was waived.
+runGate('waiver drift (is this a decision or a habit)', 'scripts/gates/waiver-drift.mjs', []);
+
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.
 const sidecar = file.replace(/\.json$/, '.intent.json');

@@ -297,6 +297,14 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make waivers [D=<file>] — every blocking gate can be waived, and a waiver costs nothing and is
+# invisible afterwards. So the failure mode is not one bad waiver, it is the SAME waiver film after film
+# until the rule is dead and nothing said so. With D= it tells you whether the break you are about to
+# make is already a habit; without it, it censuses the library. It never blocks: a gate that blocked on
+# this would itself be waived.
+waivers:
+	node scripts/gates/waiver-drift.mjs $(D)
+
 # make draft D=<scene.json> STAGE=85|95 — hand over a draft at a DECLARED level of finish.
 # Without one, review is a guess: a reviewer who thinks they are seeing a ship candidate flags the
 # placeholder photo, and one who thinks they are seeing a rough cut lets a real defect through. 85% locks

@@ -279,6 +279,13 @@ Rules that make this real, not ceremonial:
   and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
 - **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into
   a scene file.
+- **FIX THE RULE, NOT THE CALL SITE. Grep every consumer before you close it.** A measurement bug is
+  almost never in one place: the primitive that was read wrongly is read the same way somewhere else.
+  #214 taught the audit that `<style>` source is not glyphs, applied it to the overlap check alone, and
+  left the identical bug in the clipped-text check, where it surfaced as #216 the same day. Before
+  closing any finding of this shape, grep for the thing that was misread (`textContent`, `getBBox`,
+  `boxOf`, a default-substituting helper) and fix or explicitly clear EVERY consumer. A fix at one call
+  site looks exactly like a finished fix until something else trips the half you skipped.
 - **FINISH THE FIX. Reverting is not a resolution.** Having found an engine or gate bug, you fix it in
   this pass. "I could not get it working so I put it back and logged it" is the one outcome that is
   never acceptable: the next author inherits the same wall plus a note saying it is known. If a first
