@@ -297,6 +297,14 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make draft D=<scene.json> STAGE=85|95 — hand over a draft at a DECLARED level of finish.
+# Without one, review is a guess: a reviewer who thinks they are seeing a ship candidate flags the
+# placeholder photo, and one who thinks they are seeing a rough cut lets a real defect through. 85% locks
+# structure and timing and leaves polish open; 95% adds the checks that need real pixels. It records
+# every warning carried to clear the bar, so the next reviewer reads what was knowingly accepted.
+draft:
+	node scripts/gates/draft-check.mjs $(D) --stage $(if $(STAGE),$(STAGE),85)
+
 # make treatment SB=<storyboard.md> — WHY this film looks like this, written while the answer is known.
 # A treatment's real content is what was TURNED DOWN and on what grounds, and that exists for exactly one
 # moment: while the concept set is still on the table. `make concept-pick` records the rejected

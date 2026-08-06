@@ -7,6 +7,7 @@
 // Usage: node scripts/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import { writeReceipt } from '../lib/receipt.mjs';
 import path from 'node:path';
 import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf } from './tile.mjs';
@@ -49,4 +50,7 @@ console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames ·
 console.log(`  → sheet:  ${dir}/sheet.png`);
 console.log(`  → rubric: ${dir}/rubric.md  (house-style + 7 craft dimensions + verdict template)`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
+// Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
+// proxy for having looked at it. Editing the scene withdraws it, which is the whole point.
+writeReceipt('judge', inp, { sheet: `${dir}/sheet.png` });
 console.log(`  Be adversarial — this is the gate that SEES what validate/critique/slop/audit cannot.\n`);
