@@ -1,0 +1,85 @@
+{
+  "name": "glassatmos",
+  "note": "Remixed from the \"glass\" preset onto brand base #0a0f1c / accent #7cc5ff by scripts/brand/theme-remix.mjs. Glass / depth: a cool dark ground, an ice-blue accent, frosted surfaces over a living gradient. Premium and modern — pairs with the glassCard / borderBeamCard blocks and an aurora bg.",
+  "palette": {
+    "bg": "#0a0f1c",
+    "bg2": "#161b27",
+    "surface": "#141925",
+    "surface2": "#1e222e",
+    "line": "#2c313c",
+    "lineStrong": "#454952",
+    "text": "#f4f2ee",
+    "text2": "#a9a9ab",
+    "dim": "#73757a",
+    "ink": "#f4f2ee",
+    "accent": "#7cc5ff",
+    "accentDim": "rgba(124,197,255,0.1)",
+    "accentGlow": "rgba(124,197,255,0.3)",
+    "up": "#4fb584",
+    "down": "#e0655c"
+  },
+  "gradient": [
+    "#0a0f1c",
+    "#0f1625",
+    "#191d2a"
+  ],
+  "type": {
+    "sans": "Geist",
+    "serif": "Geist",
+    "mono": "JetBrains Mono",
+    "num": "JetBrains Mono"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.06,
+    "settle": 0.6,
+    "enter": 34,
+    "durationScale": 0.95,
+    "stagger": 0.05
+  },
+  "bg": {
+    "accent": "124,197,255",
+    "tint": "24,37,55",
+    "tint2": "35,55,78",
+    "dotLight": "44,49,60",
+    "paperBase": [
+      "#ffffff",
+      "#f4f5f8"
+    ],
+    "light": [
+      "#ffffff",
+      "#f4f5f8"
+    ],
+    "paper": "#ffffff",
+    "softBase": [
+      "#ffffff",
+      "#eff0f3"
+    ],
+    "accentBase": [
+      "#f5faff",
+      "#f4f5f8"
+    ],
+    "border": "#2c313c",
+    "dark": [
+      "#0a0f1c",
+      "#070a12"
+    ],
+    "deep": [
+      "#0a0f1c",
+      "#05080e"
+    ],
+    "ink": [
+      "#080c16",
+      "#04060b"
+    ],
+    "inkBase": [
+      "#0a0f1c",
+      "#070a12"
+    ],
+    "darkMesh": [
+      "#152133",
+      "#070a12"
+    ]
+  },
+  "bgDefault": "spotlight"
+}

@@ -5241,3 +5241,21 @@ file is the author's call.
 class discards input (#210 an html layer's `h`, #213 a rect's `fill`). Here it discarded a
 previously-rendered deliverable. Worth stating as a rule: **a flag that changes what the output IS
 must change what the output is CALLED.**
+
+## #216 — the audit read a stylesheet as glyphs and called it clipped text
+
+**What.** A frosted glass pane failed `clipped-text` with "mask is 287px too short for the glyphs" and a
+reported content of `.g{position:rela`. Nothing was clipped. Nothing was even text.
+
+**Root cause.** A hand-authored `html` layer carries its CSS inline, and the check read `el.textContent`,
+which includes `<style>` source. The layer legitimately sets `overflow:hidden` (a rounded pane must clip
+its own corners), so the scrollHeight of the invisible stylesheet text became a clipping report.
+
+**Fix.** The check now uses the shared `inkText()` helper, which walks text nodes and rejects anything
+inside `style` or `script`.
+
+**Class, and the part worth remembering.** This is #214 again, in a second consumer. That entry
+introduced `inkText()` for the OVERLAP check and left every other consumer of `textContent` alone,
+so the same stylesheet went on being read as content one check further down. A fix applied at one call
+site instead of at the rule is half a fix, and the half that is missing looks identical to the half that
+is done until something trips it. Library diff after the change: zero scenes change.

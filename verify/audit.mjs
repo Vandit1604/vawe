@@ -359,7 +359,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const cs = getComputedStyle(el);
     if (cs.overflow !== 'hidden' && cs.overflowY !== 'hidden') continue;
     if (el.querySelector('img, canvas, svg, video')) continue;      // media clips on purpose
-    const txt = (el.textContent || '').trim();
+    // <style> SOURCE IS NOT GLYPHS. A hand-authored `html` layer carries its CSS inline, and reading
+    // that source as text made the audit report a frosted pane as "287px of clipped descenders" whose
+    // supposed content was `.g{position:rela`. Nothing was clipped; nothing was even text. This is the
+    // same mistake as docs/MISTAKES.md #214, which fixed it for the overlap check and missed this one,
+    // so the rule is now shared rather than repeated: only RENDERED text counts.
+    const txt = inkText(el).trim();
     if (!txt || !vis(el) || !atRest(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
