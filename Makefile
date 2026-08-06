@@ -274,6 +274,19 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make concept SB=<storyboard.md> [N=3] — N DIRECTIONS FOR ONE BRIEF, before any of them is built.
+# The missing first stage: every other stage refines a single idea and nothing ever produced a second
+# one. Each direction commits to a thread, a pace and a look at once — the three decisions that actually
+# change a film — and leaves every word to you, because a tool that invents copy produces options that
+# are all wrong alike. docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md has the threads.
+concept:
+	node scripts/author/concept.mjs $(SB) $(if $(N),--n $(N)) $(if $(filter 1,$(STRICT)),--strict)
+
+# make concept-pick SB=<storyboard.md> OPTION=<slug> — promote one direction and record the rest.
+# The rejected set is what a treatment argues against; it is only available at the moment of choosing.
+concept-pick:
+	node scripts/author/concept.mjs $(SB) --pick $(OPTION)
+
 # make approve STAGE=<stage> D=<file> — SIGN OFF a stage for this exact file. Records a content hash, so
 # editing the file silently withdraws its own approval; an approval that outlives what it approved is
 # worse than none, because it reads as verified. Stages: beats · concept · treatment · draft.
