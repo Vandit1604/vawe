@@ -5259,3 +5259,25 @@ introduced `inkText()` for the OVERLAP check and left every other consumer of `t
 so the same stylesheet went on being read as content one check further down. A fix applied at one call
 site instead of at the rule is half a fix, and the half that is missing looks identical to the half that
 is done until something trips it. Library diff after the change: zero scenes change.
+
+## #217 — the same stylesheet-as-text bug, in a third and fourth consumer
+
+**What.** A frosted pane failed the SAFE-ZONE check, reported against the content
+`/* Near-opaque on `, which is a fragment of its own CSS comment.
+
+**Root cause.** `carriesContent()` decides whether a layer earns a safe check at all, and it walked text
+nodes with no filter, so a hand-authored `html` layer's inline stylesheet counted as content. Two other
+consumers had it too: `tiny-text` (a `<style>` block has a font-size, so it read as unreadably small
+text) and the image probe's emptiness test.
+
+**Fix.** All of them read the shared `inkText()` now.
+
+**Class, and why this entry exists at all.** This is the THIRD time. #214 found it in the overlap check
+and fixed that call site. #216 found it in clipped-text, fixed that call site, and its own writeup said
+"a fix applied at one call site instead of at the rule is half a fix". Then this pass found three more.
+The lesson had been written down twice and applied zero times, because writing a rule and obeying it are
+different acts, and only the second one is work.
+
+CLAUDE.md now carries "fix the rule, not the call site: grep every consumer before you close it", added
+in the same session and, notably, added BEFORE this instance was found. The rule was followed here only
+because the failure happened to recur immediately. Library diff after the change: zero scenes change.

@@ -297,6 +297,13 @@ preview:
 
 # make beats D=formats/x/video.json [VS=brand]  — first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
+# make cutout SRC=<photo> NAME=<name> — remove a photograph's background so it becomes a PROP.
+# A rectangular photo cannot be both recognisable and edge-free in a frame it does not fill. With the
+# background gone the ground is free, light can sit behind the subject, and a layer can pass in front of
+# it. Local (rembg in .venv-tools), no network after the first run, and the alpha is verified.
+cutout:
+	node scripts/media/cutout.mjs $(SRC) $(NAME)
+
 # make waivers [D=<file>] — every blocking gate can be waived, and a waiver costs nothing and is
 # invisible afterwards. So the failure mode is not one bad waiver, it is the SAME waiver film after film
 # until the rule is dead and nothing said so. With D= it tells you whether the break you are about to

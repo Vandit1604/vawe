@@ -172,12 +172,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // Decoration (gradient blobs, glows, hairline rules) routinely bleeds off-frame BY DESIGN, so a
   // layer only earns the safe check when it carries a text node or an image. Text inside a decorative
   // container is still reached: the walker descends, and child text layers are their own .hs-layer.
-  const carriesContent = (el) => {
-    if (el.querySelector('img, svg')) return true;
-    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    while (w.nextNode()) if (w.currentNode.nodeValue.trim()) return true;
-    return false;
-  };
+  // Uses inkText for the same reason clipped-text and overlap do: a hand-authored `html` layer carries
+  // its CSS inline, and counting that source as "content" made every frosted pane earn a safe-zone check
+  // it should never have been given, reported against a fragment of its own stylesheet. Third consumer of
+  // this bug (docs/MISTAKES.md #214, #216); the rule now lives in one place and all of them read it.
+  const carriesContent = (el) => !!el.querySelector('img, svg') || !!inkText(el).trim();
   // What the safe check must measure is what the VIEWER can see. A text layer given a `w` (which it
   // needs, since pin centres a box) paints nothing but glyphs: the container is invisible slack, and
   // centred text leaves half that slack on each side. Measuring the container flags empty air as
@@ -337,7 +336,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       if (!vis(el)) continue;
       if (el.getBoundingClientRect().width <= 1) continue;
       const fs = parseFloat(getComputedStyle(el).fontSize) || 0;
-      const t = (el.textContent || '').trim();
+      const t = inkText(el).trim();   // a <style> block has a font-size and would read as tiny text
       if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
     }
   }
@@ -675,7 +674,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   const imgProbe = document.createElement('canvas'); imgProbe.width = imgProbe.height = 24;
   const ipc = imgProbe.getContext('2d', { willReadFrequently: true });
   for (const e of info) {
-    const im = e.el.tagName === 'IMG' ? e.el : ((e.el.children.length === 1 || !e.el.textContent.trim()) ? e.el.querySelector('img') : null);
+    // inkText again: a wrapper holding only a stylesheet is empty as far as the viewer is concerned
+    const im = e.el.tagName === 'IMG' ? e.el : ((e.el.children.length === 1 || !inkText(e.el).trim()) ? e.el.querySelector('img') : null);
     if (!im || !im.complete || !im.naturalWidth) continue;
     let avg;
     try {

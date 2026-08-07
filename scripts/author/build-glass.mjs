@@ -1,98 +1,116 @@
 // scripts/author/build-glass.mjs — generate formats/scene/glass.json.
 //
-// An ATMOSPHERIC piece, not a message film: frosted panes, depth, and light moving behind glass. There
-// is no product and almost no copy, so everything has to be carried by material and motion.
+// THE CONCEPT, because the first version of this file did not have one. That draft was four frosted
+// rectangles drifting over a gradient: the stock result anyone gets from typing "glassmorphism" into
+// anything. Nothing happened in it, nothing became anything, and it needed a `no-visual-vocabulary`
+// waiver to ship, which was the tell.
 //
-// WHAT MAKES GLASS READ AS GLASS, and it is only one of these four:
-//   1. SOMETHING ALIVE BEHIND IT. `backdrop-filter` blurs whatever is underneath, so a frosted pane over
-//      a flat field is a grey rectangle. The aurora background is not decoration here, it is the thing
-//      being refracted — remove it and the entire look collapses.
-//   2. DEPTH, from overlap and differential drift. Panes at different distances move at different
-//      speeds; that parallax is what stops a stack of translucent boxes reading as flat.
-//   3. AN EDGE. Real glass catches light on its rim: a 1px border at low white alpha, brighter on the
-//      top edge than the bottom, is most of the illusion.
-//   4. A SPECULAR SWEEP. A highlight travelling across the surface, driven by var(--t) so it is a pure
-//      function of the frame and the render stays deterministic.
+// Glass is not a surface, it is a BEHAVIOUR: it hides, it bends, it reveals. So the film is a reveal,
+// and the glass is what is doing the hiding. A real photograph of a lit filament sits behind the panes,
+// unreadable through the frost. The panes slide off one at a time and it resolves. That gives the film a
+// subject, a turn, and a reason for the last frame to exist.
 //
-// The panes are `html` layers because backdrop-filter has no equivalent in the primitive vocabulary.
-// That is the honest reason, not a preference: a rect cannot refract what is behind it.
+// It also earns its gates instead of waiving them:
+//   · the SUBJECT is a real photograph, so `visual-vocabulary` passes on merit rather than on an excuse;
+//   · the photograph is on screen from the first frame to the last and is never replaced, so it is a
+//     genuine continuous object, and what changes across the film is how much of it you can see.
+//
+// Light through glass is also materially exact. A frosted pane over a gradient is decoration; a frosted
+// pane over a light source is the substance doing the one thing it actually does.
 import fs from 'node:fs';
 
 const OUT = 'formats/scene/glass.json';
-const W = 1920, H = 1080;
-const DUR = 13.0;
+const DUR = 12.0;
 const r1 = (v) => +v.toFixed(2);
 const layers = [];
+const SHOT = '/assets/cutouts/bulb.png';   // rembg cutout: `make cutout SRC=… NAME=bulb`
 
-// ── the panes ──────────────────────────────────────────────────────────────────────────────────────
-// Overlapping, at three depths. `depth` drives blur strength, opacity, drift distance and z-order at
-// once, because those are not four decisions — they are one decision (how far away is this) expressed
-// four ways. Tuning them independently is how a glass stack stops looking like one space.
-const PANES = [
-  { id: 'far',  x: 250,  y: 180, w: 520, h: 700, rot: -5.5, depth: 0.35, start: 1.4 },
-  { id: 'mid',  x: 700,  y: 300, w: 640, h: 460, rot: 2.5,  depth: 0.7,  start: 0.2 },
-  { id: 'near', x: 1150, y: 210, w: 480, h: 620, rot: -2.0, depth: 1.0,  start: 2.6 },
-  { id: 'chip', x: 880,  y: 760, w: 300, h: 120, rot: 1.5,  depth: 0.85, start: 5.4 },
-];
-
-const pane = (p) => {
-  const blur = r1(6 + p.depth * 16);          // nearer glass frosts harder
-  const alpha = r1(0.06 + p.depth * 0.07);
-  const edge = r1(0.16 + p.depth * 0.24);
-  const drift = r1(14 + p.depth * 34);        // parallax: nearer panes travel further
-  const dur = r1(DUR - p.start);
-  return {
-    type: 'html', id: p.id, x: p.x, y: p.y, w: p.w, h: p.h, track: Math.round(2 + p.depth * 6),
-    start: p.start, duration: dur, anim: 'none', exitDur: 0,
-    html: `<div class="g"><style>
-      .g{position:relative;height:100%;border-radius:26px;overflow:hidden;
-         background:linear-gradient(150deg, rgba(255,255,255,${alpha + 0.05}), rgba(255,255,255,${alpha * 0.4}));
-         -webkit-backdrop-filter:blur(${blur}px) saturate(1.5);
-         backdrop-filter:blur(${blur}px) saturate(1.5);
-         box-shadow:0 30px 80px rgba(4,8,18,${r1(0.2 + p.depth * 0.3)}),
-                    inset 0 1px 0 rgba(255,255,255,${edge}),
-                    inset 0 0 0 1px rgba(255,255,255,${r1(edge * 0.45)})}
-      /* the specular sweep: a soft diagonal highlight crossing the pane, positioned from the scene
-         clock so it is a pure function of the frame. Offset per pane so they do not flash in unison. */
-      .g::after{content:"";position:absolute;top:-60%;bottom:-60%;width:36%;
-         background:linear-gradient(90deg,transparent,rgba(255,255,255,${r1(0.10 + p.depth * 0.12)}),transparent);
-         transform:rotate(18deg);
-         left:calc(-40% + 180% * (0.5 + 0.5 * cos(calc((var(--t) * 0.55 + ${p.depth * 2.1}) * 1rad))))}
-    </style></div>`,
-    motion: [
-      { t: 0, opacity: 0, scale: 0.965, y: r1(drift * 0.7), rot: r1(p.rot * 1.5), blur: 5 },
-      { t: 1.1, opacity: 1, scale: 1, y: 0, rot: p.rot, blur: 0, ease: 'brake' },
-      // it never settles completely: glass this close to the camera should always be breathing
-      { t: dur, opacity: 1, scale: r1(1 + p.depth * 0.03), y: r1(-drift), rot: r1(p.rot + p.depth * 1.4), blur: 0, ease: 'linear' },
-    ],
-  };
-};
-PANES.forEach((p) => layers.push(pane(p)));
-
-// ── the light ──────────────────────────────────────────────────────────────────────────────────────
-// One slow bar of light crossing behind the panes, so the frosting has something to do. It sits UNDER
-// the near panes and OVER the far one, which is the whole reason the depth ordering above is explicit.
+// ── the subject ────────────────────────────────────────────────────────────────────────────────────
+// Present from frame one, never replaced, pushing in slowly for the whole film. It is the continuous
+// object; the panes are the obstruction. A 1024x1536 portrait photograph in a landscape frame, so it is
+// deliberately oversized and cropped to the filament rather than letterboxed around the whole picture.
+// A CUTOUT, not a photograph. This is the fix that four others failed to be. As a rectangular JPEG the
+// subject could not both be recognisable and edge-free: cropped to fill the frame it read as an orange
+// blob, and sized to the bulb it left its own border as the most obvious line on screen once the panes
+// cleared. `fade:"edges"` applies but is a fixed radial that only softens the far corners, and matching
+// the ground to the photo's sampled grey lost to the vignette. With the background actually REMOVED
+// there is no edge to hide, the ground is free again, and light can sit behind the glass.
 layers.push({
-  type: 'glow', id: 'shaft', x: -200, y: -260, w: 620, h: 1600, track: 5,
-  // glow speaks its OWN vocabulary — angle/intensity/preset — not the generic transform props. `rot`
-  // and `blur` are motion-KEY names, and the validator rightly refused them here rather than accepting
-  // them and rendering a shaft with neither.
-  color: '#7cc5ff', opacity: 0.30, intensity: 0.9, angle: 16,
-  start: 3.0, duration: r1(DUR - 3.0), anim: 'fade', enterDur: 1.4, exitDur: 1.2,
+  type: 'image', id: 'subject', src: SHOT,
+  x: 667, y: 68, w: 587, h: 880, radius: 0, track: 2, motionBlur: false,
+  start: 0, duration: DUR, anim: 'none', exitDur: 0,
   motion: [
-    { t: 0, x: 0 },
-    { t: r1(DUR - 3.0), x: 1900, ease: 'linear' },   // constant travel: a light source does not ease
+    { t: 0, scale: 1.05, y: 24 },   // sized so the push never takes the bulb past the safe box
+    { t: DUR, scale: 1.0, y: 0, ease: 'linear' },   // one continuous push, no easing beats inside it
   ],
 });
 
-// ── the one line of type ───────────────────────────────────────────────────────────────────────────
-// Small, late, and off to one side. An atmospheric piece that opens on a headline stops being
-// atmospheric; the type arrives once the material has already made its case.
+// The light the bulb is casting. Only possible with a cutout: behind a rectangular photo this would have
+// been hidden by the photo's own black ground. It sits UNDER the subject and over the backdrop, so the
+// glow reads as coming from inside the glass rather than as a lamp pointed at it.
 layers.push({
-  type: 'text', text: 'light, held still', x: 250, y: 930, w: 700, size: 46, weight: 500,
-  color: 'rgba(226,236,252,0.72)', align: 'left', track: 20,
-  split: 'word', preset: 'blur', stagger: 0.09, each: 0.7,
-  start: 8.2, duration: r1(DUR - 8.2), anim: 'none', exitDur: 0,
+  type: 'glow', id: 'halo', x: 720, y: 400, w: 480, h: 480, track: 1,
+  color: '#ffb457', opacity: 0.5, intensity: 0.85,
+  start: 0, duration: DUR, anim: 'fade', enterDur: 2.0, exitDur: 0,
+});
+
+// ── the obstruction ────────────────────────────────────────────────────────────────────────────────
+// Four panes covering the subject completely at t=0, leaving one at a time. `off` is where each goes;
+// they exit in four different directions so the clearing does not read as one curtain opening. Frost is
+// heaviest on the panes that leave first, because the film should get clearer as it goes.
+// THEY MUST TILE THE FRAME, not float in it. The first pass stacked four panes near the middle and left
+// the backdrop showing down both sides, so the subject was already visible at 1.5s and the panes read as
+// floating rectangles: the same failure as the draft this file replaces. Four oversized, slightly rotated
+// slabs, but NOT a 2x2 grid: laid out as quadrants they aligned into a hard cross seam down the middle
+// of the frame and read as four panels rather than overlapping glass. These are deliberately mismatched
+// in size and rotated 3 to 6 degrees, each far oversized, so the frame is covered several times over and
+// no two edges line up. Each one leaving uncovers a different part, so the reveal is staged rather than
+// switched on.
+const PANES = [
+  { id: 'p1', x: -300, y: -260, w: 1500, h: 1700, rot: -6.0, blur: 30, off: { x: -1700, y: -260,  rot: -13 }, go: 3.1 },
+  { id: 'p2', x: 520,  y: -420, w: 1700, h: 1150, rot: 4.5,  blur: 26, off: { x: 500,   y: -1500, rot: 11 },  go: 5.0 },
+  { id: 'p3', x: 380,  y: 260,  w: 1800, h: 1200, rot: -3.0, blur: 22, off: { x: 1800,  y: 420,   rot: 8 },   go: 6.9 },
+  { id: 'p4', x: -240, y: 340,  w: 1500, h: 1100, rot: 5.5,  blur: 18, off: { x: -260,  y: 1400,  rot: -9 },  go: 8.8 },
+];
+
+PANES.forEach((p, i) => {
+  const clear = r1(p.go + 1.5);
+  layers.push({
+    type: 'html', id: p.id, x: p.x, y: p.y, w: p.w, h: p.h, track: 4 + i,
+    start: 0, duration: DUR, anim: 'none', exitDur: 0,
+    html: `<div class="g"><style>
+      /* Near-opaque on purpose. backdrop-filter blurs what is BEHIND it, and behind most of each pane is
+         flat darkness, so blurring alone produced nothing. Two passes at this were far too transparent:
+         at ~0.15 alpha over near-black a single pane is invisible, and only the OVERLAPS doubled up
+         enough to see, which read as narrow bands crossing the frame rather than four slabs. Measuring
+         the boxes settled it. They were 1227x841 and tiling correctly the whole time, so the geometry
+         was never the problem. Frost that does not conceal cannot stage a reveal. */
+      .g{height:100%;border-radius:18px;
+         background:linear-gradient(${140 + i * 25}deg, rgba(216,228,247,0.62), rgba(146,168,202,0.50));
+         -webkit-backdrop-filter:blur(${p.blur}px) saturate(1.25) brightness(1.05);
+         backdrop-filter:blur(${p.blur}px) saturate(1.25) brightness(1.05);
+         box-shadow:0 40px 90px rgba(2,5,12,0.55),
+                    inset 0 1px 0 rgba(255,255,255,0.45),
+                    inset 0 0 0 1px rgba(255,255,255,0.16)}
+    </style></div>`,
+    motion: [
+      { t: 0, x: 0, y: 0, rot: p.rot, opacity: 1 },
+      { t: p.go, x: 0, y: 0, rot: p.rot, opacity: 1, ease: 'linear' },
+      // it leaves and keeps going. A pane that drifted back would put the obstruction back on.
+      { t: clear, x: p.off.x, y: p.off.y, rot: p.off.rot, opacity: 0, ease: 'brake' },
+      { t: DUR, x: p.off.x, y: p.off.y, rot: p.off.rot, opacity: 0, ease: 'linear' },
+    ],
+  });
+});
+
+// ── the line ───────────────────────────────────────────────────────────────────────────────────────
+// One line, arriving as the last pane leaves. It is a caption on a reveal rather than a headline over a
+// mood, which is most of the difference between this film and the draft it replaces.
+layers.push({
+  type: 'text', text: 'It was lit the whole time.', x: 150, y: 870, w: 900, size: 58, weight: 600,
+  color: 'rgba(246,240,230,0.92)', align: 'left', track: 20,
+  split: 'word', preset: 'up', stagger: 0.07, each: 0.6,
+  start: 9.4, duration: r1(DUR - 9.4), anim: 'none', exitDur: 0,
 });
 
 const scene = {
@@ -100,47 +118,27 @@ const scene = {
   theme: 'glassatmos',
   aspect: '16:9',
   duration: DUR,
-  authoringNote: 'Atmospheric glassmorphism study. The aurora background is load-bearing, not decorative: '
-    + 'backdrop-filter blurs what is behind it, so a frosted pane over a flat field is a grey rectangle. '
-    + 'Depth comes from one `depth` value driving blur, opacity, drift and z-order together.',
+  authoringNote: 'A reveal in which the glass is what hides the subject. A real photograph of a lit '
+    + 'filament sits behind four frosted panes that cover it completely at t=0 and leave one at a time. '
+    + 'The photograph is the continuous object; what changes is how much of it you can see.',
   authoring: {
-    allow: ['no-continuous-object', 'no-continuous-object-inferred', 'no-transition', 'text-only-beat',
-      'graphics-thin', 'no-visual-vocabulary'],
+    // NO `no-visual-vocabulary` waiver. The subject is a real photograph and the gate should pass on
+    // merit. If it does not, the film is wrong, not the gate. The first draft of this file waived it,
+    // and that waiver was the 31st in a library of 96 (scripts/gates/waiver-drift.mjs).
+    allow: ['no-transition'],
     _why: {
-      'no-continuous-object': 'The panes ARE the continuous object: all four are on screen from their entrance to the last frame and none is ever replaced. The gate looks for a prop that survives a CUT, and this film has no cuts at all, because an atmospheric piece that cuts is no longer atmospheric.',
-      'no-continuous-object-inferred': 'Same panes. The inferred boundaries are entrances, not cuts.',
-      'no-transition': 'Nothing to transition between. One continuous shot is the form.',
-      'text-only-beat': 'The opposite is true here: the beats are almost entirely material and carry one small line of type at the very end.',
-      'graphics-thin': 'Same reason as no-visual-vocabulary below.',
-      'no-visual-vocabulary': 'The gate is RIGHT and this is a deliberate exception, not a measurement problem. Its own taxonomy says gradients are decoration that carries no information, and these panes are gradients plus a backdrop blur: they encode no quantity and depict no real thing. A first draft of this waiver argued the panes were graphics the gate could not count, which was wrong. htmlGraphic() looks for an inline svg, a conic-gradient or variable-length bars, and those are the right things to look for. The honest position is that an ATMOSPHERIC piece has no information to show, so a rule about how information should be shown does not apply to it. That exemption is available to exactly this kind of film and to nothing that makes a claim.',
+      'no-transition': 'There is no cut in this film. One continuous shot on one subject, with the obstruction leaving in four stages; a cut would break the only thing holding it together.',
     },
   },
   layers,
-  // Load-bearing. Remove this and every pane above becomes a grey rectangle.
-  // `blobs` is an ARRAY of blob specs, not a count — passing the number 5 threw `blobs.forEach is not a
-  // function` at the first frame. The validator accepted it because the KEY is a real aurora parameter
-  // and its type is never checked, which is the type-agnostic gap from docs/MISTAKES.md #213 showing up
-  // one level down, in fx options rather than layer props.
-  //
-  // Tuned rather than defaulted: the stock blobs are blue/purple/cyan, and these are the theme's own ice
-  // blue plus a deep indigo and a teal, at large radii and long periods (18-26s) so the field moves
-  // slower than the panes do. Glass reads as glass when what is behind it drifts and the surface does
-  // not — matching their speeds flattens the whole illusion.
-  // INTENSITY IS THE WHOLE LOOK. At 0.42 the field was too dim to survive a 6-22px backdrop blur and
-  // every pane rendered as a grey rectangle — the exact failure the header of this file warns about,
-  // committed anyway on the first pass. Frosting DIVIDES what is behind it; the field has to be far
-  // brighter than looks right on its own, because you are never seeing it directly.
-  // Positioned to sit BEHIND the panes (which occupy x 250-1630, y 180-880) rather than spread evenly
-  // across the canvas: colour in the corners is colour no pane will ever refract.
-  bg: [{ t: 0, preset: 'aurora', from: 0, to: DUR, opts: { intensity: 0.95, blobs: [
-    { color: '104,186,255', x: 0.26, y: 0.30, r: 900, ax: 140, ay: 100, px: 22, py: 26, ph: 0 },
-    { color: '92,74,236', x: 0.70, y: 0.58, r: 880, ax: 170, ay: 130, px: 26, py: 19, ph: 2.1 },
-    { color: '46,214,196', x: 0.52, y: 0.22, r: 700, ax: 120, ay: 90, px: 18, py: 24, ph: 4.2 },
-    { color: '236,96,168', x: 0.84, y: 0.34, r: 520, ax: 100, ay: 120, px: 30, py: 21, ph: 1.3 },
-  ] } }],
+  // Deep and nearly black, and NOT `ink`, whose dot matrix showed through the gaps and competed with the
+  // subject. The light in this film comes from the subject; the ground's only job is to stay out of it.
+  // Free to be dark again now that the subject carries no ground of its own. The light in this film comes
+  // from inside the bulb, so the room around it should be a room, not a backdrop competing for attention.
+  bg: [{ t: 0, preset: 'deep', from: 0, to: DUR }],
   audio: { silent: true },
 };
 
 fs.writeFileSync(OUT, JSON.stringify(scene, null, 2) + '\n');
 console.log(`✓ ${OUT}  ${layers.length} layers · ${DUR}s · 16:9`);
-console.log('  4 panes at 3 depths over an aurora field · one light shaft · one line, late');
+console.log('  a lit filament behind four frosted panes · they leave at 3.1 / 5.0 / 6.9 / 8.8s');

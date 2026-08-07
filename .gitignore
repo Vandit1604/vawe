@@ -104,3 +104,5 @@ build/
 # easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel — a
 # recreation reproduces INTENT with our own assets (docs/CRAFT/RECREATION.md).
 refs/
+.venv-tools/
+assets/cutouts/
