@@ -255,6 +255,21 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    `make ledger-add D=<file>` after the user approves it.
 9. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
 
+## Open audit findings — pick work from here
+
+`docs/audits/GAUNTLET-2026-08.md` holds 61 confirmed defects from an adversarial multi-agent audit of the
+engine (raw data beside it in `gauntlet-2026-08.json`). Each carries a `file:line`, the command that
+proved it, and a proposed fix, and each survived a separate skeptic whose job was to refute it.
+
+**Run the `repro` before trusting any of them.** They were confirmed against the tree at audit time and
+some will already be stale; a finding you did not reproduce is a rumour. Tick the checkbox when done.
+
+Two are high severity and both produce WRONG OUTPUT rather than a loud failure: `--alpha` exports a fully
+opaque file, and `boxOf` squares a single-axis layer so a 590x18 underline passes the show-don't-tell
+floor. The audit did NOT clear its own bar: round 3 still found new high-severity issues, so a further
+round would find more. Its own stated blind spot is that every round read code and none compared
+RENDERED PIXELS against the scene that produced them.
+
 ## The framework harvest (do this EVERY render — the engine must compound)
 
 Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
