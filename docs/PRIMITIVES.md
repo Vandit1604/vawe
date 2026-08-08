@@ -355,6 +355,16 @@ on the layer element belong to those tracks and a modifier must not append to th
 transform gets an element of its own, or reaches for a CSS property the tracks do not own (`tilt` uses
 the `rotate` longhand). Note this is **not** `fx`, which is the named-GSAP-effect slot.
 
+**`shadow` — cast away from the scene's light.** Declare `"lighting": {"x": 540, "y": 120}` at the top
+level (canvas px, plus optional `intensity`), then `{"shadow": 30}` or
+`{"shadow": {"dist": 40, "blur": 50, "color": "#0b0b12", "opacity": 0.3}}`. Every other drop shadow in
+the engine (`elevation`, `L.shadow`) is a fixed offset written once at build, so it points the same way
+on every layer forever; this one is computed per layer from the light to that layer's centre, so two
+cards either side of the light throw their shadows in **opposite** directions and one scene-level number
+re-lights the film. It rides `box-shadow`, which follows the layer's **box, not its glyphs** — right for
+cards, panels and images, wrong for a bare headline (use `L.filter: "drop-shadow(...)"` there). Refuses
+alongside `elevation`/`shadow`/`glow` (same CSS property) and on a group child; put it on the group.
+
 **`occlude` — hide this layer where another layer covers it.** `{"occlude": "cardId"}`, or
 `{"occlude": {"by": ["a","b"], "pad": 12, "invert": true}}`. z-index can only say "in front or behind,
 always"; this says "behind THAT, right now", so a caption can disappear under a card as the card slides

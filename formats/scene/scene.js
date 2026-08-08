@@ -456,9 +456,29 @@ boot((data, fps, theme, canvas) => {
   // that stale value for every layer the loop has not reached yet, silently and only sometimes.
   const CANVAS = Object.freeze({ w: W, h: H });
   const SAFE = canvas?.safe ? Object.freeze({ ...canvas.safe }) : null; // computed once in core/boot.js
-  // A scene-level light a shadow or a shade can key off. Nothing consumes it yet; it is declared here
-  // so the first consumer widens a field rather than the signature every layer implements.
-  const LIGHT = data.lighting ? Object.freeze({ ...data.lighting }) : null;
+  // THE SCENE'S LIGHT: one point in canvas space that every shadow aims away from (core/fx/shadow.js).
+  // Resolved here rather than inside the modifier so the scene owns it and a second consumer (a shade,
+  // a specular edge, a gradient that follows the key) reads the same value. Checked here too, and
+  // loudly: a light with a mistyped key would leave every shadow pointing at the canvas origin, which
+  // looks like a design decision rather than a typo.
+  const LIGHT = (() => {
+    const l = data.lighting;
+    if (l == null) return null;
+    if (typeof l !== 'object' || Array.isArray(l))
+      throw new Error(`lighting must be an object like { "x": 540, "y": 120 } — got ${JSON.stringify(l)}.`);
+    const KEYS = ['x', 'y', 'intensity'];
+    for (const k of Object.keys(l))
+      if (!KEYS.includes(k)) throw new Error(`lighting: unknown key "${k}" — known: ${KEYS.join(', ')}.`);
+    const fin = (v) => typeof v === 'number' && Number.isFinite(v);
+    if (!fin(l.x) || !fin(l.y))
+      throw new Error(`lighting needs numeric x and y in canvas px (the point the light is at) — got `
+        + `${JSON.stringify({ x: l.x, y: l.y })}. The canvas is ${W}x${H}; a light OUTSIDE it is fine and `
+        + `is usually what you want.`);
+    const intensity = l.intensity == null ? 1 : l.intensity;
+    if (!fin(intensity) || intensity < 0)
+      throw new Error(`lighting.intensity must be a number 0 or more (it scales every shadow at once) — got ${JSON.stringify(l.intensity)}.`);
+    return Object.freeze({ x: l.x, y: l.y, intensity });
+  })();
   // One measurement pass, at build, and only for layers an author gave an id (the only ones boxOf can
   // be asked about). Text states no w/h — its box is its content — so without this every text layer
   // would report a zero box, which is a wrong answer rather than no answer.

@@ -441,6 +441,15 @@
     "cameraMove": {
       "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase (core/camera-moves.js)."
     },
+    "lighting": {
+      "type": "object",
+      "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point — so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",
+      "fields": {
+        "x": { "type": "number", "label": "Light X in canvas px", "required": true },
+        "y": { "type": "number", "label": "Light Y in canvas px", "required": true },
+        "intensity": { "type": "number", "label": "Multiplies every shadow's opacity (default 1). 0 puts the lights out." }
+      }
+    },
     "camera": {
       "type": "array",
       "label": "Global camera keyframes",
@@ -943,6 +952,10 @@
               "type": "string|object",
               "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }.",
               "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "plus-lighter"]
+            },
+            "shadow": {
+              "type": "number|object",
+              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property) and on a group child."
             },
             "occlude": {
               "type": "string|object",
