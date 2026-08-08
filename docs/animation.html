@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vawe — how we animate things</title>
+<style>
+  :root {
+    --ground:#f1f3f7; --panel:#ffffff; --ink:#141c28; --muted:#5c6980; --line:#d8dde7;
+    --accent:#2b5fe3; --accent-soft:#e7edfc; --pass:#1b7a56; --gate:#a9711a; --stop:#b4443a;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:#0d131c; --panel:#141d2a; --ink:#e6ecf6; --muted:#8d9bb3; --line:#263245;
+      --accent:#6f9bff; --accent-soft:#1a2740; --pass:#4fbf90; --gate:#d9a54e; --stop:#e8776c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0d131c; --panel:#141d2a; --ink:#e6ecf6; --muted:#8d9bb3; --line:#263245;
+    --accent:#6f9bff; --accent-soft:#1a2740; --pass:#4fbf90; --gate:#d9a54e; --stop:#e8776c;
+  }
+  :root[data-theme="light"] {
+    --ground:#f1f3f7; --panel:#ffffff; --ink:#141c28; --muted:#5c6980; --line:#d8dde7;
+    --accent:#2b5fe3; --accent-soft:#e7edfc; --pass:#1b7a56; --gate:#a9711a; --stop:#b4443a;
+  }
+
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; }
+  body {
+    background:var(--ground); color:var(--ink);
+    font:1rem/1.6 var(--sans); -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- the deck: one slide per screen, snap as you scroll ---- */
+  .deck { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scroll-behavior:smooth; }
+  section.slide {
+    min-height:100vh; scroll-snap-align:start; scroll-snap-stop:always;
+    display:grid; place-items:center; padding:4.5rem 2rem 5.5rem;
+  }
+  .inner { width:min(58rem, 100%); }
+  @media (max-width:48rem) { section.slide { padding:3.5rem 1.1rem 5rem; } }
+
+  .n { font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+       color:var(--muted); margin:0 0 1.1rem; }
+  h1 { font-size:clamp(2.2rem, 6vw, 3.6rem); line-height:1.08; margin:0 0 1.2rem; letter-spacing:-.02em;
+       text-wrap:balance; font-weight:680; }
+  h2 { font-size:clamp(1.7rem, 4.2vw, 2.5rem); line-height:1.14; margin:0 0 1.1rem; letter-spacing:-.018em;
+       text-wrap:balance; font-weight:660; }
+  p  { margin:0 0 1rem; max-width:44rem; font-size:1.06rem; color:var(--ink); text-wrap:pretty; }
+  p.lead { font-size:1.22rem; color:var(--muted); }
+  .big { font-size:1.35rem; font-weight:600; line-height:1.4; max-width:42rem; }
+  strong { font-weight:660; }
+  code { font-family:var(--mono); font-size:.9em; background:var(--accent-soft); color:var(--accent);
+         padding:.12em .38em; border-radius:4px; }
+
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:1.4rem 1.5rem; }
+  .cols { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit, minmax(15rem,1fr)); margin:1.4rem 0 0; }
+  .cols .panel h4 { margin:0 0 .45rem; font-size:.95rem; }
+  .cols .panel p { margin:0; font-size:.95rem; color:var(--muted); }
+
+  .note { border-left:3px solid var(--accent); background:var(--accent-soft); padding:.9rem 1.1rem;
+          border-radius:0 8px 8px 0; margin:1.4rem 0 0; }
+  .note p { margin:0; font-size:.98rem; }
+  .note.warn { border-left-color:var(--stop); background:transparent; border:1px solid var(--line);
+               border-left:3px solid var(--stop); }
+
+  pre { font-family:var(--mono); font-size:.86rem; line-height:1.55; background:var(--panel);
+        border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; overflow-x:auto; margin:1.3rem 0 0; }
+  pre .c { color:var(--muted); }
+  pre .k { color:var(--accent); }
+
+  /* ---- the live demos ---- */
+  .stage { position:relative; height:200px; background:var(--panel); border:1px solid var(--line);
+           border-radius:12px; overflow:hidden; margin:1.4rem 0 0; }
+  .dot { position:absolute; top:50%; width:56px; height:56px; margin-top:-28px; border-radius:14px;
+         background:var(--accent); display:grid; place-items:center; color:#fff; font-weight:700;
+         font-family:var(--mono); font-size:.8rem; }
+  .ctl { display:flex; align-items:center; gap:1rem; margin:.9rem 0 0; flex-wrap:wrap; }
+  .ctl input[type=range] { flex:1; min-width:12rem; accent-color:var(--accent); }
+  .ctl output { font-family:var(--mono); font-size:.85rem; color:var(--muted); min-width:9rem; }
+  button.btn { font:600 .85rem var(--sans); padding:.45rem .9rem; border-radius:7px; cursor:pointer;
+               border:1px solid var(--line); background:var(--panel); color:var(--ink); }
+  button.btn:hover { border-color:var(--accent); color:var(--accent); }
+  button.btn:focus-visible, a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  table { border-collapse:collapse; width:100%; margin:1.3rem 0 0; font-size:.94rem; }
+  th, td { text-align:left; padding:.55rem .7rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  td.mono { font-family:var(--mono); font-size:.86rem; white-space:nowrap; }
+  .scroll-x { overflow-x:auto; }
+
+  ol.steps { margin:1.3rem 0 0; padding:0; list-style:none; counter-reset:s; display:grid; gap:.55rem; }
+  ol.steps li { counter-increment:s; display:grid; grid-template-columns:1.8rem 1fr; gap:.7rem;
+                align-items:baseline; font-size:.98rem; }
+  ol.steps li::before { content:counter(s); font-family:var(--mono); font-size:.78rem; color:var(--accent);
+                        background:var(--accent-soft); border-radius:5px; text-align:center; padding:.15rem 0; }
+
+  /* ---- chrome: progress dots + theme toggle ---- */
+  .dots { position:fixed; right:1.4rem; top:50%; transform:translateY(-50%); display:grid; gap:.55rem; z-index:5; }
+  .dots a { width:8px; height:8px; border-radius:50%; background:var(--line); display:block;
+            transition:background .18s, transform .18s; }
+  .dots a.on { background:var(--accent); transform:scale(1.45); }
+  @media (max-width:48rem) { .dots { display:none; } }
+  .toggle { position:fixed; right:1.2rem; top:1.2rem; z-index:6; }
+  .hint { position:fixed; left:50%; bottom:1.4rem; transform:translateX(-50%); z-index:5;
+          font-family:var(--mono); font-size:.72rem; color:var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deck { scroll-behavior:auto; }
+    .dot { transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<button class="btn toggle" id="themeBtn" type="button">theme</button>
+<nav class="dots" id="dots" aria-label="slides"></nav>
+<div class="hint">↑ ↓ or scroll</div>
+
+<div class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide" id="s1"><div class="inner">
+  <p class="n">vawe · animation</p>
+  <h1>How we animate things</h1>
+  <p class="lead">There is one idea underneath all of it. Everything else is a detail hanging off that
+  idea. This deck explains the idea first, then the details, in plain words.</p>
+  <div class="note"><p>Sister page: <a href="architecture.html">how the whole engine works</a>.</p></div>
+</div></section>
+
+<!-- 2 -->
+<section class="slide" id="s2"><div class="inner">
+  <p class="n">01 · the big idea</p>
+  <h2>It is a flipbook, not a video</h2>
+  <p class="big">Nothing in this engine ever plays. We draw one still picture, save it, throw it away,
+  and draw the next one.</p>
+  <p>A video player has a film running past a lamp. Our engine has a stack of paper. We ask it
+  <em>"what does picture number 47 look like?"</em>, it draws exactly that, we take a photograph of it,
+  and we move on to 48.</p>
+  <p>At the end we have 900 photographs. We staple them together into an mp4. That is the whole render.</p>
+  <div class="cols">
+    <div class="panel"><h4>A video player</h4><p>Time flows. The picture changes because time passed.</p></div>
+    <div class="panel"><h4>Our engine</h4><p>Time does not flow. The picture changes because we asked for a different number.</p></div>
+  </div>
+</div></section>
+
+<!-- 3 -->
+<section class="slide" id="s3"><div class="inner">
+  <p class="n">02 · the one rule</p>
+  <h2>Picture 47 must always look the same</h2>
+  <p>Ask for picture 47 first, or last, or twice, or on another computer. You must get the same picture
+  every time. That is the single rule the whole engine is built around.</p>
+  <p>Drag the slider. You are doing exactly what the renderer does, one number at a time.</p>
+
+  <div class="stage" id="stage1"><div class="dot" id="dot1">47</div></div>
+  <div class="ctl">
+    <input type="range" id="rng1" min="0" max="90" value="47" aria-label="frame number">
+    <output id="out1"></output>
+    <button class="btn" id="shuffle1" type="button">jump around</button>
+  </div>
+  <div class="note"><p><strong>Press "jump around".</strong> It asks for frames in a scrambled order.
+  The box still lands in the right place for each number, because the position is worked out from the
+  number, not from wherever the box happened to be a moment ago.</p></div>
+</div></section>
+
+<!-- 4 -->
+<section class="slide" id="s4"><div class="inner">
+  <p class="n">03 · the trick</p>
+  <h2>We lie to the browser about the time</h2>
+  <p>Here is the awkward part. We draw with a real web browser, and browsers are full of things that
+  want time to pass on their own. Animations. Timers. <code>Math.random()</code>.</p>
+  <p>So before we draw picture 47, we quietly reset the browser's sense of time to
+  <strong>1.56 seconds</strong>, which is where frame 47 sits at 30 pictures a second.</p>
+  <ol class="steps">
+    <li>The clock now reads 1.56s, no matter what the real clock says.</li>
+    <li>Any timer due before 1.56s fires now, in order.</li>
+    <li>Random numbers restart from a seed made out of the number 47.</li>
+    <li>We draw. We photograph. We move to 48 and do it again.</li>
+  </ol>
+  <p style="margin-top:1.3rem">The page believes 1.56 seconds have passed. Nothing has. This is why
+  the same frame always paints the same picture, even though we are drawing inside a live browser.</p>
+  <div class="note"><p>Where it lives: <code>installVirtualClock()</code> in <code>core/boot.js</code>.</p></div>
+</div></section>
+
+<!-- 5 -->
+<section class="slide" id="s5"><div class="inner">
+  <p class="n">04 · the pieces</p>
+  <h2>A layer is just a box with a job</h2>
+  <p>Everything you see on screen is a <strong>layer</strong>. A layer is a rectangle that knows where it
+  sits, how big it is, when it appears, and what kind of thing it is.</p>
+  <div class="scroll-x"><table>
+    <thead><tr><th>The kind</th><th>What it puts on screen</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">text</td><td>Words. The most common one by far.</td></tr>
+      <tr><td class="mono">image</td><td>A picture from a file.</td></tr>
+      <tr><td class="mono">rect</td><td>A coloured block or a card.</td></tr>
+      <tr><td class="mono">component</td><td>A real piece of a real website, captured live.</td></tr>
+      <tr><td class="mono">group</td><td>Several layers that move together.</td></tr>
+      <tr><td class="mono">count</td><td>A number that counts up.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p>Each kind is <strong>one file</strong> in <code>core/layers/</code>. Adding a new
+  kind means adding a file and one line in a list. That is on purpose.</p></div>
+</div></section>
+
+<!-- 6 -->
+<section class="slide" id="s6"><div class="inner">
+  <p class="n">05 · how a layer moves</p>
+  <h2>You state where it is at a few moments</h2>
+  <p>You do not describe the movement. You state where the thing is at two or three moments, and the
+  engine fills in every picture between them.</p>
+<pre><span class="c">// "start at the left, small. End at the right, big."</span>
+<span class="k">"motion"</span>: [
+  { <span class="k">"t"</span>: 0,   <span class="k">"dx"</span>: 0,   <span class="k">"scale"</span>: 0.8 },
+  { <span class="k">"t"</span>: 2.5, <span class="k">"dx"</span>: 600, <span class="k">"scale"</span>: 1.2, <span class="k">"ease"</span>: <span class="k">"brake"</span> }
+]</pre>
+  <p style="margin-top:1.2rem">Those moments are called <strong>keys</strong>. Between two keys the
+  engine works out the in-between position for whichever picture it is drawing.</p>
+  <p><code>ease</code> is the feel of it. <code>linear</code> moves at one steady speed and looks
+  mechanical. <code>brake</code> arrives fast and settles. Real things almost never move at a constant
+  speed, which is why steady motion reads as cheap.</p>
+
+  <div class="stage" id="stage2"><div class="dot" id="dot2">go</div></div>
+  <div class="ctl">
+    <input type="range" id="rng2" min="0" max="75" value="0" aria-label="frame number">
+    <output id="out2"></output>
+    <button class="btn" id="ease2" type="button">ease: brake</button>
+  </div>
+</div></section>
+
+<!-- 7 -->
+<section class="slide" id="s7"><div class="inner">
+  <p class="n">06 · arriving and leaving</p>
+  <h2>Coming in, and going out</h2>
+  <p>Most layers do not simply exist. They arrive, they sit still for a while, and they leave. You name
+  the arrival and the departure, and the engine handles the ramps.</p>
+<pre><span class="k">"anim"</span>: <span class="k">"slide-right"</span>,   <span class="c">// how it arrives</span>
+<span class="k">"out"</span>:  <span class="k">"slide-left"</span>,    <span class="c">// how it leaves</span>
+<span class="k">"start"</span>: 2.0, <span class="k">"duration"</span>: 3.5</pre>
+  <div class="note"><p><strong>The house rule:</strong> if a thing enters from the right, it should leave
+  to the left. One direction of travel. A layer that slides in and then retreats the way it came looks
+  like a mistake, and the gates flag it as <code>enter-and-retreat</code>.</p></div>
+  <p style="margin-top:1.3rem">When moving would fight the content, leave through focus instead of
+  through space: <code>out: "defocus"</code>. That is the right call for faces, for cards, and for
+  dense grids, where sliding fifty things at once reads as chaos.</p>
+</div></section>
+
+<!-- 8 -->
+<section class="slide" id="s8"><div class="inner">
+  <p class="n">07 · one picture, step by step</p>
+  <h2>What actually happens for one frame</h2>
+  <p>For every layer, on every picture, the engine runs through a fixed list of jobs. Each one may
+  adjust the layer. They happen in this order, and the order matters.</p>
+  <ol class="steps">
+    <li><strong>Is it on screen yet?</strong> Outside its window, nothing else runs.</li>
+    <li><strong>The cut.</strong> If a cut owns this moment, it decides the arrival and exit look.</li>
+    <li><strong>Kinetic type.</strong> Words or letters revealed one at a time.</li>
+    <li><strong>Trims.</strong> Trails, counters, live values, reactions to the sound.</li>
+    <li><strong>The box track.</strong> Width and height, if they are being animated.</li>
+    <li><strong>The motion track.</strong> Position, scale, rotation, opacity, from your keys.</li>
+    <li><strong>Modifiers.</strong> Last, always. Next slide.</li>
+  </ol>
+  <div class="note warn"><p>Today this list is written out by hand inside one long function. That makes
+  adding a new job harder than it should be. Turning it into a proper list that each job signs up to is
+  the next piece of work on the engine.</p></div>
+</div></section>
+
+<!-- 9 -->
+<section class="slide" id="s9"><div class="inner">
+  <p class="n">08 · modifiers</p>
+  <h2>Things done <em>to</em> a layer</h2>
+  <p>A layer kind answers <em>"what is this thing?"</em>. A modifier answers <em>"what is done to it?"</em>
+  It is not a new thing on screen. It changes something already there.</p>
+<pre>{ <span class="k">"type"</span>: <span class="k">"image"</span>, <span class="k">"src"</span>: <span class="k">"/card.png"</span>,
+  <span class="k">"modifiers"</span>: [ { <span class="k">"tilt"</span>: { <span class="k">"y"</span>: 12 } }, { <span class="k">"shadow"</span>: 30 } ] }</pre>
+  <div class="cols">
+    <div class="panel"><h4>tilt</h4><p>Leans the layer in 3D. Everything on screen leans toward one shared vanishing point, like one camera is looking at all of it.</p></div>
+    <div class="panel"><h4>occlude</h4><p>Hides this layer wherever another named layer covers it, so one thing can pass behind another.</p></div>
+    <div class="panel"><h4>shadow</h4><p>Casts a shadow away from the scene's light. Move the light and every shadow turns.</p></div>
+    <div class="panel"><h4>mixBlend</h4><p>Decides how this layer's colours mix with what is already painted behind it.</p></div>
+  </div>
+  <div class="note"><p>Why this matters: an effect used to have to <em>be</em> a layer to exist at all.
+  That is why the engine has five separate kinds that all just paint a glowing field. A modifier applies
+  to whatever is already there, so effects stop being things you place.</p></div>
+</div></section>
+
+<!-- 10 -->
+<section class="slide" id="s10"><div class="inner">
+  <p class="n">09 · the backdrop</p>
+  <h2>The background is a decision, not a default</h2>
+  <p>Every film must state its backdrop. There is no blank. A still, flat colour is a choice you are
+  making, and usually the wrong one.</p>
+  <p>The backdrop is painted first, underneath every layer, and it moves on the same clock as everything
+  else. Same rule: its look at picture 47 is worked out from the number 47.</p>
+  <div class="note warn"><p><strong>Judge it across pictures, never on one.</strong> A single still hides
+  speed, scale and direction. A background was once "matched" to a reference on one frame and was, in
+  motion, twice too fast with shapes half the right size.</p></div>
+</div></section>
+
+<!-- 11 -->
+<section class="slide" id="s11"><div class="inner">
+  <p class="n">10 · into a file</p>
+  <h2>From pictures to an mp4</h2>
+  <ol class="steps">
+    <li>A small Go program starts a web server and opens a headless browser.</li>
+    <li>The browser loads the scene and reports how long the film is.</li>
+    <li>Go asks for picture 0, waits for it to paint, photographs it. Then 1. Then 2.</li>
+    <li>Several browser tabs do this at once, each taking a different stretch of numbers.</li>
+    <li>ffmpeg stitches the photographs into a video and adds the sound.</li>
+  </ol>
+  <div class="note"><p><strong>Step 4 is only possible because of the one rule.</strong> If picture 47
+  depended on picture 46 having been drawn first, you could not hand different stretches to different
+  tabs. Splitting the work across tabs is what the whole design buys you.</p></div>
+</div></section>
+
+<!-- 12 -->
+<section class="slide" id="s12"><div class="inner">
+  <p class="n">11 · why</p>
+  <h2>What the one rule pays for</h2>
+  <div class="cols">
+    <div class="panel"><h4>It is fast</h4><p>Four tabs draw four stretches at once, because no stretch needs another one first.</p></div>
+    <div class="panel"><h4>It is repeatable</h4><p>The same file gives the same video today and next month. Nothing drifts.</p></div>
+    <div class="panel"><h4>You can scrub it</h4><p>Jump straight to any second and see it, with no render and no waiting.</p></div>
+    <div class="panel"><h4>Bugs stay put</h4><p>A broken frame is broken every time you look at it, so it can be found.</p></div>
+  </div>
+  <p style="margin-top:1.6rem" class="big">Every awkward thing in this engine is the price of that rule.
+  It is worth it.</p>
+  <div class="note"><p>Next: <a href="architecture.html">the whole engine</a> ·
+  <a href="PRIMITIVES.md">the layer vocabulary</a> ·
+  <a href="MOTION-CRAFT.md">how motion should feel</a></p></div>
+</div></section>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---- theme toggle: stamp the root so it beats the media query in both directions ----
+  const btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', () => {
+    const now = document.documentElement.getAttribute('data-theme');
+    const dark = now ? now === 'dark'
+      : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  });
+
+  // ---- progress dots ----
+  const deck = document.getElementById('deck');
+  const slides = [...deck.querySelectorAll('section.slide')];
+  const dots = document.getElementById('dots');
+  slides.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.setAttribute('aria-label', 'slide ' + (i + 1));
+    dots.appendChild(a);
+  });
+  const marks = [...dots.children];
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) {
+      const i = slides.indexOf(e.target);
+      marks.forEach((m, j) => m.classList.toggle('on', i === j));
+    }
+  }, { threshold: 0.5 });
+  slides.forEach((s) => io.observe(s));
+
+  // arrow keys move one slide, which is what a deck is expected to do
+  addEventListener('keydown', (e) => {
+    if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(e.key)) return;
+    const at = slides.findIndex((s) => s.getBoundingClientRect().top > -window.innerHeight / 2);
+    const dir = (e.key === 'ArrowDown' || e.key === 'PageDown') ? 1 : -1;
+    const next = slides[Math.max(0, Math.min(slides.length - 1, at + dir))];
+    if (next) { next.scrollIntoView(); e.preventDefault(); }
+  });
+
+  // ---- demo 1: the same idea the renderer uses. Position is a function of the frame number,
+  //      never of the previous position — which is what makes "jump around" land correctly.
+  const FPS = 30;
+  const dot1 = document.getElementById('dot1'), rng1 = document.getElementById('rng1'),
+        out1 = document.getElementById('out1'), stage1 = document.getElementById('stage1');
+  const drawA = (n) => {
+    const p = n / 90;                                   // 0 → 1 across the film
+    const x = 16 + p * (stage1.clientWidth - 56 - 32);
+    dot1.style.transform = `translateX(${x.toFixed(1)}px) rotate(${(p * 180).toFixed(1)}deg)`;
+    dot1.textContent = n;
+    out1.textContent = `frame ${n} · ${(n / FPS).toFixed(2)}s`;
+  };
+  rng1.addEventListener('input', () => drawA(+rng1.value));
+  document.getElementById('shuffle1').addEventListener('click', () => {
+    // deliberately out of order, to show the picture depends on the number and nothing else
+    const order = [83, 12, 47, 4, 66, 29, 90, 51];
+    order.forEach((n, i) => setTimeout(() => { rng1.value = n; drawA(n); }, i * 320));
+  });
+  drawA(47);
+
+  // ---- demo 2: two keys and an ease, the way a motion track works ----
+  const dot2 = document.getElementById('dot2'), rng2 = document.getElementById('rng2'),
+        out2 = document.getElementById('out2'), stage2 = document.getElementById('stage2'),
+        easeBtn = document.getElementById('ease2');
+  const EASES = {
+    brake:  (p) => 1 - Math.pow(1 - p, 3),   // arrives fast, settles
+    linear: (p) => p,                         // one steady speed
+  };
+  let easeName = 'brake';
+  const drawB = (n) => {
+    const raw = Math.min(1, n / 75);
+    const p = EASES[easeName](raw);
+    const x = 16 + p * (stage2.clientWidth - 56 - 32);
+    const s = 0.8 + p * 0.4;
+    dot2.style.transform = `translateX(${x.toFixed(1)}px) scale(${s.toFixed(3)})`;
+    out2.textContent = `frame ${n} · ${(n / FPS).toFixed(2)}s · scale ${s.toFixed(2)}`;
+  };
+  rng2.addEventListener('input', () => drawB(+rng2.value));
+  easeBtn.addEventListener('click', () => {
+    easeName = easeName === 'brake' ? 'linear' : 'brake';
+    easeBtn.textContent = 'ease: ' + easeName;
+    drawB(+rng2.value);
+  });
+  drawB(0);
+  addEventListener('resize', () => { drawA(+rng1.value); drawB(+rng2.value); });
+})();
+</script>
+</body>
+</html>
