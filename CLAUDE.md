@@ -203,9 +203,16 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    timeline in `core/compositions/index.js`, named from the JSON (`{type:"composition","comp":…,"props":…}`)
    so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
-2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
-   whole static quality loop (validate · critique · direct · **direction-floor** · **visual-vocabulary** ·
-   slop · **designspec** · **copy** · **assets** · inspect · **plan-vs-render**). The **designspec lock** flags off-palette colours / non-role fonts (the
+2b. **MANDATORY authoring ladder:** `make author-check D=<file> [TASTE=1] [VS=<brand>]` — one command runs the
+   static quality loop, and it runs in **two halves**. BY DEFAULT it runs the checks for BROKEN: validate ·
+   **beats** · **assets** · inspect · **plan-vs-render** · treatment. Eight TASTE gates (critique · direct ·
+   **direction-floor** · **visual-vocabulary** · dissolve · slop · **designspec** · **copy**) are OFF unless you
+   pass `TASTE=1` / `--taste`; they are listed in the verdict as `(taste, off)` so you can see what did not
+   run. They were fitted to a library since called debt (52 of 93 scenes carry no large picture, 18 of 18
+   eligible shorts waive continuity, the show floor is waived by a third), so their verdicts measured new
+   work against films nobody liked. Their READINGS are still real: `make check` (iterate mode) turns them
+   back on, prints everything and blocks nothing, and `make draft` records their findings as carried.
+   `make judge` is unaffected and is still the honest taste check. The **designspec lock** flags off-palette colours / non-role fonts (the
    theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
    restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
    icon / capture / VO exists before you render. The **inspect** step verifies a `.intent.json` value
@@ -222,9 +229,10 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    never moves. Every gate stayed green until this one existed. Even plan-vs-render only proves the film is not
    empty where it promised to be full, never that it kept the promise: that is `make judge` and your eyes.
    Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
-   It **blocks** on schema/em-dash, hollow/unbacked beats, the direction tells (`linear-motion` ·
-   `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), AND the **ambition floor**
-   (`plain-slideshow` — too little motion) AND the **show floor** (`no-visual-vocabulary`: all type, no
+   It **blocks** by default on schema/em-dash, a hole in the timeline, and a missing asset. Under `TASTE=1`
+   it also blocks on hollow/unbacked beats, the direction tells (`linear-motion` ·
+   `monotone-timing` · `enter-and-retreat` · `effect-soup` · ≥3 cut families), the **ambition floor**
+   (`plain-slideshow`, too little motion) and the **show floor** (`no-visual-vocabulary`: all type, no
    picture). Two-sided: `effect-soup` is the ceiling, the floor is the
    floor; directed lives between. Reach past every WARN; waive a *deliberate* break with
    `{"authoring":{"allow":[...]}}`. Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.

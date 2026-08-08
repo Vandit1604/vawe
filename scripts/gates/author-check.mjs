@@ -39,9 +39,12 @@
 //   clock, a missing file. Those hold at every taste.
 //   Skipped steps are PRINTED in the summary as `(taste, off)`. A gate that vanishes quietly is how a rule
 //   dies without anyone deciding to kill it, which is the failure this split exists to avoid repeating.
+//   `--iterate` turns the eight back ON, because it strips every verdict anyway: what the default removes
+//   is the power to block, and iterate has none to remove. Anything that runs this ladder to RECORD rather
+//   than to gate (draft-check) should do the same.
 //   `make judge` is untouched and is still the honest taste check: it looks at the frames.
 //
-// Usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]
+// Usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--iterate] [--vs <brand>]
 //        make author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -59,10 +62,13 @@ const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 // and exits 0, and says plainly what WOULD block, while ship keeps the teeth.
 const iterate = process.argv.includes('--iterate') || process.env.MODE === 'iterate';
 // TASTE MODE: the eight style gates, off unless asked for. See the header for why they stopped being
-// mandatory and what still is.
-const taste = process.env.TASTE === '1' || process.argv.includes('--taste');
+// mandatory and what still is. ITERATE IMPLIES TASTE: the argument for the default is that the eight
+// gates' VERDICTS were not earned, and iterate has no verdict — it cannot block anything. Their
+// READINGS are real, and iterate is the one command whose whole job is to show an author where a film
+// stands, so leaving them off there would make it show the least.
+const taste = process.env.TASTE === '1' || process.argv.includes('--taste') || iterate;
 const vsArg = (() => { const i = process.argv.indexOf('--vs'); return i >= 0 ? process.argv[i + 1] : null; })();
-if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--vs <brand>]'); process.exit(2); }
+if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--iterate] [--vs <brand>]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 
 let scene = {};

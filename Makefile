@@ -106,9 +106,10 @@ build: fonts
 # make video D=path/to/video.json  — one self-describing JSON → out/<name>.mp4
 # Runs the mandatory authoring-quality ladder first (set NOCHECK=1 to skip during rapid iteration), then
 # renders, then the layout/contrast/size audit (set NOAUDIT=1 to skip). The ladder is what stops an
-# effect-soup video shipping silently; NOCHECK=1 is the explicit, logged waiver.
+# broken video shipping silently; NOCHECK=1 is the explicit, logged waiver. The eight taste gates are off
+# here by default (see the header of scripts/gates/author-check.mjs); TASTE=1 puts them back.
 video: build
-	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (value · direction · anti-slop) …" && node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)))
+	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (schema · timeline · assets; TASTE=1 adds the eight taste gates) …" && node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS)))
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)) — then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
@@ -121,16 +122,18 @@ dev: build
 	./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 
-# make check D=<file>  — every gate, every finding, ZERO consequence. Same information `make ship`
-# blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
+# make check D=<file>  — every gate, every finding, ZERO consequence. Iterate mode turns the taste gates
+# back on: what the default takes away is their power to block, and here nothing blocks, so this prints
+# MORE than `make ship` does, not less. Use it to see where a film stands without stopping.
 check:
 	@MODE=iterate node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS))
 
-# make ship D=<file>  — the ladder with its teeth in: full author-check, render, audit, seams.
+# make ship D=<file>  — the ladder with its teeth in: author-check (schema, timeline, assets, and the
+# taste gates too when TASTE=1), render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
 ship: build
-	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(STRICT)),--strict)
+	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(STRICT)),--strict) $(if $(filter 1,$(TASTE)),--taste)
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	node verify/audit.mjs $(D)
 	node scripts/gates/seam-snap.mjs $(D)
@@ -564,8 +567,8 @@ install-hooks:
 clean:
 	rm -rf bin out/*.mp4
 
-author-check: ## MANDATORY authoring ladder: validate+critique+direct+slop+inspect (D=<file> [STRICT=1] [VS=<brand>])
-	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(VS),--vs $(VS))
+author-check: ## MANDATORY ladder: validate+beats+assets+inspect; TASTE=1 adds the 8 taste gates (D=<file> [STRICT=1] [TASTE=1] [VS=<brand>])
+	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 
 direction-floor: ## ambition floor: fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
 	node scripts/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
