@@ -5281,3 +5281,169 @@ different acts, and only the second one is work.
 CLAUDE.md now carries "fix the rule, not the call site: grep every consumer before you close it", added
 in the same session and, notably, added BEFORE this instance was found. The rule was followed here only
 because the failure happened to recur immediately. Library diff after the change: zero scenes change.
+
+## #218 — a modifier slot was nearly added to a prop that was already taken
+
+**What.** The plan in `docs/audits/NEXT.md` named the new per-layer modifier slot `fx`, with the example
+`{"type":"image","fx":[{"occlude":"cardId"},{"shadow":"key"}]}`. `L.fx` was already the named-GSAP-effect
+slot, and had been since `core/gsap-effects.js` shipped.
+
+**Root cause.** The name was chosen from what the feature IS rather than from what the prop space already
+holds, and nothing in the plan step reads the prop space. Shipping it would have put two dispatch tables in
+one array, told apart by whether an object carries a `name` key, and would have silently changed two live
+behaviours: `formats/scene/scene.js:576` gates kinetic-unit animation on `!L.fx`, so a layer carrying a
+modifier would have lost its split-text reveal; and `applyGsapHooks` (`formats/scene/scene.js:292`) warns
+"unknown GSAP effect" for any item the effect registry does not know, so every modifier would have printed
+a warning about an effect nobody asked for. `L.fxOut` is the exit half of the same slot and would have had
+the same problem one prop over. The example was wrong a second way: `{"shadow":"key"}` implies named
+lights, and the scene has ONE light (`lighting: {x, y, intensity?}`).
+
+**Fix.** The slot is `modifiers` (`core/fx/index.js:13-18` states why, next to the registry it names).
+`NEXT.md` items 2 and 3 now carry what shipped instead of what was planned.
+
+**Which gate catches it.** None catches a name collision directly, and none can: two meanings in one prop
+is a design fact, not a value. What is now gated is the half that CAN be measured — `schema-drift` compares
+the schema's modifier keys against `FX_TYPES` in both directions, so a modifier the schema does not know,
+and a schema key no modifier implements, are both a failure.
+
+**Class.** Caught by reading the code before writing any, which is the only thing that catches this class.
+Worth stating plainly: a plan written in one session and executed in another names props from memory, and
+memory does not hold a 161-prop namespace.
+
+## #219 — the scene's light was going to be handed to every layer unvalidated
+
+**What.** `scene.light` is read by `core/fx/shadow.js` to aim every shadow. The obvious construction,
+`Object.freeze({ ...data.lighting })`, accepts `{"x": 540, "Y": 120}` and yields `{x: 540, y: undefined}`.
+
+**Root cause.** A spread copies whatever is there. Every shadow in the film would then have pointed away
+from `(540, NaN)`, which resolves to a single fixed direction for every layer — the exact look the feature
+exists to replace, and one that reads as a deliberate style rather than a typo. Nothing downstream can tell
+the difference, because a shadow has no correct value to be compared against.
+
+**Fix.** `formats/scene/scene.js:464-481` validates `lighting` before freezing it: object shape, the key set
+`x`/`y`/`intensity`, finite numbers, non-negative intensity, each with a message naming the canvas size.
+The schema carries the same `fields`, so a mistyped key fails validation before the render starts and fails
+again at build if it arrives some other way.
+
+**Which gate catches it.** `validate` (from the schema) and the runtime check. Both, on purpose: the schema
+is what an author's editor sees, the runtime check is what an MCP caller hits.
+
+**Class.** Silent substitution, caught before shipping rather than after. The tell is the one this file
+keeps recording: an input where every value is plausible and no value is verifiable.
+
+## #220 — the 3D spike proved a construction and said nothing about how the engine is assembled
+
+**What.** Phase 0 concluded "the camera must sit on the layers' DIRECT parent, because any intervening
+element flattens the 3D context". That is correct, and it is not enough to write the modifier: in this
+engine a layer has THREE possible direct parents, and the spike has one.
+
+**Root cause.** `scripts/dev/spike-3d.mjs` builds a stage and puts boxes in it. Case H (`wrapPlain`,
+line 76) is what identified the real rule, and it identified it in a two-element tree. The engine puts a
+layer under `#cam`, or under the per-beat `.hs-beat` wrapper that exists only in a `sceneUnits` scene
+(`formats/scene/scene.js:236`), or under the group element when it is a group child. A camera written on
+`#cam` alone is therefore flattened for every layer in any scene that uses scene units, which is most of
+them, and flattened means the tilt still rotates and simply stops being projected — no error, a visibly
+flatter frame.
+
+**Fix.** `core/fx/tilt.js` writes the camera on `el.parentNode`, whatever that turns out to be, at frame
+time (see #221 for why not at build).
+
+**Which gate catches it.** None, and that is worth saying: a flattened 3D context renders, so every gate
+stays green. It was found by asking what `parentNode` is in each of the engine's assembly paths.
+
+**Class, and the general lesson.** A spike proves a construction in isolation. It says nothing about how
+many elements the real engine puts between the two the spike had, and that count is usually the whole
+problem. Read the spike's conclusion as "this works when X is the parent", never as "X is the parent".
+
+## #221 — what a modifier may not assume at build time: no parent, and no wrapper
+
+**What.** Two constraints, one cause, found while writing the first modifiers. A modifier's `build()`
+cannot touch its parent, and it cannot insert a wrapper element around what it modifies.
+
+**Root cause.** Both follow from WHEN `buildFx` runs. `core/layers/index.js:67` runs the primitive's
+`build()` and then `buildFx`, and every caller appends afterwards: a top-level layer is built at
+`formats/scene/scene.js:419` and appended at `:425`, and `addGroupChild` calls `buildLeaf`
+(`core/layers/util.js:243`) and appends the leaf at `:251`. So `el.parentNode` is `null` inside every
+modifier's `build()`, for top-level layers and group children alike. Anything parent-facing has to run in
+`frame()`, where the tree is complete.
+A wrapper fails for the neighbouring reason: `buildFx` runs BEFORE `splitText`, `ransomStyle`, `circleText`
+and `decorate` (`formats/scene/scene.js:427-439`), all of which rewrite or append children. A
+modifier-inserted wrapper would be split into per-character spans, re-wrapped, or simply bypassed by the
+overlay divs `decorate` appends, depending on which of the four the layer happens to use.
+
+**Fix.** Stated in the contract at `core/fx/index.js:43-58` and obeyed by all four modifiers. `tilt` is the
+case that would have needed a wrapper and does not, and the reason is precise: CSS `rotate` is a separate
+property from `transform` (Transforms Level 2), the engine writes it nowhere, and the used transform is
+`translate · rotate · scale · transform`. So the tilt composes into the same matrix the tracks build
+without ever being read back by them. Measured, not assumed: the projected corners land on those of
+`rotateX(a) rotateY(b) rotateZ(c)` to 0.0px.
+
+**Which gate catches it.** `make probe` catches the consequence of getting the second half wrong — a
+modifier whose element is rebuilt by a later pass produces a frame that depends on what ran before it, and
+probe compares the DOM across render orders. Nothing catches the first half; `parentNode` is simply null
+and a modifier reading it throws on the spot, which is the acceptable outcome.
+
+**Class.** Not a bug that shipped. It is the shape of this engine's build phase, written down because it is
+invisible from inside a modifier file and both halves are one-line mistakes.
+
+## #222 — two tilted siblings under one parent resolved last-writer-wins, and one silently lost its lens
+
+**What.** `perspective` and `perspective-origin` are written on the layers' shared parent, so they are the
+scene's camera, not the layer's. Two siblings that each ask for a different `dist` or `origin` are two
+cameras on one element. CSS resolves that by taking whichever was written last, and the other layer is
+projected through a lens it did not ask for, with nothing said.
+
+**Root cause.** The property is per-parent and the spec that names it is per-layer, so the conflict is
+structurally invisible from the place it is authored. Every value involved is valid on its own.
+
+**Fix.** `core/fx/tilt.js:130-137` makes it a hard error: a layer writing a camera onto a parent that
+already carries a different one throws, naming both values and the two ways out (agree on one `dist`, or
+move one layer into a group of its own, which gives it a parent of its own).
+
+**Which gate catches it.** The throw itself, at frame time, before a single frame is captured — plus
+`gate-mutation`, which pins that the error fires.
+
+**Class.** The silent-conflict variant of silent substitution. Elsewhere in this file the engine discards
+an input (#210, #213); here CSS picks one of two valid inputs and discards the other. Same result, and
+harder to see, because the discarded layer still tilts. It just tilts through the wrong camera.
+
+## #223 — a 404's body was parsed as the scene, and a file nobody opened was blamed for its contents
+
+**What.** Two error messages, both naming the wrong cause, both current until this pass.
+
+```
+$ ./bin/vawe scratchpad/x.json --draft     # a real file, outside the served roots
+✗ render failed: scene error: SyntaxError: Unexpected token 'o', "not found" is not valid JSON
+
+$ ./bin/vawe /tmp/definitely-not-here.json # a file that does not exist at all
+✗ /tmp/definitely-not-here.json has no "module" field — add one … or pass --module
+```
+
+The first scene is valid JSON. The second has no fields at all, because it has no bytes.
+
+**Root cause, and it is one rule in two languages.** A failed read was made indistinguishable from a
+successful read of unusable content.
+· Browser side: `core/boot.js` did `await (await fetch(dataUrl)).json()`. A non-OK response still has a
+  body, and `internal/scene/scene.go:87` answers everything outside the served prefix set with the literal
+  text `not found`. `res.json()` parsed that text and reported the first character of the refusal as a
+  syntax error in the author's file.
+· Go side: `moduleOf` returned `""` on a read error, which is the same value it returns for a file that
+  parses fine and declares no module. The caller could only see the `""` and complained about the field.
+  `videoGrain` had the identical shape one line above it.
+
+**Fix, at the rule.** `core/preload.js` gains `fetchJson(url, what)` and it is now the ONLY place a JSON URL
+becomes an object in the engine: it separates "the request failed", "the server refused it" (with the served
+roots named) and "the file really is malformed". `core/boot.js` uses it for the scene data and the schema,
+and the two remaining unchecked fetches (`preloadThree`'s typeface, `preloadRansomSprites`'s manifest) were
+converted too; the six that already tested `r.ok` were left alone. `moduleOf` returns `(string, error)`, and
+`cmd/render/main.go` stats the path before any reader touches it, so "no such file" and "not valid JSON" are
+their own messages. `internal/scene` exports `Allowed`/`Served`/`ServeAll` and `internal/render` refuses an
+unservable scene before it starts a browser, naming the roots and the way out.
+
+**Which gate catches it.** None yet, and the honest reason is that these are error PATHS: no scene library
+exercises them, and every gate here measures a render that works. What now stands in for a gate is that the
+three outcomes have three different messages, so the next report names its own cause.
+
+**Class, and the shape it shares.** This is #214 → #216 → #217 a fourth time, in a different file pair: one
+primitive misread (a non-OK response is not content; a zero value is not an answer), used at several call
+sites, fixed at the rule and cleared at every consumer rather than patched where it was noticed.

@@ -28,15 +28,15 @@ Revisit in a few months, derived from films you actually like.
 
 ---
 
-## 2. Make layers extensible  ·  the architectural unlock, do it BEFORE the primitives
+## 2. Make layers extensible  ·  DONE (`edd9224`, `7afee25`)
 
 Two additive changes:
 
 - **Widen the per-frame signature** to pass a read-only scene view:
   `frame(kit, el, L, t, scene)` with `scene.boxOf(id)` · `scene.light` · `scene.camera` · `scene.canvas`.
   Purity holds (still a pure function of t) and every existing layer ignores the new argument.
-- **Add an `fx: []` modifier slot** to any layer, so an effect is a modifier applied to something rather
-  than a new type: `{"type":"image","fx":[{"occlude":"cardId"},{"shadow":"key"}]}`.
+- **Add a modifier slot** to any layer, so an effect is a modifier applied to something rather
+  than a new type: `{"type":"image","modifiers":[{"occlude":"cardId"},{"shadow":{"dist":30}}]}`.
 
 **Why.** Today a layer is handed `(kit, el, L, t)` — itself and the clock, nothing else. It cannot read
 another layer's box, the camera, the light, or what is behind it. That single signature explains every
@@ -47,9 +47,21 @@ findings, and five registry types (glow/beam/paint/shader/raymarch) that are one
 Adding a layer TYPE is already easy (one file, two exports, one registry line). Adding an EFFECT is not,
 and effects are what visual range is made of.
 
+**What shipped, where the plan was wrong.** The slot is **`modifiers`**, not `fx`. The argument for the
+slot above is unchanged and still worth reading; only the NAME was wrong, and it was wrong because `fx`
+was already taken. `L.fx` has been the named-GSAP-effect slot since `core/gsap-effects.js` shipped, with
+`L.fxOut` as its exit half; it is in the schema with that meaning, `formats/scene/scene.js:576` gates
+kinetic-unit animation on `!L.fx`, and `applyGsapHooks` warns on any entry the effect registry does not
+know. Two dispatch tables in one prop, told apart by whether an object carries a `name` key, would have
+broken both of those silently. The example was wrong for a second reason: `{"shadow":"key"}` implies
+named lights, and there is ONE scene light (`lighting: {x, y, intensity?}`). A named-light registry is a
+different feature, not part of this one.
+
+Registry at `core/fx/index.js`; an unknown modifier name is a hard error, never a skipped entry.
+
 ---
 
-## 3. The three primitives, as modifiers  ·  depends on 2
+## 3. The three primitives, as modifiers  ·  DONE (`94be3a9`, `53a5df0`, `e70bad1`)
 
 Per-layer 3D tilt · occlusion masking · shadows keyed to a light direction.
 
@@ -57,8 +69,14 @@ Phase 0 already proved the 3D construction: camera on the layers' DIRECT parent,
 element flattens (`transform-style: flat` is the default, not overflow or filter as first assumed).
 Spike lives at `scripts/dev/spike-3d.mjs` and self-checks.
 
-Build them as `fx` modifiers, not as new types. Doing them before item 2 entrenches exactly the problem
+Build them as `modifiers`, not as new types. Doing them before item 2 entrenches exactly the problem
 item 2 exists to fix.
+
+**What the spike did not say.** "The DIRECT parent" is one element in the spike and THREE in the engine:
+`#cam`, the per-beat `.hs-beat` wrapper that exists only under `sceneUnits` (`formats/scene/scene.js:236`),
+and the group element for a group child. A camera written on `#cam` alone is flattened for every layer in
+a `sceneUnits` scene. Shipped as `core/fx/tilt.js` · `core/fx/occlude.js` · `core/fx/shadow.js`; `lighting`
+entered the schema with `shadow`, the thing that reads it.
 
 ---
 
@@ -86,6 +104,14 @@ Of 61 findings, work the classes that survive the taste cull: 13 silent-substitu
 plus `make schema-check` scanning the 20-line `scene.html` shell so 33 of 161 layer props sit outside
 drift detection. That last one matters more than its severity suggests: silent substitution is the most
 frequent bug class in this repo, and schema-check is the thing meant to catch it.
+
+**The gap is wider than that line says.** `schema-drift` scans the `scene.html` shell plus
+`core/layers/*.js` and nothing else (`scripts/gates/schema-drift.mjs:27-30`). It does NOT scan
+`core/fx/*.js`, so every prop a MODIFIER reads is outside drift detection, and it does not scan the ~930
+lines of `formats/scene/scene.js`, which reads 59 props of its own. The modifier work deliberately left
+this alone: widening the scan surfaces whatever the two unscanned trees are already missing, and a gate
+change that invents findings is the shape CLAUDE.md forbids. Widening it is its own job, with a
+before/after library diff, not a rider on a feature.
 
 Run every `repro` before trusting it. A finding nobody reproduced is a rumour.
 
