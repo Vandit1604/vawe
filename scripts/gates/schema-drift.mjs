@@ -22,11 +22,25 @@ import { SEAM_FX } from '../../core/seams.js';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-// the engine = scene.html (orchestrator) + core/layers/*.js (the primitives, where most L.<prop> reads
-// now live after the layer-registry refactor). Scan BOTH, or moved props silently escape the check.
-const layersDir = path.join(ROOT, 'core/layers');
-const engineFiles = [path.join(ROOT, 'formats/scene/scene.html'),
-  ...fs.readdirSync(layersDir).filter((f) => f.endsWith('.js')).map((f) => path.join(layersDir, f))];
+// THE ENGINE IS EVERY FILE THAT READS A LAYER PROP, and that list is derived rather than remembered.
+// It was `scene.html` + `core/layers/*.js`, written when scene.html WAS the orchestrator. scene.html
+// is now a 20-line shell that imports scene.js, and it contains zero `L.` reads — so for as long as
+// that split has existed, every prop read only by the orchestrator (cut · vars · react · motionBlur ·
+// borderTrail · circle · becomes · panWith …) was outside the check, and the gate reported green over
+// the blind spot (docs/MISTAKES.md #229).
+//
+// So the scan is the orchestrator plus the three REGISTRY DIRECTORIES, each walked whole: a layer prop
+// is read by the thing that DRAWS a layer (core/layers), the thing that MODIFIES one (core/fx) or the
+// pipeline that COMPOSES one per frame (core/tracks), and each of those is one file per entry in a
+// directory, so a walk cannot go stale the way a hand-written file list did.
+//
+// Deliberately not all of core/: `L` is a local name elsewhere (core/audio-kit.mjs builds a synth voice
+// from an `L` carrying attack/decay/waveform), and a gate widened until it invents findings is worse
+// than the gap it closed.
+const engineFiles = [path.join(ROOT, 'formats/scene/scene.html'), path.join(ROOT, 'formats/scene/scene.js')];
+for (const dir of ['core/layers', 'core/fx', 'core/tracks'])
+  for (const f of fs.readdirSync(path.join(ROOT, dir)))
+    if (f.endsWith('.js')) engineFiles.push(path.join(ROOT, dir, f));
 const engineSrc = engineFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
 

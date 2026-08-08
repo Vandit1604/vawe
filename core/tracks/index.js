@@ -45,12 +45,13 @@ import * as tCircle from './circle.js';
 import * as tVars from './vars.js';
 import * as tReact from './react.js';
 import * as tBox from './box.js';
+import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
 import * as tModifiers from './modifiers.js';
 
 const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive,
   borderTrail: tBorderTrail, circle: tCircle, vars: tVars, react: tReact, box: tBox,
-  motion: tMotion, modifiers: tModifiers };
+  follow: tFollow, motion: tMotion, modifiers: tModifiers };
 
 // Exported so a gate can DERIVE the pipeline instead of restating it — the contract LAYER_TYPES and
 // FX_TYPES already have. A hand-typed copy of this list is how `make coverage` reported 14/14 while a
@@ -68,6 +69,7 @@ export const SLOTS = Object.freeze([
   'vars',       // animated custom properties the layer's own CSS reads
   'react',      // audio-driven modulation from the baked spectrum
   'box',        // w / h / depth over time — the layer's SIZE, not its scale
+  'follow',     // pin to another layer's live box, before that layer's own choreography plays
   'transform',  // the motion track and motion blur
   'post',       // modifiers (core/fx) — always last, on a finished frame
 ]);

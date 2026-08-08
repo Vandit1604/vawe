@@ -361,12 +361,32 @@ runs for EVERY layer on every frame is a **track**: one file exporting the `slot
 holds exactly one track, and two tracks claiming one slot is an error the engine refuses to start with.
 The order, top to bottom: `enter` (a declared cut's styling) · `split` (kinetic units) · `glyphs`
 (ransom cycle) · **`primitive` (the layer type's own `frame()`)** · `orbit` (borderTrail) · `spin`
-(circular text) · `vars` · `react` (audio) · `box` (w/h/depth) · `transform` (motion + motion blur) ·
-`post` (modifiers). Note where `primitive` sits: a layer type's `frame()` runs in the MIDDLE, which is
-why a `cursor` may overwrite a cut's transform and why the motion track still composes on top of it.
+(circular text) · `vars` · `react` (audio) · `box` (w/h/depth) · `follow` · `transform` (motion +
+motion blur) · `post` (modifiers). Note where `primitive` sits: a layer type's `frame()` runs in the
+MIDDLE, which is why a `cursor` may overwrite a cut's transform and why the motion track still
+composes on top of it.
 **Track or modifier?** A modifier is opt-in per layer, runs last, and may not touch `transform` /
 `opacity` / `filter`. If a feature must land between two existing jobs, or must write one of those
 three, it is a track. Otherwise it is a modifier, and modifiers are cheaper.
+
+**`follow: { id, edge, gap, dx, dy }` — pin to another layer's LIVE box, every frame.** `anchor` places
+a layer against the canvas and `becomes` hands one layer's final pose to another; both resolve ONCE at
+build, against numbers. Neither can keep a label under a card that is moving, because the card's
+position after its motion track is only known at `t`, so authors copied the card's keys into the label
+and re-copied them by hand at every retime. `edge` is `center` (default) · `above` · `below` · `left` ·
+`right`, with `gap` the space outside that edge; `dx`/`dy` nudge. Centres are matched, not corners.
+
+```json
+{ "id": "caption", "type": "text", "text": "live users",
+  "follow": { "id": "card", "edge": "below", "gap": 24 } }
+```
+
+The pin lands in the `follow` slot, **before** this layer's own `transform`, so a follower may still
+carry its own motion track and that choreography plays about the pinned position. The follower needs an
+`id` (it is placed by its own measured size). An unknown target, a missing `id` and an unknown `edge`
+are hard errors naming the known set. One limit, by arithmetic rather than by a check: a box is where a
+layer's own geometry puts it, so following a layer that is itself following a third pins you to the
+middle one's **unpinned** position. Follow the layer that actually moves.
 
 **What a modifier can see.** `frame()`'s 5th argument is a **frozen read-only view of the whole frame**,
 resolved before any layer draws, so a modifier can never read a value another layer left behind and

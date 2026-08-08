@@ -5618,3 +5618,35 @@ read, which is what a statement list cost too.
 
 **Class.** Not a wrong pixel. Knowledge that existed only as the physical arrangement of code, where
 any edit that looked harmless could destroy it without a gate having anything to compare against.
+
+## #229 — schema-drift had been reading a 20-line shell and calling it the engine
+
+**What.** `scripts/gates/schema-drift.mjs` asserts every layer prop the engine reads is defined in
+`schema.json`. It scanned `formats/scene/scene.html` plus `core/layers/*.js`. `scene.html` is a 20-line
+document that imports `scene.js`, and it contains ZERO `L.<prop>` reads. So every prop read only by the
+orchestrator — `cut`, `vars`, `varsDur`, `varsEase`, `react`, `motionBlur`, `borderTrail`, `circle`,
+`becomes`, `panWith` among them — was outside the gate for as long as the split has existed, and the
+gate printed a green line with a count each time.
+
+**Root cause.** A hand-written list of file paths, correct on the day it was written, describing an
+arrangement of the code rather than a property of it. Exactly what this gate exists to stop the SCHEMA
+doing to the registries.
+
+**Found by.** The track extraction (#228). Moving thirty props out of `scene.js` and into
+`core/tracks/*.js` should have changed the count and did not, which is what gave it away — the props
+had never been in view, so moving them changed nothing.
+
+**Fix.** The scan is now the orchestrator (`scene.js`, and `scene.html` for as long as it may hold
+anything) plus the three registry DIRECTORIES walked whole: `core/layers`, `core/fx`, `core/tracks`. A
+layer prop is read by the thing that draws a layer, the thing that modifies one, or the pipeline that
+composes one, and each is one file per entry in a directory, so a walk cannot go stale the way the list
+did. Count 130 → 163, and all 33 newly-visible props were already in the schema: the gate gains
+coverage without inventing a single finding. Deliberately NOT all of `core/` — the first attempt was,
+and `core/audio-kit.mjs` builds a synth voice out of a local `L` with `attack`/`decay`/`waveform`,
+which reported 17 phantom drifts.
+
+**Which gate catches it.** Itself, now, and it is still proven able to fail: removing one prop from
+schema.json reports exactly that prop. `gate-mutation` stays 125/125.
+
+**Class.** A gate measuring the wrong thing and reporting success about it — worse than no gate,
+because the green line is evidence to the next reader.
