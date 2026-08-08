@@ -110,6 +110,19 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: vawe <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)
 	}
+	// READ THE FILE BEFORE SAYING ANYTHING ABOUT ITS CONTENTS. Every reader below (videoGrain,
+	// moduleOf) used to swallow its read error and hand back a zero value, so a path that does not
+	// exist arrived at the "no module field" message — a complaint about the contents of a file
+	// nothing had opened (docs/MISTAKES.md #223).
+	if _, err := os.Stat(dataPath); err != nil {
+		if os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "✗ %s: no such file\n", dataPath)
+		} else {
+			fmt.Fprintf(os.Stderr, "✗ %s: cannot be read (%v)\n", dataPath, err)
+		}
+		os.Exit(1)
+	}
+
 	// film grain is OPT-IN (`"grain": true`), not a default. Most brands are clean/digital and have no
 	// grain; it also crawls over sharp text edges as shimmer. Only genuinely filmic/analog brands turn
 	// it on. (--no-grain still forces it off regardless.)
@@ -117,7 +130,12 @@ func main() {
 
 	mod := *module
 	if mod == "" {
-		mod = moduleOf(dataPath)
+		m, err := moduleOf(dataPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "✗ %s is not valid JSON: %v\n", dataPath, err)
+			os.Exit(1)
+		}
+		mod = m
 	}
 	if mod == "" {
 		fmt.Fprintf(os.Stderr, "✗ %s has no \"module\" field — add one (e.g. \"module\": \"higherlower\") or pass --module\n", dataPath)
@@ -183,17 +201,21 @@ func videoGrain(path string) bool {
 	return d.Grain != nil && *d.Grain
 }
 
-// moduleOf reads just the "module" field from a data JSON.
-func moduleOf(path string) string {
+// moduleOf reads just the "module" field from a data JSON. An unreadable or malformed file is an
+// ERROR, not an empty module: the two are indistinguishable to the caller otherwise, and the caller
+// then blames the field rather than the file.
+func moduleOf(path string) (string, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return ""
+		return "", err
 	}
 	var d struct {
 		Module string `json:"module"`
 	}
-	_ = json.Unmarshal(b, &d)
-	return d.Module
+	if err := json.Unmarshal(b, &d); err != nil {
+		return "", err
+	}
+	return d.Module, nil
 }
 
 // listFormats prints each format folder with its schema + sample paths (the authoring contract).

@@ -8,7 +8,7 @@ import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
-import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites } from './preload.js';
+import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
@@ -255,12 +255,13 @@ export async function boot(build) {
       // @font-face rules, so vendoring a font is the only step. See core/fonts.js.
       await loadRegistered();
     } catch (e) {}
-    const data = await (await fetch(dataUrl)).json();
+    if (!dataUrl) throw new Error('no ?data= in the scene URL — nothing names the JSON to render');
+    const data = await fetchJson(dataUrl, 'scene data');
     // validate data + inline theme against the format's schema BEFORE building/rendering — a bad
     // JSON fails here with a readable message instead of a broken video (or a wasted render).
     if (data.module) {
       try {
-        const schema = await (await fetch(`/formats/${data.module}/schema.json`)).json();
+        const schema = await fetchJson(`/formats/${data.module}/schema.json`, 'schema');
         const errors = validateAll(schema, data);
         if (errors.length) throw new Error(`invalid data for "${data.module}":\n  - ${errors.join('\n  - ')}`);
       } catch (e) {

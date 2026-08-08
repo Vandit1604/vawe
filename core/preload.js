@@ -15,6 +15,24 @@ export function walkData(node, visit) {
   else if (node && typeof node === 'object') Object.values(node).forEach((c) => walkData(c, visit));
 }
 
+// fetchJson(url, what): the ONE place a JSON URL becomes an object. A non-OK response still has a
+// BODY, and `res.json()` parses it happily — so a 404 whose body is "not found" was reported as
+// `SyntaxError: Unexpected token 'o'`, naming the first character of the error page instead of the
+// missing file. Every JSON fetch in the engine goes through here so the three outcomes stay distinct:
+// the request failed, the server refused it, or the file really is malformed.
+export async function fetchJson(url, what = 'file') {
+  let res;
+  try { res = await fetch(url); }
+  catch (e) { throw new Error(`${what}: ${url} could not be fetched (${e.message})`); }
+  if (!res.ok) {
+    throw new Error(`${what}: ${url} → HTTP ${res.status} — the render server did not serve it. `
+      + `Either the file does not exist, or its path is outside the roots the server allows `
+      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+  }
+  try { return await res.json(); }
+  catch (e) { throw new Error(`${what}: ${url} is not valid JSON (${e.message})`); }
+}
+
 const decodeImage = (src, crossOrigin) => new Promise((res, rej) => {
   const im = new Image();
   if (crossOrigin) im.crossOrigin = 'anonymous';
@@ -48,7 +66,7 @@ export async function preloadThree(data) {
   const fonts = new Set();
   walkData(data, (o) => { if (o && typeof o === 'object' && o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); });
   for (const f of fonts) {
-    try { window.__typefaces[f] = await (await fetch(`/assets/fonts/3d/${f}.typeface.json`)).json(); }
+    try { window.__typefaces[f] = await fetchJson(`/assets/fonts/3d/${f}.typeface.json`, 'typeface'); }
     catch (e) { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
   }
 }
@@ -108,7 +126,7 @@ export async function preloadRansomSprites(data) {
   if (!/"sprites"\s*:\s*true/.test(JSON.stringify(data))) return;
   const base = '/assets/ransom/';
   let manifest;
-  try { manifest = await (await fetch(base + 'manifest.json')).json(); }
+  try { manifest = await fetchJson(base + 'manifest.json', 'ransom sprites'); }
   catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable — run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/'); }
   await Promise.all(Object.values(manifest).flat().map((v) => decodeImage(base + v.file).catch(() => {})));
   window.__ransomSprites = { base, manifest };

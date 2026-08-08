@@ -57,6 +57,18 @@ var served = []string{
 	".vawe-data/scenes/", ".vawe-data/uploads/",
 }
 
+// Served lists the prefixes, for a caller that has to TELL the author where a scene may live. It
+// returns a copy so the policy stays owned here.
+func Served() []string { return append([]string(nil), served...) }
+
+// ServeAll reports the local-debug escape hatch. A caller pre-checking a path against Allowed must ask
+// this too, or it refuses a render the server would in fact have served.
+func ServeAll() bool { return os.Getenv("VAWE_SERVE_ALL") == "1" }
+
+// Allowed is exported so the render path can refuse an unservable scene BEFORE it starts a browser,
+// instead of letting the page fetch a 404 and report it as a parse error.
+func Allowed(p string) bool { return allowed(p) }
+
 func allowed(p string) bool {
 	// path.Clean via filepath collapses ".." so a cleaned path can never climb above the prefix it
 	// starts with; a request that still points outside every prefix is denied.
@@ -81,7 +93,7 @@ func Serve(root string) (*http.Server, int, error) {
 	fileServer := http.FileServer(http.Dir(root))
 	// VAWE_SERVE_ALL=1 restores the old serve-everything behaviour for local debugging ONLY. It must
 	// never be set on a host that renders untrusted scenes.
-	serveAll := os.Getenv("VAWE_SERVE_ALL") == "1"
+	serveAll := ServeAll()
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !serveAll && !allowed(r.URL.Path) {
 			http.Error(w, "not found", http.StatusNotFound) // 404 not 403: reveal nothing about what exists

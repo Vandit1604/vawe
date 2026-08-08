@@ -61,6 +61,15 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	}
 
 	rel, _ := filepath.Rel(repoRoot, dataAbs)
+	// The page fetches the scene over the render server, which serves a fixed prefix set and 404s
+	// everything else. A scene sitting outside those prefixes therefore reached the browser as the
+	// literal body "not found" and was reported as malformed JSON. Refuse it here, before a browser
+	// starts, and say where a scene may live — that is the only part of the answer the author needs.
+	if !scene.ServeAll() && !scene.Allowed(filepath.ToSlash(rel)) {
+		return fmt.Errorf("%s is outside the paths the render server serves (%s), so the page cannot fetch it.\n"+
+			"  Move the scene under formats/scene/ (or .vawe-data/scenes/), or set VAWE_SERVE_ALL=1 for a local debug render",
+			dataPath, strings.Join(scene.Served(), " "))
+	}
 	dataURL := url.QueryEscape("/" + filepath.ToSlash(rel))
 
 	framesDir := filepath.Join(os.TempDir(), "frames_"+strings.TrimSuffix(filepath.Base(out), ".mp4"))
