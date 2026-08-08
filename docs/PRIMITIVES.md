@@ -336,7 +336,11 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 ## The open canvas (`formats/scene/`)
 
 **Each primitive lives in its own file** — `core/layers/<type>.js`, exporting `build(kit, el, L)` (DOM)
-and optionally `frame(kit, el, L, t)` (per-frame). `core/layers/index.js` is the registry; `scene.html`
+and optionally `frame(kit, el, L, t, scene)` (per-frame). `scene` is a frozen read-only view of the rest
+of the frame — `boxOf(id)` (canvas-space box of any id'd top-level layer at this t, `null` for a group
+child or an unknown id) · `light` · `camera` · `canvas` · `safe`. Every box is resolved before any
+primitive's `frame()` runs, so it is never a value left over from the previous frame.
+`core/layers/index.js` is the registry; `scene.html`
 is a thin orchestrator (bg/camera/stings/timing) that dispatches to it. **Adding a primitive = adding a
 file** (no scene.html edit); shared helpers (styleText/chipBox/layoutGroup/…) live in `core/layers/util.js`.
 

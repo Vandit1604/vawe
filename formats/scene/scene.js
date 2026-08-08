@@ -441,8 +441,57 @@ boot((data, fps, theme, canvas) => {
   }
 
   const layers = (data.layers || []).map(buildLayer);
-
+  const topCount = layers.length; // group children follow; their x/y are relative to their group
   layers.push(...extra); // group children join the per-frame animation loop
+
+  // ---- SCENE VIEW: what one layer is allowed to know about the rest of the frame ----
+  // A primitive was handed itself and the clock and nothing else, so occlusion, a shadow keyed to a
+  // light and per-layer 3D could not be written at all: none of them is a property of one layer.
+  // `scene` is passed as the 5th argument to every primitive's frame() (core/layers/index.js).
+  //
+  // Boxes are PURE GEOMETRY — authored x/y/w/h, the motion track sampled at t, and one size measured
+  // at build for layers that state neither. Never a live DOM measurement, and that is the whole point:
+  // a geometric box for EVERY layer is resolvable before ANY layer's frame() runs, so a layer can
+  // never read a neighbour's box left behind by the previous frame. A measured box would be exactly
+  // that stale value for every layer the loop has not reached yet, silently and only sometimes.
+  const CANVAS = Object.freeze({ w: W, h: H });
+  const SAFE = canvas?.safe ? Object.freeze({ ...canvas.safe }) : null; // computed once in core/boot.js
+  // A scene-level light a shadow or a shade can key off. Nothing consumes it yet; it is declared here
+  // so the first consumer widens a field rather than the signature every layer implements.
+  const LIGHT = data.lighting ? Object.freeze({ ...data.lighting }) : null;
+  // One measurement pass, at build, and only for layers an author gave an id (the only ones boxOf can
+  // be asked about). Text states no w/h — its box is its content — so without this every text layer
+  // would report a zero box, which is a wrong answer rather than no answer.
+  const baseSize = new Map();
+  for (let i = 0; i < topCount; i++) {
+    const { L, el } = layers[i];
+    if (L.id) baseSize.set(L.id, { w: el.offsetWidth, h: el.offsetHeight });
+  }
+  const boxes = new Map();
+  function resolveBoxes(t) {
+    boxes.clear();
+    for (let i = 0; i < topCount; i++) {
+      const { L } = layers[i];
+      if (!L.id) continue;
+      const start = L.start ?? 0, end = start + (L.duration ?? 2);
+      const visible = t >= start && t < end;
+      const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start) : null;
+      const base = baseSize.get(L.id) || { w: 0, h: 0 };
+      const w = m && m.w != null ? m.w : (L.w ?? base.w);
+      const h = m && m.h != null ? m.h : (L.h ?? base.h);
+      const x = (L.x ?? 60) + (m ? m.dx : 0);
+      const y = (L.y ?? 240) + (m ? m.dy : 0);
+      // w/h are the UNSCALED layout box and `scale` is reported beside them, because CSS scales about
+      // the element's centre: folding the scale into w/h would move the top-left corner and nothing
+      // on screen moves with it (the same error that put a `becomes` handover 160px off, above).
+      boxes.set(L.id, Object.freeze({ id: L.id, x, y, w, h, cx: x + w / 2, cy: y + h / 2,
+        scale: m ? m.scale : 1, rot: m ? m.rot : 0, opacity: m ? m.opacity : 1, visible }));
+    }
+  }
+  // A GROUP CHILD IS DELIBERATELY ABSENT. Its x/y are relative to a flex or grid box whose position
+  // only layout knows, so a canvas-space box for it would be a guess dressed as a measurement. null
+  // says "not resolvable", which a caller can act on; a plausible wrong box is what it cannot.
+  const boxOf = (id) => boxes.get(id) || null;
   // duration: explicit, else the last clip's end (+0.4 tail)
   const lastEnd = layers.reduce((m, { L }) => Math.max(m, (L.start ?? 0) + (L.duration ?? 2)), 0);
   const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
@@ -493,7 +542,7 @@ boot((data, fps, theme, canvas) => {
   // the cut kit, kinetic split-text, ransom cycle, borderTrail/circle spins, animated CSS vars,
   // audio-react, and the motion track (+ motion blur). Each is a pure function of t (and f for the
   // spectrum table), composed onto what driveClips already wrote — so the frame stays pure in n.
-  function updateLayer(el, L, units, t, f) {
+  function updateLayer(el, L, units, t, f, scene) {
     const start = L.start ?? 0, end = start + (L.duration ?? 2);
     // cut kit: a declared cut owns this layer's enter/exit styling (over driveClips's fade)
     if (L.cut && t >= start && t < end) {
@@ -511,7 +560,7 @@ boot((data, fps, theme, canvas) => {
       ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...L.ransom });
     // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
     // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
-    renderer.frame(el, L, t);
+    renderer.frame(el, L, t, scene);
     // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
     // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
     if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
@@ -631,9 +680,15 @@ boot((data, fps, theme, canvas) => {
     drawBg(t);
     driveClips(cam, t); // declarative clip timing + enter/exit + z-order
     driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits) — no-op otherwise
-    for (const { L, el, units } of layers) updateLayer(el, L, units, t, f);
+    // EVERY box for this frame, before ANY layer's frame() runs — see resolveBoxes.
+    resolveBoxes(t);
+    // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
+    // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
+    const camNow = cameraAt(camKf, t);
+    const view = Object.freeze({ boxOf, light: LIGHT, camera: camNow, canvas: CANVAS, safe: SAFE });
+    for (const { L, el, units } of layers) updateLayer(el, L, units, t, f, view);
     drawCaptions(t);
-    drawCameraAndCut(t);
+    drawCameraAndCut(t, camNow);
     drawStings(t);
     drawSeams(t);
     seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
@@ -682,8 +737,7 @@ boot((data, fps, theme, canvas) => {
   // applied to the camera root so the whole beat moves as one). cutStyle ALWAYS returns the full
   // style set (identity in steady state) so a cut property can never stick into a later frame,
   // whatever order frames render in. See MISTAKES #29 (the top-level `cuts` array was once inert).
-  function drawCameraAndCut(t) {
-    const c = cameraAt(camKf, t);
+  function drawCameraAndCut(t, c) {
     // perspective() must lead the transform list, and is emitted ONLY when a tilt is actually asked
     // for — a perspective function with no rotation still promotes the layer into a 3D rendering
     // context and changes rasterisation, so scenes that never tilt stay byte-identical.

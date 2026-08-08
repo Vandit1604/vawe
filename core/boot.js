@@ -349,7 +349,10 @@ export async function boot(build) {
     await preloadGsap(data);
     await preloadRansomSprites(data);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
-    const scene = build(data, fps, theme, { width, height, aspect: aspectKey });
+    // `safe` rides along so the scene view can hand it to a layer without a second call to safeArea:
+    // the safe box is a function of destination as well as size, and two callers computing it is how
+    // the audit overlay and resolveCoords once disagreed about where the bottom edge was.
+    const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe });
     // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
     // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
     // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.

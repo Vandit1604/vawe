@@ -67,6 +67,12 @@ export function createRenderer(ctx) {
     build(el, L) { pick(L).build(kit, el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) stay in scene.html's loop; those compose around this call.
-    frame(el, L, t) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t); },
+    //
+    // `scene` is a FROZEN read-only view of the rest of the frame: { boxOf(id), light, camera, canvas,
+    // safe }. A primitive used to be handed itself and the clock and nothing else, which is why
+    // occlusion, a shadow keyed to a light, and per-layer 3D could not be written at all — none of
+    // them is a property of one layer. It is frozen because a layer that could write to it would be
+    // writing into the next layer's inputs, and renderFrame(n) has to stay pure in n.
+    frame(el, L, t, scene) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t, scene); },
   };
 }
