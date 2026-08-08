@@ -723,3 +723,7 @@ reveal:
 # own beats (not a template). WRITE=1 → <file>.cinematic.json; then refine + `make reveal`.
 cinematic:
 	node scripts/author/cinematic.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
+
+.PHONY: deck
+deck: ## publish docs/animation.html to the site as /deck (site/public/deck.html)
+	node scripts/site/deck.mjs

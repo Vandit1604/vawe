@@ -24,9 +24,9 @@
   --sans:"Anybody", system-ui, -apple-system, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-@font-face{font-family:"Anybody";src:url("../assets/fonts/Anybody.woff2") format("woff2");
+@font-face{font-family:"Anybody";src:url("/assets/fonts/Anybody.woff2") format("woff2");
            font-weight:100 900;font-display:swap}
-@font-face{font-family:"JetBrains Mono";src:url("../assets/fonts/JetBrainsMono.woff2") format("woff2");
+@font-face{font-family:"JetBrains Mono";src:url("/assets/fonts/JetBrainsMono.woff2") format("woff2");
            font-weight:100 800;font-display:swap}
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -234,9 +234,9 @@ rnd   = (frame * 2654435761) | 0;   <span class="c">// random restarts, seeded b
     together and adds the sound.</p>
     <p class="lead">Every awkward thing in this engine is the price of one rule: the same number always
     gives the same picture. It is worth it.</p>
-    <p class="small"><a href="architecture.html">how the whole engine works</a> ·
-       <a href="PRIMITIVES.md">the layer vocabulary</a> ·
-       <a href="MOTION-CRAFT.md">how motion should feel</a></p>
+    <p class="small"><a href="/docs">how the whole engine works</a> ·
+       <a href="/docs">the layer vocabulary</a> ·
+       <a href="/docs">how motion should feel</a></p>
   </section>
 
 </div>
@@ -265,7 +265,7 @@ const LOCAL = {
 };
 let EASINGS = LOCAL;
 try {
-  const m = await import('../core/motion.js');
+  const m = await import('/core/motion.js');
   if (typeof m?.EASINGS?.brake === 'function') EASINGS = m.EASINGS;
 } catch { /* not served — the copy above stands in */ }
 
