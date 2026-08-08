@@ -27,6 +27,12 @@ Every JSON **must** start with `"module": "scene"`. Save new videos as
 video (e.g. `linear-30.json`) first as working references, then compose — never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
+> **Planning any fan-out? Read [`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md) first.**
+> It carries the measured cost of a real run here (87 agents, 5.66M tokens, 65k for each agent) and the
+> rules that follow from it: fewer and larger agents, batches of 5 to 10, file contents in the prompt,
+> never two agents on the same files, always a structured schema. One agent with a better prompt beats a
+> fan-out for sequential work, and costs less.
+
 > **Shipping a real video? USE DEDICATED SUBAGENTS.** Authoring well needs several different kinds of
 > judgement, and one agent doing all of them in one context does all of them worse: it grades its own
 > work, and its reading of six sheets crowds out the room to fix anything. Give each critic ONE job, ONE
