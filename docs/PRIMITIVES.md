@@ -352,7 +352,20 @@ name is a hard error listing the known set, never a skipped entry. Modifiers app
 always last, after the primitive's own `frame()` and after every cross-cutting track (cut · units · vars
 · react · box · motion), so a modifier acts on the finished frame. `transform`, `opacity` and `filter`
 on the layer element belong to those tracks and a modifier must not append to them; one that needs a
-transform gets an element of its own. Note this is **not** `fx`, which is the named-GSAP-effect slot.
+transform gets an element of its own, or reaches for a CSS property the tracks do not own (`tilt` uses
+the `rotate` longhand). Note this is **not** `fx`, which is the named-GSAP-effect slot.
+
+**`tilt` — turn a layer out of the picture plane.** `{"tilt": {"y": 26}}` leans the layer about its own
+centre in 3D; `x`/`y`/`z` are degrees. Every tilted layer sharing a parent is projected through **one
+camera**, so a row of cards recedes toward one vanishing point instead of each leaning at its own
+(`docs/MISTAKES.md` #59 rejected per-layer 3D on exactly that failure, having used the `perspective()`
+transform *function*, which puts the camera on each layer; the *property* on the shared parent is the fix,
+proved by `scripts/dev/spike-3d.mjs`). `dist` is that camera's distance in px (default 1600, smaller = a
+wider lens) and `origin` its vanishing point (`"center"` or `[x, y]` in canvas px); siblings that disagree
+about either are a hard error, because one parent is one camera. On a **group child** the camera belongs
+to the group, so tilted children share a vanishing point local to the group and `origin` defaults to the
+group's centre; to tilt a whole group as one plane, put `tilt` on the group layer. A scene that declares
+no tilt has no camera written anywhere and renders byte-identical.
 
 Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) · `image` (+ `ken`) ·
 `component` (captured real UI) · `rect` (cards/pills/slabs) · `count` (count-up) · `glow` · `board` ·

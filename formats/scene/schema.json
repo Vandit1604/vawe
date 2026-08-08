@@ -943,6 +943,10 @@
               "type": "string|object",
               "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }.",
               "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "plus-lighter"]
+            },
+            "tilt": {
+              "type": "object",
+              "label": "Turn the layer out of the picture plane: { x, y, z } degrees about its own centre, projected through ONE camera shared by every tilted layer with the same parent. { dist } px is that camera's distance (default 1600, smaller = wider lens); { origin } is its vanishing point, \"center\" or [x, y] in canvas px. Siblings must agree on dist/origin or it is a hard error. On a group child the camera belongs to the group, not the canvas."
             }
           }
         },

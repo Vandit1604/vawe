@@ -823,6 +823,18 @@ const srcCases = [
   { name: 'schema-drift · a blend mode the engine does not accept', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"color-dodge", "color-burn"', '"color-dodge", "colour-burn"'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
+  // Pinned per MODIFIER, not once for the slot. The key-set check compares two sorted lists, so a
+  // fixture on `mixBlend` alone proves the comparison runs and proves nothing about whether the second
+  // modifier is in either list — which is exactly how a registry entry ships with no schema entry.
+  { name: 'schema-drift · the tilt modifier is missing from the schema', file: 'formats/scene/schema.json',
+    mutate: (s) => s.replace('"tilt": {', '"tlit": {'),
+    cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
+  // The other direction: the schema advertising a modifier nothing implements. Written against the
+  // REGISTRY rather than the schema, because that is the half an author never sees until a scene that
+  // validates cleanly dies at boot with "unknown modifier".
+  { name: 'schema-drift · the registry lost a modifier the schema still offers', file: 'core/fx/index.js',
+    mutate: (s) => s.replace('const REGISTRY = { mixBlend, tilt };', 'const REGISTRY = { mixBlend };'),
+    cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   // The backdrop is a REQUIRED authoring choice now that the baseline no longer injects one. Without this
   // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,
   // and nothing proves it still fires. Anchored on the top-level key (a layer `bg` is a colour string, so
