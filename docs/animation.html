@@ -35,8 +35,11 @@ body{background:var(--bg);color:var(--ink);font:400 var(--fs-body)/1.6 var(--san
      font-variation-settings:"wdth" 100;-webkit-font-smoothing:antialiased;overflow:hidden}
 
 /* ---- the stage -------------------------------------------------------------------------------- */
-.deck{height:100dvh;display:grid;grid-template-rows:1fr auto}
-.slide{display:none;align-content:center;justify-items:start;gap:18px;
+.deck{height:100dvh;display:grid;grid-template-rows:minmax(0,1fr) auto}
+/* #stage must be a grid, not a block: a block child sizes to its content, so `align-content:center`
+   on the slide had nothing to centre inside and every slide sat at the top of an empty screen. */
+#stage{display:grid;min-height:0}
+.slide{display:none;align-content:center;justify-items:start;gap:18px;height:100%;
        width:min(46rem,100%);margin:0 auto;padding:32px 28px;overflow-y:auto}
 .slide.on{display:grid;animation:in .34s var(--ease)}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -95,6 +98,17 @@ pre .c{color:var(--muted)}
 .note{padding:13px 17px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;
       font-size:var(--fs-small);color:var(--ink-2)}
 
+/* the flipbook itself: nine frames of one move, side by side. the page is about pictures and the
+   opening slide had none. hover lifts one out, which is the only decoration here that is also a
+   demonstration. */
+.strip{display:flex;gap:6px;width:100%;margin-top:4px}
+.strip i{flex:1;position:relative;aspect-ratio:4/3;border:1px solid var(--line);border-radius:6px;
+         background:#0f1620;overflow:hidden;transition:transform .2s var(--ease)}
+.strip i::after{content:"";position:absolute;top:50%;width:22%;height:26%;margin-top:-13%;
+                background:var(--accent);border-radius:2px;left:var(--x)}
+.strip i:hover{transform:translateY(-4px)}
+@media (max-width:44rem){.strip i:nth-child(n+7){display:none}}
+
 /* ---- the bar ----------------------------------------------------------------------------------- */
 .bar{display:flex;align-items:center;gap:14px;padding:14px 24px;border-top:1px solid var(--line)}
 .bar .count{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
@@ -116,7 +130,9 @@ pre .c{color:var(--muted)}
     <h1>Nothing here<br>ever <span>plays.</span></h1>
     <p class="lead">The engine draws one still picture, photographs it, throws it away, and draws the
     next. There is no film running past a lamp. It is a flipbook.</p>
-    <p class="small">8 slides · use the arrow keys</p>
+    <div class="strip" id="strip" aria-hidden="true"></div>
+    <p class="small">Nine frames of one move, spaced on the curve the engine actually uses.<br>
+    Eight slides · arrow keys</p>
   </section>
 
   <!-- 2 -->
@@ -368,6 +384,17 @@ let restartB = () => {};
   addEventListener('resize', () => draw(+scrub.value));
   restartB = run;
   draw(0);
+}
+
+/* the opening strip: nine frames of one eased move, so the first thing on screen is the idea */
+{
+  const strip = $('strip'), N = 9;
+  const ease = EASINGS.brake || LOCAL.brake;
+  for (let k = 0; k < N; k++) {
+    const cell = document.createElement('i');
+    cell.style.setProperty('--x', (8 + ease(k / (N - 1)) * 66).toFixed(1) + '%');
+    strip.appendChild(cell);
+  }
 }
 
 show(Math.max(0, (+location.hash.slice(1) || 1) - 1));
