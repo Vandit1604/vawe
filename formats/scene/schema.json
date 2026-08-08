@@ -955,11 +955,19 @@
             },
             "shadow": {
               "type": "number|object",
-              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property) and on a group child."
+              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property) and on a group child."
             },
             "occlude": {
               "type": "string|object",
-              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids], pad: px grown around the occluder, invert: show ONLY the overlap }. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer; refuses on a group child, whose canvas position is not knowable."
+              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids] | \"above\" | \"below\", pad: px grown around the occluder, invert: show ONLY the overlap }. \"above\"/\"below\" mean every layer painted in front of / behind this one, read from the scene's paint order, so the set is never a hand-written list that rots when a layer is added. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer; refuses on a group child, whose canvas position is not knowable."
+            },
+            "progress": {
+              "type": "boolean|string|object",
+              "label": "Write the FILM's progress (0 at the first frame, 1 at the last) into a CSS custom property this layer's markup draws with: true (writes --film), \"--bar\", or { var, ease }. Not `vars`, which runs over the LAYER's own window; this is the scene's clock, so a runtime bar or a chapter dot re-times itself when the film is re-cut."
+            },
+            "kick": {
+              "type": "boolean|object",
+              "label": "Kick this layer on the film's own joints: true, or { on: \"cut\" | \"seam\" | \"sting\" | \"any\" | [kinds], scale: multiplier (default 1.06), frames: settle length in FRAMES (default 5) }. The times come from the scene's own cuts/seams/stings, so moving a cut re-times every kick in the film. Named `kick` because `punch` is already a whole-frame CUT STYLE."
             },
             "tilt": {
               "type": "object",

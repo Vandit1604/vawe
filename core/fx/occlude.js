@@ -6,6 +6,7 @@
 //
 //   "modifiers": [{ "occlude": "card" }]
 //   "modifiers": [{ "occlude": { "by": ["card", "chip"], "pad": 12, "invert": true } }]
+//   "modifiers": [{ "occlude": "above" }]     // by everything painted in front of me, whatever it is
 //
 // FIRST CONSUMER OF scene.boxOf. That is the whole reason it can exist: until a layer's frame() was
 // handed a view of the rest of the frame it had itself and the clock, and "where is the other layer"
@@ -33,6 +34,12 @@
 // layer with a real box, and occluding it occludes everything in it.
 
 export const OCCLUDE_KEYS = ['by', 'pad', 'invert'];
+// `by` may name the STACK instead of a set of ids. The effect's real subject is almost always "hide me
+// under whatever is in front of me", and spelling that as a hand-written list is a list that rots: it
+// is silently wrong the moment a layer is added, reordered, or given a `track`. These read the paint
+// order out of the scene view (scene.ids is sorted by z, scene.specOf(id).z is that z), so the answer
+// is re-derived every frame from the same ordering driveClips paints with.
+const STACK = ['above', 'below'];
 
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -46,8 +53,12 @@ function resolve(spec) {
       throw new Error(`occlude: unknown key "${k}" — known: ${OCCLUDE_KEYS.join(', ')}.`);
   const by = typeof s.by === 'string' ? [s.by] : s.by;
   if (!Array.isArray(by) || !by.length || !by.every((v) => typeof v === 'string' && v))
-    throw new Error(`occlude: \`by\` must be a layer id or a list of them — got ${JSON.stringify(s.by)}. `
-      + `It names the layer(s) whose box punches the hole.`);
+    throw new Error(`occlude: \`by\` must be "above", "below", a layer id, or a list of ids — got `
+      + `${JSON.stringify(s.by)}. It names the layer(s) whose box punches the hole.`);
+  if (by.length > 1 && by.some((v) => STACK.includes(v)))
+    throw new Error(`occlude: "${by.find((v) => STACK.includes(v))}" already means every layer on that `
+      + `side of this one, so mixing it with named ids is either redundant or a contradiction. Use it `
+      + `alone, or list the ids.`);
   const pad = s.pad == null ? 0 : s.pad;
   if (!num(pad)) throw new Error(`occlude: pad must be a number of px grown around the occluder — got ${JSON.stringify(s.pad)}.`);
   if (s.invert != null && typeof s.invert !== 'boolean')
@@ -98,13 +109,20 @@ export function frame(kit, el, L, t, scene, spec) {
     const dx = (X - me.cx) / me.scale, dy = (Y - me.cy) / me.scale;
     return [(dx * c - dy * s + me.w / 2).toFixed(2), (dx * s + dy * c + me.h / 2).toFixed(2)];
   };
+  // "above"/"below" expand against the paint order, minus this layer itself. A layer sharing my z is
+  // NEITHER: CSS breaks that tie by document order and the answer would flip on a reorder that changes
+  // nothing visible, so it is left out rather than guessed at.
+  const mine = scene.specOf(L.id).z;
+  const occluders = STACK.includes(by[0])
+    ? scene.ids.filter((id) => id !== L.id && (by[0] === 'above' ? scene.specOf(id).z > mine : scene.specOf(id).z < mine))
+    : by;
   const holes = [];
-  for (const id of by) {
+  for (const id of occluders) {
     const o = scene.boxOf(id);
     if (!o)
       throw new Error(`occlude: no layer with id "${id}" — boxOf resolves TOP-LEVEL layers that declare `
         + `an id, and returns null for a group child (its canvas position is not knowable) and for a `
-        + `name nothing uses. Known here: whichever layers carry "id".`);
+        + `name nothing uses. Known here: ${scene.ids.join(', ') || '(no layer declares an id)'}.`);
     if (!o.visible || o.opacity <= 0) continue;   // outside its own window: it is not covering anything
     holes.push('M' + cornersOf(o, pad).map(toLocal).map(([x, y]) => `${x} ${y}`).join('L') + 'Z');
   }

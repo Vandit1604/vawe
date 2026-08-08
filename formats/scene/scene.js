@@ -518,6 +518,69 @@ boot((data, fps, theme, canvas) => {
   // only layout knows, so a canvas-space box for it would be a guess dressed as a measurement. null
   // says "not resolvable", which a caller can act on; a plausible wrong box is what it cannot.
   const boxOf = (id) => boxes.get(id) || null;
+
+  // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
+  // Geometry alone was not enough to write real effects against. An effect could ask WHERE another
+  // layer is and nothing else: not what it is, not what else exists, not how far through the film it
+  // is, not what colour the film is allowed to use, not what it is compositing against, not where the
+  // cuts are. Each of those is a property of the FRAME, which is exactly what this view is for.
+  //
+  // EVERY FIELD BELOW NAMES ITS CONSUMER, and that is a rule, not a courtesy: a view that advertises
+  // something nothing implements is the same lie as a schema that does, which is what schema-drift
+  // exists to refuse. Deliberately absent, with the reason, at the end of this block.
+
+  // WHO ELSE IS IN THE FRAME. `ids` in PAINT ORDER (the z driveClips writes, `track ?? array index`),
+  // so "everything in front of me" is a slice and not a sort the caller has to reinvent. `specOf`
+  // hands back the layer's own authored JSON plus that z. Read by core/fx/occlude.js, whose `by`
+  // accepts "above"/"below" — occlusion by stacking order rather than by a hand-listed set of ids,
+  // which is the form the effect actually wants ("hide me under everything on a higher track").
+  //
+  // A DEEP-FROZEN COPY, not the live object. The engine mutates layer specs (resolveRelativeStarts
+  // rewrites `start`, resolveKeyedProps expands tracks), so handing out the real one would let a
+  // modifier rewrite the input of a layer that has not rendered yet and make renderFrame(n) depend on
+  // render order. Copied and frozen ONCE at build, so the per-frame cost is a Map lookup.
+  const deepFreeze = (o) => {
+    if (o && typeof o === 'object') for (const v of Object.values(o)) deepFreeze(v);
+    return Object.freeze(o);
+  };
+  const specs = new Map();
+  for (let i = 0; i < topCount; i++) {
+    const { L } = layers[i];
+    if (!L.id) continue;
+    specs.set(L.id, deepFreeze({ ...structuredClone(L), z: L.track ?? i }));
+  }
+  const IDS = Object.freeze([...specs.keys()].sort((a, b) => specs.get(a).z - specs.get(b).z));
+  const specOf = (id) => specs.get(id) || null;
+
+  // THE LOCKED LOOK. A film's palette is decided once, in the theme, and an effect that wants to key
+  // to the accent had to be handed the hex by the author — who then owns a colour the theme already
+  // owns, in a second place, forever. `name` rides along so a modifier rejecting an unknown role can
+  // say WHICH theme does not have it. Read by core/fx/shadow.js (`color` may be a palette role, and
+  // its default resolves through this).
+  //
+  // `type` (the font roles) is NOT here. A face is written at build by the primitive that lays the
+  // text out; a modifier changing font-family per frame would relayout mid-render, and nothing in the
+  // registry can consume it. It goes in when something can.
+  const THEME = Object.freeze({ name: (theme && theme.name) || null,
+    palette: Object.freeze({ ...((theme && theme.palette) || {}) }) });
+
+  // WHAT WE ARE COMPOSITING AGAINST, at t. Read by core/fx/shadow.js for `color: "auto"` — what colour
+  // a shadow should be is a fact about the SURFACE IT FALLS ON, not about the layer casting it.
+  //
+  // The CLASSIFICATION, not the preset name. LIGHT_BGS and ACCENT_BGS are decided here, once, and a
+  // view that handed out `preset` would make every consumer re-derive them from a copied list — the
+  // duplicate-vocabulary shape this repo keeps logging. `light` is three-valued on purpose: true /
+  // false / null, where null is a hand-authored backdrop that declared no `tone`. The engine cannot
+  // read lightness out of somebody's CSS, and a guess there is how a frame ends up white-on-white, so
+  // `authored` rides beside it to let a consumer say WHY it cannot answer.
+  const bgAt = (t) => {
+    const w = bgWinAt(t);
+    if (!w) return null;                       // no bg windows: the .hs-stage theme gradient
+    const authored = w.html != null;
+    const light = authored ? (w.tone === 'light' ? true : w.tone === 'dark' ? false : null)
+      : LIGHT_BGS.includes(w.preset) && w.value !== 'dark';
+    return Object.freeze({ authored, light, accent: !authored && ACCENT_BGS.includes(w.preset) });
+  };
   // duration: explicit, else the last clip's end (+0.4 tail)
   const lastEnd = layers.reduce((m, { L }) => Math.max(m, (L.start ?? 0) + (L.duration ?? 2)), 0);
   const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
@@ -551,6 +614,20 @@ boot((data, fps, theme, canvas) => {
     .filter((s) => s.dur > 0 && isFinite(s.t))
     .sort((a, b) => a.t - b.t);
   const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
+
+  // THE FILM'S JOINTS, as one sorted list of { t, kind } — the last piece of the scene view, built
+  // here because it is the first point at which cuts, stings and seams all exist. Nothing exposed
+  // where a film TURNS, so an effect could not fire on one: a punch on every cut had to be authored as
+  // a hand-copied list of times that silently rots the moment a cut moves. Read by core/fx/punch.js.
+  //
+  // No `beat` kind, and that is not an omission: a beat boundary in this engine IS a cut time
+  // (beatBounds is built from sceneCuts), so a second name for the same instant would let an author
+  // write `on:"beat"`, get exactly `on:"cut"`, and believe the two differ.
+  const MARKS = Object.freeze([
+    ...sceneCuts.map((c) => ({ t: +c.t, kind: 'cut' })),
+    ...seams.map((s) => ({ t: s.t, kind: 'seam' })),
+    ...stings.map((s) => ({ t: +s.t, kind: 'sting' })),
+  ].filter((m) => Number.isFinite(m.t)).sort((a, b) => a.t - b.t).map(Object.freeze));
 
   // drawBg — the theme bg on canvas (last matching window wins) + a continuous slow breathe.
   // A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden for its span.
@@ -714,7 +791,16 @@ boot((data, fps, theme, canvas) => {
     // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
     // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
     const camNow = cameraAt(camKf, t);
-    const view = Object.freeze({ boxOf, light: LIGHT, camera: camNow, canvas: CANVAS, safe: SAFE });
+    // THE CLOCK. A layer was handed t and nothing to measure it against, so "how far through the film
+    // am I" could only be answered by the author restating the runtime inside the layer — a second
+    // copy of a number the scene already owns, which stops being true the moment the film is re-cut.
+    // `frame` is the INTEGER frame, and it is here rather than left to `t * fps` because that product
+    // re-derives a number f/fps already lost precision from: an event on frame 60 tested as t >= 2.0
+    // lands on the wrong side of the boundary for some fps. core/fx/punch.js compares frames for that
+    // reason; core/fx/progress.js reads t and duration.
+    const clock = Object.freeze({ t, frame: f, fps, duration });
+    const view = Object.freeze({ boxOf, specOf, ids: IDS, light: LIGHT, camera: camNow,
+      canvas: CANVAS, safe: SAFE, clock, theme: THEME, bg: bgAt(t), marks: MARKS });
     for (const { L, el, units } of layers) updateLayer(el, L, units, t, f, view);
     drawCaptions(t);
     drawCameraAndCut(t, camNow);

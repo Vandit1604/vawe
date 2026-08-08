@@ -839,7 +839,7 @@ const srcCases = [
   // REGISTRY rather than the schema, because that is the half an author never sees until a scene that
   // validates cleanly dies at boot with "unknown modifier".
   { name: 'schema-drift · the registry lost a modifier the schema still offers', file: 'core/fx/index.js',
-    mutate: (s) => s.replace('const REGISTRY = { mixBlend, occlude, shadow, tilt };', 'const REGISTRY = { mixBlend, occlude, tilt };'),
+    mutate: (s) => s.replace('const REGISTRY = { kick, mixBlend, occlude, progress, shadow, tilt };', 'const REGISTRY = { kick, mixBlend, occlude, progress, tilt };'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   // The backdrop is a REQUIRED authoring choice now that the baseline no longer injects one. Without this
   // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,

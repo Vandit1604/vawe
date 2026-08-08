@@ -18,10 +18,12 @@
 // "unknown GSAP effect" for any item the effect registry does not know.
 import * as mixBlend from './mix-blend.js';
 import * as occlude from './occlude.js';
+import * as progress from './progress.js';
+import * as kick from './kick.js';
 import * as shadow from './shadow.js';
 import * as tilt from './tilt.js';
 
-const REGISTRY = { mixBlend, occlude, shadow, tilt };
+const REGISTRY = { kick, mixBlend, occlude, progress, shadow, tilt };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it — the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -78,10 +80,12 @@ export function buildFx(kit, el, L) {
   for (const { mod, spec } of specsOf(L)) if (mod.build) mod.build(kit, el, L, spec);
 }
 
-// `scene` is the same frozen read-only view a primitive's frame() gets — { boxOf, light, camera,
-// canvas, safe } — because the effects this slot exists for (occlusion, a shadow keyed to a light) are
-// properties of the frame, not of one layer. `spec` rides LAST so the shared arguments keep the same
-// positions they have on a primitive.
+// `scene` is the same frozen read-only view a primitive's frame() gets — geometry (boxOf, specOf, ids),
+// the frame's own properties (light, camera, canvas, safe, bg), the clock, the theme's palette and the
+// film's joints (marks) — because the effects this slot exists for are properties of the FRAME, not of
+// one layer. Every field is built before the frame pass and named beside its consumer where it is
+// assembled (formats/scene/scene.js). `spec` rides LAST so the shared arguments keep the same positions
+// they have on a primitive.
 export function frameFx(kit, el, L, t, scene) {
   for (const { mod, spec } of specsOf(L)) if (mod.frame) mod.frame(kit, el, L, t, scene, spec);
 }

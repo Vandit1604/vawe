@@ -7,6 +7,7 @@
 //
 //   "lighting": { "x": 540, "y": 120 },                       // scene level, canvas px
 //   "modifiers": [{ "shadow": { "dist": 30, "blur": 48 } }]   // per layer
+//   "modifiers": [{ "shadow": { "color": "accent" } }]        // a palette ROLE, not a hex
 //
 // FIRST CONSUMER OF scene.light, which is why `lighting` enters the schema in the same change and not
 // before it: a schema that advertises a field nothing reads is the same lie as an engine that accepts
@@ -55,9 +56,9 @@ function resolve(spec) {
   if (!num(blur) || blur < 0) throw new Error(`shadow: blur must be px, 0 or more — got ${JSON.stringify(s.blur)}.`);
   const spread = s.spread == null ? 0 : s.spread;
   if (!num(spread)) throw new Error(`shadow: spread must be a number of px — got ${JSON.stringify(s.spread)}.`);
-  const color = s.color == null ? '#0b0b12' : s.color;
+  const color = s.color == null ? 'auto' : s.color;
   if (typeof color !== 'string' || !color)
-    throw new Error(`shadow: color must be a CSS colour — got ${JSON.stringify(s.color)}.`);
+    throw new Error(`shadow: color must be "auto", a palette role, or a CSS colour — got ${JSON.stringify(s.color)}.`);
   const opacity = s.opacity == null ? 0.3 : s.opacity;
   if (!num(opacity) || opacity < 0 || opacity > 1)
     throw new Error(`shadow: opacity must be 0..1 — got ${JSON.stringify(s.opacity)}. `
@@ -80,8 +81,40 @@ export function build(kit, el, L, spec) {
       + `it is called: put the modifier on the group.`);
 }
 
+// The colour a shadow should be is a fact about the SURFACE IT FALLS ON and about the film's locked
+// palette, and neither was reachable from a modifier until the scene view carried them. Three ways in,
+// in order of how specific the author is being:
+//
+//   "auto" (the default) — read the backdrop at t. Over a light field the shadow is the theme's own
+//        ink, which is the darkest colour the film is allowed to use and always the right neutral for
+//        it; over a dark field ink IS the field, so it falls back to black, which still darkens. Over
+//        an ACCENT field a neutral shadow goes muddy, so it takes the accent's own hue.
+//   a PALETTE ROLE ("accent", "ink", "line") — resolved through the theme, so the shadow moves with
+//        the brand instead of pinning a hex the theme already owns into a second place.
+//   any other string — a CSS colour, passed through untouched.
+//
+// A theme with no palette at all leaves ROLE lookups impossible; that is an error naming the theme
+// rather than a silent pass-through, because "accent" as a CSS colour is not a colour and the browser
+// would discard the whole box-shadow.
+function resolveColor(color, scene) {
+  const pal = scene.theme.palette;
+  if (color !== 'auto') {
+    if (!Object.prototype.hasOwnProperty.call(pal, color)) return color;   // a CSS colour
+    return pal[color];
+  }
+  const bg = scene.bg;
+  if (!bg) return pal.ink || '#0b0b12';   // no bg windows: the theme's own stage gradient
+  if (bg.light === null)
+    throw new Error(`shadow: color "auto" reads the backdrop's lightness, and the window at t=${scene.clock.t.toFixed(2)} `
+      + `is a hand-authored \`html\` backdrop with no \`tone\`. The engine cannot read lightness out of `
+      + `CSS and a guess here is invisible until the shadow vanishes into the field. Declare `
+      + `"tone": "light" | "dark" on that bg window, or name a colour on the modifier.`);
+  if (bg.accent) return pal.accent || pal.ink || '#0b0b12';
+  return bg.light ? (pal.ink || '#0b0b12') : '#000000';
+}
+
 export function frame(kit, el, L, t, scene, spec) {
-  const { dist, blur, spread, color, opacity } = resolve(spec);
+  const { dist, blur, spread, color: rawColor, opacity } = resolve(spec);
   if (!scene.light)
     throw new Error(`shadow: the scene declares no \`lighting\`, so there is no direction to cast away `
       + `from. Add "lighting": { "x": <px>, "y": <px> } at the top level — it is the whole point of this `
@@ -92,6 +125,7 @@ export function frame(kit, el, L, t, scene, spec) {
       + `group layer; the group then casts one shadow, which is what a card made of parts should do.`);
   const b = scene.boxOf(L.id);
   if (!b) throw new Error(`shadow: no box for this layer's own id "${L.id}" — boxOf knows only top-level layers that declare an id.`);
+  const color = resolveColor(rawColor, scene);
   let dx = b.cx - scene.light.x, dy = b.cy - scene.light.y;
   const len = Math.hypot(dx, dy);
   // Directly under the light there is no direction to point in, and the physical answer is that the

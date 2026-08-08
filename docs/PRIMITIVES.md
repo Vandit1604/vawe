@@ -355,18 +355,43 @@ on the layer element belong to those tracks and a modifier must not append to th
 transform gets an element of its own, or reaches for a CSS property the tracks do not own (`tilt` uses
 the `rotate` longhand). Note this is **not** `fx`, which is the named-GSAP-effect slot.
 
+**What a modifier can see.** `frame()`'s 5th argument is a **frozen read-only view of the whole frame**,
+resolved before any layer draws, so a modifier can never read a value another layer left behind and
+`renderFrame(n)` stays pure in `n`:
+
+| field | what it is |
+|---|---|
+| `boxOf(id)` | a layer's canvas-space box at `t` (x/y/w/h/cx/cy/scale/rot/opacity/visible), or null |
+| `specOf(id)` | that layer's own authored JSON, deep-frozen, plus its `z` (paint order) |
+| `ids` | every layer that declares an `id`, sorted by `z` |
+| `clock` | `{ t, frame, fps, duration }` — how far through the FILM this frame is |
+| `theme` | `{ name, palette }` — the film's locked colours, by role |
+| `bg` | the backdrop at `t`: `{ light, accent, authored }` (`light: null` = authored with no `tone`) |
+| `marks` | the film's joints, `[{ t, kind }]` for every cut · seam · sting, sorted |
+| `light` · `camera` · `canvas` · `safe` | the scene's key light, the camera at `t`, the canvas size, the safe box |
+
+Font roles are deliberately absent: a face is written at build by the primitive that lays the text out,
+and nothing in the registry could consume one per frame.
+
 **`shadow` — cast away from the scene's light.** Declare `"lighting": {"x": 540, "y": 120}` at the top
 level (canvas px, plus optional `intensity`), then `{"shadow": 30}` or
-`{"shadow": {"dist": 40, "blur": 50, "color": "#0b0b12", "opacity": 0.3}}`. Every other drop shadow in
+`{"shadow": {"dist": 40, "blur": 50, "color": "accent", "opacity": 0.3}}`. Every other drop shadow in
 the engine (`elevation`, `L.shadow`) is a fixed offset written once at build, so it points the same way
 on every layer forever; this one is computed per layer from the light to that layer's centre, so two
 cards either side of the light throw their shadows in **opposite** directions and one scene-level number
 re-lights the film. It rides `box-shadow`, which follows the layer's **box, not its glyphs** — right for
 cards, panels and images, wrong for a bare headline (use `L.filter: "drop-shadow(...)"` there). Refuses
 alongside `elevation`/`shadow`/`glow` (same CSS property) and on a group child; put it on the group.
+`color` defaults to **`"auto"`**, which reads the backdrop at `t` — the theme's ink over a light field,
+black over a dark one, the accent over an accent field — and also takes a **palette role name**
+(`"accent"`, `"ink"`, `"line"`), so the shadow moves with the brand instead of pinning a hex the theme
+already owns into a second place. Any other string is a plain CSS colour.
 
-**`occlude` — hide this layer where another layer covers it.** `{"occlude": "cardId"}`, or
-`{"occlude": {"by": ["a","b"], "pad": 12, "invert": true}}`. z-index can only say "in front or behind,
+**`occlude` — hide this layer where another layer covers it.** `{"occlude": "cardId"}`,
+`{"occlude": "above"}`, or `{"occlude": {"by": ["a","b"], "pad": 12, "invert": true}}`. `"above"` and
+`"below"` mean every layer painted in front of / behind this one, read from the scene's paint order, so
+the set is never a hand-written list that silently rots when a layer is added or re-tracked. z-index can
+only say "in front or behind,
 always"; this says "behind THAT, right now", so a caption can disappear under a card as the card slides
 across it. The hole follows the occluder's motion track exactly, rotation and scale included, and closes
 while the occluder is outside its own window. `invert` keeps only the overlap. Both layers need an `id`
@@ -385,6 +410,21 @@ about either are a hard error, because one parent is one camera. On a **group ch
 to the group, so tilted children share a vanishing point local to the group and `origin` defaults to the
 group's centre; to tilt a whole group as one plane, put `tilt` on the group layer. A scene that declares
 no tilt has no camera written anywhere and renders byte-identical.
+
+**`kick` — hit the layer on the film's own joints.** `{"kick": true}`, or
+`{"kick": {"on": "cut", "scale": 1.08, "frames": 6}}`. On every cut, seam or sting (`on` picks the
+kinds, default all three) the layer takes a scale kick that settles over `frames` FRAMES — the unit an
+edit is specified in, and the one that keeps the same snap at 60fps. The times come from the scene's own
+`cuts`/`seams`/`stings`, so moving a cut re-times every kick in the film; a hand-copied list of times
+would be silently wrong the moment anything moved. Named `kick` because `punch` is already a whole-frame
+cut style. It rides the `scale` longhand, so it composes over whatever the motion track wrote.
+
+**`progress` — the film's own clock, as a number your markup can draw.** `{"progress": true}` writes
+`--film` (0 at the first frame, 1 at the last) onto the layer; `{"progress": "--bar"}` or
+`{"progress": {"var": "--bar", "ease": "easeInOutCubic"}}` name it and shape it. Every descendant
+inherits it, so a runtime bar is `width: calc(var(--film) * 840px)` and a closing ring is one
+`stroke-dashoffset`. Not `vars`, which runs over the LAYER's window: this is the SCENE's, so nothing has
+to restate the runtime inside the layer and re-cutting the film re-times the bar for free.
 
 Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) · `image` (+ `ken`) ·
 `component` (captured real UI) · `rect` (cards/pills/slabs) · `count` (count-up) · `glow` · `board` ·
