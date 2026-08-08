@@ -98,30 +98,26 @@ calls it step 0 of the authoring ladder.
 
 ---
 
-## 6. Triage the correctness half of the gauntlet  ·  see GAUNTLET-2026-08.md
+## 6. Compare rendered pixels, not source  ·  later, bigger
 
-Of 61 findings, work the classes that survive the taste cull: 13 silent-substitution, 4 error-swallowed,
-plus `make schema-check` scanning the 20-line `scene.html` shell so 33 of 161 layer props sit outside
-drift detection. That last one matters more than its severity suggests: silent substitution is the most
-frequent bug class in this repo, and schema-check is the thing meant to catch it.
-
-**The gap is wider than that line says.** `schema-drift` scans the `scene.html` shell plus
-`core/layers/*.js` and nothing else (`scripts/gates/schema-drift.mjs:27-30`). It does NOT scan
-`core/fx/*.js`, so every prop a MODIFIER reads is outside drift detection, and it does not scan the ~930
-lines of `formats/scene/scene.js`, which reads 59 props of its own. The modifier work deliberately left
-this alone: widening the scan surfaces whatever the two unscanned trees are already missing, and a gate
-change that invents findings is the shape CLAUDE.md forbids. Widening it is its own job, with a
-before/after library diff, not a rider on a feature.
-
-Run every `repro` before trusting it. A finding nobody reproduced is a rumour.
+Every audit this engine has had read code, schemas and docs, and none compared RENDERED PIXELS against
+the scene that produced them. Both of the worst defects found so far lived exactly there: `--alpha`
+exported an opaque file, and `boxOf` squared a single-axis layer. Determinism under `--workers`, frame
+dedup and audio mixing all remain unverified in practice.
 
 ---
 
-## 7. The pixel gauntlet  ·  later, bigger
+## 7. Widen `schema-drift`'s scan surface  ·  its own job, with a library diff
 
-The audit's own stated blind spot: three rounds read code, schemas and docs, and none compared RENDERED
-PIXELS against the scene that produced them. Both high-severity findings lived exactly there.
-Determinism under `--workers`, frame dedup and audio mixing remain unverified in practice.
+`schema-drift` scans the `scene.html` shell plus `core/layers/*.js` and nothing else
+(`scripts/gates/schema-drift.mjs:27-30`). It does NOT scan `core/fx/*.js`, so every prop a MODIFIER
+reads sits outside drift detection, and it does not scan `formats/scene/scene.js`, which reads ~59 props
+of its own. Silent substitution is the most frequent bug class in this repo, and this gate is the thing
+meant to catch it.
+
+The modifier work deliberately left this alone. Widening the scan surfaces whatever the two unscanned
+trees are already missing, and a gate change that invents findings is the shape CLAUDE.md forbids. So it
+needs a before/after diff over the whole scene library, not a rider on a feature.
 
 ---
 
