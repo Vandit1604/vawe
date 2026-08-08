@@ -18,11 +18,6 @@
 // it. A draft that says "85%, with placeholder photography and two off-palette colours" is reviewable.
 // A draft that just says "here" is not.
 //
-// The taste gates are READ here and never barred on. They are off by default in author-check because
-// their verdicts were fitted to a library since called debt, but a draft record is not a verdict, and
-// "off-palette colours" is exactly the kind of thing this note exists to hand forward. So they run in
-// iterate mode and their findings land in the carried list, marked as read.
-//
 //   node scripts/gates/draft-check.mjs <scene.json> --stage 85|95
 //   make draft D=<scene.json> STAGE=85
 import fs from 'node:fs';
@@ -43,11 +38,8 @@ const NAME = path.basename(file, '.json');
 // `pre` exists for ledger, whose CLI is `ledger.mjs check <file>` — a subcommand BEFORE the path. The
 // first version passed the file first and read the resulting usage error as a real finding, which is a
 // gate reporting its own miscall as a defect in the film.
-// Output is captured on SUCCESS too. A gate that exits 0 and still reports (author-check in iterate
-// mode does exactly that) has findings this record is supposed to carry, and reading stdout only on
-// failure threw them away.
 const run = (script, extra = [], pre = []) => {
-  try { const out = execFileSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); return { ok: true, out }; }
+  try { execFileSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, stdio: 'pipe' }); return { ok: true, out: '' }; }
   catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}` }; }
 };
 const codes = (out) => [...new Set((out.match(/\[[a-z-]+\]/g) || []).map((c) => c.slice(1, -1)))];
@@ -58,13 +50,6 @@ const need = (label, bar, res, hint) => checks.push({ label, bar, ...res, hint }
 // ---- the 85% bar: what is expensive to change late ----
 const ac = run('scripts/gates/author-check.mjs');
 need('author-check', 85, { ok: ac.ok, codes: codes(ac.out) }, 'structure, timing and value — the things a late fix is expensive for');
-
-// The eight taste gates are OFF by default in author-check, so the tick above means "nothing is broken",
-// not "nothing was carried". This record exists so the next reviewer reads what was knowingly accepted,
-// and an empty carried list that means "not measured" is the silent substitution it was built against.
-// So read them here in iterate mode: every finding, zero consequence. They are recorded, never a bar.
-const tasteRead = run('scripts/gates/author-check.mjs', ['--iterate']);
-const tasteCodes = codes(tasteRead.out).filter((c) => !codes(ac.out).includes(c));
 
 const beats = readReceipt('beats', file);
 need('beats looked at', 85, { ok: beats.exists && !beats.stale, codes: beats.stale ? ['beats-stale'] : beats.exists ? [] : ['beats-unseen'] },
@@ -91,15 +76,13 @@ if (STAGE === '95') {
 // ---- verdict ----
 const bar = checks.filter((c) => c.bar <= +STAGE);
 const failed = bar.filter((c) => !c.ok);
-const carried = [...new Set([...bar.flatMap((c) => c.codes), ...tasteCodes])];
+const carried = [...new Set(bar.flatMap((c) => c.codes))];
 
 console.log(`\n  DRAFT ${STAGE}% · ${NAME}\n`);
 for (const c of bar) {
   console.log(`  ${c.ok ? '✓' : '✗'} ${c.label.padEnd(16)} ${c.ok ? '' : c.codes.join(', ') || 'failed'}`);
   if (!c.ok) console.log(`      ${c.hint}`);
 }
-console.log(`  ~ ${'taste'.padEnd(16)} ${tasteCodes.join(', ') || 'nothing to report'}`);
-console.log(`      read, never a bar — the taste gates do not decide a draft stage (author-check --taste)`);
 
 if (failed.length) {
   console.log(`\n  ✗ not a ${STAGE}% draft yet: ${failed.map((c) => c.label).join(', ')}.`);
