@@ -944,6 +944,10 @@
               "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }.",
               "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "plus-lighter"]
             },
+            "occlude": {
+              "type": "string|object",
+              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids], pad: px grown around the occluder, invert: show ONLY the overlap }. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer; refuses on a group child, whose canvas position is not knowable."
+            },
             "tilt": {
               "type": "object",
               "label": "Turn the layer out of the picture plane: { x, y, z } degrees about its own centre, projected through ONE camera shared by every tilted layer with the same parent. { dist } px is that camera's distance (default 1600, smaller = wider lens); { origin } is its vanishing point, \"center\" or [x, y] in canvas px. Siblings must agree on dist/origin or it is a hard error. On a group child the camera belongs to the group, not the canvas."

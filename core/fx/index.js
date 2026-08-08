@@ -17,9 +17,10 @@
 // changed two live behaviours: scene.js gates kinetic units on `!L.fx`, and applyGsapHooks warns
 // "unknown GSAP effect" for any item the effect registry does not know.
 import * as mixBlend from './mix-blend.js';
+import * as occlude from './occlude.js';
 import * as tilt from './tilt.js';
 
-const REGISTRY = { mixBlend, tilt };
+const REGISTRY = { mixBlend, occlude, tilt };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it — the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.

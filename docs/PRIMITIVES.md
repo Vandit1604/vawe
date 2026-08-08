@@ -355,6 +355,15 @@ on the layer element belong to those tracks and a modifier must not append to th
 transform gets an element of its own, or reaches for a CSS property the tracks do not own (`tilt` uses
 the `rotate` longhand). Note this is **not** `fx`, which is the named-GSAP-effect slot.
 
+**`occlude` — hide this layer where another layer covers it.** `{"occlude": "cardId"}`, or
+`{"occlude": {"by": ["a","b"], "pad": 12, "invert": true}}`. z-index can only say "in front or behind,
+always"; this says "behind THAT, right now", so a caption can disappear under a card as the card slides
+across it. The hole follows the occluder's motion track exactly, rotation and scale included, and closes
+while the occluder is outside its own window. `invert` keeps only the overlap. Both layers need an `id`
+(it is `scene.boxOf` that answers "where is the other layer"), and it refuses on a **group child**, whose
+canvas position is not knowable, and on a layer whose `cut` animates clip-path (`barn`, `letterbox`) —
+that would win silently and cancel the cut.
+
 **`tilt` — turn a layer out of the picture plane.** `{"tilt": {"y": 26}}` leans the layer about its own
 centre in 3D; `x`/`y`/`z` are degrees. Every tilted layer sharing a parent is projected through **one
 camera**, so a row of cards recedes toward one vanishing point instead of each leaning at its own
