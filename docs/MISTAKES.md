@@ -5650,3 +5650,89 @@ schema.json reports exactly that prop. `gate-mutation` stays 125/125.
 
 **Class.** A gate measuring the wrong thing and reporting success about it — worse than no gate,
 because the green line is evidence to the next reader.
+
+## #230 — four layer types were one primitive in four copies, and the copies had already drifted apart
+
+**What.** `paint`, `shader`, `raymarch` and `three` each had their own file in `core/layers/`, and each
+said in its own header that it mirrored `shader.js` "exactly". They did the same five things: size a
+canvas to the layer box, build a drawing instance once, redraw from LOCAL time, clear when off-window,
+and stamp `el.dataset.st` so the renderer's static-frame dedup can see a canvas-only change. Only the
+draw call differed.
+
+**Root cause.** Copying a file is the cheapest way to add a primitive and the most expensive way to own
+one. Nothing enforced the "exactly", so each copy aged on its own.
+
+**What the drift had already cost.** Four defects, none of which any gate could see, because a gate
+compares a scene against the engine and every copy WAS the engine:
+
+1. **An unknown `shader` name drew an empty canvas, silently.** `core/shaders-ambient.js` resolves the
+   name to a uniform index and `if (idx < 0) return;`. `shader.js` never validated, where `raymarch.js`
+   and `three.js` both did. `validate` rejects the scene, so the renderer was the lenient one — the
+   argument `core/layers/index.js` already makes about an unknown layer TYPE, unapplied one level down.
+2. **`resample` on a `raymarch` or `three` layer was accepted and ignored.** Neither called
+   `attachResample`, and `core/resample.js` only knew how to find a `paint` or `shader` canvas, so its
+   "fail loud, this type owns no raster" branch never ran for the two types that reach it. The docs
+   said "a validation error, never a silent no-op" and it was a silent no-op.
+3. **`paint` validated its effect name in `frame()`,** so a typo threw on the first drawn frame instead
+   of at build — the exact thing `core/fx/index.js` argues against, one file over.
+4. **`shader` styled its canvas at the UNROUNDED `L.w`** while sizing the buffer at the rounded one, so
+   a fractional width would have displayed the buffer at a size it is not. No scene has one.
+
+**Fix.** `core/layers/canvas.js` is the one primitive; `core/surfaces/` is a registry of backends in the
+shape of `core/layers/`, `core/fx/` and `core/tracks/` — a `REGISTRY`, an exported `SURFACE_TYPES`, a
+`pick()` that hard-errors naming the known set, and a module-load check that every backend supplies all
+five things the primitive calls. A backend owns PIXELS only. All four defects above are fixed once, and
+cannot recur in three places.
+
+**The names did not move.** `paint`, `shader`, `raymarch` and `three` are author-facing types in 101
+scenes, so they stay four entries in `LAYER_TYPES`, bound to the shared primitive at module load. There
+is no `canvas` type and no `surface` prop. The alternative — one type with a `surface` field plus three
+aliases — buys nothing an author can use and costs every scene in the library.
+
+**Which gate catches it.** `make snap-all` is scene-for-scene unchanged (51 identical · 30 changed · 3
+quarantined · 0 errored · 17 no-baseline), and `make probe` and `scene-snap` are clean. But snap-all
+compares a DOM SIGNATURE, and these four types put their whole output where the DOM cannot see it —
+the blind spot that let an opaque `--alpha` export survive three audit rounds. So the pixels were hashed
+directly: every `<canvas>` in 9 scenes at full resolution, 24 frames each, before and after — identical,
+and identical across two runs of the same tree first, so the comparison means something.
+`make canvas-purity` passes on the paint demo and on `motion-reel` (8 canvases, raymarch + three +
+shader + paint). `gate-mutation` stays 125/125, and its `canvas-purity` case now anchors on the shared
+off-window clear, so deleting it fails all four types instead of one.
+
+**Class.** Duplication as an architecture. Not a wrong pixel on the day it was written, and four
+independent wrong behaviours by the time anyone counted.
+
+## #231 — schema-drift read `L.` and `C.` but not `LL.`, which the gate next to it had matched all along
+
+**What.** `scripts/gates/schema-drift.mjs` collects the layer props the engine reads with
+`/\b[LC]\.(\w+)/`. A layer under the inner name `LL` — the convention when `L` is already taken, used by
+`core/three-fx.js` since it shipped — matched nothing. `scripts/gates/layer-props.mjs` has matched
+`(?:LL?|C)` since IT shipped, and says so in a comment two lines long.
+
+**Found by.** #230. Moving the per-frame draws into `core/surfaces/`, where the frame's layer arrives as
+`LL`, dropped the count from 163 to 162: `spin` had no other reader anywhere in the scanned tree.
+
+**Fix.** The same pattern the neighbouring gate uses. Count 163 → 164: `seed` and `spin` come back, and
+`resample` is new because the shared primitive now reads it to refuse it (#230, defect 2). No scene
+changed verdict, and every prop is still defined in the schema — coverage, not a finding.
+
+**Class.** Two gates asking the same question of the same source with different eyes, and the narrower
+one reporting a number as if it were the answer.
+
+## #232 — a gate followed a builder's imports one hop up, but never sideways
+
+**What.** `layer-props.mjs` decides which props a type honours by reading its builder AND the core
+modules the builder imports, because a builder hands the whole layer on (`paint` → `PAINT_FX`, `three` →
+`core/three-fx.js`). It matched `from '../x.js'` only. A builder importing a SIBLING was invisible.
+
+**Found by.** #230. `core/surfaces/palette.js` holds the `L.colors` read that `shader.js` and
+`raymarch.js` had each copied, and the moment it was one file over instead of inline, `colors` on a
+raymarch layer was reported as a prop nothing reads — while the render honoured it.
+
+**Fix.** Resolve both relative forms against the importing file's own directory. Also: a layer type
+whose source resolves to nothing now reports the GATE as blind and exits 2, instead of quietly giving
+that type an empty prop set and calling every prop on it dead. That is the failure mode this file
+already guards for its shared scan, on the one path that had no guard.
+
+**Class.** A rule written for the arrangement of the code on the day (`everything is one flat
+directory`) rather than for the property it was checking (`follow where the props go`).

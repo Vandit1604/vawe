@@ -344,6 +344,14 @@ primitive's `frame()` runs, so it is never a value left over from the previous f
 is a thin orchestrator (bg/camera/stings/timing) that dispatches to it. **Adding a primitive = adding a
 file** (no scene.html edit); shared helpers (styleText/chipBox/layoutGroup/…) live in `core/layers/util.js`.
 
+**Four types share one primitive.** `paint`, `shader`, `raymarch` and `three` are all "a canvas sized
+to the layer box, redrawn every frame from local time", so they are one file — `core/layers/canvas.js`
+— with a backend per type in `core/surfaces/`. A backend owns PIXELS and nothing else: the sizing, the
+styling, the off-window clear and the dedup stamp are the primitive's, once, for all four. This is
+internal. The four names, and every prop they take, are unchanged in scene JSON; there is no `canvas`
+type and no `surface` prop. Adding a canvas-drawn look = adding a file to `core/surfaces/` and a line
+to `core/layers/index.js`.
+
 **`modifiers: []` — an effect applied to a layer, instead of another layer type.** Any layer (and any
 group child) may carry `"modifiers": [{ "mixBlend": "difference" }]`. Each key names a modifier from
 `core/fx/`, a registry that mirrors the layer one: a file per modifier exporting `build(kit, el, L, spec)`
@@ -633,7 +641,9 @@ once the moment a layer can be sampled.
 
 **Constraints (all validator-enforced, all fail loud):**
 1. **Raster layers only**: `image` · `paint` · `shader`. A `text`/`rect`/`group`/`component` layer owns
-   no pixels to sample, so `resample` there is a validation error, never a silent no-op.
+   no pixels to sample, so `resample` there is a validation error, never a silent no-op. `raymarch` and
+   `three` own a canvas but not a sampleable one (they hold their own WebGL context), and they now
+   refuse `resample` by name — until the canvas types were collapsed they accepted it and ignored it.
 2. **`resample` on an image requires explicit `w` and `h`.** The GL buffer is sized at build time and
    an unsized `<img>` has no dimensions until it loads.
 3. **`ken` and `resample` cannot combine** on the same image layer. `ken` is a CSS transform on the

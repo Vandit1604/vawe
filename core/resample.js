@@ -14,11 +14,12 @@ import { createResampler, RESAMPLE_FX } from './resample-fx.js';
 
 const SPECS = new WeakMap();   // el → { r, src, fx, amount, speed, seed, static }
 
-// Resolve a layer's raster source. The ORDER matters: paint and shader stash their canvas on the
-// element at build time, and only an image layer falls through to the <img>.
+// Resolve a layer's raster source. The ORDER matters: a canvas layer (core/layers/canvas.js) stashes
+// its surface on the element at build time, and only an image layer falls through to the <img>.
+// Asking the surface rather than naming `paint` and `shader` one at a time is what stopped this from
+// silently answering "no raster" for raymarch and three; canvas.js now refuses those by name instead.
 function sourceOf(el) {
-  if (el.__paint) return { node: el.__paint.canvas, isStatic: false };
-  if (el.__shader) return { node: el.__shader.canvas, isStatic: false };
+  if (el.__surface) return { node: el.__surface.canvas, isStatic: false };
   const im = el.querySelector('img');
   if (im) return { node: im, isStatic: true };
   return null;

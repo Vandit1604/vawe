@@ -721,11 +721,12 @@ const srcCases = [
   { name: 'docs-drift · a shipped effect listed as missing', file: 'docs/ROADMAP.md',
     mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
     cmd: ['node', ['scripts/gates/docs-drift.mjs']], match: /DOCS DRIFT/ },
-  { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/paint.js',
-    // Anchored on the clearRect call, not the whole line: the line also carries the resample tick
-    // now, and pinning the exact text made the fixture go stale the moment the branch grew. A stale
-    // fixture SKIPS, which reads as "fine" in the summary while proving nothing.
-    mutate: (s) => s.replace("const [w0, h0] = el.__paintWH; ctx.clearRect(0, 0, w0, h0);", ""),
+  { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/canvas.js',
+    // Anchored on the clear() call, not the whole line: the line also carries the resample tick, and
+    // pinning the exact text made the fixture go stale the moment the branch grew. A stale fixture
+    // SKIPS, which reads as "fine" in the summary while proving nothing. The off-window clear is one
+    // branch for all four canvas types now, so this case covers shader/raymarch/three as well.
+    mutate: (s) => s.replace("{ s.clear(); if (S.resamplable)", "{ if (S.resamplable)"),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
   // that read. So the case turns on the mutation: it used to pin a prop (`r`) that no build of the

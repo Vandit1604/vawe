@@ -29,24 +29,28 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // borderTrail · circle · becomes · panWith …) was outside the check, and the gate reported green over
 // the blind spot (docs/MISTAKES.md #229).
 //
-// So the scan is the orchestrator plus the three REGISTRY DIRECTORIES, each walked whole: a layer prop
-// is read by the thing that DRAWS a layer (core/layers), the thing that MODIFIES one (core/fx) or the
-// pipeline that COMPOSES one per frame (core/tracks), and each of those is one file per entry in a
-// directory, so a walk cannot go stale the way a hand-written file list did.
+// So the scan is the orchestrator plus the four REGISTRY DIRECTORIES, each walked whole: a layer prop
+// is read by the thing that DRAWS a layer (core/layers, and core/surfaces for the four types whose
+// output is a canvas), the thing that MODIFIES one (core/fx) or the pipeline that COMPOSES one per
+// frame (core/tracks), and each of those is one file per entry in a directory, so a walk cannot go
+// stale the way a hand-written file list did.
 //
 // Deliberately not all of core/: `L` is a local name elsewhere (core/audio-kit.mjs builds a synth voice
 // from an `L` carrying attack/decay/waveform), and a gate widened until it invents findings is worse
 // than the gap it closed.
 const engineFiles = [path.join(ROOT, 'formats/scene/scene.html'), path.join(ROOT, 'formats/scene/scene.js')];
-for (const dir of ['core/layers', 'core/fx', 'core/tracks'])
+for (const dir of ['core/layers', 'core/surfaces', 'core/fx', 'core/tracks'])
   for (const f of fs.readdirSync(path.join(ROOT, dir)))
     if (f.endsWith('.js')) engineFiles.push(path.join(ROOT, dir, f));
 const engineSrc = engineFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
 
-// props the engine reads off a layer/child object (L.<prop> or C.<prop>)
+// props the engine reads off a layer/child object (L.<prop>, LL.<prop> or C.<prop>). `LL` is the same
+// layer under an inner name where `L` is already taken — core/three-fx.js has always done it, and
+// core/surfaces does it in the per-frame draw. scripts/gates/layer-props.mjs has matched all three
+// since it shipped; this pattern matched two, so a prop read only as `LL.` counted as read nowhere.
 const engineProps = new Set();
-for (const m of engineSrc.matchAll(/\b[LC]\.([a-zA-Z][a-zA-Z0-9]*)/g)) engineProps.add(m[1]);
+for (const m of engineSrc.matchAll(/\b(?:LL?|C)\.([a-zA-Z][a-zA-Z0-9]*)/g)) engineProps.add(m[1]);
 
 // every field name DEFINED anywhere in the schema (skip the JSON-schema structural keywords)
 const RESERVED = new Set(['type', 'label', 'item', 'enum', 'min', 'max', 'default', 'required',

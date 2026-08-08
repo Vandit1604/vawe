@@ -17,12 +17,15 @@ import * as html from './html.js';
 import * as component from './component.js';
 import * as board from './board.js';
 import * as doc from './doc.js';
-import * as shader from './shader.js';
 import * as lottie from './lottie.js';
-import * as paint from './paint.js';
-import * as raymarch from './raymarch.js';
-import * as three from './three.js';
 import * as composition from './composition.js';
+import { canvasLayer } from './canvas.js';
+
+// The four types whose whole output is a canvas are ONE primitive with four backends (core/surfaces/).
+// They are still four names in scene JSON and four entries here — the collapse was internal, and 101
+// scenes are written in the names.
+const shader = canvasLayer('shader'), paint = canvasLayer('paint');
+const raymarch = canvasLayer('raymarch'), three = canvasLayer('three');
 
 const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, composition };
 

@@ -62,11 +62,30 @@ for (const k of ['start', 'duration', 'motion', 'anim', 'out']) {
 // `pointSize`/`bodyColor`/`dolly` as dead while the render honoured them). So follow the builder's own
 // relative imports, one hop: whatever core module a layer builder pulls in is where its props may land.
 const ALSO = { count: ['core/layers/text.js'] };   // delegation that is not an import
-const delegatesOf = (src) => [...src.matchAll(/from\s+'\.\.\/([\w-]+\.js)'/g)].map((m) => path.join('core', m[1]));
+// Both relative forms, resolved against the importing file's OWN directory: `../x.js` is the core
+// module a builder hands the layer to, `./x.js` a sibling in the same registry directory. Matching
+// only `../` was enough while every builder lived in core/layers; the moment a builder had a sibling
+// (core/surfaces/palette.js, which reads L.colors) that read became invisible and `colors` on a
+// raymarch layer was reported dead while the render honoured it. The same shape as the `three` miss
+// this delegation-following was written for.
+const delegatesOf = (src, dir) => [...src.matchAll(/from\s+'(\.\.?)\/([\w-]+\.js)'/g)]
+  .map((m) => path.join(dir, m[1], m[2]));
+// A type's own source is core/layers/<type>.js, EXCEPT for the four canvas types, which share one
+// primitive (core/layers/canvas.js) and keep only their pixels in core/surfaces/<type>.js. Both
+// halves read layer props, so both are the type's own source. `read` returns '' for a file that is
+// not there, and an empty per-type set makes this gate call every prop on that type dead — so a type
+// resolving to nothing is reported as the gate being blind, exactly as the shared scan already is.
+const ownSourcesOf = (t) => [
+  ['core/layers', read(path.join(repoRoot, 'core/layers', `${t}.js`)) || read(path.join(repoRoot, 'core/layers/canvas.js'))],
+  ['core/surfaces', read(path.join(repoRoot, 'core/surfaces', `${t}.js`))],
+].filter(([, s]) => s.trim());
 const perType = {};
 for (const t of LAYER_TYPES) {
-  const own = read(path.join(repoRoot, 'core/layers', `${t}.js`));
-  const src = [own, ...[...delegatesOf(own), ...(ALSO[t] || [])].map((f) => read(path.join(repoRoot, f)))].join('\n');
+  const halves = ownSourcesOf(t);
+  if (!halves.length) { console.error(`✗ layer-props is blind: layer type \`${t}\` has no source at core/layers/${t}.js or core/surfaces/${t}.js. Fix the resolver in this gate.`); process.exit(2); }
+  const own = halves.map(([, s]) => s).join('\n');
+  const delegates = halves.flatMap(([dir, s]) => delegatesOf(s, dir));
+  const src = [own, ...[...delegates, ...(ALSO[t] || [])].map((f) => read(path.join(repoRoot, f)))].join('\n');
   perType[t] = readsIn(src);
   // an fx registry reads its options as `o.foo`, not `L.foo`
   for (const m of src.matchAll(/\bo\.([A-Za-z_$][\w$]*)/g)) perType[t].add(m[1]);
