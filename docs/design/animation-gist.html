@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gist — animation explainer</title>
+<style>
+/* ==================================================================================================
+   Tokens and components lifted from site/app/globals.css, not re-invented. Where this file and the
+   site disagree, the site is right.
+
+   Three things the site had already decided, which earlier drafts of this page got wrong:
+
+   1. THE MEDIA WELL IS DARK, AND THE PAGE IS NOT. `.demo-media` is `background:#0f1620` inside a
+      white-first site. So "dark cinematic room" was never a choice between the two — the site already
+      frames dark media in white chrome, and that is where the shot belongs.
+   2. BUTTONS ARE THE BRAND FACE AT 15.5/600 ON A 12px RADIUS, not mono on a sharp corner. A control
+      that looks like a readout tells the reader the wrong thing about what it does.
+   3. STATUS COLOUR IS THE ONLY SANCTIONED EXCEPTION to the One Voice Rule, and it is reserved for the
+      editor's boot state. The amber "measured value" colour an earlier draft invented was a second
+      voice the system explicitly does not allow.
+
+   The one thing added: MOTION IS SPLIT BY JOB. Chrome uses the site's --ease. The demo uses the
+   ENGINE's easing, copied from core/motion.js, because there the curve is the subject rather than the
+   styling. Mixing them would teach a curve the engine does not have.
+   ================================================================================================== */
+:root{
+  /* ---- verbatim from site/app/globals.css ---- */
+  --accent:#2563eb; --accent-2:#1d4ed8; --accent-ink:#fff; --accent-soft:#eef3ff;
+  --accent-line:#cfe0ff; --accent-on-dark:#8fc0ff;
+  --bg:#fff; --bg-2:#f6f8fb; --field:#e9ecf1; --surface:#fff;
+  --line:#e7eaf0; --line-2:#d7dce4;
+  --ink:#0f1620; --ink-2:#454f5e; --muted:#697182;
+  --r:14px; --maxw:1160px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.22,1,.36,1);
+  --shadow-1:0 1px 2px rgba(16,22,32,.04), 0 2px 8px rgba(16,22,32,.05);
+  --shadow-2:0 8px 24px -8px rgba(16,22,32,.14), 0 2px 8px rgba(16,22,32,.06);
+
+  /* ---- this page only: hairlines INSIDE the ink media well, where --line would vanish ---- */
+  --line-on-ink:rgba(255,255,255,.075);
+
+  /* ---- the ENGINE's easing, for the demo only (core/motion.js EASINGS) ---- */
+  --ease-brake:cubic-bezier(.16,.84,.32,1);   /* decel(t, 2.4) */
+
+  --font-sans:"Anybody", system-ui, -apple-system, sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@font-face{font-family:"Anybody";src:url("../../assets/fonts/Anybody.woff2") format("woff2");
+           font-weight:100 900;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url("../../assets/fonts/JetBrainsMono.woff2") format("woff2");
+           font-weight:100 800;font-display:swap}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--font-sans);
+     letter-spacing:-.004em;font-variation-settings:"wdth" 100;-webkit-font-smoothing:antialiased}
+
+.page{min-height:100vh;display:grid;place-items:center;padding:64px 24px}
+.col{width:min(var(--maxw),100%)}
+
+/* the site's .eyebrow, used ONCE for the page rather than above every section */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;
+         font-size:12.5px;color:var(--muted);margin-bottom:22px}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+h1{font:800 clamp(2.9rem,7.2vw,6rem)/1 var(--font-sans);letter-spacing:-.022em;
+   font-variation-settings:"wdth" 105;margin-bottom:22px;text-wrap:balance}
+h1 span{color:var(--muted)}
+.lead{font-size:1.2rem;line-height:1.5;color:var(--ink-2);max-width:34rem;
+      margin-bottom:44px;text-wrap:pretty}
+
+/* ---- the shot · the site's .demo-media ------------------------------------------------------- */
+.shot{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+      background:#0f1620;box-shadow:var(--shadow-2);aspect-ratio:16/7}
+.shot::before{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line-on-ink) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line-on-ink) 1px,transparent 1px);
+  background-size:72px 72px}
+
+.card{position:absolute;top:50%;left:0;width:136px;height:88px;margin-top:-44px;z-index:2;
+      background:var(--accent);border-radius:10px;display:grid;place-items:center;
+      font:500 12.5px var(--font-mono);letter-spacing:.06em;color:var(--accent-ink);
+      box-shadow:0 6px 20px -6px rgba(37,99,235,.5)}
+.ghost{position:absolute;top:50%;height:88px;margin-top:-44px;width:136px;z-index:1;
+       border:1px dashed rgba(143,192,255,.3);border-radius:10px}
+
+/* ---- readout · mono, tabular, ink. never coloured -------------------------------------------- */
+.plate{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:12px;
+       font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--muted)}
+.plate .live{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.plate .live b{font-weight:400;color:var(--muted)}
+
+/* ---- transport · the site's .btn / .btn-ghost, verbatim -------------------------------------- */
+.transport{display:flex;align-items:center;gap:24px;margin-top:32px;flex-wrap:wrap}
+input[type=range]{flex:1;min-width:14rem;accent-color:var(--accent);height:2px}
+.keys{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15.5px;
+     font-weight:600;letter-spacing:-.01em;padding:13px 22px;border-radius:12px;cursor:pointer;
+     border:1px solid transparent;
+     transition:transform .14s var(--ease),background .2s,border-color .2s,box-shadow .25s var(--ease)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.btn-ghost[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.btn-white{background:#fff;color:var(--ink);box-shadow:var(--shadow-2)}
+.btn-white:hover{transform:translateY(-2px);box-shadow:var(--shadow-3,0 40px 80px -24px rgba(16,22,32,.28))}
+
+/* ---- notes ----------------------------------------------------------------------------------- */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:32px;
+       margin-top:64px;padding-top:24px;border-top:1px solid var(--line)}
+.notes h2{font-family:var(--font-mono),monospace;font-size:12.5px;font-weight:500;color:var(--ink);
+          margin-bottom:8px}
+.notes p{font-size:.92rem;line-height:1.6;color:var(--muted);max-width:24rem}
+.notes code{font-family:var(--font-mono),monospace;font-size:.92em;color:var(--accent-2)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="page"><div class="col">
+
+  <p class="eyebrow"><span class="dot"></span>vawe / animation</p>
+
+  <h1>Nothing here<br>ever <span>plays.</span></h1>
+  <p class="lead">The engine draws one still picture, photographs it, discards it, and draws the next.
+  Ask for the same number twice and you get the same picture twice. Drag the transport, and you are
+  doing exactly what the renderer does.</p>
+
+  <div class="shot" id="shot">
+    <div class="ghost" id="ghost"></div>
+    <div class="card" id="card">FRAME 00</div>
+  </div>
+
+  <div class="plate">
+    <span>sample · 1920×1080 · 30 fps</span>
+    <span class="live"><span id="pf">000</span><b>/090</b> &nbsp; <b>t</b> <span id="pt">0.000</span>s
+      &nbsp; <b>eased</b> <span id="pe">0.000</span></span>
+  </div>
+
+  <div class="transport">
+    <input type="range" id="scrub" min="0" max="90" value="0" aria-label="frame">
+    <div class="keys">
+      <button class="btn btn-ghost" id="bBrake" type="button" aria-pressed="true">brake</button>
+      <button class="btn btn-ghost" id="bLinear" type="button" aria-pressed="false">linear</button>
+      <button class="btn btn-white" id="bJump" type="button">scramble</button>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div><h2>Scramble</h2><p>Asks for frames out of order. Each still lands correctly, because the
+      position is a function of the number and of nothing else. That is the whole argument.</p></div>
+    <div><h2>Real curves</h2><p><code>brake</code> is <code>decel(t, 2.4)</code> from core/motion.js.
+      The demo eases on the engine's curve; the buttons ease on the site's.</p></div>
+    <div><h2>One voice</h2><p>Cobalt marks what you can move. A number the page measured is mono at
+      ink, never coloured, so the accent never means two things.</p></div>
+  </div>
+
+</div></div>
+
+<script>
+(() => {
+  'use strict';
+  // Copied VERBATIM from core/motion.js so the demo cannot teach a curve the engine does not have.
+  // The built page will `import { EASINGS } from '../core/motion.js'` — a pure module with no DOM
+  // dependency — which removes the drift risk the direction named as its one risk.
+  const clamp01 = (t) => t < 0 ? 0 : t > 1 ? 1 : t;
+  const decel = (t, k = 2.4) => 1 - Math.pow(1 - clamp01(t), k);   // EASINGS.brake
+  const EASE = { brake: decel, linear: (t) => t };
+
+  const FPS = 30, LAST = 90;
+  const $ = (id) => document.getElementById(id);
+  const card = $('card'), ghost = $('ghost'), shot = $('shot'), scrub = $('scrub');
+  let ease = 'brake';
+
+  // The renderer's contract in miniature: the picture is a function of the number and nothing else.
+  // Nothing reads a previous position, nothing accumulates — which is why scramble lands correctly.
+  const draw = (n) => {
+    const p = EASE[ease](clamp01(n / LAST));
+    const span = shot.clientWidth - 136 - 48;
+    card.style.transform = `translateX(${(24 + p * span).toFixed(1)}px)`;
+    ghost.style.transform = `translateX(${(24 + span).toFixed(1)}px)`;
+    card.textContent = 'FRAME ' + String(n).padStart(2, '0');
+    $('pf').textContent = String(n).padStart(3, '0');
+    $('pt').textContent = (n / FPS).toFixed(3);
+    $('pe').textContent = p.toFixed(3);
+  };
+
+  scrub.addEventListener('input', () => draw(+scrub.value));
+  const pick = (name) => {
+    ease = name;
+    $('bBrake').setAttribute('aria-pressed', String(name === 'brake'));
+    $('bLinear').setAttribute('aria-pressed', String(name === 'linear'));
+    draw(+scrub.value);
+  };
+  $('bBrake').addEventListener('click', () => pick('brake'));
+  $('bLinear').addEventListener('click', () => pick('linear'));
+  $('bJump').addEventListener('click', () => {
+    [83, 12, 47, 4, 66, 29, 90, 51].forEach((n, i) =>
+      setTimeout(() => { scrub.value = n; draw(n); }, i * 300));
+  });
+  addEventListener('resize', () => draw(+scrub.value));
+  draw(0);
+})();
+</script>
+</body>
+</html>
