@@ -1,7 +1,7 @@
 # Vawe — render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
 
-.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples blueprints
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
