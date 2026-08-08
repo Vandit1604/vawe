@@ -813,6 +813,16 @@ const srcCases = [
   { name: 'schema-drift · a NON-anim enum drifted', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"kaleidoscope",', '"kaleidoscop",'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
+  // The modifier vocabulary is a set of schema KEYS, which the enum comparison above cannot see, so it
+  // is checked separately and pinned separately. A modifier the schema does not list is dispatched by
+  // the engine and refused by validate's unknown-prop pass: drift that makes the two disagree about
+  // what a valid scene is.
+  { name: 'schema-drift · the modifier registry and the schema disagree', file: 'formats/scene/schema.json',
+    mutate: (s) => s.replace('"mixBlend": {', '"mixBlnd": {'),
+    cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
+  { name: 'schema-drift · a blend mode the engine does not accept', file: 'formats/scene/schema.json',
+    mutate: (s) => s.replace('"color-dodge", "color-burn"', '"color-dodge", "colour-burn"'),
+    cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
   // The backdrop is a REQUIRED authoring choice now that the baseline no longer injects one. Without this
   // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,
   // and nothing proves it still fires. Anchored on the top-level key (a layer `bg` is a colour string, so

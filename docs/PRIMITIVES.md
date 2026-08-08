@@ -344,6 +344,16 @@ primitive's `frame()` runs, so it is never a value left over from the previous f
 is a thin orchestrator (bg/camera/stings/timing) that dispatches to it. **Adding a primitive = adding a
 file** (no scene.html edit); shared helpers (styleText/chipBox/layoutGroup/…) live in `core/layers/util.js`.
 
+**`modifiers: []` — an effect applied to a layer, instead of another layer type.** Any layer (and any
+group child) may carry `"modifiers": [{ "mixBlend": "difference" }]`. Each key names a modifier from
+`core/fx/`, a registry that mirrors the layer one: a file per modifier exporting `build(kit, el, L, spec)`
+and optionally `frame(kit, el, L, t, scene, spec)`, so **adding a modifier = adding a file**. An unknown
+name is a hard error listing the known set, never a skipped entry. Modifiers apply in array order and
+always last, after the primitive's own `frame()` and after every cross-cutting track (cut · units · vars
+· react · box · motion), so a modifier acts on the finished frame. `transform`, `opacity` and `filter`
+on the layer element belong to those tracks and a modifier must not append to them; one that needs a
+transform gets an element of its own. Note this is **not** `fx`, which is the named-GSAP-effect slot.
+
 Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) · `image` (+ `ken`) ·
 `component` (captured real UI) · `rect` (cards/pills/slabs) · `count` (count-up) · `glow` · `board` ·
 `doc` · `html` · `clip` · `cursor` (pointer `path` + `clicks`) · `group` (layout box — see below). Per

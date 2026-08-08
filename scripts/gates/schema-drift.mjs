@@ -12,6 +12,8 @@ import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
+import { FX_TYPES } from '../../core/fx/index.js';
+import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { PRESETS } from '../../core/type.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
@@ -83,6 +85,7 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
     // is the union of all four registries — the router in transitions-lower.js is the drift-proof guard).
     { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
+    { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
   ];
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {
@@ -98,6 +101,21 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
     if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
     if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
     bad++;
+  }
+  // The modifier vocabulary is a set of KEYS, not an enum, so the loop above cannot see it: a second
+  // file in core/fx/ would be dispatchable by the engine and rejected by validate's unknown-prop pass,
+  // which is drift pointing the other way \u2014 the engine accepts what the schema refuses.
+  {
+    const node = at('layers.item.modifiers.item') || {};
+    const have = Object.keys(node).sort().join(',');
+    if (have !== [...FX_TYPES].sort().join(',')) {
+      const missing = FX_TYPES.filter((x) => !(x in node));
+      const extra = Object.keys(node).filter((x) => !FX_TYPES.includes(x));
+      console.error('\u2717 layers.item.modifiers.item DRIFT vs core/fx/index.js REGISTRY');
+      if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
+      if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
+      bad++;
+    } else checked++;
   }
   if (bad) process.exit(1);
   console.log(`\u2713 ${checked} schema enum(s) in sync with the registries they copy`);

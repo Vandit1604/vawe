@@ -2,6 +2,7 @@
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
 import { createKit } from './util.js';
+import { buildFx, frameFx } from '../fx/index.js';
 import * as text from './text.js';
 import * as count from './count.js';
 import * as image from './image.js';
@@ -60,11 +61,15 @@ export function createRenderer(ctx) {
   // Injected AFTER the kit exists (util.js cannot import this file — that would be circular). This is
   // what lets a group child run the same builder as a top-level layer instead of a re-implemented
   // subset of it (docs/MISTAKES.md #70).
-  kit.buildLeaf = (el, L) => pick(L).build(kit, el, L);
+  // The primitive builds the thing; its `modifiers` then modify what was built, in that order and never
+  // the other way round. Routed through ONE helper so a group child and a top-level layer cannot end up
+  // with different modifier support — the second-class-child bug in 5 of the 61 audit findings.
+  const buildOne = (el, L) => { pick(L).build(kit, el, L); buildFx(kit, el, L); };
+  kit.buildLeaf = buildOne;
   return {
     kit,
     // construct a layer's DOM (default primitive = text; count reuses the text build)
-    build(el, L) { pick(L).build(kit, el, L); },
+    build(el, L) { buildOne(el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) stay in scene.html's loop; those compose around this call.
     //
@@ -74,5 +79,9 @@ export function createRenderer(ctx) {
     // them is a property of one layer. It is frozen because a layer that could write to it would be
     // writing into the next layer's inputs, and renderFrame(n) has to stay pure in n.
     frame(el, L, t, scene) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t, scene); },
+    // per-frame MODIFIER pass (core/fx/index.js), kept a separate entry point from frame() on purpose:
+    // it has to run after scene.js's cross-cutting tracks (cut · units · vars · react · box · motion),
+    // and frame() runs before them. Composition order is spelled out in core/fx/index.js.
+    modify(el, L, t, scene) { frameFx(kit, el, L, t, scene); },
   };
 }

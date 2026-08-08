@@ -673,6 +673,9 @@ boot((data, fps, theme, canvas) => {
       const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
       el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
     }
+    // MODIFIERS (`modifiers: [{ mixBlend: "difference" }]`) — last, so a modifier acts on the finished
+    // frame rather than on a half-composed one. A layer that declares none never enters this call.
+    renderer.modify(el, L, t, scene);
   }
 
   function renderFrame(f) {

@@ -935,6 +935,17 @@
           "type": "string|object",
           "label": "Named GSAP EXIT from core/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
         },
+        "modifiers": {
+          "type": "array",
+          "label": "Modifier stack applied to this layer, in array order, after every motion track: [{ \"mixBlend\": \"difference\" }]. Each key names a modifier from core/fx; an unknown name is a hard error, never a no-op. NOT `fx`, which is the named-GSAP-effect slot.",
+          "item": {
+            "mixBlend": {
+              "type": "string|object",
+              "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }.",
+              "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "plus-lighter"]
+            }
+          }
+        },
         "motionPath": {
           "type": "object",
           "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
