@@ -361,7 +361,7 @@ resolved before any layer draws, so a modifier can never read a value another la
 
 | field | what it is |
 |---|---|
-| `boxOf(id)` | a layer's canvas-space box at `t` (x/y/w/h/cx/cy/scale/rot/opacity/visible), or null |
+| `boxOf(id)` | any layer's canvas-space box at `t` (x/y/w/h/cx/cy/scale/rot/opacity/visible), or null |
 | `specOf(id)` | that layer's own authored JSON, deep-frozen, plus its `z` (paint order) |
 | `ids` | every layer that declares an `id`, sorted by `z` |
 | `clock` | `{ t, frame, fps, duration }` — how far through the FILM this frame is |
@@ -373,6 +373,13 @@ resolved before any layer draws, so a modifier can never read a value another la
 Font roles are deliberately absent: a face is written at build by the primitive that lays the text out,
 and nothing in the registry could consume one per frame.
 
+**A group child is a full layer here.** `boxOf`/`specOf`/`ids` cover group children at any depth: a child
+is laid out, so its offset inside the group is measured ONCE at build and composed with the group's
+per-frame box, and `occlude` and `shadow` work on one. Its `z` is its group's, because a group paints as
+one element. Two limits, both narrow and both loud: a group whose motion track keys `w`/`h` reflows its
+children, so their boxes are null and the modifiers that need one say exactly that; and `mixBlend` is
+refused on a child, because CSS blends against the nearest stacking context and the group is one.
+
 **`shadow` — cast away from the scene's light.** Declare `"lighting": {"x": 540, "y": 120}` at the top
 level (canvas px, plus optional `intensity`), then `{"shadow": 30}` or
 `{"shadow": {"dist": 40, "blur": 50, "color": "accent", "opacity": 0.3}}`. Every other drop shadow in
@@ -381,7 +388,9 @@ on every layer forever; this one is computed per layer from the light to that la
 cards either side of the light throw their shadows in **opposite** directions and one scene-level number
 re-lights the film. It rides `box-shadow`, which follows the layer's **box, not its glyphs** — right for
 cards, panels and images, wrong for a bare headline (use `L.filter: "drop-shadow(...)"` there). Refuses
-alongside `elevation`/`shadow`/`glow` (same CSS property) and on a group child; put it on the group.
+alongside `elevation`/`shadow`/`glow` (same CSS property). It works **on a group child** — each card in
+a group throws its own shadow away from the light, which is what a row of objects on a surface does; put
+it on the group when the group should read as one solid thing.
 `color` defaults to **`"auto"`**, which reads the backdrop at `t` — the theme's ink over a light field,
 black over a dark one, the accent over an accent field — and also takes a **palette role name**
 (`"accent"`, `"ink"`, `"line"`), so the shadow moves with the brand instead of pinning a hex the theme
@@ -395,9 +404,8 @@ only say "in front or behind,
 always"; this says "behind THAT, right now", so a caption can disappear under a card as the card slides
 across it. The hole follows the occluder's motion track exactly, rotation and scale included, and closes
 while the occluder is outside its own window. `invert` keeps only the overlap. Both layers need an `id`
-(it is `scene.boxOf` that answers "where is the other layer"), and it refuses on a **group child**, whose
-canvas position is not knowable, and on a layer whose `cut` animates clip-path (`barn`, `letterbox`) —
-that would win silently and cancel the cut.
+(it is `scene.boxOf` that answers "where is the other layer"). It refuses on a layer whose `cut` animates
+clip-path (`barn`, `letterbox`), which it would win silently and cancel.
 
 **`tilt` — turn a layer out of the picture plane.** `{"tilt": {"y": 26}}` leans the layer about its own
 centre in 3D; `x`/`y`/`z` are degrees. Every tilted layer sharing a parent is projected through **one

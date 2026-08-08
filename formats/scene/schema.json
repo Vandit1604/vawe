@@ -950,16 +950,16 @@
           "item": {
             "mixBlend": {
               "type": "string|object",
-              "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }.",
+              "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }. Refused on a group child: CSS blends against the nearest stacking context, which is the group, so it would reach nothing behind the group. Put it on the group.",
               "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "plus-lighter"]
             },
             "shadow": {
               "type": "number|object",
-              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property) and on a group child."
+              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property). Works on a group child, whose box is measured once at build and composed with its group's; the exception is a group whose motion track keys `w`/`h`, which reflows its children."
             },
             "occlude": {
               "type": "string|object",
-              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids] | \"above\" | \"below\", pad: px grown around the occluder, invert: show ONLY the overlap }. \"above\"/\"below\" mean every layer painted in front of / behind this one, read from the scene's paint order, so the set is never a hand-written list that rots when a layer is added. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer; refuses on a group child, whose canvas position is not knowable."
+              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids] | \"above\" | \"below\", pad: px grown around the occluder, invert: show ONLY the overlap }. \"above\"/\"below\" mean every layer painted in front of / behind this one, read from the scene's paint order, so the set is never a hand-written list that rots when a layer is added. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer. Works on a group child; the exception is a group whose motion track keys `w`/`h`, which reflows its children and makes their measured offsets stale."
             },
             "progress": {
               "type": "boolean|string|object",

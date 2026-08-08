@@ -26,12 +26,12 @@
 // other than this modifier is a hard error naming both. Ours is always a `path(`, which nothing else in
 // the engine emits, so the test needs no marker and no state.
 //
-// ON A GROUP CHILD IT REFUSES, and that is a limit of the geometry, not an omission. A group child's
-// x/y are relative to a flex or grid box whose position only layout knows, which is exactly why
-// scene.js's boxOf returns null for one rather than a plausible guess. Without a canvas-space box for
-// the occluded layer there is no way to place a canvas-space occluder inside it, and a hole that is
-// silently 40px off is worse than an error. Put the modifier on the GROUP: the group is a top-level
-// layer with a real box, and occluding it occludes everything in it.
+// IT WORKS ON A GROUP CHILD. It used to refuse on the argument that a child's x/y are relative to a
+// flex box whose position only layout knows — true of the AUTHORED x/y and not of the child, which is
+// laid out and therefore measurable. scene.js measures that offset once at build and composes it with
+// the group's per-frame box, so a group child has a real canvas box like anything else. The refusal
+// survives for ONE case, where the measurement really is stale: a group whose own motion track keys
+// `w`/`h` has reflowed its children, and boxOf returns null for those.
 
 export const OCCLUDE_KEYS = ['by', 'pad', 'invert'];
 // `by` may name the STACK instead of a set of ids. The effect's real subject is almost always "hide me
@@ -72,8 +72,7 @@ export function build(kit, el, L, spec) {
   // the pass that runs before any frame is drawn.
   if (!L.id)
     throw new Error(`occlude: this layer needs an \`id\` — its own box is looked up through scene.boxOf, `
-      + `which only knows layers an author named. Add "id" to the layer carrying the modifier. A group `
-      + `CHILD is refused whatever it is called: put the modifier on the group.`);
+      + `which only knows layers an author named. Add "id" to the layer carrying the modifier.`);
 }
 
 // A box as four canvas-space corners: half extents grown by pad, scaled about the centre, then rotated.
@@ -88,14 +87,15 @@ function cornersOf(b, pad) {
 
 export function frame(kit, el, L, t, scene, spec) {
   const { by, pad, invert } = resolve(spec);
-  if (!el.classList.contains('hs-layer'))
-    throw new Error(`occlude: layer "${L.id}" is a GROUP CHILD, whose position in the canvas only the `
-      + `group's layout knows — scene.boxOf returns null for one on purpose. Put the modifier on the `
-      + `group layer instead; occluding the group occludes everything in it.`);
   const me = scene.boxOf(L.id);
+  // The ONE case a box is still unresolvable, named precisely rather than blanket-refusing every group
+  // child: a group whose motion track keys w/h reflows what is inside it, so the offsets measured at
+  // build no longer describe its children.
   if (!me)
-    throw new Error(`occlude: no box for this layer's own id "${L.id}" — boxOf knows only top-level `
-      + `layers that declare an id.`);
+    throw new Error(`occlude: no box for this layer's own id "${L.id}". Either nothing declares that id, `
+      + `or this is a child of a group whose motion track keys \`w\`/\`h\` — resizing a flex or grid box `
+      + `reflows its children, so their measured offsets are stale and a hole placed from them would be `
+      + `silently wrong. Put the modifier on the group, or resize with \`scale\` instead of w/h.`);
   const prior = el.style.clipPath;
   if (prior && prior !== 'none' && !prior.startsWith('path('))
     throw new Error(`occlude: layer "${L.id}" already has a clip-path from something else (${prior}) — `
@@ -112,17 +112,21 @@ export function frame(kit, el, L, t, scene, spec) {
   // "above"/"below" expand against the paint order, minus this layer itself. A layer sharing my z is
   // NEITHER: CSS breaks that tie by document order and the answer would flip on a reorder that changes
   // nothing visible, so it is left out rather than guessed at.
+  // An id with no box (a child of a group its motion track resizes) is DROPPED from a stack expansion
+  // and still an error when named explicitly: "everything above me" is a set, and a set that cannot
+  // include one member is not a mistake, whereas naming that member is.
   const mine = scene.specOf(L.id).z;
   const occluders = STACK.includes(by[0])
-    ? scene.ids.filter((id) => id !== L.id && (by[0] === 'above' ? scene.specOf(id).z > mine : scene.specOf(id).z < mine))
+    ? scene.ids.filter((id) => id !== L.id && scene.boxOf(id)
+        && (by[0] === 'above' ? scene.specOf(id).z > mine : scene.specOf(id).z < mine))
     : by;
   const holes = [];
   for (const id of occluders) {
     const o = scene.boxOf(id);
     if (!o)
       throw new Error(`occlude: no layer with id "${id}" — boxOf resolves TOP-LEVEL layers that declare `
-        + `an id, and returns null for a group child (its canvas position is not knowable) and for a `
-        + `name nothing uses. Known here: ${scene.ids.join(', ') || '(no layer declares an id)'}.`);
+        + `an id and group children whose group is not resized by its motion track. Known here: `
+        + `${scene.ids.join(', ') || '(no layer declares an id)'}.`);
     if (!o.visible || o.opacity <= 0) continue;   // outside its own window: it is not covering anything
     holes.push('M' + cornersOf(o, pad).map(toLocal).map(([x, y]) => `${x} ${y}`).join('L') + 'Z');
   }

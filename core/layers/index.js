@@ -63,9 +63,15 @@ export function createRenderer(ctx) {
   // subset of it (docs/MISTAKES.md #70).
   // The primitive builds the thing; its `modifiers` then modify what was built, in that order and never
   // the other way round. Routed through ONE helper so a group child and a top-level layer cannot end up
-  // with different modifier support — the second-class-child bug in 5 of the 61 audit findings.
+  // with different modifier support.
   const buildOne = (el, L) => { pick(L).build(kit, el, L); buildFx(kit, el, L); };
   kit.buildLeaf = buildOne;
+  // A NESTED GROUP does not go through buildLeaf — addGroupChild lays it out itself and recurses — so
+  // for as long as this slot has existed its modifiers were never built, silently. Not "refused": the
+  // frame half still ran, so `tilt` half-worked and `mixBlend` did nothing at all, which is the exact
+  // shape (input accepted and then ignored) the registry's hard-error dispatch was written to kill.
+  // Exposed separately because the group's own construction is not a primitive build.
+  kit.buildFx = (el, L) => buildFx(kit, el, L);
   return {
     kit,
     // construct a layer's DOM (default primitive = text; count reuses the text build)
@@ -73,8 +79,9 @@ export function createRenderer(ctx) {
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) stay in scene.html's loop; those compose around this call.
     //
-    // `scene` is a FROZEN read-only view of the rest of the frame: { boxOf(id), light, camera, canvas,
-    // safe }. A primitive used to be handed itself and the clock and nothing else, which is why
+    // `scene` is a FROZEN read-only view of the rest of the frame: geometry (boxOf · specOf · ids), the
+    // frame's own properties (light · camera · canvas · safe · bg), the clock, the theme's palette, and
+    // the film's joints. A primitive used to be handed itself and the clock and nothing else, which is why
     // occlusion, a shadow keyed to a light, and per-layer 3D could not be written at all — none of
     // them is a property of one layer. It is frozen because a layer that could write to it would be
     // writing into the next layer's inputs, and renderFrame(n) has to stay pure in n.

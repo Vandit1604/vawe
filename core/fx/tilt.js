@@ -40,8 +40,10 @@
 // siblings inside one group share a vanishing point that belongs to the GROUP, not to the canvas. That
 // is the right answer for a fan of cards inside a group and the wrong one for a child meant to line up
 // with a tilted top-level layer. `origin` therefore defaults to the group's own centre there (50% 50%)
-// rather than to the canvas centre, since a group child's canvas position is not knowable — the same
-// reason scene.js's boxOf returns null for one. To tilt a whole group as ONE plane, put the modifier on
+// rather than to the canvas centre. Note this is NOT because the child's canvas position is unknown —
+// scene.boxOf answers for a group child now — but because perspective-origin resolves against the
+// PARENT's padding box, and the parent here is the group, so canvas px would land somewhere else
+// entirely. To tilt a whole group as ONE plane, put the modifier on
 // the group layer instead; its children then ride the group's single rotation, which is usually what a
 // composed card wants anyway.
 //
@@ -119,9 +121,9 @@ export function frame(kit, el, L, t, scene, spec) {
   // stacking context, which CSS resolves by last-writer-wins and shows as one of the two silently
   // losing its lens. Refused instead, with both values named.
   const persp = `${dist}px`;
-  // A group child's canvas position is not knowable (see the header), so its camera centres on the
-  // group. A top-level layer's parent is #cam or a .hs-beat wrapper, both inset:0 over the canvas, so
-  // px there ARE canvas coordinates.
+  // perspective-origin resolves against the PARENT's box (see the header), so for a group child the
+  // camera centres on the group. A top-level layer's parent is #cam or a .hs-beat wrapper, both inset:0
+  // over the canvas, so px there ARE canvas coordinates.
   const inGroup = !el.classList.contains('hs-layer');
   const org = origin === 'center'
     ? (inGroup ? '50% 50%' : `${scene.canvas.w / 2}px ${scene.canvas.h / 2}px`)

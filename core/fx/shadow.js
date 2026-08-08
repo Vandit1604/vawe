@@ -30,10 +30,12 @@
 // build-time value across frames, which is exactly the accumulated state renderFrame(n) may not have.
 // So it is an error naming both, and the fix is to delete the static one.
 //
-// ON A GROUP CHILD IT REFUSES, for the reason occlude does: the direction needs the layer's centre in
-// canvas space, a group child's position is known only to the group's layout, and scene.boxOf returns
-// null for one rather than guessing. Put the modifier on the group and the whole group casts one
-// shadow, which is also the physically honest answer for a card made of parts.
+// IT WORKS ON A GROUP CHILD. It used to refuse alongside occlude, on the same wrong conclusion: the
+// direction needs the layer's centre in canvas space, and a laid-out child HAS one, measured once at
+// build and composed with the group's per-frame box (scene.js). So the cards inside a group each throw
+// their own shadow away from the light, which is what a row of objects on a surface does. Put it on the
+// GROUP instead when the group should read as one solid thing. The refusal survives only where the box
+// does not resolve: a group whose motion track keys `w`/`h` reflows its children.
 
 export const SHADOW_KEYS = ['dist', 'blur', 'spread', 'color', 'opacity'];
 
@@ -77,8 +79,8 @@ export function build(kit, el, L, spec) {
       + `direction comes from the light.`);
   if (!L.id)
     throw new Error(`shadow: this layer needs an \`id\` — the light's direction is measured to the `
-      + `layer's own centre, which is looked up through scene.boxOf. A group CHILD is refused whatever `
-      + `it is called: put the modifier on the group.`);
+      + `layer's own centre, which is looked up through scene.boxOf, and boxOf knows only layers an `
+      + `author named.`);
 }
 
 // The colour a shadow should be is a fact about the SURFACE IT FALLS ON and about the film's locked
@@ -119,12 +121,12 @@ export function frame(kit, el, L, t, scene, spec) {
     throw new Error(`shadow: the scene declares no \`lighting\`, so there is no direction to cast away `
       + `from. Add "lighting": { "x": <px>, "y": <px> } at the top level — it is the whole point of this `
       + `modifier that one light aims every shadow in the film.`);
-  if (!el.classList.contains('hs-layer'))
-    throw new Error(`shadow: layer "${L.id}" is a GROUP CHILD, whose centre in the canvas only the `
-      + `group's layout knows — scene.boxOf returns null for one on purpose. Put the modifier on the `
-      + `group layer; the group then casts one shadow, which is what a card made of parts should do.`);
   const b = scene.boxOf(L.id);
-  if (!b) throw new Error(`shadow: no box for this layer's own id "${L.id}" — boxOf knows only top-level layers that declare an id.`);
+  if (!b)
+    throw new Error(`shadow: no box for this layer's own id "${L.id}". Either nothing declares that id, `
+      + `or this is a child of a group whose motion track keys \`w\`/\`h\` — resizing a flex or grid box `
+      + `reflows its children, so their measured offsets are stale and the direction computed from them `
+      + `would be silently wrong. Put the modifier on the group, or resize with \`scale\`.`);
   const color = resolveColor(rawColor, scene);
   let dx = b.cx - scene.light.x, dy = b.cy - scene.light.y;
   const len = Math.hypot(dx, dy);

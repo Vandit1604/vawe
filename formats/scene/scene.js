@@ -493,16 +493,41 @@ boot((data, fps, theme, canvas) => {
     const { L, el } = layers[i];
     if (L.id) baseSize.set(L.id, { w: el.offsetWidth, h: el.offsetHeight });
   }
+  // A GROUP CHILD'S BOX, which used to be null on the argument that flex and grid put it where only
+  // layout knows. That argument was right about the AUTHORED x/y and wrong about the conclusion: the
+  // child is laid out, so the browser knows exactly where it landed, and the one thing that must not
+  // happen — measuring the DOM inside the frame loop — is avoidable because the offset INSIDE the
+  // group is static. Flow position does not depend on t. So it is measured ONCE here, as a delta from
+  // the top-level ancestor's own rect, and composed with that ancestor's per-frame box below.
+  //
+  // Rects rather than an offsetLeft/offsetTop chain: offsetParent skips any statically-positioned
+  // ancestor, and a nested group is exactly that, so the chain silently reports the offset from two
+  // levels up. Nothing has written a transform yet at build (driveClips runs per frame), so a rect
+  // difference here IS the untransformed layout offset.
+  const childRel = new Map();   // layers[] index -> { root, dx, dy, w, h }
+  {
+    const rootOf = new Map();
+    for (let i = 0; i < topCount; i++) rootOf.set(layers[i].el, i);
+    for (let i = topCount; i < layers.length; i++) {
+      const { L, el } = layers[i];
+      if (!L.id) continue;
+      const rootEl = el.closest('.hs-layer');
+      const root = rootOf.get(rootEl);
+      if (root == null) continue;   // detached: nothing to be relative to
+      const r = el.getBoundingClientRect(), rr = rootEl.getBoundingClientRect();
+      childRel.set(i, { root, dx: r.left - rr.left, dy: r.top - rr.top, w: r.width, h: r.height });
+    }
+  }
   const boxes = new Map();
+  const topGeom = new Array(topCount);   // every top-level layer, id or not — a child needs its parent's
   function resolveBoxes(t) {
     boxes.clear();
     for (let i = 0; i < topCount; i++) {
       const { L } = layers[i];
-      if (!L.id) continue;
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = t >= start && t < end;
       const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start) : null;
-      const base = baseSize.get(L.id) || { w: 0, h: 0 };
+      const base = (L.id && baseSize.get(L.id)) || { w: 0, h: 0 };
       const w = m && m.w != null ? m.w : (L.w ?? base.w);
       const h = m && m.h != null ? m.h : (L.h ?? base.h);
       const x = (L.x ?? 60) + (m ? m.dx : 0);
@@ -510,13 +535,33 @@ boot((data, fps, theme, canvas) => {
       // w/h are the UNSCALED layout box and `scale` is reported beside them, because CSS scales about
       // the element's centre: folding the scale into w/h would move the top-left corner and nothing
       // on screen moves with it (the same error that put a `becomes` handover 160px off, above).
-      boxes.set(L.id, Object.freeze({ id: L.id, x, y, w, h, cx: x + w / 2, cy: y + h / 2,
-        scale: m ? m.scale : 1, rot: m ? m.rot : 0, opacity: m ? m.opacity : 1, visible }));
+      const g = { id: L.id, x, y, w, h, cx: x + w / 2, cy: y + h / 2,
+        scale: m ? m.scale : 1, rot: m ? m.rot : 0, opacity: m ? m.opacity : 1, visible,
+        // a motion track that keys w/h RESIZES the group, and flex and grid reflow when it does, so
+        // the offsets measured at build stop describing where the children are. Recorded, not guessed.
+        reflowed: !!(m && (m.w != null || m.h != null)) };
+      topGeom[i] = g;
+      if (L.id) { const { reflowed, ...box } = g; boxes.set(L.id, Object.freeze(box)); }
+    }
+    for (const [i, k] of childRel) {
+      const { L } = layers[i];
+      const p = topGeom[k.root];
+      // THE ONE CONDITION THAT STAYS NULL, narrowed from "every group child" to this: a resized group
+      // has reflowed, so the build-time offset is a stale measurement. Scaling or moving the group is
+      // fine — those transform the child with it, which the arithmetic below does exactly.
+      if (p.reflowed) continue;
+      const start = L.start ?? 0, end = start + (L.duration ?? 2);
+      const visible = p.visible && t >= start && t < end;
+      // The child rides the group's transform: its centre offset from the group's centre is scaled and
+      // rotated about that centre, exactly as CSS composes them. w/h stay the child's own layout size
+      // with the group's `scale` reported beside, matching what a top-level box means.
+      const ox = k.dx + k.w / 2 - p.w / 2, oy = k.dy + k.h / 2 - p.h / 2;
+      const r = (p.rot * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
+      const cx = p.cx + (ox * c - oy * s) * p.scale, cy = p.cy + (ox * s + oy * c) * p.scale;
+      boxes.set(L.id, Object.freeze({ id: L.id, x: cx - k.w / 2, y: cy - k.h / 2, w: k.w, h: k.h,
+        cx, cy, scale: p.scale, rot: p.rot, opacity: p.opacity, visible }));
     }
   }
-  // A GROUP CHILD IS DELIBERATELY ABSENT. Its x/y are relative to a flex or grid box whose position
-  // only layout knows, so a canvas-space box for it would be a guess dressed as a measurement. null
-  // says "not resolvable", which a caller can act on; a plausible wrong box is what it cannot.
   const boxOf = (id) => boxes.get(id) || null;
 
   // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
@@ -543,11 +588,16 @@ boot((data, fps, theme, canvas) => {
     if (o && typeof o === 'object') for (const v of Object.values(o)) deepFreeze(v);
     return Object.freeze(o);
   };
+  // GROUP CHILDREN ARE IN HERE TOO, because boxOf answers for them. Their `z` is their GROUP's, which
+  // is the truth: a group paints as one element and its children stack inside it, so a child is neither
+  // above nor below anything outside the group. Ties are excluded by the stacking sentinels that read
+  // this (core/fx/occlude.js), which is exactly right — a sibling is not "in front".
   const specs = new Map();
-  for (let i = 0; i < topCount; i++) {
+  for (let i = 0; i < layers.length; i++) {
     const { L } = layers[i];
     if (!L.id) continue;
-    specs.set(L.id, deepFreeze({ ...structuredClone(L), z: L.track ?? i }));
+    const root = i < topCount ? i : (childRel.get(i)?.root ?? i);
+    specs.set(L.id, deepFreeze({ ...structuredClone(L), z: layers[root].L.track ?? root }));
   }
   const IDS = Object.freeze([...specs.keys()].sort((a, b) => specs.get(a).z - specs.get(b).z));
   const specOf = (id) => specs.get(id) || null;

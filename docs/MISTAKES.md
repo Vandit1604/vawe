@@ -5517,3 +5517,58 @@ the scale precedes `scale2ref` and that the reference is the scaled frame.
 reason it lasted is the same one as #224 though. No gate renders a watermarked frame, `go test ./...` had
 no test in `encode`, `render` or `queue`, and the only instrument that could see it was a human opening
 the file. The MCP server ships free previews down exactly this path.
+
+## #226 — a nested group's modifiers were built by nobody, and only half of each one ran
+
+**What.** `{"type":"group", "modifiers":[…]}` nested inside another group ran its modifiers' `frame()`
+and never their `build()`. `mixBlend`, which is build-only, therefore did nothing at all: accepted,
+validated, and silently scoped to nothing. `tilt` half-worked, because its validation lives in `build()`
+and its writes live in `frame()`, so a malformed spec was caught one pass later than it should be.
+
+**Root cause.** `buildFx` was reachable through exactly one door, `kit.buildLeaf`, and
+`core/layers/util.js` calls that only in the `!isGroup` branch — a nested group is laid out by
+`addGroupChild` itself and never goes through a primitive's builder. The per-frame half had no such
+gate: `scene.js` drives every entry in `extra`, and nested groups are in it. So the two halves of the
+same registry disagreed about whether a nested group is a layer, and the disagreement was invisible
+because the half that ran is the half that draws.
+
+**Fix.** `core/layers/index.js:74` injects `kit.buildFx` beside `kit.buildLeaf`, and
+`core/layers/util.js:243` calls it for the group branch. If the injection is ever missing, a nested group
+carrying `modifiers` throws instead of skipping — the one outcome this must never have again.
+
+**Which gate catches it.** Nothing did, and that is the point: `schema-drift` proves the schema and the
+registry agree on the modifier VOCABULARY and cannot see which code paths dispatch it. The throw is now
+the instrument. `conformance` is the gate shaped to catch this class (it already compares top-level and
+group-child construction prop by prop) and extending it to modifiers is the durable fix.
+
+**Class.** Silent non-application, the worst shape in this file, made worse by being half-silent: the
+frame half ran, so the layer looked touched.
+
+## #227 — "a group child has no box" was a conclusion drawn from the authored x/y
+
+**What.** `scene.boxOf` returned null for every group child, so `occlude` and `shadow` refused on one and
+said so in three files' worth of comments. The stated reason — a child's x/y are relative to a flex or
+grid box only layout knows — is true about the AUTHORED coordinates and says nothing about the child,
+which is laid out and therefore measurable.
+
+**Root cause.** The measurement was assumed to be a per-frame DOM read, which the frame loop may not do
+(a neighbour's rect is whatever the previous frame left there). It is not: a child's offset INSIDE its
+group does not depend on `t`. Only the group moves. So one measurement at build plus the group's own
+per-frame box is a complete answer, arrived at exactly the way top-level boxes already are.
+
+**Fix.** `formats/scene/scene.js` measures each identified child once at build as a delta from its
+top-level ancestor's rect (rects, not an `offsetLeft` chain — `offsetParent` skips a statically
+positioned nested group and the chain silently reports the offset from two levels up), then composes it
+with the ancestor's per-frame box, scaling and rotating about the group's centre. `boxOf` now answers for
+any layer with an id at any depth, `specOf`/`ids` cover them, and the refusals in `occlude`/`shadow` are
+gone. ONE case keeps the null and names itself: a group whose motion track keys `w`/`h` reflows its
+children, so the build-time offsets are stale. `mixBlend` is refused on a child for an unrelated and
+unfixable reason (CSS blends against the nearest stacking context, and every timed element carries a
+transform, so a group is always one).
+
+**Which gate catches it.** `make probe` is the one that matters — it would fail immediately if the box
+were measured inside the loop instead of at build. `make snap-all` proves the change is inert on the
+library: 51 identical, 30 changed, 3 quarantined, unchanged from before.
+
+**Class.** Not silent substitution. A correct diagnosis with the wrong conclusion attached, copied into
+four files as settled fact, where each copy made the next one look better established.

@@ -231,6 +231,17 @@ export function createKit(ctx) {
       // If parentEl is itself free, the line further down overwrites this with absolute, which is
       // equally a containing block.
       if (c.dataset.free && !c.style.position) c.style.position = 'relative';
+      // A nested group's `modifiers` never reached buildFx, because that only runs inside buildLeaf and
+      // a group is not a leaf. The per-frame half ran regardless (scene.js drives every entry in
+      // `extra`), so half of each modifier applied and nothing said so. Loud if the injection is
+      // missing rather than skipped, for the same reason.
+      if (C.modifiers != null) {
+        if (!api.buildFx)
+          throw new Error(`layer "${C.id || 'group'}": \`modifiers\` on a nested group needs the fx `
+            + `builder, which core/layers/index.js injects into the kit. This build path did not get `
+            + `one, so the modifiers would apply their frame half only.`);
+        api.buildFx(c, C);
+      }
       parentEl.appendChild(c);
       for (const gc of C.children || []) addGroupChild(c, gc, rootL);
     }

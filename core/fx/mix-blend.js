@@ -7,10 +7,13 @@
 // justify it (per-layer 3D, occlusion, shadows keyed to a light) are their own piece of work, and one
 // of them half-built would entrench exactly the shape that work exists to replace.
 //
-// SCOPE, because a surprise here looks exactly like a broken modifier: CSS composites a blend against
-// the nearest stacking context's backdrop, so on a GROUP CHILD it blends against the group and not
-// against the layers behind the group, and the child renders as if nothing had been applied. That is
-// the browser's rule, not this modifier's; put the modifier on the group, or on a top-level layer.
+// ON A GROUP CHILD IT THROWS, and that is the fix rather than the limitation. CSS composites a blend
+// against the nearest stacking context's backdrop; every timed element in this engine carries a
+// per-frame transform, which makes every group a stacking context, so a child's blend can only ever
+// reach the group's own pixels. It rendered as if nothing had been applied — the modifier was written,
+// accepted, and silently scoped to nothing. Nothing in this modifier can widen that (removing the
+// group's stacking context would mean removing the transform driveClips writes), so the honest move is
+// to say so at build. Put it on the group, whose backdrop IS the frame.
 //
 // Written at BUILD, not per frame, because a blend mode is a property of the layer and not of t.
 // Nothing else in the engine writes `mixBlendMode` on a layer element, so the value set here is the
@@ -30,5 +33,10 @@ export function build(kit, el, L, spec) {
   if (!BLEND_MODES.includes(mode))
     throw new Error(`mixBlend: unknown blend mode ${JSON.stringify(mode)} — one of: ${BLEND_MODES.join(', ')}. `
       + `Write it as { "mixBlend": "difference" } or { "mixBlend": { "mode": "difference" } }.`);
+  if (!el.classList.contains('hs-layer'))
+    throw new Error(`mixBlend: layer "${L.id || L.type || 'child'}" is a GROUP CHILD, and CSS blends `
+      + `against the nearest stacking context — which is the group, because every timed element carries `
+      + `a per-frame transform. The blend would reach the group's own pixels and nothing behind it, so `
+      + `the child would render as though this modifier had not run. Put "mixBlend" on the GROUP layer.`);
   el.style.mixBlendMode = mode;
 }
