@@ -254,6 +254,49 @@ func CaptureExt(transparent bool) string {
 // alpha path); for JPEG the frames are still supersampled and ffmpeg must resolve them.
 func ResolvedInGo(transparent bool) bool { return CaptureExt(transparent) == ".png" }
 
+// TransparentPixels reports whether any sampled captured frame has a pixel that is not fully opaque.
+//
+// It is the acceptance test for the alpha and compositing exports, run on the FRAMES rather than on the
+// finished file, so a wrong deliverable is refused before it is encoded. Suppressing the backdrop makes
+// the channel real for a normal scene, but nothing stops a scene from covering the frame with content
+// of its own, and the failure looks exactly like success: ffmpeg exits 0 and writes a file whose alpha
+// is uniformly 255. Sampling beats a full scan because one transparent pixel anywhere settles it, and
+// a scene that is opaque in the sampled frames is opaque in the ones between them.
+func TransparentPixels(framesDir string, total int) (bool, error) {
+	if total <= 0 {
+		return false, fmt.Errorf("no frames were captured")
+	}
+	const samples = 8
+	step := total / samples
+	if step < 1 {
+		step = 1
+	}
+	checked := 0
+	for n := 0; n < total; n += step {
+		b, err := os.ReadFile(filepath.Join(framesDir, fmt.Sprintf("%05d.png", n)))
+		if err != nil {
+			continue // a gap in the sequence is the encoder's error to report, not this check's
+		}
+		img, err := png.Decode(bytes.NewReader(b))
+		if err != nil {
+			return false, err
+		}
+		checked++
+		r := img.Bounds()
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				if _, _, _, a := img.At(x, y).RGBA(); a < 0xffff {
+					return true, nil
+				}
+			}
+		}
+	}
+	if checked == 0 {
+		return false, fmt.Errorf("no captured frame in %s could be read", framesDir)
+	}
+	return false, nil
+}
+
 // capture builds the screenshot action for a format. chromedp.CaptureScreenshot is PNG-only, so the
 // jpeg path drops to the CDP call it wraps.
 func capture(format string, buf *[]byte) chromedp.Action {

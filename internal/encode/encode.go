@@ -26,6 +26,19 @@ func run(args ...string) error {
 // the ss×ss box resolve here via scale=flags=area, which is the same box filter scene.downsample() ran
 // in Go at 838 ms/frame against ffmpeg's 12.6 ms for decode+scale+encode combined. w/h of 0 means the
 // frames are already at native size and no scale is inserted.
+// watermarkChain lays input 1 (the sheet) over input 0 (the frames), applying preFx to the frames
+// first. Split out of Video so its shape can be asserted without an ffmpeg run: the defect it encodes
+// was invisible in every log and every exit code, and showed up only in a pixel (encode_test.go).
+func watermarkChain(preFx string) string {
+	base := "[0:v]"
+	fc := ""
+	if preFx != "" {
+		fc = "[0:v]" + preFx + "[base];"
+		base = "[base]"
+	}
+	return fc + "[1:v]" + base + "scale2ref[wm][b];[b][wm]overlay=0:0[v]"
+}
+
 func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext string, w, h int) error {
 	if ext == "" {
 		ext = ".png"
@@ -61,16 +74,13 @@ func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext str
 		// serves every aspect. Built as one filter_complex because -vf and -filter_complex cannot
 		// both be given: folding grain in here keeps the two features composable instead of
 		// mutually exclusive.
-		chain := "[base]"
-		if grainFx != "" {
-			chain = "[g]"
-		}
-		fc := "[1:v][0:v]scale2ref[wm][base];"
-		if grainFx != "" {
-			fc += "[base]" + grainFx + "[g];"
-		}
-		fc += chain + "[wm]overlay=0:0[v]"
-		args = append(args, "-filter_complex", fc, "-map", "[v]")
+		//
+		// THE BASE IS SCALED FIRST, and the sheet is sized against the RESULT. scale2ref used to take
+		// the raw captured frame as its reference, which on any non-draft render is 2x supersampled,
+		// so the sheet was built at 2160x3840, the frame was scaled down under it, and overlay=0:0 kept
+		// the sheet's top-left quarter. Every free preview shipped an oversized watermark clipped at
+		// all four edges, and only --draft looked right because ss=1 inserts no scale (MISTAKES #225).
+		args = append(args, "-filter_complex", watermarkChain(grainFx), "-map", "[v]")
 	case grainFx != "":
 		args = append(args, "-vf", grainFx)
 	}
@@ -88,27 +98,53 @@ func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext str
 
 // VideoAlpha encodes the transparent PNG sequence to a VP9 WebM with a real alpha channel
 // (yuva420p) — a motion-graphics overlay layer to composite over other footage. Video-only.
-func VideoAlpha(framesDir string, fps int, out string) error {
+// A watermark is overlaid the same way it is on the opaque path: the export a customer can drop
+// straight onto their own footage used to be the one that came out clean (MISTAKES #225).
+// These frames were already resolved to final size in Go, so no scale precedes the sheet.
+func VideoAlpha(framesDir string, fps int, watermark, out string) error {
 	seq := filepath.Join(framesDir, "%05d.png")
 	r := strconv.Itoa(fps)
-	return run("-y", "-framerate", r, "-start_number", "0", "-i", seq, "-an",
-		"-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p", "-b:v", "0", "-crf", "24", "-r", r, out)
+	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq}
+	if watermark != "" {
+		args = append(args, "-i", watermark)
+	}
+	args = append(args, "-an")
+	if watermark != "" {
+		// format=auto keeps overlay working in the input's own alpha format, so the sheet is composited
+		// INTO the transparent frame rather than flattening it.
+		args = append(args, "-filter_complex", "[1:v][0:v]scale2ref[wm][b];[b][wm]overlay=0:0:format=auto[v]", "-map", "[v]")
+	}
+	args = append(args, "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p", "-b:v", "0", "-crf", "24", "-r", r, out)
+	return run(args...)
 }
 
 // Composite overlays an alpha graphics layer (webm w/ alpha) on top of a background video →
 // out. The bg is scaled/cropped to the graphics canvas and looped/trimmed to the overlay length
 // (overlay drives duration). This is the deterministic "motion graphics on a video" layer:
 // the graphics are rendered pure-in-n with alpha, the video is composited at encode time.
-func Composite(bgVideo, overlayWebm string, w, h, fps int, out string) error {
+// The watermark goes on the FINISHED composite, not on the overlay, because the composite is the
+// deliverable a viewer sees; watermarking the overlay would put the sheet under the graphics.
+func Composite(bgVideo, overlayWebm string, w, h, fps int, watermark, out string) error {
 	r := strconv.Itoa(fps)
 	filter := fmt.Sprintf(
-		"[0:v]scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,fps=%s,setsar=1[bg];"+
-			"[bg][1:v]overlay=0:0:shortest=1,format=yuv420p[v]",
+		"[0:v]scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,fps=%s,setsar=1[bg];",
 		w, h, w, h, r)
-	return run("-y", "-stream_loop", "-1", "-i", bgVideo, "-i", overlayWebm,
-		"-filter_complex", filter, "-map", "[v]",
+	// The overlay MUST be decoded by libvpx-vp9. ffmpeg's own faster vp9 decoder cannot read the alpha
+	// side data WebM stores the plane in, and hands back yuv420p with no complaint — so the overlay
+	// arrived fully opaque and every transparent pixel composited as black, which looks like a
+	// background that failed to load rather than a decoder that dropped a channel (MISTAKES #224).
+	args := []string{"-y", "-stream_loop", "-1", "-i", bgVideo, "-c:v", "libvpx-vp9", "-i", overlayWebm}
+	if watermark != "" {
+		args = append(args, "-i", watermark)
+		filter += "[bg][1:v]overlay=0:0:shortest=1[c];" +
+			"[2:v][c]scale2ref[wm][b];[b][wm]overlay=0:0,format=yuv420p[v]"
+	} else {
+		filter += "[bg][1:v]overlay=0:0:shortest=1,format=yuv420p[v]"
+	}
+	args = append(args, "-filter_complex", filter, "-map", "[v]",
 		"-c:v", "libx264", "-profile:v", "high", "-preset", "medium", "-crf", "20",
 		"-movflags", "+faststart", "-r", r, out)
+	return run(args...)
 }
 
 // Mux combines a silent video with an audio WAV into out (AAC).

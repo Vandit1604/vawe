@@ -49,7 +49,7 @@ node scripts/gates/visual-vocabulary.mjs formats/scene/argus-launch.json   # ✓
 
 ---
 
-### [ ] --alpha exports a fully opaque "transparent overlay": the required bg canvas is never suppressed, so alpha is 255 on every pixel of every frame
+### [x] --alpha exports a fully opaque "transparent overlay": the required bg canvas is never suppressed, so alpha is 255 on every pixel of every frame
 
 **where** `internal/render/render.go:75-111 (transparent path) + core/tokens.css:44 + formats/scene/scene.js (never reads the alpha flag)`  ·  **area** pipeline  ·  **class** silent-substitution
 
@@ -573,7 +573,7 @@ node scripts/gates/copy-check.mjs formats/scene/showcase-flight.json | grep numb
 
 ---
 
-### [ ] --watermark is silently ignored on the --alpha and --bg export paths, so a "free preview" ships clean
+### [x] --watermark is silently ignored on the --alpha and --bg export paths, so a "free preview" ships clean
 
 **where** `internal/render/render.go:89-115 (transparent branch returns before encode.Video); internal/encode/encode.go:91 VideoAlpha and :102 Composite take no watermark argument`  ·  **area** pipeline  ·  **class** silent-substitution
 
@@ -631,7 +631,7 @@ node scripts/gates/copy-check.mjs formats/scene/showcase-flight.json | grep numb
 
 ---
 
-### [ ] --watermark is drawn at 2x size and cropped on every non-draft render, because scale2ref sizes the sheet against the SUPERSAMPLED frame instead of the final one
+### [x] --watermark is drawn at 2x size and cropped on every non-draft render, because scale2ref sizes the sheet against the SUPERSAMPLED frame instead of the final one
 
 **where** `internal/encode/encode.go:68`  ·  **area** pipeline  ·  **class** other
 
@@ -698,7 +698,7 @@ Severity medium rather than high only because nothing currently in the repo hits
 
 ---
 
-### [ ] --bg composites the graphics over a background video that is 100% hidden, because the overlay it builds is the same opaque frame
+### [x] --bg composites the graphics over a background video that is 100% hidden, because the overlay it builds is the same opaque frame
 
 **where** `internal/render/render.go:96-104 (encode.VideoAlpha → encode.Composite)`  ·  **area** pipeline  ·  **class** silent-substitution
 
@@ -723,7 +723,7 @@ Severity medium rather than high only because nothing currently in the repo hits
 
 ---
 
-### [ ] --alpha with an explicit --out *.mp4 silently strips the alpha channel: the .webm extension the alpha path computes is discarded whenever --out is given
+### [x] --alpha with an explicit --out *.mp4 silently strips the alpha channel: the .webm extension the alpha path computes is discarded whenever --out is given
 
 **where** `cmd/render/main.go:133-136 (ext) and cmd/render/main.go:146-147 (outPath := *out, ext only applied on the auto-named branch)`  ·  **area** pipeline  ·  **class** silent-substitution
 

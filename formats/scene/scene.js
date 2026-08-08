@@ -162,10 +162,16 @@ boot((data, fps, theme, canvas) => {
     for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;
     return { from: b.from ?? 0, to: b.to ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
   });
-  if (!bgWins.length) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
+  // --alpha exports a compositable OVERLAY, so the backdrop is the compositor's job, not the scene's.
+  // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
+  // and cannot touch canvas pixels, and `bg` is a required field, so every scene painted an opaque
+  // canvas over the whole frame and every exported alpha channel came back 255 (MISTAKES #224).
+  // Read off the class core/boot.js already set, so the flag is parsed in exactly one place.
+  const ALPHA = document.documentElement.classList.contains('alpha');
+  if (!bgWins.length || ALPHA) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
   // hand-authored backdrops: built once here, shown/hidden per frame by drawBg (null if none declared,
   // so a scene using only presets adds no DOM and renders byte-identical to before).
-  const bgHtml = createBgHtml($('root'), bgWins);
+  const bgHtml = ALPHA ? null : createBgHtml($('root'), bgWins);
   // ink-aware default text color: a layer with no explicit color gets dark ink over light
   // bg windows and light text over dark ones (looked up at the layer's midpoint) — otherwise
   // a light-text theme (plinth) silently renders white-on-paper.
@@ -549,7 +555,7 @@ boot((data, fps, theme, canvas) => {
   // drawBg — the theme bg on canvas (last matching window wins) + a continuous slow breathe.
   // A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden for its span.
   function drawBg(t) {
-    if (!bgWins.length) return;
+    if (!bgWins.length || ALPHA) return; // alpha export: no backdrop, so unpainted pixels stay transparent
     const w = bgWinAt(t);
     const authored = bgHtml ? bgHtml.frame(t, w) : false;
     cv.style.display = authored ? 'none' : '';

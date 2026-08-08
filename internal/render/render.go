@@ -100,23 +100,45 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		if w == 0 || h == 0 {
 			w, h = 1080, 1920
 		}
+		// REFUSE AN OPAQUE OVERLAY. Both of these exports are only worth anything if the graphics layer
+		// has somewhere to let the background through, and both used to hand back a file that did not,
+		// with exit 0 and a cheerful "· alpha" (MISTAKES #224). The scene suppresses its backdrop under
+		// &alpha=1, so what is left is a scene whose own content covers the frame: a full-bleed rect, a
+		// paint/shader/raymarch field, an image sized to the canvas. That is the author's design and the
+		// engine cannot fix it, so it says which flag it cannot honour and stops.
+		clear, err := scene.TransparentPixels(framesDir, meta.TotalFrames)
+		if err != nil {
+			return fmt.Errorf("checking the captured frames for transparency: %w", err)
+		}
+		if !clear {
+			flag := "--alpha"
+			purpose := "an overlay with nothing to composite it over is not a transparent export"
+			if o.BgVideo != "" {
+				flag = "--bg"
+				purpose = "the background video would be completely hidden"
+			}
+			return fmt.Errorf("%s: every captured frame is fully opaque, so %s.\n"+
+				"  The scene's backdrop is already suppressed for this export, so something in the scene "+
+				"itself covers the whole canvas — a full-bleed rect, image, paint/shader/raymarch layer or "+
+				"group. Give it a smaller box, or drop it, and render again", flag, purpose)
+		}
 		if o.BgVideo != "" {
 			// composite the graphics over a background video → out (mp4).
 			overlay := filepath.Join(filepath.Dir(out), "."+filepath.Base(out)+".ov.webm")
 			defer os.Remove(overlay)
 			fmt.Println("▶ encoding (alpha overlay)…")
-			if err := encode.VideoAlpha(framesDir, o.FPS, overlay); err != nil {
+			if err := encode.VideoAlpha(framesDir, o.FPS, "", overlay); err != nil {
 				return err
 			}
 			fmt.Println("▶ compositing over background video…")
-			if err := encode.Composite(o.BgVideo, overlay, w, h, o.FPS, out); err != nil {
+			if err := encode.Composite(o.BgVideo, overlay, w, h, o.FPS, o.Watermark, out); err != nil {
 				return err
 			}
 			fmt.Printf("✓ done → %s  (%.1fs, %d frames · over video)\n", out, meta.Duration, meta.TotalFrames)
 			return nil
 		}
 		fmt.Println("▶ encoding (alpha / vp9)…")
-		if err := encode.VideoAlpha(framesDir, o.FPS, out); err != nil {
+		if err := encode.VideoAlpha(framesDir, o.FPS, o.Watermark, out); err != nil {
 			return err
 		}
 		fmt.Printf("✓ done → %s  (%.1fs, %d frames · alpha)\n", out, meta.Duration, meta.TotalFrames)

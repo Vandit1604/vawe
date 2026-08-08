@@ -151,6 +151,16 @@ func main() {
 	ext := ".mp4"
 	if *alpha && *bg == "" {
 		ext = ".webm" // alpha overlay (no bg composite)
+		// An explicit --out names the file, and the alpha path used to let it name the CONTAINER too.
+		// MP4 has nowhere to put VP9 alpha, so ffmpeg dropped the plane, said nothing, exited 0, and
+		// `--alpha --out x.mp4` wrote a yuv420p file the CLI still called "· alpha" (MISTAKES #224).
+		// The extension is not the author's call here: it is what carries the channel they asked for.
+		if e := strings.ToLower(filepath.Ext(*out)); *out != "" && e != ".webm" && e != ".mkv" {
+			fmt.Fprintf(os.Stderr, "✗ --alpha writes VP9 with an alpha channel, which only .webm and .mkv can carry.\n"+
+				"  --out %s would silently lose the transparency. Rename it to %s.webm, or drop --out to get one automatically.\n",
+				*out, strings.TrimSuffix(*out, filepath.Ext(*out)))
+			os.Exit(1)
+		}
 	}
 	name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
 	// `.expanded` is a BUILD artifact (scripts/author/expand-blocks.mjs writes <name>.expanded.json

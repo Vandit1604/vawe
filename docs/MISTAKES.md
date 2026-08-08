@@ -5447,3 +5447,73 @@ three outcomes have three different messages, so the next report names its own c
 **Class, and the shape it shares.** This is #214 → #216 → #217 a fourth time, in a different file pair: one
 primitive misread (a non-OK response is not content; a zero value is not an answer), used at several call
 sites, fixed at the rule and cleared at every consumer rather than patched where it was noticed.
+
+## #224 — `--alpha` exported a fully opaque overlay, and every downstream flag on that path was wrong too
+
+**What.** `./bin/vawe <scene> --alpha` printed `· alpha`, exited 0, and wrote a file whose alpha channel
+was 255 on every pixel of every frame. The same code shipped three more wrong deliverables beside it:
+`--alpha --out x.mp4` wrote an mp4 with the channel stripped, `--bg` composited over a background video
+that was 100% hidden, and `--watermark` was dropped on both paths. Nothing warned on any of them.
+
+```
+$ ./bin/vawe formats/scene/zerochrome.json --draft --alpha
+$ ffmpeg -c:v libvpx-vp9 -i out/zerochrome.webm \
+    -vf "format=rgba,alphaextract,signalstats,metadata=print:key=lavfi.signalstats.YMIN:file=-" -f null -
+lavfi.signalstats.YMIN=255     # one unique value across all 90 frames
+```
+
+**Root cause, four of them, each hiding the next.**
+· `bg` is a required field with `minItems: 1`, so every valid scene paints a backdrop, and
+  `formats/scene/scene.js` paints it onto a `<canvas>`. The only alpha handling in the engine was
+  `core/tokens.css:44`, a `background: transparent` rule. A CSS background cannot clear canvas pixels,
+  and `grep -n alpha formats/scene/scene.js` returned nothing: the one module that paints the backdrop
+  never read the flag.
+· `cmd/render/main.go` computed `.webm` for the alpha path and then discarded it whenever `--out` was
+  given. MP4 has nowhere to put VP9 alpha, so ffmpeg dropped the plane and said nothing.
+· `encode.Composite` decoded the overlay with ffmpeg's default vp9 decoder, which cannot read the alpha
+  side data WebM stores the plane in and hands back `yuv420p` with no complaint. This one was NOT in the
+  audit and only appeared once the first fix landed: the composite went from "background hidden" to
+  "background black", which reads as a file that failed to load rather than a channel that was dropped.
+· `render.Render` returns inside `if transparent` before `o.Watermark` is ever read, and neither
+  `encode.VideoAlpha` nor `encode.Composite` took a watermark argument.
+
+**Fix.** `formats/scene/scene.js` reads the `alpha` class `core/boot.js` already sets and suppresses both
+backdrops, the canvas and the hand-authored `bgHtml`. `cmd/render/main.go` refuses an `--out` the channel
+cannot survive, naming the `.webm` to use instead. `encode.Composite` forces `-c:v libvpx-vp9` on the
+overlay input. `VideoAlpha` and `Composite` take a watermark and overlay it, the alpha export into its own
+transparent frame and the composite onto the finished picture.
+
+**And where it cannot be fixed, it refuses.** Suppressing the backdrop is not a promise of transparency:
+a scene can cover its own canvas with a full-bleed rect, image or paint field, and the failure looks
+exactly like success. `scene.TransparentPixels` samples the captured frames before anything is encoded,
+and `render.Render` names the flag it cannot honour and stops. It fails only when EVERY sampled frame is
+fully opaque, which is the unambiguously broken case and the one this bug produced; a scene that covers
+the frame for part of its run is a design, not a defect.
+
+**Which gate catches it.** The refusal itself, on the frames, before the encode. There is no library
+scene using either flag, so nothing else would.
+
+**Class.** Silent substitution, four deep, and the reason it survived is in the audit's own note about
+itself: three rounds read code and none compared rendered pixels against the scene that produced them.
+Every stage of this reported success. The channel was only ever visible in `alphaextract`.
+
+## #225 — the watermark was drawn at twice the frame size and clipped, on every render that was not a draft
+
+**What.** `encode.Video` built `[1:v][0:v]scale2ref[wm][base]`, sizing the sheet against `[0:v]`, the RAW
+captured frame. Every non-draft render supersamples 2x, so the sheet was built at 2160x3840, the frame was
+scaled down under it, and `overlay=0:0` kept the sheet's top-left quarter. Draft looked correct by
+accident: `ss=1` inserts no scale, so the raw frame IS the final frame there.
+
+**Root cause.** The chain asserted an order it did not have. The comment above it said the watermark
+"applies at final size"; the scale was written into the branch AFTER the reference was taken.
+
+**Fix.** `internal/encode/encode.go` scales the base first and sizes the sheet against the result. The
+chain is now built by `watermarkChain`, split out so its shape can be asserted without an ffmpeg run.
+
+**Which gate catches it.** `internal/encode/encode_test.go`, the first test in the package. It pins that
+the scale precedes `scale2ref` and that the reference is the scaled frame.
+
+**Class.** Not silent substitution: the engine did what it was told, and what it was told was wrong. The
+reason it lasted is the same one as #224 though. No gate renders a watermarked frame, `go test ./...` had
+no test in `encode`, `render` or `queue`, and the only instrument that could see it was a human opening
+the file. The MCP server ships free previews down exactly this path.
