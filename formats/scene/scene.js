@@ -1,10 +1,10 @@
 import { boot } from '/core/boot.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
 import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
-import { splitText, animateUnits, circleText } from '/core/type.js';
+import { splitText, circleText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR } from '/core/gsap-effects.js';
-import { ransomStyle, ransomTick } from '/core/ransom.js';
+import { ransomStyle } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
@@ -15,25 +15,9 @@ import { lowerScene } from '/core/transitions-lower.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
 import { cameraAt, motionAt, resolveKeyedProps } from '/core/sequence.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
-import { sampleAt } from '/core/spectrum.js';
 import { createRenderer } from '/core/layers/index.js';
+import { createTrackKit, runTracks } from '/core/tracks/index.js';
 const $ = (id) => document.getElementById(id);
-// px travelled in ONE frame before motion blur switches itself on. 16px/frame is ~480px/s at 30fps,
-// about a quarter of a 1920 frame per second — fast enough that a real camera would smear it.
-// The opacity already on the element, where ZERO IS A REAL VALUE. `parseFloat(x) || 1` was the idiom,
-// and core/clips.js writes opacity with .toFixed(3) — so a layer at the tail of its fade becomes the
-// string "0.000", parseFloat gives 0, `|| 1` reads that as "nothing set" and hands back FULL opacity.
-// The layer flashes back to solid for the last frames of its own exit. Measured on cadence-film's app
-// chrome: 0.057 at 4.80s, 0.007 at 4.90s, then 1.000 at 4.97s, one bright frame before it vanished.
-// Every layer with a motion or prop track and a fade exit was exposed to it.
-const baseOpacity = (el) => { const v = parseFloat(el.style.opacity); return Number.isFinite(v) ? v : 1; };
-// PX PER SECOND, not per frame. It was 16 px/frame, which sounds fps-neutral and is not: at 30fps that
-// is 480 px/s, and at 60fps the same physical motion covers 8px per frame, drops under the floor, and
-// auto motion blur SILENTLY STOPS ENGAGING. Rendering the same film at 60 for smoothness therefore
-// threw away the blur that makes its fastest moves read, which is the opposite of what the author
-// asked for and nothing would have said a word (docs/MISTAKES.md #204).
-const AUTO_BLUR_FLOOR_PER_SEC = 480;
-const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value for its fastest layer
 
 // resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
 // stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
@@ -691,145 +675,12 @@ boot((data, fps, theme, canvas) => {
     cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
   }
 
-  // updateLayer — everything a single layer does at time t that isn't its primitive's own frame():
-  // the cut kit, kinetic split-text, ransom cycle, borderTrail/circle spins, animated CSS vars,
-  // audio-react, and the motion track (+ motion blur). Each is a pure function of t (and f for the
-  // spectrum table), composed onto what driveClips already wrote — so the frame stays pure in n.
-  function updateLayer(el, L, units, t, f, scene) {
-    const start = L.start ?? 0, end = start + (L.duration ?? 2);
-    // cut kit: a declared cut owns this layer's enter/exit styling (over driveClips's fade)
-    if (L.cut && t >= start && t < end) {
-      const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;
-      const enter = enD > 0 ? clamp01((t - start) / enD) : 1;
-      const exit = exD > 0 ? clamp01((t - (end - exD)) / exD) : 0;
-      Object.assign(el.style, cutStyle(L.cut, { enter, exit }, { dir: L.dir, dist: L.dist ?? 110, timing: L.cutTiming, cx: L.cx, cy: L.cy }));
-    }
-    // kinetic split-text on its local clock (clip appears instantly, units reveal).
-    // presetOpts spreads any per-preset knob (gradient c1/c2, highlight color, blur px, tilt deg…).
-    if (units && !L.circle && !L.fx && t >= start && t < end) animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
-    // ransom with `cycle`: re-roll each letter into a different cutout of the same glyph, in
-    // place, every frame. Stateless and derived from t, so it stays pure in n.
-    if (units && L.ransom && L.ransom.cycle && t >= start && t < end)
-      ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (theme && theme.accent) || undefined, ...L.ransom });
-    // per-TYPE frame update (count number / typing / cursor path / clip frame / image ken) —
-    // dispatched to the primitive (core/layers/<type>.js). Cross-cutting cut/units/motion stay here.
-    renderer.frame(el, L, t, scene);
-    // borderTrail: rotate the orbiting arc by an INLINE transform (in the DOM → seen by the
-    // frame signature and pure in t; a WAAPI animation's state is not serialised, which broke dedup).
-    if (L.borderTrail) { const s = el.querySelector('[data-trail]'); if (s) { const per = +(s.dataset.trailPeriod || 4) || 4; s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; } }
-    // spinning circular text: rotate the whole ring (chars are laid out on the circle at build).
-    // Overrides the layer transform (after driveClips), so pair with anim:"fade"/"none". Pure in t.
-    if (L.circle) { const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8; el.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`; }
-    // ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and nothing
-    // else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
-    // because there was no way to animate what the block actually DOES. A gauge cannot sweep
-    // to its reading, a bar cannot grow, a line cannot draw on. Interpolating a custom property
-    // fixes the whole class at once: the block writes `var(--p)` into its own CSS or SVG and
-    // the engine drives the number. Pure in n — the value is a function of t and nothing else.
-    //   vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic'
-    if (L.vars && t >= start) {
-      const vd = L.varsDur ?? 1.0, v0 = start + (L.varsDelay ?? 0);
-      const u = vd > 0 ? clamp01((t - v0) / vd) : 1;
-      const e = resolveEasing(L.varsEase || 'easeOutCubic')(u);
-      for (const [name, range] of Object.entries(L.vars)) {
-        const [a, b] = Array.isArray(range) ? range : [0, range];
-        el.style.setProperty(name, (a + (b - a) * e).toFixed(4));
-      }
-    }
-    // AUDIO REACT: modulate a property from the baked per-frame band energy. Composed BEFORE
-    // the motion track so an authored choreography still wins the outer transform, and read
-    // from a table indexed by n — the frame never analyses audio, so purity is untouched.
-    if (L.react && window.__spectrum && t >= start && t < end) {
-      const rs = Array.isArray(L.react) ? L.react : [L.react];
-      for (const r of rs) {
-        const v = sampleAt(window.__spectrum, f, r.band || 'low');   // f IS the frame index
-        const [lo, hi] = r.range || [0, 1];
-        const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
-        if (r.prop === 'opacity') el.style.opacity = (baseOpacity(el) * val).toFixed(3);
-        else if (r.prop === 'blur') {
-          const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
-          el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
-        } else { // default: scale
-          const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-          el.style.transform = `scale(${val.toFixed(4)})${base}`;
-        }
-      }
-    }
-    // BOX track (w/h) — the layer's SIZE over time, which is a different material from `scale`. Scale
-    // magnifies a layer and everything drawn in it; a box track changes the frame the content lives in
-    // and lets the content re-fit. That is the difference between zooming a photo grid and reflowing
-    // one, and it is the move every collapsing sidebar, expanding card and FLIP transition is made of.
-    //
-    // Written on EVERY frame, not only inside the layer's window. The transform below can live inside
-    // the window because driveClips rewrites it from scratch each frame; width is a layout property
-    // nothing else touches, so a value left behind by a later frame would survive a seek backwards and
-    // a warm render would disagree with a cold one. renderFrame(n) has to be pure in n.
-    if (L.motion && L.motion.length && (L.motion[0].w != null || L.motion[0].h != null || L.motion[0].track != null)) {
-      const inWin = t >= start && t < end;
-      const b = inWin ? motionAt(L.motion, t - start) : null;
-      const bw = inWin && b.w != null ? b.w : L.w;
-      const bh = inWin && b.h != null ? b.h : L.h;
-      if (bw != null) el.style.width = bw.toFixed(2) + 'px';
-      if (bh != null) el.style.height = bh.toFixed(2) + 'px';
-      // DEPTH over time. core/clips.js:83 writes zIndex from the static data-track on every frame, so
-      // this has to land after it and does — driveClips runs first in renderFrame. Rounded because
-      // z-index is an integer: a track keyed across several siblings crosses them one at a time, which
-      // is what makes a ribbon pass BEHIND the thing it is orbiting and then in front of it again.
-      if (inWin && b.track != null) el.style.zIndex = String(Math.round(b.track));
-      else if (L.motion[0].track != null) el.style.zIndex = String(Math.round(L.motion[0].track));
-      // core/layers/image.js sizes the <img> itself in px unless the layer opted into cover-fit (via
-      // `radius` or `ken`), in which case the img is already 100%/100% and rides the wrapper. Resizing
-      // only the wrapper in that first case would move nothing on screen and say nothing about it.
-      const im = el.querySelector('img.hs-img');
-      if (im && im.style.width && im.style.width.endsWith('px')) {
-        if (bw != null) im.style.width = bw.toFixed(2) + 'px';
-        if (bh != null) im.style.height = bh.toFixed(2) + 'px';
-      }
-    }
-    // motion track: compose element choreography ON TOP of the enter/exit/cut transform (which
-    // driveClips/cutStyle already wrote to el.style), and multiply into the composed opacity.
-    if (L.motion && L.motion.length && t >= start && t < end) {
-      const m = motionAt(L.motion, t - start);
-      const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-      el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
-      el.style.opacity = (baseOpacity(el) * m.opacity).toFixed(3);
-      // TWO blur materials, summed into one blur():
-      //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
-      //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
-      //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
-      //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
-      //      Opt-in was the whole policy, and across this entire library exactly ONE layer ever set it,
-      //      so every fast move in every other film is a hard-edged slide. Blur is physics: a thing
-      //      crossing the frame in a few frames smears whether or not the author remembered. So it is
-      //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable —
-      //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
-      let blurPx = m.blur > 0.01 ? m.blur : 0;
-      if (L.motionBlur !== false) {
-        const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
-        const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
-        // ~a quarter of the frame per second: below it nothing smears in life either, and a floor is
-        // what keeps this from softening every gentle drift in the library. Converted to this frame's
-        // budget so the rule means the same thing at any frame rate.
-        const auto = speed >= AUTO_BLUR_FLOOR_PER_SEC / fps;
-        if (L.motionBlur || auto) {
-          // A GENTLER shutter when nobody asked. 0.5 is the right default for a layer whose author
-          // reached for blur deliberately; applied automatically it peaked at the 24px cap on five
-          // creed-launch rects and put 18px on a moving headline, which is dissolved, not smeared.
-          // AUTO_SHUTTER is the value the exemplar's own author chose by eye for its fastest layer.
-          const shutter = L.motionBlur == null ? AUTO_SHUTTER
-            : L.motionBlur === true ? 0.5 : +L.motionBlur;
-          blurPx += Math.min(24, shutter * speed * 0.5);    // half-shutter, capped so text never dissolves
-        }
-      }
-      // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
-      // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
-      const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
-      el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
-    }
-    // MODIFIERS (`modifiers: [{ mixBlend: "difference" }]`) — last, so a modifier acts on the finished
-    // frame rather than on a half-composed one. A layer that declares none never enters this call.
-    renderer.modify(el, L, t, scene);
-  }
+  // THE PER-FRAME PIPELINE is core/tracks/ — everything a single layer does at time t, including its
+  // primitive's own frame(), as one file per job with a declared slot in a single ordered list. It
+  // used to be this function: nine statements whose sequence WAS the composition order, so adding any
+  // cross-cutting per-frame behaviour meant editing the right paragraph of a 940-line file and the
+  // order lived only in the reader's memory of having scrolled past it.
+  const trackKit = createTrackKit({ renderer, theme, M, fps });
 
   function renderFrame(f) {
     const t = f / fps;
@@ -851,7 +702,7 @@ boot((data, fps, theme, canvas) => {
     const clock = Object.freeze({ t, frame: f, fps, duration });
     const view = Object.freeze({ boxOf, specOf, ids: IDS, light: LIGHT, camera: camNow,
       canvas: CANVAS, safe: SAFE, clock, theme: THEME, bg: bgAt(t), marks: MARKS });
-    for (const { L, el, units } of layers) updateLayer(el, L, units, t, f, view);
+    for (const { L, el, units } of layers) runTracks(trackKit, el, L, units, t, f, view);
     drawCaptions(t);
     drawCameraAndCut(t, camNow);
     drawStings(t);

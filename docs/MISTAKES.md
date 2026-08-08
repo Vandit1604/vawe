@@ -5572,3 +5572,49 @@ library: 51 identical, 30 changed, 3 quarantined, unchanged from before.
 
 **Class.** Not silent substitution. A correct diagnosis with the wrong conclusion attached, copied into
 four files as settled fact, where each copy made the next one look better established.
+
+## #228 — the per-frame pipeline's order was the order of nine statements, and three of them were load-bearing in ways nothing said
+
+**What.** Everything a layer does on a frame lived as statements in `updateLayer`, one ~140-line
+function in `formats/scene/scene.js`. The composition order — which job may overwrite whose transform,
+which must compose onto it — was the reading order of that function and nothing else. Adding any
+cross-cutting per-frame behaviour meant editing the right paragraph of a 940-line file, with only a
+neighbouring comment to say which paragraph was right.
+
+**Root cause.** The repo already had the pattern that fixes this and had applied it twice (`core/layers/`,
+`core/fx/`), but both are registries of things an AUTHOR names. The pipeline is a registry of things the
+ENGINE always runs, and nobody had noticed that is the same shape.
+
+**Fix.** `core/tracks/` — one file per job exporting `slot` and `frame()`, with the running order in a
+single `SLOTS` list resolved ONCE at module load into a flat array of functions. A slot holds exactly
+one track; a duplicate, an unknown slot name and an unclaimed slot are all hard errors at load. Named
+slots rather than integer priorities (which invite `order: 45` and explain nothing) and rather than
+before/after edges (which only give a PARTIAL order, so two unrelated tracks would still run in
+whatever sequence the sort emitted — the same implicit ordering, harder to read).
+
+**What extracting it exposed.** Three dependencies that existed only as adjacency:
+
+1. **The primitive's own `frame()` runs in the MIDDLE of the pipeline, and both sides matter.** It was
+   the fourth of nine statements, described in its comment as a different kind of thing from its
+   neighbours. `core/layers/cursor.js` writes `el.style.transform` outright, so it is entitled to
+   discard the cut kit's transform, which it can only do by running after it; and the `spin`, `react`
+   and `transform` tracks compose onto whatever transform is there, which is the only reason a cursor's
+   path reaches the screen at all. Move that one call either way and both break, silently.
+2. **`react` and `transform` COMPOUND on opacity and COLLIDE on blur.** Both write
+   `baseOpacity(el) * value`, so a layer with both gets the product — correct, and unwritten. But the
+   motion track strips every `blur()` off `filter` and rewrites it from its own numbers, so on any
+   layer with a motion track `react: { prop: "blur" }` is computed and then thrown away. Preserved
+   exactly (this is a refactor), and now recorded in `core/tracks/react.js` as a defect with a name.
+3. **`box` is the one track that deliberately runs OUTSIDE the layer's window.** Width is a layout
+   property nothing else rewrites, so a value left by a later frame survives a seek backwards and a
+   warm render disagrees with a cold one. Every other track checks the clock. `docs/animation.html`
+   said the opposite — "outside its window, nothing else runs" — as its first pipeline step.
+
+**Which gate catches it.** `make probe` is the one that matters and would fail immediately if a track
+kept state between frames. `make snap-all` proves the extraction is inert on the library: 51 identical,
+30 changed, 3 quarantined, scene for scene unchanged from before. Render time across six runs each is
+5.20s before, 5.16s after — the order is resolved at load and the per-frame cost is one indexed array
+read, which is what a statement list cost too.
+
+**Class.** Not a wrong pixel. Knowledge that existed only as the physical arrangement of code, where
+any edit that looked harmless could destroy it without a gate having anything to compare against.

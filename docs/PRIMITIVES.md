@@ -337,8 +337,8 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 
 **Each primitive lives in its own file** — `core/layers/<type>.js`, exporting `build(kit, el, L)` (DOM)
 and optionally `frame(kit, el, L, t, scene)` (per-frame). `scene` is a frozen read-only view of the rest
-of the frame — `boxOf(id)` (canvas-space box of any id'd top-level layer at this t, `null` for a group
-child or an unknown id) · `light` · `camera` · `canvas` · `safe`. Every box is resolved before any
+of the frame — `boxOf(id)` (canvas-space box of any id'd layer at this t, at any depth; see the two
+narrow limits below) · `light` · `camera` · `canvas` · `safe`. Every box is resolved before any
 primitive's `frame()` runs, so it is never a value left over from the previous frame.
 `core/layers/index.js` is the registry; `scene.html`
 is a thin orchestrator (bg/camera/stings/timing) that dispatches to it. **Adding a primitive = adding a
@@ -349,11 +349,24 @@ group child) may carry `"modifiers": [{ "mixBlend": "difference" }]`. Each key n
 `core/fx/`, a registry that mirrors the layer one: a file per modifier exporting `build(kit, el, L, spec)`
 and optionally `frame(kit, el, L, t, scene, spec)`, so **adding a modifier = adding a file**. An unknown
 name is a hard error listing the known set, never a skipped entry. Modifiers apply in array order and
-always last, after the primitive's own `frame()` and after every cross-cutting track (cut · units · vars
-· react · box · motion), so a modifier acts on the finished frame. `transform`, `opacity` and `filter`
-on the layer element belong to those tracks and a modifier must not append to them; one that needs a
-transform gets an element of its own, or reaches for a CSS property the tracks do not own (`tilt` uses
-the `rotate` longhand). Note this is **not** `fx`, which is the named-GSAP-effect slot.
+always last: they are the final SLOT of the per-frame pipeline (`core/tracks/`, below), so a modifier
+acts on the finished frame. `transform`, `opacity` and `filter` on the layer element belong to the
+tracks and a modifier must not append to them; one that needs a transform gets an element of its own,
+or reaches for a CSS property the tracks do not own (`tilt` uses the `rotate` longhand). Note this is
+**not** `fx`, which is the named-GSAP-effect slot.
+
+**`core/tracks/` — the per-frame pipeline, and where the line falls.** A cross-cutting job the engine
+runs for EVERY layer on every frame is a **track**: one file exporting the `slot` it runs in and a
+`frame()`, listed once in order in `core/tracks/index.js`. That list is the composition order, a slot
+holds exactly one track, and two tracks claiming one slot is an error the engine refuses to start with.
+The order, top to bottom: `enter` (a declared cut's styling) · `split` (kinetic units) · `glyphs`
+(ransom cycle) · **`primitive` (the layer type's own `frame()`)** · `orbit` (borderTrail) · `spin`
+(circular text) · `vars` · `react` (audio) · `box` (w/h/depth) · `transform` (motion + motion blur) ·
+`post` (modifiers). Note where `primitive` sits: a layer type's `frame()` runs in the MIDDLE, which is
+why a `cursor` may overwrite a cut's transform and why the motion track still composes on top of it.
+**Track or modifier?** A modifier is opt-in per layer, runs last, and may not touch `transform` /
+`opacity` / `filter`. If a feature must land between two existing jobs, or must write one of those
+three, it is a track. Otherwise it is a modifier, and modifiers are cheaper.
 
 **What a modifier can see.** `frame()`'s 5th argument is a **frozen read-only view of the whole frame**,
 resolved before any layer draws, so a modifier can never read a value another layer left behind and

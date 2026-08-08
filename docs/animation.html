@@ -91,10 +91,15 @@
   td.mono { font-family:var(--mono); font-size:.86rem; white-space:nowrap; }
   .scroll-x { overflow-x:auto; }
 
+  /* The marker is positioned OUT of the text flow, not given a grid or flex cell. A li here holds a
+     <strong> plus a bare sentence; as grid children those are two items, so the sentence auto-placed
+     into the 1.8rem number column and wrapped one word per line. Padding + absolute marker keeps the
+     content one continuous inline run however many elements it is made of. */
   ol.steps { margin:1.3rem 0 0; padding:0; list-style:none; counter-reset:s; display:grid; gap:.55rem; }
-  ol.steps li { counter-increment:s; display:grid; grid-template-columns:1.8rem 1fr; gap:.7rem;
-                align-items:baseline; font-size:.98rem; }
-  ol.steps li::before { content:counter(s); font-family:var(--mono); font-size:.78rem; color:var(--accent);
+  ol.steps li { counter-increment:s; position:relative; padding-left:2.6rem; font-size:.98rem;
+                max-width:44rem; }
+  ol.steps li::before { content:counter(s); position:absolute; left:0; top:.12em; width:1.8rem;
+                        font-family:var(--mono); font-size:.78rem; color:var(--accent);
                         background:var(--accent-soft); border-radius:5px; text-align:center; padding:.15rem 0; }
 
   /* ---- chrome: progress dots + theme toggle ---- */
@@ -254,17 +259,27 @@
   <p>For every layer, on every picture, the engine runs through a fixed list of jobs. Each one may
   adjust the layer. They happen in this order, and the order matters.</p>
   <ol class="steps">
-    <li><strong>Is it on screen yet?</strong> Outside its window, nothing else runs.</li>
     <li><strong>The cut.</strong> If a cut owns this moment, it decides the arrival and exit look.</li>
     <li><strong>Kinetic type.</strong> Words or letters revealed one at a time.</li>
-    <li><strong>Trims.</strong> Trails, counters, live values, reactions to the sound.</li>
+    <li><strong>Cut-out letters.</strong> The ransom look re-rolls each glyph.</li>
+    <li><strong>The layer's own job.</strong> A counter counts, a line types, a pointer moves along its path.</li>
+    <li><strong>The trail.</strong> The light that runs around a border.</li>
+    <li><strong>The ring.</strong> Text set on a circle turns.</li>
+    <li><strong>Live values.</strong> Numbers the layer's own styling reads, driven over time.</li>
+    <li><strong>Sound.</strong> Reactions to the music, read from a table baked before the render.</li>
     <li><strong>The box track.</strong> Width and height, if they are being animated.</li>
     <li><strong>The motion track.</strong> Position, scale, rotation, opacity, from your keys.</li>
     <li><strong>Modifiers.</strong> Last, always. Next slide.</li>
   </ol>
-  <div class="note warn"><p>Today this list is written out by hand inside one long function. That makes
-  adding a new job harder than it should be. Turning it into a proper list that each job signs up to is
-  the next piece of work on the engine.</p></div>
+  <p style="margin-top:1.3rem">Each job is one file in <code>core/tracks/</code>, and each file names the
+  slot it runs in. The order above is a single list in <code>core/tracks/index.js</code>, and it is the
+  only place the order lives. Two jobs asking for the same slot is an error the engine refuses to start
+  with, so "modifiers are last" is a rule the code holds rather than a sentence in a comment.</p>
+  <div class="note"><p>One thing worth knowing: <strong>a layer outside its window still runs the
+  list.</strong> Most jobs check the clock and do nothing. The box track does not, on purpose. Width is
+  a value nothing else rewrites, so a size left behind by a later picture would still be there if you
+  jumped backwards, and the same picture would then look different depending on what you watched
+  first.</p></div>
 </div></section>
 
 <!-- 9 -->

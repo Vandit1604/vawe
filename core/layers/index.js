@@ -77,7 +77,8 @@ export function createRenderer(ctx) {
     // construct a layer's DOM (default primitive = text; count reuses the text build)
     build(el, L) { buildOne(el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
-    // motion track) stay in scene.html's loop; those compose around this call.
+    // motion track) are the per-frame pipeline in core/tracks/, which calls this from the `primitive`
+    // slot — in the MIDDLE of that list, not before or after it (core/tracks/primitive.js says why).
     //
     // `scene` is a FROZEN read-only view of the rest of the frame: geometry (boxOf · specOf · ids), the
     // frame's own properties (light · camera · canvas · safe · bg), the clock, the theme's palette, and
@@ -87,8 +88,8 @@ export function createRenderer(ctx) {
     // writing into the next layer's inputs, and renderFrame(n) has to stay pure in n.
     frame(el, L, t, scene) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t, scene); },
     // per-frame MODIFIER pass (core/fx/index.js), kept a separate entry point from frame() on purpose:
-    // it has to run after scene.js's cross-cutting tracks (cut · units · vars · react · box · motion),
-    // and frame() runs before them. Composition order is spelled out in core/fx/index.js.
+    // it occupies the LAST slot of the pipeline (cut · units · vars · react · box · motion), and
+    // frame() occupies one in the middle. Composition order is spelled out in core/fx/index.js.
     modify(el, L, t, scene) { frameFx(kit, el, L, t, scene); },
   };
 }

@@ -47,10 +47,12 @@ const NONE = Object.freeze([]);
 // 1. WITHIN a layer, modifiers apply in ARRAY ORDER, left to right, and within a single object in key
 //    order. Two modifiers writing the same CSS property therefore resolve last-writer-wins, and the
 //    rightmost is what you see. No modifier may depend on being first.
-// 2. ACROSS phases, a modifier is always LAST. build() runs after the primitive's build() (a modifier
-//    modifies something that already exists), and frame() runs after the primitive's frame() AND after
-//    every cross-cutting track in scene.js's updateLayer — cut, kinetic units, borderTrail, vars,
-//    audio react, the box track and the motion track. A modifier sees the finished frame.
+// 2. ACROSS phases, a modifier is always LAST, and that is now enforced rather than described: the
+//    modifier pass is the final SLOT in the per-frame pipeline (core/tracks/index.js), and a second
+//    track claiming it is an error at load. build() runs after the primitive's build() (a modifier
+//    modifies something that already exists), and frame() runs after the primitive's frame() and after
+//    every other track — cut, kinetic units, borderTrail, vars, audio react, the box track and the
+//    motion track. A modifier sees the finished frame.
 // 3. `transform`, `opacity` and `filter` on the LAYER ELEMENT belong to those tracks, and a modifier
 //    must not append to them. That is a purity rule, not a style one: driveClips rewrites `transform`
 //    from the anim registry's resting keys, and a layer whose own anim contributes no transform key
