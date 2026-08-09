@@ -68,9 +68,19 @@ destination: web
     2. CHOSEN. Camera travel over one white plane. Every surface is a card on the same field and the
        camera moves between them; no beat is a new world.
     3. CHOSEN. A shape match on one small mark. A vertical bar is the text caret at 0s, the playhead
-       from 3.4s, and the leading edge of the render fill at 14.2s. It is the same 8px bar the whole
+       from 3.4s, and the leading edge of the render fill at 14.2s. It is the same bar the whole
        way, it survives every junction, and it changes job at each one.
   Registers 2 and 3 are both things the gate can see, so this needs no waiver for continuity.
+
+  HOW THE BAR IS BUILT, corrected against the render on 2026-08-09, because the first build did not
+  DRAW it. One layer carried the bar from 0s to 16s and it was invisible from 3.28s on: under the 3D rig
+  the browser paints by depth, so the tilted 1440px capture swept in front of a 9px bar standing at
+  z = 0 and swallowed it for 12.7 of the film's 16 seconds. Seven gates were green on a layer that put
+  no ink on the frame (docs/MISTAKES.md #243). So the bar is now TWO layers with a hand-off at the
+  landing: `playhead`, the caret, runs 0s to 3.5s in free space, and `phbar` is a group carrying the
+  capture's exact box and the same 18-degree tilt, so its child bar is COPLANAR with the surface and
+  paint order decides again. The bar also takes the lanes' own perspective, which a separately tilted
+  layer cannot. The hand-off is invisible because it happens on the frame the caret reaches the clock.
 
   THE CAPTURE THIS FILM DEPENDS ON. SETTLED, with numbers. The subject is
   `formats/scene/_playhead-subject.json`, a real renderable 16s draft built for this: fourteen layers of
@@ -188,7 +198,8 @@ destination: web
 - shot: close, the same span centred at the identical scale as the frame before the cut, opening tight and only then pulling back to the whole clock
 - camera: hold dead through the cut, then pull back to the whole clock
 - picture: the identical timeline centred at the identical scale with a bar now spanning the gap, the playhead resuming, the preview above filling, and the bar's travel handing over to a render progress fill that completes
-- mechanism: the film's ONLY hard cut, a jump cut on the same surface at the same scale, at 78% of the runtime · no camera move across the cut, so the only thing that changes is the content · the playhead resuming its travel · the progress fill inheriting the bar's leading edge and running to 100%, the second of the film's two shape matches
+- mechanism: the film's ONLY hard cut, a jump cut on the same surface at the same scale, at 78% of the runtime · no camera move across the cut, so the only thing that changes is the content · the playhead resuming its travel · the progress fill inheriting the bar's leading edge and running to 100%, the second of the film's two shape matches, over a track so a growing bar reads as progress
+- corrected: the fix is a SECOND CAPTURE, not paint. The first build covered the hazard band with a white rect and drew a blue bar by hand, and the payoff frame still carried the studio's `dead air 9.60s to 10.80s` alert chip and a red sliver of the band under the words "Fixed here": a film contradicting its own copy. So the subject's `closing-card` was extended to 10.80s IN THE SAME FILE, `#tl` was captured again at the same 1440px viewport, and the file was put back. The cut now swaps two real product surfaces that carry the same filename in their header, and the only things that change are the ones the fix changed: the band and its alert go, the closing-card bar spans the gap, `text end` arrives.
 - becomes: an empty span becomes a filled one, and the playhead becomes the leading edge of the render it just authorised
 - onscreen: Fixed here. Then rendered.
 - why: the film must end on the fix happening rather than on a sentence about fixing, so the last thing that moves is the render completing

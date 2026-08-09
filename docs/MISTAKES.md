@@ -6220,3 +6220,49 @@ painted at the intersection centre using `elementsFromPoint`, but its `at()` hel
 `e.contains(el)` — and `#cam`, the stage and `<body>` contain every layer. So the "one of them is not
 even painted here" branch can never be reached. Narrowing it would change overlap behaviour on every
 scene in the library and needs its own before/after sweep.
+
+---
+
+## #243 — a layer the engine animated for 12.7s and never drew: an overlay bar behind a tilted capture
+
+**What.** `playhead.json` declares its continuous object as one vertical bar: a text caret at 0s, the
+studio playhead from 3.3s, the leading edge of a render fill at 14s. The storyboard is built on it and
+names it as the reason the film needs no continuity waiver. In the rendered mp4 the bar is **invisible
+from 3.28s to 16.0s**, 12.7 of 16 seconds. Proved by pixel count, not by eye: the layer was recoloured
+magenta and every sampled frame from f108 to f470 returned **zero** magenta pixels. Delete the captured
+timeline and the same layer draws 3133 pixels at the same frame, so it is occlusion, not a missing
+layer.
+
+**Root cause.** The scene runs the 3D rig (`tilt` on the layers, `plane` on two of them). Inside a
+`transform-style: preserve-3d` container the browser paints by 3D position, so **document order and
+`z-index` stop deciding anything.** The captured `#tl` component is 1440px wide and tilted 18 degrees
+about its own centre, which sweeps its surface through roughly +/-222px of depth; the 9px bar tilts
+about its own centre and stays at z ~ 0. Everywhere left of the component's centre the captured surface
+is nearer the eye, so it paints over the bar.
+
+Three fixes that do NOT work, each tested rather than assumed:
+- `track` (the z-order knob, `core/clips.js:83`) — z-index is ignored under preserve-3d. Still hidden.
+- `plane` — 150/300/600 hidden; 450 visible but projected to x 66..84 when the lane it must sit on is
+  at x 305..317. Depth magnifies and displaces, so it cannot be used as a paint-order lever.
+- a `group` wrapping the component and the bar — still hidden.
+
+**Fix (authoring, and it is the general answer).** Make the overlay **coplanar** with the surface it
+overlays: a `group` with the component's exact box and the same `tilt`, carrying the bar as a child.
+Coplanar quads do not cross, so paint order decides again and the later layer wins. Measured: a
+1440x368 rect at the component's box with the same tilt paints 543656 pixels over it. As a bonus the
+bar now takes the same perspective as the lanes it points at, which no separately-tilted layer can.
+
+**What made this invisible to every gate, which is the part worth keeping.**
+`no-continuous-object` saw a layer surviving the cut and moving. `direction-floor` counted it in
+`motionTrack x2`. `audit` measured its box, found it inside the safe area, and passed it. `beat-check`
+counted it as content. Seven gates were green on a layer that contributed no pixels at all. Every one of
+them reads the DOM or the JSON; none asks the only question that mattered, **did this layer put any ink
+on the frame.** That gate does not exist yet and should: render N frames, and for each layer that
+declares a visible box, report any that never contribute a pixel over their whole window. It is the
+`buried` check generalised from "under an opaque layer" to "not painted at all", and unlike `buried` it
+needs no heuristic — a layer drawing nothing for its entire life is never intentional.
+
+**Blast radius.** Any scene that puts a marker, cursor, highlight or callout on top of a captured
+component under the 3D rig. `grep -l '"tilt"' formats/scene/*.json` is the candidate set; this film is
+the one confirmed instance, and it was confirmed only because the storyboard promised the bar loudly
+enough that its absence was noticeable.
