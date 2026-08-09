@@ -18,6 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { SEAM_FX } from '../../core/seams.js';
+import { scratch, scratchBase, ffmpegOrDie } from '../lib/scratch.mjs';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { ANIM_NAMES } from '../../core/clips.js';
@@ -81,7 +82,7 @@ fs.mkdirSync(path.join(ROOT, 'out'), { recursive: true });
 const sceneFile = path.join(ROOT, 'out', `transition-preview-${MECH}.json`);
 fs.writeFileSync(sceneFile, JSON.stringify(scene, null, 2));
 const dataUrl = '/' + path.relative(ROOT, sceneFile).split(path.sep).join('/');
-const tmpDir = process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp';
+const tmpDir = scratchBase();
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
   '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -128,8 +129,10 @@ for (let k = 0; k < frames.length; k++) {
 }
 await browser.close(); server.close();
 
-const sheet = '/tmp/transition-preview.png';
-spawnSync('ffmpeg', ['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', sheet]);
+// Same base as the frames above, and loud on failure — the split that hid reveal.mjs's missing sheet
+// was the identical shape here.
+const sheet = scratch('transition-preview.png');
+ffmpegOrDie(['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', sheet], sheet, 'transition strip');
 const easeNote = (MECH === 'seam' || MECH === 'cut') ? ` · timing ${TIMING}` : '';
 const dirNote = (MECH === 'seam' || MECH === 'cut') ? ` · dir ${DIR}` : '';
 console.log(`✓ ${MECH} · ${FX}${dirNote}${easeNote} · ${DUR}s  →  ${sheet}`);

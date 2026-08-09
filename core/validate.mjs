@@ -430,6 +430,15 @@ export function lintData(data) {
   for (const [i, L] of (data.layers || []).entries()) {
     if (!isObj(L)) continue;
     const label = `layers[${i}]${L.id ? ` #${L.id}` : ''}`;
+    // `elevation` writes an inset 1px ring as part of its depth stack, so `border` is DROPPED beside it
+    // (core/layers/util.js). That is the right pixel answer — two rings on one edge read as a mistake —
+    // but it is a prop the author wrote being discarded without a word, and on a DARK surface the ring
+    // it substitutes is rgba(255,255,255,0.06), which is not the visible 1px line the author asked for.
+    // Said out loud rather than changed: 132 layers across this library already set both, and honouring
+    // the border would restyle every one of them.
+    if (L.border && L.elevation) {
+      warns.push(`${label}: sets both \`border\` and \`elevation\`, and elevation wins — the border is DROPPED and replaced by elevation's inset ring (${L.on === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'}). On a dark surface that ring is nearly invisible. Drop one: \`elevation\` for depth, or \`border\` + \`glow\` for a lit edge.`);
+    }
     if (typeof L.at === 'string' && !L.anchor && L.type !== 'block') {
       warns.push(`${label}: \`at: "${L.at}"\` positions a layer against its \`anchor\`, and there is no \`anchor\` — so it is IGNORED and the layer sits at its own x/y. Add \`anchor: "<id>"\`, or drop \`at\`.`);
     }

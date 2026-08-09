@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { writeReceipt } from '../lib/receipt.mjs';
+import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -74,15 +75,18 @@ const beats = bounds.map((t0, i) => ({ i, t0, t1: i + 1 < bounds.length ? bounds
 
 // per scene, so two authors running at once cannot read each other's reveal (same reason as beats.mjs)
 const SLUG = path.basename(dataArg, '.json');
-const tmp = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'reveal', `${SLUG}.frames`);
+// The frames and the sheet MUST come off one base. They did not, and the sheet's parent was therefore
+// never created under a job dir — see scripts/lib/scratch.mjs.
+const sheet = scratch('reveal', `${SLUG}.png`);
+const tmp = scratch('reveal', `${SLUG}.frames`);
 fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const tileW = 200, tileH = Math.round((tileW * VH) / VW);
 const grab = async (t, file, tag, color) => {
   await page.evaluate((n) => window.__engine.renderFrame(n), Math.round(Math.max(0, Math.min(duration - 0.01, t)) * F));
   const raw = file + '.raw.png';
   await page.screenshot({ path: raw, clip: { x: 0, y: 0, width: VW, height: VH } });
-  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', raw, '-vf',
-    `scale=${tileW}:${tileH},drawtext=text='${tag}':x=5:y=5:fontsize=15:fontcolor=${color}:box=1:boxcolor=black@0.6`, file]);
+  ffmpegOrDie(['-v', 'error', '-y', '-i', raw, '-vf',
+    `scale=${tileW}:${tileH},drawtext=text='${tag}':x=5:y=5:fontsize=15:fontcolor=${color}:box=1:boxcolor=black@0.6`, file], file, `tile @${t.toFixed(2)}s`);
   return file;
 };
 
@@ -116,7 +120,7 @@ for (const u of units) {
   const cells = [];
   for (let k = 0; k < u.samples.length; k++) { const sm = u.samples[k]; cells.push(await grab(sm.t, path.join(tmp, `u${u.i}_${k}.png`), sm.tag, sm.color)); }
   const row = path.join(tmp, `row_${String(u.i).padStart(2, '0')}.png`);
-  spawnSync('ffmpeg', ['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', row]);
+  ffmpegOrDie(['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', row], row, `row ${u.label}`);
   rows.push({ img: row, n: cells.length });
   if (ALL) console.log(`  reveal @${u.label.slice(1)} · ${u.tag}`);
 }
@@ -127,11 +131,10 @@ const full = tileW * maxCells;
 const padded = rows.map((r, i) => {
   if (r.n === maxCells) return r.img;
   const p = path.join(tmp, `pad_${i}.png`);
-  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', r.img, '-vf', `pad=${full}:ih:0:0:color=0x0a0a0c`, p]);
+  ffmpegOrDie(['-v', 'error', '-y', '-i', r.img, '-vf', `pad=${full}:ih:0:0:color=0x0a0a0c`, p], p, `pad row ${i}`);
   return p;
 });
-const sheet = `/tmp/reveal/${SLUG}.png`;
-spawnSync('ffmpeg', ['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet]);
+ffmpegOrDie(['-v', 'error', '-y', ...padded.flatMap((p) => ['-i', p]), '-filter_complex', `vstack=inputs=${padded.length}`, '-frames:v', '1', sheet], sheet, 'contact sheet');
 // REVIEW RECEIPT — the same stamp `make beats` writes: proof that a sheet exists for THIS scene content.
 writeSeenReceipt(dataArg, sheet, 'reveal');
 if (ALL) console.log(`✓ reveal (ALL layers) · ${units.length} distinct entrances · each row = one reveal event's ENTER arc  →  ${sheet}`);

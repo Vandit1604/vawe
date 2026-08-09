@@ -1,0 +1,67 @@
+{
+  "name": "vawe-dark",
+  "note": "THE VAWE STUDIO, DARK. Not a restyle of the brand: these are the tokens `scripts/dev/studio.mjs` ships behind the studio's ◐ toggle (and THEME=dark), lifted verbatim, so a film framed in this palette is framed in the instrument's own colours. Cyberpunk here means LIGHT IN A DARK ROOM, not neon-on-black: the field is the near-black stage #0b0d12, the only bright surfaces are the instrument and the frame it is previewing, and exactly two hues carry meaning. Mint #5ee0c8 (12:1) is the accent and the state of a thing that has run; #ff4d6d is the studio's own playhead-and-alarm red (6:1) and it is spent ONLY on the hazard band and its measurement, so a red in this film always means a hole. Faces are unchanged from the light brand, Anybody + JetBrains Mono, because the product did not change its typography when it turned the lights off.",
+  "palette": {
+    "bg": "#0b0d12",
+    "bg2": "#11141b",
+    "surface": "#11141b",
+    "surface2": "#161b24",
+    "line": "#222831",
+    "lineStrong": "#333b47",
+    "text": "#e6e9ef",
+    "text2": "#9aa4b2",
+    "dim": "#7c8797",
+    "accent": "#5ee0c8",
+    "accentDim": "rgba(94,224,200,0.12)",
+    "accentGlow": "rgba(94,224,200,0.34)",
+    "up": "#84e06a",
+    "down": "#ff4d6d",
+    "ink": "#e6e9ef"
+  },
+  "gradient": ["#11141b", "#0b0d12", "#06080d"],
+  "type": {
+    "sans": "Anybody",
+    "serif": "Anybody",
+    "mono": "JetBrains Mono",
+    "num": "JetBrains Mono"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.08,
+    "settle": 0.5,
+    "enter": 36,
+    "durationScale": 0.88,
+    "stagger": 0.045
+  },
+  "bg": {
+    "accent": "94,224,200",
+    "tint": "40,52,72",
+    "tint2": "26,34,48",
+    "dotLight": "94,224,200",
+    "paperBase": ["#11141b", "#06080d"],
+    "softBase": ["#0e1117", "#06080d"],
+    "accentBase": ["#123028", "#06080d"],
+    "inkBase": ["#06080d", "#030407"],
+    "border": "#222831",
+    "dark": ["#0b0d12", "#06080d"],
+    "darkMesh": ["#101a1e", "#06080d"],
+    "deep": ["#06080d", "#030407"],
+    "light": ["#11141b", "#0b0d12"],
+    "ink": ["#06080d", "#030407"],
+    "paper": "#0b0d12"
+  },
+  "vars": {
+    "--ink": "#e6e9ef",
+    "--paper": "#0b0d12",
+    "--muted": "#7c8797",
+    "--em": "#5ee0c8",
+    "--on-light": "#0b0d12",
+    "--on-dark": "#e6e9ef",
+    "--border": "#222831",
+    "--accent-soft": "rgba(94,224,200,0.12)"
+  },
+  "bgDefault": {
+    "preset": "plain",
+    "value": "dark"
+  }
+}

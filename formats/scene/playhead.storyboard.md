@@ -38,13 +38,27 @@ destination: web
        material, and the material agrees: a timeline is read, not glanced at, and a viewer who cannot
        finish reading a lane has learned nothing. We keep their duty cycle and drop their frequency.
 
-    2. THEIR PALETTE, IN ITS MEASURED FORM. RESOLVED, and no longer a refusal. When this was written the
-       studio was dark only, and the choice was between the real product and the reference's 86%
-       near-white. `8624ce0` gave the studio a LIGHT MODE and made it the default, so the conflict is
-       gone: the captured surface is the product as it ships AND the page is white. Lane bars are cobalt
-       text / slate rect / green count / olive svg / magenta group on #ffffff, the hazard band is the
-       only saturated field in the frame, and the accent holds every emphasis. We keep the reference's
-       discipline, one field and one accent, and we no longer pay for it in fidelity.
+    2. THEIR PALETTE, IN ITS MEASURED FORM. INVERTED, and still not a refusal of the discipline. The
+       reference runs an 86% near-white field; this cut runs a near-black one, because the reviewer asked
+       for cyberpunk and the studio has a real dark mode to give it (`8624ce0`: light is the default, dark
+       is behind the ◐ toggle and THEME=dark). So the hero surface is `#tl` RE-CAPTURED under
+       THEME=dark at the same 1440px viewport. It is the product, not the product repainted. Lane bars are
+       mint text / slate rect / lime count / olive svg / rose group on the #0e1117 panel, the hazard band
+       is the only saturated field in the frame, and one accent holds every emphasis. What we keep is the
+       structure the reference is actually made of: ONE field, one accent, and ink that is not pure black,
+       which here means paper that is not pure white.
+
+       WHAT CYBERPUNK MEANS HERE, stated so it can be held to: LIGHT IN A DARK ROOM, not neon on black.
+       The room is near-black and almost empty. The only bright things in the frame are the instrument and
+       the monitor it is previewing, and the monitor is bright for an honest reason: the draft being
+       previewed is a white film, which is exactly what the real studio shows in dark mode. Two hues carry
+       meaning and nothing else is coloured. Mint #5ee0c8 is the accent and the state of a thing that has
+       run. #ff4d6d is the studio's own alarm, and it is spent ONLY on the hazard band, its measurement
+       and the word "nothing", so a red in this film always means a hole.
+       REJECTED, each on purpose: gradient text, glass panels, a purple-to-blue hero, scanlines, glitch,
+       chromatic fringing, and an outline glow on every element. Each is what the look degenerates into
+       when it is a colour scheme rather than a lighting decision, and the first four are on the
+       `impeccable` ban list.
 
     3. THEIR SPINE MOVE. At 2.0s their wordmark stands alone, and by 3.2s the camera has pulled back and
        that same wordmark IS the app's header logo. It is the best move in the film and WE CANNOT COPY
@@ -65,22 +79,34 @@ destination: web
   THREE WAYS THIS FILM COULD HOLD ITS SUBJECT, and the first one is rejected:
     1. REJECTED. One card that keys w and h across four beats. Eighteen films in this library already
        are that, docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md says so, and it is the gate's minimum.
-    2. CHOSEN. Camera travel over one white plane. Every surface is a card on the same field and the
+    2. CHOSEN. Camera travel over one plane. Every surface is a card on the same field and the
        camera moves between them; no beat is a new world.
     3. CHOSEN. A shape match on one small mark. A vertical bar is the text caret at 0s, the playhead
        from 3.4s, and the leading edge of the render fill at 14.2s. It is the same bar the whole
        way, it survives every junction, and it changes job at each one.
   Registers 2 and 3 are both things the gate can see, so this needs no waiver for continuity.
 
-  HOW THE BAR IS BUILT, corrected against the render on 2026-08-09, because the first build did not
-  DRAW it. One layer carried the bar from 0s to 16s and it was invisible from 3.28s on: under the 3D rig
-  the browser paints by depth, so the tilted 1440px capture swept in front of a 9px bar standing at
-  z = 0 and swallowed it for 12.7 of the film's 16 seconds. Seven gates were green on a layer that put
-  no ink on the frame (docs/MISTAKES.md #243). So the bar is now TWO layers with a hand-off at the
-  landing: `playhead`, the caret, runs 0s to 3.5s in free space, and `phbar` is a group carrying the
-  capture's exact box and the same 18-degree tilt, so its child bar is COPLANAR with the surface and
-  paint order decides again. The bar also takes the lanes' own perspective, which a separately tilted
-  layer cannot. The hand-off is invisible because it happens on the frame the caret reaches the clock.
+  HOW THE BAR IS BUILT, corrected against the render TWICE, because the bar is the film and the film
+  kept not drawing it. Under the 3D rig the browser paints by DEPTH, not by layer order, so the tilted
+  1440px capture stands partly in front of z = 0 and swallows anything flat that crosses it.
+
+  The first build put one bar at z = 0 for all 16s and lost it from 3.28s on, 12.7 of 16 seconds.
+  The fix was `phbar`, a group carrying the capture's exact box and the same 18-degree tilt: its child
+  is COPLANAR with the surface, so paint order decides again, and the bar takes the lanes' own
+  perspective, which a separately tilted layer cannot.
+
+  That rescued the second half of the mark and left the first half at z = 0. Counted in magenta on
+  2026-08-09, the caret was absent from 3.05s to 3.28s, seven frames, at the exact junction the film is
+  built on. It read as a pop, not a hand-off, and every gate was green through both versions.
+  `plane` depth was tried and rejected: it clears the occlusion, but depth is a real projection and the
+  magnification moves with the camera dolly (1.60 to 1.43 across the dive), so no constant compensation
+  exists and the move would have to be re-authored against a moving target.
+
+  So the caret and the playhead are now ONE layer inside the coplanar group, resizing from the caret's
+  box to the playhead's box with keyed `w`/`h`. There is no hand-off to hide, because there is no
+  hand-off: it is the same mark the whole way, which is what this storyboard claimed from line 6.
+  Proof is a pixel count, never an eye: `node scripts/dev/bar-probe.mjs formats/scene/playhead.json`
+  paints the subject a colour used nowhere else, renders, and fails on any frame that has none of it.
 
   THE CAPTURE THIS FILM DEPENDS ON. SETTLED, with numbers. The subject is
   `formats/scene/_playhead-subject.json`, a real renderable 16s draft built for this: fourteen layers of
@@ -105,9 +131,19 @@ destination: web
   the frame before it is beat 4's close. The first draft said medium and contradicted its own cut.
 
   BACKGROUND: the reference holds a byte-identical backdrop for 19.78 seconds and earns it, because its
-  subject moves in every phrase. We do NOT copy that by default. Ours is a near-white field with a very
-  slow drift, so the two frames that hold longest are not dead. If the subject motion lands as measured,
-  the drift can come out; that is a decision for the render pass with beats in hand, not a decision here.
+  subject moves in every phrase. We do NOT copy that by default. Ours is the ROOM: a near-black field with
+  two cool blooms drifting across the whole film at the pace the light cut used, so the two frames that
+  hold longest are not dead. It then does one thing the light cut could not. A red bloom rises over 1.1s
+  as the camera dives into the hazard band, and the film's one cut kills it at 12.44s; a mint bloom rises
+  behind the render that follows. The room reacts to the alarm and then to the fix, so the argument is
+  said in light as well as in type. Every value is driven from `var(--t)`; there is no fixed field here.
+
+  `formats/scene/_lightfall.html` WAS CONSIDERED AND REJECTED. It is a good generated light field, 42
+  seeded vertical bars with three incommensurate motion rates, and it is exactly wrong for this film. The
+  subject is a stack of horizontal bars read against ONE vertical bar, and the whole spine of the film is
+  that a viewer tracks that single mark from caret to playhead to render fill. Putting 42 vertical bars
+  behind it hands the eye 42 decoys and makes the one thing the film asks you to follow indistinguishable
+  from the wallpaper. The collision is structural, not a matter of opacity.
 
   THAT RISK IS CLOSED. The hazard band photographs. It draws as a red hatched column across the whole
   lane stack, labelled `dead air 1.20s`, with a matching alert chip above the ruler. Two things made it
@@ -138,7 +174,7 @@ destination: web
 - object: the caret is the whole frame; it blinks alone on white, types the line, then the line clears and it stays
 - shot: wide, the caret dead centre and the frame deliberately empty around it, the emptiest frame in the film
 - camera: slow push, about 4% over the beat
-- picture: one vertical ink bar dead centre on a near-white field. `See the film` types beside it at ~13% of frame height, holds, and only then does `before you render it.` arrive beneath it at half that size
+- picture: one vertical bar of light dead centre on a near-black field, with a soft bloom around it, the only thing emitting in the frame. `See the film` types beside it at ~13% of frame height, holds, and only then does `before you render it.` arrive beneath it at half that size
 - mechanism: per-character typing on a text layer, caret visible · the line arriving in TWO stages, three words then four, so the frame is never holding seven words at one weight · a hard dead stop of 0.4s on the finished line · the line clearing right to left in 0.3s, leaving the bar alone
 - becomes: an empty white field becomes a typed promise, and the promise collapses back into the single bar that wrote it
 - onscreen: See the film before you render it.

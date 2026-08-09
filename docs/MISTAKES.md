@@ -6323,3 +6323,76 @@ can load it.
 `dist`/`dir` beside an `anim` do nothing at all — `core/clips.js` drives an entrance from
 `data-anim` alone and has no distance or direction knob — which is 13 layers across four shipped films
 believing they tuned a slide they did not.
+
+## 88. `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
+
+**What happened.** `make reveal D=formats/scene/playhead.json` printed
+`✓ reveal · 5 beats … → /tmp/reveal/playhead.png` and exited 0. No such file existed, anywhere.
+`make beats` wrote its sheet from the same repo, the same run, without complaint.
+
+**Root cause, two of them stacked.** `scripts/author/reveal.mjs` decided where to put its work twice
+and disagreed with itself: the frames directory was built through `CLAUDE_JOB_DIR` (line 77) and the
+sheet path was the literal `/tmp/reveal/${SLUG}.png` (line 133). With a job dir set, `mkdirSync` created
+`$CLAUDE_JOB_DIR/tmp/reveal/`, `/tmp/reveal/` was never created, and ffmpeg could not open its output.
+It said so on stderr — into a `spawnSync` whose status the file never read. Four ffmpeg calls in that
+file dropped their result on the floor. `beats.mjs` was immune only by accident: it hard-codes both
+halves, so its two literals happen to agree.
+
+**Why it was worse than a missing file.** The run ended by calling `writeSeenReceipt`, so the review
+receipt that exists to prove somebody LOOKED at this version of the scene was stamped for an image that
+was never written. A gate designed to catch "the author skipped the sheet" was satisfied by a sheet
+nobody could open.
+
+**The fix.** `scripts/lib/scratch.mjs` — one `scratch(...parts)` that resolves against a single base and
+guarantees the parent exists, and one `ffmpegOrDie(args, out, what)` that throws on a non-zero status
+AND on a zero status that produced no file. `reveal.mjs` takes both, so the receipt is now unreachable
+unless the sheet exists. Verified: the sheet now lands and the printed path is the real one.
+
+**Fixed at the rule, not the call site.** Grepped every `CLAUDE_JOB_DIR` consumer.
+`filmstrip.mjs` and `measure-motion.mjs` were already correct (one base, and filmstrip checks ffmpeg's
+status). `transition-preview.mjs` had the identical split — job-dir frames, a `/tmp/transition-preview.png`
+literal — and survived only because `/tmp` itself always exists. It now uses the same helper.
+
+**Lesson:** a tool that prints a path is asserting the file is there. Any `spawnSync` whose output
+another line then claims as a result must check its status and its artifact, or the tool's success
+message is decoration.
+
+## 89. The film's declared subject was not drawn for seven frames, at the exact moment it hands off
+
+**What happened.** `playhead.json`'s whole spine is ONE vertical mark the viewer tracks from caret to
+playhead to render fill. Painted magenta and counted, the mark was absent from every frame between
+3.05s and 3.28s — the caret blinked out and a different, taller bar popped in at the surface's left edge
+a fifth of a second later. On screen it reads as a pop, not a hand-off.
+
+**Root cause.** Under the 3D rig, painting is by DEPTH, not by layer order. The caret was a top-level
+rect at z = 0; the hero surface is a 1440px capture tilted 18° about y, so the near half of that plane
+stands in front of z = 0 and swallowed the caret as the camera dolly swept the capture's projected
+footprint over it. The bar was immune for a reason that did not generalise: it lives inside `phbar`, a
+group placed at the capture's exact box and tilt, so the two quads are coplanar and DOM order decides.
+The earlier fix (MISTAKES on the coplanar group) had rescued the second half of the subject and left the
+first half at z = 0.
+
+**What was tried and rejected.** `plane` depth on the caret does clear the occlusion (z = 400 restores
+every frame), but depth is a real projection: the layer's size and its distance from the vanishing point
+both change, and the factor moves with the camera dolly (measured 1.60 → 1.43 across the dive). No
+constant compensation exists, so the caret could not be pushed forward without re-authoring the move
+against a moving target.
+
+**The fix.** The caret and the bar are now ONE layer, inside the coplanar group, resizing from the
+caret's box to the playhead's box with keyed `w`/`h`. That is what the film always claimed to be. The
+hand-off is pixel-exact by construction rather than by two layers being aimed at each other — measured,
+the merged mark passes through the old junction at x 292–300 continuously, and the old two-layer version
+had the caret ending at x 374–384 h 204 while the bar began at x 291–300 h 300, an 85px jump the
+occlusion had been hiding.
+
+**Which gate catches it: none of them, and that is the finding.** `validate`, `beat-check`, `critique`,
+`direct`, `direction-floor`, `dissolve`, `slop`, `designspec`, `copy`, `assets`, `audit` and
+`seam-check` were all green on the broken film, before and after. `beat-check` proves the timeline has
+no hole, which is a statement about layers being SCHEDULED, not about pixels being drawn. Nothing in
+the ladder renders the declared subject and looks for it. `scripts/dev/bar-probe.mjs` is that check:
+recolour the named subjects to a colour used nowhere else, render, and count. It reports a per-sample
+count and bounding box and exits non-zero on any empty frame.
+
+**Lesson:** "the layer is in the scene and its window covers this second" is not "the viewer can see
+it". Under a rig with any tilt or depth, occlusion is a rendering outcome no schema check can predict,
+so the only honest proof is a pixel count on a render.
