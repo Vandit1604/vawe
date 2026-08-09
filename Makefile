@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
+.PHONY: dev check ship script animatic panels beats preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -415,6 +415,14 @@ animatic:
 	node scripts/author/animatic.mjs $(SB) $(if $(VOICE),--voice $(VOICE)) $(if $(OUT),--out $(OUT))
 	@f=$$(node scripts/author/animatic.mjs $(SB) $(if $(OUT),--out $(OUT)) --path); \
 	 ./bin/vawe $$f --draft --workers 2
+
+# make panels SB=<storyboard.md>  — THE STORYBOARD STOP, AS A PICTURE. One rough grey still per beat,
+# tiled into a sheet, before any scene JSON exists. `shot:` drives the size of the subject box and any
+# placement the prose states drives where it sits, so a wide and a close are different pictures and a
+# beat holding two seconds on one word reads as the hole it is. Deliberately grey: this is BLOCKING, not
+# drawing. The animatic checks the clock, styleframes check the look, this checks the composition.
+panels:
+	node scripts/author/panels.mjs $(SB) $(if $(OUT),--out $(OUT))
 
 # make styleframes D=<scene.json> [N=4] — THE LOOK, BEFORE THE MOTION IS TRUSTED. Renders the few most
 # visually DISTINCT settled moments at full scale as individual stills, plus a sheet, and runs only the

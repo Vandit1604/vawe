@@ -1,6 +1,6 @@
 ---
 when: "\"we built the whole thing and then it was rejected\""
-answers: "the three points where the work gets shown before it is finished: concept · style frames · the 85% draft"
+answers: "the points where the work gets shown before it is finished: concept · storyboard panels · style frames · the 85% draft"
 group: crosscutting
 ---
 
@@ -23,8 +23,9 @@ earlier and far cheaper:
 | Instrument Serif, a saturated AI-default face | **style frames** | one token |
 | an explainer whose first slide carried nothing | **style frames** | one element |
 | a scroll-driven deck whose motion was the point and was wrong | **concept** | a sentence |
+| a film whose first two seconds held one character | **storyboard panels** | one line of markdown |
 
-Four rejections, four rebuilds, none of which needed to happen. The pattern is always the same:
+Five rejections, five rebuilds, none of which needed to happen. The pattern is always the same:
 momentum carried the work past the moment when redirecting it was free.
 
 ## The three stops
@@ -39,6 +40,37 @@ The reviewer picks one, kills one, or says none of these. A wrong call costs min
 
 Do not show one direction and ask whether it is good. That is not a choice, it is a request for
 permission, and it gets approved by default.
+
+### 1a. Storyboard panels — before any JSON exists
+
+`make panels SB=<storyboard.md>` draws one rough grey still per beat and tiles them into a sheet.
+
+The storyboard was the stop that broke the rule below. A storyboard here is prose, so the reviewer was
+handed `picture:` and `onscreen:` in English and asked to approve a film. `onefilm` was approved that
+way and rejected later on its beats sheet, for a two-second opening that held one character. Nothing
+about that needed the JSON to exist.
+
+A panel draws what the plan states and nothing else. `shot:` sizes the subject box, so a wide and a
+close are different pictures. Any placement the prose names ("on the left", "the lower third") moves
+the box, and a beat that names none says so on the panel. A beat that names no `picture:` is a red
+dashed box.
+
+**What a panel is not:**
+
+- **It is blocking, not drawing.** Boxes and flat type, grey on purpose. It answers where things sit
+  and how big they are. Never approve a LOOK from one; that is style frames, and the grey is there so
+  nobody tries.
+- **It cannot show motion.** One held still per beat says nothing about how a thing arrives or how
+  long it takes. `make animatic` is the clock, `make reveal` is the entrance.
+- **It is only as good as the storyboard.** A beat whose `picture:` reads "a nice shot of the product"
+  draws a grey box with that sentence in it. That is a true report, and often the most useful thing a
+  panel does.
+- **It cannot judge what the plan never states.** If no beat says where anything sits vertically, every
+  box is centred by this tool and the empty band is the tool's convention. The panel labels that case,
+  so read the label before reading the emptiness.
+
+`storyboard-check` warns when no panels exist for a storyboard, or when they were drawn from an older
+version of it. It never blocks: panels are advisory, and a gate that blocks on advice gets waived.
 
 ### 2. Style frames — before any motion exists
 

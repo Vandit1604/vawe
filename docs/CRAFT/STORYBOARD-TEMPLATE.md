@@ -57,6 +57,13 @@ duration: 29s
   core/camera-moves.js), so the plan simply did not speak the language the renderer already had, and
   camera work got invented at JSON time or not at all. Name `shot:` and `camera:` per beat.
 
+  `shot:` NOW DRAWS SOMETHING, so it is worth filling in properly. `make panels SB=<this file>` renders
+  one rough grey still per beat, and `shot:` sizes the subject box in it: a wide leaves the frame mostly
+  empty, a close fills it. A beat with no `shot:` is drawn as a medium and named in the warnings, which
+  makes the omission visible rather than average. Placement words inside `shot:` or `picture:` are read
+  too ("on the left", "the lower third"), and a beat that names none gets a centred box labelled as
+  this tool's guess. So state the shot, and if the frame divides, say which side the subject is on.
+
   `picture:` is the other half, and it is the one that matters most here. Short-form advertising
   research is blunt about it: the visual and copy channels must carry a beat SIMULTANEOUSLY, not
   sequentially, because that is the only way to fit a whole beat into three seconds. A beat with copy

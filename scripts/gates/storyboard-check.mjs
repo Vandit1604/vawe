@@ -18,6 +18,7 @@ import fs from 'node:fs';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE } from '../author/storyboard-parse.mjs';
+import { readReceipt } from '../lib/receipt.mjs';
 
 const f = process.argv[2];
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
@@ -151,6 +152,16 @@ if (timed.length && timed.length < spans.length) {
     errs.push(`timeline-hole — your beats stop at ${last.end}s of a ${durSec}s film: ${(durSec - last.end).toFixed(2)}s of the film is unplanned. The last seconds are where the payoff lands; a storyboard that runs out early ships a film that ends on a claim it never demonstrated.`);
   }
 }
+
+// ── did anybody LOOK at it ────────────────────────────────────────────────────────────────────────
+// This gate reads a plan and grades it against itself, which cannot see composition at all. `make
+// panels` draws one rough still per beat and is the only artefact that can. Never a blocker: a plan may
+// legitimately be read without panels, and a gate that blocks on an advisory step teaches people to
+// waive it. But "the storyboard changed since anyone last looked at the pictures" is precisely what the
+// receipt exists to say out loud.
+const seen = readReceipt('panels', f);
+if (!seen.exists) warns.push(`no panels have been drawn for this storyboard — run \`make panels SB=${f}\` and READ the sheet. This gate grades the plan against itself and cannot see composition; the panels are the only artefact at this stage that can.`);
+else if (seen.stale) warns.push(`the panels are stale — they were drawn from an older version of this file (${seen.receipt.at}). Re-run \`make panels SB=${f}\` and look again; the beat you changed is the one nobody has seen.`);
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  storyboard-check · ${f} · ${blocks.length} beat(s)`);
