@@ -16,7 +16,7 @@ import { lightfield } from './core/lightfield/index.js';
 const html = lightfield({
   seed: 1950907,
   colour: { bloom: '#ee7c56', mid: '#c22d45', deep: '#851b08', ground: '#000202' },
-  shadow: { depth: 0, softness: 0.5, direction: 'right', relief: 0.4 },
+  shadow: { depth: 0, softness: 0.5, direction: 'right', seam: 0.5, sheen: 0.35 },
   pattern: { kind: 'slats', count: 88, jitter: 0.55 },
   motion: { kind: 'shimmer', speed: 1, amount: 1 },
 });
@@ -44,6 +44,11 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 | `mid` | the second colour, set away from the bloom. This is what stops the field being one hue. |
 | `deep` | the saturated body the light sits in. |
 | `ground` | what the light falls away into. Usually near black. |
+| `extra` | an optional ordered list of up to four more colours, laid over the roles in the order given. Empty by default. The four roles are the whole API for a simple field; this is for a colour none of them can name. |
+
+The reference needs `extra`. It carries a dark magenta lane between two orange lobes and a cold blue
+corner, and neither of those is a bloom, a mid, a deep or a ground. Naming them as roles would have
+meant inventing two roles that mean nothing on any other palette, so they go in a list.
 
 ### shadow
 
@@ -55,7 +60,12 @@ cellar depending on it.
 | `depth` | 0 to 1 | how dark the far side goes. `0` emits no shadow layer at all, and that is what the reference wants: its colour field already drains to the ground, and a second fall on top measured worse. |
 | `softness` | 0 to 1 | how long it takes to get there. `0` is an edge you can point at, `1` crosses the whole frame. |
 | `direction` | `left` `right` `top` `bottom` `center` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis: a frame that darkens down and right at once is ordinary, and no edge keyword can say it. |
-| `relief` | 0 to 1 | how hard each pattern element is cut against its neighbour. The texture dial. |
+| `seam` | 0 to 1 | the dark line BETWEEN elements. It multiplies, so a seam gets darker without getting greyer. |
+| `sheen` | 0 to 1 | the light ON an element's face. It dodges, so a face gets brighter without going white, and black stays black. |
+
+`seam` and `sheen` are two dials because they are two jobs. There used to be one, `relief`, and it
+could not raise the seams without dimming the whole picture, which is how the first pass came out
+brown and soft at the same time. `relief` is gone: passing it throws, which is the contract working.
 
 ### pattern
 
@@ -69,9 +79,17 @@ The structure of the field. Three of them, and they are three shapes rather than
 
 `count` is how many elements, `jitter` how unequal they are. `jitter: 0` is a ruler, `1` is a thicket.
 
-A pattern never touches colour. Every cell it draws is white or black at some alpha, and the layer
-composites with `overlay`, so white brightens the hue beneath it and black deepens it. That is why
-any pattern works on any palette, and why these are two dials rather than one dial with two names.
+A pattern never touches colour. It never sees a hex. It asks for `dark` or `lit` and the generator
+decides what those mean, which is why any pattern works on any palette.
+
+Both are neutral grey and both blend multiplicatively, and that is the whole reason the field keeps
+its colour. `multiply` scales every channel DOWN by one factor; `color-dodge` scales every channel
+UP by one factor. One factor per pixel leaves the ratios between R, G and B untouched, so chroma
+survives and rises on the lit faces. One `overlay` layer doing both jobs is what turned a crimson
+field brown: overlay pulls a mid-tone towards white on one side and towards grey on the other, and
+it cannot be asked to stop. `plus-lighter` was tried too and is worse in a different way: it ADDS,
+so it lit up the reference's black right-hand side with bars that should not be there. Dodge leaves
+black alone, because zero divided by anything is still zero.
 
 ### motion
 
@@ -127,7 +145,7 @@ SEEDLIST=<its output> node scripts/author/lightfield-fit.mjs ref.jpg   # confirm
 
 Every flag is derived from the option table, so the CLI cannot drift from the generator. Group keys
 are dotted (`--pattern.kind`, `--motion.speed`); a leaf name on its own works when it is unambiguous
-(`--bloom`, `--relief`, `--count`), and `--kind` is rejected because two groups have one.
+(`--bloom`, `--seam`, `--count`), and `--kind` is rejected because two groups have one.
 
 `lightfield-shot.mjs` exists because `make preview` centres a fragment in a 1400px box, which is the
 wrong page for a full-bleed field: the field is `position:absolute;inset:0` and needs a sized parent.

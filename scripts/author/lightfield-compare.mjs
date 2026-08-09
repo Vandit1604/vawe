@@ -5,33 +5,20 @@
 // "Looks close" is not a claim anybody can check, so this prints numbers:
 //   - mean luma and mean R, G, B over the whole frame
 //   - the four sampled colours, at their positions in the reference
-//   - a 24x14 block grid, mean absolute difference per channel, and the worst blocks
+//   - a 24x14 block grid, mean absolute difference per channel
+//   - the STRIPING: how hard the pattern cuts, at full resolution
+//
+// The block grid deliberately averages the pattern away so it can judge the colour field. That
+// makes it blind to whether the bars are crisp or mushy, which is a real defect it will happily
+// call a pass. The striping numbers below are the half it cannot see, and they are reported
+// separately because they are a separate question., and the worst blocks
 //
 // ffmpeg does the decoding, so there is no image library to install and no version to drift.
 
-import { execFileSync } from 'node:child_process';
+import { pixels, luma, means, striping, blockError, chroma } from './lightfield-metrics.mjs';
 
 const BW = 24;
 const BH = 14;
-
-// Decode any image to a raw RGB buffer at a given size.
-function pixels(file, w, h) {
-  const buf = execFileSync('ffmpeg', ['-v', 'error', '-i', file, '-vf', `scale=${w}:${h}:flags=lanczos`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 28 });
-  if (buf.length !== w * h * 3) throw new Error(`ffmpeg returned ${buf.length} bytes for ${file}, expected ${w * h * 3}`);
-  return buf;
-}
-
-const luma = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-function stats(buf, w, h) {
-  let r = 0, g = 0, b = 0, y = 0;
-  for (let i = 0; i < w * h; i++) {
-    const R = buf[i * 3], G = buf[i * 3 + 1], B = buf[i * 3 + 2];
-    r += R; g += G; b += B; y += luma(R, G, B);
-  }
-  const nPx = w * h;
-  return { r: r / nPx, g: g / nPx, b: b / nPx, luma: y / nPx };
-}
 
 const hex = (r, g, b) => '#' + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
 
@@ -68,8 +55,8 @@ if (!refFile || !genFile) {
 const W = 735, H = 420;
 const a = pixels(refFile, W, H);
 const b = pixels(genFile, W, H);
-const sa = stats(a, W, H);
-const sb = stats(b, W, H);
+const sa = means(a, W, H);
+const sb = means(b, W, H);
 
 const row = (label, x, y, z) => `  ${label.padEnd(14)} ${x.padStart(9)} ${y.padStart(9)} ${z.padStart(9)}`;
 const f1 = (v) => v.toFixed(1);
@@ -79,6 +66,8 @@ console.log(`generated  ${genFile}\n`);
 console.log('MEAN (whole frame)');
 console.log(row('', 'ref', 'gen', 'delta'));
 for (const k of ['luma', 'r', 'g', 'b']) console.log(row(k, f1(sa[k]), f1(sb[k]), f1(sb[k] - sa[k])));
+const ca = chroma(a, W, H), cb = chroma(b, W, H);
+console.log(row('chroma', f1(ca), f1(cb), f1(cb - ca) + `  ${(cb / ca).toFixed(2)}x`));
 
 console.log('\nSAMPLES (mean of a 2% patch at the reference position)');
 console.log(row('', 'ref', 'gen', 'dE'));
@@ -92,17 +81,22 @@ for (const s of SAMPLES) {
 }
 console.log(row('mean', '', '', f1(sampleErr / SAMPLES.length)));
 
+const ta = striping(a, W, H);
+const tb = striping(b, W, H);
+console.log('\nSTRIPING (full resolution, luma)');
+console.log(row('', 'ref', 'gen', 'gen/ref'));
+console.log(row('edge', f1(ta.edge), f1(tb.edge), (tb.edge / ta.edge).toFixed(2) + 'x'));
+console.log(row('swing', f1(ta.swing), f1(tb.swing), (tb.swing / ta.swing).toFixed(2) + 'x'));
+
 // Block difference: downsample hard, so slat phase cancels and what is left is the colour field.
 const ga = pixels(refFile, BW, BH);
 const gb = pixels(genFile, BW, BH);
-let mad = 0;
+const mad = blockError(ga, gb);
 const worst = [];
 for (let i = 0; i < BW * BH; i++) {
   const d = (Math.abs(ga[i * 3] - gb[i * 3]) + Math.abs(ga[i * 3 + 1] - gb[i * 3 + 1]) + Math.abs(ga[i * 3 + 2] - gb[i * 3 + 2])) / 3;
-  mad += d;
   worst.push({ d, x: i % BW, y: (i / BW) | 0, ref: hex(ga[i * 3], ga[i * 3 + 1], ga[i * 3 + 2]), gen: hex(gb[i * 3], gb[i * 3 + 1], gb[i * 3 + 2]) });
 }
-mad /= BW * BH;
 worst.sort((p, q) => q.d - p.d);
 console.log(`\nBLOCK GRID ${BW}x${BH}`);
 console.log(`  mean absolute difference per channel   ${mad.toFixed(2)} / 255   (${((mad / 255) * 100).toFixed(1)}%)`);

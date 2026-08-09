@@ -42,8 +42,13 @@ console.log('\nfail early');
 throws('unknown top-level key', () => lightfield({ patern: {} }), 'unknown option patern');
 throws('unknown key inside a group', () => lightfield({ pattern: { knd: 'slats' } }), 'unknown option pattern.knd');
 throws('a bad colour', () => lightfield({ colour: { bloom: 'orange' } }), 'colour.bloom must be a 6-digit hex');
+throws('a bad colour in the extra list', () => lightfield({ colour: { extra: ['#112233', 'teal'] } }), 'colour.extra[1] must be a 6-digit hex');
+throws('an extra list that is not a list', () => lightfield({ colour: { extra: '#112233' } }), 'colour.extra must be an array');
+throws('too many extra colours', () => lightfield({ colour: { extra: ['#111111', '#222222', '#333333', '#444444', '#555555'] } }), 'colour.extra takes at most 4');
 throws('a short hex', () => lightfield({ colour: { bloom: '#f80' } }), 'colour.bloom must be a 6-digit hex');
 throws('a dial out of range', () => lightfield({ shadow: { depth: 1.4 } }), 'shadow.depth must be between 0 and 1');
+throws('the retired relief dial', () => lightfield({ shadow: { relief: 0.5 } }), 'unknown option shadow.relief');
+throws('vivid out of range', () => lightfield({ colour: { vivid: 3 } }), 'colour.vivid must be between 0.5 and 2');
 throws('a count out of range', () => lightfield({ pattern: { count: 0 } }), 'pattern.count must be between 1 and 400');
 throws('a fractional count', () => lightfield({ pattern: { count: 8.5 } }), 'pattern.count must be a whole number');
 throws('an unknown pattern', () => lightfield({ pattern: { kind: 'stripes' } }), 'pattern.kind must be one of');
@@ -65,7 +70,18 @@ for (const kind of MOTIONS) {
 }
 ok('speed 0 is as still as still', !lightfield({ motion: { speed: 0 } }).includes('var(--t)'));
 ok('two fields on one page cannot collide', lightfield({ seed: 1 }).match(/\.lf\w+\{/)[0] !== lightfield({ seed: 2 }).match(/\.lf\w+\{/)[0]);
+ok('vivid 1 emits no filter at all', !lightfield({ colour: { vivid: 1 } }).includes('filter:'));
 ok('depth 0 emits no shadow layer', !lightfield({ shadow: { depth: 0 } }).includes('class="s"'));
+ok('seams multiply, so a dark line cannot go grey', lightfield().includes('mix-blend-mode:multiply'));
+ok('faces dodge, so a lit face cannot go white and black stays black', lightfield().includes('mix-blend-mode:color-dodge'));
+ok('sheen 0 emits no lit layer at all', !lightfield({ shadow: { sheen: 0 } }).includes('color-dodge'));
+ok('a slat moves as ONE: its seam and its face take the same transform', (() => {
+  const html = lightfield({ pattern: { count: 6 }, motion: { kind: 'shimmer' } });
+  const move = (tag) => [...html.matchAll(new RegExp(`<div class="${tag}">([\\s\\S]*?)</div>`, 'g'))]
+    .flatMap((m) => [...m[1].matchAll(/translateX\(calc\(([^)]*\))/g)].map((x) => x[1]));
+  const d = move('d'), l = move('l');
+  return d.length > 0 && d.length === l.length && d.every((v, i) => v === l[i]);
+})());
 
 console.log(failures ? `\n${failures} FAILED` : '\nall passed');
 process.exit(failures ? 1 : 0);

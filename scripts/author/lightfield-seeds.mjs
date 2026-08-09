@@ -11,8 +11,8 @@
 // the blend. It is used only to RANK layouts. The winners then go through the real renderer in
 // lightfield-fit.mjs, which is what the reported number comes from.
 
-import { execFileSync } from 'node:child_process';
-import { fieldBlobs } from '../../core/lightfield/index.js';
+import { pixels } from './lightfield-metrics.mjs';
+import { fieldBlobs, RAMP } from '../../core/lightfield/index.js';
 import { toRgb, mix } from '../../core/lightfield/colour.js';
 import { PRESETS } from './lightfield-presets.mjs';
 
@@ -20,9 +20,12 @@ const BW = 24, BH = 14;
 const refFile = process.argv[2] || 'refs/lightfield-ref.jpg';
 const want = Number(process.argv[3] || 250000);
 
-const ref = execFileSync('ffmpeg', ['-v', 'error', '-i', refFile, '-vf', `scale=${BW}:${BH}:flags=lanczos`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 24 });
+const ref = pixels(refFile, BW, BH);
 
 const opts = structuredClone(PRESETS.ref);
+// EXTRA='#5c0f42,#141a3c' overrides colour.extra, so a fit can be run with and without the accent
+// colours and the two numbers compared. EXTRA='' means none.
+if (process.env.EXTRA !== undefined) opts.colour.extra = process.env.EXTRA ? process.env.EXTRA.split(',') : [];
 const rgbArr = (hex) => { const c = toRgb(hex); return [c.r, c.g, c.b]; };
 const base0 = rgbArr(mix(opts.colour.deep, opts.colour.ground, 0.35));
 const base1 = rgbArr(mix(opts.colour.deep, opts.colour.ground, 0.7));
@@ -48,13 +51,14 @@ const baseAt = (p) => {
 };
 const BASE = pts.map(baseAt);
 
-// Alpha of one blob at one point: full at the centre, 0.62 of it at 42% out, gone by 88%.
+// Alpha of one blob at one point, off the same RAMP the CSS uses.
+const P = RAMP.pos / 100, E = RAMP.end / 100;
 function alphaAt(b, p) {
   const dx = (p.x - b.x) / b.rx, dy = (p.y - b.y) / b.ry;
   const d = Math.sqrt(dx * dx + dy * dy);
-  if (d >= 0.88) return 0;
-  if (d <= 0.42) return b.a * (1 - (d / 0.42) * 0.38);
-  return b.a * 0.62 * (1 - (d - 0.42) / 0.46);
+  if (d >= E) return 0;
+  if (d <= P) return b.a * (1 - (d / P) * (1 - RAMP.mid));
+  return b.a * RAMP.mid * (1 - (d - P) / (E - P));
 }
 
 let best = [];

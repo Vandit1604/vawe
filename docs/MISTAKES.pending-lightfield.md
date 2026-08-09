@@ -42,3 +42,47 @@ sets `--t`, so every author gets it rather than every author writing their own.
 
 **Which gate catches it.** None, and this is a looks-fine failure: the preview renders, it just
 renders the wrong thing.
+
+---
+
+## A fidelity metric that averages away the thing it is grading
+
+**What.** `lightfield-compare.mjs` graded a generated field against a reference on a 24x14 block
+grid. It reported 7.1% mean error and every pass looked green. Side by side with the reference the
+field was visibly mushy: its striping amplitude measured 0.77x, and the bars are the subject.
+
+**Root cause.** Downsampling to 24x14 is the RIGHT way to judge a colour field, because it cancels
+the pattern's phase. That is also exactly why it cannot see the pattern. One number was being asked
+two questions, and it answered the one it could.
+
+**Fix.** `scripts/author/lightfield-metrics.mjs` now defines both, once, and both are printed:
+`blockError` for the colour field, `striping` for the pattern (`edge`, the mean absolute horizontal
+step; `swing`, the RMS of a row minus its own 21 pixel moving average, which is the amplitude of the
+bars with the field subtracted out). `lightfield-fit.mjs` fits the layout on the first and the
+pattern's contrast on the second, and once the pattern is in play every pass is scored on one
+combined cost. Alternating two objectives lets a later pass spend what an earlier one earned: an
+intermediate run took the striping to 10.8 and then a layout pass handed back 10.2.
+
+**Which gate catches it.** The compare tool itself, now that it prints `gen/ref` for both numbers.
+The general lesson is worth more than the fix: when a measurement deliberately discards a dimension,
+it cannot be the pass mark for anything in that dimension, and a green number is then evidence of
+nothing.
+
+---
+
+## Four abandoned search processes, all appending to one log
+
+**What.** A long fit was launched, superseded, and relaunched several times. `pkill -f` did not
+account for every one, so four `lightfield-fit.mjs` processes ran at once. Two were appending to the
+same log file, which made the log read as if a single run had stalled, and all four shared the CPU,
+which made every one of them slow. Twenty minutes were spent reading a log that two writers were
+interleaving.
+
+**Root cause.** A background search with no lock and no identity. Nothing stopped a second run
+writing where the first was writing.
+
+**Fix.** Not applied in code. The working practice is: one search at a time, verify with
+`pgrep -fl` before relaunching, and give each run its own log path. A real fix would be an exclusive
+lock on the log file, so a second run refuses to start rather than corrupting the first one's output.
+
+**Which gate catches it.** None. Worth knowing because the failure looks exactly like a slow run.
