@@ -19,7 +19,7 @@ Every rule is tagged:
 > **The fastest way to obey all of this: compose from [`BLUEPRINTS.md`](BLUEPRINTS.md)** — directed-motion
 > beats (`{type:"beat"}`) that bake these rules in, so you start from directed motion instead of a blank
 > `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling — too much,
-> undirected; the **ambition floor** (`make direction-floor`, in `author-check`) is the floor — too plain,
+> undirected; the **ambition floor** (`make direction-floor`, opt-in via `TASTE=1`) is the floor — too plain,
 > a slideshow. A directed video sits between them.
 
 ---

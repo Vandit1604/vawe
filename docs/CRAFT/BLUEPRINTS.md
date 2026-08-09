@@ -42,7 +42,7 @@ A beat emits LAYER motion; pair it with the scene-level transition it wants (a `
 
 ## The floor that enforces this
 
-`make direction-floor` (in `make author-check`) is the **ambition floor** — the inverse of effect-soup. It
+`make direction-floor` (opt-in: `TASTE=1 make author-check`) is the **ambition floor** — the inverse of effect-soup. It
 reads a scene's motion vocabulary (kinetic type · count-ups · camera · transitions · ken · cursor · motion
 tracks · fx · background motion · beats) and **fails a plain slideshow**. Composing from beats clears it by
 construction. Directed lives *between* soup and slideshow.

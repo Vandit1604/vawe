@@ -58,7 +58,7 @@ duration: 29s
   research is blunt about it: the visual and copy channels must carry a beat SIMULTANEOUSLY, not
   sequentially, because that is the only way to fit a whole beat into three seconds. A beat with copy
   and no picture is one channel doing all the work in series. That is not a style preference — it is
-  the mechanical reason 29 films in this library waive `no-visual-vocabulary`. State what the frame
+  the mechanical reason 29 films in this library used to waive the deleted show floor. State what the frame
   SHOWS, separately from what it SAYS, and if you cannot, you have found the beat's real problem while
   it is still a line of markdown.
 

@@ -71,7 +71,8 @@ For a normal video, author inline. Either way the output is one expanded scene J
 
 ## Step 6 — Finalize (user-gated)
 `make author-check D=<file>` (validate · critique · direct · **floor: front-load + monotony** · slop ·
-**designspec** (off-palette colours / non-role fonts) · **copy** (hook/jargon/restatement tells) ·
+**designspec** (off-palette colours / non-role fonts) · **copy** (hook/jargon/restatement tells; these
+three are opt-in, run `TASTE=1 make author-check`) ·
 **assets** (referenced files exist) · **inspect** (the intent contract from Step 3)) →
 `make video D=<file>` (renders; author-check runs first) → `make audit` (layout/contrast) →
 **`make seam-check D=<file>`** (sample the transition overlaps for flashes — the class the other gates miss) →

@@ -6,8 +6,15 @@ does not, and moves on. Measured across this library when the gate landed: **52 
 carried no large pictorial layer at all.** That was not a house style anyone chose. It is what you get
 when nobody is asked the question.
 
-Gate: `make visuals D=<file>` (`scripts/gates/visual-vocabulary.mjs`), also step `visuals` inside
-`author-check`. FAIL `no-visual-vocabulary`. WARN `graphics-thin` · `text-only-beat`.
+**There is no gate for this. There used to be, and it was deleted in 2026-08 because it lied.**
+`visual-vocabulary` measured a layer's area to tell a mark from a picture, and its size helper squared
+any layer that declared one axis and had no readable intrinsic aspect. A 590x18 decorative underline
+was scored as 590x590 and credited with a tenth of the frame, so the gate handed a pass to a hairline.
+It was also waived by 30 of 130 films. See `docs/TASTE.md` for the cull and what would bring it back.
+
+Read the rest of this document as craft, not as a checklist a tool will run for you. The thing it asks
+you to do has not changed; only the pretence that it was being checked has. What checks it now is
+`make judge` and your eyes.
 
 ## 1. Decoration is not explanation
 
@@ -69,35 +76,33 @@ Two practical traps:
 - **Backdrop-track graphics do not count** (`track: 0`), by design. A picture behind the content is
   scenery. If it is the explanation, bring it forward.
 
-## 4. What the gate can and cannot see
+## 4. The three questions to ask yourself, since nothing asks them for you
 
-It proves a picture is on screen and is large enough to be the subject, and it counts how many beat
-windows have one. That is all.
+The deleted gate asked exactly three, and they are still the right three. Ask them by hand.
 
-- `no-visual-vocabulary` (FAIL): not one carrying graphic in the whole film. Decoration cannot fix this.
-  Adding more glow, more rules, more ticks moves nothing, because none of them are in the count.
-- `graphics-thin` (WARN): fewer than a third of the beat windows have a graphic on screen. The film
-  leans on type for most of its length.
-- `text-only-beat` (WARN): named beat windows hold nothing but type.
+1. **Is there one carrying graphic in the whole film?** Not an icon, not a logo, not a rule. Something
+   large enough to be the subject of its beat: roughly 8% of the canvas or more. Decoration cannot
+   answer this. Adding more glow, more hairlines, more corner ticks moves nothing.
+2. **How much of the running time has one on screen?** Under a third and the film leans on type for
+   most of its length, whatever the one good beat looks like.
+3. **Which beats hold nothing but type?** Name them. Then ask each what it could show instead.
 
-**It cannot prove a picture explains anything.** A big decorative photograph passes and deserves to
-fail a human. A bar chart of a number nobody cares about passes. Green here means the film is not pure
-typography; it does not mean the graphic earned its place. That judgement is yours, and it is what
-`make judge` and the fidelity critic in [SUBAGENTS.md](SUBAGENTS.md) are for. Never read a tick from
-this gate as a verdict on the frame.
+**And the question none of it settles: does the picture EXPLAIN anything?** This is why the old gate
+was never sufficient even when it worked. A big decorative photograph satisfied all three above and
+deserved to fail a human. A bar chart of a number nobody cares about satisfied them too. That
+judgement is yours, and it is what `make judge` and the fidelity critic in
+[SUBAGENTS.md](SUBAGENTS.md) are for.
 
-Waive a deliberate break with `{"authoring":{"allow":["graphics-thin"]}}`. A waiver is for a film whose
-whole idea is type on a field, decided on purpose and defended. It is not for "I could not think of
-one".
+A film whose whole idea is type on a field is a legitimate answer to all of this, decided on purpose
+and defended. It is not an answer to "I could not think of one".
 
 ## 5. Where to get the graphic
 
 - **Blocks** (`docs/BLOCKS.md`, `make catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
   `progressRing` · `kpiRow` · `stepFlow` · `table` · `comparison`. Fastest route from a number to a
-  shape. **Caveat as of today: the gate reads the raw JSON and does not expand blocks**, so a real
-  chart authored as `{"type":"block","block":"lineChart"}` still reports `no-visual-vocabulary`. Check
-  it on the expanded file (`make expand D=<file>`, then `make visuals D=<file>.expanded.json`) before
-  you believe the failure. `showcase-count` fails on the source and passes on the expansion.
+  shape. Note that a block is build-time sugar: `{"type":"block","block":"lineChart"}` becomes real
+  layers only after `make expand D=<file>`, so read the expanded file when you want to see what the
+  film actually draws.
 - **Captured UI**: `make capture` on the live product, previewed standalone with `make preview`.
 - **Blueprints** (`make blueprints`): count-ups, cascades, dashboard dives already choreographed.
 - **Bespoke SVG**: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) for a diagram no block covers, including

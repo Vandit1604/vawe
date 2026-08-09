@@ -67,13 +67,19 @@ static loop** — and `make video` runs it for you (skip only with an explicit `
 effect-soup video can no longer ship silently:
 
 ```bash
-make author-check D=<file> [VS=<brand>]   # THE MANDATORY LADDER — chains the four below + inspect:
-                                          #   validate · critique (value) · direct (direction) · slop
-                                          # blocks on schema/em-dash, hollow beats, and the direction
-                                          # tells (linear-motion · monotone-timing · enter-and-retreat ·
-                                          # effect-soup · ≥3 cut families). Waive a deliberate break with
-                                          # {"authoring":{"allow":[...]}}. STRICT=1 makes warnings block.
+make author-check D=<file> [VS=<brand>]           # THE LADDER. Always on, about a second:
+                                                  #   validate (schema + em-dash) · beats (timeline holes)
+                                                  #   assets (referenced files exist) · inspect + plan-vs-render
+                                                  # These catch BROKEN. Waive a deliberate break with
+                                                  # {"authoring":{"allow":[...]}}. STRICT=1 makes warnings block.
+
+TASTE=1 make author-check D=<file> [VS=<brand>]   # ...plus the STYLE gates, which are opinions:
+                                                  #   critique · direct · floor · dissolve · slop
+                                                  #   designspec · copy
 ```
+
+The style half is **off by default**. The run tells you it skipped them and how to run them. Read the
+next section before you assume that is a lowered bar: it is the opposite.
 
 Then the eyeball + memory rungs (not chained — you must look):
 
@@ -93,6 +99,47 @@ flaw, it's a FIX; never rationalize one you noticed ([`MISTAKES.md`](MISTAKES.md
 
 If you find yourself *trying things* in the JSON, the plan wasn't locked. Go lock it. If a beat needs
 a decision the plan didn't make, that's a plan gap — amend the plan, don't improvise in the JSON.
+
+## What was culled, and why (2026-08)
+
+A gate is worth having when it tells the truth cheaply. Two things were found to be true of this
+repo's style gates at once, and they pull in opposite directions from "be stricter".
+
+**`visual-vocabulary` was DELETED.** It asked whether a film shows anything or is only type, and it
+answered with an area. The area came from `boxOf` in `scripts/gates/scene-timing.mjs`, which had a
+`proxy` tier: a layer declaring one axis and carrying no readable intrinsic aspect was **squared**.
+A 590x18 decorative underline was measured as 590x590 and credited with about a tenth of the frame.
+So the gate passed the exact defect it existed to catch, on the exact quantity it existed to measure.
+It was also waived by 30 of 130 films. Making the measurement honest would have made the rule true and
+then failed about 52 films nobody is going to rebuild, which is another way of saying the rule was
+already repealed and nobody wrote it down. The `proxy` tier went with it.
+
+**Seven gates were switched OFF BY DEFAULT, not deleted:** `critique`, `direct` (motion-director),
+`floor` (direction-floor), `dissolve`, `slop`, `designspec`, `copy`. Every file is still here and
+still runs under `TASTE=1`. Nothing about them is dishonest. They are *fitted*, to a library this
+repo's own doctrine calls debt, and a fitted rule left switched on stops raising the floor and starts
+teaching the waiver keyword. `direction-floor` blocked 38 of 130 shipped scenes.
+
+**Nothing that catches BROKEN was touched:** `validate`, `beat-check`, `asset-check`, `probe` /
+`scene-snap` / `canvas-purity`, `seam-check`, `audit`, `schema-drift`, `gate-mutation`, plan-vs-render.
+
+Measured across the library, before and after: 36 scenes moved FAIL to PASS, and none moved PASS to
+FAIL. Every one of the 36 was blocked by `plain-slideshow`, `no-visual-vocabulary`, or both.
+
+### What would have to be true to switch one back on by default
+
+Answer all three, in writing, before you move a gate back:
+
+1. **Name what it measures and show the measurement is right.** Not the rule, the number. `boxOf`
+   looked right for a year. Write the fixture that proves the number, and pin it in `gate-mutation`.
+2. **Run the whole library and publish the count.** A gate that fails a quarter of the shipped work
+   is not a floor, it is a tax. Either fix the films first or accept that it is opt-in.
+3. **Say what a green tick would then mean, and what it still would not.** `visual-vocabulary` could
+   prove a picture was on screen and large. It could never prove the picture explained anything, and
+   its own header said so, and it was treated as the show-don't-tell floor anyway.
+
+And the rule that produced this cull, which is worth keeping whichever way it points: **when
+satisfying a gate would make the film worse, go and read what the gate actually measures.**
 
 ## Anti-slop discipline (the defaults to reach past)
 

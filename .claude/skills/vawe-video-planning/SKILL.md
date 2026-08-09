@@ -182,7 +182,7 @@ primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
 blueprints (`{type:"beat"}`, [`docs/CRAFT/BLUEPRINTS.md`](../../../docs/CRAFT/BLUEPRINTS.md)) — kineticHook,
 statReveal, cardCascade, screenDive, terminalReveal, verdictProof, ctaEnd, … Each bakes in kinetic
 reveals / count-ups / cascades / a dashboard dive so good motion is the DEFAULT. Authoring plain
-`rise`+`fade` from scratch is the #1 failure and `make direction-floor` (in `author-check`) now FAILS it
+`rise`+`fade` from scratch is the #1 failure and `make direction-floor` (opt-in: `TASTE=1 make author-check`) FAILS it
 as a `plain-slideshow`. Reach for a blueprint per beat, then fill brand content.
 
 ## Step 3b — Choreography rules (anti-monotony)

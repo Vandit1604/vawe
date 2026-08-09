@@ -82,7 +82,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | Guide | Load it when you are… | Answers |
 |---|---|---|
 | [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
-| [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · `make visuals` |
+| [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
 | [SOUND.md](SOUND.md) | deciding audio | music-vs-silence · bed mood→feeling · sfx restraint · caption style→intent · per-profile policy |
 
 ## How these relate to the rest of the docs (no overlap)
