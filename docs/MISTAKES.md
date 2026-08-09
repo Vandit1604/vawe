@@ -6324,7 +6324,7 @@ can load it.
 `data-anim` alone and has no distance or direction knob — which is 13 layers across four shipped films
 believing they tuned a slide they did not.
 
-## 88. `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
+## #245 — `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
 
 **What happened.** `make reveal D=formats/scene/playhead.json` printed
 `✓ reveal · 5 beats … → /tmp/reveal/playhead.png` and exited 0. No such file existed, anywhere.
@@ -6357,7 +6357,7 @@ literal — and survived only because `/tmp` itself always exists. It now uses t
 another line then claims as a result must check its status and its artifact, or the tool's success
 message is decoration.
 
-## 89. The film's declared subject was not drawn for seven frames, at the exact moment it hands off
+## #246 — the film's declared subject was not drawn for seven frames, at the exact moment it hands off
 
 **What happened.** `playhead.json`'s whole spine is ONE vertical mark the viewer tracks from caret to
 playhead to render fill. Painted magenta and counted, the mark was absent from every frame between
