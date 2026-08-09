@@ -73,7 +73,7 @@ Non-negotiable moves:
   of extremes, not one safe size step.
 - **A committed non-generic face.** Reflecting a real brand → its captured font. Anything else → never
   Inter or Space Grotesk (the slop faces); reach for Instrument Serif (editorial), a captured face, or one
-  you register via brandkit.
+  you register via `make brandspec` + `make palette`.
 - **One bespoke visual device, not card soup.** Avoid the equal rounded-card grid and the rounded-icon-
   tile-above-a-heading. Invent one signature motif per video.
 - **Layout by containment — group-first.** Anything with a spatial relationship (a label+value, a logo
@@ -101,7 +101,7 @@ the purity contract. Use these closed-form, pure-in-`n` helpers instead:
 
 **Standard beat structure:** hook → enter (rise/pop in) → hold/guess → reveal (pop + count-up) →
 hold → exit. Count-ups: `setVal(el, value * interpolate(t,[r0,r1],[0,1],{easing:easeOutQuart}))`.
-`formats/higherlower/scene.html` is the reference. Test primitives with `make lib-test`.
+`formats/scene/scene.html` is the reference. Test primitives with `make lib-test`.
 
 ## Images & visuals — real first, emoji last
 
@@ -111,7 +111,7 @@ copyrighted media (posters/stills/album art) in a published video.
 - **Auto-source:** `make assets D=formats/<fmt>/<topic>.json` — fills missing icons: country→flag
   (flagcdn, PD), brand→logo (simple-icons, free), else a generated topic card. Dry-run by default;
   `WRITE=1` to apply.
-- **Topic cards (any subject):** `node scripts/cards.mjs "Quantum Computing" --sub "…"` → a designed
+- **Topic cards (any subject):** `node scripts/media/cards.mjs "Quantum Computing" --sub "…"` → a designed
   SVG (deterministic per-title palette, grain, vignette, frame). Use when no clean image exists.
 - **`icon(value, fallback)`** turns an image path into `<img class="icon-img">`, else renders the
   fallback (emoji/monogram). Always pass a monogram fallback: `icon(c.icon, name[0].toUpperCase())`.

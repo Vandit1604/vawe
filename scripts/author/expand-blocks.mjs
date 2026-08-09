@@ -1,4 +1,4 @@
-// scripts/expand-blocks.mjs — makes taste BLOCKS and reusable COMPS first-class in scene JSON, at build time.
+// scripts/author/expand-blocks.mjs — makes taste BLOCKS and reusable COMPS first-class in scene JSON, at build time.
 //
 // BLOCK — a vetted factory from blocks/index.mjs:
 //   { "type": "block", "block": "stripeCard", "x": 1260, "y": 400, "start": 40, "dur": 3 }
@@ -14,7 +14,7 @@
 // Both are deterministic: same JSON → identical expanded layers → identical render. Run before
 // validate/render, or via `make expand`. The "comps" key is stripped from the output.
 //
-// Usage: node scripts/expand-blocks.mjs <scene.json> [out.json]   (default out = <scene>.expanded.json)
+// Usage: node scripts/author/expand-blocks.mjs <scene.json> [out.json]   (default out = <scene>.expanded.json)
 import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -22,7 +22,7 @@ import { BEATS } from '../../blueprints/index.mjs';
 import { buildCameraMove } from '../../core/camera-moves.js';
 
 const inp = process.argv[2];
-if (!inp) { console.error('usage: node scripts/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
+if (!inp) { console.error('usage: node scripts/author/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
 const out = process.argv[3] || inp.replace(/\.json$/, '.expanded.json');
 const d = JSON.parse(fs.readFileSync(inp, 'utf8'));
 

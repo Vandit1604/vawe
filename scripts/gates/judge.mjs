@@ -1,10 +1,10 @@
-// scripts/judge.mjs — the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE
+// scripts/gates/judge.mjs — the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE
 // composition or asset fidelity; this preps exactly what a vision model must look at + the criteria, and the
 // agent-in-the-loop scores it. It renders the KEY frames (each beat's mid + hook + CTA) into one labeled
 // sheet and writes the rubric (the brand house-style + the 7 craft dimensions + a verdict template). The
 // AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
 //
-// Usage: node scripts/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
+// Usage: node scripts/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { writeReceipt } from '../lib/receipt.mjs';
@@ -15,7 +15,7 @@ import { craftRubric } from './rubric.mjs';
 
 const inp = process.argv[2];
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : d; };
-if (!inp) { console.error('usage: node scripts/judge.mjs <scene.json|mp4> [--vs <brand>]'); process.exit(2); }
+if (!inp) { console.error('usage: node scripts/gates/judge.mjs <scene.json|mp4> [--vs <brand>]'); process.exit(2); }
 
 // resolve the rendered mp4 (from a scene JSON → out/<name>.mp4, or a direct mp4) + the scene for beats.
 let mp4 = inp, scene = null;

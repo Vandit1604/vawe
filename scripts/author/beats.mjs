@@ -3,7 +3,7 @@
 // overlapping, or off. With --vs <brand> it stacks each beat beside its source-section screenshot (from
 // `make sections`) — a side-by-side taste diff: does our beat actually reflect the real section?
 //
-//   node scripts/beats.mjs <data.json> [--vs brand] [--stride 1]
+//   node scripts/author/beats.mjs <data.json> [--vs brand] [--stride 1]
 //   make beats D=formats/scene/linear-30.json            (self check)
 //   make beats D=formats/scene/linear-30.json VS=linear  (fidelity vs captured sections)
 //
@@ -29,7 +29,7 @@ function writeSeenReceipt(scene, sheet, tool) { writeReceipt('beats', scene, { s
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 const vs = flag('--vs', null);
-if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/beats.mjs <data.json> [--vs brand]'); process.exit(1); }
+if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/beats.mjs <data.json> [--vs brand]'); process.exit(1); }
 const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
 const format = data.module;
 if (!format || !fs.existsSync(path.join(ROOT, 'formats', format, 'scene.html'))) { console.error(`✗ unknown module "${format}" in ${dataArg}`); process.exit(1); }

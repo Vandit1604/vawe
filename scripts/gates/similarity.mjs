@@ -2,8 +2,8 @@
 // beat structure, and layout are the template problem re-emerging; this turns that taste
 // judgment into a failing check (same philosophy as the contrast + motion audits).
 //
-//   node scripts/similarity.mjs a.json b.json [...]   # score the given files pairwise
-//   node scripts/similarity.mjs                       # scan all authored data JSONs
+//   node scripts/gates/similarity.mjs a.json b.json [...]   # score the given files pairwise
+//   node scripts/gates/similarity.mjs                       # scan all authored data JSONs
 //   make similar [D="a.json b.json"]
 //
 // Fingerprint = motion vocabulary (cuts/stings/anims/presets/bgs) + beat-structure skeleton +

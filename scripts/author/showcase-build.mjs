@@ -1,6 +1,6 @@
 // showcase-build.mjs — emits the six capability clips the site's showcase rows play.
 //
-//   node scripts/showcase-build.mjs        # → formats/scene/showcase-*.json
+//   node scripts/author/showcase-build.mjs        # → formats/scene/showcase-*.json
 //
 // THE RULE EVERY CLIP OBEYS: the capability performs itself. No clip carries an eyebrow naming what
 // it is ("kinetic typography", "shader stings"), and no clip labels its effects ("fade", "whip",

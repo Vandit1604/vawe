@@ -31,8 +31,10 @@ Beat-driven scale/flash, spectrum bars, kick-triggered glitch. **Pure-in-n is ac
 2**: FFT the track OFFLINE (a build step, `scripts/`), bake per-frame frequency bins + onset flags into
 the scene JSON (or a sidecar keyed by n), and let layers read `bins[n]` at render time. No stepping, no
 clock — a pure lookup. This is a **pipeline feature, not an effect**, and a good one: it makes music
-videos trivial. Shape: `make audio-bake IN=track.wav` → `{ fps, bins:[[...]], onsets:[n,…] }`; a
+videos trivial. Shape (proposed, not built): `make audio-bake IN=track.wav` → `{ fps, bins:[[...]], onsets:[n,…] }`; a
 `reactive` binding on any numeric prop (`scale`, `intensity`) samples it. Ship this before any sim.
+
+<!-- doc-refs-allow: make audio-bake · a target this note proposes, deliberately not built yet -->
 
 ### Particle / fluid sims (smoke, fog, ink diffusion, reaction-diffusion, boids, disintegration)
 Iterative by nature — state at n depends on n-1. Options, best-first:

@@ -3,8 +3,8 @@
 // fresh clone runs `make fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
 // assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
 //
-//   node scripts/fonts.mjs            download any missing free faces
-//   node scripts/fonts.mjs --force    redownload everything
+//   node scripts/media/fonts.mjs            download any missing free faces
+//   node scripts/media/fonts.mjs --force    redownload everything
 //
 // Sources: Fontsource (npm, via jsDelivr) — the canonical open mirror for OFL/Apache webfonts.
 import fs from 'node:fs';

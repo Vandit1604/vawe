@@ -56,11 +56,9 @@
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { sceneTiming, spanOf, num, SPECK } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 if (!file) { console.error('usage: node scripts/gates/beat-check.mjs <scene.json> [--strict]'); process.exit(2); }
@@ -82,7 +80,7 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
 const TAIL = 0.2;       // the closing plate: it must hold something
 const T = sceneTiming(d);
-const { layers, content, spans, duration, cutTimes, sceneUnits } = T;
+const { layers, content, spans, duration, sceneUnits } = T;
 
 // windows a declared transition owns. A cut/seam/sting IS the content of its span, it just is not a layer.
 const owned = [];

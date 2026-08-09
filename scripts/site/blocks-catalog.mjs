@@ -1,4 +1,4 @@
-// scripts/blocks-catalog.mjs — auto-renders EVERY registry entry from the manifest onto paged stages.
+// scripts/site/blocks-catalog.mjs — auto-renders EVERY registry entry from the manifest onto paged stages.
 // Proof + visual regression + the browsable arsenal. No hand-placement: drop a row in blocks/catalog.mjs
 // and it shows up here. Writes formats/scene/_catalog-<n>.json (one per page). Run via `make catalog`.
 import fs from 'node:fs';

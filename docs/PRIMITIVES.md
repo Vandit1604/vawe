@@ -324,7 +324,7 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
 
 ## Icons & images — real assets first, in this order
 
-1. `make brandkit` / favicon + `make capture` (real product UI, pixel-faithful, animatable)
+1. `make sections` + `make capture` (real product UI, pixel-faithful, animatable)
 2. `make lookbook URL=… NAME=…` — study shots (art direction, not for rendering)
 3. Brand logos: `curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/` (free)
 4. Flags: `flagcdn.com/<iso2>.svg` (public domain) → `assets/flags/`

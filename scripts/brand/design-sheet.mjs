@@ -2,7 +2,7 @@
 // brand onto ONE page (on the theme background), each labelled with its name/size/fonts, so you vet the
 // raw material — ghost bleed, substituted fonts, missing assets — and fix it BEFORE building a video.
 //
-//   node scripts/design-sheet.mjs <brand> [--theme name] [--serve]
+//   node scripts/brand/design-sheet.mjs <brand> [--theme name] [--serve]
 //   make sheet NAME=linear            → /tmp/sheet.png  (one tall contact sheet)
 //   make sheet NAME=linear SERVE=1    → live in your browser (real fonts/assets, scrollable)
 //
@@ -17,7 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const brand = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-if (!brand) { console.error('usage: node scripts/design-sheet.mjs <brand> [--theme name] [--serve]'); process.exit(1); }
+if (!brand) { console.error('usage: node scripts/brand/design-sheet.mjs <brand> [--theme name] [--serve]'); process.exit(1); }
 const themeName = flag('--theme', brand);
 let bg = '#0a0a0c';
 try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch {}

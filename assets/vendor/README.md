@@ -17,10 +17,10 @@
 - Loaded by `core/boot.js` as `window.THREE`, a GLOBAL, via `await import(...)` in the awaited
   readiness phase, and ONLY when the scene declares a `three` layer. Two reasons, both load-bearing:
   a static import would make `core/three-fx.js` unloadable in Node, which takes the whole layer
-  registry down with it (`make schema-drift` crashed exactly that way); and awaiting it means a
+  registry down with it (`make schema-check` crashed exactly that way); and awaiting it means a
   `three` layer can build synchronously without racing the module load, which would otherwise render
   empty on whichever workers got there first. That is a purity break, not a glitch.
-- Used by `core/layers/three.js` DETERMINISTICALLY: every object is posed absolutely from local time,
+- Used by `core/surfaces/three.js` DETERMINISTICALLY: every object is posed absolutely from local time,
   never accumulated, with no Clock, no AnimationMixer and no Math.random. `make lib-test` enforces the
   banned-API list; `make canvas-purity` proves the pixels match across render orders.
 

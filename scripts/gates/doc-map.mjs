@@ -212,7 +212,10 @@ function indexBody(entries) {
   out.push('Every written thing in this repo, one line each: reach for it **when**, and it **answers**.');
   out.push('Read the line, then open only the doc you need. Nothing here loads a body you did not ask for.');
   out.push('');
-  out.push('Start at [`../CLAUDE.md`](../CLAUDE.md) for the standing rules and the render loop. This map is');
+  // The label is the bare filename, never a relative path: this body is emitted twice, at two depths
+  // (docs/INDEX.md and .claude/skills/vawe-docs/SKILL.md), and only the TARGET is rewritten per copy.
+  // A label of `../CLAUDE.md` was therefore wrong in one of the two files every time it was generated.
+  out.push('Start at [`CLAUDE.md`](../CLAUDE.md) for the standing rules and the render loop. This map is');
   out.push('for the question CLAUDE.md cannot answer without growing: *which document settles this?*');
   out.push('');
   for (const [key, title, blurb] of GROUPS) {

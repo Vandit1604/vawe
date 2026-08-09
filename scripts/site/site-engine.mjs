@@ -4,8 +4,8 @@
 // `formats/scene/scene.html?data=<url>&fps=30` (internal/scene/scene.go). Nothing in core/ imports
 // node. So the site can serve the exact same files and run the exact same renderFrame(n) live.
 //
-//   node scripts/site-engine.mjs            # copy engine → site/public
-//   node scripts/site-engine.mjs --check    # report drift, write nothing
+//   node scripts/site/site-engine.mjs            # copy engine → site/public
+//   node scripts/site/site-engine.mjs --check    # report drift, write nothing
 //
 // Paths are preserved EXACTLY (scene.html imports root-absolute '/core/boot.js', themes resolve at
 // '/themes/<name>.json'), so the copy must land at the site root. Rewriting them would fork the

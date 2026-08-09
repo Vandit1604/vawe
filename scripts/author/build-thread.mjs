@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 
 const OUT = 'formats/scene/thread.json';
-const W = 1080, H = 1920;
+const W = 1080;
 const r1 = (v) => +v.toFixed(1);
 
 // ── the clock: one clause per beat, cut on the comma ───────────────────────────────────────────────

@@ -1,4 +1,4 @@
-// scripts/motion-director.mjs — the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
+// scripts/author/motion-director.mjs — the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
 // the brand's motion personality (theme.motion) + the MOTION-CRAFT ruleset, so effects are chosen with
 // restraint instead of the author over-reaching. Suggest-first: prints a director's report; WRITE=1 (or
 // --write) applies the picks into <file>.directed.json. Deterministic (pure mapping, no Date/random).
@@ -7,13 +7,13 @@
 // the background DOESN'T change · one cut family per film, rotated so no archetype repeats · match the
 // brand: punchy → snap cuts, calm → dissolves.
 //
-// Usage: node scripts/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
+// Usage: node scripts/author/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
 import fs from 'node:fs';
 import path from 'node:path';
 import { LOOK_NAMES } from '../../core/looks.js';
 
 const file = process.argv[2];
-if (!file) { console.error('usage: node scripts/motion-director.mjs <scene.json> [--write]'); process.exit(2); }
+if (!file) { console.error('usage: node scripts/author/motion-director.mjs <scene.json> [--write]'); process.exit(2); }
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];

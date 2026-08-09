@@ -52,13 +52,15 @@ those leaves the ones that hurt:
 
 Two failures found while building, both of the same kind:
 
-1. `docs/JUDGE.md` linked `CRAFT/AB-JUDGE.md`, a file that was never written. The existing
+1. `docs/JUDGE.md` linked `CRAFT/AB-JUDGE.md`, a file that no longer exists. The existing
    `make craft-coverage` could not see it, because it only checked links *inside* `docs/CRAFT/`.
-   `docs/CRAFT/SUBAGENTS.md` records the same gap in prose — an `ab` critic advertised with no make
-   target and no script — so the repo knew, in one place, and pointed at a ghost in another.
+   Read at the time as a file that had never been written; git says otherwise. It shipped in `05a5123`
+   and was removed in `cc2dfc2` with five other engine-only tools. A dangling link says nothing about
+   which of the two happened, and guessing wrote a false history into two docs.
 2. The `CLAUDE.md` snapshot in circulation still carried an "Open audit findings" section pointing at
    `docs/audits/GAUNTLET-2026-08.md` and `gauntlet-2026-08.json`. Neither file exists; the section was
    deleted in commit `7d0f502`. A stale copy of the index outlived the index.
+   <!-- doc-refs-allow: docs/audits/GAUNTLET-2026-08.md · named here only to record that it does not exist -->
 
 **Synthesis.** Both are the same defect: nothing checked whether a doc pointed at a real thing, or
 whether a real thing was pointed at. The index and the docs were maintained separately, so they

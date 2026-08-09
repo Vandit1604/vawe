@@ -3,7 +3,7 @@
 // scale, and actually LOOK at it — before it disappears into a 900-frame render. Reuses the repo http
 // server so /assets/… and @font-face URLs resolve exactly as they do at render time.
 //
-//   node scripts/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
+//   node scripts/author/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
 //   make preview HTML=path/to/frag.html THEME=linear
 //
 // Accepts a raw HTML file, OR a captured component/scene JSON ({html} or {parts:[{html}]}) so you can
@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
+if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/author/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
 const boxW = parseInt(flag('--w', '1400'), 10);
 const themeName = flag('--theme', 'default');
 let bg = flag('--bg', null);

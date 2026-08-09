@@ -56,9 +56,10 @@ construction. Directed lives *between* soup and slideshow.
 ## The reference bar
 
 The gold standard in this repo is **`formats/scene/brew-native.json`** — study its seams, camera push,
-`motion[]` dolly heroes, gradient+motionBlur text, cursor click, and ken. `formats/scene/tokenjam-launch.json`
-is the worked blueprint-era example (kinetic hooks, dashboard dive, verdict proof, held CTA). Before authoring,
-watch one and read [`DIRECTION.md`](DIRECTION.md) — anchor on ambition, then compose.
+`motion[]` dolly heroes, gradient+motionBlur text, cursor click, and ken. The blueprint-era worked example
+(`tokenjam-launch`) was deleted from the library; `make blueprints` prints every beat it was built from, and
+`make expand` shows what one becomes. Before authoring, watch brew-native and read
+[`DIRECTION.md`](DIRECTION.md), anchor on ambition, then compose.
 
 ## Adding a blueprint
 

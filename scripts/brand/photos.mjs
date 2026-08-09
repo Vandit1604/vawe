@@ -3,7 +3,7 @@
 // to commercial-safe licenses (cc0, pdm, by, by-sa). Never rips arbitrary web images: license
 // data travels with the file in credits.json, so published videos stay claim-proof.
 //
-//   node scripts/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]
+//   node scripts/brand/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]
 //   make photos Q="server room" NAME=acme
 //
 // Output: assets/brands/<brand>/photos/<slug>-<i>.jpg + credits.json (license + author + url).
@@ -18,7 +18,7 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 const [query, brand] = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1]?.startsWith('--') !== true);
 const N = parseInt(flag('--n', '4'), 10);
 const LICENSES = flag('--license', 'cc0,pdm,by');
-if (!query || !brand) { console.error('usage: node scripts/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]'); process.exit(1); }
+if (!query || !brand) { console.error('usage: node scripts/brand/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]'); process.exit(1); }
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'photos');
 fs.mkdirSync(dir, { recursive: true });

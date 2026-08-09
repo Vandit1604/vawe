@@ -1,4 +1,4 @@
-// scripts/blocks-docs.mjs — regenerate the block table in docs/BLOCKS.md from the manifest, so the docs
+// scripts/site/blocks-docs.mjs — regenerate the block table in docs/BLOCKS.md from the manifest, so the docs
 // never drift from the registry. Replaces everything between <!-- BLOCKS:START --> and <!-- BLOCKS:END -->.
 // Run via `make blocks-docs` (or directly). Deterministic; no network.
 import fs from 'node:fs';

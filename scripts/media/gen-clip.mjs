@@ -3,14 +3,14 @@
 // decode); instead we pre-extract the video to a PNG frame sequence + a manifest, and the `clip` layer
 // swaps a preloaded <img> src per frame. Frames are downscaled to the display width to stay light.
 //
-//   node scripts/gen-clip.mjs assets/gen/city.mp4 city            # → assets/gen/city/
-//   node scripts/gen-clip.mjs in.mp4 city --fps 30 --w 720
+//   node scripts/media/gen-clip.mjs assets/gen/city.mp4 city            # → assets/gen/city/
+//   node scripts/media/gen-clip.mjs in.mp4 city --fps 30 --w 720
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const [input, name, ...rest] = process.argv.slice(2);
-if (!input || !name) { console.error('usage: node scripts/gen-clip.mjs <input.mp4> <name> [--fps 30] [--w 720]'); process.exit(1); }
+if (!input || !name) { console.error('usage: node scripts/media/gen-clip.mjs <input.mp4> <name> [--fps 30] [--w 720]'); process.exit(1); }
 if (!fs.existsSync(input)) { console.error(`not found: ${input}`); process.exit(1); }
 const opt = (k, d) => { const i = rest.indexOf(k); return i >= 0 ? rest[i + 1] : d; };
 const fps = Number(opt('--fps', 30));

@@ -18,11 +18,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { EASINGS } from '../../core/motion.js';
 import { TIMINGS } from '../../core/cuts.js';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const VIDEO = process.env.VIDEO || argv[0];
 const FROM = parseFloat(process.env.FROM ?? argv[1]);
@@ -126,7 +124,6 @@ spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', VIDEO, '-ss', String(FROM), '-t'
   '-vf', `fps=12,scale=220:-1,tile=8x2:margin=3:padding=3`, '-frames:v', '1', strip]);
 
 // ---- report ----
-const rel = (p) => path.relative(ROOT, p);
 console.log(`\n  MOTION MEASUREMENT · ${VIDEO} · [${FROM}s → ${TO}s] · ${FPS.toFixed(0)}fps · ${N} frames\n`);
 console.log(`  dominant channel : ${dom.k}  — ${CH[dom.k]}`);
 console.log(`  active window    : frames ${a}–${b}  →  measured duration ${durS.toFixed(2)}s (${b - a} frames)`);

@@ -3,7 +3,7 @@
 // the vendored impeccable detector (41 deterministic rules: overused fonts, purple/blue gradients,
 // card-in-card, rounded icon-tile-over-heading, gray-on-color, centered-everything, …). No LLM.
 //
-//   node scripts/slop.mjs formats/scene/northwind.json [--at 1.5]
+//   node scripts/gates/slop.mjs formats/scene/northwind.json [--at 1.5]
 //   make slop D=formats/scene/northwind.json
 import http from 'node:http';
 import fs from 'node:fs';
@@ -17,7 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/slop.mjs <data.json> [--at seconds]'); process.exit(1); }
+if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/slop.mjs <data.json> [--at seconds]'); process.exit(1); }
 const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
 const format = data.module;
 const at = parseFloat(flag('--at', '1.5'));

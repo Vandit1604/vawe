@@ -1,8 +1,8 @@
-// scripts/assets.mjs — make integrating images easy. Given a data JSON, fill every item that has a
+// scripts/media/assets.mjs — make integrating images easy. Given a data JSON, fill every item that has a
 // name but no real image: country → flag (flagcdn, public domain), brand → logo (simple-icons, free),
 // else → a generated topic card (scripts/cards.mjs). Rewrites the icon paths in place.
-//   node scripts/assets.mjs formats/scene/video.json            (dry run — prints the plan)
-//   node scripts/assets.mjs formats/scene/video.json --write    (fetch/generate + save JSON)
+//   node scripts/media/assets.mjs formats/scene/video.json            (dry run — prints the plan)
+//   node scripts/media/assets.mjs formats/scene/video.json --write    (fetch/generate + save JSON)
 //   flags:  --no-fetch (skip network, cards only) · --replace-emoji (also replace emoji icons)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,7 +13,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const args = process.argv.slice(2);
 const dataPath = args.find((a) => !a.startsWith('--'));
 const WRITE = args.includes('--write'), NOFETCH = args.includes('--no-fetch'), REPL = args.includes('--replace-emoji');
-if (!dataPath) { console.error('usage: node scripts/assets.mjs <data.json> [--write] [--no-fetch] [--replace-emoji]'); process.exit(1); }
+if (!dataPath) { console.error('usage: node scripts/media/assets.mjs <data.json> [--write] [--no-fetch] [--replace-emoji]'); process.exit(1); }
 
 const isImg = (v) => typeof v === 'string' && (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^(assets\/|\/|https?:)/.test(v));
 const fmtDir = path.dirname(path.resolve(dataPath));            // formats/<fmt>

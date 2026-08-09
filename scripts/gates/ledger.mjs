@@ -2,9 +2,9 @@
 // Every shipped video logs its fingerprint; every new design is checked against history BEFORE
 // shipping. Per-video QA can't see repetition — this can.
 //
-//   node scripts/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
-//   node scripts/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
-//   node scripts/ledger.mjs list
+//   node scripts/gates/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
+//   node scripts/gates/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
+//   node scripts/gates/ledger.mjs list
 //   make ledger D=… (check) · make ledger-add D=…
 //
 // Rules enforced by `check`: cross-brand SAME (>0.75) exits 1; cross-brand CLOSE (>0.55) warns;
@@ -26,7 +26,7 @@ if (cmd === 'list') {
   process.exit(0);
 }
 if (!cmd || !file || !['check', 'add'].includes(cmd)) {
-  console.error('usage: node scripts/ledger.mjs check|add|list [formats/x/video.json]');
+  console.error('usage: node scripts/gates/ledger.mjs check|add|list [formats/x/video.json]');
   process.exit(1);
 }
 

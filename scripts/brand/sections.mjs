@@ -4,7 +4,7 @@
 // The point is the doctrine flip: don't rewrite the site by hand — capture its real sections (real
 // assets, real taste) and re-animate them. This tool tells you exactly what's there and how to grab it.
 //
-//   node scripts/sections.mjs <url> <brand>     →  assets/brands/<brand>/sections/NN-*.png + sections.json
+//   node scripts/brand/sections.mjs <url> <brand>     →  assets/brands/<brand>/sections/NN-*.png + sections.json
 //   make sections URL=https://linear.app NAME=linear
 //
 // Each manifest entry: { i, label, sel, x, y, w, h, kind, note, capture } where `sel` is a nth-of-type
@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const [url, brand] = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-if (!url || !brand) { console.error('usage: node scripts/sections.mjs <url> <brand> [--viewport WxH]'); process.exit(1); }
+if (!url || !brand) { console.error('usage: node scripts/brand/sections.mjs <url> <brand> [--viewport WxH]'); process.exit(1); }
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'sections');

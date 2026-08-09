@@ -215,4 +215,6 @@ beat-role→persuasion→feeling lookup that ties them to TASTE-RULES). It is th
 this catalog keeps only the techniques each beat is built from. Plain-vs-busy per role is also in
 [`CRAFT/DENSITY.md`](CRAFT/DENSITY.md).
 
-*Companion machine-readable index: `docs/animation-db.json` (same data). Brand onboarding: `make brandkit URL=… NAME=…` → `themes/<name>.json` (colours pack) + `dna/<name>.json` (identity + storyboard).*
+*Companion machine-readable index: `docs/animation-db.json` (same data). Brand onboarding: `make brandspec URL=…` (real fonts, weights, tokens) + `make palette IMG=…` (eyedropped dominance) → hand-author `themes/<name>.json`. The single `make brandkit` that once did both was removed with the templates; `dna/<name>.json` never shipped.*
+
+<!-- doc-refs-allow: make brandkit · named here only to record that the one-shot target was removed -->

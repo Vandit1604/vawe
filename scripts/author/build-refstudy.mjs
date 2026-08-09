@@ -22,7 +22,6 @@
 import fs from 'node:fs';
 
 const OUT = 'formats/scene/refstudy.json';
-const W = 1080, H = 1920;
 const SAFE = { x0: 65, x1: 929, y0: 192, y1: 1498 };
 const r1 = (v) => +v.toFixed(2);
 const P = '/assets/brands/refstudy/photos/';
@@ -56,7 +55,6 @@ const CLAUSES = [
 ];
 
 const INK_ON_DARK = '#f2f6ff', INK_ON_LIGHT = '#0b1220';
-const HOT = '#ff6b6b';                     // the emphasis colour, used the way the reference uses red
 
 const clause = (i) => {
   const text = CLAUSES[i];

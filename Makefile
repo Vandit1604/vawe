@@ -92,6 +92,14 @@ blocks-audit:
 dead-branch:
 	node scripts/gates/dead-branch.mjs
 
+# make doc-refs · every `make <target>` and every repo path the docs NAME must exist, and every
+# Makefile recipe must run a script that exists. Docs are read as instructions: a wrong one is worse
+# than a missing one, because an author types it and then distrusts the whole file. `craft-coverage`
+# already resolves markdown links to .md files; nothing checked a command, a backticked source path,
+# or a target whose script had been deleted under it.
+doc-refs:
+	node scripts/gates/doc-refs.mjs
+
 # make docs-drift — ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
 # routed two planning passes at work that already existed; its own closing warning says nothing
 # checked it. Now something does.

@@ -101,7 +101,7 @@ registered it; validation passes only because unknown props are allowed. No auto
 and engine in sync.
 **Them:** another engine's props are typed (TS) so drift is a compile error; HF parsers validate against a
 typed IR.
-**Fix (quick win):** add `motion` (+ its keyframe shape) to the schema, and a `scripts/schema-drift.mjs`
+**Fix (quick win):** add `motion` (+ its keyframe shape) to the schema, and a `scripts/gates/schema-drift.mjs`
 (`make schema-check`) asserting every `L.<prop>` the engine reads exists in the schema.
 
 ---

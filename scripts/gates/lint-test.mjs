@@ -1,7 +1,7 @@
 // lint-test.mjs — regression asserts for validate.mjs lintData (make lint-test). Each rule below maps
 // to a bug that shipped this session and slipped every other gate; this pins that the rule still fires,
 // so a future refactor can't silently un-catch it. Pure, no browser.
-//   node scripts/lint-test.mjs
+//   node scripts/gates/lint-test.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

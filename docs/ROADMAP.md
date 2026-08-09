@@ -137,7 +137,7 @@ by hand. That is worth more than any new sting, because it is already being sold
 |---|---|---|---|
 | **1** | CSS / SVG filters | hours | `filter`, `mask`, `clip-path`, `mix-blend-mode`, `background-clip`, `@keyframes` evaluated at `t`. Already how `core/cuts.js` and `core/type.js` work. |
 | **2** | Canvas 2D | hours-days | Per-pixel work that does not need the GPU. Halftone, dither, ASCII, pixel-sort. |
-| **3** | GLSL fragment shader | days | Per-pixel, per-frame, keyed on `(progress, seed)` only. `core/shaders.js` already has this path; most items are a new `SHADER_FX` entry. |
+| **3** | GLSL fragment shader | days | Per-pixel, per-frame, keyed on `(progress, seed)` only. `core/stings.js` already has this path; most items are a new `SHADER_FX` entry. |
 | **4** | Three.js / WebGL scene | days-weeks | Real geometry, depth, raymarching. New layer type; heaviest lift, biggest payoff. |
 | **5** | Needs a determinism story first | unknown | Simulation, audio-reactivity, depth estimation. Blocked on design, not effort. |
 
@@ -168,7 +168,7 @@ sketch/matrix/newsprint. Determinism story settled: **baked once at build** (boo
 static PNG), so the pixels never change per frame — probe/snap prove it. See `docs/DESIGN-NOTES/tier5.md`
 for the general carve-out taxonomy this used.
 
-**The generative half now exists.** `paint` is a layer type (`core/layers/paint.js` + `core/paint-fx.js`):
+**The generative half now exists.** `paint` is a layer type (`core/surfaces/paint.js` + `core/paint-fx.js`):
 a Canvas 2D surface redrawn every frame as a pure function of local time, mirroring how `shader` works.
 That is the piece **Matrix Decode** was waiting on, and it ships with `matrix` · `starfield` · `waves`.
 The contract each effect keeps: no accumulation, no Math.random/Date, and CLOSED-FORM motion (a
@@ -452,7 +452,7 @@ the backlog than a wish-list is.
 5. **The `three` layer type** (Tier 4). Its own precondition ("once 1-4 prove the vocabulary") is now
    met. Note the risk it was written with has since evaporated: headless WebGL already renders in the
    Go pipeline (`site-backdrop.json` ships a `shader` layer), and the layer pattern has been proven
-   twice over by `core/layers/shader.js` and `core/layers/paint.js`.
+   twice over by `core/surfaces/shader.js` and `core/surfaces/paint.js`.
 
 **A standing warning, learned the hard way.** Items 1, 2 and 4 sat on this list as "build first" long
 after they were built, and two planning passes in a row were routed at them. Before building anything

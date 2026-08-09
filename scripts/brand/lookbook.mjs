@@ -3,7 +3,7 @@
 // these images and derives the video's design language from the brand's own typography, spacing,
 // shape language and density — instead of picking a canned style.
 //
-//   node scripts/lookbook.mjs <url> <brand>     →  assets/brands/<brand>/look/*.png
+//   node scripts/brand/lookbook.mjs <url> <brand>     →  assets/brands/<brand>/look/*.png
 //   make lookbook URL=https://site.com NAME=acme
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import puppeteer from 'puppeteer';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const [url, brand] = process.argv.slice(2);
-if (!url || !brand) { console.error('usage: node scripts/lookbook.mjs <url> <brand>'); process.exit(1); }
+if (!url || !brand) { console.error('usage: node scripts/brand/lookbook.mjs <url> <brand>'); process.exit(1); }
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'look');
 fs.mkdirSync(dir, { recursive: true });

@@ -28,33 +28,42 @@
 // invented. Exactly one occurrence means no scope in the file can possibly read it.
 import fs from 'node:fs';
 import path from 'node:path';
+import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const DIRS = ['core', 'blocks', 'scripts', 'verify'];
 
-const files = [];
-(function walk(d) {
-  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-    const fp = path.join(d, e.name);
-    if (e.isDirectory()) { if (e.name !== 'node_modules') walk(fp); }
-    else if (/\.(mjs|js)$/.test(e.name)) files.push(fp);
-  }
-})(path.join(repoRoot, DIRS[0]));
-for (const d of DIRS.slice(1)) { try { (function walk(x) {
-  for (const e of fs.readdirSync(x, { withFileTypes: true })) {
-    const fp = path.join(x, e.name);
-    if (e.isDirectory()) { if (e.name !== 'node_modules') walk(fp); }
-    else if (/\.(mjs|js)$/.test(e.name)) files.push(fp);
-  }
-})(path.join(repoRoot, d)); } catch {} }
+// THE SCAN SURFACE IS DISCOVERED, NOT LISTED. It used to be `['core','blocks','scripts','verify']`,
+// which is a map of where the code lived the day the gate was written. `formats/`, `sims/`, `mcp/`
+// and `site/` were never read, so a dead branch there was invisible by construction and the gate
+// reported "256 source files" as though that were all of them. core/props.js records the same flaw
+// turning into 1482 false findings in a sibling gate; here it produced silence instead, which is
+// harder to notice and no better. Now: every tracked .js/.mjs file, minus directories excluded BY
+// REASON below. A directory added tomorrow is in scope tomorrow.
+const EXCLUDED_DIRS = [
+  ['node_modules/', 'vendored'],
+  ['assets/vendor/', 'vendored third-party bundles, minified and not ours to edit'],
+  ['docs-site/', 'a separate Next app with its own lint'],
+  ['out/', 'render output'],
+  ['.claude/skills/impeccable/', 'a vendored third-party skill. Its 15 findings are real and none of them are ours to fix; carrying them would keep this gate permanently red on somebody else\'s code'],
+];
+
+const files = cp.execSync('git ls-files', { cwd: repoRoot }).toString().trim().split('\n')
+  .filter((f) => /\.(mjs|js)$/.test(f))
+  .filter((f) => !EXCLUDED_DIRS.some(([p]) => f.startsWith(p)))
+  .map((f) => path.join(repoRoot, f))
+  .filter((f) => fs.existsSync(f))
+  .sort();
 
 const norm = (s) => s.trim().replace(/\s+/g, ' ');
 // a ternary's two arms, kept deliberately narrow: no nested ?/: inside either arm, so a complex
 // expression is skipped rather than mis-parsed. Missing a real one is better than inventing one.
-// `(?<!\?)\?(?!\?)` — a single `?`, never the `??` of a nullish coalesce. Without it, `a ?? 0 : 0`
-// matched from the SECOND question mark and reported two identical arms that are not a ternary at all.
-const TERNARY = /(?<!\?)\?(?!\?)\s*([^?:;{}]{1,90}?)\s*:\s*([^?:;{},)\n]{1,90})/g;
+// `(?<!\?)\?(?![?.])` — a single `?`, never the `??` of a nullish coalesce and never the `?.` of an
+// optional chain. Without the first guard, `a ?? 0 : 0` matched from the SECOND question mark and
+// reported two identical arms that are not a ternary at all. Without the second,
+// `node?.nodeType === 1 ? node : node?.parentElement` matched from the `?` of `node?.` and reported
+// two identical arms cut out of the middle of an expression.
+const TERNARY = /(?<!\?)\?(?![?.])\s*([^?:;{}]{1,90}?)\s*:\s*([^?:;{},)\n]{1,90})/g;
 const balanced = (s) => (s.match(/'/g) || []).length % 2 === 0 && (s.match(/"/g) || []).length % 2 === 0
   && (s.match(/`/g) || []).length % 2 === 0 && (s.match(/\(/g) || []).length === (s.match(/\)/g) || []).length;
 
@@ -100,6 +109,10 @@ const BINDINGS = [
   { kind: 'value computed and never read', re: /(?:^|[;{}\s])(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=/g, names: (m) => [m[1]] },
   // `const { a, b } = …`
   { kind: 'destructured and never read', re: /(?:const|let)\s*\{([^{}]*)\}\s*=/g, names: (m) => boundNames(m[1]) },
+  // `const a = 1, b = 2` — the SECOND declarator. `const W = 1080, H = 1920;` had two dead constants
+  // and the rule above reported one, because it stops at the first name. The first initializer must
+  // contain no comma or bracket, so there is no call argument list for the comma to be hiding inside.
+  { kind: 'value computed and never read', re: /(?:const|let)\s+[A-Za-z_$][\w$]*\s*=\s*[^,;(){}[\]\n]+,\s*([A-Za-z_$][\w$]*)\s*=/g, names: (m) => [m[1]] },
   // a destructured object PARAMETER of a function definition — "a prop read and then discarded".
   // The trailing `=>` or `{` is what separates a definition from a call site: `launch({ headless: true })`
   // is followed by `)` and `;`, never by a function body. Without that anchor the first draft read

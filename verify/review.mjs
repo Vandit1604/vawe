@@ -15,9 +15,12 @@ const run = (label, cmd, args) => {
 };
 
 const results = [];
-results.push(run('motion primitives (lib-test)', 'node', ['scripts/lib-test.mjs']));
+results.push(run('motion primitives (lib-test)', 'node', ['scripts/gates/lib-test.mjs']));
 results.push(run('layout audit (overlap/spacing)', 'node', ['verify/audit.mjs']));
-results.push(run('motion audit (animation over time)', 'node', ['scripts/motion-audit.mjs', '--stride', '2']));
+results.push(run('motion audit (animation over time)', 'node', ['scripts/gates/motion-audit.mjs', '--stride', '2']));
+// Doc-only work runs no authoring gate, so a command or path that rotted out of the docs is invisible
+// until an author types it. This is pure file reads and costs about a second.
+results.push(run('doc refs (commands + paths the docs name)', 'node', ['scripts/gates/doc-refs.mjs']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)
 const tiles = fs.existsSync('/tmp/audit') ? fs.readdirSync('/tmp/audit').filter((f) => f.endsWith('.png')).sort() : [];
