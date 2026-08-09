@@ -6396,3 +6396,97 @@ count and bounding box and exits non-zero on any empty frame.
 **Lesson:** "the layer is in the scene and its window covers this second" is not "the viewer can see
 it". Under a rig with any tilt or depth, occlusion is a rendering outcome no schema check can predict,
 so the only honest proof is a pixel count on a render.
+
+## #247 — the dead-CSS check had three blind spots, and each one was a place hand-written CSS actually lives
+
+**What happened.** `core/tokens.css` disables `transition` and `animation` engine-wide, so hand-authored
+CSS motion renders a dead still and says nothing. The authoring gate has named that by hand since the
+`html` background shipped. It was reading roughly a third of the markup it was written to cover.
+
+Three holes, found while giving `html` layers a file form:
+
+- **A captured component was never read at all.** `grep component core/validate.mjs` returned nothing,
+  while every `make capture` result is site CSS lifted wholesale. One of the 21 components on disk
+  carries 30 `@keyframes` blocks that have never run and never will.
+- **A group child was exempt.** `htmlLayerErrors` walked `cfg.layers` flat, so the identical fragment
+  was checked at the top level and unchecked one level of nesting down.
+- **`style="transition:opacity .3s"` did not match.** The regex anchored on `^`, `;`, `{` or
+  whitespace, which is every stylesheet rule and no inline attribute — and an attribute is how
+  hand-written markup and captured UI write this most of the time.
+
+**Root cause.** The check was written for one caller, then copied to a second, and the question "what
+else is hand-authored markup?" was never asked. The anchor came from thinking in stylesheets, because
+the fragment that prompted it was a `<style>` block.
+
+**The fix.** One recursive walk over layers and their children; a node-only pass that opens what a scene
+NAMES but does not carry (`src` fragments, captured component JSON) and runs the same check on it; and a
+quote added to the anchor. A fragment is an error, a capture is a warning — the site wrote that CSS, not
+us, and it costs a still, not a broken render. Pinned in `gate-mutation` in both directions.
+
+**Lesson:** the same as #214/#216/#217 and #244, in a smaller place. A measurement bug is never at one
+call site. Before closing one, list every kind of input the rule claims to cover and prove each is
+reached — "hand-authored markup" turned out to mean four things and the check saw one and a half.
+
+## #248 — a missing fragment would have been a grey box, so it throws instead
+
+**What happened.** Hand-authored HTML could only be an escaped string inside the scene JSON: 130
+fragments across 53 scenes, one of them 127,467 characters on a single line, none of them readable,
+diffable, lintable or previewable. Giving them a file form (`{"type":"html","src":"…"}`) meant deciding
+what happens when the file is not there, and every existing loader in `core/preload.js` answers that the
+same way: `console.warn`, then an empty box or a grey 900×560 placeholder.
+
+**Root cause of the temptation.** The degrade-quietly default is right for what it was written for. A
+missing photo still leaves a film, so warning and carrying on gets the author a render they can look at.
+That reasoning does not survive the change of subject: an `html` layer IS the beat, and an `html`
+background is the whole frame, so there is nothing left to degrade to. The placeholder would have been a
+grey rectangle where the film was.
+
+**The fix.** `preloadHtml` throws, naming the path and the roots the render server serves — the message
+shape `fetchJson` already produces. The render stops before the first frame. The loader is TYPED off
+`type === "html"` like `preloadLottie`, not sniffed for path-shaped strings like `preloadComponents`,
+whose sniff is why an unrelated `.json` path in a scene gets fetched as a component. `html` and `src`
+together is a validation error, and `.html` is now an extension `asset-check` looks for, so the absence
+is caught statically as well as at render.
+
+**Lesson:** "how should this fail?" is a per-asset question, not a house style. Ask what is left on
+screen when the asset is missing. If the answer is "the beat", nothing degrades gracefully and the only
+honest option is to stop.
+
+## #249 — two gate runs at once deleted a guard from the engine and left it deleted
+
+**What happened.** `gate-mutation`'s source cases edit tracked engine files in place: write the mutation,
+run the gate, write the original back. Two runs overlapped (two agents, one checkout). The second read
+`core/layers/canvas.js` while the first had it mutated, kept that text as "the original", and restored
+it — permanently deleting the off-window `s.clear()` that #41 and #64 exist to protect.
+
+**Why it was nearly invisible.** The deletion was invisible to every gate: off-window canvas pixels sit
+at opacity 0, so nothing renders differently. The only symptom was `gate-mutation` reporting its own
+canvas-purity fixture as STALE on the next run, which reads as a maintenance chore rather than as
+"a guard has just been removed from the engine". It was found by `git status`.
+
+**The fix.** An exclusive lock (`verify/fixtures/.gate-mutation.lock`, `wx`), so a second run refuses and
+says why. Plus an `exit`/`SIGINT`/`SIGTERM` restore for every file currently mutated, which is the same
+hole in the single-run case: a Ctrl-C mid-case left the mutation in the tree with nothing to put it back.
+
+**Lesson:** a tool that edits tracked source is a tool that can corrupt the checkout, and "it always
+restores" is only true for the paths that reach the restore. Agents run gates in parallel now, so
+serialise anything that writes to a shared file, and run `git status --short` before believing a tree.
+
+## #250 — the anti-pattern detector reports "clean" when it cannot run
+
+**What happened.** Wiring `impeccable`'s detector into `make preview` (approval stop 1b), the first
+result on every fragment and on `docs/animation.html` was zero findings and exit 0. The detector was not
+finding nothing. Its static-HTML engine needs `htmlparser2`, `css-select`, `css-tree` and `domutils`,
+none of which this repo carries, and its `catch` falls back to a regex pass that reports almost nothing.
+
+**Why it matters here.** An approval stop is exactly where a green result gets believed. "Checked and
+clean" and "could not check" are opposite answers and they printed the same characters.
+
+**The fix.** `make preview` uses the BROWSER engine instead, against the page it has already opened in
+puppeteer to take the screenshot — full rule set, real computed styles, no new dependency. When the
+detector cannot be reached at all, the preview says SKIPPED and says why, in the words "unchecked, not
+clean".
+
+**Lesson:** every fallback should be asked what its output looks like when it fires. A degraded path
+that produces the same shape of answer as the healthy one is not a fallback, it is a lie with a
+try/catch around it.

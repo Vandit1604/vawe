@@ -40,7 +40,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
-| [docs/CRAFT/APPROVAL-STOPS.md](CRAFT/APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · style frames · the 85% draft |
+| [docs/CRAFT/APPROVAL-STOPS.md](CRAFT/APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft |
 | [docs/CRAFT/AUTHORING-WALKTHROUGH.md](CRAFT/AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [docs/CRAFT/BLUEPRINTS.md](CRAFT/BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
 | [docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md](CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |

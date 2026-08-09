@@ -976,6 +976,27 @@ const srcCases = [
     cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /declares no `tone`/ },
 ];
 console.log('');
+// EXCLUSIVE, because the cases below edit TRACKED SOURCE in place. Two runs overlapping is not a slow
+// run, it is a corrupted checkout: the second reads a file the first has already mutated, calls that
+// text the original, and restores the mutation as if it were the code. That deleted the off-window
+// canvas clear (#41/#64) from core/layers/canvas.js and left it deleted, and the only visible symptom
+// was this harness calling its own fixture stale on the next run. Agents run gates in parallel now, so
+// the window is not theoretical.
+const LOCK = path.join(FIX, '.gate-mutation.lock');
+try { fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' }); }
+catch {
+  console.error(`✗ another gate-mutation run holds ${path.relative(repoRoot, LOCK)} (pid ${fs.readFileSync(LOCK, 'utf8')}).\n`
+    + `  These cases edit tracked source in place, so two runs at once corrupt the checkout. Wait for it,\n`
+    + `  or delete the lock if that process is gone — then check \`git status\` before trusting the tree.`);
+  process.exit(2);
+}
+// The restore below is per-case; this is the backstop for the ways a case never reaches it (a throw, a
+// Ctrl-C, a kill). A mutated guard left in the engine is the worst outcome this file can produce.
+const inFlight = new Map();
+const restoreAll = () => { for (const [p, orig] of inFlight) { try { fs.writeFileSync(p, orig); } catch { } } inFlight.clear(); try { fs.unlinkSync(LOCK); } catch { } };
+process.on('exit', restoreAll);
+for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { restoreAll(); process.exit(130); });
+
 for (const c of srcCases) {
   const p = path.join(repoRoot, c.file);
   if (c.before) c.before();
@@ -990,9 +1011,11 @@ for (const c of srcCases) {
     broken.push({ name: c.name, why: 'FIXTURE IS STALE — the mutation no longer applies, so this gate is UNPROVEN. Re-anchor it on text that still exists in ' + c.file, out: '' });
     continue;
   }
+  inFlight.set(p, orig);
   fs.writeFileSync(p, mutated);
   const r = run(c.cmd[0], c.cmd[1]);
   fs.writeFileSync(p, orig); // always restore, even if the gate throws
+  inFlight.delete(p);
   if (c.after) c.after();
   // snap reports rather than fails (an intended change is still a change), so some cases
   // assert on OUTPUT alone — a gate can speak without exiting non-zero.

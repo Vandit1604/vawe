@@ -1,12 +1,12 @@
 ---
 when: "\"we built the whole thing and then it was rejected\""
-answers: "the points where the work gets shown before it is finished: concept · storyboard panels · style frames · the 85% draft"
+answers: "the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft"
 group: crosscutting
 ---
 
 # Approval stops — show the work before it is finished
 
-Three points in the pipeline where the author **stops**, shows one screen, and does not start the next
+Points in the pipeline where the author **stops**, shows one screen, and does not start the next
 phase until the person who asked for the film answers: approve, deny, or change it.
 
 This is not a gate. Nothing here is automated and nothing here passes or fails. It is the studio's
@@ -28,7 +28,7 @@ earlier and far cheaper:
 Five rejections, five rebuilds, none of which needed to happen. The pattern is always the same:
 momentum carried the work past the moment when redirecting it was free.
 
-## The three stops
+## The stops
 
 ### 1. Concept — before any JSON exists
 
@@ -71,6 +71,37 @@ dashed box.
 
 `storyboard-check` warns when no panels exist for a storyboard, or when they were drawn from an older
 version of it. It never blocks: panels are advisory, and a gate that blocks on advice gets waived.
+
+### 1b. The hand-written fragment — before it goes into a film
+
+Every `html` layer and every hand-authored `bg` is somebody's raw HTML. It is the least reviewed thing
+in the pipeline and the easiest to review: one file, one command, one picture.
+
+```
+make preview HTML=formats/scene/hero.html THEME=<brand>      →  /tmp/preview.png
+```
+
+Put the fragment in a FILE and point the layer at it with `src` instead of escaping it into the scene:
+
+```json
+{ "type": "html", "src": "formats/scene/hero.html", "x": 200, "y": 400, "w": 1200 }
+```
+
+`html` and `src` are alternatives, never both. A `src` that is not on disk stops the render, naming the
+path and the roots the server serves — a fragment is the whole beat, so there is nothing to degrade to.
+
+The preview runs `impeccable`'s anti-pattern detector over the file on its way to the PNG and prints
+what it finds. That is the half of this stop a picture cannot do: it is what caught the flat type
+hierarchy and the cobalt glow in `docs/animation.html`.
+
+**Two things the file does not change, and both bite:**
+
+- **A relative path inside the fragment resolves against the PAGE, not against the fragment's folder.**
+  Moving markup into `formats/scene/` does not make `./logo.svg` mean the file beside it. Write asset
+  paths from the repo root.
+- **`sanitizeHtml` strips any absolute `src`/`href`** (`core/sanitize-html.js`), so an `<img src="/…">`
+  that renders in your browser renders empty in the film. The preview shows the fragment BEFORE the
+  sanitiser, so a picture that is right here can still be wrong in the render. Check the beats sheet.
 
 ### 2. Style frames — before any motion exists
 

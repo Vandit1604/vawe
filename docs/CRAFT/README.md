@@ -52,7 +52,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [APPROVAL-STOPS.md](APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · style frames · the 85% draft |
+| [APPROVAL-STOPS.md](APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft |
 | [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [BLUEPRINTS.md](BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
 | [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |

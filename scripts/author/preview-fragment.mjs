@@ -67,8 +67,34 @@ await page.goto(`http://127.0.0.1:${port}/__frag`, { waitUntil: 'load' });
 await page.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
 const out = '/tmp/preview.png';
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
+  const findings = await detect(`http://127.0.0.1:${port}/__frag`, browser);
   await browser.close(); server.close();
   console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName}, bg ${bg}, box ${boxW}px)`);
   console.log('  open it / Read it and check: real fonts? real assets loaded? spacing + hierarchy right?');
   console.log('  want it live in your browser instead of a PNG?  add --serve');
+  report(findings);
+}
+
+// impeccable's anti-pattern detector, over the page we just photographed. A fragment is the least
+// reviewed markup in the pipeline, and the moment somebody is looking at it is the moment to say what
+// is wrong with it — the picture cannot show a flat type scale or a default face by itself.
+//
+// The BROWSER engine, deliberately: it reads computed styles off the very page in the screenshot, and it
+// needs only puppeteer, which is already open here. The static-HTML engine wants four parser packages
+// this repo does not carry, and its own fallback when they are missing is to quietly downgrade to a
+// regex pass that reports nothing — a green result meaning "not checked" is the failure mode this repo
+// least wants in an approval stop.
+async function detect(url, browser) {
+  let detectUrl;
+  try { ({ detectUrl } = await import('../../.claude/skills/impeccable/scripts/detector/detect-antipatterns.mjs')); }
+  catch (e) { return { skipped: `the impeccable skill is not vendored at .claude/skills/impeccable (${e.code || e.message})` }; }
+  try { return { findings: await detectUrl(url, { browser, waitUntil: 'load', settleMs: 100, viewport: { width: 1920, height: 1080 } }) }; }
+  catch (e) { return { skipped: `the detector threw — ${e.message}` }; }
+}
+
+function report(r) {
+  if (r.skipped) { console.log(`\n  ⚠ anti-pattern check SKIPPED, so this fragment is unchecked, not clean: ${r.skipped}`); return; }
+  if (!r.findings.length) { console.log('\n  ✓ impeccable: no anti-patterns detected (it reads craft tells, not whether the idea is right)'); return; }
+  console.log(`\n  impeccable · ${r.findings.length} anti-pattern(s) — each is a fix or a reason, never a shrug:`);
+  for (const f of r.findings) console.log(`    [${f.antipattern}] ${String(f.snippet || '').slice(0, 120)}\n      → ${f.description}`);
 }

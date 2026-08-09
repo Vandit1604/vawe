@@ -14,6 +14,9 @@ verify/*_contactsheet.png
 out/*.meta.json
 out/*.fonts.json
 verify/frames/
+# gate-mutation's exclusive lock: it edits tracked source in place, so two runs must not overlap.
+# Removed on exit; a leftover one means a run was killed — check `git status` before trusting the tree.
+verify/fixtures/.gate-mutation.lock
 
 # transient DOM snapshot baselines (make snap)
 verify/snap/
