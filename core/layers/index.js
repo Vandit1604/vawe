@@ -2,6 +2,7 @@
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
 import { mergeProps } from '../props.js';
+import { checkLayerTree } from './vocabulary.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
 import * as text from './text.js';
@@ -99,7 +100,12 @@ export function createRenderer(ctx) {
   return {
     kit,
     // construct a layer's DOM (default primitive = text; count reuses the text build)
-    build(el, L) { buildOne(el, L); },
+    //
+    // The vocabulary check runs HERE, at the one entry point the orchestrator calls, and it walks the
+    // whole subtree. Putting it inside buildOne would miss a nested group (addGroupChild lays those out
+    // itself and never calls buildLeaf), and putting it in two places would let the two drift.
+    // It THROWS: an unknown prop is accepted-then-ignored, the one outcome this repo refuses.
+    build(el, L) { checkLayerTree(L, LAYER_PROPS); buildOne(el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) are the per-frame pipeline in core/tracks/, which calls this from the `primitive`
     // slot — in the MIDDLE of that list, not before or after it (core/tracks/primitive.js says why).
