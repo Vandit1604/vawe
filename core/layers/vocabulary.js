@@ -100,7 +100,16 @@ export function checkLayer(L, typeProps, where) {
 // that names `make expand`.
 const SUGAR_TYPES = new Set(['block', 'comp', 'beat']);
 
-export function checkLayerTree(L, layerProps, where = 'layer') {
+// The orchestrator builds one layer at a time and does not hand over its index, so name the layer by
+// what an author can search the JSON for: its `id`, or a short excerpt of the content that identifies
+// it. "layer[7]" from a stack trace is no help in a 60-layer file the author did not number.
+const label = (L) => {
+  if (L.id) return `layer "${L.id}"`;
+  const hint = [L.text, L.src, L.d, L.html].find((v) => typeof v === 'string' && v.length);
+  return hint ? `layer (${JSON.stringify(hint.slice(0, 40))})` : 'layer';
+};
+
+export function checkLayerTree(L, layerProps, where = label(L)) {
   if (!L || typeof L !== 'object') return;
   if (SUGAR_TYPES.has(L.type)) return;
   const typeProps = layerProps[L.type == null || L.type === '' ? 'text' : L.type];
