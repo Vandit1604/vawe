@@ -114,3 +114,6 @@ build/
 refs/
 .venv-tools/
 assets/cutouts/
+
+# agent worktrees (scripts/dev/worktree.sh)
+.claude/worktrees/
