@@ -406,10 +406,32 @@ export function transitionErrors(cfg) {
   return out;
 }
 
-// Em-dashes are banned in all rendered text (brand voice rule). Checks every string VALUE in the
-// data (schema labels are internal and exempt). Use a comma, period, or · instead.
+// ON-SCREEN TEXT, out of a string that may be MARKUP. An `html` layer's value is a fragment: its
+// <style> block, its CSS and HTML comments and its tag attributes are all source the viewer never
+// reads. Checking that source as copy reported a frosted pane's own stylesheet comment
+// (`/* frosted pane — near-opaque */`) as a brand-voice defect, which is the same mistake as
+// docs/MISTAKES.md #214/#216/#217: reading the REPRESENTATION of the text instead of the text.
+//
+// Conservative by construction. The tag pattern needs a letter immediately after `<`, so a plain
+// sentence like "a < b" is untouched and a string carrying no markup comes through unchanged. Every
+// em-dash in ordinary copy is still caught, including inside `<b>`/`<em>`, whose TEXT survives.
+export function onScreenText(s) {
+  return String(s)
+    .replace(/<(style|script)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<\/?[a-zA-Z][^>]*>/g, ' ');
+}
+
+// Em-dashes are banned in all rendered text (brand voice rule). Checks the RENDERED text of every
+// string VALUE in the data (schema labels are internal and exempt). Use a comma, period, or · instead.
 function noEmdash(v, path, errors) {
-  if (typeof v === 'string') { if (v.includes('\u2014')) errors.push(`${path || 'data'} contains an em-dash (—): "${v.slice(0, 48)}…" — use , . or ·`); }
+  if (typeof v === 'string') {
+    const seen = onScreenText(v);
+    const at = seen.indexOf('\u2014');
+    // Quote the RENDERED text around the offence, not the head of the source: an em-dash 900
+    // characters into a fragment was reported with a 48-character snippet that did not contain it.
+    if (at >= 0) errors.push(`${path || 'data'} contains an em-dash (—): "${seen.slice(Math.max(0, at - 24), at + 25).trim()}" — use , . or ·`);
+  }
   else if (Array.isArray(v)) v.forEach((x, i) => noEmdash(x, `${path}[${i}]`, errors));
   else if (isObj(v)) for (const [k, x] of Object.entries(v)) { if (k === 'module' || k === 'theme') continue; noEmdash(x, path ? `${path}.${k}` : k, errors); }
 }
@@ -562,11 +584,50 @@ export function lintData(data) {
   //     containment/group/anchor relationship = one scene bleeding into the next (the Preferences↔agents
   //     overlap). Pure geometry; needs an explicit w to bound a box (numeric starts only).
   const CONTENT = new Set(['text', 'count', 'doc', 'image', 'group', 'board', 'html']);
+  // MEASURE THE GLYPHS, NOT THE BOX THE AUTHOR ASKED FOR. On a rect, an image, an html layer or a
+  // group, `w`/`h` size the element and the declared box IS what gets painted. On a TEXT layer they do
+  // not: `w` is a WRAPPING width (`pin` centres a box, so a placed line has to declare one), `align`
+  // decides where inside it the glyphs sit, and `h` is absent so the old estimate assumed one line.
+  // So a 1200px-wide layer reading "Hi" was compared as a 1200px-wide object and collided with a
+  // neighbour it comes nowhere near, while a layer whose copy wraps to four lines was compared as one.
+  // Both are findings about the JSON, not about the film (docs/MISTAKES.md #214 and its recurrences).
+  //
+  // This file is pure and browser-safe, so there is no font to measure with. Estimate the run from the
+  // STRING instead: a heavy sans averages roughly half an em per glyph, and 0.55 is deliberately on the
+  // generous side because over-estimating the ink keeps real collisions reported. Markup contributes no
+  // width, so it is stripped first.
+  //
+  // WIDTH ONLY. The obvious next step is to divide the run by `w` and give a wrapped line a taller box,
+  // and it was written, measured and removed: at 0.55 em a short word in a narrow column reads as
+  // wrapping when it does not, and the guessed second line reached down into the caption beneath it.
+  // That added 11 collision warnings across the library, every one of them a heading that fits on its
+  // line. A gate that manufactures a defect is worse than one that misses it (docs/MISTAKES.md #211,
+  // and the retired typing rule), so the height stays the old single-line estimate: it under-states, and
+  // under-stating can only drop a finding, never invent one.
+  const ADVANCE = 0.55;                                  // average glyph advance, in em
+  const LINE_HEIGHT = 1.04;                              // .hs-text in formats/scene/scene.css
+  const TEXT_IS_NOT_ITS_BOX = new Set(['text', 'count']);
+  const inkBox = (L) => {
+    const size = L.size ?? 40;
+    const copy = typeof L.text === 'string' ? onScreenText(L.text).trim()
+      : L.value != null ? String(L.value) : null;
+    if (!copy) return null;                              // nothing readable to measure: fall back to `w`
+    const run = copy.length * size * ADVANCE;
+    const lineW = Math.min(L.w, run);
+    const x0 = L.align === 'center' ? L.x + (L.w - lineW) / 2
+      : L.align === 'right' ? L.x + L.w - lineW
+      : L.x;
+    return { x0, x1: x0 + lineW };
+  };
   const box = (L) => {
     if (typeof L.start === 'string' || L.x == null || L.y == null || L.w == null) return null;
-    const h = L.h != null ? L.h : (L.size ?? 40) * 1.3;
+    const ink = TEXT_IS_NOT_ITS_BOX.has(L.type || 'text') ? inkBox(L) : null;
+    // 1.04 is the engine's own line-height for .hs-text (formats/scene/scene.css). The estimate used to
+    // be 1.3, which is nobody's number: it gave every headline a box a quarter taller than the line the
+    // renderer draws, and that phantom band under a title is what "collided" with the caption below it.
+    const h = L.h != null ? L.h : (L.size ?? 40) * LINE_HEIGHT;
     const s = L.start ?? 0;
-    return { x0: L.x, y0: L.y, x1: L.x + L.w, y1: L.y + h, s, e: s + (L.duration ?? 2) };
+    return { x0: ink ? ink.x0 : L.x, y0: L.y, x1: ink ? ink.x1 : L.x + L.w, y1: L.y + h, s, e: s + (L.duration ?? 2) };
   };
   const cand = layers.map((L, i) => ({ L, i, b: isObj(L) && CONTENT.has(L.type || 'text') ? box(L) : null })).filter((o) => o.b);
   for (let a = 0; a < cand.length; a++) {

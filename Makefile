@@ -181,10 +181,12 @@ verify:
 audit:
 	node verify/audit.mjs $(if $(D),$(D),$(M)) $(if $(ASPECT),--aspect $(ASPECT))
 
-# make audit-test  — regression: proves `make audit` still CATCHES invisible emphasis (blue-on-blue).
-# Runs the audit on a fixture that forces accent-<b>-on-accent-bg and asserts a hard contrast fail.
+# make audit-test  — regression on both edges of `make audit`. contrast-regression proves it still
+# CATCHES invisible emphasis (blue-on-blue). measure-regression proves it measures the DRAWN ink and
+# not the box the author declared, which is the error this repo logged four times (#214/#216/#217/#242).
 audit-test:
 	node verify/contrast-regression.mjs
+	node verify/measure-regression.mjs
 
 # make snap M=<format> [SAVE=1]  — check a scene WITHOUT rendering video: capture/diff the per-frame
 # DOM signature (bbox/transform/opacity/font/text). Baseline a refactor, then prove frames unchanged.

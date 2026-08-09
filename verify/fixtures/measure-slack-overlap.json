@@ -1,0 +1,11 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "default",
+  "duration": 4,
+  "bg": [{ "t": 0, "preset": "aurora" }],
+  "layers": [
+    { "type": "text", "id": "a", "text": "Hi", "x": 100, "y": 400, "w": 1200, "align": "left", "size": 70, "start": 0, "duration": 4 },
+    { "type": "text", "id": "b", "text": "There", "x": 900, "y": 400, "w": 600, "align": "left", "size": 70, "start": 0, "duration": 4 }
+  ]
+}
