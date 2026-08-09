@@ -101,13 +101,30 @@ destination: web
   Beat 4 needs a capture where the band is visibly drawn. If it cannot be, beat 4 must be re-planned.
 -->
 
+<!--
+  TYPE SCALE, stated because the panels exposed its absence: the first draft carried the same headline
+  size and position in all five beats, and the reference this film recreates varies its type enormously.
+  A held size across a whole film reads as a template, and it wastes the one axis that costs nothing.
+
+  The scale follows the shot, so the type gets smaller exactly as the picture gets closer and takes over:
+
+    beat 1  WIDE    13% of frame height, then 6.5% for the second clause   the type IS the frame
+    beat 2  MEDIUM  9%                                                     the product arrives, type yields
+    beat 3  MEDIUM  9%                                                     held, because the beat before it earned the size
+    beat 4  CLOSE   15%, the largest in the film                           the hole is the turn and it shouts
+    beat 5  CLOSE   7%, the smallest                                       the picture answers, so the words stop trying
+
+  Beat 4 is deliberately larger than the hook. A recreation whose loudest frame is its opening has no
+  turn, and the measured reference puts its own peak at the problem, not at the promise.
+-->
+
 ## Beat 1: See it first (0s-2.6s)
 - type: hook
 - object: the caret is the whole frame; it blinks alone on white, types the line, then the line clears and it stays
 - shot: wide, the caret dead centre and the frame deliberately empty around it, the emptiest frame in the film
 - camera: slow push, about 4% over the beat
-- picture: one vertical ink bar dead centre on a near-white field, then seven words typed beside it at ~13% of frame height
-- mechanism: per-character typing on a text layer, caret visible · a hard dead stop of 0.4s on the finished line · the line clearing right to left in 0.3s, leaving the bar alone
+- picture: one vertical ink bar dead centre on a near-white field. `See the film` types beside it at ~13% of frame height, holds, and only then does `before you render it.` arrive beneath it at half that size
+- mechanism: per-character typing on a text layer, caret visible · the line arriving in TWO stages, three words then four, so the frame is never holding seven words at one weight · a hard dead stop of 0.4s on the finished line · the line clearing right to left in 0.3s, leaving the bar alone
 - becomes: an empty white field becomes a typed promise, and the promise collapses back into the single bar that wrote it
 - onscreen: See the film before you render it.
 - why: the viewer has to meet the bar as a caret before it can mean anything as a playhead, and a line that erases itself leaves the bar as the only thing on screen
