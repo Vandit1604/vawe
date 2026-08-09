@@ -58,10 +58,10 @@ func TestRenderDeterministic(t *testing.T) {
 	out1 := filepath.Join(dir, "a.wav")
 	out2 := filepath.Join(dir, "b.wav")
 
-	if !Render(cfg, 2, nil, nil, dir, dir, out1) {
+	if ok, err := Render(cfg, 2, nil, nil, nil, dir, dir, out1); !ok || err != nil {
 		t.Fatal("expected a track")
 	}
-	if !Render(cfg, 2, nil, nil, dir, dir, out2) {
+	if ok, err := Render(cfg, 2, nil, nil, nil, dir, dir, out2); !ok || err != nil {
 		t.Fatal("expected a track")
 	}
 	b1, _ := os.ReadFile(out1)
@@ -76,7 +76,7 @@ func TestRenderSilent(t *testing.T) {
 	dir := t.TempDir()
 	cfg := Config{Music: constMusic(t, dir, 0.4, 3), Silent: true}
 	out := filepath.Join(dir, "s.wav")
-	if Render(cfg, 2, nil, nil, dir, dir, out) {
+	if ok, _ := Render(cfg, 2, nil, nil, nil, dir, dir, out); ok {
 		t.Fatal("silent must return false")
 	}
 	if _, err := os.Stat(out); err == nil {
@@ -90,7 +90,7 @@ func TestFadeInRampsUp(t *testing.T) {
 	cfg := Config{Music: constMusic(t, dir, 0.5, 3)}
 	cfg.MusicFade.In = 1.0
 	out := filepath.Join(dir, "f.wav")
-	if !Render(cfg, 2, nil, nil, dir, dir, out) {
+	if ok, err := Render(cfg, 2, nil, nil, nil, dir, dir, out); !ok || err != nil {
 		t.Fatal("expected a track")
 	}
 	w := readWavMono(out)
@@ -110,3 +110,116 @@ func TestFadeInRampsUp(t *testing.T) {
 
 // Loudness is applied at the mux by ffmpeg loudnorm (encode.Mux), not in this package, so it is
 // verified end-to-end at render time (measured near the target with ffmpeg), not by a unit test here.
+
+// bridgeSource writes a flat texture the bridge can loop, under assets/music/ so a bare NAME resolves
+// the same way an author's would.
+func bridgeSource(t *testing.T, dir, name string, amp float64) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Join(dir, "assets", "music"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	writeMonoWav(t, filepath.Join(dir, "assets", "music", name+".wav"), flat(amp, sr))
+}
+
+// rms of one second-window of the mixed file, so a test asserts what an ear would hear.
+func rmsAt(w *wav, from, to float64) float64 {
+	a, b := int(from*float64(w.rate)), int(to*float64(w.rate))
+	if b > len(w.data) {
+		b = len(w.data)
+	}
+	acc := 0.0
+	for i := a; i < b; i++ {
+		acc += w.data[i] * w.data[i]
+	}
+	if b <= a {
+		return 0
+	}
+	return math.Sqrt(acc / float64(b-a))
+}
+
+// (d) A J-cut is audible BEFORE its junction and silent well before that. The whole device is that
+// the sound arrives first, so this is the assertion the feature exists for.
+func TestJCutLeadsThePicture(t *testing.T) {
+	dir := t.TempDir()
+	bridgeSource(t, dir, "texture", 0.5)
+	out := filepath.Join(dir, "j.wav")
+	br := []Bridge{{Sound: "texture", Kind: "j", At: 3, Start: 2, End: 5, Fade: 0.2, Gain: 0.5, Duck: 1}}
+	if ok, err := Render(Config{}, 6, nil, nil, br, dir, dir, out); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	w := readWavMono(out)
+	before, lead, after := rmsAt(w, 0.5, 1.5), rmsAt(w, 2.4, 2.9), rmsAt(w, 3.5, 4.5)
+	if before > 1e-3 {
+		t.Fatalf("nothing should sound before the bridge, got rms %.4f", before)
+	}
+	if lead < 0.2 {
+		t.Fatalf("the J-cut must be audible BEFORE its junction, got rms %.4f in the lead", lead)
+	}
+	if after < 0.2 {
+		t.Fatalf("the J-cut must keep playing after the junction, got rms %.4f", after)
+	}
+}
+
+// (e) An L-cut still sounds AFTER its junction and stops at the end of its lag.
+func TestLCutTrailsThePicture(t *testing.T) {
+	dir := t.TempDir()
+	bridgeSource(t, dir, "texture", 0.5)
+	out := filepath.Join(dir, "l.wav")
+	br := []Bridge{{Sound: "texture", Kind: "l", At: 3, Start: 1, End: 4, Fade: 0.2, Gain: 0.5, Duck: 1}}
+	if ok, err := Render(Config{}, 6, nil, nil, br, dir, dir, out); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	w := readWavMono(out)
+	lag, past := rmsAt(w, 3.1, 3.6), rmsAt(w, 4.5, 5.5)
+	if lag < 0.2 {
+		t.Fatalf("the L-cut must run past its junction, got rms %.4f", lag)
+	}
+	if past > 1e-3 {
+		t.Fatalf("the L-cut must stop at the end of its lag, got rms %.4f", past)
+	}
+}
+
+// (f) A bridge with `duck` pulls the music bed down under itself — the cross in "cross it under".
+func TestBridgeDucksTheBed(t *testing.T) {
+	dir := t.TempDir()
+	bridgeSource(t, dir, "texture", 0.5)
+	out := filepath.Join(dir, "d.wav")
+	cfg := Config{Music: constMusic(t, dir, 0.5, 6)}
+	br := []Bridge{{Sound: "texture", Kind: "j", At: 3, Start: 2, End: 5, Fade: 0.2, Gain: 0, Duck: 0}}
+	if ok, err := Render(cfg, 6, nil, nil, br, dir, dir, out); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	w := readWavMono(out)
+	open, under := rmsAt(w, 0.5, 1.5), rmsAt(w, 3, 4)
+	if under > open*0.05 {
+		t.Fatalf("the bed should duck to near nothing under the bridge: open %.4f, under %.4f", open, under)
+	}
+}
+
+// (g) A missing bridge source FAILS the render. Silence here is not a quieter film, it is a film that
+// has lost the thing holding it together, and that must never pass unremarked.
+func TestMissingBridgeSourceFails(t *testing.T) {
+	dir := t.TempDir()
+	br := []Bridge{{Sound: "nosuchbed", Kind: "j", At: 3, Start: 2, End: 5, Fade: 0.2, Gain: 0.5, Duck: 1}}
+	ok, err := Render(Config{}, 6, nil, nil, br, dir, dir, filepath.Join(dir, "x.wav"))
+	if ok || err == nil {
+		t.Fatal("a missing bridge source must fail the render")
+	}
+	if !bytes.Contains([]byte(err.Error()), []byte("nosuchbed")) {
+		t.Fatalf("the error must name the sound it could not find, got: %v", err)
+	}
+}
+
+// (h) No bridges = the mix the engine produced before this feature existed.
+func TestNoBridgesIsUnchanged(t *testing.T) {
+	dir := t.TempDir()
+	cfg := Config{Music: constMusic(t, dir, 0.4, 3)}
+	a, b := filepath.Join(dir, "a.wav"), filepath.Join(dir, "b.wav")
+	Render(cfg, 2, nil, nil, nil, dir, dir, a)
+	Render(cfg, 2, nil, nil, []Bridge{}, dir, dir, b)
+	x, _ := os.ReadFile(a)
+	y, _ := os.ReadFile(b)
+	if !bytes.Equal(x, y) {
+		t.Fatal("an empty bridge list must mix byte-identically to no bridge list")
+	}
+}

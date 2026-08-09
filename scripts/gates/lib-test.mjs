@@ -35,6 +35,7 @@ import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js'
 import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SEAM_CUE } from '../../core/audio-cues.js';
+import { resolveBridges } from '../../core/audio-bridges.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
@@ -1143,6 +1144,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   threw = '';
   try { resolveBecomes({ layers: [{ id: 'x', becomes: 'x' }] }); } catch (e) { threw = e.message; }
   ok('becomes throws on a self reference', /becomes itself/.test(threw));
+}
+
+// ---- sound bridges (J/L-cuts) ------------------------------------------------------------------
+// The resolver turns a NAMED junction into a span of seconds. Every wrong span sounds only slightly
+// off, so the tests here are mostly about what it refuses.
+{
+  const MARKS = [{ t: 2, kind: 'cut' }, { t: 5, kind: 'cut' }, { t: 7, kind: 'seam' }];
+  const one = (b) => resolveBridges({ bridges: [b] }, MARKS, 10)[0];
+
+  const j = one({ bridge: 'j', at: 'cut@1', lead: 0.8, sound: 'tense' });
+  ok('a J-cut starts before its junction', Math.abs(j.start - 4.2) < 1e-6 && j.at === 5);
+  ok('a J-cut runs to the next junction by default', Math.abs(j.end - 7) < 1e-6);
+
+  const l = one({ bridge: 'l', at: 'cut@1', lag: 1.2, sound: 'tense' });
+  ok('an L-cut ends after its junction', Math.abs(l.end - 6.2) < 1e-6);
+  ok('an L-cut starts at the previous junction by default', Math.abs(l.start - 2) < 1e-6);
+
+  ok('a span overrides the default side', Math.abs(one({ bridge: 'j', at: 'cut@0', lead: 0.5, span: 1, sound: 'x' }).end - 3) < 1e-6);
+  ok('a bridge fades by default', one({ bridge: 'j', at: 'cut@0', lead: 0.5, sound: 'x' }).fade > 0);
+  ok('junction@ addresses every kind at once', one({ bridge: 'l', at: 'junction@2', lag: 0.5, sound: 'x' }).at === 7);
+  ok('no bridges resolve to nothing', resolveBridges({}, MARKS, 10).length === 0);
+
+  const throws = (b, re, label) => {
+    let m = '';
+    try { one(b); } catch (e) { m = e.message; }
+    ok(label, re.test(m));
+  };
+  throws({ bridge: 'x', at: 'cut@0', lead: 1, sound: 'a' }, /must be "j"/, 'a bridge must be j or l');
+  throws({ bridge: 'j', at: 'cut@9', lead: 1, sound: 'a' }, /does not exist/, 'an out-of-range junction names what exists');
+  throws({ bridge: 'j', at: 'beat@0', lead: 1, sound: 'a' }, /unknown junction kind/, 'an unknown junction kind is refused');
+  throws({ bridge: 'j', at: '4.37', lead: 1, sound: 'a' }, /must be "<kind>@<index>"/, 'a raw timestamp is not a junction');
+  throws({ bridge: 'j', at: 'cut@1', lead: 4, sound: 'a' }, /reaches back past the previous junction/, 'a lead longer than the preceding beat is refused');
+  throws({ bridge: 'l', at: 'cut@0', lag: 4, sound: 'a' }, /runs past the next junction/, 'a lag longer than the following beat is refused');
+  throws({ bridge: 'j', at: 'cut@0', lead: 1 }, /"sound" must name/, 'a bridge without a sound is refused');
+  throws({ bridge: 'j', at: 'cut@0', sound: 'a' }, /defined by its lead/, 'a J-cut without a lead is refused');
+  throws({ bridge: 'l', at: 'cut@0', sound: 'a' }, /defined by its lag/, 'an L-cut without a lag is refused');
+  throws({ bridge: 'j', at: 'cut@0', lead: 0.5, span: 0.2, fade: 1, sound: 'a' }, /does not fit/, 'a fade that does not fit the span is refused');
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

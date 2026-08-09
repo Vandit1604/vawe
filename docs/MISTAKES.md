@@ -152,7 +152,8 @@ absolute screen px by default (explicit x/y still makes it relative). Schema lab
 Three bugs shipped in renders and passed every gate; each is now a `validate` warning (fail with
 `--strict`), pinned by `make lint-test`:
 - **missing `duration`** → a layer renders for the WHOLE video (a "+" gutter leaked 53s).
-- **`typing` + `<b>/<em>`** → typing reveals characters literally, so tags show as text.
+- **`typing` + `<b>/<em>`** → typing revealed characters literally, so tags showed as text.
+  **This rule is retired** — typing has been HTML-safe since 2026-07-24 and the warning went stale. See #85.
 - **scene collision** → two content layers overlapping in space AND time (one scene bled into the next).
 **Lesson:** when a bug slips every gate, add the cheap deterministic gate that would have caught it.
 
@@ -5925,3 +5926,46 @@ waived by reflex is repealed.
 It found three live defects on its first run: `argus-launch.json` names a bed that does not exist and
 renders silent while claiming one, `motion-test.json` carries an empty `audio: {}` that reads sounded,
 and `vawe-launch.json`'s bed has no provenance entry at all.
+
+---
+
+## #238 — the only continuity the engine could express was visual, so every film had to carry a prop
+
+**What.** `direction-floor` blocks a short film on `no-continuous-object`: something must survive a cut
+and change across it. Every answer the engine could express was a picture — a prop that travels, a
+camera that moves, a match cut, a box whose `w` and `h` are keyed. Eighteen films in the library carry
+a waiver, and three consecutive ones were the same rectangle changing size.
+
+There is a cheaper answer, and film has used it since the 1930s: run a sound under the cut. A J-cut
+starts the next shot's sound before its picture; an L-cut lets the last shot's sound run under the new
+one. Either one holds two visually unrelated beats together and costs the picture nothing.
+
+**Root cause.** The audio model had no way to say it. A cue is a point event at a time `t` and a bed is
+one continuous file, so "start this texture 0.4s before the cut and cross it under" had no shape to be
+written in. Nobody had noticed, because the doctrine said ship it mute (#237), and a device you cannot
+use is a device you stop proposing. `docs/CRAFT/FILM-STRUCTURE.md` catalogues four families of
+structural device and one of them is aural: the engine was locked out of a quarter of the vocabulary by
+a missing field.
+
+**Fix.** `audio.bridges` — a span of sound hung off a NAMED junction, `core/audio-bridges.js` resolving
+it in the browser (the only place that knows where the film's cuts are) into seconds, and
+`internal/audio/audio.go` laying it down with an equal-power crossfade at both ends and an optional
+duck of the music bed on the mirrored curve. The junction is named (`cut@1`, `seam@0`, `sting@2`,
+`junction@3`), never timed, because a hand-written `t: 4.37` goes wrong silently the moment a beat is
+retimed — the same rot the scene marks were introduced to stop.
+
+**Why it fails loudly rather than degrading.** A missing music bed drops to silence with a warning,
+because `assets/music/` is gitignored and a fresh clone legitimately has none. A missing BRIDGE source
+fails the render outright, because the film's continuity is the thing hanging off it: a bridge that
+never plays is not a quieter film, it is a different one. A junction the film does not have names every
+junction it does. A `lead` reaching back past the previous junction is refused rather than clipped.
+
+**Gate.** `make lib-test` covers the resolver's refusals (18 assertions, most of them about what it
+will not accept); `go test ./internal/audio/` proves a J-cut is audible before its junction, an L-cut
+after it, that `duck` really pulls the bed down, that a missing source errors, and that an empty bridge
+list mixes byte-identically to no bridge list. `make validate` checks the one thing the browser cannot:
+that the texture is on disk. `make audio-check` counts a bridges-only film as sounded.
+
+**Still open.** `direction-floor` reads layers, so a film held together purely by sound still trips
+`no-continuous-object` and needs a waiver. The gate would have to reason about junctions to see it.
+

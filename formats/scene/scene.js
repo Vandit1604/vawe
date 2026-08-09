@@ -13,6 +13,7 @@ import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene } from '/core/transitions-lower.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
+import { resolveBridges } from '/core/audio-bridges.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
 import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
@@ -1003,5 +1004,9 @@ boot((data, fps, theme, canvas) => {
     }
     return sfx;
   }
-  return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(), renderFrame, bakeSeams };
+  // Sound bridges resolve HERE because this is where the junctions are: `at:"cut@2"` is only
+  // answerable next to MARKS. The result is spans of seconds, so the mixer never has to know what a
+  // cut is (core/audio-bridges.js).
+  return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(),
+    bridges: resolveBridges(data.audio, MARKS, duration), renderFrame, bakeSeams };
 });

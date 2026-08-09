@@ -67,7 +67,10 @@ export function classify(scene) {
   const makesSound = (typeof a.music === 'string' && a.music !== '')
     || (typeof a.vo === 'string' && a.vo !== '')
     || a.auto === true
-    || (Array.isArray(a.cues) && a.cues.length > 0);
+    || (Array.isArray(a.cues) && a.cues.length > 0)
+    // A film can be held together by sound bridges alone — that is the point of them — so a scene
+    // whose only audio is a J-cut across its junctions is sounded, not hollow.
+    || (Array.isArray(a.bridges) && a.bridges.length > 0);
   return makesSound ? SOUNDED : HOLLOW;
 }
 

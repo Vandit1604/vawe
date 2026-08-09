@@ -1,6 +1,6 @@
 ---
 when: the film has no sound, or you are about to ship it mute
-answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands"
+answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · how to write a sound bridge (audio.bridges) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands"
 group: crosscutting
 ---
 
@@ -94,12 +94,50 @@ carry a continuous object across its cuts, and `direction-floor` blocks on `no-c
 Every answer we have reached for so far is visual — a prop that survives a cut, a camera that travels,
 a match cut. **A sound bridge is a continuous object too, and it is the one kind that costs the picture
 nothing.** A film whose beats are visually unrelated is still held together if one texture runs under
-all of them and changes across the junctions. That is the register we have not been able to use,
-because we have been shipping mute.
+all of them and changes across the junctions. That is the register we have not been using, because we
+have been shipping mute — and, until `audio.bridges` landed, because the engine could not express it.
 
 Know the limit honestly: `direction-floor` cannot see it. The gate reads layers, so a film held
 together purely by sound will still trip `no-continuous-object` and need a waiver. Write the waiver
 and name the bridge in the `_why`.
+
+### How to write one
+
+A bridge names a **junction**, never a timestamp. The film already knows where it turns, and those
+times move whenever a beat is retimed; `t: 4.37` written by hand goes wrong silently on the next edit.
+
+```jsonc
+"audio": {
+  "bridges": [
+    // J-cut: the room tone of shot 3 arrives 0.8s before shot 3 does.
+    { "bridge": "j", "at": "cut@1", "sound": "tense", "lead": 0.8, "fade": 0.4, "duck": 0.2 },
+    // L-cut: the last shot's texture runs 1.2s under the new picture.
+    { "bridge": "l", "at": "seam@0", "sound": "lofi", "lag": 1.2 }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `bridge` | `"j"` the audio leads · `"l"` the picture leads |
+| `at` | `cut@N` · `seam@N` · `sting@N` · `junction@N` (all kinds merged), counted in TIME order |
+| `sound` | a bed name (`"tense"`), a synthesized cue name (`"loading"`), or a path to a .wav. Looped to fill the span |
+| `lead` | J only, required: seconds of sound before the picture cuts |
+| `lag` | L only, required: seconds the sound keeps running after it |
+| `span` | how long the sound holds on its OWN side. Default: to the neighbouring junction, or the edge of the film |
+| `fade` | equal-power crossfade at both ends, default 0.35s. A bridge never butts |
+| `gain` · `duck` | bridge level (0.5), and the floor the MUSIC bed drops to underneath it (1 = no duck) |
+
+`duck` is what makes the join a *cross* rather than a stack: the bed dips on the same curve the bridge
+rises on. Without it the two simply add.
+
+**It fails loudly, on purpose.** A junction the film does not have names every junction it does have.
+A `lead` that reaches back past the previous junction is refused rather than clipped, because a bridge
+leaning over two shots is not the device. A `sound` that is not on disk fails the render — a film whose
+continuity is carried by a texture that never plays is not a quieter film, it is a different one.
+
+Resolved by `core/audio-bridges.js` (in the browser, where the junctions live) into spans of seconds;
+mixed by `internal/audio/audio.go`, which never has to know what a cut is.
 
 ---
 
@@ -251,6 +289,7 @@ memory before ffmpeg muxes it.
   "musicDuck":  0.15,                     // floor the bed ducks to under VO
   "loudness":  -14,                       // LUFS target at the mux (socials)
   "auto":       true,                     // DRAFT ONLY: score every cut + sting automatically (§4)
+  "bridges":  [{ "bridge": "j", "at": "cut@1", "sound": "tense", "lead": 0.8 }],  // J/L-cuts (§2)
   "cues":     [{ "t": 3.2, "name": "chime", "gain": 0.6 }],
   "sfxGain":    0.8,                      // master over every cue, authored and derived
   "vo":        "voice.wav",
@@ -559,9 +598,9 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
    every profile to *something* — a bed, or an explicit held tone — before "sound by default" is real.
 2. **`audio.auto:true` is on in 22 of 25 sounded films.** By §4 that is a cue on every junction, which
    is mickey-mousing. Those films want hand-placed cues on two or three beats instead.
-3. **Nothing in the engine can author a J-cut or an L-cut.** Cues are point events at a time `t`, and a
-   bed is one continuous file; there is no way to say "start this texture 0.4s before the cut and cross
-   it under." The single most valuable structural device in this document is the one we cannot yet
-   express. That is the next real piece of engine work.
+3. ~~**Nothing in the engine can author a J-cut or an L-cut.**~~ **Done** — `audio.bridges`, §2. The
+   remaining gap is that `direction-floor` still cannot see a bridge, so a film held together by sound
+   alone trips `no-continuous-object` and needs a waiver. Teaching the gate to read `audio.bridges` as a
+   continuous object is the next piece: it would have to reason about junctions rather than layers.
 4. **`assets/music/` is gitignored and untracked.** A fresh clone has no beds, so every film naming one
    renders silent with only a warning. Sound cannot be a true default until the default asset exists.

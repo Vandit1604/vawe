@@ -363,7 +363,7 @@ export async function boot(build) {
     const totalFrames = Math.round(scene.duration * fps);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
-      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], segments: scene.segments || [] },
+      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], segments: scene.segments || [] },
       renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
       // Font audit is a FUNCTION, not a value: it inspects the families the DOM actually asks for,
       // so it must run against a rendered frame (layers that are not up yet declare nothing).

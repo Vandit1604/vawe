@@ -5,6 +5,7 @@ package audio
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -28,6 +29,21 @@ type Cue struct {
 	T    float64  `json:"t"`
 	Name string   `json:"name"`
 	Gain *float64 `json:"gain,omitempty"`
+}
+
+// Bridge is one sound bridge, already resolved to a span of seconds by core/audio-bridges.js. A
+// J-cut leans its start before the junction, an L-cut leans its end past it; by the time it reaches
+// here the two are the same object and the mixer does not need to know which. Kind and At survive
+// only so a failure can say WHICH bridge in the film broke.
+type Bridge struct {
+	Sound string  `json:"sound"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
+	Fade  float64 `json:"fade"`
+	Gain  float64 `json:"gain"`
+	Duck  float64 `json:"duck"` // floor the music bed drops to under the bridge; 1 = no duck
+	At    float64 `json:"at"`
+	Kind  string  `json:"kind"` // "j" | "l"
 }
 
 // Config is the data.audio block.
@@ -61,10 +77,13 @@ type wav struct {
 	data []float64
 }
 
-// Render writes the mixed stereo WAV to outWav. Returns false if there was nothing to mix.
-func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir, assetsBase, outWav string) bool {
+// Render writes the mixed stereo WAV to outWav. Returns false if there was nothing to mix, and an
+// error only for a mix that would come out WRONG rather than absent — today that is a sound bridge
+// whose source file is missing, because a film whose beats are held together by a texture that never
+// plays is not a quieter film, it is a different one.
+func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges []Bridge, formatDir, assetsBase, outWav string) (bool, error) {
 	if cfg.Silent {
-		return false
+		return false, nil
 	}
 	bases := []string{}
 	if formatDir != "" {
@@ -90,15 +109,41 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 			fallback = filepath.Join("music", cfg.Music+".wav")
 		}
 		musicFile = resolve(bases, cfg.Music, fallback)
+		if musicFile == "" {
+			// Not fatal — assets/music/ is gitignored, so a fresh clone legitimately has no beds and
+			// every sounded film would otherwise refuse to render. But it must never pass unremarked:
+			// this exact silence shipped in argus-launch for months while the scene claimed a bed.
+			fmt.Fprintf(os.Stderr, "⚠ audio.music %q resolved to no file — the film renders with NO BED. Run `make music-pack`, or fix the name.\n", cfg.Music)
+		}
 	}
 	voFile := resolve(bases, cfg.VO, "")
+	// Bridge sources resolve BEFORE anything is mixed, so a missing one fails the render instead of
+	// half-mixing a film that has lost its continuity. Order: an explicit path, then a bed name, then
+	// a synthesized cue name — the three things `sound` is allowed to be.
+	bridgeFiles := make([]string, len(bridges))
+	for i, b := range bridges {
+		f := ""
+		if strings.ContainsAny(b.Sound, "/\\") || filepath.Ext(b.Sound) != "" {
+			f = resolve(bases, b.Sound, "")
+		} else {
+			f = resolve(bases, "", filepath.Join("music", b.Sound+".wav"))
+			if f == "" {
+				f = resolve(bases, "", filepath.Join("sfx", b.Sound+".wav"))
+			}
+		}
+		if f == "" {
+			return false, fmt.Errorf("audio bridge (%s-cut at t=%.2f) names sound %q, which is not on disk — looked for it as a path, as assets/music/%s.wav and as assets/sfx/%s.wav. Run `make audio` for a cue or `make music-pack` for a bed",
+				b.Kind, b.At, b.Sound, b.Sound, b.Sound)
+		}
+		bridgeFiles[i] = f
+	}
 	// `Sting` was resolved here and then used ONLY in the emptiness guard below — its samples never
 	// reached the mix, so the field did nothing except let an auto-discovered assets/sting.wav force a
 	// silent audio track onto a scene that asked for none. No scene sets it, and what a "sting file"
 	// should mean is ambiguous now that scene.html emits per-sting `reveal` cues into the sfx list.
 	// Removed rather than left as config that reads as intent (docs/MISTAKES.md #70).
-	if musicFile == "" && voFile == "" && len(sfx) == 0 {
-		return false
+	if musicFile == "" && voFile == "" && len(sfx) == 0 && len(bridges) == 0 {
+		return false, nil
 	}
 
 	total := int(math.Round(duration * sr))
@@ -139,6 +184,43 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 		}
 	}
 
+	// SOUND BRIDGES. Each is laid down as its own looped texture with an equal-power ramp at both
+	// ends, and may pull the music bed down under itself by the same curve — that mirrored pair IS the
+	// cross in "cross it under", and it is what makes the join a bridge rather than a second file
+	// switching on. Every value is a function of the sample index, so the mix is reproducible.
+	var bridgeMix []float64
+	var bedDuck []float64
+	if len(bridges) > 0 {
+		bridgeMix = make([]float64, total)
+		bedDuck = make([]float64, total)
+		for i := range bedDuck {
+			bedDuck[i] = 1
+		}
+		for bi, b := range bridges {
+			src := readWavMono(bridgeFiles[bi])
+			if src == nil {
+				return false, fmt.Errorf("audio bridge (%s-cut at t=%.2f): %s is not a WAV this mixer can read", b.Kind, b.At, bridgeFiles[bi])
+			}
+			start := int(math.Round(b.Start * sr))
+			end := int(math.Round(b.End * sr))
+			if start < 0 {
+				start = 0
+			}
+			if end > total {
+				end = total
+			}
+			clip := fit(src, end-start, true)
+			fadeN := int(math.Round(b.Fade * sr))
+			for i := start; i < end; i++ {
+				env := bridgeEnv(i-start, end-start, fadeN)
+				bridgeMix[i] += clip[i-start] * b.Gain * env
+				if d := b.Duck + (1-b.Duck)*(1-env); d < bedDuck[i] {
+					bedDuck[i] = d
+				}
+			}
+		}
+	}
+
 	mg := musicGain
 	if cfg.MusicGain != nil {
 		mg = *cfg.MusicGain
@@ -157,13 +239,21 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 		}
 		s := 0.0
 		if music != nil {
-			s += music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN)
+			bd := 1.0
+			if bedDuck != nil {
+				bd = bedDuck[i]
+			}
+			s += music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN) * bd
 		}
 		if vo != nil {
 			s += vo[i]
 		}
 		left[i] += s * microGain[i]
 		right[i] += s * microGain[i]
+		if bridgeMix != nil {
+			left[i] += bridgeMix[i]
+			right[i] += bridgeMix[i]
+		}
 	}
 
 	// named SFX placed at cue times
@@ -208,7 +298,25 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, formatDir
 	// K-weighting + gated blocks, and an un-weighted PCM gain shipped ~7 dB off. It is applied at the
 	// mux instead, where ffmpeg's `loudnorm` does the standard measurement (see encode.Mux + Config.Loudness).
 	writeWavStereo(outWav, left, right)
-	return true
+	return true, nil
+}
+
+// bridgeEnv is the level of a bridge at sample i of an n-sample span: an equal-power (sine) ramp up
+// over the first fadeN samples and down over the last. Equal-power rather than linear because a
+// bridge crosses AGAINST the bed, and two linear ramps meeting in the middle dip audibly.
+func bridgeEnv(i, n, fadeN int) float64 {
+	g := 1.0
+	if fadeN > 0 {
+		if i < fadeN {
+			g = float64(i) / float64(fadeN)
+		}
+		if rem := n - i; rem < fadeN {
+			if out := float64(rem) / float64(fadeN); out < g {
+				g = out
+			}
+		}
+	}
+	return math.Sin(g * math.Pi / 2)
 }
 
 // fadeGain is the pure per-sample level of the music bed: a linear ramp up over the first fadeInN

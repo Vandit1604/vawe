@@ -762,6 +762,18 @@ if (isMain) {
         const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
         if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file — the mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
       }
+      // Sound bridges (J/L-cuts). The SPAN is resolved in the browser, where the junctions live, and
+      // throws there — nothing is duplicated here, because a second copy of that arithmetic would
+      // drift. What is checked here is the half the browser cannot see: whether the texture is on
+      // disk. The mixer fails the render on a missing one, so this is an error, not a warning.
+      for (const [i, b] of (Array.isArray(A.bridges) ? A.bridges : []).entries()) {
+        const s = b?.sound;
+        if (typeof s !== 'string' || !s.trim()) { errors.push(`audio.bridges[${i}].sound must name a bed, a cue, or a .wav path.`); continue; }
+        const bare = !/[\\/]/.test(s) && !path.extname(s);
+        const ok = resolves(s) || (bare && ['music', 'sfx'].some((d) => fs.existsSync(path.join(root, 'assets', d, s + '.wav'))));
+        if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav) — the render fails rather than dropping the bridge. Run make audio / make music-pack.`);
+        if (!/^[a-z]+@\d+$/.test(String(b?.at ?? ''))) errors.push(`audio.bridges[${i}].at must be "<kind>@<index>" (cut@1 · seam@0 · sting@2 · junction@3), got ${JSON.stringify(b?.at)}.`);
+      }
       // (c) VO + sidecars named but absent → the mixer skips them without a word. Fail instead.
       for (const k of ['vo', 'voWords', 'spectrum']) {
         if (typeof A[k] === 'string' && !resolves(A[k]))

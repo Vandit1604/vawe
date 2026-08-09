@@ -306,6 +306,17 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   (whoosh on every `cut`, a reveal hit on every sting) and the mixer beds `assets/music.wav` under
   it. Pure: cue times are a function of the JSON, and it never touches `renderFrame` (frames stay
   snap-identical, audio is a separate track). Assets: `assets/sfx/{whoosh,reveal,tick,…}.wav`.
+- **Sound bridges (J-cut / L-cut)**: `"audio": { "bridges": [ … ] }` — a texture that crosses a picture
+  change instead of stopping at it. A **J-cut** starts the next shot's sound before its picture
+  (`{"bridge":"j","at":"cut@1","sound":"tense","lead":0.8}`); an **L-cut** lets the last shot's sound run
+  under the new one (`{"bridge":"l","at":"seam@0","sound":"lofi","lag":1.2}`). The junction is NAMED, not
+  timed — `cut@N` · `seam@N` · `sting@N` · `junction@N`, counted in time order — so retiming a beat moves
+  the sound with it. `span` sets how long the sound holds on its own side (default: to the next junction),
+  `fade` is the equal-power crossfade at both ends (default 0.35s), `duck` pulls the music bed down under
+  the bridge on the same curve. This is the continuous object that costs the picture nothing: it holds a
+  film together across cuts that share no visual. Resolved by `core/audio-bridges.js`, mixed by
+  `internal/audio/audio.go`. A junction the film does not have, a lead longer than the beat before it, or
+  a `sound` that is not on disk all FAIL the render and name the cause. See `docs/CRAFT/SOUND.md` §2.
 - **Muted-social captions**: `captionMode: "pop"` — big bold bottom-third burned-in subtitles (accent on
   `<b>…</b>`), the style social autoplay needs. `make captions D=<file> TEXT="First line. The <b>payoff</b>."`
   auto-times a script into the `captions` array (time ∝ word count, deterministic). Watches fine on mute.

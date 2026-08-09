@@ -1704,6 +1704,59 @@
           "label": "Master multiplier over EVERY sfx cue (authored + auto-derived).",
           "min": 0
         },
+        "bridges": {
+          "type": "array",
+          "label": "Sound bridges — J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio-bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md §2.",
+          "item": {
+            "bridge": {
+              "type": "string",
+              "label": "\"j\" = the audio leads (new sound over old picture) · \"l\" = the picture leads (old sound under new picture).",
+              "required": true,
+              "enum": ["j", "l"]
+            },
+            "at": {
+              "type": "string",
+              "label": "The junction, as \"<kind>@<index>\": cut@1 · seam@0 · sting@2 · junction@3 (junction = all of them merged). The index counts in TIME order within that kind. An index the film does not have fails the render and lists what it does have.",
+              "required": true
+            },
+            "sound": {
+              "type": "string",
+              "label": "The texture: a bed name (\"tense\" → assets/music/tense.wav), a synthesized cue name (\"loading\" → assets/sfx/loading.wav), or a path to a .wav. Looped to fill the span. A source that is not on disk FAILS the render — a bridge that never plays is not a quieter film.",
+              "required": true
+            },
+            "lead": {
+              "type": "number",
+              "label": "J-cut only, required: seconds of sound that arrive before the picture cuts. A lead longer than the beat before the junction is rejected, not clipped.",
+              "min": 0
+            },
+            "lag": {
+              "type": "number",
+              "label": "L-cut only, required: seconds the sound keeps running after the picture cuts. A lag past the next junction is rejected.",
+              "min": 0
+            },
+            "span": {
+              "type": "number",
+              "label": "How long the sound holds on its OWN side of the junction (after it for a J-cut, before it for an L-cut). Default: to the neighbouring junction, or the edge of the film.",
+              "min": 0
+            },
+            "fade": {
+              "type": "number",
+              "label": "Equal-power crossfade at both ends of the span, seconds (default 0.35). A bridge never butts: the point is that the ear crosses over, not that a second file switches on.",
+              "min": 0
+            },
+            "gain": {
+              "type": "number",
+              "label": "Bridge level (default 0.5).",
+              "min": 0
+            },
+            "duck": {
+              "type": "number",
+              "label": "Floor the MUSIC bed drops to under this bridge, 0..1 (default 1 = no duck). Setting it is what makes the join a cross rather than a stack: the bed dips on the same curve the bridge rises on.",
+              "min": 0,
+              "max": 1
+            }
+          }
+        },
         "cues": {
           "type": "array",
           "label": "Sound-effect cues, each { t, name, gain }. THIS is where cues live (the engine reads `audio.cues`); there is no top-level `sfx`.",

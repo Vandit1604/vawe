@@ -39,6 +39,9 @@ type Meta struct {
 	Height      int         `json:"height"` // (set by core/boot.js boot from data.orientation)
 	Stings      []float64   `json:"stings"`
 	SFX         []audio.Cue `json:"sfx"`
+	// Bridges are J/L-cuts already resolved from junction names to spans of seconds by
+	// core/audio-bridges.js — the browser is the only place that knows where the film's cuts are.
+	Bridges []audio.Bridge `json:"bridges"`
 }
 
 // served is the ONLY prefix set the render page may fetch. A render needs the engine (core), the
