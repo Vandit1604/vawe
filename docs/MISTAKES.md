@@ -5848,3 +5848,42 @@ That is the only real test for a gate of this shape, and it had never been run.
 **Class.** A harness whose own environment was an uncontrolled input. Related to the purity doctrine the
 engine already applies to `renderFrame(n)`: the renderer was pure all along, and the measuring apparatus
 was not.
+
+## #236 — a factual finding was filed in the taste bucket, and a cull carried it out of sight
+
+`beats-wrapped-as-units` (added by #183) told an author that the engine was truncating their layers at
+every beat boundary and named the one flag that stops it. It lived in `direction-floor`. When the taste
+gates went opt-in (`docs/TASTE.md`, 2026-08), `direction-floor` stopped running by default and the
+warning went silent with it. Authors have been hitting the truncation with nothing said since.
+
+**Root cause.** The finding was correct and it was in the wrong gate. It is not a house-style opinion:
+`core/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion` track, and
+`formats/scene/scene.js` then rewrites every non-last-beat layer to end with its own beat. A layer
+authored across a cut renders shorter than its JSON says. That is a fact about the render, checkable
+without agreeing with anybody's taste, and it was grouped with the rules about whether a film is *good*
+purely because it was written next to them. When the whole group was switched off for being fitted to a
+library the doctrine calls debt, one member of the group was not an opinion at all.
+
+**Fix.** Moved to `scripts/gates/beat-check.mjs`, which is always on, walks the clock rather than the
+layer list, and already owns `dead-air` — the same class of finding, the same reader. It now fires only
+on REAL truncation: a layer whose engine end (`scene-timing.mjs` `unitEnd`) is EARLIER than its authored
+end, so a wrapped film that never wrote a layer across a cut stays quiet. It **warns** rather than fails.
+The truncation is a fact; whether it is a defect depends on whether the author meant the layer to live
+past the cut, and a gate cannot know that. Two scenes in the library trip it (`search-demo`, a block
+authored 0.05s to 9.05s that renders to 5.50s; `three-showcase`, a caption authored to 11.00s that
+renders to 4.10s), and both are genuine silent truncations nothing had ever reported.
+
+`direction-floor` keeps the STRUCTURAL half, which is a different statement: a layer the wrapper confines
+to its own beat is not a spine candidate at all, so `spineCandidates` now excludes it. That closes the
+hole #183 opened at the other end — the old code short-circuited on the whole film, so a film with a
+wrapped "crosser" could still be graded off raw `start`/`duration` in some shapes. One blocking code
+(`no-continuous-object`) instead of two, which means every existing waiver keeps working unchanged;
+`CONTINUITY_ALIASES` drops to one entry. Three new mutation cases pin the beat-check finding in all
+three directions (it fires · `acrossBeats` silences it · a film whose layers stay inside their beats is
+quiet), because a WARN-tier false positive is invisible to an exit code. 125/125. Library sweep before
+and after: 0 scenes changed verdict.
+
+**Lesson.** When a group of gates is culled, sort them by what they MEASURE, not by where the code sits.
+The question to ask of every finding in the group is whether two people who disagree about taste would
+still agree it is true. If they would, it is not a taste gate, and switching it off does not remove an
+opinion — it removes a fact.

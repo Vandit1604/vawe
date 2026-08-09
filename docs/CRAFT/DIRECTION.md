@@ -161,3 +161,16 @@ single integer validated against four films.
 card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films
 pass on that technicality. Neither can see a motif, a bookend, a metric cut rate or an unfinished sentence at
 all, and a film held by those is properly structured and fails here every time.
+
+A layer the engine confines to its own beat is not a candidate at all: see below.
+
+## beats-wrapped-as-units (always on, in `make beat-check`)
+
+Not a taste rule. `core/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion`
+track, and `formats/scene/scene.js` then rewrites every non-last-beat layer to end with its own beat so the
+wrapper can slide the beat out as one block. A layer authored across a cut is **truncated at it**, silently.
+`make beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
+should carry the film `"acrossBeats": true` and it attaches to the camera instead of its beat, keeping its
+authored window. It **warns** (blocks under `STRICT=1`): truncation is a fact about the render, and whether
+it is a defect depends on whether you meant the layer to live past the cut.
+

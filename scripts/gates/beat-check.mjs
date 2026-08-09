@@ -10,7 +10,8 @@
 //   ends-on-nothing  . does the last 0.2s hold nothing?
 //   empty-beat       . does a declared cut/seam window contain no layer at all?
 //   static-bg        . is the whole film on a flat field, or on hand-authored markup that cannot animate?
-// plus one WARN the machine cannot answer for you:
+// plus two WARNs:
+//   beats-wrapped-as-units . which layers does beat wrapping cut short of their authored duration?
 //   beats-unseen     . nobody has LOOKED at this version of the scene (`make beats` writes a receipt).
 //
 // A layer is visible over [start, start+duration), matching formats/scene/scene.js (default duration 2,
@@ -49,12 +50,12 @@
 //
 //   node scripts/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
 // FAIL (blocks): dead-air · ends-on-nothing · empty-beat · static-bg (the dead-markup tier).
-// WARN: static-bg (the flat-film tier) · beats-unseen. Both block under --strict.
+// WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-unseen. All block under --strict.
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sceneTiming, num, SPECK } from './scene-timing.mjs';
+import { sceneTiming, spanOf, num, SPECK } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -170,7 +171,33 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
   warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds.js), or split \`bg\` into windows with \`t\` so the field shifts with the story.`);
 }
 
-// ---------- 5. beats-unseen: the receipt ----------
+// ---------- 5. beats-wrapped-as-units ----------
+// The authored `duration` is not always the rendered one. `core/produce.js` turns `sceneUnits` on for
+// any cut film with no choreographed `motion` track, and `formats/scene/scene.js` then rewrites every
+// non-last-beat layer to end with its own beat so the wrapper can slide the beat out as one block. A
+// layer authored across a cut is truncated at it, silently, and the JSON keeps saying otherwise.
+//
+// This finding used to live in direction-floor, and went invisible when that gate became opt-in. It is
+// not a taste call — it describes what the renderer does to a specific layer, and it names the fix — so
+// it belongs in the gate that walks the clock and is always on.
+//
+// It fires only on REAL truncation: a layer whose engine end is EARLIER than its authored end. A layer
+// the wrapper merely extends has lost nothing, and a film where no layer was written across a cut is
+// wrapped and correct. Whether the truncation is a defect depends on what the author meant, which is why
+// this WARNS rather than fails: the JSON disagreeing with the render is always worth saying out loud,
+// and only the author knows whether the layer was supposed to live past the cut.
+const truncated = content.map((L) => {
+  const [a, b] = spanOf(L);
+  const u = T.unitEnd(L);
+  return (u != null && u < b - 1e-9) ? { L, a, b, u } : null;
+}).filter(Boolean);
+if (truncated.length) {
+  const label = (L) => `${L.type || 'text'}${L.text ? ` "${String(L.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+  const list = truncated.slice(0, 5).map(({ L, a, b, u }) => `${label(L)} authored ${s(a)} to ${s(b)}, rendered to ${s(u)}`).join(' · ');
+  warn('beats-wrapped-as-units', `${truncated.length} layer(s) are cut short by BEAT WRAPPING: ${list}${truncated.length > 5 ? ` · and ${truncated.length - 5} more` : ''}. This film wraps each beat as a unit (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its own beat's end and slid out with it, and nothing can survive a cut until one layer opts out. If the layer was meant to end there, shorten its \`duration\` so the JSON says what the render does. If it was meant to carry the film across the cut, mark it \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored window.`);
+}
+
+// ---------- 6. beats-unseen: the receipt ----------
 // `make beats` and `make reveal` render a contact sheet a human or agent has to LOOK at. No gate can score
 // that image, so the only checkable fact is whether anyone looked at THIS version. Both tools write a
 // receipt carrying the scene's content hash; a hash that no longer matches means the scene moved on.

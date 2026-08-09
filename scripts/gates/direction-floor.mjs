@@ -16,6 +16,8 @@
 // matter how much motion each island contains. Boundaries come from two places — DECLARED (`cuts` /
 // `seams` / `transitions`, blocking) and INFERRED from the layer windows when the scene declares none
 // (`no-continuous-object-inferred`, coaching), because a film of cross-faded islands never cuts.
+// The engine's beat wrapping decides which layers CAN be a spine (a layer the wrapper confines to its
+// own beat is not a candidate); the fact that it truncates them is reported by beat-check, always on.
 // FAIL (blocks): `plain-slideshow` · `no-continuous-object`. WARN (coaching): no-continuous-object-inferred ·
 // no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
@@ -143,6 +145,15 @@ for (const s of d.seams || []) if (s && typeof s.t === 'number') boundaries.push
 for (const tr of d.transitions || []) if (tr && typeof tr.at === 'number') boundaries.push(tr.at + (tr.dur ?? 0.6) / 2);
 const bounds = [...new Set(boundaries)].filter((t) => t > EPS && t < dur - EPS).sort((a, b) => a - b);
 
+const T = sceneTiming(d);
+// A layer the engine confines to its own beat CANNOT be a spine, whatever its authored window says.
+// Under `sceneUnits` (core/produce.js turns it on for any cut film with no choreographed `motion`
+// track) formats/scene/scene.js rewrites every non-last-beat layer to end with its beat, so a layer
+// authored across the cut is truncated at it. `unitEnd` is exactly that rewrite: non-null means the
+// engine ends this layer with its own beat. Reading the raw `start`/`duration` here passed a film
+// whose spine the renderer had already cut in half (MISTAKES #183); the factual half of that finding
+// now lives in the always-on beat-check as `beats-wrapped-as-units`, and this is the structural half.
+const confinedToBeat = (l) => T.unitEnd(l) != null;
 const [CW, CH] = sceneDims(d);
 // A backdrop cannot be the spine. `track:0` is the declared backdrop lane; a full-bleed rect/glow/
 // paint/beam is one by construction (the skill's "the background never cuts" carries a seam, it does
@@ -153,7 +164,7 @@ const isBackdrop = (l) => l.track === 0
 // Only TOP-LEVEL layers are candidate spines: a group child may omit `start`, which would read as
 // "visible for the whole film" and hand the gate a free pass it did not earn. The group itself carries
 // the timing, so nothing real is lost.
-const spineCandidates = (d.layers || []).filter((l) => l && typeof l === 'object' && !isBackdrop(l));
+const spineCandidates = (d.layers || []).filter((l) => l && typeof l === 'object' && !isBackdrop(l) && !confinedToBeat(l));
 const visible = (l) => { const s = l.start ?? 0; return [s, l.duration != null ? s + l.duration : dur]; };
 
 // Machinery whose internal clock this gate cannot read (a blueprint beat, a bespoke composition, a
@@ -212,30 +223,23 @@ const carriedMsg = (spanning) => (spanning.length
   : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`);
 const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.';
 
-// SCENE UNITS MAKE A SPINE IMPOSSIBLE, so say that instead of grading the film on one. When the engine
-// wraps beats as units (core/produce.js turns it on for any cut film that is not already choreographed)
-// it rewrites every non-last-beat layer to end with its beat and slides the whole beat out as one block.
-// A layer authored across the cut is truncated at it. This gate read the raw `start`/`duration`, saw a
-// crosser, and passed a film whose spine the renderer had already cut in half. The author needs the one
-// fact that fixes it, not a verdict on motion they cannot express.
-const wrapsBeats = sceneTiming(d).sceneUnits;
-// ...and the film can now say so. `acrossBeats: true` attaches a layer to the camera instead of its
-// beat wrapper, keeping its authored window, so a spine is expressible whatever the cut style. This
-// replaces the advice that used to live here, which told the author to set `"sceneUnits": false` and
-// therefore threw on any film whose cuts include `iris` or `wipe` (those REQUIRE wrapping: one root
-// can only transition through transform and filter, so the frame would go empty). One fix, no
-// exceptions, is why the special case that used to stand here is gone.
+// `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
+// window, so a spine is expressible whatever the cut style. It replaced the advice that used to live
+// here, which told the author to set `"sceneUnits": false` and therefore threw on any film whose cuts
+// include `iris` or `wipe` (those REQUIRE wrapping: one root can only transition through transform and
+// filter, so the frame would go empty).
 const hasSpine = (d.layers || []).some((l) => l && l.acrossBeats === true);
-if (bounds.length && dur < CONTINUITY_MAX_DUR && wrapsBeats && !hasSpine) {
-  fail('beats-wrapped-as-units', `this film wraps each beat as a UNIT (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its beat's end and slid out with it. Nothing can survive a cut until one layer opts out. Mark the object that should carry the film \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored duration; then make each boundary a state change of it. ${FIX_MSG}`);
-} else if (bounds.length && dur < CONTINUITY_MAX_DUR) {
+const wrapNote = (T.sceneUnits && !hasSpine)
+  ? ' This film also wraps each beat as a UNIT, so the engine ends every layer with its own beat and NOTHING can survive a cut until one layer opts out: mark the layer that should carry the film `"acrossBeats": true`. `make beat-check` names each layer the wrapping shortens and by how much.'
+  : '';
+if (bounds.length && dur < CONTINUITY_MAX_DUR) {
   const { spanning, transforming } = continuity(bounds);
   if (!transforming.length) {
     // BLOCKS. A WARN here let every NEW slideshow through, which is the one thing this tell exists to
     // stop. The 18 pre-existing short cut-bearing scenes in formats/scene/ carry an explicit
     // {"authoring":{"allow":["no-continuous-object"]}} waiver, so the gate holds new work without
     // breaking `make video` for scenes it did not cause — the same trade beat-check's `dead-air` made.
-    fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carriedMsg(spanning)} ${FIX_MSG}`);
+    fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carriedMsg(spanning)}${wrapNote} ${FIX_MSG}`);
   }
 }
 
@@ -321,8 +325,10 @@ console.log(`  directedness score: ${score}   (floor: not a plain slideshow · r
 // The declared and inferred halves of the continuity tell are one rule seen two ways, so a scene that
 // waived the declared one has already declared the break deliberate; don't re-raise it as the other.
 // The two variants are the same finding named more precisely, so the standing waiver covers them. A
-// sharper diagnosis must not turn every already-waived scene red.
-const CONTINUITY_ALIASES = new Set(['no-continuous-object-inferred', 'beats-wrapped-as-units']);
+// sharper diagnosis must not turn every already-waived scene red. `beats-wrapped-as-units` was the
+// third alias and is no longer emitted here: it is a fact about the render, not a verdict on the film,
+// and it now warns from the always-on beat-check where every author sees it.
+const CONTINUITY_ALIASES = new Set(['no-continuous-object-inferred']);
 const waivedBy = (code) => allow.has(code) || (CONTINUITY_ALIASES.has(code) && allow.has('no-continuous-object'));
 const fails = findings.filter((f) => f.sev === 'FAIL' && !waivedBy(f.code));
 const waived = findings.filter((f) => f.sev === 'FAIL' && waivedBy(f.code));

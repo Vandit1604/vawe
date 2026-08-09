@@ -255,6 +255,35 @@ const CASES = [
     scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
                  { cuts: [{ t: 0.6, style: 'punch', dur: 0.8 }] }) },
 
+  // ---- beat-check · BEAT WRAPPING TRUNCATES A LAYER. The same wrapping the two cases above model has a
+  // second consequence nobody was told about: a layer authored ACROSS a cut is silently shortened to its
+  // own beat, so the JSON's `duration` is not the rendered one. The finding used to sit in direction-floor
+  // and went invisible the day that gate became opt-in, which is why it is here — it is a fact about the
+  // render, not a verdict on the film. All three directions pinned, because a WARN-tier false positive is
+  // invisible to an exit code (#25, #159) and this one would fire on almost every cut film if it read
+  // "wrapped" instead of "actually truncated".
+  { gate: 'beatcheck', name: 'a layer authored across a cut is shortened to its own beat', expect: 'fail',
+    match: /\[beats-wrapped-as-units\]/, outputOnly: true,   // WARN tier: assert it SPOKE
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 5 },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // The escape hatch must open here too, or the warning has no true answer: `acrossBeats` attaches the
+  // layer to the camera, the engine leaves its window alone, and nothing was truncated.
+  { gate: 'beatcheck', name: 'a layer marked acrossBeats keeps its authored window', expect: 'pass',
+    notMatch: /beats-wrapped-as-units/,
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 5,
+                    acrossBeats: true },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  // ...and the narrowness clause: a wrapped film where every layer already ends inside its own beat has
+  // lost nothing. The wrapper EXTENDS those layers to the end of the cut window, which is not truncation,
+  // and reporting it would make the warning fire on most of the library and mean nothing.
+  { gate: 'beatcheck', name: 'a wrapped film whose layers stay inside their beats is quiet', expect: 'pass',
+    notMatch: /beats-wrapped-as-units/,
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 2.4 },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+
   // ---- layer-props. The must-fail half is a source mutation (below); this is the must-pass half, and
   // it is the one that was missing. The gate scanned a NAMED file for the shared path, that file was
   // split, and the shared set collapsed to nothing: ~1900 live props across the repo were reported dead
@@ -350,8 +379,10 @@ const CASES = [
   // The precondition, which cost a wasted render before it existed: a cut film with no choreographed
   // `motion` gets beat-wrapping by default, so the renderer slides each beat out whole and truncates
   // any layer authored across the cut. The gate used to read the raw `start`/`duration`, see a crosser,
-  // and pass a film whose spine had already been cut in half.
-  { gate: 'directionfloor', name: 'beats-wrapped-as-units · a spine cannot survive beat wrapping', expect: 'fail',
+  // and pass a film whose spine had already been cut in half. A layer the wrapper confines to its own
+  // beat is therefore not a spine candidate at all, and the film is graded as having none. (The FACT
+  // of the truncation is `beats-wrapped-as-units`, pinned against beat-check below.)
+  { gate: 'directionfloor', name: 'a layer the beat wrapper truncates is not a spine', expect: 'fail',
     match: /acrossBeats/,
     scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
                     ken: { from: 1, to: 1.4 } },
