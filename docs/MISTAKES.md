@@ -6062,3 +6062,51 @@ scene library was re-validated before and after: the only difference is four few
 **The general rule this belongs to.** A gate is a claim about the engine, and it needs to be re-checked
 when the engine changes. The feature commit is where the stale rule was cheap to find; grep the gates
 for the behaviour you just changed before you close the PR.
+
+---
+
+## 87. The layout audit read a rotated stage as if it were flat, and manufactured collisions
+
+**What happened.** `onefilm`'s beat 5 is its only camera move: the stage tilts and pushes so the file
+and its results are seen on a plane from an angle. `make audit` failed it with
+`[overlap] hs-layer ✕ hs-layer — 702x7px` on a frame where nothing on screen touches anything. Fixing
+the reported pair moved the failure to the next pair down the file. Spreading the layout far enough to
+clear the check would have cost about 25px of line pitch and the density the frame was rebuilt to get.
+
+**Root cause.** The moment a camera keys `rx`, `ry` or `roll` (or any layer tilts), the engine promotes
+`#cam` into a `preserve-3d` rig. From then on `getBoundingClientRect` returns the **axis-aligned bound
+of a projected quad**, not the shape. A 700px hairline rolled 3 degrees reports a box 80px tall. Two
+file lines a comfortable 88px apart report boxes that intersect. The `overlap`/`tight` pair loop
+compares exactly those numbers, so it fires hardest on the frames where a film is doing its most
+deliberate camera work.
+
+The same misreading had a second consumer. `camMoving`, which exempts the safe-zone check during
+cinematography, tested only `x`, `y` and `s` — so a roll-only or `orbit` move was classified as a still
+frame and its inflated boxes were reported as content leaving the safe area. One bad assumption, two
+call sites, and only one of them was symptomatic today (CLAUDE.md: fix the rule, not the call site).
+
+**Fix (gate).** `verify/audit.mjs`:
+1. `stageRotated` reads `#cam`'s computed transform and checks the six off-diagonal terms of the
+   `matrix3d`. A pure translate/scale leaves them zero, so a flat film is checked exactly as before.
+   When it is true the `overlap`/`tight` pair loop is skipped, and only that loop: those two are the
+   rules that read an intersection of two boxes, and a projected quad's AABB carries no information
+   about whether two shapes intersect. `safe`/`clipped`/`contrast` still run, because they ask about one
+   box against the frame, where an over-bound only ever fails safe.
+2. `camMoving` now compares every camera key (`x y s rx ry roll p`), not three of them.
+
+Read the rig rather than re-deriving it from the JSON: a top-level `tilt` builds the rig with no camera
+keys at all, so a JSON-side test would have missed it.
+
+**What this gives up, stated.** On a rotated frame the audit no longer catches a genuine text-on-text
+collision. That is the honest trade: it could not distinguish one from a false positive there, and it
+was reporting the false positives at a rate of several per camera move.
+
+**Blast radius.** Every scene declaring `rx`/`ry`/`roll`/`cameraMove`/`orbit` (14 of them) audited before
+and after. Only `onefilm` changed: FAIL to PASS. Every other scene, passing and failing alike, kept its
+exact verdict.
+
+**Found while reading, not fixed here.** The pair loop's occlusion escape asks whether both elements are
+painted at the intersection centre using `elementsFromPoint`, but its `at()` helper accepts
+`e.contains(el)` — and `#cam`, the stage and `<body>` contain every layer. So the "one of them is not
+even painted here" branch can never be reached. Narrowing it would change overlap behaviour on every
+scene in the library and needs its own before/after sweep.

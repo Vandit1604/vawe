@@ -153,6 +153,30 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // entrances but knew nothing about cuts, because until recently the cuts array rendered nothing at
   // all (MISTAKES #29); the moment it did, a cut mid-flight read as 15 safe-zone violations.
   const inCut = (CUTS || []).some((c) => Math.abs(tNow - c.t) < c.half + 0.02);
+  // A ROTATED STAGE invalidates every axis-aligned box on the frame. The moment a camera keys `rx`,
+  // `ry` or `roll` (or a layer tilts), the engine promotes #cam into a preserve-3d rig, and from then
+  // on getBoundingClientRect returns the AABB of a PROJECTED QUAD, not the shape. A 700px hairline
+  // rolled 3 degrees reports a box 80px tall; two file lines sitting a comfortable 88px apart report
+  // boxes that intersect. Neither is on screen — the ink never touches — but the overlap/tight pair
+  // loop compares those AABBs and calls it a collision. So it manufactures findings on exactly the
+  // frames a film is doing its most deliberate camera work, and the only way to clear one is to
+  // spread the layout until the OVER-BOUNDS stop touching, which makes the film worse to satisfy a
+  // measurement that was never about the film (CLAUDE.md: suspect the gate).
+  //
+  // Read the rig itself rather than re-deriving it from the JSON: `camMoving` upstream tests x/y/s and
+  // is blind to a roll-only move, and a top-level `tilt` builds the rig with no camera keys at all.
+  // The off-diagonal terms of the matrix are the rotation; a pure translate/scale leaves them zero and
+  // this stays false, so a flat film is checked exactly as before.
+  const stageRotated = (() => {
+    const cam = document.getElementById('cam');
+    if (!cam) return false;
+    const m = getComputedStyle(cam).transform || 'none';
+    if (!m.startsWith('matrix3d(')) return false;                 // matrix(...) is 2D: no projection
+    const v = m.slice(9, -1).split(',').map(Number);
+    if (v.length !== 16 || v.some((k) => !Number.isFinite(k))) return false;
+    // m12 m21 (roll) · m13 m31 (yaw) · m23 m32 (pitch), in column-major CSS order
+    return [v[1], v[4], v[2], v[8], v[6], v[9]].some((k) => Math.abs(k) > 0.001);
+  })();
   const midMove = (el) => {
     if (inCut) return true;
     if (!el || !el.dataset) return false;
@@ -420,7 +444,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const oa = +getComputedStyle(A.el).opacity, ob = +getComputedStyle(B.el).opacity;
     return oa < 0.98 && ob < 0.98;                                      // both mid-blend, neither solid
   };
-  for (let i = 0; i < info.length; i++) for (let j = i + 1; j < info.length; j++) {
+  // Skipped wholesale on a rotated stage: see stageRotated above. Only these two rules are dropped —
+  // they are the pair that reads an intersection OF TWO BOXES, and a projected quad's AABB carries no
+  // information about whether two shapes intersect. safe/clipped/contrast still run: they ask about
+  // one box against the frame, where an over-bound only ever fails safe.
+  for (let i = 0; i < info.length && !stageRotated; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
     if (A.el.contains(B.el) || B.el.contains(A.el)) continue;          // skip nested pairs
     const ox = Math.min(A.r, B.r) - Math.max(A.x, B.x);                // >0 → overlap on X
@@ -801,13 +829,19 @@ for (const aspectKey of askedAspects) {
     meta.segments.forEach((s, i) => { acc += s.dur ?? (s.t1 - s.t0); if (i < meta.segments.length - 1) cuts.push({ t: acc, trans: s.transition ?? 0.4 }); });
     inTransition = (f) => cuts.some((c) => Math.abs(f / fps - c.t) < c.trans + 0.05);
   }
-  // a MOVING camera (data.camera keyframes with changing x/y/s) is cinematography: elements crossing
-  // the frame edge mid-travel are not safe-zone breaches. Overlap/contrast still checked everywhere.
+  // a MOVING camera (data.camera keyframes with changing position OR orientation) is cinematography:
+  // elements crossing the frame edge mid-travel are not safe-zone breaches. Overlap/contrast still
+  // checked everywhere (overlap has its own rotated-stage escape in the page function).
+  // `rx`/`ry`/`roll` count as movement for the same reason x/y/s do, and more so: a rotation puts the
+  // stage on the 3D rig, where every box the audit reads is the AABB of a projected quad and therefore
+  // an OVER-bound. Testing only x/y/s meant a roll-only or orbit move was read as a still frame and
+  // its inflated boxes were reported as content leaving the safe area.
+  const CAM_KEYS = [['x', 0], ['y', 0], ['s', 1], ['rx', 0], ['ry', 0], ['roll', 0], ['p', null]];
   let camMoving = () => false;
   try {
     const kf = JSON.parse(fs.readFileSync(absPath, 'utf8')).camera || [];
     const moves = kf.slice(1).map((b, i) => ({ a: kf[i], b }))
-      .filter(({ a, b }) => (a.x ?? 0) !== (b.x ?? 0) || (a.y ?? 0) !== (b.y ?? 0) || (a.s ?? 1) !== (b.s ?? 1));
+      .filter(({ a, b }) => CAM_KEYS.some(([k, d]) => (a[k] ?? d) !== (b[k] ?? d)));
     if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
   } catch {}
   // CONTENT-AWARE SAMPLING. Uniform ticks alone have a blind spot exactly the width of a beat: with
