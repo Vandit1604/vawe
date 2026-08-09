@@ -2418,7 +2418,21 @@ watermark). It read as a slideshow of dips, not transitions.
 exits via `out`), with nothing enforcing overlap. Authored back-to-back beats left a gap between one
 beat's `end` (start+duration) and the next beat's `start`, so the stage went to zero. Both another engine
 (`TransitionSeries` subtracts the transition from both neighbors and mounts both scenes at once) and
-another engine ("the transition IS the exit; exit-then-enter is BANNED") avoid this by construction.
+another engine ("the transition IS the exit; exit-then-enter is BANNED") avoid it a different way.
+
+Read the two sources before repeating either claim, because they are not the same shape and this file
+said they were. **another engine's IS structural**: `TransitionSeries` subtracts the transition from both
+neighbours and mounts both scenes at once, so a gap is not expressible. **another engine' is not.** The
+rule exists exactly as quoted, but it lives in `skills/**/*.md` as LLM prompt text; none of its 88 lint
+codes bans an exit tween, and the nearest one (`gsap_exit_missing_hard_kill`) assumes exits exist and
+demands they carry a visibility kill so out-of-order seeking cannot strand stale state. What enforces
+it is a division of authorship inside one workflow skill: a sub-agent is told it may never write an
+exit, a separate injector owns every transition, and a `verify` script exits 1 unless each boundary is
+cross-track with `overlap > 0`. That is arguably a better idea than a check, and it is still a check.
+A hand-authored composition run through `another engine render` gets none of it.
+
+The distinction matters here because "by construction" is the thing worth copying and a gate is not.
+Checked against both repos on disk (`/Users/vandit/Developer/code/{another engine,another engine}`).
 
 **Fix:** (authoring) overlap the beats — start each beat's entrance ~0.4-0.5s BEFORE the previous
 beat's content ends, with `out:"blur"` + the next `cut:"blur"`/`cutTiming:"brake"`, so the two
