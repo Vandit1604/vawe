@@ -99,6 +99,46 @@ export async function preloadComponents(data) {
   for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status} — layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable — layer renders EMPTY`); } }
 }
 
+// Preload the images INSIDE captured components and hand-authored fragments.
+//
+// preloadImages in core/boot.js walks the SCENE DATA for image-like strings, and its own comment says
+// why it exists: without it the renderer screenshots a frame mid-download and the image is missing on
+// some frames. A component's <img> tags are not in the scene data. They arrive inside the component's
+// own HTML, fetched by preloadComponents above, so they were never preloaded and every capture raced
+// them. Measured on brew-launch: two renders of identical code differed on 373 of 1890 frames, in two
+// contiguous runs, and each run lined up with a `component` layer's span to within a few frames
+// (docs/MISTAKES.md #258).
+//
+// Runs AFTER preloadComponents and preloadHtml, because it reads what they fetched.
+export async function preloadEmbeddedImages() {
+  const urls = new Set();
+  // The browser's own parser, not a regex. A captured `src` is attribute TEXT, so it carries HTML
+  // entities: brew's images are `?url=…&amp;w=1200&amp;q=70`, and fetching that literal string asks
+  // for a different URL than the one the browser resolves. The first version of this function used a
+  // regex, preloaded seven URLs that were not the ones being drawn, and changed nothing. DOMParser
+  // builds an INERT document, so reading .src resolves and decodes entities without fetching anything.
+  const parser = new DOMParser();
+  const collect = (html) => {
+    if (typeof html !== 'string' || !html.includes('<')) return;
+    for (const im of parser.parseFromString(html, 'text/html').images) {
+      if (im.src && !im.src.startsWith('data:')) urls.add(im.src);
+    }
+  };
+  const walkAny = (o) => {
+    if (Array.isArray(o)) o.forEach(walkAny);
+    else if (o && typeof o === 'object') Object.values(o).forEach(walkAny);
+    else collect(o);
+  };
+  walkAny(window.__components || {});
+  walkAny(window.__html || {});
+  // A dead link resolves rather than hangs, exactly as preloadImages does: the frame degrades to a
+  // missing picture, which is visible, instead of the render never reporting ready. These are often
+  // THIRD-PARTY URLs off the captured site, so this is also the step that stops a render depending on
+  // how fast someone else's CDN answers.
+  window.__embeddedImages = [...urls];
+  await Promise.all([...urls].map((src) => decodeImage(src, true).catch(() => {})));
+}
+
 // Preload HAND-AUTHORED HTML FRAGMENTS: `{"type":"html","src":"formats/scene/hero.html"}` on a layer, or
 // `src` on a bg window, as the alternative to the inline `html` string. Typed like preloadLottie above,
 // NOT sniffed like preloadComponents: a path-shaped string somewhere in a scene is not a promise that it

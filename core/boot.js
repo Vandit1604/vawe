@@ -8,7 +8,7 @@ import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
-import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
+import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
@@ -355,6 +355,7 @@ export async function boot(build) {
     await preloadCanvasFx(data);
     await preloadComponents(data);
     await preloadHtml(data);
+    await preloadEmbeddedImages(); // the <img>s inside what those two just fetched
     await preloadClips(data);
     await preloadLottie(data);
     await preloadGsap(data);

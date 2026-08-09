@@ -6798,6 +6798,106 @@ everywhere else, and the untouched half looks exactly like the finished half unt
 The counter-measure that was missing every time is not a comment. It is a test that fails on the old
 code, which is why this entry ships with one.
 
+## #258 — a load-bearing comment claimed the capture was byte-stable, and it never was
+
+**What.** `internal/scene/scene.go` said the JPEG capture was "verified byte-stable across repeats AND
+across separate browser instances, which is what dedup's anchor equality and renderFrame(n) purity both
+depend on." Measured on `brew-launch`, two renders of identical code differ on **1078 of 1890 captures**
+with four workers and **373 of 1890** with one.
+
+**What the difference actually is, which took three wrong guesses to find out.** 0.001% to 0.007% of
+pixels, a max delta of about 45 on a 0-255 scale, sitting on the anti-aliased edge of a card's rounded
+corner. Nothing is missing and nothing has moved. It is rasteriser jitter, and it is invisible.
+
+**Why the wrong guesses happened, which is the useful part.** The first test compared mp4 hashes. Two
+runs of identical code hash differently, because the container is not reproducible, so that test could
+never have said anything. The second compared decoded frames and found the difference was real. The
+third found the differing frames were two contiguous runs that lined up with the film's two `component`
+layers, and concluded the cause was component images racing the capture. That was a good inference and
+it was wrong: the frames were never LOOKED AT. One crop of one frame settled in seconds what three
+rounds of reasoning got wrong. **Look at the pixels before theorising about them.**
+
+**What is true and what is not.**
+
+- Dedup is fine, by design rather than by luck. Its anchor check re-shoots inside the SAME browser and
+  tolerates 0.05% of pixels, an order of magnitude above what was measured.
+- `renderFrame(n)` purity is a claim about the DOM. That is what `make probe` compares, and it holds.
+  It was never a claim about bytes, and the deleted comment made it sound like one.
+- A green `make probe` therefore does not mean two renders produce the same picture bytes. It means
+  they produce the same document.
+
+**Fix.** The comment is replaced with the measurement. `VAWE_KEEP_FRAMES=1` keeps the captured frames
+so anyone can re-measure this: without it the frames are deleted on exit, and nobody could tell a
+non-deterministic draw from a non-deterministic encode.
+
+**Still open.** The gap between 373 (one worker) and 1078 (four) is cross-worker variance, a second
+cause that has not been diagnosed. It is the same shape and the same magnitude, so it is very likely
+the same rasteriser jitter across processes, but that is a guess and it is written down as one.
+
+## #259 — a captured component's images were never preloaded, and they are somebody else's CDN
+
+**What.** `preloadImages` in `core/boot.js` walks the SCENE DATA for image paths, and its own comment
+says why it exists: "without this the Go renderer can screenshot a frame mid-download, so the image is
+missing on some frames." A captured component's `<img>` tags are not in the scene data. They arrive
+inside the component's own HTML, fetched separately by `preloadComponents`. So the one preloader written
+to prevent mid-download captures never looked where these images live. `brew-launch` carries **16** of
+them, and every one is a live `https://brew.new/...` URL fetched from a third-party CDN at render time.
+
+**Found while chasing #258, and it was NOT the cause of #258.** Preloading them changed the frame count
+not at all. It is logged and fixed on its own merits: the race is real, the engine guards against
+exactly this race everywhere else, and a render that depends on how fast someone else's CDN answers is
+not deterministic in any useful sense.
+
+**The first fix did not fire, and the reason is worth keeping.** It matched `<img ... src="...">` with a
+regex. A captured `src` is attribute TEXT, so it carries HTML entities: these URLs read
+`?url=...&amp;w=1200&amp;q=70`, and fetching that literal string asks for a different URL than the one
+the browser resolves. It preloaded 16 URLs that were not the ones being drawn. `preloadEmbeddedImages`
+now uses `DOMParser`, which builds an inert document, so reading `.src` resolves and decodes entities
+without fetching anything. Verified by instrumenting it: 16 URLs, entities decoded.
+
+**Still open, and larger than the race.** Capturing a component should INLINE its images, as
+`core/seams.js` already does for fonts. Until it does, every film built on captured UI re-downloads
+someone else's assets on every render, and would render differently offline.
+
+## #260 — `_lightfall.html` moves at frame rates against a clock measured in seconds
+
+**What.** `formats/scene/_lightfall.html` drives every value off `sin(var(--t) * f + p)` with `f`
+between 0.04 and 0.33. `core/bg-html.js` writes `--t` as **seconds into the video**, not frames. Over
+a 10 second film the whole-field breathe advances 0.41 radians, about one fifteenth of a cycle, and
+the per-slat shimmer advances under a third of a cycle. The backdrop is very close to a still.
+
+**Root cause.** The frequencies read as if they were tuned against a frame counter. At 30fps they
+would be right: 0.041 rad per frame is one cycle every five seconds. The author never watched the
+motion across frames, which `CLAUDE.md` rule 2a0 exists to prevent.
+
+**Fix.** Not applied. `_lightfall.html` was out of scope for this pass and is hand-baked, so there is
+nothing to fix but the 58 literals. `core/lightfield/` sets its rate from one named constant,
+`RATE = 0.62` radians per second at `speed: 1`, so the unit is stated once and cannot be guessed at.
+Regenerating `_lightfall.html` through the generator would close it.
+
+**Which gate catches it.** None. `direction-floor` checks that a hand-authored backdrop *mentions*
+`var(--t)`; it cannot tell a field that moves from a field whose coefficient makes it stand still.
+A gate could: evaluate each `sin(var(--t) * f + …)` over the film's own duration and warn when the
+total phase travelled is under about half a cycle.
+
+---
+
+## #261 — `make preview` is the wrong page for a full-bleed fragment
+
+**What.** `scripts/author/preview-fragment.mjs` puts the fragment in `#frag { width: 1400px }`
+centred in a flex stage. A backdrop fragment is `position:absolute;inset:0`, so it sizes itself
+against that box and the preview shows a 1400px strip, not the frame. Nothing warns.
+
+**Root cause.** The preview page was built for cards and hero blocks, which are content-sized. A
+full-bleed field is the other kind of fragment and there was no page for it.
+
+**Fix.** `scripts/author/lightfield-shot.mjs` gives one: a stage at the exact output size with `--t`
+set explicitly. A better fix would be a `--full` flag on `make preview` that drops the 1400px box and
+sets `--t`, so every author gets it rather than every author writing their own.
+
+**Which gate catches it.** None, and this is a looks-fine failure: the preview renders, it just
+renders the wrong thing.
+
 ---
 
 ## Waivers for `doc-refs`

@@ -431,8 +431,17 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 	// CAPTURE FORMAT. PNG costs 526 ms/frame at 3840x2160 and JPEG q95 costs 80 ms — 6.6x — because a
 	// lossless compressor is being asked to encode 8.3 megapixels that end up in a lossy h264 anyway.
-	// Verified byte-stable across repeats AND across separate browser instances, which is what dedup's
-	// anchor equality and renderFrame(n) purity both depend on.
+	// NOT byte-stable across repeats, and the claim that it was is now deleted. Measured on brew-launch:
+	// two renders of identical code differ on 373 of 1890 captures with ONE worker and 1078 with four.
+	// The difference is rasteriser antialiasing on curved edges: 0.001% to 0.007% of pixels, a max delta
+	// of about 45, on the border-radius of a card. Nothing is missing and nothing has moved.
+	//
+	// What that means for the two things this comment used to lean on. Dedup is FINE, and by design
+	// rather than by luck: its anchor check re-shoots inside the SAME browser and tolerates 0.05% of
+	// pixels (see the anchor block below), which is an order of magnitude above what was measured.
+	// renderFrame(n) purity is a claim about the DOM, which is what `make probe` compares, and it holds.
+	// Neither was ever a claim about bytes. VAWE_KEEP_FRAMES=1 keeps the captures if you need to
+	// re-measure this (docs/MISTAKES.md #258).
 	//
 	// ALPHA STAYS PNG. JPEG has no alpha channel, and the transparent export is the one path whose
 	// whole point is the alpha channel — exactly the kind of silent substitution this repo keeps

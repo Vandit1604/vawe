@@ -1,7 +1,9 @@
 ---
+when: "you need a light-field backdrop, or want to recolour or re-pattern one"
+answers: "the lightfield generator: the four dials (colour · shadow · pattern · motion), the seed, and how close the reference reproduction gets"
+group: look
 title: Lightfield
 what: A generator for light-field backdrops. Four dials, one seed, one HTML string.
-when: You want a `_lightfall`-style backdrop in a palette or a structure it does not have.
 ---
 
 # Lightfield
