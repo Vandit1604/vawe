@@ -763,3 +763,19 @@ cinematic:
 .PHONY: deck
 deck: ## publish docs/animation.html to the site as /deck (site/public/deck.html)
 	node scripts/site/deck.mjs
+
+# make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
+# field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
+# formats/scene/, shoots a PNG of each into out/, and measures the reference one against
+# refs/lightfield-ref.jpg. Options and dials: docs/LIGHTFIELD.md.
+.PHONY: lightfield
+lightfield:
+ifdef PRESET
+	node scripts/author/lightfield.mjs --preset $(PRESET) --out formats/scene/_lightfield-$(PRESET).html --shot $(ARGS)
+else ifdef ARGS
+	node scripts/author/lightfield.mjs $(ARGS)
+else
+	@node scripts/author/lightfield-test.mjs
+	@for p in ref tide fern; do node scripts/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
+	@node scripts/author/lightfield-compare.mjs refs/lightfield-ref.jpg out/_lightfield-ref.png
+endif
