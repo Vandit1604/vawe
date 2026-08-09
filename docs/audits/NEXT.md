@@ -5,10 +5,22 @@ is what lets you re-order it later when something changes.
 
 ---
 
-## 1. Turn the taste gates off  ·  small, reversible, unblocks everything
+## 1. Turn the taste gates off  ·  DONE 2026-08
 
-Default these eight `author-check` steps to OFF, behind `TASTE=1`: critique · direct · floor · visuals ·
-dissolve · slop · designspec · copy. Do not delete the files.
+Seven `author-check` steps now default to OFF behind `TASTE=1`: critique · direct · floor · dissolve ·
+slop · designspec · copy. Every file stays.
+
+The eighth, `visuals`, was **deleted** rather than switched off, and that was a change to the plan
+below. The plan assumed it was merely fitted. It was not: `boxOf` squared any single-axis layer, so a
+590x18 underline measured as 590x590 and passed the one gate whose job was to tell a hairline from a
+picture. A rule that is both wrong and waived by a quarter of the library is not a rule to switch off
+for later; it is one to delete and write down. The `proxy` tier went with it.
+
+Measured before/after across the whole library: 36 scenes moved FAIL to PASS (34 on `plain-slideshow`,
+21 on `no-visual-vocabulary`, overlapping), and no scene moved PASS to FAIL. `docs/TASTE.md` records
+the cull and the three things that must be true to switch any of them back on.
+
+The original reasoning, kept because it is still the argument:
 
 **Why.** Those rules were fitted to ~100 films we have since established are debt: 52 of 93 carried no
 large picture, 18 waive continuity, and the show floor is waived by 32% of the library AND passable by a
@@ -123,6 +135,8 @@ needs a before/after diff over the whole scene library, not a rider on a feature
 
 ## Superseded by item 1
 
-- **Fix `boxOf` squaring single-axis layers.** It fixes `visual-vocabulary`, which item 1 turns off. Do it
-  if and when the taste gates come back.
-- **Re-run the waiver census after fixing the show floor.** Moot while the floor is off.
+- ~~**Fix `boxOf` squaring single-axis layers.**~~ DONE: the `proxy` tier is deleted. `boxOf` now
+  returns `{w:0,h:0,how:'unknown'}` for a single-axis layer with no readable intrinsic aspect, so no
+  caller can be handed an invented area. To measure such a layer for real, measure the rendered DOM.
+- ~~**Re-run the waiver census after fixing the show floor.**~~ DONE: the three codes are removed from
+  every scene, and `waiver-drift` now reports them as DEAD WAIVERS if any come back.

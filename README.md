@@ -53,7 +53,8 @@ A scene is one JSON:
 ## The loop
 
 ```
-author the JSON  →  make critique / slop / audit  →  make judge (the vision gate)  →  make video
+author the JSON  →  make author-check / audit  →  make judge (the vision gate)  →  make video
+                   (TASTE=1 adds critique · direct · floor · slop · designspec · copy)
 ```
 
 Ask an agent to write the scene, grounded in `formats/scene/schema.json` (the contract), the primitive
