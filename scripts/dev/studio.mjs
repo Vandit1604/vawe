@@ -7,7 +7,9 @@
 // cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
 // painted as a hazard band. It answers the question a contact sheet cannot — what is on screen WHEN.
 //
-//   make studio D=formats/scene/<file>.json [PORT=8799]   → open the printed URL, leave it running (Ctrl-C to stop)
+//   make studio D=formats/scene/<file>.json [PORT=8799] [THEME=dark]
+//     → open the printed URL, leave it running (Ctrl-C to stop). Light is the default; the toggle in the
+//       transport switches to dark and the choice sticks per browser.
 //
 // DEV TOOLING ONLY — it does not touch the renderer or the determinism contract; it just calls the engine's
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
@@ -75,64 +77,103 @@ const timelineModel = (file) => {
   };
 };
 
-const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><title>vawe studio · ${path.basename(dataArg)}</title>
+// LIGHT FIRST. Vawe is a white-first product and names the dark creative-tool look as an anti-reference
+// (PRODUCT.md), so the instrument you photograph beside the site cannot be a black box with neon on it.
+// The tokens below are `site/app/globals.css` verbatim, because a second palette drifts from the first.
+// Dark stays, behind the toggle: the timeline reads well dark and people work at night.
+const THEME0 = (process.env.THEME || 'light').toLowerCase() === 'dark' ? 'dark' : 'light';
+
+const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><meta charset=utf8><title>vawe studio · ${path.basename(dataArg)}</title>
 <style>
- :root{color-scheme:dark} body{margin:0;background:#0b0d12;color:#e6e9ef;font:14px/1.4 ui-monospace,Menlo,monospace;display:flex;flex-direction:column;height:100vh}
- #stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#05060a}
- iframe{border:0;background:#000;box-shadow:0 8px 40px #000a;flex:none}
- #bar{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#11141b;border-top:1px solid #222}
- #scrub{flex:1;accent-color:#5ee0c8} button{background:#1b2130;color:#e6e9ef;border:1px solid #333;border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}
- button:hover{background:#232b3d} #read{min-width:150px;font-variant-numeric:tabular-nums;color:#9aa4b2} b{color:#5ee0c8}
+ @font-face{font-family:Anybody;src:url(/assets/fonts/Anybody.woff2) format('woff2');font-weight:100 900;font-display:swap}
+ @font-face{font-family:'JetBrains Mono';src:url(/assets/fonts/JetBrainsMono.woff2) format('woff2');font-weight:100 800;font-display:swap}
+ /* the site's committed tokens. Ink 17:1, ink-2 8:1, muted 5:1, accent 5.17:1 — all on white. */
+ :root[data-theme=light]{color-scheme:light;
+   --accent:#2563eb;--accent-2:#1d4ed8;--accent-soft:#eef3ff;--accent-line:#cfe0ff;
+   --bg:#fff;--bg-2:#f6f8fb;--field:#e9ecf1;--surface:#fff;--line:#e7eaf0;--line-2:#d7dce4;
+   --ink:#0f1620;--ink-2:#454f5e;--muted:#697182;--ok:#2f7d55;--bad:#a3282d;--bad-bg:#fdf3f3;
+   --panel:#fff;--stage:#e9ecf1;--bar-ink:#fff;--wash:#0f1620;--wash-a:.34;
+   --shadow:0 1px 2px rgba(16,22,32,.04),0 18px 44px -18px rgba(16,22,32,.24);
+   --hz:#a3282d;--hz-beat:#8a5a00;--hz-mute:#697182;--play:#a3282d}
+ :root[data-theme=dark]{color-scheme:dark;
+   --accent:#5ee0c8;--accent-2:#5ee0c8;--accent-soft:#1d4b41;--accent-line:#5ee0c8;
+   --bg:#0b0d12;--bg-2:#11141b;--field:#05060a;--surface:#1b2130;--line:#222;--line-2:#333;
+   --ink:#e6e9ef;--ink-2:#9aa4b2;--muted:#7c8797;--ok:#84e06a;--bad:#ff9aa2;--bad-bg:#3a1418;
+   --panel:#0e1117;--stage:#05060a;--bar-ink:#08090d;--wash:#0e1117;--wash-a:.62;
+   --shadow:0 8px 40px #000a;
+   --hz:#ff3b4e;--hz-beat:#ffb02e;--hz-mute:#8a93a3;--play:#ff4d6d}
+ body{margin:0;background:var(--bg);color:var(--ink);font:12.5px/1.45 'JetBrains Mono',ui-monospace,Menlo,monospace;display:flex;flex-direction:column;height:100vh}
+ #stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--stage)}
+ iframe{border:0;background:var(--bg);box-shadow:var(--shadow);flex:none}
+ #bar{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border-top:1px solid var(--line)}
+ #scrub{flex:1;accent-color:var(--accent)}
+ button{background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:7px 14px;cursor:pointer;
+   font:600 12.5px/1 'JetBrains Mono',ui-monospace,monospace}
+ button:hover{background:var(--bg-2);border-color:var(--muted)}
+ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+ #read{min-width:158px;font-variant-numeric:tabular-nums;color:var(--ink-2)} b{color:var(--accent);font-weight:700}
+ #sel{color:var(--ink-2);min-width:170px}
  /* ---- timeline ---- */
- #tl{background:#0e1117;border-top:1px solid #222;display:flex;flex-direction:column;max-height:58vh}
+ #tl{background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;max-height:58vh}
  #tl.off #lanes,#tl.off #alerts{display:none}
- #tlhead{display:flex;align-items:center;gap:10px;padding:7px 16px;color:#7c8797;font-size:12px;border-bottom:1px solid #1b202b}
+ #tlhead{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--ink-2);font-size:12px;border-bottom:1px solid var(--line)}
+ #tlhead b{font-family:Anybody,system-ui,sans-serif;font-variation-settings:'wdth' 105;font-weight:700;font-size:13px;color:var(--ink)}
  #tlhead .sp{flex:1} #tlhead .k{display:inline-flex;align-items:center;gap:4px;margin-left:10px}
  #tlhead .k i{width:9px;height:9px;border-radius:2px;display:inline-block}
  #alerts:empty{display:none}
- #alerts{padding:6px 16px 0;display:flex;flex-wrap:wrap;gap:6px}
- #alerts span{background:#3a1418;border:1px solid #7d2530;color:#ff9aa2;border-radius:5px;padding:2px 8px;font-size:11px}
- #alerts span.dis{background:#1a1e26;border-color:#39404d;color:#aab3c2}
+ #alerts{padding:8px 16px 0;display:flex;flex-wrap:wrap;gap:6px}
+ #alerts span{background:var(--bad-bg);border:1px solid var(--bad);color:var(--bad);border-radius:6px;padding:3px 8px;font-size:11px}
+ #alerts span.dis{background:var(--bg-2);border-color:var(--line-2);color:var(--ink-2)}
  #lanes{position:relative;overflow-y:auto;overflow-x:hidden;padding:0 16px 12px;cursor:col-resize;flex:1}
- #ruler{position:sticky;top:0;z-index:4;height:34px;background:#0e1117;border-bottom:1px solid #1b202b}
- #ruler .t{position:absolute;top:0;bottom:0;border-left:1px solid #222836}
- #ruler .t s{position:absolute;left:4px;top:2px;color:#8a94a4;text-decoration:none;font-size:11px}
+ #ruler{position:sticky;top:0;z-index:4;height:34px;background:var(--panel);border-bottom:1px solid var(--line)}
+ #ruler .t{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+ #ruler .t s{position:absolute;left:4px;top:2px;color:var(--ink-2);text-decoration:none;font-size:11px}
  #ruler .t.end s{left:auto;right:4px}
- #ruler .t s em{color:#4c5666;font-style:normal;margin-left:5px}
+ #ruler .t s em{color:var(--muted);font-style:normal;margin-left:5px}
  /* a transition is a moment, not a layer — it lives on the ruler, above every track */
  #ruler .m{position:absolute;top:15px;bottom:0;border-left:2px solid;padding-left:3px;font-size:10px;font-weight:700;white-space:nowrap}
  #ruler .ms{position:absolute;top:15px;bottom:0;opacity:.2}
  #rows{position:relative}
+ /* the ruler's ticks carried down through the stack. On black the bars glowed against the field and
+    stood as a timeline on their own; on white a row of chips floating on paper reads as a chart, and
+    the grid is what puts them back on a clock. */
+ .grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);pointer-events:none}
  .row{position:relative;height:18px}
- .bar{position:absolute;top:1px;height:16px;border-radius:3px;overflow:hidden;color:#08090d;font-size:11px;line-height:16px;white-space:nowrap;cursor:pointer}
- /* the ramps are the point: an open window is not the same as a readable frame */
- .bar i{position:absolute;top:0;bottom:0;background:#0e1117;opacity:.62}
- .bar i.in{left:0;border-right:1px solid #0e1117} .bar i.out{right:0;border-left:1px solid #0e1117}
- .bar span{position:absolute;top:0;font-weight:600;text-shadow:0 1px 0 #fff3;pointer-events:none}
- .bar span em{font-style:normal;opacity:.62;font-weight:500}
- /* dead air: the hole the beat-check gate blocks on, drawn where it actually is */
- .hz{position:absolute;top:0;bottom:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(135deg,#ff3b4e33 0 6px,#ff3b4e0d 6px 12px);border-left:1px solid #ff3b4ecc;border-right:1px solid #ff3b4ecc}
- .hz.beat{background:repeating-linear-gradient(135deg,#ffb02e33 0 6px,#ffb02e0d 6px 12px);border-color:#ffb02ecc}
- .hz.disputed{background:repeating-linear-gradient(135deg,#8a93a333 0 6px,#8a93a30d 6px 12px);border-color:#8a93a3aa}
- .hz b{position:absolute;top:2px;left:3px;color:#ff8b95;font-size:10px;white-space:nowrap;background:#12060a;padding:0 3px;border-radius:2px}
- .hz.beat b{color:#ffc46a;background:#120c04} .hz.disputed b{color:#aab3c2;background:#0e1117}
+ .bar{position:absolute;top:1px;height:16px;border-radius:3px;overflow:hidden;color:var(--bar-ink);font-size:11px;line-height:16px;white-space:nowrap;cursor:pointer}
+ /* the ramps are the point: an open window is not the same as a readable frame. Both themes DARKEN the
+    ramp rather than fading it toward the panel: a bar carries a label, and on white a fill washed toward
+    the paper drops white text under 3:1 wherever a long label runs into its own exit ramp. */
+ .bar i{position:absolute;top:0;bottom:0;background:var(--wash);opacity:var(--wash-a)}
+ .bar i.in{left:0;border-right:1px solid var(--panel)} .bar i.out{right:0;border-left:1px solid var(--panel)}
+ .bar span{position:absolute;top:0;font-weight:600;pointer-events:none}
+ .bar span em{font-style:normal;opacity:.72;font-weight:400}
+ /* dead air: the hole the beat-check gate blocks on, drawn where it actually is. On white the hatch
+    has to be DARKER than it is on black (a wash that reads as danger over ink disappears over paper),
+    and the label needs its own solid chip or the hatch runs straight through the letters. */
+ .hz{position:absolute;top:0;bottom:0;z-index:3;pointer-events:none;
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--hz) 34%,transparent) 0 6px,color-mix(in srgb,var(--hz) 9%,transparent) 6px 12px);
+   border-left:1px solid var(--hz);border-right:1px solid var(--hz)}
+ .hz.beat{--hz:var(--hz-beat)} .hz.disputed{--hz:var(--hz-mute)}
+ .hz b{position:absolute;top:2px;left:3px;color:var(--hz);font-size:10px;font-weight:700;white-space:nowrap;
+   background:var(--panel);border:1px solid var(--hz);padding:0 4px;border-radius:3px}
  #drag{position:absolute;inset:0;display:none;cursor:grab}
- #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:#5ee0c81a}
- .bar.sel{outline:2px solid #fff;outline-offset:1px}
- .bar u{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.85}
- #key.on{background:#1d4b41;border-color:#5ee0c8;color:#5ee0c8}
- #ph{position:absolute;top:0;bottom:0;width:1px;background:#ff4d6d;z-index:5;pointer-events:none;box-shadow:0 0 6px #ff4d6d}
- #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid #ff4d6d}
+ #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+ .bar.sel{outline:2px solid var(--ink);outline-offset:1px}
+ .bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--bar-ink);opacity:.85}
+ #key.on{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-2)}
+ #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--play);z-index:5;pointer-events:none}
+ #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--play)}
 </style></head><body>
  <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div></div>
  <div id=bar>
   <button id=play>▶ play</button>
-  <input id=scrub type=range min=0 max=100 value=0 step=1>
+  <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
   <span id=read>frame 0 / 0 · 0.00s</span>
   <button id=key>◇ key: off</button>
   <button id=undo>⤺ undo</button>
-  <span id=sel style="color:#7c8797;min-width:170px"></span>
+  <span id=sel></span>
   <button id=tgl>timeline</button>
+  <button id=theme>◐ light</button>
  </div>
  <div id=tl>
   <div id=tlhead><b id=tlwhat>timeline</b><span class=sp></span><span id=tlkey></span></div>
@@ -208,9 +249,27 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
  // ---------- timeline ----------
  const pc=(t)=>(100*Math.max(0,Math.min(1,t/dur)))+'%';
  const esc=(s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
- const COLOR={text:'#5ee0c8',type:'#5ee0c8',count:'#84e06a',image:'#f0a35e',rect:'#5c6b86',component:'#b78bf0',html:'#b78bf0',
-   group:'#e05e8a',glow:'#e0d05e',svg:'#e0d05e',paint:'#e0d05e',shader:'#e0d05e',clip:'#5e9ef0',board:'#f06e6e',doc:'#f06e6e',beat:'#f0c05e'};
- const MARK={cut:'#ff9f43',seam:'#b78bf0',sting:'#ffd93d'};
+ // A lane bar carries its own label, so the fill and the label have to pass contrast TOGETHER. Dark
+ // keeps the light-on-dark neons (dark label). Light inverts the relationship rather than the colours:
+ // saturated fills carrying WHITE labels, every one at or above 4.9:1 against white — the same trick a
+ // status chip uses, and the reason the stack still reads as bars rather than as highlighted prose.
+ const PALETTE={
+  dark:{color:{text:'#5ee0c8',type:'#5ee0c8',count:'#84e06a',image:'#f0a35e',rect:'#5c6b86',component:'#b78bf0',html:'#b78bf0',
+    group:'#e05e8a',glow:'#e0d05e',svg:'#e0d05e',paint:'#e0d05e',shader:'#e0d05e',clip:'#5e9ef0',board:'#f06e6e',doc:'#f06e6e',beat:'#f0c05e'},
+   mark:{cut:'#ff9f43',seam:'#b78bf0',sting:'#ffd93d'},fallback:'#7d8799'},
+  light:{color:{text:'#2563eb',type:'#2563eb',count:'#2f7d55',image:'#9a5410',rect:'#697182',component:'#6d3fd4',html:'#6d3fd4',
+    group:'#a8296b',glow:'#7d6210',svg:'#7d6210',paint:'#7d6210',shader:'#7d6210',clip:'#0f6b9c',board:'#8e3b2f',doc:'#8e3b2f',beat:'#8a5a00'},
+   mark:{cut:'#9a5410',seam:'#6d3fd4',sting:'#8a5a00'},fallback:'#5b6474'},
+ };
+ let COLOR=PALETTE.light.color,MARK=PALETTE.light.mark,FALLBACK=PALETTE.light.fallback;
+ const themeBtn=document.getElementById('theme');
+ function applyTheme(t){ document.documentElement.dataset.theme=t;
+   COLOR=PALETTE[t].color; MARK=PALETTE[t].mark; FALLBACK=PALETTE[t].fallback;
+   themeBtn.textContent='◐ '+t; try{ localStorage.setItem('vawe-studio-theme',t); }catch(_){}
+   if(model) paint(model); }
+ themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+ applyTheme((()=>{ try{ return localStorage.getItem('vawe-studio-theme')||document.documentElement.dataset.theme; }
+   catch(_){ return document.documentElement.dataset.theme; } })());
  // The bars come from the LIVE DOM, not from the JSON: the engine writes each clip's real window and ramp
  // into data-start/duration/enter/exitDur (core/clips.js reads exactly these), and that survives the theme's
  // durationScale, sceneUnits rewrites and the produced baseline. The JSON only supplies the label.
@@ -252,7 +311,8 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
        +'<div class=m style="left:'+pc(k.t)+';border-color:'+c+';color:'+c+'" title="'+esc(k.kind+' '+k.t+'s'+(k.name?' '+k.name:''))+'">'+k.kind.charAt(0).toUpperCase()+'</div>'; }
    ruler.innerHTML=r;
    let h='';
-   for(const b of bars){ const c=COLOR[b.type]||'#7d8799', wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
+   for(let t=step;t<=dur+1e-6;t+=step) h+='<div class=grid style="left:'+pc(t)+'"></div>';
+   for(const b of bars){ const c=COLOR[b.type]||FALLBACK, wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
      h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+c+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s → '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' → '+b.out:''))+'">'
        +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
        +(b.keys||[]).map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
@@ -268,7 +328,7 @@ const studioPage = (fmt) => `<!doctype html><html><head><meta charset=utf8><titl
    rows.style.height=(bars.length*18)+'px';
    document.getElementById('tlwhat').textContent=m.file+' · '+bars.length+' layers · '+dur.toFixed(2)+'s / '+total+'f';
    document.getElementById('tlkey').innerHTML=[...new Set(bars.map(b=>b.type))]
-     .map(t=>'<span class=k><i style="background:'+(COLOR[t]||'#7d8799')+'"></i>'+esc(t)+'</span>').join('');
+     .map(t=>'<span class=k><i style="background:'+(COLOR[t]||FALLBACK)+'"></i>'+esc(t)+'</span>').join('');
    document.getElementById('alerts').innerHTML=holes.map(([a,b,lab])=>{
      const dis=grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
      return '<span'+(dis?' class=dis':'')+'>'+(dis?'? ':'⚠ ')+lab+' '+a.toFixed(2)+'s → '+b.toFixed(2)+'s'
@@ -340,5 +400,6 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`    open  http://127.0.0.1:${PORT}/studio`);
   console.log(`    scrub the slider · ← → step a frame · space plays · edit the JSON + reload to see changes`);
   console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
+  console.log(`    theme: light (◐ toggles to dark, and it sticks) · start dark with THEME=dark`);
   console.log(`    Ctrl-C to stop.\n`);
 });
