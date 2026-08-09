@@ -413,41 +413,135 @@ Two consequences, both already true of this repo and both important:
 | Category | What it means | Safe for a client product film? |
 |---|---|---|
 | **Subscription royalty-free** (Artlist, Epidemic Sound, Musicbed, Soundstripe, Uppbeat, Marmoset) | you pay a period fee, not a fee per broadcast | yes, **while the subscription is live** — read the trap below |
-| **CC0 / public domain** | no rights reserved | yes, unconditionally. The safest paid-nothing option |
-| **CC-BY** | free, **attribution required** | only if you will really put the credit on screen or in the description, permanently |
-| **CC-NC or CC-ND** | non-commercial, or no derivatives | **no.** A product film is commercial and syncing to picture is a derivative use |
+| **CC0 / public domain** | all rights waived worldwide | yes. The safest paid-nothing option — but CC0 gives freedom, never a warranty |
+| **CC-BY** | free, **attribution required**, commercial and adaptation both permitted | yes, if the credit really goes in the description permanently. Note the no-endorsement clause: you may not imply the composer backs the client's product |
+| **CC-NC or CC-ND** | non-commercial, or no derivatives | **no, and ND is absolute** — see below |
+| **Sync licence** (Musicbed, Marmoset) | negotiated per project, media, territory and term | yes, and it is the only one that comes with a warranty and indemnity |
 
-"Royalty-free" does not mean free and does not mean no rights. It means no *per-use royalty*. You still
-need a licence, and it still has conditions.
+"Royalty-free" is a **pricing** model, not a rights model. It means no *per-use* royalty. It says
+nothing about who owns the copyright, what uses are permitted, or how long the grant lasts. Musicbed is
+the clarifying counter-example: its catalogue is explicitly **rights-managed, not royalty-free**, and
+priced per project by your client's headcount and predicted reach.
 
-**The trap, and it is the most misunderstood term in the whole industry:** a subscription licence
-covers what you **published while the subscription was active**, in perpetuity. It does **not** cover
-anything you publish after it lapses, even using a file you downloaded while paying. Cancel the account
-and your shipped films stay legal; a re-upload, a re-cut, or a new film using the same track is
-unlicensed. Both Artlist and Epidemic Sound draw exactly this line.
-<https://www.epidemicsound.com/blog/artlist-vs-epidemic-sound/>
+### ND is the rule nobody knows, and it is decisive
 
-*Confidence note:* that summary was read through the search index and a vendor comparison page, not
-from the licence documents themselves. Before we ever buy a subscription, somebody must read the actual
-terms. Vendor marketing and legal terms routinely disagree on precisely this point.
+**Syncing music to moving image is *always* a derivative work under Creative Commons.** Not arguably.
+By definition, in the licence text itself — CC BY-ND 4.0 §1:
 
-**Content ID, and the part people get wrong.** Subscription platforms suppress claims by whitelisting
-**your registered channel**. The whitelist is attached to the account, not to the film. So a track that
-is clean on our channel can be claimed the moment the same film is uploaded to a **client's** channel,
-which is exactly what a product film is for. Register the destination channel, or pick a track whose
-licence does not depend on a whitelist at all.
+> "For purposes of this Public License, where the Licensed Material is a musical work, performance, or
+> sound recording, **Adapted Material is always produced where the Licensed Material is synched in
+> timed relation with a moving image.**"
+> <https://creativecommons.org/licenses/by-nd/4.0/legalcode.en>
 
-**Why the free/CC end is more dangerous than it looks.** Free Music Archive and ccMixter are catalogues,
-not licences: **each track carries its own terms**, and the mix includes NC and ND. Creative Commons
-defines NonCommercial as "not primarily intended for or directed towards commercial advantage or
-monetary compensation" <https://wiki.creativecommons.org/wiki/NonCommercial_interpretation>, which a
-product film plainly is. ND permits only verbatim copies: "if you remix, transform, or build upon the
-material, you may not distribute the modified material"
-<https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en>. **You must read the licence on every
-individual track.** A catalogue being "free" tells you nothing.
+CC's FAQ restates it: this holds "**whether or not it would be considered so under applicable law**."
 
-**AI-generated music** is unsettled and should be treated as unsettled. The training-data question is
-live litigation. Do not put it under a client's film on the strength of a vendor's indemnity page.
+So **every ND track is unusable in every film we publish**, commercial or not, edited or not. Playing an
+ND track untouched under picture still creates Adapted Material, and ND forbids sharing adaptations.
+This is the most-missed rule in free-music sourcing, and it is missed because ND tracks are routinely
+labelled "commercial use allowed" — which they are, for redistributing the *audio*. Never for a film.
+
+**NC is nearly as blunt.** CC defines NonCommercial as use "primarily intended for or directed toward
+commercial advantage or monetary compensation", and adds the part people assume saves them: "**CC's
+definition does not turn on the type of user:** if you are a nonprofit or charitable organization, your
+use of an NC-licensed work could still run afoul of the NC restriction." CC then declines to draw the
+line for you — "**CC cannot advise you on what is and is not commercial use**"
+<https://creativecommons.org/faq/>. A paid client product film is the paradigm case. CC's own refusal to
+define the boundary is itself the reason not to gamble on it.
+
+**Practical filter for any CC source: CC0 and CC BY only.** CC BY-SA works but is viral, so the whole
+film goes BY-SA. Everything else is out.
+
+### If we ever buy a subscription
+
+The perpetuity clause is the most misunderstood term in the industry, and the honest summary is that
+**the licence on a published film survives cancellation, but your ability to defend it does not.**
+
+| Vendor | The trap in its own paperwork |
+|---|---|
+| **Musicbed** | **Early cancellation voids licences already issued.** The 12-month term must complete or "any licenses issued under the subscription [become] null and void" — cancel in month 7 and delivered client films retroactively become unlicensed. Separately, §3: "paid media rights are **not** granted in perpetuity"; you get archival rights to leave the film where it is, not to keep running it as an ad |
+| **Artlist** | Perpetual, but frozen to "**the same media**" — a re-cut, a new platform or a re-upload is a new project. Publication must occur *during* the term, so a finished-but-unpublished film loses cover. Clearlist closes at expiry |
+| **Epidemic Sound** | Licence persists, but safelisting requires an active subscription and must happen **before posting**. Creator tier **cannot be used for brand work at all**; Pro is the client-work tier |
+| **Soundstripe** | Projects perpetual, but if you did not List a project before cancelling you can never do so without re-subscribing. Business is limited to a **single designated market area**, which a public website breaks |
+| **Uppbeat** | Published work survives; safelist protection covers only videos uploaded during the paid term |
+
+**Two vendor contradictions worth naming, because they mean the marketing cannot be relied on:**
+
+- **Musicbed's FAQ says credit is optional** ("You are not required to credit the artist or Musicbed").
+  Its binding terms §2(xiii) *require* credit per the License Details, and §9 sets **$10,000 liquidated
+  damages** for failing to. Read the License Details, not the FAQ.
+- **Soundstripe's help centre says Pro may not promote a brand, product or service.** Its Terms of Use
+  apply that restriction only to Personal, and its own plan table sells Pro for "advertising". Both
+  cannot be true. Get it in writing before relying on it.
+
+*Verification note:* **Epidemic Sound's actual licence contracts could not be reached** — the terms
+routes 404 and the policy page renders an empty shell. Everything above for Epidemic comes from its
+marketing and help centre, not the contract. Given that Soundstripe's marketing and contract
+demonstrably disagree, assume Epidemic's may too. Prices were also unverifiable for several vendors and
+are deliberately omitted here; they move, and they geo-localise.
+
+**Two eligibility gates that would catch a studio:** Artlist pushes any **agency**, or any company over
+**50 employees**, to Max Business. Epidemic pushes agencies and production companies over **$5M
+turnover** to Enterprise.
+
+### Content ID — claims are normal, even when you are correct
+
+This is the part everyone gets wrong. Every one of these platforms registers its catalogue *into*
+Content ID, so **a claim on correctly licensed music is the expected outcome, not an anomaly**. Artlist
+concedes claims arrive "even when content is licensed correctly". Musicbed's SyncID is explicitly
+**reactive**: "SyncID does not prevent you from getting a content claim ... As soon as you receive an
+email from YouTube that your video has a claim, SyncID is already working." Soundstripe admits its own
+process "may still accidentally and incorrectly interpret your use ... to be unlicensed."
+
+**Whitelists attach to a channel, not to a film.** So a track clean on our channel gets claimed the
+moment the same film goes up on a **client's** channel — which is exactly what a product film is for.
+Artlist and Epidemic both handle this with per-video client invite links valid 30 days; Soundstripe uses
+per-video clearance codes. Treat safelisting the destination channel as a **delivery checklist item**.
+
+There is documented enforcement against holders of a valid competing licence: an Adobe forum thread
+records Artlist Content ID claims against users who licensed the same track legitimately from Adobe
+Stock, with appeals citing a valid Adobe licence number **rejected**, and Adobe refunding the asset.
+<https://community.adobe.com/t5/stock-discussions/content-id-claim-from-artlist-ltd/m-p/14485916/highlight/true>
+
+### The free end, ranked honestly
+
+- **Pixabay is the strongest free option.** One site-wide licence granted by Pixabay itself, not
+  per-track CC: "irrevocable, worldwide, perpetual ... for **commercial or non-commercial purposes**",
+  no attribution required <https://pixabay.com/service/license-summary/>. Because it is irrevocable,
+  nothing published is at risk later, and every download ships a **License Certificate** to fight claims
+  with. The catch is the inverse of a paid library: content is warranted **"AS IS", no warranty**, and
+  **you indemnify Pixabay**. Claims still happen and disputes take up to 30 days, unmonetised.
+- **Freesound (SFX)** — filter to **Free Cultural Works approved**, i.e. CC0 and CC BY only. Two traps:
+  the legacy **Sampling+** licence specifically bans commercial advertising ("You can't make a track
+  with Sampling+ samples to sell a car") and is **not** caught by an "avoid NC" habit; and when layering
+  sounds, **the strictest input licence governs the output**.
+- **YouTube Audio Library — do not let it leave YouTube.** Google grants no off-platform rights and
+  says plainly it "can't give legal guidance ... off the platform". Every permissive sentence scopes
+  itself to "videos uploaded to YouTube". Only the CC-licensed subset travels, and it travels on the
+  artist's CC BY terms, so the attribution comes with it. Treat off-YouTube use as unlicensed.
+- **Free Music Archive and ccMixter are directories, not licensors**, and neither warrants anything.
+  FMA says so itself: "FMA cannot license original work to you for commercial, private, or other use."
+  Licence differs per track and includes NC and ND, so **you must read the licence on every single
+  track**. ccMixter's terms go further than the CC deed and forbid using a track "to advertise or
+  promote anything other than the work you create from it" — which is a problem for a client ad even on
+  a CC BY track. Also treat the widely repeated "$5/month FMA plan" as **false**; no FMA page confirms
+  it.
+
+### AI-generated music — no, and the reason is not the one you expect
+
+The training-data litigation is real and partly unresolved (Sony still litigating against Udio; UMG and
+Sony against Suno). But the decisive problem is ownership. The US Copyright Office's *Copyright and
+Artificial Intelligence, Part 2: Copyrightability* (29 Jan 2025)
+<https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf>
+concludes that **material generated purely by entering prompts is not copyrightable**, however elaborate
+the prompt.
+
+So if the bed is purely prompt-generated, **nobody owns it — not us, not the vendor, not the client.**
+Suno's own terms say the quiet part: it assigns "all of its right, title and interest" and then adds
+"**Suno makes no representation or warranty to you that any copyright will vest in any Output.**" It
+assigns a possibly empty set. Soundraw and Mubert retain ownership outright and grant only a use
+licence, and both **prohibit Content ID registration**.
+
+Confine AI music to internal comps, pitch boards and animatics. Never a client deliverable.
 
 ### The rule for this repo
 
