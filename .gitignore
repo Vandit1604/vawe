@@ -64,7 +64,12 @@ formats/scene/*.json
 # flagship examples + their registry — the showcase the repo ships (make gallery).
 !formats/scene/example-*.json
 !formats/scene/examples.json
-assets/music/
+# Music beds are third-party tracks and the Mixkit licence forbids redistributing the files, so the
+# audio never lands in git. credits.json is not audio, it is the PROVENANCE, and ignoring the whole
+# directory meant the one file that records where a bed came from could not survive a clone — while
+# SOUND.md told authors to record provenance there. Same policy as assets/sfx/ above.
+assets/music/*
+!assets/music/credits.json
 # music.wav is BAKED by `make audio` (core/audio-kit.mjs) — generated, never committed.
 assets/music.wav
 

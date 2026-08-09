@@ -5969,3 +5969,96 @@ that the texture is on disk. `make audio-check` counts a bridges-only film as so
 **Still open.** `direction-floor` reads layers, so a film held together purely by sound still trips
 `no-continuous-object` and needs a waiver. The gate would have to reason about junctions to see it.
 
+
+---
+
+## 86. The design-spec lock knew three type roles; the engine has four
+
+**What happened.** `onefilm` sets `"font": "num"` on its count layer, which is what the vawe theme's
+`type.num` (JetBrains Mono) exists for: tabular figures under a rolling number. `make designspec-check`
+reported it as off-spec — *font "num" is not a theme role (sans/serif/mono)* — and told the author to
+map it to a role, which it already is.
+
+**Root cause.** `scripts/gates/designspec-check.mjs` hard-coded `ROLES = ['sans','serif','mono']`. The
+engine has had four roles the whole time and says so in four places: `core/theme-contract.js` lists
+`['sans','num','serif','mono']`, `core/boot.js` emits `--font-num`, `core/layers/util.js` dispatches on
+`L.font === 'num'`, and the scene schema's `font` enum includes it. Every shipped theme sets it. The
+gate restated the list by hand instead of deriving it, and the hand copy was short by one.
+
+**Why it matters more than one warning.** The only way to clear this finding is to move the numbers off
+the numeric face, which is a worse film. Same shape as #85: a gate that measures the wrong thing does
+not miss defects, it manufactures them, and the author pays in design.
+
+**Fix (framework).** `ROLES` extended to the engine's four, and the message names all four so the next
+author is told the truth about what is legal.
+
+**Blast radius.** Two scenes in the library use `font: "num"` (`ab3-nogate-tenor`, `onefilm`), three
+layers between them. Both go from one spurious `off-font` warning to none; nothing else changes, and no
+scene moves in either direction on pass/fail.
+
+**The general rule.** A gate that restates an engine list by hand is a second source of truth. Derive
+it, or the day the engine grows a fifth role the gate starts arguing against it.
+
+---
+
+## #239 — the provenance table described a file that was no longer there, and could not survive a clone
+
+**What.** `assets/music/credits.json` recorded `calm` as Mixkit track 127, a 133-second ambient loop.
+The `calm.wav` on disk is a 8-second synthesized drone. The licence record pointed at the wrong file.
+
+**Root cause.** Two writers, one namespace, and only one of them recorded anything. `make music`
+downloads a track and writes a credits row; `make audio` (`scripts/media/audio-bake.mjs`) bakes
+`calm`/`warm`/`tense` from parameters into the same directory and wrote no row at all. Baking over a
+downloaded bed therefore left the previous entry standing, describing a file that had been replaced.
+`warm` and `tense` had no entry at all, which is how `make audio-check` came to report
+`bed-provenance-unknown` against a bed that is provably licence-free.
+
+A licence record for the wrong file is worse than no record: `bed-provenance-unknown` is a question,
+and a stale entry is a wrong answer that stops anyone asking.
+
+**Second half of the same failure.** `.gitignore` excluded `assets/music/` wholesale, so credits.json —
+which is not audio and carries no licence problem — could not survive a clone, while `docs/CRAFT/SOUND.md`
+instructed authors to record provenance in it *before* a track goes under a film. The sfx directory next
+to it had already got this right (`assets/sfx/*.wav`, with its credits tracked); music had not.
+
+**Fix.** `audio-bake.mjs` writes a credits row for every bed it bakes — generated-by, no licence,
+verified true — and says out loud when it is correcting an entry that claimed a download. `.gitignore`
+narrowed to `assets/music/*` with `!assets/music/credits.json`, so the provenance travels with the repo
+and the tracks still do not.
+
+**Blast radius.** Re-baking the three beds produced byte-identical files (checked by md5 before and
+after), so no mix changed. Only credits.json moved.
+
+---
+
+## 85. A validator rule outlived the bug it was written for, and started inventing one
+
+**What happened.** Authoring `onefilm`, every typed line in the file column carried `<b>` around its
+JSON value so the value read in ink against a grey key. `make validate` warned four times: *uses
+"typing" with `<b>`/`<em>` markup — typing renders tags literally*. The render showed the opposite: the
+values typed in correctly, in colour, no tags on screen.
+
+**Root cause.** Two commits, in this order. `core/validate.mjs` grew rule (2) of `lintData` on
+2026-07-16, when typing really did take the `textContent` path and spat tags out as glyphs. Then
+`8f1bde9` (2026-07-24) gave `core/layers/text.js` an HTML-safe typing path: `stripLen` counts only
+visible characters and `revealHtml` walks the tree revealing that many, so markup survives and an
+accent word types in its own colour. Nobody went back for the warning. It stayed correct-sounding and
+wrong for a fortnight.
+
+**Why this is worse than a missed defect.** A gate that misses something costs you the thing it missed.
+A gate that reports a defect that is not there costs you the fix: the obvious response is to delete the
+markup, which makes every typed line one flat colour. The gate does not merely fail to help, it argues
+for a plainer film, and it argues in the voice of the engine. This is the shape CLAUDE.md means by
+"when satisfying a gate requires making the film worse, suspect the gate".
+
+**Fix (framework).** Rule (2) removed from `lintData`, with the history left in place as a comment so it
+is not re-added from memory. `scripts/gates/lint-test.mjs` pinned the other way round: the known-bad
+fixture, which still carries a typed `<b>` line, must produce NO such warning.
+
+**Blast radius.** Warnings only — `lintData` never touches a frame, so no render changes. The whole
+scene library was re-validated before and after: the only difference is four fewer warnings on
+`onefilm` and none anywhere else.
+
+**The general rule this belongs to.** A gate is a claim about the engine, and it needs to be re-checked
+when the engine changes. The feature commit is where the stale rule was cheap to find; grep the gates
+for the behaviour you just changed before you close the PR.

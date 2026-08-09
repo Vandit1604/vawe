@@ -68,11 +68,23 @@ const BEDS = {
   // tense: countdown / reveal formats — a heartbeat under the pad.
   tense:   { loop: 8, root: 110, chord: [1, 1.2, 1.5], gain: 0.05, air: 0.018, tremolo: 0.25, pulse: 0.5, pulseGain: 0.18 },
 };
+// PROVENANCE FOLLOWS THE FILE, not the name. `make music` and this script both write into
+// assets/music/ and only one of them recorded where a bed came from, so baking `calm` over a
+// downloaded `calm` left credits.json describing a track that was no longer on disk — a licence
+// record for the wrong file, which is worse than none (docs/MISTAKES.md #239).
+const CREDITS = path.join(MUSIC, 'credits.json');
+const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : {};
 for (const [name, opts] of Object.entries(BEDS)) {
   // A bed sits UNDER everything: a much lower ceiling than a cue, before musicGain.
   const dur = writeWav(path.join(MUSIC, `${name}.wav`), normalize(musicBed(opts), 0.34));
+  if (credits[name]?.source && !credits[name].generated)
+    console.log(`  ⚠ ${name}: credits.json described a downloaded track (${credits[name].source}) — this bake replaced that file, so the entry is being corrected.`);
+  credits[name] = { generated: 'scripts/media/audio-bake.mjs', genre: 'synth pad',
+    licence: 'none — synthesized from parameters, carries no rights', licenceVerified: true,
+    seconds: +dur.toFixed(2) };
   total += dur; n++;
 }
+fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 1) + '\n');
 // NOTE: no assets/music.wav default is written. The synth beds read as a drone, so silence is the
 // default (internal/audio/audio.go) and the real-loop pack (`make music-pack`) is the opt-in bed.
 // These synth beds stay available for anyone who names one explicitly, but nothing auto-selects them.
