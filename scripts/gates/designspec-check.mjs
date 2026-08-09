@@ -65,7 +65,12 @@ function strings(node, keyPath, out) {
 const flat = []; (function rec(ls) { for (const l of ls || []) if (l && typeof l === 'object') { flat.push(l); if (l.children) rec(l.children); } })(data.layers);
 const scanTargets = [...flat, ...(data.bg || [])];
 
-const ROLES = new Set(['sans', 'serif', 'mono']);
+// The engine's four type roles, not three. `num` is first-class everywhere that matters — declared in
+// core/theme-contract.js, emitted as `--font-num` by core/boot.js, dispatched by core/layers/util.js,
+// and listed in the scene schema's `font` enum — and every shipped theme sets it. Leaving it out here
+// made this gate report a correctly-themed tabular-figures layer as off-spec, which is a gate inventing
+// a finding: the only way to satisfy it was to put the numbers in the wrong face. docs/MISTAKES.md #86.
+const ROLES = new Set(['sans', 'serif', 'mono', 'num']);
 const specRadii = data.spec && Array.isArray(data.spec.radii) ? new Set(data.spec.radii.map(String)) : null;
 const specShadows = data.spec && Array.isArray(data.spec.shadows) ? new Set(data.spec.shadows.map(String)) : null;
 
@@ -146,7 +151,7 @@ scanTargets.forEach((l, i) => {
     }
   }
   // fonts (the engine's roles). A `font` outside sans/serif/mono is dropped silently or off-system.
-  if (typeof l.font === 'string' && !ROLES.has(l.font)) findings.push({ sev: 'off-font', msg: `${label(l, i)} · font "${l.font}" is not a theme role (sans/serif/mono). Map it to a role in themes/${themeName}.json type.` });
+  if (typeof l.font === 'string' && !ROLES.has(l.font)) findings.push({ sev: 'off-font', msg: `${label(l, i)} · font "${l.font}" is not a theme role (sans/serif/mono/num). Map it to a role in themes/${themeName}.json type.` });
   // optional radii / shadow lock (only when the scene declares the spec)
   if (specRadii && l.radius != null && !specRadii.has(String(l.radius))) findings.push({ sev: 'off-radius', msg: `${label(l, i)} · radius ${l.radius} is off the locked scale [${[...specRadii].join(', ')}].` });
   if (specShadows && l.shadow != null && !specShadows.has(String(l.shadow))) findings.push({ sev: 'off-shadow', msg: `${label(l, i)} · shadow "${l.shadow}" is off the locked set.` });

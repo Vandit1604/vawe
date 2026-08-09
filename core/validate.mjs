@@ -475,11 +475,16 @@ export function lintData(data) {
     if (L.duration == null && L.track !== 0) warns.push(`${name(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
   });
 
-  // (2) TYPING + MARKUP — `typing` reveals characters LITERALLY, so <b>/<em> show as visible tags
-  //     ("Block <b>7 to 11am</b>" bug). Drop the tags on typed text.
-  layers.forEach((L, i) => {
-    if (isObj(L) && L.typing && typeof L.text === 'string' && /<(b|em)\b/i.test(L.text)) warns.push(`${name(L, i)} uses "typing" with <b>/<em> markup — typing renders tags literally.`);
-  });
+  // (2) TYPING + MARKUP — RETIRED, and the retirement is the point. This rule warned that `typing`
+  //     reveals characters literally so `<b>`/`<em>` show as visible tags. That was true when it was
+  //     written and stopped being true on 2026-07-24, when core/layers/text.js gained an HTML-safe
+  //     typing path (`revealHtml`): the VISIBLE characters are counted and revealed while the tags stay
+  //     intact, so an accent word types in ITS OWN COLOUR. The rule outlived the bug by a fortnight and
+  //     went on telling authors to strip markup the engine handles correctly — a gate that manufactures
+  //     a defect, which is worse than one that misses it, because the author pays by making the film
+  //     plainer. docs/MISTAKES.md #85.
+  //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
+  //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
 
   // (2b) countStart is LOCAL to the layer's own `start` (count.js: interpolate(t - start, [cs, cs+cd])),
   //      NOT an absolute scene time. Setting it to the wall-clock second the count should fire is the
