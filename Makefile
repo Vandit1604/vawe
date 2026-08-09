@@ -21,6 +21,13 @@ audio:
 audio-bed:
 	node core/audio-select.js $(D) $(if $(filter 1,$(WRITE)),--write)
 
+# make audio-check D=<file> [STRICT=1]  — THE SOUND GATE: is this film's silence a decision or an
+# omission? Blocks (STRICT=1) on a scene with no `audio` block, on `silent:true` with no `_why`, on an
+# audio block that names nothing, and on a bed that resolves to no file. Warns on an unresolved "auto"
+# and on a bed whose licence nobody has verified. `make audio-check` with no D prints the library census.
+audio-check:
+	node scripts/gates/audio-check.mjs $(if $(D),$(D),--all) $(if $(filter 1,$(STRICT)),--strict)
+
 # make vo-captions D=<file> [STYLE=weightShift] [WRITE=1]  — turn a VO word-timing sidecar (audio.voWords)
 # into timed karaoke captions. No TTS; reads the transcript only. Prints by default; WRITE → <file>.captioned.json.
 # (Distinct from `make captions`, which times captions from a plain SCRIPT string — scripts/author/captions.mjs.)

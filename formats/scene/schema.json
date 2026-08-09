@@ -1648,7 +1648,7 @@
     },
     "audio": {
       "type": "object",
-      "label": "Audio bed. OPT-IN: silence is the DEFAULT — omit this block for a silent video. Mixed by internal/audio/audio.go under core/audio-select.js. All sound is SYNTHESIZED (core/audio-kit.mjs), never licensed.",
+      "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio-select.js. The CUES are synthesized and carry no licence (core/audio-kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks — check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
       "fields": {
         "music": {
           "type": "string",
@@ -1752,7 +1752,11 @@
         },
         "silent": {
           "type": "boolean",
-          "label": "Force NO audio track at all. Silence is already the default; use this only to mute a scene that otherwise names audio."
+          "label": "Render with NO audio track at all. A real device — a film can be better mute — but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
+      },
+      "_why": {
+        "type": "string",
+        "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
         }
       }
     }
