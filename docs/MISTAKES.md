@@ -5779,3 +5779,72 @@ would have passed against the old engine too. `lib-test` round-trips `dollyZ` ba
 **Class.** Twice in one file now: a measurement taken at the wrong level (#59 found the lens one level too
 low, this found the camera one level too high), and a knob whose NAME had drifted from what it was —
 `s` was called a scale for long enough that adding depth looked like adding a key.
+
+---
+
+## #234 — a blocking gate squared a layer, and so passed the one defect it existed to catch
+
+**What.** `visual-vocabulary` decided whether a film SHOWS anything or is only type, by measuring how
+much of the canvas each pictorial layer covered. `boxOf` in `scripts/gates/scene-timing.mjs` had four
+tiers, and the fourth was `proxy`: a layer declaring only one axis, with no readable intrinsic aspect,
+was **squared** — `w` became `h`. A 590x18 decorative underline was therefore measured as 590x590 and
+credited with about a tenth of the frame. The gate whose entire purpose was to tell a mark from a
+picture handed a pass to a hairline, and did it on a BLOCKING tier.
+
+**Root cause, and it is not the arithmetic.** The tier was added honestly, to stop a real hero image
+(`h:1440`, no `w`) being dismissed as a mark, and its comment said `proxy` "marks a guess as a guess".
+It does not. Downstream the guess was multiplied into an area and compared against a threshold, and no
+consumer branched on `how`. A value labelled uncertain that every caller treats as certain is not a
+guess, it is a wrong number wearing a disclaimer. **A gate may not invent the one quantity it exists to
+measure.** If the box is not knowable from the JSON, the honest answer is zero and the honest place to
+get a real one is the rendered DOM.
+
+**Why the gate was deleted rather than fixed.** Making the measurement true would have made the rule
+true, and the true rule then failed about 52 of the shipped films. It was already waived by 30 of 130.
+A rule that can only hold by being waived by a quarter of the library has been repealed already; the
+only question is whether anyone writes that down. `docs/TASTE.md` now does, along with the three things
+that must be true before it or anything like it comes back.
+
+**Fix.** The `proxy` tier is gone: `boxOf` returns `{w:0,h:0,how:'unknown'}` for a single-axis layer
+with no intrinsic aspect. `critique` was the other consumer (`carries`) and is strictly more honest for
+it — it now credits no layer whose box it cannot read. The gate, its four `gate-mutation` cases, its
+`make` target, its ladder step and its three waiver codes are removed from the tree, and
+`waiver-drift` names those codes as DEAD WAIVERS so a stale one cannot read as a live argument.
+
+**Which gate catches it.** None, and that is the point worth carrying. `gate-mutation` proved this gate
+could FIRE, and it fired correctly on all four fixtures, because every fixture declared both axes. A
+mutation harness proves a gate is wired up; it cannot prove the gate measures the right thing. The
+fixture that would have caught this is a single-axis decorative layer, and nobody wrote it because the
+helper looked obviously right. **When you pin a gate, pin the shape its measurement is worst at.**
+
+**Class.** Same as #211 and #216: a measurement bug, not a rule bug. Also the second time a helper's
+default has quietly substituted a plausible value for a missing one (#214). Grep for the helper, not
+the call site.
+
+---
+
+## #235 — a determinism sweep reported regressions that had not happened, because it shared one browser
+
+**What.** `make snap-all` drives every scene through Chrome and diffs a DOM signature against a
+baseline. Run twice, back to back, against a tree nobody had touched, it returned `identical: 50 /
+changed: 31` and then `identical: 49 / changed: 32`. Three scenes moved between the two verdicts across
+runs: `showcase-intro` by 9 findings, `example-kinetic-type.beatsync` by 17 (as `cam.opacity: 1 →
+0.002`), `linear-launch` by 238. Every one of them is stable when snapshotted on its own, six times in
+a row. The gate that exists to prove nothing changed was the thing changing.
+
+**Root cause.** The sweep launched ONE browser and pushed ~100 scenes through it. A long-lived Chrome
+under accumulating pressure evicts decoded images and canvas backing stores, so a scene rendered thirty
+pages into the sweep is not rendering under the conditions a fresh page gives it. The scene was never
+the variable; how much the browser had already done was. Nothing in the report said so, so the reader
+was left to decide which of two numbers was the truth, and neither was.
+
+**Fix.** `scripts/gates/snap-scenes.mjs` recycles the browser every 10 scenes. That puts the sweep in
+the same conditions as the single-scene gate, which is the run everyone already trusts, and costs one
+Chrome launch per batch against a sweep measured in minutes.
+
+**Which gate catches it.** The sweep catches itself now: run it twice and the verdict has to match.
+That is the only real test for a gate of this shape, and it had never been run.
+
+**Class.** A harness whose own environment was an uncontrolled input. Related to the purity doctrine the
+engine already applies to `renderFrame(n)`: the renderer was pure all along, and the measuring apparatus
+was not.

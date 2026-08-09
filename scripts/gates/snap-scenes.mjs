@@ -70,7 +70,30 @@ if (!scenes.length) { console.error('no scenes found'); process.exit(1); }
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
 const port = server.address().port;
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+const launch = () => puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+let browser = await launch();
+
+// RECYCLE THE BROWSER. This sweep used to drive all ~100 scenes through ONE browser, and that made it
+// report regressions that had not happened: across two back-to-back runs of the identical tree, three
+// scenes moved between `identical` and `changed` (showcase-intro by 9 findings, linear-launch by 238,
+// example-kinetic-type.beatsync by 17, the last of those as `cam.opacity: 1 → 0.002`). Every one of them
+// is stable when snapshotted ON ITS OWN, repeatedly. The variable was never the scene: it was how much
+// the browser had already done. A long-lived Chrome under accumulating memory pressure evicts decoded
+// images and canvas backing stores, and a scene rendered in that state is not rendering what a fresh one
+// renders. `identical: 50 / changed: 31` one run and `51 / 30` the next costs the next person an hour
+// deciding which number was the truth, and neither was.
+//
+// So the sweep now works in batches with a fresh browser for each: the same conditions the single-scene
+// gate runs under, which is the run everyone already trusts. The cost is one Chrome launch per batch,
+// about a third of a second, against a sweep measured in minutes.
+const BATCH = 10;
+let sinceLaunch = 0;
+const freshBrowser = async () => {
+  if (sinceLaunch < BATCH) return;
+  await browser.close().catch(() => {});
+  browser = await launch();
+  sinceLaunch = 0;
+};
 
 const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [];
 for (const scene of scenes) {
@@ -79,6 +102,8 @@ for (const scene of scenes) {
   let cfg = {};
   try { cfg = JSON.parse(fs.readFileSync(path.join(dir, scene), 'utf8')); } catch {}
   const [w, h] = sceneDims(cfg);
+  await freshBrowser();
+  sinceLaunch++;
   const page = await browser.newPage();
   try {
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
