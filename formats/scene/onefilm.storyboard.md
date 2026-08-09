@@ -50,21 +50,21 @@ destination: web
   a fourth thread, and the one the picture never has to carry. Revisit once that work lands.
 -->
 
-## Beat 1: An empty file (0s-2.2s)
+## Beat 1: An empty file (0s-1.0s)
 - type: hook
 - object: none. The frame divides and the left half fills with a file that says nothing yet
 - shot: wide
 - camera: hold
-- picture: a near-white field splits: a mono caret blinking on the left, the right half empty. One `{` types in
-- mechanism: per-character typing with a visible caret, then a held beat with nothing happening
+- picture: a near-white field splits, both halves label themselves, and a NUMBERED GUTTER draws down the left: six line numbers, all of them empty. One `{` types on line 1
+- mechanism: the divider wiping down, both header rules wiping right, the gutter fading in one number at a time, then per-character typing with a visible caret
 - becomes: an undivided field becomes the two halves the whole film lives in
-- onscreen: {
-- why: establish the frame before anything happens in it, so every later beat is read as a change rather than as a new shot
+- onscreen: scene.json · 1920 x 1080 · 30fps · {
+- why: the first cut of this beat held a blank white frame for two seconds, which is where a viewer decides to leave. The gutter states the whole shape of the file before a word of it exists, so the beat carries something and the next one arrives at 1.0s instead of 2.3s
 - emotion: quiet
-- duration: 2.2s
+- duration: 1.0s
 - transition_in: none
 
-## Beat 2: It says a word (2.2s-4.6s)
+## Beat 2: It says a word (1.0s-3.5s)
 - type: build
 - object: none. The first demonstration, and the smallest
 - shot: wide
@@ -75,10 +75,10 @@ destination: web
 - onscreen: "text": "Ship it"  ·  Ship it
 - why: the smallest possible demonstration, and the one that teaches the law the other three obey
 - emotion: recognition
-- duration: 2.4s
+- duration: 2.5s
 - transition_in: none
 
-## Beat 3: It says a number (4.6s-7.4s)
+## Beat 3: It says a number (3.5s-6.2s)
 - type: build
 - object: none. A different subject, obeying the same law
 - shot: wide
@@ -89,10 +89,10 @@ destination: web
 - onscreen: "count": 2500000000  ·  2.5B
 - why: the second subject has to be genuinely unlike the first, or the film is one demonstration repeated
 - emotion: widening
-- duration: 2.8s
+- duration: 2.7s
 - transition_in: none
 
-## Beat 4: It says a picture (7.4s-10.8s)
+## Beat 4: It says a picture (6.2s-9.4s)
 - type: build
 - object: none. Larger again
 - shot: wide
@@ -103,33 +103,33 @@ destination: web
 - onscreen: "image": "/card.png"
 - why: type and numbers are things a slide can do. A real image is the first thing that is not
 - emotion: escalation
-- duration: 3.4s
+- duration: 3.2s
 - transition_in: none
 
-## Beat 5: It says how to look at it (10.8s-14.4s)
+## Beat 5: It says how to look at it (9.4s-15.5s)
 - type: turn
 - object: none. The demonstration that moves the other three
 - shot: wide
 - camera: dolly and tilt, the film's only camera move
 - picture: the last line types and the CAMERA moves: the held frame tilts and pushes, and the file and its result are seen on a plane from an angle for the first time. As the camera travels, the file's four lines light one after another
-- mechanism: a real camera move over a tilted plane, so the perspective changes across it · the four lines lighting in sequence during the travel, which is the second change and the first time the whole file is seen at once
+- mechanism: a real camera move over a tilted plane, so the perspective changes across it · the four lines lighting in sequence during the travel, which is the second change and the first time the whole file is seen at once · the tilt REACHES its mark at 12.5s and then holds and drifts, so the move is on screen for six seconds and not two
 - becomes: two flat halves become a space with the film lying in it
 - onscreen: "camera": {"move": "diveIn"}
 - why: the escalation only pays if the last demonstration displaces the earlier ones, and this is the one that does
 - emotion: the click
-- duration: 3.6s
+- duration: 6.1s
 - transition_in: none
 
-## Beat 6: And that was the film (14.4s-17.0s)
+## Beat 6: And that was the film (15.5s-17.0s)
 - type: close
 - object: none. The bookend closes
 - shot: medium
-- camera: settle back to square
-- picture: the camera settles, the plane flattens, and the left half is a complete file while the right half is the finished frame it describes. One line arrives beneath
-- mechanism: the tilt resolving to zero rather than cutting away · the line arriving word by word, each settling before the next
+- camera: relax to about half the tilt, never back to square
+- picture: the divider fades, the tilt eases back to about half its peak, and one line arrives across the WHOLE frame beneath both halves, at 80px, larger than anything else left on screen
+- mechanism: the tilt easing DOWN rather than out, so the film ends in the space it opened up · the divider dissolving, so two columns become one statement · the line arriving word by word, each settling before the next
 - becomes: an empty file becomes the film it was describing all along
 - onscreen: One file. One video.
-- why: the first frame was an empty file and the last is the film it made, which is the bookend closing
+- why: the first frame was an empty file and the last is the film it made, which is the bookend closing. The first cut snapped the plane flat at 15.8s and spent its last three seconds square, which threw away the only thing beat 5 had built
 - emotion: settled
-- duration: 2.6s
+- duration: 1.5s
 - transition_in: none
