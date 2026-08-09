@@ -5736,3 +5736,46 @@ already guards for its shared scan, on the one path that had no guard.
 
 **Class.** A rule written for the arrangement of the code on the day (`everything is one flat
 directory`) rather than for the property it was checking (`follow where the props go`).
+
+---
+
+## #233 — the camera scaled a finished picture and called it a push
+
+**What.** `tilt` shipped and a card could lean, but no camera move could get past it. Pan the camera 300px
+across a card tilted 30 degrees and the card's projected shape changed by **0.00%** — it slid and it grew
+and it never turned. Every vanishing point in the frame travelled with its own layer. Measured on the
+engine's real CSS in `scripts/dev/spike-dolly.mjs`, and again as an A/B render either side of the fix: the
+old engine holds the card's width/height at 0.905 · 0.907 · 0.908 · 0.906 across the whole move.
+
+**Root cause.** `perspective` sat on `#cam` and the camera's own `s/x/y` sat on that same `#cam`, as a 2D
+transform. So the projection was finished before the camera moved, and the camera was moving a
+photograph of the scene rather than standing in it. This is #59's lesson applied one level too high: #59
+correctly moved the lens off the layers and onto the thing that contains them, and then the camera was
+put on that same element, where it does not compose with the lens at all.
+
+**The second half, which is a naming failure and the reason this took a design round.** The obvious repair
+is a `z` keyframe key beside `s`. That is wrong, and it is the shape `core/fx/index.js` already names:
+one idea wearing several costumes. Under a lens of focal length `p`, a camera at distance `d` magnifies
+the canvas plane by `p/d` — so a magnification and a depth are ONE number in two units, and `s` was never
+a scale sitting beside depth. It WAS the depth, written in the unit an author frames in, and implemented
+as a scale. A `z` beside it would have been two knobs for one idea that disagree with each other the
+moment anything in the frame is tilted.
+
+**Fix.** One camera model — position (`x`, `y`, `s`), orientation (`roll`, `rx`, `ry`), lens (`p`) — with
+two provably equivalent emissions. Where nothing leaves the canvas plane every point is at z=0 and the
+perspective projection collapses exactly to the affine `scale(s) translate(x,y)`, which is still what gets
+written, for #59's reason: a 3D transform changes rasterisation even when it changes no geometry. Where
+anything DOES leave the plane the engine builds a rig — lens on `#root`, `#cam` inside it in
+`preserve-3d`, layer rotations composing into one 3D space. `dollyZ(s, lens)` is the whole conversion and
+`roll` is the one axis that genuinely did not exist. `tilt` at top level stops writing a lens of its own
+(a second projection leans a card about twice as hard as asked) and hands its `dist` and `origin` to the
+stage, so nothing an author wrote is dropped.
+
+**Which gate catches it.** `scripts/dev/spike-dolly.mjs` — and it asserts the NEGATIVE as well as the
+positive, which is what makes it a gate rather than a demo: the flat emission must be pixel-identical to
+the rig at rest, and it must be *unable* to move a vanishing point. A spike that only checked the new path
+would have passed against the old engine too. `lib-test` round-trips `dollyZ` back through the projection.
+
+**Class.** Twice in one file now: a measurement taken at the wrong level (#59 found the lens one level too
+low, this found the camera one level too high), and a knob whose NAME had drifted from what it was —
+`s` was called a scale for long enough that adding depth looked like adding a key.

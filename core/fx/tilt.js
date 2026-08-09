@@ -47,6 +47,14 @@
 // the group layer instead; its children then ride the group's single rotation, which is usually what a
 // composed card wants anyway.
 //
+// UNDER A CAMERA RIG none of the above applies to a TOP-LEVEL layer, and that is the point. A tilted
+// layer is the thing that makes the frame three-dimensional, so a scene containing one puts the lens on
+// the STAGE instead and turns `#cam` into a rig standing inside it (formats/scene/scene.js). This
+// modifier then contributes its rotation alone; `dist` and `origin` are read at build and become the
+// stage's lens and vanishing point, so nothing an author wrote is dropped, and the camera can travel
+// past the layer with the perspective changing as it goes — which the per-parent camera cannot do,
+// because it projects before the camera moves. A group child is unaffected: it keeps its own camera.
+//
 // KNOWN INTERACTION, because it is invisible until it bites: a few `cut` presets (flip, cube) animate a
 // `perspective(...)` transform FUNCTION of their own. Under a parent camera those layers are projected
 // twice and lean harder than they did. It only ever happens inside a scene that opted into tilt — a
@@ -116,27 +124,39 @@ export function build(kit, el, L, spec) { resolve(spec); }
 export function frame(kit, el, L, t, scene, spec) {
   const { dist, origin, rot } = resolve(spec);
   const parent = el.parentNode;
+  const inGroup = !el.classList.contains('hs-layer');
+  // UNDER A CAMERA RIG the lens is already on the stage and this layer's parent is inside its 3D space
+  // (formats/scene/scene.js). Writing a second `perspective` here would project the layer once through
+  // its parent and again through the stage, and a doubly-projected card leans about twice as hard as
+  // the angle asks for. So a top-level tilt contributes its ROTATION and nothing else, and the camera
+  // owns the vanishing point — which is the whole reason it can now be travelled past.
+  //
+  // A GROUP CHILD keeps its own camera, because that was always its contract (see the header): a group
+  // is its own diorama with its own vanishing point at its own centre. It is flattened into the group's
+  // plane and the group then rides the rig, so a tilted group child does not gain depth from a camera
+  // move. To travel past a composed card, tilt the GROUP.
+  if (inGroup || !(scene.camera && scene.camera.rig)) {
   // The camera is a property of the FRAME, so every tilted layer under one parent describes the same
   // camera and they must agree. Two siblings asking for different distances is two cameras in one
   // stacking context, which CSS resolves by last-writer-wins and shows as one of the two silently
   // losing its lens. Refused instead, with both values named.
-  const persp = `${dist}px`;
-  // perspective-origin resolves against the PARENT's box (see the header), so for a group child the
-  // camera centres on the group. A top-level layer's parent is #cam or a .hs-beat wrapper, both inset:0
-  // over the canvas, so px there ARE canvas coordinates.
-  const inGroup = !el.classList.contains('hs-layer');
-  const org = origin === 'center'
-    ? (inGroup ? '50% 50%' : `${scene.canvas.w / 2}px ${scene.canvas.h / 2}px`)
-    : `${origin[0]}px ${origin[1]}px`;
-  if (parent.style.perspective && parent.style.perspective !== persp)
-    throw new Error(`tilt: two layers under the same parent asked for different camera distances `
-      + `(${parent.style.perspective} and ${persp}). One parent is one camera; give every tilted layer `
-      + `in this group the same \`dist\`, or move one of them into a group of its own.`);
-  if (parent.style.perspectiveOrigin && parent.style.perspectiveOrigin !== org)
-    throw new Error(`tilt: two layers under the same parent asked for different camera origins `
-      + `(${parent.style.perspectiveOrigin} and ${org}). One parent is one vanishing point.`);
-  parent.style.perspective = persp;
-  parent.style.perspectiveOrigin = org;
+    const persp = `${dist}px`;
+    // perspective-origin resolves against the PARENT's box (see the header), so for a group child the
+    // camera centres on the group. A top-level layer's parent is #cam or a .hs-beat wrapper, both
+    // inset:0 over the canvas, so px there ARE canvas coordinates.
+    const org = origin === 'center'
+      ? (inGroup ? '50% 50%' : `${scene.canvas.w / 2}px ${scene.canvas.h / 2}px`)
+      : `${origin[0]}px ${origin[1]}px`;
+    if (parent.style.perspective && parent.style.perspective !== persp)
+      throw new Error(`tilt: two layers under the same parent asked for different camera distances `
+        + `(${parent.style.perspective} and ${persp}). One parent is one camera; give every tilted layer `
+        + `in this group the same \`dist\`, or move one of them into a group of its own.`);
+    if (parent.style.perspectiveOrigin && parent.style.perspectiveOrigin !== org)
+      throw new Error(`tilt: two layers under the same parent asked for different camera origins `
+        + `(${parent.style.perspectiveOrigin} and ${org}). One parent is one vanishing point.`);
+    parent.style.perspective = persp;
+    parent.style.perspectiveOrigin = org;
+  }
   // Written on every frame and always in full, never appended to: the value is a function of the spec
   // alone, so a cold render and a warm one agree and any render order gives the same string.
   el.style.rotate = rot ? `${rot.x.toFixed(6)} ${rot.y.toFixed(6)} ${rot.z.toFixed(6)} ${rot.deg.toFixed(4)}deg` : 'none';

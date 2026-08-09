@@ -5,7 +5,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
-import { cameraAt, motionAt, resolveKeyedProps } from '../../core/sequence.js';
+import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
@@ -294,6 +294,21 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('cameraAt mid scale', approx(cmid.s, 1.5));
   ok('cameraAt mid pan', approx(cmid.x, 50) && approx(cmid.y, -25));
   ok('cameraAt defaults missing keys', approx(cameraAt([{ t: 0 }, { t: 1 }], 0.5).s, 1));
+  ok('cameraAt roll defaults to 0', cameraAt([{ t: 0 }, { t: 1 }], 0.5).roll === 0);
+  ok('cameraAt roll lerps', approx(cameraAt([{ t: 0, roll: 0 }, { t: 1, roll: 10 }], 0.5).roll, 5));
+
+  // dollyZ — `s` is WHERE THE CAMERA STANDS, so it must convert to a depth the projection agrees with:
+  // a camera whose translateZ is z magnifies the canvas plane by lens/(lens-z), and that must come back
+  // out as exactly the `s` that went in. A round trip is the only assertion that catches a sign flip.
+  ok('dollyZ identity at s=1', dollyZ(1, 1600) === 0);
+  ok('dollyZ round-trips through the projection', [1.05, 1.35, 2, 0.6].every((s) => {
+    const z = dollyZ(s, 1600);
+    return approx(1600 / (1600 - z), s);
+  }));
+  ok('dollyZ scales with the lens', approx(dollyZ(2, 800), 400) && approx(dollyZ(2, 1600), 800));
+  ok('dollyZ refuses a camera at infinite distance', (() => {
+    try { dollyZ(0, 1600); return false; } catch (e) { return /positive magnification/i.test(e.message); }
+  })());
 
   // motionAt: clamps before first / after last kf; lerps a mid-segment; honors per-kf ease
   const kf = [{ t: 0, x: 0, y: 0, scale: 1, opacity: 0 }, { t: 1, x: 100, y: 20, scale: 2, opacity: 1 }];

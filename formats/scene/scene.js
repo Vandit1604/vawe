@@ -13,7 +13,8 @@ import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene } from '/core/transitions-lower.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
-import { cameraAt, motionAt, resolveKeyedProps } from '/core/sequence.js';
+import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
+import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
@@ -627,6 +628,72 @@ boot((data, fps, theme, canvas) => {
     throw new Error(`unknown captionStyle "${capStyle}" — known: ${Object.keys(CAP_STYLES).join(', ')}`);
   const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
 
+  // ---- THE CAMERA RIG: one model, two emissions ----
+  //
+  // The camera is a position in space (core/sequence.js). Where NOTHING in the frame leaves the canvas
+  // plane, every point sits at z=0 and the perspective projection of the whole frame collapses exactly
+  // to the affine `scale(s) translate(x,y)` this engine has always written — same picture, to the pixel,
+  // proved in scripts/dev/spike-dolly.mjs. So that string is still what gets emitted, for the reason
+  // #59 gives: a 3D transform promotes the subtree into a 3D rendering context and changes rasterisation
+  // even when it changes no geometry, and a film with no depth in it should not pay that.
+  //
+  // The moment anything DOES leave the plane — a tilted layer, or a camera that pitches, yaws or rolls —
+  // the flat emission stops being equivalent, and it fails in the one way that matters: it moves an
+  // already-finished projection, so a tilted card's vanishing point travels WITH the card and the
+  // perspective never changes however far the camera goes. That is the tell in
+  // docs/CRAFT/REF-pin-16818198602994243.md, and it is why this is a rig and not a transform.
+  //
+  //   #root  perspective + perspective-origin   the EYE, fixed to the frame
+  //   #cam   transform-style: preserve-3d       the RIG, standing inside the eye's space
+  //   layer  rotate: <axis> <deg>               tilt, unchanged (core/fx/tilt.js)
+  //
+  // Every layer rotation now composes with the rig's own transform in ONE 3D space, projected once. A
+  // pan becomes a TRUCK past the subject, `s` becomes a real dolly, and the vanishing point stays nailed
+  // to the frame while the world crosses it.
+  // KNOWN INTERACTION, named because it is invisible until it bites. `opacity < 1`, `filter` and a clip
+  // are GROUPING properties: they flatten the element they sit on, 3D context and all. A cut writes
+  // exactly those, onto `#cam` (whole-frame) or onto a beat wrapper (`sceneUnits`) — which is where the
+  // rig lives. So for the few frames a fading or blurring cut is mid-flight, a tilted frame loses its
+  // depth and pops back. It is steady-state-safe (the identity reset writes `none`/`1`), and no shipped
+  // scene both tilts and cuts. Pair depth with a cut that only TRANSLATES, or accept the pop. The fix,
+  // when a film needs both, is to split the rig onto an element of its own between `#cam` and the
+  // layers, so the cut and the camera stop sharing a node.
+  const tiltFx = layers.slice(0, topCount)
+    .map(({ L }) => specsOf(L).find((f) => f.name === 'tilt')).filter(Boolean);
+  const RIG = tiltFx.length > 0
+    || camKf.some((k) => Math.abs(k.rx || 0) > 1e-3 || Math.abs(k.ry || 0) > 1e-3 || Math.abs(k.roll || 0) > 1e-3);
+  // THE LENS HAS ONE OWNER. `tilt.dist` and the camera's `p` are the same focal distance, and under the
+  // rig only one of them can be on the stage — so a scene that states both is refused with both values
+  // named, rather than one of them silently losing. Without a camera `p`, a top-level tilt's `dist` IS
+  // the lens, which is what keeps `dist` meaningful instead of quietly ignored.
+  const tiltDists = [...new Set(tiltFx.map((f) => f.spec && f.spec.dist).filter((d) => d != null))];
+  if (RIG && tiltDists.length > 1)
+    throw new Error(`tilt: top-level layers asked for different camera distances (${tiltDists.join(', ')}px). `
+      + `One frame is one lens — give them the same \`dist\`, or set it once as the camera's \`p\`.`);
+  if (RIG && tiltDists.length && camKf.some((k) => k.p != null))
+    throw new Error(`the camera declares a lens (\`p\`) and a tilted layer declares another (\`dist\`: ${tiltDists[0]}px). `
+      + `Under a moving camera the lens belongs to the camera: drop \`dist\` and keep \`p\`.`);
+  const rigLens = tiltDists.length ? tiltDists[0] : null;   // null → the camera's own `p` (keyable)
+  // …and the vanishing point the same way. `tilt.origin` is where the eye sits IN THE FRAME, which under
+  // the rig is a property of the stage rather than of any one layer's parent. Resolved here so an
+  // authored origin still lands instead of being quietly overwritten by the rig's default centre.
+  const tiltOrigins = [...new Set(tiltFx.map((f) => f.spec && f.spec.origin)
+    .filter((o) => Array.isArray(o)).map((o) => `${o[0]}px ${o[1]}px`))];
+  if (RIG && tiltOrigins.length > 1)
+    throw new Error(`tilt: top-level layers asked for different camera origins (${tiltOrigins.join(' and ')}). `
+      + `One frame is one vanishing point.`);
+  // The identity camera. Under the rig `scene.camera` is always a value, because a tilted scene with no
+  // camera keyframes still HAS a camera — one standing still at the default distance — and a modifier
+  // asking where it is should not have to tell "no keyframes" apart from "at the origin".
+  const CAM_REST = { s: 1, x: 0, y: 0, rx: 0, ry: 0, roll: 0, persp: 1600 };
+  if (RIG) {
+    $('root').style.perspectiveOrigin = tiltOrigins[0] || '50% 50%';
+    cam.style.transformStyle = 'preserve-3d';
+    // a beat wrapper sits BETWEEN the rig and its layers, and `transform-style: flat` is the default on
+    // every element, so without this the whole 3D context dies one level down (spike-3d.mjs, case H).
+    for (const w of beatWrap) w.style.transformStyle = 'preserve-3d';
+  }
+
   // ---- SEAMS: two-scene shader transitions (core/seams.js) ----
   // [{t, fx, dur, dir?, seed?, intensity?}] — the two beats either side of the boundary are
   // rasterised ONCE (bakeSeams, at build) into u_from/u_to; renderFrame only SAMPLES them, so
@@ -691,7 +758,13 @@ boot((data, fps, theme, canvas) => {
     resolveBoxes(t);
     // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
     // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
-    const camNow = cameraAt(camKf, t);
+    // `rig` and `lens` ride on the camera because a modifier asking about the frame's depth is asking
+    // about the CAMERA, and core/fx/tilt.js reads exactly this to know whether the lens is already on
+    // the stage or whether it has to put one on its own parent.
+    const keyed = cameraAt(camKf, t);
+    const camNow = RIG
+      ? { ...CAM_REST, ...keyed, rig: true, lens: rigLens ?? (keyed || CAM_REST).persp }
+      : keyed;
     // THE CLOCK. A layer was handed t and nothing to measure it against, so "how far through the film
     // am I" could only be answered by the author restating the runtime inside the layer — a second
     // copy of a number the scene already owns, which stops being true the moment the film is re-cut.
@@ -754,12 +827,19 @@ boot((data, fps, theme, canvas) => {
   // style set (identity in steady state) so a cut property can never stick into a later frame,
   // whatever order frames render in. See MISTAKES #29 (the top-level `cuts` array was once inert).
   function drawCameraAndCut(t, c) {
-    // perspective() must lead the transform list, and is emitted ONLY when a tilt is actually asked
-    // for — a perspective function with no rotation still promotes the layer into a 3D rendering
-    // context and changes rasterisation, so scenes that never tilt stay byte-identical.
-    const tilt = c && (Math.abs(c.rx) > 0.001 || Math.abs(c.ry) > 0.001)
-      ? `perspective(${c.persp.toFixed(0)}px) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg) ` : '';
-    const camTf = c ? `${tilt}scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)` : '';
+    // THE RIG. The translate is written LAST in the list, so it is applied to points AFTER the
+    // orientation: x/y stay a screen-space slide and the dolly runs along the camera's own view axis
+    // rather than along the world's. The lens is re-stated every frame because `p` is keyable, and a
+    // dolly-zoom is exactly the shot where the camera moves and the lens changes together.
+    let camTf = '';
+    if (c && c.rig) {
+      $('root').style.perspective = `${c.lens.toFixed(0)}px`;
+      camTf = `translate3d(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px, ${dollyZ(c.s, c.lens).toFixed(2)}px) `
+        + `rotateZ(${c.roll.toFixed(3)}deg) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg)`;
+    } else if (c) {
+      // FLAT: nothing in this frame leaves the canvas plane, so the projection IS this affine map.
+      camTf = `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)`;
+    }
     let cutS = null;
     // sceneUnits mode drives the transition on the per-beat WRAPPERS (driveSceneUnits), not the whole
     // cam — so skip the cam-level cut entirely and let the wrappers swap the two beats as units.

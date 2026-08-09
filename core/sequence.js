@@ -5,7 +5,28 @@
 // DOM writes; the math lives here and is asserted by scripts/lib-test.mjs.
 import { clamp01, lerp, easeInOutCubic, resolveEasing } from './motion.js';
 
-// cameraAt(camKf, t): global camera keyframes → {s,x,y} (scale + pan), or null when there are none.
+// THE CAMERA IS A POSITION IN SPACE, and `s` is where it stands.
+//
+// Under a lens of focal length L, a camera at distance d from the canvas plane magnifies that plane by
+// L/d. So a magnification and a distance are the same number in two units, and `s` — which this engine
+// has always called a scale — was never a second idea beside depth. It was depth, written in the unit an
+// author frames in, and implemented as a 2D scale of an already-projected picture. That implementation
+// is what could not dolly: scaling a finished projection leaves every vanishing point exactly where it
+// was, so a tilted card grew without ever turning.
+//
+// dollyZ is the whole conversion: the CSS translateZ that puts the camera at the distance `s` asks for.
+// There is deliberately NO `z` keyframe key. A `z` beside `s` would be two knobs for one idea that
+// disagree with each other under perspective — the failure core/fx/index.js describes for layer types
+// wearing five costumes, reproduced in the camera.
+export function dollyZ(s, lens) {
+  // s → 0 puts the camera infinitely far away and s ≥ ... well past the plane inverts the projection.
+  // CSS accepts the resulting translateZ without a word and renders something no author asked for.
+  if (!(s > 0)) throw new Error(`camera: s must be a POSITIVE magnification — got ${JSON.stringify(s)}. `
+    + `s is where the camera STANDS (distance = lens / s), so 0 is a camera at infinite distance.`);
+  return lens * (1 - 1 / s);
+}
+
+// cameraAt(camKf, t): global camera keyframes → the camera's state at t, or null when there are none.
 // Keyframe times are SECONDS on the absolute timeline. Holds the last frame past the end.
 export function cameraAt(camKf, t) {
   if (!camKf || !camKf.length) return null;
@@ -19,13 +40,16 @@ export function cameraAt(camKf, t) {
   // multi-keyframe push. The old hardcoded ease-in-out zeroed velocity at every keyframe, so a chained
   // push pulsed (accelerate→stop→accelerate) — the "not smooth / shaking zoom" (docs/MISTAKES.md #125).
   const p = a === b ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((t - a.t) / (b.t - a.t)));
-  // rx/ry are a 3D TILT of the whole stage, and they belong to the camera rather than to a layer for a
+  // rx/ry/roll are the camera's ORIENTATION and they belong to the camera rather than to a layer for a
   // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
   // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
   // apart. Applied once on the camera root, every layer shares one vanishing point and the frame reads
   // as a single plane in space — which is what "perspective on the frame" means (docs/MISTAKES.md #59).
+  // `persp` is the LENS: the focal distance the projection is taken through, not the camera's position.
+  // Position is `s` (see dollyZ); confusing the two is the dolly-zoom, and it is authored by keying both.
   return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p),
     rx: lerp(a.rx ?? 0, b.rx ?? 0, p), ry: lerp(a.ry ?? 0, b.ry ?? 0, p),
+    roll: lerp(a.roll ?? 0, b.roll ?? 0, p),
     persp: lerp(a.p ?? 1600, b.p ?? 1600, p) };
 }
 

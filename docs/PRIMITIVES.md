@@ -259,7 +259,35 @@ same arbitrary motion, still deterministic (no wall clock, dedup-safe).
 
 ## Cameras
 
-- Global: `camera: [{t, s, x, y}]` keyframes (scene) / per-scene `camera` (demo) — eased pans+pushes.
+**The camera is a position in space, not a transform on the picture.** One model:
+`camera: [{t, x, y, s, roll, rx, ry, p, ease}]`.
+
+| key | what it is |
+|---|---|
+| `x`, `y` | where the camera is aimed, in canvas px |
+| `s` | **where the camera stands**, written as the magnification of the canvas plane. `1` is the default distance, `1.4` is closer. Under a lens of focal length `p` a camera at distance `d` magnifies by `p/d`, so a magnification and a distance are one number in two units. There is deliberately **no `z` key**: it would be a second knob for the same idea, and under perspective the two disagree. |
+| `roll` | rotation about the view axis, degrees |
+| `rx`, `ry` | pitch and yaw |
+| `p` | the **lens**: focal distance in px (default 1600, lower = wider). Not the camera's position — that is `s`. Keying both together is the dolly zoom. |
+
+Where nothing in the frame leaves the canvas plane, the whole projection collapses to
+`scale(s) translate(x,y)` and that is what gets emitted — the same picture to the pixel, without
+promoting the stage into a 3D rendering context. The moment anything *does* leave the plane (a `tilt`
+layer, or a non-zero `rx`/`ry`/`roll`) the engine builds a **rig**: the lens goes on the stage and `#cam`
+stands inside it in `preserve-3d`. Then a pan is a **truck past** the subject and `s` is a real **dolly** —
+the vanishing point stays nailed to the frame while the world crosses it, so a tilted card *turns* as the
+camera travels instead of merely sliding. That is the move the flat form cannot make, and
+`scripts/dev/spike-dolly.mjs` measures both: the flat form changes a tilted card's projected shape by
+0.00%, the rig by 9%+ over a 300px truck.
+
+**Depth and cuts share a node.** `opacity < 1`, `filter` and a clip flatten the element they sit on, and a
+cut writes exactly those onto the element the rig lives on. A tilted frame therefore loses its depth for
+the few frames a fading or blurring cut is in flight, and pops back. Steady state is safe. Pair depth with
+a cut that only translates.
+
+- Calculated moves: `cameraMove` sugar (`core/camera-moves.js`) — `slowPush` · `diveIn` · `panFollow` ·
+  `workspaceZoomOut` · `orbit` · `multiPhase`. `orbit` sweeps `ry`, so under the rig it is a real orbit.
+- Global: per-scene `camera` (demo) — eased pans+pushes.
 - Continuous: bg breathe `scale(1.05 + 0.02·sin(t·0.35))` — never resets at cuts.
 - Per-image: `ken: true | {from, to, fx, fy}` on image layers — clipped frame, slow zoom.
 - Impact: `shake(t - hitT, {seed})` on the camera wrapper at slam moments.
@@ -459,6 +487,13 @@ about either are a hard error, because one parent is one camera. On a **group ch
 to the group, so tilted children share a vanishing point local to the group and `origin` defaults to the
 group's centre; to tilt a whole group as one plane, put `tilt` on the group layer. A scene that declares
 no tilt has no camera written anywhere and renders byte-identical.
+
+A **top-level** tilt is what makes the frame three-dimensional, so it puts the scene on the camera rig
+(see *Cameras*): its `dist` and `origin` become the stage's lens and vanishing point, and the camera can
+then travel past the layer with the perspective changing as it goes. State the lens once — `dist` on a
+top-level tilt *and* `p` on the camera is refused with both values named, because one frame is one lens.
+A group child is unaffected and keeps its own camera, which also means it does not gain depth from a
+camera move; to travel past a composed card, tilt the **group**.
 
 **`kick` — hit the layer on the film's own joints.** `{"kick": true}`, or
 `{"kick": {"on": "cut", "scale": 1.08, "frames": 6}}`. On every cut, seam or sting (`on` picks the

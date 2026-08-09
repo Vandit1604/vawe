@@ -461,7 +461,7 @@
         },
         "s": {
           "type": "number",
-          "label": "Scale"
+          "label": "Where the camera stands, as the magnification of the canvas plane (1 = the default distance, 1.4 = closer). This is the camera's DEPTH, not a scale of the picture: with anything tilted in frame it dollies, so vanishing points move. There is deliberately no separate z key."
         },
         "ease": {
           "type": "string",
@@ -477,19 +477,25 @@
         },
         "rx": {
           "type": "number",
-          "label": "Camera tilt about X, degrees (perspective)",
+          "label": "Camera pitch, degrees (orientation)",
           "min": -45,
           "max": 45
         },
         "ry": {
           "type": "number",
-          "label": "Camera tilt about Y, degrees (perspective)",
+          "label": "Camera yaw, degrees (orientation)",
           "min": -45,
           "max": 45
         },
+        "roll": {
+          "type": "number",
+          "label": "Camera roll about the view axis, degrees. Turns the whole frame without flattening anything tilted inside it.",
+          "min": -180,
+          "max": 180
+        },
         "p": {
           "type": "number",
-          "label": "Perspective distance in px (default 1600; lower = stronger)",
+          "label": "The LENS: focal distance in px (default 1600; lower = wider). Not the camera's position — that is s. Keying both at once is the dolly zoom.",
           "min": 200,
           "max": 6000
         },
