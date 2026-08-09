@@ -308,6 +308,12 @@ function show(n) {
   location.hash = i ? '#' + (i + 1) : '';
   if (i === 4) restartB();          // the easing slide replays on arrival
 }
+// the hash was written on every move and never read again, so a pasted #4 or the browser's back
+// button changed the URL and left the deck where it was.
+addEventListener('hashchange', () => {
+  const want = Math.max(0, (+location.hash.slice(1) || 1) - 1);
+  if (want !== i) show(want);
+});
 $('prev').addEventListener('click', () => show(i - 1));
 $('next').addEventListener('click', () => show(i + 1));
 addEventListener('keydown', (e) => {
