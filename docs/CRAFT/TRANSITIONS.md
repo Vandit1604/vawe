@@ -1,3 +1,9 @@
+---
+when: "choosing the CUT between two beats (you can't say why a transition is there)"
+answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
+group: story
+---
+
 # TRANSITIONS — choosing the seam by theory, not habit
 
 A transition is the **seam between two beats**. Every school of editing agrees on one thing: the seam

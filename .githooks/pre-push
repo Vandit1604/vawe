@@ -4,8 +4,12 @@
 #
 # Installed via `make install-hooks` (sets core.hooksPath to .githooks).
 
-echo "▶ pre-push: framework gates (schema-check + lib-test) …"
-if ! make schema-check lib-test; then
+# craft-coverage is here because a doc-only commit never runs an authoring gate. The doc index went red
+# for weeks with four orphaned guides and a link to a file nobody wrote, and nothing noticed, because the
+# only thing that checked it was a command you had to remember to type. This is the place it cannot be
+# skipped by forgetting. It is pure file reads, so it costs about a second.
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage) …"
+if ! make schema-check lib-test craft-coverage; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

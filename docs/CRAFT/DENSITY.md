@@ -1,3 +1,9 @@
+---
+when: "a beat looks flat / slide-like"
+answers: "hero + support + metadata triad · the \"produced\" tell · thin-beat rule"
+group: density
+---
+
 # Density — "produced, not generated"
 
 The single biggest reason a beat looks *generated* (flat, web-page-like, AI) instead of *produced*

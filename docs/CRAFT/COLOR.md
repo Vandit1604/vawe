@@ -1,3 +1,9 @@
+---
+when: "authoring a `theme` palette, choosing bg/accent"
+answers: "build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG"
+group: look
+---
+
 # COLOR — building a palette
 
 Colours come **only from the brand** — eyedrop the real pixels (`make palette`), never invent. This guide is

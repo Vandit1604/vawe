@@ -1,3 +1,9 @@
+---
+when: asking what you may do with output from this repo
+answers: "the licence in plain answers: commercial use, redistribution, the bundled assets"
+group: project
+---
+
 # License FAQ
 
 Vawe uses the **[Vawe Company License 1.0](LICENSE)** — a *source-available* license

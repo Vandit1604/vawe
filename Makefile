@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples
+.PHONY: dev check ship script animatic styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -245,11 +245,24 @@ knobs-audit:
 coverage:
 	node scripts/gates/coverage.mjs
 
-# make craft-coverage  — keep the CRAFT decision docs honest: every look/sting in the engine is
-# classified in SELECTION.md, no doc names a removed effect, CRAFT cross-links resolve, no guide is
-# orphaned from the README index. FAIL tier (exits 1) so the docs can't silently rot.
+# make craft-coverage  — keep the docs honest: every look/sting in the engine is classified in
+# SELECTION.md, no doc names a removed effect, cross-links resolve REPO-WIDE, no guide is orphaned from
+# an index, every indexed doc carries its `when:`/`answers:` frontmatter, and every generated index view
+# is current. FAIL tier (exits 1) so the docs can't silently rot. Also runs in .githooks/pre-push,
+# because a doc-only commit never touches a render gate. Doc-map detail: scripts/gates/doc-map.mjs.
 craft-coverage:
 	node scripts/gates/craft-coverage.mjs
+
+# make docs  — PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…,
+# it answers…). Read the line, open only the doc you need. Same map as the `vawe-docs` skill.
+docs:
+	@cat docs/INDEX.md
+
+# make doc-index  — regenerate every index view from the per-doc frontmatter: docs/INDEX.md, the
+# `vawe-docs` skill, and the table inside docs/CRAFT/README.md. Run it after editing a doc's `when:` or
+# `answers:`, or after adding a doc. The views are generated so they cannot drift from the docs.
+doc-index:
+	node scripts/gates/doc-map.mjs --write
 
 # make transitions [BASIC=1]  — print THE TRANSITION DATABASE (core/transitions.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.

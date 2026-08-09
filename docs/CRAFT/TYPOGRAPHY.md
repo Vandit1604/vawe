@@ -1,3 +1,9 @@
+---
+when: "picking `type.sans/serif/mono`, sizing headlines"
+answers: which face signals which personality · pairing · the size scale · weight/tracking/leading
+group: look
+---
+
 # TYPOGRAPHY — choosing and setting type
 
 A good face does ~90% of the work; spend the effort *before* styling (Butterick). When reflecting a brand,

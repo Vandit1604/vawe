@@ -1,3 +1,9 @@
+---
+when: "you need a transition's REAL numbers (a reference to reproduce, or to verify our own render)"
+answers: "`make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop"
+group: story
+---
+
 # MEASURE — read a transition's real motion, in our own vocabulary
 
 Eyeballing frames tells you "a slide with some easing." It does not tell you `duration: 0.43s, ease:

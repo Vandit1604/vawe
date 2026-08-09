@@ -1,3 +1,9 @@
+---
+when: driving this engine from a fresh session over MCP rather than from the shell
+answers: "one-time setup · registering the server · the tools it exposes"
+group: process
+---
+
 # Making a video from a fresh Claude session
 
 Vawe runs as an MCP server. Your Claude writes the scene JSON; the server expands blocks, runs the

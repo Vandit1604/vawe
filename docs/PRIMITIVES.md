@@ -1,3 +1,9 @@
+---
+when: writing scene JSON and you need to know what a layer may contain
+answers: "every primitive and prop · the responsive one-source→every-aspect model · the motion math exports"
+group: reference
+---
+
 # The primitive library — everything you compose videos from
 
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).

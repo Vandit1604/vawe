@@ -1,3 +1,9 @@
+---
+when: you need the product thesis rather than the mechanics
+answers: who this is for, what it replaces, and what it deliberately does not do
+group: project
+---
+
 # Product
 
 ## Register

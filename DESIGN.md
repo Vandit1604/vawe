@@ -1,4 +1,7 @@
 ---
+when: you want the reasoning behind the engine design, not the API
+answers: "the design rationale: why one module, why JSON, why determinism is the constraint everything bends to"
+group: project
 name: Vawe
 description: One JSON, one video. A deterministic motion-graphics engine, and the site that proves it.
 colors:

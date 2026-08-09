@@ -1,3 +1,9 @@
+---
+when: deciding the beats and their order
+answers: "the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats"
+group: story
+---
+
 # STORY — why these beats, in this order, doing what
 
 The four other spines answer how a frame looks, fills, moves, and sounds. This one answers the

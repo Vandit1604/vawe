@@ -1,3 +1,9 @@
+---
+when: a beat has a role and you need the technique that serves it
+answers: "concept→technique catalog: backgrounds, motion character, transitions, with exact recipes per concept"
+group: reference
+---
+
 # Design database — animation & style catalog (concept → technique)
 
 A working "design brain" for the video engine: given a **concept/beat**, look up which

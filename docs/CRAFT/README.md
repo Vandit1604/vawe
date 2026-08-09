@@ -40,46 +40,50 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 ---
 
+<!-- docmap:start -->
 ## The full index
 
 **Front-to-back & cross-cutting:**
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [APPROVAL-STOPS.md](APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the three points where the work gets shown before it is finished: concept · style frames · the 85% draft |
-| [REF-pin-16818198602994243.md](REF-pin-16818198602994243.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
-| [SUBAGENT-BUDGET.md](SUBAGENT-BUDGET.md) | "why did that fan-out cost so much" | the measured cost of a real run here, and the rules that follow: fewer and larger agents, file contents in the prompt, never two agents on one file |
-| [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
-| [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
+| [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [BLUEPRINTS.md](BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
-| [`vawe-continuous-action`](../../.claude/skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) from a one-line brief, or your plan is coming out hook-then-feature-then-logo | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`. |
+| [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |
+| [DIRECTION.md](DIRECTION.md) ⚠ | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
+| [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
 | [KEYED-MOTION.md](KEYED-MOTION.md) | a film has the right structure and still feels amateur, or a recreation drifts where the original snaps | how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated |
+| [REF-pin-16818198602994243.md](REF-pin-16818198602994243.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
+| [SOUND.md](SOUND.md) | the film has no sound, or you are about to ship it mute | sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands |
+| [SUBAGENT-BUDGET.md](SUBAGENT-BUDGET.md) | "why did that fan-out cost so much" | the measured cost of a real run here, and the rules that follow: fewer and larger agents, file contents in the prompt, never two agents on one file |
 | [SUBAGENTS.md](SUBAGENTS.md) | judging your own render (a full pass, a recreation, anything you'll ship) | why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message |
+| [`vawe-continuous-action`](../../.claude/skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) whose subject really is one thing changing — pick it from FILM-STRUCTURE.md first, it is one device of about eighteen | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`. |
 
 **What & why (the story layer):**
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
-| [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles |
-| [TRANSITIONS.md](TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
 | [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
-| [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this") | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · the honest 1:1 ceiling |
+| [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
+| [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles |
+| [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
 | [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
+| [TRANSITIONS.md](TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
 
 **How it looks (the house-style layer):**
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
-| [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
-| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
-| [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
-| [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
-| [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) (gate: `make storyboard-check`). |
 | [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
+| [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
+| [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
+| [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
+| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
+| [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) ⚠ | filling in the storyboard `make storyboard-check` and `make intent` read | the fill-in template: frontmatter (including the `object:` the film is held by) · one block per beat · what each field must name |
+| [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
+| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 
 **How full · how it sounds:**
 
@@ -87,7 +91,11 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 |---|---|---|
 | [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
 | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
-| [SOUND.md](SOUND.md) | deciding audio | music-vs-silence · bed mood→feeling · sfx restraint · caption style→intent · per-profile policy |
+
+_GENERATED by `make doc-index` from each guide's `when:` / `answers:` frontmatter — the rows cannot
+drift from the docs. Change a description in the doc, then run `make doc-index`. The whole-repo map,
+including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
+<!-- docmap:end -->
 
 ## How these relate to the rest of the docs (no overlap)
 - **CRAFT/** = *how to choose/build* (decisions). ← you are here

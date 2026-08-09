@@ -1,3 +1,9 @@
+---
+when: you know the vocabulary and just need the shape of a scene file
+answers: "the one-page cheat sheet: scene shape · layer kinds · the fields you reach for most"
+group: reference
+---
+
 # Scene quick reference
 
 Everything needed to write a good scene, in one read. Call `vawe_guide` with `detail: "full"` only

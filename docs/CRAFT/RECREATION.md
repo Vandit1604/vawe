@@ -1,3 +1,9 @@
+---
+when: "recreating a specific reference video end to end (\"make ours look like this\")"
+answers: "the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · the honest 1:1 ceiling"
+group: story
+---
+
 # RECREATION — recreate a reference video, end to end
 
 You are handed a video ("make ours look like this") and there is no HTML to copy — a reference is

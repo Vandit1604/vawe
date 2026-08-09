@@ -1,3 +1,9 @@
+---
+when: a film has the right structure and still feels amateur, or a recreation drifts where the original snaps
+answers: "how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated"
+group: crosscutting
+---
+
 # KEYED MOTION — how the exemplar actually moves
 
 `formats/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything

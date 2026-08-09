@@ -1,3 +1,9 @@
+---
+when: "judging your own render (a full pass, a recreation, anything you'll ship)"
+answers: "why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message"
+group: crosscutting
+---
+
 # SUBAGENTS: one critic, one job, one verdict
 
 Authoring a video well takes several **different** kinds of judgement: does this beat read, does the

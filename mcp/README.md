@@ -1,3 +1,9 @@
+---
+when: running or changing the MCP server that exposes this engine to other agents
+answers: "the server layout: which tool does what, how a draft becomes a render, and where uploads and pricing live"
+group: engine
+---
+
 # Vawe MCP server
 
 Vawe as a product: the caller's own model writes a scene, this renders it.

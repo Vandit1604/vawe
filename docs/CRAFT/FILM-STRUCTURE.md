@@ -1,3 +1,9 @@
+---
+when: "\"what holds this film together across its cuts\""
+answers: the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last
+group: crosscutting
+---
+
 # Film structure — what holds a short film together
 
 This library has one answer to that question. One object survives every cut and changes there.

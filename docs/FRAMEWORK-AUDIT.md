@@ -1,3 +1,9 @@
+---
+when: arguing about a gap between this engine and another engine or another engine
+answers: "the benchmarked audit, severity-ranked, of API consistency, text fit and the rest"
+group: engine
+---
+
 # FRAMEWORK-AUDIT — the scene engine, benchmarked against another engine & another engine
 
 Audited July 2026. Scope = the **permanent** engine (not videos): `formats/scene/scene.html`,

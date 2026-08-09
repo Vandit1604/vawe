@@ -1,3 +1,9 @@
+---
+when: you have never run this repo
+answers: what vawe is, how to install it, and the one command that turns a JSON into an mp4
+group: project
+---
+
 <div align="center">
 
 # Vawe

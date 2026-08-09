@@ -1,3 +1,9 @@
+---
+when: you know the motion you want and need the exact keys to type
+answers: "copy-paste atomic recipes keyed to the schema: entrances · overshoot/spring · counts · cameras"
+group: reference
+---
+
 # MOTION-RECIPES — the atomic recipe index (copy-paste motion, keyed to the schema)
 
 The fastest way to author snappy, directed motion instead of default fades. Each recipe is **one line**:

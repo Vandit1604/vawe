@@ -1,3 +1,9 @@
+---
+when: picking the transition/font/look/sting for a feeling
+answers: intent→effect (cited) · complete look/sting coverage · 8 named reference profiles
+group: story
+---
+
 # SELECTION — intent → the right effect, and why
 
 `MOTION-CRAFT.md` is effect-first ("`whip` = momentum"). This file is **intent-first**: you know the

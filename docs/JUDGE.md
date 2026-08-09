@@ -1,3 +1,9 @@
+---
+when: the render is done and something must actually LOOK at it
+answers: the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this
+group: process
+---
+
 # The vision judge — the gate that SEES
 
 `validate`/`critique`/`slop`/`audit` are **static** — they read the DOM/JSON. None can see whether the
@@ -36,8 +42,11 @@ Then the agent **reads the sheet against the rubric** and returns a structured v
 ## What this judge cannot do: tell you whether an edit HELPED
 
 It sees one film, and the agent running it knows which version it just authored. Both limits are fatal to
-the question "is this better than what I had". For that, use the blind A/B judge
-([`CRAFT/AB-JUDGE.md`](CRAFT/AB-JUDGE.md)): two cuts, paired beat by beat, arms hidden, three judges.
+the question "is this better than what I had". For that you need a blind A/B judge: two cuts, paired
+beat by beat, arms hidden, three judges. **It does not exist yet.** This file pointed at a
+`CRAFT/AB-JUDGE.md` that was never written, and [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) records the
+same gap — an `ab` critic advertised with no make target and no script. Until one is built, tile the two
+renders with `make compare` and judge them by eye, knowing you know which arm is which.
 
 **N reduces variance, not bias.** Three judges drawn from one model share their blind spots, so a 3-0
 there is weaker evidence than the arithmetic suggests, and it is not certainty. The only real control is

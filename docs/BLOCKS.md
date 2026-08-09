@@ -1,3 +1,9 @@
+---
+when: "you want a ready-made composed block instead of stacking primitives by hand"
+answers: "the block registry (`make catalog`) · the contract each block honours · what every block renders"
+group: reference
+---
+
 # Block catalog — the taste library
 
 `blocks/index.mjs` is our **vetted UI component library** for scenes (a registry, like shadcn but each

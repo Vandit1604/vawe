@@ -1,3 +1,9 @@
+---
+when: changing the engine itself, not a video
+answers: "the system map: JSON → validate → scene.html → renderFrame(n) → Go renderer → mp4, and who owns what"
+group: engine
+---
+
 # Vawe — architecture codemap
 
 > One self-describing JSON → one rendered Short (1080×1920 / 1920×1080, 30fps, mp4).

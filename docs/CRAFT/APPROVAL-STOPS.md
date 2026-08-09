@@ -1,3 +1,9 @@
+---
+when: "\"we built the whole thing and then it was rejected\""
+answers: "the three points where the work gets shown before it is finished: concept · style frames · the 85% draft"
+group: crosscutting
+---
+
 # Approval stops — show the work before it is finished
 
 Three points in the pipeline where the author **stops**, shows one screen, and does not start the next

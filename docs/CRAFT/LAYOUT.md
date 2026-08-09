@@ -1,3 +1,9 @@
+---
+when: placing layers, composing a beat
+answers: grid · one hero · asymmetry vs centered · archetype→intent · safe zones
+group: look
+---
+
 # LAYOUT — composing a frame
 
 Layout is where hand-authored work most often regresses to slop (centered everything, equal card grid). This is

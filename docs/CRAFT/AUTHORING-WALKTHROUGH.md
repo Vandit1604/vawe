@@ -1,3 +1,9 @@
+---
+when: authoring a whole video, especially with no brand site
+answers: "the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship"
+group: crosscutting
+---
+
 # AUTHORING-WALKTHROUGH — one good video, from a blank page to shipped
 
 Every other doc is a *reference* you dip into. This is the one **narrative**: it walks a single video

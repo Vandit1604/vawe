@@ -1,3 +1,9 @@
+---
+when: the film must hold together and its subject is NOT one object that transforms
+answers: "the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor"
+group: crosscutting
+---
+
 # Continuity without an object
 
 `no-continuous-object` asks a film to STAY WITH a subject across its cuts. This library has answered that

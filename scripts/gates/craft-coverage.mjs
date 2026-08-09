@@ -1,14 +1,18 @@
-// scripts/gates/craft-coverage.mjs — keep the CRAFT decision docs honest against the engine.
+// scripts/gates/craft-coverage.mjs — keep the docs honest: against the engine, and against each other.
 //
 //   make craft-coverage
 //
-// Three ways the docs rot, each caught here so a doc can never silently lie to an author:
+// Four ways the docs rot, each caught here so a doc can never silently lie to an author:
 //   1. COVERAGE — a look (core/looks.js) or sting (core/stings.js SHADER_FX) exists in the engine but
 //      no CRAFT doc classifies it, so an author reaching for it finds no guidance. (New effects added
 //      to a registry without a doc row trip this.)
 //   2. PHANTOMS — a doc names a look/sting the engine no longer has (a rename left a dead reference).
 //   3. LINKS + INDEX — a CRAFT cross-link points at a missing file, or a CRAFT guide is orphaned
 //      (not linked from README's index, so nobody finds it).
+//   4. THE DOC MAP (scripts/gates/doc-map.mjs) — repo-wide, not CRAFT-only: every indexed doc carries
+//      the `when:`/`answers:` frontmatter the map is generated from, every generated view is current,
+//      every markdown link anywhere resolves, and nothing is written and left unreachable. Checks 3
+//      and 4 overlap on purpose: 3 is the CRAFT-local rule, 4 is the same rule for the other 90 docs.
 //
 // Docs are the source of truth for TASTE; this gate is the backstop for the source-decidable subset,
 // exactly the split TASTE-RULES describes. Pure: reads files, no render, no network.
@@ -17,6 +21,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { SHADER_FX } from '../../core/stings.js';
+import { run as runDocMap } from './doc-map.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT = path.join(ROOT, 'docs', 'CRAFT');
@@ -86,21 +91,27 @@ function indexErrors() {
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
+  const docmap = runDocMap();
   const groups = [
     ['registry coverage', coverageErrors()],
     ['phantom references', phantomErrors()],
     ['cross-links', linkErrors()],
     ['README index', indexErrors()],
+    ['doc map', docmap.fails],
   ];
+  // Named on every run, never silently absent: an incomplete index must announce itself.
+  for (const msg of docmap.pending) console.warn(`  ⚠ doc map: ${msg}`);
   const failed = groups.filter(([, e]) => e.length);
   if (failed.length) {
-    console.error('✗ craft-coverage: the CRAFT docs are out of sync with the engine\n');
+    console.error('✗ craft-coverage: the docs are out of sync\n');
     for (const [name, e] of failed) {
       console.error(`  ${name}:`);
       for (const msg of e) console.error(`    - ${msg}`);
     }
-    console.error('\n  Fix: classify new looks/stings in docs/CRAFT/SELECTION.md §4, repair the link, or add the doc to README.');
+    console.error('\n  Fix: classify new looks/stings in docs/CRAFT/SELECTION.md §4, repair the link, add the doc to README,');
+    console.error('  or give the doc `when:`/`answers:`/`group:` frontmatter and run `make doc-index`.');
     process.exit(1);
   }
   console.log(`✓ craft-coverage: ${LOOK_NAMES.length} looks + ${SHADER_FX.length} stings classified · all CRAFT links + index intact`);
+  console.log(`✓ doc map: ${docmap.entries.length} docs indexed · every link resolves · every generated view current`);
 }

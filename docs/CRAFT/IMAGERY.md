@@ -1,3 +1,9 @@
+---
+when: choosing image vs gradient, treating a photo, icons
+answers: the visual ladder · treatment→intent · licensing · icon choice
+group: look
+---
+
 # IMAGERY & ICONS — choosing and treating visuals
 
 The highest-taste image source is **captured real product UI** (`make capture`). Everything below is for when you

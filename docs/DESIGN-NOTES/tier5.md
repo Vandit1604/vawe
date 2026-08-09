@@ -1,3 +1,9 @@
+---
+when: you want an effect the engine refuses to ship
+answers: the effects blocked on a determinism story, and what each would cost to unblock
+group: engine
+---
+
 # Tier 5 design notes — the effects blocked on a determinism story
 
 These are not "hard", they are **unsolved for this engine**: shipping them naively breaks the one

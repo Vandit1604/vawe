@@ -1,3 +1,9 @@
+---
+when: the film is all type in boxes
+answers: "decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes"
+group: density
+---
+
 # SHOW, DON'T ONLY TELL: what to show, and how
 
 A film can be well written, locked to the palette, cut in time and directed hard, and still show the

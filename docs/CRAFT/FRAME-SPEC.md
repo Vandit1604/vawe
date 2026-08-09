@@ -1,3 +1,9 @@
+---
+when: starting a video — lock the contract BEFORE the JSON
+answers: "the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`)."
+group: look
+---
+
 # FRAME-SPEC — the per-video contract (design system + storyboard) authored BEFORE the JSON
 
 The another engine lesson: a great video is not authored frame-first. Two artifacts are locked first and every

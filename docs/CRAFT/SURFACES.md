@@ -1,3 +1,9 @@
+---
+when: choosing the SURFACE copy sits on (glass/mesh/spotlight/bento)
+answers: "the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker"
+group: look
+---
+
 # SURFACES — sleek components, the build-first loop, and the design spec
 
 The finishing layer: the actual *surfaces* copy sits on (glass, mesh, spotlight, bento), how to build a

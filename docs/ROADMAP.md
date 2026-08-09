@@ -1,3 +1,9 @@
+---
+when: proposing new engine work, or checking whether an effect already exists
+answers: "the effect surface: what ships, what is queued, and the one rule that governs all of it"
+group: engine
+---
+
 # Roadmap — the effect surface
 
 Everything here is a capability the engine should be able to render. It is a backlog, not a plan:

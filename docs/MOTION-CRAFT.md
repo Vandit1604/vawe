@@ -1,3 +1,9 @@
+---
+when: picking a preset, a cut or a sting and you need the mechanics behind it
+answers: "the stored rules of good motion: timing, physics, the gates that enforce each one"
+group: process
+---
+
 # MOTION-CRAFT — the stored rules of great motion animation
 
 > **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md) — the cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.

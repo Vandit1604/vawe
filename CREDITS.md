@@ -1,3 +1,9 @@
+---
+when: shipping a video that uses bundled assets
+answers: the attribution the fonts, icons and photo sources require
+group: project
+---
+
 # Credits & third-party attribution
 
 Vawe itself is licensed under the [Vawe Company License 1.0](LICENSE). It builds on the

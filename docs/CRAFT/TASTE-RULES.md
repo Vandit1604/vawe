@@ -1,3 +1,9 @@
+---
+when: "it \"renders fine but feels cheap\""
+answers: "cause→feeling ease table · the failure-modes catalog · restraint · continuity"
+group: story
+---
+
 # TASTE RULES — what not to do, and how each choice makes the viewer feel
 
 `MOTION-CRAFT.md` says HOW to move a thing (the 10 rules, the speed dials). This file says WHAT it

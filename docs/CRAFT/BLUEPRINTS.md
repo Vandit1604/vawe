@@ -1,3 +1,9 @@
+---
+when: "authoring any beat (don't re-derive motion)"
+answers: "compose from directed-motion beats ({type:\"beat\"}) so good motion is the default; the ambition floor that fails a plain slideshow"
+group: crosscutting
+---
+
 # BLUEPRINTS — compose a video from directed beats, don't re-derive motion
 
 The recurring failure, proven twice on the TokenJam launch: even with the full arsenal in hand, authoring

@@ -1,3 +1,9 @@
+---
+when: reaching for a physics or particle simulation inside a beat
+answers: the simulation harness, what it guarantees about determinism, and how a sim reaches the frame
+group: engine
+---
+
 # `sims/` — stateful simulation, baked offline
 
 `renderFrame(n)` is a pure function of `n`. Eight workers render frames in arbitrary order and the

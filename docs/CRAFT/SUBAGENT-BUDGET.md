@@ -1,3 +1,9 @@
+---
+when: "\"why did that fan-out cost so much\""
+answers: "the measured cost of a real run here, and the rules that follow: fewer and larger agents, file contents in the prompt, never two agents on one file"
+group: crosscutting
+---
+
 # Planning subagent work: what it costs, and how to spend less
 
 Read this before you launch a fan-out. The rules below come from two sources. One is a measured run in

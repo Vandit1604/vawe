@@ -1,3 +1,9 @@
+---
+when: looking for the next piece of engine work to pick up
+answers: "the running to-do with what is already DONE struck through"
+group: engine
+---
+
 # What to do next
 
 Decided across three conversations. Ordered, with dependencies. Each item says WHY, because the reason

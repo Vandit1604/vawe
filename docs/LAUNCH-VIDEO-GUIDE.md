@@ -1,3 +1,9 @@
+---
+when: "making a product-launch film for a real brand or website"
+answers: the launch workflow end to end · what to crawl · the references it is built from
+group: process
+---
+
 # LAUNCH-VIDEO-GUIDE — making a product-launch video for a brand/website
 
 There are no launch "formats" anymore. A launch video is a **`scene` JSON** composed from
