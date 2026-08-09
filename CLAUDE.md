@@ -211,6 +211,13 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    when the scene has changed since you last looked. Editing a scene and skipping the sheet is therefore
    visible. A `dead-air` waiver is for a deliberate held frame, never for "I did not look".
 
+2a2. **SILENCE IS A DEVICE, NOT A DEFAULT.** Five films in six here ship mute and not one says why,
+   which closes the whole aural family of structural device (`docs/CRAFT/FILM-STRUCTURE.md`): the sound
+   bridge, music-led structure, the unfinished sentence. A sound bridge is also a continuous object the
+   picture never has to carry. Give every film sound, or state the silence:
+   `"audio": {"silent": true, "_why": "…"}`. `make audio-check D=<file>` grades it; `make audio-check`
+   alone prints the census. Know the limit: the gate proves a decision was made, never that the sound is
+   good. How: **[`docs/CRAFT/SOUND.md`](docs/CRAFT/SOUND.md)**.
 2a0. **THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE.** `bg` is a required field, so the backdrop
    is always your decision. Make it a living one, a preset or hand-authored (`{"html":…}` driven by
    `var(--t)`); a static field is not a default, it is a choice you have to justify. Then **judge it across

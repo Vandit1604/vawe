@@ -5893,3 +5893,35 @@ and after: 0 scenes changed verdict.
 The question to ask of every finding in the group is whether two people who disagree about taste would
 still agree it is true. If they would, it is not a taste gate, and switching it off does not remove an
 opinion — it removes a fact.
+
+## #237 — sound by default was never decided, it was inherited from a bug fix
+
+90 of 136 scenes set `audio.silent: true` and 20 more named no `audio` block at all. Not one of the 90
+stated a reason. Five films in six ship mute.
+
+**Root cause.** The mixer once auto-discovered any `assets/music.wav` and put a bed under everything.
+Making music opt-in was the correct fix for that bug. "Opt-in" was then written into `SOUND.md` as
+"silence is the default", and the doctrine outlived the fix by a year. A correct fix hardened into a
+rule nobody re-examined, and it closed an entire structural register by habit: the sound bridge,
+music-led structure and the unfinished sentence all need audio (`docs/CRAFT/FILM-STRUCTURE.md`).
+
+The half that survives is true and worth keeping: a film must read with the sound off. The half that
+never followed from it is "therefore ship it mute".
+
+**Two supporting untruths went unnoticed throughout.** `schema.json` claimed "All sound is SYNTHESIZED,
+never licensed" while the beds are downloaded third-party tracks. And every entry in `credits.json`
+read `licenceVerified: false` with the note "confirm terms before commercial release". Nobody had.
+
+**Fix.** Doctrine reversed. `audio._why` added, matching `authoring._why` including its 12-character
+floor. Terms actually read and recorded in `assets/README-LICENCE.md`, which previously covered only
+gradients and ransom sprites.
+
+**Gate.** `make audio-check` — blocks under `STRICT=1` on `silent-by-omission`,
+`silence-without-a-reason`, `audio-block-produces-nothing` and `bed-missing`; warns on
+`bed-provenance-unknown` and `bed-licence-unverified`, neither of which anything checked before. It is
+deliberately NOT in `author-check`: 90 scenes turning red at once produces reflex waivers, and a rule
+waived by reflex is repealed.
+
+It found three live defects on its first run: `argus-launch.json` names a bed that does not exist and
+renders silent while claiming one, `motion-test.json` carries an empty `audio: {}` that reads sounded,
+and `vawe-launch.json`'s bed has no provenance entry at all.
