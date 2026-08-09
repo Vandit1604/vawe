@@ -6490,3 +6490,30 @@ clean".
 **Lesson:** every fallback should be asked what its output looks like when it fires. A degraded path
 that produces the same shape of answer as the healthy one is not a fallback, it is a lie with a
 try/catch around it.
+
+## #250 — the guard against a destructive command matched the prose describing it, twice
+
+**What happened.** A `PreToolUse` hook was written to refuse the four git commands that had already
+destroyed work in this repo with several agents in one tree. It blocked its own first commit: the commit
+message, inside a heredoc, described the command it bans, and the check ran the pattern over the whole
+command string. The fix for that was then blocked too, because the replacement text quoted the same
+literal. Then the test run was blocked, because the cases sat in a quoted list in the shell command.
+Three self-blocks, all the same misread.
+
+**Root cause.** The check read the SOURCE TEXT of a shell command instead of the commands that text
+would run. A heredoc body, a quoted string and a grep pattern are all data, and none of them is a
+command position. This is the same measurement error as #214 (`<style>` source counted as glyphs), #216
+and #217 — a gate reading the representation rather than the thing.
+
+**Fix.** `commandsIn()` in `.claude/hooks/no-blanket-git.mjs` strips heredoc bodies and quoted literals,
+splits on command positions (`;`, newline, `&&`, `||`, `|`) and anchors every pattern with `^`, so a
+match can only land where the shell would actually run something.
+
+**And the second half, which is what stops a fourth round:** the hook file names none of the commands it
+bans. Every pattern is written with `\s+` between the words and every label is a description, so editing
+the hook through a shell cannot trip the installed copy of itself. A guard whose own source is a
+tripwire is unmaintainable.
+
+**Which gate catches it.** `node .claude/hooks/test/no-blanket-git.test.mjs` — 17 cases, 8 real forms
+that must block and 9 that must not, five of which are the exact prose forms that caused the self-blocks.
+The cases live in a JSON file rather than in the test source, for the same reason.

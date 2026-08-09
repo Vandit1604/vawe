@@ -1,0 +1,22 @@
+# Files a fresh worktree must carry that .gitignore keeps out of git.
+#
+# `git worktree add` checks out TRACKED files only, so an agent in a worktree starts with no fonts, no
+# scenes, and no bin/vawe — and the failure is quiet rather than loud. A gate that walks the library
+# finds 41 scenes instead of 149 and reports a confident green, which is the exact shape of every gate
+# bug logged this week.
+#
+# Kept SMALL on purpose. The heavy directories are handled by scripts/dev/worktree.sh instead:
+# node_modules (106M) and site/node_modules (338M) are shared read-only, and .venv-tools (457M) and
+# refs/ (27M) are not needed to run a gate. Copying half a gigabyte per agent is the cost that makes
+# people abandon worktrees.
+
+# Licensed faces. Without these the engine substitutes silently and every render is subtly wrong.
+assets/fonts/local/**
+
+# The scene library. 108 of 149 scenes are gitignored, so without this a worktree cannot gate the
+# library at all — and says so by finding nothing.
+formats/scene/*.json
+
+# Captured product UI. A missing capture renders a grey placeholder box, not an error.
+assets/brands/**/components/*.json
+assets/brands/**/scenes/*.json

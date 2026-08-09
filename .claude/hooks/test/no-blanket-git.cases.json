@@ -1,0 +1,20 @@
+[
+  ["git add -A", true, "the bare banned form"],
+  ["git add --all", true, "long flag"],
+  ["git add .", true, "dot form"],
+  ["cd x && git add -A", true, "after &&"],
+  ["git stash", true, "shelve"],
+  ["git stash pop", true, "shelve subcommand"],
+  ["git checkout .", true, "discard tree"],
+  ["git reset --hard origin/main", true, "hard reset"],
+
+  ["git add core/props.js docs/MISTAKES.md", false, "explicit paths"],
+  ["git stash list", false, "read-only"],
+  ["git status", false, "read-only"],
+  ["git commit -m 'this reverts the git add -A sweep'", false, "banned form named in a quoted message"],
+  ["git commit -F - <<'MSG'\nwe stopped using git add -A here\nMSG", false, "banned form inside a heredoc body"],
+  ["echo \"never run git reset --hard\"", false, "banned form inside a double-quoted string"],
+  ["grep -n 'git stash' docs/MISTAKES.md", false, "banned form as a grep pattern"],
+  ["git checkout main", false, "checkout a branch, not the tree"],
+  ["git reset --soft HEAD~1", false, "soft reset"]
+]
