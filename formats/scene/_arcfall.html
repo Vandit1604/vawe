@@ -1,0 +1,79 @@
+<style>
+/* _arcfall · DECORATION, not explanation. It dresses the frame and carries no information; a scene
+   using it still needs a real picture to clear the show-don't-tell floor. Generated CSS only, no bitmap.
+   Every moving value is sin(var(--t)). CSS keyframe and tween declarations are banned engine-wide and
+   render as a dead still rather than an error. Periods are 100-300 s, so nothing loops inside a film. */
+.af{position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#050509 0%,#05061a 46%,#04050f 100%)}
+/* THE RING. ONE radial gradient centred at bottom-centre, dark at its core, peaking at r = 1: that
+   single primitive gives the bright arc, the dark interior AND the blue returning down the left and
+   right edges. Nothing is hand-drawn. */
+.af .arc{position:absolute;inset:0;transform-origin:50% 100%;
+  transform:scale(calc(1 + 0.015 * sin(var(--t) * 0.048 + 1.3)));
+  opacity:calc(0.93 + 0.07 * sin(var(--t) * 0.061 + 4.4));
+  background:radial-gradient(32.5% 78% at 50% 100%, rgba(4,5,14,0) 0%, rgba(6,9,32,0.5) 28%, rgba(8,13,56,0.76) 47%, rgba(8,18,84,0.9) 64%, rgba(7,27,110,1) 80%, rgba(8,42,150,1) 90%, rgba(10,56,182,1) 100%, rgba(9,50,164,1) 106%, rgba(7,38,132,0.95) 116%, rgba(6,26,100,0.82) 130%, rgba(5,17,70,0.6) 150%, rgba(3,10,42,0.34) 180%, rgba(0,5,24,0) 230%)}
+/* The reference's arc is violet at the top and blue at the bottom: a second axis the radial ramp
+   cannot carry. So the violet is its OWN ring on the same geometry, screened over the blue one and
+   masked away below mid-frame. It follows the ridge, so it never fills the dark interior. */
+.af .vio{position:absolute;inset:0;mix-blend-mode:screen;transform-origin:50% 100%;
+  transform:scale(calc(1 + 0.015 * sin(var(--t) * 0.048 + 1.3)));
+  opacity:calc(0.85 + 0.15 * sin(var(--t) * 0.055 + 0.9));
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 20%,rgba(0,0,0,0.42) 38%,transparent 56%);
+  mask-image:linear-gradient(180deg,#000 0%,#000 20%,rgba(0,0,0,0.42) 38%,transparent 56%);
+  background:radial-gradient(32.5% 78% at 50% 100%,
+    rgba(0,0,0,0) 76%, rgba(88,60,146,0.5) 92%, rgba(122,92,172,0.78) 103%,
+    rgba(92,62,142,0.42) 118%, rgba(0,0,0,0) 142%)}
+/* the pale, desaturated, slightly green cap the reference carries at the very top centre */
+.af .mint{position:absolute;inset:0;mix-blend-mode:screen;
+  transform:translateX(calc(sin(var(--t) * 0.031 + 0.7) * 3%));
+  opacity:calc(0.82 + 0.18 * sin(var(--t) * 0.031 + 2.9));
+  background:radial-gradient(26% 20% at 50% 0%,
+    rgba(140,176,96,0.88) 0%, rgba(130,154,124,0.66) 28%, rgba(120,134,154,0.38) 56%,
+    rgba(104,114,148,0.14) 78%, rgba(0,0,0,0) 100%)}
+/* the slat field drifts as one, under the per-bar drift: the parallax base */
+.af .fld{position:absolute;inset:0;transform:translateX(calc(sin(var(--t) * 0.021 + 2.2) * 14px))}
+.af .fld i{position:absolute;top:-4%;bottom:-4%;display:block;will-change:transform}
+/* coarse, very low-frequency turbulence: uneven light across the field, NOT crawling dirt. This is
+   the layer that moves; the fine grain below is static by design. */
+.af .mot{position:absolute;inset:-24%;mix-blend-mode:overlay;opacity:0.26;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='480'%20height='480'%3E%3Cfilter%20id='n'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.012'%20numOctaves='3'%20stitchTiles='stitch'%20seed='19'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA%20type='linear'%20slope='0'%20intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='480'%20height='480'%20filter='url(%23n)'/%3E%3C/svg%3E");background-size:150% 150%;
+  transform:translate(calc(sin(var(--t) * 0.026 + 1.1) * 3%),calc(sin(var(--t) * 0.019 + 4.6) * 2%))}
+/* fixed-seed feTurbulence, rasterised once, STATIC on purpose: static grain over a moving field is how
+   film and print actually look, and a per-frame seed cannot be expressed in CSS anyway. */
+.af .grain{position:absolute;inset:0;mix-blend-mode:overlay;opacity:0.5;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='200'%3E%3Cfilter%20id='n'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='2'%20stitchTiles='stitch'%20seed='7'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA%20type='linear'%20slope='0'%20intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='200'%20height='200'%20filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px}
+.af .vig{position:absolute;inset:0;transform-origin:50% 52%;
+  transform:scale(calc(1 + 0.02 * sin(var(--t) * 0.037 + 5.2)));
+  background:radial-gradient(78% 96% at 50% 51%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.78) 100%)}
+</style>
+<div class="af"><div class="arc"></div><div class="vio"></div><div class="mint"></div><div class="fld">
+<i style="left:-3%;width:1.1%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.032) 12%,rgba(0,0,0,0.032) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.086 + 4.31) * 4.29px))"></i>
+<i style="left:0.65%;width:2.43%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.024) 12%,rgba(255,255,255,0.024) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.064 + 5.9) * 3.74px))"></i>
+<i style="left:5.71%;width:4.2%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.023) 12%,rgba(0,0,0,0.023) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.085 + 0.7) * 8.71px))"></i>
+<i style="left:10.22%;width:3.33%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.029) 12%,rgba(255,255,255,0.029) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.033 + 4.31) * 8.8px))"></i>
+<i style="left:14.78%;width:0.97%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.017) 12%,rgba(255,255,255,0.017) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.068 + 4.75) * 7.79px))"></i>
+<i style="left:18.71%;width:0.51%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.016) 12%,rgba(255,255,255,0.016) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.032 + 3.52) * 2.19px))"></i>
+<i style="left:20.34%;width:4.53%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.027) 12%,rgba(255,255,255,0.027) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.069 + 0.49) * 7.47px))"></i>
+<i style="left:25.19%;width:1.33%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.021) 12%,rgba(0,0,0,0.021) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.061 + 4.27) * 5.91px))"></i>
+<i style="left:26.82%;width:3.55%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.013) 12%,rgba(255,255,255,0.013) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.052 + 5.42) * 5.19px))"></i>
+<i style="left:30.67%;width:4.4%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.019) 12%,rgba(0,0,0,0.019) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.084 + 0.13) * 4.71px))"></i>
+<i style="left:37.06%;width:1.52%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.021) 12%,rgba(0,0,0,0.021) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.052 + 1.84) * 2.5px))"></i>
+<i style="left:39.17%;width:4.39%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.022) 12%,rgba(0,0,0,0.022) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.058 + 3) * 7.86px))"></i>
+<i style="left:44.01%;width:1.4%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.012) 12%,rgba(255,255,255,0.012) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.068 + 6.27) * 3.76px))"></i>
+<i style="left:45.8%;width:2.92%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.011) 12%,rgba(255,255,255,0.011) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.062 + 5.88) * 5.78px))"></i>
+<i style="left:50.55%;width:2.45%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.012) 12%,rgba(0,0,0,0.012) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.087 + 0.81) * 7.88px))"></i>
+<i style="left:53.56%;width:0.43%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.02) 12%,rgba(0,0,0,0.02) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.084 + 2.05) * 3.74px))"></i>
+<i style="left:54.59%;width:2.51%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.022) 12%,rgba(0,0,0,0.022) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.041 + 2.6) * 6.92px))"></i>
+<i style="left:57.44%;width:2.21%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.007) 12%,rgba(255,255,255,0.007) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.036 + 4.34) * 6.56px))"></i>
+<i style="left:63.17%;width:4.2%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.011) 12%,rgba(255,255,255,0.011) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.067 + 1.4) * 5.87px))"></i>
+<i style="left:68.68%;width:4.53%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.022) 12%,rgba(255,255,255,0.022) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.072 + 1.53) * 3.29px))"></i>
+<i style="left:75.6%;width:0.66%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.017) 12%,rgba(255,255,255,0.017) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.041 + 3.96) * 7.27px))"></i>
+<i style="left:77.5%;width:0.99%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.016) 12%,rgba(255,255,255,0.016) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.069 + 2.73) * 7.88px))"></i>
+<i style="left:80%;width:3.06%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.02) 12%,rgba(255,255,255,0.02) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.083 + 3) * 2.93px))"></i>
+<i style="left:84.18%;width:1.41%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.03) 12%,rgba(0,0,0,0.03) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.062 + 0.06) * 8.92px))"></i>
+<i style="left:87.14%;width:3.2%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.04) 12%,rgba(0,0,0,0.04) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.033 + 2.72) * 7.59px))"></i>
+<i style="left:90.64%;width:0.62%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.046) 12%,rgba(0,0,0,0.046) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.089 + 0.5) * 3.25px))"></i>
+<i style="left:94.4%;width:2.41%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.018) 12%,rgba(255,255,255,0.018) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.068 + 0.37) * 8.65px))"></i>
+<i style="left:97.64%;width:3.25%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.024) 12%,rgba(0,0,0,0.024) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.085 + 1.08) * 8.72px))"></i>
+<i style="left:101.21%;width:0.7%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.033) 12%,rgba(0,0,0,0.033) 88%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.065 + 5.48) * 6.82px))"></i>
+<i style="left:102.24%;width:0.47%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.024) 12%,rgba(0,0,0,0.024) 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);transform:translateX(calc(sin(var(--t) * 0.079 + 1.92) * 6.83px))"></i>
+</div><div class="mot"></div><div class="grain"></div><div class="vig"></div></div>
