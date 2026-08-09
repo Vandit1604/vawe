@@ -30,12 +30,6 @@ const raymarch = canvasLayer('raymarch'), three = canvasLayer('three');
 
 const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, composition };
 
-// A declaration that is NOT beside its read, and the only one. `rect` was being edited in another branch
-// when the declarations landed, so its two props are stated here instead of in core/layers/rect.js.
-// MOVE THEM INTO THAT FILE — a declaration one file away from the read is the drift this system exists to
-// end, and this map is a debt, not a slot to add to.
-const PENDING_PROPS = { rect: { fill: {}, h: {} } };
-
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the
 // schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
@@ -51,7 +45,6 @@ export const LAYER_TYPES = Object.keys(REGISTRY);
 // with its surface's own pixels vocabulary — so `paint` and `three` declare different sets under one
 // primitive, exactly as they read different ones.
 const declared = (t) => {
-  if (PENDING_PROPS[t]) return PENDING_PROPS[t];
   const P = REGISTRY[t].PROPS;
   if (P === undefined)
     throw new Error(`layer type "${t}" declares no PROPS — a builder that reads layer props without `

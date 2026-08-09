@@ -5,6 +5,11 @@
 // rect written `{fill:'#d33'}` silently rendered the default white. Documented-looking input accepted and
 // discarded is the failure mode this codebase hates most (docs/MISTAKES.md #213), and here the input is
 // unambiguous, so the right answer is to honour it rather than to add an error.
+// `fill` is an alias for `bg`, accepted because it was set on real scenes and silently thrown away
+// (docs/MISTAKES.md #213). `h` is read here rather than by the shared box helper. Everything else this
+// layer paints comes through kit.chipBox, which declares its own.
+export const PROPS = { fill: {}, h: {} };
+
 export function build(kit, el, L) {
   if (L.h != null) el.style.height = L.h + 'px';
   const spec = L.fill != null && L.bg == null ? { ...L, bg: L.fill } : L;
