@@ -371,7 +371,13 @@ function make2dFallback(canvas, w, h) {
 // Limitation: cross-origin <img>/captured components can render blank inside the foreignObject; those
 // beats degrade toward the background + text, and a fully empty raster trips the cross-fade fallback.
 
-let _cssCache = null; // { base, fonts } inlined once per document (fonts fetched + base64'd)
+// Two caches, and the reason they are safe. A seam raster refetches and re-base64s every face it
+// uses, and tokens.css with it, once per seam. The bytes are identical every time, so caching them
+// changes no pixel and cannot break renderFrame(n) purity: the cached value is what the fetch would
+// have returned. The declaration below existed for months and nothing read it, so a comment claimed
+// "inlined once per document" while the work ran on every seam (docs/MISTAKES.md #257).
+const _fontCache = new Map();   // absolute url → data: URI
+let _tokensCss = null;          // core/tokens.css text, fetched once
 
 async function fetchAsDataUri(url, mime) {
   const res = await fetch(url);
@@ -404,7 +410,8 @@ async function inlineFonts(families) {
       const key = fam + '|' + rule.style.fontWeight + '|' + rule.style.fontStyle;
       if (seen.has(key)) continue; seen.add(key);
       try {
-        const data = await fetchAsDataUri(abs, 'font/woff2');
+        if (!_fontCache.has(abs)) _fontCache.set(abs, await fetchAsDataUri(abs, 'font/woff2'));
+        const data = _fontCache.get(abs);
         faces.push(`@font-face{font-family:'${fam}';font-weight:${rule.style.fontWeight || 'normal'};font-style:${rule.style.fontStyle || 'normal'};font-display:block;src:url(${data}) format('woff2');}`);
       } catch (e) { /* a face that won't fetch just falls back inside the raster */ }
     }
@@ -433,7 +440,10 @@ async function buildInlinedCss(el) {
   // would not resolve in the isolated raster — the data: versions below replace them).
   let base = '';
   for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
-  try { base += '\n' + await (await fetch('/core/tokens.css')).text(); } catch (e) {}
+  if (_tokensCss === null) {
+    try { _tokensCss = await (await fetch('/core/tokens.css')).text(); } catch (e) { _tokensCss = ''; }
+  }
+  base += '\n' + _tokensCss;
   base = base.replace(/@font-face\s*\{[^}]*\}/g, '');
   const fonts = await inlineFonts(families);
   // :root custom properties (applyTheme wrote --bg/--accent/--font-* onto the documentElement inline

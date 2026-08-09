@@ -77,7 +77,14 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	if err := os.MkdirAll(framesDir, 0755); err != nil {
 		return err
 	}
-	defer os.RemoveAll(framesDir)
+	// VAWE_KEEP_FRAMES leaves the captured PNGs on disk. The mp4 container is not byte-reproducible, so
+	// hashing two renders answers nothing, and without the frames nobody can tell a non-deterministic
+	// DRAW from a non-deterministic ENCODE. `make probe` compares the DOM, which is a different claim.
+	if os.Getenv("VAWE_KEEP_FRAMES") == "" {
+		defer os.RemoveAll(framesDir)
+	} else {
+		defer fmt.Printf("frames kept: %s\n", framesDir)
+	}
 	os.MkdirAll(filepath.Dir(out), 0755)
 
 	fmt.Printf("▶ %s : capturing across %d workers…\n", module, o.Workers)

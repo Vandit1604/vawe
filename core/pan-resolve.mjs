@@ -48,7 +48,9 @@ export function mergePan(L, src) {
   const shift = num(src.start, 0) - num(L.start, 0);   // src-local t → this layer's local t
   const own = Array.isArray(L.motion) ? L.motion : [];
   const base = src.motion;
-  const PAN = ['x', 'y'];                              // the only properties a pan supplies
+  // A pan supplies x and y and nothing else. That claim used to sit here as a `PAN` constant that
+  // nothing read: x and y are named directly at all four sites below, so the constant enforced
+  // nothing and only looked as though it did.
   const bx = num(base[0].x, 0), by = num(base[0].y, 0);// deltas from the source's first key
   const ox = num(own[0]?.x, 0), oy = num(own[0]?.y, 0);// ...applied from THIS layer's own origin
 
