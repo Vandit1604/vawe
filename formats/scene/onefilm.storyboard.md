@@ -38,6 +38,10 @@ destination: web
   2. ESCALATION. Each demonstration is larger in scope than the one before: a word, then a number, then
      a picture, then a camera move that displaces everything already on screen. The last one moves the
      first three, which is the only way the film ends bigger than it started.
+     THE SCOPE CLIMBS AND SO DOES THE SIZE. The first cut set the word at 190px, near hero scale, so the
+     smallest demonstration was already as loud as the largest and the escalation had nowhere to go. The
+     word is now 96px, the number 190px, the picture 840px wide. The right half is deliberately quiet on
+     beat 2, and the quiet is the first step of the climb rather than a hole in the frame.
   3. A BOOKEND. It opens on an empty file and closes on the film that file is. The last frame answers
      the first.
 
@@ -69,11 +73,11 @@ destination: web
 - object: none. The first demonstration, and the smallest
 - shot: wide
 - camera: hold
-- picture: `"text": "Ship it"` types on the left, and on the last character the words land at 120px on the right
-- mechanism: typing, then the words arriving on the engine's rise preset at its real duration
+- picture: `"text": "Ship it"` types on the left, and on the last character the words land SMALL, at 96px, on the right, with a mono caption naming the face and weight directly beneath them
+- mechanism: typing, then the words arriving on the engine's rise preset at its real duration · the caption typing under them, so the result and its evidence read as one small specimen rather than a headline stranded in a large empty half
 - becomes: an empty right half becomes the first thing the file asked for
-- onscreen: "text": "Ship it"  ·  Ship it
-- why: the smallest possible demonstration, and the one that teaches the law the other three obey
+- onscreen: "text": "Ship it"  ·  Ship it  ·  sans · weight 700
+- why: the smallest possible demonstration, and the one that teaches the law the other three obey. It has to LOOK smallest: the number that follows is twice its size and the picture eight times its area, and an escalation only reads if the first step is low
 - emotion: recognition
 - duration: 2.5s
 - transition_in: none
@@ -83,8 +87,8 @@ destination: web
 - object: none. A different subject, obeying the same law
 - shot: wide
 - camera: hold
-- picture: the next line types and the right half swaps to a number rolling to 2.5B, the words gone
-- mechanism: a count layer at its real speed · the previous result leaves rather than stacking, so the right half stays a single answer
+- picture: the next line types and the right half swaps to a number rolling to 2.5B at twice the word's size, the words gone
+- mechanism: a count layer at its real speed · the previous result leaves rather than stacking, so the right half stays a single answer · its own caption sits under it, the same pairing beat 2 established
 - becomes: one answer becomes a different kind of answer
 - onscreen: "count": 2500000000  ·  2.5B
 - why: the second subject has to be genuinely unlike the first, or the film is one demonstration repeated
@@ -111,8 +115,9 @@ destination: web
 - object: none. The demonstration that moves the other three
 - shot: wide
 - camera: dolly and tilt, the film's only camera move
-- picture: the last line types and the CAMERA moves: the held frame tilts and pushes, and the file and its result are seen on a plane from an angle for the first time. As the camera travels, the file's four lines light one after another
-- mechanism: a real camera move over a tilted plane, so the perspective changes across it · the four lines lighting in sequence during the travel, which is the second change and the first time the whole file is seen at once · the tilt REACHES its mark at 12.5s and then holds and drifts, so the move is on screen for six seconds and not two
+- picture: the last line types and the CAMERA moves: the held frame tilts and pushes, and the file and its result are seen IN A SPACE from an angle for the first time. The file stands nearest, the photograph sits on the picture plane, the spent results lie deepest, and they cross the frame at different speeds. As the camera travels, the file's four lines light one after another
+- mechanism: a real camera move through a space with three depths in it (`plane`: the file at z +220, the photograph at 0, the shelf at -120), so the frame parallaxes instead of turning as one rigid sheet · the four lines lighting in sequence during the travel, which is the second change and the first time the whole file is seen at once · the tilt REACHES its mark at 12.5s and then holds and drifts, so the move is on screen for six seconds and not two
+- measured: across the 1.9s travel the file's second line moves 97px, the photograph 60px and the shelved word 48px. Coplanar, the same three move 53, 60 and 86px, which is a sheet sliding. The depths were chosen against the frame, not for the largest number: the photograph can only stand forward of the plane before it crosses the divider and only behind it before it leaves the right edge, so it holds the plane and the other two part around it
 - becomes: two flat halves become a space with the film lying in it
 - onscreen: "camera": {"move": "diveIn"}
 - why: the escalation only pays if the last demonstration displaces the earlier ones, and this is the one that does
