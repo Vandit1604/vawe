@@ -13,6 +13,11 @@
 // Routing is a LOOKUP, not a heuristic: core/transitions.js already maps every fx to its mechanism(s).
 import { TRANSITIONS } from './transitions.js';
 
+// The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it
+// and deletes it before any builder sees the layer, so no registry declares it and the schema was
+// advertising a prop the declared vocabulary could not account for.
+export const PROPS = { transition: {} };
+
 // fx name → the set of mechanisms that implement it (derived from the catalog, so it can't drift).
 const MECHS_OF = new Map();
 for (const t of TRANSITIONS) {

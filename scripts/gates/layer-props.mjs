@@ -23,21 +23,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
-import { TRACK_PROPS } from '../../core/tracks/index.js';
-import { PROPS as KIT_PROPS } from '../../core/layers/util.js';
-import { PROPS as BOOT_PROPS } from '../../core/boot.js';
-import { PROPS as PAN_PROPS } from '../../core/pan-resolve.mjs';
-import { PROPS as FX_PROPS } from '../../core/fx/index.js';
-import { PROPS as ORCHESTRATOR_PROPS } from '../../formats/scene/props.js';
-import { mergeProps, firesOn } from '../../core/props.js';
+import { SHARED_PROPS as SHARED } from '../../core/layers/vocabulary.js';
+import { firesOn } from '../../core/props.js';
 import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// Props read by the SHARED path, for every layer whatever its type: the format's own orchestration, the
-// per-frame track pipeline, the shared kit, the boot-time placement grammar, the pan resolver, and the
-// modifier registry. A prop honoured here is honoured for every type.
-const SHARED = mergeProps(ORCHESTRATOR_PROPS, TRACK_PROPS, KIT_PROPS, BOOT_PROPS, PAN_PROPS, FX_PROPS);
+// The shared half of the vocabulary - what every layer reads whatever its type - comes from
+// core/layers/vocabulary.js, the same module the RENDERER refuses unknown props with. This gate used
+// to assemble that union itself from the same six imports, which meant the gate and the engine each
+// held their own copy of "what the engine accepts". They agreed on the day it was written. A gate that
+// disagrees with the renderer is worse than no gate, so there is now one union and two readers.
 
 // Self-check, not an allowlist: these are the props the shared path is DEFINED by (timing + the motion
 // track every layer can ride). If they are not declared, the declarations have been gutted rather than

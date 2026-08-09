@@ -3,7 +3,15 @@
 // primitive ships a prop that never gets registered (e.g. `motion` did), validation silently passes and
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
-//   node scripts/schema-drift.mjs      (make schema-check) — exits 1 on drift
+//   node scripts/gates/schema-drift.mjs            (make schema-check) — exits 1 on drift
+//   node scripts/gates/schema-drift.mjs --write    regenerate the derived block, then re-run to verify
+//
+// THE PER-LAYER VOCABULARY IS GENERATED, NOT MAINTAINED. `schema.layerProps` is written by this file
+// from the PROPS declarations (core/props.js) and checked in; the gate fails when the committed block
+// differs from what the declarations produce. It is TYPE-SCOPED, and that is the whole point: this
+// gate used to answer "is this prop in the schema?" by NAME over the flat `layers.item` map, so `src`
+// on an `html` layer was indistinguishable from `src` on an `image` layer and a third meaning would
+// have passed in silence. A name is not a fact about a layer; a name on a type is.
 import fs from 'node:fs';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
@@ -11,7 +19,8 @@ import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { THREE_FX } from '../../core/three-scenes.js';
-import { LAYER_TYPES } from '../../core/layers/index.js';
+import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
+import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { FX_TYPES } from '../../core/fx/index.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { PRESETS } from '../../core/type.js';
@@ -43,7 +52,96 @@ for (const dir of ['core/layers', 'core/surfaces', 'core/fx', 'core/tracks'])
   for (const f of fs.readdirSync(path.join(ROOT, dir)))
     if (f.endsWith('.js')) engineFiles.push(path.join(ROOT, dir, f));
 const engineSrc = engineFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
-const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
+const SCHEMA_PATH = path.join(ROOT, 'formats/scene/schema.json');
+const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
+
+// ---------- THE DERIVED PER-LAYER VOCABULARY (generated -> checked in -> verified) ----------
+//
+// Two halves, kept apart because they are different facts. `byType` is what ONE primitive reads and
+// nothing else does; `shared` is what every layer carries whatever its type. Names only: the guards
+// (`preset` needs `split`) stay live in the declarations, where `make layer-props` reads them, because
+// a guard is a question about one layer's other props and a static vocabulary cannot answer it.
+const vocabulary = {
+  _generated: 'node scripts/gates/schema-drift.mjs --write - do not hand-edit',
+  _source: 'the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)',
+  shared: Object.keys(SHARED_PROPS).sort(),
+  byType: Object.fromEntries(LAYER_TYPES.map((t) => [t, Object.keys(LAYER_PROPS[t]).sort()])),
+};
+
+// One line per key, so a type gaining a prop is a one-line diff rather than a re-indent.
+function renderVocabulary(v) {
+  const arr = (a) => `[${a.map((x) => JSON.stringify(x)).join(', ')}]`;
+  const types = Object.entries(v.byType).map(([t, ps]) => `      ${JSON.stringify(t)}: ${arr(ps)}`);
+  return '  "layerProps": {\n'
+    + `    "_generated": ${JSON.stringify(v._generated)},\n`
+    + `    "_source": ${JSON.stringify(v._source)},\n`
+    + `    "shared": ${arr(v.shared)},\n`
+    + '    "byType": {\n' + types.join(',\n') + '\n    }\n'
+    + '  },';
+}
+
+// Splice by anchor rather than re-serialising the whole schema: schema.json carries hand-formatted
+// inline objects that a JSON.stringify round-trip would explode, and a generator that reformats the
+// file it edits makes every regeneration look like a rewrite.
+const BLOCK = /\n {2}"layerProps": \{[\s\S]*?\n {2}\},/;
+if (process.argv.includes('--write')) {
+  const src = fs.readFileSync(SCHEMA_PATH, 'utf8');
+  const block = '\n' + renderVocabulary(vocabulary);
+  const next = BLOCK.test(src) ? src.replace(BLOCK, block) : src.replace(/\n {2}"fields": \{/, `${block}\n  "fields": {`);
+  if (next === src) { console.error('✗ could not place the layerProps block - no existing block and no `"fields": {` anchor'); process.exit(2); }
+  fs.writeFileSync(SCHEMA_PATH, next);
+  console.log('✓ wrote formats/scene/schema.json layerProps (generated from the declarations)');
+  process.exit(0);
+}
+{
+  const have = JSON.stringify(schema.layerProps ?? null);
+  const want = JSON.stringify(vocabulary);
+  if (have !== want) {
+    console.error('✗ formats/scene/schema.json `layerProps` is stale - it is GENERATED from the PROPS');
+    console.error('  declarations and a module has changed what it reads since it was last written.');
+    const hv = schema.layerProps || {};
+    const cmp = (label, a = [], b = []) => {
+      const add = b.filter((x) => !a.includes(x)), rm = a.filter((x) => !b.includes(x));
+      if (add.length) console.error(`    ${label}: now declared, not in the file - ${add.join(', ')}`);
+      if (rm.length) console.error(`    ${label}: in the file, no longer declared - ${rm.join(', ')}`);
+    };
+    cmp('shared', hv.shared, vocabulary.shared);
+    for (const t of new Set([...Object.keys(hv.byType || {}), ...LAYER_TYPES])) cmp(t, (hv.byType || {})[t], vocabulary.byType[t]);
+    console.error('  fix: node scripts/gates/schema-drift.mjs --write');
+    process.exit(1);
+  }
+  const n = Object.values(vocabulary.byType).reduce((a, ps) => a + ps.length, 0);
+  console.log(`✓ layerProps in sync - ${LAYER_TYPES.length} types declaring ${n} type-scoped prop(s) + ${vocabulary.shared.length} shared`);
+}
+
+// BOTH DIRECTIONS, against the hand-written docs in `layers.item`. The declarations say what the
+// engine READS; `layers.item` says what an author may WRITE, and it carries the labels and enums no
+// declaration can. They must name the same set, or one of them is lying:
+//   - declared and undocumented -> validate's unknown-prop pass REJECTS a prop the engine honours.
+//     `hue` (paint aurora) sat here, invisible to the regex below because paint-fx reads it as `o.hue`.
+//   - documented and undeclared -> the schema advertises a prop nothing implements, which is the `slideL`
+//     class of bug (#21): the author writes it, validate is happy, and the render ignores it.
+{
+  const LI = schema.fields?.layers?.item || {};
+  const CI = LI.children?.item || {};
+  const documented = new Set([...Object.keys(LI), ...Object.keys(CI)]);
+  const declared = new Set([...vocabulary.shared, ...Object.values(vocabulary.byType).flat()]);
+  const undocumented = [...declared].filter((k) => !documented.has(k)).sort();
+  const unread = [...documented].filter((k) => !declared.has(k)).sort();
+  if (undocumented.length || unread.length) {
+    if (undocumented.length) {
+      console.error(`✗ the engine declares ${undocumented.length} layer prop(s) that layers.item does not document:`);
+      for (const k of undocumented) console.error(`    • ${k}  (validate rejects it today; the engine reads it)`);
+    }
+    if (unread.length) {
+      console.error(`✗ layers.item documents ${unread.length} prop(s) no module declares:`);
+      for (const k of unread) console.error(`    • ${k}  (an author can write it and nothing will read it)`);
+      console.error('    either declare it beside the code that reads it, or delete it from the schema.');
+    }
+    process.exit(1);
+  }
+  console.log(`✓ layers.item documents exactly the ${declared.size} prop(s) the engine declares`);
+}
 
 // props the engine reads off a layer/child object (L.<prop>, LL.<prop> or C.<prop>). `LL` is the same
 // layer under an inner name where `L` is already taken — core/three-fx.js has always done it, and
@@ -56,10 +154,12 @@ for (const m of engineSrc.matchAll(/\b(?:LL?|C)\.([a-zA-Z][a-zA-Z0-9]*)/g)) engi
 const RESERVED = new Set(['type', 'label', 'item', 'enum', 'min', 'max', 'default', 'required',
   'minLength', 'pattern', 'minItems', 'maxItems', 'fields', 'properties', 'note', 'name']);
 const defined = new Set();
+// `schema.fields` and not `schema`: the derived `layerProps` block below is keyed by LAYER TYPE, and
+// walking it would enter every type name into the set of "fields the schema defines".
 (function walk(o) {
   if (Array.isArray(o)) return o.forEach(walk);
   if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) { if (!RESERVED.has(k)) defined.add(k); walk(v); }
-})(schema);
+})(schema.fields);
 
 // engine internals that are NOT authored data fields (computed / structural), so not in the schema
 const INTERNAL = new Set(['type', 'children', 'part', 'use']);

@@ -2,6 +2,33 @@
   "title": "Hyperscene (open canvas)",
   "description": "Generic data-driven composition — the JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
   "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080×1920 portrait, 1920×1080 landscape).",
+  "layerProps": {
+    "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
+    "_source": "the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)",
+    "shared": ["acrossBeats", "align", "align2", "anchor", "anim", "aspects", "at", "basis", "becomes", "becomesDur", "becomesEase", "bg", "border", "borderTrail", "children", "circle", "col", "colGap", "color", "cols", "colw", "critical", "cut", "cutTiming", "cx", "cy", "decimals", "delay", "dir", "direction", "dist", "duration", "dx", "dy", "each", "elevation", "emColor", "enterDur", "exitDur", "fade", "filter", "follow", "font", "from", "fx", "fxOut", "gap", "glass", "glow", "gridCols", "grow", "gutter", "h", "id", "intensity", "italic", "items", "justify", "keyClicks", "keyCue", "keyGain", "layout", "logotype", "lookOpts", "loop", "ls", "mask", "modifiers", "morph", "motion", "motionBlur", "motionPath", "on", "opacity", "out", "pad", "panWith", "parts", "phaseStep", "physics", "pin", "prefix", "preset", "presetOpts", "progressiveBlur", "radius", "ransom", "ransomSeed", "react", "reflect", "rowGap", "shadow", "size", "speed", "split", "splitText", "stagger", "start", "suffix", "text", "track", "tracking", "transition", "type", "typing", "vars", "varsDelay", "varsDur", "varsEase", "w", "weight", "wrap", "x", "y"],
+    "byType": {
+      "text": ["caret", "caretHold", "fit", "fitH", "font", "gradient", "h", "ls", "maxLines", "raw", "size", "text", "tracking", "typing", "untype", "untypeRate", "w", "weight"],
+      "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
+      "image": ["canvasFx", "edgeFade", "edgeFadeColor", "h", "ken", "radius", "resample", "seed", "src", "w"],
+      "group": ["children"],
+      "rect": ["fill", "h"],
+      "glow": ["angle", "beam", "color", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
+      "beam": ["angle", "color", "glow", "h", "intensity", "mode", "period", "radius", "speed", "tail", "thickness", "w"],
+      "svg": ["d", "draw", "fill", "h", "morph", "stroke", "strokeWidth", "viewBox", "w"],
+      "cursor": ["clicks", "color", "path", "rippleColor", "size", "x", "y"],
+      "clip": ["fit", "loop", "radius", "speed", "src", "w"],
+      "html": ["h", "html", "src", "w"],
+      "component": ["part", "src", "w"],
+      "board": ["cardSize", "cols", "gap", "headSize", "w"],
+      "doc": ["bg", "blockGap", "blocks", "bodySize", "diff", "filename", "gap", "hSize", "nameSize", "pad", "radius", "w"],
+      "shader": ["colors", "h", "intensity", "radius", "resample", "seed", "shader", "speed", "w"],
+      "lottie": ["fit", "h", "loop", "speed", "src", "w"],
+      "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
+      "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
+      "three": ["bodyColor", "colors", "count", "depth", "device", "dolly", "font", "fov", "h", "metalness", "morphSpeed", "pitch", "planes", "pointSize", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "swing", "text", "three", "travel", "w", "yaw"],
+      "composition": ["comp", "props"]
+    }
+  },
   "fields": {
     "orientation": {
       "type": "string",
@@ -1432,6 +1459,10 @@
         },
         "flash": {
           "label": "glow: one-shot attack-decay bloom. true, or {attack,decay,peak} seconds/peak<=0.45"
+        },
+        "hue": {
+          "type": "number",
+          "label": "paint aurora: ONE hue (degrees) for every blob. Overrides `hues`, which is the per-blob list."
         },
         "hues": {
           "type": "array",
