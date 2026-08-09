@@ -263,6 +263,29 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const top = Math.min(...all.map((r) => r.top)), bottom = Math.max(...all.map((r) => r.bottom));
     return { left, top, right, bottom, width: right - left, height: bottom - top, geometry: true };
   };
+  // THE INK MAY ONLY EVER SHRINK THE BORDER BOX. This clamp is the whole contract of an ink rect:
+  // ink exists to stop measuring empty space, so a rect it returns that is BIGGER than — or somewhere
+  // else entirely from — the element's own box is not ink, it is a broken measurement, and the honest
+  // answer there is the border box. It used to live at ONE call site (the safe-zone walk), where #211
+  // added it after an unclamped svg bound turned showcase-cuts from 0 hard failures into 7. `buried`
+  // read the same helper unclamped and inherited the identical bug (docs/MISTAKES.md #211/#214/#216/
+  // #217 are all this shape: a rule fixed at a call site while another consumer kept reading it raw).
+  // So the clamp is now part of inkRect and every consumer gets it.
+  //
+  // What it catches here: getScreenCTM() is NOT composed through a 3D rig. The engine promotes #cam to
+  // `perspective` + `preserve-3d` for any camera z/tilt move, and from then on an inline <svg> inside a
+  // layer reports a screen CTM that is neither the layer's scale nor its position — playhead's tick svg
+  // sits at (408,898,288x73) and its CTM maps the same paths to (150,341,123x29), a rect on the far side
+  // of the frame. Unclamped, `buried` then sampled 81 points over a region the layer does not occupy,
+  // found the white card that really is painted there, and reported the headline 100% buried.
+  const clampToBox = (r, el) => {
+    const b = el.getBoundingClientRect();
+    const left = Math.max(r.left, b.left), right = Math.min(r.right, b.right);
+    const top = Math.max(r.top, b.top), bottom = Math.min(r.bottom, b.bottom);
+    return (right > left && bottom > top)
+      ? { left, top, right, bottom, width: right - left, height: bottom - top, geometry: r.geometry }
+      : { left: b.left, top: b.top, right: b.right, bottom: b.bottom, width: b.width, height: b.height, geometry: r.geometry };
+  };
   const inkRect = (el) => {
     if (el.querySelector('img')) return null;            // raster: the element box IS the ink
     const svgs = [...el.querySelectorAll('svg')];
@@ -274,12 +297,13 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       // width/height are NOT decorative: downstream checks (buried, tight) read them and feed the centre
       // to elementsFromPoint, which throws on a non-finite value. A DOMRect carries them; a bare literal
       // standing in for one has to as well.
-      return { left, top, right, bottom, width: right - left, height: bottom - top, geometry: true };
+      if (![left, top, right, bottom].every(Number.isFinite)) return null;
+      return clampToBox({ left, top, right, bottom, width: right - left, height: bottom - top, geometry: true }, el);
     }
     const r = document.createRange();
     r.selectNodeContents(el);
     const b = r.getBoundingClientRect();
-    return (b.width > 1 && b.height > 1) ? b : null;
+    return (b.width > 1 && b.height > 1) ? clampToBox(b, el) : null;
   };
   const FW = window.innerWidth, FH = window.innerHeight;
   // `li` = the layer's index in document order. It is the only STABLE per-element identity available:
@@ -314,18 +338,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     //     often mostly empty. Taking the box vertically discarded exactly half of the svg ink fix and
     //     kept failing a rotating ring on a bound nothing visible ever crossed.
     const ink = !paintsBox(s) && inkRect(el);
-    // CLAMPED TO THE BORDER BOX, always. The ink bound exists to stop measuring empty space, so it may
-    // only ever shrink the rect. Unclamped it can also GROW one (an svg whose stroke or scale spills past
-    // its element), and that turned showcase-cuts from 0 hard failures into 7 — a gate change that
-    // invents findings is worse than the gap it closed.
-    const clamp = (r) => {
-      const left = Math.max(r.left, b.left), right = Math.min(r.right, b.right);
-      const top = Math.max(r.top, b.top), bottom = Math.min(r.bottom, b.bottom);
-      return (right > left && bottom > top) ? { left, top, right, bottom } : b;
-    };
+    // The clamp to the border box now lives in inkRect (see clampToBox), so `ink` arrives already inside
+    // `b` and every consumer gets it — this call site used to own it alone, which is how `buried` read
+    // the same helper raw for as long as it existed.
     const sb = !ink ? b
-      : ink.geometry ? clamp(ink)
-      : clamp({ left: ink.left, right: ink.right, top: b.top, bottom: b.bottom });
+      : ink.geometry ? ink
+      : { left: ink.left, right: ink.right, top: b.top, bottom: b.bottom };
     if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
       issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
   });
@@ -465,7 +483,13 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (ox > 2 && oy > 2) {
       const cx = Math.max(A.x, B.x) + ox / 2, cy = Math.max(A.y, B.y) + oy / 2;
       const stack = document.elementsFromPoint(cx, cy);
-      const at = (el) => stack.findIndex((e) => e === el || el.contains(e) || e.contains(el));
+      // The element and its descendants are its paint; its ANCESTORS are not. Ancestors sit in the
+      // stack at every point on the frame, so `e.contains(el)` made this index the depth of the whole
+      // page rather than the depth of the layer, and the scan below then walked every intervening
+      // ancestor looking for an opaque background — which a full-bleed backdrop always provides. The
+      // occlusion escape therefore fired far more often than it was written to. Same misread as the
+      // `mine` index in `buried` below; fixed in both, because the rule is one rule.
+      const at = (el) => stack.findIndex((e) => e === el || el.contains(e));
       const ia = at(A.el), ib = at(B.el);
       let hidden = ia < 0 || ib < 0;                    // one is not even painted at that point
       for (let k = 0; !hidden && k < Math.max(ia, ib); k++) {
@@ -512,6 +536,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     return a > 0.85;
   };
   const OCCLUDE_MAX = 0.4;
+  // Same identity rule the safe-zone walk uses: a layer's index in document order. Labelling a buried
+  // headline by its ink's y (the only identity it had) made ONE bug report as four, because a headline
+  // that drifts a pixel between sampled frames gets a different label on each of them and the de-dup
+  // downstream keys on the label.
+  const layerIdx = new Map([...document.querySelectorAll('.hs-layer')].map((e, i) => [e, i]));
   for (const el of document.querySelectorAll('[data-layer="critical"]')) {
     if (!vis(el) || midMove(el)) continue;
     const r = inkRect(el) || el.getBoundingClientRect();
@@ -523,7 +552,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       const px = r.left + r.width * (gx + 0.5) / 9, py = r.top + r.height * (gy + 0.5) / 9;
       if (px < 0 || py < 0 || px >= FW || py >= FH) continue;
       const stack = document.elementsFromPoint(px, py);
-      const mine = stack.findIndex((e) => e === el || el.contains(e) || e.contains(el));
+      // "Is this MY paint?" is answered by the element and its descendants only. `e.contains(el)` also
+      // matched every ANCESTOR — #cam, .hs-stage, body — and those are in the stack at every point on
+      // the frame, so the guard below could never fire and the escape hatch it documents was dead code
+      // for as long as the check existed. That is what let a mis-measured rect (see clampToBox) sample
+      // 81 points of empty canvas and still call all 81 "the headline".
+      const mine = stack.findIndex((e) => e === el || el.contains(e));
       if (mine < 0) continue;                        // not painted here at all: outside the ink, not buried
       total++;
       for (let k = 0; k < mine; k++) if (opaqueAt(stack[k])) { covered++; break; }
@@ -531,7 +565,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (total && covered / total > OCCLUDE_MAX)
       // a ransom/sprite headline has no textContent and no id, so neither can name it; the ink's top
       // edge can, and it keeps two headlines in one film from de-duping into a single reported finding
-      issues.push({ kind: 'buried', a: el.id || `headline@y${r.top | 0}`, t: (el.textContent || '').trim().slice(0, 18),
+      issues.push({ kind: 'buried', a: el.id || `headline@y${r.top | 0}`, li: layerIdx.get(el.closest('.hs-layer')),
+        t: (el.textContent || '').trim().slice(0, 18),
         detail: `${Math.round(covered / total * 100)}% of this headline sits under an opaque layer` });
   }
   // contrast (WCAG-ish) on critical TEXT: effective bg = nearest ancestor solid background-color,

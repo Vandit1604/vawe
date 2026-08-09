@@ -133,6 +133,28 @@ const CASES = [
     scene: scene([TXT({ text: 'State A', duration: 1.2, exitDur: 0.4 }),
                   TXT({ text: 'State B', start: 0.9, duration: 1.1, anim: 'fade', enterDur: 0.4 })]) },
 
+  // BURIED, both directions. The must-fail half is the plain case the rule was written for: a headline
+  // with a solid panel painted over it.
+  { gate: 'audit', name: 'buried · a headline under a solid panel', expect: 'fail', match: /\[buried\]/,
+    scene: scene([TXT({ text: 'Hidden headline', size: 110 }),
+                  { type: 'rect', x: 140, y: 330, w: 1300, h: 240, bg: '#101418', start: 0, duration: 2 }]) },
+  // The must-pass half pins the shape this measurement is WORST at, which is the point of a mutation
+  // fixture (#234: a fixture proves a gate is wired up, not that it measures the right thing).
+  //
+  // An inline <svg> inside a layer that is BOTH on the camera's 3D rig (a `s` zoom is a translateZ under
+  // perspective) and tilted in 3D itself. getScreenCTM() is not composed through either, so the ink rect
+  // it yields lands somewhere else on the frame entirely — here the tick really draws at (412,895) and
+  // measured as (152,343). `buried` then sampled 81 points of empty canvas, found the white rect that is
+  // genuinely painted there, and called a fully visible graphic 100% buried on a frame holding nothing
+  // else. The white rect is what makes this case bite: remove the clamp in inkRect and it fires again.
+  { gate: 'audit', name: 'buried · svg ink on a 3D camera rig is NOT buried', expect: 'pass',
+    scene: scene([
+      { id: 'tick', type: 'svg', x: 1601, y: 968, w: 107, h: 20, viewBox: '0 0 107 20',
+        d: 'M0 10 H107 M1.5 2 V18 M105.5 2 V18', stroke: '#0093eb', strokeWidth: 3,
+        start: 0, duration: 2, anim: 'none', exitDur: 0, modifiers: [{ tilt: { y: 18 } }] },
+      { type: 'rect', x: 1480, y: 742, w: 120, h: 40, bg: '#ffffff', start: 0, duration: 2 },
+    ], { camera: [{ t: 0, x: -848.5, y: -287.5, s: 2.6 }, { t: 2, x: -848.5, y: -287.5, s: 2.6 }] }) },
+
   // The headline bar relaxes to WCAG-large ONLY on a filled chip (#44). Both halves are pinned here,
   // because a rule that was loosened for one video and never re-tested is how a guard quietly dies.
   { gate: 'audit', name: 'weak-headline · washed-out display type on the field', expect: 'fail', match: /weak-headline/,

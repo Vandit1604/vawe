@@ -6089,6 +6089,58 @@ ever arrives because the page died before boot could report.
 
 ---
 
+## #242 — `buried` called a fully visible graphic 100% covered, because an ink rect was read raw (a fourth #211/#214/#216/#217)
+
+**What.** `make audit D=formats/scene/playhead.json` hard-failed four times with
+`[buried] f324/330/341/360 headline@y342 — 100% under an opaque layer`. No headline in the film has ink
+anywhere near y=342; the two beat-4 headlines sit at 223 and 393, and the frame shows the title as the
+cleanest thing in the picture. The author who hit it could not reproduce it by hand and, correctly,
+refused to deform the film to clear it.
+
+**Root cause, two faults compounding.**
+
+1. **An ink rect in the wrong place, read unclamped.** `shapeInk` maps an svg path's points through
+   `getScreenCTM()`. Chromium does **not** compose that matrix through a 3D rig, and the engine puts the
+   stage on one for any camera `s` zoom (a translateZ under `perspective`) and again for a layer
+   `tilt`. playhead's tick svg really draws at (408,898) 288x73; its screen CTM maps the same paths to
+   (150,341) 123x29, a rect on the far side of the frame and the source of the y=342 in the message.
+   The safe-zone walk had a clamp for exactly this, added by **#211** after an unclamped svg bound
+   turned showcase-cuts from 0 hard failures into 7. The clamp lived at that ONE call site. `buried`
+   read `inkRect` raw and inherited the whole bug.
+2. **A dead guard.** `buried` asks `stack.findIndex(e => e === el || el.contains(e) || e.contains(el))`
+   and skips the sample when the answer is -1, commented "not painted here at all: outside the ink".
+   `e.contains(el)` also matches every **ancestor**, `#cam`, `.hs-stage`, `body`, and those sit in the
+   stack at every point on the frame. The guard could never fire. So the check sampled 81 points of
+   empty canvas, found the white card that genuinely is painted there, and reported the layer buried.
+
+**This is the fourth time the same shape has been logged.** #214 (`textContent` counts `<style>` source)
+was fixed in the overlap check and left in the clipped-text check, where it came back as #216, then #217.
+#211 is the same story for the ink clamp. Every one was a measuring rule fixed at a call site while
+another consumer kept reading it raw.
+
+**Fix.** The clamp now lives **inside `inkRect`** (`clampToBox`), so an ink rect can only ever shrink the
+element's border box and falls back to the box when the intersection is empty, for every consumer,
+present and future. The safe-zone call site's private copy is deleted. The identity test drops
+`e.contains(el)` in both places that had it: `buried`'s `mine`, and the overlap occlusion escape's
+`at()`, where inflating the index made the opaque-surface forgiveness fire far more often than written.
+`buried` also gained the layer-index identity the safe walk already uses. Labelling it by the ink's `y`
+meant a headline drifting one pixel between sampled frames reported as four separate bugs.
+
+**Cleared, not fixed.** `bgFor` and `onOwnFill` also call `p.contains(el)`, as a *skip* condition, to
+ignore one's own ancestors. That use is correct. `stageRotated` is correct as written: it drops
+overlap/tight only for a **rotation**, and a z-translate under perspective is a uniform scale that
+leaves axis-aligned boxes axis-aligned, so `getBoundingClientRect` stays trustworthy there.
+
+**Which gate catches it now.** `node scripts/gates/gate-mutation.mjs` carries both halves (129 cases):
+a headline under a solid panel that must still FAIL, and, per **#234**, the shape the measurement is
+worst at: an svg on a 3D camera rig with a tilt, plus a white rect parked where the bad CTM points,
+which must PASS. Reverting the clamp makes the second case fire again on a frame holding nothing but a
+visible blue tick.
+
+**Blast radius.** `make audit` over all 148 scenes, before and after: byte-identical except playhead,
+5 hard to 1. The four buried findings were the only ones in the library and all four were false.
+---
+
 ## 85. A validator rule outlived the bug it was written for, and started inventing one
 
 **What happened.** Authoring `onefilm`, every typed line in the file column carried `<b>` around its
