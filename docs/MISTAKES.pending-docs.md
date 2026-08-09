@@ -1,3 +1,9 @@
+---
+when: handing the docs-truth pass back, before appending to docs/MISTAKES.md
+answers: which stale commands and paths docs/MISTAKES.md still names, and what each should say
+group: process
+---
+
 # Pending entry for docs/MISTAKES.md (from the docs-truth pass)
 
 This file quotes every stale reference it is asking someone to fix, so it names things that do not
