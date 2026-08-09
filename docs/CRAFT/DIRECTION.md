@@ -73,8 +73,10 @@ Source: **School of Motion; Shaw ("less, but better")**; enforced locally in [`T
   beat. Content/proof beats stay clean so the content reads. `[gated]` direct: `effect-soup`
 - **One cut family per film.** Rotate *within* a family (soft/motion/shape/spatial); mixing families
   announces edits. `[gated]` direct: `cut-families` (≥3 = FAIL)
-- **Continuity over slideshow.** Something should travel across a cut (a motion track, a layer spanning
-  the boundary) so beats connect instead of clicking past. `[gated]` direct: `continuity`
+- **Continuity over slideshow.** Something should carry across a cut so the beats connect instead of
+  clicking past. A layer spanning the boundary is one way; a match cut, a motif, a held cut rate or an
+  unfinished sentence are others, and none of them is a lesser answer ([`FILM-STRUCTURE.md`](FILM-STRUCTURE.md)).
+  `[gated]` direct: `continuity` — which sees only the first kind.
 - **Paired directional exits.** A layer that enters from a side exits the *opposite* side — one
   continuous direction of travel. Enter-and-retreat (in from right, out to right) is the tell.
   `[gated]` direct: `enter-and-retreat`
@@ -134,10 +136,18 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ## no-continuous-object (and its inferred twin)
 
-A short film (under 15s) with cuts must carry a **continuous object**: one content layer that both spans a
-cut and CHANGES across it. Pose either side of the boundary is read with the engine's own pure functions, so
-a static watermark riding the cut buys nothing. A layer whose internal clock the gate cannot read is assumed
-to transform, because a gate must not invent a failure out of something it cannot see. **Blocks.**
+**Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
+about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
+the 4% item, the one he says to sacrifice first. It is also **opt-in**: `TASTE=1 make author-check`, or
+`make direction-floor D=<file>`. Run it when the film's CONTENT is continuous, which is a single-subject
+product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
+anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
+
+What it measures: one content layer that both spans a cut and CHANGES across it. Pose either side of the
+boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing. A
+layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
+failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
+all (see `beats-wrapped-as-units` below). **Blocks when the gate is run.**
 
 `no-continuous-object-inferred` is the same test where the author declared no cuts at all. An island
 boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the
@@ -149,4 +159,5 @@ single integer validated against four films.
 
 **What neither tell can see.** Both measure that a prop survives a junction and moves. Neither can tell a
 card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films
-pass on that technicality. For the real thing, plan with `vawe-continuous-action`.
+pass on that technicality. Neither can see a motif, a bookend, a metric cut rate or an unfinished sentence at
+all, and a film held by those is properly structured and fails here every time.

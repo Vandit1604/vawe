@@ -3,7 +3,8 @@ message: "One sentence, the single thing this video must communicate."
 audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
 framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution — CHOSEN, with a reason, not defaulted"
-object: "the one noun that survives every cut (the button, the prompt box, the row, the token)"
+threads: "what holds this film across its cuts — two devices from docs/CRAFT/FILM-STRUCTURE.md"
+object: "ONLY if a continuous object is one of them: the noun that survives every cut"
 object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
 object_last: "the last frame: the payoff, or the moment just before it"
@@ -19,12 +20,14 @@ duration: 29s
   JOB. A beat with no `why` is decoration. Reveal model: weight each cue into the back ~50% of its beat
   (the direction-floor's `front-loaded` check enforces the floor of this). No two beats move alike.
 
-  THE OBJECT SPINE. One noun stays on screen across the cuts and every cut is a state change of it.
-  Fill `object` / `object_t0` / `object_states` / `object_last` above, and give every beat an `object:`
-  line, BEFORE writing a word of copy. Under ~15s the gate requires all of it (there is no room for
-  chapters, so a film of islands is a slideshow); above ~15s it is still how a film holds together.
-  Doctrine: .claude/skills/vawe-continuous-action/SKILL.md. The scene-side mirror of this rule is the
-  direction-floor's `no-continuous-object` tell.
+  WHAT HOLDS THE FILM. Under ~15s the gate requires you to NAME it in the frontmatter, and it takes
+  either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md — a
+  match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
+  question. Carry two, not one. `object:` is the one device the scene-side gate can also see: one noun
+  stays on screen across the cuts and every cut is a state change of it. Declare `object:` only if that
+  is really the film, because then `object_t0` / `object_states` / `object_last` and an `object:` line
+  on every beat are required too, and the scene-side mirror is direction-floor's `no-continuous-object`
+  (opt-in, `TASTE=1`). Doctrine for the object device: .claude/skills/vawe-continuous-action/SKILL.md.
 
   TWO FIELDS, TWO QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
   `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the

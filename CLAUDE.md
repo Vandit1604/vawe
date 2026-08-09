@@ -151,40 +151,56 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    because even at its best the gate could prove a picture was on screen and large and could never prove it
    explained anything, a big decorative photograph passed it and deserved to fail a human.
 
-2a000. **SLIDESHOWS ARE BANNED, NOT DISCOURAGED.** A film under 15s with cuts must carry a CONTINUOUS
-   OBJECT: one content layer that survives a cut and CHANGES across it. If every beat is an island, born
-   and dying inside its own window, the cuts are jumps between unrelated shots.
-   **`direction-floor` still checks this, but it is OPT-IN now** — `TASTE=1 make author-check D=<file>`,
-   or `make direction-floor D=<file>`. It is not deleted and it is not wrong; it blocked 38 of 130 shipped
-   scenes, which makes it a tax rather than a floor until those films are rebuilt (`docs/TASTE.md`).
-   Run it deliberately, on anything you intend to ship. When you run it, it blocks
-   on `no-continuous-object`. If the film declares NO cuts, boundaries are INFERRED from where the visible
-   content set turns over wholesale, and that half warns rather than blocks (`no-continuous-object-inferred`,
-   promoted to a block under `STRICT=1`): a build should not fail over a cut the author never wrote. Know the
-   limit, it is measured, not guessed: the gate can see that a prop survives a junction and moves. It cannot
-   see whether that prop BECOMES the next thing, which is the difference between a travelling card and a
-   subject. Only the skill buys that. Planning is gated too: `storyboard-check` FAILS a short storyboard that names
-   no `object:` in frontmatter, and fails any beat that never says where that object is. Name the object
-   before you write a line of JSON. How: **[`vawe-continuous-action`](.claude/skills/vawe-continuous-action/SKILL.md)**.
-   Every one of the 18 eligible short films in this library trips this and carries a waiver: that is debt to
-   rebuild, not a pattern to copy.
+2a000. **A SLIDESHOW IS STILL A FAILURE. A CONTINUOUS OBJECT IS ONE OF ABOUT EIGHTEEN WAYS OUT.**
+   The failure is real and it is easy to feel: every beat is born and dies inside its own window, so each
+   cut is a jump between unrelated shots and the film is a stack of cards read aloud. Do not ship that.
+   What was wrong in this section for a year was the prescription, not the diagnosis. It used to say that
+   a film under 15s with cuts MUST carry a CONTINUOUS OBJECT, one content layer that survives a cut and
+   CHANGES across it, and it called that the floor. That is one device, and it is the cheapest one.
+   **Murch ranks it last.** A cut serves, in order, emotion 51% · story 23% · rhythm 10% · eye-trace 7% ·
+   the screen plane 5% · three-dimensional space 4%, and the instruction is to sacrifice your way up from
+   the bottom. `no-continuous-object` measures spatial persistence plus a state change. It is the 4% item,
+   and it was the only structural rule in this engine that blocked.
+   **The registers it cannot see.** Spatial: a match cut, a oner, camera travel, masking and reveal,
+   cloning, a dolly-zoom. Verbal and aural: an unfinished sentence, a sound bridge, a bookend, an open
+   question. Temporal: metric cutting, rhythmic cutting, a track that IS the structure. Conceptual: a
+   motif, intellectual montage, escalation, a through-line. A film held by a motif and an escalation is
+   properly structured and fails `no-continuous-object` every time. The catalogue, its sources, and a
+   six-question decision aid: **[`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md)**.
+   Count your threads before you author, and carry two. One thread has to be literal and obvious to work,
+   which is exactly how a film ends up as a resizing box.
+   **The gate is OPT-IN**: `TASTE=1 make author-check D=<file>`, or `make direction-floor D=<file>`. When
+   you run it, `no-continuous-object` blocks; if the film declares no cuts, boundaries are INFERRED from
+   where the visible content set turns over wholesale, and that half warns (`no-continuous-object-inferred`,
+   promoted to a block under `STRICT=1`), because a build should not fail over a cut the author never wrote.
+   **Run it when the CONTENT is continuous**: a single-subject product film, a process shown end to end, a
+   demo where the UI is the subject. There the rule is right, and it is right because of the content, not
+   because films must be that shape. Do not run it on a manifesto, a vignette anthology, a comparison built
+   on the junction, or a metric-cut list film. It will be wrong about all four.
+   **Know the limit.** The gate can see that a prop survives a junction and moves. It cannot see whether
+   that prop BECOMES the next thing, which is the difference between a travelling card and a subject.
+   **Read the eighteen waivers as evidence about the rule, not about the films.** Eighteen short films here
+   carry a `no-continuous-object` waiver. A rule waived by reflex has already been repealed and nobody
+   wrote it down. It did not merely fail to see the alternatives: it made one alternative free and the
+   other seventeen expensive, because a keyed `w`/`h` on a rectangle passes and a motif does not.
+   Planning follows the same shape. `storyboard-check` asks a short film to NAME what holds it, in
+   frontmatter: `object:` if it is a continuous object, `threads:` for anything else in the catalogue. It
+   no longer demands an object. If you do declare one, every beat must still say where it is.
+   For the object device itself: **[`vawe-continuous-action`](.claude/skills/vawe-continuous-action/SKILL.md)**.
 
-2a001. **CONTINUITY IS A FLOOR, NOT A STYLE. Do not let it eat the invention.** The rule above bans the
-   slideshow; it does not prescribe "one card that resizes four times". Read what it actually asks for: a
-   subject the film STAYS WITH. A subject can be stayed with while the film does almost anything, and the
-   references we admire do exactly that. Continuity is carried by a shared world, a match cut on shape or
-   motion, a camera that travels between two places, a colour or a rhythm that survives the junction, a
-   thing that transforms into a different thing. A box whose w and h are keyed is the CHEAPEST way to
-   satisfy the gate and usually the least interesting, and reaching for it by reflex is how a film ends up
-   technically continuous and visually inert. Three consecutive films in this library were one rectangle
-   changing size, and each passed every gate.
-   The test to apply before you author: **name three ways this film could hold its subject, and reject the
-   first one you thought of.** If the answer to "what carries the continuity" is always "the layer resizes",
-   you are writing the gate's minimum, not a film. `make blueprints` and `docs/EFFECTS.md` exist so the
-   other answers are one command away; a match cut, a camera move through a space, a morph, an object that
-   becomes its own output all satisfy `no-continuous-object` and none of them are a resizing box.
-   Where the two rules meet: satisfying continuity is necessary and proves nothing about whether the film
-   is worth watching. Ambition is graded separately, by `direction-floor` and by your eyes.
+2a001. **NAME THE THREAD, AND REJECT THE FIRST ANSWER YOU THOUGHT OF.** The rule above rejects the
+   slideshow; it does not prescribe "one card that resizes four times". What it asks for is a subject the
+   film STAYS WITH, and a subject can be stayed with while the film does almost anything. A shared world,
+   a match cut on shape or motion, a camera that travels between two places, a colour or a rhythm that
+   survives the junction, a thing that turns into a different thing: all of these hold a film, and a box
+   whose `w` and `h` are keyed is the cheapest of them and usually the least interesting. Three consecutive
+   films in this library were one rectangle changing size, and each passed every gate.
+   The test, before you author: **name three ways this film could hold its subject, and reject the first
+   one.** If the answer to "what carries this" is always "the layer resizes", you are writing a gate's
+   minimum rather than a film. `make blueprints` and `docs/EFFECTS.md` put the other answers one command
+   away; `docs/CRAFT/FILM-STRUCTURE.md` names the ones no command can reach.
+   Where this meets the section above: holding the subject is necessary and proves nothing about whether
+   the film is worth watching. Ambition is graded separately, by `direction-floor` and by your eyes.
 
 2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats/<name>.png`, then READ it and
    fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two

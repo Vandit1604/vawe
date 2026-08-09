@@ -5,10 +5,12 @@
 // with no one-sentence message has no spine. It does not judge taste — it enforces that the decisions that
 // make a video good were actually made and written down.
 //
-// Under ~15s it also enforces the OBJECT SPINE (`vawe-continuous-action`): the frontmatter must name
-// the one object that survives every cut, and every beat must say what that object has become. A short
-// film planned as independent beats is a slideshow on paper, and the scene gate can only find that out
-// after the JSON exists.
+// Under ~15s it also asks the plan to NAME WHAT HOLDS THE FILM, because a short film planned as
+// independent beats is a slideshow on paper and the scene gate can only find that out after the JSON
+// exists. It takes either answer: `threads:` names devices from docs/CRAFT/FILM-STRUCTURE.md (a match
+// cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence), and `object:`
+// names the one device the scene-side gate can also see. It used to demand `object:` and nothing else,
+// which enforced the register Murch ranks last and made every other way of holding a film unwritable.
 //
 //   node scripts/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
 //   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
@@ -32,20 +34,30 @@ if (!message) errs.push('missing `message:` — the ONE sentence this video comm
 else if (message.split(/\s+/).length > 20) warns.push(`message is ${message.split(/\s+/).length} words — a proposal message should be ONE tight sentence (≤ ~18 words).`);
 for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warns.push(`missing \`${k}:\` in frontmatter`);
 
-// ── the OBJECT SPINE: required on short films ─────────────────────────────────────────────────────
-// A film under ~15s has no room for chapters. If no object survives the cuts, the plan is a slideshow
-// before a frame exists, and no amount of per-beat polish rescues it. The shape below is the one the
-// `vawe-continuous-action` skill emits: object · object_t0 · object_states · object_last in the
-// frontmatter (anything under a `##` heading is parsed as a beat), plus an `object:` line per beat.
+// ── WHAT HOLDS THE FILM: required on short films ──────────────────────────────────────────────────
+// A film under ~15s has no room for chapters, so something has to carry the viewer across the cuts, and
+// the plan is where that gets decided. TWO ANSWERS ARE ACCEPTED and they are not ranked. `threads:` names
+// devices from docs/CRAFT/FILM-STRUCTURE.md; `object:` names a continuous object, the one device the
+// scene-side gate can measure, and the one Murch's Rule of Six ranks last of six. Demanding `object:`
+// alone made a manifesto, an anthology, a comparison and a metric-cut film unplannable here.
+//
+// The object spine keeps its own shape when it IS the answer — object_t0 · object_states · object_last in
+// the frontmatter (anything under a `##` heading is parsed as a beat), plus an `object:` line per beat —
+// because a declared spine that no beat locates is a claim nobody kept.
 const SPINE_MAX_S = 15;
 const durRaw = field('duration');
 const durSec = parseDur(durRaw);
 const shortFilm = durSec != null && durSec < SPINE_MAX_S;
-if (shortFilm && !field('object')) {
-  errs.push(`this is a ${durRaw} film and the frontmatter names no \`object:\` — NAME THE OBJECT FIRST. One noun the viewer acts on (the button, the prompt box, the row, the token) that stays on screen across every cut and transforms at each one. Add \`object:\`, \`object_t0:\`, \`object_states:\`, \`object_last:\` before storyboarding a single beat. Under ${SPINE_MAX_S}s there is no room for chapters: a film whose beats are islands is a slideshow. See .claude/skills/vawe-continuous-action/SKILL.md.`);
+const hasObject = !!field('object');
+const hasThreads = !!field('threads');
+if (shortFilm && !hasObject && !hasThreads) {
+  errs.push(`this is a ${durRaw} film and the frontmatter names neither \`threads:\` nor \`object:\` — NAME WHAT HOLDS THIS FILM. Under ${SPINE_MAX_S}s there is no room for chapters, so a film whose beats are islands is a slideshow. Write \`threads:\` naming two devices from docs/CRAFT/FILM-STRUCTURE.md (a match cut · a camera travel · a motif · a bookend · a metric cut rate · an unfinished sentence · an open question · a transforming object). If one of them is a continuous object, name it as \`object:\` too and the scene-side gate can check it.`);
 }
-if (shortFilm) for (const k of ['object_t0', 'object_states', 'object_last']) {
-  if (!field(k)) warns.push(`missing \`${k}:\` — the spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
+if (shortFilm && !hasThreads && hasObject) {
+  warns.push('one thread only — `object:` names a continuous object and nothing else. A single thread has to be literal and obvious to work, which is how a film ends up as a resizing box. Add `threads:` with a second device (docs/CRAFT/FILM-STRUCTURE.md).');
+}
+if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'object_last']) {
+  if (!field(k)) warns.push(`missing \`${k}:\` — a declared object spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
 }
 
 // ── beats: each must state its job ────────────────────────────────────────────────────────────────
@@ -76,9 +88,10 @@ for (const b of blocks) {
   const has = (k) => new RegExp(`(^|\\n)\\s*[-*]?\\s*${k}\\s*:`, 'i').test(b);
   const r = RANGE.exec(title);
   spans.push({ title, start: r ? parseFloat(r[1]) : null, end: r ? parseFloat(r[2]) : null });
-  // On a short film every beat must say where the object IS. A beat with no object line is an island,
-  // and a film of islands is a slideshow no matter how good each island looks.
-  if (shortFilm && !has('object')) errs.push(`beat "${title}" is missing \`object:\` — say what the ${field('object') ? `"${field('object')}"` : 'spine object'} has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y".`);
+  // A DECLARED object spine must be located in every beat. Only when the film declared one: a plan held
+  // by a motif or a metric cut rate has no object to place, and asking for one anyway is what turned a
+  // catalogue of devices into a single mandatory device.
+  if (shortFilm && hasObject && !has('object')) errs.push(`beat "${title}" is missing \`object:\` — this film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) errs.push(`beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
   if (!/(^|\n)\s*[-*]?\s*(blueprint|mechanism)\s*:/i.test(b)) warns.push(`beat "${title}": no \`blueprint:\` or \`mechanism:\` — name the shot shape / motion so the JSON transcribes it (make blueprints · docs/EFFECTS.md).`);

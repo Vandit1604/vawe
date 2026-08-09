@@ -1,6 +1,6 @@
 ---
 name: vawe-continuous-action
-description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action, not a sequence of beats. Load before writing any scene JSON for a launch/promo/teaser under ~15s, or whenever a plan is coming out as hook-then-feature-then-logo. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
+description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in docs/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load this once you have picked it, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
 ---
 
 # vawe-continuous-action - plan the film as one action
@@ -17,14 +17,35 @@ changing state.
 
 That is the grammar this skill plans in. Read it before the storyboard, not after.
 
-## The one law
+## Before you use this skill: it is one device, not the law
+
+This skill was written from one reference and then treated as a floor for every short film. It is not.
+[`docs/CRAFT/FILM-STRUCTURE.md`](../../../docs/CRAFT/FILM-STRUCTURE.md) catalogues about eighteen devices
+that hold a short film together, across four registers: spatial (a match cut, a oner, camera travel,
+masking, cloning, a dolly-zoom, and this one), verbal and aural (an unfinished sentence, a sound bridge,
+a bookend, an open question), temporal (metric cutting, rhythmic cutting, a track that IS the structure),
+conceptual (a motif, intellectual montage, escalation, a through-line). Murch's Rule of Six ranks the one
+this skill teaches — three-dimensional spatial continuity — **last of six**, at 4%, and says to sacrifice
+your way up from the bottom.
+
+**Use it when the content is genuinely continuous:** one subject, one process, a product film, a demo
+where the UI is the subject. Then the object really does transform, and everything below is right.
+
+**Do not use it for** a manifesto, a vignette anthology ("three customers, three problems"), a comparison
+whose meaning lives in the junction, or a metric-cut list film where every card is a peer. Forcing one
+prop across those lies about the content. Eighteen short films in this library waive the matching gate;
+that is evidence about the rule, not about the films.
+
+## The one law (of this device)
 
 > **One object. One action. Every cut is a state change of that object.**
 
 `BLUEPRINTS.md` gives you excellent *beats*, and beats are independent units by design. That
 independence is exactly why a from-scratch plan comes out as a slideshow: three good beats with
 nothing travelling between them. Blueprints are still how you author the motion inside a beat.
-This skill decides what survives *across* the cuts.
+This skill decides what survives *across* the cuts — **when the answer is an object.** Carry a second
+thread from the catalogue anyway: a single thread has to be literal and obvious to work, which is how a
+film ends up as a rectangle that resizes four times.
 
 ---
 
@@ -259,6 +280,11 @@ The shape below is verified against both tools. Four things matter:
 what `make intent` reads to place its check. **The object spine goes in the frontmatter**, because
 anything under a `##` heading is parsed as a beat and will fail the gate.
 
+Under 15s the gate requires the frontmatter to name what holds the film, and takes `threads:` or
+`object:`. Declaring `object:` is the stronger claim: it also requires `object_t0` / `object_states` /
+`object_last` and an `object:` line on every beat, and it is what the scene-side gate later checks.
+Add `threads:` beside it naming your second device, or the gate says so.
+
 Two of those the gate now BLOCKS on, so write them first, not at the end:
 
 - **`becomes:`** is the change at this junction, written as "the X becomes the Y". Under 15s a beat
@@ -274,6 +300,7 @@ Two of those the gate now BLOCKS on, so write them first, not at the end:
 message: "One sentence, under 18 words, the single thing this film communicates."
 audience: "Who it is for."
 arc: "one continuous action: <object> <verb>s and becomes <payoff>"
+threads: "a transforming object, and an open question the last frame refuses to answer"
 object: "the generate button"
 object_t0: "a pill at the right edge of the prompt bar"
 object_states: "pressed, thrown, morphed to a dot, resolved into a spinner"
@@ -346,9 +373,11 @@ Then, and only then, write JSON.
 
 ## Where this sits
 
+- [`docs/CRAFT/FILM-STRUCTURE.md`](../../../docs/CRAFT/FILM-STRUCTURE.md) is the catalogue this skill
+  is one entry in, with the sources and the six questions that pick a register. Read it BEFORE this one.
 - [`vawe-video-planning`](../vawe-video-planning/SKILL.md) collects the brief, studies the brand
   and locks the palette, fonts, copy and lock sheet. Run it first. This skill replaces its Step 3
-  storyboard for any film under ~15s.
+  storyboard for any film under ~15s **whose subject is one thing changing**.
 - [`docs/CRAFT/BLUEPRINTS.md`](../../../docs/CRAFT/BLUEPRINTS.md) gives the motion *inside* a beat.
   Use it after the spine is fixed, never to choose the spine.
 - [`docs/CRAFT/TRANSITIONS.md`](../../../docs/CRAFT/TRANSITIONS.md) picks the seam once you know

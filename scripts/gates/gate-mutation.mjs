@@ -36,13 +36,14 @@ const TXT = (o = {}) => ({ type: 'text', text: 'Gate mutation fixture', x: 200, 
 
 /** A minimal STORYBOARD.md. Each knob turns off exactly ONE thing the gate is meant to notice, so a
  *  case cannot pass on the strength of some other tell firing in its place. */
-const SB = ({ object = true, beatObject = true, duration = '5s', becomes = true,
+const SB = ({ object = true, threads = false, beatObject = true, duration = '5s', becomes = true,
   presetBecomes = false, held = false, stubWhy = false, endsOnClaim = false,
   t1 = '0s-1.6s', t2 = '1.6s-5s' } = {}) => [
   '---',
   'message: "The record pill turns a voice note into a structured note."',
   'audience: "People who take notes on a phone."',
   'arc: "one continuous action: the record pill is pressed and becomes a finished note"',
+  ...(threads ? ['threads: "a metric cut rate at 1.6s, and a motif: the same green dot opens and closes"'] : []),
   ...(object ? ['object: "the record pill"', 'object_t0: "a dark pill on the note list"',
     'object_states: "pressed, swollen, flattened into a row"', 'object_last: "a note card, mid-unfold"'] : []),
   'format: 1920x1080',
@@ -417,14 +418,18 @@ const CASES = [
                   TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 3.8 })],
       { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
 
-  // ---- storyboard-check · the object spine, enforced at PLANNING time. The scene tell can only speak
-  // once the JSON exists; by then the plan is already a slideshow. Both directions pinned.
-  { gate: 'storyboard', name: 'spine · a short film that names no object', expect: 'fail', ext: 'md',
-    match: /NAME THE OBJECT FIRST/, scene: SB({ object: false }) },
-  { gate: 'storyboard', name: 'spine · a short film whose beats never say where the object is', expect: 'fail', ext: 'md',
+  // ---- storyboard-check · WHAT HOLDS THE FILM, enforced at PLANNING time. The scene tell can only speak
+  // once the JSON exists; by then the plan is already a slideshow. Two answers are accepted and both are
+  // pinned, because the failure this rule used to have was accepting only one of them: it demanded a
+  // continuous object, which is the register Murch ranks last, and made every other device unplannable.
+  { gate: 'storyboard', name: 'a short film that names neither threads nor an object', expect: 'fail', ext: 'md',
+    match: /NAME WHAT HOLDS THIS FILM/, scene: SB({ object: false }) },
+  { gate: 'storyboard', name: 'a short film held by threads and no object passes', expect: 'pass', ext: 'md',
+    scene: SB({ object: false, threads: true, beatObject: false }) },
+  { gate: 'storyboard', name: 'spine · a DECLARED object whose beats never say where it is', expect: 'fail', ext: 'md',
     match: /is missing `object:`/, scene: SB({ beatObject: false }) },
   { gate: 'storyboard', name: 'a short film with a full object spine passes', expect: 'pass', ext: 'md',
-    scene: SB() },
+    scene: SB({ threads: true }) },
   { gate: 'storyboard', name: 'a 45s film is not held to the spine (chapters are legitimate)', expect: 'pass', ext: 'md',
     // no ranges: this case is about the spine, and a 2-beat stub of a 45s film would otherwise trip
     // the clock rule too, which would let it "pass" for a reason it was never meant to test.
