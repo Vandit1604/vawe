@@ -7,6 +7,11 @@
 > the one narrative that carries a single video from a blank page to shipped, chaining every guide below
 > in order. And [`DIRECTION.md`](DIRECTION.md) is the cross-cutting spine (pacing · restraint · story
 > placement) these decisions all serve.
+>
+> **Writing the storyboard itself?** [`STORYBOARD-TEMPLATE.md`](STORYBOARD-TEMPLATE.md) is the fill-in
+> block `make storyboard-check` and `make intent` both read. It is linked here in prose rather than in
+> the generated table below, because its own frontmatter is the example an author copies and cannot
+> also carry index metadata.
 
 These guides answer *how to choose* — a beat order, a transition, a face, a palette, a layout, an
 image, a sound. They are opinionated checklists, not textbooks: if a rule wouldn't change what you
@@ -51,7 +56,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [BLUEPRINTS.md](BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
 | [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |
-| [DIRECTION.md](DIRECTION.md) ⚠ | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
+| [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
 | [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
 | [KEYED-MOTION.md](KEYED-MOTION.md) | a film has the right structure and still feels amateur, or a recreation drifts where the original snaps | how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated |
 | [REF-pin-16818198602994243.md](REF-pin-16818198602994243.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
@@ -81,7 +86,6 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
 | [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
 | [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
-| [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) ⚠ | filling in the storyboard `make storyboard-check` and `make intent` read | the fill-in template: frontmatter (including the `object:` the film is held by) · one block per beat · what each field must name |
 | [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 

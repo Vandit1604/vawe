@@ -1,3 +1,9 @@
+---
+when: you hit something odd in the engine, or you just fixed one and must log it
+answers: "the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory"
+group: process
+---
+
 # MISTAKES.md — errors made authoring videos, and the fix for each
 
 A permanent, append-only log so the same mistake is never made twice. Read this before authoring

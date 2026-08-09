@@ -48,14 +48,14 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/AUTHORING-WALKTHROUGH.md](../../../docs/CRAFT/AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [docs/CRAFT/BLUEPRINTS.md](../../../docs/CRAFT/BLUEPRINTS.md) | authoring any beat (don't re-derive motion) | compose from directed-motion beats ({type:"beat"}) so good motion is the default; the ambition floor that fails a plain slideshow |
 | [docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md](../../../docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |
-| [docs/CRAFT/DIRECTION.md](../../../docs/CRAFT/DIRECTION.md) ⚠ | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
+| [docs/CRAFT/DIRECTION.md](../../../docs/CRAFT/DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
 | [docs/CRAFT/FILM-STRUCTURE.md](../../../docs/CRAFT/FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
 | [docs/CRAFT/KEYED-MOTION.md](../../../docs/CRAFT/KEYED-MOTION.md) | a film has the right structure and still feels amateur, or a recreation drifts where the original snaps | how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated |
 | [docs/CRAFT/REF-pin-16818198602994243.md](../../../docs/CRAFT/REF-pin-16818198602994243.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
 | [docs/CRAFT/SOUND.md](../../../docs/CRAFT/SOUND.md) | the film has no sound, or you are about to ship it mute | sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands |
 | [docs/CRAFT/SUBAGENT-BUDGET.md](../../../docs/CRAFT/SUBAGENT-BUDGET.md) | "why did that fan-out cost so much" | the measured cost of a real run here, and the rules that follow: fewer and larger agents, file contents in the prompt, never two agents on one file |
 | [docs/CRAFT/SUBAGENTS.md](../../../docs/CRAFT/SUBAGENTS.md) | judging your own render (a full pass, a recreation, anything you'll ship) | why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message |
-| [docs/TASTE.md](../../../docs/TASTE.md) ⚠ | you are about to make something and want the front door to the taste system | the one law (every frame must fight for its value) · the spines · the block registry · the author→gate→render loop |
+| [docs/TASTE.md](../../../docs/TASTE.md) | you are about to make something and want the front door to the taste system | the one law (every frame must fight for its value) · the spines · the block registry · the author→gate→render loop |
 
 ## Craft · what & why (the story layer)
 
@@ -82,7 +82,6 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/FRAME-SPEC.md](../../../docs/CRAFT/FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
 | [docs/CRAFT/IMAGERY.md](../../../docs/CRAFT/IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
 | [docs/CRAFT/LAYOUT.md](../../../docs/CRAFT/LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
-| [docs/CRAFT/STORYBOARD-TEMPLATE.md](../../../docs/CRAFT/STORYBOARD-TEMPLATE.md) ⚠ | filling in the storyboard `make storyboard-check` and `make intent` read | the fill-in template: frontmatter (including the `object:` the film is held by) · one block per beat · what each field must name |
 | [docs/CRAFT/SURFACES.md](../../../docs/CRAFT/SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [docs/CRAFT/TYPOGRAPHY.md](../../../docs/CRAFT/TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 
@@ -104,7 +103,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/JUDGE.md](../../../docs/JUDGE.md) | the render is done and something must actually LOOK at it | the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this |
 | [docs/LAUNCH-VIDEO-GUIDE.md](../../../docs/LAUNCH-VIDEO-GUIDE.md) | making a product-launch film for a real brand or website | the launch workflow end to end · what to crawl · the references it is built from |
 | [docs/MCP.md](../../../docs/MCP.md) | driving this engine from a fresh session over MCP rather than from the shell | one-time setup · registering the server · the tools it exposes |
-| [docs/MISTAKES.md](../../../docs/MISTAKES.md) ⚠ | you hit something odd in the engine, or you just fixed one and must log it | the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory |
+| [docs/MISTAKES.md](../../../docs/MISTAKES.md) | you hit something odd in the engine, or you just fixed one and must log it | the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory |
 | [docs/MOTION-CRAFT.md](../../../docs/MOTION-CRAFT.md) | picking a preset, a cut or a sting and you need the mechanics behind it | the stored rules of good motion: timing, physics, the gates that enforce each one |
 
 ## The engine & its history
@@ -138,10 +137,4 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [`vawe-launch`](../../../.claude/skills/vawe-launch/SKILL.md) | The gated end-to-end pipeline for a product-launch / promo video in this repo, adapted from another engine: brief → capture → design-system (preset remix) → storyboard proposal → local narration → author from blueprints → build (optionally one sub-agent per beat) → finalize (author-check · seam-check · judge · render). Load when the user wants a launch/promo/feature video and you want the full orchestrated flow. Run each step, pass its gate, then continue; user-gated at Step 0, 3, 6. |
 | [`vawe-scene-authoring`](../../../.claude/skills/vawe-scene-authoring/SKILL.md) | How to author good-looking, well-spaced, well-animated Vawe scenes (formats/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop. |
 | [`vawe-video-planning`](../../../.claude/skills/vawe-video-planning/SKILL.md) | PLAN BEFORE AUTHORING any video in this repo: collect the brief, lock a style pack (from a brand site, OR from a manufactured taste anchor when there is no site), storyboard, THEN write JSON. Use whenever the user asks to 'make a video' and the goal/platform/duration/tone aren't pinned down. |
-
----
-
-⚠ 4 docs above carry no frontmatter of its own; the line shown is held in
-`scripts/gates/doc-map.mjs` PENDING because another agent owned the file when the map was built.
-`make craft-coverage` names them on every run.
 

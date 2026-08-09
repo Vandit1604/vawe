@@ -39,6 +39,10 @@ const ROOTS = new Set(['CLAUDE.md', 'AGENTS.md', 'docs/INDEX.md', 'docs/CRAFT/RE
 
 // Excluded, each with the reason. A path is excluded if any prefix/suffix rule matches.
 const EXCLUDE = [
+  // Its frontmatter is the EXAMPLE an author copies into a real storyboard, so doc-map keys added
+  // there would land in every storyboard written from it and `storyboard-check` would see props it
+  // does not know. Reached instead from DIRECTION.md and TASTE.md, which are both indexed.
+  ['docs/CRAFT/STORYBOARD-TEMPLATE.md', 'its frontmatter is a fill-in example, not metadata about the file'],
   ['docs-site/', 'a vendored Next app; its own MDX is not repo doctrine'],
   ['.claude/skills/impeccable/reference/', 'a vendored third-party skill; its SKILL.md is indexed, its 27 reference pages are not'],
   ['.claude/plans/', 'historical plan records, superseded by what shipped'],
@@ -74,26 +78,10 @@ const GENERATED = {
 // incomplete index announces itself rather than looking finished. Delete an entry once the doc
 // carries its own frontmatter — the gate fails if a PENDING doc turns out to already have it.
 const PENDING = {
-  'docs/TASTE.md': {
-    group: 'crosscutting',
-    when: 'you are about to make something and want the front door to the taste system',
-    answers: 'the one law (every frame must fight for its value) · the spines · the block registry · the author→gate→render loop',
-  },
-  'docs/CRAFT/DIRECTION.md': {
-    group: 'crosscutting',
-    when: 'it "reads amateur" though every layer renders fine',
-    answers: "the direction spine — Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it",
-  },
-  'docs/CRAFT/STORYBOARD-TEMPLATE.md': {
-    group: 'look',
-    when: 'filling in the storyboard `make storyboard-check` and `make intent` read',
-    answers: 'the fill-in template: frontmatter (including the `object:` the film is held by) · one block per beat · what each field must name',
-  },
-  'docs/MISTAKES.md': {
-    group: 'process',
-    when: 'you hit something odd in the engine, or you just fixed one and must log it',
-    answers: 'the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory',
-  },
+  // empty. Every doc that was held here has since had its frontmatter applied directly.
+  // Keep the mechanism: the next time an agent cannot take a file it does not own, its line
+  // lands here and the gate says the index is incomplete THERE, by name, instead of quietly
+  // omitting it. A partially-applied index that looks complete is the failure this replaced.
 };
 
 // A skill that belongs in the CRAFT index. Skills carry `description`, not `when`/`answers`, and this

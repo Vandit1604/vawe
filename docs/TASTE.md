@@ -1,3 +1,9 @@
+---
+when: you are about to make something and want the front door to the taste system
+answers: "the one law (every frame must fight for its value) · the spines · the block registry · the author→gate→render loop"
+group: crosscutting
+---
+
 # TASTE — how to make something good in this engine
 
 The front door. Read this before authoring anything; it routes you to the specific guides and names
