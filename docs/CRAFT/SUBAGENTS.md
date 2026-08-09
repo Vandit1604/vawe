@@ -32,7 +32,7 @@ handed.
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
 | **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
-| **ab** | which of two cuts is better, and does the graphic explain anything | `/tmp/ab/<name>/brief.md` from `make ab A=… B=… NAME=… CLAIM="…"` | the JSON in [`AB-JUDGE.md`](AB-JUDGE.md), every field naming a POSITION, never a file |
+| **ab** | which of two cuts is better, and does the graphic explain anything | *not built.* The row describes a critic that was planned and never landed: there is no `make ab` target, no script, and no `AB-JUDGE.md`. Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | — |
 
 Notes that matter per critic:
 
