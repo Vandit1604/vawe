@@ -243,13 +243,61 @@ export function validateData(schema, data) {
 // The `html` LAYER has always had the same trap as the `html` background: CSS transition/animation is
 // disabled engine-wide, so a hand-authored fragment that animates in the browser renders as a still and
 // says nothing about it. Same check, same message, both places.
+//
+// A GROUP's children were invisible to this: the walk was a flat pass over cfg.layers, so the identical
+// fragment was checked at the top level and unchecked one nesting deep. Nesting is not an exemption.
 export function htmlLayerErrors(cfg) {
   const out = [];
-  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => {
-    if (!isObj(L) || L.type !== 'html' || L.html == null) return;
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
+    if (L.type !== 'html') return;
+    // ONE source per fragment, and at least one. `html` is the markup inline; `src` names a .html file
+    // preloaded into the same place. Both is ambiguous rather than layered, and neither renders nothing.
+    if (L.html != null && L.src != null)
+      out.push(`${at} (html) declares BOTH \`html\` and \`src\` — a fragment has ONE source. \`html\` is the markup inline; \`src\` is the same markup in a file. Delete whichever is the leftover.`);
+    if (L.html == null && L.src == null)
+      out.push(`${at} (html) declares neither \`html\` nor \`src\`, so it renders an empty box. Put the markup inline in \`html\`, or point \`src\` at a .html fragment.`);
+    if (L.html == null) return;
     const timeCss = timeCssUsed(L.html);
-    if (timeCss) out.push(`layer[${i}] (html) uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Animate the layer with the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or drive your CSS from a \`vars\` custom property.`);
-  });
+    if (timeCss) out.push(`${at} (html) uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Animate the layer with the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or drive your CSS from a \`vars\` custom property.`);
+  };
+  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
+  return out;
+}
+
+// EXTERNAL HTML — markup a scene NAMES but does not contain. Two kinds: a `src` fragment on an html
+// layer or a bg window, and a CAPTURED component's markup. Both hit the same dead-CSS trap the inline
+// `html` string has been checked for all along, and neither was ever looked at: `grep component` in this
+// file returned nothing, while core/tokens.css:28 disables transition and animation for all three alike.
+// Captured site UI carries hover transitions almost by definition, so this was the loudest silence here.
+//
+// `read(p)` returns a file's text or null, so this stays pure and browser-safe; only the CLI supplies one.
+// A fragment is an ERROR (it is the author's own markup, held to the same bar as `html`). A capture is a
+// WARN: the dead CSS was written by the site, not by us, and it costs a still, not a broken render.
+export function externalHtmlErrors(cfg, read) {
+  const out = [];
+  const seen = new Set();
+  const check = (src, at, level, pick) => {
+    if (typeof src !== 'string' || seen.has(at + src)) return;
+    seen.add(at + src);
+    const text = read(src);
+    if (text == null) return; // existence is asset-check's question, and the render's
+    let markup;
+    try { markup = pick(text); } catch (e) { out.push({ level: 'error', msg: `${at} "${src}" is unreadable — ${e.message}` }); return; }
+    const timeCss = timeCssUsed(markup);
+    if (timeCss) out.push({ level, msg: `${at} "${src}" uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive the motion from \`var(--t)\` / a \`vars\` custom property instead.` });
+  };
+  const asHtml = (t) => t;
+  const asCapture = (t) => { const j = JSON.parse(t); return [j.html, ...(j.parts || []).map((p) => p && p.html)].filter((s) => typeof s === 'string').join('\n'); };
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
+    if (L.type === 'html') check(L.src, `${at} (html)`, 'error', asHtml);
+    if (L.type === 'component') check(L.src, `${at} (component)`, 'warn', asCapture);
+  };
+  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
+  (Array.isArray(cfg.bg) ? cfg.bg : []).forEach((b, i) => { if (isObj(b)) check(b.src, `bg[${i}]`, 'error', asHtml); });
   return out;
 }
 
@@ -263,10 +311,13 @@ export function bgErrors(cfg) {
     // ONE source per window. `html` paints in the DOM and `preset` paints on canvas; a window naming
     // both looks like a layered backdrop and is not one — the html wins and the preset is silently
     // dropped, which is the silent-substitution failure this codebase keeps paying for.
-    const sources = ['html', 'preset', 'use'].filter((k) => b[k] != null);
+    // `src` is `html` in a file, so it belongs in the same one-source set: it does not layer over a
+    // preset, and naming it beside `html` is the same ambiguity one level down.
+    const sources = ['html', 'src', 'preset', 'use'].filter((k) => b[k] != null);
     if (sources.length > 1)
       out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. \`html\` paints in the DOM and \`preset\` paints on canvas; they do not layer. Split them into two windows (with \`from\`/\`to\`) if you want both in one video.`);
-    if (b.html == null) {
+    const authored = b.html != null || b.src != null;
+    if (!authored) {
       if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\` — tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
       // `opts` tunes the fx a preset is made of, so the vocabulary is PER PRESET: `liquid` takes
       // scale/speed/warp/edge0…, `paperDots` takes spacing/period/drift…. Anything else used to be
@@ -280,7 +331,7 @@ export function bgErrors(cfg) {
     }
     if (b.opts != null)
       out.push(`${at} sets \`opts\` on a hand-authored (\`html\`) backdrop — \`opts\` tunes the canvas fx a PRESET is built from, and an html window paints no fx, so nothing would read it. Style the fragment itself.`);
-    const timeCss = timeCssUsed(b.html);
+    const timeCss = b.html != null ? timeCssUsed(b.html) : null; // a `src` fragment is read off disk by fragmentFileErrors
     if (timeCss)
       out.push(`${at} uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`. Both are written every frame.`);
     if (b.tone == null)
@@ -758,6 +809,17 @@ if (isMain) {
     // is held in sync with the live CUES registry by the drift guard above); this covers the one thing
     // the schema cannot: files that must exist on disk.
     const audioWarns = [];
+    // HTML the scene names but does not carry: `src` fragments and captured components. Node-only,
+    // because it opens files; the browser's boot-time validate simply never reaches this branch.
+    const readRef = (p) => {
+      for (const b of [null, path.dirname(file), root]) {
+        const abs = b == null ? (path.isAbsolute(p) ? p : null) : path.join(b, p.replace(/^\/+/, ''));
+        try { if (abs && fs.existsSync(abs) && fs.statSync(abs).isFile()) return fs.readFileSync(abs, 'utf8'); } catch { }
+      }
+      return null;
+    };
+    const htmlFileWarns = [];
+    for (const f of externalHtmlErrors(data, readRef)) (f.level === 'error' ? errors : htmlFileWarns).push(f.msg);
     if (isObj(data.audio)) {
       const A = data.audio;
       const bases = [path.dirname(file), root];
@@ -803,7 +865,7 @@ if (isMain) {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
     // lint warnings (non-failing unless --strict) — authoring smells the schema can't express
-    const warns = [...lintData(data), ...audioWarns];
+    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns];
     if (warns.length) {
       if (strict) failed++;
       for (const w of warns) console.error(`    ⚠ ${w}`);

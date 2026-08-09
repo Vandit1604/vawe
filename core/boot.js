@@ -8,7 +8,7 @@ import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
 import { safeArea, ASPECTS, sceneDims } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
-import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
+import { preloadSpectrum, preloadThree, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
@@ -347,12 +347,14 @@ export async function boot(build) {
     // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
     // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
     // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx
-    // → components → clips → lottie); three throws loudly if its module fails, the rest degrade quietly.
+    // → components → clips → lottie). three and html throw loudly if what they need is absent — a missing
+    // runtime or a missing fragment leaves nothing to render — the rest degrade quietly.
     await preloadSpectrum(data);
     await preloadImages(data); // web/local images ready before any frame is captured
     await preloadThree(data);
     await preloadCanvasFx(data);
     await preloadComponents(data);
+    await preloadHtml(data);
     await preloadClips(data);
     await preloadLottie(data);
     await preloadGsap(data);

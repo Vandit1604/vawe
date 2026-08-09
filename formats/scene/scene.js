@@ -8,6 +8,7 @@ import { ransomStyle } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
+import { htmlSource } from '/core/sanitize-html.js';
 import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
@@ -139,7 +140,10 @@ boot((data, fps, theme, canvas) => {
     const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
     // a HAND-AUTHORED window (core/bg-html.js) paints in the DOM, not on the canvas: no preset spec,
     // and the canvas is hidden while it is on screen.
-    if (b.html != null) return { from: b.from ?? 0, to: b.to ?? 1e9, html: b.html, tone: b.tone, spec: null };
+    // `src` is resolved to markup HERE, once, so every downstream reader of a window (bg-html, the ink
+    // picker, bgAt) keeps asking the one question it already asks: does this window have `html`?
+    if (b.html != null || b.src != null)
+      return { from: b.from ?? 0, to: b.to ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
     const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined), b.opts);
     // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
@@ -365,7 +369,8 @@ boot((data, fps, theme, canvas) => {
   // the layer registry (core/layers/*) — one primitive per file; scene.html just dispatches.
   const renderer = createRenderer({ theme, W, H, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
     splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
-    extra, components: window.__components, clips: window.__clips, lottie: window.__lottie });
+    extra, components: window.__components, clips: window.__clips, lottie: window.__lottie,
+    html: window.__html });
   // setLayerTiming — write the data-* attributes driveClips reads (start/duration/track/anim/enter/exit).
   // Enter/exit default to the base snap durations scaled by the theme's durationScale; a split layer
   // enters instantly (units reveal themselves), and fxOut zeroes the fade so GSAP owns the exit alone.

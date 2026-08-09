@@ -17,7 +17,10 @@ if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/as
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 const sceneDir = path.dirname(path.resolve(file));
 
-const ASSET_EXT = /\.(png|jpe?g|webp|gif|svg|mp4|webm|wav|mp3|m4a|json|woff2?)$/i;
+// `.html` is here because a hand-authored fragment can now live in a file (`{"type":"html","src":…}`).
+// Without it a fragment path outside assets|formats|themes was not even a candidate, so the one asset
+// whose absence STOPS the render was the one asset the preflight did not look for.
+const ASSET_EXT = /\.(png|jpe?g|webp|gif|svg|mp4|webm|wav|mp3|m4a|json|html|woff2?)$/i;
 const isPathish = (s) => typeof s === 'string' && !/\s/.test(s) && (/^\/?(assets|formats|themes)\//.test(s) || (s.includes('/') && ASSET_EXT.test(s)));
 const remote = (s) => /^(https?:)?\/\//.test(s) || s.startsWith('data:');
 // a scene resolves an asset path against a few bases (repo root, the scene's own dir); accept any hit.
@@ -52,6 +55,7 @@ for (const [where, v] of refs) {
 const howto = (v) => {
   if (/\.(wav|mp3|m4a)$/i.test(v)) return `narration/music — make tts SCRIPT=… OUT=${v.replace(/\.(wav|mp3|m4a)$/i, '')}, or drop the file in place`;
   if (/assets\/icons\//.test(v)) return `icon/logo — make assets D=${file} WRITE=1 (fills brand logos + UI icons)`;
+  if (/\.html$/i.test(v)) return `hand-authored fragment — write the HTML at this path, then preview it: make preview HTML=${v}`;
   if (/\.json$/i.test(v)) return `captured component — make capture URL=… SEL=… OUT=${v}`;
   if (ASSET_EXT.test(v)) return `image — make assets D=${file} WRITE=1, or make capture / make photos`;
   return `add the file at this path`;

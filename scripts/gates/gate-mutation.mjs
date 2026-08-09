@@ -229,6 +229,37 @@ const CASES = [
   { gate: 'validate', name: 'bg opts · on a hand-authored html backdrop nothing reads them', expect: 'fail', match: /paints no fx/,
     scene: scene([TXT()], { bg: [{ html: '<div style="background:#fff;width:100%;height:100%"></div>', tone: 'light', from: 0, to: 2, opts: { grain: 0.2 } }] }) },
 
+  // A hand-authored fragment may live INLINE (`html`) or in a FILE (`src`), never both and never
+  // neither. `src` re-uses a key the schema already gives to an image and to a captured component, so
+  // schema-drift is name-based and cannot see the third meaning arrive; these four cases are the only
+  // thing standing between that key and a silent widening.
+  { gate: 'validate', name: 'html layer · inline html AND a src file', expect: 'fail', match: /a fragment has ONE source/,
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2,
+      html: '<div style="color:#fff">inline</div>', src: 'verify/fixtures/mut-frag-clean.html' }]) },
+  { gate: 'validate', name: 'html layer · neither html nor src', expect: 'fail', match: /neither `html` nor `src`/,
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2 }]) },
+  { gate: 'validate', name: 'html layer · a src file alone is the legal spelling', expect: 'pass',
+    aux: { 'verify/fixtures/mut-frag-clean.html': '<div style="color:#fff;font-size:80px">Fragment in a file</div>' },
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'verify/fixtures/mut-frag-clean.html' }]) },
+  // The dead-CSS rule has always applied to the markup, not to where the markup is stored. A fragment
+  // moved into a file must not become the one place transition/animation goes unread.
+  { gate: 'validate', name: 'html layer · dead CSS inside the src FILE', expect: 'fail', match: /DEAD STILL/,
+    aux: { 'verify/fixtures/mut-frag-dead.html': '<style>@keyframes drift{to{opacity:1}}</style><div style="color:#fff">x</div>' },
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'verify/fixtures/mut-frag-dead.html' }]) },
+  // A group child's html was checked by nothing at all: the walk was flat, so one level of nesting was
+  // an exemption from a rule nobody meant to make optional.
+  { gate: 'validate', name: 'html inside a GROUP child is checked too', expect: 'fail', match: /DEAD STILL/,
+    scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', start: 0, duration: 2, children: [
+      { type: 'html', html: '<div style="transition:opacity .3s;color:#fff">nested</div>' }] }]) },
+
+  // ---- asset preflight: a fragment that is not on disk STOPS the render, so it is the one asset the
+  // preflight most has to see. `.html` was not even a candidate extension until the fragment loader
+  // existed, so both halves are pinned here rather than assumed.
+  { gate: 'assetcheck', name: 'a src fragment that is not on disk', expect: 'fail', match: /missing|not found/i,
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'formats/scene/_no-such-fragment.html' }]) },
+  { gate: 'assetcheck', name: 'a src fragment that IS on disk', expect: 'pass',
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'formats/scene/_lightfall.html' }]) },
+
   // ---- beat-check: the only gate that reads the scene as a TIMELINE rather than a bag of layers.
   // Both tells are pinned, because they are measured off different edges of the clock (an interior
   // hole vs the closing plate) and one can rot while the other keeps firing.
@@ -642,6 +673,7 @@ const GATE_CMD = {
   designspec: (f) => ['node', ['scripts/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
   dissolve: (f) => ['node', ['scripts/gates/dissolve-check.mjs', f]],
+  assetcheck: (f) => ['node', ['scripts/gates/asset-check.mjs', f, '--strict']],
   // the one gate that reads a second document: the scene and the plan it claims to deliver.
   planrender: (f, intent) => ['node', ['scripts/gates/plan-vs-render.mjs', f, '--intent', intent]],
 };
@@ -661,6 +693,14 @@ for (const c of CASES) {
   // pair lives in the fixture dir like every other case.
   const ip = c.intent ? f.replace(/\.json$/, '.intent.json') : null;
   if (ip) fs.writeFileSync(ip, c.intent);
+  // `aux` writes companion files the SCENE points at by repo-relative path (an html fragment in a file).
+  // A case that needs one must own it: leaning on a library file would make the case pass or fail on
+  // somebody else's edit, which is the opposite of what a mutation fixture is for.
+  for (const [rel, body] of Object.entries(c.aux || {})) {
+    const p = path.join(repoRoot, rel);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, body);
+  }
   const [cmd, args] = GATE_CMD[c.gate](rel, ip && path.relative(repoRoot, ip));
   const r = run(cmd, args);
   const failed = r.code !== 0;
@@ -680,6 +720,7 @@ for (const c of CASES) {
   if (ok) pass++; else broken.push({ ...c, why, out: r.out.split('\n').filter(Boolean).slice(-4).join(' | ').slice(0, 220) });
   fs.unlinkSync(f);
   if (ip) fs.unlinkSync(ip);
+  for (const rel of Object.keys(c.aux || {})) { try { fs.unlinkSync(path.join(repoRoot, rel)); } catch { } }
 }
 
 /** A minimal, CURRENT bake of `sim` under assets/baked/<name>/ — the fixture the sim cases mutate. */

@@ -32,6 +32,23 @@ export function sanitizeHtml(src) {
     .replace(ON_HANDLER, '');
 }
 
+// htmlSource(o, table, where) → the markup an `html` layer or an html bg window is made of, from either
+// `html` (inline, escaped into the scene JSON) or `src` (a .html file, preloaded by preloadHtml into a
+// path→text table). ONE resolver, so a layer and a backdrop cannot drift on which source wins.
+//
+// A `src` with no entry in the table THROWS. Every other asset here degrades to something — an empty
+// box, a grey placeholder — because a missing photo still leaves a film. A fragment IS the beat, or the
+// whole backdrop, so there is nothing left to degrade to and guessing is how a scene ships blank.
+export function htmlSource(o, table, where) {
+  if (o == null || typeof o.src !== 'string') return o && o.html;
+  const got = table && table[o.src];
+  if (got == null)
+    throw new Error(`${where}: html fragment "${o.src}" was never loaded. `
+      + `Either the file does not exist, or its path is outside the roots the render server allows `
+      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+  return got;
+}
+
 // CSS `transition` and `animation` DO NOT RUN in a rendered scene. core/tokens.css kills both globally
 // with `!important`, because both are wall-clock: a transition fires off a property change and an
 // animation runs against the document timeline, so neither survives being seeked to frame 300 by one of
@@ -46,7 +63,11 @@ export function sanitizeHtml(src) {
 // Without that declaration `--p` is simply undefined, `var(--p, 1)` falls back to 1, and the fragment
 // renders permanently settled: the same silent no-op this comment exists to warn about, one level down.
 // `blocks/kit.mjs`'s `sweep()` exists to stamp exactly those four fields onto a block's html layer.
-const TIME_CSS = /(?:^|[;{\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
+// The anchor also accepts a QUOTE, because `style="transition:opacity .3s"` is how hand-authored markup
+// and captured site UI write this far more often than a stylesheet rule does — and an inline style is
+// the one spelling that opens on a quote. Anchored on nothing at all, the check would fire on the word
+// inside a sentence; anchored only on `;{` and whitespace, it read every stylesheet and no attribute.
+const TIME_CSS = /(?:^|[;{"'\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
 export function timeCssUsed(src) {
   const m = TIME_CSS.exec(String(src || ''));
   return m ? (m[1] ? m[1].toLowerCase() : 'keyframes') : null;

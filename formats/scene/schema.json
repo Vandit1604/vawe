@@ -79,6 +79,10 @@
           "type": "string",
           "label": "Hand-authored living background (raw HTML/CSS instead of a preset)"
         },
+        "src": {
+          "type": "string",
+          "label": "Path to a .html fragment holding that hand-authored background, instead of the inline `html` string (exactly one of the two)"
+        },
         "tone": {
           "type": "string",
           "label": "Is the hand-authored backdrop light or dark? (picks the default text ink)",
@@ -563,7 +567,7 @@
         },
         "html": {
           "type": "string",
-          "label": "html: raw hand-authored HTML/CSS for the layer (static; <script> stripped)"
+          "label": "html: raw hand-authored HTML/CSS for the layer, inline (static; <script> stripped). Put it in a file with `src` instead when it is long enough to want reading, diffing or previewing"
         },
         "speed": {
           "type": "number",
@@ -635,7 +639,7 @@
         },
         "src": {
           "type": "string",
-          "label": "Image / captured-component path"
+          "label": "Path to the layer's source file: an image, a captured component (.json), a lottie (.json), or — on an `html` layer — a hand-authored fragment (.html) instead of the inline `html` string (exactly one of the two)"
         },
         "x": {
           "type": "number|string",

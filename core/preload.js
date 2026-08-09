@@ -99,6 +99,39 @@ export async function preloadComponents(data) {
   for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status} — layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable — layer renders EMPTY`); } }
 }
 
+// Preload HAND-AUTHORED HTML FRAGMENTS: `{"type":"html","src":"formats/scene/hero.html"}` on a layer, or
+// `src` on a bg window, as the alternative to the inline `html` string. Typed like preloadLottie above,
+// NOT sniffed like preloadComponents: a path-shaped string somewhere in a scene is not a promise that it
+// is a fragment, and that sniff is why an unrelated .json path gets fetched as a component.
+//
+// A missing fragment THROWS (see htmlSource in core/sanitize-html.js for why this one does not degrade).
+export async function preloadHtml(data) {
+  window.__html = {};
+  const srcs = new Set();
+  walkData(data, (o) => { if (o && typeof o === 'object' && o.type === 'html' && typeof o.src === 'string') srcs.add(o.src); });
+  // bg windows carry no `type`, so they are read off `data.bg` directly rather than by shape.
+  for (const b of Array.isArray(data.bg) ? data.bg : []) if (b && typeof b === 'object' && typeof b.src === 'string') srcs.add(b.src);
+  for (const p of srcs) window.__html[p] = await fetchHtmlText(p);
+}
+
+// The .html twin of fetchJson: same three distinct outcomes, same served-roots message. fetchJson parses
+// and cannot be reused, and a fragment that 404s must not arrive as the error page's own markup.
+async function fetchHtmlText(src) {
+  // Root-normalised like lottie's src (:182): "formats/scene/x.html" resolved against the scene page at
+  // /formats/scene/ happens to work and resolves to nothing from anywhere else. Which page is loading a
+  // fragment is not something an author should have to know.
+  const url = /^(https?:)?\//.test(src) ? src : '/' + src;
+  let res;
+  try { res = await fetch(url); }
+  catch (e) { throw new Error(`html fragment: ${url} could not be fetched (${e.message})`); }
+  if (!res.ok) {
+    throw new Error(`html fragment: ${url} → HTTP ${res.status} — the render server did not serve it. `
+      + `Either the file does not exist, or its path is outside the roots the server allows `
+      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+  }
+  return await res.text();
+}
+
 // Preload generated CLIPS (scripts/gen-clip.mjs): any "/…/manifest.json" string is a frame-sequence
 // manifest {fps,w,h,frames:[url]}. Decode EVERY frame up front so the `clip` layer can swap an <img>
 // src per renderFrame(n) with zero async — deterministic playback of a generated/any video.
