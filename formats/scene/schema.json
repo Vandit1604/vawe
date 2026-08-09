@@ -978,6 +978,10 @@
             "tilt": {
               "type": "object",
               "label": "Turn the layer out of the picture plane: { x, y, z } degrees about its own centre, projected through ONE camera shared by every tilted layer with the same parent. { dist } px is that camera's distance (default 1600, smaller = wider lens); { origin } is its vanishing point, \"center\" or [x, y] in canvas px. Siblings must agree on dist/origin or it is a hard error. On a group child the camera belongs to the group, not the canvas."
+            },
+            "plane": {
+              "type": "number|object",
+              "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
             }
           }
         },

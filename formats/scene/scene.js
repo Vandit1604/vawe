@@ -638,7 +638,8 @@ boot((data, fps, theme, canvas) => {
   // #59 gives: a 3D transform promotes the subtree into a 3D rendering context and changes rasterisation
   // even when it changes no geometry, and a film with no depth in it should not pay that.
   //
-  // The moment anything DOES leave the plane — a tilted layer, or a camera that pitches, yaws or rolls —
+  // The moment anything DOES leave the plane — a tilted layer, a layer standing at a DEPTH
+  // (core/fx/plane.js), or a camera that pitches, yaws or rolls —
   // the flat emission stops being equivalent, and it fails in the one way that matters: it moves an
   // already-finished projection, so a tilted card's vanishing point travels WITH the card and the
   // perspective never changes however far the camera goes. That is the tell in
@@ -647,6 +648,7 @@ boot((data, fps, theme, canvas) => {
   //   #root  perspective + perspective-origin   the EYE, fixed to the frame
   //   #cam   transform-style: preserve-3d       the RIG, standing inside the eye's space
   //   layer  rotate: <axis> <deg>               tilt, unchanged (core/fx/tilt.js)
+  //   layer  translate: 0 0 <z>px               depth — which plane the layer stands on (core/fx/plane.js)
   //
   // Every layer rotation now composes with the rig's own transform in ONE 3D space, projected once. A
   // pan becomes a TRUCK past the subject, `s` becomes a real dolly, and the vanishing point stays nailed
@@ -659,9 +661,14 @@ boot((data, fps, theme, canvas) => {
   // scene both tilts and cuts. Pair depth with a cut that only TRANSLATES, or accept the pop. The fix,
   // when a film needs both, is to split the rig onto an element of its own between `#cam` and the
   // layers, so the cut and the camera stop sharing a node.
-  const tiltFx = layers.slice(0, topCount)
-    .map(({ L }) => specsOf(L).find((f) => f.name === 'tilt')).filter(Boolean);
-  const RIG = tiltFx.length > 0
+  const topFx = (name) => layers.slice(0, topCount)
+    .map(({ L }) => specsOf(L).find((f) => f.name === name)).filter(Boolean);
+  const tiltFx = topFx('tilt');
+  // A DEPTH turns the rig on for the same reason an angle does, and the reason is worth stating: without
+  // the rig `translate: 0 0 z` lands in a flat parent, is projected by no lens, and moves the layer by
+  // exactly zero pixels — input accepted and then ignored. core/fx/plane.js refuses that case rather than
+  // rendering it, so this is what keeps a depth from ever reaching it.
+  const RIG = tiltFx.length > 0 || topFx('plane').length > 0
     || camKf.some((k) => Math.abs(k.rx || 0) > 1e-3 || Math.abs(k.ry || 0) > 1e-3 || Math.abs(k.roll || 0) > 1e-3);
   // THE LENS HAS ONE OWNER. `tilt.dist` and the camera's `p` are the same focal distance, and under the
   // rig only one of them can be on the stage — so a scene that states both is refused with both values

@@ -279,7 +279,8 @@ same arbitrary motion, still deterministic (no wall clock, dedup-safe).
 Where nothing in the frame leaves the canvas plane, the whole projection collapses to
 `scale(s) translate(x,y)` and that is what gets emitted — the same picture to the pixel, without
 promoting the stage into a 3D rendering context. The moment anything *does* leave the plane (a `tilt`
-layer, or a non-zero `rx`/`ry`/`roll`) the engine builds a **rig**: the lens goes on the stage and `#cam`
+layer, a `plane` layer standing at a depth, or a non-zero `rx`/`ry`/`roll`) the engine builds a **rig**:
+the lens goes on the stage and `#cam`
 stands inside it in `preserve-3d`. Then a pan is a **truck past** the subject and `s` is a real **dolly** —
 the vanishing point stays nailed to the frame while the world crosses it, so a tilted card *turns* as the
 camera travels instead of merely sliding. That is the move the flat form cannot make, and
@@ -405,7 +406,9 @@ name is a hard error listing the known set, never a skipped entry. Modifiers app
 always last: they are the final SLOT of the per-frame pipeline (`core/tracks/`, below), so a modifier
 acts on the finished frame. `transform`, `opacity` and `filter` on the layer element belong to the
 tracks and a modifier must not append to them; one that needs a transform gets an element of its own,
-or reaches for a CSS property the tracks do not own (`tilt` uses the `rotate` longhand). Note this is
+or reaches for a CSS property the tracks do not own — `rotate` (`tilt`), `scale` (`kick`) and
+`translate` (`plane`) are the three Transforms Level 2 longhands, and the used transform is
+`translate · rotate · scale · transform`, so all three land outside what the tracks compose. Note this is
 **not** `fx`, which is the named-GSAP-effect slot.
 
 **`core/tracks/` — the per-frame pipeline, and where the line falls.** A cross-cutting job the engine
@@ -511,6 +514,27 @@ then travel past the layer with the perspective changing as it goes. State the l
 top-level tilt *and* `p` on the camera is refused with both values named, because one frame is one lens.
 A group child is unaffected and keeps its own camera, which also means it does not gain depth from a
 camera move; to travel past a composed card, tilt the **group**.
+
+**`plane` — stand the layer at a DEPTH, so the frame holds objects instead of one sheet.**
+`{"plane": -600}` puts it 600px behind the picture plane; `{"plane": {"z": 240}}` puts it in front,
+toward the eye. The sign is the CSS one, the same one the camera's dolly uses. A tilt turns a layer out
+of the plane and the rig can travel past it, but with every layer still at `z = 0` the whole composition
+turns as **one rigid pane**: a camera trucking past two cards moves both by exactly the same amount.
+Parallax is a *difference* of depth and cannot exist while there is only one depth to have. Under the
+rig a layer at `z` is projected by `lens / (lens - z)`, so a near layer crosses the frame faster than a
+far one: at the default 1600px lens a 600px truck moves `z = +300` by 738px, `z = 0` by 600px and
+`z = -900` by 384px. Those are measured, not derived —
+`node scripts/dev/spike-depth.mjs` renders the real engine and reports them.
+
+It **turns the rig on by itself**, exactly as a top-level `tilt` does, because without the rig
+`translate: 0 0 z` lands in a flat parent and moves the layer by zero pixels. The layer **changes
+apparent size**, and must: a depth that does not is a scale. Size the layer for the distance
+(divide by `(lens - z) / lens` to get your screen size back) rather than compensating with a scale.
+`z` at or past the lens is refused (the layer would stand at or through the camera, which CSS renders
+mirrored and says nothing about), and so is a **group child**, whose flat parent would project it
+through nothing; put `plane` on the **group** and the whole composed card stands at that depth.
+It rides the `translate` longhand — the third and last of the three the tracks do not own, after
+`rotate` (tilt) and `scale` (kick) — so it composes over whatever the motion track wrote.
 
 **`kick` — hit the layer on the film's own joints.** `{"kick": true}`, or
 `{"kick": {"on": "cut", "scale": 1.08, "frames": 6}}`. On every cut, seam or sting (`on` picks the

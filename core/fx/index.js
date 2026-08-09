@@ -22,8 +22,9 @@ import * as progress from './progress.js';
 import * as kick from './kick.js';
 import * as shadow from './shadow.js';
 import * as tilt from './tilt.js';
+import * as plane from './plane.js';
 
-const REGISTRY = { kick, mixBlend, occlude, progress, shadow, tilt };
+const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it — the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
