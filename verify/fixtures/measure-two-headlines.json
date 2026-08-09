@@ -1,0 +1,38 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "default",
+  "duration": 4,
+  "bg": [
+    {
+      "t": 0,
+      "preset": "paper"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "id": "big",
+      "text": "Bigger headline",
+      "x": 100,
+      "y": 200,
+      "w": 900,
+      "size": 90,
+      "color": "#000000",
+      "start": 0,
+      "duration": 4
+    },
+    {
+      "type": "text",
+      "id": "washed",
+      "text": "Washed headline",
+      "x": 100,
+      "y": 600,
+      "w": 900,
+      "size": 80,
+      "color": "#8a8a8a",
+      "start": 0,
+      "duration": 4
+    }
+  ]
+}

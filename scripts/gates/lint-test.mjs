@@ -22,6 +22,15 @@ ok(bad.some((w) => /no "duration"/.test(w)), 'rule 1: missing-duration (the "+" 
 // come back by reflex and go on telling authors to strip markup the engine renders correctly.
 ok(!bad.some((w) => /typing.*markup/i.test(w)), 'rule 2 retired: typing + <b>/<em> is silent (HTML-safe typing, #85)');
 ok(bad.some((w) => /colliding/.test(w)), 'rule 3: scene collision (Preferences↔agents overlap)');
+// rule 3, the other half: the collision must be measured on the GLYPHS, not on the declared `w`. A
+// centred or left-aligned line needs a `w` (pin centres a box) and mostly does not fill it, so two
+// boxes can intersect over empty slack while nothing on screen touches. Pinned because the same
+// read-the-representation bug has been logged four times (docs/MISTAKES.md #214/#216/#217/#242).
+const slack = lintData({ module: 'scene', layers: [
+  { type: 'text', text: 'Hi', x: 100, y: 400, w: 1200, size: 70, start: 0, duration: 4 },
+  { type: 'text', text: 'There', x: 900, y: 400, w: 600, size: 70, start: 0, duration: 4 },
+] });
+ok(!slack.some((w) => /colliding/.test(w)), `rule 3: declared boxes that overlap only in empty slack are silent (got ${slack.filter((w) => /colliding/.test(w)).join('; ') || 'none'})`);
 
 // committed clean scene must stay silent (no false positives)
 const clean = lintData(read('formats/scene/sample.json'));

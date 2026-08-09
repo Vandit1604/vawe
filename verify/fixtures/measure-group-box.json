@@ -1,0 +1,32 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "default",
+  "duration": 4,
+  "bg": [
+    {
+      "t": 0,
+      "preset": "aurora"
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "id": "g1",
+      "x": 200,
+      "y": 700,
+      "w": 600,
+      "h": 400,
+      "layout": "row",
+      "start": 0,
+      "duration": 4,
+      "children": [
+        {
+          "type": "text",
+          "text": "small",
+          "size": 30
+        }
+      ]
+    }
+  ]
+}
