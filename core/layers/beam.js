@@ -20,6 +20,11 @@ export const beamConic = (a, c, tail) =>
   `conic-gradient(from ${a.toFixed(1)}deg, transparent 0deg, ${alphaMix(c, 0.0)} 1deg, ` +
   `${alphaMix(c, 0.85)} ${(tail * 0.5).toFixed(0)}deg, ${c} ${tail.toFixed(0)}deg, transparent ${(tail + 1).toFixed(0)}deg)`;
 
+// `mode:"shine"` and the default border-beam read disjoint halves of this list, but both halves are
+// authored on the same prop (`mode`), so guarding either on the other would say the wrong thing.
+export const PROPS = { w: {}, h: {}, radius: {}, color: {}, mode: {}, intensity: {},
+  angle: {}, thickness: {}, tail: {}, glow: {}, period: {}, speed: {} };
+
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';

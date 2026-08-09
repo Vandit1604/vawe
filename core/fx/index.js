@@ -61,6 +61,11 @@ const NONE = Object.freeze([]);
 //    that read the current transform and appended to it would be appending to ITS OWN value from
 //    whichever frame ran last, growing the string without bound and making renderFrame(n) depend on
 //    what rendered before it. A modifier needing a transform gets an element of its own to put it on.
+// The one layer prop this registry reads. What is INSIDE a modifier's options bag is that modifier's
+// own vocabulary and not a layer prop — `{ tilt: { dist: 900 } }` and a layer's `dist` are two different
+// things that share a spelling, and merging them would make each excuse the other.
+export const PROPS = { modifiers: {} };
+
 export function specsOf(L) {
   const raw = L.modifiers;
   if (raw == null) return NONE;           // the path every existing scene takes, untouched

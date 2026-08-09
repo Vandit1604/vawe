@@ -7,6 +7,9 @@
 // load rather than a diff somebody notices in a render.
 export const slot = 'post';
 
+// Reads nothing itself — `modifiers` is read by core/fx/index.js, which declares it.
+export const PROPS = {};
+
 export function frame(kit, el, L, units, t, f, start, end, scene) {
   kit.renderer.modify(el, L, t, scene);
 }

@@ -29,6 +29,9 @@ const near = (a, b) => Math.abs(a - b) < 1e-6;
 // The origin key is own[0] — identified BY INDEX, the same way ox/oy read it, never by comparing its
 // time to the pan's first key. The spinner's origin sits at t=0 while the track it rides opens at
 // t=-0.08, so a time comparison read that origin as a peel and silently stopped the spinner panning.
+// `panWith` names the source; the merge then reads this layer's own track and clock to place the copy.
+export const PROPS = { panWith: {}, motion: { when: 'panWith' }, id: {}, start: {} };
+
 export function peelTime(own) {
   let peel = Infinity;
   for (let i = 1; i < own.length; i++) {         // [0] is where the ride starts, not where it ends

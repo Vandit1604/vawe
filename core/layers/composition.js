@@ -9,6 +9,9 @@
 // No frame() hook: the timeline is global and seeked centrally.
 import { COMPOSITIONS } from '../compositions/index.js';
 
+// `props` is DATA handed to the named comp; what is inside it is the comp's own vocabulary.
+export const PROPS = { comp: {}, props: {} };
+
 export function build(kit, el, L) {
   el.style.pointerEvents = 'none';
   const comp = COMPOSITIONS[L.comp];

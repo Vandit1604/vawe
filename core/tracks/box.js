@@ -12,6 +12,10 @@ import { motionAt } from '../sequence.js';
 
 export const slot = 'box';
 
+// w/h are read as the value to fall back to OUTSIDE the window, so this file only reads them where a
+// track exists. They are unconditional elsewhere (the layer's own box), and the union says so.
+export const PROPS = { motion: {}, w: { when: 'motion' }, h: { when: 'motion' } };
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.motion && L.motion.length && (L.motion[0].w != null || L.motion[0].h != null || L.motion[0].track != null))) return;
   const inWin = t >= start && t < end;

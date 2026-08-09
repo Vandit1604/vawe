@@ -15,6 +15,11 @@ const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value fo
 
 export const slot = 'transform';
 
+// `motionBlur` is derived from the DISTANCE between two samples of the motion track, so without a track
+// there is nothing to differentiate and the prop decides nothing — including `motionBlur: false`, which
+// opts out of an automatic blur that a still layer would never have had.
+export const PROPS = { motion: {}, motionBlur: { when: 'motion' } };
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.motion && L.motion.length && t >= start && t < end)) return;
   const fps = kit.fps;

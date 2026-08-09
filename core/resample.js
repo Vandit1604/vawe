@@ -25,6 +25,9 @@ function sourceOf(el) {
   return null;
 }
 
+// `seed` falls back to the layer's own when the spec states none, so both spellings are read here.
+export const PROPS = { resample: {}, seed: { when: 'resample' } };
+
 export function attachResample(kit, el, L) {
   if (!L.resample) return;
   const spec = typeof L.resample === 'string' ? { fx: L.resample } : L.resample;

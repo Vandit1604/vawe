@@ -6,6 +6,8 @@
 // slot is free. It sits here because the layer's own decoration belongs with the layer's own frame().
 export const slot = 'orbit';
 
+export const PROPS = { borderTrail: {} };
+
 export function frame(kit, el, L, units, t) {
   if (!L.borderTrail) return;
   const s = el.querySelector('[data-trail]');

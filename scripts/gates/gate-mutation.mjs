@@ -333,6 +333,13 @@ const CASES = [
                     anim: 'slide-right', out: 'slide-left', motion: [{ to: { x: 400 }, dur: 1 }] }]) },
   { gate: 'layerprops', name: 'a prop no layer type reads is still caught', expect: 'fail',
     match: /nothing reads it/, scene: scene([TXT({ notARealProp: 7 })]) },
+  // THE GUARD, both directions. `preset` is the kinetic reveal's, and the units track only runs on a
+  // layer that asked to be split — so the same prop is live on one layer and dead on the next, which is
+  // the half the old source scan could not express at all and the half ~66 authored props sit on.
+  { gate: 'layerprops', name: 'a split preset without the split is inert', expect: 'fail',
+    match: /`preset` is read only when the layer sets/, scene: scene([TXT({ preset: 'rise' })]) },
+  { gate: 'layerprops', name: '...and with the split it is live', expect: 'pass',
+    scene: scene([TXT({ preset: 'rise', split: 'word' })]) },
 
   // ---- direction-floor · no-continuous-object. A SLIDESHOW is a film where every beat is an island:
   // nothing survives a cut, so each seam is a jump between unrelated shots instead of a state change of
@@ -751,24 +758,39 @@ const srcCases = [
     mutate: (s) => s.replace("{ s.clear(); if (S.resamplable)", "{ if (S.resamplable)"),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
-  // that read. So the case turns on the mutation: it used to pin a prop (`r`) that no build of the
-  // engine reads, which made it pass whether or not the mutation applied, and a case that cannot
-  // distinguish the two states proves nothing. Deleting a real read is the defect being simulated.
+  // its DECLARATION. The gate answers from the declarations now, so deleting the read itself would
+  // prove nothing about the gate — it is the statement that has to be load-bearing, and this is the
+  // case that says so. (It used to pin a prop `r` that no build of the engine reads, which made it
+  // pass whether or not the mutation applied; a case that cannot tell the two states apart is noise.)
   { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
-    mutate: (s) => s.replace('L.pulseAmp', 'undefined'),
+    mutate: (s) => s.replace("pulseAmp: { when: 'pulse' },", ''),
     cmd: ['node', ['scripts/gates/layer-props.mjs', 'formats/scene/_lp-fixture.json']], match: /`pulseAmp` is set and nothing reads it/,
     before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), JSON.stringify({
       module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
       bg: [{ preset: 'plain', from: 0, to: 2 }],
       layers: [{ type: 'glow', x: 200, y: 200, w: 400, h: 400, pulse: 2, pulseAmp: 0.4, start: 0, duration: 2 }] })),
     after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), { force: true }) },
-  // ...and the other direction: layer-props must NOTICE when its own shared-path scan goes blind.
-  // Renaming every `L.` read in the format's driver is what a file split did in effect, and the gate
-  // answered by calling ~1900 live props dead instead of saying it could no longer see. It must now
-  // report itself broken rather than blame the scenes.
-  { name: 'layer-props · the shared-path scan goes blind', file: `${SCENE_DIR}/scene.js`,
-    mutate: (s) => s.replace(/\bL\./g, 'Q.'),
+  // ...and the other direction: layer-props must NOTICE when the SHARED declarations are gutted. A
+  // file split once emptied the shared set and the gate answered by calling ~1900 live props dead
+  // instead of saying it could no longer see. Losing `start` from the orchestrator's declarations is
+  // that same collapse in the declared world: it must report itself broken, never blame the scenes.
+  { name: 'layer-props · the shared declarations go blind', file: `${SCENE_DIR}/props.js`,
+    mutate: (s) => s.replace(/^  start: \{\}.*$/m, ''),
     cmd: ['node', ['scripts/gates/layer-props.mjs', `${SCENE_DIR}/higgsfield-recreation.json`]], match: /layer-props is blind/ },
+  // THE SHAPE THE OLD MEASUREMENT WAS WORST AT, pinned deliberately (#234): a prop read ONLY inside a
+  // registry directory that did not exist when the gate was written. core/tracks/ is that directory —
+  // 1454 live props reported as dropped the day it landed, because a scanner can only look where its
+  // author knew to point it. The declaration travels with the track, so this must fail on its removal.
+  { name: 'layer-props · a prop read only by a track', file: 'core/tracks/vars.js',
+    mutate: (s) => s.replace("varsDur: { when: 'vars' }, ", ''),
+    cmd: ['node', ['scripts/gates/layer-props.mjs', 'formats/scene/_lp-track-fixture.json']],
+    match: /`varsDur` is set and nothing reads it/,
+    before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-track-fixture.json'), JSON.stringify({
+      module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
+      bg: [{ preset: 'plain', from: 0, to: 2 }],
+      layers: [{ type: 'html', html: '<b>hi</b>', x: 200, y: 200, w: 400, start: 0, duration: 2,
+        vars: { '--p': [0, 1] }, varsDur: 1.2 }] })),
+    after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-track-fixture.json'), { force: true }) },
   { name: 'dead-branch · a ternary whose arms are identical', file: 'core/layers/rect.js',
     mutate: (s) => s.replace('export function build', 'const DEAD = 1 === 1 ? 2 : 2;\nexport function build'),
     cmd: ['node', ['scripts/gates/dead-branch.mjs']], match: /both arms are/ },

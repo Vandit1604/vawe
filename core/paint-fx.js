@@ -21,6 +21,12 @@ export function hash01(i, seed = 0) {
 }
 const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFXYZ';
 
+// The option names every effect below reads OFF THE LAYER. A paint layer's `o` IS the layer object
+// (core/surfaces/paint.js passes it straight through), so these are layer props, not a nested options
+// bag — which is why they are declared here rather than left to the effect that reads them.
+export const PROPS = { size: {}, color: {}, headColor: {}, tail: {}, rate: {}, speed: {}, count: {},
+  amp: {}, angle: {}, hue: {}, hues: {}, length: {}, opacity: {}, weight: {} };
+
 export const PAINT_FX = {
   // matrix rain — the effect ROADMAP names as needing this layer. Each column falls at its own seeded
   // speed; the head position is (lt * speed + offset) wrapped, so it is f(lt) and never integrated.

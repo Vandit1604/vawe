@@ -9,6 +9,17 @@ import { animateUnits } from '../type.js';
 
 export const slot = 'split';
 
+// `units` exist only where the layer asked to be split, so every knob below is guarded on `split` — with
+// `ransom` beside it, because scene.js implies a char split for a ransom layer and the reveal then runs
+// on those units. `circle` implies a split too and is deliberately NOT here: it lays the units out on a
+// ring and this track yields to it, so a preset on a circle layer is inert for the opposite reason.
+const SPLIT = ['split', 'ransom'];
+export const PROPS = {
+  preset: { when: SPLIT }, stagger: { when: SPLIT }, each: { when: SPLIT }, loop: { when: SPLIT },
+  dist: { when: SPLIT }, speed: { when: SPLIT }, phaseStep: { when: SPLIT }, presetOpts: { when: SPLIT },
+  circle: {}, fx: {}, ransom: {},
+};
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(units && !L.circle && !L.fx && t >= start && t < end)) return;
   animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });

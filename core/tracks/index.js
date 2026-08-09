@@ -36,6 +36,7 @@
 // is one line, in the one file that documents the pipeline.
 // Bound under `t<Name>` so the registry's keys stay the track names while `units` and `motion` remain
 // free as the argument and kit-field names they have carried since updateLayer.
+import { mergeProps } from '../props.js';
 import * as tCut from './cut.js';
 import * as tUnits from './units.js';
 import * as tRansom from './ransom.js';
@@ -57,6 +58,15 @@ const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimit
 // FX_TYPES already have. A hand-typed copy of this list is how `make coverage` reported 14/14 while a
 // 15th layer type existed (docs/MISTAKES.md #21, #65).
 export const TRACK_TYPES = Object.keys(REGISTRY);
+
+// The props the PIPELINE reads, merged from the tracks themselves — every layer rides all twelve, so
+// this is a flat set rather than a per-track one. Derived for the same reason TRACK_TYPES is: a gate
+// asking "does anything read `motionBlur`?" must read the answer off the code that reads it.
+for (const name of TRACK_TYPES)
+  if (REGISTRY[name].PROPS === undefined)
+    throw new Error(`track "${name}" declares no PROPS — a track that reads layer props without saying `
+      + `which ones puts them back out of a gate's reach. Export \`PROPS = {}\` if it reads none.`);
+export const TRACK_PROPS = Object.freeze(mergeProps(...TRACK_TYPES.map((n) => REGISTRY[n].PROPS)));
 
 // THE PIPELINE. Read top to bottom, this is the order every layer is composed in on every frame.
 export const SLOTS = Object.freeze([

@@ -1,5 +1,7 @@
 // core/layers/clip.js — a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame
 // sequence (scripts/gen-clip.mjs → manifest). No <video>: renderFrame(n) swaps the <img> src.
+export const PROPS = { src: {}, w: {}, radius: {}, fit: {}, speed: {}, loop: {} };
+
 export function build(kit, el, L) {
   const man = (kit.clips && kit.clips[L.src]) || { frames: [], w: 640, h: 360, fps: 30 };
   if (L.w != null) el.style.width = L.w + 'px';

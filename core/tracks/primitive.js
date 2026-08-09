@@ -14,6 +14,10 @@
 // Both facts lived in nobody's head. They live in this file now.
 export const slot = 'primitive';
 
+// Reads no prop of its own: it hands the layer to the type's builder, which declares its own. Stated
+// rather than omitted, because "declares nothing" and "nobody wrote the declaration yet" have to differ.
+export const PROPS = {};
+
 export function frame(kit, el, L, units, t, f, start, end, scene) {
   kit.renderer.frame(el, L, t, scene);
 }

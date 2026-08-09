@@ -13,6 +13,11 @@ import { clamp01, resolveEasing } from '../motion.js';
 
 export const slot = 'vars';
 
+export const PROPS = {
+  vars: {},
+  varsDur: { when: 'vars' }, varsDelay: { when: 'vars' }, varsEase: { when: 'vars' },
+};
+
 export function frame(kit, el, L, units, t, f, start) {
   if (!(L.vars && t >= start)) return;
   const vd = L.varsDur ?? 1.0, v0 = start + (L.varsDelay ?? 0);

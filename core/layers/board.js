@@ -1,5 +1,9 @@
 // core/layers/board.js — a believable populated workspace from pure data: columns of mini issue-cards
 // with the elevation-1 treatment. Hard caps (4 cols × 5 cards); enters as ONE clip.
+// `cols` carries the whole board (titles, counts, cards, labels); its inner shape is the column's
+// vocabulary, not the layer's.
+export const PROPS = { cols: {}, w: {}, gap: {}, headSize: {}, cardSize: {} };
+
 export function build(kit, el, L) {
   const cols = (L.cols || []).slice(0, 4);
   const colW = ((L.w ?? 1200) - (cols.length - 1) * (L.gap ?? 28)) / Math.max(1, cols.length);

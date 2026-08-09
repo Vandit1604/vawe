@@ -1,5 +1,9 @@
 // core/layers/doc.js — a markdown / source FILE card from pure data: optional filename + diff-chip
 // header, then blocks (heading with accent bar · mono body · code · bullets). Theme-styled, auto-height.
+// `blocks` carries the document body; its keys (h · code · bullets · body) are the block's vocabulary.
+export const PROPS = { blocks: {}, filename: {}, diff: {}, w: {}, bg: {}, radius: {}, pad: {},
+  gap: {}, blockGap: {}, nameSize: {}, hSize: {}, bodySize: {} };
+
 export function build(kit, el, L) {
   const mono = 'var(--font-mono)', sans = 'var(--font-sans)';
   const nS = L.nameSize ?? 30, hS = L.hSize ?? 40, bS = L.bodySize ?? 30;

@@ -1,7 +1,15 @@
 // core/layers/image.js — an <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
 // `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
 import { canvasFxKey } from '../canvas-fx.js';
-import { attachResample, tickResample } from '../resample.js';
+import { mergeProps } from '../props.js';
+import { attachResample, tickResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
+
+// `radius` and `ken` are the two ways an image opts into a clipped cover-fit box, so each unlocks the
+// other's geometry; `edgeFadeColor` paints the plate the fade dissolves toward and means nothing alone.
+export const PROPS = mergeProps({
+  src: {}, w: {}, h: {}, radius: {}, ken: {}, canvasFx: {},
+  edgeFade: {}, edgeFadeColor: { when: 'edgeFade' },
+}, RESAMPLE_PROPS);
 
 export function build(kit, el, L) {
   el.innerHTML = kit.icon(L.src, '');

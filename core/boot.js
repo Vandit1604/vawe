@@ -32,6 +32,14 @@ const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return 
 //   "center"          → centered given the layer's size
 //   "left/right/top/bottom" → anchored to that edge inside a per-aspect safe inset
 //   pin: "center|top|bottom|left|right|top-left|…" → shorthand for the x/y edge pair
+// The props BOOT resolves before any layer is built: the placement grammar (edge keywords, the 12-col
+// grid, string coordinates) and the per-aspect override map. They are read here and nowhere else, and
+// this file is imported by node, so a gate can read the declaration without knowing where boot lives.
+export const PROPS = {
+  pin: {}, col: {}, cols: { when: 'col' }, gutter: { when: 'col' },
+  aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {},
+};
+
 export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
   const inset = safe.margin;
   // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:

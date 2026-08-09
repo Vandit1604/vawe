@@ -1,6 +1,14 @@
 // core/layers/count.js — a number that counts from→to over local time (stats, timers). Build is the
 // text build (styleText renders count content); this adds the per-frame value.
+import { mergeProps } from '../props.js';
+import { PROPS as TEXT_PROPS } from './text.js';
 export { build } from './text.js';
+
+// The count's own vocabulary, on top of the text build it reuses — the same shape as `export { build }`.
+export const PROPS = mergeProps(TEXT_PROPS, {
+  from: {}, to: {}, countStart: {}, countDur: {}, ease: {},
+  unit: {}, suffix: {}, prefix: {}, decimals: {},
+});
 
 export function frame(kit, el, L, t) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);

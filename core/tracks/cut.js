@@ -7,6 +7,15 @@ import { clamp01 } from '../motion.js';
 
 export const slot = 'enter';
 
+// Everything but `cut` itself is inside the guard: a layer that states a `dist` or a `cutTiming` and no
+// `cut` is describing a transition it never declared, and the frame is identical without it.
+export const PROPS = {
+  cut: {},
+  enterDur: { when: 'cut' }, exitDur: { when: 'cut' },
+  dir: { when: 'cut' }, dist: { when: 'cut' }, cutTiming: { when: 'cut' },
+  cx: { when: 'cut' }, cy: { when: 'cut' },
+};
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.cut && t >= start && t < end)) return;
   const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;

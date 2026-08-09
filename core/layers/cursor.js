@@ -1,5 +1,7 @@
 // core/layers/cursor.js — a pointer that follows a `path` ([{t,x,y}] keyframes) and clicks at
 // `clicks:[t…]` — the core of a product demo. macOS arrow + a ripple ring that fires on click.
+export const PROPS = { size: {}, x: {}, y: {}, color: {}, rippleColor: {}, path: {}, clicks: {} };
+
 export function build(kit, el, L) {
   const sz = L.size ?? 34;
   // `path` coords are ABSOLUTE screen px by default: with no authored x/y, anchor the base at (0,0)

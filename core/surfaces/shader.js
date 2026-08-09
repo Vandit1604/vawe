@@ -8,6 +8,8 @@ export const size = (kit) => [kit.W, kit.H];   // an ambient field: fills the fr
 export const stamp = 2;
 export const resamplable = true;
 
+export const PROPS = { shader: {}, seed: {}, intensity: {}, colors: {} };
+
 // The ambient draw call resolves a name to a uniform index and RETURNS on a miss, so `shader:"aurara"`
 // has always produced an empty canvas that passes every gate. `validate` refuses the scene instead
 // (`make validate` already rejects it, and the renderer being the lenient one is the wrong way round —

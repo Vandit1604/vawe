@@ -22,6 +22,7 @@
 // exists — core/layers/canvas.js does all of that once, for all four. A surface that needed its own
 // build order would not belong here; it would be a layer type, like `glow` and `beam`, which paint
 // with CSS gradients and own no canvas at all.
+import { mergeProps } from '../props.js';
 import * as paint from './paint.js';
 import * as shader from './shader.js';
 import * as raymarch from './raymarch.js';
@@ -34,10 +35,16 @@ const REGISTRY = { paint, shader, raymarch, three };
 // reported 14/14 while a 15th layer type existed (docs/MISTAKES.md #21, #65).
 export const SURFACE_TYPES = Object.keys(REGISTRY);
 
+// The layer props each surface reads, keyed by surface name. `PROPS` is in REQUIRED below for the same
+// reason `validate` is: a surface that reads props without declaring them puts them out of a gate's
+// reach, and the whole point of the declaration is that adding a file cannot open a blind spot.
+export const SURFACE_PROPS = Object.freeze(Object.fromEntries(
+  SURFACE_TYPES.map((n) => [n, Object.freeze(mergeProps(REGISTRY[n].PROPS))])));
+
 // THE CONTRACT, checked at MODULE LOAD rather than described in a comment: core/layers/canvas.js
 // calls all five of these on every surface, and a surface missing one would fail deep inside a build
 // or, worse for `validate`, would accept any effect name and draw an empty canvas.
-const REQUIRED = ['size', 'stamp', 'resamplable', 'validate', 'create'];
+const REQUIRED = ['size', 'stamp', 'resamplable', 'validate', 'create', 'PROPS'];
 for (const name of SURFACE_TYPES)
   for (const k of REQUIRED)
     if (REGISTRY[name][k] === undefined)

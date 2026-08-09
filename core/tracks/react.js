@@ -16,6 +16,8 @@ import { baseOpacity } from './util.js';
 
 export const slot = 'react';
 
+export const PROPS = { react: {} };
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.react && window.__spectrum && t >= start && t < end)) return;
   const rs = Array.isArray(L.react) ? L.react : [L.react];

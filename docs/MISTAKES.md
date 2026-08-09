@@ -6280,3 +6280,46 @@ needs no heuristic — a layer drawing nothing for its entire life is never inte
 component under the 3D rig. `grep -l '"tilt"' formats/scene/*.json` is the candidate set; this film is
 the one confirmed instance, and it was confirmed only because the storyboard promised the bar loudly
 enough that its absence was noticeable.
+
+## #244 — `layer-props` was inverted: 1482 false alarms and ~66 real misses, because it looked for reads instead of asking for them (a fourth #229/#232/#242, and the same shape as #214/#216/#217)
+
+`make layer-props` reported **1482 props "accepted and dropped"** — the failure CLAUDE.md names as the
+most expensive in this repo. Every one of the 1482 was a false alarm. 1454 were read in `core/tracks/`,
+a registry directory created the day it started shouting; 26 in `core/pan-resolve.mjs`, a `.mjs` outside
+every registry directory; 2 in a file it did scan, under a variable named `A` instead of `L`.
+
+Meanwhile it missed the class it exists for. Six props fire only behind another prop — `preset` needs a
+split (`core/tracks/units.js:13`), `dist` needs a `cut` or a split, `motionBlur` needs a `motion` track —
+and 23 authored layers set one without its enabler. Those render exactly as if the prop were absent, and
+the gate called every one of them live while shouting about the ones that worked.
+
+**Root cause: a static scanner over a moving file tree.** The scan surface was a hardcoded four-file list
+plus one hop of each builder's *relative* imports. That list is a map of where the engine lived on the day
+it was written, and this engine keeps moving — three registries landed in one day. Each earlier fix widened
+the scan by exactly the shape that had just broken (#232 followed `../` but never a sibling; #229 scanned a
+20-line shell after a file split) and each was overtaken by the next move. Widening a scan cannot outrun a
+refactor.
+
+**Fix: every module that reads `L.<prop>` declares it, beside the read** (`core/props.js` is the contract;
+`core/layers/index.js` exports `LAYER_PROPS`, `core/tracks/index.js` `TRACK_PROPS`, `core/surfaces/index.js`
+`SURFACE_PROPS`, the same "gates derive, never restate" contract `LAYER_TYPES` already had). The gate is a
+set difference against those statements, so a new directory cannot open a blind spot: a declaration travels
+in the file that does the reading. The guard is declared too — `preset: { when: 'split' }` — which is what
+lets the gate tell "nothing reads this" from "nothing reads this **here**".
+
+**The gate now catches (verified by mutation, `gate-mutation` 132/132):** deleting a `PROPS` entry for a
+prop a scene uses; deleting one read only inside `core/tracks/`, the exact shape that was invisible (#234);
+gutting the shared declarations, which reports the gate blind rather than blaming 4369 layers; and a
+`preset` with no `split`, both directions.
+
+**What it still cannot do, stated rather than discovered.** A declaration can drift from the read beside
+it. Nothing proves that `PROPS` and the code in the same file agree — `make conformance` boots a real page
+and is the place that check belongs. And one declaration is deliberately NOT beside its read:
+`formats/scene/props.js`, because `formats/scene/scene.js` imports by absolute specifier and no node gate
+can load it.
+
+**Found on the way, by the new gate and not the old one:** `src` on an `svg` layer is read by nothing
+(`core/layers/svg.js` takes `d`/`viewBox`); the old scan hid it behind the shared kit's `C.src`. And
+`dist`/`dir` beside an `anim` do nothing at all — `core/clips.js` drives an entrance from
+`data-anim` alone and has no distance or direction knob — which is 13 layers across four shipped films
+believing they tuned a slide they did not.

@@ -22,6 +22,12 @@
 // core/layers/index.js imports every layer, that would take the entire layer registry down with it.
 // `make schema-drift` crashed exactly that way before this was changed. Vendored libs are globals here.
 import { THREE_FX } from './three-scenes.js';
+// The dials a three scene reads OFF THE LAYER (it is handed the whole layer, named `LL` where `L` is
+// taken). Declared here because this is where they are read; core/surfaces/three.js merges them.
+export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
+  depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
+  morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {} };
+
 export { THREE_FX };
 const T = () => {
   if (typeof window === 'undefined' || !window.THREE) {

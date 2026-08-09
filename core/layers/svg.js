@@ -15,6 +15,10 @@ import { resamplePath, bestRotation, rotatePoints, morphD } from '../path-morph.
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
+// `draw.weight` still wins over `strokeWidth` where both are set, so neither is guarded on the other.
+export const PROPS = { w: {}, h: {}, viewBox: {}, d: {}, fill: {}, stroke: {}, strokeWidth: {},
+  draw: {}, morph: {} };
+
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';

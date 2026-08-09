@@ -7,6 +7,8 @@
 // is entitled to discard, and before `react` and `transform`, which compose onto the ring's angle.
 export const slot = 'spin';
 
+export const PROPS = { circle: {} };
+
 export function frame(kit, el, L, units, t) {
   if (!L.circle) return;
   const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8;

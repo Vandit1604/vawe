@@ -1,6 +1,7 @@
 // core/surfaces/paint.js — GENERATIVE Canvas 2D. The `paint` layer type's pixels.
 // See core/paint-fx.js for the determinism contract each effect keeps.
-import { PAINT_FX } from '../paint-fx.js';
+import { PAINT_FX, PROPS as FX_PROPS } from '../paint-fx.js';
+import { mergeProps } from '../props.js';
 
 export const size = (kit) => [kit.W, kit.H];   // an ambient field: fills the frame unless boxed
 export const stamp = 3;
@@ -8,6 +9,11 @@ export const resamplable = true;
 
 // At BUILD, so a typo fails before a single frame is drawn rather than 30 times a second into a
 // render nobody is watching. This used to throw from frame() instead, one frame too late.
+// The whole layer is the effect's options bag (core/paint-fx.js reads it as `LL`), so an effect's own
+// knobs are its own vocabulary rather than props declared here — `count`, `amp` and the rest belong to
+// the named effect. Declared here: what this file itself reads.
+export const PROPS = mergeProps({ paint: {}, bg: {}, seed: {} }, FX_PROPS);
+
 export function validate(L) {
   if (!PAINT_FX[L.paint]) throw new Error(`unknown paint "${L.paint}" — one of: ${Object.keys(PAINT_FX).join(', ')}`);
 }

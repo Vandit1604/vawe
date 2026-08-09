@@ -13,6 +13,30 @@ export function hexA(hex, a) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
+// The props the SHARED KIT reads, for every layer type that calls it — the type styling, the chip box,
+// the decoration pass, the group layout, and a group child's own timing. A prop honoured here is honoured
+// everywhere, which is why it is one flat set and not a per-type one.
+//
+// A group CHILD is the same object under the name `C`, and the reads are the same reads: the child path
+// delegates to the primitive builder rather than re-implementing it. So there is nothing extra to declare
+// for a child except what the group's own layout gives it (`grow`, `basis`, `delay`).
+export const PROPS = {
+  // styleText
+  font: {}, italic: {}, weight: {}, tracking: {}, ls: {}, size: {}, w: {}, align: {}, color: {},
+  emColor: {}, text: {}, prefix: {}, from: {}, decimals: {}, suffix: {},
+  // chipBox
+  bg: {}, border: {}, shadow: {}, elevation: {}, glow: {}, pad: {}, radius: {}, on: { when: 'elevation' },
+  intensity: { when: 'glow' },
+  // decoration: glass / progressive blur / border trail / mask / look / reflect / logotype / base opacity
+  glass: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
+  fade: {}, reflect: {}, logotype: {}, opacity: {},
+  // layoutGroup
+  layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
+  items: {}, align2: {}, direction: {}, wrap: {}, justify: {}, h: {},
+  // a group child's own box and timing (addGroupChild / sizeChild)
+  grow: {}, basis: {}, delay: {}, critical: {}, x: {}, y: {}, split: {},
+};
+
 export function createKit(ctx) {
   const { theme, inkAt, bgWinAt, ACCENT_BGS, trackingFor, splitText, icon } = ctx;
   const extra = ctx.extra;
@@ -50,25 +74,32 @@ export function createKit(ctx) {
   }
 
   function chipBox(el, L) { // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer
-    if (L.bg == null && !L.border && !L.shadow && !L.elevation) return;
+    if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow) return;
     if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
     if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     el.style.borderRadius = (L.radius ?? 16) + 'px';
     if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
+    // `glow` used to be reachable ONLY from inside the elevation branch, so a layer that asked for a
+    // glow and no elevation got silently nothing — schema.json advertises it as a standalone prop.
+    // It composes now: elevation (or `shadow`) writes the depth stack, glow appends the bloom.
+    const stack = [];
     if (L.elevation) {
       const light = L.on === 'light';
-      const stack = [
+      stack.push(
         light ? 'inset 0 0 0 1px rgba(0,0,0,0.08)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
         light ? 'inset 0 1px 0 rgba(255,255,255,0.7)' : 'inset 0 1px 0 rgba(255,255,255,0.05)',
         '0 1px 1px rgba(0,0,0,0.07)', '0 2px 2px rgba(0,0,0,0.05)',
-      ];
+      );
       const e = Math.min(4, Math.max(1, L.elevation | 0));
       if (e >= 2) stack.push('0 4px 8px rgba(0,0,0,0.2)');
       if (e >= 3) stack.push('0 12px 24px rgba(0,0,0,0.28)');
       if (e >= 4) stack.push('0 0 64px rgba(0,0,0,0.4)');
-      if (L.glow) stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, 0.25)}`);
-      el.style.boxShadow = stack.join(', ');
-    } else if (L.shadow) el.style.boxShadow = '0 24px 70px rgba(20,20,25,0.12)';
+    } else if (L.shadow) stack.push('0 24px 70px rgba(20,20,25,0.12)');
+    if (L.glow) {
+      const spread = L.intensity != null ? Math.max(0.05, Math.min(1, L.intensity)) : 0.25;
+      stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, spread)}`);
+    }
+    if (stack.length) el.style.boxShadow = stack.join(', ');
     if (el.classList.contains('hs-text')) el.style.display = 'inline-block';
   }
 

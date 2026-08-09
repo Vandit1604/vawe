@@ -2,6 +2,17 @@
 // Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
 import { isPainting } from '../fonts.js';
 
+// The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
+// family because a caret with no `typing` has no reveal to trail. Everything the shared kit reads
+// (font · colour · the chip box) is declared in core/layers/util.js, which reads it.
+export const PROPS = {
+  text: {}, size: {}, weight: {}, font: {}, ls: {}, tracking: {}, raw: {}, gradient: {},
+  w: {}, h: {}, maxLines: {}, fit: {}, fitH: { when: 'fit' },
+  typing: {},
+  caret: { when: 'typing' }, caretHold: { when: 'typing' },
+  untype: { when: 'typing' }, untypeRate: { when: 'typing' },
+};
+
 export function build(kit, el, L) {
   kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)

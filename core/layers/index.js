@@ -1,6 +1,7 @@
 // core/layers/index.js — the layer registry. Each primitive is a file exporting build(kit,el,L) and
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
+import { mergeProps } from '../props.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
 import * as text from './text.js';
@@ -29,10 +30,37 @@ const raymarch = canvasLayer('raymarch'), three = canvasLayer('three');
 
 const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, composition };
 
+// A declaration that is NOT beside its read, and the only one. `rect` was being edited in another branch
+// when the declarations landed, so its two props are stated here instead of in core/layers/rect.js.
+// MOVE THEM INTO THAT FILE — a declaration one file away from the read is the drift this system exists to
+// end, and this map is a debt, not a slot to add to.
+const PENDING_PROPS = { rect: { fill: {}, h: {} } };
+
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the
 // schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);
+
+// The props each TYPE reads, taken off the modules that read them. Same contract as LAYER_TYPES, applied
+// to the vocabulary inside a layer rather than the vocabulary of layers: a gate answers "does anything
+// read `preset` on a glow?" by asking glow.js, never by scanning for it. `layer-props` used to scan, and
+// a scan is a map of where the code lived on the day it was written — the day core/tracks/ appeared it
+// reported 1454 live props as dropped (core/props.js has the full account).
+//
+// The four canvas types get theirs from core/layers/canvas.js, which merges the shared canvas procedure
+// with its surface's own pixels vocabulary — so `paint` and `three` declare different sets under one
+// primitive, exactly as they read different ones.
+const declared = (t) => {
+  if (PENDING_PROPS[t]) return PENDING_PROPS[t];
+  const P = REGISTRY[t].PROPS;
+  if (P === undefined)
+    throw new Error(`layer type "${t}" declares no PROPS — a builder that reads layer props without `
+      + `saying which ones puts them out of a gate's reach, and a prop nothing reads is the most `
+      + `expensive bug class in this repo. Export \`PROPS = {}\` if it reads none.`);
+  return P;
+};
+export const LAYER_PROPS = Object.freeze(Object.fromEntries(
+  LAYER_TYPES.map((t) => [t, Object.freeze(mergeProps(declared(t)))])));
 
 // `REGISTRY[L.type] || text` was the dispatch, so ANY type the registry does not know quietly ran the
 // text builder, which paints nothing when there is no `text` prop. A scene whose only layer was an

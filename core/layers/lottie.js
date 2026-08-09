@@ -3,6 +3,8 @@
 // frame index), so a frame is a pure function of n and order-independent (verified by `make probe`).
 // The animationData is preloaded in boot() into kit.lottie[src]; lottie-web is the global window.lottie
 // (vendored, SVG-light build). A missing lib or src degrades to an empty box, never a throw.
+export const PROPS = { src: {}, w: {}, h: {}, fit: {}, speed: {}, loop: {} };
+
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';

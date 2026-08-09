@@ -7,12 +7,19 @@
 // type is. core/layers/index.js registers four of them under their four author-facing names, so the
 // scene vocabulary is unchanged: there is no `canvas` type and no `surface` prop in scene JSON.
 import { pick } from '../surfaces/index.js';
-import { attachResample, tickResample } from '../resample.js';
+import { attachResample, tickResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
+import { mergeProps } from '../props.js';
+
+// The props the SHARED canvas procedure reads, whichever surface is behind it: the box, the corner, the
+// local clock's rate, and the resampler it may attach. The surface's own pixels vocabulary is merged in
+// below, so a `paint` layer and a `three` layer declare different sets under one primitive.
+const CANVAS_PROPS = { w: {}, h: {}, radius: {}, speed: {} };
 
 export function canvasLayer(name) {
   const S = pick(name);
 
   return {
+    PROPS: mergeProps(CANVAS_PROPS, S.PROPS, RESAMPLE_PROPS),
     build(kit, el, L) {
       S.validate(L);
       // The layer box, or the surface's own default when the author gave none: an ambient field

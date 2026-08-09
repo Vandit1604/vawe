@@ -1,5 +1,7 @@
 // core/layers/component.js — a REAL UI capture (capture-component.mjs), or one PART of a captured
 // animated scene (capture-scene.mjs) — parts carry their own w/h and are re-animated here.
+export const PROPS = { src: {}, part: {}, w: {} };
+
 export function build(kit, el, L) {
   let c = (kit.components && kit.components[L.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
   if (L.part && c.parts) c = c.parts.find((pp) => pp.name === L.part) || { html: `<div style="color:#888">part ${L.part} missing</div>`, w: 600, h: 300 };

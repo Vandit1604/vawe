@@ -26,6 +26,9 @@
 // that actually moves.
 export const slot = 'follow';
 
+// `id` and x/y are read only to place a follower, and both are unconditional reads elsewhere.
+export const PROPS = { follow: {}, id: { when: 'follow' }, x: { when: 'follow' }, y: { when: 'follow' } };
+
 const EDGES = ['center', 'above', 'below', 'left', 'right'];
 
 export function frame(kit, el, L, units, t, f, start, end, scene) {

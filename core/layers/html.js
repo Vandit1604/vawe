@@ -12,6 +12,10 @@ import { sanitizeHtml } from '../sanitize-html.js';
 // `height:100%` on the wrapper is deliberately a no-op when the layer declares no height: 100% against
 // an auto-height parent computes to auto, which is exactly today's behaviour. It changes the render only
 // for layers that DID state a box, which is the broken case.
+// `html` is the layer. `--t` is written every frame with nothing read off the layer to decide it, so
+// there is no per-frame prop here.
+export const PROPS = { html: {}, w: {}, h: {} };
+
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';

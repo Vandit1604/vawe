@@ -137,6 +137,16 @@ export function flashEnvelope(lt, { attack = 0.35, decay = 0.9, peak = 0.4 } = {
 
 // ---- layer builder -------------------------------------------------------------------------------
 
+// Three shapes of glow in one file, and the guards say which prop belongs to which: the geometry knobs
+// only reach a named PRESET, `pulseAmp` only scales a `pulse`, `cycle` only times the chromaCycle preset.
+// `beam` and `intensity` are read on the preset-less path too, so they stay unconditional.
+export const PROPS = {
+  color: {}, intensity: {}, beam: {}, preset: {}, pulse: {}, flash: {},
+  cx: { when: 'preset' }, cy: { when: 'preset' }, angle: { when: 'preset' },
+  cycle: { when: 'preset' }, pulseAmp: { when: 'pulse' },
+  h: {},
+};
+
 export function build(kit, el, L) {
   if (L.h != null) el.style.height = L.h + 'px';
   el.style.pointerEvents = 'none';

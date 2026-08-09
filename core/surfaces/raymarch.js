@@ -10,6 +10,8 @@ export const size = () => [720, 720];   // a subject, not a field: a square you 
 export const stamp = 3;
 export const resamplable = false;       // one WebGL context already; the resampler would want a second
 
+export const PROPS = { raymarch: {}, seed: {}, intensity: {}, spin: {}, colors: {} };
+
 export function validate(L) {
   if (!RAYMARCH_FX.includes(L.raymarch)) throw new Error(`unknown raymarch "${L.raymarch}" — one of: ${RAYMARCH_FX.join(', ')}`);
 }
