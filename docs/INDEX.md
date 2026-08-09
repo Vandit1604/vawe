@@ -100,7 +100,6 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/LAUNCH-VIDEO-GUIDE.md](LAUNCH-VIDEO-GUIDE.md) | making a product-launch film for a real brand or website | the launch workflow end to end · what to crawl · the references it is built from |
 | [docs/MCP.md](MCP.md) | driving this engine from a fresh session over MCP rather than from the shell | one-time setup · registering the server · the tools it exposes |
 | [docs/MISTAKES.md](MISTAKES.md) | you hit something odd in the engine, or you just fixed one and must log it | the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory |
-| [docs/MISTAKES.pending-docs.md](MISTAKES.pending-docs.md) | handing the docs-truth pass back, before appending to docs/MISTAKES.md | which stale commands and paths docs/MISTAKES.md still names, and what each should say |
 | [docs/MOTION-CRAFT.md](MOTION-CRAFT.md) | picking a preset, a cut or a sting and you need the mechanics behind it | the stored rules of good motion: timing, physics, the gates that enforce each one |
 
 ## The engine & its history

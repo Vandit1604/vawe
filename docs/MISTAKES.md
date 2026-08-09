@@ -80,7 +80,7 @@ blue.)
 **What:** used `deep` as a bg preset before it existed; boot failed with a bare "unknown preset".
 **Root cause:** no "did you mean" and the preset genuinely didn't exist.
 **Fix:** added `deep`/`dark`/`accentPlain` as real presets, plus a Levenshtein "Did you mean 'x'?"
-suggestion in `scripts/validate.mjs` for enum typos. Doctrine: when a default doesn't fit, CREATE or
+suggestion in `core/validate.mjs` for enum typos. Doctrine: when a default doesn't fit, CREATE or
 customize a preset — don't force a wrong default.
 
 ## 9. `<b>` emphasis invisible on an accent-coloured background (blue-on-blue)
@@ -230,7 +230,7 @@ in a 1080-wide portrait) but declared **no `aspect` and no `orientation`**. The 
 existed because a human passed `--aspect 16:9` on the command line. The shape lived in shell history, so
 the JSON was not self-describing — the whole premise is *one JSON → one video*, and these needed a JSON
 plus a flag someone had to remember.
-**The fix:** `"aspect": "16:9"` is now IN each scene. Plus a guard: `scripts/site-assets.mjs` records the
+**The fix:** `"aspect": "16:9"` is now IN each scene. Plus a guard: `scripts/site/site-assets.mjs` records the
 ratio the site layout expects per asset and refuses to encode a render whose real shape disagrees (>1%).
 `showcase-aspect` — the one scene that legitimately renders three ratios — declares its multi-aspect
 render in the manifest instead.
@@ -861,7 +861,7 @@ Three voicings rotate by character index, because a real keyboard does not make 
 38 times and one repeated sample is its own kind of machine gun.
 **Gate:** `make sfx-check` — every cue must be the SHAPE its role claims. A transient that outlasts
 the gap between two of its own triggers is not a transient, and that is checkable arithmetic.
-**Also found:** `make audio` (synth) and `make sfx` (recorded) write the same directory, so baking
+**Also found:** `make audio` (synth) and `make sfx-check` (recorded) write the same directory, so baking
 silently replaced every recorded sample. Baking is now additive; `--force` to overwrite.
 **Rule:** a downloaded asset is an input, not a fact. Check its shape against the role you gave it.
 
@@ -1547,7 +1547,7 @@ looked at, exactly like a number. Nothing in the type system, the schema, or any
 
 ## #89 — The gate that proves every other gate can fire silently stopped proving one
 
-Editing `core/layers/paint.js` for resample changed the off-window line that
+Editing `core/surfaces/paint.js` for resample changed the off-window line that
 `gate-mutation` patches to prove `canvas-purity` works. The fixture pinned the ENTIRE line, so it no
 longer matched, and the harness printed `~ SKIP (fixture is stale)` and **exited 0**.
 
@@ -1578,9 +1578,9 @@ cheap and still absent" hours after all three shipped, and quoted `SHADER_FX` at
 at 14 when they held 34 and 16.
 
 **Root cause:** the warning asked future authors to remember. Nothing enforced it. The same shape as
-the schema enums before `make schema-drift` existed.
+the schema enums before `make schema-check` existed.
 
-**Fix:** `make roadmap-drift`, registered in the mutation harness (37/37). Two narrow checks:
+**Fix:** `make docs-drift`, registered in the mutation harness (37/37). Two narrow checks:
 a line claiming absence may not name a registry entry that ships, and a quoted registry count must
 match the registry. Deliberately not a prose linter.
 
@@ -1769,7 +1769,7 @@ Third instance today of the same root cause, after #83 (hardcoded counts) and #9
 
 ## #97 — The docs decayed identically, one file over from the gate watching them
 
-`make roadmap-drift` shipped hours earlier to stop ROADMAP.md listing shipped work as missing. It
+`make docs-drift` shipped hours earlier to stop ROADMAP.md listing shipped work as missing. It
 watched one file. `docs/PRIMITIVES.md` states counts in its section HEADINGS and had drifted exactly
 the same way: 33 stings and 14 ambient against a real 35 and 17.
 
@@ -1797,7 +1797,7 @@ the only path that read it was a depth-1 check almost nothing exercised.
 **How it surfaced:** I added a validator rule enforcing the enum, and it condemned two shipped videos.
 A new rule that fails the existing corpus is evidence about the RULE, not the corpus.
 
-**Fix:** the child enum is the full layer registry, and `make schema-drift` now derives it from
+**Fix:** the child enum is the full layer registry, and `make schema-check` now derives it from
 `core/layers/index.js` so it cannot drift again. The validator also checks children at every depth,
 where before it stopped after one and a bad type reached the engine as a boot crash after a green
 validate.
@@ -2501,7 +2501,7 @@ committed scene used seams, so the default change has zero baseline blast radius
 (easing is pure in p) — `make probe` still byte-identical, and the seam scene renders across 8
 out-of-order workers unchanged.
 
-**Which gate catches it now.** `make schema-drift` compares `seams.item.timing` against `TIMINGS` (a
+**Which gate catches it now.** `make schema-check` compares `seams.item.timing` against `TIMINGS` (a
 copied enum can't drift). `make transition-preview FX=… TIMING=linear|smooth` renders the window as a
 filmstrip so the easing is visible (where the motion bunches) before authoring. `make direct` now also
 suggests ONE eased seam at the payoff, applying the decision procedure (docs/CRAFT/TRANSITIONS.md)
@@ -4337,6 +4337,8 @@ a different set each run, 4 gives zero, 1 gives zero. Each worker is a full brow
 supersample, and past about four of them raster cannot keep up with the draw.
 
 **On the gate.** `make flicker-check` reads the encoded mp4 and finds frames that lose content both
+
+> **Cut on 2026-08-05 in `cc2dfc2`**, with five other engine-only tools, on the ground that none had ever made a video better. The paragraph above describes what it did while it existed.
 their neighbours carry. It separates this defect perfectly on the film it was built from, and swept over
 the library it flagged 39 films, of which the first checked (`showcase-aspect`) produced the SAME five
 frames at 4 workers as at 8: content, not corruption. So it is shipped as a diagnostic and deliberately
@@ -4598,6 +4600,8 @@ check the behaviour, not the shape.
 **The sweep around it.** 172 probes across every camera generator and every block factory: 1 hit, 165
 clean, 6 skipped for needing props. That ratio is the honest result — the prediction method paid for
 itself once and found nothing else in this class. `scripts/dev/predict.mjs` keeps the probes rerunnable,
+
+> **Cut on 2026-08-05 in `cc2dfc2`.** The probes are no longer rerunnable; the ratio above is the result it produced while it existed.
 and it was checked against a deliberately reintroduced bug to prove it fires.
 
 ---
@@ -4774,6 +4778,8 @@ convenience in this workflow. It is the only source of truth about how a brand l
 ## #202 — the rules audit: nine of thirty-four rules are not doing what they claim
 
 `scripts/dev/rules-audit.mjs` asks every gate finding the three questions the gates ask films: does it
+
+> **Cut on 2026-08-05 in `cc2dfc2`.** The audit below is the one run it produced. Nothing re-runs it now.
 FIRE on real work, is it FIXED or waived when it does, and does anyone write down WHY. Run over 102
 scenes and five static gates it found 34 findings and two distinct pathologies.
 
@@ -6612,3 +6618,76 @@ have drawn.
 
 **Fix.** One union, `SHARED_PROPS` in `core/layers/vocabulary.js`. The renderer and the gate both
 read it from there.
+
+## #256 — the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
+
+**What.** `docs/MISTAKES.md` told an author to run `make schema-drift`, `make roadmap-drift`,
+`make sfx` and `make flicker-check`. None of the four exist. `docs/PRIMITIVES.md`,
+`docs/DESIGN-DATABASE.md` and `docs/LAUNCH-VIDEO-GUIDE.md` all opened the brand workflow with
+`make brandkit`, a target removed with the templates, and one of them wrote it inside the fenced
+block an author copies first. `docs/ROADMAP.md` said `core/shaders.js` "already has this path" and
+that a pattern was "proven twice over by `core/layers/shader.js` and `core/layers/paint.js`"; all
+three moved in a rename two refactors ago. `docs/CRAFT/BLUEPRINTS.md` named a deleted scene as its
+worked example. 111 usage strings inside `scripts/**` printed `node scripts/<name>.mjs` after the
+scripts moved into `scripts/author|brand|gates|media|site/`, so the message a tool prints when you
+get its arguments wrong named a path that had not existed for months.
+
+Worse than any single one: `docs/JUDGE.md`, `docs/CRAFT/SUBAGENTS.md` and
+`docs/CODEMAPS/DOC-DISCOVERY.md` all stated that the blind A/B judge "was never written". Git says it
+shipped on 2026-07-29 in `05a5123` and was cut on 2026-08-05 in `cc2dfc2`, in a commit that removed
+six tools on the ground that none had ever made a video better. The three docs were rewritten on
+2026-08-09, four days after the removal, by someone who found a dangling link and inferred the wrong
+history from it.
+
+**Root cause, one for all of it.** Nothing checked whether a doc pointed at a real thing. The two
+checks that come closest each own a slice: `craft-coverage` resolves markdown links inside
+`docs/CRAFT/`, `doc-map` resolves markdown links to `.md` files repo-wide. Neither reads a `make`
+command, a backticked source path, a link to a non-markdown file, a Makefile recipe, or a usage
+string. A doc is read as an instruction, so an instruction that fails teaches the author to distrust
+the whole file, which is the expensive part.
+
+The false history has its own cause worth naming: **a dangling reference does not say which of two
+things happened.** "Never built" and "built and then cut" leave identical evidence in the tree, and
+they are opposite facts about the project. Guessing turned a decision into an oversight, in three
+places, permanently, unless someone ran `git log`.
+
+**Fix.** `scripts/gates/doc-refs.mjs` (`make doc-refs`), wired into `make review`. Four rules:
+every `make <target>` a doc names exists; every repo path a doc cites exists; every Makefile recipe
+runs a script that exists; every `node <script>` printed or documented inside a source file exists.
+Scan surface is `git ls-files`, never a hardcoded array. A doc may waive one reference with
+`<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
+
+**Also fixed in the same pass.** `site-counts` was red on six figures and is green.
+`dead-branch` scanned four hardcoded directories, which is a map of where the code lived the day it
+was written; it now discovers its surface from `git ls-files`, which immediately found two dead
+bindings in `formats/scene/scene.js`, a file it had never read.
+
+**What the gate cannot do.** It cannot see an un-backticked command, and it will not judge a bare
+filename with no directory in it (`linear-30.json` in CLAUDE.md was wrong for months and only a human
+caught it). It proves a name resolves. It cannot prove the sentence around the name is true.
+
+---
+
+---
+
+## Waivers for `doc-refs`
+
+`make doc-refs` checks that every command and path a doc names exists. This file is the one place
+that legitimately names things the repo does not have, because several entries record a tool being
+DELETED, and the entry has to say what was deleted. A waiver here means the sentence is true and the
+thing is gone on purpose. It never means a reference was not worth fixing: the nine that were merely
+stale were corrected instead.
+
+<!-- doc-refs-allow: make schema-drift · #256 quotes the stale name it was chartered to correct -->
+<!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
+<!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
+<!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
+<!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
+<!-- doc-refs-allow: core/layers/shader.js · #256 quotes a path that moved into core/surfaces/ -->
+<!-- doc-refs-allow: core/layers/paint.js · #256 quotes a path that moved into core/surfaces/ -->
+<!-- doc-refs-allow: make visuals · #NNN records a gate that was later culled -->
+<!-- doc-refs-allow: scripts/gates/visual-vocabulary.mjs · the entry records this gate's own deletion -->
+<!-- doc-refs-allow: make flicker-check · cut in cc2dfc2 with five other engine-only tools -->
+<!-- doc-refs-allow: scripts/dev/predict.mjs · cut in cc2dfc2 with five other engine-only tools -->
+<!-- doc-refs-allow: scripts/dev/rules-audit.mjs · cut in cc2dfc2 with five other engine-only tools -->
+<!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->

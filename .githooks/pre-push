@@ -8,12 +8,11 @@
 # for weeks with four orphaned guides and a link to a file nobody wrote, and nothing noticed, because the
 # only thing that checked it was a command you had to remember to type. This is the place it cannot be
 # skipped by forgetting. It is pure file reads, so it costs about a second.
-# NOT YET HERE: `doc-refs`. It belongs beside craft-coverage for exactly the same reason (a doc-only
-# commit runs no authoring gate) and it is already green everywhere except docs/MISTAKES.md, which
-# names nine renamed or deleted commands and files. Add `doc-refs` to the line below the moment that
-# file is patched; until then it would block every push over a defect nobody in flight can fix.
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage) …"
-if ! make schema-check lib-test craft-coverage; then
+# doc-refs joined it once docs/MISTAKES.md was patched. Same argument: a doc names a command as an
+# instruction, and an instruction that fails teaches the author to distrust the whole file. It found
+# 111 usage strings printing a path that had moved months earlier.
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs) …"
+if ! make schema-check lib-test craft-coverage doc-refs; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

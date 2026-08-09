@@ -151,7 +151,15 @@ export function docMap() {
   const files = tracked().filter((f) => !ROOTS.has(f) && !excluded(f)).sort();
 
   for (const f of files) {
-    const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    // `git ls-files` lists a file that is still TRACKED, which includes one deleted from the working
+    // tree but not yet from the index. Reading it threw a raw ENOENT stack, and the generator that
+    // rebuilds the index is the one thing that cannot ask the author to fix the index first.
+    const abs = path.join(ROOT, f);
+    if (!fs.existsSync(abs)) {
+      problems.push({ kind: 'fail', msg: `${f} is tracked by git and missing from disk — run \`git rm --cached ${f}\` if you meant to delete it, or restore it` });
+      continue;
+    }
+    const text = fs.readFileSync(abs, 'utf8');
     const fm = frontmatter(text) || {};
 
     if (GENERATED[f]) {
