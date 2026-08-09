@@ -45,10 +45,17 @@ export const spanOf = (L) => {
 // therefore reads 0 for those and reports it with total confidence, which is how `plinth-ad`'s hero
 // figure (h:1440, no w, i.e. 67% of the frame) came to be dismissed as "a mark, not a subject".
 //
-// The tiers below are ordered by how much they KNOW, and the last two are the honest ones: `proxy`
-// marks a guess as a guess, and `unknown` returns zero rather than inventing a size. An undeclared box
-// is an unknown size, not a large one, so crediting it would let `{"type":"image","src":"x.png"}` buy a
-// pass off nothing. Callers are expected to surface `how === 'unknown'` rather than silently skip it.
+// The tiers below are ordered by how much they KNOW, and the last one is the honest one: `unknown`
+// returns zero rather than inventing a size. An undeclared box is an unknown size, not a large one, so
+// crediting it would let `{"type":"image","src":"x.png"}` buy a pass off nothing. Callers are expected
+// to surface `how === 'unknown'` rather than silently skip it.
+//
+// THERE USED TO BE A FOURTH TIER, `proxy`, and deleting it is the point of this note. A layer declaring
+// only one axis and carrying no readable intrinsic aspect was squared: w became h. A 590x18 decorative
+// underline was therefore measured as 590x590 and credited with about a tenth of the frame. That is not
+// a guess marked as a guess, it is a wrong number with a label on it, and every caller multiplied it
+// into an area and compared it against a threshold. A gate cannot be allowed to invent the one quantity
+// it exists to measure. If you need the real box of a single-axis layer, measure the rendered DOM.
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const _aspect = new Map();
 
@@ -94,9 +101,9 @@ export function intrinsicAspect(src, root = ROOT) {
 }
 
 // THE PICTORIAL VOCABULARY — which layer types DEPICT and which merely DECORATE. It lives here, beside
-// the geometry, because more than one gate needs it: `visual-vocabulary` asks whether a film shows
-// anything, and `critique` asks whether a layer spanning the film is its subject or just wallpaper. Two
-// copies of this list would eventually disagree about what a picture is.
+// the geometry, because a gate that reasons about layers needs it: `critique` asks whether a layer
+// spanning the film is its subject or just wallpaper. It is kept in one place so two copies could never
+// disagree about what counts as a picture. (`visual-vocabulary` was the other reader, and is deleted.)
 //
 // `rect` is deliberately absent: a rect is a divider or a scrim far more often than it is a bar, and
 // counting it would let any film buy a pass with a hairline.
@@ -140,11 +147,12 @@ export function boxOf(L, root = ROOT) {
   if (known == null) return { w: 0, h: 0, how: 'unknown' };
   const ar = intrinsicAspect(L.src, root);
   if (ar) return w != null ? { w, h: w / ar, how: 'intrinsic' } : { w: h * ar, h, how: 'intrinsic' };
-  return { w: known, h: known, how: 'proxy' };
+  // one axis, no intrinsic aspect: the other axis is genuinely not known here. Say so.
+  return { w: 0, h: 0, how: 'unknown' };
 }
 
 // the share of the canvas a layer actually covers. Clipped to the frame first: off-canvas pixels are
-// not the subject, and clipping is what makes the `proxy` guess above safe to act on.
+// not the subject. A layer whose box is unknown reports a share of 0, never a guess.
 export function canvasShare(L, CW, CH, root = ROOT) {
   const b = boxOf(L, root);
   if (!b.w || !b.h) return { share: 0, how: b.how };

@@ -50,11 +50,10 @@ const scene = {
     + 'motion key): a ribbon that passes in front of a photograph on the near side of its arc and behind '
     + 'it on the far side. Not a deliverable, a primitive test.',
   authoring: {
-    allow: ['no-camera', 'plain-slideshow', 'no-visual-vocabulary', 'no-continuous-object-inferred'],
+    allow: ['no-camera', 'plain-slideshow', 'no-continuous-object-inferred'],
     _why: {
       'no-camera': 'A primitive test holds a locked frame so the only thing moving is the thing under test.',
       'plain-slideshow': 'The ambition floor counts presets and cuts. This has one continuous move and no cuts by design.',
-      'no-visual-vocabulary': 'One photograph and one ribbon; there is nothing here to explain, the film IS the mechanism.',
       'no-continuous-object-inferred': 'Every layer is on screen for the whole four seconds; there is no junction to carry an object across.',
     },
   },

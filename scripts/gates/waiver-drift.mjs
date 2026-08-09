@@ -42,6 +42,18 @@ for (const f of fs.readdirSync(SCENES)) {
   }
 }
 
+// A WAIVER FOR A RULE THAT NO LONGER EXISTS IS NOISE, and worse, it reads as a live argument. When a
+// gate is deleted its codes have to be named here, or the census keeps counting ghosts and every author
+// who reads a scene file believes a rule is being dodged that nothing has enforced for months.
+// Retired: `visual-vocabulary`'s three codes. It measured a single-axis layer by squaring it, so a
+// 590x18 underline scored as 590x590 and bought a pass off the exact defect the gate existed to catch;
+// it was also waived by a quarter of the library. Deleted rather than fixed — docs/TASTE.md says why.
+const RETIRED = new Map([
+  ['no-visual-vocabulary', 'visual-vocabulary, deleted (its size measurement was wrong)'],
+  ['graphics-thin', 'visual-vocabulary, deleted (its size measurement was wrong)'],
+  ['text-only-beat', 'visual-vocabulary, deleted (its size measurement was wrong)'],
+]);
+
 // A code waived by this share of the library has stopped being an exception. 0.15 is deliberately low:
 // with ~100 scenes it takes fifteen films to trip, which is far past the point where a pattern is real.
 const DRIFT = 0.15;
@@ -55,6 +67,11 @@ if (file) {
   if (!mine.length) process.exit(0);
   const name = path.basename(file, '.json');
   for (const c of mine) {
+    if (RETIRED.has(c)) {
+      console.log(`  ✗ ${c} — DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
+      console.log(`      Delete it from "authoring.allow" (and its \`_why\`). It excuses nothing.`);
+      continue;
+    }
     const others = (tally.get(c) || []).filter((n) => n !== name);
     const pct = Math.round(share(c) * 100);
     if (!others.length) { console.log(`  ✓ ${c} — waived here and nowhere else. That is a decision.`); continue; }
@@ -74,9 +91,16 @@ if (file) {
 }
 
 // ---- the whole library ----
-const rows = [...tally.entries()].sort((a, b) => b[1].length - a[1].length);
+const all = [...tally.entries()].sort((a, b) => b[1].length - a[1].length);
+const dead = all.filter(([c]) => RETIRED.has(c));
+const rows = all.filter(([c]) => !RETIRED.has(c));
 console.log(`\n  WAIVER CENSUS · ${total} scenes\n`);
-if (!rows.length) { console.log('  no waivers anywhere.\n'); process.exit(0); }
+if (dead.length) {
+  console.log(`  ✗ DEAD WAIVERS — no gate emits these codes any more, so they excuse nothing:\n`);
+  for (const [c, films] of dead) console.log(`      ${c.padEnd(28)} ${films.length} film(s): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`);
+  console.log(`      (${[...new Set(dead.map(([c]) => RETIRED.get(c)))].join('; ')})\n`);
+}
+if (!rows.length) { console.log('  no live waivers anywhere.\n'); process.exit(0); }
 console.log(`  ${'code'.padEnd(30)} ${'films'.padEnd(6)} share`);
 console.log(`  ${'─'.repeat(30)} ${'─'.repeat(6)} ─────`);
 for (const [c, films] of rows) {

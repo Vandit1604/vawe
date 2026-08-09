@@ -183,7 +183,7 @@ for (const r of timed) {
 const scene = {
   module: 'scene',
   authoring: {
-    allow: ['no-visual-vocabulary', 'no-continuous-object', 'no-continuous-object-inferred', 'plain-slideshow',
+    allow: ['no-continuous-object', 'no-continuous-object-inferred', 'plain-slideshow',
       'dead-air', 'ends-on-nothing', 'linear-motion', 'monotone-timing', 'static-bg', 'overlap', 'contrast', 'safe',
       'no-camera', 'no-transition', 'no-kinetic-type', 'no-bg-motion', 'low-vocab', 'front-loaded'],
     _why: { animatic: `Timing pass generated from ${path.basename(SB)} by scripts/author/animatic.mjs. It is meant to look like nothing so that pacing is the only thing left to judge, and it is never a deliverable. The taste gates are waived BY CONSTRUCTION here rather than per-scene by an author talking themselves into it.` },

@@ -1,5 +1,4 @@
 {
-  "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "the schema reference scene CLAUDE.md names as the first thing an author reads. Deliberately minimal so the JSON stays legible; a chart here would teach the wrong first lesson." } },
  "module": "scene",
  "theme": "default",
  "duration": 7.6,

@@ -13,11 +13,16 @@
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
 //   floor     — the AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
+//   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
 //   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM (advisory here)
 //   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme (advisory here)
 //   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text (advisory)
 //   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (advisory)
 //   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
+//
+// `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
+// single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
+// job was to catch exactly that. See docs/TASTE.md and docs/MISTAKES.md.
 //
 // The vision judge (docs/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
 // step. A deterministic script also cannot force an agent to judge honestly. So the ladder ends by
@@ -53,7 +58,7 @@ try { scene = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.e
 const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : []);
 // A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver is a deliberate exception with
 // a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
-// waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carries a
+// waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
 // reason on every single one — and that difference is exactly the difference between a rule people
 // argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #203).
 //
@@ -81,7 +86,7 @@ const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 // Blocks and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every gate
 // that walks layers sees `{type:"block"}` as one opaque thing rather than the chart it becomes. So a scene
 // written with the repo's own vocabulary could not pass its own mandatory ladder: the source failed
-// validate, and the `.expanded.json` is a derivative that `visual-vocabulary` skips. Neither file could be
+// validate, and the `.expanded.json` is a derivative some gates skip by name. Neither file could be
 // green. Expand to a temp that keeps the BASENAME (receipts and theme resolution key off it) and is not
 // named `.expanded` (so nothing skips it), then gate that.
 let target = file;
@@ -128,11 +133,6 @@ record('direct', runGate('direct (direction gate)', 'scripts/author/motion-direc
 // 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
 record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : []), { waivable: true });
 
-// 4b. visual vocabulary — the OTHER floor. `direction-floor` asks whether the film MOVES enough; this
-//     asks whether it SHOWS anything, or whether every layer carrying information is type. 52 of 93
-//     shipped scenes had no large pictorial layer at all when this landed, which was nobody's decision.
-record('visuals', runGate('visual vocabulary (show, do not only tell)', 'scripts/gates/visual-vocabulary.mjs', strict ? ['--strict'] : []), { waivable: true });
-
 // 4c. dissolve — the TRANSITION gate. Everything else here samples settled frames by construction, so a
 //     crossfade between two text states (a double exposure: both strings at half strength through the
 //     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
@@ -171,8 +171,7 @@ record('dissolve', runGate('dissolve check (crossfade mud)', 'scripts/gates/diss
 // 4f. waiver drift — is this waiver a decision or a habit? ADVISORY, and never blocking, because a gate
 //     that blocked on this would itself be waived. It reads the whole library and reports how many other
 //     films excuse the same rule, which is the only level at which "we keep letting ourselves off" is
-//     visible. Written after visual-vocabulary correctly blocked two films on the same day and the second
-//     one was waived.
+//     visible. Written after a gate blocked two films on the same day and the second one was waived.
 runGate('waiver drift (is this a decision or a habit)', 'scripts/gates/waiver-drift.mjs', []);
 
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here

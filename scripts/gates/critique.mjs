@@ -141,8 +141,8 @@ const sceneDur = d.duration ?? 0;
 // The persistence exclusion is aimed at a WATERMARK, and it was written as "spans most of the film",
 // which also excluded the one thing the continuity doctrine demands: a subject that survives the cuts.
 // A film built on a continuous object was told its stage was empty at the very junction its spine was
-// carrying. So a spanning layer is still content when it is big enough to BE the subject: the same 8%
-// of canvas `visual-vocabulary` uses to separate a mark from a picture, one threshold, one meaning.
+// carrying. So a spanning layer is still content when it is big enough to BE the subject: 8% of the
+// canvas, which is where a mark stops being a mark and starts being a picture.
 // A full-bleed slab or a scrim also spans the film, and letting THAT count would hand every scene a way
 // to hide a dip behind wallpaper. So the exemption needs both halves: the layer must DEPICT something
 // (the shared PICTORIAL vocabulary, which excludes `rect` for exactly this reason) and be large.

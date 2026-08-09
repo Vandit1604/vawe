@@ -90,11 +90,9 @@ const PLAN = (beats) => JSON.stringify({ spine: { object: 'the record pill' }, b
 const MOVER = (o = {}) => ({ type: 'html', w: 800, x: 200, y: 700, start: 0, duration: 2,
   html: '<div style="width:100%;height:200px;background:#c2f23b;opacity:calc(0.4 + var(--t) * 0.6)"></div>', ...o });
 
-/** A graphic big enough to BE the subject of a beat: `visual-vocabulary` only counts a pictorial layer
- *  once it covers a real share of the canvas, so the box is sized off the canvas rather than in bare
- *  pixels and stays a carrier whatever the base aspect becomes. */
-const GFX = (o = {}) => ({ type: 'image', src: '/assets/icons/ui/search.svg',
-  x: 300, y: 260, w: Math.round(CANVAS_W * 0.42), h: Math.round(CANVAS_H * 0.42), start: 0, duration: 2, ...o });
+// NB there used to be a GFX fixture here, and four `visuals` cases, pinning `visual-vocabulary`. That
+// gate was deleted: it measured a single-axis layer by squaring it, so it passed the exact defect it
+// existed to catch. A pinned gate is only worth pinning if what it measures is true. See docs/TASTE.md.
 
 /** One html layer holding two strings at the SAME point with their opacities on the same variable — the
  *  exact shape dissolve-check reads. `clip` wraps each string in a clip-path wrapper, which is the WIPE
@@ -521,56 +519,6 @@ const CASES = [
     scene: PVR_CLEAN,
     intent: PLAN([B('Record', [0, 3], 'the pill becomes a capsule'), B('Structure', [3, 6], 'the capsule becomes a note card')]) },
 
-  // ---- visual-vocabulary · does the film SHOW anything, or is every layer that carries information
-  // type? The gate turns on DECORATION vs EXPLANATION, so each fixture below differs only in how much
-  // of the clock a large pictorial layer is on screen for. Its two constants (the subject-size share and
-  // the thin share) are tunable, so every case anchors on the printed finding CODE and never on a
-  // percentage, a size or a formatted duration — and BRACKETED, because the case name is slugified into
-  // the fixture's filename and the gate echoes the path it read, so a bare `/graphics-thin/` match is
-  // satisfied by the filename alone with the gate completely silenced.
-  { gate: 'visuals', name: 'a film where every layer carrying information is type', expect: 'fail',
-    match: /\[no-visual-vocabulary\]/,
-    scene: scene([TXT({ text: 'Ninety-four percent', y: 300, duration: 2 }),
-                  TXT({ text: 'of them never came back', y: 460, size: 44, duration: 2 })]) },
-  // A graphic on screen for one beat of four. Sized and placed identically to the mirror's; the ONLY
-  // difference is how long it lives, so this case cannot pass on the size rule firing in its place.
-  //   NB `text-only-beat` is waived rather than avoided: it is a strictly weaker statement than
-  //   `graphics-thin` (a film whose graphic covers under a third of its windows always leaves a bare
-  //   one), so the two CANNOT be separated by any fixture. The waiver is what makes exactly one tell
-  //   speak here; without it this case would also be the text-only-beat case, and neither would be
-  //   proven on its own.
-  { gate: 'visuals', name: 'a graphic that is on screen for one beat of four', expect: 'fail',
-    match: /\[graphics-thin\]/, outputOnly: true,   // WARN tier: assert it SPOKE
-    scene: scene([GFX({ start: 0, duration: 2.6 }),
-                  TXT({ text: 'The first beat', y: 800, start: 0, duration: 2.6 }),
-                  TXT({ text: 'The second beat', y: 800, start: 3.2, duration: 2.6 }),
-                  TXT({ text: 'The third beat', y: 800, start: 6.2, duration: 2.6 }),
-                  TXT({ text: 'The fourth beat', y: 800, start: 9.2, duration: 2.6 })],
-      { duration: 12, bg: [{ preset: 'gradient', from: 0, to: 12 }],
-        authoring: { allow: ['text-only-beat'] },
-        cuts: [{ t: 3, style: 'punch', dur: 0.2 }, { t: 6, style: 'punch', dur: 0.2 }, { t: 9, style: 'punch', dur: 0.2 }] }) },
-  // The same film with the graphic carrying two of its three beats: past the thin share, so the only
-  // thing left to say is that the closing beat is bare. This is the tell that CAN stand alone.
-  { gate: 'visuals', name: 'a closing beat that holds nothing but type', expect: 'fail',
-    match: /\[text-only-beat\]/, outputOnly: true,   // WARN tier: assert it SPOKE
-    scene: scene([GFX({ start: 0, duration: 7.4 }),
-                  TXT({ text: 'The first beat', y: 800, start: 0, duration: 3.6 }),
-                  TXT({ text: 'The second beat', y: 800, start: 4.2, duration: 3.4 }),
-                  TXT({ text: 'The third beat', y: 800, start: 8.2, duration: 3.6 })],
-      { duration: 12, bg: [{ preset: 'gradient', from: 0, to: 12 }],
-        cuts: [{ t: 4, style: 'punch', dur: 0.2 }, { t: 8, style: 'punch', dur: 0.2 }] }) },
-  // ...and the mirror (#25): a film carrying a real large graphic the whole way through. All three tells
-  // are named, because two of them are WARN tier and an exit code cannot see a warning — a gate that
-  // starts calling a film typeset while a picture is on screen is caught here rather than trained away.
-  { gate: 'visuals', name: 'a film that carries a large graphic throughout is green', expect: 'pass',
-    notMatch: /\[(?:no-visual-vocabulary|graphics-thin|text-only-beat)\]/,
-    scene: scene([GFX({ start: 0, duration: 12 }),
-                  TXT({ text: 'The first beat', y: 800, start: 0, duration: 3.6 }),
-                  TXT({ text: 'The second beat', y: 800, start: 4.2, duration: 3.4 }),
-                  TXT({ text: 'The third beat', y: 800, start: 8.2, duration: 3.6 })],
-      { duration: 12, bg: [{ preset: 'gradient', from: 0, to: 12 }],
-        cuts: [{ t: 4, style: 'punch', dur: 0.2 }, { t: 8, style: 'punch', dur: 0.2 }] }) },
-
   // ---- dissolve-check · two text states cross-dissolving in place, which is a double exposure and not
   // a transition. Its two constants (the opacity at which a glyph muddies the one behind it, and the
   // share of the range they may share) are tunable, so every case anchors on the printed finding CODE,
@@ -611,7 +559,6 @@ const GATE_CMD = {
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
   designspec: (f) => ['node', ['scripts/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
-  visuals: (f) => ['node', ['scripts/gates/visual-vocabulary.mjs', f]],
   dissolve: (f) => ['node', ['scripts/gates/dissolve-check.mjs', f]],
   // the one gate that reads a second document: the scene and the plan it claims to deliver.
   planrender: (f, intent) => ['node', ['scripts/gates/plan-vs-render.mjs', f, '--intent', intent]],

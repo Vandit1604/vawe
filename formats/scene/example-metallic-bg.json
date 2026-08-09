@@ -1,5 +1,4 @@
 {
-  "authoring": { "allow": ["no-visual-vocabulary"], "_why": { "no-visual-vocabulary": "a background-preset demo. The subject IS the bg field, which this gate cannot measure. Bolting a chart on would hide the one thing it exists to show." } },
   "module": "scene",
   "aspect": "16:9",
   "theme": "vawe",

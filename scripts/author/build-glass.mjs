@@ -5,13 +5,16 @@
 // anything. Nothing happened in it, nothing became anything, and it needed a `no-visual-vocabulary`
 // waiver to ship, which was the tell.
 //
+// (`visual-vocabulary` has since been deleted for measuring size wrongly, but the tell was still a
+// tell: the draft had no subject, and needing a waiver was how that showed.)
+//
 // Glass is not a surface, it is a BEHAVIOUR: it hides, it bends, it reveals. So the film is a reveal,
 // and the glass is what is doing the hiding. A real photograph of a lit filament sits behind the panes,
 // unreadable through the frost. The panes slide off one at a time and it resolves. That gives the film a
 // subject, a turn, and a reason for the last frame to exist.
 //
 // It also earns its gates instead of waiving them:
-//   · the SUBJECT is a real photograph, so `visual-vocabulary` passes on merit rather than on an excuse;
+//   · the SUBJECT is a real photograph, so the film shows something rather than excusing itself;
 //   · the photograph is on screen from the first frame to the last and is never replaced, so it is a
 //     genuine continuous object, and what changes across the film is how much of it you can see.
 //
@@ -122,9 +125,9 @@ const scene = {
     + 'filament sits behind four frosted panes that cover it completely at t=0 and leave one at a time. '
     + 'The photograph is the continuous object; what changes is how much of it you can see.',
   authoring: {
-    // NO `no-visual-vocabulary` waiver. The subject is a real photograph and the gate should pass on
-    // merit. If it does not, the film is wrong, not the gate. The first draft of this file waived it,
-    // and that waiver was the 31st in a library of 96 (scripts/gates/waiver-drift.mjs).
+    // The first draft of this file waived `no-visual-vocabulary`, and that waiver was the 31st in a
+    // library of 96 (scripts/gates/waiver-drift.mjs). That gate is gone now; the reason for the rewrite
+    // was never the gate. This film has a subject because a film needs one.
     allow: ['no-transition'],
     _why: {
       'no-transition': 'There is no cut in this film. One continuous shot on one subject, with the obstruction leaving in four stages; a cut would break the only thing holding it together.',

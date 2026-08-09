@@ -27,7 +27,7 @@ for (const it of reg.examples || []) {
   }
   // Blocks are build-time sugar: the renderer rejects an un-expanded `{type:"block"}` layer outright.
   // Without this step a flagship example could not use the repo's own charting vocabulary at all, which
-  // became load-bearing the moment `visual-vocabulary` started requiring a picture. Expanded IN PLACE so
+  // matters for any example whose point is the chart it draws. Expanded IN PLACE so
   // the artefact keeps the name the registry asks for (`<name>.beatsync.mp4`); the target is already a
   // generated derivative by this point, or the source itself when there is nothing to expand.
   const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (l.type === 'block' || l.type === 'comp' || hasSugar(l.children)));
