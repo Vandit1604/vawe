@@ -391,6 +391,13 @@ boot((data, fps, theme, canvas) => {
         const cut = sceneCuts.find((c) => +c.t === be);
         const dur = cut && cut.dur != null ? +cut.dur : 0.4;
         el.dataset.exitDur = '0';                          // wrapper owns the exit slide (no per-layer fade)
+        // KEEP THE AUTHORED NUMBER. This line REPLACES the author's `duration`, so a layer written to
+        // leave at 2.0s can render to 9.8s, and until this attribute existed nothing downstream could
+        // tell the difference: the DOM was the only record of timing and it held the rewritten value
+        // alone. data-duration stays what the renderer needs (driveClips must hold the layer through
+        // the wrapper's slide, or it vanishes mid-move); data-authored-duration is what the author
+        // asked for, so every tool that REPORTS timing can show both and name the substitution.
+        if (L.duration != null) el.dataset.authoredDuration = String(L.duration);
         el.dataset.duration = String(+(be + dur - (L.start ?? 0)).toFixed(3)); // live through the slide-out
       }
     }

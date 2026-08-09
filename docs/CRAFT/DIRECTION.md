@@ -180,3 +180,13 @@ should carry the film `"acrossBeats": true` and it attaches to the camera instea
 authored window. It **warns** (blocks under `STRICT=1`): truncation is a fact about the render, and whether
 it is a defect depends on whether you meant the layer to live past the cut.
 
+## beats-held-open (always on, in `make beat-check`)
+
+The same rewrite read the other way. `setLayerTiming` **replaces** the authored duration; it does not keep
+the shorter of the two. So a layer written to leave at 2.0s inside a beat that runs to 9.4s stays on screen
+for the whole beat, and the frame holds content the JSON says has already gone. Carrying a layer through its
+own beat's cut window is the wrapper's job and is never reported; what is reported is the excess, measured
+against the same 0.4s this gate calls the line where a held frame stops reading as a breath. Same two
+answers as above: write `duration` to say what you meant, or mark the layer `"acrossBeats": true` to keep
+the authored window (it then fades out on its own instead of sliding with the beat). It **warns**.
+

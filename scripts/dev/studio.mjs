@@ -145,6 +145,11 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
     the paper drops white text under 3:1 wherever a long label runs into its own exit ramp. */
  .bar i{position:absolute;top:0;bottom:0;background:var(--wash);opacity:var(--wash-a)}
  .bar i.in{left:0;border-right:1px solid var(--panel)} .bar i.out{right:0;border-left:1px solid var(--panel)}
+ /* the tail beat wrapping added. The bar used to be drawn at the REWRITTEN duration with nothing to say
+    the author had asked for less, so the picture agreed with the render and quietly overruled the JSON.
+    Hatched in the label's own colour, so it reads on every fill in both themes. */
+ .bar .held{position:absolute;top:0;bottom:0;right:0;border-left:1px solid var(--bar-ink);
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--bar-ink) 42%,transparent) 0 2px,transparent 2px 6px)}
  .bar span{position:absolute;top:0;font-weight:600;pointer-events:none}
  .bar span em{font-style:normal;opacity:.72;font-weight:400}
  /* dead air: the hole the beat-check gate blocks on, drawn where it actually is. On white the hatch
@@ -156,6 +161,14 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  .hz.beat{--hz:var(--hz-beat)} .hz.disputed{--hz:var(--hz-mute)}
  .hz b{position:absolute;top:2px;left:3px;color:var(--hz);font-size:10px;font-weight:700;white-space:nowrap;
    background:var(--panel);border:1px solid var(--hz);padding:0 4px;border-radius:3px}
+ /* the boot failure, said out loud. core/boot.js validates the scene before the first frame and parks the
+    reason on window.__engineError; studio polled for __engineReady alone, so an invalid scene showed a
+    blank stage and a frame counter reading 0 of 0, while the exact message sat one property away. */
+ #err{position:absolute;z-index:6;max-width:min(920px,86%);max-height:80%;overflow:auto;
+   background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;box-shadow:var(--shadow);
+   padding:16px 18px;color:var(--ink);white-space:pre-wrap;font-size:12.5px;line-height:1.55}
+ #err b{display:block;margin-bottom:8px;color:var(--bad);font-family:Anybody,system-ui,sans-serif;
+   font-variation-settings:'wdth' 105;font-weight:700;font-size:15px}
  #drag{position:absolute;inset:0;display:none;cursor:grab}
  #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:color-mix(in srgb,var(--accent) 12%,transparent)}
  .bar.sel{outline:2px solid var(--ink);outline-offset:1px}
@@ -164,7 +177,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--play);z-index:5;pointer-events:none}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--play)}
 </style></head><body>
- <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div></div>
+ <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div><div id=err hidden></div></div>
  <div id=bar>
   <button id=play>▶ play</button>
   <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
@@ -236,8 +249,24 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    FITS=s;
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n; ph.style.left='calc(16px + '+pc(n/fps)+')'; if(selIdx>=0&&!dragging)selReadout(); }
- function ready(){ const w=sc.contentWindow; if(!w.__engineReady||!w.__engine){return setTimeout(ready,80);} const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
- sc.addEventListener('load',ready); window.addEventListener('resize',fit);
+ const errBox=document.getElementById('err');
+ // The engine already knows why it did not boot — core/boot.js runs core/validate.mjs before the first
+ // frame and parks the reason on __engineError. Waiting only on __engineReady turned that into a blank
+ // stage, which is the same picture a slow load gives, so the one state that needs a message had none.
+ // The deadline covers the third case: neither flag ever arrives (a syntax error before boot even runs).
+ function fail(title,detail){ errBox.hidden=false; errBox.innerHTML='<b></b><span></span>';
+   errBox.querySelector('b').textContent=title; errBox.querySelector('span').textContent=detail;
+   read.textContent='scene did not load'; }
+ function ready(deadline){ const w=sc.contentWindow;
+   if(w.__engineError) return fail('this scene does not render',String(w.__engineError));
+   if(!w.__engineReady||!w.__engine){
+     const dl=deadline||Date.now()+20000;
+     if(Date.now()>dl) return fail('the scene never signalled ready',
+       'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report — open '+sc.src+' directly and read the console.');
+     return setTimeout(()=>ready(dl),80); }
+   errBox.hidden=true;
+   const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
+ sc.addEventListener('load',()=>ready()); window.addEventListener('resize',fit);
  // the stage resizes without the WINDOW resizing (the timeline expands, a hazard band wraps), and a
  // scale computed against the old height overflows and clips the frame
  if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe(document.getElementById('stage'));
@@ -279,6 +308,10 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
      .filter(el=>!el.parentElement.closest('.hs-layer'))  // top-level only: a group's window covers its children
      .map(el=>{ const d=el.dataset, s=+d.start||0, w=d.duration!=null?+d.duration:dur-s;
        return { s, w:Math.max(0,Math.min(w,dur-s)), enter:d.enter!=null?+d.enter:.3, exit:d.exitDur!=null?+d.exitDur:.26,
+                // what the AUTHOR wrote, when beat wrapping overruled it. The engine records both now,
+                // so the bar can draw the authored window and the held tail as two different things
+                // instead of drawing the rewritten number and calling it the layer.
+                aw:d.authoredDuration!=null?+d.authoredDuration:null,
                 anim:d.anim||'', out:d.out||'', txt:(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,44),
                 cls:(el.className.match(/hs-(img-wrap|rect|comp-wrap|group|text)/)||[])[1] }; });
  }
@@ -297,9 +330,10 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
      // invented has none, and must not be selectable: there is nothing on disk to write a key into.
      b.i=L?L.i:-1; b.keys=(L&&L.keys)||[];
      // the engine can hold a layer open past its declared window (produceBaseline turns sceneUnits on for
-     // any scene with cuts, and a beat's layers then live through the beat's exit slide). beat-check reads
-     // the JSON, so it cannot see that — and would report a hole the rendered film does not have.
-     b.grew=L?Math.max(0,(b.s+b.w)-(L.start+L.dur)):0; }
+     // any scene with cuts, and a beat's layers then live through the beat's exit slide). The engine says
+     // so itself now, per layer, so take its word: pairing a bar to a JSON layer by start time is a guess,
+     // and it was the only source of this number before data-authored-duration existed.
+     b.grew=b.aw!=null?Math.max(0,b.w-b.aw):(L?Math.max(0,(b.s+b.w)-(L.start+L.dur)):0); }
    const grown=bars.filter(b=>b.grew>0.01).map(b=>[b.s+ (b.w-b.grew), b.s+b.w]);
    bars.sort((a,b)=>a.s-b.s||a.w-b.w);
    // ruler: a tick per beat of the clock, labelled in seconds AND frames
@@ -313,7 +347,9 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    let h='';
    for(let t=step;t<=dur+1e-6;t+=step) h+='<div class=grid style="left:'+pc(t)+'"></div>';
    for(const b of bars){ const c=COLOR[b.type]||FALLBACK, wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
-     h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+c+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s → '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' → '+b.out:''))+'">'
+     const heldp=b.grew>0.005&&b.w?100*Math.min(b.grew,b.w)/b.w:0;
+     h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+c+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s → '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' → '+b.out:'')+(heldp?' · authored to '+(b.s+b.w-b.grew).toFixed(2)+'s, held '+b.grew.toFixed(2)+'s longer by beat wrapping':''))+'">'
+       +(heldp?'<div class=held style="width:'+heldp+'%"></div>':'')
        +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
        +(b.keys||[]).map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
        +'<span style="left:calc('+inp+'% + 4px)">'+esc(b.type)+' <em>'+esc(b.name)+'</em></span></div></div>'; }

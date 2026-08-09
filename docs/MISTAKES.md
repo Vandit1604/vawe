@@ -6031,6 +6031,64 @@ after), so no mix changed. Only credits.json moved.
 
 ---
 
+## #240 — beat wrapping discarded the authored `duration`, and the DOM kept no record of it
+
+**What.** Under `sceneUnits`, `formats/scene/scene.js` rewrote every non-last-beat layer's
+`data-duration` to `beatEnd + cutDur`. A layer authored `duration: 2.0` inside a beat running to 9.4s
+emitted `data-duration: 9.8`. The rewrite REPLACES; it does not take the shorter of the two. `tpot-launch`
+holds thirteen layers on screen past the point they were written to leave, one of them for 4.73s.
+
+**Root cause.** Silent substitution, the class this file logs most often. The rewrite is real and
+load-bearing: the beat wrapper owns the exit slide, so `driveClips` has to keep the layer alive through
+it or the layer vanishes mid-move. But `data-duration` was the ONLY record of a layer's timing in the
+rendered document, so the moment the engine overwrote it the author's number was gone. Every tool that
+reports timing off the DOM — `make studio`'s timeline first — therefore drew the rewritten window and
+called it the layer. The picture agreed with the render and quietly overruled the JSON, which is exactly
+the shape that makes a substitution invisible: nothing disagrees, so nothing looks wrong.
+
+`beats-wrapped-as-units` (#183) covered the other direction, a layer authored ACROSS a cut and cut short
+at it. Extension had no finding at all.
+
+**Fix.** Separate what renders from what is reported, rather than change what renders.
+
+- `scene.js` writes `data-authored-duration` alongside the rewrite. `data-duration` still carries what
+  `driveClips` needs, so no frame moves; the author's number now survives into the document.
+- `make studio` reads it and draws the authored window solid with the wrapper's extension hatched, so
+  the bar says "authored to here, held to there" instead of one flat claim.
+- `beat-check` gained `beats-held-open` (WARN). It reports the EXCESS only — how long the layer is held
+  past its authored end and before its beat even starts leaving — because carrying a layer through its
+  own cut window is the wrapper's documented job. The threshold is `DEAD_AIR`, the 0.4s this gate
+  already calls the line where a held frame stops reading as a breath.
+- `scene-timing.mjs` gained `unitCut(L)`; `unitEnd` is now defined off it. One model, two questions.
+
+**Blast radius.** `snap-all` unchanged. Four scenes gain the new WARN (`tpot-launch`, `chromatic`,
+`showcase-scenecut`, `paint-demo`); none changes verdict, and the 0.4s floor is what keeps the other
+nineteen wrapped films quiet. Reading `beats-held-open` on every wrapped layer would have fired on most
+of the library and meant nothing.
+
+**Not fixed here, and deliberately.** Holding a layer 4.73s past its authored end is arguably a RENDER
+defect, not only a reporting one — the honest rewrite would be `max(authored, beatEnd + cutDur)` only
+for layers that reach their beat's cut, and would restore the exit fade for the ones that do not. That
+changes pixels in nineteen shipped scenes, which is a far bigger change than a silent-substitution bug
+warrants in the same pass. The gate now names every scene it would touch.
+
+---
+
+## #241 — `make studio` showed a blank stage for a scene whose exact error was one property away
+
+**What.** A scene with `cuts[0].style: "cut"` opened the studio on an empty stage and a readout stuck at
+`frame 0 / 0`, with no message anywhere. `core/validate.mjs` had already produced the reason — *cuts[0].style
+"cut" is not valid. Did you mean 'cube'?* — and `core/boot.js` had parked it on `window.__engineError`.
+
+**Root cause.** `ready()` polled `__engineReady` and nothing else, forever. A failed boot and a slow load
+therefore produced the identical picture, and the one state that needs a message was the one with none.
+
+**Fix.** `ready()` checks `__engineError` first and paints it into a card over the stage, verbatim,
+with the readout saying `scene did not load`. A 20s deadline covers the third case, where neither flag
+ever arrives because the page died before boot could report.
+
+---
+
 ## 85. A validator rule outlived the bug it was written for, and started inventing one
 
 **What happened.** Authoring `onefilm`, every typed line in the file column carried `<b>` around its

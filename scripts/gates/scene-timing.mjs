@@ -20,6 +20,8 @@
 //   T.sceneUnits   // whether the engine will wrap beats as units
 //   T.edges        // [0, ...cutTimes] — the start of each beat
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
+//   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
+//   T.unitEnd(L)   // where the engine actually drops the layer: unitCut + that cut's window
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -180,7 +182,11 @@ export function sceneTiming(d) {
   };
   const edges = [0, ...cutTimes];
   // beat i covers [edges[i], cutTimes[i]); the last beat runs to the end and has no exit cut.
-  const unitEnd = (L) => {
+  // The CUT that closes a layer's beat, which is where the wrapper starts sliding it out. Separated
+  // from unitEnd because the two answer different questions: unitEnd is when the layer is gone, this is
+  // when the film moves on from it. A layer authored to leave long before its beat's cut is being HELD,
+  // and telling the two apart needs the cut time, not the end of the cut window.
+  const unitCut = (L) => {
     if (!sceneUnits || !cutTimes.length) return null;
     // `acrossBeats` opts a layer out of the wrapper (formats/scene/scene.js beatIndexOf), so the engine
     // leaves its authored window alone. Modelling it as truncated would make every gate that reasons
@@ -188,10 +194,11 @@ export function sceneTiming(d) {
     if (L.acrossBeats === true) return null;
     const start = num(L.start, 0);
     for (let i = 0; i < edges.length - 1; i++) {            // non-last beats only
-      if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i] + cutDurAt(cutTimes[i]);
+      if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i];
     }
     return null;                                            // last beat: no exit cut, no extension
   };
+  const unitEnd = (L) => { const c = unitCut(L); return c == null ? null : c + cutDurAt(c); };
 
   // a blackout and a speck both keep a window open without putting anything in the frame.
   const [CANVAS_W, CANVAS_H] = sceneDims(d);
@@ -216,5 +223,5 @@ export function sceneTiming(d) {
   // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
   const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
 
-  return { layers, content, spans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
+  return { layers, content, spans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
 }

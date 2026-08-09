@@ -284,6 +284,23 @@ const CASES = [
                   TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
       { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
 
+  // ---- beat-check · THE SAME WRAPPING, THE OTHER WAY. `setLayerTiming` REPLACES the authored duration,
+  // so a layer written to leave early is HELD to the end of its beat instead — the mirror of truncation,
+  // and the half that had no finding at all: the DOM carried only the rewritten number, so no gate and no
+  // picture could see the author's. Pinned in both directions because the threshold is the whole design:
+  // carrying a layer through its beat's cut window is the wrapper's documented job and must stay quiet.
+  { gate: 'beatcheck', name: 'a layer authored to leave early is held to the end of its beat', expect: 'fail',
+    match: /\[beats-held-open\]/, outputOnly: true,          // WARN tier: assert it SPOKE
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 1 },
+                  TXT({ text: 'First island', start: 0.8, duration: 1.6 }),
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+  { gate: 'beatcheck', name: 'a layer carried only through its own cut window is quiet', expect: 'pass',
+    notMatch: /beats-held-open/,
+    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 2.2 },
+                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
+      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
+
   // ---- layer-props. The must-fail half is a source mutation (below); this is the must-pass half, and
   // it is the one that was missing. The gate scanned a NAMED file for the shared path, that file was
   // split, and the shared set collapsed to nothing: ~1900 live props across the repo were reported dead

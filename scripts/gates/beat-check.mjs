@@ -12,6 +12,7 @@
 //   static-bg        . is the whole film on a flat field, or on hand-authored markup that cannot animate?
 // plus two WARNs:
 //   beats-wrapped-as-units . which layers does beat wrapping cut short of their authored duration?
+//   beats-held-open  . …and which does it hold on screen long past theirs?
 //   beats-unseen     . nobody has LOOKED at this version of the scene (`make beats` writes a receipt).
 //
 // A layer is visible over [start, start+duration), matching formats/scene/scene.js (default duration 2,
@@ -50,7 +51,8 @@
 //
 //   node scripts/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
 // FAIL (blocks): dead-air · ends-on-nothing · empty-beat · static-bg (the dead-markup tier).
-// WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-unseen. All block under --strict.
+// WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-held-open · beats-unseen.
+// All block under --strict.
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -195,6 +197,28 @@ if (truncated.length) {
   const label = (L) => `${L.type || 'text'}${L.text ? ` "${String(L.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
   const list = truncated.slice(0, 5).map(({ L, a, b, u }) => `${label(L)} authored ${s(a)} to ${s(b)}, rendered to ${s(u)}`).join(' · ');
   warn('beats-wrapped-as-units', `${truncated.length} layer(s) are cut short by BEAT WRAPPING: ${list}${truncated.length > 5 ? ` · and ${truncated.length - 5} more` : ''}. This film wraps each beat as a unit (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its own beat's end and slid out with it, and nothing can survive a cut until one layer opts out. If the layer was meant to end there, shorten its \`duration\` so the JSON says what the render does. If it was meant to carry the film across the cut, mark it \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored window.`);
+}
+
+// ---------- 5b. beats-held-open ----------
+// The SAME rewrite, read the other way, and the half nobody was ever told about. `setLayerTiming`
+// REPLACES the authored duration; it does not take a max. So a layer written to leave at 2.0s inside a
+// beat that runs to 9.4s is held on screen for the whole beat, and until this fired the only record of
+// the author's number was the JSON that the render had already overruled.
+//
+// The cut window itself is NOT this finding. Carrying a layer through its beat's slide-out is the
+// documented job of the wrapper, it is a fraction of a second, and reporting it would fire on 19 of the
+// library's scenes and mean nothing. What is reported is the excess: how long the engine holds the layer
+// past the point the author wanted it gone and BEFORE the beat even starts leaving. The threshold is
+// DEAD_AIR, the same 0.4s this gate already calls the line where a held frame stops reading as a breath.
+const heldOpen = content.map((L) => {
+  const [a, b] = spanOf(L);
+  const c = T.unitCut(L);
+  return (c != null && c - b >= DEAD_AIR - 1e-9) ? { L, a, b, c, u: T.unitEnd(L) } : null;
+}).filter(Boolean);
+if (heldOpen.length) {
+  const label = (L) => `${L.type || 'text'}${L.text ? ` "${String(L.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+  const list = heldOpen.slice(0, 5).map(({ L, b, u }) => `${label(L)} authored to ${s(b)}, rendered to ${s(u)}`).join(' · ');
+  warn('beats-held-open', `${heldOpen.length} layer(s) stay on screen far past their authored \`duration\` because BEAT WRAPPING replaced it: ${list}${heldOpen.length > 5 ? ` · and ${heldOpen.length - 5} more` : ''}. This film wraps each beat as a unit, and the wrapper runs every layer in a non-last beat to that beat's cut so it can slide the whole beat out together — it does not keep the shorter of the two windows. The frame therefore holds content the JSON says has already gone, and no other gate can see the difference. If the layer really should hold the beat, write its \`duration\` to say so. If it should leave when you wrote it to leave, mark it \`"acrossBeats": true\`: it attaches to the camera instead of the beat wrapper and keeps its authored window (it then fades out on its own rather than sliding with the beat).`);
 }
 
 // ---------- 6. beats-unseen: the receipt ----------
