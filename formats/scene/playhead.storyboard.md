@@ -38,19 +38,13 @@ destination: web
        material, and the material agrees: a timeline is read, not glanced at, and a viewer who cannot
        finish reading a lane has learned nothing. We keep their duty cycle and drop their frequency.
 
-    2. THEIR PALETTE, IN ITS MEASURED FORM. The reference is 86% near-white with 1.56% of pixels under
-       128 luma. Our hero surface is the real vawe studio, and the real vawe studio is dark: stage
-       #0b0d12, timeline panel #0e1117, teal #5ee0c8, a red playhead. Verified by screenshot, not
-       assumed. We cannot have both the real product and their measurement.
-       THE CHOICE MADE HERE: keep the near-white page, and let it hold one dark instrument. The page is
-       white, the type is ink, the only saturated thing in the frame is the hazard band. That keeps the
-       reference's actual discipline, which is one field and one accent, and abandons its specific
-       percentage, which was never the point. It also means the studio appears as the product ships,
-       which the launch rules require.
-       THE REVIEWER MAY OVERRULE THIS. The two alternatives are: give the studio a light mode and
-       capture that (engine work, and it advertises a UI that does not ship), or draw a light timeline
-       by hand (breaks the rule that the hero surface must be the product). Both are worse. Say so if
-       you disagree, because it decides the look of every frame.
+    2. THEIR PALETTE, IN ITS MEASURED FORM. RESOLVED, and no longer a refusal. When this was written the
+       studio was dark only, and the choice was between the real product and the reference's 86%
+       near-white. `8624ce0` gave the studio a LIGHT MODE and made it the default, so the conflict is
+       gone: the captured surface is the product as it ships AND the page is white. Lane bars are cobalt
+       text / slate rect / green count / olive svg / magenta group on #ffffff, the hazard band is the
+       only saturated field in the frame, and the accent holds every emphasis. We keep the reference's
+       discipline, one field and one accent, and we no longer pay for it in fidelity.
 
     3. THEIR SPINE MOVE. At 2.0s their wordmark stands alone, and by 3.2s the camera has pulled back and
        that same wordmark IS the app's header logo. It is the best move in the film and WE CANNOT COPY
@@ -60,6 +54,11 @@ destination: web
        weaker reveal than theirs and it is honest. Their second match, the send circle becoming the
        service badge, we do reproduce in kind at beat 5: the playhead's leading edge becomes the leading
        edge of the render fill.
+       HOW BEAT 1 STAGES IT, corrected against the build. The bar does not move to make room for the
+       typed line, and it does not track the caret. It stands still in the world and the CAMERA trucks
+       right, so the bar leaves dead centre and settles at the left of the frame with the line typing
+       beside it. That is the reference's own move (it tracks left to hold a growing caret in frame),
+       it costs one camera keyframe, and it starts the single rightward travel that runs to beat 4.
 
     4. THEIR CONTENT. Their product, their claim, their typo. Every word here is true of this repo.
 
@@ -73,11 +72,18 @@ destination: web
        way, it survives every junction, and it changes job at each one.
   Registers 2 and 3 are both things the gate can see, so this needs no waiver for continuity.
 
-  THE CAPTURE THIS FILM DEPENDS ON, and its one hard constraint. The studio timeline of an 8-layer
-  scene is 1500x225, a 6.7:1 sliver. Tilted, a sliver is invisible, and there is nothing to travel up.
-  Capture the timeline of a scene with AT LEAST 14 LAYERS so the lane stack is a block, not a strip.
-  That single choice is what makes beat 2's tilt and beat 3's vertical lift possible at all. Verified
-  by screenshotting the running studio; the lane area scrolls, so lane count is the only lever.
+  THE CAPTURE THIS FILM DEPENDS ON. SETTLED, with numbers. The subject is
+  `formats/scene/_playhead-subject.json`, a real renderable 16s draft built for this: fourteen layers of
+  SIX types (text, rect, count, svg, group, and the component's own naming), and NO cuts, so `sceneUnits`
+  never turns on and no authored duration is rewritten. Its dead-air hole is genuine, and beat-check
+  names it 9.60s to 10.80s, 1.20s. Beat 4's copy is that measurement.
+  Two things were learned by doing it. The LANE COUNT is not the only lever: capture WIDTH is, and it is
+  the better one. `#tl` captured at an 1800px viewport is 1800x368 (4.9:1), at 1240px it is 1240x368
+  (3.4:1) but the ruler's last two labels collide. 1440x368 (3.9:1) is the one used: a block, and the
+  product's own label collision stays off the end of the ruler.
+  The MIXED TYPES matter as much as the count. Fourteen `text` layers would draw fourteen identical
+  cobalt bars and the stack would read as one block, which is fine for beat 2 and wrong for beat 3.
+  Six types give six hues, and beat 3's playhead crosses bars a viewer can tell apart.
 
   THE SCALE LADDER, fixed after reading the first panels sheet. The first draft called beats 2 and 3
   wide and every other beat medium, so all five panels drew the same size box in the same place and the
@@ -93,12 +99,11 @@ destination: web
   slow drift, so the two frames that hold longest are not dead. If the subject motion lands as measured,
   the drift can come out; that is a decision for the render pass with beats in hand, not a decision here.
 
-  KNOWN RISK, unresolved, and the reviewer should know it before approving beat 4. The hazard band is
-  the picture beat 4 rests on, and it could not be produced this pass. The studio draws lane bars from
-  the RENDERED DOM while it draws hazard bands from beat-check, which reads the JSON, and under
-  `sceneUnits` the engine overwrites every non-final layer's authored duration with its beat's end
-  (formats/scene/scene.js:394). So the bars stretch and the hole the gate found has no gap to sit in.
-  Beat 4 needs a capture where the band is visibly drawn. If it cannot be, beat 4 must be re-planned.
+  THAT RISK IS CLOSED. The hazard band photographs. It draws as a red hatched column across the whole
+  lane stack, labelled `dead air 1.20s`, with a matching alert chip above the ruler. Two things made it
+  work: `c353920` records the authored duration per layer, so a beat-wrapped bar no longer swallows the
+  hole; and the subject scene declares no cuts, so nothing is beat-wrapped at all and the band is
+  undisputed rather than drawn with the studio's `disputed` caveat. Beat 4 needs no re-planning.
 -->
 
 <!--
@@ -138,7 +143,8 @@ destination: web
 - shot: medium, the tilted lane stack centred and owning the middle two thirds of the frame, receding to the right
 - camera: pull back, hold dead for 0.4s, then travel right along the tilted plane
 - picture: a captured vawe studio timeline of a fourteen-layer scene, centred, seconds ruler across the top, the lane stack filling the middle of the frame as a block, the playhead standing at 0s
-- mechanism: the window does NOT slide in. It fades up in place, already tilted, exactly as the reference's app window does, while the camera pulls back · per-layer `plane` depth so the near lanes travel further than the far ones and the perspective changes as the camera moves · the ruler drawing on left to right · the lane bars arriving staggered 60ms apart, top to bottom · a full stop before the rightward travel starts
+- mechanism: the window does NOT slide in. It fades up in place, already tilted, exactly as the reference's app window does, while the camera pulls back · `plane` depth ACROSS the frame, not within the lane stack: the page slab stands 500px behind the picture plane and the timeline on it, so a 140px camera truck moves the slab 96px and the timeline 123px, measured · a full stop before the rightward travel starts
+- corrected: the ruler cannot draw on and the lane bars cannot arrive staggered. The timeline is ONE captured component, so it arrives as one surface. Per-lane entrance would mean re-drawing the product by hand, which the capture-first rule forbids. The beat earns its motion from the camera instead.
 - becomes: the caret becomes the playhead of a real clock, and an empty rule becomes fourteen layer bars with a shape
 - onscreen: Every layer, on one clock.
 - why: the claim only lands if the viewer sees the actual product surface making it, so this beat spends its seconds on captured UI and four words
@@ -152,7 +158,8 @@ destination: web
 - shot: medium, the lane stack holding the lower two thirds with a preview frame riding above it
 - camera: track right with the playhead, stop dead, then lift up the lane stack
 - picture: in the lower two thirds the playhead crosses the bars while a live preview above swaps frame for frame, then the camera rises up the stack and a red hazard band arrives at the far end of the ruler
-- mechanism: a motion track carrying the playhead across x, the camera matching it so the bar stays near frame centre · a hard stop when it reaches the far lane · the camera then lifting UP the lane stack, the film's largest single move, the same treatment the reference gives its model card · the preview cross-cutting on each bar boundary · the hazard band arriving last, after the eye has settled into the rhythm
+- mechanism: a motion track carrying the playhead across x in three moves with a hard stop after each, the camera travelling right with it so the bar crosses frame centre rather than sitting on it · the camera then lifting UP the lane stack while pushing in, the film's largest single move, the same treatment the reference gives its model card · a preview card at `plane` +150, in FRONT of the timeline, cutting between three real frames of the subject scene
+- corrected: the hazard band cannot arrive. It is drawn into the captured surface, so it is REVEALED by the camera reaching the far end of the ruler instead of animating in. The effect the beat wanted is intact, the mechanism is a camera move rather than an entrance.
 - becomes: a static plan becomes a film playing, and an even run of bars becomes a run with a hole in it
 - onscreen: Scrub it. No render.
 - why: this is the turn, and it has to arrive while the viewer is enjoying the smoothness so the hole reads as a problem rather than a feature
@@ -163,13 +170,14 @@ destination: web
 ## Beat 4: The hole (8.8s-12.4s)
 - type: problem
 - object: the playhead stops dead inside the hazard band, and the preview above it goes empty
-- shot: close, the band centred and filling the frame with the measurement reading across it, the tightest frame in the film
+- shot: close, the band filling the frame vertically with the measurement under it, the tightest frame in the film. It sits LEFT of centre with the type right, not centred: the camera has travelled one direction since beat 1 and centring the band here would mean reversing it
 - camera: dive in on the band fast, about 0.3s, then a hard dead stop held for a full second
 - picture: the red hatched band at hero scale, centred and filling the frame, the preview above it showing nothing but the backdrop, and a 1.2s measurement drawn across the band as a dimension line
-- mechanism: a fast camera dive to the band's centre, then a stop long enough to read · a dimension line drawing outward from both ends · the words arriving one at a time, the first in the accent colour decaying to ink and each one after it grey until the next lands · the line re-centring as it grows rather than sitting in a fixed slot
+- mechanism: a 0.36s camera dive to the band, then a 1.20s dead stop, then a very slow scale ramp, which is the shape `make measure` found in the reference's hero dolly · a dimension line drawing on beneath the band with its 1.20s label · the two lines of copy arriving word by word, the second line in the theme's `down` red · the empty preview card holding the frame the render actually produces at 10.0s, which is white
+- corrected: the grey-to-ink word decay is NOT built. It needs one text layer per word with staggered windows or a bespoke composition, and the engine has no staged colour on a word split. This is debt, named rather than hidden.
 - becomes: a stretch of timeline becomes a measured hole, and a film you thought was finished becomes 1.2 seconds of nothing
 - onscreen: 1.2 seconds of nothing.
-- why: the cost has to be a number the viewer can see the size of, so the band is measured on screen instead of described
+- why: the cost has to be a number the viewer can see the size of, so the band is measured on screen instead of described. The number is not written by hand: beat-check found this hole in a real scene and the studio drew it
 - emotion: sinking
 - duration: 3.6s
 - transition_in: none
