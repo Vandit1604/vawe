@@ -110,7 +110,7 @@ build: fonts
 # renders, then the layout/contrast/size audit (set NOAUDIT=1 to skip). The ladder is what stops an
 # effect-soup video shipping silently; NOCHECK=1 is the explicit, logged waiver.
 video: build
-	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (value · direction · anti-slop) …" && node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)))
+	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (schema · timeline · assets · plan; TASTE=1 adds the style gates) …" && node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS)))
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)) — then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
@@ -126,13 +126,13 @@ dev: build
 # make check D=<file>  — every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:
-	@MODE=iterate node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS))
+	@MODE=iterate node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 
 # make ship D=<file>  — the ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
 ship: build
-	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(STRICT)),--strict)
+	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	node verify/audit.mjs $(D)
 	node scripts/gates/seam-snap.mjs $(D)
@@ -361,6 +361,7 @@ sheet:
 # make slop D=formats/x/video.json [AT=1.5]  — ANTI-SLOP gate: render the real DOM at a frame and run the
 # vendored impeccable detector (41 rules: overused fonts, purple/blue gradients, card-in-card, centered
 # defaults, …). Catches AI-generic tells in the HTML we hand-author. See .claude/skills/{taste-skill,impeccable}.
+# TASTE gate: not in the default ladder. `TASTE=1 make author-check` runs it.
 slop:
 	node scripts/gates/slop.mjs $(D) $(if $(AT),--at $(AT))
 
@@ -423,13 +424,14 @@ intent:
 
 # make designspec-check D=<scene.json> [STRICT=1] — THE DESIGN-SPEC LOCK: the theme is the locked visual
 # system; flag any layer using an off-palette chromatic colour or a non-role font. The look twin of the
-# storyboard gate. Advisory in author-check; STRICT=1 blocks. Optional radii/shadow lock via scene "spec".
+# storyboard gate. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.
+# Optional radii/shadow lock via scene "spec".
 designspec-check:
 	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
 
 # make copy-check D=<scene.json> [STRICT=1] — THE COPY GATE: on-screen writing tells (hook >12 words /
 # weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The
-# words are the video's voice. Advisory in author-check; STRICT=1 blocks.
+# words are the video's voice. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.
 copy-check:
 	node scripts/gates/copy-check.mjs $(D) $(if $(STRICT),--strict,)
 
@@ -566,10 +568,11 @@ install-hooks:
 clean:
 	rm -rf bin out/*.mp4
 
-author-check: ## MANDATORY authoring ladder: validate+critique+direct+slop+inspect (D=<file> [STRICT=1] [VS=<brand>])
-	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(VS),--vs $(VS))
+author-check: ## authoring ladder: validate+beats+assets+inspect+plan (D=<file> [STRICT=1] [TASTE=1] [VS=<brand>])
+	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 
-direction-floor: ## ambition floor: fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
+# TASTE gate: not in the default ladder. `TASTE=1 make author-check` runs it, or run it here directly.
+direction-floor: ## TASTE: ambition floor, fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
 	node scripts/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead backdrop (D=<file> [STRICT=1])
@@ -590,7 +593,7 @@ effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from 
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
-critique: ## value-gate: flag hollow/low-value beats (D=<file>)
+critique: ## TASTE: value-gate, flag hollow/low-value beats (D=<file>)
 	node scripts/gates/critique.mjs $(D)
 
 compare: ## variant selection: tile candidate frames to pick the best (args in ARGS)
@@ -631,7 +634,7 @@ blocks-scenes: ## per-block scene JSON + poster still for the site (no render ne
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
-direct: ## direction gate + motion director: audit direction, suggest cuts/stings (D=<file> [WRITE=1])
+direct: ## TASTE: direction gate + motion director, suggest cuts/stings (D=<file> [WRITE=1])
 	node scripts/author/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
@@ -643,7 +646,7 @@ inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 plan-check: ## plan vs render: does the film change where the storyboard promised it would (D=<file>)
 	node scripts/gates/plan-vs-render.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
-dissolve: ## transition gate: is any text state cross-dissolved into another (mud) (D=<file>)
+dissolve: ## TASTE: transition gate, is any text state cross-dissolved into another (D=<file>)
 	node scripts/gates/dissolve-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)

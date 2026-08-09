@@ -5,20 +5,26 @@
 // command chains them so `make video` can REQUIRE the loop (it runs author-check unless NOCHECK=1).
 // See docs/MISTAKES.md (authoring-gates-were-optional) and docs/CRAFT/DIRECTION.md.
 //
-// The ladder (all PRE-render, so it can gate the render):
+// The ladder (all PRE-render, so it can gate the render). It has two halves, and the split is whether a
+// step can be WRONG about a film it has never seen:
+//
+// ALWAYS ON — these catch BROKEN, and cost about a second:
 //   validate  — schema + em-dash (correctness; never waivable)
 //   beats     — the TIMELINE gate: dead air, an empty last frame, an empty cut/seam window, a dead backdrop
+//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (advisory)
+//   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
+//   plan      — plan vs render, off the same sidecar
+//
+// OPT-IN, behind TASTE=1 (or --taste) — these check HOUSE STYLE, which is an argument, not a fact:
 //   critique  — the value gate: hollow/placeholder/unbacked/thin/mis-centre beats
 //   direct    — the direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
 //   floor     — the AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
 //   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
-//   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM (advisory here)
-//   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme (advisory here)
-//   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text (advisory)
-//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (advisory)
-//   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
+//   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM
+//   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme
+//   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
 //
 // `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
 // single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
@@ -32,8 +38,8 @@
 //   { "authoring": { "allow": ["cut-families", "profile"] } }
 // Waivers apply only to blocking findings (critique errors, direct FAILs); validate is never waivable.
 //
-// Usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--vs <brand>]
-//        make author-check D=<file> [STRICT=1] [VS=<brand>]
+// Usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]
+//        make author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -50,7 +56,7 @@ const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 // and exits 0, and says plainly what WOULD block, while ship keeps the teeth.
 const iterate = process.argv.includes('--iterate') || process.env.MODE === 'iterate';
 const vsArg = (() => { const i = process.argv.indexOf('--vs'); return i >= 0 ? process.argv[i + 1] : null; })();
-if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--vs <brand>]'); process.exit(2); }
+if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 
 let scene = {};
@@ -120,30 +126,48 @@ const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true }) 
   results.push({ name, failed: failed && !waived, waived, unwaived, blockCodes });
 };
 
+// TASTE GATES ARE OPT-IN. Seven of the steps below do not check that a film is BROKEN; they check that
+// it matches a house style, and the style they were fitted to is a library this repo's own docs call
+// debt. Fitted rules do not stay true: `direction-floor` blocked 38 of 130 shipped scenes and
+// `visual-vocabulary` was waived by a quarter of the library before it was deleted for measuring the
+// wrong thing. A rule that is waived by reflex has already been repealed; leaving it switched on only
+// hides that fact behind a green tick.
+//
+// So they run when you ask for them, and the run says plainly that they were skipped otherwise:
+//   TASTE=1 make author-check D=<file>      · or `--taste`
+// The default ladder keeps every step that catches BROKEN — a schema error, a hole in the timeline, a
+// missing asset, a plan the render does not deliver. Nothing here was deleted; see docs/TASTE.md for
+// what was culled, why, and what would have to be true to switch one back on by default.
+const taste = process.argv.includes('--taste') || process.env.TASTE === '1';
+const skippedTaste = [];
+const tasteGate = (name, label, script, args, opts) => {
+  if (!taste) { skippedTaste.push(name); return; }
+  record(name, runGate(label, script, args), opts);
+};
+
 // 1. validate — correctness, never waivable.
 record('validate', runGate('validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
 // 1b. beats — the TIMELINE gate: dead air, an empty closing plate, a transition window with nothing in it,
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
-// 2. critique — value gate; errors block, waivable by rule code.
-record('critique', runGate('critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : []), { waivable: true });
-// 3. direct — direction gate; FAILs block, waivable by code.
-record('direct', runGate('direct (direction gate)', 'scripts/author/motion-director.mjs', []), { waivable: true });
-// 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
-record('floor', runGate('direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : []), { waivable: true });
+// 2. critique — value gate; errors block, waivable by rule code. TASTE.
+tasteGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
+// 3. direct — direction gate; FAILs block, waivable by code. TASTE.
+tasteGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
+// 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow. TASTE.
+tasteGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
 
 // 4c. dissolve — the TRANSITION gate. Everything else here samples settled frames by construction, so a
 //     crossfade between two text states (a double exposure: both strings at half strength through the
-//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
-record('dissolve', runGate('dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : []), { waivable: true });
-// 4. slop — advisory here (exit code surfaced, not blocking unless --strict). Hand-written HTML tells.
-{ const r = runGate('slop (anti-slop detector)', 'scripts/gates/slop.mjs', []); record('slop', r, { waivable: true, exitMeansFail: strict }); }
-// 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts.
-//     Advisory here (surfaced, blocks only under --strict), same as slop. The theme is the locked spec.
-{ const r = runGate('design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : []); record('designspec', r, { waivable: true, exitMeansFail: strict }); }
-// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
-{ const r = runGate('copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : []); record('copy', r, { waivable: true, exitMeansFail: strict }); }
+//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174. TASTE.
+tasteGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
+// 4. slop — the hand-written-HTML tells. TASTE.
+tasteGate('slop', 'slop (anti-slop detector)', 'scripts/gates/slop.mjs', [], { waivable: true, exitMeansFail: strict });
+// 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
+tasteGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers. TASTE.
+tasteGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
@@ -201,6 +225,12 @@ for (const r of results) {
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
 }
 if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
+if (skippedTaste.length) {
+  console.log(`\n  ⚠ ${skippedTaste.length} TASTE gate(s) NOT RUN: ${skippedTaste.join(', ')}.`);
+  console.log(`      These check house style, not breakage, so they are opt-in. Nothing above says anything`);
+  console.log(`      about whether this film is any good.  Run them:  TASTE=1 make author-check D=${file}`);
+  console.log(`      Why they are off by default: docs/TASTE.md · "What was culled, and why".`);
+}
 
 // ---- the required post-render step the static ladder structurally cannot be ----
 console.log(`\n  ▶ REQUIRED after render (the ladder is not complete without it):`);
