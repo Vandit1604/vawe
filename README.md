@@ -17,7 +17,7 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 
 ![Vawe demo](docs/media/vawe-demo.gif)
 
-<sub>*The Vawe wordmark, typed out from a single JSON scene and rendered deterministically to the frame. See more in the [showcase](site/showcase.html).*</sub>
+<sub>*The Vawe wordmark, typed out from a single JSON scene and rendered deterministically to the frame. See more in the [showcase](https://vawe.dev/showcase).*</sub>
 
 </div>
 

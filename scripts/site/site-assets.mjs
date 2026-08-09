@@ -6,10 +6,10 @@
 // The manifest below is the contract: every video on the site names the scene it came from and
 // the width it ships at. Re-run after re-rendering any scene.
 //
-//   node scripts/site-assets.mjs                 # encode from existing out renders
-//   node scripts/site-assets.mjs --render        # render every scene first, then encode
-//   node scripts/site-assets.mjs --only films    # limit to one group
-//   node scripts/site-assets.mjs --check         # report staleness, write nothing
+//   node scripts/site/site-assets.mjs                 # encode from existing out renders
+//   node scripts/site/site-assets.mjs --render        # render every scene first, then encode
+//   node scripts/site/site-assets.mjs --only films    # limit to one group
+//   node scripts/site/site-assets.mjs --check         # report staleness, write nothing
 //
 // Width is the ONLY size knob: height is derived from the source so the aspect ratio is never
 // altered here. Cropping a composed frame would destroy the composition the engine just laid out.

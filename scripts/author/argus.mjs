@@ -1,11 +1,11 @@
-// scripts/argus.mjs — composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
+// scripts/author/argus.mjs — composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
 // the brand's signature details (pixel-eye mascot, hand-drawn cobalt underline, X-native surfaces).
 // Colours come from themes/argus.json via CSS vars (theme-aware blocks), so everything is cobalt-on-white.
-// Writes formats/scene/argus-launch.json. Run: node scripts/argus.mjs
+// Writes formats/scene/argus-launch.json. Run: node scripts/author/argus.mjs
 import fs from 'node:fs';
 import { tweetCard, chatBubble, statCard, barChart, reactionBar, avatarStack, kpiRow } from '../../blocks/index.mjs';
 
-const W = 1920, H = 1080;
+const W = 1920;
 const INK = 'var(--ink)', SUB = 'var(--text-2)', DIM = 'var(--dim)', COBALT = 'var(--accent)';
 const T = (o) => ({ type: 'text', weight: 400, color: INK, ...o });                 // Archivo defaults light
 const L = [];

@@ -3,7 +3,7 @@
 // styles (so it renders identically without the site's CSS), absolutizes images, and writes a JSON
 // { html, w, h } the video engine can drop into a `component` scene and animate.
 //
-//   node scripts/capture-component.mjs <url> "<css-selector>" <brand> <label> [--viewport 1512x950] [--settle 500]
+//   node scripts/author/capture-component.mjs <url> "<css-selector>" <brand> <label> [--viewport 1512x950] [--settle 500]
 //   make capture URL=https://site.com SEL=".pricing-card" NAME=acme LABEL=pricing
 //
 // Output: assets/brands/<brand>/components/<label>.json
@@ -18,7 +18,7 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const [url, selector, brand, label] = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--viewport' && argv[i - 1] !== '--settle');
 if (!url || !selector || !brand || !label) {
-  console.error('usage: node scripts/capture-component.mjs <url> "<selector>" <brand> <label> [--viewport WxH] [--settle ms]');
+  console.error('usage: node scripts/author/capture-component.mjs <url> "<selector>" <brand> <label> [--viewport WxH] [--settle ms]');
   process.exit(1);
 }
 const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);

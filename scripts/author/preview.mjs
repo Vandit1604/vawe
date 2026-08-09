@@ -1,8 +1,8 @@
 // preview.mjs — FAST iteration: render the key frames of a format directly (no encode),
 // into one labeled contact sheet. ~5s, not a full render.
-//   node scripts/preview.mjs higherlower            (storyboard)
-//   node scripts/preview.mjs higherlower 560         (single exact frame)
-//   node scripts/preview.mjs higherlower 560 mydata.json   (custom data file)
+//   node scripts/author/preview.mjs higherlower            (storyboard)
+//   node scripts/author/preview.mjs higherlower 560         (single exact frame)
+//   node scripts/author/preview.mjs higherlower 560 mydata.json   (custom data file)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,7 @@ const format = process.argv[2];
 const single = process.argv[3] != null ? Number(process.argv[3]) : null;
 const dataArg = process.argv[4];
 if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
-  console.error('usage: node scripts/preview.mjs <format> [frame] [data.json]');
+  console.error('usage: node scripts/author/preview.mjs <format> [frame] [data.json]');
   console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
   process.exit(1);
 }

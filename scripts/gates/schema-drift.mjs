@@ -3,7 +3,7 @@
 // primitive ships a prop that never gets registered (e.g. `motion` did), validation silently passes and
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
-//   node scripts/schema-drift.mjs      (make schema-check) — exits 1 on drift
+//   node scripts/gates/schema-drift.mjs      (make schema-check) — exits 1 on drift
 import fs from 'node:fs';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';

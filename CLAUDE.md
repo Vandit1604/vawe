@@ -24,7 +24,7 @@ make video D=path/to/video.json        # same, via make   (add --draft to bin/va
 
 Every JSON **must** start with `"module": "scene"`. Save new videos as
 `formats/scene/<topic>.json` (siblings of `sample.json`). Always read `sample.json` and an existing
-video (e.g. `linear-30.json`) first as working references, then compose — never copy a structure wholesale
+video (e.g. `linear-launch.json`) first as working references, then compose — never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
 > **Planning any fan-out? Read [`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md) first.**
@@ -234,7 +234,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    (`{type:"beat","beat":"kineticHook",…}`, `docs/CRAFT/BLUEPRINTS.md`). Drop one per beat + fill brand
    content so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT, then `make expand`.
    Authoring plain `rise`+`fade` from a blank JSON is the #1 failure — blueprints + the floor prevent it.
-0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (240 effects, 15 families,
+0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (245 effects, 16 families,
    generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
    aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
    shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves

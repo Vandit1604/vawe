@@ -43,10 +43,17 @@ Then the agent **reads the sheet against the rubric** and returns a structured v
 
 It sees one film, and the agent running it knows which version it just authored. Both limits are fatal to
 the question "is this better than what I had". For that you need a blind A/B judge: two cuts, paired
-beat by beat, arms hidden, three judges. **It does not exist yet.** This file pointed at a
-`CRAFT/AB-JUDGE.md` that was never written, and [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) records the
-same gap — an `ab` critic advertised with no make target and no script. Until one is built, tile the two
-renders with `make compare` and judge them by eye, knowing you know which arm is which.
+beat by beat, arms hidden, three judges. **It was built, and then it was cut.** `make ab`, `make ab-record`
+and `CRAFT/AB-JUDGE.md` shipped on 2026-07-29 (`05a5123`) and were removed on 2026-08-05 (`cc2dfc2`), in a
+commit that cut six tools on the ground that none of them had ever been the reason a video looked better.
+This file and [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) then spent four days saying the judge had never
+been written, which is a harder thing to notice than a dangling link and a worse thing to believe: it
+turns a decision into an oversight. Until one is built again, tile the two renders with `make compare`
+and judge them by eye, knowing you know which arm is which.
+
+<!-- doc-refs-allow: CRAFT/AB-JUDGE.md · named here only to record that this file was built and then cut -->
+<!-- doc-refs-allow: make ab · named here only to record that this target was built and then cut -->
+<!-- doc-refs-allow: make ab-record · named here only to record that this target was built and then cut -->
 
 **N reduces variance, not bias.** Three judges drawn from one model share their blind spots, so a 3-0
 there is weaker evidence than the arithmetic suggests, and it is not certainty. The only real control is

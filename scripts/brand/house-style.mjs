@@ -1,16 +1,16 @@
-// scripts/house-style.mjs — scaffold a brand's persisted DESIGN READ as declarative markdown, so the
+// scripts/brand/house-style.mjs — scaffold a brand's persisted DESIGN READ as declarative markdown, so the
 // planning skill reads taste instead of re-deriving it every video (the another engine "house style" pattern).
 // Measured facts (faces, palette, motion, dominance) are auto-filled from themes/<name>.json; the
 // judgment lines (<…>) are yours to sharpen from the site study. Writes assets/brands/<name>/house-style.md.
 //
-// Usage: node scripts/house-style.mjs <brand>            (theme = themes/<brand>.json)
-//        node scripts/house-style.mjs <brand> <theme>    (explicit theme name)
+// Usage: node scripts/brand/house-style.mjs <brand>            (theme = themes/<brand>.json)
+//        node scripts/brand/house-style.mjs <brand> <theme>    (explicit theme name)
 //        make house-style NAME=<brand> [THEME=<theme>]
 import fs from 'node:fs';
 import path from 'node:path';
 
 const brand = process.argv[2];
-if (!brand) { console.error('usage: node scripts/house-style.mjs <brand> [theme]'); process.exit(2); }
+if (!brand) { console.error('usage: node scripts/brand/house-style.mjs <brand> [theme]'); process.exit(2); }
 const themeName = process.argv[3] || brand;
 const themePath = path.join('themes', themeName + '.json');
 if (!fs.existsSync(themePath)) { console.error(`theme not found: ${themePath} (pass a theme name as arg 2)`); process.exit(1); }

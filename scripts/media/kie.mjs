@@ -2,11 +2,11 @@
 // Async job model: createTask → poll recordInfo → parse resultJson.resultUrls → download.
 // Key from env KIE_API_KEY or a gitignored .kie.key file. Import as a lib OR run as a CLI.
 //
-//   node scripts/kie.mjs tts   "Hello world" --out assets/gen/vo.mp3
-//   node scripts/kie.mjs image "a neon city"  --out assets/gen/city.png --aspect 9:16
-//   node scripts/kie.mjs music "lofi, calm"    --out assets/gen/bed.mp3 --instrumental
-//   node scripts/kie.mjs video "a drone shot"  --out assets/gen/clip.mp4 --aspect 9:16
-//   node scripts/kie.mjs stt   assets/gen/vo.mp3 --out captions.json
+//   node scripts/media/kie.mjs tts   "Hello world" --out assets/gen/vo.mp3
+//   node scripts/media/kie.mjs image "a neon city"  --out assets/gen/city.png --aspect 9:16
+//   node scripts/media/kie.mjs music "lofi, calm"    --out assets/gen/bed.mp3 --instrumental
+//   node scripts/media/kie.mjs video "a drone shot"  --out assets/gen/clip.mp4 --aspect 9:16
+//   node scripts/media/kie.mjs stt   assets/gen/vo.mp3 --out captions.json
 //   add --dry to print the request(s) without calling the API (no key needed).
 import fs from 'node:fs';
 import path from 'node:path';

@@ -253,5 +253,5 @@ then validate/render that. `make validate` errors on any un-expanded `block`/`co
 
 ## Adding a block
 Keep it a pure `(props) => layers[]`. Respect the schema (font size ≥ 18; layer fonts `sans|serif|mono`;
-`elevation ≥ 1` when present). Add a row above + a tile in `scripts/blocks-catalog.mjs`, then re-preview.
+`elevation ≥ 1` when present). Add a row above + a tile in `scripts/site/blocks-catalog.mjs`, then re-preview.
 A block earns its place in the library only if it makes a beat *demonstrate* something — never a decorative shell.

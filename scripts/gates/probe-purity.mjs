@@ -9,8 +9,8 @@
 // frame to dirty any hidden state, render n again, and require the two screenshots
 // to be byte-identical.
 //
-//   node scripts/probe-purity.mjs bracket
-//   node scripts/probe-purity.mjs higherlower mydata.json
+//   node scripts/gates/probe-purity.mjs bracket
+//   node scripts/gates/probe-purity.mjs higherlower mydata.json
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +21,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const format = process.argv[2];
 const dataArg = process.argv[3];
 if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
-  console.error('usage: node scripts/probe-purity.mjs <format> [data.json]');
+  console.error('usage: node scripts/gates/probe-purity.mjs <format> [data.json]');
   console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
   process.exit(2);
 }

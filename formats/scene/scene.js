@@ -120,7 +120,6 @@ boot((data, fps, theme, canvas) => {
   data = lowerScene(data);
   // canvas W,H come from boot (aspect-resolved). Fallback keeps standalone use working.
   const [W, H] = [canvas?.width || 1080, canvas?.height || 1920];
-  const landscape = W > H;
   const cam = $('cam'), cv = $('cv');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -252,7 +251,6 @@ boot((data, fps, theme, canvas) => {
     for (let i = 0; i < beatBounds.length; i++) if (s >= beatBounds[i].start && s < beatBounds[i].end) return i;
     return beatBounds.length - 1;
   };
-  const beatExitEnd = (i, half) => (beatBounds[i] && isFinite(beatBounds[i].end) ? beatBounds[i].end + half : null);
 
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin

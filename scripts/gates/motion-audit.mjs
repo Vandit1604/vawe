@@ -1,4 +1,4 @@
-// scripts/motion-audit.mjs — check ANIMATION OVER TIME without rendering video. Renders every frame
+// scripts/gates/motion-audit.mjs — check ANIMATION OVER TIME without rendering video. Renders every frame
 // headless (no encode, no screenshots), builds a per-element time series ({effective opacity, position,
 // text}) for id'd / [data-layer="critical"] elements, and asserts the motion contract per segment:
 //
@@ -14,7 +14,7 @@
 // pulsing chrome) are skipped by (ii)/(iii). Segment windows come from meta.segments (each format
 // returns its SEGS); fallback: meta.stings, then the whole video as one segment.
 //
-//   node scripts/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
+//   node scripts/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
 //   make motion [M=<format>] [STRIDE=2]
 import fs from 'node:fs';
 import path from 'node:path';

@@ -4,7 +4,7 @@ Paste this whole file into Claude (or any model) and ask for a scene. Paste the 
 the editor at **/editor** and watch it render live in your browser. Nothing is uploaded; the engine
 runs client-side.
 
-> GENERATED from the engine (`node scripts/rules-build.mjs`). If it is in this file, it is real.
+> GENERATED from the engine (`node scripts/site/rules-build.mjs`). If it is in this file, it is real.
 
 ## The one idea
 
@@ -41,32 +41,32 @@ JSON *is* the video.
 
 ## Layer types
 
-`text` · `image` · `component` · `rect` · `count` · `group` · `glow` · `board` · `doc` · `html` · `clip` · `cursor` · `shader` · `lottie`
+`text` · `image` · `component` · `rect` · `count` · `group` · `glow` · `beam` · `svg` · `board` · `doc` · `html` · `clip` · `cursor` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `composition`
 
 ## The props you will actually use
 
 | prop | type | notes |
 |---|---|---|
-| `type` | string | Layer type — one of: `text` `image` `component` `rect` `count` `group` `glow` `board` `doc` `html` `clip` `cursor` `shader` `lottie` |
+| `type` | string | Layer type — one of: `text` `image` `component` `rect` `count` `group` `glow` `beam` `svg` `board` `doc` `html` `clip` `cursor` `shader` `lottie` `paint` `raymarch` `three` `composition` |
 | `text` | string | Text (may use <b>/<em>) |
 | `x` | number|string | Left: px number, or relative "50%" / "50%-40" / center / left / right (resolve |
 | `y` | number|string | Top: px number, or relative "50%" / center / top / bottom (resolved per aspect |
 | `w` | number|string | Width: px number or "50%" of canvas |
 | `h` | number|string | Height: px number or "50%" of canvas |
-| `size` | number | Font size (px) |
+| `size` | number | Font size (px). Up to 560 for frame-filling hero words (real launch films let  |
 | `weight` | number | Font weight |
-| `color` | string | Glow color / text color |
+| `color` | string|boolean | Glow color / text color (glow accepts true = the theme accent glow) |
 | `align` | string | Text align — one of: `left` `center` `right` |
-| `font` | string | Face — one of: `sans` `serif` `mono` |
+| `font` | string | Face — one of: `sans` `serif` `mono` `num` |
 | `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset) — one of: `char` `word` `line` `path` |
-| `preset` | string | Kinetic preset (split text) OR glow preset (bloom/halation/diffusion/rimLight/ |
+| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
 | `stagger` | number | Per-unit delay (s) |
 | `each` | number | Per-unit duration (s) |
 | `start` | ? | Window start: seconds, or relative "otherId+0.5" / "otherId.end-0.2" |
 | `duration` | number | Window length (s) |
-| `anim` | string | driveClips enter anim (fade/rise/pop/slideL/...) |
-| `out` | string | driveClips exit anim |
+| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale / — one of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `iris` `clock` `none` `wipe-down` `wipe-up` |
+| `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT |
 | `enterDur` | number | Enter window (s, cut layers) |
 | `exitDur` | number | Exit window (s; 0 = hold to end) |
 | `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds — one of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
@@ -75,24 +75,24 @@ JSON *is* the video.
 | `to` | number | Count end value (count) |
 | `unit` | string | Count unit appended after the number (e.g. %, k, $B); raw ≥1e6 auto-compacts ( |
 | `ease` | string | Count easing (EASINGS name, e.g. ramp) |
-| `src` | string | Image / captured-component path |
+| `src` | string | Path to the layer's source file: an image, a captured component (.json), a lot |
 | `radius` | number | Corner radius (rect/ken-image) |
 | `bg` | string | Fill (rect) |
-| `border` | string | Border (rect) |
+| `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (22)
+## Kinetic presets (27)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `underline` · `shadow` · `riseClip` · `draw`
+`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `inkflash` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.
 - `presetOpts` passes per-preset knobs, e.g. `{"px":30}` for `blur`, `{"ease":"easeOutQuint"}` for `draw`.
 
-## Easings (39)
+## Easings (41)
 
-`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `spring-bouncy` · `spring-stiff` · `settle`
+`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `spring-bouncy` · `spring-stiff` · `springEase` · `settle` · `snap`
 
 Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are sinusoidal
 (`easeInOutSine`). Never `linear` on a visible move.
@@ -101,24 +101,24 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 `"cuts": [{ "t": 3.2, "style": "punch" }]` — `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
 
-## Shader stings (32)
+## Shader stings (35)
 
 `"stings": [{ "t": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]`
 
-`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion`
+`flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` · `iridescence` · `cinematicZoom`
 
 A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
-## Backgrounds (16)
+## Backgrounds (21)
 
-`"bg": [{ "t": 0, "preset": "plain" }]` — `paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark`
+`"bg": [{ "t": 0, "preset": "plain" }]` — `paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
 
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (16)
+## Themes (34)
 
-`argus` · `creed-launch` · `creed` · `default` · `ditherkit` · `linear` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `vawe-creed` · `vawe-site` · `vawe`
+`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew-dark` · `brew` · `cadence` · `creed-launch` · `creed` · `default` · `ditherkit` · `glassatmos` · `higgsfield` · `ledgerline-cyber` · `ledgerline-neon` · `linear` · `lumen` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `tpot` · `vawe-creed` · `vawe-dark` · `vawe-inter` · `vawe-site` · `vawe`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.

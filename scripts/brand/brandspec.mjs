@@ -4,11 +4,11 @@
 // the key colours (bg/text/accent) with WCAG contrast checks, and the shape language (radius/shadow).
 // This is the "measure, don't guess" fix for the wrong-weight / wrong-font class of mistakes.
 //
-//   node scripts/brandspec.mjs https://creed.md/home        ·        make brandspec URL=…
+//   node scripts/brand/brandspec.mjs https://creed.md/home        ·        make brandspec URL=…
 import puppeteer from 'puppeteer';
 
 const url = process.argv[2];
-if (!url) { console.error('usage: node scripts/brandspec.mjs <url>'); process.exit(1); }
+if (!url) { console.error('usage: node scripts/brand/brandspec.mjs <url>'); process.exit(1); }
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-color-profile=srgb'] });
 const page = await browser.newPage();

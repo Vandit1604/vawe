@@ -1,8 +1,8 @@
-// scripts/cards.mjs — parametric, copyright-safe topic cards (designed SVGs) for ANY topic.
+// scripts/media/cards.mjs — parametric, copyright-safe topic cards (designed SVGs) for ANY topic.
 // A deterministic palette derived from the title gives each card a distinct, on-brand look:
 // dark→mid gradient + soft grain + vignette + accent frame + balanced wrapped title.
 // Use as a library (import { card, slugify }) or a CLI:
-//   node scripts/cards.mjs "Quantum Computing" --sub "the next frontier" --out assets/cards/qc.svg
+//   node scripts/media/cards.mjs "Quantum Computing" --sub "the next frontier" --out assets/cards/qc.svg
 import fs from 'node:fs';
 import path from 'node:path';
 

@@ -1,4 +1,4 @@
-// scripts/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
+// scripts/author/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
 const p = 'formats/scene/vawe-launch.json';

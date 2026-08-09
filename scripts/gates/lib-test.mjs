@@ -1,5 +1,5 @@
-// scripts/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/motion.js.
-// No browser needed (the primitives are pure). Run: node scripts/lib-test.mjs  (make lib-test)
+// scripts/gates/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/motion.js.
+// No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';

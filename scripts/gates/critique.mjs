@@ -1,7 +1,7 @@
-// scripts/critique.mjs — the VALUE GATE. Static critic over a scene JSON that fires on the failure
+// scripts/gates/critique.mjs — the VALUE GATE. Static critic over a scene JSON that fires on the failure
 // modes a human otherwise catches per-scene: placeholder words, unbacked claims, static lists,
 // illegible transitions, lonely low-value beats. Not taste-complete, but it makes the recurring
-// mistakes un-shippable. Run: node scripts/critique.mjs <scene.json> [--strict]
+// mistakes un-shippable. Run: node scripts/gates/critique.mjs <scene.json> [--strict]
 //
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
@@ -9,7 +9,7 @@ import { canvasShare, sceneTiming, PICTORIAL, htmlGraphic } from './scene-timing
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
-if (!file) { console.error('usage: node scripts/critique.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node scripts/gates/critique.mjs <scene.json> [--strict]'); process.exit(2); }
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];
 const findings = [];

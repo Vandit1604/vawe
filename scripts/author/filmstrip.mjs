@@ -15,9 +15,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const env = (k, d) => (process.env[k] != null && process.env[k] !== '' ? process.env[k] : d);
 const VIDEO = env('VIDEO', process.argv[2]);
 if (!VIDEO || !fs.existsSync(VIDEO)) { console.error('usage: make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]'); process.exit(2); }
@@ -28,7 +25,11 @@ const TILEW = +env('TILEW', '240');
 const DEDUP = env('DEDUP', '') === '1';
 const FROM = env('FROM', null), TO = env('TO', null);
 
-const dims = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', VIDEO], { encoding: 'utf8' }).stdout.trim().split(',');
+const dims = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,r_frame_rate', '-of', 'csv=p=0', VIDEO], { encoding: 'utf8' }).stdout.trim().split(',');
+// the source frame rate, as ffprobe's `num/den`. The heartbeat below counts FRAMES, so it needs this
+// and not the tile geometry: `+dims[0] ? 30 : 30` asked whether the video had a width and answered 30
+// either way, which is a branch that decides nothing (dead-branch, MISTAKES #81).
+const SRC_FPS = (() => { const [n, d] = String(dims[2] || '').split('/').map(Number); return Math.round(n / (d || 1)) || 30; })();
 const TILEH = Math.round((TILEW * (+dims[1] || 720)) / (+dims[0] || 1280) / 2) * 2;
 
 const out = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'filmstrip');
@@ -39,7 +40,7 @@ const frames = path.join(out, 'f'); fs.mkdirSync(frames, { recursive: true });
 const clip = FROM != null && TO != null ? ['-ss', String(FROM), '-t', String(+TO - +FROM)] : [];
 const label = FROM != null ? `%{eif\\:${FROM}+t\\:f\\:2}s` : `%{pts\\:hms}`;
 const vf = DEDUP
-  ? `select='gt(scene,0.18)+not(mod(n,${Math.round((+dims[0] ? 30 : 30))}))',scale=${TILEW}:${TILEH},drawtext=text='${label}':x=3:y=3:fontsize=13:fontcolor=yellow:box=1:boxcolor=black@0.7`
+  ? `select='gt(scene,0.18)+not(mod(n,${SRC_FPS}))',scale=${TILEW}:${TILEH},drawtext=text='${label}':x=3:y=3:fontsize=13:fontcolor=yellow:box=1:boxcolor=black@0.7`
   : `fps=${FPS},scale=${TILEW}:${TILEH},drawtext=text='${label}':x=3:y=3:fontsize=13:fontcolor=yellow:box=1:boxcolor=black@0.7`;
 const ex = spawnSync('ffmpeg', ['-v', 'error', '-y', ...clip, '-i', VIDEO, '-vsync', 'vfr', '-vf', vf, path.join(frames, 'f%04d.png')]);
 if (ex.status !== 0) { console.error('ffmpeg failed:', (ex.stderr || '').toString().slice(0, 300)); process.exit(1); }

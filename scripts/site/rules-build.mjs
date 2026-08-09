@@ -1,7 +1,7 @@
 // rules-build.mjs — emits vawe-rules.md, the single file you paste into Claude (or any model) to
 // get a valid scene.json back.
 //
-//   node scripts/rules-build.mjs      → docs/vawe-rules.md + site/public/vawe-rules.md
+//   node scripts/site/rules-build.mjs      → docs/vawe-rules.md + site/public/vawe-rules.md
 //
 // GENERATED, never hand-written. A hand-maintained rules file drifts from the engine the moment a
 // preset is added, and a rules file that lies is worse than none: the model authors a scene that
@@ -48,7 +48,7 @@ Paste this whole file into Claude (or any model) and ask for a scene. Paste the 
 the editor at **/editor** and watch it render live in your browser. Nothing is uploaded; the engine
 runs client-side.
 
-> GENERATED from the engine (\`node scripts/rules-build.mjs\`). If it is in this file, it is real.
+> GENERATED from the engine (\`node scripts/site/rules-build.mjs\`). If it is in this file, it is real.
 
 ## The one idea
 

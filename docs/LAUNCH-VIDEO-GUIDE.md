@@ -12,8 +12,10 @@ primitives, reflecting the real site. The old `demo`/`brandfilm` templates were 
 ## The workflow
 
 ```bash
-make brandkit URL=https://site.com NAME=<brand>   # colours pack (themes/<brand>.json) + fonts + favicon
+make brandspec URL=https://site.com                # real font families, weights, :root tokens, WCAG contrast
 make sections URL=https://site.com NAME=<brand>   # inventory every real section → sections/*.png + sections.json
+make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero pixels → dominance + swatches
+# then hand-author themes/<brand>.json from those two. There is no one-shot `brandkit`; it went with the templates.
 ```
 
 1. **Study + inventory.** Read the section shots. Name the site's design language in words (typography,
@@ -35,5 +37,5 @@ make sections URL=https://site.com NAME=<brand>   # inventory every real section
 ## References
 - Primitive vocabulary: **`docs/PRIMITIVES.md`**  ·  Motion rules: **`docs/MOTION-CRAFT.md`**
 - Design knowledge (backgrounds, transitions, plain-vs-busy): **`docs/DESIGN-DATABASE.md`**
-- Worked example: `formats/scene/linear-30.json` (reflects linear.app section-by-section).
+- Worked example: `formats/scene/linear-launch.json` (reflects linear.app section-by-section).
 - Landscape 1920×1080 for launch videos (`"orientation": "landscape"`).

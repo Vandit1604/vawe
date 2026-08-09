@@ -5,14 +5,14 @@
 // true average luminance, not one section's. Writes a swatch card to /tmp/palette.png. NOT a
 // substitute for looking: confirm against the screenshots + the make beats VS=<brand> fidelity gate.
 //
-//   node scripts/palette.mjs assets/brands/<brand>/sections   # whole page (recommended)
-//   node scripts/palette.mjs path/to/one-screenshot.png              # single image
+//   node scripts/brand/palette.mjs assets/brands/<brand>/sections   # whole page (recommended)
+//   node scripts/brand/palette.mjs path/to/one-screenshot.png              # single image
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const arg = process.argv[2];
-if (!arg || !fs.existsSync(arg)) { console.error('usage: node scripts/palette.mjs <sections-dir | screenshot.png>'); process.exit(1); }
+if (!arg || !fs.existsSync(arg)) { console.error('usage: node scripts/brand/palette.mjs <sections-dir | screenshot.png>'); process.exit(1); }
 const files = fs.statSync(arg).isDirectory()
   ? fs.readdirSync(arg).filter((f) => /\.(png|jpe?g)$/i.test(f)).map((f) => path.join(arg, f))
   : [arg];

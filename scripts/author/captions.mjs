@@ -3,13 +3,13 @@
 // writes `captions` + `captionMode:"pop"` into the JSON. Deterministic: same script + duration → same
 // timing. Emphasise a word with <b>…</b> in the script (renders in the theme accent).
 //
-//   node scripts/captions.mjs formats/scene/video.json "First line. Then the <b>payoff</b>."
+//   node scripts/author/captions.mjs formats/scene/video.json "First line. Then the <b>payoff</b>."
 //   make captions D=formats/scene/video.json TEXT="…"
 import fs from 'node:fs';
 
 const [file, text] = [process.argv[2], process.argv[3]];
 if (!file || !text || !fs.existsSync(file)) {
-  console.error('usage: node scripts/captions.mjs <video.json> "<script text>"');
+  console.error('usage: node scripts/author/captions.mjs <video.json> "<script text>"');
   process.exit(1);
 }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
