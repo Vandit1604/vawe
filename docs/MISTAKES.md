@@ -7291,10 +7291,24 @@ differed forever, the PNG oscillating between 200K and 270K. With the hint remov
 byte-identical from the eighth attempt on. **A promotion hint the browser cannot honour is worse than
 none**, and this is the same family as #267, where deferred raster cost whole product screenshots.
 
-**Still open, and worth someone's time:** `formats/scene/scene.css:16` puts `will-change: transform,
-opacity, filter` on EVERY `.hs-layer`. That is the same hint at scene scale, and #269 records 250 frames
-that still differ between two identical renders with no explanation. The measurement is cheap and
-written down here: render twice, compare captures, then do it again with the property off.
+**TESTED, and it is not the explanation. Do not spend the experiment again.**
+`formats/scene/scene.css:16` puts `will-change: transform, opacity, filter` on EVERY `.hs-layer`, which
+is the same hint at scene scale, so it was the obvious suspect for #269's residual. Two renders with it
+and two without, `brew-launch`, same machine:
+
+| | frames differing | median ratio | median max-delta |
+|---|---|---|---|
+| with (as shipped) | 110 | 0.00104% | 5 |
+| without | **85** | **0.17693%** | **12** |
+
+Fewer frames differ and the ones that do differ MORE, which is not a win, and every magnitude here is
+tiny (worst frame 0.2% of pixels, max channel delta 16). The measurement's own noise is the size of the
+effect: an earlier pair of runs on unchanged code gave 100 rather than 110. So `scene.css` is unchanged,
+deliberately. Changing shipped behaviour on evidence this weak is how a gate invents findings.
+
+What is still true: the lightfield case was unambiguous (never settles versus byte-identical from the
+eighth attempt), because 400 promoted layers is a different order of magnitude from a scene's dozen.
+The residue in #269 remains unexplained.
 
 ## #273 — a screenshot taken at `load` is a picture of the browser's timing
 
