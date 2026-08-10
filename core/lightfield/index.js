@@ -41,10 +41,10 @@ function tag(opts) {
 
 // Where the light sits, as data.
 //
-// The bloom appears THREE times, as a cluster of lobes of falling size. One radial blob makes a
-// spotlight. A cluster makes light that came from somewhere and spread, with dark lanes between the
-// lobes, and those lanes are most of what the eye reads as depth. The seed places the cluster, so
-// two fields sharing a palette are still two fields.
+// The bloom appears as a CLUSTER of lobes of falling size, `colour.lobes` of them. One radial blob
+// makes a spotlight. A cluster makes light that came from somewhere and spread, with dark lanes
+// between the lobes, and those lanes are most of what the eye reads as depth. The seed places the
+// cluster, so two fields sharing a palette are still two fields.
 // The CSS below is built from this, and so is the search in
 // scripts/author/lightfield-fit.mjs. One source, so a fitted seed cannot mean two different layouts.
 // How a blob fades. It is here, exported, because the arithmetic search in lightfield-seeds.mjs
@@ -60,6 +60,82 @@ function tag(opts) {
 // to one photograph and imposed on every field after it. See colour.spread in options.js.
 export const RAMP = { mid: 0.85, pos: 30, end: 80 };
 export const rampEnd = (spread) => RAMP.end + 90 * spread;
+
+// THE CLUSTER, as a series rather than as three literals.
+//
+// The first three entries are the fitted ones, unchanged and in their fitted order: the top lobe is
+// the widest and sits high, and each one after it is a step smaller and a step fainter. That decay
+// is the only thing the fitted three ever said, so continuing it is the honest generalisation, and
+// `STEP` / `DIM` are read off the fitted numbers rather than invented (rx 40 -> 32 -> 28 and alpha
+// 1 -> 0.96 -> 0.90 are both about 0.88 and about 0.95 per step near the end of the series).
+//
+// A lobe's `y` reach widens after the first, because the first lobe IS the top of the cluster and
+// every lobe under it may sit anywhere down the frame.
+const SERIES = [
+  { yTo: 25, rx: [18, 40], ry: [30, 70], a: 1 },
+  { yTo: 60, rx: [14, 32], ry: [20, 55], a: 0.96 },
+  { yTo: 60, rx: [12, 28], ry: [18, 50], a: 0.9 },
+];
+const STEP = 0.88;   // each lobe past the fitted three is this much smaller than the one before it
+const DIM = 0.95;    // and this much fainter
+const FITTED = SERIES.length;
+
+// WHERE ACROSS THE FRAME A LOBE MAY SIT. The span is the fitted one, 8% to 92%.
+//
+// At `evenness` 0 every lobe draws independently anywhere in it, which is what the fitted cluster
+// does and which is LUMPY BY CONSTRUCTION: a handful of independent draws pile up, and the sum of a
+// few piled-up blobs is humps with dips between them. It cannot make the broad flat band both
+// references actually have. At 1 the span is cut into one band per lobe and each lobe draws inside
+// its own, so the cluster covers the frame instead of clumping in part of it.
+//
+// Bands are handed out FROM THE MIDDLE OUTWARDS, because the series decays: the largest lobe takes
+// the centre and the smaller ones fall away to the edges. Handing them out left to right would ramp
+// the lobe size across the frame and tilt every field to one side.
+const X0 = 8, X1 = 92;
+export function bandOrder(count) {
+  const mid = Math.floor((count - 1) / 2);
+  const out = [mid];
+  for (let d = 1; out.length < count; d++) {
+    if (mid + d < count) out.push(mid + d);
+    if (mid - d >= 0) out.push(mid - d);
+  }
+  return out;
+}
+// `u` is one draw in [0,1), taken by the caller so the random stream stays in lobe order.
+// At evenness 0 this is exactly `X0 + (X1 - X0) * u`, which is `span(r, 8, 92)`: the fitted layout.
+function lobeX(band, count, evenness, u) {
+  const w = (X1 - X0) / count;
+  const lo = X0 + (X0 + band * w - X0) * evenness;
+  const hi = X1 + (X0 + (band + 1) * w - X1) * evenness;
+  return lo + (hi - lo) * u;
+}
+
+// The nominal footprint of one lobe: the mid of its width range by the mid of its height range.
+// It is what the area scaling below is computed from, so it has to be the same arithmetic for the
+// fitted three and for everything after them.
+const footprint = (s) => ((s.rx[0] + s.rx[1]) / 2) * ((s.ry[0] + s.ry[1]) / 2);
+
+// The series, `count` long, scaled so it covers the same total area as the fitted three.
+//
+// Without the scaling, `lobes` would be a brightness dial wearing a structure dial's name: eight
+// lobes at the fitted sizes is eight times the light, and every palette would blow out as you turned
+// it. With it, the dial only ever decides how the same light is DIVIDED, which is the question it is
+// there to ask.
+export function lobeSeries(count) {
+  const specs = [];
+  for (let i = 0; i < count; i++) {
+    if (i < FITTED) { specs.push(SERIES[i]); continue; }
+    const p = specs[i - 1];
+    specs.push({ yTo: p.yTo, rx: p.rx.map((v) => v * STEP), ry: p.ry.map((v) => v * STEP), a: p.a * DIM });
+  }
+  const sum = (xs) => xs.reduce((t, s) => t + footprint(s), 0);
+  // Always the fitted three's total, so one lobe is that whole area in one mass and eight is the
+  // same area cut eight ways. At count 3 the two sums are the same arithmetic on the same numbers,
+  // so the scale is exactly 1 and the fitted layout is byte-identical.
+  const k = Math.sqrt(sum(SERIES) / sum(specs));
+  return specs.map((s) => ({ ...s, rx: s.rx.map((v) => v * k), ry: s.ry.map((v) => v * k) }));
+}
+
 export function fieldBlobs(given) {
   // Resolve here too. This is exported, and an exported function that only works on options someone
   // else already filled in is a trap: the search tool passed a raw preset and got a crash on
@@ -75,11 +151,11 @@ export function fieldBlobs(given) {
   // `mid` is drawn ON TOP of the bloom cluster. Under it, three overlapping orange lobes wash the
   // second colour out and the field goes back to being one hue, which is the thing `mid` exists to
   // prevent. Order here is CSS order: the first entry is the topmost layer.
-  const lobes = [
-    lightBlob(bloom, span(r, 8, 92), span(r, 0, 25), span(r, 18, 40), span(r, 30, 70), 1),
-    lightBlob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 14, 32), span(r, 20, 55), 0.96),
-    lightBlob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 12, 28), span(r, 18, 50), 0.9),
-  ];
+  const count = opts.colour.lobes;
+  const bands = bandOrder(count);
+  const lobes = lobeSeries(count).map((s, i) =>
+    lightBlob(bloom, lobeX(bands[i], count, opts.colour.evenness, r()), span(r, 0, s.yTo),
+      span(r, s.rx[0], s.rx[1]), span(r, s.ry[0], s.ry[1]), s.a));
   // `extra` sits on top of everything. A colour the four roles cannot name is almost always an
   // accent that has to CUT the field, and an accent under three orange lobes is not an accent.
   const accents = extra.map((hex) =>
@@ -124,8 +200,18 @@ function paintShadow(opts) {
   const g = opts.colour.ground;
   if (depth === 0) return null;
   const start = (1 - softness) * 68;
-  const stops = `${fade(g)} ${n(start)}%, ${rgba(g, depth * 0.42)} ${n(start + (100 - start) * 0.5)}%, ${rgba(g, depth)} 100%`;
+  const mid = start + (100 - start) * 0.5;
+  const stops = `${fade(g)} ${n(start)}%, ${rgba(g, depth * 0.42)} ${n(mid)}%, ${rgba(g, depth)} 100%`;
   if (direction === 'center') return `radial-gradient(72% 82% at 50% 50%, ${stops})`;
+  // Away along ONE axis. The same profile, mirrored about the middle of the frame: `start` and `mid`
+  // are distances from the light, so a point at distance u sits at 50 - u/2 on the near side and at
+  // 50 + u/2 on the far one. The middle of the frame is the lit band and takes nothing at all.
+  if (direction === 'top-and-bottom' || direction === 'left-and-right') {
+    const near = (u) => n(50 - u / 2), far = (u) => n(50 + u / 2);
+    return `linear-gradient(${direction === 'top-and-bottom' ? 180 : 90}deg, ${rgba(g, depth)} 0%, `
+      + `${rgba(g, depth * 0.42)} ${near(mid)}%, ${fade(g)} ${near(start)}%, ${fade(g)} ${far(start)}%, `
+      + `${rgba(g, depth * 0.42)} ${far(mid)}%, ${rgba(g, depth)} 100%)`;
+  }
   // A directional fall gets a frame vignette under it. Light that leaves one way still leaves at
   // every edge, and without this the far corners stay lit and the field reads as a printed gradient.
   const vignette = `radial-gradient(76% 88% at 50% 46%, ${fade(g)} 40%, ${rgba(g, depth * 0.5)} 100%)`;

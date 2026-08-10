@@ -15,7 +15,17 @@ export const SHAPES = ['full', 'ramp', 'arch', 'valley', 'wave'];
 export const ANCHORS = ['bottom', 'top'];
 // Light rarely leaves along an axis. The corners are here because a frame that darkens down AND
 // right at once is ordinary, and no edge keyword can say it.
+// `center` is away in EVERY direction at once. The two paired names are away along ONE axis and not
+// at all along the other, which is the shape a low sun makes: a lit band with darkness above and
+// below it and nothing taken off the sides.
+//
+// Measured on refs/ref-b.png, which is that picture. Under `center` the render was 27 units too
+// bright at the top edge and 16 too dark at the left edge in the same frame, because a radial fall
+// cannot darken the top without darkening the sides by more. No value of `depth` or `softness` fixes
+// that, and no existing keyword says it: `top` and `bottom` each darken one end and leave the other
+// lit. It is a SHAPE that was missing from the vocabulary, not a number that was wrong.
 export const DIRECTIONS = ['left', 'right', 'top', 'bottom', 'center',
+  'top-and-bottom', 'left-and-right',
   'top-left', 'top-right', 'bottom-left', 'bottom-right'];
 export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 
@@ -95,6 +105,39 @@ export const SCHEMA = {
       // layout was chosen for does not move.
       originX: { kind: 'num', min: -50, max: 150, def: 50 },
       originY: { kind: 'num', min: -50, max: 150, def: 12.5 },
+      // HOW MANY LOBES THE BLOOM CLUSTER HAS.
+      //
+      // This was the number 3, written into the array literal in index.js, and it was fitted to the
+      // same photograph everything else here was fitted to. `colour.spread` was the same class of bug
+      // one level up: a constant chosen for one image and then imposed on every field after it.
+      //
+      // The count decides what KIND of light this is, and no other dial can say it. One lobe is a
+      // torch. Three large ones overlap into a single soft mass with a round edge you can point at,
+      // which is a spotlight on a curtain. Six or eight smaller ones make a field that flows, with
+      // dark lanes between the regions, which is what a photograph of light in a room looks like.
+      //
+      // The cluster keeps the same TOTAL area whatever the count: each lobe's size is scaled so the
+      // series' nominal area matches the fitted three's. So this dial spends light differently and
+      // never adds more of it, and a field cannot be brightened by asking for more lobes.
+      //
+      // 3 is the fitted cluster exactly, so the fields that number was chosen for do not move.
+      lobes: { kind: 'int', min: 1, max: 12, def: 3 },
+      // HOW EVENLY THOSE LOBES ARE SPREAD ACROSS THE FRAME.
+      //
+      // `lobes` alone cannot make a broad band, and that is worth being precise about. Every lobe
+      // draws its position independently, so a cluster is lumpy however many lobes it has: pile up a
+      // few independent draws and you get humps with dips between them. Measured on ref-b, the
+      // fitted three put a dip at 56% of the width where the reference's horizontal profile is flat
+      // from 25% to 75%, and adding lobes at random positions moved the dips around rather than
+      // filling them.
+      //
+      // 0 draws every lobe anywhere in the span, which is the fitted behaviour. 1 gives each lobe
+      // its own equal band of the frame, so the cluster covers the width instead of clumping in part
+      // of it. Between them the band opens up towards the full span.
+      //
+      // It is x only. Both references put their light in a horizontal BAND, so spreading the cluster
+      // vertically as well would work against the thing this is for.
+      evenness: { kind: 'unit', def: 0 },
       // Anything the four roles cannot name, as an ordered list, laid over them in the order given.
       // The roles stay the whole API for a simple field: this is empty by default and most palettes
       // never touch it. The reference needs it, because it carries a dark magenta lane between two

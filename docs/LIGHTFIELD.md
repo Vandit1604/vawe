@@ -42,7 +42,9 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 
 | key | what it is |
 |---|---|
-| `bloom` | the hot core. It appears as three lobes of falling size, not one blob, because one blob is a spotlight and three are light that came from somewhere. |
+| `bloom` | the hot core. It appears as a cluster of lobes of falling size, not one blob, because one blob is a spotlight and a cluster is light that came from somewhere. |
+| `lobes` | 1 to 12: how many lobes that cluster has. The cluster keeps the same total area whatever you set, so this decides how the light is DIVIDED and never how much of it there is. |
+| `evenness` | 0 to 1: how evenly those lobes are spread across the width. `0` draws each one anywhere, which clumps; `1` gives each its own band of the frame. |
 | `mid` | the second colour, set away from the bloom. This is what stops the field being one hue. |
 | `deep` | the saturated body the light sits in. |
 | `ground` | what the light falls away into. Usually near black. |
@@ -109,6 +111,29 @@ The reference needs `extra`. It carries a dark magenta lane between two orange l
 corner, and neither of those is a bloom, a mid, a deep or a ground. Naming them as roles would have
 meant inventing two roles that mean nothing on any other palette, so they go in a list.
 
+#### `lobes` and `evenness`, the same class of bug one level deeper
+
+`spread` was a constant fitted to one photograph. So was the number of lobes, and so was where they
+were allowed to sit. Both were written into an array literal: exactly three blobs, each drawn at a
+random x anywhere between 8% and 92% of the width.
+
+Three large blobs can only ever make one soft mass, and independent draws are lumpy however many of
+them there are. The two failures those two constants caused are visible in two different references:
+
+* `refs/lightfield-ref.jpg` is a flowing field with several colour regions, and the render was one
+  soft lobe that reads as a spotlight on a curtain. That is the COUNT.
+* `refs/ref-b.png` has a horizontal profile that is flat from a quarter of the way across to three
+  quarters, and the render dipped in the middle, because three independently placed lobes overlapped
+  into two humps. That is the PLACEMENT, and adding lobes at random positions only moved the dips.
+
+`lobes` is scaled so the cluster covers the same total area at any count: nine lobes are nine smaller
+lobes, never nine times the light, so the dial cannot be used to brighten a field by accident.
+`evenness` hands each lobe its own band of the width, from the middle outwards so the largest lobe
+takes the centre and the smaller ones fall away to the edges. Handing bands out left to right instead
+would ramp the lobe size across the frame and tilt every field to one side.
+
+`lobes` 3 with `evenness` 0 is the fitted cluster exactly, down to the byte.
+
 ### shadow
 
 How the light falls off. This is the mood dial: one palette and one pattern read as dawn or as a
@@ -118,7 +143,7 @@ cellar depending on it.
 |---|---|---|
 | `depth` | 0 to 1 | how dark the far side goes. `0` emits no shadow layer at all, and that is what the reference wants: its colour field already drains to the ground, and a second fall on top measured worse. |
 | `softness` | 0 to 1 | how long it takes to get there. `0` is an edge you can point at, `1` crosses the whole frame. |
-| `direction` | `left` `right` `top` `bottom` `center` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis: a frame that darkens down and right at once is ordinary, and no edge keyword can say it. |
+| `direction` | `left` `right` `top` `bottom` `center` `top-and-bottom` `left-and-right` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis. The two paired names are a lit BAND: away along one axis and not at all along the other, which `center` cannot say because a radial fall darkens every edge at once. |
 | `seam` | **-1 to 1** | the line BETWEEN elements. The SIGN is the polarity: positive multiplies (a dark seam), negative dodges (a bright one). `0` emits no seam at all. |
 | `seamWidth` | 0 to 1 | how wide that line is, as a fraction of the element it trails. `slats` only. |
 | `peak` | 0 to 100 | where the light lands across a lit face, as a percentage from its leading edge. `slats` only. |
