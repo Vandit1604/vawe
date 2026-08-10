@@ -163,9 +163,9 @@ export const SCHEMA = {
   pattern: {
     kind: 'group',
     fields: {
-      kind: { kind: 'enum', of: PATTERNS, def: 'slats', primary: true },
+      kind: { kind: 'enum', of: PATTERNS, def: 'slats' },
       // How many elements across the field.
-      count: { kind: 'int', min: 1, max: 400, def: 62, primary: true },
+      count: { kind: 'int', min: 1, max: 400, def: 62 },
       // How unequal they are. 0 is a ruler, 1 is a thicket.
       jitter: { kind: 'unit', def: 0.55 },
     },
@@ -174,7 +174,7 @@ export const SCHEMA = {
   motion: {
     kind: 'group',
     fields: {
-      kind: { kind: 'enum', of: MOTIONS, def: 'shimmer', primary: true },
+      kind: { kind: 'enum', of: MOTIONS, def: 'shimmer' },
       // Cycles per second, roughly. Motion is driven off var(--t), the engine frame clock.
       speed: { kind: 'num', min: 0, max: 4, def: 1 },
       // How big the move is, as a multiple of the preset's own size.

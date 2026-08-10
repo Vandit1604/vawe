@@ -7714,6 +7714,34 @@ That keeps `motion.kind` honest: freezing alone would have left it a dial with n
 is the silent-substitution shape this repo logs more than any other. Verified rather than assumed: the
 markup is byte-identical 700ms apart and `--t` reads 0.000.
 
+## #282 — two of the five looks were invented, and it showed
+
+The user opened the library and said everything except `colonnade` looked bad. They were right, and the
+reason is on record in this repo's own tooling: `tide` and `fern` had **no reference**. Nobody ever
+compared them to anything. `lightfield-check.mjs` reported them as unscored rather than passing, which
+is the correct behaviour and is also an admission nobody had read.
+
+An invented look is not a look, it is a guess with a name. A library that shows guesses beside measured
+work teaches nobody which is which, so both are out of the library. The PRESETS stay, so `rings` and
+`shards` are still reachable and still built by `make lightfield`; what they lost is a card, until each
+has a reference and a score. Bringing one back is two lines and an image on disk.
+
+The library is three looks and `lightfield-check` now ends with **"0 without a reference"**. Everything
+on the page is measured against something.
+
+**The general rule this is an instance of.** A gate that reports "not checked" is only useful if
+somebody reads it. It said so on every run for as long as those looks existed. What made the difference
+was a person looking at the pictures, which is the thing no gate replaces.
+
+## #283 — the basic panel is a colour changer, and that is the whole point
+
+Eight primary dials was still a control panel. A look is its own entry now, so `pattern.kind` is what
+the look IS rather than a dial on it, and `motion` cannot be judged while the preview is deliberately
+still. Both moved behind the disclosure.
+
+What is left is a seed and four colours. Everything else is one click away and labelled with its count.
+Someone who came to see what the thing does gets the control they were going to reach for first.
+
 ---
 
 ## Waivers for `doc-refs`

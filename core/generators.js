@@ -82,11 +82,19 @@ const LOOKS = [
     blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
   { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png',
     blurb: 'Wide panels split by bright hairlines, soft masses under a glow.' },
-  { name: 'tide', preset: 'tide', ref: null,
-    blurb: 'Concentric bands round a point, like light on water.' },
-  { name: 'fern', preset: 'fern', ref: null,
-    blurb: 'A fan of rays from a pivot below the frame.' },
 ];
+
+// `tide` and `fern` are NOT here, and the reason is worth keeping.
+//
+// They were invented: no reference, never compared to anything, and `lightfield-check.mjs` reported
+// them as unscored rather than passing. The user looked at the library and said everything except
+// colonnade looked bad, which is the same finding arrived at by eye. An invented look is not a look, it
+// is a guess with a name, and a library that shows guesses beside measured work teaches nobody which is
+// which.
+//
+// The presets stay in core/lightfield/presets.js, so `rings` and `shards` are still reachable and still
+// rendered by `make lightfield`. What they do not get is a card, until each has a reference and a score.
+// Bringing one back is two lines here plus an image on disk.
 
 export const GENERATORS = LOOKS.map(({ name, preset, ref, blurb }) => {
   const opts = LIGHTFIELD_PRESETS[preset];
