@@ -85,7 +85,12 @@ export function fieldBlobs(given) {
 export const fieldBase = ({ colour: { deep, ground } }) =>
   `linear-gradient(100deg in oklab, ${mix(deep, ground, 0.35)} 0%, ${mix(deep, ground, 0.7)} 52%, ${ground} 100%)`;
 
-function paintField(opts) {
+// Exported so a probe can render the colour field ALONE, with no pattern over it. The question
+// "is the field already brown, or does the composite make it brown?" is only answerable by looking
+// at the field on its own, and re-deriving this ramp in the probe would mean measuring a different
+// field from the one that ships.
+export function paintField(given) {
+  const opts = resolve(given);
   const css = ({ hex, x, y, rx, ry, a }) =>
     `radial-gradient(${n(rx)}% ${n(ry)}% at ${n(x)}% ${n(y)}% in oklab, ${rgba(hex, a)} 0%, ${rgba(hex, a * RAMP.mid)} ${RAMP.pos}%, ${fade(hex)} ${RAMP.end}%)`;
   return [...fieldBlobs(opts).map(css), fieldBase(opts)].join(',');

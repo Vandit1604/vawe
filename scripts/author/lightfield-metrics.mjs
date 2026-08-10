@@ -35,6 +35,31 @@ export function blockError(refBlocks, genBlocks) {
   return sum / refBlocks.length;
 }
 
+// The same block comparison, but over the WORST `frac` of the grid only.
+//
+// blockError is a mean, and a mean is a budget a fit is free to spend: it will trade one region deep
+// into the ground to shave a fraction off everywhere else, and it did. Between two passes the
+// aggregate improved from 7.3% to 6.9% while the magenta sample went from dE 36.7 to 59.1, which is
+// the whole reason anyone was looking. That is docs/MISTAKES.md #262 again in a second costume: a
+// number that cannot see the defect you were sent to fix is not a pass mark.
+//
+// So this reports the tail. `frac` 0.15 over a 24x14 grid is the worst ~50 blocks. A fit scored on
+// it cannot buy the average by abandoning a region, because the abandoned region IS the score.
+export function tailError(refBlocks, genBlocks, frac = 0.15) {
+  const n = refBlocks.length / 3;
+  const per = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    per[i] = (Math.abs(refBlocks[i * 3] - genBlocks[i * 3])
+      + Math.abs(refBlocks[i * 3 + 1] - genBlocks[i * 3 + 1])
+      + Math.abs(refBlocks[i * 3 + 2] - genBlocks[i * 3 + 2])) / 3;
+  }
+  per.sort();
+  const take = Math.max(1, Math.round(n * frac));
+  let sum = 0;
+  for (let i = n - take; i < n; i++) sum += per[i];
+  return sum / take;
+}
+
 // How saturated the picture is, at full resolution: mean (max - min) over the three channels,
 // weighted nowhere and averaged over every pixel.
 //
