@@ -29,6 +29,8 @@ COPY scripts ./scripts
 # Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
 # brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
 COPY assets/brands ./assets/brands
+# plinth is outside assets/brands and one published scene reaches for its hero figure.
+COPY assets/plinth ./assets/plinth
 
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none — and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.

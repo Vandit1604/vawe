@@ -25,6 +25,17 @@ assets/flags
 !assets/brands/creed/brandmark.svg
 !assets/brands/argus/mascot.png
 !assets/brands/linear/icon.png
+# The rest of what the PUBLISHED scenes name. site-engine.mjs derives this list and fails the build
+# when one is absent, but it looks in the build context and this file decides what is in it, so an
+# asset can exist in the repo, pass every local run, and simply not be in the image. `make docker-check`
+# runs the same derivation and fails here instead of on the deploy (docs/MISTAKES.md #275).
+!assets/brands/ditherkit/sections/03-area.png
+!assets/brands/ditherkit/sections/04-bar.png
+!assets/brands/ditherkit/sections/05-line.png
+!assets/brands/looks/photos/david.jpg
+!assets/brands/threadcite/components/howitworks.json
+!assets/brands/threadcite/icon.svg
+!assets/plinth/hero-figure.png
 
 # not part of the site image
 # NB: docs-site IS part of it — the image runs the docs app on 3001 and the site rewrites /docs to
