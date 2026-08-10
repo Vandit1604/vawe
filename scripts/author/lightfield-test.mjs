@@ -163,6 +163,29 @@ ok('the light origin moves the bloom cluster and leaves deep alone', (() => {
     && Math.abs(b[1][0] - a[1][0] - 40) < 1e-6 && Math.abs(b[1][1] - a[1][1] - 47.5) < 1e-6;
 })());
 
+ok('through #000000 is the exact no-op and emits no transmitted layer at all',
+  lightfield({ colour: { through: '#000000' } }) === lightfield()
+  && !/class="p"/.test(lightfield()));
+ok('through draws the LIT faces again, as light, on a screen layer', (() => {
+  const h = lightfield({ colour: { through: '#2a2a34' } });
+  const box = (t) => (h.match(new RegExp(`<div class="${t}">([\\s\\S]*?)\\n</div>`)) || [, ''])[1];
+  const lit = box('l').split('\n').filter(Boolean).length;
+  const thru = box('p').split('\n').filter(Boolean).length;
+  // One transmitted element per lit face and not one per cell: a seam is where no light comes
+  // through, so it has to be a GAP in this layer or the light reads as a wash instead of as bars.
+  return /\.p\{[^}]*mix-blend-mode:screen/.test(h) && thru > 0 && thru === lit
+    && box('p').includes('rgba(42,42,52');
+})());
+ok('the transmitted faces sit exactly where the lit faces sit', (() => {
+  // The builder is called a second time rather than the styles being recoloured. If it ever stopped
+  // laying out the same geometry, the two layers would drift apart and nothing else would notice.
+  const h = lightfield({ colour: { through: '#2a2a34' } });
+  const box = (t) => (h.match(new RegExp(`<div class="${t}">([\\s\\S]*?)\\n</div>`)) || [, ''])[1];
+  const geom = (s) => s.split('\n').filter(Boolean).map((x) => (x.match(/left:[-0-9.]+%;top:[-0-9.]+%;width:[-0-9.]+%/) || [''])[0]);
+  const a = geom(box('l')), b = geom(box('p'));
+  return a.length > 0 && a.every((v, i) => v === b[i]);
+})());
+
 ok('a paired direction darkens BOTH ends of its axis and leaves the middle alone', (() => {
   const s = (d) => lightfield({ shadow: { depth: 0.8, softness: 0.5, direction: d } }).match(/\.s\{[^}]*\}/)[0];
   const v = s('top-and-bottom'), h = s('left-and-right');

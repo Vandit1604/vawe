@@ -267,9 +267,17 @@ export function lightfield(given) {
   // A single factor per pixel leaves the ratios between R, G and B untouched, so a seam gets darker
   // and a face gets brighter and neither gets greyer. Chroma survives, and it rises on the faces.
   //
-  // Dodge also leaves black alone: base / (1 - 0) is base, and 0 / anything is 0. That matters here
-  // more than it sounds. `plus-lighter` ADDS, so it lit up the reference's black right-hand side
-  // with bars that should not be there. Light that is not behind the blind cannot come through it.
+  // Dodge also leaves black alone: base / (1 - 0) is base, and 0 / anything is 0. That is why it is
+  // the right blend for a face catching light, and it is also its whole limitation: wherever the
+  // field has drained away, an element scaling it cannot be seen at all.
+  //
+  // THIS COMMENT USED TO SAY the reference's black right-hand side has no bars in it and that
+  // plus-lighter "lit up bars that should not be there". That is false about the photograph. Crop
+  // the darkest third of refs/lightfield-ref.jpg and lift it and there are ranks of cool grey slats
+  // running to the right edge; measured, that third's striping is edge 4.22 and swing 14.52 against
+  // the whole frame's 3.26 and 10.70, so it is STRONGER there than anywhere. What was actually wrong
+  // was the strength, not the presence. `colour.through` is the dial for it, and it screens rather
+  // than adds so a face already brighter than the light landing on it does not walk up.
   //
   // Dodge is driven by the grey VALUE, not by alpha. Alpha on a dodge layer lerps towards the
   // source and desaturates, which is the bug being fixed, so a face at zero strength is opaque
@@ -317,6 +325,21 @@ export function lightfield(given) {
 
   const darkCells = cells.filter((c) => !c.lit);
   const litCells = cells.filter((c) => c.lit);
+  // THE LIGHT THROUGH THE PATTERN. The same faces a second time, painted as light rather than as a
+  // scaling of what is behind them, so the pattern still exists where the field has gone black.
+  //
+  // The builder is called again rather than the cells being recoloured, because a builder seeds its
+  // own generator from `opts.seed` and therefore lays out the identical geometry every time. Reading
+  // the styles back out and swapping a colour inside them would be a parser, and a parser is how the
+  // two copies drift apart.
+  //
+  // Only the LIT cells. A seam is where no light comes through, so it is a gap in this layer, which
+  // is what makes the transmitted light read as bars rather than as a wash.
+  const throughCells = opts.colour.through === '#000000' ? []
+    : BUILDERS[opts.pattern.kind](opts, {
+      dark: () => 'rgba(0,0,0,0)',
+      lit: (a) => rgba(opts.colour.through, clamp(a)),
+    }).cells.filter((c) => c.lit);
   const layer = (name, blend, list) => list.length
     ? `.${cls} .${name}{position:absolute;inset:-4%;mix-blend-mode:${blend}`
       + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}`
@@ -346,6 +369,13 @@ export function lightfield(given) {
       + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}}` : '',
     layer('d', 'multiply', darkCells),
     layer('l', emitted ? 'plus-lighter' : 'color-dodge', litCells),
+    // SCREEN, not plus-lighter, and the difference is the whole behaviour. plus-lighter ADDS, so it
+    // brightens the lit half of the picture by as much as the dark half and every highlight walks
+    // up: measured, it matched the reference's striping exactly and cost 3.4 points of block error
+    // doing it. Screen is x + y - xy, so it lifts black to the colour and leaves white alone, which
+    // is what light arriving on a surface that is already brighter than it actually looks like.
+    // It goes ABOVE the dodged faces, because light through the blind lands on the blind too.
+    layer('p', 'screen', throughCells),
     // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
     // them: that is 400 compositor layers, more than Chrome will keep rastered, so it cycles which ones
     // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
@@ -360,7 +390,7 @@ export function lightfield(given) {
   const box = (name, list) => (list.length ? `<div class="${name}">\n${list.map(cell).join('\n')}\n</div>` : '');
   const fill = opts.colour.shade === '#000000' ? '' : '<div class="sh"></div>';
   return `<style>\n${css}\n</style>\n<div class="${cls}"><div class="f"></div>${fill}`
-    + `${ridge ? box('r', ridge) : ''}${box('d', darkCells)}${box('l', litCells)}`
+    + `${ridge ? box('r', ridge) : ''}${box('d', darkCells)}${box('l', litCells)}${box('p', throughCells)}`
     + `${shadow ? '<div class="s"></div>' : ''}</div>`;
 }
 

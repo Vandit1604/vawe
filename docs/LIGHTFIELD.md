@@ -49,6 +49,7 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 | `deep` | the saturated body the light sits in. |
 | `ground` | what the light falls away into. Usually near black. |
 | `shade` | AMBIENT FILL: the colour a shadow goes, screened under the pattern. `#000000` is the exact no-op and emits no layer. |
+| `through` | the light that comes THROUGH the pattern rather than off it, screened on the lit faces only. It is what keeps a blind visible where the field behind it has gone black. `#000000` is the exact no-op. |
 | `spread` | 0 to 1: how far a lobe of light reaches before it dies. `0` is the tight ramp fitted to the first reference; `1` melts the lobes into one mass. |
 | `vivid` | how much the finished field is saturated. `1` leaves it alone. |
 | `originX` / `originY` | WHERE THE LIGHT IS, as a percentage across and down the frame. It moves the bloom cluster and the mid with it, rigidly, and leaves `deep` alone. Off-frame values are legal and useful. |
@@ -83,6 +84,38 @@ It is a trade and no number picks the setting: every step darker buys about 4 un
 and spends about 3.5 in the highlights. The judgement in `ref` is that they are not equally visible.
 Eight units of r-b in a near-black region is the difference between a brown black and a blue black;
 eight units on a highlight of 127 is under 6% and nothing looks different.
+
+#### `through`, and a blind that stops existing in the dark
+
+`sheen` is COLOR-DODGE. It SCALES what is behind an element, and 1.5 times black is black, so
+wherever the colour field has drained away the pattern disappears with it. Real backlit blinds do not
+do that: some light passes through them everywhere, usually a cooler light than the one making the
+bloom, so the slats stay visible against a dark wall.
+
+The reference says so plainly. In the darkest third of `refs/lightfield-ref.jpg` the striping is
+STRONGER than in the frame as a whole, and the render's is less than half its own frame average:
+
+| | frame edge | frame swing | dark third: luma | edge | swing |
+|---|---|---|---|---|---|
+| `refs/lightfield-ref.jpg` | 3.26 | 10.70 | 27.1 | **4.22** | **14.52** |
+| render, `through` off | 2.15 | 7.13 | 29.7 | **1.60** | **5.35** |
+| render, `through` `#3a3a4c` | 3.40 | 11.10 | 38.7 | 3.06 | 9.86 |
+
+**No existing dial reaches it**, which is why this is a role rather than a preset value. `shade` is
+the obvious candidate and fails by construction: it screens the faces and the gaps between them
+equally, so brightening it took the dark third's mean luma from 29.7 to 49.6 while the swing moved
+only from 5.35 to 6.67. It floods the dark long before the bars arrive.
+
+It SCREENS rather than adding. Plus-lighter matched the reference's striping exactly and cost 3.4
+points of block error doing it, because it brightens the lit half of the picture by as much as the
+dark half. Screen lifts black to the colour and leaves white alone, which is what light landing on a
+surface already brighter than itself looks like.
+
+It is not free on this reference. Every setting that improves the striping also lifts a region the
+reference keeps darker than the render already has it, so the mean block error rises: `#181820` costs
+1.4 points, `#3a3a4c` costs 4.2. The `ref` preset therefore leaves it off, and the striping gap is
+recorded rather than paid for. Looks whose elements have no face (`colonnade`, `sheen: 0`) have
+almost nothing for it to draw, and it moves their score by 0.05.
 
 #### `originX` / `originY`, and a layout that was fitted to one photograph
 

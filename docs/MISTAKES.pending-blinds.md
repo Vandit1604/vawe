@@ -66,6 +66,34 @@ darkness above and below a lit band and nothing taken off the sides, was simply 
 **Fix.** `top-and-bottom` and `left-and-right` in `DIRECTIONS`: the existing falloff profile mirrored
 about the middle of the frame. Both are opt-in, so nothing committed moves.
 
+## C2. A recorded finding said the reference's dark side has no bars. It has more than anywhere else
+
+**What.** `core/lightfield/index.js` carried this, as the argument for choosing COLOR-DODGE over
+plus-lighter: "`plus-lighter` ADDS, so it lit up the reference's black right-hand side with bars that
+should not be there. Light that is not behind the blind cannot come through it."
+
+The second half is a claim about the photograph, and it is false. Cropping the darkest third of
+`refs/lightfield-ref.jpg` and lifting it shows ranks of cool grey slats running the full height to the
+right edge. Measured: that third has edge 4.22 and swing 14.52 against the whole frame's 3.26 and
+10.70, so the striping there is STRONGER than average, not absent. The render's same third is 1.60 and
+5.35 and is featureless black beside it.
+
+**Root cause.** The blend was chosen on a real defect (plus-lighter at full sheen blew the dark side
+out) and the conclusion drawn was about the reference rather than about the strength. A wrong reading
+of the source picture then hardened into a comment that reads as evidence.
+
+**Fix.** `colour.through`, a fifth colour role: the light that comes through the pattern rather than
+off it, screened on the lit faces only. Default `#000000`, the exact no-op. The comment now says what
+dodge cannot do instead of what the photograph does not have.
+
+**Not enabled on `ref`.** Every setting that improves the striping also lifts a region the reference
+keeps darker than the render already has it, so the block error rises by 1.4 to 4.2 points. That trade
+needs a human's eye, not this pass's.
+
+**The general lesson.** A claim about what a REFERENCE contains is checkable in one command, and this
+one survived three passes in a comment because nobody cropped the region it was about. Numbers were
+taken over the whole frame the entire time, and a whole-frame number cannot see a third.
+
 ## D. `lightfield-seeds.mjs` and `lightfield-fit.mjs` have never run
 
 **What.** Both import `./lightfield-model.mjs`. That file is not in the repository and never has been:
