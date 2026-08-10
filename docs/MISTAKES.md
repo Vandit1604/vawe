@@ -6940,6 +6940,55 @@ lock on the log file, so a second run refuses to start rather than corrupting th
 
 **Which gate catches it.** None. Worth knowing because the failure looks exactly like a slow run.
 
+## #264 — a backdrop declared by `src` rendered nothing, and said nothing, the day `src` shipped
+
+**What.** `{"bg": [{"t": 0, "src": "formats/scene/_lightfall.html"}]}` painted no backdrop. The file was
+found, fetched and stored: `preloadHtml` handles the bg case explicitly and puts the text in
+`window.__html`. Then `core/bg-html.js` selected its windows with `windows.filter((w) => w.html != null)`,
+so a window carrying only `src` was dropped on the floor and nothing was ever read back out of the table.
+
+**Root cause.** The feature was built in two halves that were never joined. The loader learned about
+`src`; the renderer did not. `core/sanitize-html.js` already exports `htmlSource(o, table, where)`, whose
+own comment says it exists so "a layer and a backdrop cannot drift on which source wins" — and the
+backdrop never called it. The layer half did.
+
+**How it hid.** The scene still rendered. A film with no backdrop is a valid film, `validate` passes,
+`probe` passes, `scene-snap` passes, and the only symptom is a frame that is emptier than the author
+meant. This is the silent-substitution class again, and it is the fourth entry in this file where a
+`filter` on the OLD spelling of a field outlived the field gaining a second spelling.
+
+**Fix.** `createBgHtml` takes the table and resolves through `htmlSource`, so both halves of the feature
+use one resolver. `formats/scene/_lightfall-test.json` and `_arcfall-test.json` now declare their
+backdrops by `src`, which makes them the standing test: if this regresses, both render blank.
+
+**What it was worth beyond the bug.** Those two scenes each carried a duplicate inline copy of the
+fragment. **17,349 bytes to 398, and 14,316 to 405.** A fragment kept in one place can be previewed,
+diffed and linted; the same fragment escaped into a JSON string cannot.
+
+## #265 — the one-source rule explained a collision it was not looking at
+
+**What.** A bg window naming both `html` and `src` was refused with: "`html` paints in the DOM and
+`preset` paints on canvas; they do not layer." Neither `preset` nor canvas was involved. The rule
+correctly checks four keys and the message only ever described one pair of them.
+
+**Why it matters more than it reads.** An author who is told the wrong reason goes and looks in the
+wrong place. `html` beside `src` is the easiest of these to fix and the message pointed at a subsystem
+that had nothing to do with it. A gate that names the wrong cause costs more than a gate that says
+nothing, because it is trusted.
+
+**Fix.** The message now names the pair that actually collided: `src` IS `html` in a file, so keep one.
+Verified on both branches.
+
+## #260 update — the two hand-authored backdrops moved at frame rates against a clock in seconds
+
+Fixed in the same pass. Every `var(--t) * K` coefficient in `_lightfall.html` (86 terms) and
+`_arcfall.html` (40 terms) was authored as if `--t` counted frames; `core/bg-html.js` writes SECONDS.
+Over a 10s film the slowest term travelled 0.40 radians in one and **0.19** in the other, so both were
+stills wearing motion. Rescaled by 30, which restores the author's intended pace exactly at 30fps.
+
+Judged the way rule 2a0 demands, across four timestamps rather than on one still: both now visibly
+drift and breathe, and neither flickers.
+
 ---
 
 ## Waivers for `doc-refs`

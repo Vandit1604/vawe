@@ -315,7 +315,13 @@ export function bgErrors(cfg) {
     // preset, and naming it beside `html` is the same ambiguity one level down.
     const sources = ['html', 'src', 'preset', 'use'].filter((k) => b[k] != null);
     if (sources.length > 1)
-      out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. \`html\` paints in the DOM and \`preset\` paints on canvas; they do not layer. Split them into two windows (with \`from\`/\`to\`) if you want both in one video.`);
+      // The message names the PAIR that actually collided. It used to explain html-versus-preset
+      // whatever the conflict was, so `html` beside `src` was refused with a sentence about canvas
+      // that had nothing to do with it. A gate that names the wrong cause costs more than silence.
+      out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. `
+        + (b.html != null && b.src != null
+          ? '`src` IS `html`, in a file, so naming both says the same backdrop twice and only one can win. Keep the file and drop the inline copy, or the other way round.'
+          : '`html` and `src` paint in the DOM, `preset` and `use` paint on canvas; they do not layer. Split them into two windows (with `from`/`to`) if you want both in one video.'));
     const authored = b.html != null || b.src != null;
     if (!authored) {
       if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\` — tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);

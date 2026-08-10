@@ -160,7 +160,7 @@ boot((data, fps, theme, canvas) => {
   if (!bgWins.length || ALPHA) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
   // hand-authored backdrops: built once here, shown/hidden per frame by drawBg (null if none declared,
   // so a scene using only presets adds no DOM and renders byte-identical to before).
-  const bgHtml = ALPHA ? null : createBgHtml($('root'), bgWins);
+  const bgHtml = ALPHA ? null : createBgHtml($('root'), bgWins, window.__html);
   // ink-aware default text color: a layer with no explicit color gets dark ink over light
   // bg windows and light text over dark ones (looked up at the layer's midpoint) — otherwise
   // a light-text theme (plinth) silently renders white-on-paper.

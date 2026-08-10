@@ -20,20 +20,25 @@
 //
 // A CSS animation here would not error, it would silently render a still — so the authoring gate
 // rejects it by name and points at `--t` (timeCssUsed() in core/sanitize-html.js).
-import { sanitizeHtml } from './sanitize-html.js';
+import { sanitizeHtml, htmlSource } from './sanitize-html.js';
 
 // createBgHtml(root, windows) → a controller, or null when no window is hand-authored.
 // One element per html window, built ONCE at build time and only shown/hidden per frame: rebuilding
 // markup per frame would restart every CSS animation on it, which is the same class of bug as a
 // frame() hook that leaves state behind.
-export function createBgHtml(root, windows) {
-  const html = windows.filter((w) => w.html != null);
+export function createBgHtml(root, windows, table) {
+  // `src` counts as hand-authored just as much as `html` does. Filtering on `w.html != null` dropped
+  // every src-only window on the floor: preloadHtml fetched the file into the table and NOTHING read it,
+  // so declaring a backdrop by path rendered no backdrop and said nothing. That shipped the same day the
+  // `src` alternative did (docs/MISTAKES.md #264). htmlSource is the one resolver, so a layer and a
+  // backdrop cannot disagree about which source wins.
+  const html = windows.filter((w) => w.html != null || typeof w.src === 'string');
   if (!html.length) return null;
   const els = new Map();
   for (const w of html) {
     const el = document.createElement('div');
     el.className = 'hs-bghtml';
-    el.innerHTML = sanitizeHtml(w.html);
+    el.innerHTML = sanitizeHtml(htmlSource(w, table, 'bg window'));
     root.insertBefore(el, root.firstChild); // behind the canvas and the camera
     els.set(w, el);
   }

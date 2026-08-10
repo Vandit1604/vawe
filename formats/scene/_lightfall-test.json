@@ -1,0 +1,34 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 20,
+  "audio": {
+    "silent": true,
+    "_why": "motion test"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "tone": "dark",
+      "src": "formats/scene/_lightfall.html"
+    }
+  ],
+  "layers": [
+    {
+      "id": "probe",
+      "type": "text",
+      "text": "lightfall",
+      "x": 120,
+      "y": 120,
+      "w": 900,
+      "align": "left",
+      "size": 64,
+      "weight": 600,
+      "color": "#ffffff",
+      "start": 0,
+      "duration": 20,
+      "anim": "fade"
+    }
+  ]
+}
