@@ -133,7 +133,56 @@ const build = ({ name, preset, ref, blurb, ready }) => {
 
 // EVERY look, ready or not. The check scores this list, so holding one back keeps it measured instead
 // of making it disappear: a look nobody can see is exactly how tide and fern went unexamined (#282).
-export const ALL_GENERATORS = LOOKS.map(build);
+// `blinds` is a SHADER, not markup: our own branch in core/shaders-ambient.js. It reaches the playground
+// as scene LAYERS rather than HTML, which is the path the page already has for a scene fragment, so the
+// preview boots the real engine on it and there is no second renderer to keep in step.
+//
+// Its schema is declared here rather than beside the shader because the shader's parameter vector is
+// four anonymous floats by design: `u_p` means whatever the branch reading it says, so the NAMES live
+// with the generator that knows them.
+const BLINDS_SCHEMA = {
+  count:     { kind: 'int', min: 2, max: 80, def: 14, primary: true },
+  angle:     { kind: 'num', min: -0.25, max: 0.25, def: 0 },
+  glow:      { kind: 'unit', def: 0.62, primary: true },
+  softness:  { kind: 'num', min: 0.3, max: 4, def: 1.6 },
+  intensity: { kind: 'unit', def: 1 },
+  seed:      { kind: 'int', min: 0, max: 4294967295, def: 7, primary: true },
+  colour: {
+    kind: 'group',
+    fields: {
+      edge:  { kind: 'hex', def: '#3a1f00', primary: true },
+      warm:  { kind: 'hex', def: '#ffb300', primary: true },
+      core:  { kind: 'hex', def: '#ffe6a8', primary: true },
+      deep:  { kind: 'hex', def: '#05060a', primary: true },
+    },
+  },
+};
+
+const BLINDS = {
+  name: 'blinds',
+  group: 'shader',
+  blurb: 'Light behind a slatted screen. A repeating ramp over a gradient, drawn by the engine\'s own shader.',
+  docs: 'docs/LIGHTFIELD.md',
+  reference: null,
+  schema: BLINDS_SCHEMA,
+  presets: { blinds: {} },
+  produces: 'layers',
+  ready: true,
+  render: (o) => [{
+    type: 'shader', shader: 'blinds',
+    intensity: o.intensity ?? 1,
+    seed: o.seed ?? 7,
+    params: [o.count ?? 14, o.angle ?? 0, o.glow ?? 0.62, o.softness ?? 1.6],
+    // Falls back to the declared defaults, because `render` is also called with a partial patch (the
+    // card previews from a preset that sets nothing). An empty `colors` silently gives the shader's own
+    // palette, which is a different picture from the one the panel is showing.
+    colors: [o.colour?.edge ?? '#3a1f00', o.colour?.warm ?? '#ffb300',
+             o.colour?.core ?? '#ffe6a8', o.colour?.deep ?? '#05060a'],
+    x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6,
+  }],
+};
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BLINDS];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

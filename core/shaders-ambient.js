@@ -18,13 +18,20 @@
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
 //   Projector:   gateWeave (film dust, hairs, and the frame drifting in the gate)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave'];
+export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave', 'blinds'];
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
 const FRAG = `precision highp float;
 uniform vec2 u_res; uniform float u_time; uniform float u_seed; uniform int u_fx;
 uniform vec3 u_pal[4]; uniform int u_palN; uniform float u_intensity;
+// Per-effect parameters. The shared set had none, so an effect wanting more than one knob had to
+// encode it into u_seed, which makes the seed mean two things. Four floats meaning whatever the branch
+// that reads them says, and ignored by the seventeen branches written before it.
+uniform vec4 u_p;
+// A second parameter vector, for effects that outgrew the first. Same contract, same indifference
+// from every branch that does not read it.
+uniform vec4 u_p2;
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 // hash12 (Hoskins): decorrelated at LARGE integer coords where the p.x*p.y hash above bands into
@@ -177,7 +184,7 @@ void main(){
     float edge = smoothstep(0.35, 0.95, noise(p*7.0 + t*0.05));     // crawl concentrates on detail
     col = 0.5 + 0.5*chroma;
     alpha = edge * (0.10 + 0.10*abs(lat));
-  } else {                                                // gateWeave — film dust + gate weave (index 16, trailing else)
+  } else if(u_fx==16){                                    // gateWeave — film dust + gate weave
     // A frame never sits still in a projector gate: the sprockets let it drift a pixel or two, and it
     // is the GATE EDGE moving that the eye reads as weave. This layer cannot move the content beneath
     // it, so the weave is carried by everything it CAN draw — the soft dark frame border, the dust and
@@ -199,6 +206,70 @@ void main(){
     float hair = hon * smoothstep(0.0026, 0.0, abs(q.x - (hx + sway))) * step(1.0 - hlen, q.y);
     col = mix(vec3(1.0), vec3(0.02), max(dust*dirt, max(gate, hair)));
     alpha = gate*0.6 + dust*0.85 + hair*0.75;
+  } else {                                                // blinds — light through a slatted screen
+    float bt = t * 0.06;                                  // the clock, first line, see note below
+    vec2  drift = vec2(0.05*sin(t*0.07), 0.03*cos(t*0.05));
+    // Index 17, the trailing else. The clock is on the FIRST line because lib-test reads the opening
+    // 600 characters of a branch looking for a use of t, and a long comment can push the only one out
+    // of the window. That is the test being positional rather than this code being odd, and putting
+    // the drift up top is better code anyway: it is the one thing every term below reads.
+    //
+    // OUR implementation of a common idiom, written from the maths rather than ported. A repeating
+    // ramp over a scalar field, tinted by a gradient, with a light term added: that is how a venetian
+    // blind has always been drawn, and jackyzha0/sunlit does the same three ideas in pure CSS.
+    float count = u_p.x > 0.0 ? u_p.x : 14.0;
+    float ang   = u_p.y * 6.2831853;
+    float cs = cos(ang), sn = sin(ang);
+    vec2  q  = vec2(p.x - 0.5*ar, uv.y - 0.5);
+    // THE FIELD THE BANDS RUN OVER. Everything else about this effect is the same whichever one is
+    // chosen, which is the whole reason it is one uniform and not three effects: repeat a ramp over a
+    // scalar field, tint it with a gradient, add a light. Swapping the field turns vertical panels into
+    // concentric arcs into nested rounded rectangles, and those are three different reference images
+    // that a single branch now covers.
+    //
+    //   0  linear   a rotated axis         panels, slats, blinds
+    //   1  radial   distance from a point  concentric arcs
+    //   2  box      chamfered distance     nested rounded rectangles
+    float ax;
+    if (u_p2.x < 0.5) {
+      ax = (q.x*cs - q.y*sn) + 0.5;
+    } else if (u_p2.x < 1.5) {
+      ax = length(q - vec2(u_p2.y, u_p2.z));
+    } else if (u_p2.x >= 1.5) {
+      // Explicit rather than a bare trailing else: lib-test finds this branch by the LAST trailing else
+      // in the shader, so an unlabelled else nested inside it steals the anchor and the test starts
+      // reading the wrong 600 characters. Its own comment warns about exactly this class.
+      vec2 b = abs(q - vec2(u_p2.y, u_p2.z));
+      // A chamfered box distance: max() alone gives a hard square, and mixing in the sum rounds the
+      // corner without the cost of a real squircle.
+      ax = mix(max(b.x, b.y), (b.x + b.y)*0.75, 0.45);
+    }
+    // The light is BEHIND the screen, so the field falls off at both edges. A ramp that runs dark to
+    // light leaves one side blown out and the picture reads as a wall, not a window: the first version
+    // did exactly that.
+    float across = 1.0 - abs(ax - 0.5)*2.0;
+    vec3  base = mix(c0, mix(c1, c2, smoothstep(0.45, 1.0, across)), smoothstep(0.0, 0.7, across));
+    // SMOOTH falloff. 1 - 2*pow(d/r, k) crosses zero and has to be clamped, and the clamp is a hard
+    // ellipse edge the eye finds immediately.
+    // The light behind the screen drifts, and the screen breathes against it. Slow on purpose: this is
+    // a backdrop, and lib-test refuses a frozen one (a still ambient field is a decision, not a default).
+    vec2  lc   = vec2(0.5, 0.55) + drift;
+    float d    = length(vec2((uv.x - lc.x)*ar, uv.y - lc.y));
+    float rad  = (u_p.z > 0.0 ? u_p.z : 0.62) * (1.0 + 0.06*sin(t*0.09));
+    float glow = pow(1.0 - smoothstep(0.0, rad, d), u_p.w > 0.0 ? u_p.w : 1.6);
+    float f    = fract(ax * count + 0.02*sin(bt));
+    // Softened by a fraction of one slat so a high count does not alias into moire when the canvas is
+    // scaled. A hard fract() is right in maths and crawls on screen.
+    float soft = smoothstep(0.0, 0.35, min(f, 1.0 - f) * 2.0);
+    float slat = f * mix(0.55, 1.0, soft);
+    // u_p2.w is the light's SIGN and strength. Negative darkens, which is one of the references: a
+    // dark radial mass sitting BEHIND the panels rather than a glow in front of them.
+    float lw = u_p2.w == 0.0 ? 1.0 : u_p2.w;
+    float lit = glow * lw;
+    col = clamp(base*(0.25 + 0.75*max(lit, 0.0)) + c2*max(lit, 0.0)*0.45
+              + c3*max(-lit, 0.0)*0.85 - slat*0.30, 0.0, 1.0);
+    col = mix(col, c3, 0.5*smoothstep(0.35, 1.0, 1.0 - across));   // the deep role owns the far edges
+    alpha = 1.0;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
   alpha *= clamp(u_intensity, 0.0, 1.0);
@@ -224,17 +295,25 @@ export function createAmbientLayer(w = 1920, h = 1080) {
   const U = { res: gl.getUniformLocation(prog, 'u_res'), time: gl.getUniformLocation(prog, 'u_time'),
     seed: gl.getUniformLocation(prog, 'u_seed'), fx: gl.getUniformLocation(prog, 'u_fx'),
     pal: gl.getUniformLocation(prog, 'u_pal'), palN: gl.getUniformLocation(prog, 'u_palN'),
-    intensity: gl.getUniformLocation(prog, 'u_intensity') };
+    intensity: gl.getUniformLocation(prog, 'u_intensity'),
+    p: gl.getUniformLocation(prog, 'u_p'),
+    p2: gl.getUniformLocation(prog, 'u_p2') };
   gl.viewport(0, 0, w, h); gl.uniform2f(U.res, w, h);
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   return {
     canvas,
-    draw(fx, time, seed = 0, palette = null, intensity = 0.35) {
+    // `params` is the per-effect vector. Absent means four zeros, which every branch written before it
+    // ignores, so adding it changed no pixel of the seventeen that came first.
+    draw(fx, time, seed = 0, palette = null, intensity = 0.35, params = null, params2 = null) {
       const idx = AMBIENT_FX.indexOf(fx); if (idx < 0) return;
       gl.useProgram(prog);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform1f(U.time, time); gl.uniform1f(U.seed, seed); gl.uniform1i(U.fx, idx);
       gl.uniform1f(U.intensity, intensity);
+      const P4 = params || [0, 0, 0, 0];
+      gl.uniform4f(U.p, P4[0] || 0, P4[1] || 0, P4[2] || 0, P4[3] || 0);
+      const Q4 = params2 || [0, 0, 0, 0];
+      gl.uniform4f(U.p2, Q4[0] || 0, Q4[1] || 0, Q4[2] || 0, Q4[3] || 0);
       const flat = new Float32Array(12); const n = palette ? Math.min(4, palette.length) : 0;
       for (let i = 0; i < n; i++) { flat[i * 3] = palette[i][0]; flat[i * 3 + 1] = palette[i][1]; flat[i * 3 + 2] = palette[i][2]; }
       gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n);
