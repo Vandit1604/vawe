@@ -7231,6 +7231,40 @@ is gone, and it is left recorded rather than closed. What is settled is the defe
 which is real, which was losing whole product screenshots, and which is fixed.
 
 
+## #270 — two passes tuned the wrong half, because each inherited the last one's ceiling
+
+**What.** The lightfield reference reproduction was washed out. Pass one concluded "the ceiling is the
+blend mode". Pass two inherited that, split the composite into seam and sheen, improved the aggregate,
+and left the colour untouched: mean green stayed +7.8 and the magenta sample got WORSE, from dE 36.7 to
+59.1, while the block error improved.
+
+**Root cause of the miss, which is a method and not a bug.** Nobody measured the halves separately. One
+command settles it: render the colour field with `shadow.seam 0 --shadow.sheen 0`, so nothing composites
+over the ramp, and it is ALREADY brown at g +6.6, b -8.3, chroma 0.91x, within noise of the finished
+field. The composite was never losing the saturation. Two passes of work went into the half that was
+innocent, on the strength of a sentence written by the first pass and quoted by the second.
+
+**The fix, once the right half was named.** Green high with blue low is a HUE error, and `saturate()`
+cannot add blue: sweeping `vivid` to 1.75 drove chroma to 1.32x and every sample dE through the roof,
+which is what rules a knob out rather than an opinion about it. Three stops moved.
+
+| | before | after |
+|---|---|---|
+| sample mean dE | 27.5 | **12.7** |
+| deep red | 22.9 | **5.7** |
+| magenta | 59.1 | **26.3** |
+| bloom | 20.1 | **11.0** |
+| block error | 17.71 | **16.58** |
+
+**The ceiling that IS real, stated rather than hidden.** Chroma stays at 0.90x. The shortfall is not
+uniform across the field, so the one global control cannot close it without breaking every hue that is
+now right. That is a different claim from "the blend mode is the ceiling", and it is one a measurement
+supports.
+
+**The transferable rule.** A ceiling reported by a previous pass is a hypothesis, not a finding. Before
+inheriting one, run the cheapest experiment that could refute it. Here that experiment was two flags and
+four seconds, and it moved every number on the board.
+
 ---
 
 ## Waivers for `doc-refs`
