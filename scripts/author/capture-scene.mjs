@@ -14,6 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
+import { localizeCapture, mediaTargetFor } from '../brand/localize-assets.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const argv = process.argv.slice(2);
@@ -112,7 +113,22 @@ if (!result.parts.length) { console.error('✗ no parts captured'); process.exit
 const dir = path.join(ROOT, 'assets/brands', brand, 'scenes');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
-fs.writeFileSync(out, JSON.stringify({ url, sectionSel, w: result.w, h: result.h, parts: result.parts }, null, 0) + '\n');
+
+// LOCALIZE every remote asset, exactly as capture-component.mjs does. A part's html is absolutized
+// against the live site too, so without this a captured scene depends on someone else's CDN at render
+// time. This call site was the identical bug next door: the component capture localized and the scene
+// capture never did, and nothing said so.
+const capture = { url, sectionSel, w: result.w, h: result.h, parts: result.parts };
+const { localized, failures } = await localizeCapture(capture, { ...mediaTargetFor(out, ROOT), referer: url });
+if (failures.length && !argv.includes('--allow-remote')) {
+  console.error(`✗ ${failures.length} asset(s) could not be localized — the capture was NOT written.`);
+  for (const f of failures) console.error(`    ${f.reason}: ${f.url}`);
+  console.error('  Fix the source, or pass --allow-remote to write it anyway (the render will then depend on the network).');
+  process.exit(1);
+}
+fs.writeFileSync(out, JSON.stringify(capture, null, 0) + '\n');
+if (localized) console.log(`  ✓ localized ${localized} asset(s) → media/ (render stays offline + deterministic)`);
+for (const f of failures) console.warn(`  ⚠ still remote (${f.reason}): ${f.url}`);
 console.log(`✓ scene "${label}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${result.parts.length} part(s), ${(fs.statSync(out).size / 1024).toFixed(0)}kb)`);
 
 // ready-to-paste scene stubs, scaled into 1920-wide frame space (author adds windows/cuts)
