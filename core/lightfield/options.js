@@ -10,7 +10,11 @@ import { isHex } from './colour.js';
 export const PATTERNS = ['slats', 'rings', 'shards'];
 // How an element's extent varies with where it sits. `full` is the no-op: every element runs the
 // whole frame, which is what a blind does.
-export const SHAPES = ['full', 'ramp', 'arch', 'valley', 'wave'];
+// The last four are built from circular arcs and gaussians rather than from sines, and they are here
+// because `arch` is the only round thing the table had and a sine hump is not a dome: it leaves the
+// baseline at a finite slope and its shoulders sag. `circle` leaves it vertically.
+export const SHAPES = ['full', 'ramp', 'arch', 'valley', 'wave',
+  'circle', 'crescent', 'scallops', 'hills'];
 // Which edge an element grows from. An envelope is a horizon, and a horizon has a side.
 export const ANCHORS = ['bottom', 'top'];
 // Light rarely leaves along an axis. The corners are here because a frame that darkens down AND
@@ -180,6 +184,25 @@ export const SCHEMA = {
       softness: { kind: 'unit', def: 0.3 },
       // Which way the light falls off.
       direction: { kind: 'enum', of: DIRECTIONS, def: 'bottom' },
+      // WHERE THE SHADOW IS, as a percentage across and down the frame.
+      //
+      // `direction` is eleven keywords and a keyword is a BEARING, not a place: it says which way the
+      // dark lies and never how far off centre it sits. So the light could be moved anywhere in the
+      // frame with `colour.originX/originY` and the shadow it casts stayed pinned to the middle, and
+      // the two halves of one picture were asked for in two different languages.
+      //
+      // Same name, same units, same meaning: percent of the frame, 50/50 unmoved, off-frame legal.
+      // What it reaches depends on the shape `direction` names, and that is a property of the shapes
+      // rather than of this dial:
+      //   `center`           the radial's centre. The whole vector lands.
+      //   the paired names   the middle of the lit band moves along the axis the fall runs on.
+      //   the eight bearings the fall BEGINS earlier or later along its own axis, and the vignette
+      //                      under it takes the whole vector. A one-way linear fall has no across,
+      //                      so the component at right angles to it can only move the vignette.
+      //
+      // Defaults are the unmoved position, so no committed field moves.
+      originX: { kind: 'num', min: -50, max: 150, def: 50 },
+      originY: { kind: 'num', min: -50, max: 150, def: 50 },
       // WHAT THE LIT HALF OF THE PATTERN IS: a surface catching light, or a source making it.
       //
       // `reflected` is COLOR-DODGE. It scales the field under an element up by one factor per pixel,
@@ -252,6 +275,12 @@ export const SCHEMA = {
     kind: 'group',
     fields: {
       // The function. `full` is 1 everywhere, so the default envelope is no envelope.
+      //
+      // `circle` is an exact semicircular arc, symmetric about the middle. The four round kinds are
+      // not reachable by turning the five that came before them: `from` above `to` already gives the
+      // upside-down version of any curve, so a round valley is `circle` run backwards and is not a
+      // separate kind, while a crescent, a row of arcs and a range of hills are shapes no pair of
+      // endpoints can produce.
       kind: { kind: 'enum', of: SHAPES, def: 'full' },
       // The extent at the function's floor and at its ceiling. `from` above `to` runs the shape
       // backwards, which is why there is no separate direction dial.
@@ -280,6 +309,24 @@ export const SCHEMA = {
       // the edges of boxes. The number is the mass's opacity: a ridge can be a black cut-out or a
       // haze on the horizon.
       mass: { kind: 'unit', def: 0 },
+      // WHERE THE DARK IS, as a percentage across and down the frame.
+      //
+      // The silhouette had no position at all. `from` and `to` say how TALL it is and `kind` says
+      // what SHAPE it is, and between them there was no way to say that the dome sits three quarters
+      // of the way across, or that the ridge sits low. An author could only reach for `kind`, and a
+      // shape chosen because it happens to peak in the right place is a shape chosen for the wrong
+      // reason.
+      //
+      // Same name, same units and same meaning as `colour.originX/originY`, because they answer the
+      // same question about the other half of the picture: `colour` places the LIGHT and this places
+      // the MASS. Percent of the frame, 50/50 unmoved, off-frame values legal because half a dome is
+      // an ordinary horizon. Raising `originY` always moves the silhouette's free edge DOWN the
+      // frame, whichever edge `anchor` holds.
+      //
+      // The defaults are exactly the unmoved position, so every field written before these existed
+      // draws the same picture.
+      originX: { kind: 'num', min: -50, max: 150, def: 50 },
+      originY: { kind: 'num', min: -50, max: 150, def: 50 },
       // How sharply the extent ENDS. 0 stops dead, 1 fades over the element's whole length.
       //
       // An extent with a hard end is a bar chart. Both references that needed an envelope end soft:

@@ -197,26 +197,40 @@ const ANGLE = { top: 0, 'top-right': 45, right: 90, 'bottom-right': 135, bottom:
 // `direction` is which way it is. This is the mood control: the same palette and pattern read as
 // dawn or as a cellar depending on it.
 function paintShadow(opts) {
-  const { depth, softness, direction } = opts.shadow;
+  const { depth, softness, direction, originX, originY } = opts.shadow;
   const g = opts.colour.ground;
   if (depth === 0) return null;
   const start = (1 - softness) * 68;
   const mid = start + (100 - start) * 0.5;
+  // WHERE THE DARK IS, as an offset from the unmoved position. 50/50 gives exactly 0 and 0, so every
+  // string below is character for character what it was before this dial existed.
+  const dx = originX - 50, dy = originY - 50;
+  const pct = (v) => n(v < 0 ? 0 : v > 100 ? 100 : v);
   const stops = `${fade(g)} ${n(start)}%, ${rgba(g, depth * 0.42)} ${n(mid)}%, ${rgba(g, depth)} 100%`;
-  if (direction === 'center') return `radial-gradient(72% 82% at 50% 50%, ${stops})`;
-  // Away along ONE axis. The same profile, mirrored about the middle of the frame: `start` and `mid`
-  // are distances from the light, so a point at distance u sits at 50 - u/2 on the near side and at
-  // 50 + u/2 on the far one. The middle of the frame is the lit band and takes nothing at all.
+  if (direction === 'center') return `radial-gradient(72% 82% at ${n(50 + dx)}% ${n(50 + dy)}%, ${stops})`;
+  // Away along ONE axis. The same profile, mirrored about the CENTRE OF THE LIT BAND: `start` and
+  // `mid` are distances from the light, so a point at distance u sits at c - u/2 on the near side and
+  // at c + u/2 on the far one. The band itself takes nothing at all. `c` is the middle of the frame
+  // until the origin moves it, which is the whole of what a position means for this shape: the dark
+  // is the two ends, so placing it is placing the light band between them.
   if (direction === 'top-and-bottom' || direction === 'left-and-right') {
-    const near = (u) => n(50 - u / 2), far = (u) => n(50 + u / 2);
+    const c = 50 + (direction === 'top-and-bottom' ? dy : dx);
+    const near = (u) => pct(c - u / 2), far = (u) => pct(c + u / 2);
     return `linear-gradient(${direction === 'top-and-bottom' ? 180 : 90}deg, ${rgba(g, depth)} 0%, `
       + `${rgba(g, depth * 0.42)} ${near(mid)}%, ${fade(g)} ${near(start)}%, ${fade(g)} ${far(start)}%, `
       + `${rgba(g, depth * 0.42)} ${far(mid)}%, ${rgba(g, depth)} 100%)`;
   }
+  // A linear gradient has a direction and no centre, so only the component of the move ALONG the fall
+  // can reach it: it makes the darkness begin earlier or later. The direction vector for a CSS angle
+  // A is (sin A, -cos A) in screen coordinates, y down, so that component is dx*sin - dy*cos.
+  const rad = (ANGLE[direction] * Math.PI) / 180;
+  const shift = dx * Math.sin(rad) - dy * Math.cos(rad);
+  const moved = `${fade(g)} ${pct(start + shift)}%, ${rgba(g, depth * 0.42)} ${pct(mid + shift)}%, ${rgba(g, depth)} 100%`;
   // A directional fall gets a frame vignette under it. Light that leaves one way still leaves at
   // every edge, and without this the far corners stay lit and the field reads as a printed gradient.
-  const vignette = `radial-gradient(76% 88% at 50% 46%, ${fade(g)} 40%, ${rgba(g, depth * 0.5)} 100%)`;
-  return `${vignette},${`linear-gradient(${ANGLE[direction]}deg, ${stops})`}`;
+  // The vignette is radial, so it is the half of this shape that CAN take the whole vector.
+  const vignette = `radial-gradient(76% 88% at ${n(50 + dx)}% ${n(46 + dy)}%, ${fade(g)} 40%, ${rgba(g, depth * 0.5)} 100%)`;
+  return `${vignette},${`linear-gradient(${ANGLE[direction]}deg, ${moved})`}`;
 }
 
 // Motion, as CSS that reads `var(--t)` (seconds into the video, never frames).
