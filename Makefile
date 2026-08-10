@@ -791,6 +791,6 @@ else ifdef ARGS
 	node scripts/author/lightfield.mjs $(ARGS)
 else
 	@node scripts/author/lightfield-test.mjs
-	@for p in ref tide fern; do node scripts/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
+	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node scripts/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
 	@node scripts/author/lightfield-compare.mjs refs/lightfield-ref.jpg out/_lightfield-ref.png
 endif
