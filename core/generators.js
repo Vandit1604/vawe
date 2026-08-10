@@ -41,25 +41,69 @@
 // generator has no schema it does not belong in the playground yet: without one there is nothing to
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
-import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise } from './lightfield/options.js';
+import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
 // their gate (blocks/schema.mjs, scripts/gates/block-schema.mjs), because a contract is worth having
 // whether or not a page renders it. They are not here because a block is a scene FRAGMENT rather than a
-// picture: previewing one means booting a whole scene around it, and a picker of 71 entries buries the
-// thing people come to play with.
-export const GENERATORS = [
-  {
-    name: 'lightfield',
-    blurb: 'Light-field backdrops. Four colour roles, a pattern, a fall of shadow, one seed.',
+// picture: previewing one means booting a whole scene around it, and a picker of 71 entries buried the
+// thing people came to turn.
+//
+// ONE ENTRY PER LOOK, not one entry with five presets. `slats`, `rings` and `shards` are different
+// pictures with different dials and different references, and folding them together meant one averaged
+// fidelity score that could not say which look regressed. Each look now carries its own reference and
+// is measured on its own (scripts/author/lightfield-check.mjs).
+//
+// One implementation underneath. A look is a name, a preset, a reference, and a NARROWED VIEW of the
+// same schema.
+
+// Which dials a look does not honour, taken from the generator's own HONOURS table rather than listed
+// again here. Narrowing is why a `rings` look cannot show `shadow.seamWidth` and therefore cannot build
+// the illegal pair that used to throw in someone's face (docs/MISTAKES.md #277).
+function narrow(schema, kind) {
+  const drop = HONOURS.filter((r) => !r.by.includes(kind)).map((r) => r.at);
+  const out = {};
+  for (const [key, spec] of Object.entries(schema)) {
+    if (drop.includes(key)) continue;                       // a whole group
+    if (spec.kind !== 'group') { out[key] = spec; continue; }
+    const fields = Object.fromEntries(
+      Object.entries(spec.fields).filter(([k]) => !drop.includes(`${key}.${k}`)));
+    out[key] = { ...spec, fields };
+  }
+  return out;
+}
+
+// A look's reference, where one exists. `tide` and `fern` have none, and that is stated rather than
+// scored against nothing.
+const LOOKS = [
+  { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg',
+    blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
+  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg',
+    blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
+  { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png',
+    blurb: 'Wide panels split by bright hairlines, soft masses under a glow.' },
+  { name: 'tide', preset: 'tide', ref: null,
+    blurb: 'Concentric bands round a point, like light on water.' },
+  { name: 'fern', preset: 'fern', ref: null,
+    blurb: 'A fan of rays from a pivot below the frame.' },
+];
+
+export const GENERATORS = LOOKS.map(({ name, preset, ref, blurb }) => {
+  const opts = LIGHTFIELD_PRESETS[preset];
+  const kind = opts.pattern?.kind ?? LIGHTFIELD_SCHEMA.pattern.fields.kind.def;
+  return {
+    name,
+    group: 'lightfield',
+    blurb,
     docs: 'docs/LIGHTFIELD.md',
-    schema: LIGHTFIELD_SCHEMA,
-    presets: LIGHTFIELD_PRESETS,
+    reference: ref,
+    schema: narrow(LIGHTFIELD_SCHEMA, kind),
+    presets: { [preset]: opts },
     produces: 'html',
     normalise: lightfieldNormalise,
     render: lightfield,
-  },
-];
+  };
+});
 
 export const byName = (name) => GENERATORS.find((g) => g.name === name) || null;
 

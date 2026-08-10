@@ -7660,6 +7660,44 @@ a block is a scene fragment rather than a picture, so previewing one boots a who
 buried the one thing people came to turn. The schemas and their gate stay; `blocks/` came back out of
 the image and the Dockerfile, which is 260K and one COPY line fewer.
 
+## #279 — one score for five looks could not say which one was wrong
+
+`lightfield` was one generator with five presets and ONE fidelity number, taken against one photograph.
+That number read 12.7 while a human said "that is not it", and even if it had been right it could not
+have named the look that regressed, because four of the five were never measured at all.
+
+**Each look is its own registry entry now**, with its own reference. One implementation underneath: a
+look is a name, a preset, a reference, and a NARROWED VIEW of the same schema, and the narrowing comes
+from the generator's own `HONOURS` table rather than a second list.
+
+The first run says what five presets behind one average never could:
+
+| look | block error | shadow warmth vs reference |
+|---|---|---|
+| blinds | 20.0 | +11.3 |
+| **ember** | **64.2** | +4.4 |
+| colonnade | 27.3 | +9.7 |
+| tide | no reference | |
+| fern | no reference | |
+
+`ember` is three times the error of `blinds` and was invisible inside a single mean. A look with no
+reference is REPORTED as such and not scored, because scoring against nothing is how a green tick gets
+attached to a picture nobody has compared.
+
+**Narrowing also removes the bug class rather than catching it.** A `rings` look does not show
+`shadow.seamWidth`, so the illegal pair that used to throw in someone's face (#277) cannot be built.
+`normalise` stays as the backstop for the paths that still can.
+
+## #280 — a preview that animates cannot be judged
+
+The playground drove `--t` from a rAF loop, so the field was always moving. A moving picture is the one
+thing you cannot compare to a still reference, and the page exists to be looked at closely.
+
+It writes `--t` ONCE now, and the clock is a slider parked at zero. Nothing moves until it is dragged.
+That keeps `motion.kind` honest: freezing alone would have left it a dial with no visible effect, which
+is the silent-substitution shape this repo logs more than any other. Verified rather than assumed: the
+markup is byte-identical 700ms apart and `--t` reads 0.000.
+
 ---
 
 ## Waivers for `doc-refs`

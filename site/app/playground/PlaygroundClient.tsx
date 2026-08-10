@@ -74,6 +74,7 @@ export function PlaygroundClient() {
   const [preset, setPreset] = useState<string | null>(null);
   const [noDial, setNoDial] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [t, setT] = useState(0);
   const stage = useRef<HTMLDivElement>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
@@ -153,31 +154,17 @@ export function PlaygroundClient() {
     return () => { if (prev && prev !== sceneUrl) URL.revokeObjectURL(prev); };
   }, [sceneUrl]);
 
-  // Paint it, and drive `--t` the way core/bg-html.js does: SECONDS, every frame. Without it every
-  // calc() that reads the clock is invalid and the browser drops the declaration, so the field
-  // previews as a different picture and nothing says so (docs/MISTAKES.md #261).
+  // Paint it and write `--t` ONCE. The preview does not animate: a moving field cannot be judged, and a
+  // rAF loop on a page whose whole purpose is looking closely is a cost with no benefit. `--t` is still
+  // the engine's own clock in SECONDS, so what you see at t is exactly the frame the renderer would
+  // produce there, and the slider is how you inspect motion instead of being subjected to it.
   useEffect(() => {
     const el = stage.current;
     if (!el || html == null) return;
     el.innerHTML = html;
-    // t0 comes from the FIRST rAF timestamp, not from performance.now(). The two share an origin but
-    // not a reading, so seeding from now() made the first frame land a fraction BEFORE zero and the
-    // clock start negative. A generator is free to do something odd at t < 0 and would be right to.
-    let t0 = 0;
-    let raf = 0;
-    const tick = (now: number) => {
-      if (!t0) t0 = now;
-      el.style.setProperty("--t", ((now - t0) / 1000).toFixed(4));
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [html]);
+    el.style.setProperty("--t", t.toFixed(3));
+  }, [html, t]);
 
-  // ONE way in. A dial, a preset, a roll and a section roll all land here, so the generator's repair
-  // runs on every one of them: a structure that cannot honour a dial resets that dial rather than
-  // handing the person an error they did not cause. If the repair itself refuses, that message is real
-  // and it is shown.
   const apply = useCallback((next: Record<string, unknown>, named: string | null = null) => {
     setPreset(named);
     try { setOpts(gen?.normalise ? gen.normalise(next) : next); setErr(null); }
@@ -252,6 +239,14 @@ export function PlaygroundClient() {
             ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
             : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
           {err && <p className="pgerr">{err}</p>}
+          {/* Parked at 0, so nothing moves until you ask. A generator with `motion: still` ignores it,
+              which is correct and visible rather than hidden. */}
+          <label className="pgtime">
+            <span>t</span>
+            <input type="range" min={0} max={6} step={0.05} value={t}
+              onChange={(e) => setT(Number(e.target.value))} aria-label="time, in seconds" />
+            <code>{t.toFixed(2)}s</code>
+          </label>
         </div>
 
         <div className="pgpanel">
