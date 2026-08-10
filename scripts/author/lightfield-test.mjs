@@ -163,6 +163,79 @@ ok('the light origin moves the bloom cluster and leaves deep alone', (() => {
     && Math.abs(b[1][0] - a[1][0] - 40) < 1e-6 && Math.abs(b[1][1] - a[1][1] - 47.5) < 1e-6;
 })());
 
+ok('through #000000 is the exact no-op and emits no transmitted layer at all',
+  lightfield({ colour: { through: '#000000' } }) === lightfield()
+  && !/class="p"/.test(lightfield()));
+ok('through draws the LIT faces again, as light, on a screen layer', (() => {
+  const h = lightfield({ colour: { through: '#2a2a34' } });
+  const box = (t) => (h.match(new RegExp(`<div class="${t}">([\\s\\S]*?)\\n</div>`)) || [, ''])[1];
+  const lit = box('l').split('\n').filter(Boolean).length;
+  const thru = box('p').split('\n').filter(Boolean).length;
+  // One transmitted element per lit face and not one per cell: a seam is where no light comes
+  // through, so it has to be a GAP in this layer or the light reads as a wash instead of as bars.
+  return /\.p\{[^}]*mix-blend-mode:screen/.test(h) && thru > 0 && thru === lit
+    && box('p').includes('rgba(42,42,52');
+})());
+ok('the transmitted faces sit exactly where the lit faces sit', (() => {
+  // The builder is called a second time rather than the styles being recoloured. If it ever stopped
+  // laying out the same geometry, the two layers would drift apart and nothing else would notice.
+  const h = lightfield({ colour: { through: '#2a2a34' } });
+  const box = (t) => (h.match(new RegExp(`<div class="${t}">([\\s\\S]*?)\\n</div>`)) || [, ''])[1];
+  const geom = (s) => s.split('\n').filter(Boolean).map((x) => (x.match(/left:[-0-9.]+%;top:[-0-9.]+%;width:[-0-9.]+%/) || [''])[0]);
+  const a = geom(box('l')), b = geom(box('p'));
+  return a.length > 0 && a.every((v, i) => v === b[i]);
+})());
+
+ok('a paired direction darkens BOTH ends of its axis and leaves the middle alone', (() => {
+  const s = (d) => lightfield({ shadow: { depth: 0.8, softness: 0.5, direction: d } }).match(/\.s\{[^}]*\}/)[0];
+  const v = s('top-and-bottom'), h = s('left-and-right');
+  const alpha = (css) => [...css.matchAll(/rgba\(0,2,2,([0-9.]+)\)/g)].map((m) => +m[1]);
+  const a = alpha(v);
+  return /linear-gradient\(180deg/.test(v) && /linear-gradient\(90deg/.test(h)
+    // full depth at both ends, nothing at all across the middle, and the two halves mirror.
+    && a[0] === 0.8 && a[a.length - 1] === 0.8 && a[2] === 0 && a[3] === 0
+    && a[1] === a[a.length - 2];
+})());
+ok('a paired direction takes NOTHING off the axis it is not on', (() => {
+  // The failure it exists to fix: `center` cannot darken the top without darkening the sides too.
+  const css = lightfield({ shadow: { depth: 0.9, direction: 'top-and-bottom' } }).match(/\.s\{[^}]*\}/)[0];
+  return !/radial-gradient/.test(css);
+})());
+
+ok('3 lobes and evenness 0 are the fitted cluster exactly, so no committed field moves',
+  lightfield({ colour: { lobes: 3, evenness: 0 } }) === lightfield());
+ok('the lobe count decides how many bloom stops the field carries', (() => {
+  const bloom = (h) => [...h.matchAll(/rgba\(238,124,86/g)].length;
+  // Three stops per blob (start, mid, fade) and `mid` is a different colour, so the bloom stop count
+  // is 3 per lobe and nothing else.
+  return bloom(lightfield({ colour: { lobes: 6 } })) === bloom(lightfield()) + 9;
+})());
+ok('the cluster keeps its total area as the count rises: more lobes are SMALLER lobes', (() => {
+  const area = (h) => [...h.matchAll(/radial-gradient\(([0-9.]+)% ([0-9.]+)%/g)]
+    .reduce((t, m) => t + +m[1] * +m[2], 0);
+  const a = area(lightfield()), b = area(lightfield({ colour: { lobes: 9 } }));
+  // Not equal: `mid`, `deep` and the drawn positions all move with the stream. But nine lobes must
+  // not be three times the light, which is what an unscaled count would have given.
+  return b < a * 1.35;
+})());
+ok('evenness spreads the cluster across the frame instead of clumping it', (() => {
+  // The x of every bloom lobe, which is every radial stop carrying the bloom colour.
+  const xs = (h) => [...h.matchAll(/radial-gradient\([^)]*?at ([-0-9.]+)% [-0-9.]+% in oklab, rgba\(238,124,86/g)].map((m) => +m[1]);
+  const spread = (v) => Math.max(...v) - Math.min(...v);
+  const flat = xs(lightfield({ colour: { lobes: 8, evenness: 1 } }));
+  const clumped = xs(lightfield({ colour: { lobes: 8, evenness: 0 } }));
+  // Eight even bands must cover more of the frame than eight independent draws did on this seed,
+  // and no two lobes may share a band, so the gaps are bounded by the band width.
+  return flat.length === 8 && spread(flat) > spread(clumped)
+    && flat.slice().sort((a, b) => a - b).every((v, i, s) => i === 0 || v - s[i - 1] < (92 - 8) / 8 * 2);
+})());
+ok('evenness 1 still moves with the light origin', (() => {
+  const xs = (h) => [...h.matchAll(/radial-gradient\([^)]*?at ([-0-9.]+)% [-0-9.]+% in oklab, rgba\(238,124,86/g)].map((m) => +m[1]);
+  const a = xs(lightfield({ colour: { lobes: 6, evenness: 1 } }));
+  const b = xs(lightfield({ colour: { lobes: 6, evenness: 1, originX: 70 } }));
+  return a.every((v, i) => Math.abs(b[i] - v - 20) < 1e-6);
+})());
+
 ok('peak 34 is the old fixed range exactly, so the fitted field does not move',
   lightfield({ shadow: { peak: 34 } }) === lightfield());
 ok('peak moves the mound across the face', (() => {

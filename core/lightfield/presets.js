@@ -134,7 +134,15 @@ export const PRESETS = {
     colour: { bloom: '#ffd15c', mid: '#c97a0d', deep: '#5a3a12', ground: '#0c0d10', vivid: 1.05, shade: '#020308', spread: 1, originY: 55 },
     // `sheen` is 0, and that is the point of the rewrite: the elements are no longer the dark thing.
     // The ridge is, and the panels are only the bright hairlines between them.
-    shadow: { depth: 0.85, softness: 0.5, direction: 'center', seam: -0.85, seamWidth: 0.025, sheen: 0 },
+    //
+    // `direction` WAS `center`, and a radial fall could not draw this picture. Measured against the
+    // reference at 160x104, the render was 27 units too bright at the top edge (29.9 against 56.8)
+    // and 16 too dark at the left edge (39.7 against 23.4) in the same frame, because a radial cannot
+    // darken the top without darkening the sides by more. `top-and-bottom` is the missing shape: a
+    // lit band with darkness above and below it and nothing taken off the sides. Every depth and
+    // softness pair under it beat every pair under `center`, and the best took the block error from
+    // 21.5 to 19.1.
+    shadow: { depth: 0.7, softness: 0.5, direction: 'top-and-bottom', seam: -0.85, seamWidth: 0.025, sheen: 0 },
     pattern: { kind: 'slats', count: 12, jitter: 0.02 },
     envelope: { kind: 'valley', from: 0.42, to: 0.72, jitter: 0.3, anchor: 'bottom', taper: 0, softness: 0.35, mass: 0.93 },
     motion: { kind: 'drift', speed: 0.35, amount: 0.5 },

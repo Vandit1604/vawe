@@ -42,11 +42,14 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 
 | key | what it is |
 |---|---|
-| `bloom` | the hot core. It appears as three lobes of falling size, not one blob, because one blob is a spotlight and three are light that came from somewhere. |
+| `bloom` | the hot core. It appears as a cluster of lobes of falling size, not one blob, because one blob is a spotlight and a cluster is light that came from somewhere. |
+| `lobes` | 1 to 12: how many lobes that cluster has. The cluster keeps the same total area whatever you set, so this decides how the light is DIVIDED and never how much of it there is. |
+| `evenness` | 0 to 1: how evenly those lobes are spread across the width. `0` draws each one anywhere, which clumps; `1` gives each its own band of the frame. |
 | `mid` | the second colour, set away from the bloom. This is what stops the field being one hue. |
 | `deep` | the saturated body the light sits in. |
 | `ground` | what the light falls away into. Usually near black. |
 | `shade` | AMBIENT FILL: the colour a shadow goes, screened under the pattern. `#000000` is the exact no-op and emits no layer. |
+| `through` | the light that comes THROUGH the pattern rather than off it, screened on the lit faces only. It is what keeps a blind visible where the field behind it has gone black. `#000000` is the exact no-op. |
 | `spread` | 0 to 1: how far a lobe of light reaches before it dies. `0` is the tight ramp fitted to the first reference; `1` melts the lobes into one mass. |
 | `vivid` | how much the finished field is saturated. `1` leaves it alone. |
 | `originX` / `originY` | WHERE THE LIGHT IS, as a percentage across and down the frame. It moves the bloom cluster and the mid with it, rigidly, and leaves `deep` alone. Off-frame values are legal and useful. |
@@ -82,6 +85,38 @@ and spends about 3.5 in the highlights. The judgement in `ref` is that they are 
 Eight units of r-b in a near-black region is the difference between a brown black and a blue black;
 eight units on a highlight of 127 is under 6% and nothing looks different.
 
+#### `through`, and a blind that stops existing in the dark
+
+`sheen` is COLOR-DODGE. It SCALES what is behind an element, and 1.5 times black is black, so
+wherever the colour field has drained away the pattern disappears with it. Real backlit blinds do not
+do that: some light passes through them everywhere, usually a cooler light than the one making the
+bloom, so the slats stay visible against a dark wall.
+
+The reference says so plainly. In the darkest third of `refs/lightfield-ref.jpg` the striping is
+STRONGER than in the frame as a whole, and the render's is less than half its own frame average:
+
+| | frame edge | frame swing | dark third: luma | edge | swing |
+|---|---|---|---|---|---|
+| `refs/lightfield-ref.jpg` | 3.26 | 10.70 | 27.1 | **4.22** | **14.52** |
+| render, `through` off | 2.15 | 7.13 | 29.7 | **1.60** | **5.35** |
+| render, `through` `#3a3a4c` | 3.40 | 11.10 | 38.7 | 3.06 | 9.86 |
+
+**No existing dial reaches it**, which is why this is a role rather than a preset value. `shade` is
+the obvious candidate and fails by construction: it screens the faces and the gaps between them
+equally, so brightening it took the dark third's mean luma from 29.7 to 49.6 while the swing moved
+only from 5.35 to 6.67. It floods the dark long before the bars arrive.
+
+It SCREENS rather than adding. Plus-lighter matched the reference's striping exactly and cost 3.4
+points of block error doing it, because it brightens the lit half of the picture by as much as the
+dark half. Screen lifts black to the colour and leaves white alone, which is what light landing on a
+surface already brighter than itself looks like.
+
+It is not free on this reference. Every setting that improves the striping also lifts a region the
+reference keeps darker than the render already has it, so the mean block error rises: `#181820` costs
+1.4 points, `#3a3a4c` costs 4.2. The `ref` preset therefore leaves it off, and the striping gap is
+recorded rather than paid for. Looks whose elements have no face (`colonnade`, `sheen: 0`) have
+almost nothing for it to draw, and it moves their score by 0.05.
+
 #### `originX` / `originY`, and a layout that was fitted to one photograph
 
 The blob layout under the palette was fitted to `refs/lightfield-ref.jpg` and then imposed on every
@@ -109,6 +144,29 @@ The reference needs `extra`. It carries a dark magenta lane between two orange l
 corner, and neither of those is a bloom, a mid, a deep or a ground. Naming them as roles would have
 meant inventing two roles that mean nothing on any other palette, so they go in a list.
 
+#### `lobes` and `evenness`, the same class of bug one level deeper
+
+`spread` was a constant fitted to one photograph. So was the number of lobes, and so was where they
+were allowed to sit. Both were written into an array literal: exactly three blobs, each drawn at a
+random x anywhere between 8% and 92% of the width.
+
+Three large blobs can only ever make one soft mass, and independent draws are lumpy however many of
+them there are. The two failures those two constants caused are visible in two different references:
+
+* `refs/lightfield-ref.jpg` is a flowing field with several colour regions, and the render was one
+  soft lobe that reads as a spotlight on a curtain. That is the COUNT.
+* `refs/ref-b.png` has a horizontal profile that is flat from a quarter of the way across to three
+  quarters, and the render dipped in the middle, because three independently placed lobes overlapped
+  into two humps. That is the PLACEMENT, and adding lobes at random positions only moved the dips.
+
+`lobes` is scaled so the cluster covers the same total area at any count: nine lobes are nine smaller
+lobes, never nine times the light, so the dial cannot be used to brighten a field by accident.
+`evenness` hands each lobe its own band of the width, from the middle outwards so the largest lobe
+takes the centre and the smaller ones fall away to the edges. Handing bands out left to right instead
+would ramp the lobe size across the frame and tilt every field to one side.
+
+`lobes` 3 with `evenness` 0 is the fitted cluster exactly, down to the byte.
+
 ### shadow
 
 How the light falls off. This is the mood dial: one palette and one pattern read as dawn or as a
@@ -118,7 +176,7 @@ cellar depending on it.
 |---|---|---|
 | `depth` | 0 to 1 | how dark the far side goes. `0` emits no shadow layer at all, and that is what the reference wants: its colour field already drains to the ground, and a second fall on top measured worse. |
 | `softness` | 0 to 1 | how long it takes to get there. `0` is an edge you can point at, `1` crosses the whole frame. |
-| `direction` | `left` `right` `top` `bottom` `center` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis: a frame that darkens down and right at once is ordinary, and no edge keyword can say it. |
+| `direction` | `left` `right` `top` `bottom` `center` `top-and-bottom` `left-and-right` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis. The two paired names are a lit BAND: away along one axis and not at all along the other, which `center` cannot say because a radial fall darkens every edge at once. |
 | `seam` | **-1 to 1** | the line BETWEEN elements. The SIGN is the polarity: positive multiplies (a dark seam), negative dodges (a bright one). `0` emits no seam at all. |
 | `seamWidth` | 0 to 1 | how wide that line is, as a fraction of the element it trails. `slats` only. |
 | `peak` | 0 to 100 | where the light lands across a lit face, as a percentage from its leading edge. `slats` only. |
