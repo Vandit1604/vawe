@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { GENERATORS, defaultsOf } from '../../core/generators.js';
+import { ALL_GENERATORS, defaultsOf } from '../../core/generators.js';
 import { shoot } from './lightfield-shot.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -57,7 +57,7 @@ function compare(refFile, genFile) {
 }
 
 const rows = [];
-for (const g of GENERATORS) {
+for (const g of ALL_GENERATORS) {
   if (only && g.name !== only) continue;
   const preset = Object.values(g.presets || {})[0] || {};
   const opts = merge(defaultsOf(g.schema), preset);
@@ -71,7 +71,7 @@ for (const g of GENERATORS) {
   if (!g.reference) { rows.push({ name: g.name, note: 'no reference' }); continue; }
   const ref = path.join(ROOT, g.reference);
   if (!fs.existsSync(ref)) { rows.push({ name: g.name, note: `reference missing: ${g.reference}` }); continue; }
-  rows.push({ name: g.name, ...compare(ref, out) });
+  rows.push({ name: g.name, ready: g.ready, ...compare(ref, out) });
 }
 
 console.log('look        block err   shadow warmth (r-b)      verdict');
@@ -83,7 +83,8 @@ for (const r of rows) {
   worst = Math.max(worst, r.err);
   // A shadow that is warm where the reference's is cool reads as brown-black against blue-black, and
   // it is the difference a mean error cannot see.
-  const verdict = Math.abs(d) > 12 ? 'SHADOW TEMPERATURE' : r.err > 24 ? 'structure or colour' : 'close';
+  const verdict = r.ready ? (Math.abs(d) > 12 ? 'SHADOW TEMPERATURE' : r.err > 24 ? 'structure or colour' : 'close')
+    : 'HELD BACK, not in the library';
   console.log(`${r.name.padEnd(11)} ${r.err.toFixed(1).padStart(9)}   ${r.refWarm.toFixed(1).padStart(6)} `
     + `${r.genWarm.toFixed(1).padStart(6)} ${d >= 0 ? '+' : ''}${d.toFixed(1).padStart(6)}    ${verdict}`);
 }

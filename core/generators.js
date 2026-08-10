@@ -75,13 +75,26 @@ function narrow(schema, kind) {
 
 // A look's reference, where one exists. `tide` and `fern` have none, and that is stated rather than
 // scored against nothing.
+// `ready` is the gate, and it is a HUMAN'S judgement rather than a number.
+//
+// The first version of this list gated on "has a reference", which only means a look CAN be measured.
+// ember has a reference and scores 64.2: its reference is black with white-hot flames and the render is
+// a pale field with black wedges, the tonal inverse. Measurable and wrong are not opposites, and
+// shipping the second because of the first is how a library fills up with things nobody would defend.
+//
+// A look is `ready` when somebody has put it beside its reference, looked, and would stand behind it.
+// The score is evidence for that judgement and never a substitute: `lightfield-check.mjs` prints every
+// look including the ones held back, so the gap is visible rather than hidden by omission.
 const LOOKS = [
-  { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg',
-    blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
-  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg',
-    blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
-  { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png',
+  { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png', ready: true,
     blurb: 'Wide panels split by bright hairlines, soft masses under a glow.' },
+  // HELD BACK. Same family as its reference and not the same picture: the slats are too wide, the
+  // magenta depth is missing, and the bloom reads as a spotlight rather than light through a blind.
+  { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg', ready: false,
+    blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
+  // HELD BACK. The tonal inverse of its reference, and the worst score of the three at 64.2.
+  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg', ready: false,
+    blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
 ];
 
 // `tide` and `fern` are NOT here, and the reason is worth keeping.
@@ -96,7 +109,7 @@ const LOOKS = [
 // rendered by `make lightfield`. What they do not get is a card, until each has a reference and a score.
 // Bringing one back is two lines here plus an image on disk.
 
-export const GENERATORS = LOOKS.map(({ name, preset, ref, blurb }) => {
+const build = ({ name, preset, ref, blurb, ready }) => {
   const opts = LIGHTFIELD_PRESETS[preset];
   const kind = opts.pattern?.kind ?? LIGHTFIELD_SCHEMA.pattern.fields.kind.def;
   return {
@@ -108,10 +121,23 @@ export const GENERATORS = LOOKS.map(({ name, preset, ref, blurb }) => {
     schema: narrow(LIGHTFIELD_SCHEMA, kind),
     presets: { [preset]: opts },
     produces: 'html',
+    ready: !!ready,
     normalise: lightfieldNormalise,
     render: lightfield,
   };
-});
+};
+
+// EVERY look, ready or not. The check scores this list, so holding one back keeps it measured instead
+// of making it disappear: a look nobody can see is exactly how tide and fern went unexamined (#282).
+export const ALL_GENERATORS = LOOKS.map(build);
+
+// What the library shows.
+export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
+
+// How many exist but are not shown. The page says this out loud: a one-card library with no
+// explanation reads as a broken page, and "two more are being worked on" is both true and the more
+// useful thing to know.
+export const HELD_BACK = ALL_GENERATORS.length - GENERATORS.length;
 
 export const byName = (name) => GENERATORS.find((g) => g.name === name) || null;
 

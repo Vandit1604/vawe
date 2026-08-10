@@ -36,6 +36,7 @@ type Generator = {
 };
 type Engine = {
   GENERATORS: Generator[];
+  HELD_BACK: number;
   randomOptions: (s: Record<string, Spec>, rand?: () => number, out?: Record<string, unknown>,
     skipped?: string[], base?: Record<string, unknown> | null, free?: boolean) => Record<string, unknown>;
   controlsOf: (s: Record<string, Spec>) => Control[];
@@ -214,11 +215,19 @@ export function PlaygroundClient() {
 
   if (which == null) {
     return (
-      <div className="lgrid">
-        {engine.GENERATORS.map((g, i) => (
-          <LookCard key={g.name} gen={g} engine={engine} active={false} onPick={() => setWhich(i)} />
-        ))}
-      </div>
+      <>
+        <div className="lgrid">
+          {engine.GENERATORS.map((g, i) => (
+            <LookCard key={g.name} gen={g} engine={engine} active={false} onPick={() => setWhich(i)} />
+          ))}
+        </div>
+        {engine.HELD_BACK > 0 && (
+          <p className="lheld">
+            {engine.HELD_BACK} more {engine.HELD_BACK === 1 ? "look is" : "looks are"} built and held
+            back: each one is measured against a reference on every run and is not close enough yet.
+          </p>
+        )}
+      </>
     );
   }
 

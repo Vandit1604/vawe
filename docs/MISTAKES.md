@@ -7714,6 +7714,28 @@ That keeps `motion.kind` honest: freezing alone would have left it a dial with n
 is the silent-substitution shape this repo logs more than any other. Verified rather than assumed: the
 markup is byte-identical 700ms apart and `--t` reads 0.000.
 
+## #284 — "has a reference" is not "looks good", and I shipped the difference
+
+Having pulled the two invented looks, I kept the other three because each HAD a reference. The user
+asked why, since two of them still looked bad. They were right and the gate was wrong.
+
+A reference means a look CAN be measured. It says nothing about whether it passes. `ember` has a
+reference and scores 64.2: its reference is black with white-hot flames and the render is a pale field
+with black wedges, the tonal inverse. `blinds` scores 20.0 and is the same family as its reference
+without being the same picture, with slats too wide and the magenta depth missing.
+
+**Measurable and wrong are not opposites**, and shipping the second because of the first is how a
+library fills with things nobody would defend.
+
+`ready` is the gate now, and it is a HUMAN'S judgement: a look is ready when somebody has put it beside
+its reference, looked, and would stand behind it. The score is evidence for that judgement and never a
+substitute. One look qualifies today.
+
+**Held back is not hidden.** `ALL_GENERATORS` keeps every look, `lightfield-check.mjs` scores all of
+them and prints HELD BACK beside the ones out of the library, and the page says how many exist and why.
+Removing a thing from view without leaving a number to watch is exactly how `tide` and `fern` went
+unexamined for as long as they did (#282).
+
 ## #282 — two of the five looks were invented, and it showed
 
 The user opened the library and said everything except `colonnade` looked bad. They were right, and the
