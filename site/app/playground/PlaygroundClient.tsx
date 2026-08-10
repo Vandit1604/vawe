@@ -31,12 +31,13 @@ type Generator = {
   produces?: "html" | "layers";
   schema: Record<string, Spec>;
   presets?: Record<string, Record<string, unknown>>;
+  normalise?: (o: unknown) => Record<string, unknown>;
   render: (opts: unknown) => string | Layer[];
 };
 type Engine = {
   GENERATORS: Generator[];
   randomOptions: (s: Record<string, Spec>, rand?: () => number, out?: Record<string, unknown>,
-    skipped?: string[], base?: Record<string, unknown> | null) => Record<string, unknown>;
+    skipped?: string[], base?: Record<string, unknown> | null, free?: boolean) => Record<string, unknown>;
   controlsOf: (s: Record<string, Spec>) => Control[];
   defaultsOf: (s: Record<string, Spec>) => Record<string, unknown>;
   diffFromDefaults: (o: unknown, s: Record<string, Spec>) => Record<string, unknown>;
@@ -168,10 +169,36 @@ export function PlaygroundClient() {
     return () => cancelAnimationFrame(raf);
   }, [html]);
 
+  // ONE way in. A dial, a preset, a roll and a section roll all land here, so the generator's repair
+  // runs on every one of them: a structure that cannot honour a dial resets that dial rather than
+  // handing the person an error they did not cause. If the repair itself refuses, that message is real
+  // and it is shown.
+  const apply = useCallback((next: Record<string, unknown>, named: string | null = null) => {
+    setPreset(named);
+    try { setOpts(gen?.normalise ? gen.normalise(next) : next); setErr(null); }
+    catch (e) { setErr(String((e as Error)?.message || e)); }
+  }, [gen]);
+
   const change = useCallback((path: string, v: unknown) => {
-    setPreset(null);
-    setOpts((o) => (o ? setAt(o, path, v) : o));
-  }, []);
+    setOpts((o) => {
+      if (!o) return o;
+      const next = setAt(o, path, v);
+      setPreset(null);
+      try { return gen?.normalise ? gen.normalise(next) : next; }
+      catch { return next; }        // the render below reports it; do not swallow the edit
+    });
+  }, [gen]);
+
+  // Roll one section. Asking for `colour` by name is asking for a different colour, not a slightly
+  // different one, so a section roll is FREE where the global one nudges.
+  const rollSection = useCallback((group: string) => {
+    if (!engine || !gen || !opts) return;
+    const spec = gen.schema[group];
+    if (!spec?.fields) return;
+    const sub = engine.randomOptions(spec.fields, Math.random, {}, [],
+      (opts[group] ?? null) as Record<string, unknown> | null, true);
+    apply({ ...opts, [group]: sub });
+  }, [engine, gen, opts, apply]);
 
   const copy = useCallback((label: string, text: string) => {
     navigator.clipboard?.writeText(text).then(() => {
@@ -228,16 +255,19 @@ export function PlaygroundClient() {
             <div className="pgpresets">
               {Object.keys(gen.presets).map((k) => (
                 <button key={k} className={preset === k ? "on" : undefined}
-                  onClick={() => {
-                    setPreset(k);
-                    setOpts(deepMerge(engine.defaultsOf(gen.schema), gen.presets![k]));
-                  }}>{k}</button>
+                  onClick={() => apply(deepMerge(engine.defaultsOf(gen.schema), gen.presets![k]), k)}>{k}</button>
               ))}
             </div>
           )}
           {groupControls(controls).map(([group, items]) => (
             <fieldset key={group ?? "_"} className="pggroup">
-              {group && <legend>{LABELS[group] ?? group}</legend>}
+              {group && (
+                <legend>
+                  {LABELS[group] ?? group}
+                  <button className="pgroll" title={`randomise ${group} only`}
+                    onClick={() => rollSection(group)} aria-label={`randomise ${group}`}>↻</button>
+                </legend>
+              )}
               {items.map((c) => (
                 <Row key={c.path} c={c} value={get(opts, c.path)} onChange={change} />
               ))}
@@ -247,16 +277,23 @@ export function PlaygroundClient() {
       </div>
 
       <div className="pgbar">
-        <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
-          {copied === "options" ? "copied" : "copy options"}
-        </button>
-        <button className="btn btn-ghost" disabled={!made}
-          onClick={() => made && copy("out", typeof made === "string" ? made : JSON.stringify(made, null, 2))}>
-          {copied === "out" ? "copied" : typeof made === "string" ? "copy HTML" : "copy layers"}
-        </button>
-        <button className="btn btn-ghost" onClick={() => copy("link", link)}>
-          {copied === "link" ? "copied" : "copy link"}
-        </button>
+        {/* One copy control. Three buttons of equal weight made the person choose before they knew the
+            difference; options is what almost everyone wants, and the other two are a keystroke away. */}
+        <div className="pgcopy">
+          <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
+            {copied ? "copied" : "copy options"}
+          </button>
+          <select aria-label="copy something else" value=""
+            onChange={(e) => {
+              if (e.target.value === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
+              if (e.target.value === "link") copy("link", link);
+              e.target.value = "";
+            }}>
+            <option value="" disabled>…</option>
+            <option value="html">copy HTML</option>
+            <option value="link">copy link</option>
+          </select>
+        </div>
         <button className="btn btn-ghost" onClick={() => {
           // Randomise WITHIN what each field declares, and seed it from the value on screen so a
           // colour keeps its lightness: rolling that uniformly makes a bright ground and a dark bloom,
@@ -264,16 +301,10 @@ export function PlaygroundClient() {
           // with no declared range is a gap in the schema and the person turning dials should see it.
           const skipped: string[] = [];
           setPreset(null);
-          setOpts(engine.randomOptions(gen.schema, Math.random, {}, skipped, opts));
+          apply(engine.randomOptions(gen.schema, Math.random, {}, skipped, opts));
           setNoDial(skipped);
         }}>randomise</button>
-        <button className="btn btn-ghost" onClick={() => {
-          const first = gen.presets ? Object.keys(gen.presets)[0] : null;
-          setPreset(first);
-          setOpts(first
-            ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
-            : engine.defaultsOf(gen.schema));
-        }}>reset</button>
+
         {noDial.length > 0 && (
           <span className="pgmeta pgskip" title="these fields declare no range, so randomise leaves them alone">
             left alone: {noDial.join(", ")}
@@ -286,6 +317,12 @@ export function PlaygroundClient() {
 
       <details className="pgjson">
         <summary>the options, as a scene would carry them</summary>
+        <p className="pgabout">
+          Every control here is built from the generator&apos;s own option schema, so what you can turn
+          is exactly what it accepts, and an option it does not understand says so instead of quietly
+          doing nothing. Paste these into a scene, or copy the HTML straight out. If a dial should
+          exist and does not, that is worth telling us.
+        </p>
         <pre>{patchJson === "{}" ? "// nothing changed yet" : patchJson}</pre>
       </details>
     </div>

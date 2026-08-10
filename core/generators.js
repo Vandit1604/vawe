@@ -18,15 +18,19 @@
 //           the same thing as a good-looking result: lightfield's fitted `ref` differs from its
 //           defaults on three colour stops. Landing a visitor on the raw defaults shows them the
 //           least considered version of the thing you are asking them to judge.
+//   normalise optional. Turns a PLAUSIBLE option set into a legal one, and throws if it cannot. Some
+//           dials are only meaningful for some structures, and a caller that picks a structure at
+//           random cannot be expected to know the table. Without this the randomiser makes illegal
+//           pairs and the person clicking sees an error they did not cause. It is not a silent
+//           substitution: what it resets is a value the chosen structure has no way to express.
 //   render  called with a partial options object. It MUST validate and throw on anything it does not
 //           understand, rather than substituting a default. The playground shows that message to the
 //           person turning the dial, so a thrown error is a feature here, not a failure.
-//   produces what `render` returns, and therefore how a page previews it:
-//             'html'   a markup string. Inject it and drive `--t`.
-//             'layers' an array of scene layers. A block is a scene FRAGMENT, not a picture, so it is
-//                      previewed by booting the engine on a scene built around it, which is the path
-//                      /blocks already takes. Rendering its `html` layers by hand would be a second
-//                      engine that agrees with the first until it does not.
+//   produces what `render` returns: 'html', a markup string to inject and drive with `--t`. The page
+//           also understands 'layers', an array of scene layers, which it previews by booting the
+//           engine on a scene built around them. Nothing declares that today; it is kept because it is
+//           the only correct way to show a scene fragment, and re-deriving it later would mean writing
+//           a second engine that agrees with the first until it does not.
 //
 // WHY A REGISTRY AND NOT A LIST IN THE SITE. The site is a separate app that vendors this directory
 // (scripts/site/site-engine.mjs). A hand-kept list over there is a second source of truth that goes
@@ -37,56 +41,25 @@
 // generator has no schema it does not belong in the playground yet: without one there is nothing to
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
-import { SCHEMA as LIGHTFIELD_SCHEMA } from './lightfield/options.js';
+import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
-import { SCHEMA as BLOCK_SCHEMA } from '../blocks/schema.mjs';
-import { CATALOG } from '../blocks/catalog.mjs';
-import * as BLOCKS from '../blocks/index.mjs';
-
-const FIELDS = [
+// The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
+// their gate (blocks/schema.mjs, scripts/gates/block-schema.mjs), because a contract is worth having
+// whether or not a page renders it. They are not here because a block is a scene FRAGMENT rather than a
+// picture: previewing one means booting a whole scene around it, and a picker of 71 entries buries the
+// thing people come to play with.
+export const GENERATORS = [
   {
     name: 'lightfield',
-    group: 'fields',
     blurb: 'Light-field backdrops. Four colour roles, a pattern, a fall of shadow, one seed.',
     docs: 'docs/LIGHTFIELD.md',
     schema: LIGHTFIELD_SCHEMA,
     presets: LIGHTFIELD_PRESETS,
     produces: 'html',
+    normalise: lightfieldNormalise,
     render: lightfield,
   },
 ];
-
-// The block families, DERIVED from the two registries rather than listed again here. A third list of
-// blocks would go stale the first time one was added, and `make coverage` already reported 14 of 14
-// while a 15th type existed (docs/MISTAKES.md #21, #65).
-//
-// `catalog.mjs` maps a NAMED entry to a family plus example props, and several names share a family,
-// so the examples become this family's presets: `card.pricing` and `card.stat` are two starting points
-// for one set of dials, which is exactly what a preset is for.
-const blockFamilies = () => {
-  const byFamily = new Map();
-  for (const c of CATALOG) {
-    if (!BLOCK_SCHEMA[c.family] || typeof BLOCKS[c.family] !== 'function') continue;
-    if (!byFamily.has(c.family)) byFamily.set(c.family, { blurb: c.blurb, presets: {} });
-    byFamily.get(c.family).presets[c.name] = c.props || {};
-  }
-  return [...byFamily].map(([family, { blurb, presets }]) => ({
-    name: family,
-    group: 'blocks',
-    blurb,
-    docs: 'docs/BLOCKS.md',
-    schema: BLOCK_SCHEMA[family],
-    presets,
-    produces: 'layers',
-    // x/y/start/dur are placement and timing the SCENE supplies, never dials, so the caller provides
-    // them and the panel never shows them (blocks/schema.mjs says the same thing from the other side).
-    // The values match scripts/site/blocks-scenes.mjs, which builds the /blocks posters: a block placed
-    // at the origin sits half off the canvas, and one that starts at 0 has not finished animating in.
-    render: (opts) => BLOCKS[family]({ x: 160, y: 160, start: 0.2, dur: 8, ...opts }),
-  }));
-};
-
-export const GENERATORS = [...FIELDS, ...blockFamilies()];
 
 export const byName = (name) => GENERATORS.find((g) => g.name === name) || null;
 
@@ -135,29 +108,59 @@ export function diffFromDefaults(opts, schema) {
 // randomiser that makes up limits produces values the generator will refuse, and the person turning the
 // dial gets an error they did not cause.
 //
-// `rand` is injected so a caller can seed it. Same rand, same options.
-export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null) {
+// IT VARIES THE LOOK ON SCREEN, it does not replace it. Rolling every field uniformly changes the
+// STRUCTURE and the COLOUR at once, so each click is an unrelated picture and most of them are muddy.
+// Here the preset chooses what kind of thing this is and randomise explores inside it:
+//
+//   enum      KEPT. `pattern.kind` and `motion.kind` are what the thing IS.
+//   number    NUDGED around its current value, not rolled across its range.
+//   colour    hue and saturation roll, LIGHTNESS is kept, so the palette's own ordering survives.
+//   seed      rolled outright. A range in the billions is an identifier, not a dial, and re-rolling
+//             it is the cheapest way to get a genuinely different arrangement of the same look.
+//
+// Every one of those is derived from what the schema already declares. Nothing here knows what a
+// lightfield is.
+//
+// `rand` is injected so a caller can seed it. Same rand and same base, same options.
+// A number moves by up to 22% of its declared range OR half of where it already sits, whichever is
+// SMALLER. The second clause is what keeps a nudge a nudge: `pattern.count` is declared 1 to 400, so a
+// flat 22% is plus or minus 88, and a field of 58 slats became 138. Half the current value keeps a
+// small number in its own neighbourhood while a large one still gets room.
+const NUDGE = 0.22;
+const IDENTIFIER = 100000;          // a range wider than this is an id, not a dial
+
+// `free` rolls a field across its whole declared range instead of nudging, and lets an enum change.
+// That is what a PER SECTION button means: the global one varies the look you have, and asking for one
+// section by name is asking for that aspect to be different, not slightly different.
+export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false) {
   for (const [key, spec] of Object.entries(schema)) {
     switch (spec.kind) {
       case 'group': {
         const sub = {};
-        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null);
+        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null, free);
         out[key] = sub;
         break;
       }
       case 'enum':
-        out[key] = spec.of[Math.floor(rand() * spec.of.length)];
+        // What the thing IS. Rolling it is picking a different subject, which the presets already do.
+        out[key] = free || base?.[key] === undefined ? spec.of[Math.floor(rand() * spec.of.length)] : base[key];
         break;
       case 'bool':
-        out[key] = rand() < 0.5;
+        out[key] = free || base?.[key] === undefined ? rand() < 0.5 : base[key];
         break;
       case 'unit':
-        out[key] = +rand().toFixed(2);
-        break;
       case 'int':
       case 'num': {
-        if (typeof spec.min !== 'number' || typeof spec.max !== 'number') { skipped.push(key); break; }
-        const v = spec.min + rand() * (spec.max - spec.min);
+        const min = spec.kind === 'unit' ? 0 : spec.min;
+        const max = spec.kind === 'unit' ? 1 : spec.max;
+        if (typeof min !== 'number' || typeof max !== 'number') { skipped.push(key); break; }
+        const span = max - min;
+        const from = typeof base?.[key] === 'number' ? base[key] : min + rand() * span;
+        // An identifier is rolled; a dial is nudged around where it already sits.
+        const reach = Math.min(span * NUDGE, Math.abs(from) * 0.5 || span * NUDGE);
+        const v = free || span > IDENTIFIER
+          ? min + rand() * span
+          : Math.min(max, Math.max(min, from + (rand() * 2 - 1) * reach));
         out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
         break;
       }

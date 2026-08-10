@@ -23,10 +23,6 @@ const PUB = path.join(root, 'site', 'public');
 // [from, to] — relative to repo root / site/public
 const COPY = [
   ['core', 'core'],                                   // the engine itself (216K, zero node imports)
-  // The block registry, for the playground: 70 families, each with a declared option schema, and zero
-  // node imports like core/. A block returns scene LAYERS rather than markup, so the page previews it
-  // by booting the engine on a scene it builds, which is the same path /blocks already uses.
-  ['blocks', 'blocks'],
   ['themes', 'themes'],                               // boot.js fetches /themes/<name>.json
   // these land inside the site's OWN public/assets/, which is why .gitignore names them
   ['assets/fonts', 'assets/fonts'],     // boot() blocks on document.fonts for every face

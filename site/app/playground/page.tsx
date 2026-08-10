@@ -17,13 +17,8 @@ export default function PlaygroundPage() {
         <header className="pghead">
           <h1>Playground</h1>
           <p>
-            These are the engine&apos;s generators, running here rather than in a render. Every control
-            is built from the generator&apos;s own option schema, so what you can turn is exactly what it
-            accepts, and an option it does not understand says so instead of quietly doing nothing.
-          </p>
-          <p className="pgsub">
-            Copy the options into a scene, or copy the HTML straight out. If a dial should exist and
-            does not, that is worth telling us.
+            The engine&apos;s generators, running here rather than in a render. Pick a preset, roll it,
+            keep what you like.
           </p>
         </header>
         <PlaygroundClient />

@@ -7601,6 +7601,51 @@ this up should add a field-wide silhouette that elements are drawn against, rath
 again.
 
 
+## #277 — the randomiser could roll an illegal pair, and the person clicking got the blame
+
+**What.** `lightfield` refuses a dial the chosen structure cannot express: `rings` has no seam WIDTH and
+no left-to-right axis, so `shadow.seamWidth` and `envelope` on a ring field throw and name the patterns
+that do take them. That is the right design and it is a declared table, `HONOURS`.
+
+Then the playground grew a randomiser, and a per-section roll that changes `pattern.kind` while
+`shadow.seamWidth` sits at a slats-only value produces exactly that illegal pair. The user clicked a
+button and got an error about a combination they never chose.
+
+**Fix, derived rather than invented.** `normalise(opts)` is the repair the table was always able to
+drive: every field the chosen structure cannot honour goes back to its declared default, and nothing
+else is touched. It is not a silent substitution, because the value being dropped is one the structure
+has no way to express. The registry carries it as an optional `normalise`, and the page routes EVERY
+option change through it, so a dial, a preset, a roll and a section roll cannot differ on this.
+
+`resolve` gained a `skipHonours` flag for one caller only: `normalise` has to fill and range-check
+BEFORE the cross-field rule, because that rule is the thing it is repairing. It re-runs the real check
+at the end, so a wrong repair table fails loudly instead of shipping a bad option set.
+
+**The general lesson.** A generator that validates strictly needs a way to say what a plausible input
+SHOULD have been, or every caller that composes options mechanically has to learn its private rules.
+Strictness without repair pushes the work onto whoever is least able to do it.
+
+## #278 — the playground did not fit on a screen, measured
+
+Before, on the live page: 2.4 screens at 1440x900, 2.7 at 1280x800, 3.1 on a phone, and **the preview
+started 455px down and ended at 914px against a 900px viewport**, so the thing the page exists for was
+never fully visible. The panel was one unbroken 1442px column of 28 rows, so the DOCUMENT grew to
+whatever the tallest generator needed.
+
+After: **1.4 screens**, preview 251px to 851px, entirely above the fold. The fix is that the panel
+scrolls inside itself rather than growing the page, which is the shape `.ed-main` on /editor already
+used. Buttons went 5 to 2: three copy buttons of equal weight made someone choose before they knew the
+difference, so `copy options` is the button and the other two are one keystroke away, and `reset` went
+because picking a preset already resets and the chips are always on screen.
+
+Also: a backdrop has no intrinsic ratio, so an injected field fills the row instead of sitting in a
+16:9 box with dead space under it. A scene preview keeps its aspect, because a film does have one.
+
+**Blocks left the playground.** 70 families with declared schemas is a good contract and a bad picker:
+a block is a scene fragment rather than a picture, so previewing one boots a whole scene, and 71 entries
+buried the one thing people came to turn. The schemas and their gate stay; `blocks/` came back out of
+the image and the Dockerfile, which is 260K and one COPY line fewer.
+
 ---
 
 ## Waivers for `doc-refs`

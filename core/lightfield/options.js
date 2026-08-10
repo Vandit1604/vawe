@@ -242,7 +242,7 @@ function checkValue(rule, value, at) {
 
 // Check the given options against the table and return a fully filled, key-ordered copy.
 // Key order is fixed by the table, so two equal option sets always serialise the same way.
-export function resolve(given = {}) {
+export function resolve(given = {}, skipHonours = false) {
   if (given === null || typeof given !== 'object' || Array.isArray(given)) {
     fail(`lightfield: options must be a plain object. Got ${JSON.stringify(given)}.`);
   }
@@ -264,7 +264,7 @@ export function resolve(given = {}) {
       out[key][k] = sub && k in sub ? checkValue(r, sub[k], `${key}.${k}`) : r.def;
     }
   }
-  checkHonoured(out);
+  if (!skipHonours) checkHonoured(out);
   return out;
 }
 
@@ -292,6 +292,32 @@ function atDefault(out, at) {
   const rule = SCHEMA[group];
   if (leaf) return out[group][leaf] === rule.fields[leaf].def;
   return Object.entries(rule.fields).every(([k, r]) => out[group][k] === r.def);
+}
+
+// normalise(opts) -> a valid option set from a plausible one.
+//
+// `resolve` REFUSES a dial the chosen structure cannot honour, which is right: quietly accepting it
+// hands back a field nobody asked for. But a caller that picks a structure at random, like the
+// playground's randomiser, then has to know the table to avoid making an illegal pair. It should not:
+// the table is here, so the repair is here too. Every field a structure cannot honour goes back to its
+// declared default, and nothing else is touched.
+//
+// This is the one legitimate reset. It is not a silent substitution, because the value being dropped
+// is one the structure has no way to express.
+export function normalise(given) {
+  // Fill and range-check WITHOUT the cross-field rule, because that rule is the thing being repaired:
+  // calling the strict resolver first would throw on exactly the input this function exists to accept.
+  const out = resolve(given, true);
+  const kind = out.pattern.kind;
+  for (const rule of HONOURS) {
+    if (rule.by.includes(kind)) continue;
+    const [group, leaf] = rule.at.split('.');
+    const spec = SCHEMA[group];
+    if (leaf) out[group][leaf] = spec.fields[leaf].def;
+    else for (const [k, r] of Object.entries(spec.fields)) out[group][k] = r.def;
+  }
+  checkHonoured(out);   // it must now pass the real rule, or the repair table is wrong
+  return out;
 }
 
 function checkHonoured(out) {
