@@ -73,6 +73,18 @@ export function decodeEntities(s) {
 
 const isRemote = (u) => /^(https?:)?\/\//i.test(u.trim());
 
+// splitRef(raw) → { url, hash }. A protocol-relative `//host/x` is not a URL node can fetch, so it is
+// resolved to https. A `#fragment` names a node INSIDE the file (an SVG <use href="sprite.svg#icon">):
+// the fragment-less URL is what gets downloaded, and the fragment has to survive into the local path
+// or the <use> resolves to nothing.
+function splitRef(raw) {
+  const s = decodeEntities(raw).trim();
+  const cut = s.indexOf('#');
+  const hash = cut < 0 ? '' : s.slice(cut);
+  const url = (cut < 0 ? s : s.slice(0, cut)).replace(/^\/\//, 'https://');
+  return { url, hash };
+}
+
 // ---- the scanner ---------------------------------------------------------------------------------
 // One tokenizer, one rewriter, driven by the same table. Collecting and rewriting share this function
 // so the set of URLs downloaded can never drift from the set of URLs replaced.
@@ -135,8 +147,8 @@ function rewriteSrcset(raw, onUrl) {
 export function collectRemoteUrls(html) {
   const seen = new Map();
   walkHtml(html, (raw) => {
-    const url = decodeEntities(raw).trim();
-    if (isRemote(url)) seen.set(url, true);
+    if (!isRemote(raw)) return null;
+    seen.set(splitRef(raw).url, true);
     return null;
   });
   return [...seen.keys()];
@@ -211,8 +223,10 @@ export async function localizeHtml(html, { mediaDir, publicBase, referer } = {})
     }
   }
   const out = walkHtml(html, (raw) => {
-    const url = decodeEntities(raw).trim();
-    return local.get(url) ?? null;
+    if (!isRemote(raw)) return null;
+    const { url, hash } = splitRef(raw);
+    const got = local.get(url);
+    return got == null ? null : got + hash;
   });
   return { html: out, localized: local.size, failures };
 }
