@@ -55,6 +55,37 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
   `stripeCard` stay literal on purpose.)
 - Deterministic — no `Date`/random, var strings are static. Same props → same layers.
 
+## The option contract (`blocks/schema.mjs`)
+
+Every one of the 70 families declares its options in a table, mirroring `core/lightfield/options.js`
+key for key. A JS default is a value, not a contract: `w = 560` carries no floor, `color = SERIES[0]`
+carries no "this is a colour rather than a string", `tone = 'info'` carries no list of the spellings
+that paint. So no control panel could be built from a factory and no caller could be validated.
+
+```js
+import { SCHEMA, resolve } from './blocks/schema.mjs';
+
+SCHEMA.barChart.h;                       // { kind: 'int', min: 130, max: 1080, def: 260 }
+resolve('barChart', { h: 40 });          // throws: barChart.h must be between 130 and 1080
+```
+
+A rule is `{ kind, def, ...bounds }`. The kinds are lightfield's seven (`int` · `unit` · `num` ·
+`hex` · `hexlist` · `enum` · `group`) plus seven the blocks needed: `str` · `bool` · `color` (a hex
+**or** a theme expression like `var(--accent)`, which is what the library actually emits) · `list` ·
+`row` · `oneOf` · `block` (a `{block, props}` pane descriptor).
+
+Read the tables beside the factories they describe: `CHART_SCHEMAS`, `UI_SCHEMAS`, `DEV_SCHEMAS`,
+`SOCIAL_SCHEMAS`, `APP_SCHEMAS`, `INTERACT_SCHEMAS`, `SLEEK_SCHEMAS`, `CORE_SCHEMAS`. `schema.mjs`
+merges them into one `SCHEMA` map and owns the checker.
+
+`x` · `y` · `start` · `dur` appear in **no** table. They are placement and timing the scene supplies,
+never content an author dials, and `resolve` passes them through untouched.
+
+**The gate:** `node scripts/gates/block-schema.mjs`. It reads the factory source, so a table cannot
+drift from the code it describes: every catalog family has a table, every declared key is a parameter
+the factory really destructures, every parameter is declared or listed in `OMIT` with a reason, every
+`def` deep-equals the real default, and every example row in `blocks/catalog.mjs` passes its table.
+
 ## Blocks
 
 Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editing the manifest. Browse

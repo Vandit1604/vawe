@@ -3,7 +3,7 @@
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
   R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows,
+  sweep, stagger, growUp, fillRight, stackWindows, TONE_NAMES,
 } from './kit.mjs';
 const T = TOKENS;
 
@@ -350,3 +350,174 @@ export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', c
       cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: onColor(accent), delay: 0.35, anim: 'pop', enterDur: 0.3 })] },
     ].filter(Boolean) }];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
+//
+// The alert family (notification · toast · callout · banner) shares one vocabulary, `title` + `body`.
+// The older spellings are still accepted, so they are declared as aliases rather than dropped: a dial
+// that hides a name the engine answers to is a second, quieter contract.
+export const UI_SCHEMAS = {
+  browserFrame: {
+    w: { kind: 'int', min: 200, max: 1920, def: 900 },
+    h: { kind: 'int', min: 100, max: 1080, def: 560 },
+    url: { kind: 'str', max: 80, def: 'example.com' },
+  },
+
+  pillRow: {
+    items: { kind: 'list', of: { kind: 'str', max: 40 }, def: [] },
+    fg: { kind: 'color', def: 'var(--accent)' },
+    bg: { kind: 'color', def: 'color-mix(in srgb, var(--accent) 14%, transparent)' },
+  },
+
+  notification: {
+    w: { kind: 'int', min: 200, max: 1080, def: 460 },
+    title: { kind: 'str', max: 80 },
+    message: { kind: 'str', max: 80, def: '' },      // alias of title
+    body: { kind: 'str', max: 200 },
+    desc: { kind: 'str', max: 200, def: '' },        // alias of body
+    // A glyph rides inside the dot; without one the dot stays plain. One character, not a sentence.
+    icon: { kind: 'str', max: 4, def: null },
+    accent: { kind: 'color', def: 'var(--accent)' },
+    // The stacked form. Null renders the single card; a list renders N alerts that arrive and EXPIRE.
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      title: { kind: 'str', max: 80 },
+      body: { kind: 'str', max: 200 },
+      icon: { kind: 'str', max: 4 },
+      accent: { kind: 'color' },
+    } }, def: null },
+    // How long one alert sits. Clipped to the block's own end, never extended past it.
+    life: { kind: 'num', min: 0.4, max: 30, def: 2.4 },
+    // The pitch between arrivals. Below the enter+exit ramps the stack reads as one arrival.
+    step: { kind: 'num', min: 0.1, max: 10, def: 1 },
+    // The row pitch the stack steps down by. It is the card's own height, not a gap.
+    rowH: { kind: 'int', min: 40, max: 400, def: 96 },
+    gap: { kind: 'int', min: 0, max: 80, def: 12 },
+  },
+
+  callout: {
+    w: { kind: 'int', min: 200, max: 1920, def: 720 },
+    text: { kind: 'str', max: 200 },
+    body: { kind: 'str', max: 200, def: '' },        // alias of text
+    title: { kind: 'str', max: 200, def: '' },       // alias of text
+    tone: { kind: 'enum', of: TONE_NAMES, def: 'info' },
+  },
+
+  phoneFrame: {
+    // Every piece of the shell is a proportion of `w` (the notch, the status type), so the device
+    // stays a device at any size instead of growing a fixed 116px notch on a 230px phone.
+    w: { kind: 'int', min: 120, max: 900, def: 300 },
+    h: { kind: 'int', min: 200, max: 1920, def: 620 },
+    status: { kind: 'bool', def: true },
+    time: { kind: 'str', max: 8, def: '10:24' },
+  },
+
+  tabBar: {
+    w: { kind: 'int', min: 160, max: 1920, def: 520 },
+    // A tab is a bare label, or an icon over a label.
+    tabs: { kind: 'list', of: { kind: 'oneOf', of: [
+      { kind: 'str', max: 24 },
+      { kind: 'row', fields: { label: { kind: 'str', max: 24 }, icon: { kind: 'str', max: 4 } } },
+    ] }, def: [] },
+    // Where the selection STANDS. `activeFrom` + `activeTo` are where it TRAVELS between.
+    // All three are clamped to the tab count inside the factory, so the ceiling here is a sanity bound.
+    active: { kind: 'int', min: 0, max: 20, def: 0 },
+    activeFrom: { kind: 'int', min: 0, max: 20, def: null },
+    activeTo: { kind: 'int', min: 0, max: 20, def: null },
+    switchAt: { kind: 'num', min: 0, max: 60, def: 0.9 },
+    switchDur: { kind: 'num', min: 0.05, max: 10, def: 0.5 },
+  },
+
+  checklist: {
+    w: { kind: 'int', min: 160, max: 1920, def: 480 },
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      text: { kind: 'str', max: 120 },
+      done: { kind: 'bool' },
+    } }, def: [] },
+  },
+
+  table: {
+    w: { kind: 'int', min: 200, max: 1920, def: 640 },
+    cols: { kind: 'list', of: { kind: 'str', max: 40 }, def: [] },
+    // One row is a list of cells, and a cell is stringified, so a number is fine.
+    rows: { kind: 'list', of: { kind: 'list', of: { kind: 'str', max: 60 } }, def: [] },
+  },
+
+  timeline: {
+    w: { kind: 'int', min: 160, max: 1920, def: 480 },
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      title: { kind: 'str', max: 120 },
+      meta: { kind: 'str', max: 40 },
+      done: { kind: 'bool' },
+    } }, def: [] },
+  },
+
+  stepFlow: {
+    w: { kind: 'int', min: 200, max: 1920, def: 720 },
+    steps: { kind: 'list', of: { kind: 'str', max: 24 }, def: [] },
+    active: { kind: 'int', min: 0, max: 20, def: 0 },
+    activeFrom: { kind: 'int', min: 0, max: 20, def: null },
+    activeTo: { kind: 'int', min: 0, max: 20, def: null },
+    buildAt: { kind: 'num', min: 0, max: 60, def: 0.3 },
+    // Zero means "derive it from the distance travelled", which is what the factory does.
+    buildDur: { kind: 'num', min: 0, max: 20, def: 0 },
+  },
+
+  kanban: {
+    w: { kind: 'int', min: 200, max: 1920, def: 720 },
+    columns: { kind: 'list', of: { kind: 'row', fields: {
+      title: { kind: 'str', max: 40 },
+      cards: { kind: 'list', of: { kind: 'str', max: 80 } },
+    } }, def: [] },
+  },
+
+  toast: {
+    w: { kind: 'int', min: 160, max: 1080, def: 420 },
+    title: { kind: 'str', max: 120 },
+    message: { kind: 'str', max: 120, def: '' },     // alias of title
+    // `body` is NOT declared. It is destructured and never rendered, so a dial for it would be a
+    // control that does nothing. It is listed in the gate's OMIT with that reason, and reported.
+    action: { kind: 'str', max: 24, def: '' },
+    icon: { kind: 'str', max: 4, def: '✓' },
+    accent: { kind: 'color', def: 'var(--up)' },
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      title: { kind: 'str', max: 120 },
+      // no `body` here either: the stack hands it to the single-card form, which drops it.
+      action: { kind: 'str', max: 24 },
+      icon: { kind: 'str', max: 4 },
+      accent: { kind: 'color' },
+    } }, def: null },
+    life: { kind: 'num', min: 0.4, max: 30, def: 2.2 },
+    step: { kind: 'num', min: 0.1, max: 10, def: 0.9 },
+    rowH: { kind: 'int', min: 30, max: 400, def: 58 },
+    gap: { kind: 'int', min: 0, max: 80, def: 12 },
+  },
+
+  logoWall: {
+    w: { kind: 'int', min: 160, max: 1920, def: 640 },
+    // A cell is a wordmark or a real logo file. `src` is preferred: a mark re-typed in the theme's
+    // face is a lookalike, not the brand.
+    logos: { kind: 'list', of: { kind: 'row', fields: {
+      text: { kind: 'str', max: 40 },
+      src: { kind: 'str', max: 200 },
+    } }, def: [] },
+    cols: { kind: 'int', min: 1, max: 8, def: 3 },
+  },
+
+  badge: {
+    label: { kind: 'str', max: 24, def: '' },
+    value: { kind: 'str', max: 24, def: '' },
+    tone: { kind: 'enum', of: TONE_NAMES, def: 'ok' },
+  },
+
+  banner: {
+    w: { kind: 'int', min: 200, max: 1920, def: 720 },
+    text: { kind: 'str', max: 200, def: '' },
+    body: { kind: 'str', max: 200, def: '' },        // alias of text
+    title: { kind: 'str', max: 200, def: '' },       // alias of text
+    cta: { kind: 'str', max: 24, def: '' },
+    icon: { kind: 'str', max: 4, def: '★' },
+    accent: { kind: 'color', def: 'var(--accent)' },
+  },
+};

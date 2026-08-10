@@ -171,3 +171,107 @@ export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '
   const html = `<div style="width:${size}px">${svg}${label ? `<div style="text-align:center;font:600 16px var(--font-mono);color:${T.dim};margin-top:8px">${label}</div>` : ''}</div>`;
   return [{ type: 'html', x, y, w: size, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. See blocks/schema.mjs for the kind vocabulary and
+// the checker; the doctrine is core/lightfield/options.js, which this mirrors key for key.
+//
+// x · y · start · dur are absent from every table on purpose. They are placement and timing the SCENE
+// supplies (a container injects them, `make expand` writes them), never content an author dials.
+//
+// A `w` floor is the block's own furniture: `htmlCard` pads CHART_PAD on both sides, so below
+// 2 * CHART_PAD plus one minimum bar there is no plot left to draw into. A `w` ceiling is the stage.
+export const CHART_SCHEMAS = {
+  statBig: {
+    to: { kind: 'num', min: -1e12, max: 1e12, def: 0 },
+    from: { kind: 'num', min: -1e12, max: 1e12, def: 0 },
+    // `unit` suffixes the figure ("ms"), `prefix` leads it ("$"). The count layer compacts >= 1e6.
+    unit: { kind: 'str', max: 8, def: '' },
+    prefix: { kind: 'str', max: 8, def: '' },
+    label: { kind: 'str', max: 60 },
+    // The label is placed at y + size * 0.9, so `size` is the block's whole vertical rhythm.
+    size: { kind: 'int', min: 18, max: 400, def: 150 },
+    color: { kind: 'color', def: 'var(--text)' },
+  },
+
+  barChart: {
+    w: { kind: 'int', min: 120, max: 1920, def: 560 },
+    // The plot is what is LEFT after the card's pad and the two caption rows: h - 96 bare, h - 126
+    // with a label. Below that it clamps to zero and every bar disappears.
+    h: { kind: 'int', min: 130, max: 1080, def: 260 },
+    data: { kind: 'list', of: { kind: 'row', fields: {
+      label: { kind: 'str', max: 24 },
+      value: { kind: 'num', min: -1e12, max: 1e12 },
+    } }, def: [] },
+    color: { kind: 'color', def: 'var(--accent)' },
+    label: { kind: 'str', max: 60, def: '' },
+  },
+
+  lineChart: {
+    w: { kind: 'int', min: 120, max: 1920, def: 560 },
+    // ch = h - cardInsetY, and the polyline insets 8px top and bottom inside that.
+    h: { kind: 'int', min: 80, max: 1080, def: 240 },
+    data: { kind: 'list', of: { kind: 'row', fields: {
+      label: { kind: 'str', max: 24 },
+      value: { kind: 'num', min: -1e12, max: 1e12 },
+    } }, def: [] },
+    color: { kind: 'color', def: 'var(--accent)' },
+    area: { kind: 'bool', def: false },
+    label: { kind: 'str', max: 60, def: '' },
+  },
+
+  donutChart: {
+    // The ring is drawn at the card's inner width, so w below 2 * CHART_PAD leaves no ring.
+    w: { kind: 'int', min: 120, max: 1080, def: 320 },
+    segments: { kind: 'list', of: { kind: 'row', fields: {
+      value: { kind: 'num', min: 0, max: 1e12 },
+      // Omitted, a segment takes its colour from SERIES by index.
+      color: { kind: 'color' },
+      label: { kind: 'str', max: 24 },
+    } }, def: [] },
+    label: { kind: 'str', max: 60, def: '' },
+  },
+
+  stackedBar: {
+    w: { kind: 'int', min: 120, max: 1920, def: 520 },
+    // One caption row here, not two, so the plot is h - 70.
+    h: { kind: 'int', min: 80, max: 1080, def: 280 },
+    data: { kind: 'list', of: { kind: 'row', fields: {
+      label: { kind: 'str', max: 24 },
+      values: { kind: 'list', of: { kind: 'num', min: 0, max: 1e12 } },
+    } }, def: [] },
+    series: { kind: 'list', of: { kind: 'row', fields: {
+      color: { kind: 'color' },
+    } }, def: [] },
+  },
+
+  statCard: {
+    w: { kind: 'int', min: 160, max: 1080, def: 340 },
+    to: { kind: 'num', min: -1e12, max: 1e12, def: 0 },
+    from: { kind: 'num', min: -1e12, max: 1e12, def: 0 },
+    unit: { kind: 'str', max: 8, def: '' },
+    label: { kind: 'str', max: 60, def: '' },
+    // Empty draws no chip at all. The block never invents a delta.
+    delta: { kind: 'str', max: 12, def: '' },
+    deltaUp: { kind: 'bool', def: true },
+  },
+
+  gauge: {
+    w: { kind: 'int', min: 120, max: 1080, def: 300 },
+    value: { kind: 'num', min: -1e9, max: 1e9, def: 0 },
+    // `max` is the divisor. Zero would make the reading Infinity, which clamps to a full arc and
+    // says nothing, so the floor is above zero.
+    max: { kind: 'num', min: 0.001, max: 1e9, def: 100 },
+    label: { kind: 'str', max: 60, def: '' },
+    color: { kind: 'color', def: 'var(--accent)' },
+  },
+
+  progressRing: {
+    // The ring is the whole block: `size` is its width AND its height.
+    size: { kind: 'int', min: 40, max: 1080, def: 160 },
+    value: { kind: 'num', min: -1e9, max: 1e9, def: 0 },
+    max: { kind: 'num', min: 0.001, max: 1e9, def: 100 },
+    label: { kind: 'str', max: 60, def: '' },
+    color: { kind: 'color', def: 'var(--accent)' },
+  },
+};

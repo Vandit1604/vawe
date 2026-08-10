@@ -105,3 +105,82 @@ export function bento({ x, y, w = 900, h = 560, gap = 20, cells = [], start = 0,
   });
   return out;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
+//
+// These surfaces are white-on-dark by construction (the copy is '#fff' at every size), so they want a
+// living background under them. That is a scene decision, not a dial, and it is why there is no `bg`.
+export const SLEEK_SCHEMAS = {
+  glassCard: {
+    w: { kind: 'int', min: 160, max: 1920, def: 640 },
+    h: { kind: 'int', min: 120, max: 1080, def: 360 },
+    title: { kind: 'str', max: 60 },
+    desc: { kind: 'str', max: 200 },
+    kicker: { kind: 'str', max: 40 },
+    // How milky the glass is. 0 is clear and the panel is only its edge and its blur; 1 is opaque
+    // white and the backdrop it exists to blur stops reading at all.
+    tint: { kind: 'unit', def: 0.06 },
+    radius: { kind: 'int', min: 0, max: 200, def: 22 },
+    anim: { kind: 'str', max: 24, def: 'pop' },
+    enterDur: { kind: 'num', min: 0, max: 4, def: 0.5 },
+  },
+
+  meshPanel: {
+    w: { kind: 'int', min: 160, max: 1920, def: 720 },
+    h: { kind: 'int', min: 120, max: 1080, def: 420 },
+    title: { kind: 'str', max: 60 },
+    desc: { kind: 'str', max: 200 },
+    radius: { kind: 'int', min: 0, max: 200, def: 26 },
+    anim: { kind: 'str', max: 24, def: 'scale' },
+    enterDur: { kind: 'num', min: 0, max: 4, def: 0.55 },
+  },
+
+  spotlightCard: {
+    w: { kind: 'int', min: 160, max: 1920, def: 640 },
+    h: { kind: 'int', min: 120, max: 1080, def: 360 },
+    title: { kind: 'str', max: 60 },
+    desc: { kind: 'str', max: 200 },
+    // Where the light comes from. Anything else falls back to `top`.
+    from: { kind: 'enum', of: ['top', 'top-left', 'top-right', 'center'], def: 'top' },
+    radius: { kind: 'int', min: 0, max: 200, def: 22 },
+    anim: { kind: 'str', max: 24, def: 'pop' },
+    enterDur: { kind: 'num', min: 0, max: 4, def: 0.5 },
+  },
+
+  borderBeamCard: {
+    w: { kind: 'int', min: 160, max: 1920, def: 640 },
+    h: { kind: 'int', min: 120, max: 1080, def: 300 },
+    title: { kind: 'str', max: 60 },
+    desc: { kind: 'str', max: 200 },
+    radius: { kind: 'int', min: 0, max: 200, def: 22 },
+    // The travelling light's stroke width and its speed along the border.
+    thickness: { kind: 'num', min: 0.5, max: 20, def: 2.5 },
+    speed: { kind: 'num', min: 0, max: 5, def: 0.55 },
+  },
+
+  grainOverlay: {
+    // This one is a full-frame overlay, so its box defaults to the portrait stage rather than a card.
+    w: { kind: 'int', min: 1, max: 4000, def: 1080 },
+    h: { kind: 'int', min: 1, max: 4000, def: 1920 },
+    // Overlay-blended noise. Past about 0.2 the grain stops being a finish and becomes the picture.
+    opacity: { kind: 'unit', def: 0.08 },
+    // feTurbulence baseFrequency: low is coarse cloud, high is fine sand.
+    freq: { kind: 'num', min: 0.05, max: 4, def: 0.9 },
+  },
+
+  bento: {
+    w: { kind: 'int', min: 200, max: 1920, def: 900 },
+    h: { kind: 'int', min: 160, max: 1080, def: 560 },
+    gap: { kind: 'int', min: 0, max: 200, def: 20 },
+    // The first cell is the hero and takes the left column at full height; the rest stack on the
+    // right. Each cell picks which sleek surface draws it.
+    cells: { kind: 'list', of: { kind: 'row', fields: {
+      kind: { kind: 'enum', of: ['glass', 'mesh', 'spotlight'] },
+      title: { kind: 'str', max: 60 },
+      desc: { kind: 'str', max: 200 },
+      kicker: { kind: 'str', max: 40 },
+    } }, def: [] },
+  },
+};

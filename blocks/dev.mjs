@@ -248,3 +248,106 @@ export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', lab
   if (label) out.push(text({ text: label, x, y: r2(y + size + 12), font: 'mono', size: 18, color: T.dim, start: r2(start + 0.2), duration: dur }));
   return out;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
+export const DEV_SCHEMAS = {
+  codeBlock: {
+    w: { kind: 'int', min: 200, max: 1920, def: 640 },
+    // A line is a bare string, or a string plus the colour to set it in.
+    lines: { kind: 'list', of: { kind: 'oneOf', of: [
+      { kind: 'str', max: 200 },
+      { kind: 'row', fields: { text: { kind: 'str', max: 200 }, color: { kind: 'color' } } },
+    ] }, def: [] },
+    label: { kind: 'str', max: 60 },
+    dark: { kind: 'bool', def: false },
+    // Mono code. Below about 10px the glyphs stop resolving at 1080p; the card grows to fit above.
+    size: { kind: 'int', min: 10, max: 80, def: 24 },
+    // Read off CODE_THEMES itself, so a new palette cannot exist without the dial knowing it.
+    // The factory throws on an unknown name, which is exactly what this enum states.
+    theme: { kind: 'enum', of: Object.keys(CODE_THEMES) },
+    anim: { kind: 'str', max: 24, def: 'fade' },
+    enterDur: { kind: 'num', min: 0, max: 4, def: 0.25 },
+  },
+
+  terminal: {
+    w: { kind: 'int', min: 200, max: 1920, def: 720 },
+    command: { kind: 'str', max: 200 },
+    output: { kind: 'list', of: { kind: 'str', max: 200 }, def: [] },
+    // Characters per second. The output's start is DERIVED from command.length / cps, so a cps at or
+    // below zero would divide the whole block's timing by nothing.
+    cps: { kind: 'num', min: 1, max: 120, def: 18 },
+  },
+
+  loadingBar: {
+    w: { kind: 'int', min: 60, max: 1920, def: 420 },
+    // The radius is h / 2, so the track is always a capsule whatever the height.
+    h: { kind: 'int', min: 2, max: 60, def: 6 },
+    fillDur: { kind: 'num', min: 0.1, max: 20, def: 1.5 },
+    settle: { kind: 'color', def: 'var(--up)' },
+    label: { kind: 'str', max: 60 },
+    done: { kind: 'bool', def: true },
+  },
+
+  deploySuccess: {
+    w: { kind: 'int', min: 200, max: 1920, def: 620 },
+    url: { kind: 'str', max: 80, def: 'app.vawe.dev' },
+    title: { kind: 'str', max: 80, def: 'Deployed to production' },
+    // Null draws no timing line at all. A claim only appears when a caller can stand behind it.
+    note: { kind: 'str', max: 60, def: null },
+    steps: { kind: 'list', of: { kind: 'str', max: 24 }, def: ['Building', 'Deploying', 'Live'] },
+    // The index of the step currently RUNNING. Null runs the cascade instead of freezing one moment.
+    active: { kind: 'int', min: 0, max: 20, def: null },
+    // The pitch between step rows. The success card is placed at steps.length * rowGap + 30.
+    rowGap: { kind: 'int', min: 24, max: 200, def: 52 },
+  },
+
+  diff: {
+    w: { kind: 'int', min: 200, max: 1920, def: 620 },
+    lines: { kind: 'list', of: { kind: 'row', fields: {
+      // The sign picks the colour: added, removed, or context.
+      sign: { kind: 'enum', of: ['+', '-', ' '] },
+      text: { kind: 'str', max: 200 },
+    } }, def: [] },
+  },
+
+  fileTree: {
+    w: { kind: 'int', min: 160, max: 1080, def: 360 },
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      name: { kind: 'str', max: 60 },
+      type: { kind: 'enum', of: ['dir', 'file'] },
+      // One depth step indents 22px, so the tree runs out of card width around depth 12 at w 360.
+      depth: { kind: 'int', min: 0, max: 12 },
+      active: { kind: 'bool' },
+    } }, def: [] },
+  },
+
+  logLines: {
+    w: { kind: 'int', min: 200, max: 1920, def: 620 },
+    lines: { kind: 'list', of: { kind: 'row', fields: {
+      t: { kind: 'str', max: 12 },
+      // Each level has a measured colour on BOTH surfaces. An unknown level falls back to the body ink.
+      level: { kind: 'enum', of: ['info', 'ok', 'warn', 'error'] },
+      text: { kind: 'str', max: 200 },
+    } }, def: [] },
+    dark: { kind: 'bool', def: true },
+  },
+
+  commitRow: {
+    w: { kind: 'int', min: 200, max: 1920, def: 620 },
+    commits: { kind: 'list', of: { kind: 'row', fields: {
+      hash: { kind: 'str', max: 40 },
+      msg: { kind: 'str', max: 120 },
+      author: { kind: 'str', max: 40 },
+      time: { kind: 'str', max: 20 },
+    } }, def: [] },
+  },
+
+  spinner: {
+    // The lottie is square: `size` is its width AND its height.
+    size: { kind: 'int', min: 24, max: 600, def: 90 },
+    src: { kind: 'str', max: 200, def: '/assets/lottie/spin.json' },
+    label: { kind: 'str', max: 60, def: '' },
+  },
+};
