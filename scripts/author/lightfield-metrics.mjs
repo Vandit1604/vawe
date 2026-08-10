@@ -76,6 +76,165 @@ export function chroma(buf, w, h) {
   return sum / (w * h);
 }
 
+// ---------------------------------------------------------------------------------------------
+// REGIONS: the same picture graded where the light ISN'T.
+//
+// Everything above this line grades a mean, and a mean over a lit picture is a report on the lit
+// part. The `ref` preset scored a mean sample dE of 12.7 and a human said "that is not it", because
+// all four sample points sat in bright areas and the defect was in the dark ones: the reference's
+// shadows are COOL (right third rgb(0,2,11), lower left rgb(23,12,35) violet) and the generated
+// ones were WARM (rgb(11,4,4) and rgb(83,5,12)). No number here could see that. docs/MISTAKES.md
+// #262 is titled "a fidelity metric that averages away the thing it is grading"; this is the same
+// failure in a third costume.
+//
+// So: cut the frame into a coarse grid, split the cells into SHADOW / MID / HIGHLIGHT by the
+// REFERENCE's own luma (the reference decides what a shadow is, never the render), and report each
+// band separately. Report warmth, r minus b, because "warm or cool" is the axis the eye grades a
+// shadow on and dE cannot tell a violet miss from a green one.
+
+export const warmth = ({ r, b }) => r - b;
+
+const GW = 8, GH = 5;
+
+// Mean rgb per grid cell, from an already-decoded buffer at any size.
+function cells(buf, w, h, gw = GW, gh = GH) {
+  const out = [];
+  for (let cy = 0; cy < gh; cy++) {
+    for (let cx = 0; cx < gw; cx++) {
+      const x0 = Math.floor((cx * w) / gw), x1 = Math.floor(((cx + 1) * w) / gw);
+      const y0 = Math.floor((cy * h) / gh), y1 = Math.floor(((cy + 1) * h) / gh);
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+        const i = (y * w + x) * 3;
+        r += buf[i]; g += buf[i + 1]; b += buf[i + 2]; count++;
+      }
+      out.push({ x: cx, y: cy, r: r / count, g: g / count, b: b / count });
+    }
+  }
+  for (const c of out) c.luma = luma(c.r, c.g, c.b);
+  return out;
+}
+
+/**
+ * regions(refBuf, genBuf, w, h) -> { bands, worst, worstWarm, all }
+ *
+ * bands  one entry per tonal band, each with mean dE and mean warmth for both pictures.
+ * worst  the single cell with the largest dE, whatever band it is in. A mean is a budget a fit is
+ *        free to spend, so the tail is reported next to it and never folded into it.
+ * worstWarm  the cell whose warmth is most wrong, which is a different question and usually a
+ *        different cell: a shadow can be near-black in both pictures, tiny in dE, and still be red
+ *        where the reference is violet.
+ */
+export function regions(refBuf, genBuf, w, h, gw = GW, gh = GH) {
+  const A = cells(refBuf, w, h, gw, gh);
+  const B = cells(genBuf, w, h, gw, gh);
+  const all = A.map((a, i) => {
+    const b = B[i];
+    return {
+      x: a.x, y: a.y, ref: a, gen: b,
+      dE: Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b),
+      refWarm: warmth(a), genWarm: warmth(b), warmDelta: warmth(b) - warmth(a),
+    };
+  });
+
+  // The REFERENCE's luma terciles decide the bands. Using the render's own luma would let a field
+  // that lost all its shadows redefine what a shadow is and then pass.
+  const sorted = [...all].sort((p, q) => p.ref.luma - q.ref.luma);
+  const third = Math.max(1, Math.round(sorted.length / 3));
+  const split = [
+    ['shadow', sorted.slice(0, third)],
+    ['mid', sorted.slice(third, sorted.length - third)],
+    ['highlight', sorted.slice(sorted.length - third)],
+  ];
+  const mean = (xs, f) => xs.reduce((s, x) => s + f(x), 0) / xs.length;
+  const bands = split.map(([name, xs]) => ({
+    name,
+    n: xs.length,
+    dE: mean(xs, (c) => c.dE),
+    worstDE: Math.max(...xs.map((c) => c.dE)),
+    refWarm: mean(xs, (c) => c.refWarm),
+    genWarm: mean(xs, (c) => c.genWarm),
+    warmDelta: mean(xs, (c) => c.warmDelta),
+  }));
+
+  const worst = [...all].sort((p, q) => q.dE - p.dE)[0];
+  const worstWarm = [...all].sort((p, q) => Math.abs(q.warmDelta) - Math.abs(p.warmDelta))[0];
+  return { bands, worst, worstWarm, all };
+}
+
+// ---------------------------------------------------------------------------------------------
+// BANDS: how many elements the field has, and how hard their edges are.
+//
+// striping() below answers "is the pattern crisp" as an amplitude. It cannot answer "are there 76
+// bars or 102", and a field with the right crispness and half again too many bars is a different
+// picture. Both questions come off ONE column-luma profile: average every row away, so what is left
+// is the vertical structure alone.
+
+// Mean luma per column. Rows are averaged out, so the colour field's vertical variation cannot be
+// mistaken for a bar.
+export function columnProfile(buf, w, h) {
+  const p = new Float64Array(w);
+  for (let x = 0; x < w; x++) {
+    let s = 0;
+    for (let y = 0; y < h; y++) {
+      const i = (y * w + x) * 3;
+      s += luma(buf[i], buf[i + 1], buf[i + 2]);
+    }
+    p[x] = s / h;
+  }
+  return p;
+}
+
+/**
+ * bandProfile(buf, w, h) -> { count, hardness, swing }
+ *
+ * count     local maxima in the column profile whose PROMINENCE clears a floor. Counting bare local
+ *           maxima counts sensor noise; prominence (the drop to the lower of the two neighbouring
+ *           valleys) is what makes a bar a bar. The floor is a fraction of the profile's own range,
+ *           so the number does not change when the picture gets brighter.
+ * hardness  mean |p[x] - p[x-1]| in luma units. High when the boundaries cut.
+ * swing     standard deviation of the profile: how much light-to-dark the banding actually covers.
+ *           hardness alone cannot tell 100 faint bars from 50 hard ones.
+ */
+export function bandProfile(buf, w, h, prominence = 0.04) {
+  const p = columnProfile(buf, w, h);
+  let lo = Infinity, hi = -Infinity, sum = 0;
+  for (const v of p) { if (v < lo) lo = v; if (v > hi) hi = v; sum += v; }
+  const floor = (hi - lo) * prominence;
+
+  // Walk the profile as an alternating chain of extrema, dropping any swing smaller than the floor.
+  // This is the standard prominence filter and it is done in one pass: a peak survives only if the
+  // valleys on both sides are at least `floor` below it.
+  const ext = [];
+  for (let x = 1; x < p.length - 1; x++) {
+    if (p[x] >= p[x - 1] && p[x] > p[x + 1]) ext.push({ x, v: p[x], max: true });
+    else if (p[x] <= p[x - 1] && p[x] < p[x + 1]) ext.push({ x, v: p[x], max: false });
+  }
+  // Collapse the chain until every swing left in it clears the floor. The bound is the number of
+  // extrema, because each pass removes two, and it must NOT be a fixed number of passes: a profile
+  // with flat plateaus in it (which is what a field of solid silhouettes produces) throws off
+  // hundreds of near-equal extrema, and a 64-pass cap left them in and reported 292 bands for a
+  // picture with twelve panels. A metric that gives up quietly is worse than no metric.
+  let chain = ext;
+  for (let pass = 0; pass <= ext.length && chain.length > 1; pass++) {
+    let smallest = Infinity, at = -1;
+    for (let i = 1; i < chain.length; i++) {
+      const d = Math.abs(chain[i].v - chain[i - 1].v);
+      if (d < smallest) { smallest = d; at = i; }
+    }
+    if (at < 0 || smallest >= floor) break;
+    chain = chain.filter((_, i) => i !== at && i !== at - 1);
+  }
+  const count = chain.filter((e) => e.max).length;
+
+  let grad = 0;
+  for (let x = 1; x < p.length; x++) grad += Math.abs(p[x] - p[x - 1]);
+  const meanV = sum / p.length;
+  let varr = 0;
+  for (const v of p) varr += (v - meanV) * (v - meanV);
+  return { count, hardness: grad / (p.length - 1), swing: Math.sqrt(varr / p.length) };
+}
+
 // How hard the pattern cuts, at full resolution, on luma, row by row. This is the half blockError
 // is deliberately blind to, and a field can pass that one while being visibly mushy.
 //

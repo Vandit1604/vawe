@@ -8,24 +8,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { stableShot } from './lightfield-render.mjs';
+import { stableShot, stage, LAUNCH, W, H } from './lightfield-render.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-export async function shoot(htmlFile, outPng, { w = 735, h = 420, t = 0 } = {}) {
+export async function shoot(htmlFile, outPng, { w = W, h = H, t = 0 } = {}) {
   const frag = fs.readFileSync(htmlFile, 'utf8');
-  // Chrome wraps the last device pixel of a gradient background when the element is an ODD number
-  // of pixels wide: at 735 the right-hand column repeats the left edge, at 734 and 736 it does not.
-  // The engine's canvases are 1080 and 1920, so a real render never sees it. A reference shot can be
-  // any size, so lay the page out even and clip back to what was asked for.
+  // The stage is defined once, in lightfield-render.mjs. It used to be written out here as well,
+  // which is two pages and therefore two pictures the moment either copy is edited.
   const pw = w + (w % 2), ph = h + (h % 2);
-  const page$ = `<!doctype html><html><head><meta charset="utf-8"><style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    html,body{width:${pw}px;height:${ph}px;overflow:hidden;background:#000}
-    #stage{position:relative;width:${pw}px;height:${ph}px;--t:${t};--p:0}
-  </style></head><body><div id="stage">${frag}</div></body></html>`;
+  const page$ = stage(frag, w, h, t);
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--force-color-profile=srgb', '--disable-lcd-text'] });
+  const browser = await puppeteer.launch(LAUNCH);
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: pw, height: ph, deviceScaleFactor: 1 });

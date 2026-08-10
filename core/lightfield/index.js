@@ -15,11 +15,14 @@
 //      core/tokens.css kills `animation` with `!important` because the renderer seeks frames instead
 //      of playing them. A keyframe here would render one frozen frame and warn nobody.
 //
-// Four dials, in the order you should reach for them:
-//   colour   the palette          shadow   how the light falls off
-//   pattern  the structure        motion   how it lives against the clock
+// Five dials, in the order you should reach for them:
+//   colour    the palette, including the ambient fill that decides whether shadows are warm or cool
+//   pattern   the structure
+//   envelope  how far each element reaches, as a function of where it sits, and how it tapers
+//   shadow    how the light falls off, and the pattern's contrast and polarity
+//   motion    how it lives against the clock
 
-import { resolve, LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS } from './options.js';
+import { resolve, LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS, SHAPES, ANCHORS } from './options.js';
 import { rgba, fade, mix } from './colour.js';
 import { rng, span, n } from './rng.js';
 import { BUILDERS } from './patterns.js';
@@ -52,7 +55,11 @@ function tag(opts) {
 // two hues, and an sRGB composite of two hues is less saturated than either: that wide mixed band is
 // what read as brown. Holding 0.85 out to 30% and finishing by 80% narrows it. Measured against the
 // reference, this ramp scores 18.13 where the gentle one scored 18.60.
+// `end` is where a lobe's light has finished, as a percentage of the lobe's own ending shape. It is
+// a FUNCTION of colour.spread rather than a constant, because as a constant it was a number fitted
+// to one photograph and imposed on every field after it. See colour.spread in options.js.
 export const RAMP = { mid: 0.85, pos: 30, end: 80 };
+export const rampEnd = (spread) => RAMP.end + 90 * spread;
 export function fieldBlobs(given) {
   // Resolve here too. This is exported, and an exported function that only works on options someone
   // else already filled in is a trap: the search tool passed a raw preset and got a crash on
@@ -91,8 +98,9 @@ export const fieldBase = ({ colour: { deep, ground } }) =>
 // field from the one that ships.
 export function paintField(given) {
   const opts = resolve(given);
+  const end = n(rampEnd(opts.colour.spread));
   const css = ({ hex, x, y, rx, ry, a }) =>
-    `radial-gradient(${n(rx)}% ${n(ry)}% at ${n(x)}% ${n(y)}% in oklab, ${rgba(hex, a)} 0%, ${rgba(hex, a * RAMP.mid)} ${RAMP.pos}%, ${fade(hex)} ${RAMP.end}%)`;
+    `radial-gradient(${n(rx)}% ${n(ry)}% at ${n(x)}% ${n(y)}% in oklab, ${rgba(hex, a)} 0%, ${rgba(hex, a * RAMP.mid)} ${RAMP.pos}%, ${fade(hex)} ${end}%)`;
   return [...fieldBlobs(opts).map(css), fieldBase(opts)].join(',');
 }
 
@@ -212,6 +220,16 @@ export function lightfield(given) {
       // A dial at its no-op value emits nothing, so the markup says what the options said.
       + `${opts.colour.vivid === 1 ? '' : `;filter:saturate(${n(opts.colour.vivid)})`}}`,
     `.${cls} .f{position:absolute;inset:-4%;background:${paintField(opts)}}`,
+    // Ambient fill, and the reason a picture can have warm light and cool shadows at once.
+    //
+    // SCREEN lifts black to exactly this colour and leaves white exactly white, which is what a
+    // faint cold skylight does to a scene lit by one warm source. It sits ABOVE the colour field and
+    // BELOW the pattern on purpose: fill is light, so the blind occludes it like any other light,
+    // and the seams stay relatively dark instead of being flattened by a wash laid over the top.
+    //
+    // Black is the exact identity, so the default emits no layer at all.
+    opts.colour.shade === '#000000' ? ''
+      : `.${cls} .sh{position:absolute;inset:-4%;mix-blend-mode:screen;background:${opts.colour.shade}}`,
     layer('d', 'multiply', darkCells),
     layer('l', 'color-dodge', litCells),
     // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
@@ -226,9 +244,10 @@ export function lightfield(given) {
   ].filter(Boolean).join('\n');
 
   const box = (name, list) => (list.length ? `<div class="${name}">\n${list.map(cell).join('\n')}\n</div>` : '');
-  return `<style>\n${css}\n</style>\n<div class="${cls}"><div class="f"></div>`
+  const fill = opts.colour.shade === '#000000' ? '' : '<div class="sh"></div>';
+  return `<style>\n${css}\n</style>\n<div class="${cls}"><div class="f"></div>${fill}`
     + `${box('d', darkCells)}${box('l', litCells)}${shadow ? '<div class="s"></div>' : ''}</div>`;
 }
 
-export { LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS };
+export { LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS, SHAPES, ANCHORS };
 export default lightfield;
