@@ -6989,6 +6989,34 @@ stills wearing motion. Rescaled by 30, which restores the author's intended pace
 Judged the way rule 2a0 demands, across four timestamps rather than on one still: both now visibly
 drift and breathe, and neither flickers.
 
+## #261 closed in part, and one half of it is still open
+
+**Two real defects in `make preview`, both fixed.**
+
+**One: the preview never set `--t`.** The frame clock is written by `core/bg-html.js` every frame, in
+seconds. The preview page never declared it, so every `calc(... var(--t) ...)` was INVALID and Chrome
+dropped the whole declaration. A time-driven fragment therefore previewed as a different picture, with
+nothing said. Confirmed by fixing it: with `--t` set, the left half of `_lightfall` matches the rendered
+film bar for bar, and without it the bars sit elsewhere. `--t <seconds>` is now a flag, which is also how
+you check that a backdrop moves at all rather than trusting one still.
+
+**Two: a full-bleed fragment previewed as a strip.** `#frag` declared a width and no height, so a child
+at `position:absolute; inset:0` collapsed to zero. Detected from the markup rather than declared, because
+the author of a backdrop should not have to know this tool internal layout, and the choice is PRINTED on
+every run so it is never silent.
+
+**Still open, and stated rather than guessed.** A full-bleed field still paints only the left 1080px of
+1920 in the preview, where the film fills the frame. It is a PAINT problem, not a layout one, and that is
+measured rather than assumed: all 42 bars are in the DOM, at correct percentage positions, spanning x=-23
+to x=2029. Three hypotheses were tested and all three were WRONG: a compositor raster race (a double
+requestAnimationFrame barrier was already there), `will-change` layer promotion (overriding it to `auto`
+changed the coverage by 0.0%), and the supersample the render path uses (deviceScaleFactor 2 changed
+nothing). Coverage is 53.6% in every case, and 1080/1920 is 56.25%, which is close enough to be a clue
+and was not enough to find it.
+
+Logging it unfinished on purpose. Three eliminated hypotheses are worth more to whoever picks this up
+than a fourth guess dressed as a conclusion, and the two fixes above stand on their own measurements.
+
 ---
 
 ## Waivers for `doc-refs`

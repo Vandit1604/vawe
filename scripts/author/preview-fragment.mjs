@@ -20,6 +20,17 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/author/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
 const boxW = parseInt(flag('--w', '1400'), 10);
+// `--t` is the frame clock, in SECONDS, written every frame by core/bg-html.js. A preview that never
+// sets it leaves every `calc(... var(--t) ...)` INVALID, so the browser drops the whole declaration and
+// the fragment previews as a different picture with no warning. Default 0 (the first frame); pass
+// `--t 3.5` to preview any other moment, which is also how you check that a backdrop moves at all.
+const tSec = parseFloat(flag('--t', '0'));
+// A FULL-BLEED fragment sizes itself to its container, so a centred 1400px box previews a STRIP of it
+// and nothing says so (docs/MISTAKES.md #261). `#frag` declares a width and no height, so a child at
+// `position:absolute; inset:0` collapses to zero. Detected rather than declared, because the author of
+// a backdrop should not have to know this tool's layout; the choice is PRINTED so it is never silent.
+const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
+const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 const themeName = flag('--theme', 'default');
 let bg = flag('--bg', null);
 if (!bg) { try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch { bg = '#0a0a0c'; } }
@@ -31,6 +42,9 @@ if (src.endsWith('.json')) {
   raw = j.html || (j.parts || []).map((p) => `<div style="position:relative;margin:24px auto">${p.html}</div>`).join('') || raw;
 }
 
+// Decided after `raw` is resolved, because a captured .json carries its markup one level in.
+const fullBleed = FULLBLEED_RE.test(raw) && INSET_RE.test(raw);
+
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2',
   '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const page$html = `<!doctype html><html><head><meta charset="utf-8">
@@ -39,7 +53,7 @@ const page$html = `<!doctype html><html><head><meta charset="utf-8">
 /* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
    1920x1080 via the screenshot clip, so it's unaffected. */
 #stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
-#frag{width:${boxW}px;position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
+#frag{--t:${tSec};--p:0;${fullBleed ? 'width:1920px;height:1080px' : `width:${boxW}px`};position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
 <body><div id="stage"><div id="frag">${raw}</div></div></body></html>`;
 
 const server = http.createServer((req, res) => {
@@ -69,7 +83,9 @@ const out = '/tmp/preview.png';
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
   const findings = await detect(`http://127.0.0.1:${port}/__frag`, browser);
   await browser.close(); server.close();
-  console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName}, bg ${bg}, box ${boxW}px)`);
+  console.log(`  --t: ${tSec}s (the frame clock; pass --t <seconds> for another moment)`);
+  console.log(`  layout: ${fullBleed ? 'FULL BLEED 1920x1080 (the fragment positions itself against its container)' : boxW + 'px centred'}`);
+console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName}, bg ${bg}, ${fullBleed ? 'full bleed 1920x1080' : `box ${boxW}px`})`);
   console.log('  open it / Read it and check: real fonts? real assets loaded? spacing + hierarchy right?');
   console.log('  want it live in your browser instead of a PNG?  add --serve');
   report(findings);
