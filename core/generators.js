@@ -210,12 +210,17 @@ const IDENTIFIER = 100000;          // a range wider than this is an id, not a d
 // `free` rolls a field across its whole declared range instead of nudging, and lets an enum change.
 // That is what a PER SECTION button means: the global one varies the look you have, and asking for one
 // section by name is asking for that aspect to be different, not slightly different.
-export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false) {
+export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false, ctx = null) {
+  // ONE hue anchor per CALL, so every role in a palette agrees where the palette went while consecutive
+  // rolls land somewhere new. The first version cached it on the base object, which is the same object
+  // every time the panel rolls, so five rolls produced the same colour and the fix looked like a
+  // regression that had merely stopped moving.
+  ctx = ctx || { hue: rand() * 360 };
   for (const [key, spec] of Object.entries(schema)) {
     switch (spec.kind) {
       case 'group': {
         const sub = {};
-        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null, free);
+        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null, free, ctx);
         out[key] = sub;
         break;
       }
@@ -243,16 +248,26 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
         break;
       }
       case 'hex': {
-        // A colour's range is the gamut, which is declared, just not as min and max. Hue and saturation
-        // are free; LIGHTNESS IS KEPT from the value being replaced.
+        // A PALETTE IS ONE HUE WITH OFFSETS, not four independent colours.
         //
-        // That is not a stylistic nicety, it is the difference between a randomiser and a scrambler. A
-        // palette's roles carry a composition: `ground` is the dark the field falls to and `bloom` is
-        // the light it rises to. Rolling lightness uniformly makes a bright ground and a dark bloom, so
-        // the field inverts and every result looks broken. The ordering is not in the schema, so rather
-        // than invent a rule about which role means what, this preserves the ordering already present.
-        const l = base?.[key] ? lightnessOf(base[key]) : 12 + rand() * 55;
-        out[key] = hslHex(rand() * 360, 45 + rand() * 45, l);
+        // Rolling each hue over the whole circle produced a green bloom, a blue blob and a yellow wash
+        // in one frame: three unrelated light sources and nothing to look at. Measured across the five
+        // committed presets, the LIT roles span an arc of 10, 22, 39 and 40 degrees. The one outlier is
+        // `fern` at 86, and `fern` is one of the two looks that was judged bad by eye. So narrow is not
+        // a taste I am imposing; it is what everything that works here already does.
+        //
+        // So the palette's own SHAPE is kept and only its anchor moves: each role holds its hue offset
+        // from the bloom, its lightness, and roughly its saturation. Same argument as the lightness rule
+        // below it, one axis over. A roll gives the same palette in a different colour, which is a
+        // variation; four random hues is a collision.
+        const from = base?.[key];
+        const anchorHue = ctx.hue;
+        if (!from) { out[key] = hslHex(anchorHue, 45 + rand() * 45, 12 + rand() * 55); break; }
+        const me = toHsl(from);
+        const offset = anchorHue - hueOf(base, ANCHOR_ROLE) + me.h;
+        // A little play in saturation, none in the relationship. Presets run 0.55 to 1.00.
+        const sat = clamp(me.s * 100 * (0.85 + rand() * 0.3), 40, 100);
+        out[key] = hslHex(((offset % 360) + 360) % 360, sat, me.l * 100);
         break;
       }
       // `color` may hold a theme expression, and a random hex would silently drop the theming that is
@@ -264,6 +279,26 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
   }
   return out;
 }
+
+// The role every other colour is measured against. `bloom` is the light the field rises to, so it is
+// the one a viewer reads first and the natural anchor for the rest.
+const ANCHOR_ROLE = 'bloom';
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+function toHsl(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex));
+  if (!m) return { h: 0, s: 0.6, l: 0.4 };
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) h = mx === r ? 60 * ((((g - b) / d) % 6 + 6) % 6) : mx === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4);
+  const l = (mx + mn) / 2;
+  return { h, s: d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)), l };
+}
+
+const hueOf = (obj, role) => (obj && obj[role] ? toHsl(obj[role]).h : 0);
 
 const lightnessOf = (hex) => {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex));
