@@ -595,3 +595,168 @@ for (const e of CATALOG) {
 // APP SURFACES — the app-content families (feed/list/settings/profile/onboarding/empty) live in
 // blocks/app.mjs and are re-exported here so `blocks/index.mjs` stays the single import point.
 export * from './app.mjs';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for the families that live in THIS file. Vocabulary and checker:
+// blocks/schema.mjs; the doctrine is core/lightfield/options.js, mirrored key for key.
+//
+// x · y · start · dur are excluded from every table on purpose. They are placement and timing the
+// SCENE supplies, never content an author dials.
+export const CORE_SCHEMAS = {
+  card: {
+    w: { kind: 'int', min: 160, max: 1920, def: 740 },
+    h: { kind: 'int', min: 120, max: 1080, def: 336 },
+    // The inner panel's fill. A tint, not a colour: it reads as the accent through the card.
+    tint: { kind: 'color', def: 'color-mix(in srgb, var(--accent) 10%, var(--card))' },
+    title: { kind: 'str', max: 60 },
+    desc: { kind: 'str', max: 160 },
+    pills: { kind: 'list', of: { kind: 'str', max: 24 }, def: [] },
+    // Empty draws no footer row at all.
+    cta: { kind: 'str', max: 24, def: 'Explore' },
+    anim: { kind: 'str', max: 24, def: 'rise' },
+    enterDur: { kind: 'num', min: 0, max: 4, def: 0.5 },
+  },
+
+  colorCycle: {
+    word: { kind: 'str', max: 40, def: 'colour' },
+    size: { kind: 'int', min: 18, max: 400, def: 78 },
+    weight: { kind: 'int', min: 100, max: 900, def: 700 },
+    colors: { kind: 'hexlist', max: 12, def: ['#4338E8', '#12B26A', '#F6A417', '#E23B94', '#1E5BF0', '#C96442'] },
+    // Seconds per hue. The block emits one layer per step across `dur`, so a very small `each` is a
+    // very large layer count for one word.
+    each: { kind: 'num', min: 0.05, max: 5, def: 0.5 },
+  },
+
+  stripeCard: {
+    w: { kind: 'int', min: 200, max: 1080, def: 380 },
+    // The only figure on the card, and empty by default: it was baked once and every caller
+    // published the same invented number.
+    amount: { kind: 'str', max: 20, def: '' },
+  },
+
+  quote: {
+    w: { kind: 'int', min: 200, max: 1920, def: 900 },
+    text: { kind: 'str', max: 240 },
+    author: { kind: 'str', max: 60 },
+  },
+
+  kpiRow: {
+    // A cell counts UP when it gives a numeric `to`, and lands as text when it gives a formatted
+    // `value` ("$2.4M") the count layer cannot render.
+    items: { kind: 'list', of: { kind: 'row', fields: {
+      to: { kind: 'num', min: -1e12, max: 1e12 },
+      from: { kind: 'num', min: -1e12, max: 1e12 },
+      unit: { kind: 'str', max: 8 },
+      value: { kind: 'str', max: 20 },
+      label: { kind: 'str', max: 40 },
+    } }, def: [] },
+    gap: { kind: 'int', min: 0, max: 400, def: 80 },
+  },
+
+  comparison: {
+    w: { kind: 'int', min: 200, max: 1920, def: 900 },
+    leftTitle: { kind: 'str', max: 40, def: 'Others' },
+    rightTitle: { kind: 'str', max: 40, def: 'Vawe' },
+    left: { kind: 'list', of: { kind: 'str', max: 80 }, def: [] },
+    right: { kind: 'list', of: { kind: 'str', max: 80 }, def: [] },
+    // …OR two SCREENS. Either screen present turns the columns into panes and hands the geometry to
+    // splitScreen, so the string form above is untouched and takes precedence by absence.
+    leftScreen: { kind: 'block', def: null },
+    rightScreen: { kind: 'block', def: null },
+    gap: { kind: 'int', min: 0, max: 400, def: 40 },
+  },
+
+  captions: {
+    // `t` is relative to the block's start, `dur` is this line's own life.
+    lines: { kind: 'list', of: { kind: 'row', fields: {
+      t: { kind: 'num', min: 0, max: 3600 },
+      text: { kind: 'str', max: 120 },
+      dur: { kind: 'num', min: 0.2, max: 30 },
+    } }, def: [] },
+    size: { kind: 'int', min: 18, max: 120, def: 30 },
+  },
+
+  pricingCard: {
+    w: { kind: 'int', min: 200, max: 1080, def: 360 },
+    plan: { kind: 'str', max: 24, def: 'Pro' },
+    // Empty by default: a default price is a figure published by every caller who forgets to set one.
+    price: { kind: 'str', max: 16, def: '' },
+    period: { kind: 'str', max: 12, def: '/mo' },
+    features: { kind: 'list', of: { kind: 'str', max: 60 }, def: [] },
+    cta: { kind: 'str', max: 24, def: 'Start free' },
+    // The featured plan: accent border, accent CTA, one step more elevation.
+    highlight: { kind: 'bool', def: false },
+  },
+
+  lowerThird: {
+    name: { kind: 'str', max: 60, def: '' },
+    role: { kind: 'str', max: 60, def: '' },
+    // Twelve chromes, one layout. The factory throws on anything else, which is what this states.
+    variant: { kind: 'enum', of: ['cleanBar', 'boldBlock', 'bild', 'darkCard', 'sideRule', 'kickerName',
+      'accentUnderline', 'maskReveal', 'softPill', 'colourBlock', 'stackBars', 'newsTicker'], def: 'cleanBar' },
+    accent: { kind: 'color', def: 'var(--accent)' },
+  },
+
+  searchEngine: {
+    w: { kind: 'int', min: 300, max: 1920, def: 900 },
+    variant: { kind: 'enum', of: ['home', 'results'], def: 'home' },
+    // The mark, in three forms. `logo` wins: a wordmark re-typed in the theme's face is a lookalike.
+    brand: { kind: 'str', max: 40, def: 'Search' },
+    word: { kind: 'list', of: { kind: 'row', fields: {
+      c: { kind: 'str', max: 2 },
+      color: { kind: 'color' },
+    } }, def: null },
+    logo: { kind: 'str', max: 200, def: null },
+    // The logo file's own aspect, used to scale it into the mark height. Both must be above zero or
+    // the ratio is undefined.
+    logoW: { kind: 'int', min: 1, max: 4000, def: 272 },
+    logoH: { kind: 'int', min: 1, max: 4000, def: 92 },
+    query: { kind: 'str', max: 120, def: '' },
+    results: { kind: 'list', of: { kind: 'row', fields: {
+      url: { kind: 'str', max: 120 },
+      title: { kind: 'str', max: 120 },
+      snippet: { kind: 'str', max: 200 },
+    } }, def: [] },
+    markAlign: { kind: 'enum', of: ['center', 'left'], def: 'center' },
+    // Characters per second for the query. The engine derives one key click per revealed character.
+    cps: { kind: 'num', min: 1, max: 120, def: 11 },
+    keyCue: { kind: 'str', max: 40 },
+    keyGain: { kind: 'num', min: 0, max: 2 },
+    clickIndex: { kind: 'int', min: 0, max: 20, def: 0 },
+    cursorStart: { kind: 'num', min: 0, max: 3600 },
+  },
+
+  splitScreen: {
+    w: { kind: 'int', min: 200, max: 1920, def: 1200 },
+    // A row split uses `h` for the divider and the pip inset only, so a two-row-tall split is a real
+    // and shipped case (the catalog's own example is 96). A column split divides it, so it has to
+    // clear the gap with something left over.
+    h: { kind: 'int', min: 40, max: 1920, def: 560 },
+    orient: { kind: 'enum', of: ['row', 'column'], def: 'row' },
+    // The FRACTION of the long axis the first pane gets, clamped to 0.1..0.9 inside the factory so
+    // neither pane can vanish.
+    split: { kind: 'num', min: 0.1, max: 0.9, def: 0.5 },
+    gap: { kind: 'int', min: 0, max: 400, def: 24 },
+    left: { kind: 'block', def: null },
+    right: { kind: 'block', def: null },
+    // Picture-in-picture: the second pane insets into a corner of the first instead of sitting beside it.
+    pip: { kind: 'bool', def: false },
+    pipScale: { kind: 'unit', def: 0.36 },
+    pipInset: { kind: 'int', min: 0, max: 400, def: 20 },
+    pipCorner: { kind: 'enum', of: ['top-left', 'top-right', 'bottom-left', 'bottom-right'], def: 'bottom-right' },
+    divider: { kind: 'bool', def: false },
+    // How far the second pane trails the first. Zero lands both on one frame, which reads as one slab
+    // arriving, which is the thing a split is not.
+    lead: { kind: 'num', min: 0, max: 5, def: 0.18 },
+  },
+
+  screenSwap: {
+    w: { kind: 'int', min: 100, max: 1920, def: 320 },
+    screens: { kind: 'list', of: { kind: 'block' }, def: [] },
+    // One screen's turn. A screen whose turn falls past the block's end never gets one.
+    hold: { kind: 'num', min: 0.2, max: 60, def: 1.6 },
+    // How far a screen outlives its successor's arrival, so the two transitions are one move.
+    overlap: { kind: 'num', min: 0, max: 5, def: 0.45 },
+    transition: { kind: 'enum', of: Object.keys(SWAP), def: 'wipe' },
+  },
+};

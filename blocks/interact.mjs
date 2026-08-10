@@ -150,3 +150,59 @@ export function pressButton({ x, y, w = 260, label = '', pressAt = 0.8, color = 
     varsEase: 'linear',
   }];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table, with ONE thing worth saying here: for `pointer`
+// and `tapRipple`, x and y are the POINT touched rather than a top-left corner. That is still
+// placement, so it is still the scene's, but it is not the same placement the other blocks take.
+//
+// The moment dials (`clickAt`, `at`, `pressAt`) are the block's own choreography, not scene timing,
+// so they ARE dials: they are seconds measured from the block's start.
+export const INTERACT_SCHEMAS = {
+  pointer: {
+    // An absolute stage point {x,y}, OR a relative move {dx,dy} that travels WITH the block. Null
+    // leaves the pointer where it starts and clicks there, which is the correct degenerate case.
+    to: { kind: 'oneOf', of: [
+      { kind: 'row', fields: { x: { kind: 'num', min: -1e4, max: 1e4 }, y: { kind: 'num', min: -1e4, max: 1e4 } } },
+      { kind: 'row', fields: { dx: { kind: 'num', min: -1e4, max: 1e4 }, dy: { kind: 'num', min: -1e4, max: 1e4 } } },
+    ], def: null },
+    // The travel lands 0.15s before this, so the click fires on a pointer that is already still.
+    clickAt: { kind: 'num', min: 0, max: 60, def: 0.9 },
+    // Given, these replace the derived single click and the derived two-point path.
+    clicks: { kind: 'list', of: { kind: 'num', min: 0, max: 60 }, def: null },
+    path: { kind: 'list', of: { kind: 'row', fields: {
+      t: { kind: 'num', min: 0, max: 60 },
+      x: { kind: 'num', min: -1e4, max: 1e4 },
+      y: { kind: 'num', min: -1e4, max: 1e4 },
+    } }, def: null },
+    size: { kind: 'int', min: 12, max: 200, def: 36 },
+    color: { kind: 'color', def: null },
+    rippleColor: { kind: 'color', def: null },
+  },
+
+  tapRipple: {
+    // The moment of contact: nothing is drawn until the sweep leaves zero.
+    at: { kind: 'num', min: 0, max: 60, def: 0.4 },
+    // The ring's final diameter, floored at 40 inside the factory (below that the contact dot and
+    // the 3px ring stroke are the whole graphic and there is no wave to read).
+    size: { kind: 'int', min: 40, max: 800, def: 120 },
+    color: { kind: 'color', def: 'var(--accent)' },
+  },
+
+  keyboard: {
+    w: { kind: 'int', min: 160, max: 1080, def: 420 },
+    // Read off LAYOUTS itself, so a new tray cannot exist without the dial knowing it.
+    layout: { kind: 'enum', of: Object.keys(LAYOUTS), def: 'qwerty' },
+  },
+
+  pressButton: {
+    w: { kind: 'int', min: 80, max: 1080, def: 260 },
+    label: { kind: 'str', max: 40, def: '' },
+    // The moment of CONTACT. The dip is centred on it, so a `pointer` clicking at the same second
+    // lands on a button that moves under it.
+    pressAt: { kind: 'num', min: 0, max: 60, def: 0.8 },
+    color: { kind: 'color', def: 'var(--accent)' },
+    radius: { kind: 'int', min: 0, max: 100, def: 12 },
+  },
+};

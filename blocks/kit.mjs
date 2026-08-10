@@ -157,6 +157,8 @@ const TONES = {
   warn: '#F6A417', danger: T.down, error: T.down,
 };
 export function toneColor(tone, fallback = T.accent) { return TONES[tone] || fallback; }
+// The accepted spellings, read off the map itself so a `tone` dial cannot drift from what paints.
+export const TONE_NAMES = Object.keys(TONES);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IDENTITY. Four blocks drew an avatar and no two agreed: two took `initials`, two derived them from

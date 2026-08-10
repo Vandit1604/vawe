@@ -147,3 +147,71 @@ export function emptyState({ x, y, w = 460, icon = '', title = '', body = '', ct
       children: [text({ text: cta, size: 17, weight: 700, color: T.paper })] },
   ].filter(Boolean) }];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
+//
+// CONTENT RULE, restated as a contract: these surfaces carry counts and metadata by nature, so every
+// count is a prop that defaults to empty. No table below has a figure in a `def`.
+export const APP_SCHEMAS = {
+  feedRow: {
+    w: { kind: 'int', min: 200, max: 1920, def: 520 },
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+    name: { kind: 'str', max: 60, def: '' },
+    sub: { kind: 'str', max: 40, def: '' },
+    time: { kind: 'str', max: 20, def: '' },
+    body: { kind: 'str', max: 280, def: '' },
+  },
+
+  listRow: {
+    w: { kind: 'int', min: 200, max: 1920, def: 520 },
+    // One glyph in a 44px tile. Empty draws no tile and the title takes the row's leading edge.
+    icon: { kind: 'str', max: 4, def: '' },
+    title: { kind: 'str', max: 80, def: '' },
+    sub: { kind: 'str', max: 80, def: '' },
+    meta: { kind: 'str', max: 20, def: '' },
+  },
+
+  settingsRow: {
+    w: { kind: 'int', min: 200, max: 1920, def: 520 },
+    label: { kind: 'str', max: 80, def: '' },
+    sub: { kind: 'str', max: 120, def: '' },
+    control: { kind: 'enum', of: ['toggle', 'chevron', 'value'], def: 'chevron' },
+    // For `toggle` this is the switch state, where anything but false reads as on. For `value` it is
+    // the setting itself, drawn as text. `chevron` ignores it.
+    value: { kind: 'oneOf', of: [{ kind: 'bool' }, { kind: 'str', max: 40 }], def: '' },
+  },
+
+  profileHeader: {
+    w: { kind: 'int', min: 200, max: 1920, def: 460 },
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+    name: { kind: 'str', max: 60, def: '' },
+    handle: { kind: 'str', max: 40, def: '' },
+    // Empty by default: a caller with no counts ships no counts.
+    stats: { kind: 'list', of: { kind: 'row', fields: {
+      value: { kind: 'str', max: 12 },
+      label: { kind: 'str', max: 20 },
+    } }, def: [] },
+  },
+
+  onboardCard: {
+    w: { kind: 'int', min: 200, max: 1920, def: 460 },
+    // Both are rounded and clamped inside the factory: `of` to at least 1, `step` into 1..of.
+    step: { kind: 'int', min: 1, max: 20, def: 1 },
+    of: { kind: 'int', min: 1, max: 20, def: 1 },
+    title: { kind: 'str', max: 60, def: '' },
+    body: { kind: 'str', max: 200, def: '' },
+    cta: { kind: 'str', max: 24, def: '' },
+  },
+
+  emptyState: {
+    w: { kind: 'int', min: 200, max: 1920, def: 460 },
+    icon: { kind: 'str', max: 4, def: '' },
+    title: { kind: 'str', max: 60, def: '' },
+    body: { kind: 'str', max: 200, def: '' },
+    cta: { kind: 'str', max: 24, def: '' },
+  },
+};

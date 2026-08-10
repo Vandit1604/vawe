@@ -229,3 +229,135 @@ export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rat
         children: [text({ text: cta, size: 17, weight: 700, color: onColor(T.accent) })] },
     ].filter(Boolean) }];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
+// x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
+//
+// The five identity blocks speak ONE surface: {name, handle?, sub?, avatar, initials}. Each block's
+// older word for a slot is kept as an alias and declared as one, because a shared vocabulary is worth
+// nothing if adopting it breaks the callers.
+export const SOCIAL_SCHEMAS = {
+  profileCard: {
+    w: { kind: 'int', min: 160, max: 1080, def: 360 },
+    name: { kind: 'str', max: 60, def: '' },
+    sub: { kind: 'str', max: 60, def: '' },
+    role: { kind: 'str', max: 60, def: '' },         // alias of sub
+    // An image path wins; otherwise the initials are drawn, derived from `name` when not given.
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+  },
+
+  chatBubble: {
+    w: { kind: 'int', min: 160, max: 1080, def: 480 },
+    messages: { kind: 'list', of: { kind: 'row', fields: {
+      text: { kind: 'str', max: 200 },
+      // Mine: right, in accent. Theirs: left, in a hairline card.
+      me: { kind: 'bool' },
+    } }, def: [] },
+  },
+
+  tweetCard: {
+    w: { kind: 'int', min: 200, max: 1080, def: 480 },
+    name: { kind: 'str', max: 40, def: '' },
+    handle: { kind: 'str', max: 40, def: '' },
+    text: { kind: 'str', max: 280, def: '' },
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+    // Counts are strings so a caller can write "1.2k". Empty ships no figure.
+    likes: { kind: 'str', max: 12, def: '' },
+    reposts: { kind: 'str', max: 12, def: '' },
+  },
+
+  avatarStack: {
+    avatars: { kind: 'list', of: { kind: 'oneOf', of: [
+      { kind: 'str', max: 200 },
+      { kind: 'row', fields: {
+        avatar: { kind: 'str', max: 200 },
+        initials: { kind: 'str', max: 3 },
+        name: { kind: 'str', max: 60 },
+        color: { kind: 'color' },
+      } },
+    ] }, def: [] },
+    // The "+N" overflow. Zero draws no overflow cell.
+    extra: { kind: 'int', min: 0, max: 9999, def: 0 },
+    // One circle's diameter. The overlap step is 0.65 of it, so the stack's width follows from this.
+    size: { kind: 'int', min: 16, max: 300, def: 48 },
+  },
+
+  socialProof: {
+    avatars: { kind: 'list', of: { kind: 'oneOf', of: [
+      { kind: 'str', max: 200 },
+      { kind: 'row', fields: {
+        avatar: { kind: 'str', max: 200 },
+        initials: { kind: 'str', max: 3 },
+        name: { kind: 'str', max: 60 },
+        color: { kind: 'color' },
+      } },
+    ] }, def: [] },
+    extra: { kind: 'int', min: 0, max: 9999, def: 0 },
+    size: { kind: 'int', min: 16, max: 300, def: 44 },
+    // Empty by default: a social-proof block that ships a line nobody stood behind is the defect
+    // this registry has already shipped twice.
+    caption: { kind: 'str', max: 80, def: '' },
+    sub: { kind: 'str', max: 80, def: '' },
+    // Between the stack's real end and the caption. The stack's width is the block's own arithmetic.
+    gap: { kind: 'int', min: 0, max: 200, def: 18 },
+  },
+
+  reactionBar: {
+    reactions: { kind: 'list', of: { kind: 'row', fields: {
+      emoji: { kind: 'str', max: 8 },
+      count: { kind: 'num', min: 0, max: 1e9 },
+      // The one you picked: accent fill and an accent border.
+      mine: { kind: 'bool' },
+    } }, def: [] },
+  },
+
+  nowPlaying: {
+    w: { kind: 'int', min: 200, max: 1080, def: 380 },
+    name: { kind: 'str', max: 60, def: '' },
+    track: { kind: 'str', max: 60, def: '' },        // alias of name
+    sub: { kind: 'str', max: 60, def: '' },
+    artist: { kind: 'str', max: 60, def: '' },       // alias of sub
+    avatar: { kind: 'str', max: 200, def: '' },
+    art: { kind: 'str', max: 200, def: '' },         // alias of avatar
+    initials: { kind: 'str', max: 3, def: '' },
+    // How far through the track, clamped to 0..1 inside the factory. The fill's width IS this.
+    progress: { kind: 'unit', def: 0.4 },
+  },
+
+  videoLowerThird: {
+    w: { kind: 'int', min: 200, max: 1920, def: 520 },
+    name: { kind: 'str', max: 60, def: '' },
+    channel: { kind: 'str', max: 60, def: '' },      // alias of name
+    sub: { kind: 'str', max: 60, def: '' },
+    subscribers: { kind: 'str', max: 60, def: '' },  // alias of sub
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+    cta: { kind: 'str', max: 24, def: 'Subscribe' },
+  },
+
+  followCard: {
+    w: { kind: 'int', min: 160, max: 1080, def: 360 },
+    handle: { kind: 'str', max: 40, def: '' },
+    name: { kind: 'str', max: 60, def: '' },
+    // No portrait is drawn unless one is given: a card designed without one must not sprout an
+    // invented circle just because it learned the vocabulary.
+    avatar: { kind: 'str', max: 200, def: '' },
+    initials: { kind: 'str', max: 3, def: '' },
+    cta: { kind: 'str', max: 24, def: 'Follow' },
+  },
+
+  installCard: {
+    w: { kind: 'int', min: 200, max: 1080, def: 400 },
+    icon: { kind: 'str', max: 4, def: '' },
+    name: { kind: 'str', max: 40, def: '' },
+    sub: { kind: 'str', max: 40, def: '' },
+    // Out of five, clamped to 0..5 inside the factory. Zero draws no stars at all.
+    rating: { kind: 'num', min: 0, max: 5, def: 0 },
+    // The count of ratings, FORMATTED by the block (1204 becomes "1.2K"). Zero draws no count.
+    ratings: { kind: 'int', min: 0, max: 1e9, def: 0 },
+    cta: { kind: 'str', max: 24, def: '' },
+  },
+};
