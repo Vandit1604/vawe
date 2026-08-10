@@ -77,8 +77,11 @@ export function PlaygroundClient() {
   const [copied, setCopied] = useState<string | null>(null);
   const [preset, setPreset] = useState<string | null>(null);
   const [noDial, setNoDial] = useState<string[]>([]);
+  // The patch, for the download filename only. A ref because it is read inside a callback and must not
+  // put that callback in every render's dependency list.
+  const patchRef = useRef<Record<string, unknown>>({});
+  const presetRef = useRef<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [t, setT] = useState(0);
   const stage = useRef<HTMLDivElement>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
@@ -158,16 +161,19 @@ export function PlaygroundClient() {
     return () => { if (prev && prev !== sceneUrl) URL.revokeObjectURL(prev); };
   }, [sceneUrl]);
 
-  // Paint it and write `--t` ONCE. The preview does not animate: a moving field cannot be judged, and a
-  // rAF loop on a page whose whole purpose is looking closely is a cost with no benefit. `--t` is still
-  // the engine's own clock in SECONDS, so what you see at t is exactly the frame the renderer would
-  // produce there, and the slider is how you inspect motion instead of being subjected to it.
+  // Paint it and pin `--t` to ZERO. Nothing on this page moves, and nothing can be made to move: there
+  // is no loop and no clock control. A field is judged against a still reference, and a picture that
+  // changes while you look at it cannot be compared to one that does not.
+  //
+  // `motion.*` are still real options, because they are real in a render. They sit behind the
+  // disclosure and the panel says the preview is still, which is the honest version of a dial whose
+  // effect you cannot see here.
   useEffect(() => {
     const el = stage.current;
     if (!el || html == null) return;
     el.innerHTML = html;
-    el.style.setProperty("--t", t.toFixed(3));
-  }, [html, t]);
+    el.style.setProperty("--t", "0");
+  }, [html]);
 
   const apply = useCallback((next: Record<string, unknown>, named: string | null = null) => {
     setPreset(named);
@@ -195,6 +201,54 @@ export function PlaygroundClient() {
       (opts[group] ?? null) as Record<string, unknown> | null, true);
     apply({ ...opts, [group]: sub });
   }, [engine, gen, opts, apply]);
+
+  // Rasterise the fragment to a PNG, client side, with the same trick core/seams.js uses in the engine:
+  // wrap the markup in an SVG <foreignObject>, load that as an image, draw it to a canvas.
+  //
+  // TWO THINGS THAT WOULD SILENTLY RUIN IT, both learned in the engine and both handled here:
+  //   1. External stylesheets DO NOT apply inside a foreignObject. This works because a generator emits
+  //      its own <style> inline, so the fragment is self-contained. A generator that ever relied on a
+  //      page stylesheet would rasterise wrong, and that is why this asks the generator for markup
+  //      rather than serialising the live DOM node.
+  //   2. `--t` has to be written on the wrapper. Inside the SVG there is no page to inherit it from, so
+  //      every calc() reading it would be invalid and the whole declaration dropped (docs/MISTAKES.md
+  //      #261). Pinned to 0, the frame everyone is looking at.
+  const download = useCallback(async (what: "png" | "html") => {
+    if (typeof html !== "string" || !gen) return;
+    // The name says what this IS. `preset` was measured against the schema's defaults, so simply opening
+    // a look and downloading it produced "custom" before anyone had touched a dial, which is a filename
+    // that lies about its own contents. The preset STATE is the honest source: it is null the moment
+    // anything is changed and holds the preset's name until then.
+    // A look and its only preset usually share a name, and "colonnade-colonnade" is noise.
+    const tag = presetRef.current ?? "custom";
+    const stamp = tag === gen.name ? gen.name : `${gen.name}-${tag}`;
+    if (what === "html") {
+      // A whole page, not a bare fragment: what someone downloads should open.
+      const doc = `<!doctype html><meta charset="utf-8"><title>${gen.name}</title>`
+        + `<style>html,body{margin:0;height:100%;background:#000}`
+        + `#f{position:relative;width:100vw;height:100vh;--t:0}</style><div id="f">${html}</div>`;
+      save(new Blob([doc], { type: "text/html" }), `${stamp}.html`);
+      return;
+    }
+    const W = 3840, H = 2160;                 // 4K. A backdrop gets scaled up in use, so give it room.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`
+      + `<foreignObject width="100%" height="100%">`
+      + `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;height:${H}px;position:relative;--t:0">`
+      + `${html}</div></foreignObject></svg>`;
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    try {
+      await img.decode();
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      c.getContext("2d")!.drawImage(img, 0, 0);
+      const blob: Blob | null = await new Promise((r) => c.toBlob(r, "image/png"));
+      if (blob) save(blob, `${stamp}-${W}x${H}.png`);
+    } catch (e) {
+      // Loud, because a silent failure here looks like a browser that ignored the click.
+      setErr(`could not rasterise: ${String((e as Error)?.message || e)}`);
+    }
+  }, [html, gen]);
 
   const copy = useCallback((label: string, text: string) => {
     navigator.clipboard?.writeText(text).then(() => {
@@ -236,6 +290,8 @@ export function PlaygroundClient() {
   // Only what was changed. Short, and more usefully READABLE: it says what this person did, which is
   // the thing worth pasting into a scene or into an issue.
   const patch = engine.diffFromDefaults(opts, gen.schema);
+  patchRef.current = patch;
+  presetRef.current = preset;
   const patchJson = JSON.stringify(patch, null, 2);
   const link = typeof window === "undefined" ? "" :
     `${window.location.origin}${window.location.pathname}?g=${gen.name}` +
@@ -255,14 +311,6 @@ export function PlaygroundClient() {
             ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
             : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
           {err && <p className="pgerr">{err}</p>}
-          {/* Parked at 0, so nothing moves until you ask. A generator with `motion: still` ignores it,
-              which is correct and visible rather than hidden. */}
-          <label className="pgtime">
-            <span>t</span>
-            <input type="range" min={0} max={6} step={0.05} value={t}
-              onChange={(e) => setT(Number(e.target.value))} aria-label="time, in seconds" />
-            <code>{t.toFixed(2)}s</code>
-          </label>
         </div>
 
         <div className="pgpanel">
@@ -306,11 +354,15 @@ export function PlaygroundClient() {
           </button>
           <select aria-label="copy something else" value=""
             onChange={(e) => {
-              if (e.target.value === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
-              if (e.target.value === "link") copy("link", link);
+              const v = e.target.value;
+              if (v === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
+              if (v === "link") copy("link", link);
+              if (v === "png" || v === "file") download(v === "png" ? "png" : "html");
               e.target.value = "";
             }}>
             <option value="" disabled>…</option>
+            <option value="png">download PNG (4K)</option>
+            <option value="file">download HTML</option>
             <option value="html">copy HTML</option>
             <option value="link">copy link</option>
           </select>
@@ -556,6 +608,15 @@ function groupControls(cs: Control[]): [string | null, Control[]][] {
     else out.push([c.group, [c]]);
   }
   return out;
+}
+
+function save(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  a.click();
+  // Revoking immediately cancels the download in some browsers; a tick is enough and leaks nothing.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const countLeaves = (o: unknown): number =>

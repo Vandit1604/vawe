@@ -7764,6 +7764,34 @@ still. Both moved behind the disclosure.
 What is left is a seed and four colours. Everything else is one click away and labelled with its count.
 Someone who came to see what the thing does gets the control they were going to reach for first.
 
+## #285 — the playground exports what it shows, and nothing on it can move
+
+**No movement, no way to make it move.** The rAF loop went in #280 and the clock slider went with this
+change. `--t` is pinned to 0 and there is no control for it: a field is judged against a still
+reference, and a picture that changes while you look cannot be compared to one that does not. Verified
+rather than asserted: markup byte-identical a second apart, `--t` reads 0, zero clock controls in the
+DOM. `motion.*` remain real options because they are real in a render; they sit behind the disclosure.
+
+**Download, 4K PNG or a page that opens.** Rasterising uses the trick `core/seams.js` already uses in
+the engine: wrap the markup in an SVG `<foreignObject>`, load it as an image, draw it to a canvas. Two
+things would have silently ruined it, and both are handled because the engine already paid for them:
+
+- **External stylesheets do not apply inside a `foreignObject`.** This works only because a generator
+  emits its own `<style>` inline. That is also why the export asks the GENERATOR for markup instead of
+  serialising the live node: a fragment that leaned on the page's CSS would rasterise wrong and look
+  merely "a bit off".
+- **`--t` has to be written on the wrapper.** Inside the SVG there is no page to inherit it from, so
+  every `calc()` reading it would be invalid and the whole declaration dropped (#261).
+
+Proved by measurement, not by the file existing: 3840x2160, mean level 72.1, 2013 of 2304 sampled cells
+painted. A blank PNG of the right size is exactly what this would produce if either trap were open.
+
+**And the filename told a lie for two revisions.** It was stamped `custom` whenever the options differed
+from the SCHEMA DEFAULTS, which a preset always does, so opening a look and downloading it produced
+`colonnade-custom` before anyone had touched a dial. The preset STATE is the honest source: it is null
+the moment anything changes and holds the name until then. Then it read `colonnade-colonnade`, because a
+look and its only preset share a name. Both fixed. A filename is a claim about its contents.
+
 ---
 
 ## Waivers for `doc-refs`
