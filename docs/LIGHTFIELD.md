@@ -49,6 +49,7 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 | `shade` | AMBIENT FILL: the colour a shadow goes, screened under the pattern. `#000000` is the exact no-op and emits no layer. |
 | `spread` | 0 to 1: how far a lobe of light reaches before it dies. `0` is the tight ramp fitted to the first reference; `1` melts the lobes into one mass. |
 | `vivid` | how much the finished field is saturated. `1` leaves it alone. |
+| `originX` / `originY` | WHERE THE LIGHT IS, as a percentage across and down the frame. It moves the bloom cluster and the mid with it, rigidly, and leaves `deep` alone. Off-frame values are legal and useful. |
 | `extra` | an optional ordered list of up to four more colours, laid over the roles in the order given. Empty by default. The four roles are the whole API for a simple field; this is for a colour none of them can name. |
 
 #### `shade`, and why `ground` could not do its job
@@ -81,6 +82,18 @@ and spends about 3.5 in the highlights. The judgement in `ref` is that they are 
 Eight units of r-b in a near-black region is the difference between a brown black and a blue black;
 eight units on a highlight of 127 is under 6% and nothing looks different.
 
+#### `originX` / `originY`, and a layout that was fitted to one photograph
+
+The blob layout under the palette was fitted to `refs/lightfield-ref.jpg` and then imposed on every
+field after it: the bloom cluster high, the mid below it, the deep body against the left edge,
+whatever palette you hand it. So a generator advertised as general could only ever light a picture
+from the top. `refs/ref-a.jpg` is lit from off the bottom-right corner and was unreachable by any
+seed: four million layouts were searched and none of them existed, because the search was over jitter
+inside a fixed frame rather than over the frame.
+
+The pair moves the light and NOT `deep`, because `deep` is the body the light sits in rather than
+part of the light. The defaults are the centres of the fitted ranges, so they shift nothing.
+
 #### `spread`, and a constant that was fitted to one photograph
 
 The bloom is three lobes, and how fast a lobe fades used to be a constant: hold 0.85 out to 30%,
@@ -108,7 +121,9 @@ cellar depending on it.
 | `direction` | `left` `right` `top` `bottom` `center` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis: a frame that darkens down and right at once is ordinary, and no edge keyword can say it. |
 | `seam` | **-1 to 1** | the line BETWEEN elements. The SIGN is the polarity: positive multiplies (a dark seam), negative dodges (a bright one). `0` emits no seam at all. |
 | `seamWidth` | 0 to 1 | how wide that line is, as a fraction of the element it trails. `slats` only. |
+| `peak` | 0 to 100 | where the light lands across a lit face, as a percentage from its leading edge. `slats` only. |
 | `sheen` | **-1 to 1** | the element's face. Positive dodges (a lit surface), negative multiplies (a silhouette). `0` emits no face at all. |
+| `light` | `reflected` `emitted` | what the lit half of the pattern IS: a surface catching light, or a source making it. |
 
 `seam` and `sheen` are two dials because they are two jobs. There used to be one, `relief`, and it
 could not raise the seams without dimming the whole picture, which is how the first pass came out
@@ -122,8 +137,32 @@ pictures:
 | `seam` | `sheen` | what you get |
 |---|---|---|
 | `+` | `+` | a backlit blind: lit faces cut by dark seams (`ref`) |
-| `0` | `-` | silhouettes on a lit field, nothing between them (`ember`) |
-| `-` | `-` | a colonnade against a bright sky: dark panels split by bright hairlines (`colonnade`) |
+| `0` | `-` | silhouettes on a lit field, nothing between them |
+| `-` | `+` | flames: emitted spikes, each with a hot line up its trailing edge (`ember`) |
+| `-` | `0` | panels against a bright sky, with the mass carried by the field (`colonnade`) |
+
+#### `light`: reflected or emitted
+
+`reflected` is COLOR-DODGE, and it is right for a blind, a colonnade and a wall: it scales what is
+under an element up by one factor, so black stays black and light that is not behind the blind cannot
+come through it.
+
+It is also a CEILING. Dodge clamps at about 1.5x, and 1.5 times black is black, so no combination of
+`sheen`, `seam`, palette and seed can draw a BRIGHT MARK ON A DARK GROUND. A flame, a filament, a
+neon line and a star are all that picture. `ember` was the tonal inverse of its own reference for
+three passes for exactly this reason, and no dial value could have fixed it.
+
+`emitted` is PLUS-LIGHTER in `colour.bloom`. An element ADDS light at the strength `sheen` asks for,
+so it is bright against black and clips to white where the field beneath it is already hot, which is
+how a hot core reads. The two are one word apart because they are one question: does this element
+take light, or give it?
+
+#### `peak`: which side of an element the light lands on
+
+A blind is brightest a little way in from the seam it trails, because that seam is the slat's own
+shadow. A flame is brightest AT its trailing edge. That was a constant, 22 to 46 percent from the
+leading edge, so every lit field this generator could reach was lit from the same side. The default
+is the midpoint of the old range and the spread around it is the old range exactly.
 
 A lit face gets a mound of light across it, because that is what a surface catching light looks like.
 A silhouette gets a flat fill, because a thing that BLOCKS light is opaque all the way across; given
@@ -163,7 +202,21 @@ extent is a curve in the element's position.
 | `jitter` | 0 to 1 | how far each element wanders off the curve. |
 | `anchor` | `bottom` `top` | which edge the element grows from. The other end is the free one. |
 | `taper` | 0 to 1 | how much it narrows towards the free end. `1` ends in a point. |
-| `softness` | 0 to 1 | how sharply the extent ENDS. `0` stops dead, which is a bar chart; both references that needed an envelope end soft. |
+| `softness` | 0 to 1 | how sharply the extent ENDS. `0` stops dead, which is a bar chart; both references that needed an envelope end soft. With `mass`, it is the blur of the whole silhouette instead. |
+| `mass` | 0 to 1 | HAND THE ENVELOPE TO THE FIELD at this strength, instead of to the elements. `0` emits nothing. |
+
+#### `mass`: a landscape is not a row of boxes
+
+A landscape is ONE curve sampled per column. An envelope is ONE EXTENT PER ELEMENT. A row of twelve
+panels each holding its own height is twelve boxes with steps between them, and `refs/ref-b.png` is a
+single continuous ridge with the panel seams drawn OVER it. Softness cannot close that gap: softness
+blurs an edge, and what is wrong is who owns the edge. Two passes were spent on that dial and both
+made the picture worse.
+
+Above `0` the same curve is drawn once, across the whole frame, at 180 columns, with smooth noise
+riding on it in place of the per-element jitter. The elements then run the whole frame, which is what
+makes their seams full-height panel lines rather than the edges of boxes. The number is the mass's
+opacity, so a ridge can be a black cut-out or a haze on the horizon.
 
 `slats` honours all of it. `shards` honours everything but `anchor`, because a ray grows from a pivot
 outwards and its far end is already the far end. `rings` honours none of it: a band's position is a
@@ -176,9 +229,10 @@ its colour. `multiply` scales every channel DOWN by one factor; `color-dodge` sc
 UP by one factor. One factor per pixel leaves the ratios between R, G and B untouched, so chroma
 survives and rises on the lit faces. One `overlay` layer doing both jobs is what turned a crimson
 field brown: overlay pulls a mid-tone towards white on one side and towards grey on the other, and
-it cannot be asked to stop. `plus-lighter` was tried too and is worse in a different way: it ADDS,
-so it lit up the reference's black right-hand side with bars that should not be there. Dodge leaves
-black alone, because zero divided by anything is still zero.
+it cannot be asked to stop. `plus-lighter` is the OTHER mode rather than a worse one: it ADDS, so it
+lit up the first reference's black right-hand side with bars that should not be there, and it is the
+only way to draw a flame. Which one runs is `shadow.light`, and dodge is the default because it
+leaves black alone: zero divided by anything is still zero.
 
 ### motion
 
@@ -247,14 +301,15 @@ wrong page for a full-bleed field: the field is `position:absolute;inset:0` and 
 | file | palette | pattern | polarity | envelope |
 |---|---|---|---|---|
 | `formats/scene/_lightfield-ref.html` | orange, magenta, red, navy fill | slats, 58 | dark seam, lit face | none |
-| `formats/scene/_lightfield-ember.html` | white, orange, oxblood, black | slats, 40 | no seam, silhouette | ramp, from the top, tapered to points |
-| `formats/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, silhouette | valley, from the bottom, soft-topped |
+| `formats/scene/_lightfield-ember.html` | orange, scarlet, oxblood, black | slats, 40 | bright hairline seam, EMITTED face | ramp, from the bottom, tapered to points |
+| `formats/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, no face | valley, drawn as a field-wide `mass` |
 | `formats/scene/_lightfield-tide.html` | ice blue, steel, navy, black | rings, 120 | dark seam, lit face | none |
 | `formats/scene/_lightfield-fern.html` | acid green, jade, forest, black | shards, 34 | dark seam, lit face | none |
 
 The first three are all `slats`. That is the point of the table: `ref`, `ember` and `colonnade`
 reproduce three photographs that look nothing alike, and none of them is a new structure. What
-separates them is the two polarity signs, an envelope and a spread.
+separates them is the two polarity signs, an envelope, a light origin and whether the lit half of the
+pattern reflects light or emits it.
 
 Their option sets are in `core/lightfield/presets.js`, and each one is a worked example of
 the API. Nothing about them is special-cased inside the generator: a preset is only an argument.
@@ -265,7 +320,7 @@ the API. Nothing about them is special-cased inside the generator: a preset is o
 |---|---|
 | `core/lightfield/index.js` | the generator, the colour field, the shadow, the motion |
 | `core/lightfield/options.js` | the option table. The only place that decides what is valid |
-| `core/lightfield/patterns.js` | the three structures. Knows nothing about colour |
+| `core/lightfield/patterns.js` | the three structures and the field-wide `mass`. Knows nothing about colour |
 | `core/lightfield/colour.js` | hex parsing and mixing |
 | `core/lightfield/rng.js` | the seeded generator. Never swap this for `Math.random` |
 
