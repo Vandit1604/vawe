@@ -27,7 +27,7 @@
 // It prints an option set. It does not write one: a fit is a proposal, and a human still has to look.
 
 import fs from 'node:fs';
-import { PRESETS } from './lightfield-presets.mjs';
+import { PRESETS } from '../../core/lightfield/presets.js';
 import { pixels, striping, blockError, tailError, chroma } from './lightfield-metrics.mjs';
 import { open, W, H } from './lightfield-render.mjs';
 import { gridPoints, fitPalette, toHex } from './lightfield-model.mjs';

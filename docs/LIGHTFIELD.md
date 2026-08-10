@@ -160,7 +160,7 @@ wrong page for a full-bleed field: the field is `position:absolute;inset:0` and 
 | `formats/scene/_lightfield-tide.html` | ice blue, steel, navy, black | rings | soft, from below |
 | `formats/scene/_lightfield-fern.html` | acid green, jade, forest, black | shards | hard, centred |
 
-Their option sets are in `scripts/author/lightfield-presets.mjs`, and each one is a worked example of
+Their option sets are in `core/lightfield/presets.js`, and each one is a worked example of
 the API. Nothing about them is special-cased inside the generator: a preset is only an argument.
 
 ## Files
@@ -195,3 +195,17 @@ Three things it does not reach, and why:
 3. **The exact lobe arrangement.** The layout is five ellipses placed by one seed. Four million
    layouts were ranked and the best modelled error plateaued near 18, so the gap is the vocabulary,
    not the search. A sixth blob would close some of it and make the seed harder to reason about.
+
+## Turning the dials without a render
+
+The generator is on the site at **`/playground`**. Every control there is built from `SCHEMA` in
+`core/lightfield/options.js`, so what you can turn is exactly what the generator accepts, and an
+option it refuses says so on the page instead of quietly doing nothing.
+
+It opens on `ref` rather than on the schema's raw defaults. A `def` is the neutral value of one
+field, which is not the same as a considered result: the fitted `ref` differs from the defaults on
+three colour stops.
+
+Copy the options straight into a scene, copy the HTML, or copy a link that carries only what you
+changed. To add another generator to that page, export a `SCHEMA` and a render function and add a
+row to `core/generators.js`. The page reads the registry; there is no list to keep on the site.

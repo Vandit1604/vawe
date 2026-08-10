@@ -7,7 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { lightfield, PATTERNS, MOTIONS, DIRECTIONS } from '../../core/lightfield/index.js';
-import { PRESETS } from './lightfield-presets.mjs';
+import { PRESETS } from '../../core/lightfield/presets.js';
 
 let failures = 0;
 const sha = (s) => createHash('sha256').update(s).digest('hex').slice(0, 16);

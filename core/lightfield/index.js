@@ -214,7 +214,14 @@ export function lightfield(given) {
     `.${cls} .f{position:absolute;inset:-4%;background:${paintField(opts)}}`,
     layer('d', 'multiply', darkCells),
     layer('l', 'color-dodge', litCells),
-    `.${cls} i{position:absolute;display:block;will-change:transform,opacity}`,
+    // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
+    // them: that is 400 compositor layers, more than Chrome will keep rastered, so it cycles which ones
+    // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
+    // 90ms apart differed forever, the PNG oscillating between 200K and 270K, and with will-change off
+    // the same field was byte-identical from the eighth attempt on. Same family as the deferred raster
+    // in docs/MISTAKES.md #267, which cost whole product screenshots. A promotion hint that the browser
+    // cannot honour is worse than none (docs/MISTAKES.md #272).
+    `.${cls} i{position:absolute;display:block}`,
     shadow ? `.${cls} .s{position:absolute;inset:0;pointer-events:none;background:${shadow}}` : '',
   ].filter(Boolean).join('\n');
 

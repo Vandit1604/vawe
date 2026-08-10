@@ -1,0 +1,344 @@
+"use client";
+
+/**
+ * The generator playground: dials on the right, the live generator on the left.
+ *
+ * NOTHING HERE KNOWS WHAT A LIGHTFIELD IS. It reads `GENERATORS` out of the vendored engine
+ * (core/generators.js) and builds the panel from each generator's declarative schema, so adding a
+ * generator to the registry is the whole job of putting it on this page. A hand-kept list of dials
+ * over here would be a second source of truth that goes stale in silence, which is exactly how
+ * site/public froze 77 files behind core/ (docs/MISTAKES.md #271).
+ *
+ * The engine is loaded at RUNTIME with a dynamic import of "/core/generators.js", not bundled. Two
+ * reasons, and the second is the real one: the site vendors core/ into public/ as static files, so
+ * bundling would fork the engine into a webpack copy that drifts from the one /editor boots. This
+ * way the page runs the same file the renderer does.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+type Spec = {
+  kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist";
+  min?: number; max?: number; def?: unknown; of?: string[]; max_?: number;
+  fields?: Record<string, Spec>;
+};
+type Control = { path: string; key: string; group: string | null; spec: Spec };
+type Generator = {
+  name: string; blurb: string; docs?: string;
+  schema: Record<string, Spec>;
+  presets?: Record<string, Record<string, unknown>>;
+  render: (opts: unknown) => string;
+};
+type Engine = {
+  GENERATORS: Generator[];
+  controlsOf: (s: Record<string, Spec>) => Control[];
+  defaultsOf: (s: Record<string, Spec>) => Record<string, unknown>;
+  diffFromDefaults: (o: unknown, s: Record<string, Spec>) => Record<string, unknown>;
+};
+
+// A RUNTIME url, held in a variable on purpose. As a literal, TypeScript tries to resolve it as a
+// module path and fails, because it is not one: it is a static file the site serves at the root. The
+// variable also keeps the bundler out of it, which is the point of the whole arrangement.
+const ENGINE_URL = "/core/generators.js";
+
+const get = (o: Record<string, unknown>, path: string): unknown =>
+  path.split(".").reduce<unknown>((a, k) => (a as Record<string, unknown>)?.[k], o);
+
+/** Immutable set-at-path. The panel re-renders off identity, and mutating state in place is how a
+ *  control ends up showing a value the generator never received. */
+const setAt = (o: Record<string, unknown>, path: string, v: unknown): Record<string, unknown> => {
+  const [head, ...rest] = path.split(".");
+  if (!rest.length) return { ...o, [head]: v };
+  const child = (o[head] ?? {}) as Record<string, unknown>;
+  return { ...o, [head]: setAt(child, rest.join("."), v) };
+};
+
+const LABELS: Record<string, string> = {
+  seed: "seed", colour: "colour", shadow: "shadow", pattern: "pattern", motion: "motion",
+};
+
+export function PlaygroundClient() {
+  const [engine, setEngine] = useState<Engine | null>(null);
+  const [bootErr, setBootErr] = useState<string | null>(null);
+  const [which, setWhich] = useState(0);
+  const [opts, setOpts] = useState<Record<string, unknown> | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [preset, setPreset] = useState<string | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
+
+  // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
+  // message is the worst outcome, because it looks like the page simply has nothing in it.
+  useEffect(() => {
+    let alive = true;
+    import(/* webpackIgnore: true */ ENGINE_URL)
+      .then((m) => { if (alive) setEngine(m as unknown as Engine); })
+      .catch((e) => { if (alive) setBootErr(String(e?.message || e)); });
+    return () => { alive = false; };
+  }, []);
+
+  const gen = engine?.GENERATORS[which] ?? null;
+
+  // Reset to a generator's own defaults when it changes, and read a shared link on first load.
+  useEffect(() => {
+    if (!engine || !gen) return;
+    // Start on the generator's FIRST PRESET where it has one. The schema's defaults are the neutral
+    // value of each field, which is a different thing from a considered result, and landing someone on
+    // them shows the least interesting version of what you are asking them to judge.
+    const first = gen.presets ? Object.keys(gen.presets)[0] : null;
+    const base = first
+      ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
+      : engine.defaultsOf(gen.schema);
+    setPreset(first);
+    const raw = new URLSearchParams(window.location.search).get("o");
+    if (!raw) { setOpts(base); return; }
+    try {
+      const patch = JSON.parse(atob(raw));
+      setOpts(deepMerge(base, patch));
+      setPreset(null);
+    } catch { setOpts(base); }
+  }, [engine, gen]);
+
+  const controls = useMemo(
+    () => (engine && gen ? engine.controlsOf(gen.schema) : []),
+    [engine, gen],
+  );
+
+  // The generated markup, or the generator's own error message. `render` THROWS on a bad option
+  // rather than substituting a default, and that message is the most useful thing on the page when
+  // something is wrong, so it is shown verbatim instead of being turned into "invalid input".
+  const html = useMemo(() => {
+    if (!gen || !opts) return null;
+    try { const h = gen.render(opts); setErr(null); return h; }
+    catch (e) { setErr(String((e as Error)?.message || e)); return null; }
+  }, [gen, opts]);
+
+  // Paint it, and drive `--t` the way core/bg-html.js does: SECONDS, every frame. Without it every
+  // calc() that reads the clock is invalid and the browser drops the declaration, so the field
+  // previews as a different picture and nothing says so (docs/MISTAKES.md #261).
+  useEffect(() => {
+    const el = stage.current;
+    if (!el || html == null) return;
+    el.innerHTML = html;
+    // t0 comes from the FIRST rAF timestamp, not from performance.now(). The two share an origin but
+    // not a reading, so seeding from now() made the first frame land a fraction BEFORE zero and the
+    // clock start negative. A generator is free to do something odd at t < 0 and would be right to.
+    let t0 = 0;
+    let raf = 0;
+    const tick = (now: number) => {
+      if (!t0) t0 = now;
+      el.style.setProperty("--t", ((now - t0) / 1000).toFixed(4));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [html]);
+
+  const change = useCallback((path: string, v: unknown) => {
+    setPreset(null);
+    setOpts((o) => (o ? setAt(o, path, v) : o));
+  }, []);
+
+  const copy = useCallback((label: string, text: string) => {
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1600);
+    });
+  }, []);
+
+  if (bootErr) {
+    return (
+      <p className="pgnote pgbad">
+        The engine did not load: {bootErr}. It is served from <code>/core/generators.js</code>; if you
+        are running the site locally, <code>npm run predev</code> publishes it.
+      </p>
+    );
+  }
+  if (!engine || !gen || !opts) return <p className="pgnote">Loading the engine…</p>;
+
+  // Only what was changed. Short, and more usefully READABLE: it says what this person did, which is
+  // the thing worth pasting into a scene or into an issue.
+  const patch = engine.diffFromDefaults(opts, gen.schema);
+  const patchJson = JSON.stringify(patch, null, 2);
+  const link = typeof window === "undefined" ? "" :
+    `${window.location.origin}${window.location.pathname}?g=${gen.name}` +
+    (Object.keys(patch).length ? `&o=${btoa(JSON.stringify(patch))}` : "");
+
+  return (
+    <div className="pg">
+      {engine.GENERATORS.length > 1 && (
+        <div className="pgtabs" role="tablist">
+          {engine.GENERATORS.map((g, i) => (
+            <button key={g.name} role="tab" aria-selected={i === which}
+              className={i === which ? "on" : undefined} onClick={() => setWhich(i)}>
+              {g.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="pggrid">
+        <div className="pgstage">
+          <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />
+          {err && <p className="pgerr">{err}</p>}
+        </div>
+
+        <div className="pgpanel">
+          <p className="pgblurb">{gen.blurb}</p>
+          {gen.presets && (
+            <div className="pgpresets">
+              {Object.keys(gen.presets).map((k) => (
+                <button key={k} className={preset === k ? "on" : undefined}
+                  onClick={() => {
+                    setPreset(k);
+                    setOpts(deepMerge(engine.defaultsOf(gen.schema), gen.presets![k]));
+                  }}>{k}</button>
+              ))}
+            </div>
+          )}
+          {groupControls(controls).map(([group, items]) => (
+            <fieldset key={group ?? "_"} className="pggroup">
+              {group && <legend>{LABELS[group] ?? group}</legend>}
+              {items.map((c) => (
+                <Row key={c.path} c={c} value={get(opts, c.path)} onChange={change} />
+              ))}
+            </fieldset>
+          ))}
+        </div>
+      </div>
+
+      <div className="pgbar">
+        <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
+          {copied === "options" ? "copied" : "copy options"}
+        </button>
+        <button className="btn btn-ghost" disabled={!html}
+          onClick={() => html && copy("html", html)}>
+          {copied === "html" ? "copied" : "copy HTML"}
+        </button>
+        <button className="btn btn-ghost" onClick={() => copy("link", link)}>
+          {copied === "link" ? "copied" : "copy link"}
+        </button>
+        <button className="btn btn-ghost" onClick={() => {
+          const first = gen.presets ? Object.keys(gen.presets)[0] : null;
+          setPreset(first);
+          setOpts(first
+            ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
+            : engine.defaultsOf(gen.schema));
+        }}>reset</button>
+        <span className="pgmeta">
+          {Object.keys(patch).length ? `${countLeaves(patch)} changed from the defaults` : "at the defaults"}
+        </span>
+      </div>
+
+      <details className="pgjson">
+        <summary>the options, as a scene would carry them</summary>
+        <pre>{patchJson === "{}" ? "// nothing changed yet" : patchJson}</pre>
+      </details>
+    </div>
+  );
+}
+
+function Row({ c, value, onChange }:
+  { c: Control; value: unknown; onChange: (p: string, v: unknown) => void }) {
+  const { spec, path, key } = c;
+  const id = `pg-${path.replace(/\./g, "-")}`;
+
+  if (spec.kind === "enum") {
+    return (
+      <label className="pgrow" htmlFor={id}>
+        <span>{key}</span>
+        <select id={id} value={String(value ?? "")} onChange={(e) => onChange(path, e.target.value)}>
+          {(spec.of ?? []).map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </label>
+    );
+  }
+
+  if (spec.kind === "hex") {
+    return (
+      <label className="pgrow" htmlFor={id}>
+        <span>{key}</span>
+        <span className="pghex">
+          <input id={id} type="color" value={String(value ?? "#000000")}
+            onChange={(e) => onChange(path, e.target.value)} />
+          <code>{String(value ?? "")}</code>
+        </span>
+      </label>
+    );
+  }
+
+  if (spec.kind === "hexlist") {
+    const list = Array.isArray(value) ? (value as string[]) : [];
+    return (
+      <div className="pgrow pgrow-stack">
+        <span>{key}</span>
+        <span className="pghex">
+          {list.map((h, i) => (
+            <input key={i} type="color" value={h}
+              onChange={(e) => onChange(path, list.map((x, j) => (j === i ? e.target.value : x)))} />
+          ))}
+          {list.length < (spec.max ?? 4) && (
+            <button className="pgadd" onClick={() => onChange(path, [...list, "#4c8dff"])}>+</button>
+          )}
+          {list.length > 0 && (
+            <button className="pgadd" onClick={() => onChange(path, list.slice(0, -1))}>−</button>
+          )}
+        </span>
+      </div>
+    );
+  }
+
+  // int · unit · num. A `unit` is a 0..1 dial, so its bounds are implicit and its step is fine;
+  // an `int` steps by 1. A number with no declared bounds gets a plain field rather than a slider
+  // with invented ends, because a made-up range is a lie about what the generator accepts.
+  const isUnit = spec.kind === "unit";
+  const min = isUnit ? 0 : spec.min;
+  const max = isUnit ? 1 : spec.max;
+  const step = spec.kind === "int" ? 1 : isUnit ? 0.01 : 0.05;
+  const bounded = typeof min === "number" && typeof max === "number";
+  // A seed is a bounded int and a slider over four billion values is not a control anyone can use.
+  const huge = bounded && (max as number) - (min as number) > 100000;
+
+  return (
+    <label className="pgrow" htmlFor={id}>
+      <span>{key}</span>
+      <span className="pgnum">
+        {bounded && !huge && (
+          <input type="range" min={min} max={max} step={step} value={Number(value ?? 0)}
+            onChange={(e) => onChange(path, Number(e.target.value))} aria-hidden tabIndex={-1} />
+        )}
+        <input id={id} type="number" min={min} max={max} step={step} value={Number(value ?? 0)}
+          onChange={(e) => onChange(path, Number(e.target.value))} />
+        {huge && (
+          <button className="pgadd" title="a new random seed"
+            onClick={() => onChange(path, Math.floor(Math.random() * (max as number)))}>↻</button>
+        )}
+      </span>
+    </label>
+  );
+}
+
+function groupControls(cs: Control[]): [string | null, Control[]][] {
+  const out: [string | null, Control[]][] = [];
+  for (const c of cs) {
+    const last = out[out.length - 1];
+    if (last && last[0] === c.group) last[1].push(c);
+    else out.push([c.group, [c]]);
+  }
+  return out;
+}
+
+const countLeaves = (o: unknown): number =>
+  o && typeof o === "object" && !Array.isArray(o)
+    ? Object.values(o).reduce<number>((n, v) => n + countLeaves(v), 0)
+    : 1;
+
+function deepMerge(base: Record<string, unknown>, patch: Record<string, unknown>) {
+  const out = { ...base };
+  for (const [k, v] of Object.entries(patch)) {
+    out[k] = v && typeof v === "object" && !Array.isArray(v)
+      ? deepMerge((base[k] ?? {}) as Record<string, unknown>, v as Record<string, unknown>)
+      : v;
+  }
+  return out;
+}

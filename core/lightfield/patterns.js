@@ -69,6 +69,10 @@ function slats(opt, { dark, lit }) {
 
 // rings, concentric bands round a point, like light on water. The eye travels outwards from a point
 // instead of across a grille.
+// How far out the bands run, as a percentage of the box. Well past 100 on purpose: the outermost
+// bands leave the frame, which is what stops the field reading as a bullseye centred on nothing.
+const REACH = 260;
+
 function rings(opt, { dark, lit }) {
   const r = rng(opt.seed ^ 0x21f65);
   const { count, jitter } = opt.pattern;
@@ -79,8 +83,15 @@ function rings(opt, { dark, lit }) {
   // Bands grow outwards by a jittered step and each stays a comparable width. Growing the width
   // with the radius turns the field into a bullseye: the outer bands get so heavy they stop
   // modulating the light and start being the subject.
+  //
+  // THE STEP IS DERIVED FROM `count`, not fixed. It used to grow by a jittered 4-to-18 whatever the
+  // caller asked for, so the loop's `size < 260` guard was the real limit and rings saturated at about
+  // 42: every value above that was accepted and silently discarded, while the schema advertised 400.
+  // That is the silent-substitution class this repo keeps paying for, and the playground found it
+  // within minutes of existing (docs/MISTAKES.md #272).
   let size = span(r, 4, 10);
-  for (let i = 0; i < count && size < 260; i++) {
+  const step = (REACH - size) / count;
+  for (let i = 0; i < count && size < REACH; i++) {
     const thick = (0.4 + jitter * 2.2) * span(r, 0.5, 1.7);
     const isLit = i % 2 === 0;
     const a = isLit ? sheen * span(r, 0.4, 1.1) : (0.05 + seam * 0.62) * span(r, 0.6, 1.25);
@@ -89,7 +100,7 @@ function rings(opt, { dark, lit }) {
       lit: isLit,
       style: `left:${n(cx - size / 2)}%;top:${n(cy - size / 2)}%;width:${n(size)}%;height:${n(size)}%;border-radius:50%;border:${n(thick)}vmin solid ${isLit ? lit(a) : dark(a)}`,
     });
-    size += span(r, 4, 4 + 14 * jitter);
+    size += step * span(r, 1 - jitter * 0.55, 1 + jitter * 0.55);
   }
   // The bands are hard-edged by construction. One radial mask turns them into light rather than ink.
   return { cells, mask: `radial-gradient(75% 80% at ${n(cx)}% ${n(cy)}%, #000 0%, rgba(0,0,0,0.45) 62%, transparent 100%)` };

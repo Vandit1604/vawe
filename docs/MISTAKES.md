@@ -7265,6 +7265,52 @@ supports.
 inheriting one, run the cheapest experiment that could refute it. Here that experiment was two flags and
 four seconds, and it moved every number on the board.
 
+## #272 — the playground found two engine bugs in its first hour, which is the argument for it
+
+The generator playground went up so people could turn the dials in a browser. Its first interaction
+test found both of these, and neither was visible from any gate.
+
+**`count` was accepted and discarded above about 42.** `rings` grew each band by a fixed jittered step
+and stopped at a hard reach, so the loop's `size < 260` guard was the real limit, not the caller's
+`count`. The schema advertised `min 1, max 400`. Measured: 8 to 40 drew what you asked, 60 drew 42,
+120 drew 42, 400 drew 42. Every value above the cap was taken and thrown away, silently, which is the
+most-logged bug class in this file.
+
+Fixed by deriving the step FROM count, so the whole declared range means something: 400 now draws 400.
+Then checked the other two builders rather than closing at the call site, because that is the #214
+recurrence: `slats` and `shards` both scale properly and neither needed a change.
+
+**The preset that exposed it had been fitted against the bug.** `tide` says `count: 120` and had always
+drawn 42. Its real 120 rings read better than the 42 did, so the preset stands as written, and now what
+it says is what it draws.
+
+**`will-change` on every element made the picture never settle.** A field carries up to 400 elements and
+each one carried `will-change:transform,opacity`, so Chrome was asked for 400 compositor layers. It
+cannot keep that many rastered, so it cycles which ones it paints: consecutive screenshots 90ms apart
+differed forever, the PNG oscillating between 200K and 270K. With the hint removed the same field is
+byte-identical from the eighth attempt on. **A promotion hint the browser cannot honour is worse than
+none**, and this is the same family as #267, where deferred raster cost whole product screenshots.
+
+**Still open, and worth someone's time:** `formats/scene/scene.css:16` puts `will-change: transform,
+opacity, filter` on EVERY `.hs-layer`. That is the same hint at scene scale, and #269 records 250 frames
+that still differ between two identical renders with no explanation. The measurement is cheap and
+written down here: render twice, compare captures, then do it again with the property off.
+
+## #273 — a screenshot taken at `load` is a picture of the browser's timing
+
+`stableShot` (`scripts/author/lightfield-render.mjs`) shoots until two consecutive frames are
+byte-identical, and throws when that never happens. Before it, `tide` "spent a day looking broken when
+only its portrait was": a blended, masked field can return a valid, correctly-sized, almost-black PNG
+because the compositor handed back a frame before everything rastered. Every fidelity number measured
+off such a shot is a measurement of Chrome, not of the generator.
+
+Waiting longer is not the fix and #267 already proved it: there, waiting turned "always wrong" into
+"sometimes wrong" and settled nothing. Waiting for the picture to STOP CHANGING is a different claim
+and a checkable one.
+
+**And it threw immediately, on `tide`, which is how #272's `will-change` bug was found.** A tool that
+fails loudly on the first thing it is pointed at has earned its place.
+
 ---
 
 ## Waivers for `doc-refs`

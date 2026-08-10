@@ -1,5 +1,10 @@
-// The committed fields. Each one is a full option set, so it doubles as a worked example of the API.
-// Nothing here is special-cased inside the generator: a preset is just an argument.
+// core/lightfield/presets.js — the committed fields. Each is a full option set, so it doubles as a
+// worked example of the API. Nothing here is special-cased inside the generator: a preset is just an
+// argument.
+//
+// This lives in core/ rather than beside the CLI because the BROWSER needs it too. The site's
+// playground starts you on a fitted field rather than on the schema's raw defaults, and a preset kept
+// in scripts/ could not reach it. One copy, read by the CLI and by the page.
 
 export const PRESETS = {
   // The reference reproduction. Orange bloom high and left of centre, magenta below it, red body,

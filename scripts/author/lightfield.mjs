@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lightfield, SCHEMA } from '../../core/lightfield/index.js';
-import { PRESETS } from './lightfield-presets.mjs';
+import { PRESETS } from '../../core/lightfield/presets.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

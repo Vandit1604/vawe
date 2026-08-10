@@ -20,7 +20,7 @@
 
 import { pixels } from './lightfield-metrics.mjs';
 import { gridPoints, fitPalette, toHex } from './lightfield-model.mjs';
-import { PRESETS } from './lightfield-presets.mjs';
+import { PRESETS } from '../../core/lightfield/presets.js';
 
 const BW = 24, BH = 14;
 const refFile = process.argv[2] || 'refs/lightfield-ref.jpg';

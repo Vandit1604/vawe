@@ -956,3 +956,94 @@ a{color:inherit;text-decoration:none}
   /* two-row nav is ~124px tall here; clear it or it lands on top of the eyebrow */
   .hero-head{padding-top:148px}
 }
+
+/* ── the generator playground ──────────────────────────────────────────────────────────────────
+   The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
+   generated fields are light on dark, and framing them in white chrome is what the site does. */
+.pgpage { padding: 56px 0 96px; }
+.pghead { max-width: 46rem; margin-bottom: 34px; }
+.pghead h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); letter-spacing: -.022em; margin-bottom: 14px; }
+.pghead p { color: var(--ink-2); line-height: 1.6; }
+.pghead .pgsub { color: var(--muted); font-size: .95rem; margin-top: 10px; }
+
+.pgtabs { display: flex; gap: 6px; margin-bottom: 16px; }
+.pgtabs button {
+  font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  background: var(--surface); color: var(--ink-2); border: 1px solid var(--line-2);
+}
+.pgtabs button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+.pggrid { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .pggrid { grid-template-columns: minmax(0, 1fr); } }
+
+.pgstage { min-width: 0; }
+/* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
+   it a height. A width with no height collapses an inset:0 child to nothing (docs/MISTAKES.md #261). */
+.pgfield {
+  position: relative; aspect-ratio: 16 / 9; width: 100%; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 16px; background: #05070c;
+  box-shadow: var(--shadow-2);
+}
+.pgerr {
+  margin-top: 12px; padding: 12px 14px; border-radius: 10px;
+  background: var(--bad-bg); color: var(--bad); border: 1px solid #f0d3d4;
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.5;
+}
+
+.pgpanel {
+  border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
+  padding: 16px 16px 6px; box-shadow: var(--shadow-1);
+}
+.pgblurb { color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; }
+.pggroup { border: 0; padding: 0; margin: 0 0 14px; }
+.pggroup legend {
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; color: var(--muted);
+  letter-spacing: .06em; text-transform: uppercase; padding: 0 0 6px;
+}
+.pgrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 5px 0; font-size: 13.5px; color: var(--ink-2);
+}
+.pgrow-stack { align-items: flex-start; }
+.pgrow > span:first-child { flex: 0 0 auto; }
+.pgnum { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pgnum input[type="range"] { width: 6.5rem; accent-color: var(--accent); height: 2px; }
+.pgnum input[type="number"], .pgrow select {
+  font: inherit; font-size: 13px; padding: 4px 7px; width: 6.2rem;
+  border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.pgrow select { width: 8rem; }
+.pghex { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pghex input[type="color"] {
+  width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-2);
+  border-radius: 6px; background: none; cursor: pointer;
+}
+.pghex code { font-size: 11.5px; color: var(--muted); }
+.pgadd {
+  width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px;
+  border: 1px solid var(--line-2); background: var(--bg); color: var(--ink-2);
+}
+.pgadd:hover { border-color: var(--accent); color: var(--accent); }
+
+.pgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.pgbar .btn { font-size: 14px; padding: 9px 15px; }
+.pgmeta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+.pgnote { color: var(--muted); padding: 28px 0; }
+.pgnote.pgbad { color: var(--bad); }
+
+.pgjson { margin-top: 20px; }
+.pgjson summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.pgjson pre {
+  margin-top: 10px; padding: 14px; border-radius: 10px; overflow-x: auto;
+  background: var(--bg-2); border: 1px solid var(--line);
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) { .pgtabs button, .pgadd { transition: none; } }
+.pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
+.pgpresets button {
+  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
+}
+.pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
