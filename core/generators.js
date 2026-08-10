@@ -88,12 +88,16 @@ function narrow(schema, kind) {
 const LOOKS = [
   { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png', ready: true,
     blurb: 'Wide panels split by bright hairlines, soft masses under a glow.' },
-  // HELD BACK. Same family as its reference and not the same picture: the slats are too wide, the
-  // magenta depth is missing, and the bloom reads as a spotlight rather than light through a blind.
+  // HELD BACK still. Its shadow temperature was fixed (+11.3 to -1.7) and its score did not move off
+  // 20.0, because the remaining gap is COMPOSITION: the reference is a flowing field of magenta and
+  // orange and this is one soft lobe that reads as a spotlight. A number that stays put while another
+  // improves is the useful kind of stuck, and it says the next work is layout rather than colour.
   { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg', ready: false,
     blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
-  // HELD BACK. The tonal inverse of its reference, and the worst score of the three at 64.2.
-  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg', ready: false,
+  // READY. Was the tonal inverse of its reference at 64.2 and is now the same construction at 22.2:
+  // black ground, flame spikes climbing left to right. The tips are amber where the reference's are
+  // white-hot, which needs an emitter colour that varies with intensity rather than a dial.
+  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg', ready: true,
     blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
 ];
 
@@ -240,10 +244,20 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
         const span = max - min;
         const from = typeof base?.[key] === 'number' ? base[key] : min + rand() * span;
         // An identifier is rolled; a dial is nudged around where it already sits.
+        // A nudge is bounded by the smaller of 22% of the RANGE and half of where the dial already sits.
+        // The second clause is what keeps it a nudge rather than a jump, and it does two jobs. It stops
+        // `pattern.count` at 58 landing on 138. And on a SIGNED dial it preserves the sign: `sheen: -1`
+        // means an emitted silhouette and `seam: -0.6` means a bright hairline, so a roll that crosses
+        // zero does not vary the picture, it deletes the thing the picture is made of. Rolling `shadow`
+        // freely took colonnade's near-black from 23% of the frame to 3.2%, measured, while rolling
+        // `colour` freely left it at 25.1%. Contrast is composition, and composition is what a
+        // randomiser preserves.
         const reach = Math.min(span * NUDGE, Math.abs(from) * 0.5 || span * NUDGE);
+        const lo = from < 0 ? min : Math.max(min, 0);
+        const hi = from < 0 ? Math.min(max, 0) : max;
         const v = free || span > IDENTIFIER
           ? min + rand() * span
-          : Math.min(max, Math.max(min, from + (rand() * 2 - 1) * reach));
+          : Math.min(hi, Math.max(lo, from + (rand() * 2 - 1) * reach));
         out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
         break;
       }
