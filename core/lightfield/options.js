@@ -77,6 +77,24 @@ export const SCHEMA = {
       //
       // 0 is the fitted ramp exactly, so the field that constant was chosen for does not move.
       spread: { kind: 'unit', def: 0 },
+      // WHERE THE LIGHT IS, as a percentage across and down the frame.
+      //
+      // The blob layout underneath was fitted to one photograph and then imposed on every field
+      // after it: the bloom cluster is drawn high, the mid below it and the deep body against the
+      // left edge, whatever palette you hand it. So a generator advertised as general could only
+      // ever light a picture from the top, and a reference lit from the bottom right was
+      // unreachable by any seed. Four million layouts were searched for one and none existed,
+      // because the search was over jitter inside a fixed frame rather than over the frame.
+      //
+      // The pair moves the bloom cluster and the mid with it, rigidly. It does NOT move `deep`:
+      // that is the body the light sits in, not part of the light, and it stays the large soft mass
+      // against one edge. A value outside the frame is legal and useful, because a light source is
+      // often just off the picture.
+      //
+      // The defaults are the CENTRES of the fitted ranges, so they shift nothing and the field that
+      // layout was chosen for does not move.
+      originX: { kind: 'num', min: -50, max: 150, def: 50 },
+      originY: { kind: 'num', min: -50, max: 150, def: 12.5 },
       // Anything the four roles cannot name, as an ordered list, laid over them in the order given.
       // The roles stay the whole API for a simple field: this is empty by default and most palettes
       // never touch it. The reference needs it, because it carries a dark magenta lane between two
@@ -96,6 +114,25 @@ export const SCHEMA = {
       softness: { kind: 'unit', def: 0.3 },
       // Which way the light falls off.
       direction: { kind: 'enum', of: DIRECTIONS, def: 'bottom' },
+      // WHAT THE LIT HALF OF THE PATTERN IS: a surface catching light, or a source making it.
+      //
+      // `reflected` is COLOR-DODGE. It scales the field under an element up by one factor per pixel,
+      // so a lit face brightens along the hue that is lighting it and black stays black: light that
+      // is not behind the blind cannot come through it. That is right for a blind, a colonnade and a
+      // wall, and it is why dodge replaced plus-lighter here in the first place.
+      //
+      // It is also a CEILING, and the ceiling is the whole reason this dial exists. Dodge is clamped
+      // at about 1.5x, and 1.5 times black is black, so no combination of sheen, seam, palette and
+      // seed can draw a bright mark on a dark ground. A flame, a filament, a neon line and a star are
+      // all that picture, and all of them were unreachable: the field of flame came out as a lit
+      // field with black teeth in it, the tonal inverse of its own reference, and three passes of
+      // dial-turning could not have fixed it because the missing thing was not a dial value.
+      //
+      // `emitted` is PLUS-LIGHTER in the light's own colour. An element ADDS `colour.bloom` at the
+      // strength `sheen` asks for, so it is bright against black and clips to white where the field
+      // beneath it is already hot, which is exactly how a hot core reads. The two are one word apart
+      // because they are one question: does this element take light, or give it?
+      light: { kind: 'enum', of: ['reflected', 'emitted'], def: 'reflected' },
       // The two halves of the pattern's contrast, and they are two dials because they are two jobs.
       // `seam` is the line BETWEEN elements: it multiplies, so it darkens without desaturating.
       // `sheen` is the light ON an element's face: it adds the bloom colour, so it brightens along
@@ -117,6 +154,18 @@ export const SCHEMA = {
       // frame wide, and what a lit colonnade actually shows is a hairline. The default reproduces
       // the old fixed range exactly.
       seamWidth: { kind: 'unit', def: 0.28 },
+      // WHERE THE LIGHT LANDS ACROSS AN ELEMENT'S FACE, as a percentage from its leading edge.
+      //
+      // It was a constant, 22 to 46, and that constant is a statement about one photograph: a
+      // backlit blind is brightest a little way in from the seam it trails, because the seam is the
+      // slat's own shadow. A field of flame is the other way round. Each wedge is dark at its
+      // leading edge and climbs to a hot line at its trailing one, and no combination of polarity,
+      // taper and envelope can say that, because the mound was nailed to the left of every element.
+      // With the mound fixed, every lit field this generator could reach was lit from the same side.
+      //
+      // The default is the midpoint of the old fixed range, and the +/-12 spread around it is the
+      // old range exactly, so the field that constant was chosen for does not move.
+      peak: { kind: 'num', min: 0, max: 100, def: 34 },
       // SHEEN IS SIGNED FOR THE SAME REASON, and the two signs together are what make one pattern
       // reach two opposite pictures. A backlit blind is bright faces cut by dark seams; a colonnade
       // against a bright sky is dark SILHOUETTES separated by bright gaps. That is not a second
@@ -150,6 +199,21 @@ export const SCHEMA = {
       // point. This is the cross-axis half of the same silhouette, which is why it lives here and
       // not beside `count`: it narrows towards whichever end `anchor` says is free.
       taper: { kind: 'unit', def: 0 },
+      // HAND THE ENVELOPE TO THE FIELD INSTEAD OF TO THE ELEMENTS, at this strength. 0 emits nothing
+      // and every element keeps its own extent, which is everything above.
+      //
+      // A landscape is one curve sampled per column; an envelope is one extent per element. A row of
+      // twelve panels each holding its own height is twelve boxes with steps between them, and the
+      // reference this was written for is a single continuous ridge with panel seams drawn OVER it.
+      // Softness cannot close that gap, because softness blurs an edge and what was wrong was who
+      // owned the edge. Two passes were spent on that dial and both made the picture worse.
+      //
+      // Above 0 the same curve is drawn once, across the whole frame, at a resolution the eye reads
+      // as continuous, with smooth noise riding on it in place of the per-element jitter. The
+      // elements then run the whole frame, so their seams are full-height panel lines rather than
+      // the edges of boxes. The number is the mass's opacity: a ridge can be a black cut-out or a
+      // haze on the horizon.
+      mass: { kind: 'unit', def: 0 },
       // How sharply the extent ENDS. 0 stops dead, 1 fades over the element's whole length.
       //
       // An extent with a hard end is a bar chart. Both references that needed an envelope end soft:
@@ -278,6 +342,9 @@ export function resolve(given = {}, skipHonours = false) {
 // A whole group, or one leaf inside it, and who takes it.
 export const HONOURS = [
   { at: 'shadow.seamWidth', by: ['slats'] },
+  // Only slats draw a face with a mound on it. A ring's face is a border and a shard's runs along
+  // its length, so neither has a leading edge for the light to land a given distance in from.
+  { at: 'shadow.peak', by: ['slats'] },
   // Rings have no axis to run an envelope along: a band's position is a radius, not a place in a
   // row, so `from` and `to` would have nothing to interpolate between.
   { at: 'envelope', by: ['slats', 'shards'] },

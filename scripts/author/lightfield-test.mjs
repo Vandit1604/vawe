@@ -150,5 +150,63 @@ ok('a slat moves as ONE: its seam and its face take the same transform', (() => 
   return d.length > 0 && d.length === l.length && d.every((v, i) => v === l[i]);
 })());
 
+ok('the light origin defaults to the fitted layout and emits the same field', (() => {
+  // The pair must be a NO-OP at its defaults, or every committed preset moves when it is added.
+  return lightfield({ colour: { originX: 50, originY: 12.5 } }) === lightfield();
+})());
+ok('the light origin moves the bloom cluster and leaves deep alone', (() => {
+  const at = (h) => [...h.matchAll(/radial-gradient\([^)]*?at ([-0-9.]+)% ([-0-9.]+)%/g)].map((m) => [+m[1], +m[2]]);
+  const a = at(lightfield()), b = at(lightfield({ colour: { originX: 90, originY: 60 } }));
+  // Same number of lobes, the last one (deep) unmoved, at least one of the others moved by the vector.
+  return a.length === b.length
+    && a[a.length - 1][0] === b[b.length - 1][0] && a[a.length - 1][1] === b[b.length - 1][1]
+    && Math.abs(b[1][0] - a[1][0] - 40) < 1e-6 && Math.abs(b[1][1] - a[1][1] - 47.5) < 1e-6;
+})());
+
+ok('peak 34 is the old fixed range exactly, so the fitted field does not move',
+  lightfield({ shadow: { peak: 34 } }) === lightfield());
+ok('peak moves the mound across the face', (() => {
+  // The mean position of the mound, because the two fields do not emit the same STOPS: a peak hard
+  // against either edge drops the falloff behind it, so the lists are not index-comparable.
+  const mean = (h) => {
+    const at = [...h.matchAll(/rgb\(\d+,\d+,\d+\) 0%,rgb\(\d+,\d+,\d+\) ([0-9.]+)%/g)].map((m) => +m[1]);
+    return at.reduce((a, b) => a + b, 0) / at.length;
+  };
+  return mean(lightfield({ shadow: { peak: 80 } })) - mean(lightfield({ shadow: { peak: 10 } })) > 60;
+})());
+ok('a peak hard against the trailing edge drops the falloff behind it, not in front of it', (() => {
+  // A three-stop mound at peak 97 puts a dark hairline in the last 3% of the bar, which is exactly
+  // where a flame is hottest. The stop is dropped instead.
+  const h = lightfield({ shadow: { peak: 97 } });
+  return !/ 97[0-9.]*%,rgb\(\d+,\d+,\d+\) 100%/.test(h);
+})());
+
+ok('reflected light is the default and dodges', lightfield().includes('mix-blend-mode:color-dodge'));
+ok('emitted light adds the bloom colour on a plus-lighter layer', (() => {
+  const h = lightfield({ shadow: { light: 'emitted' }, colour: { bloom: '#123456' } });
+  return h.includes('mix-blend-mode:plus-lighter') && !h.includes('color-dodge') && h.includes('rgba(18,52,86,');
+})());
+
+ok('mass 0 emits no field-wide silhouette at all', !lightfield().includes('class="r"'));
+ok('mass draws one continuous silhouette and lets the elements run full frame', (() => {
+  const h = lightfield({ envelope: { kind: 'valley', from: 0.3, to: 0.8, mass: 0.9 } });
+  const ridge = h.match(/<div class="r">([\s\S]*?)<\/div>/);
+  if (!ridge) return false;
+  const tops = [...ridge[1].matchAll(/top:([-0-9.]+)%/g)].map((m) => +m[1]);
+  // A landscape, not a row of boxes: every column is within a whisker of the one beside it, and the
+  // curve genuinely dips and rises across the frame.
+  const smooth = tops.every((v, i) => i === 0 || Math.abs(v - tops[i - 1]) < 3);
+  // The elements themselves are back to full frame, so their seams are full-height panel lines.
+  const bars = h.match(/<div class="d">([\s\S]*?)<\/div>/)[1];
+  const full = [...bars.matchAll(/top:([-0-9.]+)%;height:([0-9.]+)%/g)].every((m) => m[1] === '-2' && m[2] === '104');
+  return tops.length > 100 && smooth && Math.max(...tops) - Math.min(...tops) > 5 && full;
+})());
+ok('the silhouette moves as ONE group, never per column', (() => {
+  const h = lightfield({ envelope: { mass: 0.9, kind: 'ramp' }, motion: { kind: 'shimmer' } });
+  const ridge = h.match(/<div class="r">([\s\S]*?)<\/div>/)[1];
+  const moves = new Set([...ridge.matchAll(/translateX\(calc\(([^)]*\))/g)].map((m) => m[1]));
+  return moves.size === 1;
+})());
+
 console.log(failures ? `\n${failures} FAILED` : '\nall passed');
 process.exit(failures ? 1 : 0);

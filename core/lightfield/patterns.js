@@ -24,6 +24,19 @@
 import { rng, span, n } from './rng.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const clamp100 = (v) => (v < 0 ? 0 : v > 100 ? 100 : v);
+
+// The mound on a lit face, as gradient stops. A falloff shorter than 6% of the bar is a LINE, not a
+// falloff: at a peak hard against one edge the old three-stop form drew a dark hairline in the last
+// few percent, exactly where a flame's hottest edge belongs. So a stop that close to the peak is not
+// drawn at all, and the face runs bright to that edge.
+function mound(fp, fa, peak) {
+  const stops = [];
+  if (peak > 6) stops.push(`${fp(fa * 0.25)} 0%`);
+  stops.push(`${fp(fa)} ${n(peak)}%`);
+  if (peak < 94) stops.push(`${fp(fa * 0.1)} 100%`);
+  return `linear-gradient(90deg,${stops.join(',')})`;
+}
 
 // The envelope, as one function of one number.
 //
@@ -84,13 +97,73 @@ function softMask(anchor, softness) {
   return `;-webkit-mask-image:${g};mask-image:${g}`;
 }
 
+// THE FIELD-WIDE SILHOUETTE, and why it is not a per-element dial.
+//
+// A landscape is ONE curve sampled per column. An envelope is ONE EXTENT PER ELEMENT. Those are not
+// the same object, and no amount of softness, jitter or count turns the second into the first: a row
+// of twelve panels each holding its own height is twelve boxes with steps between them, and the
+// reference it was fitted to is a single continuous ridge with panel seams drawn OVER it. Two passes
+// were spent turning the softness dial at that gap and both made the picture worse, because the dial
+// blurs an edge and the thing that was wrong was the edge's owner.
+//
+// So `envelope.mass` hands the envelope to the FIELD instead of to the elements. The same curve, the
+// same `from`, `to`, `kind` and `anchor`, sampled at a resolution the eye reads as continuous, with
+// smooth noise riding on it in place of the per-element jitter. The elements then run the whole
+// frame, which is what makes their seams full-height panel lines rather than the edges of boxes.
+const COLS = 180;   // columns across the ridge. Fine enough that the steps are under half a percent.
+
+// Smooth value noise on [0,1] from k control points, so the ridge wanders instead of following a
+// formula. Smoothstep between points: linear interpolation puts a visible corner at every knot, and
+// a corner in a horizon reads as a fold rather than as a hill.
+function wobble(r, k) {
+  const pts = Array.from({ length: k + 1 }, () => r());
+  return (u) => {
+    const x = clamp01(u) * k;
+    const i = Math.min(k - 1, Math.floor(x));
+    const t = x - i;
+    return pts[i] + (pts[i + 1] - pts[i]) * (t * t * (3 - 2 * t));
+  };
+}
+
+/**
+ * fieldMass(opt, dark) -> cells | null
+ *
+ * The silhouette as one row of columns, in the multiply layer. Null when `mass` is 0, so a field
+ * that never asked for a horizon carries no extra markup and no extra rng draw.
+ */
+export function fieldMass(opt, dark, group) {
+  const { mass, jitter, anchor } = opt.envelope;
+  if (mass === 0) return null;
+  const r = rng(opt.seed ^ 0x11d6e);
+  const env = envelopeOf({ ...opt, envelope: { ...opt.envelope, jitter: 0 } });
+  const noise = wobble(r, 7);
+  const amp = jitter * 0.45;
+  const paint = dark(mass);
+  const cells = [];
+  for (let i = 0; i < COLS; i++) {
+    const u = (i + 0.5) / COLS;
+    const ext = clamp01(env(u, r) + (noise(u) - 0.5) * 2 * amp);
+    // The column runs 12% past the frame at its anchored end. The layer is blurred as a whole, and a
+    // mass that stops at the frame edge blurs into a bright hairline along it.
+    const h = 104 * ext + 12;
+    const box = anchor === 'top' ? `top:-12%;height:${n(h)}%` : `top:${n(102 - 104 * ext)}%;height:${n(h)}%`;
+    cells.push({
+      g: group,
+      lit: false,
+      // A hair over one column wide, or the seams between columns show as light through the mass.
+      style: `left:${n((i / COLS) * 100)}%;width:${n(100 / COLS + 0.06)}%;${box};background:${paint}`,
+    });
+  }
+  return cells;
+}
+
 // slats, a backlit blind. A narrow hard seam at each bar's trailing edge, and a soft mound of light
 // across its face. All the vertical variation comes from the colour field beneath, so the bars read
 // as a screen the light comes through, not as painted stripes.
 function slats(opt, { dark, lit }) {
   const r = rng(opt.seed ^ 0x51a75);
   const { count, jitter } = opt.pattern;
-  const { seam, sheen, seamWidth } = opt.shadow;
+  const { seam, sheen, seamWidth, peak: peakAt } = opt.shadow;
   const { anchor, taper, softness } = opt.envelope;
   const env = envelopeOf(opt);
   // The sign is the polarity: a negative seam is a bright line between lit panels rather than a
@@ -107,7 +180,11 @@ function slats(opt, { dark, lit }) {
   let g = 0;
   while (x < 101) {
     const w = nominal * (1 + jitter * span(r, -0.6, 1.4));
-    const ext = env(clamp01((x + w / 2) / 100), r);
+    // With a field-wide mass the envelope belongs to the FIELD, so the elements run the whole frame
+    // and their seams become full-height panel lines. The draw is still taken, so a field keeps its
+    // layout when the mass is turned on and off.
+    const own = env(clamp01((x + w / 2) / 100), r);
+    const ext = opt.envelope.mass > 0 ? 1 : own;
     const box = extentBox(anchor, ext) + taperClip(anchor, taper) + softMask(anchor, softness);
 
     // The seam. Narrow on purpose: a line you can point at is what reads as a hard edge, and a
@@ -129,9 +206,11 @@ function slats(opt, { dark, lit }) {
       style: `left:${n(x + w - sw)}%;width:${n(sw)}%;${box};background:linear-gradient(90deg,${clear} 0%,${paint(sa * 0.45)} 46%,${paint(sa)} 100%)`,
     });
 
-    // The face. It catches the light rather than reflecting a lamp, so it peaks a little way in
-    // from the seam and falls off both ways.
-    const peak = span(r, 22, 46);
+    // The face. It catches the light rather than reflecting a lamp, so it peaks somewhere across
+    // the bar and falls off both ways. WHERE is `shadow.peak`: a blind is brightest just in from
+    // the seam it trails, a flame is brightest at its trailing edge, and that is one number.
+    // The +/-12 spread around it is the old fixed 22..46 exactly at the default of 34.
+    const peak = clamp100(span(r, peakAt - 12, peakAt + 12));
     const fa = sheenMag * span(r, 0.45, 1.2);
     const fp = faceLit ? lit : dark;
     // A dial at 0 removes the thing, it does not emit an invisible copy of it. sheen 0 means no
@@ -148,9 +227,7 @@ function slats(opt, { dark, lit }) {
       // silhouette came out as a grey smudge that faded to a tenth of itself at both edges, which
       // is a lit surface drawn in black rather than an object in the way.
       style: `left:${n(x)}%;width:${n(sa > 0 ? w - sw : w)}%;${box};background:`
-        + (faceLit
-          ? `linear-gradient(90deg,${fp(fa * 0.25)} 0%,${fp(fa)} ${n(peak)}%,${fp(fa * 0.1)} 100%)`
-          : fp(fa)),
+        + (faceLit ? mound(fp, fa, peak) : fp(fa)),
     });
 
     x += w;
@@ -232,7 +309,8 @@ function shards(opt, { dark, lit }) {
     // A ray's extent is its LENGTH, and its position across the fan is the envelope's u. The bar is
     // drawn from the pivot outwards, so the free end is always the far one: `anchor` has nothing to
     // hold here and is not read.
-    const ext = env((ang + fan / 2) / fan, r);
+    const own = env((ang + fan / 2) / fan, r);
+    const ext = opt.envelope.mass > 0 ? 1 : own;
     if (a > 0) cells.push({
       g,
       lit: isLit,

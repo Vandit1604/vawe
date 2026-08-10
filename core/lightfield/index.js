@@ -25,7 +25,7 @@
 import { resolve, LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS, SHAPES, ANCHORS } from './options.js';
 import { rgba, fade, mix } from './colour.js';
 import { rng, span, n } from './rng.js';
-import { BUILDERS } from './patterns.js';
+import { BUILDERS, fieldMass } from './patterns.js';
 
 // A stable short name per option set, so two fields on one page cannot collide and the same
 // options always produce the same class name.
@@ -66,15 +66,19 @@ export function fieldBlobs(given) {
   // `extra`. resolve() is idempotent, so calling it twice costs nothing and closes the hole.
   const opts = resolve(given);
   const r = rng(opts.seed ^ 0x0c010f);
-  const { bloom, mid, deep, extra } = opts.colour;
+  const { bloom, mid, deep, extra, originX, originY } = opts.colour;
+  // The light cluster moves as one rigid body. The defaults are the centres of the ranges below, so
+  // an unmoved field draws exactly the layout that was fitted to the reference photograph.
+  const dx = originX - 50, dy = originY - 12.5;
   const blob = (hex, x, y, rx, ry, a) => ({ hex, x, y, rx, ry, a });
+  const lightBlob = (hex, x, y, rx, ry, a) => blob(hex, x + dx, y + dy, rx, ry, a);
   // `mid` is drawn ON TOP of the bloom cluster. Under it, three overlapping orange lobes wash the
   // second colour out and the field goes back to being one hue, which is the thing `mid` exists to
   // prevent. Order here is CSS order: the first entry is the topmost layer.
   const lobes = [
-    blob(bloom, span(r, 8, 92), span(r, 0, 25), span(r, 18, 40), span(r, 30, 70), 1),
-    blob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 14, 32), span(r, 20, 55), 0.96),
-    blob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 12, 28), span(r, 18, 50), 0.9),
+    lightBlob(bloom, span(r, 8, 92), span(r, 0, 25), span(r, 18, 40), span(r, 30, 70), 1),
+    lightBlob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 14, 32), span(r, 20, 55), 0.96),
+    lightBlob(bloom, span(r, 8, 92), span(r, 0, 60), span(r, 12, 28), span(r, 18, 50), 0.9),
   ];
   // `extra` sits on top of everything. A colour the four roles cannot name is almost always an
   // accent that has to CUT the field, and an accent under three orange lobes is not an accent.
@@ -82,7 +86,7 @@ export function fieldBlobs(given) {
     blob(hex, span(r, 5, 95), span(r, 0, 90), span(r, 10, 30), span(r, 14, 45), 0.92));
   return [
     ...accents,
-    blob(mid, span(r, 25, 65), span(r, 35, 75), span(r, 16, 34), span(r, 26, 55), 0.95),
+    lightBlob(mid, span(r, 25, 65), span(r, 35, 75), span(r, 16, 34), span(r, 26, 55), 0.95),
     ...lobes,
     blob(deep, span(r, 0, 18), span(r, 20, 55), span(r, 40, 64), span(r, 50, 80), 1),
   ];
@@ -183,13 +187,30 @@ export function lightfield(given) {
   // Dodge is driven by the grey VALUE, not by alpha. Alpha on a dodge layer lerps towards the
   // source and desaturates, which is the bug being fixed, so a face at zero strength is opaque
   // BLACK, the exact no-op, and never a transparent pixel.
+  //
+  // An EMITTED element is the other half of that argument, and it is a different operation, not a
+  // stronger one. Dodge multiplies, and 1.5 times black is black, so an element can never be
+  // brighter than the field it stands on. A flame is brighter than the night behind it. So an
+  // emitted element ADDS `bloom` on a plus-lighter layer: bright against black, and clipping to
+  // white where the field beneath it is already hot. `lit(0)` stays the exact no-op in both modes,
+  // opaque black under dodge and transparent under plus-lighter, so the patterns need no branch.
+  const emitted = opts.shadow.light === 'emitted';
+  const clamp = (a) => Math.min(1, Math.max(0, a));
   const paints = {
-    dark: (a) => `rgba(0,0,0,${n(Math.min(1, Math.max(0, a)))})`,
-    lit: (a) => { const v = Math.round(255 * Math.min(1, Math.max(0, a)) * DODGE); return `rgb(${v},${v},${v})`; },
+    dark: (a) => `rgba(0,0,0,${n(clamp(a))})`,
+    lit: emitted
+      ? (a) => rgba(opts.colour.bloom, clamp(a))
+      : (a) => { const v = Math.round(255 * clamp(a) * DODGE); return `rgb(${v},${v},${v})`; },
   };
   const { cells, mask } = BUILDERS[opts.pattern.kind](opts, paints);
 
-  const groups = cells.reduce((m, c) => (c.g > m ? c.g : m), -1) + 1;
+  // The field-wide silhouette. It is ONE group, not one per column: a horizon whose columns each
+  // took their own phase would tear along every column, which is the same argument that makes a
+  // seam and the face beside it one slat.
+  const ridgeGroup = cells.reduce((m, c) => (c.g > m ? c.g : m), -1) + 1;
+  const ridge = fieldMass(opts, paints.dark, ridgeGroup);
+
+  const groups = ridgeGroup + (ridge ? 1 : 0);
   const mo = motions(opts, groups);
   const shadow = paintShadow(opts);
 
@@ -230,8 +251,14 @@ export function lightfield(given) {
     // Black is the exact identity, so the default emits no layer at all.
     opts.colour.shade === '#000000' ? ''
       : `.${cls} .sh{position:absolute;inset:-4%;mix-blend-mode:screen;background:${opts.colour.shade}}`,
+    // The ridge takes the softness dial as a BLUR of the whole mass, not as a mask on each column.
+    // A mask fades one element towards its own free end; a horizon goes soft as a single silhouette,
+    // and 180 columns each fading on their own is a comb, not a haze.
+    ridge ? `.${cls} .r{position:absolute;inset:-4%;mix-blend-mode:multiply`
+      + `${opts.envelope.softness === 0 ? '' : `;filter:blur(${n(opts.envelope.softness * 6)}vmin)`}`
+      + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}}` : '',
     layer('d', 'multiply', darkCells),
-    layer('l', 'color-dodge', litCells),
+    layer('l', emitted ? 'plus-lighter' : 'color-dodge', litCells),
     // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
     // them: that is 400 compositor layers, more than Chrome will keep rastered, so it cycles which ones
     // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
@@ -246,7 +273,8 @@ export function lightfield(given) {
   const box = (name, list) => (list.length ? `<div class="${name}">\n${list.map(cell).join('\n')}\n</div>` : '');
   const fill = opts.colour.shade === '#000000' ? '' : '<div class="sh"></div>';
   return `<style>\n${css}\n</style>\n<div class="${cls}"><div class="f"></div>${fill}`
-    + `${box('d', darkCells)}${box('l', litCells)}${shadow ? '<div class="s"></div>' : ''}</div>`;
+    + `${ridge ? box('r', ridge) : ''}${box('d', darkCells)}${box('l', litCells)}`
+    + `${shadow ? '<div class="s"></div>' : ''}</div>`;
 }
 
 export { LightfieldError, SCHEMA, PATTERNS, DIRECTIONS, MOTIONS, SHAPES, ANCHORS };

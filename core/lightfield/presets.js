@@ -53,29 +53,59 @@ export const PRESETS = {
     // seam and count moved with it. A softer, sparser blind put the band hardness at 1.07x of the
     // reference where it had been 1.27x, and 259 alternative seeds were rendered and scored against
     // this one under the same cost. None beat it, so the layout is unchanged.
-    colour: { bloom: '#e08050', mid: '#96153f', deep: '#900d18', ground: '#000202', shade: '#010208' },
-    shadow: { depth: 0, softness: 0.3, direction: 'bottom', seam: 0.35, sheen: 0.8 },
+    //
+    // THE LAYOUT WAS RIGHT AND THE FALLOFF WAS MISSING. The seed search was exhausted: 259
+    // alternatives scored worse, and moving the light with `colour.originX/Y` scored worse again
+    // (27.2 at x 40, 27.1 at x 60, against 20.0). What was left was the corner the search could not
+    // reach, because no layout puts a shadow there: the reference darkens towards the bottom left,
+    // and this carried `depth: 0`, so that corner stayed lit crimson where the photograph is a dark
+    // violet. Measured on the corner itself, #5a071f against the reference's #1c0b21. A
+    // `bottom-left` fall at 0.45 plus a colder `shade` takes it to #340514, and the whole shadow
+    // band from +11.3 warmer than the reference to -1.7, which is a brown black turning blue;
+    // `vivid` 1.3 pays back the chroma the extra ambient fill costs. Block error 20.0 to 20.0. The
+    // mean did not move at all and the picture did, which is the argument for grading the shadows
+    // separately from the mean.
+    //
+    // `spread` was tried again here and is still 0. Every value above it softens the lobe edges,
+    // which is the one visible flaw left, and spends more than it earns: 0.12 costs a point of block
+    // error and three of shadow warmth, because a longer reach carries warm light into the very
+    // corners the reference keeps black.
+    colour: { bloom: '#e08050', mid: '#96153f', deep: '#900d18', ground: '#000202', shade: '#030412', vivid: 1.3 },
+    shadow: { depth: 0.45, softness: 0.5, direction: 'bottom-left', seam: 0.35, sheen: 0.65 },
     pattern: { kind: 'slats', count: 58, jitter: 0.55 },
     motion: { kind: 'shimmer', speed: 1, amount: 1 },
   },
 
-  // Flame. The same slats, with every polarity reversed and an envelope on top.
+  // Flame. The same slats, read the other way up, and the one preset that needed the generator to
+  // grow rather than to be turned differently.
   //
-  // This is the preset that proves the generator is a generator. Nothing here is a new structure:
-  // the elements are the SAME vertical bars, and what makes them a rising row of flames is that the
-  // face is a silhouette rather than a lit surface (`sheen` negative), that each bar hangs from the
-  // top and narrows to a point (`anchor` top, `taper`), and that how far down it reaches is a
-  // function of where it sits (`envelope.kind` ramp, run backwards with `from` above `to`). The
-  // flames are the GAPS. Read the picture as black wedges and the construction falls out.
+  // IT USED TO BE THE TONAL INVERSE OF ITS OWN REFERENCE, and the reason is worth keeping. It was
+  // written as black wedges hanging from the top, with the flames as the GAPS between them, on the
+  // argument that reading the picture as silhouettes made the construction fall out. The
+  // construction did fall out; the picture did not. ref-a is black with bright flames on it, and a
+  // field of silhouettes is a LIT field with black teeth in it, which is a different photograph.
+  // Every pass that followed turned dials inside that reading and scored 64 against the image.
   //
-  // `spread` at 0.9 is doing quiet work: at the fitted default the light is three lobes with edges
-  // you can point at, and against black those read as three bokeh circles rather than as a fire.
+  // Three things had to be true before the right reading was reachable, and none of them was a
+  // value:
+  //   * `shadow.light: 'emitted'`. Dodge cannot draw a bright mark on black, because 1.5 times
+  //     black is black. A flame gives light, so it ADDS `bloom` instead of scaling what is under it,
+  //     and clips to white where the field beneath is already hot.
+  //   * `colour.originX/Y`. The light in this picture is off the bottom-right corner, and the blob
+  //     layout was pinned to one photograph whose light is high and central. No seed could move it.
+  //   * `shadow.peak`. Each flame is dark at its leading edge and hot at its trailing one; the mound
+  //     on a lit face was nailed near the leading edge, so every lit field was lit from one side.
+  // With those three, the rest is the ordinary vocabulary: the elements stand on the bottom
+  // (`anchor`), narrow to a point (`taper` 0.9) and get taller to the right (`ramp` from 0.12 to 1),
+  // and a thin bright `seam` draws the hot line up each flame's trailing edge.
+  //
+  // Block error against ref-a: 64.2 to 22.2.
   ember: {
     seed: 72,
-    colour: { bloom: '#fff6d8', mid: '#ff8608', deep: '#240400', ground: '#000000', vivid: 1.2, spread: 0.9 },
-    shadow: { depth: 1, softness: 0.2, direction: 'top', seam: 0, seamWidth: 0.28, sheen: -1 },
+    colour: { bloom: '#ff9000', mid: '#ff3c00', deep: '#0a0100', ground: '#000000', vivid: 1.2, spread: 0.8, originX: 118, originY: 112 },
+    shadow: { light: 'emitted', depth: 1, softness: 0.65, direction: 'top-left', seam: -0.8, seamWidth: 0.07, peak: 88, sheen: 0.9 },
     pattern: { kind: 'slats', count: 40, jitter: 0.1 },
-    envelope: { kind: 'ramp', from: 1, to: 0.4, jitter: 0.05, anchor: 'top', taper: 0.75, softness: 0.02 },
+    envelope: { kind: 'ramp', from: 0.12, to: 1, jitter: 0.04, anchor: 'bottom', taper: 0.9, softness: 0.4 },
     motion: { kind: 'breathe', speed: 0.6, amount: 0.8 },
   },
 
@@ -88,16 +118,25 @@ export const PRESETS = {
   // `ember` wearing a different envelope: `valley` puts them tall at the edges and low in the
   // middle, `softness` blurs their tops so they read as hills instead of bar charts, and `jitter`
   // stops the row being a formula.
+  //
+  // WHAT WAS WRONG WITH IT FOR THREE PASSES: the masses were twelve separate boxes and the reference
+  // is ONE continuous ridge with the panel seams drawn over it. That is not a softness value, and
+  // turning the softness dial at it twice made the picture worse both times, because softness blurs
+  // an edge and what was wrong was who owned the edge. `envelope.mass` hands the curve to the field:
+  // the ridge is sampled per column, the elements run full height, and their seams become the
+  // full-height hairlines the reference has. Block error against ref-b: 27.3 to 21.5.
   colonnade: {
-    seed: 52,
+    seed: 7,
     // `shade` earns its place a second time, on a palette that has nothing to do with the first.
     // ref-b's dark masses are neutral grey (r-b about 2) and a warm amber field leaves them brown:
     // graded on the shadow band they came out 22.4 too warm. A neutral ground and a faint blue fill
     // took that to 16.2, which is the same dial answering the same question in another colour.
-    colour: { bloom: '#ffd15c', mid: '#c97a0d', deep: '#5a3a12', ground: '#0c0d10', vivid: 1.05, shade: '#020308', spread: 1 },
-    shadow: { depth: 0.85, softness: 0.5, direction: 'center', seam: -0.6, seamWidth: 0.025, sheen: -1 },
-    pattern: { kind: 'slats', count: 12, jitter: 0.08 },
-    envelope: { kind: 'valley', from: 0.4, to: 1, jitter: 0.28, anchor: 'bottom', taper: 0, softness: 0.6 },
+    colour: { bloom: '#ffd15c', mid: '#c97a0d', deep: '#5a3a12', ground: '#0c0d10', vivid: 1.05, shade: '#020308', spread: 1, originY: 55 },
+    // `sheen` is 0, and that is the point of the rewrite: the elements are no longer the dark thing.
+    // The ridge is, and the panels are only the bright hairlines between them.
+    shadow: { depth: 0.85, softness: 0.5, direction: 'center', seam: -0.85, seamWidth: 0.025, sheen: 0 },
+    pattern: { kind: 'slats', count: 12, jitter: 0.02 },
+    envelope: { kind: 'valley', from: 0.42, to: 0.72, jitter: 0.3, anchor: 'bottom', taper: 0, softness: 0.35, mass: 0.93 },
     motion: { kind: 'drift', speed: 0.35, amount: 0.5 },
   },
 
