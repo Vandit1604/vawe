@@ -126,3 +126,78 @@ export function diffFromDefaults(opts, schema) {
   }
   return out;
 }
+
+// ── randomise, within what each field DECLARES ──────────────────────────────────────────────────
+//
+// The point of a schema is that a range is stated rather than guessed, so a randomiser is derivable:
+// every bounded number, every enum, every boolean already carries its own legal set. Nothing here
+// invents a bound. A field with no declared range is LEFT ALONE, and `skipped` says which, because a
+// randomiser that makes up limits produces values the generator will refuse, and the person turning the
+// dial gets an error they did not cause.
+//
+// `rand` is injected so a caller can seed it. Same rand, same options.
+export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null) {
+  for (const [key, spec] of Object.entries(schema)) {
+    switch (spec.kind) {
+      case 'group': {
+        const sub = {};
+        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null);
+        out[key] = sub;
+        break;
+      }
+      case 'enum':
+        out[key] = spec.of[Math.floor(rand() * spec.of.length)];
+        break;
+      case 'bool':
+        out[key] = rand() < 0.5;
+        break;
+      case 'unit':
+        out[key] = +rand().toFixed(2);
+        break;
+      case 'int':
+      case 'num': {
+        if (typeof spec.min !== 'number' || typeof spec.max !== 'number') { skipped.push(key); break; }
+        const v = spec.min + rand() * (spec.max - spec.min);
+        out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
+        break;
+      }
+      case 'hex': {
+        // A colour's range is the gamut, which is declared, just not as min and max. Hue and saturation
+        // are free; LIGHTNESS IS KEPT from the value being replaced.
+        //
+        // That is not a stylistic nicety, it is the difference between a randomiser and a scrambler. A
+        // palette's roles carry a composition: `ground` is the dark the field falls to and `bloom` is
+        // the light it rises to. Rolling lightness uniformly makes a bright ground and a dark bloom, so
+        // the field inverts and every result looks broken. The ordering is not in the schema, so rather
+        // than invent a rule about which role means what, this preserves the ordering already present.
+        const l = base?.[key] ? lightnessOf(base[key]) : 12 + rand() * 55;
+        out[key] = hslHex(rand() * 360, 45 + rand() * 45, l);
+        break;
+      }
+      // `color` may hold a theme expression, and a random hex would silently drop the theming that is
+      // the whole reason that kind exists. `str`, `list`, `row`, `oneOf`, `block` and `hexlist` are
+      // content, and content is not a dial.
+      default:
+        skipped.push(key);
+    }
+  }
+  return out;
+}
+
+const lightnessOf = (hex) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex));
+  if (!m) return 40;
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  return ((Math.max(r, g, b) + Math.min(r, g, b)) / 2) * 100;
+};
+
+function hslHex(h, s, l) {
+  const a = (s / 100) * Math.min(l / 100, 1 - l / 100);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const c = l / 100 - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * c).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}

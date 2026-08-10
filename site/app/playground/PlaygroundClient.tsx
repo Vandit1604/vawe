@@ -35,6 +35,8 @@ type Generator = {
 };
 type Engine = {
   GENERATORS: Generator[];
+  randomOptions: (s: Record<string, Spec>, rand?: () => number, out?: Record<string, unknown>,
+    skipped?: string[], base?: Record<string, unknown> | null) => Record<string, unknown>;
   controlsOf: (s: Record<string, Spec>) => Control[];
   defaultsOf: (s: Record<string, Spec>) => Record<string, unknown>;
   diffFromDefaults: (o: unknown, s: Record<string, Spec>) => Record<string, unknown>;
@@ -69,6 +71,7 @@ export function PlaygroundClient() {
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [preset, setPreset] = useState<string | null>(null);
+  const [noDial, setNoDial] = useState<string[]>([]);
   const stage = useRef<HTMLDivElement>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
@@ -255,12 +258,27 @@ export function PlaygroundClient() {
           {copied === "link" ? "copied" : "copy link"}
         </button>
         <button className="btn btn-ghost" onClick={() => {
+          // Randomise WITHIN what each field declares, and seed it from the value on screen so a
+          // colour keeps its lightness: rolling that uniformly makes a bright ground and a dark bloom,
+          // and every result looks broken. `skipped` is shown rather than swallowed, because a field
+          // with no declared range is a gap in the schema and the person turning dials should see it.
+          const skipped: string[] = [];
+          setPreset(null);
+          setOpts(engine.randomOptions(gen.schema, Math.random, {}, skipped, opts));
+          setNoDial(skipped);
+        }}>randomise</button>
+        <button className="btn btn-ghost" onClick={() => {
           const first = gen.presets ? Object.keys(gen.presets)[0] : null;
           setPreset(first);
           setOpts(first
             ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
             : engine.defaultsOf(gen.schema));
         }}>reset</button>
+        {noDial.length > 0 && (
+          <span className="pgmeta pgskip" title="these fields declare no range, so randomise leaves them alone">
+            left alone: {noDial.join(", ")}
+          </span>
+        )}
         <span className="pgmeta">
           {Object.keys(patch).length ? `${countLeaves(patch)} changed from the defaults` : "at the defaults"}
         </span>
