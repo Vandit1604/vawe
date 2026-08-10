@@ -1147,3 +1147,35 @@ a{color:inherit;text-decoration:none}
 .pgtime { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
 .pgtime input[type="range"] { flex: 1; accent-color: var(--accent); height: 2px; }
 .pgtime code { font-family: var(--font-mono), ui-monospace, monospace; min-width: 3.4rem; text-align: right; }
+
+/* ── the library ───────────────────────────────────────────────────────────────────────────────
+   A wall of looks, each one the REAL generator rendered still at card size, not a poster. Mirrors
+   .bgrid/.bcard on /blocks; the difference is that a field costs a few gradients, so every card can
+   be live where a block needed a screenshot and a click to play. */
+.lgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.lcard {
+  display: grid; gap: 2px; padding: 0 0 10px; text-align: left; cursor: pointer; font: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  transition: transform .16s var(--ease), border-color .2s, box-shadow .2s var(--ease);
+}
+.lcard:hover { transform: translateY(-2px); border-color: var(--accent-line); box-shadow: var(--shadow-2); }
+.lcard.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.lcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lcard-shot { display: block; position: relative; aspect-ratio: 16/10; overflow: hidden; background: #05070c; }
+.lcard-name { padding: 8px 11px 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.lcard-blurb {
+  padding: 0 11px; font-size: 11.5px; line-height: 1.4; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lback { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; font-size: 13px; }
+.lback button {
+  font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; cursor: pointer; padding: 0;
+}
+.lback button:hover { text-decoration: underline; }
+.lback strong { color: var(--ink); font-size: 15px; }
+.lback span { color: var(--muted); margin-left: auto; font-size: 12.5px; }
+/* browsing shows more of the wall, so the cards get more room than they do beside a panel */
+.pgpage .lgrid { grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 16px; }

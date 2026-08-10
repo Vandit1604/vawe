@@ -67,7 +67,10 @@ const LABELS: Record<string, string> = {
 export function PlaygroundClient() {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [bootErr, setBootErr] = useState<string | null>(null);
-  const [which, setWhich] = useState(0);
+  // `null` is the LIBRARY: a wall of looks and nothing else. Picking one opens the tuner. Two states
+  // rather than one, because a grid plus a full-size preview plus a panel put the preview back below
+  // the fold, which is the thing this page was just fixed for.
+  const [which, setWhich] = useState<number | null>(null);
   const [opts, setOpts] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -87,7 +90,7 @@ export function PlaygroundClient() {
     return () => { alive = false; };
   }, []);
 
-  const gen = engine?.GENERATORS[which] ?? null;
+  const gen = which == null ? null : (engine?.GENERATORS[which] ?? null);
 
   // Reset to a generator's own defaults when it changes, and read a shared link on first load.
   useEffect(() => {
@@ -207,7 +210,19 @@ export function PlaygroundClient() {
       </p>
     );
   }
-  if (!engine || !gen || !opts) return <p className="pgnote">Loading the engine…</p>;
+  if (!engine) return <p className="pgnote">Loading the engine…</p>;
+
+  if (which == null) {
+    return (
+      <div className="lgrid">
+        {engine.GENERATORS.map((g, i) => (
+          <LookCard key={g.name} gen={g} engine={engine} active={false} onPick={() => setWhich(i)} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!gen || !opts) return <p className="pgnote">Loading the engine…</p>;
 
   // Only what was changed. Short, and more usefully READABLE: it says what this person did, which is
   // the thing worth pasting into a scene or into an issue.
@@ -219,19 +234,11 @@ export function PlaygroundClient() {
 
   return (
     <div className="pg">
-      {engine.GENERATORS.length > 1 && (
-        <div className="pgpick">
-          <label htmlFor="pg-gen">generator</label>
-          <select id="pg-gen" value={which} onChange={(e) => setWhich(Number(e.target.value))}>
-            {groupsOf(engine.GENERATORS).map(([label, items]) => (
-              <optgroup key={label ?? "_"} label={label ?? "other"}>
-                {items.map(({ g, i }) => <option key={g.name} value={i}>{g.name}</option>)}
-              </optgroup>
-            ))}
-          </select>
-          <span className="pgcount">{engine.GENERATORS.length} in the registry</span>
-        </div>
-      )}
+      <div className="lback">
+        <button onClick={() => setWhich(null)}>← all looks</button>
+        <strong>{gen.name}</strong>
+        <span>{engine.GENERATORS.length} in the library</span>
+      </div>
 
       <div className="pggrid">
         <div className="pgstage">
@@ -465,6 +472,36 @@ function Row({ c, value, onChange }:
         )}
       </span>
     </label>
+  );
+}
+
+/** A card in the library: the look itself, rendered still, at card size.
+ *
+ *  It is the REAL generator, not a screenshot. A poster would be a second artefact to keep in step with
+ *  the code, and site/public froze 77 files behind core/ the last time this repo had one of those
+ *  (docs/MISTAKES.md #271). A field is a handful of gradients, so a wall of them costs little, and
+ *  nothing animates. */
+function LookCard({ gen, engine, active, onPick }:
+  { gen: Generator; engine: Engine; active: boolean; onPick: () => void }) {
+  const box = useRef<HTMLDivElement>(null);
+  const html = useMemo(() => {
+    try {
+      const preset = Object.values(gen.presets || {})[0] || {};
+      return gen.render(deepMerge(engine.defaultsOf(gen.schema), preset)) as string;
+    } catch { return null; }
+  }, [gen, engine]);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof html !== "string") return;
+    el.innerHTML = html;
+    el.style.setProperty("--t", "0");
+  }, [html]);
+  return (
+    <button className={`lcard${active ? " on" : ""}`} onClick={onPick} aria-pressed={active}>
+      <span className="lcard-shot" ref={box} aria-hidden />
+      <span className="lcard-name">{gen.name}</span>
+      <span className="lcard-blurb">{gen.blurb}</span>
+    </button>
   );
 }
 

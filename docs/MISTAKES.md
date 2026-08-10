@@ -7688,6 +7688,22 @@ attached to a picture nobody has compared.
 `shadow.seamWidth`, so the illegal pair that used to throw in someone's face (#277) cannot be built.
 `normalise` stays as the backstop for the paths that still can.
 
+## #281 — the library is the page, and the cards are the real thing
+
+The playground picked a generator from a dropdown, which is fine for one and useless for twenty-seven.
+It is a wall of cards now: browse, open one, turn its dials, go back. Two states rather than one,
+because a grid PLUS a full-size preview PLUS a panel put the preview back below the fold at 486px, which
+is the exact thing the page had just been fixed for. Measured after: the library is 900px on a 900px
+screen, one screen exactly, and the tuner is 1.25.
+
+**Every card renders the actual generator**, still, at card size. Not a poster. A poster is a second
+artefact that has to be kept in step with the code, and the last time this repo had one of those,
+site/public sat 77 files behind core/ and nobody could tell (#271). A field is a handful of gradients,
+so a wall of them costs almost nothing, and none of them animates.
+
+The honest cost: `fern` is a genuinely dark look, so its card is nearly black and says little. That is
+the real picture, and faking a brighter one would make the library lie about what you are picking.
+
 ## #280 — a preview that animates cannot be judged
 
 The playground drove `--t` from a rAF loop, so the field was always moving. A moving picture is the one
