@@ -7449,6 +7449,21 @@ production. Same file, same mistake, one directory over, with the explanation si
 Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context
 will not carry. No Docker needed, runs in milliseconds.
 
+**Its second version measured the wrong thing, and that is the real lesson here.** It asked the
+FILESYSTEM whether a file exists. The build context is a GIT CLONE. Six pictures named by published
+scenes sat on the developer's disk, were copied by the Dockerfile, were re-included by `.dockerignore`,
+and were simply not on the server, because `assets/brands/**` is gitignored and they had never been
+committed. The four marks that DO ship were force-added at some point, which made the mechanism look
+proven. Existence is asked of `git ls-files` now.
+
+That is three times in one session: a stand-in measured instead of the thing. An mp4 hash instead of the
+frames. A filesystem copy instead of `.dockerignore`. A filesystem check instead of the clone. Each time
+the stand-in agreed with the truth right up until it mattered.
+
+**And the deploy had been failing for twelve days before any of today's work**, since the commit that
+added the scene-asset check on 2026-07-17. That check is correct and it fails the build for the right
+reason; nothing ever told anyone, because a red deploy in Coolify does not reach the repo.
+
 **Its first version invented a finding**, reporting `assets/brands`, which has been deploying for
 months: the directory is ignored and four marks under it are re-included by `!` rules, so COPY carries
 exactly those four. Fixed before shipping, because a gate that cries wolf about working code is worse
