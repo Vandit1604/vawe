@@ -105,8 +105,9 @@ export function bandOrder(count) {
 // At evenness 0 this is exactly `X0 + (X1 - X0) * u`, which is `span(r, 8, 92)`: the fitted layout.
 function lobeX(band, count, evenness, u) {
   const w = (X1 - X0) / count;
-  const lo = X0 + (X0 + band * w - X0) * evenness;
-  const hi = X1 + (X0 + (band + 1) * w - X1) * evenness;
+  const at = (t) => X0 + t * w;             // the edges of this lobe's own band
+  const lo = X0 + (at(band) - X0) * evenness;
+  const hi = X1 + (at(band + 1) - X1) * evenness;
   return lo + (hi - lo) * u;
 }
 
