@@ -136,6 +136,13 @@ export async function preloadEmbeddedImages() {
   // THIRD-PARTY URLs off the captured site, so this is also the step that stops a render depending on
   // how fast someone else's CDN answers.
   window.__embeddedImages = [...urls];
+  // A REMOTE url here is debt, not a feature. Captures are localized at capture time
+  // (scripts/brand/localize-assets.mjs), so anything still pointing off-origin makes this render
+  // depend on how fast a third party answers, and makes an archived film change when their site does.
+  // Warn per URL rather than silently preloading it, so the dependency is visible in the render log
+  // instead of only in a frame. Run `node scripts/brand/localize-assets.mjs --write` to clear it.
+  const remote = [...urls].filter((u) => { try { return new URL(u).origin !== location.origin; } catch { return false; } });
+  for (const u of remote) console.warn(`embedded image is REMOTE: ${u} — this render depends on the network. Fix: node scripts/brand/localize-assets.mjs --write`);
   await Promise.all([...urls].map((src) => decodeImage(src, true).catch(() => {})));
 }
 
