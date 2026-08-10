@@ -55,6 +55,19 @@ throws('an unknown pattern', () => lightfield({ pattern: { kind: 'stripes' } }),
 throws('an unknown direction', () => lightfield({ shadow: { direction: 'up' } }), 'shadow.direction must be one of');
 throws('a group given a string', () => lightfield({ colour: '#ff0000' }), 'colour must be an object');
 throws('options given an array', () => lightfield([]), 'options must be a plain object');
+throws('a signed dial past its range', () => lightfield({ shadow: { seam: -1.2 } }), 'shadow.seam must be between -1 and 1');
+throws('a signed dial given a string', () => lightfield({ shadow: { sheen: 'bright' } }), 'shadow.sheen must be a number from -1 to 1');
+throws('a bad shade colour', () => lightfield({ colour: { shade: '#12' } }), 'colour.shade must be a 6-digit hex');
+throws('an unknown envelope shape', () => lightfield({ envelope: { kind: 'sawtooth' } }), 'envelope.kind must be one of');
+throws('an unknown envelope key', () => lightfield({ envelope: { phase: 0.5 } }), 'unknown option envelope.phase');
+// A dial no structure can honour must SAY so. Accepting it and then ignoring it is the silent
+// substitution this whole option table exists to prevent.
+throws('rings given an envelope', () => lightfield({ pattern: { kind: 'rings' }, envelope: { kind: 'ramp' } }),
+  'pattern.kind "rings" does not honour envelope');
+throws('rings given a seam width', () => lightfield({ pattern: { kind: 'rings' }, shadow: { seamWidth: 0.5 } }),
+  'pattern.kind "rings" does not honour shadow.seamWidth');
+throws('shards given an anchor they cannot use', () => lightfield({ pattern: { kind: 'shards' }, envelope: { anchor: 'top' } }),
+  'pattern.kind "shards" does not honour envelope.anchor');
 
 console.log('\nrender contract');
 const all = [];
@@ -75,6 +88,60 @@ ok('depth 0 emits no shadow layer', !lightfield({ shadow: { depth: 0 } }).includ
 ok('seams multiply, so a dark line cannot go grey', lightfield().includes('mix-blend-mode:multiply'));
 ok('faces dodge, so a lit face cannot go white and black stays black', lightfield().includes('mix-blend-mode:color-dodge'));
 ok('sheen 0 emits no lit layer at all', !lightfield({ shadow: { sheen: 0 } }).includes('color-dodge'));
+
+console.log('\npolarity, envelope, taper and fill');
+// The sign is the polarity, and the proof is which blend layer the cell lands in. With only a seam
+// and no face there is exactly one layer, so the test cannot be fooled by the other one.
+const onlySeam = (seam) => lightfield({ shadow: { seam, sheen: 0 } });
+ok('a positive seam is a DARK line: it goes to the multiply layer',
+  onlySeam(0.6).includes('multiply') && !onlySeam(0.6).includes('color-dodge'));
+ok('a negative seam is a BRIGHT line: the same cell goes to the dodge layer',
+  onlySeam(-0.6).includes('color-dodge') && !onlySeam(-0.6).includes('multiply'));
+ok('seam 0 emits no seam layer at all', !onlySeam(0).includes('<i '));
+const onlyFace = (sheen) => lightfield({ shadow: { seam: 0, sheen } });
+ok('a negative sheen makes the element a silhouette, in the multiply layer',
+  onlyFace(-0.8).includes('multiply') && !onlyFace(-0.8).includes('color-dodge'));
+ok('sign flips the layer without changing the geometry', (() => {
+  const box = (h) => [...h.matchAll(/left:[\d.]+%;width:[\d.]+%/g)].map((m) => m[0]).join('|');
+  return box(onlySeam(0.6)) === box(onlySeam(-0.6));
+})());
+ok('seamWidth scales the line', (() => {
+  const wide = onlySeam(0.6).match(/width:([\d.]+)%/)[1];
+  const thin = lightfield({ shadow: { seam: 0.6, sheen: 0, seamWidth: 0.07 } }).match(/width:([\d.]+)%/)[1];
+  return Number(thin) < Number(wide) / 3;
+})());
+
+ok('the default envelope emits full-height elements', lightfield().includes('top:-2%;height:104%'));
+ok('a ramp envelope makes the extent depend on position', (() => {
+  const hs = [...lightfield({ envelope: { kind: 'ramp' } }).matchAll(/height:([\d.]+)%/g)].map((m) => Number(m[1]));
+  // A ramp rises, so the last element must clear the first by most of the frame.
+  return hs.length > 4 && hs[hs.length - 1] - hs[0] > 60;
+})());
+ok('from above to runs the same shape backwards', (() => {
+  const hs = (o) => [...lightfield(o).matchAll(/height:([\d.]+)%/g)].map((m) => Number(m[1]));
+  const up = hs({ envelope: { kind: 'ramp', from: 0, to: 1 } });
+  const down = hs({ envelope: { kind: 'ramp', from: 1, to: 0 } });
+  return up[up.length - 1] > up[0] && down[down.length - 1] < down[0];
+})());
+ok('anchor decides which edge an element grows from', (() => {
+  const o = { kind: 'ramp', from: 0.2, to: 0.4 };
+  return lightfield({ envelope: { ...o, anchor: 'top' } }).includes('top:-2%')
+    && !lightfield({ envelope: { ...o, anchor: 'bottom' } }).includes('top:-2%;height:2');
+})());
+ok('taper 0 emits no clip-path', !lightfield().includes('clip-path'));
+ok('taper narrows the element towards its free end', lightfield({ envelope: { taper: 0.8 } }).includes('clip-path:polygon'));
+ok('envelope softness 0 emits no mask', !lightfield().includes('mask-image'));
+ok('envelope softness fades the free end', lightfield({ envelope: { softness: 0.4 } }).includes('mask-image:linear-gradient(0deg'));
+ok('a shards field with an envelope shortens its rays',
+  /height:1[0-9.]+vmax/.test(lightfield({ pattern: { kind: 'shards' }, envelope: { kind: 'ramp', from: 0.05, to: 0.1 } })));
+
+ok('shade #000000 is the exact no-op and emits no fill layer', !lightfield().includes('class="sh"'));
+ok('a shade colour screens a cool fill under the pattern', (() => {
+  const h = lightfield({ colour: { shade: '#04060f' } });
+  return h.includes('mix-blend-mode:screen;background:#04060f') && h.includes('<div class="sh">')
+    // Fill is light, so the blind occludes it: it must sit ABOVE the field and BELOW the pattern.
+    && h.indexOf('class="f"') < h.indexOf('class="sh"') && h.indexOf('class="sh"') < h.indexOf('class="d"');
+})());
 ok('a slat moves as ONE: its seam and its face take the same transform', (() => {
   const html = lightfield({ pattern: { count: 6 }, motion: { kind: 'shimmer' } });
   const move = (tag) => [...html.matchAll(new RegExp(`<div class="${tag}">([\\s\\S]*?)</div>`, 'g'))]

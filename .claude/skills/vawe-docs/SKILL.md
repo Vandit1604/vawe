@@ -84,7 +84,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/LAYOUT.md](../../../docs/CRAFT/LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
 | [docs/CRAFT/SURFACES.md](../../../docs/CRAFT/SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [docs/CRAFT/TYPOGRAPHY.md](../../../docs/CRAFT/TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
-| [docs/LIGHTFIELD.md](../../../docs/LIGHTFIELD.md) | you need a light-field backdrop, or want to recolour or re-pattern one | the lightfield generator: the four dials (colour · shadow · pattern · motion), the seed, and how close the reference reproduction gets |
+| [docs/LIGHTFIELD.md](../../../docs/LIGHTFIELD.md) | you need a light-field backdrop, or want to recolour or re-pattern one | the lightfield generator: the five dials (colour · pattern · envelope · shadow · motion), polarity, the seed, and how close each reference reproduction gets |
 
 ## Craft · how full · how it sounds
 
