@@ -116,6 +116,20 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		chromedp.Flag("hide-scrollbars", true),
 		chromedp.Flag("force-color-profile", "srgb"),
 		chromedp.Flag("font-render-hinting", "none"),
+		// DETERMINISTIC RASTER. Chrome's "checker imaging" defers an image's decode off the raster
+		// thread and paints a blank placeholder in the meantime, and the compositor is free to draw a
+		// frame before every stage has finished. Neither is visible to renderFrame(n), to a rAF, or to
+		// document.images (which report complete). The screenshot simply catches the placeholder, so a
+		// captured component's screenshots vanish from a frame or two and reappear.
+		//
+		// That is a race against wall time, so it lands on different frames in every render, and each
+		// worker browser loses it independently — which is why four workers damage roughly four times
+		// as many frames as one. Measured on brew-launch: 925 of 1890 frames differed between two
+		// 4-worker renders, up to 17% of the pixels of a frame, with whole product screenshots missing.
+		// Waiting longer only shifts the odds; these two flags remove the race
+		// (docs/MISTAKES.pending-worker.md).
+		chromedp.Flag("disable-checker-imaging", true),
+		chromedp.Flag("run-all-compositor-stages-before-draw", true),
 		// SUPERSAMPLE: capture at ss× device pixels so animated transforms (camera, kinetic type,
 		// stings) land text on a fine grid — the ss×ss box-resolve in downsample() averages the
 		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by
@@ -555,13 +569,26 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			dups++
 		}
 	}
-	frames := make(chan capJob, len(jobs))
-	for _, j := range jobs {
-		frames <- j
+	// DEAL THE FRAMES, do not race for them. A shared job channel gives whichever browser asks first,
+	// so frame 856 is drawn by a different worker in every render and no two renders can be compared
+	// frame by frame. Round-robin is the same balanced interleave the channel produced in practice, and
+	// it is decided here, once, before any browser starts. A measurement of what changes between two
+	// renders is only possible when this is fixed.
+	perWorker := make([][]capJob, workers)
+	for i, j := range jobs {
+		w := i % workers
+		perWorker[w] = append(perWorker[w], j)
 	}
-	close(frames)
 
-	worker := func(ctx context.Context) error {
+	// VAWE_FRAME_MAP=<path> records which worker browser drew each frame, one "frame rep worker" triple
+	// per line. It exists so a byte difference between two renders can be attributed: same worker or a
+	// different one is the question, and no other signal in the render answers it.
+	frameMap := make([]int32, total)
+	for i := range frameMap {
+		frameMap[i] = -1
+	}
+
+	worker := func(ctx context.Context, widx int) error {
 		// size this tab's viewport to the capture dimensions (landscape support)
 		if err := chromedp.Run(ctx, chromedp.EmulateViewport(cw, ch, chromedp.EmulateScale(float64(ss)))); err != nil {
 			return fmt.Errorf("emulate viewport: %w", err)
@@ -608,7 +635,8 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			prof.add(t1.Sub(t0), t2.Sub(t1), t3.Sub(t2), t4.Sub(t3), 0, len(buf), len(out))
 			return out, derr
 		}
-		for j := range frames {
+		for _, j := range perWorker[widx] {
+			atomic.StoreInt32(&frameMap[j.frame], int32(widx))
 			buf, err := shoot(j.frame)
 			if err != nil {
 				return fmt.Errorf("frame %d: %w", j.frame, err)
@@ -658,7 +686,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				}
 			}
 			defer cancel()
-			if e := worker(ctx); e != nil {
+			if e := worker(ctx, w); e != nil {
 				errs <- e
 			}
 		}(w)
@@ -670,6 +698,17 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			return meta, e
 		}
 	}
+	if mp := os.Getenv("VAWE_FRAME_MAP"); mp != "" {
+		var sb strings.Builder
+		for f := 0; f < total; f++ {
+			// A deduped frame is drawn by whichever worker drew its representative.
+			fmt.Fprintf(&sb, "%d %d %d\n", f, rep[f], frameMap[rep[f]])
+		}
+		if err := os.WriteFile(mp, []byte(sb.String()), 0644); err != nil {
+			return meta, err
+		}
+	}
+
 	anchorsOK := len(anchorFor)
 	if dups > 0 {
 		for f := 0; f < total; f++ {
