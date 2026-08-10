@@ -21,7 +21,7 @@ import { useSceneEngine } from "../components/useSceneEngine";
 type Spec = {
   kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist"
       | "str" | "bool" | "color" | "list" | "row" | "oneOf" | "block";
-  min?: number; max?: number; def?: unknown; of?: unknown;
+  min?: number; max?: number; def?: unknown; of?: unknown; primary?: boolean;
   fields?: Record<string, Spec>;
 };
 type Control = { path: string; key: string; group: string | null; spec: Spec };
@@ -73,6 +73,7 @@ export function PlaygroundClient() {
   const [copied, setCopied] = useState<string | null>(null);
   const [preset, setPreset] = useState<string | null>(null);
   const [noDial, setNoDial] = useState<string[]>([]);
+  const [showAll, setShowAll] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
@@ -111,6 +112,10 @@ export function PlaygroundClient() {
     () => (engine && gen ? engine.controlsOf(gen.schema) : []),
     [engine, gen],
   );
+  // A generator that declares primaries shows those; one that declares none shows everything, which is
+  // right for the 63 of 71 with eight controls or fewer. No inference either way.
+  const hasPrimary = controls.some((c) => c.spec.primary);
+  const shown = hasPrimary && !showAll ? controls.filter((c) => c.spec.primary) : controls;
 
   // The generated markup, or the generator's own error message. `render` THROWS on a bad option
   // rather than substituting a default, and that message is the most useful thing on the page when
@@ -259,7 +264,7 @@ export function PlaygroundClient() {
               ))}
             </div>
           )}
-          {groupControls(controls).map(([group, items]) => (
+          {groupControls(shown).map(([group, items]) => (
             <fieldset key={group ?? "_"} className="pggroup">
               {group && (
                 <legend>
@@ -273,6 +278,11 @@ export function PlaygroundClient() {
               ))}
             </fieldset>
           ))}
+          {hasPrimary && (
+            <button className="pgmore" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? "fewer options" : `all options (${controls.length - shown.length} more)`}
+            </button>
+          )}
         </div>
       </div>
 

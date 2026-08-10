@@ -7641,6 +7641,20 @@ because picking a preset already resets and the chips are always on screen.
 Also: a backdrop has no intrinsic ratio, so an injected field fills the row instead of sitting in a
 16:9 box with dead space under it. A scene preview keeps its aspect, because a film does have one.
 
+**Two things the measurement caught that the eye did not.** Filling the row is right BESIDE a panel and
+wrong ABOVE one: stacked on a phone the clamp resolved to 544px of preview and pushed the page back to
+3.1 screens, worse than before the change. Height is a share of the viewport under 900px now. And the
+`pill` header variant is positioned ABSOLUTELY, to float over a hero band this page does not have, so it
+landed on top of the first heading. A header in flow cannot collide with the content under it.
+
+**Then `primary` on eight dials took it the rest of the way**: 28 controls to 8, panel 1442px to 624px,
+1.2 screens on a laptop and 1.8 on a phone. It is declared rather than inferred, and a generator that
+declares none still shows everything, which is right for the 63 of 71 with eight controls or fewer.
+
+**And the page went dark**, because the generators are dark light-fields and a white frame fights its
+own picture. Token-level: the route redefines `--bg`, `--surface`, `--ink` and friends on one wrapper,
+so the header, the panel and every input follow without a single component being overridden.
+
 **Blocks left the playground.** 70 families with declared schemas is a good contract and a bad picker:
 a block is a scene fragment rather than a picture, so previewing one boots a whole scene, and 71 entries
 buried the one thing people came to turn. The schemas and their gate stay; `blocks/` came back out of

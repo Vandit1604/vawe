@@ -12,6 +12,12 @@ export const metadata: Metadata = {
 export default function PlaygroundPage() {
   return (
     <>
+      {/* The generators are dark light-fields, and a white page around one is a frame fighting its
+          picture. The dark is scoped to this route by redefining the TOKENS on a wrapper, so the header,
+          the panel and every input follow without a single component being overridden. */}
+      <div className="pgdark">
+      {/* `solid`, not `pill`. The pill floats ABSOLUTELY over a hero band, and this page has no band, so
+          it landed on top of the first heading. A header in flow cannot collide with the content under it. */}
       <Header active="playground" />
       <main className="wrap pgpage">
         <header className="pghead">
@@ -24,6 +30,7 @@ export default function PlaygroundPage() {
         <PlaygroundClient />
       </main>
       <Footer />
+      </div>
     </>
   );
 }

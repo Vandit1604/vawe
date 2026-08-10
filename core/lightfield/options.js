@@ -21,17 +21,17 @@ export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 
 // kind: int | unit (a 0..1 dial) | signed (a -1..1 dial) | num | hex | enum | group
 export const SCHEMA = {
-  seed: { kind: 'int', min: 0, max: 4294967295, def: 3449610 },
+  seed: { kind: 'int', min: 0, max: 4294967295, def: 3449610, primary: true },
 
   colour: {
     kind: 'group',
     fields: {
       // The hot core of the light. Read the field from here outwards.
-      bloom: { kind: 'hex', def: '#ee7c56' },
+      bloom: { kind: 'hex', def: '#ee7c56', primary: true },
       // The second colour, opposite the bloom. This is what stops a field being one hue.
-      mid: { kind: 'hex', def: '#c22d45' },
+      mid: { kind: 'hex', def: '#c22d45', primary: true },
       // The saturated body the light sits in.
-      deep: { kind: 'hex', def: '#851b08' },
+      deep: { kind: 'hex', def: '#851b08', primary: true },
       // What the light falls away into. Usually near black.
       //
       // `ground` is the FAR STOP OF THE BODY GRADIENT as well as the backdrop, so it is not free to
@@ -40,7 +40,7 @@ export const SCHEMA = {
       // #000202 to #12082a took the shadow band's temperature error from +14.4 to -2.6, which is
       // the fix, and the shadow band's dE from 27.7 to 42.2 and the mid band's brightest cell from
       // r-b 133 to 55, which is the picture falling apart. That is why `shade` exists below.
-      ground: { kind: 'hex', def: '#000202' },
+      ground: { kind: 'hex', def: '#000202', primary: true },
       // AMBIENT FILL, and the reason real shadows are cool while the sunlit parts stay warm.
       //
       // A field lit by one warm source has warm shadows, because a shadow here is just less of the
@@ -163,9 +163,9 @@ export const SCHEMA = {
   pattern: {
     kind: 'group',
     fields: {
-      kind: { kind: 'enum', of: PATTERNS, def: 'slats' },
+      kind: { kind: 'enum', of: PATTERNS, def: 'slats', primary: true },
       // How many elements across the field.
-      count: { kind: 'int', min: 1, max: 400, def: 62 },
+      count: { kind: 'int', min: 1, max: 400, def: 62, primary: true },
       // How unequal they are. 0 is a ruler, 1 is a thicket.
       jitter: { kind: 'unit', def: 0.55 },
     },
@@ -174,7 +174,7 @@ export const SCHEMA = {
   motion: {
     kind: 'group',
     fields: {
-      kind: { kind: 'enum', of: MOTIONS, def: 'shimmer' },
+      kind: { kind: 'enum', of: MOTIONS, def: 'shimmer', primary: true },
       // Cycles per second, roughly. Motion is driven off var(--t), the engine frame clock.
       speed: { kind: 'num', min: 0, max: 4, def: 1 },
       // How big the move is, as a multiple of the preset's own size.
