@@ -586,6 +586,12 @@ lint-test:
 engine-sync:
 	@node scripts/site/site-engine.mjs $(if $(CHECK),--check,)
 
+# make docker-check  — will the image carry what the Dockerfile copies? Reads the COPY lines and
+# applies .dockerignore. A mismatch here is invisible locally and fails the deploy.
+.PHONY: docker-check
+docker-check:
+	@node scripts/site/docker-context-check.mjs
+
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review:

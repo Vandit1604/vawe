@@ -34,7 +34,11 @@ assets/flags
 bin
 verify
 dna
-blocks
+# `blocks` used to be here and is NOT ignorable any more: the playground needs the 70 families and
+# their option schemas, and core/generators.js imports them, so the build fails at COPY without it.
+# It is 260K of pure JS with no node imports. The comment above about docs-site records the same
+# lesson one directory over: a thing listed here can never work in production, however correct the
+# code is (docs/MISTAKES.md #275).
 sims
 scratchpad
 *.mp4

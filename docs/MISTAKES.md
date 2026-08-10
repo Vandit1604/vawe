@@ -7416,6 +7416,45 @@ Recorded so nobody reads a wide bound as a considered one:
   engine ever exports its animation names, this should become an enum reading that export, the way
   `codeBlock.theme` reads `CODE_THEMES` and `callout.tone` reads `TONE_NAMES`.
 
+## #275 — the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
+
+**What.** Adding the playground meant the image needed `blocks/`. The Dockerfile copied it, every gate
+passed, the site built locally, and the deploy failed in 16 seconds:
+
+```
+ERROR: failed to compute cache key: "/blocks": not found
+Dockerfile:31  >>> COPY blocks ./blocks
+```
+
+`.dockerignore` listed `blocks`. The repo has the directory, so nothing on this machine could tell.
+
+**And I verified the wrong thing before pushing.** I replayed the Dockerfile's own COPY lines into an
+empty tree and ran the publish step there, which passed, because copying from the filesystem never
+consults `.dockerignore`. A simulation that skips the one file that decides the answer is not a
+simulation of anything. This is the session's recurring lesson in a new costume: measure the thing, not
+a convenient stand-in for it.
+
+**A second, larger bug found while looking at the deployed site rather than the local one.**
+`scene.html` loads `/formats/scene/scene.js` and `scene.css` by absolute path, and `site-engine.mjs`
+shipped only the html. **Both were 404 in production**, so `/editor` and the live previews on `/blocks`
+had been loading a page whose engine never started, behind a 200. It worked locally because those files
+were already in `public/` from an earlier copy. The publish step reads the directory now instead of
+listing two files, and the Dockerfile copies the directory rather than two paths out of it.
+
+**The precedent was already in the file that caused it.** `.dockerignore` carries a comment saying
+`docs-site` had been listed there, so the build could not see it and `/docs` could never have worked in
+production. Same file, same mistake, one directory over, with the explanation sitting three lines above.
+
+**Fix.** `scripts/site/docker-context-check.mjs` (`make docker-check`, in `make review`): read the
+Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context
+will not carry. No Docker needed, runs in milliseconds.
+
+**Its first version invented a finding**, reporting `assets/brands`, which has been deploying for
+months: the directory is ignored and four marks under it are re-included by `!` rules, so COPY carries
+exactly those four. Fixed before shipping, because a gate that cries wolf about working code is worse
+than no gate. Pinned both ways: with `blocks` restored to `.dockerignore` it fails and names it; without
+it, all 15 COPY sources pass.
+
 ---
 
 ## Waivers for `doc-refs`
