@@ -14,7 +14,16 @@ export const PRESETS = {
     // them. The list stays in the API because it is cheap and some palettes need it. This one does
     // not, and the number says so.
     seed: 3449610,
-    colour: { bloom: '#ee7c56', mid: '#c22d45', deep: '#851b08', ground: '#000202' },
+    // FITTED, not chosen. The instrumented question was where the saturation is lost, and the answer
+    // is the RAMP, not the composite: with seams and sheen at 0 the colour field alone measured
+    // g +6.6 / b -8.3 / chroma 0.91x, which is the same brown as the finished field. So the previous
+    // two passes were tuning the wrong half. The signature (green high, blue low) is a HUE error, and
+    // no amount of saturate() fixes it, because saturate cannot ADD blue: sweeping vivid to 1.75 drove
+    // chroma to 1.32x and every sample dE through the roof.
+    //   deep  #851b08 -> #900d18   deep-red sample dE 22.9 -> 5.7
+    //   mid   #c22d45 -> #96153f   magenta  sample dE 59.1 -> 26.3
+    //   bloom #ee7c56 -> #e08050   bloom    sample dE 20.1 -> 11.0
+    colour: { bloom: '#e08050', mid: '#96153f', deep: '#900d18', ground: '#000202' },
     shadow: { depth: 0, softness: 0.3, direction: 'bottom', seam: 0.5, sheen: 0.8 },
     pattern: { kind: 'slats', count: 62, jitter: 0.55 },
     motion: { kind: 'shimmer', speed: 1, amount: 1 },

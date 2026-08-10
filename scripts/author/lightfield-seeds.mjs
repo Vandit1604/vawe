@@ -1,19 +1,25 @@
 // scripts/author/lightfield-seeds.mjs: search the seed space for the layout closest to a reference.
 //
 //   node scripts/author/lightfield-seeds.mjs refs/lightfield-ref.jpg [howMany]
+//   EXTRA=2 node scripts/author/lightfield-seeds.mjs        # how many accent stops the palette may use
 //
 // The seed decides where the light sits, and that is ten numbers at once. Searching it through the
 // browser costs about a second a candidate, so a few hundred tries is all you get, and a few hundred
 // samples of a ten-dimensional space finds nothing. This scores the colour field ARITHMETICALLY
-// instead, straight off `fieldBlobs`, and does a quarter of a million in under a minute.
+// instead, off the shared model in lightfield-model.mjs, and does a quarter of a million in a minute.
 //
-// It is a model, so it is approximate: it composites the blobs and skips the pattern, the shadow and
-// the blend. It is used only to RANK layouts. The winners then go through the real renderer in
-// lightfield-fit.mjs, which is what the reported number comes from.
+// Each layout is scored wearing the palette SOLVED FOR IT, not a palette borrowed from whichever
+// layout happened to be in the preset. That distinction is not academic. The previous version held
+// four hand-typed hex values fixed across four million layouts and reported that the incumbent could
+// not be beaten and that four stops were the ceiling. Both conclusions were artefacts of the fixed
+// palette: every rival was being judged in the incumbent's clothes.
+//
+// It is a model, so it is approximate: it skips the pattern, the shadow and the blend. It is used
+// only to RANK. The winners then go through the real renderer in lightfield-fit.mjs, which is what
+// the reported number comes from.
 
 import { pixels } from './lightfield-metrics.mjs';
-import { fieldBlobs, RAMP } from '../../core/lightfield/index.js';
-import { toRgb, mix } from '../../core/lightfield/colour.js';
+import { gridPoints, fitPalette, toHex } from './lightfield-model.mjs';
 import { PRESETS } from './lightfield-presets.mjs';
 
 const BW = 24, BH = 14;
@@ -21,75 +27,33 @@ const refFile = process.argv[2] || 'refs/lightfield-ref.jpg';
 const want = Number(process.argv[3] || 250000);
 
 const ref = pixels(refFile, BW, BH);
+const target = Float64Array.from(ref);
+const pts = gridPoints(BW, BH);
 
-const opts = structuredClone(PRESETS.ref);
-// EXTRA='#5c0f42,#141a3c' overrides colour.extra, so a fit can be run with and without the accent
-// colours and the two numbers compared. EXTRA='' means none.
-if (process.env.EXTRA !== undefined) opts.colour.extra = process.env.EXTRA ? process.env.EXTRA.split(',') : [];
-const rgbArr = (hex) => { const c = toRgb(hex); return [c.r, c.g, c.b]; };
-const base0 = rgbArr(mix(opts.colour.deep, opts.colour.ground, 0.35));
-const base1 = rgbArr(mix(opts.colour.deep, opts.colour.ground, 0.7));
-const base2 = rgbArr(opts.colour.ground);
+const base = structuredClone(PRESETS.ref);
+// EXTRA is how MANY accent stops the palette may use. Their values are solved, so there is nothing
+// to type. EXTRA=0 ranks layouts under the four named roles alone.
+const nExtra = process.env.EXTRA === undefined ? base.colour.extra.length : Number(process.env.EXTRA);
+const nRoles = 4 + nExtra;
 
-// Sample points, in percent of the FIELD element. The element is inset -4%, so it runs from -4 to
-// 104 percent of the frame and every position has to be mapped into it.
-const pts = [];
-for (let by = 0; by < BH; by++) {
-  for (let bx = 0; bx < BW; bx++) {
-    const fx = ((bx + 0.5) / BW) * 100, fy = ((by + 0.5) / BH) * 100;
-    pts.push({ x: ((fx + 4) / 108) * 100, y: ((fy + 4) / 108) * 100 });
-  }
-}
-
-// The base gradient runs at 100deg, so its progress is mostly across and slightly down.
-const RAD = ((100 - 90) * Math.PI) / 180;
-const baseAt = (p) => {
-  const t = Math.min(1, Math.max(0, (p.x / 100) * Math.cos(RAD) + (p.y / 100) * Math.sin(RAD)));
-  return t < 0.52
-    ? [base0[0] + (base1[0] - base0[0]) * (t / 0.52), base0[1] + (base1[1] - base0[1]) * (t / 0.52), base0[2] + (base1[2] - base0[2]) * (t / 0.52)]
-    : [base1[0] + (base2[0] - base1[0]) * ((t - 0.52) / 0.48), base1[1] + (base2[1] - base1[1]) * ((t - 0.52) / 0.48), base1[2] + (base2[2] - base1[2]) * ((t - 0.52) / 0.48)];
-};
-const BASE = pts.map(baseAt);
-
-// Alpha of one blob at one point, off the same RAMP the CSS uses.
-const P = RAMP.pos / 100, E = RAMP.end / 100;
-function alphaAt(b, p) {
-  const dx = (p.x - b.x) / b.rx, dy = (p.y - b.y) / b.ry;
-  const d = Math.sqrt(dx * dx + dy * dy);
-  if (d >= E) return 0;
-  if (d <= P) return b.a * (1 - (d / P) * (1 - RAMP.mid));
-  return b.a * RAMP.mid * (1 - (d - P) / (E - P));
-}
-
+// Two stages. One plain solve per layout is the sieve; the shortlist is then re-solved with the
+// worst points given a louder vote, because the tail is what decides and the mean is only a filter.
 let best = [];
 for (let seed = 0; seed < want; seed++) {
-  const blobs = fieldBlobs({ ...opts, seed }).map((b) => ({ ...b, rgb: toRgb(b.hex) }));
-  // Least squares gain, so the search ranks LAYOUT and is not distracted by the fact that the
-  // pattern and the shadow will darken everything by some constant factor later.
-  let num = 0, den = 0;
-  const model = new Float64Array(pts.length * 3);
-  for (let i = 0; i < pts.length; i++) {
-    let r = BASE[i][0], g = BASE[i][1], b = BASE[i][2];
-    for (let k = blobs.length - 1; k >= 0; k--) {
-      const a = alphaAt(blobs[k], pts[i]);
-      if (a <= 0) continue;
-      r += (blobs[k].rgb.r - r) * a; g += (blobs[k].rgb.g - g) * a; b += (blobs[k].rgb.b - b) * a;
-    }
-    model[i * 3] = r; model[i * 3 + 1] = g; model[i * 3 + 2] = b;
-    num += ref[i * 3] * r + ref[i * 3 + 1] * g + ref[i * 3 + 2] * b;
-    den += r * r + g * g + b * b;
-  }
-  const gain = Math.min(1.5, Math.max(0.3, den ? num / den : 1));
-  let err = 0;
-  for (let i = 0; i < model.length; i++) err += Math.abs(ref[i] - gain * model[i]);
-  err /= model.length;
-  if (best.length < 24 || err < best[best.length - 1].err) {
-    best.push({ seed, err, gain });
-    best.sort((a, b) => a.err - b.err);
+  const opts = { ...base, seed, colour: { ...base.colour, extra: Array(nExtra).fill('#000000') } };
+  const { mad } = fitPalette(opts, target, nRoles, pts, 1);
+  if (best.length < 24 || mad < best[best.length - 1].mad) {
+    best.push({ seed, mad, opts });
+    best.sort((a, b) => a.mad - b.mad);
     best = best.slice(0, 24);
   }
 }
+for (const b of best) Object.assign(b, fitPalette(b.opts, target, nRoles, pts, 4));
+best.sort((a, b) => a.tail - b.tail);
 
-console.log(`searched ${want} seeds against ${refFile}`);
-for (const b of best.slice(0, 24)) console.log(`  seed ${String(b.seed).padStart(7)}  modelled err ${b.err.toFixed(2)}  gain ${b.gain.toFixed(2)}`);
-console.log('\nSEEDS=' + best.map((b) => b.seed).join(','));
+console.log(`searched ${want} seeds against ${refFile}, ${nRoles} stops, each layout wearing its own solved palette`);
+for (const b of best) {
+  console.log(`  seed ${String(b.seed).padStart(7)}  modelled mad ${b.mad.toFixed(2)}  tail15 ${b.tail.toFixed(2)}`
+    + `  ${b.stops.map(toHex).join(' ')}`);
+}
+console.log('\nSEEDLIST=' + best.map((b) => b.seed).join(','));
