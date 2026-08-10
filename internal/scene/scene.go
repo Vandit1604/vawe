@@ -446,9 +446,14 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// CAPTURE FORMAT. PNG costs 526 ms/frame at 3840x2160 and JPEG q95 costs 80 ms — 6.6x — because a
 	// lossless compressor is being asked to encode 8.3 megapixels that end up in a lossy h264 anyway.
 	// NOT byte-stable across repeats, and the claim that it was is now deleted. Measured on brew-launch:
-	// two renders of identical code differ on 373 of 1890 captures with ONE worker and 1078 with four.
-	// The difference is rasteriser antialiasing on curved edges: 0.001% to 0.007% of pixels, a max delta
-	// of about 45, on the border-radius of a card. Nothing is missing and nothing has moved.
+	// two renders of identical code differed on 373 of 1890 captures with ONE worker and 1078 with four.
+	//
+	// The four-worker half of that WAS content, not noise, and #258's reading of it as antialiasing was
+	// wrong: whole product screenshots were missing from a card, up to 17% of a frame's pixels. That is
+	// the deferred image decode the raster flags above now close, and it is why the counts are lower
+	// than these. What remains after the fix is 250 frames, of which one span of 122 moves ~1.8% of its
+	// pixels with a content group offset by about 60 supersampled pixels. That is still open and it is
+	// still not antialiasing (docs/MISTAKES.pending-worker.md).
 	//
 	// What that means for the two things this comment used to lean on. Dedup is FINE, and by design
 	// rather than by luck: its anchor check re-shoots inside the SAME browser and tolerates 0.05% of
