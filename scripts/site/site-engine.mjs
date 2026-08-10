@@ -37,8 +37,12 @@ const FILES = [
 const DRY = process.argv.includes('--check');
 let copied = 0, drift = 0, bytes = 0;
 
-const same = (a, b) => fs.existsSync(b) && fs.statSync(a).size === fs.statSync(b).size
-  && fs.statSync(a).mtimeMs <= fs.statSync(b).mtimeMs;
+// CONTENT, not size-and-mtime. The old test called two files the same when their sizes matched and
+// the published one was newer, which is true of an edit that keeps a file the same length, and of any
+// published file touched after the fact. `--check` is the gate that has to be trustworthy here, and a
+// gate that answers from a timestamp reports what happened to the filesystem rather than what is in
+// the file (docs/MISTAKES.md #271).
+const same = (a, b) => fs.existsSync(b) && fs.readFileSync(a).equals(fs.readFileSync(b));
 
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
   const p = path.join(dir, e.name);

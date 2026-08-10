@@ -21,9 +21,10 @@ results.push(run('motion audit (animation over time)', 'node', ['scripts/gates/m
 // Doc-only work runs no authoring gate, so a command or path that rotted out of the docs is invisible
 // until an author types it. This is pure file reads and costs about a second.
 results.push(run('doc refs (commands + paths the docs name)', 'node', ['scripts/gates/doc-refs.mjs']));
-// The site boots the engine out of site/public/. A frozen copy there is a page that claims to run
-// the real thing and does not, which no other gate can see (docs/MISTAKES.md #271).
-results.push(run('site engine (published copy matches this repo)', 'node', ['scripts/site/engine-sync.mjs', '--check']));
+// The site boots the engine out of site/public/, and site-engine.mjs has always known how to publish
+// it. What was missing is that NOTHING RAN ITS CHECK outside a site build, so between builds the page
+// served a frozen engine while saying it was the real one (docs/MISTAKES.md #271).
+results.push(run('site engine (published copy matches this repo)', 'node', ['scripts/site/site-engine.mjs', '--check']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)
 const tiles = fs.existsSync('/tmp/audit') ? fs.readdirSync('/tmp/audit').filter((f) => f.endsWith('.png')).sort() : [];
