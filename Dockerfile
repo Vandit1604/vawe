@@ -16,9 +16,15 @@ WORKDIR /src
 # re-keys the parent. `docker builder prune -af` on the host is the actual cure.
 COPY themes ./themes
 COPY core ./core
-COPY formats/scene/scene.html formats/scene/schema.json ./formats/scene/
+# The whole scene directory, not just the page: scene.html loads scene.js and scene.css, and shipping
+# only the page put a dead engine in production behind a 200.
+COPY formats/scene ./formats/scene
 COPY assets/icons ./assets/icons
 COPY assets/vendor ./assets/vendor
+# The block registry: 70 families and their option schemas. site-engine.mjs publishes it for the
+# playground, and core/generators.js imports it, so a build without it fails at prebuild rather than
+# shipping a page that 404s.
+COPY blocks ./blocks
 COPY scripts ./scripts
 # Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
 # brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
