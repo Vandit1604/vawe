@@ -21,6 +21,12 @@
 //   render  called with a partial options object. It MUST validate and throw on anything it does not
 //           understand, rather than substituting a default. The playground shows that message to the
 //           person turning the dial, so a thrown error is a feature here, not a failure.
+//   produces what `render` returns, and therefore how a page previews it:
+//             'html'   a markup string. Inject it and drive `--t`.
+//             'layers' an array of scene layers. A block is a scene FRAGMENT, not a picture, so it is
+//                      previewed by booting the engine on a scene built around it, which is the path
+//                      /blocks already takes. Rendering its `html` layers by hand would be a second
+//                      engine that agrees with the first until it does not.
 //
 // WHY A REGISTRY AND NOT A LIST IN THE SITE. The site is a separate app that vendors this directory
 // (scripts/site/site-engine.mjs). A hand-kept list over there is a second source of truth that goes
@@ -33,17 +39,54 @@
 import { lightfield } from './lightfield/index.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
+import { SCHEMA as BLOCK_SCHEMA } from '../blocks/schema.mjs';
+import { CATALOG } from '../blocks/catalog.mjs';
+import * as BLOCKS from '../blocks/index.mjs';
 
-export const GENERATORS = [
+const FIELDS = [
   {
     name: 'lightfield',
+    group: 'fields',
     blurb: 'Light-field backdrops. Four colour roles, a pattern, a fall of shadow, one seed.',
     docs: 'docs/LIGHTFIELD.md',
     schema: LIGHTFIELD_SCHEMA,
     presets: LIGHTFIELD_PRESETS,
+    produces: 'html',
     render: lightfield,
   },
 ];
+
+// The block families, DERIVED from the two registries rather than listed again here. A third list of
+// blocks would go stale the first time one was added, and `make coverage` already reported 14 of 14
+// while a 15th type existed (docs/MISTAKES.md #21, #65).
+//
+// `catalog.mjs` maps a NAMED entry to a family plus example props, and several names share a family,
+// so the examples become this family's presets: `card.pricing` and `card.stat` are two starting points
+// for one set of dials, which is exactly what a preset is for.
+const blockFamilies = () => {
+  const byFamily = new Map();
+  for (const c of CATALOG) {
+    if (!BLOCK_SCHEMA[c.family] || typeof BLOCKS[c.family] !== 'function') continue;
+    if (!byFamily.has(c.family)) byFamily.set(c.family, { blurb: c.blurb, presets: {} });
+    byFamily.get(c.family).presets[c.name] = c.props || {};
+  }
+  return [...byFamily].map(([family, { blurb, presets }]) => ({
+    name: family,
+    group: 'blocks',
+    blurb,
+    docs: 'docs/BLOCKS.md',
+    schema: BLOCK_SCHEMA[family],
+    presets,
+    produces: 'layers',
+    // x/y/start/dur are placement and timing the SCENE supplies, never dials, so the caller provides
+    // them and the panel never shows them (blocks/schema.mjs says the same thing from the other side).
+    // The values match scripts/site/blocks-scenes.mjs, which builds the /blocks posters: a block placed
+    // at the origin sits half off the canvas, and one that starts at 0 has not finished animating in.
+    render: (opts) => BLOCKS[family]({ x: 160, y: 160, start: 0.2, dur: 8, ...opts }),
+  }));
+};
+
+export const GENERATORS = [...FIELDS, ...blockFamilies()];
 
 export const byName = (name) => GENERATORS.find((g) => g.name === name) || null;
 

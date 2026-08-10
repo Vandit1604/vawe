@@ -16,18 +16,22 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSceneEngine } from "../components/useSceneEngine";
 
 type Spec = {
-  kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist";
-  min?: number; max?: number; def?: unknown; of?: string[]; max_?: number;
+  kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist"
+      | "str" | "bool" | "color" | "list" | "row" | "oneOf" | "block";
+  min?: number; max?: number; def?: unknown; of?: unknown;
   fields?: Record<string, Spec>;
 };
 type Control = { path: string; key: string; group: string | null; spec: Spec };
+type Layer = Record<string, unknown>;
 type Generator = {
-  name: string; blurb: string; docs?: string;
+  name: string; blurb: string; docs?: string; group?: string;
+  produces?: "html" | "layers";
   schema: Record<string, Spec>;
   presets?: Record<string, Record<string, unknown>>;
-  render: (opts: unknown) => string;
+  render: (opts: unknown) => string | Layer[];
 };
 type Engine = {
   GENERATORS: Generator[];
@@ -107,11 +111,38 @@ export function PlaygroundClient() {
   // The generated markup, or the generator's own error message. `render` THROWS on a bad option
   // rather than substituting a default, and that message is the most useful thing on the page when
   // something is wrong, so it is shown verbatim instead of being turned into "invalid input".
-  const html = useMemo(() => {
+  const made = useMemo(() => {
     if (!gen || !opts) return null;
-    try { const h = gen.render(opts); setErr(null); return h; }
+    try { const r = gen.render(opts); setErr(null); return r; }
     catch (e) { setErr(String((e as Error)?.message || e)); return null; }
   }, [gen, opts]);
+  const html = typeof made === "string" ? made : null;
+  const layers = Array.isArray(made) ? made : null;
+
+  // A block is a scene FRAGMENT, so it previews as a scene: build one around it and hand the engine a
+  // blob URL, which is the path /blocks already takes. Painting its `html` layers by hand here would be
+  // a second engine that agrees with the first right up until it does not.
+  const sceneUrl = useMemo(() => {
+    if (!layers) return null;
+    // The SAME scene shape scripts/site/blocks-scenes.mjs builds for the /blocks posters, copied rather
+    // than invented: the first version guessed a `calm` backdrop that is not in the registry, and a
+    // scene naming a preset nothing has renders black.
+    const scene = {
+      module: "scene", aspect: "16:9", theme: "vawe", duration: 9,
+      audio: { silent: true },
+      bg: [{ preset: "plain", from: 0, to: 9 }],
+      layers,
+    };
+    return URL.createObjectURL(new Blob([JSON.stringify(scene)], { type: "application/json" }));
+  }, [layers]);
+  // Revoke the previous blob when it is replaced. Every keystroke on a dial makes one, and a page that
+  // leaks a blob per keystroke is a page that gets slower the longer someone plays with it.
+  const lastUrl = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = lastUrl.current;
+    lastUrl.current = sceneUrl;
+    return () => { if (prev && prev !== sceneUrl) URL.revokeObjectURL(prev); };
+  }, [sceneUrl]);
 
   // Paint it, and drive `--t` the way core/bg-html.js does: SECONDS, every frame. Without it every
   // calc() that reads the clock is invalid and the browser drops the declaration, so the field
@@ -167,19 +198,24 @@ export function PlaygroundClient() {
   return (
     <div className="pg">
       {engine.GENERATORS.length > 1 && (
-        <div className="pgtabs" role="tablist">
-          {engine.GENERATORS.map((g, i) => (
-            <button key={g.name} role="tab" aria-selected={i === which}
-              className={i === which ? "on" : undefined} onClick={() => setWhich(i)}>
-              {g.name}
-            </button>
-          ))}
+        <div className="pgpick">
+          <label htmlFor="pg-gen">generator</label>
+          <select id="pg-gen" value={which} onChange={(e) => setWhich(Number(e.target.value))}>
+            {groupsOf(engine.GENERATORS).map(([label, items]) => (
+              <optgroup key={label ?? "_"} label={label ?? "other"}>
+                {items.map(({ g, i }) => <option key={g.name} value={i}>{g.name}</option>)}
+              </optgroup>
+            ))}
+          </select>
+          <span className="pgcount">{engine.GENERATORS.length} in the registry</span>
         </div>
       )}
 
       <div className="pggrid">
         <div className="pgstage">
-          <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />
+          {sceneUrl
+            ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
+            : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
           {err && <p className="pgerr">{err}</p>}
         </div>
 
@@ -211,9 +247,9 @@ export function PlaygroundClient() {
         <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
           {copied === "options" ? "copied" : "copy options"}
         </button>
-        <button className="btn btn-ghost" disabled={!html}
-          onClick={() => html && copy("html", html)}>
-          {copied === "html" ? "copied" : "copy HTML"}
+        <button className="btn btn-ghost" disabled={!made}
+          onClick={() => made && copy("out", typeof made === "string" ? made : JSON.stringify(made, null, 2))}>
+          {copied === "out" ? "copied" : typeof made === "string" ? "copy HTML" : "copy layers"}
         </button>
         <button className="btn btn-ghost" onClick={() => copy("link", link)}>
           {copied === "link" ? "copied" : "copy link"}
@@ -248,7 +284,7 @@ function Row({ c, value, onChange }:
       <label className="pgrow" htmlFor={id}>
         <span>{key}</span>
         <select id={id} value={String(value ?? "")} onChange={(e) => onChange(path, e.target.value)}>
-          {(spec.of ?? []).map((o) => <option key={o} value={o}>{o}</option>)}
+          {((spec.of as string[]) ?? []).map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
       </label>
     );
@@ -288,6 +324,60 @@ function Row({ c, value, onChange }:
     );
   }
 
+  if (spec.kind === "str") {
+    return (
+      <label className="pgrow" htmlFor={id}>
+        <span>{key}</span>
+        <input id={id} type="text" className="pgtext" maxLength={spec.max as number | undefined}
+          value={String(value ?? "")} onChange={(e) => onChange(path, e.target.value)} />
+      </label>
+    );
+  }
+
+  if (spec.kind === "bool") {
+    return (
+      <label className="pgrow" htmlFor={id}>
+        <span>{key}</span>
+        <input id={id} type="checkbox" checked={!!value}
+          onChange={(e) => onChange(path, e.target.checked)} />
+      </label>
+    );
+  }
+
+  // `color` is NOT `hex`. A block's real defaults are `var(--accent)` and `color-mix(...)`, because a
+  // block reskins per theme, so the field has to accept an expression as well as a literal. A colour
+  // well alone would force every one of them to a hex and quietly break the theming that is the point.
+  if (spec.kind === "color") {
+    const v = String(value ?? "");
+    const literal = /^#[0-9a-f]{6}$/i.test(v);
+    return (
+      <label className="pgrow" htmlFor={id}>
+        <span>{key}</span>
+        <span className="pghex">
+          {literal && <input type="color" value={v} onChange={(e) => onChange(path, e.target.value)} />}
+          <input id={id} type="text" className="pgtext pgtext-sm" value={v}
+            onChange={(e) => onChange(path, e.target.value)} />
+        </span>
+      </label>
+    );
+  }
+
+  // list · row · oneOf · block are CONTENT, not a dial: a chart's rows, a pane descriptor, a slot that
+  // takes two shapes. Rendering them as a number field is what this branch used to do, and a string
+  // field showing `0` is worse than no control, because it lies about what the generator holds. Say so
+  // instead, and let the JSON below stay the way to edit them.
+  if (spec.kind === "list" || spec.kind === "row" || spec.kind === "oneOf" || spec.kind === "block") {
+    const n = Array.isArray(value) ? value.length : null;
+    return (
+      <div className="pgrow">
+        <span>{key}</span>
+        <span className="pgtodo">
+          {n === null ? spec.kind : `${n} item${n === 1 ? "" : "s"}`} · edit as JSON
+        </span>
+      </div>
+    );
+  }
+
   // int · unit · num. A `unit` is a 0..1 dial, so its bounds are implicit and its step is fine;
   // an `int` steps by 1. A number with no declared bounds gets a plain field rather than a slider
   // with invented ends, because a made-up range is a lie about what the generator accepts.
@@ -316,6 +406,40 @@ function Row({ c, value, onChange }:
       </span>
     </label>
   );
+}
+
+/** The engine iframe, the same hook /blocks and /editor use, so the site runs one engine.
+ *
+ *  It wears `.sp-stage`, not a class of its own. The hook names the iframe `sp-frame`, and that pair
+ *  exists because the iframe renders at FULL frame size and is scaled down: sizing it to the box
+ *  instead crops the scene to its top-left corner, which is exactly what the first version here did. */
+function ScenePreview({ url, title }: { url: string; title: string }) {
+  const { hostRef, meta } = useSceneEngine({ dataUrl: url, aspect: "16:9", title, playing: true });
+  useEffect(() => {
+    const h = hostRef.current;
+    if (!h || !meta) return;
+    const fit = () => {
+      h.style.setProperty("--sp-scale", String(h.clientWidth / meta.width));
+      h.style.setProperty("--sp-w", `${meta.width}px`);
+      h.style.setProperty("--sp-h", `${meta.height}px`);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(h);
+    return () => ro.disconnect();
+  }, [hostRef, meta]);
+  return <div className="sp-stage pgscene" ref={hostRef} aria-label={title} />;
+}
+
+function groupsOf(gs: Generator[]): [string | null, { g: Generator; i: number }[]][] {
+  const out: [string | null, { g: Generator; i: number }[]][] = [];
+  gs.forEach((g, i) => {
+    const key = g.group ?? null;
+    const row = out.find(([k]) => k === key);
+    if (row) row[1].push({ g, i });
+    else out.push([key, [{ g, i }]]);
+  });
+  return out;
 }
 
 function groupControls(cs: Control[]): [string | null, Control[]][] {
