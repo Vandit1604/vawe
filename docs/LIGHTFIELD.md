@@ -177,6 +177,7 @@ cellar depending on it.
 | `depth` | 0 to 1 | how dark the far side goes. `0` emits no shadow layer at all, and that is what the reference wants: its colour field already drains to the ground, and a second fall on top measured worse. |
 | `softness` | 0 to 1 | how long it takes to get there. `0` is an edge you can point at, `1` crosses the whole frame. |
 | `direction` | `left` `right` `top` `bottom` `center` `top-and-bottom` `left-and-right` and the four corners | which way "away" is. The corners are there because light rarely leaves along an axis. The two paired names are a lit BAND: away along one axis and not at all along the other, which `center` cannot say because a radial fall darkens every edge at once. |
+| `originX` / `originY` | -50 to 150 | WHERE THE SHADOW IS, as a percentage across and down the frame. `50`/`50` is unmoved. `direction` is a BEARING and this is a PLACE; you need both. |
 | `seam` | **-1 to 1** | the line BETWEEN elements. The SIGN is the polarity: positive multiplies (a dark seam), negative dodges (a bright one). `0` emits no seam at all. |
 | `seamWidth` | 0 to 1 | how wide that line is, as a fraction of the element it trails. `slats` only. |
 | `peak` | 0 to 100 | where the light lands across a lit face, as a percentage from its leading edge. `slats` only. |
@@ -186,6 +187,37 @@ cellar depending on it.
 `seam` and `sheen` are two dials because they are two jobs. There used to be one, `relief`, and it
 could not raise the seams without dimming the whole picture, which is how the first pass came out
 brown and soft at the same time. `relief` is gone: passing it throws, which is the contract working.
+
+#### One spelling for "where", on all three things
+
+The light could be put anywhere in the frame and the shadow could not. `colour.originX/originY` moved
+the bloom cluster; `shadow.direction` said only which WAY the dark lay, never how far off centre it
+sat; and the silhouette had no position at all, so an author reached for `envelope.kind` and picked a
+shape because it happened to peak in the right place. That is choosing a shape for the wrong reason.
+
+Three things now answer the question the same way, in the same units, under the same name:
+
+| dial | places |
+|---|---|
+| `colour.originX` / `colour.originY` | the LIGHT: the bloom cluster and the mid, rigidly, leaving `deep` alone |
+| `shadow.originX` / `shadow.originY` | the DARK: the fall, and the vignette under it |
+| `envelope.originX` / `envelope.originY` | the MASS: the silhouette, across the frame and down it |
+
+Percent of the frame in every case, off-frame values legal in every case, and the default in every
+case is exactly the unmoved position, so nothing written before they existed moves by a pixel.
+
+What `shadow.origin` reaches depends on the SHAPE `direction` names, and that is a property of the
+shapes rather than a limit of the dial:
+
+* `center` is a radial, so the whole vector lands on its centre.
+* `top-and-bottom` and `left-and-right` are a lit band with dark at both ends, so placing the dark is
+  placing the band: the move along the fall's own axis slides it, and the other axis has nothing to do.
+* The eight bearings are a linear gradient, which has a direction and no centre. Only the component
+  ALONG the fall can reach it, where it makes the darkness begin earlier or later. The component at
+  right angles moves the vignette underneath, which is the radial half of that shape.
+
+`envelope.originY` always moves the silhouette's free edge DOWN the frame as it rises, whichever edge
+`anchor` holds, so the dial means one thing from either side.
 
 #### Polarity
 
@@ -255,13 +287,47 @@ extent is a curve in the element's position.
 
 | key | range | what it does |
 |---|---|---|
-| `kind` | `full` `ramp` `arch` `valley` `wave` | the curve. `full` is 1 everywhere, so the default envelope is no envelope. |
+| `kind` | `full` `ramp` `arch` `valley` `wave` · `circle` `crescent` `scallops` `hills` | the curve. `full` is 1 everywhere, so the default envelope is no envelope. The four after the dot are round. |
 | `from` / `to` | 0 to 1 | the extent at the curve's floor and at its ceiling. `from` ABOVE `to` runs the shape backwards, which is why there is no direction dial. |
 | `jitter` | 0 to 1 | how far each element wanders off the curve. |
 | `anchor` | `bottom` `top` | which edge the element grows from. The other end is the free one. |
+| `originX` / `originY` | -50 to 150 | WHERE THE MASS IS, as a percentage across and down the frame. `50`/`50` is unmoved. Same name and units as `colour.originX/originY`, because it is the same question about the other half of the picture. |
 | `taper` | 0 to 1 | how much it narrows towards the free end. `1` ends in a point. |
 | `softness` | 0 to 1 | how sharply the extent ENDS. `0` stops dead, which is a bar chart; both references that needed an envelope end soft. With `mass`, it is the blur of the whole silhouette instead. |
 | `mass` | 0 to 1 | HAND THE ENVELOPE TO THE FIELD at this strength, instead of to the elements. `0` emits nothing. |
+
+#### The round kinds, and why a sine hump was not one
+
+`arch` was the only curved shape the table had, and a sine hump is not a dome. It leaves the baseline
+at a finite slope and its shoulders sag, so a mass built on it reads as a bump. A circle leaves the
+baseline UPRIGHT, and that one difference is the whole of what the eye calls round. The four kinds
+below are built out of circular arcs and gaussians, so none of them is a polyline and none has a
+corner anywhere.
+
+| kind | the maths | what you get |
+|---|---|---|
+| `circle` | the unit semicircular arc, `sqrt(1 - (2u-1)^2)`. Every point satisfies x² + y² = 1, and the test asserts it rather than trusting it. | a symmetric dome, a planet's limb, an eclipse |
+| `crescent` | one circular arc with a second equal arc bitten out of it, offset along x. Both edges are circles. | a moon horn: empty on one side, a concave inner edge, a point at the tip |
+| `scallops` | the same semicircle repeated five times. Odd, so one arc sits dead centre and the row is symmetric. | a shallow `from`/`to` is a scalloped horizon; a tall one is an arcade with light between the piers |
+| `hills` | three gaussians of unequal width and height at 0.19, 0.5 and 0.82, summed. Gaussians have no edges, so the sum is smooth everywhere and three unequal ones never repeat. | rolling ground: three summits with soft saddles between them |
+
+`crescent` and `hills` are divided by their own peak, so `to` still means "the extent at the curve's
+ceiling" for every kind alike. A shape whose ceiling was 0.81 would quietly make `to` mean something
+else.
+
+**A round VALLEY is not here, and that is not an omission.** `from` above `to` already runs any curve
+backwards, so `circle` with `from: 1, to: 0` is the bowl. A kind that draws a picture another kind
+already reaches is a dial nobody needs.
+
+**A lens is not here either, and the reason is the envelope's own shape.** An envelope is anchored to
+an edge: it says how far an element reaches from that edge, so it cannot describe anything that
+floats. A lens or a vesica is a floating form, and the only part of one an anchored envelope can
+express is its upper arc, which is a slightly pointier `circle`. There is no third picture in it.
+
+**The curve is circular in the ENVELOPE's units, not in the frame's.** `u` is a fraction of the width
+and the extent is a fraction of the height, so on a 16:9 frame a `circle` draws a wide ellipse, the
+same way `arch` is stretched. The generator emits percentages and never learns the aspect, so it
+cannot correct for it. If you want a rounder dome on a wide frame, lower `to`.
 
 #### `mass`: a landscape is not a row of boxes
 

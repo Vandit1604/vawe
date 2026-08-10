@@ -135,6 +135,117 @@ ok('envelope softness fades the free end', lightfield({ envelope: { softness: 0.
 ok('a shards field with an envelope shortens its rays',
   /height:1[0-9.]+vmax/.test(lightfield({ pattern: { kind: 'shards' }, envelope: { kind: 'ramp', from: 0.05, to: 0.1 } })));
 
+console.log('\nround shapes');
+// The silhouette as a curve, read back out of the markup. `mass` samples the envelope at 180 columns
+// and writes `top:${102 - 104 * ext}%`, so this recovers the extent the shape asked for, exactly.
+// jitter 0 kills both the per-element jitter and the ridge noise, so nothing random is in the number.
+const curveOf = (kind, extra = {}) => {
+  const h = lightfield({ envelope: { kind, from: 0, to: 1, jitter: 0, mass: 0.9, ...extra } });
+  return [...h.match(/<div class="r">([\s\S]*?)<\/div>/)[1].matchAll(/top:([-0-9.]+)%/g)]
+    .map((m, i) => ({ u: (i + 0.5) / 180, ext: (102 - Number(m[1])) / 104 }));
+};
+for (const kind of ['circle', 'crescent', 'scallops', 'hills']) {
+  ok(`${kind} is a legal envelope kind and draws a silhouette`, curveOf(kind).length === 180);
+}
+ok('an unknown round-sounding kind still throws and lists every shape', (() => {
+  try { lightfield({ envelope: { kind: 'sphere' } }); } catch (e) {
+    return e.message.includes('"circle"') && e.message.includes('"hills"');
+  }
+  return false;
+})());
+ok('circle is an EXACT circular arc: every sample satisfies x squared plus y squared = 1', (() => {
+  // Not "close to a hump": the curve is measured against the circle's own equation, and the only
+  // slack allowed is the three decimal places the markup is printed to.
+  return curveOf('circle').every(({ u, ext }) => Math.abs((2 * u - 1) ** 2 + ext * ext - 1) < 0.002);
+})());
+ok('circle is symmetric about its centre', (() => {
+  const c = curveOf('circle');
+  return c.every((p, i) => Math.abs(p.ext - c[179 - i].ext) < 0.002);
+})());
+ok('circle is NOT arch: a sine hump leaves the baseline at a slope and a circle leaves it upright', (() => {
+  const c = curveOf('circle'), a = curveOf('arch');
+  // Same peak, and a circle is fatter everywhere else, most of all near the edges.
+  return Math.abs(c[89].ext - a[89].ext) < 0.01 && c[4].ext - a[4].ext > 0.2;
+})());
+ok('crescent is a lune: it is empty on one side and rises to a horn on the other', (() => {
+  const c = curveOf('crescent');
+  const peak = c.reduce((m, p) => (p.ext > m.ext ? p : m));
+  // Nothing at all in the left third, the horn past the middle, and diving back to the baseline at
+  // the far edge. It does not reach 0 in the last column, and it should not: both edges of a lune are
+  // circles, so it comes down VERTICALLY, and the last sample is taken half a column short of the end.
+  return c.slice(0, 60).every((p) => p.ext < 0.01) && peak.u > 0.5 && peak.ext > 0.99
+    && c[179].ext < 0.2 && c[179].ext < peak.ext / 5;
+})());
+ok('scallops is five arcs, so the row is symmetric and has five summits', (() => {
+  const c = curveOf('scallops');
+  const tops = c.filter((p, i) => i > 0 && i < 179 && p.ext >= c[i - 1].ext && p.ext > c[i + 1].ext);
+  return tops.length === 5 && c.every((p, i) => Math.abs(p.ext - c[179 - i].ext) < 0.01);
+})());
+ok('hills is three unequal summits, none of them a repeat of another', (() => {
+  const c = curveOf('hills');
+  const tops = c.filter((p, i) => i > 0 && i < 179 && p.ext >= c[i - 1].ext && p.ext > c[i + 1].ext);
+  return tops.length === 3 && new Set(tops.map((p) => p.ext.toFixed(2))).size === 3;
+})());
+ok('every round kind reaches 1 at its ceiling, so `from` and `to` mean the same thing for all of them',
+  ['circle', 'crescent', 'scallops', 'hills'].every((k) => {
+    const top = Math.max(...curveOf(k).map((p) => p.ext));
+    return top > 0.99 && top <= 1.0001;
+  }));
+
+console.log('\nplacement: where the light is, where the dark is, where the mass is');
+ok('the envelope origin defaults to the unmoved silhouette', (() => {
+  const both = { kind: 'circle', from: 0.2, to: 0.9, mass: 0.8 };
+  return lightfield({ envelope: { ...both, originX: 50, originY: 50 } }) === lightfield({ envelope: both });
+})());
+ok('envelope originX slides the crest across the frame', (() => {
+  const crest = (originX) => curveOf('circle', { originX }).reduce((m, p) => (p.ext > m.ext ? p : m)).u;
+  return Math.abs(crest(50) - 0.5) < 0.01 && Math.abs(crest(75) - 0.75) < 0.01;
+})());
+ok('envelope originY moves the silhouette DOWN the frame from either anchor', (() => {
+  // The free edge is the top of a bottom-anchored mass and the bottom of a top-anchored one, and
+  // raising originY has to push both of them down the frame or the dial means two things.
+  const edge = (anchor, originY) => {
+    const h = lightfield({ envelope: { kind: 'circle', from: 0, to: 0.8, jitter: 0, mass: 0.9, anchor, originY } });
+    const tops = [...h.match(/<div class="r">([\s\S]*?)<\/div>/)[1].matchAll(/top:([-0-9.]+)%;height:([0-9.]+)%/g)];
+    return anchor === 'top'
+      ? Math.max(...tops.map((m) => Number(m[1]) + Number(m[2])))   // the bottom of the tallest column
+      : Math.min(...tops.map((m) => Number(m[1])));                 // the top of the tallest column
+  };
+  return edge('bottom', 70) > edge('bottom', 50) && edge('top', 70) > edge('top', 50);
+})());
+ok('the shadow origin defaults to the unmoved fall, in every direction family', (() => {
+  const at = (d, o) => lightfield({ shadow: { depth: 0.6, direction: d, ...o } });
+  return ['center', 'top-and-bottom', 'left-and-right', 'bottom', 'top-left']
+    .every((d) => at(d, {}) === at(d, { originX: 50, originY: 50 }));
+})());
+ok('shadow origin moves the centre of a radial fall', (() => {
+  const h = lightfield({ shadow: { depth: 0.6, direction: 'center', originX: 20, originY: 75 } });
+  return h.includes('radial-gradient(72% 82% at 20% 75%');
+})());
+ok('shadow origin moves the LIT BAND of a paired fall along its own axis', (() => {
+  const band = (originY) => {
+    const s = lightfield({ shadow: { depth: 0.6, direction: 'top-and-bottom', originY } })
+      .match(/\.s\{[^}]*background:linear-gradient\(180deg,([^}]*)\)\}/)[1];
+    const clear = [...s.matchAll(/rgba\(\d+,\d+,\d+,0\) ([\d.]+)%/g)].map((m) => Number(m[1]));
+    return (clear[0] + clear[1]) / 2;
+  };
+  return Math.abs(band(50) - 50) < 0.01 && Math.abs(band(72) - 72) < 0.01;
+})());
+ok('shadow origin shifts where a one-way fall BEGINS, along the fall', (() => {
+  const start = (o) => Number(lightfield({ shadow: { depth: 0.6, direction: 'bottom', ...o } })
+    .match(/linear-gradient\(180deg, rgba\(\d+,\d+,\d+,0\) ([\d.]+)%/)[1]);
+  // `bottom` means the dark is below, so pushing the dark further down delays the fall.
+  return start({ originY: 80 }) - start({}) > 25 && start({ originY: 20 }) < start({});
+})());
+ok('the vignette under a one-way fall takes the WHOLE vector, including the part the line cannot', (() => {
+  const h = lightfield({ shadow: { depth: 0.6, direction: 'bottom', originX: 30 } });
+  return h.includes('radial-gradient(76% 88% at 30% 46%');
+})());
+ok('a shadow origin off the scale throws and names itself',
+  (() => { try { lightfield({ shadow: { originX: 400 } }); } catch (e) { return e.message.includes('shadow.originX must be between -50 and 150'); } return false; })());
+ok('an envelope origin off the scale throws and names itself',
+  (() => { try { lightfield({ envelope: { originY: -80 } }); } catch (e) { return e.message.includes('envelope.originY must be between -50 and 150'); } return false; })());
+
 ok('shade #000000 is the exact no-op and emits no fill layer', !lightfield().includes('class="sh"'));
 ok('a shade colour screens a cool fill under the pattern', (() => {
   const h = lightfield({ colour: { shade: '#04060f' } });

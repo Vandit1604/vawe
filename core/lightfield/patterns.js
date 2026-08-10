@@ -44,12 +44,56 @@ function mound(fp, fa, peak) {
 // fraction of the frame it fills along its own axis. Every shape here is a plain curve in u, which
 // is the whole reason a rising row of spikes and a dipping horizon of panels are one dial and not
 // two features.
+//
+// THE ROUND HALF OF THE TABLE, and why sin was not already it. `arch` is a sine hump: it leaves the
+// baseline at a finite slope and its shoulders sag. A circle leaves the baseline VERTICALLY, and that
+// single difference is what the eye reads as a dome rather than as a bump. Everything below is built
+// out of circular arcs or out of gaussians, so none of it is a polyline and none of it has a corner.
+//
+// One unit circular arc, in x running -1 to 1. Every point of the returned curve satisfies
+// x*x + y*y = 1 exactly, so this is a circle and not a shape that resembles one.
+const arc = (x) => (x <= -1 || x >= 1 ? 0 : Math.sqrt(1 - x * x));
+
+// The largest value a curve reaches, scanned rather than guessed. `from` and `to` are documented as
+// the extent at the curve's FLOOR and at its CEILING, and a shape whose ceiling is 0.81 quietly makes
+// `to` mean something else. The scan is a fixed loop over a pure function, so it is as deterministic
+// as the curve it measures.
+const peakOf = (f) => {
+  let m = 0;
+  for (let i = 0; i <= 2000; i++) { const v = f(i / 2000); if (v > m) m = v; }
+  return m;
+};
+
+// A crescent: one circular arc with a second, equal arc bitten out of it. The bite is offset along x,
+// so the left side cancels to nothing and the right side keeps the whole of the first arc. Both edges
+// are circles, which is what makes it a moon and not a wedge.
+const BITE = 0.42;
+const crescentRaw = (u) => { const x = 2 * u - 1; return Math.max(0, arc(x) - arc(x + BITE)); };
+
+// A row of arcs: the unit semicircle repeated. An odd count puts one arc dead centre, so the row is
+// symmetric about the middle of the frame the way `arch` and `circle` are.
+const SCALLOPS = 5;
+const scallops = (u) => { const t = u * SCALLOPS; return arc(2 * (t - Math.floor(t)) - 1); };
+
+// Rolling ground: three gaussians of different widths at different places, summed. Gaussians have no
+// edges at all, so the sum is smooth everywhere, and three unequal ones never repeat, which is what
+// separates a landscape from a pattern.
+const HILLS = [{ at: 0.19, w: 0.1, h: 0.78 }, { at: 0.5, w: 0.13, h: 1 }, { at: 0.82, w: 0.085, h: 0.62 }];
+const hillsRaw = (u) => HILLS.reduce((s, g) => { const z = (u - g.at) / g.w; return s + g.h * Math.exp(-0.5 * z * z); }, 0);
+
+const CRESCENT_PEAK = peakOf(crescentRaw);
+const HILLS_PEAK = peakOf(hillsRaw);
+
 const SHAPE = {
   full: () => 1,
   ramp: (u) => u,
   arch: (u) => Math.sin(Math.PI * u),
   valley: (u) => 1 - Math.sin(Math.PI * u),
   wave: (u) => 0.5 + 0.5 * Math.sin(2 * Math.PI * u),
+  circle: (u) => arc(2 * u - 1),
+  crescent: (u) => crescentRaw(u) / CRESCENT_PEAK,
+  scallops,
+  hills: (u) => hillsRaw(u) / HILLS_PEAK,
 };
 
 // `from` and `to` map the curve onto the extents the caller wants, and `from` above `to` runs it
@@ -58,11 +102,22 @@ const SHAPE = {
 // The jitter draw is taken ONLY when jitter is non-zero. A draw taken unconditionally would shift
 // the rng stream for every field that never asked for an envelope, and every committed preset would
 // change without anyone touching it.
+//
+// WHERE THE SHAPE IS. `envelope.originX/originY` are a translation of the whole silhouette, in the
+// same percent-of-frame units as `colour.originX/originY`, and 50/50 is the unmoved position, so a
+// field that never asks for one is byte-identical to the field before these existed.
+//
+// originX slides the curve ACROSS: the sample point moves the other way, so raising it moves a dome's
+// crest to the right. originY slides the silhouette's free edge DOWN the frame whichever end it grows
+// from, which is why the sign follows `anchor`: adding extent to a bottom-anchored mass raises its
+// top, and adding it to a top-anchored one lowers its bottom.
 export function envelopeOf(opt) {
-  const { kind, from, to, jitter } = opt.envelope;
+  const { kind, from, to, jitter, anchor, originX, originY } = opt.envelope;
   const curve = SHAPE[kind];
+  const across = (originX - 50) / 100;
+  const along = (anchor === 'top' ? originY - 50 : 50 - originY) / 100;
   return (u, r) => {
-    const base = from + (to - from) * curve(clamp01(u));
+    const base = from + (to - from) * curve(clamp01(u - across)) + along;
     return clamp01(jitter === 0 ? base : base * (1 + jitter * span(r, -1, 1)));
   };
 }
