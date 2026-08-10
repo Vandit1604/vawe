@@ -579,6 +579,13 @@ schema-check:
 lint-test:
 	node scripts/gates/lint-test.mjs
 
+# make engine-sync [CHECK=1]  — publish core/ + formats/scene/ into site/public/, which is what the
+# site's in-browser engine actually boots. CHECK=1 only reports. The site said "this is the real
+# engine, running in your browser" while serving a copy 77 files behind (docs/MISTAKES.md #271).
+.PHONY: engine-sync
+engine-sync:
+	@node scripts/site/engine-sync.mjs $(if $(CHECK),--check,)
+
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review:
