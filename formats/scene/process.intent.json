@@ -1,0 +1,91 @@
+{
+ "spine": {
+  "object": "the semicircle in its element box, and the measured rectangle drawn around it",
+  "object_t0": "a semicircle inscribed in a dashed square box, turning, with a red measured rectangle around it that is already too big",
+  "object_states": "the red rectangle swells to 1.414x while the ink never moves -> the whole object shrinks 40 percent so the rectangle fits -> the object holds still while the error is measured to scale beside it -> the object dims under seven red failures -> the rectangle snaps onto the ink and turns mint",
+  "object_last": "the same shot as the first frame, measured correctly"
+ },
+ "beats": [
+  {
+   "at": 1.6,
+   "span": [
+    0,
+    3.2
+   ],
+   "name": "nothing came near the edge",
+   "mustShow": [
+    "Nothing came near the",
+    "The safe-zone audit failed it at every rotation."
+   ],
+   "mustAnimate": true,
+   "artifact": "the contradiction is the open loop, and the picture states it before the words do",
+   "object": "the semicircle turning in its box, the red rectangle swelling around it",
+   "becomes": "a correctly measured shape becomes a failing one without moving"
+  },
+  {
+   "at": 4.65,
+   "span": [
+    3.2,
+    6.1
+   ],
+   "name": "shrink it 40 percent",
+   "mustShow": [
+    "40 percent.",
+    "The only change that passed. The film got worse."
+   ],
+   "mustAnimate": true,
+   "artifact": "the wrong answer has to be shown working, or the middle of the film has no cost",
+   "object": "the whole pair scales to 0.6, the red box now fits",
+   "becomes": "a passing measurement becomes a worse film"
+  },
+  {
+   "at": 7.65,
+   "span": [
+    6.1,
+    9.2
+   ],
+   "name": "255px of clearance",
+   "mustShow": [
+    "of clearance.",
+    "Measured as 139px over the edge."
+   ],
+   "mustAnimate": true,
+   "artifact": "this is the payoff of the open question, and it is a quantity, so it is a length and not a numeral",
+   "object": "the object returns to full size and holds still while the error is drawn against it",
+   "becomes": "a disagreement becomes a distance you can see"
+  },
+  {
+   "at": 10.6,
+   "span": [
+    9.2,
+    12
+   ],
+   "name": "fix two of three",
+   "mustShow": [
+    "Fix two of three.",
+    "Unclamped, one clean scene became seven failures."
+   ],
+   "mustAnimate": true,
+   "artifact": "the most counterintuitive moment goes last before the payoff, and the middle of a process is where it looks like a mistake",
+   "object": "the object dims to a quarter and the failures land on top of it",
+   "becomes": "a partial fix becomes a bigger regression than the bug"
+  },
+  {
+   "at": 13.5,
+   "span": [
+    12,
+    15
+   ],
+   "name": "only fixing all three worked",
+   "mustShow": [
+    "Only fixing",
+    "Two scenes changed. Fail to pass. Zero regressions."
+   ],
+   "mustAnimate": true,
+   "artifact": "the bookend closes on the corrected shot, and the idea is what is left over rather than what is said",
+   "object": "the red rectangle snaps from 933 square onto the ink and turns mint",
+   "becomes": "a rectangle that was measuring the empty corners becomes one measuring the ink"
+  }
+ ],
+ "_note": "mustShow needles are the longest tag-free substring of each line. scripts/gates/inspect.mjs matches against the RAW layer text, so a line carrying the engine's documented <b> emphasis can never match its own plain copy. See docs/MISTAKES.pending-film.md."
+}
