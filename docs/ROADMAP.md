@@ -254,6 +254,22 @@ Both cheap paths shipped:
   texture in boot's awaited preload, mirroring how `canvasFx` bakes. That work has **not** been done, so
   **Code Shader Dissolve** (wants a `codeBlock` as its texture) is still blocked, and the validator
   rejects `resample` on any non-raster layer rather than silently ignoring it.
+
+  **The technique is now PROVEN, in about sixty lines: `node scripts/dev/seam-c-proto.mjs`.** DOM →
+  `foreignObject` → `<img>` → `texImage2D` → a fragment shader → pixels, with the frame number as the
+  only input. Five frames rendered forwards, backwards, shuffled and replayed are byte-identical to
+  their first render and all five differ from each other. So the plan above is sound and what remains
+  is the plumbing: the bake belongs in boot's awaited preload, and the validator's refusal can then be
+  narrowed instead of lifted.
+
+  **Why the proof was written: whether to adopt `vfx-js`.** It is MIT, zero-dependency, and does
+  exactly this. Two measured facts ruled it out as a runtime dependency, neither of them about
+  quality. Its released 1.1.0 has no way to set the clock — `render()` opens with `Date.now()`, and
+  asking for the same logical frame five times returned five different pictures on all three shaders
+  tried. And the half it would give us is `foreignObject` rasterisation, which this repo already
+  performs for the playground's PNG download. The seekable API (`setTime(t); render()`, documented as
+  exact) exists on its main branch and is unreleased; if it ships, this is worth revisiting for its
+  effect chain and its shader library rather than for the sampling.
 - **Full-frame feedback**: sampling the COMPOSITED frame. Out of scope on purpose: the composite is one
   frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it.
   That breaks pure-in-`n`, which is the product's central claim. `resample` never samples its own

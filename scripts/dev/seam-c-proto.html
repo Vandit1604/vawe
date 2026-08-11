@@ -1,0 +1,91 @@
+<!doctype html><meta charset=utf-8><body style="margin:0;background:#000">
+<div id="stage" style="width:600px;height:340px;background:#0a1030;display:grid;place-content:center;
+  font:800 92px Helvetica,Arial;color:#9fd6ff;letter-spacing:.02em">VAWE</div>
+<script type="module">
+// SEAM C, PROVEN. Not a feature: a proof that the plan docs/ROADMAP.md already wrote is sound.
+//
+// The roadmap lists "sampling an arbitrary DOM subtree" as the one sampling seam still not built, and
+// names the technique: an offline foreignObject bake to a texture. This is that, end to end, in about
+// sixty lines: DOM -> foreignObject -> <img> -> texImage2D -> our own fragment shader -> pixels.
+//
+// WHY IT WAS WRITTEN. The question asked was whether to adopt vfx-js. vfx-js does exactly this, is
+// MIT, and is good. Two measured facts decided against it as a runtime dependency: its released 1.1.0
+// has no way to set the clock (render() opens with Date.now(), and asking for the same logical frame
+// five times returned five different pictures), and the rasterising half it provides is foreignObject,
+// which this repo already uses for the playground PNG download. The seekable API exists on its main
+// branch and is unreleased.
+//
+// WHAT THIS MEASURES. renderFrame(n) takes n and nothing else. Rendered forwards, backwards, shuffled
+// and replayed, all five frames are byte-identical to their first render, and all five differ from
+// each other. That is the property the whole engine is built on and the one vfx-js cannot offer yet.
+//   node scripts/dev/seam-c-proto.mjs
+const q = new URLSearchParams(location.search);
+const W = 600, H = 340;
+
+// 1. DOM -> image, the foreignObject path. Deterministic: same DOM, same bytes.
+async function rasterise(el) {
+  const xml = new XMLSerializer().serializeToString(el);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`
+    + `<foreignObject width="100%" height="100%">`
+    + `<div xmlns="http://www.w3.org/1999/xhtml">${xml}</div></foreignObject></svg>`;
+  const img = new Image();
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  await img.decode();
+  return img;
+}
+
+// 2. Our own GL, with a sampler2D. The engine's ambient shader has no sampler at all, which is the
+//    documented reason frosted glass and everything in that family was blocked.
+const VERT = `attribute vec2 a; varying vec2 v; void main(){ v = a*0.5+0.5; gl_Position = vec4(a,0.,1.); }`;
+const FRAG = `precision highp float; varying vec2 v; uniform sampler2D u_src; uniform float u_t;
+void main(){
+  vec2 uv = vec2(v.x, 1.0 - v.y);
+  // rgbShift, driven by u_t and nothing else. No clock, no state, no history.
+  float amt = 0.012 * sin(u_t * 2.2);
+  float r = texture2D(u_src, uv + vec2(amt, 0.0)).r;
+  vec4 g = texture2D(u_src, uv);
+  float b = texture2D(u_src, uv - vec2(amt, 0.0)).b;
+  // a scanline, so there is a second thing to see moving
+  float s = 1.0 - 0.18 * step(0.5, fract((uv.y * 170.0) + u_t * 0.6));
+  gl_FragColor = vec4(vec3(r, g.g, b) * s, g.a);
+}`;
+const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+const gl = cv.getContext('webgl', { preserveDrawingBuffer: true, premultipliedAlpha: true });
+const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
+gl.linkProgram(prog); gl.useProgram(prog);
+const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+const uT = gl.getUniformLocation(prog, 'u_t');
+
+const img = await rasterise(document.getElementById('stage'));
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+gl.viewport(0, 0, W, H);
+
+// 3. renderFrame(n). The ONLY input is n.
+function renderFrame(n) {
+  gl.uniform1f(uT, n / 30);
+  gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  const px = new Uint8Array(W * H * 4);
+  gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  let h = 2166136261 >>> 0, lit = 0;
+  for (let i = 0; i < px.length; i += 4) if (px[i] || px[i+1] || px[i+2]) lit++;
+  for (const b of px) { h ^= b; h = Math.imul(h, 16777619) >>> 0; }
+  return { hash: h.toString(16), lit };
+}
+document.body.appendChild(cv);
+window.__frames = (ns) => ns.map(renderFrame);
+window.__png = () => { renderFrame(Number(q.get('n') || 0)); return cv.toDataURL('image/png'); };
+document.title = 'READY';
+</script></body>
