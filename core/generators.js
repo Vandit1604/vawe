@@ -271,10 +271,13 @@ function bandLayers(o, S, { gradient, w, h }) {
     // not luminance, so the only value that does not spoil the picture is full.
     intensity: 1,
     seed: pick(o, 'seed', S),
-    // `bands` counts bands ACROSS THE FRAME; the shader counts them along its own axis, which is
-    // scaled by the aspect. One divide here is what keeps the dial meaning the same thing on a
-    // portrait canvas as on a landscape one.
-    params: [bands / ar, deg(pick(o, 'bandAngle', S)), width, pick(o, 'lightEdge', S)],
+    // NO aspect divide. It used to be here because the shader's band axis was in aspect-scaled units,
+    // so `bands` had to be corrected to keep meaning bands-across-the-frame. The shader normalises that
+    // axis itself now, and dividing here as well applied the correction TWICE: on a 16:9 canvas the
+    // band index that drives `converge` came out wrong and the ramp clamped to its end stop, which for
+    // `spectrum` is white, so the right of the frame went flat. One correction, in the place that knows
+    // the aspect, which is the shader.
+    params: [bands, deg(pick(o, 'bandAngle', S)), width, pick(o, 'lightEdge', S)],
     params2: [['panels', 'arcs', 'rounded'].indexOf(shape),
       frac(pick(o, 'shapeOriginX', S) ?? 50), -frac(pick(o, 'shapeOriginY', S) ?? 50),
       pick(o, 'lightPolarity', S)],
@@ -286,7 +289,12 @@ function bandLayers(o, S, { gradient, w, h }) {
       pick(o, 'bandShading', S) ?? 0, pick(o, 'bandLean', S) ?? 0],
     params6: [pick(o, 'lightRing', S), pick(o, 'lightPoints', S), pick(o, 'lightSpike', S), zoom],
     colors: colours,
-    x: 0, y: 0, w, h, start: 0, duration: 6,
+    // NO w/h. core/surfaces/shader.js sizes an UNBOXED ambient layer to the frame. Declaring a box
+    // bakes in whatever aspect the generator was fitted at: `spectrum` carried 1080x1920, so on a 16:9
+    // canvas it painted 1080 of 1920 pixels and the right 44% was bare background. I chased that as a
+    // shader bug through three wrong hypotheses; sampling the pixel said rgb(12,19,29), the scene's own
+    // dark, and the answer was the box all along.
+    x: 0, y: 0, start: 0, duration: 6,
   }];
 }
 

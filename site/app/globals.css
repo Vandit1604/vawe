@@ -1064,29 +1064,53 @@ a{color:inherit;text-decoration:none}
 .pgscene { border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2); }
 .pgskip { margin-left: 0; font-style: normal; opacity: .8; }
 
-/* ── playground: one screen ────────────────────────────────────────────────────────────────────
-   The preview used to start 455px down and end below the fold on every size, so the thing you came
-   to look at was never fully visible. The page is a fixed-height frame now: the stage takes the room
-   that is left, and the PANEL scrolls inside itself rather than growing the document. Same shape as
-   .ed-main on /editor. */
+/* ── playground: preview wide, controls beneath ────────────────────────────────────────────────
+   The panel used to be a 20rem column beside the stage. With twenty-odd dials that is a cramped
+   scroller next to a preview that never gets the width it wants, so both halves lose. Now the stage
+   takes the full column and the controls wrap under it as a grid of chips: more dials visible at once,
+   and the picture as large as the page allows. */
 .pgpage { padding: 28px 0 32px; }
 .pghead { max-width: 44rem; margin-bottom: 18px; }
 .pghead h1 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); margin-bottom: 8px; }
 .pghead p { font-size: .98rem; }
 .pgpick { margin-bottom: 12px; }
 
-.pggrid { align-items: stretch; }
-.pgstage { display: flex; flex-direction: column; min-height: 0; }
-/* A BACKDROP HAS NO INTRINSIC RATIO, so the injected kind fills the row rather than sitting in a 16:9
-   box with dead space under it. A scene preview is different: it is a film at a stated aspect, and
-   .sp-stage keeps that. */
-.pgfield { aspect-ratio: auto; height: clamp(320px, calc(100vh - 300px), 620px); width: 100%; }
-.pgscene { max-height: calc(100vh - 300px); margin-inline: auto; width: 100%; }
+.pggrid { display: block; }
+.pgstage { display: block; min-width: 0; }
+.pgfield { aspect-ratio: auto; height: clamp(320px, 56vh, 640px); width: 100%; }
+.pgscene { max-height: 56vh; margin-inline: auto; width: 100%; }
+
+/* the control wall */
 .pgpanel {
-  position: sticky; top: 88px;
-  max-height: calc(100vh - 132px); overflow-y: auto; overscroll-behavior: contain;
+  position: static; max-height: none; overflow: visible;
+  margin-top: 16px; padding: 0; background: none; border: 0; box-shadow: none;
 }
-.pgabout { color: var(--muted); font-size: .9rem; line-height: 1.6; margin-bottom: 12px; max-width: 40rem; }
+.pgblurb { max-width: 46rem; }
+.pggroup {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  gap: 8px; margin: 0 0 10px;
+}
+.pggroup legend {
+  grid-column: 1 / -1; padding: 6px 0 2px;
+}
+/* every dial is a chip: its name on the left, its control on the right, one line */
+.pgrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 11px; margin: 0; font-size: 13px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+}
+.pgrow:hover { border-color: var(--line-2); }
+.pgrow > span:first-child { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pgnum input[type="range"] { width: 4.2rem; }
+.pgnum input[type="number"], .pgrow select, .pgtext { width: 5.4rem; font-size: 12.5px; }
+.pgrow select { width: 6.6rem; }
+.pgtext-sm { width: 5.4rem; }
+
+@media (max-width: 900px) {
+  .pgfield { height: 38vh; }
+  .pgscene { max-height: none; }
+  .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
 
 /* the per-section roll sits in the legend, so it reads as belonging to that group */
 .pggroup legend { display: flex; align-items: center; gap: 8px; width: 100%; }
