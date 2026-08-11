@@ -18,7 +18,7 @@
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
 //   Projector:   gateWeave (film dust, hairs, and the frame drifting in the gate)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave', 'blinds'];
+export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave', 'bands'];
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
@@ -206,7 +206,7 @@ void main(){
     float hair = hon * smoothstep(0.0026, 0.0, abs(q.x - (hx + sway))) * step(1.0 - hlen, q.y);
     col = mix(vec3(1.0), vec3(0.02), max(dust*dirt, max(gate, hair)));
     alpha = gate*0.6 + dust*0.85 + hair*0.75;
-  } else {                                                // blinds — light through a slatted screen
+  } else {                                                // bands — a ramp repeated over a scalar field
     float bt = t * 0.06;                                  // the clock, first line, see note below
     vec2  drift = vec2(0.05*sin(t*0.07), 0.03*cos(t*0.05));
     // Index 17, the trailing else. The clock is on the FIRST line because lib-test reads the opening

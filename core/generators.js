@@ -133,14 +133,14 @@ const build = ({ name, preset, ref, blurb, ready }) => {
 
 // EVERY look, ready or not. The check scores this list, so holding one back keeps it measured instead
 // of making it disappear: a look nobody can see is exactly how tide and fern went unexamined (#282).
-// `blinds` is a SHADER, not markup: our own branch in core/shaders-ambient.js. It reaches the playground
+// `bands` is a SHADER, not markup: our own branch in core/shaders-ambient.js. It reaches the playground
 // as scene LAYERS rather than HTML, which is the path the page already has for a scene fragment, so the
 // preview boots the real engine on it and there is no second renderer to keep in step.
 //
 // Its schema is declared here rather than beside the shader because the shader's parameter vector is
 // four anonymous floats by design: `u_p` means whatever the branch reading it says, so the NAMES live
 // with the generator that knows them.
-const BLINDS_SCHEMA = {
+const BANDS_SCHEMA = {
   count:     { kind: 'int', min: 2, max: 80, def: 14, primary: true },
   angle:     { kind: 'num', min: -0.25, max: 0.25, def: 0 },
   glow:      { kind: 'unit', def: 0.62, primary: true },
@@ -158,18 +158,18 @@ const BLINDS_SCHEMA = {
   },
 };
 
-const BLINDS = {
-  name: 'blinds',
+const BANDS = {
+  name: 'bands',
   group: 'shader',
-  blurb: 'Light behind a slatted screen. A repeating ramp over a gradient, drawn by the engine\'s own shader.',
+  blurb: 'A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind.',
   docs: 'docs/LIGHTFIELD.md',
   reference: null,
-  schema: BLINDS_SCHEMA,
-  presets: { blinds: {} },
+  schema: BANDS_SCHEMA,
+  presets: { bands: {} },
   produces: 'layers',
   ready: true,
   render: (o) => [{
-    type: 'shader', shader: 'blinds',
+    type: 'shader', shader: 'bands',
     intensity: o.intensity ?? 1,
     seed: o.seed ?? 7,
     params: [o.count ?? 14, o.angle ?? 0, o.glow ?? 0.62, o.softness ?? 1.6],
@@ -182,7 +182,7 @@ const BLINDS = {
   }],
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BLINDS];
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

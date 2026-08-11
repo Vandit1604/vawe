@@ -85,6 +85,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/SURFACES.md](../../../docs/CRAFT/SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [docs/CRAFT/TYPOGRAPHY.md](../../../docs/CRAFT/TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 | [docs/LIGHTFIELD.md](../../../docs/LIGHTFIELD.md) | you need a light-field backdrop, or want to recolour or re-pattern one | the lightfield generator: the five dials (colour · pattern · envelope · shadow · motion), polarity, the seed, and how close each reference reproduction gets |
+| [docs/MISTAKES.pending-round.md](../../../docs/MISTAKES.pending-round.md) | you are about to fold the round-shapes and placement pass into docs/MISTAKES.md | why the envelope had no round curve and no position, why the shadow had a bearing but no place, and why the committed HTML fragments were stale |
 
 ## Craft · how full · how it sounds
 

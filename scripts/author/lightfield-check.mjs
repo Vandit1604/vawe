@@ -59,6 +59,10 @@ function compare(refFile, genFile) {
 const rows = [];
 for (const g of ALL_GENERATORS) {
   if (only && g.name !== only) continue;
+  // This tool shoots an HTML fragment. A generator that emits scene LAYERS (the blinds shader) is a
+  // different kind of thing and is scored by rendering a scene, not by writing a file. Skipping it
+  // loudly rather than crashing on a caller it was never written for.
+  if (g.produces !== 'html') { rows.push({ name: g.name, note: `produces ${g.produces}, not scored here` }); continue; }
   const preset = Object.values(g.presets || {})[0] || {};
   const opts = merge(defaultsOf(g.schema), preset);
   // `shoot` takes a FILE, because that is what every other caller has. Writing one here rather than

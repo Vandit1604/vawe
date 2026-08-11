@@ -48,6 +48,7 @@ type Engine = {
 // module path and fails, because it is not one: it is a static file the site serves at the root. The
 // variable also keeps the bundler out of it, which is the point of the whole arrangement.
 const ENGINE_URL = "/core/generators.js";
+const AMBIENT_URL = "/core/shaders-ambient.js";
 
 const get = (o: Record<string, unknown>, path: string): unknown =>
   path.split(".").reduce<unknown>((a, k) => (a as Record<string, unknown>)?.[k], o);
@@ -82,6 +83,7 @@ export function PlaygroundClient() {
   const patchRef = useRef<Record<string, unknown>>({});
   const presetRef = useRef<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const optsFor = useRef<string | null>(null);
   const stage = useRef<HTMLDivElement>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
@@ -107,6 +109,7 @@ export function PlaygroundClient() {
       ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
       : engine.defaultsOf(gen.schema);
     setPreset(first);
+    optsFor.current = gen.name;
     const raw = new URLSearchParams(window.location.search).get("o");
     if (!raw) { setOpts(base); return; }
     try {
@@ -129,7 +132,11 @@ export function PlaygroundClient() {
   // rather than substituting a default, and that message is the most useful thing on the page when
   // something is wrong, so it is shown verbatim instead of being turned into "invalid input".
   const made = useMemo(() => {
-    if (!gen || !opts) return null;
+    // Options are a generator's OWN vocabulary. Switching looks kept the previous object for one
+    // render, so `bands`' `count` reached lightfield and it refused, correctly, with an error the
+    // person switching had not caused. `optsFor` is the name of the generator these belong to, and a
+    // mismatch means the reset below has not run yet: render nothing rather than something wrong.
+    if (!gen || !opts || optsFor.current !== gen.name) return null;
     try { const r = gen.render(opts); setErr(null); return r; }
     catch (e) { setErr(String((e as Error)?.message || e)); return null; }
   }, [gen, opts]);
@@ -177,6 +184,7 @@ export function PlaygroundClient() {
 
   const apply = useCallback((next: Record<string, unknown>, named: string | null = null) => {
     setPreset(named);
+    if (gen) optsFor.current = gen.name;
     try { setOpts(gen?.normalise ? gen.normalise(next) : next); setErr(null); }
     catch (e) { setErr(String((e as Error)?.message || e)); }
   }, [gen]);
@@ -545,18 +553,47 @@ function Row({ c, value, onChange }:
 function LookCard({ gen, engine, active, onPick }:
   { gen: Generator; engine: Engine; active: boolean; onPick: () => void }) {
   const box = useRef<HTMLDivElement>(null);
-  const html = useMemo(() => {
+  const made = useMemo(() => {
     try {
       const preset = Object.values(gen.presets || {})[0] || {};
-      return gen.render(deepMerge(engine.defaultsOf(gen.schema), preset)) as string;
+      return gen.render(deepMerge(engine.defaultsOf(gen.schema), preset));
     } catch { return null; }
   }, [gen, engine]);
   useEffect(() => {
     const el = box.current;
-    if (!el || typeof html !== "string") return;
-    el.innerHTML = html;
-    el.style.setProperty("--t", "0");
-  }, [html]);
+    if (!el) return;
+    if (typeof made === "string") { el.innerHTML = made; el.style.setProperty("--t", "0"); return; }
+    // A generator that emits scene LAYERS cannot be injected. Where that layer is a SHADER, the card
+    // draws it straight to a canvas with the engine's own ambient layer: no scene, no iframe, no
+    // second renderer. Booting an engine per card is what /blocks refuses to do, for good reason.
+    const layer = Array.isArray(made) ? (made[0] as Record<string, unknown>) : null;
+    if (!layer || layer.type !== "shader") return;
+    let live = true;
+    let inst: { canvas: HTMLCanvasElement; draw: (...a: unknown[]) => void; dispose?: () => void } | null = null;
+    import(/* webpackIgnore: true */ AMBIENT_URL).then((m) => {
+      if (!live) return;
+      inst = m.createAmbientLayer(480, 300);
+      // `draw` wants GL float triples, not hex. The engine's own surface converts with
+      // core/surfaces/palette.js; passing the raw strings gives a black canvas that looks like a
+      // shader that drew nothing rather than a palette that was never read.
+      const pal = (layer.colors as string[] | undefined)?.length
+        ? (layer.colors as string[]).map((h) => {
+            const n = parseInt(String(h).replace("#", ""), 16);
+            return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+          })
+        : null;
+      inst!.draw(layer.shader, 0, layer.seed ?? 0, pal, layer.intensity ?? 1, layer.params, layer.params2);
+      el.replaceChildren(inst!.canvas);
+      inst!.canvas.style.width = "100%";
+      inst!.canvas.style.height = "100%";
+      inst!.canvas.style.display = "block";
+    }).catch((e) => {
+      // Never silent. A blank card that swallowed its reason is indistinguishable from a card that has
+      // nothing to draw, and this repo has paid for that confusion more than once.
+      console.error(`playground: ${gen.name} card could not draw`, e);
+    });
+    return () => { live = false; inst?.dispose?.(); };
+  }, [made]);
   return (
     <button className={`lcard${active ? " on" : ""}`} onClick={onPick} aria-pressed={active}>
       <span className="lcard-shot" ref={box} aria-hidden />
