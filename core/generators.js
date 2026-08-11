@@ -181,7 +181,16 @@ const LIGHT_SCHEMA = {
 
 // The bands themselves, shared for the same reason.
 const BAND_SCHEMA = {
-  bands:       { kind: 'num', min: 2, max: 80, def: 25, primary: true, note: 'how many bands fit across the frame at zoom 1.' },
+  // 48, not 25. MEASURED BY LOOKING: rendered at 8, 16, 25, 40, 60 and 80 side by side, the picture
+  // changes character between 25 and 40. Below it the stripes are the subject and they cut the light
+  // into slabs; above it the light is the subject and the stripes are texture across it, which is what
+  // "a light behind a screen" means. 25 sat on the wrong side of that line and nothing had chosen it.
+  // 48 leaves room to roll both ways inside the half that reads.
+  //
+  // NOT raised on `spectrum`, which overrides this with 10.7. That one is fitted to a photograph and
+  // scores 14.2 against it, so its default is a measurement and not a preference.
+  bands:       { kind: 'num', min: 2, max: 80, def: 48, primary: true, scale: 'log',
+                 note: 'how many bands fit across the frame at zoom 1.' },
   bandAngle:   { kind: 'num', min: -90, max: 90, def: 0, note: 'degrees. 0 stands the bands upright.' },
   bandOffset:  { kind: 'num', min: 0, max: 1, def: 0, note: 'slides the whole set sideways by a fraction of one band, which is how you put a seam or a band centre on the middle of the frame.' },
   mirrorBands: { kind: 'bool', def: false, note: 'fold the pattern about the field\'s middle, so each band shades outward on both sides instead of one way across the whole picture.' },
@@ -496,12 +505,33 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
         // freely took colonnade's near-black from 23% of the frame to 3.2%, measured, while rolling
         // `colour` freely left it at 25.1%. Contrast is composition, and composition is what a
         // randomiser preserves.
+        // A COUNT IS PERCEPTUALLY LOGARITHMIC, and a linear nudge on one is lopsided. `bands` sits at
+        // 48 in a range to 80: plus 12 adds a quarter more stripes and is barely a change, while minus
+        // 12 removes a quarter and visibly coarsens the picture. Halving a count is an enormous visual
+        // step; adding half again is a small one. So a symmetric nudge in the number is an asymmetric
+        // nudge in the picture, and it spends half its rolls at the crude end.
+        //
+        // Looking at the renders is what settles it rather than the arithmetic. Below about 25 bands
+        // the stripes ARE the subject and they break the light into slabs; above about 40 the light is
+        // the subject and the stripes are texture over it, which is the whole idea of the generator.
+        // Half of every roll was landing in the first half.
+        //
+        // A schema declares `scale: 'log'` and the nudge becomes multiplicative. Note what this
+        // replaces: `Math.abs(from) * 0.5` was already a linear stand-in for exactly this, added
+        // because `pattern.count` at 58 rolled to 138. That clause stays for every other dial, where
+        // it is doing a different job, which is holding the sign on a signed dial.
+        const logScale = spec.scale === 'log' && min > 0 && from > 0;
+        // The same 22% of the declared range, measured in log space, and capped so a roll can never
+        // more than 1.6x or less than 1/1.6x the count.
+        const logReach = Math.min(NUDGE * Math.log(max / min), Math.log(1.6));
         const reach = Math.min(span * NUDGE, Math.abs(from) * 0.5 || span * NUDGE);
         const lo = from < 0 ? min : Math.max(min, 0);
         const hi = from < 0 ? Math.min(max, 0) : max;
         const v = free || span > IDENTIFIER
           ? min + rand() * span
-          : Math.min(hi, Math.max(lo, from + (rand() * 2 - 1) * reach));
+          : logScale
+            ? Math.min(max, Math.max(min, from * Math.exp((rand() * 2 - 1) * logReach)))
+            : Math.min(hi, Math.max(lo, from + (rand() * 2 - 1) * reach));
         out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
         break;
       }

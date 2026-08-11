@@ -148,7 +148,7 @@ export const SCHEMA = {
       // never adds more of it, and a field cannot be brightened by asking for more lobes.
       //
       // 3 is the fitted cluster exactly, so the fields that number was chosen for do not move.
-      lobes: { kind: 'int', min: 1, max: 12, def: 3 },
+      lobes: { kind: 'int', scale: 'log', min: 1, max: 12, def: 3 },
       // HOW EVENLY THOSE LOBES ARE SPREAD ACROSS THE FRAME.
       //
       // `lobes` alone cannot make a broad band, and that is worth being precise about. Every lobe
@@ -342,7 +342,7 @@ export const SCHEMA = {
     fields: {
       kind: { kind: 'enum', of: PATTERNS, def: 'slats' },
       // How many elements across the field.
-      count: { kind: 'int', min: 1, max: 400, def: 62 },
+      count: { kind: 'int', scale: 'log', min: 1, max: 400, def: 62 },
       // How unequal they are. 0 is a ruler, 1 is a thicket.
       jitter: { kind: 'unit', def: 0.55 },
     },
