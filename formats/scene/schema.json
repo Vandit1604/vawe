@@ -28,6 +28,7 @@
       "cols",
       "colw",
       "critical",
+      "crt",
       "cut",
       "cutTiming",
       "cx",
@@ -1932,6 +1933,10 @@
         "varsEase": {
           "type": "string",
           "label": "Easing for the `vars` sweep (default easeOutCubic)"
+        },
+        "crt": {
+          "type": "boolean|object",
+          "label": "Cathode ray tube: softens and blooms what is BEHIND this layer, then lays scanlines and a corner falloff over it. { bloom: px, lines: 0-1, gap: px, scan: px, vignette: 0-1, tint }"
         },
         "glass": {
           "type": "boolean|number|string",

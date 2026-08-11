@@ -732,6 +732,30 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // A one-liner for "this must refuse the input", used throughout the block below.
   const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
+  // ── crt ────────────────────────────────────────────────────────────────────────────────────────
+  {
+    const { crtSpec } = await import('../../core/layers/util.js');
+    const d = crtSpec();
+    ok('crt: the default blurs the backdrop, which is the half an overlay cannot do',
+      /^blur\(1\.6px\)/.test(d.filter));
+    // The one relationship in here that is not a preference. Blur spreads a glyph's light over more
+    // area, so softness without lift is a dimmer picture, and a caller turning up `bloom` would be
+    // quietly turning down the brightness.
+    const b = (s) => Number(/brightness\(([\d.]+)\)/.exec(s)[1]);
+    ok('crt: more bloom means more lift, always',
+      b(crtSpec({ bloom: 4 }).filter) > b(crtSpec({ bloom: 1 }).filter));
+    ok('crt: bloom 0 asks for no backdrop filter at all', crtSpec({ bloom: 0 }).filter === '');
+    ok('crt: scanlines are HORIZONTAL, which is the direction a tube actually scans',
+      d.background.includes('repeating-linear-gradient(to bottom'));
+    ok('crt: lines 0 removes them and leaves the rest',
+      !crtSpec({ lines: 0 }).background.includes('repeating-linear') && crtSpec({ lines: 0 }).background.includes('radial-gradient'));
+    ok('crt: a scan thicker than the gap cannot paint a solid black field',
+      crtSpec({ gap: 3, scan: 99 }).background.includes('0 3px'));
+    ok('crt: everything off leaves nothing to paint',
+      crtSpec({ lines: 0, vignette: 0 }).background === '');
+    ok('crt: a tint is laid over the whole thing', crtSpec({ tint: 'red' }).background.startsWith('linear-gradient(red, red)'));
+  }
+
   // ── ramp stop positions ────────────────────────────────────────────────────────────────────────
   // The whole contract of the feature, because every part of it has already been got wrong once.
   {

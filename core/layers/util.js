@@ -27,8 +27,8 @@ export const PROPS = {
   // chipBox
   bg: {}, border: {}, shadow: {}, elevation: {}, glow: {}, pad: {}, radius: {}, on: { when: 'elevation' },
   intensity: { when: 'glow' },
-  // decoration: glass / progressive blur / border trail / mask / look / reflect / logotype / base opacity
-  glass: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
+  // decoration: glass / crt / progressive blur / border trail / mask / look / reflect / logotype / base opacity
+  glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
   fade: {}, reflect: {}, logotype: {}, opacity: {},
   // layoutGroup
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
@@ -36,6 +36,29 @@ export const PROPS = {
   // a group child's own box and timing (addGroupChild / sizeChild)
   grow: {}, basis: {}, delay: {}, critical: {}, x: {}, y: {}, split: {},
 };
+
+// crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
+// DOM, the same reason core/layers/glow.js exports presetSpec.
+export function crtSpec(o = {}) {
+  const bloom = o.bloom ?? 1.6;
+  const gap = Math.max(2, o.gap ?? 3);
+  const scan = Math.max(0, Math.min(gap, o.scan ?? 1));
+  const lines = o.lines ?? 0.34;
+  const vig = o.vignette ?? 0.5;
+  // The lift is TIED to the blur rather than being its own dial. Blurring alone DIMS a bright glyph,
+  // because it spreads the same light over more area, so the two have to move together or turning up
+  // the softness quietly turns down the picture.
+  const filter = bloom > 0
+    ? `blur(${bloom}px) brightness(${(1 + bloom * 0.14).toFixed(3)}) saturate(${(1 + bloom * 0.08).toFixed(3)})`
+    : '';
+  const layers = [];
+  if (o.tint) layers.push(`linear-gradient(${o.tint}, ${o.tint})`);
+  if (vig > 0) layers.push(`radial-gradient(120% 120% at 50% 50%, transparent 38%, rgba(0,0,0,${vig.toFixed(3)}) 100%)`);
+  if (lines > 0 && scan > 0) {
+    layers.push(`repeating-linear-gradient(to bottom, rgba(0,0,0,${lines.toFixed(3)}) 0 ${scan}px, transparent ${scan}px ${gap}px)`);
+  }
+  return { filter, background: layers.join(',') };
+}
 
 export function createKit(ctx) {
   const { theme, inkAt, bgWinAt, ACCENT_BGS, trackingFor, splitText, icon } = ctx;
@@ -195,8 +218,43 @@ export function createKit(ctx) {
     ring.appendChild(spin); el.appendChild(ring);
   }
 
+  // CRT. A cathode ray tube does three things to a picture and only one of them is an overlay.
+  //
+  // The engine already HAD a `crt` shader effect, and looking at it over real type is what showed the
+  // problem: it draws phosphor stripes, scanlines and a roll bar on top and leaves the content exactly
+  // as it found it. On a reference photograph of a real tube the dominant feature is the opposite,
+  // that the picture itself is soft and glowing. A generative overlay has no sampler and cannot reach
+  // what is under it, so that half was unreachable from there.
+  //
+  // `backdrop-filter` can, which is the same capability `glass` above is built on. Blurring and
+  // brightening the backdrop IS the phosphor: type on a tube is not sharp with a halo around it, it is
+  // genuinely soft-edged and blooming, so replacing the region with a blurred brighter copy is closer
+  // to the real thing than drawing a glow beside a crisp glyph would be.
+  //
+  // Then the overlay half is painted on top as this element's own background: scanlines as a repeating
+  // gradient, and a corner falloff.
+  //
+  //   crt: true                       a sensible tube
+  //   crt: { bloom, lines, gap, scan, vignette, tint }
+  //     bloom     px of defocus; the brightness lift scales with it
+  //     lines     opacity of the dark scanline, 0 turns them off
+  //     gap       px from one scanline to the next
+  //     scan      px of the dark part of each line
+  //     vignette  0..1 corner darkening
+  //     tint      a CSS colour laid over the whole thing, the phosphor's own colour
+  function applyCrt(el, L) {
+    if (L.crt == null || L.crt === false) return;
+    const { filter, background } = crtSpec(typeof L.crt === 'object' ? L.crt : {});
+    if (filter) { el.style.backdropFilter = filter; el.style.webkitBackdropFilter = filter; }
+    // A backdrop-filter needs the element to paint something, exactly as progressiveBlur notes above.
+    el.style.backgroundImage = background || 'none';
+    if (!background && !el.style.background && !el.style.backgroundColor) el.style.background = 'rgba(0,0,0,0.001)';
+    el.style.pointerEvents = 'none';
+  }
+
   function decorate(el, L) {
     applyGlass(el, L);
+    applyCrt(el, L);
     applyProgressiveBlur(el, L);
     applyBorderTrail(el, L);
     if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
