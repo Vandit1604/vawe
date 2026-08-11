@@ -8543,6 +8543,38 @@ blank from correct is not a test; the hash now refuses to report unless the pict
 
 ---
 
+## #320 — The playground card drew a different picture from the generator it names
+
+**What.** `LookCard` in `site/app/playground/PlaygroundClient.tsx` draws a shader generator by calling
+the engine's ambient layer directly. It passed **two** of the six parameter vectors:
+
+```js
+inst.draw(layer.shader, 0, layer.seed ?? 0, pal, layer.intensity ?? 1, layer.params, layer.params2);
+```
+
+`bands` and `spectrum` read as far as `params6`. So every card of them was drawn with `params3`
+through `params6` defaulted to zero: no gradient, no converge, no light shape, no zoom. The card was
+not a rough approximation of the generator, it was a different picture.
+
+**Why it survived.** It looked plausible. A band field with no gradient is still a band field, and
+nobody put the card beside a real render to compare. The page's own copy says "every card is the real
+thing", which is the claim that should have been tested and was instead trusted.
+
+**Second bug in the same six lines.** The hex-to-float conversion was hand-rolled here, a second
+implementation of `core/surfaces/palette.js`, and it was already behind: a stop may now carry its own
+position as `#rrggbb@0.42`, and this copy dropped it silently, so a card could not show a moved ramp
+at all. Now imports and calls the engine's own `palette()`.
+
+**Fix.** Pass all six vectors; use the engine's converter. Both are the same lesson as #275 and the
+77-file `site/public` drift: the site must READ the engine, never re-state it.
+
+**Which gate would catch it.** None today, and that is the honest answer. A card is a picture in a
+browser and no static gate compares it to a render. The cheap version is a test that asserts the card
+path forwards every vector the surface declares, which is a property of the code rather than of the
+picture.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

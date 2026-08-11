@@ -41,6 +41,7 @@
 // generator has no schema it does not belong in the playground yet: without one there is nothing to
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
+import { crtSpec } from './layers/util.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
@@ -386,7 +387,73 @@ const SPECTRUM = {
   render: (o) => bandLayers(o, SPECTRUM_SCHEMA, { gradient: true, w: 1080, h: 1920 }),
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM];
+// The CRT card.
+//
+// Every other card in this library is a FIELD: it paints a backdrop and that backdrop is the whole
+// subject. `crt` is not one. It is a treatment applied to whatever is under it, so a card showing it
+// on its own would show nothing at all, and a card showing it over a flat colour would show only its
+// scanlines, which is the half that was already easy.
+//
+// So this card carries a stand-in screen, and the dials act on the treatment rather than on the
+// screen. The stand-in is deliberately plain and deliberately BRIGHT ON DARK, because the thing worth
+// looking at is what happens to a lit edge: the bloom is the half a generative overlay cannot do, and
+// it is invisible unless there is something lit to bloom.
+const CRT_SCHEMA = {
+  bloom:     { kind: 'num', min: 0, max: 8, def: 1.6, primary: true,
+               note: 'how far the picture underneath spreads, in pixels. This is the phosphor, and it is the part an overlay cannot do. Brightness rises with it, because blurring a bright shape over more area would otherwise dim it.' },
+  lines:     { kind: 'unit', def: 0.34, primary: true,
+               note: 'how dark each scanline is. 0 removes them.' },
+  gap:       { kind: 'num', min: 2, max: 12, def: 3, primary: true,
+               note: 'pixels from one scanline to the next. Bigger is a coarser, older tube.' },
+  scan:      { kind: 'num', min: 0, max: 6, def: 1,
+               note: 'pixels of dark in each line. It can never exceed the gap, or the field would be solid black.' },
+  vignette:  { kind: 'unit', def: 0.5, primary: true, note: 'how much the corners fall away.' },
+  tintAmount:{ kind: 'unit', def: 0, note: 'how much of the phosphor colour is laid over the whole picture. 0 leaves the colours alone.' },
+  colour: {
+    kind: 'group',
+    fields: { tint: { kind: 'hex', def: '#1e46ff', note: 'the phosphor colour, used only when tintAmount is above 0.' } },
+  },
+};
+
+const hexToRgba = (hex, a) => {
+  const n = parseInt(String(hex).replace('#', ''), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a.toFixed(3)})`;
+};
+
+const CRT = {
+  name: 'crt',
+  group: 'treatment',
+  blurb: 'A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.',
+  docs: 'docs/EFFECTS.md',
+  reference: null,
+  schema: CRT_SCHEMA,
+  presets: { tube: {} },
+  produces: 'html',
+  ready: true,
+  render: (o) => {
+    const amt = o?.tintAmount ?? CRT_SCHEMA.tintAmount.def;
+    const { filter, background } = crtSpec({
+      bloom: pick(o, 'bloom', CRT_SCHEMA),
+      lines: pick(o, 'lines', CRT_SCHEMA),
+      gap: pick(o, 'gap', CRT_SCHEMA),
+      scan: pick(o, 'scan', CRT_SCHEMA),
+      vignette: pick(o, 'vignette', CRT_SCHEMA),
+      tint: amt > 0 ? hexToRgba(o?.colour?.tint ?? CRT_SCHEMA.colour.fields.tint.def, amt * 0.35) : null,
+    });
+    // ONE element over the screen, carrying exactly what the engine's `crt` layer prop carries. Not a
+    // second implementation: crtSpec is the same function core/layers/util.js calls, so a card that
+    // looks right is evidence about the layer and not about this file.
+    return `<div style="position:absolute;inset:0;overflow:hidden;background:#050b1e">
+  <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
+    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:#bfe3ff;letter-spacing:.01em">CRT
+    <div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:#5aa6ff;margin-top:.7em;letter-spacing:.22em">PHOSPHOR &middot; SCANLINE &middot; BLOOM</div>
+  </div>
+  <div style="position:absolute;inset:0;pointer-events:none;backdrop-filter:${filter};-webkit-backdrop-filter:${filter};background-image:${background || 'none'}"></div>
+</div>`;
+  },
+};
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

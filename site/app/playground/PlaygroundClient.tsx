@@ -49,6 +49,7 @@ type Engine = {
 // variable also keeps the bundler out of it, which is the point of the whole arrangement.
 const ENGINE_URL = "/core/generators.js";
 const AMBIENT_URL = "/core/shaders-ambient.js";
+const PALETTE_URL = "/core/surfaces/palette.js";
 
 const get = (o: Record<string, unknown>, path: string): unknown =>
   path.split(".").reduce<unknown>((a, k) => (a as Record<string, unknown>)?.[k], o);
@@ -595,19 +596,25 @@ function LookCard({ gen, engine, active, onPick }:
     if (!layer || layer.type !== "shader") return;
     let live = true;
     let inst: { canvas: HTMLCanvasElement; draw: (...a: unknown[]) => void; dispose?: () => void } | null = null;
-    import(/* webpackIgnore: true */ AMBIENT_URL).then((m) => {
+    Promise.all([
+      import(/* webpackIgnore: true */ AMBIENT_URL),
+      import(/* webpackIgnore: true */ PALETTE_URL),
+    ]).then(([m, p]) => {
       if (!live) return;
       inst = m.createAmbientLayer(480, 300);
-      // `draw` wants GL float triples, not hex. The engine's own surface converts with
-      // core/surfaces/palette.js; passing the raw strings gives a black canvas that looks like a
-      // shader that drew nothing rather than a palette that was never read.
+      // `draw` wants GL float triples, not hex, and the CONVERSION IS THE ENGINE'S. This used to be a
+      // hand-rolled parseInt here, which was a second implementation of core/surfaces/palette.js and
+      // was already behind it: a stop may now carry its own position along the ramp as `#rrggbb@0.42`,
+      // and the copy here dropped it silently, so a card could not show a moved ramp at all.
       const pal = (layer.colors as string[] | undefined)?.length
-        ? (layer.colors as string[]).map((h) => {
-            const n = parseInt(String(h).replace("#", ""), 16);
-            return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-          })
+        ? (p as { palette: (l: unknown) => unknown }).palette({ colors: layer.colors })
         : null;
-      inst!.draw(layer.shader, 0, layer.seed ?? 0, pal, layer.intensity ?? 1, layer.params, layer.params2);
+      // ALL SIX PARAMETER VECTORS. It passed two. `bands` and `spectrum` read as far as params6, so
+      // every card of them was drawn with the other four vectors defaulted to zero: no gradient, no
+      // converge, no light shape, no zoom. The card was not a small approximation of the generator, it
+      // was a different picture, and it looked plausible enough that nobody checked it against one.
+      inst!.draw(layer.shader, 0, layer.seed ?? 0, pal, layer.intensity ?? 1,
+        layer.params, layer.params2, layer.params3, layer.params4, layer.params5, layer.params6);
       el.replaceChildren(inst!.canvas);
       inst!.canvas.style.width = "100%";
       inst!.canvas.style.height = "100%";
