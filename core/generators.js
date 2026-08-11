@@ -42,6 +42,7 @@
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
 import { crtSpec } from './layers/util.js';
+import { sanitizeHtml } from './sanitize-html.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
@@ -413,6 +414,14 @@ const CRT_SCHEMA = {
     kind: 'group',
     fields: { tint: { kind: 'hex', def: '#1e46ff', note: 'the phosphor colour, used only when tintAmount is above 0.' } },
   },
+  // THE SCREEN'S OWN WORDS. Every other card here has no content to speak of, because a field IS its
+  // own subject. This one is a treatment, and a treatment needs something to treat, so the stand-in
+  // words are part of what you are looking at and there is no reason they should be mine.
+  //
+  // `str` is the right kind rather than `text`: the randomiser skips it by declaration, because
+  // content is not a dial and rolling somebody's words is not a variation of the look.
+  text:    { kind: 'str', def: 'CRT', note: 'the big line on the screen. <b> and <em> work.' },
+  sub:     { kind: 'str', def: 'PHOSPHOR · SCANLINE · BLOOM', note: 'the small line under it. Leave it empty to drop it.' },
 };
 
 const hexToRgba = (hex, a) => {
@@ -443,10 +452,15 @@ const CRT = {
     // ONE element over the screen, carrying exactly what the engine's `crt` layer prop carries. Not a
     // second implementation: crtSpec is the same function core/layers/util.js calls, so a card that
     // looks right is evidence about the layer and not about this file.
+    // SANITISED, with the engine's own sanitiser rather than a second rule. These words arrive from a
+    // text box on a public page, so they are bytes somebody else wrote, which is the exact case
+    // core/sanitize-html.js exists for. `<b>` and `<em>` survive; a script or an iframe does not.
+    const line = sanitizeHtml(o?.text ?? CRT_SCHEMA.text.def);
+    const sub = sanitizeHtml(o?.sub ?? CRT_SCHEMA.sub.def);
     return `<div style="position:absolute;inset:0;overflow:hidden;background:#050b1e">
   <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
-    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:#bfe3ff;letter-spacing:.01em">CRT
-    <div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:#5aa6ff;margin-top:.7em;letter-spacing:.22em">PHOSPHOR &middot; SCANLINE &middot; BLOOM</div>
+    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:#bfe3ff;letter-spacing:.01em">${line}
+    ${sub ? `<div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:#5aa6ff;margin-top:.7em;letter-spacing:.22em">${sub}</div>` : ''}
   </div>
   <div style="position:absolute;inset:0;pointer-events:none;backdrop-filter:${filter};-webkit-backdrop-filter:${filter};background-image:${background || 'none'}"></div>
 </div>`;
