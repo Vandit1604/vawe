@@ -140,22 +140,158 @@ const build = ({ name, preset, ref, blurb, ready }) => {
 // Its schema is declared here rather than beside the shader because the shader's parameter vector is
 // four anonymous floats by design: `u_p` means whatever the branch reading it says, so the NAMES live
 // with the generator that knows them.
+// NAMES THAT SAY WHAT THEY DO. The first version of this table read count / angle / glow / softness /
+// edge / warm / core / deep, and every one of those failed the only test that matters for a control:
+// somebody who has not read the shader cannot tell what it changes. `count` of what. `angle` in TURNS,
+// so a right angle was 0.25. `glow` was a radius but is named like a switch. `softness` when three
+// different things in the picture are soft. So they are renamed here, in DEGREES and in percent, and
+// the shader's uniform layout did not move: this file is the layer whose whole job is turning names
+// into positions, and the mapping lives in `render` below.
+//
+// WHERE A NUMBER MEANS A PLACE it is the same spelling the lightfield generator settled on: percent of
+// the frame, 50/50 unmoved, off-frame values legal because a light source is often just outside the
+// picture (core/lightfield/options.js, `colour.originX`). Two generators inventing two vocabularies for
+// "where is the light" is how an author ends up converting units in their head.
+// The name a person picks, and the distance function the shader runs. NOT the same list in the same
+// order: `round` and `oval` are one function with a different second radius, so two names share an
+// index, and the shader's numbering was fixed before these names existed. Sending the position in the
+// name list instead of this table is a bug that draws a plausible picture, which is the worst kind:
+// every shape rendered as a different shape and every one of them looked deliberate.
+const LIGHT_SHAPES = { round: 0, oval: 0, bar: 1, rounded: 2, cross: 3, sweep: 4 };
+const LIGHT_SHAPE_NAMES = Object.keys(LIGHT_SHAPES);
+
+// Every dial that describes the LIGHT, shared by both cards, because it is the same light. Declared
+// once so the two panels cannot drift apart.
+const LIGHT_SCHEMA = {
+  lightShape:    { kind: 'enum', of: LIGHT_SHAPE_NAMES, def: 'round', primary: true,
+                   note: 'round and oval are ellipses; bar is a band of light with no hot centre; cross is two bars; rounded is a chamfered box; sweep is a sector, like a beacon.' },
+  lightWidth:    { kind: 'num', min: 0.05, max: 2, def: 0.62, primary: true,
+                   note: 'how far the light reaches sideways, as a fraction of the frame height.' },
+  lightHeight:   { kind: 'num', min: 0.05, max: 2, def: 0.62,
+                   note: 'the same reach up and down. Equal to the width is a circle. `round` forces it equal.' },
+  lightAngle:    { kind: 'num', min: -180, max: 180, def: 0, note: 'degrees. Turns the light\'s shape, so a bar can lie flat or stand up.' },
+  lightOriginX:  { kind: 'num', min: -50, max: 150, def: 50, primary: true, note: 'percent across the frame. 50 is the middle; outside 0..100 is off-frame and legal.' },
+  lightOriginY:  { kind: 'num', min: -50, max: 150, def: 45, primary: true, note: 'percent DOWN the frame. 45 is where the light always used to sit.' },
+  lightEdge:     { kind: 'num', min: 0.3, max: 4, def: 1.6, note: 'how abruptly the light stops. Low is a wide haze, high is a defined pool.' },
+  lightRing:     { kind: 'num', min: 0, max: 1.5, def: 0, note: 'put the light\'s brightest point at this radius instead of at its centre, making a halo. 0 is a solid light.' },
+  lightPoints:   { kind: 'int', min: 0, max: 12, def: 0, note: 'how many spikes the light has. Needs lightSpike above 0 to show.' },
+  lightSpike:    { kind: 'num', min: 0, max: 0.9, def: 0, note: 'how far the spikes reach. 0 is a smooth edge whatever lightPoints says.' },
+  lightPolarity: { kind: 'num', min: -2, max: 2, def: 1, note: 'positive lights the field, negative DARKENS it: a shadow mass behind the bands rather than a glow in front.' },
+};
+
+// The bands themselves, shared for the same reason.
+const BAND_SCHEMA = {
+  bands:       { kind: 'num', min: 2, max: 80, def: 25, primary: true, note: 'how many bands fit across the frame at zoom 1.' },
+  bandAngle:   { kind: 'num', min: -90, max: 90, def: 0, note: 'degrees. 0 stands the bands upright.' },
+  bandOffset:  { kind: 'num', min: 0, max: 1, def: 0, note: 'slides the whole set sideways by a fraction of one band, which is how you put a seam or a band centre on the middle of the frame.' },
+  mirrorBands: { kind: 'bool', def: false, note: 'fold the pattern about the field\'s middle, so each band shades outward on both sides instead of one way across the whole picture.' },
+  zoom:        { kind: 'num', min: 0.2, max: 6, def: 1, primary: true,
+                 note: 'push into the pattern, around the LIGHT rather than around the middle of the frame. It magnifies; it does not change how many bands `bands` means.' },
+};
+
 const BANDS_SCHEMA = {
-  count:     { kind: 'int', min: 2, max: 80, def: 14, primary: true },
-  angle:     { kind: 'num', min: -0.25, max: 0.25, def: 0 },
-  glow:      { kind: 'unit', def: 0.62, primary: true },
-  softness:  { kind: 'num', min: 0.3, max: 4, def: 1.6 },
-  intensity: { kind: 'unit', def: 1 },
-  seed:      { kind: 'int', min: 0, max: 4294967295, def: 7, primary: true },
+  shape: { kind: 'enum', of: ['panels', 'arcs', 'rounded'], def: 'panels', primary: true,
+           note: 'what the bands are cut on: upright panels, rings around a point, or nested rounded rectangles.' },
+  ...BAND_SCHEMA,
+  shapeOriginX: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent across. Where arcs and rounded rectangles are centred; panels ignore it.' },
+  shapeOriginY: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent down. The other half of the same point.' },
+  ...LIGHT_SCHEMA,
+  brightness: { kind: 'unit', def: 1 },
+  seed:       { kind: 'int', min: 0, max: 4294967295, def: 7, primary: true },
   colour: {
     kind: 'group',
     fields: {
-      edge:  { kind: 'hex', def: '#3a1f00', primary: true },
-      warm:  { kind: 'hex', def: '#ffb300', primary: true },
-      core:  { kind: 'hex', def: '#ffe6a8', primary: true },
-      deep:  { kind: 'hex', def: '#05060a', primary: true },
+      farEdges:    { kind: 'hex', def: '#3a1f00', primary: true, note: 'the colour the field falls to where the light does not reach.' },
+      midField:    { kind: 'hex', def: '#ffb300', primary: true, note: 'the lit face of a band.' },
+      lightCore:   { kind: 'hex', def: '#ffe6a8', primary: true, note: 'the hottest part, and the colour the light itself adds.' },
+      deepShadow:  { kind: 'hex', def: '#05060a', primary: true, note: 'the dark that owns the far edges, and what a negative lightPolarity paints.' },
     },
   },
+};
+
+// The SPECTRUM card. Same shader, a different picture, and a different colour model: here the palette
+// is a RAMP read end to end rather than four named roles, so the fields are positions.
+const SPECTRUM_SCHEMA = {
+  ...BAND_SCHEMA,
+  bands:       { ...BAND_SCHEMA.bands, min: 3, max: 40, def: 10.7 },
+  bandOffset:  { ...BAND_SCHEMA.bandOffset, def: 0.5 },
+  mirrorBands: { ...BAND_SCHEMA.mirrorBands, def: true },
+  gradientAngle: { kind: 'num', min: -180, max: 180, def: 90, primary: true,
+                   note: 'degrees. Which way the colour ramp runs. 90 sends it straight down the frame, at a right angle to upright bands, which is the whole point of this look.' },
+  converge:    { kind: 'num', min: 0, max: 0.4, def: 0.10, primary: true,
+                 note: 'how much less of the ramp each band shows as it gets further from the middle. 0 is flat stripes all alike; a tenth is what reads as depth.' },
+  bandLean:    { kind: 'num', min: 0, max: 1.5, def: 0.5,
+                 note: 'how much of that step happens ACROSS a band instead of on its seam. 0 makes every band one flat depth.' },
+  bandShading: { kind: 'num', min: -1, max: 1, def: -0.25,
+                 note: 'darken a band toward one edge. Negative brightens the outer edge instead, which is what a lit column does.' },
+  ...LIGHT_SCHEMA,
+  lightPolarity: { ...LIGHT_SCHEMA.lightPolarity, def: 0, note: 'positive lights the field, negative darkens it, and here 0 means NO light at all: the ramp carries the picture on its own.' },
+  brightness: { kind: 'unit', def: 1 },
+  seed:       { kind: 'int', min: 0, max: 4294967295, def: 0 },
+  // Eight stops read in order from the start of the ramp to its end. They are numbered rather than
+  // named because on a ramp the POSITION is the meaning: stop 3 is a third of the way down and calling
+  // it "midField" would be a guess about a picture nobody has made yet.
+  colour: {
+    kind: 'group',
+    fields: Object.fromEntries(['#effce6', '#def9de', '#68b290', '#c0e87a', '#7ccdd8', '#56a0dd', '#dcf4fb', '#eeffff']
+      .map((def, i) => [`ramp${i + 1}`, { kind: 'hex', def, primary: i < 4,
+        note: `ramp stop ${i + 1} of 8, ${Math.round((i / 7) * 100)}% along the gradient.` }])),
+  },
+};
+
+const deg = (d) => (d ?? 0) / 360;                       // the shader counts turns; a person counts degrees
+const frac = (pct, mid = 50) => ((pct ?? mid) - mid) / 100;  // percent of frame -> fraction from that point
+const pick = (o, k, s) => o?.[k] ?? s[k]?.def;
+
+// One mapping, both cards. `render` is called with PARTIAL option objects (a card previews from a
+// preset that sets almost nothing), so every read falls back to the schema's own declared default
+// rather than to a literal written twice.
+function bandLayers(o, S, { gradient, w, h }) {
+  const ar = w / h;
+  const shape = pick(o, 'shape', S) ?? 'panels';
+  const lname = pick(o, 'lightShape', S);
+  const lshape = LIGHT_SHAPES[lname];
+  if (lshape === undefined) throw new Error(`unknown lightShape "${lname}" — one of: ${LIGHT_SHAPE_NAMES.join(', ')}`);
+  const width = pick(o, 'lightWidth', S);
+  // `round` has no second radius to give, so it is the ratio 1 whatever the height dial says. This is
+  // the same reset `normalise` performs on the option object; doing it here as well means a caller who
+  // skipped normalise gets a circle rather than silently gets an oval called round.
+  const height = pick(o, 'lightShape', S) === 'round' ? width : pick(o, 'lightHeight', S);
+  const bands = pick(o, 'bands', S);
+  if (!(bands > 0)) throw new Error(`bands must be a positive number, got ${bands}`);
+  const zoom = pick(o, 'zoom', S);
+  if (!(zoom > 0)) throw new Error(`zoom must be greater than 0, got ${zoom}`);
+  const colours = Object.keys(S.colour.fields).map((k) => o?.colour?.[k] ?? S.colour.fields[k].def);
+  return [{
+    type: 'shader', shader: 'bands',
+    intensity: pick(o, 'brightness', S),
+    seed: pick(o, 'seed', S),
+    // `bands` counts bands ACROSS THE FRAME; the shader counts them along its own axis, which is
+    // scaled by the aspect. One divide here is what keeps the dial meaning the same thing on a
+    // portrait canvas as on a landscape one.
+    params: [bands / ar, deg(pick(o, 'bandAngle', S)), width, pick(o, 'lightEdge', S)],
+    params2: [['panels', 'arcs', 'rounded'].indexOf(shape),
+      frac(pick(o, 'shapeOriginX', S) ?? 50), -frac(pick(o, 'shapeOriginY', S) ?? 50),
+      pick(o, 'lightPolarity', S)],
+    params3: [gradient ? 1 : 0, deg(pick(o, 'gradientAngle', S) ?? 0),
+      pick(o, 'converge', S) ?? 0, pick(o, 'bandOffset', S)],
+    params4: [pick(o, 'mirrorBands', S) ? 1 : 0,
+      frac(pick(o, 'lightOriginX', S)), -frac(pick(o, 'lightOriginY', S), 45), lshape],
+    params5: [height / width, deg(pick(o, 'lightAngle', S)),
+      pick(o, 'bandShading', S) ?? 0, pick(o, 'bandLean', S) ?? 0],
+    params6: [pick(o, 'lightRing', S), pick(o, 'lightPoints', S), pick(o, 'lightSpike', S), zoom],
+    colors: colours,
+    x: 0, y: 0, w, h, start: 0, duration: 6,
+  }];
+}
+
+// A dial the chosen shape has no way to express is RESET rather than obeyed, and saying so is the
+// difference between this and a silent substitution: `round` is a circle by definition, so a height
+// that differs from the width is not a setting it can honour.
+const bandsNormalise = (o) => {
+  const out = { ...o };
+  if (out.lightShape === 'round' && out.lightHeight !== out.lightWidth) out.lightHeight = out.lightWidth;
+  return out;
 };
 
 const BANDS = {
@@ -168,21 +304,30 @@ const BANDS = {
   presets: { bands: {} },
   produces: 'layers',
   ready: true,
-  render: (o) => [{
-    type: 'shader', shader: 'bands',
-    intensity: o.intensity ?? 1,
-    seed: o.seed ?? 7,
-    params: [o.count ?? 14, o.angle ?? 0, o.glow ?? 0.62, o.softness ?? 1.6],
-    // Falls back to the declared defaults, because `render` is also called with a partial patch (the
-    // card previews from a preset that sets nothing). An empty `colors` silently gives the shader's own
-    // palette, which is a different picture from the one the panel is showing.
-    colors: [o.colour?.edge ?? '#3a1f00', o.colour?.warm ?? '#ffb300',
-             o.colour?.core ?? '#ffe6a8', o.colour?.deep ?? '#05060a'],
-    x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6,
-  }],
+  normalise: bandsNormalise,
+  render: (o) => bandLayers(o, BANDS_SCHEMA, { gradient: false, w: 1920, h: 1080 }),
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BANDS];
+// MEASURED, not invented. Fitted to refs/colonnade/c6.jpg at that image's own 9:16, where it scores a
+// mean per-channel error of 14.2 out of 255 against the reference. What still differs is written down
+// in docs/LIGHTFIELD.md rather than left for the next person to rediscover.
+const SPECTRUM = {
+  name: 'spectrum',
+  group: 'shader',
+  blurb: 'Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.',
+  docs: 'docs/LIGHTFIELD.md',
+  reference: 'refs/colonnade/c6.jpg',
+  schema: SPECTRUM_SCHEMA,
+  presets: { c6: {} },
+  produces: 'layers',
+  ready: true,
+  normalise: bandsNormalise,
+  // PORTRAIT, because the look is: the ramp needs the long axis to read, and the reference it was
+  // fitted against is 9:16. Landscape draws the same construction squashed.
+  render: (o) => bandLayers(o, SPECTRUM_SCHEMA, { gradient: true, w: 1080, h: 1920 }),
+};
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

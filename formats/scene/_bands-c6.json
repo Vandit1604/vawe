@@ -1,0 +1,77 @@
+{
+  "module": "scene",
+  "aspect": "9:16",
+  "theme": "vawe",
+  "duration": 6,
+  "produced": false,
+  "audio": {
+    "silent": true,
+    "_why": "A probe for one shader parameter set. There is no film here to score."
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "shader",
+      "shader": "bands",
+      "intensity": 1,
+      "seed": 0,
+      "params": [
+        19.022222222222222,
+        0,
+        0.62,
+        1.6
+      ],
+      "params2": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "params3": [
+        1,
+        0.25,
+        0.1,
+        0.5
+      ],
+      "params4": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "params5": [
+        1,
+        0,
+        -0.25,
+        0.5
+      ],
+      "params6": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "colors": [
+        "#effce6",
+        "#def9de",
+        "#68b290",
+        "#c0e87a",
+        "#7ccdd8",
+        "#56a0dd",
+        "#dcf4fb",
+        "#eeffff"
+      ],
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "start": 0,
+      "duration": 6
+    }
+  ]
+}

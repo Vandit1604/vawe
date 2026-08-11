@@ -24,7 +24,12 @@ const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`
 
 const FRAG = `precision highp float;
 uniform vec2 u_res; uniform float u_time; uniform float u_seed; uniform int u_fx;
-uniform vec3 u_pal[4]; uniform int u_palN; uniform float u_intensity;
+// EIGHT palette stops, not four. Four is enough for a mesh gradient built from blobs, and it is not
+// enough for a RAMP: the reference this grew for runs white, green, yellow-green, pale gold, cyan,
+// blue, white, which is seven stops that no interpolation between four can reach. The seventeen
+// branches written before this ask for stops 0 to 3 only, and P() answers those the same whether the
+// array holds four or eight, so growing it changed no pixel of any of them.
+uniform vec3 u_pal[8]; uniform int u_palN; uniform float u_intensity;
 // Per-effect parameters. The shared set had none, so an effect wanting more than one knob had to
 // encode it into u_seed, which makes the seed mean two things. Four floats meaning whatever the branch
 // that reads them says, and ignored by the seventeen branches written before it.
@@ -32,6 +37,13 @@ uniform vec4 u_p;
 // A second parameter vector, for effects that outgrew the first. Same contract, same indifference
 // from every branch that does not read it.
 uniform vec4 u_p2;
+// A third and a fourth. Same contract again. Every field of both is defined so that ZERO means the
+// behaviour that was there before it existed, which is what makes them provably additive rather than
+// merely believed to be.
+uniform vec4 u_p3;
+uniform vec4 u_p4;
+uniform vec4 u_p5;
+uniform vec4 u_p6;
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 // hash12 (Hoskins): decorrelated at LARGE integer coords where the p.x*p.y hash above bands into
@@ -44,8 +56,26 @@ vec3 P(int i, vec3 df){                                   // palette stop, or a 
   if(i==0) return u_palN>0 ? u_pal[0] : df;
   if(i==1) return u_palN>1 ? u_pal[1] : df;
   if(i==2) return u_palN>2 ? u_pal[2] : df;
-  return u_palN>3 ? u_pal[3] : df; }
+  if(i==3) return u_palN>3 ? u_pal[3] : df;
+  if(i==4) return u_palN>4 ? u_pal[4] : df;
+  if(i==5) return u_palN>5 ? u_pal[5] : df;
+  if(i==6) return u_palN>6 ? u_pal[6] : df;
+  return u_palN>7 ? u_pal[7] : df; }
 float blob(vec2 p, vec2 c, float s){ vec2 d=p-c; return exp(-dot(d,d)*s); }
+// The palette read as an EVEN RAMP: every declared stop gets an equal share of u, in order. Written
+// as a chain of saturating mixes rather than an indexed lookup because WebGL1 refuses a fragment
+// shader that indexes a uniform array with anything but a constant. Each step is fully applied once
+// u has passed its stop and untouched before it, so what comes out is piecewise-linear between
+// adjacent stops and nothing else.
+vec3 ramp(float u){
+  float n = max(float(u_palN) - 1.0, 1.0);
+  float s = clamp(u, 0.0, 1.0) * n;
+  vec3 c = P(0, vec3(1.0));
+  for(int i=0;i<7;i++){
+    if(float(i) >= n) break;
+    c = mix(c, P(i+1, vec3(1.0)), clamp(s - float(i), 0.0, 1.0));
+  }
+  return c; }
 
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res; float ar = u_res.x/u_res.y;
@@ -221,6 +251,14 @@ void main(){
     float ang   = u_p.y * 6.2831853;
     float cs = cos(ang), sn = sin(ang);
     vec2  q  = vec2(p.x - 0.5*ar, uv.y - 0.5);
+    // ZOOM, around the LIGHT rather than around the middle, so pushing in goes toward whatever the
+    // picture is about instead of always toward the centre of the canvas. It scales the field's
+    // coordinates and nothing else, so count keeps meaning bands across the frame at zoom 1 and at
+    // zoom 2 you see the same pattern twice the size, not twice as many bands. Written behind a guard
+    // because (q - c)/1.0 + c is not bit-for-bit q, and neither an unset dial nor a zoom of exactly
+    // one may change a pixel. Skipping the arithmetic at 1 is not a special case, it is the identity.
+    vec2  lz = vec2(u_p4.y*ar, u_p4.z + 0.05);
+    if (u_p6.w > 0.0 && u_p6.w != 1.0) q = (q - lz)/u_p6.w + lz;
     // THE FIELD THE BANDS RUN OVER. Everything else about this effect is the same whichever one is
     // chosen, which is the whole reason it is one uniform and not three effects: repeat a ramp over a
     // scalar field, tint it with a gradient, add a light. Swapping the field turns vertical panels into
@@ -231,15 +269,20 @@ void main(){
     //   1  radial   distance from a point  concentric arcs
     //   2  box      chamfered distance     nested rounded rectangles
     float ax;
+    //
+    // u_p2.yz is the field's centre as a FRACTION OF THE FRAME from the middle, so 0,0 is the middle
+    // and 0.5,0 is the right edge. The x half is multiplied by the aspect here rather than by the
+    // caller, because the caller does not know the aspect and the shader does. Zero is still the
+    // middle, so nothing that predates this moves.
     if (u_p2.x < 0.5) {
       ax = (q.x*cs - q.y*sn) + 0.5;
     } else if (u_p2.x < 1.5) {
-      ax = length(q - vec2(u_p2.y, u_p2.z));
+      ax = length(q - vec2(u_p2.y*ar, u_p2.z));
     } else if (u_p2.x >= 1.5) {
       // Explicit rather than a bare trailing else: lib-test finds this branch by the LAST trailing else
       // in the shader, so an unlabelled else nested inside it steals the anchor and the test starts
       // reading the wrong 600 characters. Its own comment warns about exactly this class.
-      vec2 b = abs(q - vec2(u_p2.y, u_p2.z));
+      vec2 b = abs(q - vec2(u_p2.y*ar, u_p2.z));
       // A chamfered box distance: max() alone gives a hard square, and mixing in the sum rounds the
       // corner without the cost of a real squircle.
       ax = mix(max(b.x, b.y), (b.x + b.y)*0.75, 0.45);
@@ -253,22 +296,99 @@ void main(){
     // ellipse edge the eye finds immediately.
     // The light behind the screen drifts, and the screen breathes against it. Slow on purpose: this is
     // a backdrop, and lib-test refuses a frozen one (a still ambient field is a decision, not a default).
-    vec2  lc   = vec2(0.5, 0.55) + drift;
-    float d    = length(vec2((uv.x - lc.x)*ar, uv.y - lc.y));
+    // WHERE THE LIGHT IS. u_p4.yz moves it, as a fraction of the frame from where it used to sit. A
+    // light source has a place, and this one was the constant vec2(0.5, 0.55) that no caller could
+    // reach: every field made with this effect had its light in the same spot. An offset rather than
+    // an absolute position so that zero means unmoved and no committed field changes.
+    vec2  lc   = vec2(0.5, 0.55) + u_p4.yz + drift;
+    vec2  lv   = vec2((uv.x - lc.x)*ar, uv.y - lc.y);
+    // WHAT SHAPE THE LIGHT IS. It was length(), so it was always a circle, and a circle can only put a
+    // hot spot in the middle of whatever it lights. Two of the references need something else: a broad
+    // horizontal WASH that lights a row of panels evenly, and a dark OVAL sitting behind them. Same
+    // three ideas as the band field one term over, so the same distance functions serve.
+    //
+    //   0  round / oval   an ellipse. u_p5.x is the y radius as a fraction of the x radius, so one
+    //                     value covers the circle and both stretches of it.
+    //   1  bar            distance along ONE axis only: a band of light, no centre to be hot.
+    //   2  rounded        the chamfered box distance the bands already use.
+    //
+    // u_p5.y turns the whole shape, so a bar can lie across the frame or stand up in it.
+    float la   = u_p5.y * 6.2831853;
+    vec2  lr   = u_p5.y == 0.0 ? lv : vec2(lv.x*cos(la) - lv.y*sin(la), lv.x*sin(la) + lv.y*cos(la));
+    vec2  le   = vec2(lr.x, lr.y / (u_p5.x > 0.0 ? u_p5.x : 1.0));
+    //   3  cross          two bars crossing: a shaft through a gap, and the narrow case is a slit.
+    //   4  sweep          an ANGLE rather than a distance, so the light is a sector, like a beacon.
+    //
+    // Two modifiers ride on top of whichever shape is chosen, and both are one operator:
+    //   u_p6.x  RING     brightest at a radius instead of at the middle. Turns round into a halo,
+    //                    oval into an ellipse of light, bar into a pair of parallel bars.
+    //   u_p6.yz STAR     u_p6.y points, u_p6.z depth. An angular squeeze on the distance, so the
+    //                    light grows spikes. Depth zero is exactly the unspiked shape.
+    float d;
+    if (u_p4.w < 0.5) {
+      d = length(le);
+    } else if (u_p4.w < 1.5) {
+      d = abs(le.y);
+    } else if (u_p4.w < 2.5) {
+      vec2 lb = abs(le);
+      d = mix(max(lb.x, lb.y), (lb.x + lb.y)*0.75, 0.45);
+    } else if (u_p4.w < 3.5) {
+      d = min(abs(le.x), abs(le.y));
+    } else if (u_p4.w >= 3.5) {
+      d = abs(atan(le.y, le.x)) * 0.31830989;
+    }
+    d = abs(d - u_p6.x);
+    // Guarded, not multiplied by zero: atan(0,0) at the light's exact centre is undefined, and one
+    // NaN pixel times a zero depth is still NaN.
+    if (u_p6.z != 0.0) d = d * (1.0 + u_p6.z*cos(u_p6.y*atan(le.y, le.x)));
     float rad  = (u_p.z > 0.0 ? u_p.z : 0.62) * (1.0 + 0.06*sin(t*0.09));
     float glow = pow(1.0 - smoothstep(0.0, rad, d), u_p.w > 0.0 ? u_p.w : 1.6);
-    float f    = fract(ax * count + 0.02*sin(bt));
+    // THE BAND COORDINATE. u_p4.x folds it about the field's own middle, so a band's shading runs
+    // OUTWARD on both sides instead of one way across the whole picture. Every reference of this
+    // family that is symmetric left-to-right needs the fold: an unfolded sawtooth puts its bright
+    // side on the same hand of every band, and the eye reads that as a lean rather than as depth.
+    float bx   = u_p4.x > 0.5 ? abs(ax - 0.5) : ax;
+    float f    = fract(bx * count + 0.02*sin(bt) + u_p3.w);
     // Softened by a fraction of one slat so a high count does not alias into moire when the canvas is
     // scaled. A hard fract() is right in maths and crawls on screen.
-    float soft = smoothstep(0.0, 0.35, min(f, 1.0 - f) * 2.0);
+    // and the window WIDENS as the bands get thinner on screen, which is what zooming out does. The
+    // window is a fixed fraction of a band, so in pixels it shrinks exactly when it is needed most and
+    // the moire comes back at the setting people reach for. Zoom 1 and above is the case the 0.35 was
+    // chosen for and is left alone; below 1 the window grows in step, to a whole half-band.
+    float sw   = u_p6.w > 0.0 && u_p6.w < 1.0 ? min(1.0, 0.35/u_p6.w) : 0.35;
+    float soft = smoothstep(0.0, sw, min(f, 1.0 - f) * 2.0);
     float slat = f * mix(0.55, 1.0, soft);
     // u_p2.w is the light's SIGN and strength. Negative darkens, which is one of the references: a
-    // dark radial mass sitting BEHIND the panels rather than a glow in front of them.
-    float lw = u_p2.w == 0.0 ? 1.0 : u_p2.w;
+    // dark radial mass sitting BEHIND the panels rather than a glow in front of them. Zero has always
+    // meant one, so that an unset vector lit the field; the ramp gradient below is new and can afford
+    // the honest reading, where zero means no light at all.
+    float lw = u_p3.x >= 0.5 ? u_p2.w : (u_p2.w == 0.0 ? 1.0 : u_p2.w);
     float lit = glow * lw;
-    col = clamp(base*(0.25 + 0.75*max(lit, 0.0)) + c2*max(lit, 0.0)*0.45
-              + c3*max(-lit, 0.0)*0.85 - slat*0.30, 0.0, 1.0);
-    col = mix(col, c3, 0.5*smoothstep(0.35, 1.0, 1.0 - across));   // the deep role owns the far edges
+    if (u_p3.x < 0.5) {
+      col = clamp(base*(0.25 + 0.75*max(lit, 0.0)) + c2*max(lit, 0.0)*0.45
+                + c3*max(-lit, 0.0)*0.85 - slat*0.30, 0.0, 1.0);
+      col = mix(col, c3, 0.5*smoothstep(0.35, 1.0, 1.0 - across));   // the deep role owns the far edges
+    } else if (u_p3.x >= 0.5) {
+      // THE GRADIENT ON ITS OWN AXIS. Above, the tint is sampled along ax, the same axis the bands
+      // are cut on, so the colour can only ever run the way the slats run. The reference that asked
+      // for this has vertical panels and a spectrum falling DOWN the frame, at a right angle to them,
+      // and no setting of the branch above reaches it. Same rotation as the band axis, its own angle.
+      float ga = u_p3.y * 6.2831853;
+      float gx = (q.x*cos(ga) - q.y*sin(ga)) + 0.5;
+      // PER-BAND CONVERGENCE, which is what makes this read as depth rather than as stripes. Each
+      // band out from the middle shows LESS of the ramp, squeezed toward its centre, the way a column
+      // further down a colonnade subtends less of the view. Zero is a flat set of stripes all showing
+      // the same gradient, and the difference between zero and a tenth is the whole picture.
+      float mid = u_p4.x > 0.5 ? 0.0 : floor(0.5*count + 0.02*sin(bt) + u_p3.w);
+      float bi  = abs(floor(bx*count + 0.02*sin(bt) + u_p3.w) - mid);
+      // u_p5.w LEANS the step. At zero a band is one flat depth and the whole change happens on the
+      // seam; at one the depth climbs back across the band, so each band is itself a small ramp and
+      // the seam carries a step of two. The reference has both, and a flat step alone leaves every
+      // band reading as a single colour where the picture has a gradient inside each one.
+      float sc  = max(0.0, 1.0 - u_p3.z * (bi - u_p5.w * f));
+      col = clamp(ramp(0.5 + (gx - 0.5)*sc) - 0.30*slat*u_p5.z
+                + max(lit, 0.0)*0.35 - max(-lit, 0.0)*0.35, 0.0, 1.0);
+    }
     alpha = 1.0;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
@@ -297,14 +417,18 @@ export function createAmbientLayer(w = 1920, h = 1080) {
     pal: gl.getUniformLocation(prog, 'u_pal'), palN: gl.getUniformLocation(prog, 'u_palN'),
     intensity: gl.getUniformLocation(prog, 'u_intensity'),
     p: gl.getUniformLocation(prog, 'u_p'),
-    p2: gl.getUniformLocation(prog, 'u_p2') };
+    p2: gl.getUniformLocation(prog, 'u_p2'),
+    p3: gl.getUniformLocation(prog, 'u_p3'),
+    p4: gl.getUniformLocation(prog, 'u_p4'),
+    p5: gl.getUniformLocation(prog, 'u_p5'),
+    p6: gl.getUniformLocation(prog, 'u_p6') };
   gl.viewport(0, 0, w, h); gl.uniform2f(U.res, w, h);
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   return {
     canvas,
     // `params` is the per-effect vector. Absent means four zeros, which every branch written before it
     // ignores, so adding it changed no pixel of the seventeen that came first.
-    draw(fx, time, seed = 0, palette = null, intensity = 0.35, params = null, params2 = null) {
+    draw(fx, time, seed = 0, palette = null, intensity = 0.35, params = null, params2 = null, params3 = null, params4 = null, params5 = null, params6 = null) {
       const idx = AMBIENT_FX.indexOf(fx); if (idx < 0) return;
       gl.useProgram(prog);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
@@ -314,7 +438,15 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       gl.uniform4f(U.p, P4[0] || 0, P4[1] || 0, P4[2] || 0, P4[3] || 0);
       const Q4 = params2 || [0, 0, 0, 0];
       gl.uniform4f(U.p2, Q4[0] || 0, Q4[1] || 0, Q4[2] || 0, Q4[3] || 0);
-      const flat = new Float32Array(12); const n = palette ? Math.min(4, palette.length) : 0;
+      const R4 = params3 || [0, 0, 0, 0];
+      gl.uniform4f(U.p3, R4[0] || 0, R4[1] || 0, R4[2] || 0, R4[3] || 0);
+      const S4 = params4 || [0, 0, 0, 0];
+      gl.uniform4f(U.p4, S4[0] || 0, S4[1] || 0, S4[2] || 0, S4[3] || 0);
+      const T4 = params5 || [0, 0, 0, 0];
+      gl.uniform4f(U.p5, T4[0] || 0, T4[1] || 0, T4[2] || 0, T4[3] || 0);
+      const V4 = params6 || [0, 0, 0, 0];
+      gl.uniform4f(U.p6, V4[0] || 0, V4[1] || 0, V4[2] || 0, V4[3] || 0);
+      const flat = new Float32Array(24); const n = palette ? Math.min(8, palette.length) : 0;
       for (let i = 0; i < n; i++) { flat[i * 3] = palette[i][0]; flat[i * 3 + 1] = palette[i][1]; flat[i * 3 + 2] = palette[i][2]; }
       gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n);
       gl.drawArrays(gl.TRIANGLES, 0, 3);

@@ -516,3 +516,84 @@ three colour stops.
 Copy the options straight into a scene, copy the HTML, or copy a link that carries only what you
 changed. To add another generator to that page, export a `SCHEMA` and a render function and add a
 row to `core/generators.js`. The page reads the registry; there is no list to keep on the site.
+
+## The `bands` shader, and the `spectrum` look built on it
+
+`bands` is not a lightfield. It is one branch of `core/shaders-ambient.js`, reached from a scene as
+`{"type":"shader","shader":"bands"}`, and it shares this page because it answers the same question
+with different machinery: a repeating ramp over a scalar field, tinted, with a light behind it.
+
+Two cards in `core/generators.js` sit on that one branch. `bands` is the original look, dark and lit
+from behind. `spectrum` is the same shader with the colour running at a right angle to the bands.
+
+### The dials, and why they were renamed
+
+The first set read `count` / `angle` / `glow` / `softness` / `edge` / `warm` / `core` / `deep`, and
+every one failed the only test a control has to pass: a person who has not read the shader cannot
+tell what it changes. `angle` was in TURNS, so a right angle was `0.25`. `glow` was a radius named
+like a switch. They are now in degrees and in percent, and the shader's uniform layout did not move:
+`core/generators.js` does the mapping, which is the job that file exists for.
+
+Where a number means a PLACE it uses the spelling this document already settled on for the
+lightfield's three origins: percent of the frame, `50`/`50` unmoved, off-frame values legal.
+
+| dial | what it does |
+|---|---|
+| `shape` | what the bands are cut on: `panels`, `arcs`, `rounded` |
+| `bands` | how many fit across the frame at zoom 1. Divided by the aspect on the way to the shader, so it means the same thing on a portrait canvas as on a landscape one |
+| `bandAngle` | degrees. 0 stands them upright |
+| `bandOffset` | slides the set by a fraction of one band, which is how a seam or a band centre lands on the middle |
+| `mirrorBands` | fold the pattern about the field's middle, so each band shades OUTWARD on both sides |
+| `zoom` | push into the pattern, around the LIGHT rather than around the middle. It magnifies; it does not change what `bands` counts |
+| `lightShape` | `round` · `oval` · `bar` · `cross` · `rounded` · `sweep` |
+| `lightWidth` / `lightHeight` | the light's two radii. Equal is a circle, and `round` forces them equal |
+| `lightAngle` | degrees. Turns the light, so a bar can lie flat or stand up |
+| `lightOriginX` / `lightOriginY` | percent across and down. The light used to be the constant `vec2(0.5, 0.55)` that no caller could reach |
+| `lightRing` | put the brightest point at a radius instead of at the centre: a halo, or from a bar a pair of parallel bars |
+| `lightPoints` / `lightSpike` | angular spikes on the light. Depth 0 is exactly the unspiked shape |
+| `lightEdge` | how abruptly the light stops |
+| `lightPolarity` | positive lights the field, negative DARKENS it. On `spectrum`, 0 means no light at all |
+
+`spectrum` adds `gradientAngle` (which way the ramp runs), `converge` (how much less of the ramp each
+band shows as it gets further out), `bandLean` (how much of that step happens across a band rather
+than on its seam), `bandShading`, and eight ramp stops instead of four named colour roles.
+
+### Eight palette stops
+
+`u_pal` was four and is now eight. Four is right for a mesh gradient built from blobs and wrong for a
+RAMP: `refs/colonnade/c6.jpg` runs white, green, yellow-green, pale gold, cyan, blue, white, and no
+interpolation between four stops reaches it. The seventeen effects written before this ask for stops
+0 to 3 only and `P()` answers those the same either way, so all seventeen are byte-identical after
+the change. That was checked by shooting every effect at two clocks with and without a palette,
+before and after, and comparing the hashes rather than the pictures.
+
+### Where `spectrum` stops, measured against `refs/colonnade/c6.jpg`
+
+Mean per-channel error **14.2 out of 255** at the reference's own 9:16, on a 120x214 grid, which is
+the same measurement `scripts/author/lightfield-check.mjs` uses one size up.
+
+The construction is right: eleven bands, evenly spaced, mirror-symmetric, the band edges within a
+pixel of the reference's, a spectrum falling down the frame, and each band out from the middle
+showing less of that spectrum, which is what makes the picture read as depth rather than as stripes.
+
+What still differs, in one word, is CONTRAST. The reference's dark green is darker and its blue
+deeper; ours is the same hue at roughly two thirds the punch, and where the reference's adjacent
+columns jump, ours slide. The cause is nameable: the eight stops are EVENLY SPACED along the ramp, and
+the reference's dark-green trough is about 6% of the frame height wide, sitting between our stops at
+28.6% and 42.9%. The straight leg between two stops cuts that corner off. Closing it needs per-stop
+POSITIONS, not more stops, and that is eight more floats than the parameter vectors currently carry.
+
+One smaller residual: the reference's per-band depth is not a clean step. Within each band the depth
+recovers slightly toward the band's outer edge, which `bandLean` models but only approximately; the
+reference behaves as though the recovery is about half a step and ours is a straight ramp.
+
+### What was measured on the reference
+
+Recorded so the next person does not re-derive it. At 120x214: eleven bands, edges at
+`x = 10, 21, 32 … 110`, no jitter. The ramp runs DOWN the frame, perpendicular to the bands. The
+centre column, top to bottom, is `(239,251,231) → (206,239,212) → (107,175,144) → (124,185,109) →
+(216,235,157) → (137,205,207) → (66,155,213) → (224,239,248) → (240,251,255)`. Each band samples that
+ramp at a different vertical SCALE, not a different offset: fitting `(scale, offset)` per column gives
+offsets inside ±0.01 everywhere and scales of `1.00, 0.89, 0.78, 0.66, 0.54, 0.44` out from the middle
+band. That is a per-band ZOOM on the gradient anchored at its midpoint, and it is the single most
+characteristic thing about the picture.
