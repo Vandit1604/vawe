@@ -66,12 +66,15 @@ const LABELS: Record<string, string> = {
   seed: "seed", colour: "colour", shadow: "shadow", pattern: "pattern", motion: "motion",
 };
 
-export function PlaygroundClient() {
+export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [bootErr, setBootErr] = useState<string | null>(null);
   // `null` is the LIBRARY: a wall of looks and nothing else. Picking one opens the tuner. Two states
   // rather than one, because a grid plus a full-size preview plus a panel put the preview back below
   // the fold, which is the thing this page was just fixed for.
+  // `null` is the LIBRARY. The name comes from the URL, so a refresh keeps you where you were and a
+  // link opens on the same generator. Resolved to an index once the engine has loaded, because only
+  // the engine knows the registry.
   const [which, setWhich] = useState<number | null>(null);
   const [opts, setOpts] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -96,7 +99,29 @@ export function PlaygroundClient() {
     return () => { alive = false; };
   }, []);
 
+  // Adopt the name from the path exactly once, when the engine arrives. An unknown name falls through
+  // to the library rather than 404ing: the registry is the only thing that knows what exists, and it
+  // lives here.
+  const adopted = useRef(false);
+  useEffect(() => {
+    if (!engine || adopted.current) return;
+    adopted.current = true;
+    if (!initial) return;
+    const i = engine.GENERATORS.findIndex((g) => g.name === initial);
+    if (i >= 0) setWhich(i);
+  }, [engine, initial]);
+
   const gen = which == null ? null : (engine?.GENERATORS[which] ?? null);
+
+  // Keep the address bar honest without a navigation: replaceState, so opening a generator and going
+  // back does not stack history entries nobody asked for.
+  useEffect(() => {
+    if (!engine) return;
+    const path = gen ? `/playground/${gen.name}` : "/playground";
+    if (window.location.pathname !== path) {
+      window.history.replaceState(null, "", path + window.location.search);
+    }
+  }, [engine, gen]);
 
   // Reset to a generator's own defaults when it changes, and read a shared link on first load.
   useEffect(() => {
