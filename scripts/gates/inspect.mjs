@@ -24,6 +24,7 @@
 //
 // Usage: node scripts/gates/inspect.mjs <scene.json> [--intent path] [--strict]
 import fs from 'node:fs';
+import { plain } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -37,7 +38,9 @@ const layers = d.layers || [];
 const s0 = (l) => l.start ?? 0, s1 = (l) => s0(l) + (l.duration ?? 0);
 const active = (t) => layers.filter((l) => s0(l) <= t + 0.001 && s1(l) >= t - 0.001);
 const flat = (l, acc = []) => { acc.push(l); (l.children || []).forEach((c) => flat(c, acc)); return acc; };
-const textOf = (l) => (l.type === 'text' ? l.text || '' : '') + (l.block ? ` [block:${l.block}]` : '');
+// STRIPPED. The needle comes from the storyboard's plain prose and the layer holds HTML, so matching
+// the authored string fails every film that emphasises a word (docs/MISTAKES.md #313).
+const textOf = (l) => (l.type === 'text' ? plain(l.text) : '') + (l.block ? ` [block:${l.block}]` : '');
 const animated = (l) => !!(l.anim || l.split || l.preset || l.type === 'count' || l.ken || (l.children || []).some(animated));
 
 let pass = 0, fail = 0;

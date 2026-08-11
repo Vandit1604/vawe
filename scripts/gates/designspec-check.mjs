@@ -13,6 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { snippet } from '../lib/text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
@@ -75,7 +76,7 @@ const specRadii = data.spec && Array.isArray(data.spec.radii) ? new Set(data.spe
 const specShadows = data.spec && Array.isArray(data.spec.shadows) ? new Set(data.spec.shadows.map(String)) : null;
 
 const findings = [];
-const label = (l, i) => `${l.type || 'text'}${l.text ? ` "${String(l.text).slice(0, 22)}"` : l.comp ? ` (${l.comp})` : ''}`;
+const label = (l, i) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text, 22)}"` : l.comp ? ` (${l.comp})` : ''}`;
 
 // ---- the token lock: a `var(--x)` the engine never defines ----
 // CSS answers an undefined custom property by inheriting, so `var(--text2)` (the engine defines

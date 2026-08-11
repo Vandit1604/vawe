@@ -9,6 +9,7 @@
 // WARN by default (coaching); --strict blocks. Not taste-policing — it flags the specific tells that make
 // copy read as generated, so you reach past them.
 import fs from 'node:fs';
+import { plain as stripTags } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -26,7 +27,6 @@ const VAGUE = ['many', 'tons of', 'lots of', 'a lot of', 'countless', 'numerous'
 const WEAK_OPENER = ['the', 'a', 'an', 'we', 'our', 'it', 'this', 'that', 'here', 'introducing', 'meet', 'welcome', 'discover', 'presenting'];
 
 const flat = []; (function rec(ls) { for (const l of ls || []) if (l && typeof l === 'object') { flat.push(l); if (l.children) rec(l.children); } })(data.layers);
-const stripTags = (s) => String(s).replace(/<[^>]+>/g, '');
 const words = (s) => stripTags(s).trim().split(/\s+/).filter(Boolean);
 const norm = (s) => stripTags(s).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 const emojiCount = (s) => ([...stripTags(s)].filter((c) => /\p{Extended_Pictographic}/u.test(c))).length;

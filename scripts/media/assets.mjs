@@ -23,13 +23,24 @@ const cardsDir = path.join(fmtDir, 'assets', 'cards');         // per-format gen
 const COUNTRY = { 'united states': 'us', usa: 'us', america: 'us', 'united kingdom': 'gb', uk: 'gb', britain: 'gb', china: 'cn', india: 'in', japan: 'jp', germany: 'de', france: 'fr', italy: 'it', spain: 'es', russia: 'ru', brazil: 'br', canada: 'ca', australia: 'au', mexico: 'mx', indonesia: 'id', 'south korea': 'kr', korea: 'kr', turkey: 'tr', 'saudi arabia': 'sa', iran: 'ir', egypt: 'eg', nigeria: 'ng', ethiopia: 'et', pakistan: 'pk', bangladesh: 'bd', vietnam: 'vn', philippines: 'ph', greenland: 'gl', antarctica: 'aq', 'congo': 'cd', netherlands: 'nl', sweden: 'se', norway: 'no', poland: 'pl', argentina: 'ar', 'south africa': 'za', thailand: 'th', ukraine: 'ua', switzerland: 'ch', ireland: 'ie', portugal: 'pt', greece: 'gr', israel: 'il', uae: 'ae', singapore: 'sg', 'new zealand': 'nz' };
 
 // collect "slots": (object holding the icon, the name string, the icon field key)
+// BLOCKS THAT CANNOT HOLD A PICTURE. This walk collects any object carrying a `name` and calls it a
+// subject that wants an icon, which is right for a layer and wrong for a sound: an audio cue has a
+// `name` too, so a film that took CLAUDE.md 2a2 seriously and gave itself sound got a plan to draw
+// `whisper`, `press` and `droplet` as image cards, and `error` and `success` deduped against each
+// other seven times (docs/MISTAKES.md #314). The better the film, the louder the false plan.
+//
+// A cue name resolves against assets/sfx/ and never against assets/cards/, so these subtrees are not
+// this tool's business at all. Named rather than inferred: guessing which blocks are visual from
+// their shape is what produced the bug.
+const NOT_VISUAL = new Set(['audio', 'captions', 'vo', 'voiceover', 'authoring']);
+
 function slots(o, acc = []) {
   if (!o || typeof o !== 'object') return acc;
   if (Array.isArray(o)) { for (const v of o) slots(v, acc); return acc; }
   if (typeof o.name === 'string' && ('icon' in o || o.name)) acc.push({ obj: o, name: o.name, key: 'icon' });
   if (typeof o.a === 'string' && ('iconA' in o || true)) acc.push({ obj: o, name: o.a, key: 'iconA' });
   if (typeof o.b === 'string' && ('iconB' in o || true)) acc.push({ obj: o, name: o.b, key: 'iconB' });
-  for (const v of Object.values(o)) if (v && typeof v === 'object') slots(v, acc);
+  for (const [k, v] of Object.entries(o)) if (v && typeof v === 'object' && !NOT_VISUAL.has(k)) slots(v, acc);
   return acc;
 }
 

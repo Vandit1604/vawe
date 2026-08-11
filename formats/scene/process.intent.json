@@ -14,7 +14,7 @@
    ],
    "name": "nothing came near the edge",
    "mustShow": [
-    "Nothing came near the",
+    "Nothing came near the edge.",
     "The safe-zone audit failed it at every rotation."
    ],
    "mustAnimate": true,
@@ -30,7 +30,7 @@
    ],
    "name": "shrink it 40 percent",
    "mustShow": [
-    "40 percent.",
+    "Shrink it 40 percent.",
     "The only change that passed. The film got worse."
    ],
    "mustAnimate": true,
@@ -46,7 +46,7 @@
    ],
    "name": "255px of clearance",
    "mustShow": [
-    "of clearance.",
+    "255px of clearance.",
     "Measured as 139px over the edge."
    ],
    "mustAnimate": true,
@@ -62,7 +62,7 @@
    ],
    "name": "fix two of three",
    "mustShow": [
-    "Fix two of three.",
+    "Fix two of three. Nothing moves.",
     "Unclamped, one clean scene became seven failures."
    ],
    "mustAnimate": true,
@@ -78,7 +78,7 @@
    ],
    "name": "only fixing all three worked",
    "mustShow": [
-    "Only fixing",
+    "Only fixing all three worked.",
     "Two scenes changed. Fail to pass. Zero regressions."
    ],
    "mustAnimate": true,
@@ -86,6 +86,5 @@
    "object": "the red rectangle snaps from 933 square onto the ink and turns mint",
    "becomes": "a rectangle that was measuring the empty corners becomes one measuring the ink"
   }
- ],
- "_note": "mustShow needles are the longest tag-free substring of each line. scripts/gates/inspect.mjs matches against the RAW layer text, so a line carrying the engine's documented <b> emphasis can never match its own plain copy. See docs/MISTAKES.pending-film.md."
+ ]
 }

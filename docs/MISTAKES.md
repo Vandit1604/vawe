@@ -8344,6 +8344,20 @@ emphasise something. Fix or explicitly clear each.
 tag-free substring of each line (`"Nothing came near the"`), with a `_note` saying why. That is a
 workaround, so by CLAUDE.md's rule it is a bug report, and this is it.
 
+**FIXED, and the grep was the point.** The stripping regex existed FIVE times as five local copies,
+and the two places that lacked one were both matchers. `inspect.mjs` was the reported one.
+`critique.mjs` was the silent one: its false-claim regex wants digits then whitespace, and
+`<b>245</b> effects` puts a `<` after the digits, so a film that emphasised its own number walked past
+the check that exists to catch an unbacked number and nothing said anything.
+
+One definition now, `scripts/lib/text.mjs`, imported by six gates. A copy in each gate is exactly how
+the two that lacked one went unnoticed: nothing looked missing, because there was nothing central to
+be missing from.
+
+The workaround in `process.intent.json` is deleted and its needles are the real lines again. Proof it
+was a real bug and not a needle problem: the OLD gate fails four beats on the same file the new gate
+passes. Across the whole library, 43 scenes by 5 gates, no scene changed verdict.
+
 ---
 
 ## #314 — `make assets` plans image cards for audio cue names
@@ -8369,6 +8383,12 @@ themselves sound: the better the film, the louder the false plan. `asset preflig
 
 **Fix.** Skip `audio` (and `captions`) when collecting subjects. A cue name resolves against
 `assets/sfx/`, never `assets/cards/`.
+
+**FIXED.** The walk collects any object carrying a `name` and calls it a subject wanting an icon,
+which is right for a layer and wrong for a sound. It now refuses to descend into `audio`, `captions`,
+`vo`, `voiceover` and `authoring`. Named rather than inferred: guessing which blocks are visual from
+their shape is what produced the bug. `process.json` went from seven false cards to
+"every item already has a real image".
 
 ---
 
@@ -8457,6 +8477,15 @@ renders perfectly happily.
 minimum warn once, loudly, in the render log) when one 404s. A worktree bootstrap note in
 `CLAUDE.md` — run `make fonts` and `make audio` before the first render in a new worktree — is the
 five-minute half of it, but the loud check is the part that survives the next person not reading it.
+
+**FIXED.** `asset-check` now parses `core/tokens.css` for every `@font-face` src and checks the file
+is on disk: 17 typefaces, derived from the stylesheet so a face added there is checked the day it is
+added and no list can go stale. It runs inside `author-check`, so every render looks. Missing faces
+print loudly and block under `--strict`.
+
+One file backs several families, so the report names all of them: hiding `InterVariable.woff2` prints
+`(Inter, Inter Variable, Inter Display)`. Naming only the last one seen would hide two thirds of what
+just broke.
 
 ---
 

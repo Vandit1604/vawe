@@ -27,6 +27,7 @@ import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
+import { plain, snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -196,7 +197,7 @@ const poseAt = (l, t) => {
     p.k = round3(from + (to - from) * (span > 0 ? clamp01(lt / span) : 0));
   }
   if (l.typing && typeof l.text === 'string') {
-    const visLen = l.text.replace(/<[^>]*>/g, '').length;
+    const visLen = plain(l.text).length;
     p.t = typedLen(lt, { cps: l.typing === true ? 24 : +l.typing, visLen, untype: l.untype, untypeRate: l.untypeRate });
   }
   return JSON.stringify(p);
@@ -217,7 +218,7 @@ const continuity = (bs) => {
   }
   return { spanning, transforming };
 };
-const label = (l) => `${l.type || 'text'}${l.text ? ` "${String(l.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''}`;
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there — a fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`);

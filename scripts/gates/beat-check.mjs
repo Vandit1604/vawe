@@ -58,6 +58,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
+import { snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -192,7 +193,7 @@ const truncated = content.map((L) => {
   return (u != null && u < b - 1e-9) ? { L, a, b, u } : null;
 }).filter(Boolean);
 if (truncated.length) {
-  const label = (L) => `${L.type || 'text'}${L.text ? ` "${String(L.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+  const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
   const list = truncated.slice(0, 5).map(({ L, a, b, u }) => `${label(L)} authored ${s(a)} to ${s(b)}, rendered to ${s(u)}`).join(' · ');
   warn('beats-wrapped-as-units', `${truncated.length} layer(s) are cut short by BEAT WRAPPING: ${list}${truncated.length > 5 ? ` · and ${truncated.length - 5} more` : ''}. This film wraps each beat as a unit (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its own beat's end and slid out with it, and nothing can survive a cut until one layer opts out. If the layer was meant to end there, shorten its \`duration\` so the JSON says what the render does. If it was meant to carry the film across the cut, mark it \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored window.`);
 }
@@ -214,7 +215,7 @@ const heldOpen = content.map((L) => {
   return (c != null && c - b >= DEAD_AIR - 1e-9) ? { L, a, b, c, u: T.unitEnd(L) } : null;
 }).filter(Boolean);
 if (heldOpen.length) {
-  const label = (L) => `${L.type || 'text'}${L.text ? ` "${String(L.text).replace(/<[^>]*>/g, '').slice(0, 24)}"` : ''}`;
+  const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
   const list = heldOpen.slice(0, 5).map(({ L, b, u }) => `${label(L)} authored to ${s(b)}, rendered to ${s(u)}`).join(' · ');
   warn('beats-held-open', `${heldOpen.length} layer(s) stay on screen far past their authored \`duration\` because BEAT WRAPPING replaced it: ${list}${heldOpen.length > 5 ? ` · and ${heldOpen.length - 5} more` : ''}. This film wraps each beat as a unit, and the wrapper runs every layer in a non-last beat to that beat's cut so it can slide the whole beat out together — it does not keep the shorter of the two windows. The frame therefore holds content the JSON says has already gone, and no other gate can see the difference. If the layer really should hold the beat, write its \`duration\` to say so. If it should leave when you wrote it to leave, mark it \`"acrossBeats": true\`: it attaches to the camera instead of the beat wrapper and keeps its authored window (it then fades out on its own rather than sliding with the beat).`);
 }

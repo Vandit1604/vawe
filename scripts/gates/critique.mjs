@@ -6,6 +6,7 @@
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
+import { plain, snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -35,24 +36,26 @@ const LOW_LEGIBILITY_STINGS = new Set(['blinds']);
 // ---- 1. placeholder-word: a big text that is JUST a filler noun ----
 for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
-  const w = l.text.replace(/<[^>]+>/g, '').trim().toLowerCase();
+  const w = plain(l.text).trim().toLowerCase();
   if (PLACEHOLDER.has(w) && (l.size ?? 0) >= 48) {
-    F('error', 'placeholder-word', `"${l.text}" (${l.size}px) is a filler label, not a real artifact — render the actual thing (a live mini-scene), not the word.`, s0(l));
+    F('error', 'placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact — render the actual thing (a live mini-scene), not the word.`, s0(l));
   }
 }
 
 // ---- 2. unbacked-claim: "N <things>" copy where the N things aren't visibly demonstrated ----
 for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
-  const m = l.text.match(CLAIM);
+  // MATCHED ON THE STRIPPED COPY. CLAIM wants digits then whitespace, and `<b>245</b> effects` puts a
+  // `<` after the digits, so a film that emphasised its own number escaped this check entirely.
+  const m = plain(l.text).match(CLAIM);
   if (m) {
     const noun = m[2].toLowerCase();
     const shaderish = /shader/.test(noun);
     const hasShaderLayer = layers.some((x) => x.type === 'shader');
     if (shaderish && !hasShaderLayer) {
-      F('error', 'false-claim', `"${l.text}" claims ${m[1]} ${noun} but the scene has NO shader layers — remove the claim or add the effect.`, s0(l));
+      F('error', 'false-claim', `"${snippet(l.text, 40)}" claims ${m[1]} ${noun} but the scene has NO shader layers — remove the claim or add the effect.`, s0(l));
     } else {
-      F('warn', 'unbacked-claim', `"${l.text}" — a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
+      F('warn', 'unbacked-claim', `"${snippet(l.text, 40)}" — a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
     }
   }
 }
@@ -102,7 +105,7 @@ for (const l of layers) {
   if (l.type && l.type !== 'text') continue;
   if (!l.text || l.split) continue;
   if ((l.size ?? 0) >= 40 && (l.w ?? 0) >= 600 && !l.align) {
-    F('warn', 'mis-centre', `"${String(l.text).replace(/<[^>]+>/g, '').slice(0, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align" — text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
+    F('warn', 'mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align" — text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
   }
 }
 
@@ -124,11 +127,11 @@ for (const l of layers) {
   if (!l.typing || l.type !== 'text') continue;
   const cps = l.typing === true ? 24 : +l.typing;
   if (!(cps > 0)) continue;
-  const chars = String(l.text || '').replace(/<[^>]+>/g, '').length;
+  const chars = plain(l.text).length;
   const typeTime = chars / cps;
   const dur = l.duration ?? 0;
   if (typeTime + MIN_TYPE_HOLD > dur + 1e-6) {
-    F('warn', 'typing-cutoff', `"${String(l.text).replace(/<[^>]+>/g, '').slice(0, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s — it cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
+    F('warn', 'typing-cutoff', `"${snippet(l.text, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s — it cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
   }
 }
 

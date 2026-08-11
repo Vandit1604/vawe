@@ -61,10 +61,45 @@ const howto = (v) => {
   return `add the file at this path`;
 };
 
-console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote)`);
+// THE TYPEFACES, which no scene references and nothing therefore checked.
+//
+// `assets/fonts/*.woff2` is gitignored, so a fresh worktree has none. `core/tokens.css` declares an
+// @font-face against each one, the browser cannot find it, and it falls back. Nothing warns. Four
+// render passes were judged for composition, hierarchy and line breaks in a high-contrast serif while
+// the theme declared Anybody, and the only clue was that the frames looked wrong in a way nobody could
+// name (docs/MISTAKES.md #317). A fallback renders perfectly happily, which is what makes it expensive.
+//
+// Derived from the stylesheet rather than listed here, so a face added to tokens.css is checked the
+// day it is added and a list cannot go stale.
+const cssPath = path.join(ROOT, 'core', 'tokens.css');
+const fonts = new Map();
+if (fs.existsSync(cssPath)) {
+  const css = fs.readFileSync(cssPath, 'utf8');
+  for (const m of css.matchAll(/@font-face\s*\{[^}]*\}/g)) {
+    const fam = /font-family:\s*['"]([^'"]+)['"]/.exec(m[0]);
+    const url = /url\(['"]([^'"]+\.woff2?)['"]\)/i.exec(m[0]);
+    // One file backs several families (InterVariable is Inter, Inter Variable and Inter Display), so
+    // the value is a SET. Keeping the last one seen would name one family and hide the other two.
+    if (!fam || !url) continue;
+    if (!fonts.has(url[1])) fonts.set(url[1], new Set());
+    fonts.get(url[1]).add(fam[1]);
+  }
+}
+const missingFonts = [...fonts].filter(([u]) => !resolvesToFile(u));
+
+console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s))`);
+if (missingFonts.length) {
+  console.log(`  ${missingFonts.length} MISSING typeface(s) — every frame will render in a fallback face and NOTHING else will say so:`);
+  for (const [u, fam] of missingFonts) console.log(`    ✗ ${u}  (${[...fam].join(', ')})`);
+  console.log(`        → make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)`);
+}
 if (remotes.length) for (const [w, v] of remotes) console.log(`    · remote (not checked): ${v}  [${w}]`);
-if (!missing.length) { console.log(`  ✓ every local asset reference resolves to a file on disk.\n`); process.exit(0); }
+if (!missing.length && !missingFonts.length) { console.log(`  ✓ every local asset reference and every declared typeface resolves to a file on disk.\n`); process.exit(0); }
+if (!missing.length) {
+  console.log(`  ✓ every local asset reference resolves to a file on disk.\n`);
+  process.exit(strict ? 1 : 0);
+}
 console.log(`  ${missing.length} MISSING asset(s) — the render will show a broken image / silent gap:`);
 for (const [w, v] of missing) console.log(`    ✗ ${v}  [${w}]\n        → ${howto(v)}`);
 console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make assets D=${file} fills most). Block with --strict.\n`);
-process.exit(strict && missing.length ? 1 : 0);
+process.exit(strict && (missing.length || missingFonts.length) ? 1 : 0);

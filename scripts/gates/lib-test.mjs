@@ -732,6 +732,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // A one-liner for "this must refuse the input", used throughout the block below.
   const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
+  // ── layer copy vs authored markup ──────────────────────────────────────────────────────────────
+  {
+    const { plain, layerText, snippet } = await import('../lib/text.mjs');
+    ok('text: markup is stripped, which is what a viewer reads',
+      plain('Nothing came near the <b>edge.</b>') === 'Nothing came near the edge.');
+    ok('text: a needle from the storyboard now matches the layer that emphasises a word',
+      plain('Nothing came near the <b>edge.</b>').includes('Nothing came near the edge.'));
+    // The silent half of the same bug. This regex wants digits then whitespace, and a tag between
+    // them is why a film that styled its own number walked past the check meant to catch it.
+    const CLAIM = /\b(\d+)\s+(effects?|cuts?|shaders?)\b/i;
+    ok('text: an emphasised number is still a claim',
+      !CLAIM.test('<b>245</b> effects') && CLAIM.test(plain('<b>245</b> effects')));
+    ok('text: a count layer carries copy too', layerText({ type: 'count', text: '<b>9</b>' }) === '9');
+    ok('text: a null type is a text layer', layerText({ text: 'hi' }) === 'hi');
+    ok('text: an image layer has no copy', layerText({ type: 'image', text: 'x' }) === '');
+    ok('text: a nullish text is empty, never the string "undefined"', plain(undefined) === '' && plain(null) === '');
+    // Cutting the RAW string can slice a tag in half and print markup at a person.
+    ok('text: a snippet cuts the readable copy, not the markup',
+      snippet('Nothing came near the <b>edge.</b>', 24) === 'Nothing came near the ed…');
+  }
+
   // ── crt ────────────────────────────────────────────────────────────────────────────────────────
   {
     const { crtSpec } = await import('../../core/layers/util.js');
