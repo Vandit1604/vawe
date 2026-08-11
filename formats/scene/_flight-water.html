@@ -1,0 +1,24 @@
+<div style="position:absolute;inset:0;
+  /* THE SEA, and the light crossing it. This is a backdrop and not part of the chart, on purpose: the
+     chart is geometry and this is weather. Keeping them apart is what let the chart be restyled by
+     four tokens instead of rewritten.
+
+     The terminator's position is the SAME expression the chart's own terminator group uses
+     (translateX(1500px - dw * 1460px), scaled to this frame's width), so the line you can see and the
+     light it divides cannot drift apart. Two copies of that arithmetic would be two dawns.
+
+     Capped at 0.72. Sunrise from altitude is a band of light on the horizon ahead, not a lit room, and
+     a terminator that runs off the west edge leaves no dark in the frame at all: no contrast for the
+     route, and nowhere for the closing line to sit. The first styleframe ran it to full daylight and
+     the back half read as a sunset poster with the continents in silhouette. */
+  --dw:clamp(0, (var(--t,0) - 0.8) / 19.0, 0.72);
+  --term:calc(100% - var(--dw) * 97.3%);
+  background:linear-gradient(90deg,
+    #04070f 0%,
+    #060b1c calc(var(--term) - 22%),
+    #101a35 calc(var(--term) - 6%),
+    #3a3446 calc(var(--term) - 0.7%),
+    #6d5254 calc(var(--term) + 2.2%),
+    #8a6a63 calc(var(--term) + 6.2%),
+    #6a728e calc(var(--term) + 19%),
+    #79839f 100%)"></div>
