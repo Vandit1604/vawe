@@ -66,6 +66,11 @@ export function parseStoryboard(src) {
       // the shot vocabulary — see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),
+      // WHERE things sit. Its own field, not a placement word buried in `picture`, because that is
+      // what a reviewer is being asked to approve when they look at a panel. It was not parsed at
+      // all: a storyboard stating a HUD corner on every beat still drew centred boxes labelled
+      // "placement not stated", which is a declaration accepted and ignored.
+      placement: f('placement'),
       // narration: what is SPOKEN over this beat. Optional, and separate from `onscreen` because the
       // two are different channels: a line can be said and not shown, or shown and not said. The
       // animatic reads this when present and falls back to the on-screen copy as a reading-time proxy.

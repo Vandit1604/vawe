@@ -153,7 +153,11 @@ for (const b of beats) {
 
   // ── the subject, at the size the shot says ───────────────────────────────────────────────────────
   const bw = Math.round(FRAME_W * shot.sx), bh = Math.round(FRAME_H * shot.sy);
-  const place = readPlace(b.picture, b.shot);
+  // `placement` FIRST, because a field whose entire job is to say where things go should outrank a
+  // placement word that happens to appear in a prose description. It was not read at all until now: a
+  // storyboard stating "HUD top-left" on every beat still drew seven centred boxes and labelled them
+  // "placement not stated", which is a declaration accepted and ignored.
+  const place = readPlace(b.placement, b.picture, b.shot);
   const EDGE = 0.06;
   let bx = FRAME_X + Math.round((FRAME_W - bw) / 2), by = FRAME_Y + Math.round((FRAME_H - bh) / 2);
   if (place.where === 'left') bx = FRAME_X + Math.round(FRAME_W * EDGE);
