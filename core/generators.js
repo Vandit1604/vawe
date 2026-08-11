@@ -258,7 +258,7 @@ const SPECTRUM_SCHEMA = {
         // built on 0.1429 is not the ramp built on 1/7: the divisor below it becomes 0.1429 instead
         // of 0.142857 and every field that never asked for positions would quietly shift. A default
         // whose whole job is to reproduce the old behaviour has to reproduce it to the last bit.
-        [`ramp${i + 1}At`, { kind: 'num', min: 0, max: 1, def: i / 7, primary: false,
+        [`ramp${i + 1}At`, { kind: 'num', min: 0, max: 1, def: i / 7, primary: false, monotone: 'ramp',
           note: `how far along the gradient stop ${i + 1} sits. Stops must stay in order.` }],
       ])),
   },
@@ -552,7 +552,20 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
         const anchorHue = ctx.hue;
         if (!from) { out[key] = hslHex(anchorHue, 45 + rand() * 45, 12 + rand() * 55); break; }
         const me = toHsl(from);
-        const offset = anchorHue - hueOf(base, ANCHOR_ROLE) + me.h;
+        // ROTATING AN ARC DOES NOT PRESERVE ITS CHARACTER, which is the hole in the paragraph above.
+        // Keeping each role's offset from the anchor keeps the palette's SHAPE, and the shape is not
+        // the whole of what makes a palette work, because hue space is not uniform. `spectrum` spans
+        // 125 degrees, from yellow-green through to blue: wide, and every colour in it clean. Rotate
+        // that same arc onto magenta and its middle now crosses red, orange and yellow, and at these
+        // stops' saturation that middle IS brown. Measured on one roll: #bb6b5f brick, #d3bb81 khaki,
+        // #dce152 mustard. Those are stops, not a mixing artefact between them.
+        //
+        // So a wide arc is COMPRESSED toward its anchor before it is rotated. The cap is 60 degrees,
+        // chosen above every preset that works (10, 22, 39, 40) and well under the one judged bad
+        // (86). The fitted palettes themselves are untouched: this runs only on a roll.
+        const arc = paletteArc(base, ctx);
+        const k = arc.span > ARC_CAP ? ARC_CAP / arc.span : 1;
+        const offset = anchorHue + signedHue(me.h - arc.anchor) * k;
         // A little play in saturation, none in the relationship. Presets run 0.55 to 1.00.
         const sat = clamp(me.s * 100 * (0.85 + rand() * 0.3), 40, 100);
         out[key] = hslHex(((offset % 360) + 360) % 360, sat, me.l * 100);
@@ -565,12 +578,69 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
         skipped.push(key);
     }
   }
+  // SOME NUMBERS ARE A SET, NOT A ROW OF INDEPENDENT DIALS. The ramp positions must not cross: stop 5
+  // sitting before stop 4 is not a ramp, and the generator rightly refuses it. Rolling each one on its
+  // own produced exactly that, and the playground threw on its first random spectrum.
+  //
+  // Sorting is the whole fix, and it is the right one rather than a repair: what a caller wants from
+  // rolling these is different SPACING, and the spacing is a property of the set. Sorting varies where
+  // the ramp's features sit and can never produce an order nobody asked for.
+  //
+  // Declared with `monotone: '<name>'` on each member, so this stays a rule about a declaration and
+  // not a rule about ramps.
+  const groups = new Map();
+  for (const [key, spec] of Object.entries(schema)) {
+    if (!spec.monotone || typeof out[key] !== 'number') continue;
+    if (!groups.has(spec.monotone)) groups.set(spec.monotone, []);
+    groups.get(spec.monotone).push(key);
+  }
+  for (const keys of groups.values()) {
+    const sorted = keys.map((k) => out[k]).sort((a, b) => a - b);
+    keys.forEach((k, i) => { out[k] = sorted[i]; });
+  }
   return out;
 }
 
 // The role every other colour is measured against. `bloom` is the light the field rises to, so it is
 // the one a viewer reads first and the natural anchor for the rest.
 const ANCHOR_ROLE = 'bloom';
+
+// How wide a hue arc a rolled palette may span. See the note at the `hex` case for the measurement.
+const ARC_CAP = 60;
+
+// A hue difference as the SHORT way round, in -180..180. Hue is a circle and subtracting two numbers
+// on it is only correct when the answer happens not to cross zero.
+const signedHue = (d) => ((((d % 360) + 540) % 360) - 180);
+
+// The anchor this palette's hues are measured from, and how wide an arc they cover.
+//
+// `hueOf(base, ANCHOR_ROLE)` returned 0 whenever the named role was absent, and a ramp has no
+// `bloom`: `spectrum`'s eight stops are ramp1..ramp8. So every spectrum palette was being measured
+// against red, a colour not in it. It happened to look right, because measuring a whole palette from
+// a fixed wrong origin still rotates it rigidly, which is the same answer for a different reason. It
+// stops being the same answer the moment anything else uses the offset, as the compression below now
+// does. So the anchor falls back to the first stop with real colour in it.
+//
+// The span is the SMALLEST arc containing every saturated hue, found as the circle minus its largest
+// gap. Taking max-minus-min would call a palette straddling zero nearly 360 degrees wide.
+function paletteArc(base, ctx) {
+  ctx.arcs = ctx.arcs || new Map();
+  if (ctx.arcs.has(base)) return ctx.arcs.get(base);
+  const hues = Object.values(base || {})
+    .filter((v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v))
+    .map(toHsl).filter((c) => c.s > 0.15).map((c) => c.h);
+  let out;
+  if (!hues.length) out = { anchor: 0, span: 0 };
+  else {
+    const anchor = base?.[ANCHOR_ROLE] ? toHsl(base[ANCHOR_ROLE]).h : hues[0];
+    const sorted = [...hues].sort((a, b) => a - b);
+    let gap = 360 - (sorted[sorted.length - 1] - sorted[0]);
+    for (let i = 1; i < sorted.length; i++) gap = Math.max(gap, sorted[i] - sorted[i - 1]);
+    out = { anchor, span: 360 - gap };
+  }
+  ctx.arcs.set(base, out);
+  return out;
+}
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
