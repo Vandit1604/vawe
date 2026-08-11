@@ -8400,6 +8400,16 @@ not a sibling of whatever scene happened to be passed in.
 whether any shipped scene already references a path under `formats/*/assets/` that only exists because
 of this.
 
+**FIXED.** Both write paths now check the same flag the JSON edit checks. There were TWO, not one: the
+card generator, and `tryFetch`, which downloaded icons from the network and put them on disk. The
+fetch still happens on a dry run and that is deliberate — the plan reports `logo` or `card` depending
+on whether the icon exists upstream, so the accuracy of the printed plan depends on asking. What it no
+longer does is keep the answer. Verified by counting `git status --untracked-files=all` across a dry
+run: 16 entries before, 16 after, with the plan's rows unchanged.
+
+**What made it survive.** The banner is printed at the END, after the writing. Anyone reading the code
+top to bottom meets `PLAN (dry run)` last and reads it as a summary of what the function did.
+
 ---
 
 ## #316 — A motion track is layer-relative and nothing shows it in film time
@@ -8459,13 +8469,86 @@ thing is gone on purpose. It never means a reference was not worth fixing: the n
 stale were corrected instead.
 
 <!-- doc-refs-allow: make schema-drift · #256 quotes the stale name it was chartered to correct -->
+## #318 — The two tools that FIT a seed have never once run
+
+**What.** `scripts/author/lightfield-seeds.mjs` and `scripts/author/lightfield-fit.mjs` both import
+`./lightfield-model.mjs`. That file was never written and never committed: `git log --all` for the path
+returns nothing. Both tools died on `Cannot find module` before their first line of work, on every
+invocation, since the day their imports were typed.
+
+These are the two tools that FIT a layout to a reference. Everything they exist to measure has
+therefore been judged by eye, while the repo's own comments cite their numbers as evidence: the header
+of `lightfield-seeds.mjs` reports that a previous version "held four hand-typed hex values fixed across
+four million layouts", a result no run could have produced.
+
+**Root cause.** An import is a promise about a file, and nothing checks that the promise is kept until
+someone runs the thing. A tool nobody has run since it was written is indistinguishable from a tool
+that works.
+
+**Fix.** Wrote the module. The field is a stack of CSS gradients composited source-over, and
+source-over is `src*a + dst*(1-a)`, so every alpha comes from geometry and the painted colour at any
+point is a weighted average of the role colours. That makes "which palette best fits this photograph"
+a linear least squares solve instead of a search, which is what both tools assumed all along.
+
+Two more bugs surfaced the moment they ran, each of which had been sitting behind the first:
+
+- `lightfield-seeds.mjs` read `PRESETS.ref.colour.extra.length` off a RAW preset. A preset is a patch
+  and carries no `extra`, so it crashed on `undefined`. `fieldBlobs` already carries a comment about
+  this exact crash from this exact caller; the caller was never fixed because it never got that far.
+- `export { W, H } from './lightfield-model.mjs'` forwards names to importers but does not BIND them in
+  the module's own scope, and `lightfield-render.mjs` reads them itself.
+
+**Which gate now catches it.** `scripts/author/lightfield-model-check.mjs` renders the colour field
+alone and compares it to the model's prediction: 0.34 to 0.92 out of 255 across the three presets,
+with every weight row summing to exactly 1. A model that is quietly wrong does not crash, it returns
+confident numbers and the search walks past the right answer, so the check asserts agreement rather
+than absence of error.
+
+---
+
+## #319 — A default that reproduces the old behaviour, except in float32
+
+**What.** `spectrum` needed per-stop ramp POSITIONS: eight evenly spaced stops cannot describe a
+feature narrower than a seventh of the ramp, however many you add, and the reference's trough is about
+6% of the frame. Adding stops had been tried and could not reach it, because count was never the
+missing axis.
+
+The obvious safe design is to give every stop a position defaulting to the even spacing, so nothing
+changes until someone changes it. In real arithmetic that is exact: `(x - i/n) / ((i+1)/n - i/n)` is
+`x*n - i`, the formula that was already there. It is not exact in float32, because `1/7` does not
+round-trip. Rendering both and hashing the pixels: the spectrum card DIFFERED.
+
+Two separate versions of the same mistake, in one change:
+
+1. The schema's defaults were written `Number((i / 7).toFixed(4))`, prettier to read and 0.1429 rather
+   than 0.142857.
+2. Fixing that to exactly `i / 7` was still not enough, because the general path and the even path are
+   different float expressions whatever numbers you feed them.
+
+**Fix.** Even spacing is sent as NO positions at all: the generator drops the suffix when every stop
+sits exactly where the even spread would put it, and the shader reads a negative first position as the
+sentinel for "spread them evenly" and takes its original code path unchanged. A moved stop puts a
+position on every stop and takes the new path.
+
+**Which gate now catches it.** `lib-test` pins it from both ends: an untouched ramp emits plain hex, a
+moved one puts a position on every stop, stops that go backwards throw, and the shader source still
+contains the sentinel test. Proven with a pixel hash of the shader drawn old-versus-new: identical for
+an untouched spectrum and for bands, different once a stop moves.
+
+**The lesson worth keeping.** "This is byte-identical" is a claim about the arithmetic that actually
+runs, not about the algebra. It is cheap to check and I nearly shipped it unchecked. The first pixel
+comparison I wrote reported IDENTICAL for two BLANK canvases, because the harness had disabled WebGL
+and `createAmbientLayer` returns a no-op `draw` when there is no context. A test that cannot tell
+blank from correct is not a test; the hash now refuses to report unless the picture is really there.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
 <!-- doc-refs-allow: core/layers/shader.js · #256 quotes a path that moved into core/surfaces/ -->
 <!-- doc-refs-allow: core/layers/paint.js · #256 quotes a path that moved into core/surfaces/ -->
-<!-- doc-refs-allow: scripts/author/lightfield-model.mjs · named as the missing import that makes lightfield-seeds.mjs unrunnable -->
 <!-- doc-refs-allow: scripts/gates/copy.mjs · quoted from a film pass; the copy gate runs inside author-check, not as its own file -->
 <!-- doc-refs-allow: make visuals · #NNN records a gate that was later culled -->
 <!-- doc-refs-allow: scripts/gates/visual-vocabulary.mjs · the entry records this gate's own deletion -->

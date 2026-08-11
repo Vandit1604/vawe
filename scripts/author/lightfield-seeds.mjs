@@ -21,6 +21,7 @@
 import { pixels } from './lightfield-metrics.mjs';
 import { gridPoints, fitPalette, toHex } from './lightfield-model.mjs';
 import { PRESETS } from '../../core/lightfield/presets.js';
+import { resolve } from '../../core/lightfield/options.js';
 
 const BW = 24, BH = 14;
 const refFile = process.argv[2] || 'refs/lightfield-ref.jpg';
@@ -30,7 +31,10 @@ const ref = pixels(refFile, BW, BH);
 const target = Float64Array.from(ref);
 const pts = gridPoints(BW, BH);
 
-const base = structuredClone(PRESETS.ref);
+// RESOLVED, not raw. A preset is a PATCH: `PRESETS.ref` carries no `colour.extra` at all, so the
+// line below read `.length` of undefined and this tool crashed before its first seed. Every other
+// consumer of a preset resolves it, and fieldBlobs() resolves defensively for this exact caller.
+const base = resolve(structuredClone(PRESETS.ref));
 // EXTRA is how MANY accent stops the palette may use. Their values are solved, so there is nothing
 // to type. EXTRA=0 ranks layouts under the four named roles alone.
 const nExtra = process.env.EXTRA === undefined ? base.colour.extra.length : Number(process.env.EXTRA);

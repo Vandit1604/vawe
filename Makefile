@@ -779,6 +779,14 @@ cinematic:
 deck: ## publish docs/animation.html to the site as /deck (site/public/deck.html)
 	node scripts/site/deck.mjs
 
+# make lightfield-model  check that the CPU model of the colour field agrees with the renderer.
+# The two fitting tools (lightfield-seeds, lightfield-fit) RANK layouts by what that model says, so a
+# model that is quietly wrong reports a confident winner that is not the winner. Renders the field
+# alone, with no pattern or shadow to hide behind, and fails if the prediction drifts.
+.PHONY: lightfield-model
+lightfield-model:
+	node scripts/author/lightfield-model-check.mjs
+
 # make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
 # field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
 # formats/scene/, shoots a PNG of each into out/, and measures the reference one against

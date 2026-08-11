@@ -730,6 +730,55 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       body.length > 1000 && !body.includes('`'));
   }
 
+  // A one-liner for "this must refuse the input", used throughout the block below.
+  const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
+  // ── ramp stop positions ────────────────────────────────────────────────────────────────────────
+  // The whole contract of the feature, because every part of it has already been got wrong once.
+  {
+    const { palette } = await import('../../core/surfaces/palette.js');
+    const hex = (n) => Array.from({ length: n }, (_, i) => '#0011' + String(i).padStart(2, '0'));
+    ok('palette: plain stops parse to rgb triples, with no position',
+      palette({ colors: ['#ff0000', '#00ff00'] }).every((c) => c.length === 3));
+    ok('palette: a stop may name its own position',
+      palette({ colors: ['#ff0000@0', '#00ff00@0.4'] })[1][3] === 0.4);
+    ok('palette: a stop the engine cannot read THROWS rather than rendering as black',
+      thrown(() => palette({ colors: ['teal'] })));
+    ok('palette: a half-positioned ramp throws instead of guessing the rest',
+      thrown(() => palette({ colors: ['#ff0000@0', '#00ff00'] })));
+    ok('palette: a position outside 0..1 throws',
+      thrown(() => palette({ colors: ['#ff0000@0', '#00ff00@2'] })));
+    ok('palette: an empty or absent colors list is still null (use the effect default)',
+      palette({}) === null && palette({ colors: [] }) === null);
+    ok('palette: eight stops is still the ceiling the shader declares', hex(8).length === 8);
+  }
+  {
+    // The EVEN case must reach the shader as no positions at all. The two shader paths are the same
+    // formula in real arithmetic and different pictures in float32, so a generator that helpfully
+    // filled in `@0.142857…` would shift every field that never asked for positions.
+    const { ALL_GENERATORS, defaultsOf } = await import('../../core/generators.js');
+    const spectrum = ALL_GENERATORS.find((g) => g.name === 'spectrum');
+    const flat = spectrum.render(defaultsOf(spectrum.schema))[0].colors;
+    ok('spectrum: untouched ramp stops carry NO position (bit-identical to before positions existed)',
+      flat.length === 8 && flat.every((c) => !c.includes('@')));
+    const moved = defaultsOf(spectrum.schema);
+    moved.colour.ramp3At = 0.34;
+    const withPos = spectrum.render(moved)[0].colors;
+    ok('spectrum: moving one stop puts a position on EVERY stop',
+      withPos.every((c) => c.includes('@')) && withPos[2].endsWith('@0.34'));
+    const back = defaultsOf(spectrum.schema);
+    back.colour.ramp3At = 0.05;   // before ramp2At (0.1428)
+    ok('spectrum: stops that go backwards throw, naming both dials',
+      thrown(() => spectrum.render(back)));
+    const bands = ALL_GENERATORS.find((g) => g.name === 'bands');
+    ok('bands: declares no stop positions, so its colours stay plain hex',
+      bands.render(defaultsOf(bands.schema))[0].colors.every((c) => !c.includes('@')));
+  }
+  {
+    // The sentinel is load-bearing and invisible: nothing about `-1` looks like "even" at a call site.
+    ok('ambient: FRAG reads u_palAt[0] below zero as the even-spacing sentinel',
+      frag.includes('A(0) < 0.0'));
+  }
+
   const AMBIENT_EXEMPT = new Set(['barrel']);   // a static lens vignette, motionless by design
   const still = AMBIENT_FX.filter((name) => {
     const i = AMBIENT_FX.indexOf(name);

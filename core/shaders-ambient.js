@@ -30,6 +30,11 @@ uniform vec2 u_res; uniform float u_time; uniform float u_seed; uniform int u_fx
 // branches written before this ask for stops 0 to 3 only, and P() answers those the same whether the
 // array holds four or eight, so growing it changed no pixel of any of them.
 uniform vec3 u_pal[8]; uniform int u_palN; uniform float u_intensity;
+// WHERE each stop sits along the ramp, 0 to 1. Even spacing is the DEFAULT, never the only option:
+// eight evenly spaced stops cannot put a narrow trough anywhere, because the narrowest feature they
+// can describe is a seventh of the ramp. The spectrum reference has a trough about 6 percent of the
+// frame tall, and adding stops never reached it. Position is the missing axis, not count.
+uniform float u_palAt[8];
 // Per-effect parameters. The shared set had none, so an effect wanting more than one knob had to
 // encode it into u_seed, which makes the seed mean two things. Four floats meaning whatever the branch
 // that reads them says, and ignored by the seventeen branches written before it.
@@ -62,18 +67,43 @@ vec3 P(int i, vec3 df){                                   // palette stop, or a 
   if(i==6) return u_palN>6 ? u_pal[6] : df;
   return u_palN>7 ? u_pal[7] : df; }
 float blob(vec2 p, vec2 c, float s){ vec2 d=p-c; return exp(-dot(d,d)*s); }
-// The palette read as an EVEN RAMP: every declared stop gets an equal share of u, in order. Written
+// The palette read as a RAMP: each stop sits at its declared position along u, in order, and evenly
+// spaced is simply the default set of positions. Written
 // as a chain of saturating mixes rather than an indexed lookup because WebGL1 refuses a fragment
 // shader that indexes a uniform array with anything but a constant. Each step is fully applied once
 // u has passed its stop and untouched before it, so what comes out is piecewise-linear between
 // adjacent stops and nothing else.
+// Same indexing dodge as P(): WebGL1 will not index a uniform array with a variable.
+float A(int i){
+  if(i==0) return u_palAt[0];
+  if(i==1) return u_palAt[1];
+  if(i==2) return u_palAt[2];
+  if(i==3) return u_palAt[3];
+  if(i==4) return u_palAt[4];
+  if(i==5) return u_palAt[5];
+  if(i==6) return u_palAt[6];
+  return u_palAt[7]; }
+// u_palAt[0] BELOW ZERO means "no positions given, spread them evenly". A sentinel rather than
+// filling in the even values on the JS side, because the two are not the same picture. In real
+// arithmetic (x - i/n)/((i+1)/n - i/n) is exactly x*n - i; in float32 it is not, because 1/7 does not
+// round-trip. Feeding computed even positions through the general path shifted the spectrum card in
+// a scatter of pixels. A default that exists to reproduce the old behaviour has to take the old path.
 vec3 ramp(float u){
-  float n = max(float(u_palN) - 1.0, 1.0);
-  float s = clamp(u, 0.0, 1.0) * n;
+  float x = clamp(u, 0.0, 1.0);
   vec3 c = P(0, vec3(1.0));
+  if(A(0) < 0.0){
+    float n = max(float(u_palN) - 1.0, 1.0);
+    float s = x * n;
+    for(int i=0;i<7;i++){
+      if(float(i) >= n) break;
+      c = mix(c, P(i+1, vec3(1.0)), clamp(s - float(i), 0.0, 1.0));
+    }
+    return c;
+  }
   for(int i=0;i<7;i++){
-    if(float(i) >= n) break;
-    c = mix(c, P(i+1, vec3(1.0)), clamp(s - float(i), 0.0, 1.0));
+    if(i+1 >= u_palN) break;
+    float a = A(i), b = A(i+1);
+    c = mix(c, P(i+1, vec3(1.0)), clamp((x - a) / max(b - a, 1e-4), 0.0, 1.0));
   }
   return c; }
 
@@ -422,6 +452,7 @@ export function createAmbientLayer(w = 1920, h = 1080) {
   const U = { res: gl.getUniformLocation(prog, 'u_res'), time: gl.getUniformLocation(prog, 'u_time'),
     seed: gl.getUniformLocation(prog, 'u_seed'), fx: gl.getUniformLocation(prog, 'u_fx'),
     pal: gl.getUniformLocation(prog, 'u_pal'), palN: gl.getUniformLocation(prog, 'u_palN'),
+    palAt: gl.getUniformLocation(prog, 'u_palAt'),
     intensity: gl.getUniformLocation(prog, 'u_intensity'),
     p: gl.getUniformLocation(prog, 'u_p'),
     p2: gl.getUniformLocation(prog, 'u_p2'),
@@ -455,7 +486,23 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       gl.uniform4f(U.p6, V4[0] || 0, V4[1] || 0, V4[2] || 0, V4[3] || 0);
       const flat = new Float32Array(24); const n = palette ? Math.min(8, palette.length) : 0;
       for (let i = 0; i < n; i++) { flat[i * 3] = palette[i][0]; flat[i * 3 + 1] = palette[i][1]; flat[i * 3 + 2] = palette[i][2]; }
-      gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n);
+      // A stop MAY carry its own position along the ramp as a fourth number. It rides on the stop
+      // rather than arriving as a parallel array, because a parallel array is a second thing to keep
+      // in the same order and that is how a palette ends up wearing someone else's spacing.
+      //
+      // All of them or none of them. A half-positioned palette has no honest reading: the unset stops
+      // would have to be guessed at, and guessing is what puts a colour somewhere nobody asked for.
+      const at = new Float32Array(8);
+      const given = palette ? palette.filter((c) => c.length > 3).length : 0;
+      if (given && given !== n) throw new Error(`palette stop positions: ${given} of ${n} stops carry one. Give every stop a position or none.`);
+      // -1 is the sentinel the shader reads as "even". Computing the even values here instead would
+      // change the arithmetic, and with it the picture, for every field that never asked.
+      if (!given) at[0] = -1;
+      else for (let i = 0; i < n; i++) at[i] = palette[i][3];
+      for (let i = 1; i < n; i++) {
+        if (!(at[i] >= at[i - 1])) throw new Error(`palette stop positions must not go backwards: stop ${i + 1} is at ${at[i]}, after ${at[i - 1]}.`);
+      }
+      gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n); gl.uniform1fv(U.palAt, at);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
     // wipe the buffer when the layer is off-window, so the canvas holds a function of t and not of

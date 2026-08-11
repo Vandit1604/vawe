@@ -17,10 +17,15 @@
 import puppeteer from 'puppeteer';
 import { lightfield } from '../../core/lightfield/index.js';
 import { pixels } from './lightfield-metrics.mjs';
+import { W, H } from './lightfield-model.mjs';
 
 // The measuring size, in one place. A fidelity number is only comparable to another one taken at the
 // same size, and this used to live in three files.
-export const W = 735, H = 420;
+// The shot size IS the box the model evaluates in, so it is defined once, in lightfield-model.mjs,
+// and re-exported here for every caller that already reaches for it.
+// `export … from` forwards the names to importers but never BINDS them in this module's scope, and
+// this file reads W and H itself. Import, then re-export.
+export { W, H };
 
 /**
  * The page a field is measured on, defined ONCE.

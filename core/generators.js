@@ -237,8 +237,21 @@ const SPECTRUM_SCHEMA = {
   colour: {
     kind: 'group',
     fields: Object.fromEntries(['#effce6', '#def9de', '#68b290', '#c0e87a', '#7ccdd8', '#56a0dd', '#dcf4fb', '#eeffff']
-      .map((def, i) => [`ramp${i + 1}`, { kind: 'hex', def, primary: i < 4,
-        note: `ramp stop ${i + 1} of 8, ${Math.round((i / 7) * 100)}% along the gradient.` }])),
+      .flatMap((def, i) => [
+        [`ramp${i + 1}`, { kind: 'hex', def, primary: i < 4,
+          note: `ramp stop ${i + 1} of 8, by default ${Math.round((i / 7) * 100)}% along the gradient.` }],
+        // WHERE the stop sits. Defaulted to the even spacing this ramp always had, so nothing moves
+        // until someone moves it, and NOT primary: it is the axis you reach for after the colours are
+        // right, when a feature is too narrow for eight evenly spaced stops to describe. Adding stops
+        // cannot fix that, because the narrowest thing eight even stops can draw is a seventh of the
+        // ramp however many you have.
+        // EXACTLY i/7, never rounded for looks. `Number((i/7).toFixed(4))` is 0.1429, and a ramp
+        // built on 0.1429 is not the ramp built on 1/7: the divisor below it becomes 0.1429 instead
+        // of 0.142857 and every field that never asked for positions would quietly shift. A default
+        // whose whole job is to reproduce the old behaviour has to reproduce it to the last bit.
+        [`ramp${i + 1}At`, { kind: 'num', min: 0, max: 1, def: i / 7, primary: false,
+          note: `how far along the gradient stop ${i + 1} sits. Stops must stay in order.` }],
+      ])),
   },
 };
 
@@ -264,7 +277,31 @@ function bandLayers(o, S, { gradient, w, h }) {
   if (!(bands > 0)) throw new Error(`bands must be a positive number, got ${bands}`);
   const zoom = pick(o, 'zoom', S);
   if (!(zoom > 0)) throw new Error(`zoom must be greater than 0, got ${zoom}`);
-  const colours = Object.keys(S.colour.fields).map((k) => o?.colour?.[k] ?? S.colour.fields[k].def);
+  // The STOPS are the hex fields. A schema may also declare a companion `<name>At` position for each
+  // one, and then every stop carries its own place on the ramp as a `#rrggbb@0.42` suffix
+  // (core/surfaces/palette.js). A schema that declares no positions, like BANDS_SCHEMA, emits plain
+  // hex and is spread evenly exactly as before.
+  const stopKeys = Object.keys(S.colour.fields).filter((k) => S.colour.fields[k].kind === 'hex');
+  const colours = stopKeys.map((k) => {
+    const hex = o?.colour?.[k] ?? S.colour.fields[k].def;
+    const posField = S.colour.fields[`${k}At`];
+    if (!posField) return hex;
+    return `${hex}@${o?.colour?.[`${k}At`] ?? posField.def}`;
+  });
+  const at = (c) => Number(String(c).split('@')[1]);
+  for (let i = 1; i < colours.length; i++) {
+    if (colours[i].includes('@') && at(colours[i]) < at(colours[i - 1])) {
+      throw new Error(`${stopKeys[i]}At (${at(colours[i])}) sits before ${stopKeys[i - 1]}At (${at(colours[i - 1])}). Ramp stops must stay in order.`);
+    }
+  }
+  // EVEN POSITIONS ARE SENT AS NO POSITIONS. Not a shortcut: the shader's positional path and its
+  // even path are the same formula in real arithmetic and different pictures in float32, because 1/7
+  // does not round-trip. Emitting `@0.142857…` for an untouched ramp would shift the spectrum card
+  // the moment this feature landed, for nobody's benefit. So the suffix appears only once someone has
+  // actually moved a stop, and until then the render is bit-for-bit what it always was.
+  const even = colours.length > 1
+    && colours.every((c, i) => c.includes('@') && at(c) === i / (colours.length - 1));
+  const stops = even ? colours.map((c) => c.split('@')[0]) : colours;
   return [{
     type: 'shader', shader: 'bands',
     // Always 1. See the note where `brightness` used to be: this uniform is alpha in the shared tail,
@@ -288,7 +325,7 @@ function bandLayers(o, S, { gradient, w, h }) {
     params5: [height / width, deg(pick(o, 'lightAngle', S)),
       pick(o, 'bandShading', S) ?? 0, pick(o, 'bandLean', S) ?? 0],
     params6: [pick(o, 'lightRing', S), pick(o, 'lightPoints', S), pick(o, 'lightSpike', S), zoom],
-    colors: colours,
+    colors: stops,
     // NO w/h. core/surfaces/shader.js sizes an UNBOXED ambient layer to the frame. Declaring a box
     // bakes in whatever aspect the generator was fitted at: `spectrum` carried 1080x1920, so on a 16:9
     // canvas it painted 1080 of 1920 pixels and the right 44% was bare background. I chased that as a

@@ -33,12 +33,20 @@ function slots(o, acc = []) {
   return acc;
 }
 
+// A DRY RUN MUST NOT WRITE. It still fetches, because the plan's accuracy depends on knowing whether
+// the icon actually exists upstream: "logo" and "card" are different rows and the caller is choosing
+// between them. What it must not do is put the file on disk.
+//
+// It used to. The word "PLAN (dry run)" was printed AFTER two write paths had already run, so every
+// `make video` downloaded icons and generated cards into formats/scene/assets/, and a clean checkout
+// grew seven SVGs nobody asked for (docs/MISTAKES.md #315). Only the final JSON edit was ever gated.
 async function tryFetch(url, dest) {
   if (NOFETCH) return false;
   try {
     const r = await fetch(url); if (!r.ok) return false;
     const body = Buffer.from(await r.arrayBuffer());
     if (body.length < 60 || !body.toString('utf8', 0, 200).includes('<svg')) return false; // guard 404/placeholder
+    if (!WRITE) return true;                       // it exists upstream, which is all the plan needs
     fs.mkdirSync(path.dirname(dest), { recursive: true }); fs.writeFileSync(dest, body); return true;
   } catch { return false; }
 }
@@ -60,8 +68,11 @@ for (const s of all) {
     if (fs.existsSync(dest) || await tryFetch(`https://flagcdn.com/${iso}.svg`, dest)) { to = `/assets/flags/${iso}.svg`; how = 'flag'; } }
   if (!to) { const dest = path.join(repoRoot, 'assets/icons', slug + '.svg');
     if (fs.existsSync(dest) || await tryFetch(`https://cdn.simpleicons.org/${slug}`, dest)) { to = `/assets/icons/${slug}.svg`; how = 'logo'; } }
-  if (!to) { const dest = path.join(cardsDir, slug + '.svg'); fs.mkdirSync(cardsDir, { recursive: true });
-    fs.writeFileSync(dest, card({ title: s.name })); to = path.relative(fmtDir, dest); how = 'card'; }
+  if (!to) {
+    const dest = path.join(cardsDir, slug + '.svg');
+    if (WRITE) { fs.mkdirSync(cardsDir, { recursive: true }); fs.writeFileSync(dest, card({ title: s.name })); }
+    to = path.relative(fmtDir, dest); how = 'card';
+  }
   done.set(s.name, to); plan.push({ ...s, to, how });
 }
 
