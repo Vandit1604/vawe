@@ -284,6 +284,10 @@
         "intensity",
         "params",
         "params2",
+        "params3",
+        "params4",
+        "params5",
+        "params6",
         "radius",
         "resample",
         "seed",
@@ -2047,7 +2051,35 @@
           "label": "Per-effect parameters, second vector",
           "of": "number",
           "max": 4,
-          "note": "shader only. `bands` reads it as (field: 0 linear / 1 radial / 2 box, centre x, centre y, light sign)."
+          "note": "shader only. `bands` reads it as (field: 0 linear / 1 radial / 2 box, centre x, centre y as a fraction of the frame from the middle, light sign)."
+        },
+        "params3": {
+          "type": "array",
+          "label": "Per-effect parameters, third vector",
+          "of": "number",
+          "max": 4,
+          "note": "shader only. `bands` reads it as (gradient: 0 along the bands / 1 on its own axis, that axis in turns, per-band convergence, band phase)."
+        },
+        "params4": {
+          "type": "array",
+          "label": "Per-effect parameters, fourth vector",
+          "of": "number",
+          "max": 4,
+          "note": "shader only. `bands` reads it as (mirror the bands about the field centre, light x offset, light y offset, light shape: 0 round or oval / 1 bar / 2 rounded)."
+        },
+        "params5": {
+          "type": "array",
+          "label": "Per-effect parameters, fifth vector",
+          "of": "number",
+          "max": 4,
+          "note": "shader only. `bands` reads it as (the light's y radius as a fraction of its x radius, the light's angle in turns, within-band shading depth, how much of the per-band convergence step leans across the band)."
+        },
+        "params6": {
+          "type": "array",
+          "label": "Per-effect parameters, sixth vector",
+          "of": "number",
+          "max": 4,
+          "note": "shader only. `bands` reads it as (light ring radius, light star points, light star depth, zoom around the light). Every field is 0 for the behaviour that predates them."
         }
       }
     },
