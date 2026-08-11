@@ -7950,6 +7950,227 @@ is which colour it is and where the light sits, which is variation. Scrambling e
 more creative, it is noise, and it produced roughly one usable frame in six.
 
 
+## #294 — a backtick inside a GLSL comment silently ended the shader
+
+Adding a `blinds` effect to `core/shaders-ambient.js`, the render stopped failing with a named GLSL
+error and started TIMING OUT with nothing in the log. The cause: the fragment shader is a JS TEMPLATE
+LITERAL, and I had written a comment inside it quoting some maths in backticks. The first backtick
+ended the string. Everything after it became JavaScript, and the page hung rather than throwing.
+
+Third time in this session that a backtick inside a quoted region has bitten: it swallowed a word from
+a commit message, it terminated a CSS-in-JS template, and now it ended a shader. **A template literal
+has exactly one terminator and prose reaches for it constantly.**
+
+Two other things this cost, both worth naming because they were self-inflicted:
+
+- **I spliced the new branch by searching backwards for `  }`**, which found the closing brace of a
+  `for` loop inside an unrelated effect. Then, removing it, I ate the tail of that effect. Restoring the
+  file from git and reapplying every edit against a UNIQUE anchor took less time than the two repairs.
+- **The grey I thought was a bug was the scene showing through.** The shared tail multiplies alpha by
+  `u_intensity`, correctly, because most of these effects are overlays. A backdrop wants intensity 1.
+  Nothing was wrong with the shader; I was reading a composite and blaming a term.
+
+## #295 — the blinds generator is ours, and the licence is why
+
+React Bits ships a "Gradient Blinds" component under **MIT plus the Commons Clause**, which permits use
+and forbids redistributing the component "whether alone, in a bundle, or as a ported version". This repo
+is going open source, so vendoring or porting that file is the one thing that licence rules out.
+
+It is also not the better construction. Implemented exactly and swept against `refs/ref-b.png`, its
+math scores **43.9** where our lightfield already scores 19.1. It is a different effect that shares a
+name.
+
+So `blinds` is written from the technique, which predates them and is not theirs: a repeating `fract()`
+ramp over a gradient with a radial term behind it, the same three ideas `jackyzha0/sunlit` does in pure
+CSS. It lives as a branch in our own ambient shader, so it inherits determinism, palette tinting,
+resampling and the WebGL-missing stub for free.
+
+**One general addition came with it.** The shared uniform set had no per-effect parameters, so an effect
+wanting more than one knob had to encode it into `u_seed`, which makes the seed mean two things. `u_p`
+is four floats meaning whatever the branch that reads them says. The seventeen effects written before it
+ignore it, and `probe` and `scene-snap` both confirm not one pixel of them moved.
+
+## #296 — The bloom cluster had exactly three lobes, and the three was a constant
+
+**What.** `blinds` was held out of the library at block error 20.0. Its shadow temperature had been
+fixed the pass before, from +11.3 to -1.7, and the block error did not move at all. The reference is a
+flowing field with several colour regions, orange across the top, magenta through the middle left,
+deep red at the left edge and near-black falling away right. The render was one soft lobe that reads
+as a spotlight on a curtain. Same palette, different picture.
+
+**Root cause.** `fieldBlobs` in `core/lightfield/index.js` built the light as an array literal of
+three `lightBlob` calls with size ranges fitted to `refs/lightfield-ref.jpg`. Three lobes at rx 18 to
+40 and ry 30 to 70 overlap into a single mass whatever the seed does with them. `colour.spread` was
+this same bug one level up, and the note that fixed it said so; the count and the size ranges were the
+half that was left.
+
+**Fix.** `colour.lobes`, 1 to 12, default 3. The lobe series is the fitted three continued by their
+own decay, and the whole series is scaled so the cluster covers the same total area at any count. That
+scaling is load-bearing: without it the dial would be a brightness control wearing a structure
+control's name, and every palette would blow out as you turned it. At 3 the scale is exactly 1 and
+every committed preset is byte-identical apart from its class hash.
+
+## #297 — Lobe placement was independent, so a cluster is lumpy by construction
+
+**What.** `colonnade`'s horizontal luma profile dips at 56% of the width where `refs/ref-b.png` is
+flat from 25% to 75%, because two lobes overlapped into two humps with a valley between them. Adding
+lobes at random positions moved the dips around and did not fill them.
+
+**Root cause.** Every lobe drew its x independently from `span(r, 8, 92)`. A sum of a few independent
+draws is humps and dips; it has no mechanism that produces a broad flat band, at any count.
+
+**Fix.** `colour.evenness`, 0 to 1, default 0. At 1 the span is cut into one band per lobe and each
+lobe draws inside its own. Bands are handed out from the middle outwards, because the series decays in
+size and handing them out left to right would ramp the lobe size across the frame and tilt every field
+to one side. At 0 it is the same single random draw as before, so the fitted layout does not move.
+
+**The lesson under both.** A structural constant cannot be evaluated at a fitted seed. Sweeping
+`lobes` at `blinds`' own seed said 3 was best and sweeping it at `colonnade`'s said the same, because
+changing the count changes every draw after it and the incumbent seed was chosen for the incumbent
+count. The rival was being judged in the incumbent's clothes, which is the same trap
+`lightfield-seeds.mjs` documents about palettes. Any change to layout has to be scored against a
+re-searched seed or it is scored against nothing.
+
+## #298 — `shadow.direction` could not say "a lit band"
+
+**What.** Measured on `refs/ref-b.png` against `out/_check-colonnade.png` at 160x104, the render was
+27 units too bright at the top edge (29.9 against 56.8) and 16 units too dark at the left edge (39.7
+against 23.4), in the same frame.
+
+**Root cause.** `colonnade` uses `direction: 'center'`, which is a radial fall. A radial cannot darken
+the top without darkening the sides by more, so no value of `depth` or `softness` reaches the
+reference. `top` and `bottom` each darken one end and leave the other lit. The shape the picture needs,
+darkness above and below a lit band and nothing taken off the sides, was simply not in the vocabulary.
+
+**Fix.** `top-and-bottom` and `left-and-right` in `DIRECTIONS`: the existing falloff profile mirrored
+about the middle of the frame. Both are opt-in, so nothing committed moves.
+
+## #299 — A recorded finding said the reference's dark side has no bars. It has more than anywhere else
+
+**What.** `core/lightfield/index.js` carried this, as the argument for choosing COLOR-DODGE over
+plus-lighter: "`plus-lighter` ADDS, so it lit up the reference's black right-hand side with bars that
+should not be there. Light that is not behind the blind cannot come through it."
+
+The second half is a claim about the photograph, and it is false. Cropping the darkest third of
+`refs/lightfield-ref.jpg` and lifting it shows ranks of cool grey slats running the full height to the
+right edge. Measured: that third has edge 4.22 and swing 14.52 against the whole frame's 3.26 and
+10.70, so the striping there is STRONGER than average, not absent. The render's same third is 1.60 and
+5.35 and is featureless black beside it.
+
+**Root cause.** The blend was chosen on a real defect (plus-lighter at full sheen blew the dark side
+out) and the conclusion drawn was about the reference rather than about the strength. A wrong reading
+of the source picture then hardened into a comment that reads as evidence.
+
+**Fix.** `colour.through`, a fifth colour role: the light that comes through the pattern rather than
+off it, screened on the lit faces only. Default `#000000`, the exact no-op. The comment now says what
+dodge cannot do instead of what the photograph does not have.
+
+**Not enabled on `ref`.** Every setting that improves the striping also lifts a region the reference
+keeps darker than the render already has it, so the block error rises by 1.4 to 4.2 points. That trade
+needs a human's eye, not this pass's.
+
+**The general lesson.** A claim about what a REFERENCE contains is checkable in one command, and this
+one survived three passes in a comment because nobody cropped the region it was about. Numbers were
+taken over the whole frame the entire time, and a whole-frame number cannot see a third.
+
+## #300 — `lightfield-seeds.mjs` and `lightfield-fit.mjs` have never run
+
+**What.** Both import `./lightfield-model.mjs`. That file is not in the repository and never has been:
+`git log -- scripts/author/lightfield-model.mjs` is empty. Running either tool dies on
+`ERR_MODULE_NOT_FOUND` before it does any work.
+
+**Why it matters here.** These are the two tools that fit a seed, which is exactly what finding A says
+any layout change needs. Their doc comments describe measured results in detail, so a reader has every
+reason to believe they work. The seed search for this pass had to be written from scratch against
+`lightfield-render.open()`.
+
+**Not fixed in this pass**, and that is a gap rather than a decision: rebuilding the palette solver the
+two tools share is a bigger job than the composition fix it was blocking, and the search was done
+another way. Either restore `lightfield-model.mjs` or delete the two tools. A tool that cannot start is
+worse than no tool, because its comments are read as evidence.
+
+## #301 — Every curve in the envelope was a sine or a straight line
+
+**What.** A user looked at `colonnade` and said the dark mass was an angular ridge, a jagged V of
+straight segments, and asked for round. The dial they needed was `envelope.kind`, and it held `full`,
+`ramp`, `arch`, `valley` and `wave`. Only `arch` and `valley` curve at all, and both are sines.
+
+**Root cause.** The shapes were added one at a time to serve a reference, and every reference so far
+wanted a slope or a hump. `arch` was treated as "the round one" because it is not straight. It is
+not round: a sine leaves the baseline at a finite slope and its shoulders sag, so a mass built on it
+reads as a bump with sloping sides. A circle leaves the baseline UPRIGHT. That single property is
+most of what the eye calls round, and no value of `from`, `to`, `jitter` or `softness` could add it,
+because it is a property of the function and not of its range. The angular ridge the user saw was
+`valley` plus `jitter` 0.3 plus noise: a sine with corners shaken into it.
+
+**Fix.** Four kinds built from circular arcs and gaussians rather than from sines: `circle` (the exact
+unit semicircular arc, symmetric), `crescent` (one arc with an equal arc bitten out of it), `scallops`
+(five semicircles in a row) and `hills` (three unequal gaussians summed). No new plumbing: `mass`
+already turns any curve into a silhouette, which is the design working.
+
+**Which gate catches it.** `lightfield-test.mjs` now asserts the circle against the circle's own
+equation, sample by sample, rather than asserting that it looks like a hump. It also asserts every
+round kind reaches 1 at its ceiling, so `from` and `to` keep one meaning across the table.
+
+**What was NOT added, and why.** A round valley, because `from` above `to` already runs any curve
+backwards and `circle` reversed IS the bowl. A lens or a vesica, because an envelope is anchored to
+an edge and therefore cannot describe a floating form; the only part of a lens an anchored envelope
+can express is its upper arc, which is a slightly pointier circle. A kind that draws a picture
+another kind already reaches is a dial nobody needs.
+
+## #302 — `shadow.direction` is a bearing, and a bearing is not a place
+
+**What.** The light could be moved anywhere in the frame with `colour.originX/originY`. The shadow it
+cast could not be moved at all. Eleven direction keywords say which WAY the dark lies and never how
+far off centre it sits, and the radial centre, the lit band and the vignette were all nailed to the
+middle of the frame in the source.
+
+**Root cause.** The same one as `colour.spread` and `colour.lobes` before it: a number fitted to one
+photograph, then imposed on every field after it. `at 50% 50%` and `at 50% 46%` are literals in
+`paintShadow`, and they were right for the references that were in front of the author.
+
+**Fix.** `shadow.originX` / `shadow.originY`, the same units and the same name as the light's pair,
+default 50/50 which is exactly the unmoved position. What it reaches depends on the shape
+`direction` names: the whole vector for a radial, the axis it runs on for a paired band, and for a
+one-way bearing the component along the fall (which delays or advances it) plus the whole vector on
+the vignette. That limit is a property of a linear gradient, which has a direction and no centre, and
+it is written into the option comment and the doc rather than left for someone to discover.
+
+## #303 — The silhouette had no position, so authors picked its shape for the wrong reason
+
+**What.** `envelope.from` and `to` say how TALL the mass is and `kind` says what SHAPE it is. Nothing
+said WHERE. So an author who wanted the crest three quarters of the way across had to hunt for a kind
+that happens to peak there.
+
+**Root cause.** The envelope grew out of "an extent as a function of position", and a function has no
+position of its own. Nobody noticed that the missing dial was the one the light already had.
+
+**Fix.** `envelope.originX` / `envelope.originY`, same units, same name, default 50/50 unmoved.
+`originX` slides the sample point, so the crest moves. `originY` always moves the silhouette's free
+edge DOWN the frame as it rises, whichever edge `anchor` holds, so it means one thing from both sides.
+
+**The general lesson.** Three things in this generator can be somewhere: the light, the dark, and the
+mass. One of them had a position, one had only a bearing, and one had nothing, and they were asked
+for in three different languages. When an API can place one thing, check every other thing of the
+same kind before shipping.
+
+## #304 — The committed HTML fragments were stale, and nothing said so
+
+**What.** `formats/scene/_lightfield-ember.html` and `_lightfield-colonnade.html` in the tree did not
+match what their own presets generate. Colonnade's committed fragment still carried the `center`
+radial shadow that the preset moved off to `top-and-bottom`, which is the change that took its block
+error from 21.5 to 19.1. Anyone reading the committed file was reading a picture the library no longer
+produces.
+
+**Root cause.** The fragments are generated by hand with `scripts/author/lightfield.mjs --out`, and a
+pass that changes a preset has no reason to remember them. `lightfield-check.mjs` renders from the
+preset in memory, so it is green either way and cannot see the drift.
+
+**Fix in this pass.** Regenerated all three. **Not fixed:** nothing regenerates or verifies them. The
+cheap gate is a check that re-renders each `formats/scene/_lightfield-*.html` from its preset and
+fails on a diff, which is the same shape as the receipt `make beats` already uses. That belongs in the
+Makefile, which this pass was not allowed to touch.
+
 ---
 
 ## Waivers for `doc-refs`
