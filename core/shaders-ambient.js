@@ -275,7 +275,14 @@ void main(){
     // caller, because the caller does not know the aspect and the shader does. Zero is still the
     // middle, so nothing that predates this moves.
     if (u_p2.x < 0.5) {
-      ax = (q.x*cs - q.y*sn) + 0.5;
+      // NORMALISED to the frame, not to one unit. q.x spans plus and minus ar/2, so on a 16:9 canvas
+      // the raw axis ran -0.39..1.39 and across below went negative outside the middle, collapsing
+      // the base to c0: for spectrum that is white, and the render showed bands over the left 58%
+      // and flat white after. On 9:16 the same expression never reached the edges at all. Dividing by
+      // the rotated half-extent maps the axis to exactly 0..1 across the frame at ANY aspect, which is
+      // also what makes count mean bands-across-the-frame rather than bands-per-unit.
+      float ext = ar*abs(cs) + abs(sn);
+      ax = (q.x*cs - q.y*sn)/max(ext, 1e-4) + 0.5;
     } else if (u_p2.x < 1.5) {
       ax = length(q - vec2(u_p2.y*ar, u_p2.z));
     } else if (u_p2.x >= 1.5) {

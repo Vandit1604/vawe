@@ -714,6 +714,22 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // EVERY ambient look must animate — one that ignores t is a frozen still on a layer whose entire
   // contract is "loops smoothly". Derived from AMBIENT_FX with a NAMED exemption set, because the
   // hand-typed wave list covered 8 of 17 and every appended effect landed outside it uncovered.
+  // FRAG IS A TEMPLATE LITERAL. A backtick anywhere inside it ends the string, and what follows is
+  // parsed as JavaScript: the failure is a syntax error or, worse, a page that hangs with nothing in
+  // the log. Four separate times in one session a backtick reached a GLSL comment while someone was
+  // quoting an identifier, including inside the comment warning about it. Care did not work; a check
+  // does.
+  // The BODY between the opening backtick and the closing one. Anything in there ends the string early.
+  // Counting backticks in `frag` would be wrong twice over: the slice carries the opener AND the
+  // closer, and it is exactly this kind of off-by-a-delimiter that the bug itself is.
+  {
+    const open = frag.indexOf('`');
+    const close = frag.lastIndexOf('`');
+    const body = open >= 0 && close > open ? frag.slice(open + 1, close) : '';
+    ok('ambient: FRAG body contains no backtick (it would end the template literal)',
+      body.length > 1000 && !body.includes('`'));
+  }
+
   const AMBIENT_EXEMPT = new Set(['barrel']);   // a static lens vignette, motionless by design
   const still = AMBIENT_FX.filter((name) => {
     const i = AMBIENT_FX.indexOf(name);

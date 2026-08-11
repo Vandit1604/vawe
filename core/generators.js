@@ -196,7 +196,11 @@ const BANDS_SCHEMA = {
   shapeOriginX: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent across. Where arcs and rounded rectangles are centred; panels ignore it.' },
   shapeOriginY: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent down. The other half of the same point.' },
   ...LIGHT_SCHEMA,
-  brightness: { kind: 'unit', def: 1 },
+  // NO `brightness`. It read as a brightness dial and was an OPACITY one: the shared shader tail does
+  // `alpha *= clamp(u_intensity)`, so anything under 1 made the whole field translucent and let the
+  // page behind it wash through. Every value except 1 looked broken, which means it was never a
+  // control, it was a way to spoil the picture. The light's own strength is `lightPolarity`, and the
+  // colours are where you change how bright the thing is.
   seed:       { kind: 'int', min: 0, max: 4294967295, def: 7, primary: true },
   colour: {
     kind: 'group',
@@ -226,7 +230,6 @@ const SPECTRUM_SCHEMA = {
                  note: 'darken a band toward one edge. Negative brightens the outer edge instead, which is what a lit column does.' },
   ...LIGHT_SCHEMA,
   lightPolarity: { ...LIGHT_SCHEMA.lightPolarity, def: 0, note: 'positive lights the field, negative darkens it, and here 0 means NO light at all: the ramp carries the picture on its own.' },
-  brightness: { kind: 'unit', def: 1 },
   seed:       { kind: 'int', min: 0, max: 4294967295, def: 0 },
   // Eight stops read in order from the start of the ramp to its end. They are numbered rather than
   // named because on a ramp the POSITION is the meaning: stop 3 is a third of the way down and calling
@@ -264,7 +267,9 @@ function bandLayers(o, S, { gradient, w, h }) {
   const colours = Object.keys(S.colour.fields).map((k) => o?.colour?.[k] ?? S.colour.fields[k].def);
   return [{
     type: 'shader', shader: 'bands',
-    intensity: pick(o, 'brightness', S),
+    // Always 1. See the note where `brightness` used to be: this uniform is alpha in the shared tail,
+    // not luminance, so the only value that does not spoil the picture is full.
+    intensity: 1,
     seed: pick(o, 'seed', S),
     // `bands` counts bands ACROSS THE FRAME; the shader counts them along its own axis, which is
     // scaled by the aspect. One divide here is what keeps the dial meaning the same thing on a
