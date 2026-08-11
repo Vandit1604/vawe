@@ -73,6 +73,36 @@ float blob(vec2 p, vec2 c, float s){ vec2 d=p-c; return exp(-dot(d,d)*s); }
 // shader that indexes a uniform array with anything but a constant. Each step is fully applied once
 // u has passed its stop and untouched before it, so what comes out is piecewise-linear between
 // adjacent stops and nothing else.
+// MIXING HAPPENS IN OKLAB, NOT IN sRGB.
+//
+// A hex is gamma encoded, and mixing two gamma-encoded numbers is not mixing two lights. The midpoint
+// comes out darker and duller than either end, and on a ramp that reads as a grey band where two
+// colours meet. Every CSS gradient in this engine already says "in oklab" (core/lightfield/index.js
+// paints its field that way); this shader was the one place still averaging raw sRGB, so the two
+// halves of the same product disagreed about what a gradient is.
+//
+// KNOW WHAT THIS DOES NOT FIX. Two near-complementary colours have a desaturated midpoint in every
+// correct space. Measured on one such pair: sRGB gives #b99875, linear light #bfa87e, OKLab #c6a181.
+// All three are tan. This makes a ramp cleaner and more even; it cannot make magenta mix into green.
+float s2l(float c){ return c <= 0.04045 ? c/12.92 : pow((c+0.055)/1.055, 2.4); }
+float l2s(float c){ return c <= 0.0031308 ? c*12.92 : 1.055*pow(max(c,0.0), 1.0/2.4) - 0.055; }
+vec3 toOk(vec3 c){
+  vec3 n = vec3(s2l(c.r), s2l(c.g), s2l(c.b));
+  float l = pow(max(dot(n, vec3(0.4122214708, 0.5363325363, 0.0514459929)), 0.0), 1.0/3.0);
+  float m = pow(max(dot(n, vec3(0.2119034982, 0.6806995451, 0.1073969566)), 0.0), 1.0/3.0);
+  float s = pow(max(dot(n, vec3(0.0883024619, 0.2817188376, 0.6299787005)), 0.0), 1.0/3.0);
+  return vec3(0.2104542553*l + 0.7936177850*m - 0.0040720468*s,
+              1.9779984951*l - 2.4285922050*m + 0.4505937099*s,
+              0.0259040371*l + 0.7827717662*m - 0.8086757660*s); }
+vec3 fromOk(vec3 c){
+  float lp = c.x + 0.3963377774*c.y + 0.2158037573*c.z;
+  float mp = c.x - 0.1055613458*c.y - 0.0638541728*c.z;
+  float sp = c.x - 0.0894841775*c.y - 1.2914855480*c.z;
+  float l = lp*lp*lp, m = mp*mp*mp, s = sp*sp*sp;
+  vec3 lin = max(vec3( 4.0767416621*l - 3.3077115913*m + 0.2309699292*s,
+                      -1.2684380046*l + 2.6097574011*m - 0.3413193965*s,
+                      -0.0041960863*l - 0.7034186147*m + 1.7076147010*s), 0.0);
+  return clamp(vec3(l2s(lin.r), l2s(lin.g), l2s(lin.b)), 0.0, 1.0); }
 // Same indexing dodge as P(): WebGL1 will not index a uniform array with a variable.
 float A(int i){
   if(i==0) return u_palAt[0];
@@ -90,22 +120,22 @@ float A(int i){
 // a scatter of pixels. A default that exists to reproduce the old behaviour has to take the old path.
 vec3 ramp(float u){
   float x = clamp(u, 0.0, 1.0);
-  vec3 c = P(0, vec3(1.0));
+  vec3 c = toOk(P(0, vec3(1.0)));
   if(A(0) < 0.0){
     float n = max(float(u_palN) - 1.0, 1.0);
     float s = x * n;
     for(int i=0;i<7;i++){
       if(float(i) >= n) break;
-      c = mix(c, P(i+1, vec3(1.0)), clamp(s - float(i), 0.0, 1.0));
+      c = mix(c, toOk(P(i+1, vec3(1.0))), clamp(s - float(i), 0.0, 1.0));
     }
-    return c;
+    return fromOk(c);
   }
   for(int i=0;i<7;i++){
     if(i+1 >= u_palN) break;
     float a = A(i), b = A(i+1);
-    c = mix(c, P(i+1, vec3(1.0)), clamp((x - a) / max(b - a, 1e-4), 0.0, 1.0));
+    c = mix(c, toOk(P(i+1, vec3(1.0))), clamp((x - a) / max(b - a, 1e-4), 0.0, 1.0));
   }
-  return c; }
+  return fromOk(c); }
 
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res; float ar = u_res.x/u_res.y;
