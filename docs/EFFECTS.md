@@ -66,6 +66,7 @@
 | `fade` | opacity only |
 | `iris` | — |
 | `lift` | staggered rise |
+| `none` | — |
 | `pop` | scale overshoot |
 | `rise` | translate up + fade in |
 | `scale` | punch in from small (overshoot) |
@@ -76,6 +77,7 @@
 | `up` | words/chars rise into place — the default kinetic headline |
 | `wipe` | — |
 | `wipe-down` | — |
+| `wipe-left` | — |
 | `wipe-right` | — |
 | `wipe-up` | — |
 
@@ -224,10 +226,18 @@
 |---|---|
 | `cinematicZoom` | dive-in zoom into a screen |
 | `crossWarp` | — |
+| `dispersion` | — |
 | `dissolve` | time/place change |
+| `fade` | opacity only |
 | `flashWhite` | white flash on an energy pivot |
+| `lens` | — |
 | `portal` | glowing portal reveal (once) |
+| `push` | — |
+| `sdfIris` | — |
+| `slide` | — |
+| `uncover` | — |
 | `whipPan` | momentum swipe between beats |
+| `wipe` | — |
 
 ## Composite looks (static)  `[static]`
 
@@ -311,6 +321,7 @@
 | `dotmatrix` | dot matrix grid |
 | `gradientWash` | — |
 | `ink` | — |
+| `liquid` | — |
 | `mesh` | soft gradient mesh (dark/saturated — check contrast) |
 | `metallic` | vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured |
 | `metallicSheen` | — |
@@ -352,9 +363,11 @@
 | `kineticHook` | hook: eyebrow + hero count-up|word + kinetic subline |
 | `logoLockup` | mark pops + wordmark travels + kinetic headline |
 | `logoReveal` | mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
+| `morphButton` | — |
 | `screenDive` | kinetic title + UI shot ken-pushes in |
 | `statReveal` | hero count-up + kinetic label |
 | `terminalReveal` | typing command + cursor + rising output + result |
+| `typedHook` | — |
 | `verdictProof` | typing command + tone verdict chip |
 
 ## Camera moves  `[camera]`
@@ -376,7 +389,315 @@
 
 | name | what / when |
 |---|---|
+| `commaSplit` | — |
 | `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
 
+## Layer types  `[layer]`
+
+The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.
+
+| name | what / when |
+|---|---|
+| `beam` | — |
+| `board` | — |
+| `clip` | — |
+| `component` | — |
+| `composition` | — |
+| `count` | — |
+| `cursor` | — |
+| `doc` | — |
+| `glow` | — |
+| `group` | — |
+| `html` | — |
+| `image` | — |
+| `lottie` | — |
+| `paint` | — |
+| `raymarch` | — |
+| `rect` | — |
+| `shader` | — |
+| `svg` | — |
+| `text` | — |
+| `three` | — |
+
+## three.js scenes (real geometry)  `[layer]`
+
+`{ "type":"three", "three":"<name>" }` — a scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract — every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.
+
+| name | what / when |
+|---|---|
+| `deviceShowcase` | — |
+| `extrudeText` | — |
+| `pointCloud` | — |
+| `uiParallax` | — |
+
+## Raymarched surfaces  `[layer]`
+
+`{ "type":"raymarch", "raymarch":"<name>" }` — implicit surfaces from a distance field. A subject you place, not a field behind everything.
+
+| name | what / when |
+|---|---|
+| `caustics` | — |
+| `chromeGlass` | — |
+| `holoFoil` | — |
+| `mandelbulb` | — |
+| `metaballs` | — |
+
+## Layer-as-texture (resample)  `[per-frame]`
+
+`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.
+
+| name | what / when |
+|---|---|
+| `bitCrush` | — |
+| `chromaShift` | — |
+| `dissolve` | time/place change |
+| `fisheye` | — |
+| `macroblock` | — |
+| `refract` | — |
+| `spinBlur` | — |
+| `zoomBlur` | — |
+
+## Ambient shader fields  `[per-frame]`
+
+`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.
+
+| name | what / when |
+|---|---|
+| `aurora` | drifting colour aurora (moves) |
+| `bands` | — |
+| `barrel` | — |
+| `crt` | — |
+| `dotCrawl` | — |
+| `drift` | — |
+| `filmGrain` | — |
+| `flow` | — |
+| `gateWeave` | — |
+| `heatShimmer` | — |
+| `kaleidoscope` | — |
+| `lightLeak` | — |
+| `matrixDecode` | — |
+| `mist` | — |
+| `nebula` | — |
+| `plasma` | — |
+| `ripple` | — |
+| `vhs` | — |
+
+## Per-layer fx  `[per-layer]`
+
+`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.
+
+| name | what / when |
+|---|---|
+| `kick` | — |
+| `mixBlend` | — |
+| `occlude` | — |
+| `plane` | — |
+| `progress` | — |
+| `shadow` | — |
+| `tilt` | 3D tilt-in |
+
+## Blend modes  `[per-layer]`
+
+`mixBlend` — how a layer composites with what is beneath it.
+
+| name | what / when |
+|---|---|
+| `color` | — |
+| `color-burn` | — |
+| `color-dodge` | — |
+| `darken` | — |
+| `difference` | — |
+| `exclusion` | — |
+| `hard-light` | — |
+| `hue` | — |
+| `lighten` | — |
+| `luminosity` | — |
+| `multiply` | — |
+| `normal` | — |
+| `overlay` | — |
+| `plus-lighter` | — |
+| `saturation` | — |
+| `screen` | — |
+| `soft-light` | — |
+
+## Filter presets  `[static]`
+
+`filter:"<name>"` — a named colour grade. Composite LOOKS are the richer set above; these are the primitives.
+
+| name | what / when |
+|---|---|
+| `bloom` | — |
+| `chromaGlow` | — |
+| `convolve` | — |
+| `displace` | — |
+| `duotone` | — |
+| `gradientMap` | — |
+| `morph` | — |
+| `posterize` | — |
+| `relief` | — |
+| `sepia` | — |
+| `tritone` | — |
+| `vignette` | — |
+
+## Easings  `[timing]`
+
+`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
+
+| name | what / when |
+|---|---|
+| `brake` | — |
+| `easeInBack` | — |
+| `easeInBounce` | — |
+| `easeInCirc` | — |
+| `easeInCubic` | — |
+| `easeInElastic` | — |
+| `easeInExpo` | — |
+| `easeInOutBack` | — |
+| `easeInOutBounce` | — |
+| `easeInOutCirc` | — |
+| `easeInOutCubic` | — |
+| `easeInOutElastic` | — |
+| `easeInOutExpo` | — |
+| `easeInOutQuad` | — |
+| `easeInOutQuart` | — |
+| `easeInOutQuint` | — |
+| `easeInOutSine` | — |
+| `easeInQuad` | — |
+| `easeInQuart` | — |
+| `easeInQuint` | — |
+| `easeInSine` | — |
+| `easeOutBack` | — |
+| `easeOutBounce` | — |
+| `easeOutCirc` | — |
+| `easeOutCubic` | — |
+| `easeOutElastic` | — |
+| `easeOutExpo` | — |
+| `easeOutQuad` | — |
+| `easeOutQuart` | — |
+| `easeOutQuint` | — |
+| `easeOutSine` | — |
+| `linear` | — |
+| `ramp` | — |
+| `rush` | — |
+| `settle` | — |
+| `snap` | — |
+| `spring` | — |
+| `spring-bouncy` | — |
+| `spring-stiff` | — |
+| `springEase` | — |
+| `springStiff` | — |
+
+## Caption styles  `[captions]`
+
+`captions:{ style:"<name>" }` — how burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
+
+| name | what / when |
+|---|---|
+| `clipWipe` | — |
+| `highlight` | marker highlight sweep |
+| `pillKaraoke` | — |
+| `weightShift` | — |
+
+## Drawn icons  `[asset]`
+
+`svgIcon("<name>")` — a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.
+
+| name | what / when |
+|---|---|
+| `agent` | — |
+| `arrowRight` | — |
+| `bolt` | — |
+| `braces` | — |
+| `check` | — |
+| `clock` | — |
+| `cube` | — |
+| `dollar` | — |
+| `file` | — |
+| `globe` | — |
+| `layers` | — |
+| `link` | — |
+| `plug` | — |
+| `shield` | — |
+| `spark` | — |
+
+## Ransom faces  `[text]`
+
+`ransom` on a text layer — per-glyph face mixing, from this fixed set.
+
+| name | what / when |
+|---|---|
+| `Anybody` | — |
+| `Archivo` | — |
+| `Caveat` | — |
+| `Fraunces` | — |
+| `Hanken Grotesk` | — |
+| `Instrument Serif` | — |
+| `JetBrains Mono` | — |
+| `Space Grotesk` | — |
+
+## Output targets  `[canvas]`
+
+`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.
+
+| name | what / when |
+|---|---|
+| `16:9` | — |
+| `1:1` | — |
+| `4:3` | — |
+| `4:5` | — |
+| `9:16` | — |
+| `broadcast` | — |
+| `feed` | — |
+| `reels` | — |
+| `shorts` | — |
+| `tiktok` | — |
+| `web` | — |
+
+## Generators (the playground)  `[generator]`
+
+Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
+
+| name | what / when |
+|---|---|
+| `bands` | — |
+| `colonnade` | — |
+| `crt` | — |
+| `ember` | — |
+| `spectrum` | — |
+
+## Lightfield dials  `[generator]`
+
+The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `arch` | — |
+| `bottom` | — |
+| `bottom-left` | — |
+| `bottom-right` | — |
+| `breathe` | idle breathe |
+| `center` | — |
+| `circle` | — |
+| `crescent` | — |
+| `drift` | — |
+| `full` | — |
+| `hills` | — |
+| `left` | — |
+| `left-and-right` | — |
+| `ramp` | — |
+| `right` | — |
+| `rings` | — |
+| `scallops` | — |
+| `shards` | — |
+| `shimmer` | — |
+| `slats` | — |
+| `still` | — |
+| `top` | — |
+| `top-and-bottom` | — |
+| `top-left` | — |
+| `top-right` | — |
+| `valley` | — |
+| `wave` | sinusoidal wave across units |
+
 ---
-_245 effects across 16 families. Regenerate: `make effects`._
+_461 effects across 31 families. Regenerate: `make effects`._

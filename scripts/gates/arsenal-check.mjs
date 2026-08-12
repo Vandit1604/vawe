@@ -1,0 +1,151 @@
+// scripts/gates/arsenal-check.mjs — is every capability the engine offers actually IN the catalogue
+// an author is told to read?
+//
+//   node scripts/gates/arsenal-check.mjs
+//
+// WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
+// docs/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/three-fx.js` sat in
+// the repo with a full three.js scene-graph layer, a written determinism contract and four registered
+// scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
+// either, which is the one worth fixing: 0 of 4 THREE_FX scenes were named in it, along with 0 of 5
+// raymarch effects and 0 of 5 playground generators (docs/MISTAKES.md #321).
+//
+// The cause is that `scripts/site/effects-catalog.mjs` imports a HAND-WRITTEN list of registries. Add a
+// vocabulary to core/ and it appears in the catalogue only if someone remembers to add an import line.
+// `make effects-check` cannot catch that: it proves the registries the catalogue knows about are not
+// stale, and has no way to know about the one it was never told about.
+//
+// WHY THIS IS A GATE AND NOT MORE AUTOMATION. Generating the catalogue mechanically from every export
+// would produce a worse document: its value is the one-line description beside each name, which is
+// judgement and not derivable. So the catalogue keeps its prose, and this makes an OMISSION LOUD
+// instead of silent. That is the same trade as `make beats`: the tool cannot look at the picture, so it
+// checks that somebody did.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const CATALOG = 'scripts/site/effects-catalog.mjs';
+
+// NOT A VOCABULARY. Each of these is a SCREAMING_CASE export that an author never picks from, so the
+// catalogue is the wrong home for it. Named with a reason, because an unexplained waiver list becomes a
+// place to hide the next real one.
+const WAIVED = new Map(Object.entries({
+  PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
+  SHARED_PROPS: 'the props every layer type inherits — a prop list, not a vocabulary',
+  LAYER_PROPS: 'the generated prop table behind schema-drift',
+  SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
+  TRACK_PROPS: 'as LAYER_PROPS, for tracks',
+  FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
+  KNOBS: 'playground control metadata, not an effect a scene can name',
+  UNIFORM_FAMILIES: 'shader uniform grouping for the playground panel',
+  KERNELS: 'convolution matrices behind the filter presets, which ARE catalogued',
+  TIMINGS: 'cut duration constants',
+  MECHANISMS: 'internal classification of transitions, used by the direction gate',
+  FAMILIES: 'internal classification of transitions, used by the direction gate',
+  HONOURS: 'which lightfield options each pattern reads — drives narrow(), not an author choice',
+  BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
+  SLOTS: 'track slot names, internal to the track resolver',
+  FPS: 'the frame rate constant',
+  CANVAS_FX: 'the implementations behind CANVAS_FX_NAMES, which IS catalogued',
+  CANVAS_FX_PRESETS: 'preset bundles over CANVAS_FX_NAMES',
+  ALL_GENERATORS: 'includes generators held back from the library; GENERATORS is the catalogued list',
+  COMPOSITIONS: 'the implementations behind COMPOSITION_NAMES, which IS catalogued',
+  CAP_STYLES: 'the implementations behind CAP_STYLE_NAMES, which IS catalogued',
+  DESTINATIONS: 'the safe-area table behind DESTINATION_NAMES, which IS catalogued',
+  BANDS: 'a single generator definition, reached through GENERATORS',
+  THREE_FX_PROPS: 'prop declaration',
+  CAMERA_MOVES: 'the move implementations behind CAMERA_MOVE_NAMES, which IS catalogued',
+  LOOKS: 'the look implementations behind LOOK_NAMES, which IS catalogued',
+  PAINT_FX: 'the implementations behind PAINT_FX_NAMES, which IS catalogued',
+  ANIM: 'the anim implementations behind ANIM_NAMES, which IS catalogued',
+  PAL: 'the colour tables the background presets draw from, and those ARE catalogued',
+  PAL_PLINTH: 'as PAL, for one brand',
+  SCHEMA: 'the lightfield option schema. It drives narrow() and the playground panel; its user-facing dials are PATTERNS/SHAPES/ANCHORS/DIRECTIONS/MOTIONS, which ARE catalogued',
+  RAMP: 'the lightfield bloom falloff constants',
+  DEFAULT_MOTION: 'the fallback motion block',
+  REQUIRED: 'the theme contract keys a theme file must define — checked by the theme gate, not chosen by a scene',
+  ORDER: 'track resolution order',
+  LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
+  DENSE_KEY_SEC: 'a density threshold constant',
+  KICK_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  KICK_KINDS: 'option values of one fx; the fx itself is catalogued under FX_TYPES',
+  OCCLUDE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  PLANE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in docs/CRAFT/SOUND.md and graded by make audio-check',
+  SEAM_CUE: 'sound, as CUT_CUE',
+  CUES: 'sound, as CUT_CUE',
+  PROFILE_BED: 'sound, as CUT_CUE',
+  TRANSITIONS: 'the transition implementations behind PRESENTATIONS, which IS catalogued',
+  SURFACE_TYPES: 'the surfaces behind the layer types, which ARE catalogued via LAYER_TYPES',
+  TRACK_TYPES: 'the track vocabulary, documented with the tracks in docs/PRIMITIVES.md rather than as an effect',
+}));
+
+const files = [];
+const walk = (d) => {
+  for (const e of fs.readdirSync(path.join(ROOT, d), { withFileTypes: true })) {
+    const p = `${d}/${e.name}`;
+    if (e.isDirectory()) walk(p);
+    else if (e.name.endsWith('.js') || e.name.endsWith('.mjs')) files.push(p);
+  }
+};
+walk('core');
+if (fs.existsSync(path.join(ROOT, 'blueprints/index.mjs'))) files.push('blueprints/index.mjs');
+
+// WHAT COUNTS AS A VOCABULARY IS DECIDED BY THE VALUE, NOT THE NAME. The first version matched every
+// SCREAMING_CASE export and flagged 55 things, most of them constants: TAU, BAYER4, MARGIN, a palette
+// of hex strings. A gate that cries about `TAU` teaches people to skim its output, and then it stops
+// working for the case it was written for.
+//
+// A vocabulary is a set of NAMES A SCENE CAN WRITE. In practice that is an array of two or more
+// strings, or an object keyed by those names. A number, a matrix of numbers, or a bag of numeric
+// constants is not something an author picks from.
+const isVocabulary = (v) => {
+  if (Array.isArray(v)) return v.length >= 2 && v.every((x) => typeof x === 'string');
+  if (v && typeof v === 'object') {
+    const k = Object.keys(v);
+    return k.length >= 2 && k.every((x) => /^[a-zA-Z][\w-]*$/.test(x))
+      && !Object.values(v).every((x) => typeof x === 'number');
+  }
+  return false;
+};
+
+const found = new Map();
+const unreadable = [];
+for (const f of files) {
+  const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  const names = [...src.matchAll(/export const ([A-Z][A-Z0-9_]{2,})\s*=/g)].map((m) => m[1]);
+  if (!names.length) continue;
+  let mod;
+  try { mod = await import(path.join(ROOT, f)); } catch { unreadable.push(f); continue; }
+  for (const n of names) if (isVocabulary(mod[n]) && !found.has(n)) found.set(n, f);
+}
+
+const catalog = fs.readFileSync(path.join(ROOT, CATALOG), 'utf8');
+const missing = [];
+for (const [name, file] of found) {
+  if (WAIVED.has(name)) continue;
+  if (new RegExp(`\\b${name}\\b`).test(catalog)) continue;
+  missing.push([name, file]);
+}
+
+const covered = found.size - WAIVED.size - missing.length;
+console.log(`\n  arsenal · ${found.size} vocabular(ies) found · ${WAIVED.size} waived · ${covered} in the catalogue`);
+// A module this gate cannot import is a hole in it, and a hole nobody is told about is how the last
+// one happened. Browser-only modules are expected here; the list being non-empty is not a failure, the
+// list being INVISIBLE would be.
+if (unreadable.length) console.log(`  ~ ${unreadable.length} module(s) could not be imported in node, so their exports are unchecked: ${unreadable.join(', ')}`);
+
+if (!missing.length) {
+  console.log(`  ✓ every capability the engine exports is named in docs/EFFECTS.md\n`);
+  process.exit(0);
+}
+console.error(`\n  ✗ ${missing.length} capabilit(ies) the engine offers and the catalogue never mentions:\n`);
+for (const [name, file] of missing) console.error(`     ${name.padEnd(22)} ${file}`);
+console.error(`\n  An author told to "see the whole arsenal, then choose" cannot choose these. Either add a`);
+console.error(`  section for it to ${CATALOG} and run \`make effects\`, or waive it in`);
+console.error(`  this file WITH A REASON if it is not something a scene can name.\n`);
+process.exit(1);

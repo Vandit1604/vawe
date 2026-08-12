@@ -8604,6 +8604,61 @@ picture.
 
 ---
 
+## #321 — The catalogue that exists so nobody misses a capability was missing the biggest one
+
+**What.** Asked whether we could use a globe from a component library, I went to npm. three.js was
+already a dependency, `core/three-fx.js` already had a scene-graph layer with four registered scenes,
+a written determinism contract and a purity gate that hashes real pixels. I did not know.
+
+**The first cause is mine.** `CLAUDE.md` step 0a says "see the whole arsenal, then choose: `make
+effects` → docs/EFFECTS.md". I did not run it, on this film or on the vfx-js question two days
+earlier. Twice in a week I read GitHub before I read `core/`.
+
+**The second cause is the one worth fixing, because running it would not have helped.** Measured:
+
+| registry | members named in docs/EFFECTS.md |
+|---|---|
+| `THREE_FX` | **0 of 4** |
+| `RAYMARCH_FX` | **0 of 5** |
+| `GENERATORS` | **0 of 5** |
+| `AMBIENT_FX` | 5 of 18 |
+| `LAYER_TYPES` | 11 of 20 |
+| `FILTER_PRESETS` | 2 of 12 |
+| `RESAMPLE_FX` | 2 of 8 |
+
+**Root cause.** `scripts/site/effects-catalog.mjs` imported a HAND-WRITTEN list of 12 registries. Add a
+vocabulary to `core/` and it reaches the catalogue only if someone remembers an import line. Its own
+header claims it is "derived from the registries themselves — it can never drift from the code", which
+was true of the twelve it knew and silent about the rest. `make effects-check` cannot help: it proves
+those twelve are not stale and has no way to know about the thirteenth.
+
+The Seams section was the same bug in miniature — six names typed by hand while `SEAM_FX` carries
+fourteen.
+
+**Fix.** `scripts/gates/arsenal-check.mjs`. It walks `core/`, imports each module, and treats an export
+as a vocabulary by its VALUE (an array of two or more strings, or an object keyed by names) rather than
+by its name — the first version matched every SCREAMING_CASE const and cried about `TAU` and `BAYER4`,
+and a gate that cries about `TAU` teaches people to skim it. Anything not named in the catalogue fails
+the push, unless waived here with a sentence saying why it is not something a scene can name.
+
+Not more automation: generating the catalogue mechanically would lose the one-line description beside
+each name, which is judgement and not derivable. The document keeps its prose; the gate makes an
+OMISSION LOUD. Same trade as `make beats` — the tool cannot look at the picture, so it checks that
+somebody did.
+
+It also reports which modules it could not import, because a hole nobody is told about is how this
+happened in the first place.
+
+**Result.** 245 effects in 16 families became 461 in 31. Wired into `.githooks/pre-push` rather than
+`author-check`, deliberately: the commit that ADDS a capability is a framework commit, and framework
+commits never run an authoring ladder. That is exactly how the three.js layer landed and stayed
+invisible for as long as it existed.
+
+**Falsifiable test.** Delete the `THREE_FX` import and its section: the gate names `THREE_FX` and
+fails. Restore: green.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

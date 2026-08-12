@@ -641,6 +641,9 @@ blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs
 effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
 
+arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
+	node scripts/gates/arsenal-check.mjs
+
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
