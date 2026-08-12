@@ -1,6 +1,12 @@
 {
   "module": "scene",
-  "authoring": { "allow": ["no-continuous-object"] },
+  "authoring": {
+    "allow": [
+      "no-continuous-object",
+      "off-colour"
+    ],
+    "_allow_why": "off-colour: as vawe-intro, this depicts real window chrome and its dots are the actual macOS colours."
+  },
   "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
   "aspect": "16:9",
   "theme": "vawe",
@@ -147,7 +153,7 @@
             {
               "type": "text",
               "weight": 500,
-              "text": "▲",
+              "text": "\u25b2",
               "size": 15,
               "color": "var(--up)"
             },
@@ -235,7 +241,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 14,
               "color": "#fff"
             }
@@ -313,5 +319,10 @@
       "intensity": 0.35
     }
   ],
-  "bg": [{ "t": 0, "preset": "dotmatrix" }]
+  "bg": [
+    {
+      "t": 0,
+      "preset": "dotmatrix"
+    }
+  ]
 }

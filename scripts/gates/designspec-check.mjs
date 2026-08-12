@@ -47,6 +47,14 @@ const palette = theme.palette || {};
 const paletteRGB = Object.values(palette).map(parseColor).filter(Boolean);
 const gradRGB = (theme.gradient || []).map(parseColor).filter(Boolean);
 const allowRGB = [...paletteRGB, ...gradRGB];
+
+// PER-SCENE WAIVERS, the repo's own mechanism ({"authoring":{"allow":["off-colour"]}}), which this gate
+// never read. It matters now that the gate BLOCKS: some scenes are legitimately off the brand and
+// saying so in the file is better than keeping the gate toothless for all of them. The two real cases
+// today are a depicted macOS window chrome (#FF5F57 is the traffic-light red, and a brand token there
+// would be a lie about the UI being shown) and a generator fitted to a photograph, whose palette is a
+// measurement of that photo rather than a choice. A waiver still has to be written down per scene.
+const allowed = new Set(data.authoring?.allow || []);
 const TOL = 0.14, NEUTRAL_SAT = 0.12;
 
 // every colour LITERAL inside a value string that is NOT token-based (var/color-mix skipped whole).
@@ -148,6 +156,7 @@ scanTargets.forEach((l, i) => {
       if (near <= TOL) continue; // ≈ a palette colour (hardcoded, but on-spec)
       const key = lit + '@' + k.replace(/\[\d+\]/g, '');
       if (seen.has(key)) continue; seen.add(key);
+      if (allowed.has('off-colour')) continue;
       findings.push({ sev: 'off-colour', msg: `${label(l, i)} · \`${k}\` uses ${lit} — a chromatic colour NOT in the ${themeName} palette (nearest is ${(near * 100).toFixed(0)}% away). Use a var(--token) or a color-mix of one, or add it to the theme.` });
     }
   }

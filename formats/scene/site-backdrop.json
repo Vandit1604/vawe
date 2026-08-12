@@ -1,13 +1,23 @@
 {
   "module": "scene",
-  "authoring": {"allow": ["ends-on-nothing"]},
+  "authoring": {
+    "allow": [
+      "ends-on-nothing",
+      "off-colour"
+    ],
+    "_allow_why": "off-colour: a site backdrop tuned to the live page it sits behind, not to the film theme."
+  },
   "authoringNote": "PRE-EXISTING empty closing plate, not a design choice: this scene was authored before beat-check existed and ends on a bare backdrop. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "theme": "vawe",
   "aspect": "16:9",
   "duration": 14,
   "note": "The site's hero/footer bookend backdrop. Deliberately CONTENTLESS: one ambient shader field, no text, no blocks, no cuts, no stings. Every other clip in assets/ demonstrates a capability, which means every other clip has words in it, and words behind a headline read as drifting smudges. This one exists only to be a surface. The page blurs it, multiplies it over cobalt and crops it, so it is judged on luminance movement alone, never on legibility. If you add a layer with copy in it, you have broken the one thing this file is for.",
   "bg": [
-    { "preset": "accentPlain", "from": 0, "to": 14 }
+    {
+      "preset": "accentPlain",
+      "from": 0,
+      "to": 14
+    }
   ],
   "layers": [
     {
@@ -21,8 +31,15 @@
       "speed": 0.22,
       "intensity": 0.3,
       "seed": 7,
-      "colors": ["#2563eb", "#1d4ed8", "#8fc0ff", "#3b82f6"]
+      "colors": [
+        "#2563eb",
+        "#1d4ed8",
+        "#8fc0ff",
+        "#3b82f6"
+      ]
     }
   ],
-  "audio": { "silent": true }
+  "audio": {
+    "silent": true
+  }
 }

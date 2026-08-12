@@ -182,7 +182,7 @@
                     {
                       "type": "text",
                       "weight": 600,
-                      "text": "☰",
+                      "text": "\u2630",
                       "size": 26,
                       "color": "var(--text-2)"
                     }
@@ -519,7 +519,7 @@
                         {
                           "type": "text",
                           "weight": 500,
-                          "text": "ines · 2h",
+                          "text": "ines \u00b7 2h",
                           "font": "mono",
                           "size": 15,
                           "color": "var(--dim)",
@@ -575,7 +575,7 @@
                         {
                           "type": "text",
                           "weight": 500,
-                          "text": "bram · 1d",
+                          "text": "bram \u00b7 1d",
                           "font": "mono",
                           "size": 15,
                           "color": "var(--dim)",
@@ -631,7 +631,7 @@
                         {
                           "type": "text",
                           "weight": 500,
-                          "text": "petra · 2d",
+                          "text": "petra \u00b7 2d",
                           "font": "mono",
                           "size": 15,
                           "color": "var(--dim)",
@@ -890,7 +890,7 @@
                         {
                           "type": "text",
                           "weight": 600,
-                          "text": "→",
+                          "text": "\u2192",
                           "size": 22,
                           "color": "var(--accent)"
                         }
@@ -954,7 +954,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 14,
               "color": "#fff"
             }
@@ -1021,7 +1021,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 16,
               "radius": 8,
               "pad": "5px 7px",
@@ -1053,7 +1053,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 16,
               "radius": 8,
               "pad": "5px 7px",
@@ -1085,7 +1085,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 16,
               "radius": 8,
               "pad": "5px 7px",
@@ -1117,7 +1117,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "✓",
+              "text": "\u2713",
               "size": 16,
               "radius": 8,
               "pad": "5px 7px",
@@ -1147,7 +1147,7 @@
       "x": 1100,
       "y": 420,
       "w": 640,
-      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:640px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">demo workspace · updates sent</div><svg viewBox=\"0 0 596 226\" width=\"100%\" height=\"226\" style=\"display:block;overflow:visible\"><polyline points=\"8.0,176.0 153.0,134.0 298.0,134.0 443.0,92.0 588.0,8.0\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-dasharray=\"614.5\" stroke-dashoffset=\"calc(614.5 * (1 - var(--p, 1)))\"/><circle cx=\"8.0\" cy=\"176.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"153.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"298.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"443.0\" cy=\"92.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"588.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--accent)\"/></svg></div>",
+      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:640px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">demo workspace \u00b7 updates sent</div><svg viewBox=\"0 0 596 226\" width=\"100%\" height=\"226\" style=\"display:block;overflow:visible\"><polyline points=\"8.0,176.0 153.0,134.0 298.0,134.0 443.0,92.0 588.0,8.0\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-dasharray=\"614.5\" stroke-dashoffset=\"calc(614.5 * (1 - var(--p, 1)))\"/><circle cx=\"8.0\" cy=\"176.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"153.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"298.0\" cy=\"134.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"443.0\" cy=\"92.0\" r=\"2.6\" fill=\"var(--accent)\"/><circle cx=\"588.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--accent)\"/></svg></div>",
       "start": 14.35,
       "duration": 2.45,
       "anim": "fade",
@@ -1261,7 +1261,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1283,7 +1283,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1305,7 +1305,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1405,7 +1405,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1427,7 +1427,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1449,7 +1449,7 @@
                 {
                   "type": "text",
                   "weight": 700,
-                  "text": "✓",
+                  "text": "\u2713",
                   "size": 18,
                   "color": "var(--up)"
                 },
@@ -1605,7 +1605,7 @@
                 {
                   "type": "text",
                   "weight": 500,
-                  "text": "▮▮▮",
+                  "text": "\u25ae\u25ae\u25ae",
                   "size": 14,
                   "color": "var(--dim)"
                 }
@@ -1716,5 +1716,11 @@
         }
       ]
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "off-colour"
+    ],
+    "_allow_why": "off-colour: generated by make expand from showcase-spot.json, which carries the same waiver for the same reason."
+  }
 }

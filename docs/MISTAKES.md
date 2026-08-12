@@ -8700,6 +8700,34 @@ it also exposed two things worth having: the on-screen claim still said "600 fra
 
 ---
 
+<!-- doc-refs-allow: formats/scene/showcase-flight.json · superseded by showcase-flight-globe and deleted; entries that cite it are records of what it taught -->
+<!-- doc-refs-allow: formats/scene/showcase-flight-computed.json · the flat-chart iteration, superseded and deleted -->
+<!-- doc-refs-allow: formats/scene/_flight-chart.html · lived only in the deleted flat-chart film -->
+## #323 — A gate that names the exact drift, and is only a warning
+
+**What.** `designspec-check` reported `#8fdcff is a chromatic colour NOT in the vawe-dark palette
+(nearest is 17% away)` on two consecutive films. I quoted it back in a progress report and shipped
+both anyway. The globe was wearing cobe's default palette with a nudge — its `arcColor` is `#8fdbff`
+and I sent `#8fdcff`, one hex digit apart — while the theme's own accent `#5ee0c8` appeared nowhere.
+
+**Root cause.** Precision without severity. The finding named the value, the distance and the fix, and
+sat in the advisory half, so the cost of ignoring it was zero. That teaches an author that warnings are
+decoration, which is worse than not having the check.
+
+**Fix.** It blocks under `TASTE=1`, not only under `STRICT=1`. Every scene in the library passes:
+measured first, 34 clean and 7 with findings, and each of those 7 got a per-scene waiver with a real
+reason rather than a blanket exemption — a depicted macOS window whose traffic-light dots are the
+actual `#FF5F57` (a brand token there would be a lie about the UI being shown), and a generator whose
+palette is FITTED to a photograph and is therefore a measurement, not a choice. The gate never read the
+repo's own `{"authoring":{"allow":[...]}}` mechanism; it does now.
+
+**A bad probe is not a passing gate.** The first falsifiable test injected `#ff4488` and the gate said
+nothing, which looked like a broken check. The theme carries `down: #ff4d6d`, so that colour was
+correctly within tolerance. `#b400ff` at 41% away blocks. Verify the probe before believing the gate is
+broken.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

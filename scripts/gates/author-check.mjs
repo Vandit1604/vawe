@@ -165,7 +165,12 @@ tasteGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-
 // 4. slop — the hand-written-HTML tells. TASTE.
 tasteGate('slop', 'slop (anti-slop detector)', 'scripts/gates/slop.mjs', [], { waivable: true, exitMeansFail: strict });
 // 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
-tasteGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// BLOCKS under TASTE, not just under STRICT. It was a warning, and across two films it named the exact
+// drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway — twice. A
+// gate whose finding is precise and whose severity is advisory teaches the author that warnings are
+// decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
+// so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #323).
+tasteGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
 // 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers. TASTE.
 tasteGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // PACE. It sits with the taste gates rather than the always-on ones because a still film is sometimes

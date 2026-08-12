@@ -21,10 +21,10 @@
       "type": "three",
       "three": "globe",
       "colors": [
-        "#8affd8",
-        "#071a2e",
-        "#8fdcff",
-        "#ffffff"
+        "#5ee0c8",
+        "#11141b",
+        "#5ee0c8",
+        "#e6e9ef"
       ],
       "pointSize": 0.019,
       "spin": 0.16,

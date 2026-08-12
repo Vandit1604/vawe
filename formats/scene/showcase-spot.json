@@ -3,20 +3,55 @@
   "aspect": "16:9",
   "theme": "threadcite",
   "duration": 23.5,
-  "audio": { "silent": true },
+  "audio": {
+    "silent": true
+  },
   "bg": [
-    { "preset": "paper", "from": 0, "to": 23.5 }
+    {
+      "preset": "paper",
+      "from": 0,
+      "to": 23.5
+    }
   ],
   "cuts": [
-    { "t": 3.45, "style": "softwipe", "dur": 0.4 },
-    { "t": 6.65, "style": "slide", "dur": 0.4 },
-    { "t": 10.25, "style": "rise", "dur": 0.4 },
-    { "t": 13.65, "style": "whip", "dur": 0.36 },
-    { "t": 16.95, "style": "softiris", "dur": 0.42 },
-    { "t": 20.15, "style": "riseBlur", "dur": 0.42 }
+    {
+      "t": 3.45,
+      "style": "softwipe",
+      "dur": 0.4
+    },
+    {
+      "t": 6.65,
+      "style": "slide",
+      "dur": 0.4
+    },
+    {
+      "t": 10.25,
+      "style": "rise",
+      "dur": 0.4
+    },
+    {
+      "t": 13.65,
+      "style": "whip",
+      "dur": 0.36
+    },
+    {
+      "t": 16.95,
+      "style": "softiris",
+      "dur": 0.42
+    },
+    {
+      "t": 20.15,
+      "style": "riseBlur",
+      "dur": 0.42
+    }
   ],
   "stings": [
-    { "t": 9.95, "fx": "flash", "dur": 0.4, "seed": 2 }
+    {
+      "t": 9.95,
+      "fx": "flash",
+      "dur": 0.4,
+      "seed": 2
+    }
   ],
   "layers": [
     {
@@ -53,7 +88,7 @@
           "type": "block",
           "block": "emptyState",
           "w": 640,
-          "icon": "☰",
+          "icon": "\u2630",
           "title": "Weekly update",
           "body": "Nothing written yet. Due in four hours.",
           "cta": "Start writing",
@@ -85,9 +120,16 @@
       "y": 460,
       "w": 760,
       "messages": [
-        { "text": "Where did the sprint land?" },
-        { "text": "Give me an hour, I will write it up.", "me": true },
-        { "text": "Same as last Friday then" }
+        {
+          "text": "Where did the sprint land?"
+        },
+        {
+          "text": "Give me an hour, I will write it up.",
+          "me": true
+        },
+        {
+          "text": "Same as last Friday then"
+        }
       ],
       "start": 3.85,
       "dur": 2.65
@@ -120,9 +162,24 @@
           "block": "commitRow",
           "w": 820,
           "commits": [
-            { "hash": "b31f8ac", "msg": "offline queue survives a reconnect", "author": "ines", "time": "2h" },
-            { "hash": "7d0c412", "msg": "drop the second sync pass", "author": "bram", "time": "1d" },
-            { "hash": "a95e6f0", "msg": "coldharbour import, first pass", "author": "petra", "time": "2d" }
+            {
+              "hash": "b31f8ac",
+              "msg": "offline queue survives a reconnect",
+              "author": "ines",
+              "time": "2h"
+            },
+            {
+              "hash": "7d0c412",
+              "msg": "drop the second sync pass",
+              "author": "bram",
+              "time": "1d"
+            },
+            {
+              "hash": "a95e6f0",
+              "msg": "coldharbour import, first pass",
+              "author": "petra",
+              "time": "2d"
+            }
           ],
           "start": 7.15,
           "dur": 3.0
@@ -143,7 +200,10 @@
       "block": "pointer",
       "x": 1380,
       "y": 900,
-      "to": { "x": 640, "y": 542 },
+      "to": {
+        "x": 640,
+        "y": 542
+      },
       "clickAt": 2.05,
       "size": 44,
       "start": 7.55,
@@ -182,7 +242,11 @@
           "h": 330,
           "title": "Week of the 14th",
           "desc": "Offline queue now survives a reconnect. The second sync pass is gone. Coldharbour import landed a first pass.",
-          "pills": ["3 commits", "2 tickets", "1 draft"],
+          "pills": [
+            "3 commits",
+            "2 tickets",
+            "1 draft"
+          ],
           "cta": "Send it",
           "start": 10.75,
           "dur": 2.75
@@ -242,10 +306,22 @@
       "y": 420,
       "w": 640,
       "items": [
-        { "text": "Reads the commits you pushed", "done": true },
-        { "text": "Reads the tickets you closed", "done": true },
-        { "text": "Writes the draft in your words", "done": true },
-        { "text": "Waits for you to press send", "done": false }
+        {
+          "text": "Reads the commits you pushed",
+          "done": true
+        },
+        {
+          "text": "Reads the tickets you closed",
+          "done": true
+        },
+        {
+          "text": "Writes the draft in your words",
+          "done": true
+        },
+        {
+          "text": "Waits for you to press send",
+          "done": false
+        }
       ],
       "start": 14.1,
       "dur": 2.7
@@ -257,13 +333,28 @@
       "y": 420,
       "w": 640,
       "h": 300,
-      "label": "demo workspace · updates sent",
+      "label": "demo workspace \u00b7 updates sent",
       "data": [
-        { "label": "M", "value": 1 },
-        { "label": "T", "value": 2 },
-        { "label": "W", "value": 2 },
-        { "label": "T", "value": 3 },
-        { "label": "F", "value": 5 }
+        {
+          "label": "M",
+          "value": 1
+        },
+        {
+          "label": "T",
+          "value": 2
+        },
+        {
+          "label": "W",
+          "value": 2
+        },
+        {
+          "label": "T",
+          "value": 3
+        },
+        {
+          "label": "F",
+          "value": 5
+        }
       ],
       "start": 14.35,
       "dur": 2.45
@@ -308,7 +399,11 @@
       "w": 360,
       "plan": "Free",
       "price": "$0",
-      "features": ["One workspace", "Weekly draft", "You press send"],
+      "features": [
+        "One workspace",
+        "Weekly draft",
+        "You press send"
+      ],
       "cta": "Open the demo",
       "highlight": true,
       "start": 17.35,
@@ -322,7 +417,11 @@
       "w": 360,
       "plan": "Team",
       "price": "$18",
-      "features": ["Every workspace", "Shared voice", "Scheduled sends"],
+      "features": [
+        "Every workspace",
+        "Shared voice",
+        "Scheduled sends"
+      ],
       "cta": "Talk to us",
       "highlight": false,
       "start": 17.55,
@@ -412,5 +511,11 @@
         }
       ]
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "off-colour"
+    ],
+    "_allow_why": "off-colour: a lighting demo whose whole subject is coloured light, sampled from the reference it recreates."
+  }
 }

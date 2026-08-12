@@ -73,5 +73,11 @@
       "start": 0,
       "duration": 6
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "off-colour"
+    ],
+    "_allow_why": "off-colour: the palette is FITTED to refs/colonnade/c6.jpg and scores against it. It is a measurement of a photograph, not a brand choice."
+  }
 }
