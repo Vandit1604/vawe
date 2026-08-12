@@ -27,9 +27,9 @@ import { canvasLayer } from './canvas.js';
 // They are still four names in scene JSON and four entries here — the collapse was internal, and 101
 // scenes are written in the names.
 const shader = canvasLayer('shader'), paint = canvasLayer('paint');
-const raymarch = canvasLayer('raymarch'), three = canvasLayer('three');
+const raymarch = canvasLayer('raymarch'), three = canvasLayer('three'), globe = canvasLayer('globe');
 
-const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, composition };
+const REGISTRY = { text, count, image, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the

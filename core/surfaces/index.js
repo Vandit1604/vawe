@@ -25,10 +25,11 @@
 import { mergeProps } from '../props.js';
 import * as paint from './paint.js';
 import * as shader from './shader.js';
+import * as globe from './globe.js';
 import * as raymarch from './raymarch.js';
 import * as three from './three.js';
 
-const REGISTRY = { paint, shader, raymarch, three };
+const REGISTRY = { paint, shader, raymarch, three, globe };
 
 // Exported so a gate can DERIVE this vocabulary instead of restating it — the contract LAYER_TYPES,
 // FX_TYPES and TRACK_TYPES already have. A hand-typed copy of such a list is how `make coverage`

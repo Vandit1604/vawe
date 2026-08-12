@@ -54,6 +54,16 @@ export async function preloadSpectrum(data) {
   } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable — react layers will hold still`); }
 }
 
+// cobe is LAZY and AWAITED, for the same two reasons three is: a `globe` layer builds synchronously
+// and would otherwise race the module load, and a layer that renders empty on whichever workers got
+// there first is a purity break rather than a glitch. It is 12.9 KB, so laziness is about correctness
+// here, not weight.
+export async function preloadCobe(data) {
+  if (!JSON.stringify(data).includes('"globe"')) return;
+  try { window.__cobe = (await import('/assets/vendor/cobe.module.js')).default; }
+  catch (e) { throw new Error('cobe failed to load from /assets/vendor/cobe.module.js: ' + e.message); }
+}
+
 // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
 // because a `three` layer builds synchronously and would otherwise race the module load — a layer that
 // renders empty on the workers that got there first is a purity break, not a glitch. Extruded type

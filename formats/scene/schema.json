@@ -26,6 +26,7 @@
       "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
       "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
       "three": ["arcHeight", "bodyColor", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
+      "globe": ["arcHeight", "arcWidth", "colors", "dark", "dest", "diffuse", "drawDur", "drawStart", "globe", "h", "mapBrightness", "mapSamples", "markerSize", "origin", "phi", "phiDur", "phiTo", "radius", "resample", "scale", "seed", "speed", "theta", "w"],
       "composition": ["comp", "props"]
     }
   },
@@ -577,6 +578,7 @@
             "paint",
             "raymarch",
             "three",
+            "globe",
             "composition"
           ]
         },
@@ -1258,6 +1260,7 @@
                 "paint",
                 "raymarch",
                 "three",
+            "globe",
                 "composition"
               ]
             },
@@ -1674,6 +1677,43 @@
         },
         "pointSize": {
           "label": "three pointCloud / globe: point size in world units"
+        },
+        "globe": {
+          "type": "boolean",
+          "label": "globe: a dotted planet with a great-circle route drawn on it (cobe). Set the layer type to \"globe\"; this key is the marker. Route endpoints are `origin`/`dest` as [lon, lat]."
+        },
+        "phi": {
+          "label": "globe: rotation in radians at t=0. 4.8 puts the North Atlantic facing the camera"
+        },
+        "phiTo": {
+          "label": "globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame"
+        },
+        "phiDur": {
+          "label": "globe: seconds the settle takes"
+        },
+        "theta": {
+          "label": "globe: tilt in radians — how far the pole leans toward the camera"
+        },
+        "arcWidth": {
+          "label": "globe: thickness of the route"
+        },
+        "mapSamples": {
+          "label": "globe: how many dots the land is sampled into (default 16000)"
+        },
+        "mapBrightness": {
+          "label": "globe: how bright the land dots are against the sea"
+        },
+        "diffuse": {
+          "label": "globe: how hard the day/night shading falls across the sphere"
+        },
+        "dark": {
+          "label": "globe: overall darkness of the unlit side"
+        },
+        "scale": {
+          "label": "globe: how much of its box the planet fills (1 = default)"
+        },
+        "markerSize": {
+          "label": "globe: size of the two endpoint markers"
         },
         "origin": {
           "label": "three globe: [lon, lat] of the route's start. NOT `from`, which is a number on `count`"
