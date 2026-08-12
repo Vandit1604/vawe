@@ -25,7 +25,7 @@
       "lottie": ["fit", "h", "loop", "speed", "src", "w"],
       "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
       "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
-      "three": ["arcHeight", "bodyColor", "colors", "count", "depth", "device", "dolly", "drawDur", "drawStart", "font", "fov", "from", "h", "metalness", "morphSpeed", "pitch", "planes", "pointSize", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "swing", "text", "three", "to", "travel", "w", "yaw"],
+      "three": ["arcHeight", "bodyColor", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
       "composition": ["comp", "props"]
     }
   },
@@ -1674,6 +1674,33 @@
         },
         "pointSize": {
           "label": "three pointCloud / globe: point size in world units"
+        },
+        "origin": {
+          "label": "three globe: [lon, lat] of the route's start. NOT `from`, which is a number on `count`"
+        },
+        "dest": {
+          "label": "three globe: [lon, lat] of the route's end"
+        },
+        "spinFrom": {
+          "label": "three globe: rotation in radians at t=0"
+        },
+        "spinTo": {
+          "label": "three globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame; this arrives and stays"
+        },
+        "spinDur": {
+          "label": "three globe: seconds the settle takes"
+        },
+        "sunFrom": {
+          "label": "three globe: sun longitude in degrees at t=0. The terminator is computed from it, so the lit land and the lit sea cannot disagree"
+        },
+        "sunTo": {
+          "label": "three globe: sun longitude at the end of the layer. Decreasing sends the terminator WEST, which is the direction the real one moves"
+        },
+        "sunLat": {
+          "label": "three globe: the sun's declination in degrees — the seasonal tilt of the day/night line"
+        },
+        "dawnWidth": {
+          "label": "three globe: how soft the terminator is, in cosine units. 0 is a hard edge, 0.22 is a band of dawn"
         },
         "arcHeight": {
           "label": "three globe: how far the route lifts off the surface, as a fraction of the radius (default 0.18)"

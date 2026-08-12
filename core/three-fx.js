@@ -29,7 +29,8 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
   depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
   morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {},
   // globe
-  from: {}, to: {}, arcHeight: {}, drawStart: {}, drawDur: {} };
+  origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
+  spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {} };
 
 export { THREE_FX };
 const T = () => {
@@ -172,21 +173,33 @@ const SCENES = {
     }
     const dg = new (T().BufferGeometry)();
     dg.setAttribute('position', new (T().BufferAttribute)(pos, 3));
+    // PER-DOT COLOUR, because the terminator is the point. A single material colour can only make a
+    // globe that is lit everywhere or nowhere, and day and night on a sphere is a hemisphere, not a
+    // gradient someone paints on. Each dot asks where the sun is and answers for itself.
+    const dcol = new Float32Array(n * 3);
+    dg.setAttribute('color', new (T().BufferAttribute)(dcol, 3));
     grp.add(new (T().Points)(dg, new (T().PointsMaterial)({
-      color: hex(colors?.[0], '#7fe3c0'), size: L.pointSize ?? 0.011, sizeAttenuation: true,
+      vertexColors: true, size: L.pointSize ?? 0.011, sizeAttenuation: true,
       transparent: true, opacity: 0.95 })));
 
     // The ocean: a sphere just inside the dots so the far side is occluded. Without it every dot on the
     // back of the world shows through and the globe reads as a wire ball rather than a planet.
-    const ocean = new (T().Mesh)(new (T().SphereGeometry)(R * 0.985, 48, 32),
-      new (T().MeshBasicMaterial)({ color: hex(colors?.[1], '#0b2a4a') }));
+    const og = new (T().SphereGeometry)(R * 0.985, 64, 40);
+    const opos = og.attributes.position;
+    const ocol = new Float32Array(opos.count * 3);
+    og.setAttribute('color', new (T().BufferAttribute)(ocol, 3));
+    const ocean = new (T().Mesh)(og, new (T().MeshBasicMaterial)({ vertexColors: true }));
     grp.add(ocean);
 
     // THE ROUTE, as a real great circle: slerp between the two endpoints, lifted off the surface. A
     // quadratic through a midpoint would be the flat map's approximation and is simply wrong on a
     // sphere, where the shortest path between two points IS this curve.
-    const from = L.from ?? [-73.78, 40.64];             // JFK
-    const to = L.to ?? [2.55, 49.01];                   // CDG
+    // `origin`/`dest`, NOT `from`/`to`. Those are already shared props and already numbers: `count`
+    // reads them as the start and end of a tally. Reusing the name for a lon/lat pair would have been a
+    // second meaning on one label, which is the thing schema-drift exists to prevent and which the
+    // validator caught here on the first run.
+    const from = L.origin ?? [-73.78, 40.64];           // JFK
+    const to = L.dest ?? [2.55, 49.01];                 // CDG
     const a = new (T().Vector3)(...at(from[0], from[1]));
     const b = new (T().Vector3)(...at(to[0], to[1]));
     const arcH = L.arcHeight ?? 0.18;
@@ -208,10 +221,50 @@ const SCENES = {
       new (T().MeshBasicMaterial)({ color: hex(colors?.[3], '#ffffff') }));
     grp.add(plane);
 
+    // Colours resolved once. hex() allocates, and doing it per dot per frame would be 2438 allocations
+    // a frame for four values that never change.
+    const cDay = hex(colors?.[0], '#8affd8'), cNight = hex(colors?.[4] ?? colors?.[0], '#1d4a5e');
+    const oDay = hex(colors?.[1], '#123c63'), oNight = hex(colors?.[5] ?? colors?.[1], '#050f1e');
+    const tmp = new (T().Vector3)();
+
+    // How lit a point is: the cosine between its normal and the sun, softened across the terminator so
+    // the edge is a band of dawn rather than a hard line. `k` is that softness in cosine units.
+    const litness = (x, y, z, sx, sy, sz, k) => {
+      const d = x * sx + y * sy + z * sz;
+      return Math.max(0, Math.min(1, (d + k) / (2 * k)));
+    };
+
     return { obj: grp, pose(t, LL) {
-      const spin = LL.spin ?? 0.12;
-      grp.rotation.y = t * spin;                        // absolute, never +=
+      // THE GLOBE SETTLES. A constant spin turns the subject out of frame: over twelve seconds at 0.16
+      // the North Atlantic leaves and the film is watching the Pacific. This eases from an opening turn
+      // to a stop, so the route arrives facing the camera and stays there.
+      const s0 = LL.spinFrom ?? 0, s1 = LL.spinTo ?? 0, sd = LL.spinDur ?? 1;
+      const sp = Math.max(0, Math.min(1, t / Math.max(sd, 1e-6)));
+      grp.rotation.y = s0 + (s1 - s0) * ease(sp);       // absolute, never +=
       grp.rotation.x = (LL.pitch ?? 0.32);
+
+      // THE SUN, as a direction rather than a picture. sunLon travels west across the film, which is
+      // the direction the terminator actually moves, and every dot and every ocean vertex reads the
+      // same vector. One source, so the lit land and the lit sea cannot disagree.
+      const sunA = ((LL.sunFrom ?? 40) + ((LL.sunTo ?? -60) - (LL.sunFrom ?? 40)) * Math.min(1, t / Math.max(LL.duration ?? 20, 1e-6))) * Math.PI / 180;
+      const sunTilt = (LL.sunLat ?? 12) * Math.PI / 180;
+      const sx = Math.cos(sunTilt) * Math.cos(sunA), sy = Math.sin(sunTilt), sz = Math.cos(sunTilt) * Math.sin(sunA);
+      const k = LL.dawnWidth ?? 0.22;
+      for (let i = 0; i < n; i++) {
+        const l = litness(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2], sx, sy, sz, k);
+        dcol[i * 3] = cNight.r + (cDay.r - cNight.r) * l;
+        dcol[i * 3 + 1] = cNight.g + (cDay.g - cNight.g) * l;
+        dcol[i * 3 + 2] = cNight.b + (cDay.b - cNight.b) * l;
+      }
+      dg.attributes.color.needsUpdate = true;
+      for (let i = 0; i < opos.count; i++) {
+        tmp.fromBufferAttribute(opos, i).normalize();
+        const l = litness(tmp.x, tmp.y, tmp.z, sx, sy, sz, k);
+        ocol[i * 3] = oNight.r + (oDay.r - oNight.r) * l;
+        ocol[i * 3 + 1] = oNight.g + (oDay.g - oNight.g) * l;
+        ocol[i * 3 + 2] = oNight.b + (oDay.b - oNight.b) * l;
+      }
+      og.attributes.color.needsUpdate = true;
       // The route draws on across its own window, and the aircraft sits at the same parameter, so the
       // line and the marker are one event rather than two clocks that can disagree.
       const d0 = LL.drawStart ?? 0, dd = LL.drawDur ?? 4;
