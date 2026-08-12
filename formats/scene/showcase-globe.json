@@ -1,0 +1,47 @@
+{
+  "module": "scene",
+  "note": "The globe is sampled, not drawn. core/globe-dots.js is 2438 real coordinates baked from Natural Earth by `make globe-dots`, so every dot on the land is a place. The route is a true great circle (a slerp between JFK and CDG lifted off the surface), never the flat map's quadratic, because on a sphere the shortest path between two points IS that curve. Nothing in the scene accumulates: the spin, the route's draw-on and the aircraft's position are all f(t), which is what lets frame 900 render on a different worker to frame 899. Verified by make canvas-purity.",
+  "aspect": "16:9",
+  "theme": "vawe-dark",
+  "duration": 12,
+  "destination": "web",
+  "audio": {
+    "silent": true,
+    "_why": "A determinism fixture and a look test, not a film. It has no argument to carry, so it has nothing to score."
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 12
+    }
+  ],
+  "layers": [
+    {
+      "type": "three",
+      "three": "globe",
+      "colors": [
+        "#8affd8",
+        "#071a2e",
+        "#8fdcff",
+        "#ffffff"
+      ],
+      "pointSize": 0.019,
+      "spin": 0.16,
+      "pitch": 0.34,
+      "drawStart": 1.2,
+      "drawDur": 6.5,
+      "arcHeight": 0.2,
+      "x": 420,
+      "y": 0,
+      "w": 1080,
+      "h": 1080,
+      "start": 0,
+      "duration": 12,
+      "anim": "fade",
+      "enterDur": 0.6,
+      "exitDur": 0,
+      "dolly": 3.5
+    }
+  ]
+}

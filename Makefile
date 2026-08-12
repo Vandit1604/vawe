@@ -641,6 +641,12 @@ blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs
 effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
 
+# make globe-dots [SPACING=2.2]  — re-bake core/globe-dots.js from Natural Earth. Run this only when
+# the spacing or the source changes; the output is committed and the runtime never fetches anything.
+.PHONY: globe-dots
+globe-dots:
+	node scripts/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
+
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
 	node scripts/gates/arsenal-check.mjs
 

@@ -16,6 +16,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "d3-geo": "^3.1.1",
     "fontkit": "^2.0.4",
     "three": "^0.185.1",
     "wawoff2": "^2.0.1"

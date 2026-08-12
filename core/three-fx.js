@@ -22,11 +22,14 @@
 // core/layers/index.js imports every layer, that would take the entire layer registry down with it.
 // `make schema-drift` crashed exactly that way before this was changed. Vendored libs are globals here.
 import { THREE_FX } from './three-scenes.js';
+import { LONLAT } from './globe-dots.js';
 // The dials a three scene reads OFF THE LAYER (it is handed the whole layer, named `LL` where `L` is
 // taken). Declared here because this is where they are read; core/surfaces/three.js merges them.
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
   depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
-  morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {} };
+  morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {},
+  // globe
+  from: {}, to: {}, arcHeight: {}, drawStart: {}, drawDur: {} };
 
 export { THREE_FX };
 const T = () => {
@@ -143,6 +146,87 @@ const SCENES = {
 
   // Points sampled on one shape, morphing to another. Abstract/technical brand moments, and the
   // cheapest way to make geometry read as data.
+  // THE GLOBE. Land as points, a great-circle route, and a marker flying it.
+  //
+  // Every dot is a real coordinate: core/globe-dots.js is baked from Natural Earth by
+  // `make globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
+  // not used. That is not only taste — a photographic earth would make the film that carries this
+  // prettier and its claim ("computed, not drawn") false.
+  //
+  // Nothing here accumulates. The rotation, the route's draw-on and the aircraft's position are all
+  // f(t), which is what lets frame 900 render on a different worker to frame 899.
+  globe(L, colors) {
+    const R = 1;
+    const grp = new (T().Group)();
+    // lon/lat -> cartesian, once. The Y axis is the spin axis, so latitude is the polar angle.
+    const at = (lon, lat, r = R) => {
+      const p = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
+      return [-r * Math.sin(p) * Math.cos(th), r * Math.cos(p), r * Math.sin(p) * Math.sin(th)];
+    };
+
+    const n = LONLAT.length / 2;
+    const pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const [x, y, z] = at(LONLAT[i * 2], LONLAT[i * 2 + 1]);
+      pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+    }
+    const dg = new (T().BufferGeometry)();
+    dg.setAttribute('position', new (T().BufferAttribute)(pos, 3));
+    grp.add(new (T().Points)(dg, new (T().PointsMaterial)({
+      color: hex(colors?.[0], '#7fe3c0'), size: L.pointSize ?? 0.011, sizeAttenuation: true,
+      transparent: true, opacity: 0.95 })));
+
+    // The ocean: a sphere just inside the dots so the far side is occluded. Without it every dot on the
+    // back of the world shows through and the globe reads as a wire ball rather than a planet.
+    const ocean = new (T().Mesh)(new (T().SphereGeometry)(R * 0.985, 48, 32),
+      new (T().MeshBasicMaterial)({ color: hex(colors?.[1], '#0b2a4a') }));
+    grp.add(ocean);
+
+    // THE ROUTE, as a real great circle: slerp between the two endpoints, lifted off the surface. A
+    // quadratic through a midpoint would be the flat map's approximation and is simply wrong on a
+    // sphere, where the shortest path between two points IS this curve.
+    const from = L.from ?? [-73.78, 40.64];             // JFK
+    const to = L.to ?? [2.55, 49.01];                   // CDG
+    const a = new (T().Vector3)(...at(from[0], from[1]));
+    const b = new (T().Vector3)(...at(to[0], to[1]));
+    const arcH = L.arcHeight ?? 0.18;
+    const SEG = 220;
+    const arc = [];
+    for (let i = 0; i <= SEG; i++) {
+      const u = i / SEG;
+      const v = new (T().Vector3)().copy(a).lerp(b, u).normalize();
+      arc.push(v.multiplyScalar(R * (1 + arcH * Math.sin(Math.PI * u))));
+    }
+    const rg = new (T().BufferGeometry)().setFromPoints(arc);
+    const route = new (T().Line)(rg, new (T().LineBasicMaterial)({
+      color: hex(colors?.[2], '#8fdcff'), transparent: true }));
+    grp.add(route);
+
+    // The aircraft. A cone rather than a sphere so its heading is visible, and it is ORIENTED by
+    // looking at the next point on the arc, never by integrating a turn rate.
+    const plane = new (T().Mesh)(new (T().ConeGeometry)(0.018, 0.055, 12),
+      new (T().MeshBasicMaterial)({ color: hex(colors?.[3], '#ffffff') }));
+    grp.add(plane);
+
+    return { obj: grp, pose(t, LL) {
+      const spin = LL.spin ?? 0.12;
+      grp.rotation.y = t * spin;                        // absolute, never +=
+      grp.rotation.x = (LL.pitch ?? 0.32);
+      // The route draws on across its own window, and the aircraft sits at the same parameter, so the
+      // line and the marker are one event rather than two clocks that can disagree.
+      const d0 = LL.drawStart ?? 0, dd = LL.drawDur ?? 4;
+      const u = Math.max(0, Math.min(1, (t - d0) / Math.max(dd, 1e-6)));
+      const p = ease(u);
+      rg.setDrawRange(0, Math.max(2, Math.round(p * (SEG + 1))));
+      const i = Math.min(SEG, Math.max(0, Math.round(p * SEG)));
+      plane.position.copy(arc[i]);
+      plane.lookAt(arc[Math.min(SEG, i + 1)]);
+      plane.rotateX(Math.PI / 2);                       // a cone points +Y; aim it along the path
+      plane.visible = p > 0.001 && p < 0.999;
+      route.material.opacity = Math.min(1, u * 6);
+    } };
+  },
+
   pointCloud(L, colors) {
     const n = Math.min(20000, Math.max(200, L.count ?? 6000));
     const r = rng(L.seed ?? 1);
