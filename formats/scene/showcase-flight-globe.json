@@ -1,9 +1,9 @@
 {
   "module": "scene",
-  "note": "The globe is cobe (MIT, 12.9 KB, vendored at assets/vendor/cobe.module.js), and the reason it is safe to use is measured rather than assumed: its published build contains zero requestAnimationFrame, zero performance.now and zero Date.now. It owns no clock, so `phi = f(t)` is the entire integration and determinism is a property of the shape rather than a contract someone has to remember. Magic UI's globe is a React wrapper around this same library; we use the library, not the wrapper, so no React enters the engine and its rAF spring loop, which is exactly the thing we must not have, is simply not part of it. The three.js globe in core/three-fx.js stays for the one thing cobe cannot do, a terminator computed as a real hemisphere from a sun vector. This one is prettier and is a tenth of the code.",
+  "note": "The globe is cobe (MIT, 12.9 KB, vendored at assets/vendor/cobe.module.js), and the reason it is safe to use is measured rather than assumed: its published build contains zero requestAnimationFrame, zero performance.now and zero Date.now. It owns no clock, so `phi = f(t)` is the entire integration and determinism is a property of the shape rather than a contract someone has to remember. Magic UI's globe is a React wrapper around this same library; we use the library, not the wrapper, so no React enters the engine and its rAF spring loop, which is exactly the thing we must not have, is simply not part of it. The three.js globe in core/three-fx.js stays for the one thing cobe cannot do, a terminator computed as a real hemisphere from a sun vector. This one is prettier and is a tenth of the code. PACING, after measuring: the first cut of this ran twenty seconds at 0.85 events per second, slower than the film it replaces (1.79) and below the library's median (1.20). The cause was not too few layers, it was too much time: a route that took 9.2s to draw and a camera settling over 11s, neither of which reads as motion. It is 13s now with the same content, and the first thing cut was duration.",
   "aspect": "16:9",
   "theme": "vawe-dark",
-  "duration": 20,
+  "duration": 13,
   "destination": "web",
   "audio": {
     "silent": true,
@@ -16,19 +16,8 @@
       "to": 20
     }
   ],
-  "_cuts_why": "Two, at the only two real turns: the route completes, and the camera hands the frame to the claim. The subject is one object that never leaves, so every other beat boundary is carried by copy arriving and leaving over a globe that never blinks.",
-  "cuts": [
-    {
-      "t": 13.0,
-      "style": "fade",
-      "dur": 0.28
-    },
-    {
-      "t": 16.8,
-      "style": "fade",
-      "dur": 0.28
-    }
-  ],
+  "_cuts_why": "NONE. The argument is one object that never leaves, and a cut is a moment it does not survive. Two fades over a globe that is mid-draw were furniture: they marked beats the copy already marks, and the direction floor was right to call the result a slideshow by construction, because the only thing crossing those junctions was a canvas whose change it cannot see. Removing them makes the claim true rather than waived. Beat boundaries are carried entirely by copy arriving and leaving over a route that keeps drawing.",
+  "cuts": [],
   "layers": [
     {
       "type": "globe",
@@ -44,7 +33,7 @@
       "_colors_why": "base sea \u00b7 marker \u00b7 atmospheric glow \u00b7 route",
       "phi": 4.42,
       "phiTo": 4.86,
-      "phiDur": 11.0,
+      "phiDur": 7.0,
       "theta": 0.24,
       "origin": [
         -73.78,
@@ -67,12 +56,12 @@
       "w": 1080,
       "h": 1080,
       "start": 0,
-      "duration": 20,
+      "duration": 13,
       "anim": "fade",
-      "enterDur": 1.0,
+      "enterDur": 0.7,
       "exitDur": 0,
-      "drawStart": 3.4,
-      "drawDur": 9.2
+      "drawStart": 2.0,
+      "drawDur": 6.0
     },
     {
       "type": "text",
@@ -84,12 +73,12 @@
       "x": 96,
       "y": 84,
       "w": 520,
-      "start": 3.4,
-      "duration": 3.3,
+      "start": 2.0,
+      "duration": 2.6,
       "anim": "slide-right",
       "out": "defocus",
-      "enterDur": 0.5,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -101,12 +90,12 @@
       "x": 96,
       "y": 134,
       "w": 520,
-      "start": 3.6,
-      "duration": 3.1,
+      "start": 2.2,
+      "duration": 2.4,
       "anim": "fade",
       "out": "defocus",
-      "enterDur": 0.5,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -122,10 +111,10 @@
       "y": 176,
       "w": 620,
       "countStart": 0,
-      "countDur": 8.6,
+      "countDur": 6.0,
       "ease": "easeInOutCubic",
-      "start": 3.4,
-      "duration": 9.0,
+      "start": 2.0,
+      "duration": 6.6,
       "anim": "fade",
       "out": "defocus",
       "enterDur": 0.4,
@@ -142,12 +131,12 @@
       "x": 96,
       "y": 84,
       "w": 420,
-      "start": 7.2,
-      "duration": 5.6,
+      "start": 4.9,
+      "duration": 3.4,
       "anim": "rise",
       "out": "defocus",
-      "enterDur": 0.5,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -160,12 +149,12 @@
       "x": 96,
       "y": 134,
       "w": 420,
-      "start": 7.45,
-      "duration": 5.35,
+      "start": 5.1,
+      "duration": 3.2,
       "anim": "rise",
       "out": "defocus",
-      "enterDur": 0.5,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -179,12 +168,12 @@
       "x": 1304,
       "y": 84,
       "w": 520,
-      "start": 13.1,
-      "duration": 3.6,
+      "start": 8.3,
+      "duration": 2.0,
       "anim": "slide-left",
       "out": "defocus",
-      "enterDur": 0.45,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -197,12 +186,12 @@
       "x": 1304,
       "y": 134,
       "w": 520,
-      "start": 13.3,
-      "duration": 3.4,
+      "start": 8.5,
+      "duration": 1.8,
       "anim": "fade",
       "out": "defocus",
-      "enterDur": 0.45,
-      "exitDur": 0.4,
+      "enterDur": 0.4,
+      "exitDur": 0.35,
       "acrossBeats": true
     },
     {
@@ -215,15 +204,19 @@
       "color": "#eef5ff",
       "x": 70,
       "y": 380,
-      "start": 17.0,
-      "duration": 3.0,
-      "anim": "rise",
-      "enterDur": 0.6,
-      "exitDur": 0
+      "start": 10.6,
+      "duration": 2.4,
+      "anim": "none",
+      "enterDur": 0.5,
+      "exitDur": 0,
+      "split": "word",
+      "preset": "up",
+      "each": 0.42,
+      "stagger": 0.055
     },
     {
       "type": "text",
-      "text": "one JSON \u00b7 600 frames \u00b7 identical every run",
+      "text": "one JSON \u00b7 780 frames \u00b7 identical every run",
       "size": 20,
       "font": "mono",
       "w": 640,
@@ -231,10 +224,10 @@
       "color": "#b9c9e6",
       "x": 70,
       "y": 536,
-      "start": 17.35,
-      "duration": 2.65,
+      "start": 10.9,
+      "duration": 2.1,
       "anim": "fade",
-      "enterDur": 0.5,
+      "enterDur": 0.45,
       "exitDur": 0
     },
     {
@@ -248,11 +241,20 @@
       "color": "#93a6c6",
       "x": 1204,
       "y": 986,
-      "start": 7.0,
-      "duration": 13.0,
+      "start": 4.8,
+      "duration": 8.2,
       "anim": "fade",
-      "enterDur": 0.8,
+      "enterDur": 0.6,
       "exitDur": 0
+    }
+  ],
+  "cameraMove": [
+    {
+      "move": "slowPush",
+      "start": 0,
+      "dur": 13,
+      "from": 1,
+      "to": 1.07
     }
   ]
 }

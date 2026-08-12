@@ -5,75 +5,247 @@
   "theme": "vawe-dark",
   "duration": 20,
   "destination": "web",
-
   "audio": {
     "silent": true,
     "_why": "Shipped silent for this pass, and that is a gap rather than a decision. The film wants a low bed under the crossing that lifts as the light does, so the ear gets the same night-to-dawn ramp as the eye, and the storyboard says so. It is not here because the bed has not been chosen and cut, and a wrong one is worse than none. Not a claim that the film is better mute."
   },
-
-  "bg": [{ "src": "formats/scene/_flight-water.html", "tone": "dark", "from": 0, "to": 20 }],
-
-  "cameraMove": [
-    { "move": "slowPush", "start": 0, "dur": 3.2, "from": 1, "to": 1.04 },
-    { "move": "slowPush", "start": 3.2, "dur": 9.8, "from": 1.04, "to": 1.09 },
-    { "move": "slowPush", "start": 16.6, "dur": 1.7, "from": 1.09, "to": 1 }
+  "bg": [
+    {
+      "src": "formats/scene/_flight-water.html",
+      "tone": "dark",
+      "from": 0,
+      "to": 20
+    }
   ],
-
+  "cameraMove": [
+    {
+      "move": "slowPush",
+      "start": 0,
+      "dur": 3.2,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "slowPush",
+      "start": 3.2,
+      "dur": 9.8,
+      "from": 1.04,
+      "to": 1.09
+    },
+    {
+      "move": "slowPush",
+      "start": 16.6,
+      "dur": 1.7,
+      "from": 1.09,
+      "to": 1
+    }
+  ],
   "_cuts_why": "THREE, not the seven beat boundaries, and all one family. A cut here is working against the film: the whole argument is that one object survives twenty seconds, and a transition is a moment where it does not. So they sit only at the three real turns (the crossing begins, the aircraft arrives, the camera pulls back) and every other beat boundary is carried by layers entering and leaving over a chart that never blinks. One family because three is the point at which docs/CRAFT/DIRECTION.md calls it effect soup, and the old film used five.",
   "cuts": [
-    { "t": 6.8, "style": "fade", "dur": 0.28 },
-    { "t": 13.0, "style": "fade", "dur": 0.28 },
-    { "t": 16.6, "style": "fade", "dur": 0.28 }
+    {
+      "t": 6.8,
+      "style": "fade",
+      "dur": 0.28
+    },
+    {
+      "t": 13.0,
+      "style": "fade",
+      "dur": 0.28
+    },
+    {
+      "t": 16.6,
+      "style": "fade",
+      "dur": 0.28
+    }
   ],
-
   "layers": [
     {
       "type": "html",
       "id": "chart",
       "src": "formats/scene/_flight-chart.html",
       "acrossBeats": true,
-      "x": 0, "y": 169, "w": 1920, "h": 742,
-      "start": 0, "duration": 20,
-      "anim": "none", "enterDur": 0, "exitDur": 0
+      "x": 0,
+      "y": 169,
+      "w": 1920,
+      "h": 742,
+      "start": 0,
+      "duration": 20,
+      "anim": "none",
+      "enterDur": 0,
+      "exitDur": 0
     },
-
-    { "type": "text", "text": "NEW YORK", "size": 40, "weight": 700, "tracking": "0.16em",
-      "color": "var(--text)", "x": 96, "y": 84, "w": 520,
-      "start": 3.35, "duration": 3.3, "anim": "slide-right", "out": "defocus", "enterDur": 0.5, "exitDur": 0.4 },
-    { "type": "text", "text": "JFK · 22:40", "size": 24, "font": "mono",
-      "color": "var(--dim)", "x": 96, "y": 128, "w": 520,
-      "start": 3.55, "duration": 3.1, "anim": "fade", "out": "defocus", "enterDur": 0.5, "exitDur": 0.4 },
-
-    { "type": "count", "from": 0, "to": 3635, "unit": " mi", "size": 58, "weight": 700, "font": "mono",
-      "color": "#8fdcff", "x": 96, "y": 172, "w": 620,
-      "start": 3.5, "duration": 3.2, "countStart": 0, "countDur": 3.1, "ease": "easeInOutCubic", "anim": "fade", "out": "defocus", "enterDur": 0.4, "exitDur": 0.4 },
-
-    { "type": "text", "text": "38,000 ft", "size": 34, "weight": 700, "font": "mono",
-      "color": "var(--text)", "x": 96, "y": 84, "w": 420,
-      "start": 7.1, "duration": 6.18, "anim": "rise", "out": "defocus", "enterDur": 0.5, "exitDur": 0.4 },
-    { "type": "text", "text": "512 mph", "size": 34, "weight": 700, "font": "mono",
-      "color": "var(--text)", "x": 96, "y": 134, "w": 420,
-      "start": 7.35, "duration": 5.93, "anim": "rise", "out": "defocus", "enterDur": 0.5, "exitDur": 0.4 },
-
-    { "type": "text", "text": "PARIS", "size": 40, "weight": 700, "tracking": "0.16em", "align": "right",
-      "color": "var(--text)", "x": 1304, "y": 84, "w": 520,
-      "start": 13.15, "duration": 3.73, "anim": "slide-left", "out": "defocus", "enterDur": 0.45, "exitDur": 0.35 },
-    { "type": "text", "text": "CDG · 11:55", "size": 24, "font": "mono", "align": "right",
-      "color": "var(--dim)", "x": 1304, "y": 128, "w": 520,
-      "start": 13.35, "duration": 3.53, "anim": "fade", "out": "defocus", "enterDur": 0.45, "exitDur": 0.35 },
-
-    { "type": "text", "text": "Every vertex <b>computed</b>. Not one drawn.",
-      "size": 58, "weight": 700, "w": 1180, "align": "left",
-      "color": "#eef5ff", "x": 96, "y": 132,
-      "start": 18.45, "duration": 1.55, "anim": "rise", "enterDur": 0.6, "exitDur": 0 },
-    { "type": "text", "text": "one JSON · 600 frames · identical every run",
-      "size": 22, "font": "mono", "w": 1180, "align": "left",
-      "color": "#b9c9e6", "x": 96, "y": 258,
-      "start": 18.75, "duration": 1.25, "anim": "fade", "enterDur": 0.5, "exitDur": 0 },
-
-    { "type": "text", "text": "sample route · figures are illustrative",
-      "size": 18, "font": "mono", "align": "right", "w": 620,
-      "color": "#93a6c6", "x": 1204, "y": 986, "acrossBeats": true,
-      "start": 6.9, "duration": 13.1, "anim": "fade", "enterDur": 0.8, "exitDur": 0 }
+    {
+      "type": "text",
+      "text": "NEW YORK",
+      "size": 40,
+      "weight": 700,
+      "tracking": "0.16em",
+      "color": "var(--text)",
+      "x": 96,
+      "y": 84,
+      "w": 520,
+      "start": 3.35,
+      "duration": 3.3,
+      "anim": "slide-right",
+      "out": "defocus",
+      "enterDur": 0.5,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "JFK \u00b7 22:40",
+      "size": 24,
+      "font": "mono",
+      "color": "var(--dim)",
+      "x": 96,
+      "y": 128,
+      "w": 520,
+      "start": 3.55,
+      "duration": 3.1,
+      "anim": "fade",
+      "out": "defocus",
+      "enterDur": 0.5,
+      "exitDur": 0.4
+    },
+    {
+      "type": "count",
+      "from": 0,
+      "to": 3635,
+      "unit": " mi",
+      "size": 58,
+      "weight": 700,
+      "font": "mono",
+      "color": "#8fdcff",
+      "x": 96,
+      "y": 172,
+      "w": 620,
+      "start": 3.5,
+      "duration": 3.2,
+      "countStart": 0,
+      "countDur": 3.1,
+      "ease": "easeInOutCubic",
+      "anim": "fade",
+      "out": "defocus",
+      "enterDur": 0.4,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "38,000 ft",
+      "size": 34,
+      "weight": 700,
+      "font": "mono",
+      "color": "var(--text)",
+      "x": 96,
+      "y": 84,
+      "w": 420,
+      "start": 7.1,
+      "duration": 6.18,
+      "anim": "rise",
+      "out": "defocus",
+      "enterDur": 0.5,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "512 mph",
+      "size": 34,
+      "weight": 700,
+      "font": "mono",
+      "color": "var(--text)",
+      "x": 96,
+      "y": 134,
+      "w": 420,
+      "start": 7.35,
+      "duration": 5.93,
+      "anim": "rise",
+      "out": "defocus",
+      "enterDur": 0.5,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "PARIS",
+      "size": 40,
+      "weight": 700,
+      "tracking": "0.16em",
+      "align": "right",
+      "color": "var(--text)",
+      "x": 1304,
+      "y": 84,
+      "w": 520,
+      "start": 13.15,
+      "duration": 3.73,
+      "anim": "slide-left",
+      "out": "defocus",
+      "enterDur": 0.45,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "CDG \u00b7 11:55",
+      "size": 24,
+      "font": "mono",
+      "align": "right",
+      "color": "var(--dim)",
+      "x": 1304,
+      "y": 128,
+      "w": 520,
+      "start": 13.35,
+      "duration": 3.53,
+      "anim": "fade",
+      "out": "defocus",
+      "enterDur": 0.45,
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "text": "Every vertex <b>computed</b>. Not one drawn.",
+      "size": 58,
+      "weight": 700,
+      "w": 1180,
+      "align": "left",
+      "color": "#eef5ff",
+      "x": 96,
+      "y": 132,
+      "start": 18.45,
+      "duration": 1.55,
+      "anim": "rise",
+      "enterDur": 0.6,
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "one JSON \u00b7 1200 frames \u00b7 identical every run",
+      "size": 22,
+      "font": "mono",
+      "w": 1180,
+      "align": "left",
+      "color": "#b9c9e6",
+      "x": 96,
+      "y": 258,
+      "start": 18.75,
+      "duration": 1.25,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "sample route \u00b7 figures are illustrative",
+      "size": 18,
+      "font": "mono",
+      "align": "right",
+      "w": 620,
+      "color": "#93a6c6",
+      "x": 1204,
+      "y": 986,
+      "acrossBeats": true,
+      "start": 6.9,
+      "duration": 13.1,
+      "anim": "fade",
+      "enterDur": 0.8,
+      "exitDur": 0
+    }
   ]
 }

@@ -168,6 +168,11 @@ tasteGate('slop', 'slop (anti-slop detector)', 'scripts/gates/slop.mjs', [], { w
 tasteGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers. TASTE.
 tasteGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// PACE. It sits with the taste gates rather than the always-on ones because a still film is sometimes
+// right, and it is opt-in for the same reason the rest of this half is. What it is NOT is a matter of
+// opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
+// measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #322).
+tasteGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 

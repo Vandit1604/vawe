@@ -8659,6 +8659,47 @@ fails. Restore: green.
 
 ---
 
+## #322 — Two films authored as improvements, both slower than the one they replaced
+
+**What.** `showcase-flight-globe` and `showcase-flight-computed` were written to fix `showcase-flight`.
+Measured as events per second (any moment a layer arrives or leaves, plus cuts and stings):
+
+| film | events/s |
+|---|---|
+| `showcase-flight` — the one being replaced | **1.79** |
+| library median (39 committed scenes) | 1.20 |
+| `showcase-flight-computed` — my replacement | **0.95** |
+| `showcase-flight-globe` — my replacement | **0.85** |
+
+Both were slower than the thing they criticised, and below the median of everything else in the repo.
+
+**Root cause, and it is not "too few layers".** It is too much time. A route that took 9.2 seconds to
+draw, a camera settling over 11 seconds, and a 20-second duration inherited from the old film without
+ever being questioned. Slowness here is almost always a film that is too long, and the first thing to
+cut is duration, not content.
+
+**The gate that knew was looking at the wrong artefact.** `storyboard-check` warns
+`held-state-too-long` at about 1.5 seconds — and it grades the PLAN. Both films were replanned until
+that cleared, then authored with nine-second draws. CLAUDE.md already says it: a green
+`storyboard-check` proves nothing about the film.
+
+**Fix.** `scripts/gates/pace-check.mjs`, in the TASTE half of `author-check` and runnable as
+`make pace-check` (no argument prints a census over the library). It fails a film below 1.0 events/s,
+and any stretch over 4 seconds with nothing arriving or leaving. Calibrated on the library rather than
+invented: median 1.20, p90 1.92, and a backdrop or determinism fixture sits near 0.15 and is meant to,
+so a scene with no copy is measured and reported and never failed.
+
+**Known limit, stated.** It cannot see a count ticking or a route drawing, so a film can score badly
+and be fine — which is why the floor is p10 among films and not the median. It also cannot see the
+opposite failure, and `direction-floor`'s `effect-soup` is the ceiling that answers for that.
+
+**The globe film after the fix:** 20s → 13s, same content, 1.08 events/s, longest hold 3.2s. Cutting
+it also exposed two things worth having: the on-screen claim still said "600 frames" when the film was
+780, which a film arguing for exactness cannot do, and removing the two decorative fades made
+`direction-floor` demand real technique instead of transitions-as-furniture.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

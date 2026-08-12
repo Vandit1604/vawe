@@ -647,6 +647,12 @@ effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from 
 globe-dots:
 	node scripts/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
 
+# make pace-check [D=scene.json]  — events per second, and the longest stretch where nothing arrives or
+# leaves. No D prints a census across the committed library.
+.PHONY: pace-check
+pace-check:
+	node scripts/gates/pace-check.mjs $(D)
+
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
 	node scripts/gates/arsenal-check.mjs
 
