@@ -467,7 +467,7 @@ intent:
 designspec-check:
 	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
 
-# make designspec-copy D=<scene.json> [STRICT=1] — OUR OWN anti-slop copy rules, over the scene's words
+# make designspec-copy D=<scene.json>  (copy + colour families) [STRICT=1] — OUR OWN anti-slop copy rules, over the scene's words
 # AND the html fragments it names (only readable since the fragments moved into files). The rule table is
 # scripts/lib/designspec-rules.mjs: ours, fitted to films, every rule carrying the two samples that prove
 # it works. `--self-test` runs those samples; `--census` prints the whole library.

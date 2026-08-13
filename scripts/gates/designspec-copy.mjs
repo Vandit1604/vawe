@@ -33,8 +33,9 @@ if (argv.includes('--self-test')) {
   let bad = 0;
   console.log(`\n  designspec copy rules · self-test · ${RULES.length} rule(s)\n`);
   for (const r of RULES) {
-    const fired = r.test(plain(r.fires));
-    const quiet = r.test(plain(r.clean));
+    const sample = (v) => (typeof v === 'string' ? plain(v) : v);
+    const fired = r.test(sample(r.fires));
+    const quiet = r.test(sample(r.clean));
     const ok = !!fired && !quiet;
     if (!ok) bad++;
     console.log(`  ${ok ? '✓' : '✗'} ${r.id.padEnd(26)} fires:${fired ? 'yes' : 'NO '}  clean:${quiet ? 'FIRED' : 'quiet'}`);
@@ -69,7 +70,7 @@ function subjectText(p) {
   }
   // Kept as UNITS, never joined. A joined blob let one pattern match across eight layers on the first
   // census run; scope now lives on the rule (see runRules in scripts/lib/designspec-rules.mjs).
-  return { units: parts, allow: d.authoring?.allow || [], fragments: srcs.size };
+  return { units: parts, scene: d, allow: d.authoring?.allow || [], fragments: srcs.size };
 }
 
 const scenes = () => cp.execSync("git ls-files 'formats/scene/*.json'", { cwd: ROOT, encoding: 'utf8' })
@@ -80,7 +81,7 @@ if (argv.includes('--census')) {
   let hit = 0;
   for (const f of scenes()) {
     const s = subjectText(path.join(ROOT, f));
-    const found = runRules(s.units, { allow: s.allow });
+    const found = runRules(s.units, { allow: s.allow, scene: s.scene });
     if (!found.length) continue;
     hit++;
     console.log(`  ${f.split('/').pop().replace('.json', '').padEnd(30)} ${found.map((x) => `[${x.id}] ${x.snippet}`).join('\n' + ' '.repeat(33))}`);
@@ -94,7 +95,7 @@ if (!file || !fs.existsSync(file)) {
   process.exit(2);
 }
 const s = subjectText(file);
-const found = runRules(s.units, { allow: s.allow });
+const found = runRules(s.units, { allow: s.allow, scene: s.scene });
 console.log(`\n  designspec copy rules · ${file}  (${RULES.length} rule(s) · ${s.fragments} fragment(s) read)`);
 if (!found.length) { console.log('  ✓ no copy tells\n'); process.exit(0); }
 for (const f of found) {

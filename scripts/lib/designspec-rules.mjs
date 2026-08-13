@@ -111,6 +111,43 @@ export const RULES = [
     fires: 'Every vertex computed. Not one drawn.',
     clean: 'The route draws in six seconds and the aircraft rides the same parameter.',
   },
+  {
+    id: 'gradient-text-overuse',
+    category: 'colour',
+    scope: 'scene',
+    severity: 'warn',
+    needs: 'scene',
+    // THE COLOUR FAMILY WAS ALMOST ENTIRELY ALREADY OURS, and better. Four of the five rules we went
+    // to port were dropped after measuring what this repo has:
+    //   low-contrast    → verify/audit.mjs already computes WCAG contrast on the RENDERED scene, walks
+    //                     for the effective background, and samples the bg canvas underneath. It also
+    //                     parses `color(srgb …)`, which is what Chromium returns for every color-mix()
+    //                     this library uses. Strictly more than a detector reading one element's style.
+    //   ai-color-palette → designspec-check asks the better question: distance from the theme's own
+    //                     palette, not membership of a global "purple is 260–310°" hue band.
+    //   cream-palette   → same answer. Our backdrops come from the theme.
+    //   gray-on-color   → a subset of the contrast audit above, on the cases where it matters.
+    //
+    // Which leaves gradient text, and the port INVERTS there. Upstream calls it "decorative, never
+    // meaningful" and bans it. Here it is a first-party effect: `core/type.js:122` implements a
+    // gradient sweep and its own comment sets the dose — "ONE hero word per film". A rule that banned
+    // it would ban a capability we built. So this counts instead, and the engine's comment IS the
+    // threshold. Only we could know that, which is the whole argument for owning the table.
+    why: 'A gradient sweep reads as the hero moment because it is rare. Two of them in one film is two '
+      + 'ordinary words. core/type.js sets the dose at one, and that is the number.',
+    test(scene) {
+      const found = [];
+      const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
+        if (!l || typeof l !== 'object') continue;
+        if (l.preset === 'gradient' || l.anim === 'gradient') found.push(plain(l.text || '').slice(0, 24) || l.id || l.type || '?');
+        if (l.children) walk(l.children);
+      } };
+      walk(scene && scene.layers);
+      return found.length > 1 ? `${found.length} gradient-swept unit(s): ${found.join(' · ')}` : null;
+    },
+    fires: { layers: [{ type: 'text', text: 'Compose', preset: 'gradient' }, { type: 'text', text: 'Render', preset: 'gradient' }] },
+    clean: { layers: [{ type: 'text', text: 'Compose', preset: 'gradient' }, { type: 'text', text: 'Render', preset: 'up' }] },
+  },
 ];
 
 /** Run every rule over a scene's text UNITS — one per layer, one per fragment file.
@@ -125,12 +162,18 @@ export const RULES = [
  *  `document` — the tell IS the relationship between pieces (01 / 02 / 03 across three layers).
  *
  *  Pure: no files, no DOM, no globals. That is what makes the self-test meaningful. */
-export function runRules(units, { allow = [] } = {}) {
+export function runRules(units, { allow = [], scene = null } = {}) {
   const list = (Array.isArray(units) ? units : [units]).map((u) => plain(String(u || ''))).filter((u) => u.trim());
   const doc = list.join('\n');
   const out = [];
   for (const r of RULES) {
     if (allow.includes(r.id)) continue;
+    // A `scene` rule reads the parsed JSON, not words: some tells are declarations, not writing.
+    if (r.scope === 'scene') {
+      const snippet = r.test(scene);
+      if (snippet) out.push({ id: r.id, severity: r.severity, why: r.why, snippet });
+      continue;
+    }
     if (r.scope === 'document') {
       const snippet = r.test(doc);
       if (snippet) out.push({ id: r.id, severity: r.severity, why: r.why, snippet });
