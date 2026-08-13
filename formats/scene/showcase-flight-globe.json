@@ -25,12 +25,12 @@
       "id": "globe",
       "acrossBeats": true,
       "colors": [
-        "#223046",
+        "#1b2534",
         "#e6e9ef",
-        "#2a3a54",
-        "#5ee0c8"
+        "#2e4a55",
+        "#e6e9ef"
       ],
-      "_colors_why": "base sea (theme bg tint) \u00b7 marker (theme text) \u00b7 atmospheric glow (theme bg tint2) \u00b7 route (theme accent)",
+      "_colors_why": "sea #1b2534 (slate off page-black) \u00b7 marker+route #e6e9ef (theme ink, the lightest value it owns, because the route is the subject) \u00b7 glow #2e4a55 (accent at low weight, so the limb is ours). The count keeps the accent #5ee0c8: one bright accent per frame, and it belongs to the number.",
       "phi": 4.42,
       "phiTo": 4.86,
       "phiDur": 7.0,
@@ -43,11 +43,11 @@
         2.55,
         49.01
       ],
-      "arcHeight": 0.19,
-      "arcWidth": 2.4,
+      "arcHeight": 0.035,
+      "arcWidth": 3.0,
       "markerSize": 0.045,
       "mapSamples": 22000,
-      "mapBrightness": 7,
+      "mapBrightness": 5.5,
       "diffuse": 1.25,
       "dark": 1,
       "scale": 1.02,
