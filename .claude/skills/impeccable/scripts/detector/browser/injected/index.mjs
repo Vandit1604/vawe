@@ -1,5 +1,19 @@
 const IS_BROWSER = typeof window !== 'undefined';
 
+// SVG paints text with `fill`, never with CSS `color`. Reading `color` off an <svg><text> measures a
+// property that paints nothing, so a chart whose glyphs are #454f5e on white was reported 21 times as
+// 1.1:1 near-white-on-white — the page's inherited `color` token, which the SVG never uses. False
+// findings are worse than none: they teach the reader to skim the detector's output.
+// `currentColor` is the one case where fill and color agree; `none` means the glyphs are not painted.
+function textPaintCss(el, style) {
+  if (el && el.namespaceURI === 'http://www.w3.org/2000/svg') {
+    const fill = (style.fill || '').trim();
+    if (fill === 'none') return null;
+    if (fill && fill !== 'currentColor') return fill;
+  }
+  return style.color;
+}
+
 // ─── Section 7: Browser UI (IS_BROWSER only) ────────────────────────────────
 
 if (IS_BROWSER) {
@@ -680,7 +694,8 @@ if (IS_BROWSER) {
       const reasons = collectVisualContrastReasons(el, style);
       if (reasons.length === 0) continue;
 
-      const textColor = parseRgb(style.color);
+      const _paint = textPaintCss(el, style);
+  const textColor = _paint ? parseRgb(_paint) : null;
       const fontSize = parseFloat(style.fontSize) || 16;
       const fontWeight = parseInt(style.fontWeight) || 400;
       const isLargeText = fontSize >= WCAG_LARGE_TEXT_PX || (fontSize >= WCAG_LARGE_BOLD_TEXT_PX && fontWeight >= 700);
@@ -1107,7 +1122,8 @@ if (IS_BROWSER) {
     }
 
     const style = getComputedStyle(el);
-    const textColor = parseRgb(style.color) || candidate.textColor;
+    const _paint = textPaintCss(el, style);
+    const textColor = (_paint ? parseRgb(_paint) : null) || candidate.textColor;
     if (!textColor) return { ...candidate, status: 'unresolved', confidence: 'none', reason: 'unreadable text color' };
 
     const rect = getDirectTextRect(el) || el.getBoundingClientRect();

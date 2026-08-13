@@ -8728,6 +8728,43 @@ broken.
 
 ---
 
+## #324 — The anti-slop detector cannot read SVG text, and invented 21 findings on the first fragment it was ever pointed at
+
+**What.** `formats/scene/hero-site.json` was the first scene to move its hand-authored markup into a
+file, which is also the first time `make preview` could run the impeccable detector over it. The
+detector reported **21 `low-contrast` findings, every one of them false**: `1.1:1 — text #f7f8f8 on
+#ffffff`, twenty-one times. `#f7f8f8` appears nowhere in the fragment. Its glyphs are `fill="#454f5e"`
+(21 of them), `#2563eb` and `#0f1620`, all comfortably legible on white.
+
+**Root cause.** SVG paints text with `fill`. The detector reads CSS `color`
+(`.claude/skills/impeccable/scripts/detector/rules/checks.mjs`, and four more sites across the browser
+source and its generated bundle), which for an inline `<svg><text>` is whatever the page happened to
+inherit and paints nothing at all. So it measured a property the SVG never uses, against the real
+background, and reported the arithmetic confidently. This engine's fragments are overwhelmingly inline
+SVG, so the check was wrong about nearly everything it will ever be shown here.
+
+**Why it is worse than no check.** Twenty-one false findings on the first run teach the reader to skim
+the detector's output, and the stop this feature exists to create (`docs/CRAFT/APPROVAL-STOPS.md`, stop
+1b) is worth nothing if its evidence is noise.
+
+**Fix.** One helper, `textPaintCss(el, style)`, applied at every text-colour site in all three files —
+the SVG namespace means `fill` is the paint, `currentColor` is the one case where the two agree, and
+`none` means the glyphs are not painted. Proven both directions: the hero-site fragment goes 21 → 0,
+and a probe whose SVG text really is `fill="#f7f8f8"` on white is still caught, which the detector could
+not have distinguished before. Regression-checked the way a gate change must be: three non-SVG pages
+(`docs/animation.html` 2, `docs/architecture.html` 26, `docs/design/animation-gist.html` 2) report
+identical counts before and after, and the eight `.html` fragments are unchanged on the static engine.
+
+**This is a patch to VENDORED third-party code** (`.claude/skills/impeccable`, Apache-2.0). Its build
+script is not vendored, so both the source (`rules/checks.mjs`, `browser/injected/index.mjs`) and the
+generated bundle (`detect-antipatterns-browser.js`, which is the file `detectUrl` actually injects)
+carry the same edit. **Updating the skill will silently revert it.** Re-apply, or the 21 come back.
+
+**Lesson.** A measurement of the wrong property does not fail quietly, it fails *confidently*. Before
+believing a detector about markup it has never seen, point it at markup whose answer you already know.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

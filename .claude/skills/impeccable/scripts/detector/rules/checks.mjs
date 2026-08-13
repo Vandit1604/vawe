@@ -19,6 +19,21 @@ import {
   relativeLuminance,
 } from '../shared/color.mjs';
 
+// SVG paints text with `fill`, never with CSS `color`. Reading `color` off an <svg><text> measures a
+// property that paints nothing, so a chart whose glyphs are #454f5e on white was reported 21 times as
+// 1.1:1 near-white-on-white — the page's inherited `color` token, which the SVG never uses. False
+// findings are worse than none: they teach the reader to skim the detector's output.
+// `currentColor` is the one case where fill and color agree; `none` means the glyphs are not painted.
+function textPaintCss(el, style) {
+  if (el && el.namespaceURI === 'http://www.w3.org/2000/svg') {
+    const fill = (style.fill || '').trim();
+    if (fill === 'none') return null;
+    if (fill && fill !== 'currentColor') return fill;
+  }
+  return style.color;
+}
+
+
 const DETECTOR_IS_BROWSER = typeof window !== 'undefined';
 
 // ─── Section 3: Pure Detection ──────────────────────────────────────────────
@@ -776,7 +791,7 @@ function checkElementColorsDOM(el) {
   const effectiveBg = resolveBackground(el);
   return checkColors({
     tag,
-    textColor: parseRgb(style.color),
+    textColor: (() => { const c = textPaintCss(el, style); return c ? parseRgb(c) : null; })(),
     bgColor: readOwnBackgroundColor(el, style),
     effectiveBg,
     effectiveBgStops: effectiveBg ? null : resolveGradientStops(el),
@@ -1179,7 +1194,8 @@ function checkElementAIPaletteDOM(el) {
   }
 
   // Check for neon text (vivid cyan/purple color on dark background)
-  const textColor = parseRgb(style.color);
+  const _paint = textPaintCss(el, style);
+  const textColor = _paint ? parseRgb(_paint) : null;
   if (textColor && hasChroma(textColor, 80)) {
     const hue = getHue(textColor);
     const isAIPalette = (hue >= 160 && hue <= 200) || (hue >= 260 && hue <= 310);
@@ -1750,7 +1766,7 @@ function checkElementColors(el, style, tag, window, customPropMap, hasAnchorInhe
   // parseRgb misses Tailwind-tokenized text colors. Resolve through the
   // customPropMap first; fall back to parseRgb for vanilla rgb() pages.
   let textColor = customPropMap ? parseColorResolved(style.color, customPropMap) : null;
-  if (!textColor) textColor = parseRgb(style.color);
+  if (!textColor) { const c = textPaintCss(el, style); textColor = c ? parseRgb(c) : null; }
 
   // Anchor-inherit FP workaround: jsdom's UA stylesheet has `:link { color:
   // blue }` at high specificity. The page's `a { color: inherit }` rule
