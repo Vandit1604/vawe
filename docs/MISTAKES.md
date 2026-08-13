@@ -8836,6 +8836,44 @@ into 41 silences that look like 41 passes.
 
 ---
 
+## #327 — A background parameter one level out of place: accepted, dropped, and a byte-identical render
+
+**What.** The flight film's backdrop was a flat white field for all 13 seconds, so I gave it
+`gradientWash`. The stock pools were far too strong, so I wrote `"intensity": 0.3` on the bg window and
+re-rendered the contact sheet. Identical. I replaced `intensity` with a hand-tuned `blobs` array and
+re-rendered. **Identical again.** Two parameter changes, two byte-identical sheets, nothing said.
+
+**Root cause.** `formats/scene/scene.js:146` reads `applyBgOver(spec, b.opts)`. Parameters live under
+`opts`; I had written them at the TOP LEVEL of the window, where `b.opts` is undefined and the whole
+override is a no-op. The render is exactly as if the keys were absent.
+
+**This is #157 one level up, and #157's own fix is why it hid.** That entry made an unknown key *inside*
+`opts` throw, and `bgOverErrors` does that job well. Nothing looked one level out. So the shape that
+fails loudly is a typo in the right place, and the shape that fails silently is a correct key in the
+wrong place — which is the easier mistake to make and the harder one to see.
+
+**How it was found.** Not by a gate. By changing a number twice and getting the same picture, then
+reading the call site. Everything up to that point looked right: the JSON validated, the schema accepted
+it, the preset applied, the film rendered.
+
+**Fix.** `bgErrors` in `core/validate.mjs` now flags any key at the top level of a bg window that is a
+real parameter of that window's preset (`bgOptKeys`) and not one of the window's own keys, and prints
+the corrected JSON. Falsifiable both ways: re-adding `"intensity": 0.3` to the flight film fails with
+the exact message, removing it passes.
+
+**It immediately found a second one, in a shipped film.** `ransom-intro` declared
+`"period": 7.5, "peakAlpha": 0.34` on its dotmatrix window, outside `opts`. Both had been dropped since
+the day they were written, and the film had been rendering on the preset's defaults while its JSON said
+otherwise. Moving them into `opts` changes the scene signature, which is the proof they were inert —
+a gate change that alters a render is exactly the outcome that has to be demonstrated rather than
+asserted. Beats re-read, backdrop still subtle, baseline re-saved.
+
+**Lesson.** When a knob does nothing, do not turn it harder. Read the call site that consumes it. And
+when you fix an "accepted and ignored" bug, ask where else the same value could be written — the level
+above is a place a correct key can be wrong.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

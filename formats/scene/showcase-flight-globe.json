@@ -9,11 +9,19 @@
     "silent": true,
     "_why": "As showcase-flight-computed.json: the film wants a bed that lifts with the light, and shipping the wrong one is worse than shipping none. A gap, stated, not a claim that mute is better."
   },
+  "_bg_why": "plain was a decision nobody made. This is the light-mode mesh wash, but the stock gradientWash pools are cobalt at alpha 0.78 and at that strength the backdrop turned half the frame blue and fought the route, which is the one cobalt thing that matters. So the blobs are hand-set: mostly the theme's line grey, one cobalt pool at alpha 0.09, and periods of 9 to 13 seconds so the field actually travels within a 13s film instead of creeping. Judged on the beat sheet across five beats, never on one still.",
   "bg": [
     {
-      "preset": "plain",
+      "preset": "gradientWash",
       "from": 0,
-      "to": 13
+      "to": 13,
+      "opts": {
+        "blobs": [
+        { "color": "231,234,240", "x": 0.14, "y": 0.22, "rf": 0.44, "ax": 0.07, "ay": 0.05, "px": 11, "py": 13, "ph": 0, "a": 0.85 },
+        { "color": "37,99,235", "x": 0.86, "y": 0.8, "rf": 0.3, "ax": 0.06, "ay": 0.055, "px": 9, "py": 12, "ph": 2, "a": 0.09 },
+          { "color": "231,234,240", "x": 0.62, "y": 0.92, "rf": 0.26, "ax": 0.05, "ay": 0.045, "px": 13, "py": 10, "ph": 4, "a": 0.6 }
+        ]
+      }
     }
   ],
   "_cuts_why": "NONE. The argument is one object that never leaves, and a cut is a moment it does not survive. Two fades over a globe that is mid-draw were furniture: they marked beats the copy already marks, and the direction floor was right to call the result a slideshow by construction, because the only thing crossing those junctions was a canvas whose change it cannot see. Removing them makes the claim true rather than waived. Beat boundaries are carried entirely by copy arriving and leaving over a route that keeps drawing.",
@@ -62,6 +70,28 @@
       "exitDur": 0,
       "drawStart": 2.0,
       "drawDur": 6.0
+    },
+    {
+      "type": "text",
+      "text": "One arc, across the Atlantic.",
+      "size": 60,
+      "weight": 700,
+      "color": "#0f1620",
+      "x": 360,
+      "y": 120,
+      "w": 1200,
+      "align": "center",
+      "start": 0.45,
+      "duration": 1.5,
+      "anim": "none",
+      "enterDur": 0.55,
+      "exitDur": 0.4,
+      "out": "defocus",
+      "acrossBeats": true,
+      "split": "word",
+      "preset": "up",
+      "each": 0.4,
+      "stagger": 0.05
     },
     {
       "type": "text",

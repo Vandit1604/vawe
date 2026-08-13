@@ -81,5 +81,5 @@
       "src": "formats/scene/_ransom-intro-page.html"
     }
   ],
-  "bg": [{ "t": 0, "preset": "dotmatrix", "mode": "wave", "period": 7.5, "peakAlpha": 0.34 }]
+  "bg": [{ "t": 0, "preset": "dotmatrix", "mode": "wave", "opts": { "period": 7.5, "peakAlpha": 0.34 } }]
 }

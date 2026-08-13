@@ -21,7 +21,7 @@ import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
 import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
-import { bgPreset, bgOverErrors } from '../core/backgrounds.js';
+import { bgPreset, bgOverErrors, bgOptKeys } from '../core/backgrounds.js';
 import { mergePan } from './pan-resolve.mjs';
 import { motionAt } from './sequence.js';
 
@@ -301,6 +301,11 @@ export function externalHtmlErrors(cfg, read) {
   return out;
 }
 
+// The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
+// Listed rather than derived: a window's own vocabulary is small and stable, and deriving it from the
+// schema would make this check silently weaker the moment the schema grew a key.
+const BG_WINDOW_KEYS = new Set(['preset', 'use', 'value', 'html', 'src', 'from', 'to', 't', 'tone', 'opts', 'mode', 'seed']);
+
 // BACKGROUND WINDOWS. Two rules the schema walk cannot express, both about the hand-authored (`html`)
 // backdrop introduced alongside the canvas presets.
 export function bgErrors(cfg) {
@@ -333,6 +338,23 @@ export function bgErrors(cfg) {
       // resolved without the theme; applyBgOver throws on it at build time instead.
       if (isObj(b.opts) && b.use == null)
         out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
+      // ...AND THE SAME KEY ONE LEVEL UP. #157 made an unknown key INSIDE `opts` throw. Nothing checked
+      // a real fx parameter written OUTSIDE it: `{"preset":"gradientWash","intensity":0.3}` is read by
+      // formats/scene/scene.js:146 as `applyBgOver(spec, b.opts)` with `b.opts` undefined, so the whole
+      // override is dropped and the film renders exactly as if the key were not there. That is the
+      // identical failure the earlier fix was written for, at the level nobody looked at: I authored one
+      // myself, changed the numbers twice, and got a byte-identical contact sheet both times before
+      // reading the call site (docs/MISTAKES.md #327).
+      if (b.use == null) {
+        const known = new Set(bgOptKeys(bgPreset(b.preset || 'paper', b.value)));
+        const stray = Object.keys(b).filter((k) => known.has(k) && !BG_WINDOW_KEYS.has(k));
+        if (stray.length)
+          out.push(`${at} sets ${stray.map((k) => `\`${k}\``).join(', ')} at the top level of the window, `
+            + `where nothing reads ${stray.length > 1 ? 'them' : 'it'}. ${stray.length > 1 ? 'These are' : 'This is'} `
+            + `a preset PARAMETER, and parameters live under \`opts\`: `
+            + `{"preset":"${b.preset || 'paper'}", "opts": {${stray.map((k) => `"${k}": …`).join(', ')}}}. `
+            + `Written where you have it, the render is unchanged and nothing says so.`);
+      }
       return;
     }
     if (b.opts != null)
