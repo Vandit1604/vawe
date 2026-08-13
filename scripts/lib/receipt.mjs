@@ -36,11 +36,44 @@ export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'verify', 'app
 const keyOf = (subject) => path.basename(subject).replace(/\.(json|md|markdown)$/i, '');
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);
 
-/** sha256 of the subject's bytes. Null when the file is unreadable, never a thrown error: a missing
- *  subject is the caller's problem to report, not this module's to crash on. */
+// A scene's hand-authored markup can live INSIDE the JSON as an escaped `html` string, or beside it as
+// `{"type":"html","src":"formats/scene/x.html"}`. The second form moves the markup out of the subject's
+// bytes — so hashing the subject alone would leave every receipt for that scene FRESH while its whole
+// backdrop was rewritten. That is precisely the failure this module exists to prevent, reintroduced by
+// a feature, and it landed before a single scene used `src`.
+//
+// So the fragments a scene NAMES are part of what was signed off. Same rule preloadHtml uses (an html
+// layer's `src`, or a bg window's), not every path-shaped string: an image changing is a different
+// question, and folding assets in here would stale the whole library at once.
+//
+// The path is folded in beside the bytes, so pointing a layer at a different file with identical
+// contents still counts as a change — it is a different scene to read.
+function fragmentsOf(subject) {
+  if (!/\.json$/i.test(subject)) return [];
+  let data;
+  try { data = JSON.parse(fs.readFileSync(subject, 'utf8')); } catch { return []; }
+  const out = new Set();
+  const walk = (a) => { if (Array.isArray(a)) for (const l of a) {
+    if (!l || typeof l !== 'object') continue;
+    if (l.type === 'html' && typeof l.src === 'string') out.add(l.src);
+    if (l.children) walk(l.children);
+  } };
+  walk(data.layers);
+  // bg windows carry no `type`, exactly as in core/preload.js.
+  for (const b of Array.isArray(data.bg) ? data.bg : []) if (b && typeof b === 'object' && typeof b.src === 'string') out.add(b.src);
+  return [...out].sort();
+}
+
+/** sha256 of the subject's bytes, plus the bytes of any html fragment it names. Null when anything it
+ *  covers is unreadable, never a thrown error: a missing subject is the caller's problem to report,
+ *  not this module's to crash on. A subject that names no fragment hashes exactly as it always has,
+ *  which is what keeps this change from un-approving the whole library in one commit. */
 export function hashOf(subject) {
-  try { return crypto.createHash('sha256').update(fs.readFileSync(subject)).digest('hex'); }
-  catch { return null; }
+  try {
+    const h = crypto.createHash('sha256').update(fs.readFileSync(subject));
+    for (const rel of fragmentsOf(subject)) h.update('\0').update(rel).update('\0').update(fs.readFileSync(path.join(ROOT, rel)));
+    return h.digest('hex');
+  } catch { return null; }
 }
 
 /** Record that `stage` was completed for `subject`. `meta` is free-form and is what makes a receipt

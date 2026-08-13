@@ -8765,6 +8765,37 @@ believing a detector about markup it has never seen, point it at markup whose an
 
 ---
 
+## #325 — Moving markup into a file moved it out of the hash that proves somebody looked at it
+
+**What.** `scripts/lib/receipt.mjs` hashed the subject file's bytes and nothing else. The `html.src`
+feature lets a scene name its markup instead of containing it, so from the day it shipped, rewriting a
+6,788-character fragment left every receipt for that scene reading FRESH. `make beat-check` would have
+gone on reporting that the beats had been seen, about a film whose whole backdrop had been replaced.
+
+**Root cause.** The receipt's entire argument is at `receipt.mjs:15-17` — hashing the subject's bytes
+means editing the subject silently withdraws its own sign-off. A feature that moves content out of
+those bytes breaks that argument, and nothing connected the two. It shipped before any scene used
+`src`, so there was no wrong render to notice; the hole was found by asking what extraction would do
+to the receipts, not by anything failing.
+
+**Fix.** `hashOf` folds in the bytes of every html fragment the subject NAMES, path first so pointing
+at a different file with identical contents still counts, in sorted order so the digest is stable. Same
+rule `preloadHtml` uses — an html layer's `src` or a bg window's — and deliberately not every
+path-shaped string: folding image assets in would stale the whole library in one commit and read as a
+mass un-approval.
+
+**A hash change must not un-approve anything.** Measured across all 26 live receipts before and after:
+identical, not one changed state, because a subject that names no fragment hashes exactly as it always
+did. Then the positive test, which is the one that matters: with `hero-site` freshly signed off,
+appending one comment line to `_hero-site-card.html` and touching nothing else turns it STALE and
+`beat-check` prints `beats-unseen`.
+
+**Lesson.** Loosening a coupling can quietly widen the blast radius of everything that measured the
+tight version. When a feature moves content across a boundary, go and ask what on the other side was
+counting on it being there.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
