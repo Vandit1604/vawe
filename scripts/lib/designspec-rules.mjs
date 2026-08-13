@@ -148,6 +148,82 @@ export const RULES = [
     fires: { layers: [{ type: 'text', text: 'Compose', preset: 'gradient' }, { type: 'text', text: 'Render', preset: 'gradient' }] },
     clean: { layers: [{ type: 'text', text: 'Compose', preset: 'gradient' }, { type: 'text', text: 'Render', preset: 'up' }] },
   },
+  {
+    id: 'flat-type-hierarchy',
+    category: 'type',
+    scope: 'scene',
+    severity: 'warn',
+    needs: 'scene',
+    // THE TYPOGRAPHY FAMILY, TRIAGED. Seven of the ten rules we looked at are dropped, and each drop is
+    // a measurement of what this repo already does better:
+    //   overused-font  → designspec-check asks whether the face is a ROLE the theme declares. A global
+    //                    list of 17 "overused" faces cannot know that a brand owns one of them.
+    //   tiny-text      → verify/audit.mjs:389 already has a floor, and it is FRAME-RELATIVE (1.3% of
+    //                    frame height) rather than a fixed 12px, so it scales with the canvas. It is
+    //                    what caught a 17px footer on the flight film.
+    //   wide-tracking  → would fire on nearly every film here and be wrong every time. Our labels are
+    //                    deliberately tracked out ("NEW YORK" at 0.16em); that is the house style, not
+    //                    a defect. A rule that flags the design we chose teaches people to ignore it.
+    //   tight-leading  → same argument, on display type.
+    //   single-font · italic-serif-display · oversized-h1 → the first two are theme questions
+    //                    designspec-check already owns; the third overlaps copy-check's hook length.
+    //
+    // What is left is scale contrast, which nothing here measured and CLAUDE.md names directly: "one
+    // huge hero + tiny caption". Threshold fitted to the library rather than taken: the ratio between
+    // the largest and smallest text on a scene is 1.13 at the worst, then 1.37, then 1.56. 1.25 sits in
+    // the real gap, so it separates the one flat scene from the ones that are merely close.
+    why: 'Sizes within a quarter of each other read as one undifferentiated block, so nothing is the '
+      + 'subject. Scale contrast is what makes a frame legible in the second it gets.',
+    test(scene) {
+      const sizes = [];
+      const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
+        if (!l || typeof l !== 'object') continue;
+        if (l.type === 'text' && typeof l.text === 'string' && plain(l.text).trim() && l.size) sizes.push(l.size);
+        if (l.children) walk(l.children);
+      } };
+      walk(scene && scene.layers);
+      // Two text layers are a title and a caption, not a hierarchy to judge.
+      if (sizes.length < 3) return null;
+      const u = [...new Set(sizes)].sort((a, b) => b - a);
+      if (u.length < 2) return null;
+      const ratio = u[0] / u[u.length - 1];
+      return ratio < 1.25 ? `${u[0]}px to ${u[u.length - 1]}px is a ${ratio.toFixed(2)}x range over ${sizes.length} text layers` : null;
+    },
+    fires: { layers: [{ type: 'text', text: 'a', size: 100 }, { type: 'text', text: 'b', size: 95 }, { type: 'text', text: 'c', size: 90 }] },
+    clean: { layers: [{ type: 'text', text: 'a', size: 120 }, { type: 'text', text: 'b', size: 96 }, { type: 'text', text: 'c', size: 24 }] },
+  },
+  {
+    id: 'extreme-negative-tracking',
+    category: 'type',
+    scope: 'scene',
+    severity: 'warn',
+    needs: 'scene',
+    // The library's tightest declared tracking is exactly -0.04em, so the floor sits just beyond it:
+    // fitted to what we ship, not to a number somebody else picked. `ls` is a documented synonym for
+    // `tracking` (docs/MISTAKES.md), so both are read — reading one and not the other is how a prop
+    // goes silently unchecked here.
+    why: 'Past about -0.04em the letters touch and the word stops being read, it is recognised. That is '
+      + 'a logo technique, and it is wrong for anything a viewer has to actually read.',
+    test(scene) {
+      const bad = [];
+      const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
+        if (!l || typeof l !== 'object') continue;
+        const raw = l.tracking ?? l.ls;
+        if (raw != null) {
+          const s = String(raw);
+          let em = null;
+          if (/em$/.test(s)) em = parseFloat(s);
+          else if (/px$/.test(s) && l.size) em = parseFloat(s) / l.size;   // px is relative to THIS layer's size
+          if (em != null && em < -0.04) bad.push(`${plain(l.text || '').slice(0, 20) || l.id || l.type} at ${s}`);
+        }
+        if (l.children) walk(l.children);
+      } };
+      walk(scene && scene.layers);
+      return bad.length ? `${bad.length} layer(s) past the -0.04em floor: ${bad.join(' · ')}` : null;
+    },
+    fires: { layers: [{ type: 'text', text: 'Crushed', size: 100, tracking: '-0.06em' }] },
+    clean: { layers: [{ type: 'text', text: 'Tight', size: 100, tracking: '-0.04em' }, { type: 'text', text: 'Px', size: 100, ls: '-4px' }] },
+  },
 ];
 
 /** Run every rule over a scene's text UNITS — one per layer, one per fragment file.
