@@ -58,9 +58,9 @@
       "mapBrightness": 1.35,
       "diffuse": 0.55,
       "dark": 0,
-      "scale": 1.06,
+      "scale": 1.24,
       "x": 360,
-      "y": 300,
+      "y": 250,
       "w": 1200,
       "h": 1200,
       "start": 0,
@@ -274,8 +274,8 @@
       "w": 680,
       "acrossBeats": true,
       "color": "#697182",
-      "x": 1180,
-      "y": 1006,
+      "x": 1150,
+      "y": 978,
       "start": 4.8,
       "duration": 8.2,
       "anim": "fade",
@@ -285,7 +285,9 @@
   ],
   "authoring": {
     "allow": ["aphoristic-cadence"],
-    "_why": "\"Every vertex computed. Not one drawn.\" is the shape the rule flags, and here it is literally true: the globe is 22,000 points sampled from Natural Earth and a great-circle route, with no hand-drawn art anywhere in the film. The rule asks the author to decide rather than comply, and this is the decision."
+    "_why": {
+      "aphoristic-cadence": "The rule would have me cut \"Every vertex computed. Not one drawn.\" as manufactured contrast, and it is right about the shape. Here the contrast is the fact: the globe is 22,000 points sampled from Natural Earth and a great-circle route solved per frame, and there is no drawn artwork anywhere in the film. The rule exists to make the author decide rather than comply. This is the decision."
+    }
   },
   "cameraMove": [
     {
