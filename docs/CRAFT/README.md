@@ -85,7 +85,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
 | [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
 | [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
-| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones |
+| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace |
 | [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 

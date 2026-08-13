@@ -278,6 +278,13 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    Reach past every WARN; waive a *deliberate* break with
    `{"authoring":{"allow":[...]}}`. Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
 3. **Render:** `make video D=formats/scene/<topic>.json` (runs author-check first unless `NOCHECK=1`).
+3a. **IS THE EMPTY PART OF THE FRAME DOING A JOB?** Whitespace is ACTIVE (isolating the subject,
+   directing the eye) or PASSIVE (what merely happened between two things placed independently). Passive
+   space does not read as minimal, it reads as unfinished. Two tests, and the second decides: name what
+   the emptiness is doing in one clause, then ask whether enlarging the subject removes it and improves
+   the frame. If it does, that space was never working. NO GATE SEES THIS: `make audit` fires on things
+   COLLIDING, never on a frame that is half empty because nobody decided anything. It is `make judge`
+   and your eyes. **[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md)**.
 4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
    **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
    A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text

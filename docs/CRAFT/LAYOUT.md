@@ -1,6 +1,6 @@
 ---
 when: placing layers, composing a beat
-answers: grid · one hero · asymmetry vs centered · archetype→intent · safe zones
+answers: grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace
 group: look
 ---
 
@@ -68,5 +68,58 @@ beat is *doing* (see [STORY.md](STORY.md) for the beat role), not by habit. Marg
 (See [../MOTION-CRAFT.md](../MOTION-CRAFT.md) for the rhythm side; the `impeccable` skill flags
 centered-default tells.)
 
+## Active vs passive whitespace
+
+**The empty part of a frame is either doing a job or it is a leftover, and those look completely
+different to a viewer.** Design writing names the two:
+
+- **ACTIVE** whitespace is deliberately left blank to do something: isolate the subject, direct the
+  eye, give a line room to land, hold a beat.
+- **PASSIVE** whitespace is what merely *occurs* between elements. It usually comes from placing things
+  independently, most often on opposite sides of the frame, and it reads as slack rather than as calm.
+
+A film composed of passive space does not read as minimal. It reads as unfinished, because nothing in
+it is claiming the emptiness.
+
+### The two tests, in order
+
+**1. Name what the empty area is doing.** In one clause. "It isolates the claim." "It gives the globe
+somewhere to be." If the honest answer is *"it is the gap between the thing on the left and the thing
+on the right"*, it is passive and it is not composition.
+
+**2. Ask whether making the subject bigger removes it, and whether the frame improves.** If enlarging
+the subject eats the emptiness and the frame gets better, that space was never working. Active space
+survives this test: enlarging the subject into it makes the frame worse, which is the proof it was
+load-bearing.
+
+The second test is the one that decides, because the first is easy to pass with a sentence you invented
+after the fact.
+
+### How this actually goes wrong here
+
+Not by anyone choosing to leave space. It goes wrong by placing the subject in one box and the type in
+another and never looking at what is between them:
+
+> `showcase-flight-globe` had the globe boxed at x 780 on a 1920 frame with the copy in the left
+> column. Half the frame was empty and it had not been composed, it was arithmetic left over from two
+> independent placements. The fix was one column: the globe centred at 1200 wide and running past the
+> bottom edge, with the type above it on the same axis. The emptiness that remains is above and around
+> the type, and it has one job.
+
+That fix carries a second rule worth keeping: **a subject the frame cannot contain reads differently
+from one it can.** A sphere that fits entirely inside the frame is an object on a page. One cropped by
+the edge is a planet you are near. Cropping the subject is an active use of the frame's boundary and it
+is usually stronger than centring it with room to spare.
+
+### What no gate will tell you
+
+There is none for this, and there probably cannot be: `make audit` measures overlap, clipping, safe
+zones and contrast, all of which are about content COLLIDING, and none of which fires on a frame that
+is half empty because nobody decided anything. `pace-check` measures time, not space. This is `make
+judge` and your eyes, and the question to ask the sheet is the first test above, per beat.
+
+
 **Sources:** Refactoring UI (hierarchy, spacing, layout); Müller-Brockmann *Grid Systems in Graphic Design*;
-Gestalt principles (proximity, similarity, common region); Butterick (measure); broadcast title-safe standards.
+Gestalt principles (proximity, similarity, common region); Butterick (measure); broadcast title-safe standards;
+active/passive whitespace is standard graphic-design vocabulary (Depositphotos, AND Academy, Think Design all draw
+the same line), applied here to a moving frame.
