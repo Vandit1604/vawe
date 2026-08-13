@@ -464,16 +464,14 @@ intent:
 # system; flag any layer using an off-palette chromatic colour or a non-role font. The look twin of the
 # storyboard gate. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.
 # Optional radii/shadow lock via scene "spec".
+# ONE gate, one name. Beside the colour/font lock it runs OUR anti-slop rule table
+# (scripts/lib/designspec-rules.mjs): copy tells and effect doses, over the scene's words AND the html
+# fragments it names. Replaces the vendored impeccable detector rule by rule.
+#   make designspec-check SELFTEST=1  — every rule must fire on its own sample and stay quiet on its counter-sample
+#   make designspec-check CENSUS=1    — the whole library, one line per scene with a finding
 designspec-check:
-	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
+	node scripts/gates/designspec-check.mjs $(if $(filter 1,$(SELFTEST)),--self-test,$(if $(filter 1,$(CENSUS)),--census,$(D))) $(if $(STRICT),--strict,)
 
-# make designspec-copy D=<scene.json>  (copy + colour families) [STRICT=1] — OUR OWN anti-slop copy rules, over the scene's words
-# AND the html fragments it names (only readable since the fragments moved into files). The rule table is
-# scripts/lib/designspec-rules.mjs: ours, fitted to films, every rule carrying the two samples that prove
-# it works. `--self-test` runs those samples; `--census` prints the whole library.
-# The first family of the designspec skill that replaces the vendored impeccable detector.
-designspec-copy:
-	node scripts/gates/designspec-copy.mjs $(D) $(if $(STRICT),--strict,)
 
 # make copy-check D=<scene.json> [STRICT=1] — THE COPY GATE: on-screen writing tells (hook >12 words /
 # weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The

@@ -21,7 +21,7 @@
 // EVERY RULE DECLARES `fires` AND `clean`. A rule that cannot demonstrate its own failure is a rule
 // nobody can trust, and that is not theoretical here: the detector we are replacing shipped a rule
 // whose catalogue entry says "more than two em-dashes" over an implementation that requires five.
-// `node scripts/gates/designspec-copy.mjs --self-test` runs both samples through every rule.
+// `make designspec-check SELFTEST=1` runs both samples through every rule.
 import { plain } from './text.mjs';
 
 /** A phrase list is an opinion, so it is DATA and it sits where it can be argued with.

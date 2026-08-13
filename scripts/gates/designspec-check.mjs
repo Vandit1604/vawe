@@ -13,12 +13,77 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { snippet } from '../lib/text.mjs';
+import cp from 'node:child_process';
+import { snippet, plain as plainText } from '../lib/text.mjs';
+// THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock — the
+// theme is the locked look — and the rules there are the second half of the same question: not only
+// "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
+// They live in one gate under one name because an author should run one command, not two.
+import { RULES, runRules } from '../lib/designspec-rules.mjs';
+
+/** A scene's text as UNITS — one per layer, one per named fragment. Never joined: a joined blob let a
+ *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
+ *  `type:"html"` layers and bg windows, the same rule core/preload.js uses. */
+function sceneTextUnits(d) {
+  const parts = []; const srcs = new Set();
+  const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
+    if (!l || typeof l !== 'object') continue;
+    if (typeof l.text === 'string') parts.push(plainText(l.text));
+    if (typeof l.html === 'string') parts.push(plainText(l.html));
+    if (l.type === 'html' && typeof l.src === 'string') srcs.add(l.src);
+    if (l.children) walk(l.children);
+  } };
+  walk(d.layers);
+  for (const b of Array.isArray(d.bg) ? d.bg : []) if (b && typeof b === 'object') {
+    if (typeof b.html === 'string') parts.push(plainText(b.html));
+    if (typeof b.src === 'string') srcs.add(b.src);
+  }
+  for (const rel of [...srcs].sort()) {
+    try { parts.push(plainText(fs.readFileSync(path.join(ROOT, rel), 'utf8'))); } catch { /* asset-check's question */ }
+  }
+  return parts;
+}
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const file = process.argv[2];
+const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 const strict = process.argv.includes('--strict');
-if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/designspec-check.mjs <scene.json> [--strict]'); process.exit(2); }
+
+// EVERY RULE PROVES ITSELF BEFORE IT IS TRUSTED. `fires` must produce a finding, `clean` must not. The
+// second half is the one that matters: a rule that flags everything is not strict, it is broken, and
+// that is how 21 false findings shipped from the detector this replaces (docs/MISTAKES.md #324).
+if (process.argv.includes('--self-test')) {
+  let bad = 0;
+  console.log(`\n  designspec rules · self-test · ${RULES.length} rule(s)\n`);
+  for (const r of RULES) {
+    const s = (v) => (typeof v === 'string' ? plainText(v) : v);
+    const fired = r.test(s(r.fires));
+    const quiet = r.test(s(r.clean));
+    if (!fired || quiet) bad++;
+    console.log(`  ${!fired || quiet ? '✗' : '✓'} ${r.id.padEnd(26)} fires:${fired ? 'yes' : 'NO '}  clean:${quiet ? 'FIRED' : 'quiet'}`);
+    if (!fired) console.log(`      its own \`fires\` sample produced nothing: ${JSON.stringify(r.fires)}`);
+    if (quiet) console.log(`      its \`clean\` sample was flagged (${quiet}): ${JSON.stringify(r.clean)}`);
+  }
+  console.log(bad ? `\n  ✗ ${bad} rule(s) cannot demonstrate themselves\n` : '\n  ✓ every rule fires on its sample and stays quiet on its counter-sample\n');
+  process.exit(bad ? 1 : 0);
+}
+
+if (process.argv.includes('--census')) {
+  const files = cp.execSync("git ls-files 'formats/scene/*.json'", { cwd: ROOT, encoding: 'utf8' })
+    .split('\n').filter((f) => f && !/intent|expanded/.test(f));
+  console.log(`\n  designspec rules · census · ${RULES.length} rule(s) over ${files.length} scene(s)\n`);
+  let hit = 0;
+  for (const f of files) {
+    let d; try { d = JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8')); } catch { continue; }
+    const found = runRules(sceneTextUnits(d), { allow: d.authoring?.allow || [], scene: d });
+    if (!found.length) continue;
+    hit++;
+    console.log(`  ${f.split('/').pop().replace('.json', '').padEnd(30)} ${found.map((x) => `[${x.id}] ${x.snippet}`).join('\n' + ' '.repeat(33))}`);
+  }
+  console.log(`\n  ${hit} of ${files.length} scene(s) with a finding\n`);
+  process.exit(0);
+}
+
+if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/designspec-check.mjs <scene.json> [--strict] | --self-test | --census'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
 let theme = {};
@@ -166,6 +231,12 @@ scanTargets.forEach((l, i) => {
   if (specRadii && l.radius != null && !specRadii.has(String(l.radius))) findings.push({ sev: 'off-radius', msg: `${label(l, i)} · radius ${l.radius} is off the locked scale [${[...specRadii].join(', ')}].` });
   if (specShadows && l.shadow != null && !specShadows.has(String(l.shadow))) findings.push({ sev: 'off-shadow', msg: `${label(l, i)} · shadow "${l.shadow}" is off the locked set.` });
 });
+
+// The copy + effect-dose rules, over this scene's words and the fragments it names. Same `findings`
+// array, same waiver mechanism, so one gate speaks once.
+for (const f of runRules(sceneTextUnits(data), { allow: [...allowed], scene: data })) {
+  findings.push({ sev: f.id, msg: `${f.snippet}\n        → ${f.why}` });
+}
 
 // ---- report ----
 console.log(`\n  design-spec lock · ${file}  (spec: themes/${themeName} · ${paletteRGB.length} palette colours${specRadii ? ` · ${specRadii.size} radii` : ''})`);
