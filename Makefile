@@ -467,6 +467,14 @@ intent:
 designspec-check:
 	node scripts/gates/designspec-check.mjs $(D) $(if $(STRICT),--strict,)
 
+# make designspec-copy D=<scene.json> [STRICT=1] — OUR OWN anti-slop copy rules, over the scene's words
+# AND the html fragments it names (only readable since the fragments moved into files). The rule table is
+# scripts/lib/designspec-rules.mjs: ours, fitted to films, every rule carrying the two samples that prove
+# it works. `--self-test` runs those samples; `--census` prints the whole library.
+# The first family of the designspec skill that replaces the vendored impeccable detector.
+designspec-copy:
+	node scripts/gates/designspec-copy.mjs $(D) $(if $(STRICT),--strict,)
+
 # make copy-check D=<scene.json> [STRICT=1] — THE COPY GATE: on-screen writing tells (hook >12 words /
 # weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The
 # words are the video's voice. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.

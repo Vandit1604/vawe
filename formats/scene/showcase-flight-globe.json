@@ -253,6 +253,10 @@
       "exitDur": 0
     }
   ],
+  "authoring": {
+    "allow": ["aphoristic-cadence"],
+    "_why": "\"Every vertex computed. Not one drawn.\" is the shape the rule flags, and here it is literally true: the globe is 22,000 points sampled from Natural Earth and a great-circle route, with no hand-drawn art anywhere in the film. The rule asks the author to decide rather than comply, and this is the decision."
+  },
   "cameraMove": [
     {
       "move": "slowPush",
