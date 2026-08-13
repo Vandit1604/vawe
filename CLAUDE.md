@@ -284,7 +284,9 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    the emptiness is doing in one clause, then ask whether enlarging the subject removes it and improves
    the frame. If it does, that space was never working. NO GATE SEES THIS: `make audit` fires on things
    COLLIDING, never on a frame that is half empty because nobody decided anything. It is `make judge`
-   and your eyes. **[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md)**.
+   and your eyes. Same doc carries the rest of the composition vocabulary for a MOVING frame: lead room
+   (a subject needs space in the direction it travels, and that is fixed at the START of the shot), visual
+   weight, leading lines, and three-plane depth. **[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md)**.
 4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
    **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
    A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text

@@ -119,7 +119,47 @@ is half empty because nobody decided anything. `pace-check` measures time, not s
 judge` and your eyes, and the question to ask the sheet is the first test above, per beat.
 
 
+## The rest of the composition vocabulary, for a frame that MOVES
+
+Active/passive whitespace above is the one that caught us. These are the neighbours, and each is
+written in the form it takes here rather than the form a photographer uses, because our frame changes
+and theirs does not.
+
+**LEAD ROOM.** A moving subject needs space in FRONT of it, in the direction of travel. A photograph
+wants this so the subject is not about to hit the edge; a film wants it more, because the subject is
+genuinely going there and the eye is already ahead of it. The version that bites here: a subject that
+travels toward the edge it is nearest reads as cramped for the whole of the move, and the fix is at the
+START of the shot, not the end.
+
+> Directly relevant and not yet applied: the aircraft in `showcase-flight-globe` flies west to east
+> across a centred globe. It has no lead room by construction, because the globe is centred and the
+> route ends near the limb. Worth a pass.
+
+**VISUAL WEIGHT.** Bright, large, saturated and detailed all pull harder than dark, small, muted and
+plain. Balance is not symmetry: one large quiet mass balances one small loud one. This is why a single
+accent works and two do not, and it is the same argument as one bright thing per frame.
+
+**LEADING LINES.** A line in the frame directs the eye whether or not you intended it. Ours are usually
+literal: a route, a track, an arc, the edge of a captured UI. Ask where each one points and whether that
+is where you want the eye when the cut comes.
+
+**THREE PLANES.** Foreground, middle, background. Depth comes from having all three doing something,
+and most films here have exactly one: a subject on a flat field. A backdrop that moves is the cheapest
+second plane, which is one more reason the bg is a required field.
+
+**THE FRAME EDGE IS A TOOL.** Covered above under cropping, and it belongs to this list: containing a
+subject and cropping it are two different statements, not a tidy version and a sloppy one.
+
+### Why these are in the storyboard, not the audit
+
+Every one of them is decided when you choose the shot, and none of them can be repaired later by moving
+a layer twenty pixels. `storyboard-check` asks for `shot:`, `camera:`, `picture:` and `placement:` for
+exactly this reason: the composition is a plan, and the JSON transcribes it.
+
+
 **Sources:** Refactoring UI (hierarchy, spacing, layout); Müller-Brockmann *Grid Systems in Graphic Design*;
 Gestalt principles (proximity, similarity, common region); Butterick (measure); broadcast title-safe standards;
+lead room, visual weight, leading lines and three-plane depth from the standard film-composition
+literature (Filmmakers Academy, storyboardart.org, wolfcrow), restated for a frame that moves;
 active/passive whitespace is standard graphic-design vocabulary (Depositphotos, AND Academy, Think Design all draw
 the same line), applied here to a moving frame.
