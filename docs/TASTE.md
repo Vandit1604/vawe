@@ -154,4 +154,4 @@ The enforcement lives in `.claude/skills/{taste-skill, impeccable}` — dials + 
 The doctrine, in one breath: **asymmetry over centered · scale contrast (one huge hero + tiny
 caption) · a committed non-generic face (the real brand font) · real assets over emoji · colour only
 from the brand · patterns as seasoning, never wallpaper · no em-dashes on screen.** CRAFT tells you
-what to do; `make slop` checks you did it; this doc tells you the loop that ties it together.
+what to do; `make designspec-check` checks you did it; this doc tells you the loop that ties it together.

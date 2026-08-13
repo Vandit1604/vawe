@@ -81,7 +81,7 @@ this engine actually shipped (`docs/MISTAKES.md`).
   than none.
 - **Centered everything**: one size, everything centred, Inter, a blue→purple gradient. The AI-slop
   signature. → Asymmetry over centred; one huge hero + one tiny caption (scale contrast); a committed
-  non-generic face; one accent hue. (`make slop` catches the mechanical tells.)
+  non-generic face; one accent hue. (`make designspec-check` catches the mechanical tells.)
 - **The dead final frame**: the CTA fades out, or the last held word sits over an emptied plate. → End
   on a held frame, `exitDur:0`. Never fade the payoff.
 
@@ -141,7 +141,7 @@ subset. Cross-linked by name so a rule can say "or it trips `X`."
 | Taste rule | Backstop |
 |---|---|
 | No em-dash; unbacked number; claim-not-shown | `make validate` / `make critique` |
-| Centered / overused-font / gradient tells | `make slop` |
+| Centered / overused-font / gradient tells | `make designspec-check` |
 | Invisible-at-size text; dead-final-frame; overlap | `make audit` |
 | A dial set on a preset that ignores it | `make knobs-audit` |
 | Monotone timing; payoff doesn't settle | `make motion` |

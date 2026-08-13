@@ -100,8 +100,19 @@ a face / palette / layout / image), then the **`taste-skill`** (state the Design
 DENSITY dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Skills are vendored in `.claude/skills/`.
 Defaults to reach past: **asymmetry over centered · scale contrast (one huge hero + tiny caption) · a
 committed non-generic face** (the real brand font when reflecting a brand; never Inter/Space Grotesk for
-anything generic). Then gate it: **`make slop D=<file>`** runs the impeccable detector (41 rules, no LLM) —
-it must be clean before you render.
+anything generic). Then gate it two ways, and know which one sees what.
+**`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
+with real computed styles. That is where it works, and it is the only place it is still wired.
+**`make designspec-check D=<file>`** runs OUR rule table (`scripts/lib/designspec-rules.mjs`) over the
+scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
+<!-- doc-refs-allow: make slop · this line records the target's retirement -->
+> `make slop` was RETIRED in 2026-08 (`docs/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
+> dump that inlined three CSS properties — `font-family`, `color`, `background` — so every rule about a
+> border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
+> the whole library. Of the 38 borrowed rules examined for the fork, **6 were worth keeping**: most were
+> already measured better here, four had no subject in our artifacts at all, and five would have fired on
+> the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
+> blueprint prop, the blinds-wipe mask in `core/cuts.js:130` that `lib-test` asserts).
 
 ## Icons & images (real assets first, emoji last)
 

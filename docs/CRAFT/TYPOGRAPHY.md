@@ -48,7 +48,7 @@ accidental one.
 
 \* **Avoid Inter / Space Grotesk / Poppins for *generic* work** — they're the default on every AI/landing page,
 so they read as "template". Commit to a face with a viewpoint, or the real brand font. (This is also an
-`impeccable` rule — `make slop` flags overused faces.)
+`impeccable` rule — `make designspec-check` flags overused faces.)
 
 ## 2. Pair with contrast, not conflict
 - **Two faces max; one is often enough.** Differ *clearly* by class or weight (serif + sans, or black + regular),

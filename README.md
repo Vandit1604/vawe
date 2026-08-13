@@ -183,7 +183,7 @@ make brandspec URL=… / sections / palette   read a real site's CSS + eyedrop i
 # gates
 make validate [D=…]                     schema + no-em-dash + build-time sugar checks
 make critique D=…                       value gate (hollow/scattered/mis-centre beats)
-make slop D=…                           anti-slop detector (brand-face aware)
+make designspec-check D=…                           anti-slop detector (brand-face aware)
 make audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
 make judge D=… VS=<brand>               THE VISION GATE — rubric + house-style, agent scores the frames
 make probe [M=…]                        render-order purity (determinism)

@@ -388,12 +388,6 @@ beats:
 sheet:
 	node scripts/brand/design-sheet.mjs $(NAME) $(if $(THEME),--theme $(THEME)) $(if $(SERVE),--serve)
 
-# make slop D=formats/x/video.json [AT=1.5]  — ANTI-SLOP gate: render the real DOM at a frame and run the
-# vendored impeccable detector (41 rules: overused fonts, purple/blue gradients, card-in-card, centered
-# defaults, …). Catches AI-generic tells in the HTML we hand-author. See .claude/skills/{taste-skill,impeccable}.
-# TASTE gate: not in the default ladder. `TASTE=1 make author-check` runs it.
-slop:
-	node scripts/gates/slop.mjs $(D) $(if $(AT),--at $(AT))
 
 # make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex]  — pick a design-system
 # PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
@@ -436,7 +430,7 @@ panels:
 
 # make styleframes D=<scene.json> [N=4] — THE LOOK, BEFORE THE MOTION IS TRUSTED. Renders the few most
 # visually DISTINCT settled moments at full scale as individual stills, plus a sheet, and runs only the
-# LOOK gates (slop, designspec). Answers "is this the right-looking film at all", which no static gate
+# LOOK gates (designspec). Answers "is this the right-looking film at all", which no static gate
 # can: `onefile` passed every gate with a backdrop that rendered as loud blue blooms, and one still
 # showed it in three seconds. Approve these, then animate.
 styleframes:
@@ -636,7 +630,7 @@ beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead
 	node scripts/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 # make impeccable D="a.html b.html"  — the bundled impeccable anti-slop detector on raw HTML fragments
-# (local, no network, token-efficient). `make slop` runs the same detector on the RENDERED scene DOM;
+# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #326);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
 impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node .claude/skills/impeccable/scripts/detect.mjs --json $(D)

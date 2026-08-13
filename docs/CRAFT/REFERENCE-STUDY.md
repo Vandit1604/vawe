@@ -59,7 +59,7 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    headline is the amateur tell. *(Constraint: our `size` caps at 260; for true frame-fill push the
    `camera` in on the beat, or see the harvest note below.)*
 4. **Asymmetry — never dead-center.** Hero words sit low-left or offset, not centered. Dead-center is the
-   AI-slop tell (`make slop` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
+   AI-slop tell (`make designspec-check` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
    centering for a deliberate brand lockup.
 5. **Dolly enter AND exit — the word "breathes" through scale.** The premium version: a word enters
    OVERSIZED + motion-blurred and scales DOWN to settle (a dolly-in, not a scale-up-from-small — note the

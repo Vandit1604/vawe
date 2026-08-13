@@ -81,7 +81,7 @@ Non-negotiable moves:
   and children can be **nested groups**) — never two absolute `x/y` layers you space by eye (that's what
   collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the another engine/HF
   flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
-- **Gate it:** `make slop D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
+- **Gate it:** `make designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.
 
 ## Animation — pure primitives in `core/motion.js` (no GSAP)

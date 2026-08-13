@@ -45,7 +45,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 7. **Hand-written HTML is BUILT through impeccable, never by eye.** For any `html` fragment / hook / CTA:
    load the `impeccable` skill (its `polish`/`audit`/`quieter` register-craft), and run
-   `make impeccable D=<fragment.html>` (the bundled detector, local + token-efficient) — plus `make slop`
+   `make impeccable D=<fragment.html>` (the bundled detector, local + token-efficient) — plus `make designspec-check`
    on the rendered scene. Clear every tell before rendering (overused font, gradient text, card-in-card,
    centered defaults).
 

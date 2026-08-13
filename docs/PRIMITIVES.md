@@ -371,7 +371,7 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity
   holds. Use theme vars (`var(--font-sans)`, `var(--accent)`) to stay on-brand. The whole block
   animates as ONE unit (use atomic layers when you want per-element choreography). **Preview standalone
-  first (`make preview HTML=frag.html`) and gate the markup (`make slop`)** — hand HTML regresses to slop.
+  first (`make preview HTML=frag.html`) and gate the markup (`make designspec-check`)** — hand HTML regresses to slop.
 - Optical tracking: themes with `type.optical: true` get size-scaled letter-spacing via
   `trackingFor(px)` (−0.008em body → −0.022em hero). Variable weights (510/590) pass through.
 - **Animated site sections**: `make capture-scene URL=… SEL="section" NAME=b LABEL=x PARTS="s1,s2"`

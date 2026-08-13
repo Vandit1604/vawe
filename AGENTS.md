@@ -23,14 +23,14 @@ card grid). **Before writing HTML by hand:**
 1. Load **taste-skill** — state the one-line Design Read and set the three dials
    (`DESIGN_VARIANCE` / `MOTION_INTENSITY` / `VISUAL_DENSITY`); obey its Anti-Default Discipline.
 2. Prefer to **capture** a real, art-directed surface (`make capture`/`make sections`) over inventing one.
-3. After authoring, run **`make slop D=<file>`** — the vendored impeccable detector (no LLM). It must be
+3. After authoring, run **`make designspec-check D=<file>`** — the vendored impeccable detector (no LLM). It must be
    clean of overused-font / gradient / card-in-card / centered-default tells before render.
 
 ## The five anti-slop fixes (enforced by skill + gate)
 
 1. **Capture the art direction, don't invent it** — reflect a real source; hand-write only connective tissue.
 2. **Commit + name one art direction** per video (from taste-skill's Design Read). "Clean modern SaaS" is banned.
-3. **`make slop`** gate — fail the generic tells deterministically before shipping.
+3. **`make designspec-check`** gate — fail the generic tells deterministically before shipping.
 4. **Asymmetry + scale contrast are defaults** — off-center anchor; one oversized hero paired with tiny text.
 5. **Distinctive type** — for a real brand, the captured brand font; for anything else, never Inter/Space Grotesk.
 

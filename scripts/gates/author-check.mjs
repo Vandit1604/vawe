@@ -22,7 +22,6 @@
 //   floor     — the AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
 //   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
-//   slop      — the impeccable 41-rule anti-slop detector on the rendered DOM
 //   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme
 //   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
 //
@@ -162,8 +161,11 @@ tasteGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.
 //     crossfade between two text states (a double exposure: both strings at half strength through the
 //     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174. TASTE.
 tasteGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
-// 4. slop — the hand-written-HTML tells. TASTE.
-tasteGate('slop', 'slop (anti-slop detector)', 'scripts/gates/slop.mjs', [], { waivable: true, exitMeansFail: strict });
+// 4. slop — RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
+// properties those rules read, so most of them had no evidence to work from and their silence read as
+// a pass across the whole library (docs/MISTAKES.md #326). Its replacement is the designspec rule
+// table, which runs in the gate below. The vendored detector is still the right tool for a hand-authored
+// FRAGMENT, where it gets real computed styles — `make preview HTML=<file>` still runs it.
 // 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
 // BLOCKS under TASTE, not just under STRICT. It was a warning, and across two films it named the exact
 // drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway — twice. A

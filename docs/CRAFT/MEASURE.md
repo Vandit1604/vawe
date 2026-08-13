@@ -86,5 +86,5 @@ a curve for motion that isn't one. That distinction is the whole point.
 3. Read the `EXPECT` line: a low residual means the render is faithful to the authored intent; a high one
    with a different `best` preset means what shipped isn't what you asked for — a real bug to chase.
 
-This closes the loop the static gates can't: `make direct`/`make slop` check *choice*; `make measure`
+This closes the loop the static gates can't: `make direct`/`make designspec-check` check *choice*; `make measure`
 checks that the **rendered motion** matches the choice.

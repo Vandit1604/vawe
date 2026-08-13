@@ -84,7 +84,7 @@ copy a structure wholesale (the ledger flags it). Build in the [`README.md`](REA
    [`SOUND.md`](SOUND.md) (silence + crisp SFX is a fine default).
 
 Hand-writing any HTML fragment (a hook, a CTA)? Load `taste-skill` + `impeccable` first, then
-`make slop D=<frag>` before you trust it.
+`make designspec-check D=<frag>` before you trust it.
 
 ## Step 4 — The mandatory ladder (this is what stops effect-soup)
 

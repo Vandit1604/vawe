@@ -8796,6 +8796,46 @@ counting on it being there.
 
 ---
 
+## #326 — The anti-slop gate ran 41 rules over three CSS properties, and its silence read as a pass
+
+**What.** `make slop` rendered a scene, dumped the DOM and ran the vendored 41-rule detector over it.
+Measured on a real film's dump: **`box-shadow` appears zero times.** So every rule about a glow, an
+elevation or a card shadow had literally nothing to read, and returned nothing, on every scene in the
+library. The gate was in `author-check`'s TASTE tier and had been quiet for its whole life.
+
+**Root cause.** `slop.mjs:58` inlined exactly three computed properties onto each element:
+`font-family`, `color`, `background`. The text-family rules therefore worked — #NNN records `make slop`
+correctly failing a film on `numbered-section-markers` — while every rule that reads a border, a shadow,
+a radius or letter-spacing was structurally blind. Nothing said so. A gate answering a question it was
+never asked is worse than no gate, because the answer looks authoritative.
+
+**Why the fix was to retire it, not to widen the dump.** Inlining the missing properties would have made
+it SEE, and what it would then have seen is the engine's own vocabulary. Five of the nine motion and
+effect rules fire on first-party features: `dark-glow` on `core/layers/util.js:121`, where `L.glow`
+appends `0 0 64px var(--accent-glow)`; `gpt-thin-border-wide-shadow` on `core/layers/doc.js:25`, which
+IS the card recipe, a 1px hairline with a 60px diffuse shadow; `hero-eyebrow-chip` on the `eyebrow` prop
+of the `kineticHook` blueprint and the `kicker` in `blocks/sleek.mjs:24`, which carries the exact banned
+styling; `bounce-easing` on nine shipped easings and on `easeOutSnap`, the DEFAULT layer entrance, whose
+own comment calls overshoot "the single most recognizable motion-graphics tell"; and
+`repeating-stripes-gradient` on `core/cuts.js:130`, the mask for the blinds wipe, which
+`scripts/gates/lib-test.mjs:770` asserts. A presence test would have failed the engine's own test suite.
+
+**What replaced it.** `scripts/lib/designspec-rules.mjs`, run inside `designspec-check`. 38 borrowed
+rules examined across five batches, **6 kept**. The rest divide into three honest categories: already
+measured better here (`verify/audit.mjs`'s frame-relative and destination-aware safe box against a flat
+16px edge test; its 7:1 bar for display type; `copy-check`'s words-per-line against characters-per-line),
+no subject in our artifacts (a tag census over all 15 fragments returns `div` and `svg` and nothing else,
+so heading levels and justified paragraphs have nothing to measure), and would-fire-on-our-own-features.
+
+**The detector is still wired where it works.** `make preview HTML=<fragment>` runs it in a real browser
+with real computed styles. That is the one place it gets the evidence its rules need.
+
+**Lesson.** Before trusting a gate that has never fired, check what it can SEE. A rule set is only as
+good as the evidence it is handed, and a dump that drops the properties the rules read turns 41 checks
+into 41 silences that look like 41 passes.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
@@ -8809,3 +8849,5 @@ counting on it being there.
 <!-- doc-refs-allow: scripts/dev/predict.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: scripts/dev/rules-audit.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->
+<!-- doc-refs-allow: make slop · retired in #326; the entries that cite it are records of what it did -->
+<!-- doc-refs-allow: scripts/gates/slop.mjs · the script #326 records the retirement of -->

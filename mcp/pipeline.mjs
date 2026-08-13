@@ -64,7 +64,7 @@ export function illegalRefs(scene) {
 
 /**
  * validate ONLY. Pure JSON, no browser, back in well under a second — which is why it is the only
- * thing a tool call may wait for. Everything else (expand, slop, ledger, audit) opens Chrome and can
+ * thing a tool call may wait for. Everything else (expand, designspec, ledger, audit) opens Chrome and can
  * outlast an MCP client's 60s cancel, so it belongs behind the async boundary with the render.
  */
 export async function validate(scenePath) {
@@ -80,16 +80,19 @@ export async function gates(scenePath) {
   const expand = await step('node', ['scripts/author/expand-blocks.mjs', scenePath], 120_000);
   const target = fs.existsSync(expanded) ? expanded : scenePath;
 
-  const slop = await step('node', ['scripts/gates/slop.mjs', target], 180_000);
+  // `slop` (the vendored 41-rule detector over a DOM dump) was retired: it inlined three CSS
+  // properties, so most of its rules had no evidence and its silence read as a pass
+  // (docs/MISTAKES.md #326). designspec-check is the replacement and reads the scene directly.
+  const designspec = await step('node', ['scripts/gates/designspec-check.mjs', target], 60_000);
   const ledger = await step('node', ['scripts/gates/ledger.mjs', 'check', target], 120_000);
   const knobs = await step('node', ['scripts/gates/knobs-audit.mjs', scenePath], 30_000);
   return {
     target,
     report: {
       expand: expand.ok ? 'ok' : expand.out,
-      // slop and ledger are ADVISORY. They are taste opinions, and refusing to render someone's
+      // designspec and ledger are ADVISORY. They are taste opinions, and refusing to render someone's
       // video because a detector dislikes their font is the wrong side of a paid product.
-      slop: slop.out,
+      designspec: designspec.out,
       ledger: ledger.out,
       // a dial set on a preset that ignores it: advisory, but it means an intended effect is doing
       // nothing, which is worth telling the author.
