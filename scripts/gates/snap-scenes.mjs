@@ -15,6 +15,7 @@
 //   node scripts/gates/snap-scenes.mjs          # diff current vs baselines
 //   make snap-all [SAVE=1]
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -31,6 +32,30 @@ const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
 fs.mkdirSync(SNAP, { recursive: true });
 const args = process.argv.slice(2);
 const SAVE = args.includes('--save');
+
+// A BASELINE IS ONLY VALID WITHIN ONE FONT STATE, and nothing used to record which one.
+// `assets/fonts/` is gitignored and populated by `make fonts`, so a fresh clone, a worktree, or a
+// `make build` that fetches a face mid-session all silently rewrite every text width in the library.
+// Measured: a worktree with 2 faces against this tree's 24 reported 57 scenes changed with not one line
+// of code different, and a `make build` fetching 16 fonts moved 56 scenes the same way.
+//
+// That is worse than a flaky number. A refactor verified across the boundary reads as broken, and a
+// real regression captured after it reads as fonts — so the net stops being evidence in both
+// directions at once. The stamp is one file for the whole SET, because the font state is a property of
+// the set and not of any scene, and it deliberately does not touch the per-scene signature format.
+const FONT_DIRS = ['assets/fonts', 'assets/fonts/local'];
+const fontState = () => {
+  const names = [];
+  for (const d of FONT_DIRS) {
+    try { for (const f of fs.readdirSync(path.join(repoRoot, d))) {
+      const st = fs.statSync(path.join(repoRoot, d, f));
+      if (st.isFile()) names.push(`${d}/${f}:${st.size}`);
+    } } catch { /* absent is a state too, and it hashes to a different one */ }
+  }
+  names.sort();
+  return { n: names.length, hash: crypto.createHash('sha256').update(names.join('\n')).digest('hex').slice(0, 12) };
+};
+const STAMP = path.join(SNAP, '.font-state.json');
 const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one scene by name
 
 // Every shipped SCENE: formats/scene/*.json with module:"scene", except the schema and _-prefixed
@@ -153,8 +178,20 @@ await browser.close(); server.close();
 
 // ---- report ----
 console.log(`\n==== SNAP-ALL · ${scenes.length} scenes ====`);
+if (!SAVE) {
+  const now = fontState();
+  let was = null;
+  try { was = JSON.parse(fs.readFileSync(STAMP, 'utf8')); } catch { /* baselines predating the stamp */ }
+  if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make snap-all SAVE=1\` to stamp them.`);
+  else if (was.hash !== now.hash)
+    console.log(`  ⚠ FONT STATE CHANGED since these baselines were saved (${was.n} face(s) ${was.hash} → ${now.n} face(s) ${now.hash}).\n`
+      + `    Every text width in the library moves with it, so a "changed" scene below is NOT evidence about the code.\n`
+      + `    Run \`make fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
+}
 if (SAVE) {
-  console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/`);
+  const fsNow = fontState();
+  fs.writeFileSync(STAMP, JSON.stringify(fsNow, null, 2) + '\n');
+  console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic — NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(quarantined.length || errored.length ? 1 : 0);

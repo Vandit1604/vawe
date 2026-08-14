@@ -9067,6 +9067,38 @@ differ textually — feed both the whole input space and measure where the ANSWE
 
 ---
 
+## #334 — A snapshot baseline was only valid within one font state, and nothing recorded which
+
+**What.** `assets/fonts/` is gitignored and populated by `make fonts`. Every text width in the library
+moves with it, and `snap-all` compares text widths. So the determinism-and-regression net silently
+depended on ambient state it never recorded.
+
+**Measured, twice in one day.** A worktree with 2 faces against this tree's 24 reported **57 scenes
+changed with not one line of code different**. Separately, a `make build` that fetched 16 fonts partway
+through an agent's verification moved **56 scenes** the same way.
+
+**Why it is worse than a flaky number.** It breaks the net in BOTH directions at once. A refactor
+verified across the boundary reads as broken, so the author chases a bug that is not there. A real
+regression captured after the boundary reads as fonts, so the author dismisses one that is. Either way
+the answer looks authoritative, which is the failure this repo keeps paying for.
+
+**Fix.** `snap-scenes.mjs` stamps the font state — every file under `assets/fonts/` and
+`assets/fonts/local/` by name and size, hashed — into `verify/snap/scenes/.font-state.json` when
+baselines are saved, and compares it on every diff run. A mismatch prints the face counts and both
+hashes and says plainly that a changed scene below is not evidence about the code. Baselines predating
+the stamp say so rather than pretending.
+
+One file for the whole SET, because the font state is a property of the set and not of any scene, and
+the per-scene signature format is untouched.
+
+**Falsifiable both ways.** Moving one face out of `assets/fonts/` fires
+`23 face(s) 5436b51bc25f → 22 face(s) 3cb0f9a59ac8`; moving it back goes quiet.
+
+**Lesson.** Ask what ambient, uncommitted state your verification depends on, and record it beside the
+result. A gate that cannot tell "the inputs moved" from "the code moved" is not measuring the code.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
