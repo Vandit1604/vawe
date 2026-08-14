@@ -755,7 +755,13 @@ boot((data, fps, theme, canvas) => {
     const w = bgWinAt(t);
     const authored = bgHtml ? bgHtml.frame(t, w) : false;
     cv.style.display = authored ? 'none' : '';
-    if (authored) return;
+    // CLEAR IT, do not just hide it. Returning early left the canvas holding the last frame it painted,
+    // so its pixels were a function of WHICH FRAME RENDERED BEFORE THIS ONE — the one thing renderFrame(n)
+    // promises they are not. Invisible today, because the element is display:none while an authored
+    // backdrop owns the frame; not invisible to the determinism net, which quarantined `refstudy` for it
+    // and therefore left that scene with no regression baseline at all. And latent: the day anything
+    // cross-fades a preset window into an html one, those stale pixels become visible.
+    if (authored) { ctx.clearRect(0, 0, W, H); return; }
     renderBg(ctx, W, H, t, w.spec);
     cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
   }
