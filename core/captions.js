@@ -6,13 +6,17 @@
 // style still reads as intentional karaoke on plain `make captions` output.
 import { clamp01 } from './motion.js';
 import { PRESETS } from './type.js';
+import { onScreenText } from './on-screen-text.js';
 
 // capWords(cap) → [{ w, t0, t1 }] with ABSOLUTE windows covering [cap.t0, cap.t1].
 // Author-supplied cap.words ([{t0,t1}], aligned to the markup-stripped word list) wins;
 // otherwise distribute (t1 - t0 - TAIL) ∝ word length. Deterministic either way.
 const TAIL = 0.12; // the last word finishes its fill before the 0.14s line fade-out starts
 export function capWords(cap) {
-  const words = String(cap.text).replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  // WORDS, so onScreenText: a `<br>` separates two of them and a `<b>` around part of one does not.
+  // The author's optional `cap.words` array is aligned to THIS list, so the rule has to be the shared
+  // one or a hand-timed line silently falls back to the estimator.
+  const words = onScreenText(cap.text).split(/\s+/).filter(Boolean);
   if (Array.isArray(cap.words) && cap.words.length === words.length)
     return words.map((w, i) => ({ w, t0: cap.words[i].t0, t1: cap.words[i].t1 }));
   const span = Math.max(0.1, (cap.t1 - cap.t0) - TAIL);

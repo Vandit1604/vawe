@@ -14,7 +14,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cp from 'node:child_process';
-import { snippet, plain as plainText } from '../lib/text.mjs';
+import { snippet, onScreenText as plainText } from '../lib/text.mjs';
+import { flattenLayers } from '../lib/layers.mjs';
 // THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock — the
 // theme is the locked look — and the rules there are the second half of the same question: not only
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
@@ -27,14 +28,14 @@ import { parseColorRGB } from '../../core/motion.js';
  *  `type:"html"` layers and bg windows, the same rule core/preload.js uses. */
 function sceneTextUnits(d) {
   const parts = []; const srcs = new Set();
-  const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
-    if (!l || typeof l !== 'object') continue;
+  for (const l of flattenLayers(d.layers)) {
     if (typeof l.text === 'string') parts.push(plainText(l.text));
+    // `html` is a whole fragment carrying its own <style> block, and so is the file behind `src`.
+    // plainText used to be the naive strip, so a captured component's CSS and comments arrived here as
+    // the film's COPY and the jargon/vague rules ran over selectors. #214's bug, fifth consumer.
     if (typeof l.html === 'string') parts.push(plainText(l.html));
     if (l.type === 'html' && typeof l.src === 'string') srcs.add(l.src);
-    if (l.children) walk(l.children);
-  } };
-  walk(d.layers);
+  }
   for (const b of Array.isArray(d.bg) ? d.bg : []) if (b && typeof b === 'object') {
     if (typeof b.html === 'string') parts.push(plainText(b.html));
     if (typeof b.src === 'string') srcs.add(b.src);
@@ -126,7 +127,7 @@ function strings(node, keyPath, out) {
   if (node && typeof node === 'object') { for (const k of Object.keys(node)) strings(node[k], keyPath ? `${keyPath}.${k}` : k, out); }
 }
 
-const flat = []; (function rec(ls) { for (const l of ls || []) if (l && typeof l === 'object') { flat.push(l); if (l.children) rec(l.children); } })(data.layers);
+const flat = flattenLayers(data.layers);
 const scanTargets = [...flat, ...(data.bg || [])];
 
 // The engine's four type roles, not three. `num` is first-class everywhere that matters — declared in

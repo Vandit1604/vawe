@@ -19,6 +19,7 @@
 //   node scripts/author/animatic.mjs <STORYBOARD.md> [--voice Samantha] [--out <scene.json>]
 //   make animatic SB=<file>            (generates, then renders draft)
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parseStoryboard } from './storyboard-parse.mjs';
@@ -55,14 +56,14 @@ fs.mkdirSync(VODIR, { recursive: true });
 const READ_WPM = 238;      // Brysbaert 2019, silent reading of English prose
 const FIXATION = 0.35;     // per line: the eye has to land before it can read
 const readSec = (lines) => {
-  const words = lines.join(' ').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
+  const words = onScreenText(lines.join(' ')).split(/\s+/).filter(Boolean).length;
   return words / (READ_WPM / 60) + FIXATION * lines.length;
 };
 const speech = sb.beats.map((b) => {
   const narration = (b.narration || '').trim();
   return {
     beat: b,
-    text: narration.replace(/<[^>]+>/g, '').trim(),
+    text: onScreenText(narration),
     read: readSec(b.onscreen),          // how long the frame's copy takes to READ
     proxy: !narration,                  // no voice on this beat; the clock comes from reading
   };

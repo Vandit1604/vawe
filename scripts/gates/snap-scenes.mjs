@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { SCENE_DIR } from './paths.mjs';
+import { flattenLayers } from '../lib/layers.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig } from './snap-signature.mjs';
@@ -47,9 +48,7 @@ const SUGAR = new Set(['block', 'beat', 'comp']);
 const hasSugar = (f) => {
   try {
     const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    let found = false;
-    (function rec(ls) { for (const l of ls || []) { if (!l || typeof l !== 'object') continue; if (SUGAR.has(l.type)) found = true; if (l.children) rec(l.children); } })(d.layers);
-    return found;
+    return flattenLayers(d.layers).some((l) => SUGAR.has(l.type));
   } catch { return false; }
 };
 const skippedSugar = [];

@@ -21,6 +21,7 @@
 //   node scripts/author/script.mjs <STORYBOARD.md> [--strict]
 //   make script SB=<storyboard.md>
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { parseStoryboard } from './storyboard-parse.mjs';
 
@@ -36,7 +37,7 @@ const SPEAK_WPM = 150;   // the trade's standard for explainer narration
 const CARD_MAX = 8;      // words on a text card before it stops being a card and becomes a paragraph
 const CARD_SEC = 2.2;    // a card needs this long on screen to be comfortably read
 
-const strip = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const strip = onScreenText;
 const words = (s) => strip(s).toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
 
 // STOPWORDS OUT BEFORE COMPARING. "One file in, one video out" against "One file." overlaps on `one`

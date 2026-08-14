@@ -6,7 +6,7 @@
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
-import { plain, snippet } from '../lib/text.mjs';
+import { onScreenText, glyphText, snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -36,7 +36,7 @@ const LOW_LEGIBILITY_STINGS = new Set(['blinds']);
 // ---- 1. placeholder-word: a big text that is JUST a filler noun ----
 for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
-  const w = plain(l.text).trim().toLowerCase();
+  const w = onScreenText(l.text).toLowerCase();
   if (PLACEHOLDER.has(w) && (l.size ?? 0) >= 48) {
     F('error', 'placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact — render the actual thing (a live mini-scene), not the word.`, s0(l));
   }
@@ -47,7 +47,7 @@ for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
   // MATCHED ON THE STRIPPED COPY. CLAIM wants digits then whitespace, and `<b>245</b> effects` puts a
   // `<` after the digits, so a film that emphasised its own number escaped this check entirely.
-  const m = plain(l.text).match(CLAIM);
+  const m = onScreenText(l.text).match(CLAIM);
   if (m) {
     const noun = m[2].toLowerCase();
     const shaderish = /shader/.test(noun);
@@ -127,7 +127,9 @@ for (const l of layers) {
   if (!l.typing || l.type !== 'text') continue;
   const cps = l.typing === true ? 24 : +l.typing;
   if (!(cps > 0)) continue;
-  const chars = plain(l.text).length;
+  // glyphText: this predicts typing TIME, so it must count the characters the caret walks past —
+  // which is core/layers/text.js stripLen(), i.e. DOM textContent, where a `<br>` costs nothing.
+  const chars = glyphText(l.text).length;
   const typeTime = chars / cps;
   const dur = l.duration ?? 0;
   if (typeTime + MIN_TYPE_HOLD > dur + 1e-6) {

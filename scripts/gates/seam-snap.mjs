@@ -17,6 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { flattenLayers } from '../lib/layers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
@@ -54,7 +55,7 @@ const probe = spawnSync('ffprobe', ['-v', 'error', '-count_frames', '-select_str
 const total = parseInt(String(probe.stdout).trim(), 10) || Math.round((data.duration || 10) * fps);
 
 // ── collect transition boundaries (seconds) ──────────────────────────────────────────────────────
-const flat = (function walk(ls) { return (ls || []).flatMap((l) => [l, ...walk(l.children)]); })(data.layers);
+const flat = flattenLayers(data.layers);
 const bounds = new Set();
 for (const c of data.cuts || []) if (typeof c.t === 'number') bounds.add(c.t);
 for (const s of data.seams || []) if (typeof s.t === 'number') bounds.add(s.t);

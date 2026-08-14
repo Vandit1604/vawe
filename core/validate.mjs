@@ -16,6 +16,7 @@
 // it does not tell them what a good answer looks like, and a required field they cannot answer is a wall.
 // Only fields PRESENT in the schema are checked; unknown data keys (module, audio, theme, …) pass.
 
+import { onScreenText, glyphText } from './on-screen-text.js';
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
@@ -192,7 +193,7 @@ export function layoutErrors(cfg) {
   (cfg.layers || []).forEach((L0, i) => {
     if (!isObj(L0)) return;
     if (L0.anchor) return;                      // anchor overwrites x/y downstream
-    const label0 = `layers[${i}] (${L0.type || 'text'}${typeof L0.text === 'string' ? ` "${L0.text.replace(/<[^>]+>/g, '').slice(0, 20)}"` : ''})`;
+    const label0 = `layers[${i}] (${L0.type || 'text'}${typeof L0.text === 'string' ? ` "${onScreenText(L0.text).slice(0, 20)}"` : ''})`;
     // `aspects` is checked as the MERGED layer, once per declared aspect. An override that drops `w` while
     // keeping a centring keyword is the same trap, visible only at that one canvas — which is the
     // failure mode per-aspect overrides exist to prevent, so it cannot be the failure mode they add.
@@ -434,21 +435,12 @@ export function transitionErrors(cfg) {
   return out;
 }
 
-// ON-SCREEN TEXT, out of a string that may be MARKUP. An `html` layer's value is a fragment: its
-// <style> block, its CSS and HTML comments and its tag attributes are all source the viewer never
-// reads. Checking that source as copy reported a frosted pane's own stylesheet comment
-// (`/* frosted pane — near-opaque */`) as a brand-voice defect, which is the same mistake as
-// docs/MISTAKES.md #214/#216/#217: reading the REPRESENTATION of the text instead of the text.
-//
-// Conservative by construction. The tag pattern needs a letter immediately after `<`, so a plain
-// sentence like "a < b" is untouched and a string carrying no markup comes through unchanged. Every
-// em-dash in ordinary copy is still caught, including inside `<b>`/`<em>`, whose TEXT survives.
-export function onScreenText(s) {
-  return String(s)
-    .replace(/<(style|script)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<\/?[a-zA-Z][^>]*>/g, ' ');
-}
+// ON-SCREEN TEXT, out of a string that may be MARKUP. The rule moved to core/on-screen-text.js and is
+// re-exported here so the existing importers keep working: it was the strictest of eight copies, and
+// making it the only one is what closes docs/MISTAKES.md #214/#216/#217 in the consumers that still
+// used the naive `/<[^>]+>/g` form. Every em-dash in ordinary copy is still caught, including inside
+// `<b>`/`<em>`, whose TEXT survives.
+export { onScreenText, glyphText } from './on-screen-text.js';
 
 // Em-dashes are banned in all rendered text (brand voice rule). Checks the RENDERED text of every
 // string VALUE in the data (schema labels are internal and exempt). Use a comma, period, or · instead.
@@ -576,7 +568,7 @@ export function lintData(data) {
     }
   }
   const layers = Array.isArray(data?.layers) ? data.layers : [];
-  const name = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${L.text.replace(/<[^>]+>/g, '').slice(0, 24)}"` : ''})`;
+  const name = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${onScreenText(L.text).slice(0, 24)}"` : ''})`;
 
   // (1) MISSING WINDOW — a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
@@ -637,7 +629,10 @@ export function lintData(data) {
   const TEXT_IS_NOT_ITS_BOX = new Set(['text', 'count']);
   const inkBox = (L) => {
     const size = L.size ?? 40;
-    const copy = typeof L.text === 'string' ? onScreenText(L.text).trim()
+    // GLYPHS, not words: this multiplies a character count by an average advance to guess how wide the
+    // ink runs, so it must count what the DOM counts. onScreenText yields a space for a `<br>`, which
+    // is right for reading and wrong here — it padded every emphasised line by a character per tag.
+    const copy = typeof L.text === 'string' ? glyphText(L.text).trim()
       : L.value != null ? String(L.value) : null;
     if (!copy) return null;                              // nothing readable to measure: fall back to `w`
     const run = copy.length * size * ADVANCE;

@@ -27,7 +27,8 @@ import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
-import { plain, snippet } from '../lib/text.mjs';
+import { glyphText, snippet } from '../lib/text.mjs';
+import { flattenLayers } from '../lib/layers.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -40,7 +41,7 @@ const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // flatten every layer, including group children and beat descriptors.
-const flat = []; (function rec(ls) { for (const l of ls || []) if (l && typeof l === 'object') { flat.push(l); if (l.children) rec(l.children); } })(d.layers);
+const flat = flattenLayers(d.layers);
 
 const texts = flat.filter((l) => (l.type === 'text' || l.type == null) && l.text);
 const headlines = texts.filter((l) => (l.size ?? 0) >= 40 && l.font !== 'mono');
@@ -197,7 +198,9 @@ const poseAt = (l, t) => {
     p.k = round3(from + (to - from) * (span > 0 ? clamp01(lt / span) : 0));
   }
   if (l.typing && typeof l.text === 'string') {
-    const visLen = plain(l.text).length;
+    // glyphText, because this feeds typedLen and the engine's own visLen is stripLen() in
+    // core/layers/text.js — innerHTML then textContent, which inserts nothing for a `<br>`.
+    const visLen = glyphText(l.text).length;
     p.t = typedLen(lt, { cps: l.typing === true ? 24 : +l.typing, visLen, untype: l.untype, untypeRate: l.untypeRate });
   }
   return JSON.stringify(p);

@@ -8967,6 +8967,46 @@ three separate proofs of "nothing changed" do not compose into one. Here the mai
 sending work to a worktree, ask which gitignored directory the verification silently depends on.
 
 ---
+## #331 — Stripping tags eight times with three answers, and the two common answers were both wrong
+
+**What.** "What does this string read as on screen" was implemented eight times: `plain` in
+`scripts/lib/text.mjs` (`/<[^>]*>/g` → empty), `onScreenText` in `core/validate.mjs` (style/script
+bodies + comments dropped, then every tag → a space), and six naive `/<[^>]+>/g` copies in
+`core/validate.mjs`, `core/captions.js`, `verify/audit.mjs` and `scripts/author/*`. Layer-tree flatten
+had six copies, two of them missing the guard the other four had.
+
+**Root cause, and the part worth keeping.** The substitution character was treated as a detail, and it
+is the whole rule. Empty-for-every-tag glued `"Financial infrastructure to<br>grow"` into
+`"...togrow"` — 22 live strings across the library counted one word short of what the frame shows, and
+`copy-check` therefore could not see a 13-word hook. Space-for-every-tag split `"North<b>wind</b>"`
+into two words. **Neither is right, because HTML already answers this**: an inline element does not
+interrupt the run of text, a block-level one does. There is also a genuinely separate second question —
+how many CHARACTERS the caret walks — whose answer is the DOM's `textContent`, because that is what
+`core/layers/text.js` `stripLen()` counts and what `typedLen()`'s `visLen` must match. So: two
+functions, `onScreenText` (words, block-aware) and `glyphText` (characters, textContent), not eight.
+
+**The live leak.** `designspec-check` ran `plain` over `l.html` AND over whole captured component
+files, so a fragment's stylesheet arrived as the film's copy and the jargon rules ran over CSS. A
+`<style>` comment reading `/* seamless, cutting-edge, world-class */` produced a `buzzword-phrase`
+finding against words no viewer can see. This is **#214 / #216 / #217 / #242 in a fifth consumer**, and
+it was still there because all four earlier fixes were applied at a call site rather than at the rule.
+
+**Fix.** One definition in `core/on-screen-text.js` — in `core/`, not `scripts/lib/`, because
+`core/validate.mjs` and `core/captions.js` need it and both ship to the browser, so a definition parked
+in `scripts/` could never be the only one. `scripts/lib/text.mjs` re-exports it. `scripts/lib/layers.mjs`
+holds the one guarded `flattenLayers`.
+
+**Proof.** 102 scenes snapshot-identical, 0 changed. Validator output byte-identical across all 43
+tracked scenes. Every finding of `copy-check` · `direction-floor` · `designspec-check` · `critique` ·
+`inspect` · `beat-check` identical across the library — the corrected word counts moved no verdict,
+because none of the 22 crossed a threshold. The corrections are real, and demonstrated on fixtures
+rather than inferred: a 13-word hook the old counter read as 12 now fires `hook-length`, and the
+stylesheet buzzword finding is gone.
+
+**Lesson.** A helper copied per call site cannot be audited, because nothing looks missing — there is
+no centre for it to be missing from. And when several copies of one rule disagree, do not pick the
+strictest and unify onto it: ask what the rule is actually a rule ABOUT. Two of the three answers here
+were wrong, and the correct one was in neither.
 
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->

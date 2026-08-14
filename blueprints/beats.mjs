@@ -7,6 +7,7 @@
 //   { "type": "beat", "beat": "kineticHook", "start": 0.3, "dur": 5.5, "eyebrow": "...", "to": 94, ... }
 // and expanded by `make expand`. See docs/CRAFT/BLUEPRINTS.md.
 import { INK, DIM, ACCENT, kineticHeadline, dollyNumber, caption, chip, panel, verdictChip, rowGroup, colGroup } from './kit.mjs';
+import { glyphText } from '../core/on-screen-text.js';
 
 // kineticHook — the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
 // then a word-by-word subline. Front-loads the strong element (DIRECTION.md §4).
@@ -166,7 +167,9 @@ export function ctaEnd({ mark, markX = 895, markY = 250, markW = 130, command, s
 // considered, deleting is not.
 export function typedHook({ text, x = 368, y = 459, w = 1400, size = 126, weight = 700, color = INK,
   cps = 33, ls = '0.04em', start = 0, dur = 1.6 } = {}) {
-  const chars = String(text).replace(/<[^>]+>/g, '').length;
+  // glyphText: the caret walks textContent characters (core/layers/text.js stripLen), so the typing
+  // time this blueprint budgets has to be counted the same way the renderer counts it.
+  const chars = glyphText(text).length;
   const typeTime = chars / cps;
   // hold at least a beat once typed, then untype in the remainder
   const untypeAt = Math.max(typeTime + 0.25, dur - Math.max(0.3, chars / (cps * 2)));

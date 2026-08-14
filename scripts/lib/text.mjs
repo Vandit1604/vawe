@@ -1,12 +1,11 @@
 // scripts/lib/text.mjs — what a layer's copy READS AS, which is not what it is authored as.
 //
-// A text layer's `text` is HTML. `docs/PRIMITIVES.md` documents `<b>` and `<em>`, CLAUDE.md names them
-// under Hard rules, and every shipped film uses them to carry the accent word. So the authored string
-// and the string on screen are different, and a gate that matches, counts or measures the authored one
-// is measuring markup.
+// The RULE lives in core/on-screen-text.js, because core/validate.mjs and core/captions.js need it too
+// and they ship to the browser, so they cannot import out of scripts/. This file is the tooling front
+// door onto that one rule; read the reasoning there.
 //
-// This existed already, five times, as five local copies of the same regex, and the two places that
-// did NOT have a copy were both matchers:
+// This existed as EIGHT copies with THREE answers, and the two gates that had no copy were both
+// matchers:
 //
 //   inspect.mjs      compared a needle against the raw string, so `"Nothing came near the edge."`
 //                    never matched `"Nothing came near the <b>edge.</b>"`. Every beat of every film
@@ -17,17 +16,20 @@
 //                    a `<` after the digits. A film that emphasised its own number walked past the
 //                    check that exists to catch an unbacked number, silently.
 //
-// So it is one definition now, and callers import it. A copy in each gate is how the two that lacked
-// one went unnoticed: nothing looked missing, because there was nothing central to be missing from.
-export const plain = (s) => String(s ?? '').replace(/<[^>]*>/g, '');
+// A copy in each gate is how the two that lacked one went unnoticed: nothing looked missing, because
+// there was nothing central to be missing from. It is also how the same `<style>`-is-not-glyphs bug
+// (#214/#216/#217) reached a fifth consumer — `designspec-check` was reading a captured component's
+// CSS as the film's copy and running the jargon rules over it.
+export { onScreenText, glyphText } from '../../core/on-screen-text.js';
+import { onScreenText } from '../../core/on-screen-text.js';
 
 // A layer's on-screen words. `count` layers carry `text` too, and a null type is a text layer.
-export const layerText = (l) => (l && (l.type === 'text' || l.type === 'count' || l.type == null) ? plain(l.text) : '');
+export const layerText = (l) => (l && (l.type === 'text' || l.type === 'count' || l.type == null) ? onScreenText(l.text) : '');
 
 // For a message or a label: the readable copy, cut to length. Truncating the RAW string can cut a tag
 // in half and print `"Nothing came near the <b>ed"`, which is noise in the one place a person is
 // reading the output.
 export const snippet = (s, n = 24) => {
-  const t = plain(s).trim();
+  const t = onScreenText(s);
   return t.length > n ? `${t.slice(0, n)}…` : t;
 };

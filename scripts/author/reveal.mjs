@@ -12,6 +12,7 @@
 // (no JSON) use `make filmstrip … FROM=<beat> FPS=12` per beat instead — this tool is for our renders.
 import http from 'node:http';
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -93,7 +94,7 @@ const grab = async (t, file, tag, color) => {
 // --layers / LAYERS=1 : the "ALL reveals" mode — every DISTINCT entrance (unique layer start-time),
 // not just beat-starts, so a staggered sub-reveal mid-beat is captured too. Otherwise: beat-level arcs.
 const ALL = argv.includes('--layers') || process.env.LAYERS === '1';
-const desc = (l) => l.text ? `"${String(l.text).replace(/<[^>]+>/g, '').trim().slice(0, 16)}"` : (l.src ? l.src.split('/').pop().slice(0, 16) : l.type);
+const desc = (l) => l.text ? `"${onScreenText(l.text).slice(0, 16)}"` : (l.src ? l.src.split('/').pop().slice(0, 16) : l.type);
 
 let units;
 if (ALL) {
