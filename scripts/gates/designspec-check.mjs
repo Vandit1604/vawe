@@ -20,6 +20,7 @@ import { snippet, plain as plainText } from '../lib/text.mjs';
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../lib/designspec-rules.mjs';
+import { parseColorRGB } from '../../core/motion.js';
 
 /** A scene's text as UNITS — one per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -90,21 +91,10 @@ let theme = {};
 try { theme = typeof data.theme === 'string' ? JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', data.theme + '.json'), 'utf8')) : (data.theme || {}); } catch {}
 const themeName = typeof data.theme === 'string' ? data.theme : (theme.name || 'inline');
 
-// ---- colour maths (small, local) ----
-const parseColor = (raw) => {
-  const s = String(raw).trim().toLowerCase();
-  let m;
-  if ((m = /^#([0-9a-f]{3,8})$/.exec(s))) {
-    let h = m[1];
-    if (h.length === 3) h = [...h].map((c) => c + c).join('');
-    else if (h.length === 4) h = [...h.slice(0, 3)].map((c) => c + c).join('');
-    else if (h.length === 8) h = h.slice(0, 6);
-    if (h.length !== 6) return null;
-    return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
-  }
-  if ((m = /^rgba?\(([^)]+)\)$/.exec(s))) { const p = m[1].split(',').map(parseFloat); if (p.length >= 3 && p.slice(0, 3).every(Number.isFinite)) return { r: p[0], g: p[1], b: p[2] }; }
-  return null;
-};
+// ---- colour maths ----
+// The gate reads colours through the ENGINE's parser (core/motion.js), not a local copy. It used to
+// keep its own, and that is how a gate could pass a colour the renderer then read as null.
+const parseColor = parseColorRGB;
 const sat = ({ r, g, b }) => { const R = r / 255, G = g / 255, B = b / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B); if (mx === mn) return 0; const l = (mx + mn) / 2, d = mx - mn; return l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); };
 const dist = (a, b) => Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2) / 441.673;
 

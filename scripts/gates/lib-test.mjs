@@ -13,6 +13,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js';
+import { parseColorRGB } from '../../core/motion.js';
+import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
@@ -45,6 +47,31 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 let pass = 0, fail = 0;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error('✗ ' + name); } };
+
+// `node scripts/gates/lib-test.mjs --colours` prints what the ONE parser now does with the colours
+// the four old copies disagreed about. The asserts below are the gate; this is how you READ it.
+if (process.argv.includes('--colours')) {
+  const rows = [
+    ['#7cf', 'filters + motion only 3-digit form'],
+    ['#7cfa', 'was gate-only (#rgba)'],
+    ['#ee7c56', 'the only form the lightfield takes, on purpose'],
+    ['#0b0b0fcc', 'was gate-only (#rrggbbaa)'],
+    ['#12345', 'a typo — null everywhere, before and after'],
+    ['rgb(1, 2, 3)', 'every copy took this'],
+    ['rgb(1 2 3)', 'was motion-only (space-separated)'],
+    ['rgba(1.5, 2, 3, 0.5)', 'was gate-only (float channels)'],
+    ['foo rgb(1,2,3)', 'was motion-only — the missing anchor, now null'],
+    [[1, 2, 3], 'was motion-only (array passthrough)'],
+  ];
+  console.log('\n  the one colour parser · core/motion.js\n');
+  for (const [v, why] of rows) {
+    const t = parseColor(v), o = parseColorRGB(v);
+    let lf; try { lf = JSON.stringify(lightfieldToRgb(v)); } catch { lf = 'refused'; }
+    console.log(`  ${JSON.stringify(v).padEnd(24)} ${String(JSON.stringify(t)).padEnd(14)} ${String(JSON.stringify(o)).padEnd(26)} lightfield:${lf.padEnd(10)} ${why}`);
+  }
+  console.log('');
+  process.exit(0);
+}
 
 // clamp01 / lerp
 ok('clamp01 below', clamp01(-2) === 0);
@@ -548,6 +575,34 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('filter: null safe', JSON.stringify(resolveFilter(null)) === JSON.stringify({ filter: '', overlay: null }));
   ok('filter: parseColor hex3 + rgb + junk', JSON.stringify(parseColor('#7cf')) === '[119,204,255]' && JSON.stringify(parseColor('rgb(1, 2, 3)')) === '[1,2,3]' && parseColor('nope') === null);
   ok('filter: all six presets exist', ['duotone','tritone','gradientMap','posterize','sepia','vignette'].every((k) => FILTER_PRESETS[k]));
+
+  // THE ONE COLOUR PARSER (core/motion.js). Four copies with four grammars became one, and this is
+  // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
+  // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
+  // dropped again, one of these flips. `node scripts/gates/lib-test.mjs --colours` prints the table.
+  const J = (v) => JSON.stringify(parseColor(v));
+  // filters.js rejected every hex that was not 3 or 6 digits, so an 8-digit brand colour read null
+  // and the grade silently fell back to white.
+  ok('colour: filters.js rejected #rrggbbaa — now parsed, alpha dropped', J('#0b0b0fcc') === '[11,11,15]');
+  ok('colour: filters.js rejected #rgba — now parsed', J('#7cfa') === '[119,204,255]');
+  ok('colour: filters.js accepted #rgb and rgb() — still the same channels', J('#7cf') === '[119,204,255]' && J('rgb(1, 2, 3)') === '[1,2,3]');
+  // motion.js was the only copy with an array passthrough, and the only one whose rgb() was
+  // UNANCHORED. The passthrough is kept; the missing anchor was a bug and is gone.
+  ok('colour: motion.js array passthrough kept', J([1, 2, 3]) === '[1,2,3]');
+  ok('colour: motion.js unanchored rgb() is now rejected', parseColor('foo rgb(1,2,3)') === null && parseColor('rgb(1,2,3) bar') === null);
+  // designspec-check.mjs split rgb() on commas only, so the modern space-separated CSS form was
+  // null to the gate; and it alone read floats, which the palette-distance maths depends on.
+  ok('colour: designspec rejected space-separated rgb() — now parsed', J('rgb(1 2 3)') === '[1,2,3]' && J('rgb(1 2 3 / 50%)') === '[1,2,3]');
+  ok('colour: designspec accepted float channels — still unrounded', J('rgba(1.5, 2, 3, 0.5)') === '[1.5,2,3]');
+  ok('colour: 5- and 7-digit hex are a typo, not a colour', parseColor('#12345') === null && parseColor('#1234567') === null);
+  // The {r,g,b} adapter is the SAME parse, reshaped — never a second grammar.
+  ok('colour: parseColorRGB is the tuple, reshaped', JSON.stringify(parseColorRGB('#0b0b0fcc')) === '{"r":11,"g":11,"b":15}' && parseColorRGB('nope') === null);
+  // lightfield stays 6-digit-hex only ON PURPOSE (core/lightfield/colour.js) — a narrow wrapper over
+  // the shared parser, not a widening of it. Everything the shared parser gained is still refused here.
+  ok('colour: lightfield accepts its 6-digit hex', JSON.stringify(lightfieldToRgb('#ee7c56')) === '{"r":238,"g":124,"b":86}');
+  ok('colour: lightfield still refuses what the shared parser gained', ['#7cf', '#0b0b0fcc', 'rgb(1,2,3)'].every((v) => {
+    try { lightfieldToRgb(v); return false; } catch { return true; }
+  }));
   // chromaGlow: soft neon bloom in the glyph shape (pure CSS drop-shadow stack, no SVG)
   ok('filter: chromaGlow is a pure-css glow preset', FILTER_PRESETS.chromaGlow && FILTER_PRESETS.chromaGlow.kind === 'css' && FILTER_PRESETS.chromaGlow.mode === 'glow');
   ok('filter: chromaGlow is a smooth white drop-shadow bloom (no hard fringe)', (() => { const f = resolveFilter('chromaGlow').filter; return f.startsWith('drop-shadow(') && (f.match(/drop-shadow/g) || []).length >= 4 && f.includes('255,255,255') && !/drop-shadow\(0 -?\d+px/.test(f); })());

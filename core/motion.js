@@ -330,20 +330,66 @@ export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
 // holdLast (default true): the LAST segment never exits — there is no next scene to hand off to,
 // so the ending (usually the CTA) holds at full visibility through the final frame.
 // Pass { holdLast: false } for looping content that should fade back out.
-// ---------- color contrast (WCAG) ----------
-// parseColor: #rgb/#rrggbb/rgb()/rgba() -> [r,g,b] (0-255). contrastRatio >= 1 (21 = black/white).
-// ensureContrast: keep fg if it clears min against bg, else return whichever of light/dark reads.
+// ---------- colour parsing (THE one parser) ----------
+// THE colour parser for the whole engine. Everything that reads a colour string reads it here:
+// core/filters.js (grade stops, glow flood), the WCAG maths below, core/lightfield/colour.js, and
+// the designspec gate. It is exported from motion.js because motion.js is the pure, DOM-free module
+// every other one may import without pulling in a browser.
+//
+// WHY IT LIVES IN ONE PLACE NOW. There used to be four copies with three axes of drift, and the
+// damage was the usual shape: a colour the GATE accepted, the ENGINE rejected, and nothing said so.
+//   · core/filters.js          #rgb · #rrggbb · rgb()/rgba() with INTEGER parts → [r,g,b]
+//   · core/motion.js           the same, plus an array passthrough, and its rgb() form was
+//                              UNANCHORED, so "foo rgb(1,2,3)" parsed and filters.js said null
+//   · core/lightfield/colour.js 6-digit hex ONLY, deliberately (see that file)
+//   · scripts/gates/designspec-check.mjs  #rgb · #rgba · #rrggbb · #rrggbbaa · rgb()/rgba() with
+//                              FLOAT parts → {r,g,b}. The gate alone understood 8-digit hex, so a
+//                              scene could carry "#0b0b0fcc", be graded against the palette, and
+//                              then reach a grade or a glow that read null and silently fell back.
+// This accepts the UNION of those grammars and is ANCHORED at both ends. The unanchored form was a
+// bug, not a feature: it made a typo ("colour: #fff rgb(1,2,3)") parse as a colour instead of
+// failing, which is exactly the silent substitution docs/MISTAKES.md keeps warning about.
+//
+// Return shape is [r,g,b], because that is what the engine's own call sites already destructure.
+// Channels are NOT rounded: the gate measures palette distance on floats, and rounding here would
+// move its numbers. `parseColorRGB` is the thin {r,g,b} adapter for the gate and the lightfield.
+//
+// Grammar, exactly:
+//   [r,g,b]        passed through untouched (a caller that already resolved a colour)
+//   #rgb  #rgba    each digit doubled; the alpha digit is parsed and dropped
+//   #rrggbb  #rrggbbaa   the alpha pair is parsed and dropped
+//   rgb()/rgba()   3+ finite numbers separated by commas, whitespace or a slash; alpha dropped
+// Anything else → null. Alpha is dropped everywhere because every consumer wants opaque channels;
+// a caller that needs the alpha must read it off the source string itself.
 export function parseColor(c) {
   if (Array.isArray(c)) return c;
-  const s = String(c || '').trim();
-  let m = s.match(/^#([0-9a-f]{3})$/i);
-  if (m) return [...m[1]].map((h) => parseInt(h + h, 16));
-  m = s.match(/^#([0-9a-f]{6})$/i);
-  if (m) return [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
-  m = s.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);
-  if (m) return [+m[1], +m[2], +m[3]];
+  const s = String(c ?? '').trim();
+  let m = /^#([0-9a-f]{3,8})$/i.exec(s);
+  if (m) {
+    let h = m[1];
+    if (h.length === 3 || h.length === 4) h = [...h.slice(0, 3)].map((d) => d + d).join('');
+    else if (h.length === 8) h = h.slice(0, 6);
+    if (h.length !== 6) return null; // 5 and 7 digits are a typo, not a colour
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  }
+  m = /^rgba?\(([^)]*)\)$/i.exec(s);
+  if (m) {
+    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
+    if (p.length >= 3 && p.slice(0, 3).every(Number.isFinite)) return p.slice(0, 3);
+  }
   return null;
 }
+
+// {r,g,b} adapter. The gate and the lightfield read named channels; the engine reads the tuple.
+// One parser, two shapes, so neither side had to be rewritten to share the grammar.
+export function parseColorRGB(c) {
+  const t = parseColor(c);
+  return t ? { r: t[0], g: t[1], b: t[2] } : null;
+}
+
+// ---------- color contrast (WCAG) ----------
+// contrastRatio >= 1 (21 = black/white).
+// ensureContrast: keep fg if it clears min against bg, else return whichever of light/dark reads.
 const relLum = ([r, g, b]) => {
   const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);

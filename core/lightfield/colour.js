@@ -1,13 +1,21 @@
 // Colour helpers. Six-digit hex only, on purpose: one accepted form means one way to be wrong,
 // and the validator can say exactly what it wanted.
 
+import { parseColorRGB } from '../motion.js';
+
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
 export const isHex = (v) => typeof v === 'string' && HEX.test(v);
 
+// A NARROW wrapper over the engine's one parser (core/motion.js), not a fifth grammar. The shared
+// parser also reads #rgb, #rgba, #rrggbbaa and rgb(), and this file deliberately reads none of
+// them: the reason in the header still holds, so the gate stays here and only the maths is shared.
+// options.js already rejects anything non-hex with a message naming the field, so a throw here is a
+// backstop that should never fire — and it fires loudly rather than returning NaN channels, which
+// is how a bad lightfield colour used to reach a gradient string as "rgba(NaN,NaN,NaN,1)".
 export function toRgb(hex) {
-  const v = parseInt(hex.slice(1), 16);
-  return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+  if (!isHex(hex)) throw new Error(`lightfield colour: expected a 6-digit hex like "#ee7c56". Got ${JSON.stringify(hex)}.`);
+  return parseColorRGB(hex);
 }
 
 // A CSS rgba() string from a hex plus an alpha. Alpha is rounded so output text is stable.

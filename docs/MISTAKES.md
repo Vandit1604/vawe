@@ -8912,6 +8912,62 @@ work, ask what the skipped branch leaves behind, not just what it avoids doing.
 
 ---
 
+## #329 — Four colour parsers, four grammars, and one of them was unanchored
+
+**What.** `parseColor` existed four times with four different contracts: `core/filters.js:70` (array,
+anchored), `core/motion.js:336` (array, plus passthrough, **unanchored**), `core/lightfield/colour.js:8`
+(object, 6-digit hex only), `scripts/gates/designspec-check.mjs:94` (object, plus `#rgba`/`#rrggbbaa`
+and float channels). They had drifted in three dimensions at once: return SHAPE, accepted GRAMMAR, and
+ANCHORING.
+
+**The consequence.** A colour a gate accepted, the engine rejected, and the reverse. `"foo rgb(1,2,3)"`
+parsed in `core/motion.js` because its regex had no `^`, so a stray prefix was silently ignored rather
+than refused. `#rrggbbaa` worked only in the gate. Float channels worked only in the gate. None of it
+was written down anywhere; each copy just knew a little more or less than its neighbours.
+
+**Fix.** One parser in `core/motion.js`, accepting the union and anchored at both ends, with a
+`{r,g,b}` adapter for the two object-shaped consumers. The lightfield's hex-only restriction was KEPT,
+because its comment gives the reason ("one accepted form means one way to be wrong, and the validator
+can say exactly what it wanted") — it became a narrow gate over the shared parser that throws a named
+error instead of returning NaN channels. 11 assertions pin the grammar, printable with
+`node scripts/gates/lib-test.mjs --colours`. Library: 100 identical, 0 changed.
+
+**It is a third done.** Seven more inline hex parsers exist outside those four files —
+`core/layers/util.js:10`, `core/produce.js:19`, `core/surfaces/globe.js:35`, `core/generators.js:729`,
+`:743`, `:711`, `core/surfaces/palette.js:16` — none of which accepts `#rgb` or `rgb()`. Copies five
+through eleven of one idea. And `core/filters.js` `defId` calls `.toString(16)` on a channel that can
+now be a float; unreachable today because `parseSpec` splits on commas before `parseColor` sees it,
+real nonetheless.
+
+---
+
+## #330 — A git worktree silently removes the thing that proves a change is safe
+
+**What.** Three agents ran in isolated worktrees on disjoint files, each told to prove `make snap-all`
+reported zero changed scenes. The first came back with **42 identical, 57 changed** and, correctly,
+reported that it could therefore only diff before-against-after rather than verify absolutely.
+
+**Root cause, two of them.** `verify/snap/` is gitignored, so a fresh worktree has **no baselines** and
+every scene reports `no-baseline` — a sweep that checks nothing and exits 0. That one was anticipated
+and the prompts seeded it by copying from the main tree. The second was not: **`assets/fonts/` is also
+gitignored**, populated by `make fonts`. The worktree had 2 faces against the main tree's 24, so 57
+scenes drifted on text metrics before a line was changed.
+
+**Why it matters more than it looks.** An agent in that state does not fail; it reports success against
+a net with holes in it. The determinism gate, the layout audit and every text-measuring check are all
+weaker or vacuous, and nothing in their output says so. A change interacting with one of the 57 already
+drifting scenes would have been masked.
+
+**Fix.** Any worktree agent whose brief includes verification must first run `make fonts` and copy
+`verify/snap/` from the main tree, and the merge must be re-verified in the main tree regardless —
+three separate proofs of "nothing changed" do not compose into one. Here the main-tree run gave
+100 identical, 0 changed, which is the number that counts.
+
+**Lesson.** Isolation removes ambient state, and ambient state is often what the proof rests on. Before
+sending work to a worktree, ask which gitignored directory the verification silently depends on.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

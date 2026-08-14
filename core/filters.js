@@ -28,6 +28,8 @@
 //   "vignette" | "vignette:0.6" | "vignette:#001a33,0.5" → strength 0..1 (+ optional colour)
 //   anything else                  → passed through as a raw CSS filter string.
 
+import { parseColor } from './motion.js';
+
 const LUMA = '0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DEFS_HOST_ID = 'hs-filter-defs';
@@ -66,17 +68,9 @@ export function chromaGlowFilter(size = 1) {
 
 // ---- colour plumbing (pure) ----
 
-// '#7cf' | '#7cffd4' | 'rgb(124,255,212)' → [r,g,b]; null if unparseable.
-export function parseColor(s) {
-  const str = String(s || '').trim();
-  let m = /^#([0-9a-f]{3})$/i.exec(str);
-  if (m) return m[1].split('').map((c) => parseInt(c + c, 16));
-  m = /^#([0-9a-f]{6})$/i.exec(str);
-  if (m) { const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-  m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(str);
-  if (m) return [+m[1], +m[2], +m[3]];
-  return null;
-}
+// One parser for the whole engine, in core/motion.js — read the comment there for what drifted.
+// Re-exported here because this module's own public surface has always carried `parseColor`.
+export { parseColor };
 
 // Theme defaults, resolved ONCE at build (getComputedStyle cannot run per frame — it would still be
 // deterministic, but the contract is: filters.js is build-only). Cached because the theme is static
