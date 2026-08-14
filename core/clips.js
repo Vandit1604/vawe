@@ -82,7 +82,29 @@ export function driveClips(root, t) {
     const exitDur = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : BASE_EXIT;
     if (el.dataset.track != null) el.style.zIndex = el.dataset.track;
 
-    if (t < start || t >= end) { el.style.opacity = '0'; el.style.pointerEvents = 'none'; continue; }
+    // OFF-WINDOW MUST BE A STATE, NOT AN ABSENCE. This branch used to zero opacity and `continue`,
+    // leaving every OTHER property exactly as the previously-rendered frame wrote it — so an off-window
+    // clip's transform was a function of which frame a worker happened to render before this one, which
+    // is the one thing renderFrame(n) promises it is not.
+    //
+    // It hid because opacity 0 makes it invisible. It surfaced through geometry: getBoundingClientRect
+    // on a CHILD includes its ancestors' transforms, so the two text nodes inside a not-yet-entered
+    // `rise` group reported y 418.7 rendering forwards and 454.3 rendering backwards — the rise
+    // distance, stuck. Two scenes were quarantined by the determinism net for it, and a quarantined
+    // scene gets no regression baseline, so the files carrying the bug were also the files with no
+    // protection against the next one.
+    //
+    // The resting set is the same one the in-window path composes for the same reason (MISTAKES #41):
+    // only the layer's OWN anims contribute keys, so an authored look on a property nothing animates is
+    // left alone. Writing it here costs nothing visible — the element is transparent — and makes the
+    // whole style a pure function of t.
+    if (t < start || t >= end) {
+      const off = el.dataset.out ? resolveAnim(el.dataset.out) : null;
+      Object.assign(el.style, { ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1) });
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      continue;
+    }
     el.style.pointerEvents = '';
     const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
     const enterS = resolveAnim(el.dataset.anim)(enterT);

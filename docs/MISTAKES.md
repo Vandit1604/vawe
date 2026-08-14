@@ -8874,6 +8874,44 @@ above is a place a correct key can be wrong.
 
 ---
 
+## #328 — Off-window was an absence, not a state: two clocks' worth of stale transform
+
+**What.** `snap-scenes` quarantined `ab-control-shotcode` and `ab2-control-tenor` as NON-DETERMINISTIC.
+The symptom was geometric: two text nodes inside a pricing card reported `y 418.7` when the frames
+rendered forwards and `y 454.3` when they rendered backwards. Same frame, same time, 35.6px apart.
+
+**Root cause.** `core/clips.js` handled an off-window clip with
+`{ el.style.opacity = '0'; el.style.pointerEvents = 'none'; continue; }`. Opacity was set; **every other
+property was left exactly as the previously-rendered frame wrote it.** Frames render on 8 workers in
+arbitrary order, so "the previous frame" is not "the earlier frame" — an off-window clip's transform was
+a function of which frame the worker happened to do first.
+
+35.6px is the `rise` distance. The group had not entered yet at t=0.1; rendering backwards, it had
+already entered at later frames and its settled transform was still on the element.
+
+**Why it hid, and why it still mattered.** Opacity 0 makes it invisible, so no pixel was ever wrong.
+It surfaced through geometry, because `getBoundingClientRect` on a CHILD includes its ancestors'
+transforms. The cost was not a bad frame, it was a bad *net*: a quarantined scene never gets a baseline,
+so the two files carrying the bug were also the only two files with no regression protection at all.
+
+**The same shape, twice in one pass.** `formats/scene/scene.js:753` `drawBg` returned early when a
+hand-authored backdrop owned the frame, leaving the canvas holding the last thing it painted
+(docs/MISTAKES.md and the commit beside this one). Both are the identical error: a branch that says
+"nothing to do here" and leaves the previous frame's state behind. Purity is not "do not compute from
+the clock", it is "every property is a function of t, including the ones you are skipping".
+
+**Fix.** The off-window branch writes the resting style set before zeroing opacity — the same set the
+in-window path composes, for the same reason recorded at #41: only the layer's OWN anims contribute
+keys, so an authored look on a property nothing animates is untouched.
+
+**Proof it is inert.** 98 scenes identical, 0 changed, 0 quarantined. The only two that moved are the
+two that were quarantined, whose baselines had been captured under the bug and are now re-saved.
+
+**Lesson.** An early `continue` is a state machine with a hole in it. When a per-frame function skips
+work, ask what the skipped branch leaves behind, not just what it avoids doing.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
