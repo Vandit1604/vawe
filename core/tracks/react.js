@@ -27,7 +27,11 @@ export function frame(kit, el, L, units, t, f, start, end) {
     const val = lo + (hi - lo) * Math.max(0, Math.min(1, v));
     if (r.prop === 'opacity') el.style.opacity = (baseOpacity(el) * val).toFixed(3);
     else if (r.prop === 'blur') {
-      const fb = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+      // Guarded exactly as core/tracks/motion.js guards the same strip, and for the same reason: the
+      // write below is authoritative and stays unconditional, while the scan for a previous blur() only
+      // has to run when there is one to find. `replace` with no match returns its input unchanged.
+      const cur = el.style.filter || '';
+      const fb = (cur.includes('blur(') ? cur.replace(/blur\([^)]*\)/g, '') : cur).trim();
       el.style.filter = val > 0.4 ? (fb ? fb + ' ' : '') + `blur(${val.toFixed(2)}px)` : (fb || 'none');
     } else { // default: scale
       const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';

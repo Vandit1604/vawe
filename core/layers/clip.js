@@ -13,7 +13,16 @@ export function frame(kit, el, L, t) {
   const man = (kit.clips && kit.clips[L.src]) || { frames: [] };
   const N = man.frames.length;
   if (!N) return;
-  const img = el.querySelector('img');
+  // The <img> is written once by build() above and only its `src` ever changes, so finding it again on
+  // every one of the 780 frames of a render is a tree walk for an answer that cannot have moved.
+  // Memoised on the element rather than taken in build(), because a primitive's frame() can run for an
+  // element its own build() never touched: core/layers/util.js `addGroupChild` delegates to buildLeaf
+  // when the kit has one and falls back to its own two-line builder when it does not. A memo written
+  // only in build() would be permanently absent on that path and the layer would quietly stop
+  // advancing — silent substitution, which is the failure this codebase pays for most (MISTAKES #21).
+  // `undefined` = not looked yet, `null` = looked and there is none.
+  if (el.__clipImg === undefined) el.__clipImg = el.querySelector('img');
+  const img = el.__clipImg;
   let fi = Math.floor((t - start) * (man.fps || 30) * (L.speed ?? 1));
   fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
   if (img && img.getAttribute('src') !== man.frames[fi]) img.setAttribute('src', man.frames[fi]);

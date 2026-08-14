@@ -19,6 +19,10 @@ export function frame(kit, el, L, t) {
   let s = 1, rip = -1;
   for (const c of (L.clicks || [])) { const d = lt - c; if (d >= 0 && d < 0.45) { s = Math.min(s, 1 - 0.22 * Math.sin(kit.clamp01(d / 0.11) * 3.14159)); rip = d / 0.45; } }
   el.style.transform = `translate(${(pm.dx).toFixed(1)}px, ${(pm.dy).toFixed(1)}px) scale(${s.toFixed(3)})`;
-  const rp = el.querySelector('.hs-cur-ripple');
+  // The ripple ring is built once and never replaced; memoised on the element so a demo's pointer does
+  // not walk its own subtree on every frame. On the element rather than in build() for the reason
+  // core/layers/clip.js states at length: a group child can reach frame() without this build() running.
+  if (el.__ripple === undefined) el.__ripple = el.querySelector('.hs-cur-ripple');
+  const rp = el.__ripple;
   if (rp) { const on = rip >= 0 && rip < 1; rp.style.opacity = on ? (0.8 * (1 - rip)).toFixed(2) : '0'; rp.style.transform = `scale(${on ? (0.2 + rip * 1.7).toFixed(2) : 0})`; }
 }
