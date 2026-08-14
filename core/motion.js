@@ -390,6 +390,26 @@ export function parseColorRGB(c) {
 // ---------- color contrast (WCAG) ----------
 // contrastRatio >= 1 (21 = black/white).
 // ensureContrast: keep fg if it clears min against bg, else return whichever of light/dark reads.
+/** Is this background LIGHT? One answer, in linear light, for every consumer that has to choose
+ *  between dark ink and light ink.
+ *
+ *  There were two answers and they disagreed on 5.8% of the sRGB cube. `core/boot.js` and
+ *  `core/produce.js` both weighted the GAMMA-ENCODED channels — `0.2126r + 0.7152g + 0.0722b` on the
+ *  raw 0-1 values — while the four copies that grade contrast linearise first, as WCAG requires. The
+ *  disagreement is concentrated exactly where it hurts: SATURATED colours. `#ef720b`, a hot orange,
+ *  reads 0.522 gamma (dark) and 0.304 linear (light), so a brand shipping an orange backdrop got the
+ *  producer choosing dark ink for a surface the auditor then graded as light. Neutrals agree, which is
+ *  why nothing had surfaced: 0 of the 78 background colours across every theme in this repo changes
+ *  classification under this fix.
+ *
+ *  The threshold is 0.26 because that is where the old ones already sat. Gamma 0.55 and 140/255 = 0.549
+ *  are the same point, and 0.55 in sRGB linearises to ≈0.26 — so this is the SAME line, drawn in the
+ *  space where the weights mean something. */
+export const isLightBg = (c) => {
+  const rgb = parseColor(c);
+  return rgb ? relLum(rgb) > 0.26 : true;   // unreadable → light, the white-first common case
+};
+
 const relLum = ([r, g, b]) => {
   const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);

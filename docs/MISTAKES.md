@@ -9039,6 +9039,34 @@ the frame loop its set; do not let it look.
 
 ---
 
+## #333 — Two answers to "is this background light", disagreeing on every saturated colour
+
+**What.** Six places compute relative luminance. Four linearise the sRGB channels as WCAG requires and
+are used to GRADE contrast. Two — `core/boot.js` `luma` and `core/produce.js` `bgIsLight` — weighted the
+**gamma-encoded** channels and are used to DECIDE light-versus-dark, which picks the ink. So the code
+choosing the ink and the code grading the ink used different maths.
+
+**Where it bites.** They agree on neutrals, which is why nothing surfaced: 0 of the 78 background
+colours across every theme in this repo changes classification. They disagree on **5.8% of the sRGB
+cube**, and all of it is saturated. `#ef720b`, a hot orange, reads 0.522 gamma (dark) and 0.304 linear
+(light) — so a brand shipping an orange backdrop would get the producer choosing DARK ink for a surface
+the auditor then grades as LIGHT. The defect was waiting on a colour nobody had shipped yet.
+
+**Fix.** One `isLightBg` in `core/motion.js`, in linear light, beside the `relLum` the contrast maths
+already uses. The threshold is **0.26** because that is where the old ones already sat: gamma 0.55 and
+140/255 = 0.549 are the same point, and 0.55 in sRGB linearises to ≈0.26. The same line, drawn in the
+space where the weights mean something.
+
+**Proof it is inert on what exists.** Enumerated all 78 theme background colours: 0 flip. Library:
+100 identical, 0 changed, 0 quarantined. `lib-test` 634 passed. The fix corrects the future without
+moving the present, which is the only shape a maths correction on a live library can safely take.
+
+**Lesson.** A duplicated formula is a nuisance; a duplicated formula whose copies answer the same
+question differently is a bug with a delay on it. When you find one, do not ask whether the copies
+differ textually — feed both the whole input space and measure where the ANSWERS diverge.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

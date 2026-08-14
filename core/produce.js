@@ -14,13 +14,10 @@
 // `"produced": false` disables the whole pass. Applies to the `scene` module only. Pure JS → runs in the
 // browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
 
-// relative luminance of a #rrggbb bg → is the brand light (white-first) or dark?
-function bgIsLight(bg) {
-  const m = /^#?([0-9a-f]{6})$/i.exec(String(bg || '').trim());
-  if (!m) return true; // unknown → assume light (white-first is the common case)
-  const n = parseInt(m[1], 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return (0.2126 * r + 0.7152 * g + 0.0722 * b) > 140;
-}
+import { isLightBg as bgIsLight } from './motion.js';
+// Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
+// This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
+// maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
 
 export function produceBaseline(data, theme) {
   if (!data || typeof data !== 'object') return data;

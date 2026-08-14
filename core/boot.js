@@ -2,7 +2,7 @@
 // core/boot.js — the scene RUNTIME lifted out of core/motion.js: theme resolution + CSS apply,
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
-import { FPS } from './motion.js';
+import { FPS, isLightBg } from './motion.js';
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
@@ -17,10 +17,9 @@ const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 const hexToRgb = (h) => { let s = String(h).replace('#', ''); if (s.length === 3) s = s.split('').map((c) => c + c).join(''); const n = parseInt(s, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const rgbToHex = (a) => '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
 const mixHex = (a, b, t) => { try { const A = hexToRgb(a), B = hexToRgb(b); return rgbToHex(A.map((v, i) => v + (B[i] - v) * t)); } catch { return a; } };
-const luma = (h) => { try { const [r, g, b] = hexToRgb(h).map((v) => v / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; } catch { return 1; } };
 // deriveCard: a raised CARD surface. Lighten the theme's surface toward white on light themes, lift it
 // gently on dark — so elevated block cards read correctly on any brand that didn't declare palette.card.
-const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return mixHex(base, '#ffffff', luma(P.bg || base) > 0.55 ? 0.55 : 0.1); };
+const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return mixHex(base, '#ffffff', isLightBg(P.bg || base) ? 0.55 : 0.1); };
 
 // ---- multi-aspect: canvas sizes + a pure relative-coordinate resolver ----
 // One source renders at any platform ratio. Absolute px coords pass through unchanged (back-compat);
