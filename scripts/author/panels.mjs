@@ -21,6 +21,7 @@
 //   node scripts/author/panels.mjs <STORYBOARD.md> [--out /tmp/panels]
 //   make panels SB=formats/scene/<name>.storyboard.md
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { openScene } from './scene-page.mjs';
@@ -197,7 +198,7 @@ for (const b of beats) {
     weight: 400, color: b.becomes ? INK : RED, align: 'left', ...hold });
 
   rows.push({ b, shot, place, hasPic, start, dur, fill: shot.sx * shot.sy,
-    words: b.onscreen.join(' ').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length });
+    words: onScreenText(b.onscreen.join(' ')).split(/\s+/).filter(Boolean).length });
 }
 
 const total = +Math.max(...beats.map((b) => b.end ?? 0)).toFixed(2);

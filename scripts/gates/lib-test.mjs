@@ -734,23 +734,67 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
   // ── layer copy vs authored markup ──────────────────────────────────────────────────────────────
   {
-    const { plain, layerText, snippet } = await import('../lib/text.mjs');
+    const { onScreenText, glyphText, layerText, snippet } = await import('../lib/text.mjs');
     ok('text: markup is stripped, which is what a viewer reads',
-      plain('Nothing came near the <b>edge.</b>') === 'Nothing came near the edge.');
+      onScreenText('Nothing came near the <b>edge.</b>') === 'Nothing came near the edge.');
     ok('text: a needle from the storyboard now matches the layer that emphasises a word',
-      plain('Nothing came near the <b>edge.</b>').includes('Nothing came near the edge.'));
+      onScreenText('Nothing came near the <b>edge.</b>').includes('Nothing came near the edge.'));
     // The silent half of the same bug. This regex wants digits then whitespace, and a tag between
     // them is why a film that styled its own number walked past the check meant to catch it.
     const CLAIM = /\b(\d+)\s+(effects?|cuts?|shaders?)\b/i;
     ok('text: an emphasised number is still a claim',
-      !CLAIM.test('<b>245</b> effects') && CLAIM.test(plain('<b>245</b> effects')));
+      !CLAIM.test('<b>245</b> effects') && CLAIM.test(onScreenText('<b>245</b> effects')));
     ok('text: a count layer carries copy too', layerText({ type: 'count', text: '<b>9</b>' }) === '9');
     ok('text: a null type is a text layer', layerText({ text: 'hi' }) === 'hi');
     ok('text: an image layer has no copy', layerText({ type: 'image', text: 'x' }) === '');
-    ok('text: a nullish text is empty, never the string "undefined"', plain(undefined) === '' && plain(null) === '');
+    ok('text: a nullish text is empty, never the string "undefined"', onScreenText(undefined) === '' && onScreenText(null) === '');
     // Cutting the RAW string can slice a tag in half and print markup at a person.
     ok('text: a snippet cuts the readable copy, not the markup',
       snippet('Nothing came near the <b>edge.</b>', 24) === 'Nothing came near the ed…');
+
+    // ── the three semantics this used to have, and which one each caller needs ────────────────────
+    // A BLOCK tag breaks the run of text and an INLINE one does not. Substituting empty for every tag
+    // (the old `plain`) glued 22 live strings, `"Financial infrastructure to<br>grow"` among them;
+    // substituting a space for every tag (the old `onScreenText`) split "Northwind" in two.
+    ok('text: a <br> separates two words',
+      onScreenText('Financial infrastructure to<br>grow') === 'Financial infrastructure to grow');
+    ok('text: emphasis INSIDE a word does not split it',
+      onScreenText('North<b>wind</b>') === 'Northwind');
+    ok('text: a block element separates its neighbours', onScreenText('<div>Mon</div><div>Tue</div>') === 'Mon Tue');
+    // docs/MISTAKES.md #214/#216/#217: a <style> body, a <script> body and a comment are source the
+    // frame never shows. Read as copy they became a brand-voice defect, clipped text and tiny type.
+    ok('text: a stylesheet is not copy',
+      onScreenText('<style>.g{color:red}/* unlock */</style><p>Ship it</p>') === 'Ship it');
+    ok('text: an HTML comment is not copy', onScreenText('<!-- elevate --><p>Ship it</p>') === 'Ship it');
+    ok('text: a script body is not copy', onScreenText('<script>var x="empower"</script>hi') === 'hi');
+    // A string with no markup must survive untouched, so a plain comparison is unaffected.
+    ok('text: prose with a bare < is left alone', onScreenText('a < b, and 3<4') === 'a < b, and 3<4');
+    // glyphText is the DOM's textContent, which is what core/layers/text.js stripLen() counts, which is
+    // what typedLen()'s visLen must be. A <br> costs the caret nothing.
+    ok('text: glyphText counts what the caret walks, so a <br> is worth zero characters',
+      glyphText('ab<br>cd') === 'abcd' && glyphText('<b>245</b>') === '245');
+    ok('text: glyphText still refuses a stylesheet', glyphText('<style>.g{color:red}</style>hi') === ' hi');
+    ok('text: the two variants disagree ONLY about tag spacing, never about which source is copy',
+      onScreenText('<style>x</style>a<br>b') === 'a b' && glyphText('a<br>b') === 'ab');
+  }
+
+  // ── the layer TREE, walked once ────────────────────────────────────────────────────────────────
+  {
+    const { flattenLayers, flattenLayer } = await import('../lib/layers.mjs');
+    const tree = [{ id: 'a', children: [{ id: 'b' }, { id: 'c', children: [{ id: 'd' }] }] }, { id: 'e' }];
+    ok('layers: parents come before their children, depth first',
+      flattenLayers(tree).map((l) => l.id).join('') === 'abcde');
+    ok('layers: one layer plus its descendants', flattenLayer(tree[0]).map((l) => l.id).join('') === 'abcd');
+    // seam-snap threw a TypeError on a null and inspect silently counted a stray string as a layer.
+    ok('layers: a null in the array is skipped, not thrown on',
+      flattenLayers([null, { id: 'a' }, undefined]).map((l) => l.id).join('') === 'a');
+    ok('layers: a stray string is not a layer',
+      flattenLayers(['oops', { id: 'a' }]).length === 1);
+    ok('layers: a null child is skipped too',
+      flattenLayers([{ id: 'a', children: [null, { id: 'b' }] }]).map((l) => l.id).join('') === 'ab');
+    ok('layers: a non-array children is not walked', flattenLayers([{ id: 'a', children: 'x' }]).length === 1);
+    ok('layers: no layers at all is empty, not an error',
+      flattenLayers(undefined).length === 0 && flattenLayers(null).length === 0);
   }
 
   // ── crt ────────────────────────────────────────────────────────────────────────────────────────

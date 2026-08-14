@@ -10,13 +10,14 @@
 // NOT a template: it adds MOTION to the layers/beats you already authored and never invents content or
 // a canned layout. The ledger + `make direct` one-family rule stay the gate. Verify with `make reveal`.
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 
 const file = process.argv[2];
 if (!file) { console.error('usage: node scripts/author/cinematic.mjs <scene.json> [--write]'); process.exit(2); }
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];
-const stripHtml = (s) => String(s || '').replace(/<[^>]+>/g, '').trim();
+const stripHtml = onScreenText;
 const wordCount = (s) => stripHtml(s).split(/\s+/).filter(Boolean).length;
 
 // duration: explicit, else last layer end (+0.4 tail) — mirrors scene.html

@@ -17,6 +17,7 @@
 // `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked —
 // see the honesty note in scripts/gates/inspect.mjs.
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 
 const SB = process.env.SB || process.argv[2];
@@ -28,7 +29,9 @@ const D = process.env.D || null;
 const quotes = (s) => {
   const out = [];
   for (const m of s.matchAll(/"([^"]{2,})"|'([^']{2,})'/g)) out.push((m[1] || m[2]).trim());
-  for (const m of s.matchAll(/<b>(.*?)<\/b>|<em>(.*?)<\/em>/gi)) out.push((m[1] || m[2]).replace(/<[^>]+>/g, '').trim());
+  // The needle this GENERATES is matched by inspect.mjs with onScreenText, so it has to be built with
+  // onScreenText. Two halves of one feature disagreeing about markup is #313.
+  for (const m of s.matchAll(/<b>(.*?)<\/b>|<em>(.*?)<\/em>/gi)) out.push(onScreenText(m[1] || m[2]));
   return [...new Set(out.filter(Boolean))];
 };
 const fieldIn = (block, k) => { const m = new RegExp(`(?:^|\\n)\\s*[-*]?\\s*${k}\\s*:\\s*(.+)`, 'i').exec(block); return m ? m[1].trim() : null; };

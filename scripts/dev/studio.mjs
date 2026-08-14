@@ -15,6 +15,7 @@
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
 import http from 'node:http';
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -55,7 +56,7 @@ const beatCheck = (file) => {
 
 // The JSON's own view of the film: the transition markers, and a label pool the page matches its DOM bars
 // against (the DOM knows the real timing, the JSON knows what each layer IS).
-const label = (L) => L.id || (L.text && String(L.text).replace(/<[^>]*>/g, '').trim())
+const label = (L) => L.id || (L.text && onScreenText(L.text))
   || (L.src && path.basename(String(L.src))) || L.comp || L.capture || L.preset || '';
 // UNDO is a stack of whole previous file contents. A scene is a few kilobytes and an editing session is
 // tens of edits, so keeping the bytes is simpler and more honest than replaying inverse operations —

@@ -22,6 +22,10 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
 import { layoutErrors } from '../core/validate.mjs';
+// The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
+// <style> body as glyphs (docs/MISTAKES.md #216/#217); this file went on doing exactly that when it
+// labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
+import { snippet } from '../scripts/lib/text.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -820,7 +824,7 @@ function sourceIssues(cfg) {
   for (const L of cfg.layers || []) {
     if (!L || typeof L !== 'object') continue;
     const id = L.id || L.type || 'layer';
-    const t = String(L.text ?? '').replace(/<[^>]+>/g, '').trim().slice(0, 18);
+    const t = snippet(L.text, 18);
     // dx/dy are read only inside scene.html's anchor pass (`const T = L.anchor && byId[L.anchor]`), so
     // without a resolvable anchor they are silently dropped — authored intent that never renders.
     if ((L.dx != null || L.dy != null) && !L.anchor)

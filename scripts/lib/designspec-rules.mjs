@@ -22,7 +22,7 @@
 // nobody can trust, and that is not theoretical here: the detector we are replacing shipped a rule
 // whose catalogue entry says "more than two em-dashes" over an implementation that requires five.
 // `make designspec-check SELFTEST=1` runs both samples through every rule.
-import { plain } from './text.mjs';
+import { onScreenText as plain } from './text.mjs';
 
 /** A phrase list is an opinion, so it is DATA and it sits where it can be argued with.
  *  These are PHRASES. `copy-check.mjs` already carries 43 single WORDS (`seamless`, `leverage`,

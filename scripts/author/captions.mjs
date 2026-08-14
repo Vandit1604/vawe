@@ -6,6 +6,7 @@
 //   node scripts/author/captions.mjs formats/scene/video.json "First line. Then the <b>payoff</b>."
 //   make captions D=formats/scene/video.json TEXT="…"
 import fs from 'node:fs';
+import { onScreenText } from '../lib/text.mjs';
 
 const [file, text] = [process.argv[2], process.argv[3]];
 if (!file || !text || !fs.existsSync(file)) {
@@ -17,7 +18,9 @@ const duration = data.duration || 12;
 const START = 0.5, END_PAD = 0.4, GAP = 0.08, MAX_WORDS = 7;
 
 // split into sentences, then chunk long sentences into <= MAX_WORDS phrases (keeps each caption readable)
-const wordsOf = (s) => s.replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(Boolean).length;
+// The same word list core/captions.js capWords() builds, so the pacing this tool writes and the
+// per-word windows the engine derives cannot disagree about how many words a line has.
+const wordsOf = (s) => onScreenText(s).split(/\s+/).filter(Boolean).length;
 const sentences = text.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
 const phrases = [];
 for (const s of sentences) {
