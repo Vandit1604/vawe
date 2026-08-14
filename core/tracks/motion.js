@@ -57,6 +57,13 @@ export function frame(kit, el, L, units, t, f, start, end) {
   }
   // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
   // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
-  const fBase = (el.style.filter || '').replace(/blur\([^)]*\)/g, '').trim();
+  //
+  // The WRITE stays unconditional — that is what "authoritative" means, and skipping it is how a blur
+  // from another frame survives a seek backwards (MISTAKES #41). Only the STRIP is conditional: every
+  // layer with a motion track pays this on every frame it is on screen, and the great majority of them
+  // never carry a blur at all — an authored `filter`, or nothing. `replace` on a string with no match
+  // returns the string, so the guarded form is the same value by construction, without the scan.
+  const cur = el.style.filter || '';
+  const fBase = (cur.includes('blur(') ? cur.replace(/blur\([^)]*\)/g, '') : cur).trim();
   el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
 }

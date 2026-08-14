@@ -8912,6 +8912,37 @@ work, ask what the skipped branch leaves behind, not just what it avoids doing.
 
 ---
 
+## #329 — driveClips asked the DOM what to drive, on every frame
+
+**What.** `core/clips.js` opened with `root.querySelectorAll('[data-start]')` INSIDE `driveClips`, which
+is the first thing `renderFrame` calls. An attribute-selector walk of the whole scene tree, 780 times a
+render, for a set that cannot change after the scene is built.
+
+**Root cause.** The set of timed elements was never given to the driver; the driver went and found it.
+Two writers create those attributes and both run at build (`formats/scene/scene.js` `setLayerTiming` for
+a top-level layer, `core/layers/util.js` `addGroupChild` for a group child), so the query returned the
+same nodes 780 times.
+
+**Why it is a correctness finding and not only a cost.** A live query means `driveClips` operates on
+whatever is in the DOM at the instant it runs. Nothing does add a clip mid-render today, so no frame was
+ever wrong — but the file's own header claims `driveClips(clips, t)` is a pure function of t, and that
+line was the one thing in it that was not. It is the same shape as #328 directly above, found in the same
+file: a per-frame result that depends on something other than t, invisible until something moves.
+
+**Fix.** `collectClips(root)` takes the set ONCE, frozen, where the scene finishes building;
+`driveClips` takes the collection instead of a root. Anything that ever legitimately needs to add a clip
+after build re-collects explicitly, which is a build-time act that shows up in a diff — rather than
+reinstating a query that runs 780 times to notice.
+
+**Proof it is inert.** `make snap-all`: 101 identical, 0 changed, 0 quarantined (1 pre-existing error,
+`three-showcase`, an undecoded asset). `make probe`, `make canvas-purity` and `lib-test` (606 passed) all
+green.
+
+**Lesson.** A per-frame function that discovers its own inputs has a dependency it never declared. Hand
+the frame loop its set; do not let it look.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

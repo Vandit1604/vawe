@@ -8,9 +8,16 @@ export const slot = 'orbit';
 
 export const PROPS = { borderTrail: {} };
 
+// The arc node is found ONCE and remembered on the element. A track has no build hook (core/tracks/
+// index.js: a track is frame() and nothing else), so the memo is taken on the first frame instead —
+// which is the same thing, because the node is written by the layer's build() and the DOM under a
+// layer does not change after that. `undefined` is the "not looked yet" sentinel and `null` a real
+// answer, so a layer that declares `borderTrail` and has no arc stops searching too.
+// core/layers/text.js is the pattern: measure at build, read the measurement in frame().
 export function frame(kit, el, L, units, t) {
   if (!L.borderTrail) return;
-  const s = el.querySelector('[data-trail]');
+  if (el.__trail === undefined) el.__trail = el.querySelector('[data-trail]');
+  const s = el.__trail;
   if (!s) return;
   const per = +(s.dataset.trailPeriod || 4) || 4;
   s.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`;

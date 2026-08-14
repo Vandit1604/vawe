@@ -1,7 +1,7 @@
 // core/clips.js — declarative composition layer (another engine parity):
 //   • data-attribute timing/tracks   (data-start / data-duration / data-track / data-anim / data-out)
 //   • a seekable animation-adapter interface (WAAPI + registered/GSAP paused timelines)
-// Both are PURE in the time input: driveClips(root, t) is a deterministic function of t; seeking a
+// Both are PURE in the time input: driveClips(clips, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
 import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
@@ -69,11 +69,31 @@ const resolveAnim = (name) => ANIM[name] || fade;
 // engine was backwards (MISTAKES #40).
 const asExit = (fn, exitT) => fn(1 - clamp01(exitT));
 
-// driveClips(root, t): position every [data-start] clip in time. A clip is visible on
+// collectClips(root): the FIXED set of timed elements a scene drives, taken ONCE when the scene has
+// finished building. driveClips used to run this query itself, on every frame — 780 attribute-selector
+// tree walks per render for a set that cannot change after build.
+//
+// The cost was the smaller half. A live query means driveClips operates on whatever is in the DOM at
+// the instant it runs, so anything that adds or removes a `[data-start]` element mid-render changes
+// what frame N renders and nothing says so — the header of this file claims driveClips is a pure
+// function of t, and a live query is the one line in it that was not. It is the same shape as the
+// off-window branch below (MISTAKES #41): a style that depended on which frame a worker happened to
+// render first. Frozen because the array is the scene's timing contract, not a scratch list.
+//
+// NOTHING in this engine legitimately adds a clip after build, and that is a checked claim, not an
+// assumption: every writer of `dataset.start` runs at build time (formats/scene/scene.js
+// `setLayerTiming` for a top-level layer, core/layers/util.js `addGroupChild` for a group child). If a
+// future feature ever does need to add one — a beat materialised mid-film, a lazily built sub-scene —
+// it must call collectClips again and hand driveClips the new array, rather than reinstating the live
+// query. Re-collecting is an explicit build-time act; a live query is an invisible per-frame one.
+export function collectClips(root) {
+  return Object.freeze([...root.querySelectorAll('[data-start]')]);
+}
+
+// driveClips(clips, t): position every clip in time. A clip is visible on
 // [start, start+duration); it plays data-anim on entry and data-out (or its reverse anim) on exit.
 // z-order comes from data-track. Off-window clips are fully transparent (layout preserved → pure).
-export function driveClips(root, t) {
-  const clips = root.querySelectorAll('[data-start]');
+export function driveClips(clips, t) {
   for (const el of clips) {
     const start = parseFloat(el.dataset.start) || 0;
     const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;

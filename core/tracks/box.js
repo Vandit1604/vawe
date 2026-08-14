@@ -33,7 +33,12 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // core/layers/image.js sizes the <img> itself in px unless the layer opted into cover-fit (via
   // `radius` or `ken`), in which case the img is already 100%/100% and rides the wrapper. Resizing
   // only the wrapper in that first case would move nothing on screen and say nothing about it.
-  const im = el.querySelector('img.hs-img');
+  // Looked up once per element, not once per frame: this track runs on every frame of a keyed layer's
+  // life and the <img> is written by core/layers/image.js build() and never replaced. A track has no
+  // build hook, so the memo is taken on the first frame that needs it; `undefined` means "not looked
+  // yet" and `null` is a real answer, so a keyed rect never searches twice for an image it has not got.
+  if (el.__hsImg === undefined) el.__hsImg = el.querySelector('img.hs-img');
+  const im = el.__hsImg;
   if (im && im.style.width && im.style.width.endsWith('px')) {
     if (bw != null) im.style.width = bw.toFixed(2) + 'px';
     if (bh != null) im.style.height = bh.toFixed(2) + 'px';

@@ -1,6 +1,6 @@
 import { boot } from '/core/boot.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
-import { driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
+import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR } from '/core/gsap-effects.js';
@@ -446,6 +446,15 @@ boot((data, fps, theme, canvas) => {
   const topCount = layers.length; // group children follow; their x/y are relative to their group
   layers.push(...extra); // group children join the per-frame animation loop
 
+  // THE TIMED SET, taken here because here is where the scene has finished being built: every
+  // top-level layer is in `cam` (or in its beat wrapper, which is), and every group child was appended
+  // by addGroupChild during the map above. Both writers of `data-start` have run, and nothing after
+  // this line adds one. Collected once instead of re-queried inside driveClips, which walked the tree
+  // 780 times a render for a set that is fixed after build — and, worse, made what frame N renders a
+  // function of what was in the DOM at that instant. core/clips.js carries the reasoning and the rule
+  // for the day something legitimately needs to add a clip later.
+  const CLIPS = collectClips(cam);
+
   // ---- SCENE VIEW: what one layer is allowed to know about the rest of the frame ----
   // A primitive was handed itself and the clock and nothing else, so occlusion, a shadow keyed to a
   // light and per-layer 3D could not be written at all: none of them is a property of one layer.
@@ -516,6 +525,20 @@ boot((data, fps, theme, canvas) => {
   }
   const boxes = new Map();
   const topGeom = new Array(topCount);   // every top-level layer, id or not — a child needs its parent's
+  // `reflowed` is the ONE field of a top-level layer's geometry that is not part of its box: it says the
+  // build-time child offsets went stale, which is a fact about this frame's bookkeeping and not about
+  // where the layer is. It used to live ON the geometry object, so every id'd layer paid a second object
+  // and a destructure per frame purely to take it back off again before freezing. Kept beside the array
+  // instead, so `g` IS the box and can be frozen in place. Not folded into `g` and frozen with it: a box
+  // handed to a modifier must advertise only what boxOf promises, and a stray key is how an effect comes
+  // to read a field the contract never had (the same drift TRACK_PROPS and IDS exist to refuse).
+  const topReflowed = new Uint8Array(topCount);
+  // A REUSED object for every top-level layer that has NO id. Nothing outside this function can ever see
+  // one — boxOf answers from `boxes`, which only id'd layers enter — so its only reader is the child loop
+  // below, on the same frame that wrote it. An id'd layer still gets a fresh frozen object, because that
+  // one IS handed out and freezing a reused object would freeze it for every later frame.
+  // core/tracks/index.js states the rule this serves: nothing allocates per frame if it does not have to.
+  const scratchGeom = Array.from({ length: topCount }, () => ({}));
   function resolveBoxes(t) {
     boxes.clear();
     for (let i = 0; i < topCount; i++) {
@@ -531,13 +554,14 @@ boot((data, fps, theme, canvas) => {
       // w/h are the UNSCALED layout box and `scale` is reported beside them, because CSS scales about
       // the element's centre: folding the scale into w/h would move the top-left corner and nothing
       // on screen moves with it (the same error that put a `becomes` handover 160px off, above).
-      const g = { id: L.id, x, y, w, h, cx: x + w / 2, cy: y + h / 2,
-        scale: m ? m.scale : 1, rot: m ? m.rot : 0, opacity: m ? m.opacity : 1, visible,
-        // a motion track that keys w/h RESIZES the group, and flex and grid reflow when it does, so
-        // the offsets measured at build stop describing where the children are. Recorded, not guessed.
-        reflowed: !!(m && (m.w != null || m.h != null)) };
+      const g = L.id ? {} : scratchGeom[i];
+      g.id = L.id; g.x = x; g.y = y; g.w = w; g.h = h; g.cx = x + w / 2; g.cy = y + h / 2;
+      g.scale = m ? m.scale : 1; g.rot = m ? m.rot : 0; g.opacity = m ? m.opacity : 1; g.visible = visible;
       topGeom[i] = g;
-      if (L.id) { const { reflowed, ...box } = g; boxes.set(L.id, Object.freeze(box)); }
+      // a motion track that keys w/h RESIZES the group, and flex and grid reflow when it does, so
+      // the offsets measured at build stop describing where the children are. Recorded, not guessed.
+      topReflowed[i] = (m && (m.w != null || m.h != null)) ? 1 : 0;
+      if (L.id) boxes.set(L.id, Object.freeze(g));
     }
     for (const [i, k] of childRel) {
       const { L } = layers[i];
@@ -545,7 +569,7 @@ boot((data, fps, theme, canvas) => {
       // THE ONE CONDITION THAT STAYS NULL, narrowed from "every group child" to this: a resized group
       // has reflowed, so the build-time offset is a stale measurement. Scaling or moving the group is
       // fine — those transform the child with it, which the arithmetic below does exactly.
-      if (p.reflowed) continue;
+      if (topReflowed[k.root]) continue;
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = p.visible && t >= start && t < end;
       // The child rides the group's transform: its centre offset from the group's centre is scaled and
@@ -776,7 +800,7 @@ boot((data, fps, theme, canvas) => {
   function renderFrame(f) {
     const t = f / fps;
     drawBg(t);
-    driveClips(cam, t); // declarative clip timing + enter/exit + z-order
+    driveClips(CLIPS, t); // declarative clip timing + enter/exit + z-order
     driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits) — no-op otherwise
     // EVERY box for this frame, before ANY layer's frame() runs — see resolveBoxes.
     resolveBoxes(t);

@@ -45,7 +45,13 @@ export function frame(kit, el, L, t) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   const active = t >= start && t < end;
   if (L.ken) {
-    const im = el.querySelector('img');
+    // Memoised on the element: the <img> comes from build() and is never swapped (core/resample.js
+    // hides it and appends a canvas beside it, it does not replace it), so re-finding it every frame
+    // buys nothing. Taken here rather than in build() because a group child reaches this frame()
+    // through core/layers/util.js, which has a fallback path that does not call this build() at all —
+    // a memo written there would be missing exactly where ken already had to be fixed once.
+    if (el.__kenImg === undefined) el.__kenImg = el.querySelector('img');
+    const im = el.__kenImg;
     if (im) Object.assign(im.style, active
       ? kit.kenBurns(t - start, L.duration ?? 2, L.ken === true ? {} : L.ken)
       : { transform: 'scale(1)', transformOrigin: '50% 50%' });
