@@ -39,7 +39,25 @@ func main() {
 	// run, 4 workers gave zero. Compositor determinism flags, doubling the rAF settle wait, and
 	// capture-until-stable all left it untouched, which is what ruled out the capture path and pointed
 	// at raster starvation. See docs/MISTAKES.md #190 and `make flicker-check`.
-	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 4)), "parallel capture browsers")
+	//
+	// RAISED TO 6 IN 2026-08, BECAUSE THE PREMISE ABOVE STOPPED BEING TRUE. "Each worker is a full
+	// browser" was the whole mechanism: eight browsers meant eight independent raster pipelines
+	// competing for one GPU. Workers are now TABS on one browser sharing one GPU process
+	// (docs/MISTAKES.md #335), so the starvation argument has to be re-measured rather than inherited.
+	//
+	// Re-measured across three films at 4 versus 6 workers, comparing the CAPTURED FRAMES, not the mp4:
+	//   gradient-showcase (7 images)   25 of 636 frames differ, worst max-delta 2 of 255
+	//   showcase-flight-globe          308 of 780,             worst max-delta 70 on 0.14% of pixels
+	//   hero-site (SVG, text-heavy)    402 of 456,             worst max-delta 47 on 0.29% of pixels
+	// Every difference is anti-aliasing on glyph outlines, at 2x supersample before the downsample
+	// averages four pixels into one; the image-heavy film varies least, which is the direct answer to
+	// the #267 hazard. None of it is the partially-painted large text #190 describes, and that is what
+	// the max-delta figure is there to detect: a half-painted region reads far above 47.
+	//
+	// 6 is 14% faster than 4 (42.1s against 48.7s on showcase-flight-globe) for 400 MB more. 8 was
+	// measured too and buys nothing further (42.7s), so the cap goes to 6 and not higher — #190's
+	// corruption was found AT 8 and has not been re-tested there.
+	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 6)), "parallel capture tabs")
 	draft := flag.Bool("draft", false, "fast encode, no grain")
 	// SUPERSAMPLE override. ss=2 costs 4x the pixels of every expensive stage and exists to stop text
 	// shimmering under motion; whether it survives the h264 encode had never been tested, and a flag is
