@@ -9203,6 +9203,50 @@ the first version was not evidence for it.
 
 ---
 
+## #337 — `make preview` clipped every fragment at 1080px, because a portrait default outlived its page
+
+The tool that exists so you can LOOK at a fragment before rendering it was showing you a cropped one.
+A `component` captured off linear.app (1344x546) previewed as a card with its right third missing: the
+"Assign to" popover cut mid-word, no check mark, no overflow menu. Nothing said anything. The tool
+printed `layout: 1400px centred` and `box 1400px` under a picture clipped at x=1079.
+
+**Root cause.** `scripts/author/preview-fragment.mjs` links `core/tokens.css` for its font registry.
+That sheet also carries the frame geometry: `html, body { width: var(--vw); height: var(--vh);
+overflow: hidden }`, with the defaults `--vw: 1080px` / `--vh: 1920px`. Those defaults are PORTRAIT,
+and `core/boot.js` overwrites them per aspect at boot. The preview page never boots. So the body stayed
+1080px wide with `overflow:hidden`, and everything past x=1080 was thrown away before the screenshot.
+
+The clip was invisible for two reasons. It is at 1080, which reads as a plausible edge rather than a
+round number, and the harness's own comment asserted the opposite: *"min-height (not fixed) + no
+overflow:hidden -> the page SCROLLS when served"*. That comment describes the rules the harness writes.
+It does not describe the linked sheet that overrides them. tokens.css:13-17 even names this case, in a
+warning about a different bug: *"for fragment previews that never boot"*.
+
+**Diagnosis, and why guessing failed.** Two previews at `--w 1344` and `--w 1900` put the card's LEFT
+edge in two places and its right edge in the same place both times, at pixel 1079 of 1920. A boundary
+that does not move with the layout is not layout. Reproducing the harness without the `<link>` painted
+the card whole to x=1353, which named the sheet.
+
+**Fix.** Both harnesses that link tokens.css without booting now state their own geometry, each with
+the reason in place:
+- `preview-fragment.mjs` sets `:root{--vw:1920px;--vh:1080px}` (the canvas it actually photographs) and
+  `html,body{width:auto;height:auto;overflow:visible}`, so `--serve` still scrolls and the PNG still
+  clips through the screenshot rect, as its comment always claimed.
+- `scripts/brand/design-sheet.mjs` had the identical bug at its own call site: a 1280px-wide sheet
+  clipped to 1080, and `fullPage` bounded to `--vh` = 1920px tall. `make sheet NAME=linear` went from
+  1080x1920 to 1360x4182 with the same two lines. Found by grepping the linked sheet, not the symptom
+  (CLAUDE.md: fix the rule, not the call site).
+
+**Silence closed.** The preview now measures `#frag` against the 1920x1080 canvas and prints, when it
+hangs off any edge, how far past and that the PNG is cropped. Off-canvas content and content designed
+to end there look identical in a photograph, which is what let this run.
+
+**Blast radius: none in rendering.** `formats/scene/scene.html` boots, so `boot.js` sets both vars from
+the aspect before anything paints; every mp4 is unaffected. Only the two non-booting harnesses read the
+defaults, and both are fixed.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

@@ -49,7 +49,15 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/jav
   '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const page$html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="/core/tokens.css">
-<style>*{box-sizing:border-box}html,body{margin:0;background:${bg};color:#f7f8f8}
+<style>*{box-sizing:border-box}
+/* tokens.css is linked for its fonts, but it also sets html,body{width:var(--vw);overflow:hidden} and
+   its default --vw is PORTRAIT 1080px. This page never boots, so nothing ever rewrites that default —
+   every fragment wider than 1080px was silently cut at x=1080 while the tool printed "box 1900px
+   centred" (docs/MISTAKES.md #337). Undo both: the vars carry the landscape canvas this harness really
+   photographs, and html/body grow rather than clip, so --serve still scrolls and the PNG path clips
+   through the screenshot rect as the comment below says. */
+:root{--vw:1920px;--vh:1080px}
+html,body{margin:0;background:${bg};color:#f7f8f8;width:auto;height:auto;overflow:visible}
 /* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
    1920x1080 via the screenshot clip, so it's unaffected. */
 #stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
@@ -80,12 +88,22 @@ await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/__frag`, { waitUntil: 'load' });
 await page.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
 const out = '/tmp/preview.png';
+// The PNG is the canvas, so anything outside it is not in the picture you are about to judge. Say so:
+// a fragment that hangs off the edge looks in the shot exactly like a fragment that was designed to
+// end there, which is how a 1344px capture read as a cropped card for as long as #337 was live.
+const overflow = await page.evaluate(() => {
+  const r = document.getElementById('frag').getBoundingClientRect();
+  return { l: Math.round(r.left), t: Math.round(r.top), r: Math.round(r.right), b: Math.round(r.bottom) };
+});
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
   const findings = await detect(`http://127.0.0.1:${port}/__frag`, browser);
   await browser.close(); server.close();
   console.log(`  --t: ${tSec}s (the frame clock; pass --t <seconds> for another moment)`);
   console.log(`  layout: ${fullBleed ? 'FULL BLEED 1920x1080 (the fragment positions itself against its container)' : boxW + 'px centred'}`);
 console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName}, bg ${bg}, ${fullBleed ? 'full bleed 1920x1080' : `box ${boxW}px`})`);
+  const off = [overflow.l < 0 && `${-overflow.l}px past the left`, overflow.t < 0 && `${-overflow.t}px past the top`,
+    overflow.r > 1920 && `${overflow.r - 1920}px past the right`, overflow.b > 1080 && `${overflow.b - 1080}px past the bottom`].filter(Boolean);
+  if (off.length) console.log(`  ⚠ the fragment runs off the 1920x1080 canvas — ${off.join(', ')}. What you see in the PNG is CROPPED, not the whole thing.`);
   console.log('  open it / Read it and check: real fonts? real assets loaded? spacing + hierarchy right?');
   console.log('  want it live in your browser instead of a PNG?  add --serve');
   report(findings);
