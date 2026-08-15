@@ -147,4 +147,8 @@ try {
       console.warn(`  ⚠ font "${f}" is used by this component but has no @font-face in core/tokens.css — it will SUBSTITUTE at render. Run brandkit (downloads fonts) or add it manually.`);
   }
 } catch {}
-console.log(`  use in a demo scene: { "type": "component", "use": "${label}", "src": "/assets/brands/${brand}/components/${label}.json" }`);
+// The snippet a tool prints is the one an author pastes, so it has to VALIDATE. This line used to
+// carry a `use` key, which the component layer does not read (core/layers/component.js PROPS is
+// src/part/w) and core/validate.mjs rejects as an unknown prop. `w` is here because the layer scales
+// the capture to it and defaults to 1200 — worth stating rather than discovering.
+console.log(`  use in a scene: { "type": "component", "src": "/assets/brands/${brand}/components/${label}.json", "w": ${Math.min(1600, result.w)}, "x": 0, "y": 0 }`);

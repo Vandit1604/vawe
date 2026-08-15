@@ -9247,6 +9247,48 @@ defaults, and both are fixed.
 
 ---
 
+## #338 — The one gate that blocks on structure read six of the eight channels its own source returns
+
+`no-continuous-object` is the only structural rule in this engine that fails a build. It asks that one
+object survive each cut and CHANGE there, and CLAUDE.md says plainly what that costs: *"it made one
+alternative free and the other seventeen expensive, because a keyed `w`/`h` on a rectangle passes and a
+motif does not."*
+
+**A keyed `w` did not pass.** `linear-agents.json` is four captured Linear surfaces cut together, held
+by one accent bar whose width advances through every junction: 192px under the first panel, 711 under
+the second, 1236 under the third, the full 1760 under the last. It is the cheap device, chosen because
+the gate rewards it. The gate failed the film anyway, and said *"3 layer(s) do cross a boundary (rect)
+but none of them CHANGE there"* with the change sitting in the track it had just read.
+
+**Root cause, one line.** `core/sequence.js:94` `motionAt` returns nine keys — `dx, dy, scale, rot,
+opacity, blur, w, h, track`. `direction-floor.mjs` `poseAt` built its comparison string from six of
+them and dropped `w`, `h` and `track`. So resizing, re-proportioning and re-lettering were all
+invisible to the one gate that blocks, while a 1px drift in `dx` counted.
+
+**Fix.** `poseAt` folds all nine, with `null` (this track does not drive that property) printed as `-`
+so it compares equal to itself. A layer that only moves scores exactly as before.
+
+**Blast radius, measured as the discipline requires: zero.** `direction-floor` over all 150 scenes,
+before and after, is byte-identical — 56 fail, 94 pass, the same 56. The rule got stricter about
+nothing and looser about one device it always claimed to accept. It still fires: the 56 failures stand.
+
+**Also in this pass, the same class one file over.** `scripts/author/capture-component.mjs` printed a
+usage snippet carrying `"use": "<label>"`. The component layer has no such prop (`core/layers/component.js`
+PROPS is `src`/`part`/`w`) and `core/validate.mjs` rejects it as unknown, so the line every author pastes
+after a capture did not validate. It now prints `src`/`w`/`x`/`y`, and `w` is stated because the layer
+scales the capture to it and silently defaults to 1200. **A tool's printed snippet is documentation with
+a shorter path to the file than the docs have.**
+
+**What this film was for.** #267 (a captured DOM component racing the capture) had no live coverage —
+no scene in the library used a `component` layer. Now one does, and the measurements: two full renders
+byte-identical; 1 worker against 6 differs on 671 of 684 frames, worst frame PSNR 40.95 dB, max delta
+124 of 255, 0.116% of pixels over delta 32, longest contiguous run of big-delta pixels 24px. A 6x
+amplified diff of the worst frame is glyph outlines and avatar RIMS — every one of the six images is
+present in both renders, and a dropped image would be a solid block, not a ring. #267 does not
+reproduce, and the component layer adds no difference class beyond #258's characterised glyph jitter.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
