@@ -9150,6 +9150,22 @@ nobody read it as a cost.
 
 ## #336 — Worker count changes about 80% of frames, and the cap should not move until that is understood
 
+> **CORRECTED by its own Phase 0, below. The headline number is right and its significance is not.**
+> 631 of 780 was measured on DECODED MP4 FRAMES. At the capture level the figure is **308 of 780** —
+> the encode roughly doubles it, because a JPEG re-encode of a slightly different raster differs across
+> far more of the frame than the raster does. And the magnitude, which this entry never measured, is
+> **max delta 70 of 255 on 0.14% of pixels, entirely on the anti-aliased outlines of text glyphs**,
+> measured at 2x supersample before the downsample averages four pixels into one. The globe, the route
+> and the backdrop are bit-identical. This is #258's characterised rasteriser jitter, not a new defect,
+> and the entry below made #258's exact mistake one layer up: it counted how many frames differ and
+> never asked by how much. #258 says "look at the pixels before theorising about them" and its own
+> correction says "look at the WORST case". Doing both took one ffmpeg pass and one image.
+>
+> **What follows for the 4-worker cap:** the correctness question that blocked it is answered on this
+> film. Six workers is 14% faster (42.1s against 48.7s) for 400 MB more. Confirm on two or three more
+> films — one with a captured `component`, since #267 is the failure that hid in exactly that place —
+> and then the default can move.
+
 **What.** Phase 2 of the one-browser-N-tabs work was to re-measure the 4-worker cap (#190), which was
 tuned against four separate browser process trees and no longer describes the topology. Rendering
 `showcase-flight-globe` at 1, 4, 6 and 8 workers and hashing every DECODED frame:
