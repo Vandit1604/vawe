@@ -9148,6 +9148,45 @@ nobody read it as a cost.
 
 ---
 
+## #336 — Worker count changes about 80% of frames, and the cap should not move until that is understood
+
+**What.** Phase 2 of the one-browser-N-tabs work was to re-measure the 4-worker cap (#190), which was
+tuned against four separate browser process trees and no longer describes the topology. Rendering
+`showcase-flight-globe` at 1, 4, 6 and 8 workers and hashing every DECODED frame:
+
+| pair | frames differing (of 780) |
+|---|---|
+| w1 vs w4 | **639** |
+| w4 vs w6 | 631 |
+| w4 vs w8 | 631 |
+| w6 vs w8 | 631 |
+
+The same worker count is perfectly reproducible — w4 old-binary against w4 new-binary is byte-identical
+(#335). Change the worker count and roughly four frames in five come out different.
+
+**This predates the tabs change.** The 1-vs-4 figure was measured on the pre-change binary too. It is
+the residue #258/#269 records as open, and it is considerably larger than the count recorded there.
+
+**Wall clock says the cap is worth revisiting, which is exactly why it must not move yet.** 4 workers
+48.7s / 2,012 MB · 6 workers **42.1s** / 2,413 MB · 8 workers 42.7s / 2,678 MB. Six is 14% faster and
+eight adds nothing. That is a real win sitting behind an unexplained correctness question, which is the
+worst possible reason to take it.
+
+**What is NOT yet isolated, and is the next measurement.** All of the above compares decoded mp4
+frames, so it cannot yet separate "the captured PNGs differ" from "the encode differs". The engine
+writes PNGs before encoding and `VAWE_KEEP_FRAMES` (render.go:78) preserves them. Compare the PNG sets
+at two worker counts directly. Until that runs, the size of the defect is known and its location is not.
+
+**A measurement I got wrong on the way.** The first pass hashed with `ffmpeg -f framemd5 -c copy`,
+which hashes compressed PACKETS rather than pixels and would report a difference for any re-encode.
+Re-run with `-pix_fmt rgb24` and no `-c copy`; the numbers were identical, so the conclusion held, but
+the first version was not evidence for it.
+
+**Decision: the 4-worker cap stays.** Raising it would widen a defect whose cause is unknown, to buy
+14%.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
