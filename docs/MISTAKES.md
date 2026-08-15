@@ -9099,6 +9099,55 @@ result. A gate that cannot tell "the inputs moved" from "the code moved" is not 
 
 ---
 
+## #335 — Four workers meant four whole browsers, and one CDP call was the difference
+
+**What.** `internal/scene/scene.go` `newTab` called `chromedp.NewExecAllocator` on every invocation.
+Its own comment said so — "spins up an independent browser + tab" — so `--workers 4` started four
+complete Chrome installations. Measured against two other engines rendering 1920x1080 on this machine:
+
+| | processes | peak RSS |
+|---|---|---|
+| vawe | **51** | **5,306 MB** |
+| another engine | 12 | 1,738 MB |
+| another engine | 9 | 1,347 MB |
+
+At the fully matched workload — same frames, same resolution, no supersample — we still used 5,305 MB
+against another engine's 1,568. The gap was topology, not settings.
+
+**The fix is a parent argument.** `chromedp.NewContext(allocCtx)` starts a NEW BROWSER; a new TAB is
+`NewContext(<an existing tab's context>)`. One allocator and one first tab now live in `Capture` and
+outlive every worker, and workers 1..N-1 open tabs off that first tab. Worker 0 borrows it and must NOT
+cancel it, or the browser closes under its siblings.
+
+**Measured after: 2,012 MB median (2069 / 2012 / 1947), 62% less. Wall time unchanged at 48.7s.** The
+spike put the marginal cost of a tab at exactly one renderer process and about 118 MB, with the
+browser, GPU and utility processes flat — so 4 tabs is 13 processes where 4 browsers was 51.
+
+**`setFocusEmulationEnabled` is load-bearing and is not the flag anyone reaches for first.** A
+background tab in headless Chrome is not throttled, it is FROZEN: measured zero rAF callbacks in three
+seconds while the foreground tab ran 362. `--disable-background-timer-throttling`,
+`--disable-backgrounding-occluded-windows` and `--disable-renderer-backgrounding` change NOTHING — all
+three measured, all three leave the tab at zero. `Emulation.setFocusEmulationEnabled(true)` per tab
+puts all eight tabs at the full rate. This mattered more here than it would elsewhere: the readiness
+`Poll` runs in rAF mode and `shoot` awaits a double `__realRaf` before every screenshot, so without it
+every worker but one would have waited forever — #121, exactly.
+
+**The spike was wrong twice before it was right, and both times the SHAPE of the numbers said so, not a
+failure.** It rooted a process walk at a pgrep guess that did not resolve, so root was 0 and it
+reported 2,404 processes and 12.7 GB — the whole machine. And it read rAF counters without resetting
+them, so the descending ladder [1118 947 664 405] across four tabs was tab AGE, since tabs are created
+sequentially. A spike that answers a decision needs the same scepticism as the code it is deciding on.
+
+**Proof it is inert.** Frame hashes via `ffmpeg -f framemd5`, old binary against new: 1 worker
+`ab3b3a2a` both, 4 workers `a05d1bd0` both. Identical at each worker count. `w1 != w4` in BOTH
+binaries, which is the pre-existing residue of #258/#269 — untouched, neither fixed nor worsened.
+
+**Lesson.** Before optimising a hot path, check the cheap structural question: are we creating one of
+something, or N. The comment had said "an independent browser" for as long as the function existed and
+nobody read it as a cost.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

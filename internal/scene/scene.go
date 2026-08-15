@@ -143,13 +143,32 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	return opts
 }
 
-// newTab spins up an independent browser + tab loaded at url, ready to render at ss× device scale.
+// newTab opens a TAB on the browser that `parent` belongs to, loaded at url, ready to render at ss×
+// device scale. Pass an allocator context for the first tab (which starts the browser) and that first
+// tab's context for every later one.
+//
+// IT USED TO SPIN UP A WHOLE BROWSER PER CALL — `chromedp.NewExecAllocator` was inside here, and its
+// own comment said "an independent browser + tab". Four workers meant four complete Chrome
+// installations: measured at 51 processes and 5,604 MB peak against another engine's 12 / 1,738 and
+// another engine' 9 / 1,347 for the same job. One browser with four tabs measures 13 processes and
+// 1,468 MB. Each extra tab costs exactly one renderer process and about 118 MB; the browser, GPU and
+// utility processes stay flat, so the parallelism is unchanged and only the duplication goes.
+//
+// setFocusEmulationEnabled IS LOAD-BEARING, and it is not the flag anyone would reach for first. A
+// background tab in headless Chrome is not throttled, it is FROZEN: measured zero rAF callbacks in
+// three seconds while the foreground tab ran 362. `--disable-background-timer-throttling`,
+// `--disable-backgrounding-occluded-windows` and `--disable-renderer-backgrounding` change NOTHING —
+// all three were measured and all three leave the tab at zero. This one call makes every tab report
+// itself focused and visible, and all eight tabs then tick at the full rate.
+//
+// That matters here more than it would elsewhere, because the readiness Poll below runs in rAF mode
+// and `shoot` awaits a double `__realRaf` before every screenshot. Without this, every worker except
+// one would wait forever — which is docs/MISTAKES.md #121 exactly.
 func newTab(parent context.Context, url string, ss int) (context.Context, context.CancelFunc, error) {
-	allocCtx, cancelAlloc := chromedp.NewExecAllocator(parent, allocOpts(ss)...)
-	ctx, cancelCtx := chromedp.NewContext(allocCtx)
-	cancel := func() { cancelCtx(); cancelAlloc() }
+	ctx, cancel := chromedp.NewContext(parent)
 	err := chromedp.Run(ctx,
 		chromedp.EmulateViewport(W, H, chromedp.EmulateScale(float64(ss))),
+		emulation.SetFocusEmulationEnabled(true),
 		chromedp.Navigate(url),
 		chromedp.Poll("window.__engineReady === true || !!window.__engineError", nil, chromedp.WithPollingTimeout(45*time.Second)),
 	)
@@ -494,8 +513,15 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		url += "&alpha=1" // scene drops its opaque background so unpainted pixels stay transparent
 	}
 
-	// one tab for meta
-	ctx0, cancel0, err := newTab(context.Background(), url, ss)
+	// ONE browser for the whole render. The allocator and the first tab outlive every worker, so no
+	// worker's `defer cancel()` can take the browser down under its siblings.
+	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), allocOpts(ss)...)
+	defer cancelAlloc()
+
+	// one tab for meta — and it is the tab that owns the browser, so it is cancelled here, not by the
+	// worker that borrows it.
+	ctx0, cancel0, err := newTab(allocCtx, url, ss)
+	defer cancel0()
 	if err != nil {
 		return meta, err
 	}
@@ -681,16 +707,18 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			var ctx context.Context
 			var cancel context.CancelFunc
 			if w == 0 {
-				ctx, cancel = ctx0, cancel0
+				// Borrowed, not owned: Capture cancels ctx0. A worker cancelling it would close the
+				// browser every other tab is running on.
+				ctx = ctx0
 			} else {
 				var e error
-				ctx, cancel, e = newTab(context.Background(), url, ss)
+				ctx, cancel, e = newTab(ctx0, url, ss) // a TAB on the same browser
 				if e != nil {
 					errs <- e
 					return
 				}
+				defer cancel()
 			}
-			defer cancel()
 			if e := worker(ctx, w); e != nil {
 				errs <- e
 			}
