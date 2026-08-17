@@ -183,41 +183,41 @@
 
 | name | what / when |
 |---|---|
-| `blinds` | — |
-| `bokeh` | — |
-| `burn` | — |
-| `chromaticSplit` | — |
+| `blinds` | playful "notice the cut" (shape wipes) |
+| `bokeh` | time passing / reflection |
+| `burn` | a heavy story turn |
+| `chromaticSplit` | digital shock / rupture |
 | `cinematicZoom` | dive-in zoom into a screen |
-| `circle` | — |
-| `confetti` | — |
-| `crossWarp` | — |
-| `dispersion` | — |
+| `circle` | playful "notice the cut" (shape wipes) |
+| `confetti` | punctuation / a hit |
+| `crossWarp` | liquid / organic morph |
+| `dispersion` | digital shock / rupture |
 | `dissolve` | time/place change |
-| `domainWarp` | — |
-| `doors` | — |
-| `flash` | — |
+| `domainWarp` | liquid / organic morph |
+| `doors` | playful "notice the cut" (shape wipes) |
+| `flash` | punctuation / a hit |
 | `glitch` | RGB-split glitch |
-| `grain` | — |
-| `gridPixelateWipe` | — |
-| `ink` | — |
-| `iridescence` | — |
-| `leak` | — |
-| `lens` | — |
-| `pinwheel` | — |
-| `pixel` | — |
-| `polka` | — |
-| `ridgedBurn` | — |
-| `ripple` | — |
-| `scan` | — |
-| `sdfIris` | — |
-| `squares` | — |
-| `streak` | — |
-| `swirl` | — |
-| `thermal` | — |
-| `vortex` | — |
-| `warp` | — |
+| `grain` | punctuation / a hit |
+| `gridPixelateWipe` | digital shock / rupture |
+| `ink` | time passing / reflection |
+| `iridescence` | premium glamour / product |
+| `leak` | time passing / reflection |
+| `lens` | premium glamour / product |
+| `pinwheel` | playful "notice the cut" (shape wipes) |
+| `pixel` | digital shock / rupture |
+| `polka` | playful "notice the cut" (shape wipes) |
+| `ridgedBurn` | a heavy story turn |
+| `ripple` | liquid / organic morph |
+| `scan` | digital shock / rupture |
+| `sdfIris` | playful "notice the cut" (shape wipes) |
+| `squares` | playful "notice the cut" (shape wipes) |
+| `streak` | energy, momentum |
+| `swirl` | playful "notice the cut" (shape wipes) |
+| `thermal` | premium glamour / product |
+| `vortex` | a heavy story turn |
+| `warp` | energy, momentum |
 | `whipPan` | momentum swipe between beats |
-| `wipe` | — |
+| `wipe` | playful "notice the cut" (shape wipes) |
 
 ## Seams (2-scene blends)  `[transition]`
 
@@ -246,37 +246,37 @@
 
 | name | what / when |
 |---|---|
-| `angelic` | — |
-| `chrome` | — |
-| `crt` | — |
-| `cyberpunk` | — |
-| `dreamSequence` | — |
-| `dreamyHaze` | — |
-| `droneCinematic` | — |
-| `edgeGlow` | — |
-| `emboss` | — |
-| `fadedPolaroid` | — |
-| `fatten` | — |
-| `filmNoir` | — |
-| `glassWarp` | — |
-| `glitchGlow` | — |
-| `halationFilm` | — |
-| `heatWarp` | — |
-| `hologram` | — |
-| `impact` | — |
-| `letterpress` | — |
-| `lomo` | — |
-| `melt` | — |
-| `neon` | — |
-| `nightVision` | — |
-| `nostalgia` | — |
-| `rippleGlass` | — |
-| `super8` | — |
-| `thermal` | — |
-| `timeFreeze` | — |
-| `vhs` | — |
-| `vintageAnamorphic` | — |
-| `watercolor` | — |
+| `angelic` | premium / glamour / energy |
+| `chrome` | premium / glamour / energy |
+| `crt` | analog nostalgia (warm, dated) |
+| `cyberpunk` | sci-fi / data / digital |
+| `dreamSequence` | cinematic / film |
+| `dreamyHaze` | dreamy / soft-focus |
+| `droneCinematic` | cinematic / film |
+| `edgeGlow` | premium / glamour / energy |
+| `emboss` | print / editorial |
+| `fadedPolaroid` | analog nostalgia (warm, dated) |
+| `fatten` | distortion / physical FX |
+| `filmNoir` | cinematic / film |
+| `glassWarp` | distortion / physical FX |
+| `glitchGlow` | sci-fi / data / digital |
+| `halationFilm` | cinematic / film |
+| `heatWarp` | distortion / physical FX |
+| `hologram` | sci-fi / data / digital |
+| `impact` | print / editorial |
+| `letterpress` | print / editorial |
+| `lomo` | analog nostalgia (warm, dated) |
+| `melt` | distortion / physical FX |
+| `neon` | premium / glamour / energy |
+| `nightVision` | sci-fi / data / digital |
+| `nostalgia` | analog nostalgia (warm, dated) |
+| `rippleGlass` | distortion / physical FX |
+| `super8` | analog nostalgia (warm, dated) |
+| `thermal` | sci-fi / data / digital |
+| `timeFreeze` | distortion / physical FX |
+| `vhs` | analog nostalgia (warm, dated) |
+| `vintageAnamorphic` | analog nostalgia (warm, dated) |
+| `watercolor` | dreamy / soft-focus |
 
 ## Canvas image passes (baked)  `[static]`
 

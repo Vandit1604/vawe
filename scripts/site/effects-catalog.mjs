@@ -10,6 +10,7 @@ import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { LOOK_NAMES } from '../../core/looks.js';
+import { registersOf } from '../gates/craft-coverage.mjs';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
@@ -88,7 +89,16 @@ const DESC = {
   'svg:morph (shape melts into a logo)': 'one path melts into another (blob into logo), optional spin',
 };
 
-const d = (n) => DESC[n] || '—';
+// docs/CRAFT/SELECTION.md §4 already classifies every look and every sting by the register it evokes,
+// and `craft-coverage` already FAILS when one is missing — so that map is both complete and guaranteed.
+// It just had no reader, which is why 31 looks and 35 stings rendered here as bare names. Falling back to
+// the register is not a stopgap: for a held texture, "analog nostalgia (warm, dated)" is the thing an
+// author is choosing between, more useful than a sentence about `lomo`'s curve.
+const REGISTERS = registersOf(fs.readFileSync(path.join(root, 'docs/CRAFT/SELECTION.md'), 'utf8'));
+
+// `kind` scopes the lookup because `thermal` is BOTH a look and a sting, with a different register in
+// each table. Sections that carry no register pass nothing and behave exactly as before.
+const d = (n, kind) => DESC[n] || (kind && REGISTERS[kind] && REGISTERS[kind][n]) || '—';
 const table = (rows) => ['| name | what / when |', '|---|---|', ...rows.map(([n, x]) => `| \`${n}\` | ${x} |`)].join('\n');
 const names = (arr) => [...new Set(arr)].sort();
 
@@ -98,9 +108,9 @@ const sections = [
   ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text'],
   ['GSAP exits', '`fxOut` — pair every entrance with a directional exit.', names(EXIT_FX), 'exit'],
   ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition'],
-  ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition'],
+  ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', 'sting'],
   ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition'],
-  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static'],
+  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static', 'look'],
   ['Canvas image passes (baked)', '`canvasFx` — a one-time baked image pass (cannot move).', names(CANVAS_FX_NAMES), 'static'],
   ['Generative paint FX (per-frame)', '`{ "type":"paint", "paint":"<name>" }` — a full-canvas animated field, pure in t.', names(PAINT_FX_NAMES), 'per-frame'],
   ['Backgrounds', '`bg:[{preset,from,to}]` — the field behind everything; moving ones (aurora/constellation/mesh/…) animate.', names(BG_NAMES), 'background'],
@@ -152,13 +162,13 @@ out.push('| A logo to appear | the `logoReveal` beat / path draw-on / shape-morp
 out.push('| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |');
 out.push('');
 let total = 0;
-for (const [title, intro, list, tag] of sections) {
+for (const [title, intro, list, tag, kind] of sections) {
   total += list.length;
   out.push(`## ${title}  \`[${tag}]\``);
   out.push('');
   out.push(intro);
   out.push('');
-  out.push(table(list.map((n) => [n, d(n)])));
+  out.push(table(list.map((n) => [n, d(n, kind)])));
   out.push('');
 }
 out.push(`---`);

@@ -37,20 +37,56 @@ const nameRe = (n) => new RegExp(`(^|[^A-Za-z0-9_])${n}([^A-Za-z0-9_]|$)`);
 const covers = (text, name) => nameRe(name).test(text);
 
 // The two §4 coverage tables, as their table-row lines only (prose like "an `apple` beat" is excluded,
-// so profile names are never mistaken for effect names).
-function selectionTableRows(selection) {
-  const start = selection.indexOf('Looks — the held texture');
+// so profile names are never mistaken for effect names). `from`/`to` bound ONE of the two tables so the
+// looks rows and the stings rows can be read apart — see registersOf for why that matters.
+function selectionTableRows(selection, from = 'Looks — the held texture', to = '\n## ') {
+  const start = selection.indexOf(from);
   if (start < 0) return [];
-  const end = selection.indexOf('\n## ', start);
+  const end = selection.indexOf(to, start + from.length);
   const region = selection.slice(start, end < 0 ? undefined : end);
   return region.split('\n').filter((l) => l.trim().startsWith('|'));
+}
+
+// registersOf(selection) — §4's classification as DATA: { look: {name → register}, sting: {…} }.
+//
+// The rows were already parsed here and then thrown away by a `.join('\n')`, so the one place in this
+// repo that knows a `vhs` is analog nostalgia and a `lens` is premium glamour could not tell anyone.
+// docs/EFFECTS.md renders 31 looks and 35 stings as bare names for exactly that reason, and a quiz or an
+// MCP client asking "what IS this" gets nothing. Returning the map costs a split and buys 66 entries.
+//
+// KEYED BY KIND, not flat, because `thermal` is BOTH a look (sci-fi/data/digital) and a sting (premium
+// glamour/product) — verified against the registries, and the only such collision. A flat map would
+// silently give one of them the other's meaning, which is worse than the blank it replaces.
+export function registersOf(selection) {
+  const parse = (rows) => {
+    const out = {};
+    for (const line of rows) {
+      if (/^\|\s*-+/.test(line.trim())) continue;                       // the |---|---| separator
+      const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+      if (cells.length < 2) continue;
+      // Two header rows exist with DIFFERENT first-column labels ("Register / era" and "The seam should
+      // read as…"), because each table titles its own axis. A header carries no backticked member, so
+      // the member scan below drops both without either label being hardcoded here.
+      const members = [...cells[1].matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+      for (const m of members) out[m] = cells[0];
+    }
+    return out;
+  };
+  return {
+    look: parse(selectionTableRows(selection, 'Looks — the held texture', '**Stings')),
+    sting: parse(selectionTableRows(selection, 'Stings — the shader AT the seam')),
+  };
 }
 
 function coverageErrors() {
   const errs = [];
   const selection = read('SELECTION.md');
-  for (const look of LOOK_NAMES) if (!covers(selection, look)) errs.push(`look "${look}" (core/looks.js) is not classified in SELECTION.md`);
-  for (const fx of SHADER_FX) if (!covers(selection, fx)) errs.push(`sting "${fx}" (SHADER_FX) is not classified in SELECTION.md`);
+  // Ask the MAP, not the whole file. `covers()` tested for the name anywhere in SELECTION.md, so a look
+  // named once in a profile paragraph counted as classified while its §4 row was missing — the check
+  // could pass on prose. Reading the table means "classified" means what it says.
+  const reg = registersOf(selection);
+  for (const look of LOOK_NAMES) if (!reg.look[look]) errs.push(`look "${look}" (core/looks.js) is not classified in SELECTION.md §4's LOOKS table`);
+  for (const fx of SHADER_FX) if (!reg.sting[fx]) errs.push(`sting "${fx}" (SHADER_FX) is not classified in SELECTION.md §4's STINGS table`);
   return errs;
 }
 
