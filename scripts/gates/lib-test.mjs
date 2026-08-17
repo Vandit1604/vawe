@@ -19,7 +19,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope 
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen } from '../../core/layers/text.js';
-import { slowPush, diveIn, panFollow, orbit, multiPhase, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { slowPush, diveIn, panFollow, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -1257,6 +1257,65 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('multiPhase: a leg that mentions nothing holds position', approx(h1.x, h0.x, 1e-6) && approx(h1.y, h0.y, 1e-6));
   ok('multiPhase: ...and holds scale, as it always did', approx(h1.s, h0.s, 1e-6));
   ok('multiPhase: an explicit later leg still moves', approx(cameraAt(hold, 5).x, 0, 1e-6) && approx(cameraAt(hold, 5).s, 1, 1e-6));
+  // travel: the contract is the pan math, so every station must sit at frame CENTRE when the camera
+  // arrives — that conversion is the reason the helper exists and the thing hand-typed legs get wrong.
+  const trStations = [
+    { tx: 400, ty: 300, s: 1.4 },
+    { tx: 1500, ty: 800, s: 1.8, dur: 1.2, dwell: 0.6 },
+    { tx: 960, ty: 540, s: 1, dur: 1 },
+  ];
+  const tr = travel({ stations: trStations, start: 0, canvasW: 1920, canvasH: 1080 });
+  const arrivals = [0, 1.2, 2.8];   // station 0 opens the flight; 1.2 = dur, 2.8 = 1.2 + 0.6 dwell + 1
+  ok('travel: every station lands at frame centre (x = W/2 - tx)', trStations.every((st, i) =>
+    approx(cameraAt(tr, arrivals[i]).x, 1920 / 2 - st.tx, 1e-6)));
+  ok('travel: ...and on y (y = H/2 - ty)', trStations.every((st, i) =>
+    approx(cameraAt(tr, arrivals[i]).y, 1080 / 2 - st.ty, 1e-6)));
+  ok('travel: each station arrives at its own scale', trStations.every((st, i) =>
+    approx(cameraAt(tr, arrivals[i]).s, st.s, 1e-6)));
+  // One journey, not four hops: an eased curve at each station zeroes velocity on arrival (#125).
+  ok('travel: interiors are linear, only the final arrival settles',
+    tr.slice(1, -1).every((k) => k.ease === 'linear') && tr[tr.length - 1].ease === 'easeOutCubic'
+    && tr[0].ease === undefined);
+  const dw0 = cameraAt(tr, 1.2), dw1 = cameraAt(tr, 1.5);
+  ok('travel: a dwell holds the pose on s/x/y', approx(dw1.s, dw0.s, 1e-6) && approx(dw1.x, dw0.x, 1e-6)
+    && approx(dw1.y, dw0.y, 1e-6));
+  // The #197 shape: an axis a station does not mention must CHANGE nothing.
+  const carry = travel({ stations: [{ tx: 0, ty: 0, s: 1.5 }, { tx: 1920, ty: 1080, dur: 1 }], start: 0 });
+  ok('travel: a station without `s` carries the previous scale', approx(cameraAt(carry, 1).s, 1.5, 1e-6));
+  ok('travel: a station without tx/ty carries the previous pan', (() => {
+    const zoom = travel({ stations: [{ tx: 400, ty: 300, s: 1.2 }, { s: 2, dur: 1 }], start: 0 });
+    const z = cameraAt(zoom, 1);
+    return approx(z.x, 1920 / 2 - 400, 1e-6) && approx(z.y, 1080 / 2 - 300, 1e-6) && approx(z.s, 2, 1e-6);
+  })());
+  ok('travel: throws on missing/empty stations', ['skip', undefined, []].every((s) => {
+    try { travel(s === 'skip' ? undefined : { stations: s }); return false; } catch { return true; }
+  }));
+  ok('travel: deterministic', JSON.stringify(travel({ stations: trStations }))
+    === JSON.stringify(travel({ stations: trStations })));
+  const tk = truck({ start: 1, dur: 2, dx: -800, s: 1.3 });
+  ok('truck: 2 keyframes, x runs 0 → dx', tk.length === 2 && approx(cameraAt(tk, 1).x, 0)
+    && approx(cameraAt(tk, 3).x, -800));
+  ok('truck: s is constant across the move', [1, 1.5, 2, 2.5, 3].every((t) => approx(cameraAt(tk, t).s, 1.3, 1e-6)));
+  ok('truck: lateral only, y never moves', approx(cameraAt(tk, 2).y, 0, 1e-6));
+  // The canvas is now REQUIRED for any move that centres a point, because defaulting to landscape
+  // mis-centred every target in a portrait scene by 420px per axis in silence. expand-blocks.mjs passes
+  // sceneDims(data); here it is spelled out.
+  ok('buildCameraMove resolves travel by name', JSON.stringify(buildCameraMove({ move: 'travel', stations: trStations }, [1920, 1080]))
+    === JSON.stringify(travel({ stations: trStations })));
+  ok('buildCameraMove injects the scene canvas into a targeting move',
+    approx(cameraAt(buildCameraMove({ move: 'diveIn', tx: 540, ty: 960, dur: 1 }, [1080, 1920]), 1).x, 0)
+    && approx(cameraAt(buildCameraMove({ move: 'diveIn', tx: 540, ty: 960, dur: 1 }, [1080, 1920]), 1).y, 0));
+  ok('buildCameraMove REFUSES a targeting move with no canvas', (() => {
+    try { buildCameraMove({ move: 'diveIn', tx: 540, ty: 960 }); return false; } catch { return true; }
+  })());
+  ok('buildCameraMove REFUSES a param the move does not read', (() => {
+    try { buildCameraMove({ move: 'slowPush', too: 1.2 }); return false; } catch { return true; }
+  })());
+  ok('diveIn REFUSES a missing target coordinate instead of carrying NaN', (() => {
+    try { diveIn({ tx: 960 }); return false; } catch { return true; }
+  })());
+  ok('CAMERA_MOVE_NAMES picks up travel + truck',
+    CAMERA_MOVE_NAMES.includes('travel') && CAMERA_MOVE_NAMES.includes('truck'));
   ok('buildCameraMove resolves by name', buildCameraMove({ move: 'slowPush', start: 0, dur: 2 }).length === 2);
   ok('buildCameraMove throws on unknown', (() => { try { buildCameraMove({ move: 'nope' }); return false; } catch { return true; } })());
   ok('CAMERA_MOVE_NAMES lists the generators', CAMERA_MOVE_NAMES.includes('diveIn') && CAMERA_MOVE_NAMES.includes('panFollow'));

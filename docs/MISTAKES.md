@@ -9289,6 +9289,48 @@ reproduce, and the component layer adds no difference class beyond #258's charac
 
 ---
 
+## #339 — The camera sugar accepted a typo, a missing target and the wrong frame, and said nothing to all three
+
+Adding `travel` (the station-to-station journey) meant reading `core/camera-moves.js` closely, and the
+module had three silent failures sitting under the one it was asked for. None had ever fired, because
+every author had already routed around them.
+
+**1. The pan math defaulted to landscape, in an engine that renders portrait.** The conversion is
+`canvasW/2 - tx`, and `CENTER` was a module constant of `{ w: 1920, h: 1080 }`. A 1080x1920 scene calling
+`diveIn` would mis-centre its target by 420px on each axis with no signal at all. It has never happened,
+and the reason is the tell: **all 8 scenes using the sugar that name a target also spell out `canvasW`
+and `canvasH` by hand.** That is the workaround, and CLAUDE.md says a workaround is a bug report.
+`scripts/author/expand-blocks.mjs` holds the scene, so it now passes `sceneDims(d)`, and a move that
+centres a point with no resolvable canvas is refused rather than guessed.
+
+**2. `diveIn` had no default and no check for `tx`/`ty`.** Omit one and the keyframe carried `NaN`,
+`cameraAt` lerped `NaN`, and the camera pose was `NaN` for the whole segment. `core/sequence.js:24`
+`dollyZ` already refuses a non-positive `s` for exactly this reason and says why. This is the same
+refusal one field over. `travel` validates each station the same way, because one bad station poisons
+every later keyframe through the carry-forward, not just its own stop.
+
+**3. `buildCameraMove` forwarded every key without looking.** `station:` for `stations:`, `too:` for
+`to:` — the generator destructures what it knows and the rest evaporates. `too:` on a `slowPush` would
+have rendered a move nobody authored, silently. It now refuses a key the move does not read, and the
+accepted set is **read off the generator's own signature** rather than declared in a table beside it: a
+table is a second source of truth that drifts the first time somebody adds a param, and this file's
+whole contract is that its vocabulary derives from the code.
+
+**Blast radius: none.** All 8 scenes that use `cameraMove` expand to byte-identical camera arrays before
+and after (`0 changed`). `make lib-test` goes 634 to 652 assertions, 0 failed. Every refusal was proved
+to fire, and the one pre-existing assertion that started throwing was the fix working: it resolved
+`travel` with no canvas.
+
+**Left open, deliberately, because it changes shared semantics.** Every generator hardcodes its opening
+keyframe to `x: 0, y: 0`, so no move can begin from the pose the previous move left. Chaining two specs
+snaps the camera home. The three scenes that chain today all keep `x`/`y` at zero and hand-thread
+`from` to the previous `to` (`showcase-composition` writes `from: 1.05` under a `to: 1.05`). Same shape
+of workaround, same bug report, but fixing it changes what `from` MEANS, so it is a decision rather than
+a repair. It is also the reason the two camera-travel films in this library hand-typed 12 and 20
+keyframes: `travel` closes the case inside one move, never across two.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

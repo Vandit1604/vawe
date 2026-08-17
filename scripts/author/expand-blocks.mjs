@@ -20,6 +20,7 @@ import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS } from '../../blueprints/index.mjs';
 import { buildCameraMove } from '../../core/camera-moves.js';
+import { sceneDims } from '../../core/safe.js';
 
 const inp = process.argv[2];
 if (!inp) { console.error('usage: node scripts/author/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
@@ -112,7 +113,11 @@ d.layers = (d.layers || []).flatMap((l) => expand(l, []));
 let nCam = 0;
 if (d.cameraMove) {
   const specs = Array.isArray(d.cameraMove) ? d.cameraMove : [d.cameraMove];
-  d.camera = specs.flatMap((s) => buildCameraMove(s));
+  // Pass the scene's REAL canvas. The pan math is `canvasW/2 - tx`, and core/camera-moves.js can only
+  // default to landscape because it cannot see the scene, so a portrait film mis-centred every target by
+  // 420px on each axis in silence. Every scene here that names a target spells canvasW/canvasH out by
+  // hand, which is the workaround that reports the bug.
+  d.camera = specs.flatMap((s) => buildCameraMove(s, sceneDims(d)));
   delete d.cameraMove;
   nCam = specs.length;
 }
