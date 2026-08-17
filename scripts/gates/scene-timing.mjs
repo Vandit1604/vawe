@@ -13,7 +13,9 @@
 //
 //   import { sceneTiming } from './scene-timing.mjs';
 //   const T = sceneTiming(sceneJson);
-//   T.spans        // [[start, end], ...] for CONTENT layers, sorted, engine-corrected
+//   T.spans        // [[start, end], ...] for CONTENT layers, SORTED, engine-corrected — so spans[i] is
+//                  // NOT content[i]. For a per-layer question use T.contentSpans.
+//   T.contentSpans // the same spans, aligned to T.content by index, unsorted
 //   T.allSpans     // the same for every top-level layer, blackouts and specks included
 //   T.duration     // declared, else last end + a beat — the renderer's own rule
 //   T.cutTimes     // sorted times of every real (style !== 'none') cut
@@ -26,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/safe.js';
+import { cameraView } from '../../core/sequence.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 
@@ -153,15 +156,62 @@ export function boxOf(L, root = ROOT) {
   return { w: 0, h: 0, how: 'unknown' };
 }
 
-// the share of the canvas a layer actually covers. Clipped to the frame first: off-canvas pixels are
+// the share of the FRAME a layer actually covers. Clipped to the frame first: off-canvas pixels are
 // not the subject. A layer whose box is unknown reports a share of 0, never a guess.
-export function canvasShare(L, CW, CH, root = ROOT) {
+//
+// `view` is WHERE THE FRAME IS, from cameraView(). Without it the frame is the canvas box at the origin,
+// which is where the camera stands on frame 0 and nowhere else: on a film that travels between stations
+// (linear-journey lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
+// every one of its pixels is off-canvas at the origin. Pass a view and both halves move with the camera —
+// the clip and the denominator — so the share stays "how much of what the viewer sees is this layer".
+// Absent or null it is the old canvas-box answer, byte for byte.
+export function canvasShare(L, CW, CH, root = ROOT, view = null) {
   const b = boxOf(L, root);
   if (!b.w || !b.h) return { share: 0, how: b.how };
+  // an undeclared x/y centres the layer in the CANVAS, not in the view: the renderer's default is a stage
+  // coordinate and the camera does not move it. So this stays CW/CH whether or not a view was supplied.
   const x = num(L.x, (CW - b.w) / 2), y = num(L.y, (CH - b.h) / 2);
-  const vw = Math.max(0, Math.min(x + b.w, CW) - Math.max(x, 0));
-  const vh = Math.max(0, Math.min(y + b.h, CH) - Math.max(y, 0));
-  return { share: Math.min(1, (vw * vh) / (CW * CH)), how: b.how };
+  const V = view || { x: 0, y: 0, w: CW, h: CH };
+  const vw = Math.max(0, Math.min(x + b.w, V.x + V.w) - Math.max(x, V.x));
+  const vh = Math.max(0, Math.min(y + b.h, V.y + V.h) - Math.max(y, V.y));
+  return { share: Math.min(1, (vw * vh) / (V.w * V.h)), how: b.how };
+}
+
+// sceneView(d, t, CW, CH) — the stage rectangle the camera is looking at, or `null` for "no opinion,
+// measure against the canvas as before". THE WHOLE RULE IN ONE PLACE, because it has two halves and the
+// second is easy to forget: `cameraView` refuses when the CAMERA carries an angle, and it takes
+// keyframes, so it cannot see that a top-level `tilt` or `plane` modifier builds the same 3D rig with no
+// camera angle at all (formats/scene/scene.js:705). playhead ships `{"tilt":{"y":18}}` + `{"plane":-500}`
+// and its stage is visibly turned at 12.4s; a view computed there is a rect standing in for a quad, and
+// deleting findings against it deletes them for a reason that is not true.
+// It was split across cameraView and one call site when `scattered-beat` was the only consumer. A second
+// consumer (beat-check's camera-aimed-at-nothing) is exactly when a half-remembered rule gets remembered
+// by half, so it moves here, where both callers get both halves or neither.
+export function sceneView(d, t, CW, CH) {
+  const layers = Array.isArray(d?.layers) ? d.layers : [];
+  const rigged = layers.some((l) => (Array.isArray(l?.modifiers) ? l.modifiers : [])
+    .some((m) => m && typeof m === 'object' && (m.tilt != null || m.plane != null)));
+  if (rigged || d?.tilt != null) return null;
+  return cameraView(Array.isArray(d?.camera) ? d.camera : null, t, CW, CH);
+}
+
+// inView(L, view) — does this layer's box meet the camera's rectangle? `null` view means yes: the caller
+// has no camera opinion and must not lose a layer to one. An UNKNOWN box keeps its POSITION (boxOf's
+// contract is that the extent is unknown, never that the layer is elsewhere), so it is placed by its own
+// x/y and given no size, which can keep a layer whose top-left sits just outside a view its body is in.
+// That direction is deliberate: this predicate only ever REMOVES things from a count, so erring toward
+// "visible" cannot invent a finding.
+export function inView(L, view, root = ROOT) {
+  if (!view) return true;
+  // x/y are NOT always numbers: `x:"center"` and the `pin` keywords are resolved by the engine against
+  // the safe area, and nothing here can do that. A string compares false against every number in JS
+  // silently, so `<=` judged every centred layer to be outside the frame and ab2-control-tenor gained a
+  // second of invented emptiness. No coordinate means no opinion, which is the only direction that
+  // cannot manufacture a finding.
+  if (!Number.isFinite(L?.x) || !Number.isFinite(L?.y)) return true;
+  const b = boxOf(L, root);
+  const w = b.how === 'unknown' ? 0 : b.w, h = b.how === 'unknown' ? 0 : b.h;
+  return L.x <= view.x + view.w && L.x + w >= view.x && L.y <= view.y + view.h && L.y + h >= view.y;
 }
 
 export function sceneTiming(d) {
@@ -214,14 +264,20 @@ export function sceneTiming(d) {
 
   // scene.js REPLACES a non-last-beat layer's duration with the run to `beatEnd + cutDur` (it does not
   // take a max), so a layer can be shortened as well as lengthened. Mirror that exactly.
-  const correct = (list) => list.map((L) => { const [a, b] = spanOf(L); const u = unitEnd(L); return [a, u == null ? b : u]; })
-    .sort((a, b) => a[0] - b[0]);
+  const correctEach = (list) => list.map((L) => { const [a, b] = spanOf(L); const u = unitEnd(L); return [a, u == null ? b : u]; });
+  const correct = (list) => correctEach(list).sort((a, b) => a[0] - b[0]);
   const spans = correct(content);
+  // `spans` is SORTED, so spans[i] is not content[i]. Every consumer so far only merges it into a coverage
+  // map, where order cannot matter, and the sort is what makes that merge a single pass. The moment a gate
+  // asks a per-layer question of the clock (beat-check's camera-aimed-at-nothing needs "where was THIS
+  // layer at t"), the index looks aligned and is not: it silently answers about a different layer, which
+  // read as 2.15s of empty frame on a film whose frames were full. Aligned copy, same correction, no sort.
+  const contentSpans = correctEach(content);
   const allSpans = correct(layers);
 
   const lastEnd = spans.reduce((m, [, b]) => Math.max(m, b), 0);
   // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
   const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
 
-  return { layers, content, spans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
+  return { layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
 }

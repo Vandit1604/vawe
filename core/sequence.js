@@ -53,6 +53,40 @@ export function cameraAt(camKf, t) {
     persp: lerp(a.p ?? 1600, b.p ?? 1600, p) };
 }
 
+// cameraView(camKf, t, CW, CH): the stage-space rectangle the camera is LOOKING AT, or null when there
+// is no axis-aligned answer. Every static gate measures a layer against the canvas box at the origin,
+// which is where the camera stands on frame 0 and nowhere else. A film that uses the camera as its edit
+// lays its content out across a canvas far larger than the frame and travels between stations:
+// formats/scene/linear-journey.json puts five stations across 5760x2160 and declares ZERO cuts, and every
+// gate read it against 1920x1080 at the origin. canvasShare scored a station at x:2180 that FILLS the
+// screen as share 0, and critique's scattered-beat added four stations the eye never sees at once into one
+// count and called two beats crammed. Both findings were false, and the cause was the same missing answer.
+//
+// The map is INVERTED from the flat camera transform, not guessed at: #cam is `inset: 0` with
+// `transform-origin: 50% 50%` (formats/scene/scene.css:15) and drawCameraAndCut writes
+// `scale(s) translate(x, y)` (formats/scene/scene.js:888). A CSS function list applies to points right to
+// left, so a stage point p lands on screen at C + s * (p + T - C), with C the canvas centre and T = (x, y).
+// Solving that for p at the two screen corners gives a view starting at C - C/s - T and sized CW/s by CH/s.
+//
+// It answers for the CAMERA, and the camera is not the only thing that can rotate the stage: a top-level
+// `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all (formats/scene/scene.js:705,
+// and formats/scene/playhead.json is a shipped film that does exactly that). Layers are not visible from
+// here, so THE CALLER must refuse that case as well — this returns a rect for it, and the rect is a lie.
+export function cameraView(camKf, t, CW, CH) {
+  const c = cameraAt(camKf, t);
+  if (!c) return null;
+  // A ROTATED STAGE has no axis-aligned preimage: the frame maps back to a projected quad, and that quad's
+  // AABB is not the shape. verify/audit.mjs refuses to measure through exactly this and says why at length
+  // — a projection MANUFACTURES findings on the very frames a film is doing its most deliberate camera
+  // work, and the only way to clear one is to make the film worse. A gate must not guess through it.
+  if (Math.abs(c.rx) > 1e-3 || Math.abs(c.ry) > 1e-3 || Math.abs(c.roll) > 1e-3) return null;
+  // s <= 0 is a camera the renderer itself refuses (dollyZ throws on it), so there is no view to report
+  // and inventing one would divide by it.
+  if (!(c.s > 0)) return null;
+  const w = CW / c.s, h = CH / c.s;
+  return { x: CW / 2 - w / 2 - c.x, y: CH / 2 - h / 2 - c.y, w, h };
+}
+
 // motionAt(kfs, lt): per-layer keyframe track → {dx,dy,scale,rot,opacity}. Keyframe times are
 // SECONDS from the layer's start; x/y are OFFSETS added onto the layer's base position, and
 // scale/rot/opacity are composed onto the enter/cut transform. Per-keyframe `ease` (any named

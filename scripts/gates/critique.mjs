@@ -5,7 +5,7 @@
 //
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
-import { canvasShare, sceneTiming, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
+import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
@@ -15,6 +15,8 @@ const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];
 const findings = [];
 const F = (sev, rule, msg, t) => findings.push({ sev, rule, msg, t });
+
+const [CW, CH] = sceneTiming(d).canvas;
 
 const s0 = (l) => l.start ?? 0;
 const s1 = (l) => s0(l) + (l.duration ?? 0);
@@ -111,9 +113,25 @@ for (const l of layers) {
 
 // ---- 8. scattered-beat: a beat crammed with too many top-level content elements has no clear focal
 //        (the "make judge" beat-4 class). Rough static proxy for the vision "no hierarchy" finding. ----
+//
+// COUNTED AGAINST THE FRAME THE CAMERA IS IN, not the canvas box at the origin. A film whose transition IS
+// the camera lays its beats out at stations across a canvas much larger than the frame, so "alive in this
+// window" and "on screen together" are different sets. linear-journey (five stations on 5760x2160, zero
+// cuts) reported 10 and 11 elements at 14.5s and 19.7s by summing the station arriving with the one still
+// fading out two stations away; the eye sees one station and about five things. Both findings were false.
+// No camera, or a camera rotated at this instant, and cameraView returns null — then this is the old count.
+//
+// THE STAGE MUST BE FLAT for any of this to mean anything, and the camera's own angles are only half of
+// that test — a top-level `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all.
+// Both halves, and the reason, now live in `sceneView` (scripts/gates/scene-timing.mjs), because
+// beat-check became a second consumer and a rule split across two files gets remembered by half.
 for (const b of beats) {
+  // the camera at the instant the finding NAMES. A beat's own start is when the viewer is looking at
+  // whatever this beat is about to interrupt, which is exactly the frame the count claims is crammed.
+  const view = sceneView(d, b.start, CW, CH);
   const content = layers.filter((l) => (l.track ?? 9) > 2 && l.x != null && l.y != null
-    && overlaps(l, b.start, b.end + 0.3) && (l.type !== 'text' || (l.size ?? 0) >= 18));
+    && overlaps(l, b.start, b.end + 0.3) && (l.type !== 'text' || (l.size ?? 0) >= 18)
+    && inView(l, view));
   if (content.length >= 8) {
     F('warn', 'scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements — likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
   }
@@ -151,10 +169,19 @@ const sceneDur = d.duration ?? 0;
 // A full-bleed slab or a scrim also spans the film, and letting THAT count would hand every scene a way
 // to hide a dip behind wallpaper. So the exemption needs both halves: the layer must DEPICT something
 // (the shared PICTORIAL vocabulary, which excludes `rect` for exactly this reason) and be large.
-const [CW, CH] = sceneTiming(d).canvas;
 // And it must not fill the frame. A full-bleed plate held for the whole film is a BACKDROP wearing a
 // layer's clothes (a gradient image, a paint field), and the two scenes in this library that do it are
 // both exactly that. A beat's subject sits IN the frame; it is not the frame.
+//
+// This share is deliberately CANVAS-relative while scattered-beat's is camera-relative, because the two ask
+// different questions. Scattered-beat asks about one named instant, which is a frame the camera is in.
+// This asks whether a layer spanning most of the film is ever the subject — a question about the film, with
+// no single instant to hand cameraView, and a layer at a station is large in frame only while the camera is
+// there. Sampling one arbitrary time would swap one wrong number for another, and it could split one
+// transition-dip warning into two, which is a gate inventing findings. Measured across the library: exactly
+// one scene (playhead) has a travelling camera AND a spanning pictorial layer, and its box is `unknown`, so
+// both answers are 0 today. If that stops being true, the missing primitive is "was it ever large in frame",
+// not a guess at which frame counts.
 const carries = (l) => {
   if (!(PICTORIAL.has(l.type) || (l.type === 'html' && htmlGraphic(l.html)))) return false;
   const { share } = canvasShare(l, CW, CH);

@@ -9331,6 +9331,61 @@ keyframes: `travel` closes the case inside one move, never across two.
 
 ---
 
+## #340 — Every static gate measured against the canvas origin, so a film whose transition is the camera was graded on a frame nobody was looking at
+
+A film can lay its beats out as STATIONS on a canvas far larger than the frame and travel between them
+with the camera, which is how `linear-journey` (5760x2160, 12 camera keys, **zero cuts**) and `playhead`
+(20 keys, `s` 1 to 2.66 while `x` travels 656 to -848) are built. Every static gate read those layers
+against the 1920x1080 box at the origin, where most of them are not.
+
+**What it cost.** `critique` reported `scattered-beat` twice on `linear-journey` — "packs 10 top-level
+elements", "packs 11" — by summing the station arriving with one still fading out 1080-2160px away. The
+two are never on screen together. Pulled the frames at 14.5s and 19.7s: about five things, one station.
+**Both findings were false**, and the advice they gave ("cut to a hero plus 1-2 supports") would have
+made the film worse to satisfy a measurement that was never about the film.
+
+**The fix.** `cameraView(camKf, t, CW, CH)` in `core/sequence.js` inverts the flat camera map
+(`scale(s) translate(x,y)` about the stage centre, `formats/scene/scene.js:888`) and returns the stage
+rect the camera is in. `canvasShare` takes an optional view. `scattered-beat` counts only what is in it.
+
+**THE STAGE MUST BE FLAT, and the camera's own angles are only half of that test.** A top-level `tilt`
+or `plane` modifier builds the same 3D rig with **no camera angle at all** (`formats/scene/scene.js:705`).
+`playhead` ships `{"tilt":{"y":18}}` + `{"plane":-500}`, and at 12.4s its stage is visibly turned; a view
+computed there is a rect standing in for a quad, and deleting a finding against it deletes it for a
+reason that is not true. That half was caught only by pulling the frame after the count changed. Both
+halves now live in one predicate, `sceneView`, because the moment a second gate needed the rule was
+exactly the moment half of it would have been forgotten.
+
+**New: `camera-aimed-at-nothing` (beat-check, WARN).** `dead-air` asks whether anything is ALIVE, which
+on these films is half the question: a layer can be alive for its whole window and 2000px outside the
+shot, so the frame holds bare backdrop while every structural gate reads full coverage. Reported as the
+DIFFERENCE from `dead-air` so one empty frame never arrives under two tells. It warns rather than fails,
+because a held empty frame during a long travel is a real choice and no gate can tell that from a
+mistake. It fires on exactly one scene in 150, `linear-journey` at 4.05-4.50s, and the rendered frame
+there is empty.
+
+**Two bugs of my own, both caught by measuring instead of trusting the gate.**
+1. `sceneTiming.spans` is **sorted**; `T.content` is in author order. They are not index-aligned, and the
+   docstring said "sorted" all along. Every consumer until now merged spans into a coverage map, where
+   order cannot matter. The first gate to ask a PER-LAYER question of the clock read a different layer's
+   window and reported **2.15s of empty frame on a film whose frames were full**. Added `T.contentSpans`,
+   the same corrected spans without the sort, and said so in the docstring where the trap is.
+2. `x` is not always a number. `x:"center"` and the `pin` keywords are resolved by the engine against the
+   safe area, and a string compares false against every number in JS **silently**, so the intersection
+   test judged every centred layer to be off-frame. `ab2-control-tenor` gained a second of invented
+   emptiness. No coordinate now means no opinion.
+
+**Blast radius, measured both ways.** critique: 1 scene of 150 changed (`linear-journey`, 2 findings
+removed, 0 added). direction-floor: 0 of 150. beat-check: 1 of 150 (the true finding above). `make
+lib-test` 652 passed. Every changed verdict was checked against the rendered mp4, not argued from the
+JSON.
+
+**Still measuring at the origin, and not fixed here:** `plan-vs-render`, `verify/audit.mjs`, and
+`direction-floor`'s full-bleed-scrim test. None changed today, and each is wrong the same way for a
+travelling camera.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

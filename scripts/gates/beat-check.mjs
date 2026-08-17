@@ -56,7 +56,7 @@
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
-import { sceneTiming, spanOf, num, SPECK } from './scene-timing.mjs';
+import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { snippet } from '../lib/text.mjs';
 
@@ -81,7 +81,7 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
 const TAIL = 0.2;       // the closing plate: it must hold something
 const T = sceneTiming(d);
-const { layers, content, spans, duration, sceneUnits } = T;
+const { layers, content, spans, contentSpans, duration, sceneUnits } = T;
 
 // windows a declared transition owns. A cut/seam/sting IS the content of its span, it just is not a layer.
 const owned = [];
@@ -125,6 +125,45 @@ const deadAir = holes.filter(([a, b]) => b < duration - 1e-9 && b - a >= DEAD_AI
 if (deadAir.length) {
   const list = deadAir.map(([a, b]) => `${s(a)} to ${s(b)} (${s(b - a)})`).join(' · ');
   fail('dead-air', `${deadAir.length} span(s) hold NO content layer: ${list}. The frame sits on the backdrop and the film stalls there, which reads as a stutter or a broken render, not as a beat of rest. Fix it by extending the outgoing layer's \`duration\` (or pulling the next layer's \`start\` earlier) so the windows touch, or by declaring a cut/seam across the gap so a transition owns it. Anything under ${s(DEAD_AIR)} is treated as a breath and passes. A full-canvas opaque rect (a blackout) and a box under ${Math.round(SPECK * 100)}% of the canvas (a dot, a spinner) do NOT close a gap: neither carries the frame.`);
+}
+
+// ---------- 1b. camera-aimed-at-nothing ----------
+// dead-air asks whether anything is ALIVE. On a film whose transition IS the camera, that is only half
+// the question: the beats sit at stations across a canvas far bigger than the frame, so a layer can be
+// alive for its whole window and 2000px outside the shot. The frame then holds bare backdrop while every
+// structural gate reads full coverage, because they all measure at the canvas origin. Only the contact
+// sheet catches it, and only if a sample happens to land in the hole.
+//
+// Reported as the DIFFERENCE, never as coverage: a stretch the camera cannot see that dead-air has not
+// already claimed. Otherwise one empty frame arrives under two tells, which is the noise `dead-air`
+// itself refuses just above.
+//
+// WARN, not FAIL. A held empty frame during a long move is a real choice (a beat of travel between two
+// places), and this gate cannot tell that from a mistake. `sceneView` returns null on a rotated stage or
+// a camera-less scene, and null means no opinion — the whole check is then skipped rather than guessed.
+const camMoves = Array.isArray(d.camera) && d.camera.length > 1
+  && d.camera.some((k) => (k.s ?? 1) !== (d.camera[0].s ?? 1) || (k.x ?? 0) !== (d.camera[0].x ?? 0) || (k.y ?? 0) !== (d.camera[0].y ?? 0));
+if (camMoves && !allow.has('camera-aimed-at-nothing')) {
+  const [CW, CH] = T.canvas;
+  const STEP = 0.05;                                   // fixed, because a gate that samples must be pure
+  const blind = [];
+  let run = null;
+  for (let i = 0; i * STEP < duration; i++) {
+    const t = i * STEP;
+    const alive = spans.some(([a, b]) => t >= a && t < b);
+    const view = sceneView(d, t, CW, CH);
+    // no view means no opinion, so the sample cannot be blind. Same for a moment nothing is alive in:
+    // that is dead-air's finding and reporting it here would double it.
+    const seen = !alive || !view || content.some((l, j) => t >= contentSpans[j][0] && t < contentSpans[j][1] && inView(l, view));
+    if (!seen) { if (!run) run = [t, t]; run[1] = t + STEP; }
+    else if (run) { blind.push(run); run = null; }
+  }
+  if (run) blind.push(run);
+  const real = blind.filter(([a, b]) => b - a >= DEAD_AIR - 1e-9 && !ownedBy(a, b));
+  if (real.length) {
+    const list = real.map(([a, b]) => `${s(a)} to ${s(b)} (${s(b - a)})`).join(' · ');
+    warn('camera-aimed-at-nothing', `${real.length} span(s) hold content that the CAMERA IS NOT LOOKING AT: ${list}. Layers are alive there, so \`dead-air\` stays quiet and every structural gate reads full coverage, but the camera has travelled off them and the frame shows the backdrop. Fix it by moving the camera keyframe to the station the content is at, or the content to where the camera is pointed, or by shortening the flight so it lands when the next station's layers start. Deliberate travel over an empty stretch is a real choice: waive it with {"authoring":{"allow":["camera-aimed-at-nothing"]}}.`);
+  }
 }
 
 // ---------- 2. ends-on-nothing ----------
