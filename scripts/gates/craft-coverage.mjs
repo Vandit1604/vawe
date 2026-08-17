@@ -72,10 +72,33 @@ export function registersOf(selection) {
     }
     return out;
   };
-  return {
-    look: parse(selectionTableRows(selection, 'Looks — the held texture', '**Stings')),
+  // The looks table ends at the next BOLD SUB-HEADER, found structurally, not by naming the sting one.
+  // Bounding it with the literal `'**Stings'` was the one asymmetry here and it failed in the worst
+  // direction: retitle that header so the literal no longer matches and `indexOf` returns -1, the region
+  // runs to end-of-file, and the stings rows are parsed as LOOKS. `flash` then carries the look-register
+  // "punctuation / a hit". That is a wrong answer where the whole point of this map is to replace a blank
+  // with a right one, so the terminator must not depend on the other table's wording.
+  const nextBold = (from) => {
+    const at = selection.indexOf(from);
+    if (at < 0) return '\n## ';
+    const m = /\n\*\*/.exec(selection.slice(at + from.length));
+    return m ? selection.slice(at + from.length + m.index, at + from.length + m.index + 3) : '\n## ';
+  };
+  const LOOKS = 'Looks — the held texture';
+  const reg = {
+    look: parse(selectionTableRows(selection, LOOKS, nextBold(LOOKS))),
     sting: parse(selectionTableRows(selection, 'Stings — the shader AT the seam')),
   };
+  // …and prove the split landed where it was meant to. A key that is not a member of the registry its
+  // table is FOR means the region boundaries slipped, which no missing-key check can see: `coverageErrors`
+  // looks for absent names and this failure ADDS names. Loud beats subtly wrong.
+  const stray = [
+    ...Object.keys(reg.look).filter((n) => !LOOK_NAMES.includes(n)).map((n) => `look table names "${n}", which is not a look`),
+    ...Object.keys(reg.sting).filter((n) => !SHADER_FX.includes(n)).map((n) => `sting table names "${n}", which is not a sting`),
+  ];
+  if (stray.length) throw new Error(`SELECTION.md §4 did not parse into two tables — ${stray.join(' · ')}. `
+    + `Did a bold sub-header get retitled, or a row move between tables?`);
+  return reg;
 }
 
 function coverageErrors() {

@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { LOOK_NAMES } from '../../core/looks.js';
+import { PROFILES } from './profiles.mjs';
 
 const file = process.argv[2];
 if (!file) { console.error('usage: node scripts/author/motion-director.mjs <scene.json> [--write]'); process.exit(2); }
@@ -37,16 +38,8 @@ const FAMILY = {
 // Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
 // A scene opts in with a top-level "profile":"apple". `bounceOk` and the banned lists are the
 // contradiction rules — a bounce preset on `apple` is wrong by rule, not by taste.
-const PROFILES = {
-  linear:   { cuts: ['none', 'blur'], stings: [], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'cube', 'roll'], face: 'mono' },
-  apple:    { cuts: ['fade', 'riseBlur'], stings: ['lens'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'punch', 'jitter'], face: 'sans' },
-  stripe:   { cuts: ['blur', 'fade'], stings: ['dissolve'], bounceOk: false, restraint: 'med', banCuts: ['whip', 'jitter'], face: 'sans' },
-  nike:     { cuts: ['whip', 'punch'], stings: ['flash', 'streak'], bounceOk: 'accent', restraint: 'low', banCuts: [], face: 'sans' },
-  a24:      { cuts: ['fade', 'letterbox'], stings: ['ink', 'leak'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'pop'], face: 'serif' },
-  bloomberg:{ cuts: ['collapse', 'punch'], stings: ['scan'], bounceOk: false, restraint: 'med', banCuts: ['whip', 'wipe', 'spin'], face: 'mono' },
-  duolingo: { cuts: ['wipe', 'iris'], stings: ['confetti', 'sdfIris'], bounceOk: true, restraint: 'low', banCuts: [], face: 'sans' },
-  vercel:   { cuts: ['none'], stings: ['glitch', 'chromaticSplit'], bounceOk: false, restraint: 'high', banCuts: ['whip', 'wipe', 'spin', 'cube', 'roll', 'bounce'], face: 'sans' },
-};
+// The table moved to scripts/author/profiles.mjs so it has more than one reader (this file consumed it
+// on the very next line, so nothing else could ask what a profile means).
 const profile = PROFILES[d.profile] || null;
 if (profile) { FAMILY.cuts = profile.cuts.length ? profile.cuts : FAMILY.cuts; FAMILY.stings = profile.stings; }
 
@@ -57,6 +50,11 @@ if (profile) {
   if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}" — cheap on a serious brand (SELECTION §contradictions)`);
   for (const l of layers) {
     if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}" — announces an edit this profile hides`);
+    // …and the ENTRANCE, which banCuts could never reach: `pop` is an anim and `bounce` is a preset, so
+    // both sat in a cut list being compared against cut styles and never matched anything.
+    for (const k of ['anim', 'preset']) {
+      if (l[k] && (profile.banMotion || []).includes(l[k])) contradictions.push(`${k} "${l[k]}" on "${d.profile}" — this profile's entrances do not overshoot`);
+    }
   }
   for (const c of d.cuts || []) {
     if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}" — wrong for this profile's restraint`);

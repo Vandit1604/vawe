@@ -9420,6 +9420,53 @@ Review before push, and treat a reviewer's finding as a sample of a class rather
 
 ---
 
+## #342 — Two profile rules read as enforced and had never once run
+
+Extracting the reference-profile table (it lived in `scripts/author/motion-director.mjs:40` and was
+consumed on line 50, so nothing else in the repo could ask what a profile means) meant checking that
+every name it uses is real. Two are not what they claim:
+
+```
+a24.banCuts    includes 'pop'      — `pop` is an ANIM (core/clips.js)
+vercel.banCuts includes 'bounce'   — `bounce` is a PRESET (core/type.js)
+```
+
+`banCuts` is compared against `l.cut` and `d.cuts[].style`, both cut styles. Neither `pop` nor `bounce`
+is a cut style, so **both entries were unreachable**. The intent behind them is real and legible — a24
+does not want popping entrances, vercel does not want overshoot — and the check could not see it.
+
+**Fix.** `banMotion` is a second list holding per-layer entrance names, and the contradiction loop now
+tests `l.anim` and `l.preset` against it. Two lists rather than one, because the two vocabularies are
+disjoint and a single list cannot say which it means. Proved the previously-dead ban now fires: an `a24`
+scene with `anim:"pop"` reports `anim "pop" on "a24" — this profile's entrances do not overshoot`.
+
+**Blast radius: none.** `make direct` over all 150 scenes is byte-identical before and after, twice —
+once for the extraction and once for the new check. Only one scene in the library names a profile at all
+(`vawe-identity`, `linear`), which is a large part of why this went unnoticed for so long.
+
+**Gated now.** `make lib-test` asserts every name a profile bans or prefers resolves in its registry, and
+that all seven fields SELECTION.md declares are present. 654 to 657 assertions. Proved it bites by
+typo'ing `pop` to `popp`.
+
+**And a correction I nearly shipped as a fix.** My first integrity check tested every profile name against
+`LOOK_NAMES` and reported `matrixDecode` as a phantom in `SELECTION.md`. It is not: it is an AMBIENT
+SHADER FIELD (`core/shaders-ambient.js:21`), and the doc says "backdrop", which is exactly what an
+ambient field is. The doc was right and my check was too narrow. I had the edit half-written. **A gate
+that knows one registry will call every other registry a phantom** — the reason `craft-coverage`'s
+phantom check unions `LOOK_NAMES` with `SHADER_FX` rather than checking either alone.
+
+**Follow-up, from the review of this same change.** The looks table's terminator was the literal
+`'**Stings'`, the one place in the parser that named the OTHER table's wording. Retitle that sub-header
+so the literal stops matching and `indexOf` returns -1, the region runs to end-of-file, and the stings
+rows parse as LOOKS: `flash` comes back carrying the look-register "punctuation / a hit". Reproduced
+before fixing. That is a WRONG answer from a map whose entire purpose is to replace a blank with a right
+one, and `coverageErrors` cannot see it because it looks for absent names while this failure adds them.
+Fixed twice over: the terminator is now the next bold sub-header, found structurally, and `registersOf`
+throws when a key is not a member of the registry its table is for. Both proved — the retitle no longer
+leaks, and moving a sting into the looks table throws by name. `make effects` output unchanged.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

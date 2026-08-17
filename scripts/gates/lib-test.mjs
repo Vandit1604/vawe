@@ -5,6 +5,8 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
+import { ANIM_NAMES } from '../../core/clips.js';
+import { PROFILES } from '../author/profiles.mjs';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
@@ -1228,6 +1230,25 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     return asc.every(([lt, n]) => got.get(lt) === n);
   })());
 }
+// ---- reference profiles (scripts/author/profiles.mjs) --------------------------------------------
+// Every name a profile BANS or PREFERS has to exist in the registry it comes from, or the rule is
+// decoration. Two did not: a24 banned `pop` and vercel banned `bounce`, both sitting in `banCuts` and
+// both compared only against cut styles, so neither ever fired. Split into banCuts (cut styles) and
+// banMotion (an anim or a kinetic preset), and asserted here so the next one cannot go quiet.
+{
+  const CUTS = new Set(Object.keys(PRESENTATIONS));
+  const MOTION = new Set([...ANIM_NAMES, ...Object.keys(PRESETS)]);
+  const bad = [];
+  for (const [name, P] of Object.entries(PROFILES)) {
+    for (const k of ['cuts', 'banCuts']) for (const v of P[k] || []) if (!CUTS.has(v)) bad.push(`${name}.${k}: ${v}`);
+    for (const v of P.banMotion || []) if (!MOTION.has(v)) bad.push(`${name}.banMotion: ${v}`);
+    for (const v of P.stings || []) if (!SHADER_FX.includes(v)) bad.push(`${name}.stings: ${v}`);
+  }
+  ok('every profile names only real cuts / stings / entrances' + (bad.length ? ` — ${bad.join(' · ')}` : ''), bad.length === 0);
+  ok('every profile carries the 7 fields SELECTION.md declares',
+    Object.values(PROFILES).every((P) => ['face', 'pace', 'easing', 'accent', 'look', 'blurb', 'antiBlurb'].every((k) => typeof P[k] === 'string' && P[k].length)));
+}
+
 // ---- camera moves (pure keyframe generators, checked through cameraAt) ----------------------------
 {
   const push = slowPush({ start: 1, dur: 4, from: 1, to: 1.2 });
