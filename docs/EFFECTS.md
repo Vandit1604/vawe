@@ -15,6 +15,7 @@
 | A number to read | `{ "type":"count" }` (it counts up) |
 | To move between beats | a cut (family) + at most 1-3 seams; a sting on a background jump |
 | To zoom into a product/UI | a `cinematicZoom` seam + `ken` push, or a camera `diveIn` |
+| To move BETWEEN two elements without cutting | `cameraMove:{move:"travel", stations:[…]}` — lay the beats out as stations on a canvas bigger than the frame and fly between them. Pair with a `plane` modifier or every layer moves by the same amount and it reads as a slide |
 | A living background | a moving `bg` preset (aurora/constellation/paperShapes) — brand-appropriate |
 | A whole beat, directed | a `{type:"beat"}` blueprint |
 | A border to glow / a sheen to sweep | the per-frame effects (border-beam / shine) |
@@ -381,6 +382,8 @@
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
 | `panFollow` | camera pans to track downward-growing content (terminal) |
 | `slowPush` | gentle continuous zoom in (the frame stays alive) |
+| `travel` | station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut) |
+| `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
 
 ## Compositions (bespoke per-beat timeline)  `[composition]`
@@ -406,6 +409,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `count` | — |
 | `cursor` | — |
 | `doc` | — |
+| `globe` | — |
 | `glow` | — |
 | `group` | — |
 | `html` | — |
@@ -427,6 +431,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 |---|---|
 | `deviceShowcase` | — |
 | `extrudeText` | — |
+| `globe` | — |
 | `pointCloud` | — |
 | `uiParallax` | — |
 
@@ -700,4 +705,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_461 effects across 31 families. Regenerate: `make effects`._
+_465 effects across 31 families. Regenerate: `make effects`._

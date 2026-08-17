@@ -79,6 +79,8 @@ const DESC = {
   slowPush: 'gentle continuous zoom in (the frame stays alive)', diveIn: 'zoom INTO a target point (it travels to centre)',
   panFollow: 'camera pans to track downward-growing content (terminal)', workspaceZoomOut: 'pull back from a detail to reveal the whole',
   orbit: 'a gentle 3D swing around the frame (ry through 0)', multiPhase: 'chain legs into one journey (push, hold-drift, settle)',
+  travel: 'station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut)',
+  truck: 'plain lateral travel, linear, so it reads as tracking rather than a lurch',
   logoLockup: 'mark pops + wordmark travels + kinetic headline', logoReveal: 'mark DRAWS on / MELTS from a blob + bloom + wordmark cascade',
   // per-frame accent layers (pseudo-names)
   'beam:border (border-beam)': 'a light travels the rounded-rect border', 'beam:shine (sheen sweep)': 'a sheen sweeps across the box',
@@ -142,6 +144,7 @@ out.push('| A key line to land with motion | a kinetic text preset (`split`+`pre
 out.push('| A number to read | `{ "type":"count" }` (it counts up) |');
 out.push('| To move between beats | a cut (family) + at most 1-3 seams; a sting on a background jump |');
 out.push('| To zoom into a product/UI | a `cinematicZoom` seam + `ken` push, or a camera `diveIn` |');
+out.push('| To move BETWEEN two elements without cutting | `cameraMove:{move:"travel", stations:[…]}` — lay the beats out as stations on a canvas bigger than the frame and fly between them. Pair with a `plane` modifier or every layer moves by the same amount and it reads as a slide |');
 out.push('| A living background | a moving `bg` preset (aurora/constellation/paperShapes) — brand-appropriate |');
 out.push('| A whole beat, directed | a `{type:"beat"}` blueprint |');
 out.push('| A border to glow / a sheen to sweep | the per-frame effects (border-beam / shine) |');
