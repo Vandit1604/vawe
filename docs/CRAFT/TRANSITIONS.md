@@ -133,6 +133,7 @@ the engine actually does (a layer `cut`/`out`, a sting overlay, a Seam D two-sce
 | **J-cut** (audio leads) | anticipation — pulls the viewer forward | lead into what's coming; make it feel inevitable | start the next beat's audio cue / bed BEFORE its visual |
 | **L-cut** (audio lingers) | continuity · a held emotion | hold a tone/voice while the image moves on | let a cue / VO / bed run OVER the next beat's entrance |
 | **Invisible / hidden cut** | immersion · unbroken flow | fake a one-take; hide the seam entirely | cover the cut with a full-bleed element or a whip at peak |
+| **Camera travel** | one world · the beats are PLACES, not claims | the content has a spatial logic worth walking | `cameraMove:{move:"travel", stations:[…]}` — the transition IS the flight, and there is no cut |
 | **Morph / shared-element** | magic · same identity across states | a thing becomes its next role (the highest-craft cut) | a persistent layer with a `motion` track that repositions/resizes |
 | **Jump cut** | disjunction · urgency · restlessness | compress time; deliberately call attention | a hard cut within the same framing (use sparingly) |
 | **Ripple dissolve** | dreamlike time displacement | present → flashback (reads dated) | sting `ripple` over a dissolve |
