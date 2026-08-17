@@ -30,6 +30,24 @@ const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt };
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
 export const FX_TYPES = Object.keys(REGISTRY);
 
+// One line per modifier, beside the registry, each condensed from that module's own header. docs/EFFECTS.md
+// renders these and scripts/gates/lib-test.mjs fails when one is missing.
+//
+// This family is here because it was the LAST place the flat name-keyed map in effects-catalog.mjs could
+// still lie: with no map of its own, `tilt` fell through to the KINETIC TEXT PRESET called `tilt` and the
+// per-layer fx table said "3D tilt-in", an entrance. The modifier is nothing of the kind — it turns a
+// layer out of the picture plane and holds it there. Same name, two registries, one shared description,
+// and the wrong one won. A family-scoped map is the only thing that makes that impossible.
+export const FX_BLURBS = {
+  kick: 'hit the layer on the film\'s own joints — a cut, a seam or a sting shoves it, so the frame feels the edit',
+  mixBlend: 'how this layer\'s pixels combine with what is already painted behind it — knock a headline out of a photo',
+  occlude: 'hide this layer where another one covers it — put something BEHIND something else without reordering the stack',
+  plane: 'stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours — this is parallax',
+  progress: 'hand the layer the FILM\'s progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with',
+  shadow: 'a drop shadow that knows where the light is, so every layer does not point the same way',
+  tilt: 'turn the layer out of the picture plane and hold it there — a card leaning away, a phone at an angle, panels receding',
+};
+
 // An unknown name is a HARD ERROR, never a skipped entry. A modifier that quietly does nothing is the
 // worst shape this repo has: `fx:[{"mixBlned":"screen"}]` would render a frame that looks plausible,
 // pass every gate, and differ from what was asked in a way only the author's memory can catch. Input

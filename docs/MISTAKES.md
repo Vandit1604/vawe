@@ -9467,6 +9467,58 @@ leaks, and moving a sting into the looks table throws by name. `make effects` ou
 
 ---
 
+## #343 — The arsenal could not describe itself, and the one shared map made it lie
+
+`docs/EFFECTS.md` is generated from the registries and exists so an author can "see everything, then
+choose". Measured: **476 entries, 379 with no description at all — 20% covered.** The only source was a
+flat 68-key `DESC` map in the generator, and its own comment declared the gap as policy:
+
+> "Curated one-liners for the notable effects. An effect not listed still appears (name only) — the point
+> is EXHAUSTIVE coverage from the registry; the notes are a bonus, never a second source of truth."
+
+A name with no description is a vocabulary nobody can choose from. Worse, a FLAT map keyed by name across
+31 families cannot tell two families apart, so it did not merely omit — **it lied**:
+
+- the anim `up` was handed the KINETIC PRESET `up`'s line, "words/chars rise into place", which is about
+  glyph units and not about a layer;
+- the per-layer modifier `tilt` was handed the kinetic preset `tilt`'s line, "3D tilt-in". The modifier is
+  not an entrance at all: it turns a layer out of the picture plane and HOLDS it there;
+- `logoReveal` was declared **twice** in the same object literal, so one of the two descriptions had never
+  rendered.
+
+**Fix, following the pattern `blocks/catalog.mjs` already proves at 70/70:** the description lives beside
+the registry it describes. `PRESET_BLURBS` (27) · `ANIM_BLURBS` (19) · `CUT_BLURBS` (26) · `SEAM_BLURBS`
+(14) · `FX_BLURBS` (7). The generator prefers the family map, then the flat map, then the register.
+**Coverage 20% to 46%**, and every one of those five families is now at 100%.
+
+**Gated, so it cannot rot.** `make lib-test` fails when a registry entry has no blurb and when a blurb
+names an entry that does not exist — the same shape as `blueprints-catalog.mjs:44`, which exits 1 when a
+beat has no trailing comment. 657 to 668 assertions.
+
+**One invariant is DERIVED rather than written.** Ten cut styles transition only by masking, so a
+whole-frame cut on them would empty the frame and `scene.js` throws. That set is not a list anyone
+maintains: `SOLO_BLIND` computes it at load by probing every presentation for a transform or filter that
+ever leaves identity. The blurbs carry the caution, and lib-test asserts the cautioned set EQUALS
+`SOLO_BLIND` — 10 for 10. Change a cut's mechanics and the stale blurb fails immediately. A caution that
+named the wrong set would be worse than none, because an author would trust it.
+
+**What writing 93 descriptions turned up in the code they describe:**
+- `core/cuts.js:98` said `softwipe` feathers over an 18% band. The gradient runs `e-18` to `e+2`, which is
+  **20**. The blurb inherited the wrong number by faithful transcription — the comment was already wrong.
+- `core/type.js:84` told authors to pass `loop:true` for `wave`. `animateUnits` force-loops `wave` and
+  `shimmerWave` BY NAME (line ~255), so the instruction was redundant and read as a requirement.
+- `docs/PRIMITIVES.md` claimed "25 presets" in two places. There are 27, and three (`shimmerWave`,
+  `inkflash`, `draw`) are named nowhere in that file.
+- The existing doc text for `slide-left`/`slide-right` was **backwards for the entrance**: `slide(u,'left')`
+  starts at `translateX(-60px)` and travels to rest, so the layer enters FROM the left. Verified in code.
+- `lift` was described as a "staggered rise". Nothing in it staggers; the stagger comes from the caller.
+
+**The remaining 256 are not one job.** Roughly half exist as prose elsewhere and need wiring; the rest
+nobody has written. Some should stay blank on purpose — blend modes are CSS standard, output targets are
+self-evident, ransom faces are font names, and a drawn icon called `check` needs no sentence.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

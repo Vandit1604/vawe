@@ -3,9 +3,11 @@
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
-import { unitProgress, PRESETS } from '../../core/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND } from '../../core/cuts.js';
-import { ANIM_NAMES } from '../../core/clips.js';
+import { unitProgress, PRESETS, PRESET_BLURBS } from '../../core/type.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
+import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
+import { SEAM_BLURBS } from '../../core/seams.js';
+import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
@@ -1230,6 +1232,37 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     return asc.every(([lt, n]) => got.get(lt) === n);
   })());
 }
+// ---- registry blurbs (the description lives beside the thing it describes) ------------------------
+// docs/EFFECTS.md is generated from the registries and 379 of its 476 rows had no description, because
+// the only source was a FLAT 68-key map in the generator whose own comment called the notes "a bonus,
+// never a second source of truth". A name with no description is a vocabulary nobody can choose from.
+// Each family now keeps its blurbs next to its registry, and a missing one fails HERE — the same shape
+// as blueprints-catalog.mjs, which exits 1 when a beat has no trailing comment.
+{
+  const families = [
+    ['PRESETS', Object.keys(PRESETS), PRESET_BLURBS],
+    ['ANIM_NAMES', ANIM_NAMES, ANIM_BLURBS],
+    ['PRESENTATIONS', Object.keys(PRESENTATIONS), CUT_BLURBS],
+    ['SEAM_FX', SEAM_FX, SEAM_BLURBS],
+    ['FX_TYPES', FX_TYPES, FX_BLURBS],
+  ];
+  for (const [label, keys, map] of families) {
+    const miss = keys.filter((k) => !map[k]);
+    const extra = Object.keys(map).filter((k) => !keys.includes(k));
+    ok(`every ${label} entry has a blurb` + (miss.length ? ` — missing ${miss.join(', ')}` : ''), miss.length === 0);
+    ok(`no blurb for a ${label} entry that does not exist` + (extra.length ? ` — ${extra.join(', ')}` : ''), extra.length === 0);
+  }
+  // THE CAUTION IS DERIVABLE, so it must not drift. SOLO_BLIND is computed at load by probing every
+  // presentation for a transform/filter that ever leaves identity, and scene.js throws on those styles
+  // when sceneUnits is off. A blurb that names the caution for a different set than the runtime one is
+  // worse than none: an author would trust it. Change a cut's mechanics and this fails until the blurb
+  // is corrected.
+  const cautioned = Object.entries(CUT_BLURBS).filter(([, v]) => /sceneUnits/.test(v)).map(([k]) => k).sort();
+  const blind = [...SOLO_BLIND].sort();
+  ok(`the sceneUnits caution names exactly the mask-only cuts (${blind.length})`,
+    cautioned.length === blind.length && blind.every((n, i) => n === cautioned[i]));
+}
+
 // ---- reference profiles (scripts/author/profiles.mjs) --------------------------------------------
 // Every name a profile BANS or PREFERS has to exist in the registry it comes from, or the rule is
 // decoration. Two did not: a24 banned `pop` and vercel banned `bounce`, both sitting in `banCuts` and

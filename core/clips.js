@@ -46,6 +46,34 @@ export const ANIM = {
 // and therefore silently resolved to fade (MISTAKES #21).
 export const ANIM_NAMES = Object.keys(ANIM);
 
+// One line per enter/exit anim, beside the registry itself. docs/EFFECTS.md renders these, and
+// scripts/gates/lib-test.mjs fails when a name has no blurb — a name with no description is a
+// vocabulary an author cannot choose from. The DIRECTIONS below are read off the registry above, not
+// off the names: `slide-*` names the EDGE the layer travels from (and an `out` sends it back to that
+// same edge), while `wipe-*` names the edge the reveal travels TOWARD. Those two conventions are
+// opposite, they are both deliberate, and a blurb that guesses from the name gets one of them wrong.
+export const ANIM_BLURBS = {
+  fade: 'opacity only',
+  up: 'translate up + fade in — the alias of `rise`',
+  rise: 'translate up + fade in',
+  pop: 'scale overshoot',
+  scale: 'punch in from small (overshoot)',
+  lift: 'travels further than `pop` and settles alive — faces, avatars, a staggered row of cards',
+  defocus: 'leave through blur (dense/faces)',
+  'slide-left': 'enters from the left edge; as an `out`, leaves toward it',
+  'slide-right': 'enters from the right edge; as an `out`, leaves toward it',
+  'slide-up': 'enters from above; as an `out`, leaves upward',
+  'slide-down': 'enters from below; as an `out`, leaves downward',
+  wipe: 'clip reveal grows rightward — the default direction, same as `wipe-right`',
+  'wipe-right': 'clip reveal grows rightward from the left edge',
+  'wipe-left': 'clip reveal grows leftward from the right edge',
+  'wipe-down': 'clip reveal grows downward from the top edge',
+  'wipe-up': 'clip reveal grows upward from the bottom edge — what a bar chart wants',
+  iris: 'circular iris opens from the centre of the layer',
+  clock: 'radial sweep from 12 o\'clock, clockwise',
+  none: 'no move and no fade — the layer just appears at its window edges',
+};
+
 // Base enter/exit durations, in seconds. Snap band (0.2-0.3s): a default entrance that lands in ~a
 // third of a second reads as directed; the old 0.45/0.4 read as floaty. Exported so scene.html can
 // scale them by the theme's motion.durationScale from ONE source (no duplicated literal).

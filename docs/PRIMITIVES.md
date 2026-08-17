@@ -143,7 +143,7 @@ Two roles:
   the DOM under it) — honest, and still perfectly composable. Knobs: `speed` · `intensity` · `colors`
   · `seed`. Reel: _wave3-reel demonstrates all eight overlay looks over live copy.
 
-## Kinetic type (`core/type.js`) — 25 presets × char/word/line splits
+## Kinetic type (`core/type.js`) — 27 presets × char/word/line splits
 
 `splitText(el, mode)` (preserves `<b>/<em>`) + `animateUnits(units, t, {preset, stagger, each})`:
 `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`
@@ -608,7 +608,7 @@ When two primitives can do the job, prefer the one on the right:
 | absolute `x`/`y` on each of a row/grid of layers | a **`group`** (`layout: 'row'\|'grid'`, `gap`, `items`) | layout-by-containment; one edit re-flows the set, no hand-math |
 | `ease: 'easeOutBack'` on every settle | **`ease: 'spring'`** / `spring-bouncy` on the `motion`/count track | organic overshoot+settle, not a canned curve |
 | hand-sizing a headline so it won't clip | **`fitH`** (binary-search multi-line fit) | can't clip; survives a font substitution |
-| `preset: 'up'` on every entrance | **vary it** across the 25 presets (`decode`/`tilt`/`riseClip`/`highlight`…) | the "all text rises" tell; monotony is flagged |
+| `preset: 'up'` on every entrance | **vary it** across the 27 presets (`decode`/`tilt`/`riseClip`/`highlight`…) | the "all text rises" tell; monotony is flagged |
 | a still `image` layer | add **`ken`** (Ken Burns) | dead stills read as slop; a slow push gives life |
 
 Rule of thumb: if `make feature-audit` says a primitive is *never adopted*, that's usually a gap in the

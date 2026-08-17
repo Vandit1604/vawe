@@ -11,6 +11,16 @@ import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { registersOf } from '../gates/craft-coverage.mjs';
+// The per-family blurb maps, each living beside the registry it describes (the pattern blocks/catalog.mjs
+// proves at 70/70). They take PRECEDENCE over DESC below, and that ordering is the point: DESC is a FLAT
+// name-keyed map shared across 31 families, so `up` the anim was being handed `up` the kinetic preset's
+// description ("words/chars rise into place"), which is about glyph units and not about a layer at all.
+// A family-scoped map cannot make that mistake.
+import { CUT_BLURBS } from '../../core/cuts.js';
+import { SEAM_BLURBS } from '../../core/seams.js';
+import { PRESET_BLURBS } from '../../core/type.js';
+import { ANIM_BLURBS } from '../../core/clips.js';
+import { FX_BLURBS } from '../../core/fx/index.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
@@ -73,7 +83,7 @@ const DESC = {
   pipelineFlow: 'staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline)',
   // beats
   kineticHook: 'hook: eyebrow + hero count-up|word + kinetic subline', screenDive: 'kinetic title + UI shot ken-pushes in',
-  terminalReveal: 'typing command + cursor + rising output + result', logoReveal: 'logo draws on + blooms + wordmark',
+  terminalReveal: 'typing command + cursor + rising output + result',
   cardCascade: 'title + cards pop in one after another', statReveal: 'hero count-up + kinetic label',
   ctaEnd: 'held end card: mark + install chip + url', verdictProof: 'typing command + tone verdict chip',
   // camera moves
@@ -98,19 +108,25 @@ const REGISTERS = registersOf(fs.readFileSync(path.join(root, 'docs/CRAFT/SELECT
 
 // `kind` scopes the lookup because `thermal` is BOTH a look and a sting, with a different register in
 // each table. Sections that carry no register pass nothing and behave exactly as before.
-const d = (n, kind) => DESC[n] || (kind && REGISTERS[kind] && REGISTERS[kind][n]) || '—';
+// `meta` is the section's own vocabulary: { blurbs } for a family that keeps its descriptions beside its
+// registry, { kind } for one classified by register in SELECTION.md §4. Sections with neither pass nothing
+// and fall through to DESC exactly as before.
+const d = (n, meta = {}) => (meta.blurbs && meta.blurbs[n])
+  || DESC[n]
+  || (meta.kind && REGISTERS[meta.kind] && REGISTERS[meta.kind][n])
+  || '—';
 const table = (rows) => ['| name | what / when |', '|---|---|', ...rows.map(([n, x]) => `| \`${n}\` | ${x} |`)].join('\n');
 const names = (arr) => [...new Set(arr)].sort();
 
 const sections = [
-  ['Kinetic text presets', '`split`+`preset` on a text layer — words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`', names(Object.keys(PRESETS)), 'text'],
-  ['Enter / exit anims', '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`', names(ANIM_NAMES), 'per-layer'],
+  ['Kinetic text presets', '`split`+`preset` on a text layer — words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`', names(Object.keys(PRESETS)), 'text', { blurbs: PRESET_BLURBS }],
+  ['Enter / exit anims', '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`', names(ANIM_NAMES), 'per-layer', { blurbs: ANIM_BLURBS }],
   ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text'],
   ['GSAP exits', '`fxOut` — pair every entrance with a directional exit.', names(EXIT_FX), 'exit'],
-  ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition'],
-  ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', 'sting'],
-  ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition'],
-  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static', 'look'],
+  ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition', { blurbs: CUT_BLURBS }],
+  ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', { kind: 'sting' }],
+  ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition', { blurbs: SEAM_BLURBS }],
+  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static', { kind: 'look' }],
   ['Canvas image passes (baked)', '`canvasFx` — a one-time baked image pass (cannot move).', names(CANVAS_FX_NAMES), 'static'],
   ['Generative paint FX (per-frame)', '`{ "type":"paint", "paint":"<name>" }` — a full-canvas animated field, pure in t.', names(PAINT_FX_NAMES), 'per-frame'],
   ['Backgrounds', '`bg:[{preset,from,to}]` — the field behind everything; moving ones (aurora/constellation/mesh/…) animate.', names(BG_NAMES), 'background'],
@@ -124,7 +140,7 @@ const sections = [
   ['Raymarched surfaces', '`{ "type":"raymarch", "raymarch":"<name>" }` — implicit surfaces from a distance field. A subject you place, not a field behind everything.', names(RAYMARCH_FX), 'layer'],
   ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.', names(RESAMPLE_FX), 'per-frame'],
   ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame'],
-  ['Per-layer fx', '`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.', names(FX_TYPES), 'per-layer'],
+  ['Per-layer fx', '`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.', names(FX_TYPES), 'per-layer', { blurbs: FX_BLURBS }],
   ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer'],
   ['Filter presets', '`filter:"<name>"` — a named colour grade. Composite LOOKS are the richer set above; these are the primitives.', names(Object.keys(FILTER_PRESETS)), 'static'],
   ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing'],
@@ -162,13 +178,13 @@ out.push('| A logo to appear | the `logoReveal` beat / path draw-on / shape-morp
 out.push('| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |');
 out.push('');
 let total = 0;
-for (const [title, intro, list, tag, kind] of sections) {
+for (const [title, intro, list, tag, meta] of sections) {
   total += list.length;
   out.push(`## ${title}  \`[${tag}]\``);
   out.push('');
   out.push(intro);
   out.push('');
-  out.push(table(list.map((n) => [n, d(n, kind)])));
+  out.push(table(list.map((n) => [n, d(n, meta)])));
   out.push('');
 }
 out.push(`---`);

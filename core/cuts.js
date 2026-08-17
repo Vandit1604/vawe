@@ -95,7 +95,7 @@ export const PRESENTATIONS = {
     enter: (p) => { const r = ((1 - clamp01(p)) * 50).toFixed(2); const c = `inset(0 ${r}% 0 ${r}%)`; return style({ opacity: clamp01(p * 3).toFixed(3), clipPath: c, WebkitClipPath: c }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   },
-  // soft wipe: the feathered-edge reveal — an 18%-wide gradient band instead of a hard line
+  // soft wipe: the feathered-edge reveal — a 20%-wide gradient band instead of a hard line
   softwipe: {
     enter: (p, o) => { const e = clamp01(p) * 130 - 5; return style({ ...mask(`linear-gradient(${gradAngle(o.dir)}, #000 ${(e - 18).toFixed(1)}%, transparent ${(e + 2).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
@@ -155,6 +155,40 @@ export const PRESENTATIONS = {
     enter: (p) => { const q = Math.floor(clamp01(p) * 10), amp = (1 - clamp01(p)) * 14; const jx = (frac(q * 12.9898 + 78.233) - 0.5) * 2 * amp, jy = (frac(q * 39.3468 + 11.135) - 0.5) * 2 * amp; return style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
     exit: (p) => { const q = Math.floor(clamp01(p) * 10), amp = clamp01(p) * 14; const jx = (frac(q * 26.651 + 43.77) - 0.5) * 2 * amp, jy = (frac(q * 51.313 + 7.19) - 0.5) * 2 * amp; return style({ opacity: (1 - p).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
   },
+};
+
+// CUT_BLURBS — one line per presentation, next to the thing it describes (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
+// with no presentation, or a presentation with no key, is a bug the transitions catalog reports.
+// The MASK-ONLY styles (SOLO_BLIND, derived just below) say so: on a whole-frame cut there is nothing
+// underneath them, so formats/scene/scene.js refuses them unless `sceneUnits: true` splits the beats.
+export const CUT_BLURBS = {
+  none: 'no transition at all, the beats simply replace each other — masks nothing and moves nothing, so a whole-frame cut needs sceneUnits',
+  fade: 'opacity only — masks, so a whole-frame cut needs sceneUnits',
+  slide: 'the frame travels one way, dir-aware — the plain workhorse, between same-background beats only',
+  whip: 'motion-blurred directional throw — momentum, between same-background beats only',
+  punch: 'scale burst, the leaving beat bursts past the camera — product focus',
+  wipe: 'hard directional reveal — playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits',
+  iris: 'circular reveal growing from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits',
+  clock: 'clock-hand sweep reveal — masks, so a whole-frame cut needs sceneUnits',
+  flip: 'perspective hinge flip about an edge — cards and panels',
+  rise: 'translate up + fade in',
+  blur: 'resolve out of blur — calm, premium',
+  zoom: 'push-through: the leaving beat shrinks away, the arriving one lands from too close — product focus',
+  cube: 'perspective hinge with travel, the beats turning like faces of a cube',
+  barn: 'barn doors open from the centre outward — cinematic opener; masks, so a whole-frame cut needs sceneUnits',
+  softwipe: 'feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits',
+  softiris: 'feathered circular reveal from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits',
+  squeeze: 'smear-stretch along the travel axis — a speed ramp you can see',
+  roll: 'tilts in from a corner and settles level',
+  letterbox: 'cinema curtains open and close top and bottom — cinematic opener; masks, so a whole-frame cut needs sceneUnits',
+  drop: 'falls in from above under gravity, leaves by falling away',
+  blinds: 'venetian slat mask sweeps open — editorial reveal; masks, so a whole-frame cut needs sceneUnits',
+  skewWhip: 'sheared throw whose shear straightens as it lands — velocity you can read in the letterforms, same-background beats only',
+  spin: 'rotate in with a scale settle — logos, badges, seals',
+  collapse: 'vertical fold down to a line — terminal and data beats',
+  riseBlur: 'slow rise through heavy defocus — premium slow beats',
+  jitter: 'decaying deterministic shake — alarm and glitch beats only',
 };
 
 // ---- SOLO MODE: a cut applied to ONE root that carries the whole frame ----

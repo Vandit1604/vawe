@@ -81,7 +81,9 @@ export const PRESETS = {
   bounce: (u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
   // slide from a side
   slide: (u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
-  // persistent sinusoidal wave (u is used as raw phase, not a one-shot) — pass loop:true in animateUnits
+  // persistent sinusoidal wave (u is used as raw phase, not a one-shot). No `loop:true` needed: this
+  // preset and `shimmerWave` are force-looped by name at animateUnits (line ~255), so the instruction
+  // this comment used to carry was redundant and read as a requirement.
   wave: (u, { amp = 14, phase = 0 } = {}) => ({ opacity: 1, transform: `translateY(${(Math.sin(u * Math.PI * 2 + phase) * amp).toFixed(2)}px)` }),
   // shimmerWave — a 3D traveling shimmer over live text (motion-primitives TextShimmerWave). Each glyph
   // rides a bump (translate + scale + rotateY + brightness) and the bump travels across the word via the
@@ -172,6 +174,40 @@ export const PRESETS = {
     const e = easeOutCubic(clamp01(u));
     return { opacity: clamp01(u * 2), transformOrigin: 'left center', transform: `perspective(820px) rotateY(${((1 - e) * -deg).toFixed(1)}deg)` };
   },
+};
+
+// One line per kinetic preset, beside the presets themselves. docs/EFFECTS.md renders these, and
+// scripts/gates/lib-test.mjs fails when a preset has no blurb — a name with no description is a
+// vocabulary an author cannot choose from. Say what it LOOKS like and when to reach for it, not how
+// the maths works, and carry the caution where there is one (`wave`/`shimmerWave` never settle).
+export const PRESET_BLURBS = {
+  up: 'words/chars rise into place — the default kinetic headline',
+  down: 'words/chars drop into place from above — the mirror of `up`',
+  type: 'typewriter hard on/off, no transform — terminals, timers, code',
+  scale: 'punch in from small (overshoot)',
+  blur: 'resolve out of blur — calm, premium',
+  bounce: 'springy bounce in — playful brands only',
+  slide: 'slides in from one side (`dir`) — pair it with the opposite exit',
+  wave: 'sinusoidal wave across units — a LOOP that never settles; ambient only',
+  shimmerWave: 'looping light wave (per-unit) — a 3D crest travelling across the word; never settles',
+  flip: '3D flip-up per unit, letters somersault into place — `axis` picks the hinge',
+  fall: 'falls from above under gravity and lands with a small squash',
+  elastic: 'elastic scale pop with visible wobble — playful brands only',
+  skew: 'italic shear that straightens as it lands — editorial, sporty',
+  focus: 'focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium',
+  decode: 'scramble→settle, techy',
+  tilt: '3D tilt-in',
+  stretch: 'horizontal smear that snaps true — impact words',
+  gradient: 'gradient sweeps through letterforms',
+  highlight: 'marker highlight sweep',
+  inkflash: 'per-word accent colour-wave',
+  underline: 'underline draws on',
+  shadow: 'a long poster shadow collapses as the word settles — poster statements',
+  riseClip: 'mask-rise reveal',
+  draw: 'stroke draw-on for SVG paths',
+  chroma: 'R/G/B ghosts split apart and converge to a crisp glyph',
+  swing: 'each unit hinges from its top edge and swings upright — playful, short words',
+  unfold: 'opens from edge-on about its left hinge, a panel turning to face you — premium',
 };
 
 // decode support: scrambles textContent deterministically until u resolves each char L->R.

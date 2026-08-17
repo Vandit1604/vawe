@@ -27,6 +27,30 @@
 // are the "cover the basics" set — real two-scene transitions, dir-aware via u_dir (left/right/up/down).
 export const SEAM_FX = ['fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom', 'portal'];
 
+// SEAM_BLURBS — one line per fx, next to the thing it describes (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and any catalog/MCP surface; a name in
+// SEAM_FX with no entry here is a bug the transitions catalog reports.
+// Read every line knowing what only a seam can do: it samples BOTH beats as textures, so it can carry
+// the leaving beat INTO the arriving one. A cut transforms one root; a sting paints over one beat.
+// `dir` (left/right/up/down) steers the directional five; `seed` varies noise and shape; `intensity`
+// scales strength. Browser file — plain data only, no node APIs.
+export const SEAM_BLURBS = {
+  fade: 'flat cross-dissolve of both beats — the universal fallback every seam degrades to with no WebGL or a blank raster',
+  dissolve: 'grainy film dissolve, each pixel flipping as a noise front passes it — time/place change',
+  slide: 'the arriving beat slides in over a held outgoing one (cover), dir-aware — the basic every tool has',
+  push: 'both beats shove together toward dir, the arriving one following the leaving one off screen — dir-aware basic',
+  uncover: 'the leaving beat slides off toward dir and reveals a held arriving beat under it — dir-aware basic',
+  wipe: 'a soft-edged line sweeps toward dir, the arriving beat revealed behind it — playful, "notice the cut"',
+  crossWarp: 'both beats drag toward the centre and swap through a soft noise front — a wipe with grit, for organic brands and dark scenes',
+  whipPan: 'momentum swipe between beats',
+  sdfIris: 'the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim — playful reveal, the shape is the personality',
+  dispersion: 'prism channel-split across the seam along a seeded axis, peaking mid-way — optical, techy pivots',
+  lens: 'one moving optical centre bends BOTH beats through a single lens, with a warm flare — premium product glamour, dark scenes',
+  flashWhite: 'white flash on an energy pivot',
+  cinematicZoom: 'dive-in zoom into a screen',
+  portal: 'glowing portal reveal (once)',
+};
+
 const VERT = 'attribute vec2 a; varying vec2 v_uv; void main(){ v_uv = a*0.5+0.5; gl_Position = vec4(a, 0.0, 1.0); }';
 
 // One program, both beats as samplers. getFrom/getTo flip Y (canvas rows are top-down, GL is

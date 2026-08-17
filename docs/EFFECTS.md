@@ -29,32 +29,32 @@
 | name | what / when |
 |---|---|
 | `blur` | resolve out of blur — calm, premium |
-| `bounce` | — |
-| `chroma` | — |
+| `bounce` | springy bounce in — playful brands only |
+| `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
 | `decode` | scramble→settle, techy |
-| `down` | — |
+| `down` | words/chars drop into place from above — the mirror of `up` |
 | `draw` | stroke draw-on for SVG paths |
-| `elastic` | — |
-| `fall` | — |
-| `flip` | — |
-| `focus` | — |
+| `elastic` | elastic scale pop with visible wobble — playful brands only |
+| `fall` | falls from above under gravity and lands with a small squash |
+| `flip` | 3D flip-up per unit, letters somersault into place — `axis` picks the hinge |
+| `focus` | focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium |
 | `gradient` | gradient sweeps through letterforms |
 | `highlight` | marker highlight sweep |
 | `inkflash` | per-word accent colour-wave |
 | `riseClip` | mask-rise reveal |
 | `scale` | punch in from small (overshoot) |
-| `shadow` | — |
-| `shimmerWave` | looping light wave (per-unit) |
-| `skew` | — |
-| `slide` | — |
-| `stretch` | — |
-| `swing` | — |
+| `shadow` | a long poster shadow collapses as the word settles — poster statements |
+| `shimmerWave` | looping light wave (per-unit) — a 3D crest travelling across the word; never settles |
+| `skew` | italic shear that straightens as it lands — editorial, sporty |
+| `slide` | slides in from one side (`dir`) — pair it with the opposite exit |
+| `stretch` | horizontal smear that snaps true — impact words |
+| `swing` | each unit hinges from its top edge and swings upright — playful, short words |
 | `tilt` | 3D tilt-in |
-| `type` | — |
+| `type` | typewriter hard on/off, no transform — terminals, timers, code |
 | `underline` | underline draws on |
-| `unfold` | — |
+| `unfold` | opens from edge-on about its left hinge, a panel turning to face you — premium |
 | `up` | words/chars rise into place — the default kinetic headline |
-| `wave` | sinusoidal wave across units |
+| `wave` | sinusoidal wave across units — a LOOP that never settles; ambient only |
 
 ## Enter / exit anims  `[per-layer]`
 
@@ -62,25 +62,25 @@
 
 | name | what / when |
 |---|---|
-| `clock` | — |
+| `clock` | radial sweep from 12 o'clock, clockwise |
 | `defocus` | leave through blur (dense/faces) |
 | `fade` | opacity only |
-| `iris` | — |
-| `lift` | staggered rise |
-| `none` | — |
+| `iris` | circular iris opens from the centre of the layer |
+| `lift` | travels further than `pop` and settles alive — faces, avatars, a staggered row of cards |
+| `none` | no move and no fade — the layer just appears at its window edges |
 | `pop` | scale overshoot |
 | `rise` | translate up + fade in |
 | `scale` | punch in from small (overshoot) |
-| `slide-down` | — |
-| `slide-left` | enter/exit leftward |
-| `slide-right` | enter/exit rightward |
-| `slide-up` | — |
-| `up` | words/chars rise into place — the default kinetic headline |
-| `wipe` | — |
-| `wipe-down` | — |
-| `wipe-left` | — |
-| `wipe-right` | — |
-| `wipe-up` | — |
+| `slide-down` | enters from below; as an `out`, leaves downward |
+| `slide-left` | enters from the left edge; as an `out`, leaves toward it |
+| `slide-right` | enters from the right edge; as an `out`, leaves toward it |
+| `slide-up` | enters from above; as an `out`, leaves upward |
+| `up` | translate up + fade in — the alias of `rise` |
+| `wipe` | clip reveal grows rightward — the default direction, same as `wipe-right` |
+| `wipe-down` | clip reveal grows downward from the top edge |
+| `wipe-left` | clip reveal grows leftward from the right edge |
+| `wipe-right` | clip reveal grows rightward from the left edge |
+| `wipe-up` | clip reveal grows upward from the bottom edge — what a bar chart wants |
 
 ## GSAP named effects  `[per-layer/text]`
 
@@ -150,32 +150,32 @@
 
 | name | what / when |
 |---|---|
-| `barn` | — |
-| `blinds` | — |
+| `barn` | barn doors open from the centre outward — cinematic opener; masks, so a whole-frame cut needs sceneUnits |
+| `blinds` | venetian slat mask sweeps open — editorial reveal; masks, so a whole-frame cut needs sceneUnits |
 | `blur` | resolve out of blur — calm, premium |
-| `clock` | — |
-| `collapse` | — |
-| `cube` | — |
-| `drop` | — |
-| `fade` | opacity only |
-| `flip` | — |
-| `iris` | — |
-| `jitter` | — |
-| `letterbox` | — |
-| `none` | — |
-| `punch` | — |
+| `clock` | clock-hand sweep reveal — masks, so a whole-frame cut needs sceneUnits |
+| `collapse` | vertical fold down to a line — terminal and data beats |
+| `cube` | perspective hinge with travel, the beats turning like faces of a cube |
+| `drop` | falls in from above under gravity, leaves by falling away |
+| `fade` | opacity only — masks, so a whole-frame cut needs sceneUnits |
+| `flip` | perspective hinge flip about an edge — cards and panels |
+| `iris` | circular reveal growing from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits |
+| `jitter` | decaying deterministic shake — alarm and glitch beats only |
+| `letterbox` | cinema curtains open and close top and bottom — cinematic opener; masks, so a whole-frame cut needs sceneUnits |
+| `none` | no transition at all, the beats simply replace each other — masks nothing and moves nothing, so a whole-frame cut needs sceneUnits |
+| `punch` | scale burst, the leaving beat bursts past the camera — product focus |
 | `rise` | translate up + fade in |
-| `riseBlur` | — |
-| `roll` | — |
-| `skewWhip` | — |
-| `slide` | — |
-| `softiris` | — |
-| `softwipe` | — |
-| `spin` | — |
-| `squeeze` | — |
-| `whip` | — |
-| `wipe` | — |
-| `zoom` | — |
+| `riseBlur` | slow rise through heavy defocus — premium slow beats |
+| `roll` | tilts in from a corner and settles level |
+| `skewWhip` | sheared throw whose shear straightens as it lands — velocity you can read in the letterforms, same-background beats only |
+| `slide` | the frame travels one way, dir-aware — the plain workhorse, between same-background beats only |
+| `softiris` | feathered circular reveal from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits |
+| `softwipe` | feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits |
+| `spin` | rotate in with a scale settle — logos, badges, seals |
+| `squeeze` | smear-stretch along the travel axis — a speed ramp you can see |
+| `whip` | motion-blurred directional throw — momentum, between same-background beats only |
+| `wipe` | hard directional reveal — playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits |
+| `zoom` | push-through: the leaving beat shrinks away, the arriving one lands from too close — product focus |
 
 ## Shader stings  `[transition]`
 
@@ -226,19 +226,19 @@
 | name | what / when |
 |---|---|
 | `cinematicZoom` | dive-in zoom into a screen |
-| `crossWarp` | — |
-| `dispersion` | — |
-| `dissolve` | time/place change |
-| `fade` | opacity only |
+| `crossWarp` | both beats drag toward the centre and swap through a soft noise front — a wipe with grit, for organic brands and dark scenes |
+| `dispersion` | prism channel-split across the seam along a seeded axis, peaking mid-way — optical, techy pivots |
+| `dissolve` | grainy film dissolve, each pixel flipping as a noise front passes it — time/place change |
+| `fade` | flat cross-dissolve of both beats — the universal fallback every seam degrades to with no WebGL or a blank raster |
 | `flashWhite` | white flash on an energy pivot |
-| `lens` | — |
+| `lens` | one moving optical centre bends BOTH beats through a single lens, with a warm flare — premium product glamour, dark scenes |
 | `portal` | glowing portal reveal (once) |
-| `push` | — |
-| `sdfIris` | — |
-| `slide` | — |
-| `uncover` | — |
+| `push` | both beats shove together toward dir, the arriving one following the leaving one off screen — dir-aware basic |
+| `sdfIris` | the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim — playful reveal, the shape is the personality |
+| `slide` | the arriving beat slides in over a held outgoing one (cover), dir-aware — the basic every tool has |
+| `uncover` | the leaving beat slides off toward dir and reveals a held arriving beat under it — dir-aware basic |
 | `whipPan` | momentum swipe between beats |
-| `wipe` | — |
+| `wipe` | a soft-edged line sweeps toward dir, the arriving beat revealed behind it — playful, "notice the cut" |
 
 ## Composite looks (static)  `[static]`
 
@@ -493,13 +493,13 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `kick` | — |
-| `mixBlend` | — |
-| `occlude` | — |
-| `plane` | — |
-| `progress` | — |
-| `shadow` | — |
-| `tilt` | 3D tilt-in |
+| `kick` | hit the layer on the film's own joints — a cut, a seam or a sting shoves it, so the frame feels the edit |
+| `mixBlend` | how this layer's pixels combine with what is already painted behind it — knock a headline out of a photo |
+| `occlude` | hide this layer where another one covers it — put something BEHIND something else without reordering the stack |
+| `plane` | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours — this is parallax |
+| `progress` | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
+| `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
+| `tilt` | turn the layer out of the picture plane and hold it there — a card leaning away, a phone at an angle, panels receding |
 
 ## Blend modes  `[per-layer]`
 
