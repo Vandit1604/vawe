@@ -9386,6 +9386,40 @@ travelling camera.
 
 ---
 
+## #341 — Six camera generators would run their clock backward, and the reviewer that found it named two
+
+`/ecc:review` over the six commits of this session returned one finding: `travel` and `truck` validate
+`dur` and `dwell` for FINITENESS and never for SIGN, so a negative value walks the keyframe times
+backward. `travel({stations:[…,{dwell:-10},…]})` emits `t = [0, 0.8, -9.2, -8.2]`.
+
+That array is not ascending, and `cameraAt` (`core/sequence.js:31`) scans for the bracketing pair
+assuming it is. Against a jumbled track it locks onto the last keyframe, so the camera **teleports to
+the destination at t=0 and holds there for the whole clip**. The move is silently deleted. Reproduced
+before fixing: the pose at t=0.4 was already past the second station.
+
+**The finding was right and its scope was wrong, which is the reusable part.** The review looked at the
+diff, and the diff contained the two new generators. Every one of the six advances the same clock the
+same way: `slowPush({dur:-4})` emits `[0, -4]`, `orbit({dur:-6})` emits `[0, -3, -6]`,
+`panFollow({dur:0})` emits `[0, 0]` — two keys at one `t`, which makes `cameraAt` divide by zero and
+lerp `NaN`. None of them errored. **A review scoped to a diff finds bugs scoped to a diff**; CLAUDE.md's
+"fix the rule, not the call site" is the standing correction, and it applies to a reviewer's findings
+exactly as it applies to your own.
+
+**Fix.** Two helpers, `span` (positive, for anything that advances the clock) and `hold` (zero allowed,
+negative never), used by all six generators plus `travel`'s stations. `make lib-test` 652 to 655, and
+the three new assertions cover every generator rather than the two that were flagged. Proved they bite:
+disabling the guard fails exactly one assertion, and it is the right one.
+
+**Blast radius: none.** No scene in the library passes a non-positive duration to `cameraMove`, and all
+8 that use the sugar still expand.
+
+**The process note, since it is the reason this entry exists.** These six commits were pushed to main
+BEFORE being reviewed. The bug was real, it was in code I wrote and had already tested, and my own
+`lib-test` additions did not cover sign because I was testing the feature rather than attacking it.
+Review before push, and treat a reviewer's finding as a sample of a class rather than as the whole of it.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

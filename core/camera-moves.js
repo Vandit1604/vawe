@@ -13,8 +13,30 @@
 
 const CENTER = { w: 1920, h: 1080 };
 
+// EVERY DURATION HERE ADVANCES A CLOCK, so a non-positive one walks the keyframe times BACKWARD and the
+// array stops being ascending. `cameraAt` scans for the bracketing pair assuming ascending `t`
+// (core/sequence.js:31), so against a jumbled array it locks onto the last keyframe and the camera
+// teleports to the destination at t=0 and stays there — a whole move silently deleted. A zero duration
+// is the same class one step milder: two keys at the same `t` make cameraAt divide by zero and lerp NaN.
+// Neither errors. `slowPush({dur:-4})` emits [0, -4] and `panFollow({dur:0})` emits [0, 0]; both looked
+// like working calls. Guarded in ONE place because all six generators advance a clock the same way, and
+// the review that caught it named only the two new ones (docs/MISTAKES.md #341).
+const span = (move, key, v) => {
+  if (!Number.isFinite(v) || v <= 0)
+    throw new Error(`${move}: "${key}" must be a positive number of seconds (it advances the camera clock); got ${JSON.stringify(v)}`);
+  return v;
+};
+// A HOLD may be zero — that just means "do not hold" — but never negative, which rewinds the clock.
+const hold = (move, key, v) => {
+  if (v == null) return 0;
+  if (!Number.isFinite(v) || v < 0)
+    throw new Error(`${move}: "${key}" must be zero or a positive number of seconds; got ${JSON.stringify(v)}`);
+  return v;
+};
+
 // slowPush — a gentle, continuous zoom in (the default "the frame is alive" move). One segment, ease-out.
 export function slowPush({ start = 0, dur = 6, from = 1, to = 1.12, ease = 'easeOutCubic' } = {}) {
+  span('slowPush', 'dur', dur);
   return [{ t: start, s: from, x: 0, y: 0 }, { t: start + dur, s: to, x: 0, y: 0, ease }];
 }
 
@@ -29,6 +51,7 @@ export function diveIn({ start = 0, dur = 1.6, tx, ty, to = 1.6, canvasW = CENTE
   for (const [k, v] of [['tx', tx], ['ty', ty]]) {
     if (!Number.isFinite(v)) throw new Error(`diveIn needs a finite "${k}" (the stage coordinate to centre on); got ${JSON.stringify(v)}`);
   }
+  span('diveIn', 'dur', dur);
   return [
     { t: start, s: 1, x: 0, y: 0 },
     { t: start + dur, s: to, x: canvasW / 2 - tx, y: canvasH / 2 - ty, ease },
@@ -38,6 +61,7 @@ export function diveIn({ start = 0, dur = 1.6, tx, ty, to = 1.6, canvasW = CENTE
 // panFollow — the camera TRANSLATES to keep pace with content that grows downward (the "terminal types
 // while the camera pans down" move). Linear so the pan tracks the typing at constant speed, no easing lurch.
 export function panFollow({ start = 0, dur = 5, dx = 0, dy = -300, s = 1, ease = 'linear' } = {}) {
+  span('panFollow', 'dur', dur);
   return [{ t: start, s, x: 0, y: 0 }, { t: start + dur, s, x: dx, y: dy, ease }];
 }
 
@@ -45,6 +69,7 @@ export function panFollow({ start = 0, dur = 5, dx = 0, dy = -300, s = 1, ease =
 // opposite of diveIn). Ends on a slow settle.
 export function workspaceZoomOut({ start = 0, dur = 3, from = 1.4, to = 1, tx, ty, canvasW = CENTER.w,
   canvasH = CENTER.h, ease = 'easeOutCubic' } = {}) {
+  span('workspaceZoomOut', 'dur', dur);
   const fx = tx != null ? canvasW / 2 - tx : 0, fy = ty != null ? canvasH / 2 - ty : 0;
   return [{ t: start, s: from, x: fx, y: fy }, { t: start + dur, s: to, x: 0, y: 0, ease }];
 }
@@ -52,6 +77,7 @@ export function workspaceZoomOut({ start = 0, dur = 3, from = 1.4, to = 1, tx, t
 // orbit — a gentle 3D swing around the frame (ry sweeps through 0), giving depth to a dimensional beat.
 // 3 keyframes → interior gets ease:"linear" so the swing is one continuous arc, not two eased halves.
 export function orbit({ start = 0, dur = 6, deg = 12, s = 1.05, ease = 'easeInOutSine' } = {}) {
+  span('orbit', 'dur', dur);
   const mid = start + dur / 2;
   return [
     { t: start, s, x: 0, y: 0, ry: -deg },
@@ -67,7 +93,7 @@ export function multiPhase({ start = 0, legs = [], settleEase = 'easeOutCubic' }
   const kf = [{ t: start, s: 1, x: 0, y: 0 }];
   let t = start;
   legs.forEach((leg, i) => {
-    t += leg.dur ?? 1;
+    t += span('multiPhase', `legs[${i}].dur`, leg.dur ?? 1);
     const last = i === legs.length - 1;
     // Every axis a leg does not mention CARRIES FORWARD. `s` always did; x and y defaulted to 0 on the
     // same line, so the documented "hold" leg (`{dur: 2}` between a push and a settle) was not a hold at
@@ -100,7 +126,7 @@ export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = C
     // A station may legitimately OMIT tx/ty (that is the carry-forward, a zoom in place). A station that
     // SUPPLIES one non-finite is a typo, and it would poison every later keyframe through prev — one bad
     // station silently NaNs the rest of the journey, not just its own stop.
-    for (const k of ['tx', 'ty', 's', 'dur', 'dwell']) {
+    for (const k of ['tx', 'ty', 's']) {
       if (st && st[k] != null && !Number.isFinite(st[k]))
         throw new Error(`travel station ${i}: "${k}" must be a finite number; got ${JSON.stringify(st[k])}`);
     }
@@ -112,13 +138,13 @@ export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = C
       x: st.tx == null ? prev.x : canvasW / 2 - st.tx,
       y: st.ty == null ? prev.y : canvasH / 2 - st.ty,
     };
-    if (i > 0) t += st.dur ?? 0.8;
+    if (i > 0) t += span('travel', `station ${i} "dur"`, st.dur ?? 0.8);
     const arrive = { t, ...pose };
     if (i > 0) arrive.ease = 'linear';
     lastArrival = kf.push(arrive) - 1;
     // A dwell is a second keyframe at the SAME pose, so the hold is a real hold rather than the tail of
     // the incoming tween creeping on.
-    if (st.dwell) { t += st.dwell; kf.push({ t, ...pose, ease: 'linear' }); }
+    if (hold('travel', `station ${i} "dwell"`, st.dwell)) { t += st.dwell; kf.push({ t, ...pose, ease: 'linear' }); }
     prev = pose;
   });
   // The settle belongs to the ARRIVAL at the final station, never to a dwell keyframe behind it: a hold
@@ -131,6 +157,7 @@ export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = C
 // VERTICAL (dy: -300), so a sideways move had no name and got hand-typed each time. Linear because a
 // constant-speed side move reads as the camera tracking; an eased one reads as a lurch.
 export function truck({ start = 0, dur = 3, dx = -1920, s = 1, ease = 'linear' } = {}) {
+  span('truck', 'dur', dur);
   return [{ t: start, s, x: 0, y: 0 }, { t: start + dur, s, x: dx, y: 0, ease }];
 }
 

@@ -19,7 +19,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope 
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen } from '../../core/layers/text.js';
-import { slowPush, diveIn, panFollow, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -1314,6 +1314,25 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('diveIn REFUSES a missing target coordinate instead of carrying NaN', (() => {
     try { diveIn({ tx: 960 }); return false; } catch { return true; }
   })());
+  // A non-positive duration walks the keyframe clock BACKWARD, and cameraAt scans for its bracketing
+  // pair assuming ascending t, so the camera teleports to the destination and the move vanishes. Zero is
+  // the same class one step milder (a divide by zero, lerping NaN). Guarded for every generator, so
+  // asserted for every generator.
+  ok('every camera generator REFUSES a non-positive duration', [
+    () => slowPush({ dur: -4 }), () => panFollow({ dur: 0 }), () => orbit({ dur: -6 }),
+    () => multiPhase({ legs: [{ dur: -2 }] }), () => diveIn({ tx: 1, ty: 1, dur: -1 }),
+    () => workspaceZoomOut({ dur: 0 }), () => truck({ dur: -2 }),
+    () => travel({ stations: [{ tx: 0, ty: 0 }, { tx: 1, ty: 1, dur: -1 }] }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+  ok('travel REFUSES a negative dwell but allows zero', (() => {
+    try { travel({ stations: [{ tx: 0, ty: 0 }, { tx: 1, ty: 1, dwell: -10 }] }); return false; } catch {}
+    return travel({ stations: [{ tx: 0, ty: 0 }, { tx: 500, ty: 500, dwell: 0 }] }).length === 2;
+  })());
+  ok('every emitted camera track is ascending in t', [
+    slowPush({}), panFollow({}), orbit({}), multiPhase({ legs: [{ dur: 1 }, { dur: 2 }] }),
+    diveIn({ tx: 100, ty: 100 }), workspaceZoomOut({}), truck({}),
+    travel({ stations: [{ tx: 0, ty: 0 }, { tx: 500, ty: 500, dwell: 0.5 }, { tx: 900, ty: 100 }] }),
+  ].every((kf) => kf.every((k, i) => i === 0 || k.t >= kf[i - 1].t)));
   ok('CAMERA_MOVE_NAMES picks up travel + truck',
     CAMERA_MOVE_NAMES.includes('travel') && CAMERA_MOVE_NAMES.includes('truck'));
   ok('buildCameraMove resolves by name', buildCameraMove({ move: 'slowPush', start: 0, dur: 2 }).length === 2);
