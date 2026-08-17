@@ -189,11 +189,15 @@ server.registerTool('vawe_capabilities', {
   const c = await catalog.capabilities();
   // Render each preset with its dials, so a caller does not just learn a name exists but how to tune
   // it. A dial set on a preset that ignores it is reported by the draft gates (dead-knob check).
+  // core/knobs.js writes a `desc` on 79 of its dials and this printed only `k.name`, so every one of
+  // them was fetched across the wire and dropped on the floor — while the comment above claimed the
+  // opposite. A caller learned that `stagger` exists and never that it is the rhythm offset per unit.
+  const dial = (k) => (k.desc ? `${k.name} (${k.desc})` : k.name);
   const knobLine = (fam) => {
     const K = c.knobs[fam]; if (!K) return '';
-    const shared = (K._shared || []).map((k) => k.name).join(' ');
+    const shared = (K._shared || []).map(dial).join(' · ');
     const per = Object.entries(K).filter(([p]) => p !== '_shared' && K[p].length)
-      .map(([p, list]) => `    ${p.padEnd(16)} ${list.map((k) => k.name).join(' ')}`);
+      .map(([p, list]) => `    ${p.padEnd(16)} ${list.map(dial).join(' · ')}`);
     return `  shared dials: ${shared}\n${per.join('\n')}`;
   };
   return text([

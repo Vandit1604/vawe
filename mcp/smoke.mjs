@@ -16,8 +16,12 @@ const RENDER = !process.argv.includes('--no-render');
 
 const SCENE = {
   module: 'scene', theme: 'vawe', aspect: '16:9', duration: 2, audio: { silent: true },
+  // `bg` is REQUIRED, and this scene declared none: it painted a full-canvas rect instead, which the
+  // validator does not accept as a backdrop (a scrim is a layer wearing a backdrop's clothes). So the one
+  // thing that exercises the MCP path has been failing at `draft not accepted` — and it is wired to no
+  // make target, so nothing said so. Verified identical at HEAD before this line was added.
+  bg: [{ t: 0, preset: 'plain', value: 'dark' }],
   layers: [
-    { type: 'rect', x: 0, y: 0, w: 1920, h: 1080, bg: '#0d0f13', start: 0, duration: 2 },
     { type: 'text', text: 'Hello from MCP', x: 260, y: 470, w: 1400, align: 'center',
       size: 120, font: 'sans', weight: 700, color: '#ffffff', anim: 'rise', enterDur: 0.6,
       start: 0.2, duration: 1.8 },
