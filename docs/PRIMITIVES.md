@@ -665,8 +665,12 @@ vignette`), applied via `filter:` like any grade. All pure CSS (filter functions
 `heatWarp` `melt` `watercolor` `dreamSequence` `rippleGlass`.
 - **Customization (defaults just work):** every look reskins to the theme with zero config. Quick:
   `filter: "neon:0.9"` (the one positional arg is always `strength` 0..1). Full: `filter: "neon"` +
-  **`lookOpts: { color, color2, strength, grain, vignette, warmth }`**. `strength` is a master dial —
-  one number scales bloom radius, overlay alpha, grain and chromatic px together.
+  **`lookOpts: { strength, color, color2, colors, grain, vignette }`**. `strength` is a master dial —
+  one number scales bloom radius, overlay alpha, grain and chromatic px together — and it is the only
+  knob every look takes. The rest depend on the look's own passes: `grain` needs a grain pass,
+  `color2` needs a colour split. **A knob a look cannot apply THROWS**, naming what that look does
+  take, rather than being silently dropped. `liveKnobs(name)` in `core/looks.js` is the list.
+  There is no `warmth`; it was advertised in three places and no pass ever read it (`docs/MISTAKES.md` #351).
 - **Colours** default to `var(--accent)`/tokens, so a look matches the brand; looks whose identity is a
   fixed palette (`cyberpunk` teal/magenta, `nightVision` green, `thermal` ramp) default to that but take
   overrides. Apply a full-frame look to a `group`/full-frame layer; a text look (`neon`, glow) to the text.

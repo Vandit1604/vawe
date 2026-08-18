@@ -531,18 +531,19 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `bloom` | — |
-| `chromaGlow` | — |
-| `convolve` | — |
-| `displace` | — |
-| `duotone` | — |
-| `gradientMap` | — |
-| `morph` | — |
-| `posterize` | — |
-| `relief` | — |
-| `sepia` | — |
-| `tritone` | — |
-| `vignette` | — |
+| `bloom` | thresholds LUMINANCE and blooms the bright parts at two scales — light comes out of the picture, so a dark edge emits nothing. `ry` makes it directional (an anamorphic streak) |
+| `chromaGlow` | a stack of zero-offset drop-shadows: white core, warm mid halo, cool outer. It follows the ALPHA, so it is right on GLYPHS and wrong on an opaque picture, where it haloes the rectangle. For a photo use `bloom` |
+| `chromaSplit` | the colour channels pulled apart per pixel and summed back — real fringing on the picture, not a coloured silhouette of its alpha. `warm`/`cool` tint each direction |
+| `convolve` | a 3x3 kernel reading NEIGHBOURING pixels: emboss (a lit rubbing), edge (flat areas cancel to black, only boundaries survive), sharpen |
+| `displace` | static turbulence drives a displacement map — the pixels are pushed around by a fixed noise field. `freq` sets lump size (low = few big lumps), `scale` sets how far |
+| `duotone` | luminance remapped to TWO colours, shadows to highlights — the poster/press look; defaults to --ink and --accent, so it reskins per theme |
+| `gradientMap` | luminance remapped across any number of stops — the general case the two above are special cases of: a heat ramp, a risograph, a false-colour read |
+| `morph` | dilate or erode — swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight |
+| `posterize` | each channel quantised to N discrete levels IN PLACE, hues kept — banding as a decision, not an artefact |
+| `relief` | a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite |
+| `sepia` | the plain CSS sepia, an amount 0..1 — the cheapest warm-and-dated pass there is |
+| `tritone` | duotone with a third stop in the middle, which is what stops the midtones going muddy |
+| `vignette` | NOT a filter — a darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
 ## Easings  `[timing]`
 
@@ -705,4 +706,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_465 effects across 31 families. Regenerate: `make effects`._
+_466 effects across 31 families. Regenerate: `make effects`._

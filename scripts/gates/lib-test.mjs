@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
-import { resolveFilter, parseColor, FILTER_PRESETS } from '../../core/filters.js';
+import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import { parseColorRGB } from '../../core/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
@@ -33,7 +33,7 @@ import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
-import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName } from '../../core/looks.js';
+import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
@@ -979,6 +979,65 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: pipeline order — grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('url(#f-bloom'));
   ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
   ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
+
+  // ---- the three guards from docs/MISTAKES.md #351 ----
+  // All derived from LOOKS. A hand-written list is what let `color` be dead on nineteen looks while
+  // the test above proved the feature on `neon` — one of the three where it happened to work.
+  const sig = (r) => r.filter + '||' + JSON.stringify(r.overlays);
+  const PROBE = { color: '#123456', color2: '#654321', colors: ['#111111', '#eeeeee'], grain: 0.9, vignette: 0.9, strength: 0.2 };
+
+  // 1. A KNOB A LOOK DECLARES MUST DO SOMETHING. Behavioural, so it holds however routing is built.
+  const deadKnobs = [];
+  for (const n of LOOK_NAMES) {
+    for (const k of Object.keys(LOOKS[n].d)) {
+      if (k === 'strength') continue;
+      let moved = false;
+      try { moved = sig(resolveComposite(n, {})) !== sig(resolveComposite(n, { [k]: PROBE[k] })); } catch { moved = false; }
+      if (!moved) deadKnobs.push(`${n}.${k}`);
+    }
+  }
+  ok(`looks: every knob a look declares changes its output${deadKnobs.length ? ' — dead: ' + deadKnobs.join(', ') : ''}`, deadKnobs.length === 0);
+
+  // The routing table must agree with what the passes actually read, in BOTH directions, or the
+  // "this look does not take that knob" error starts lying.
+  const knobDrift = [];
+  for (const n of LOOK_NAMES) {
+    for (const k of Object.keys(KNOB_ROUTES)) {
+      let moved = false;
+      try { moved = sig(resolveComposite(n, {})) !== sig(resolveComposite(n, { [k]: PROBE[k] })); } catch { moved = false; }
+      if (moved !== liveKnobs(n).includes(k)) knobDrift.push(`${n}.${k}`);
+    }
+  }
+  ok(`looks: liveKnobs matches behaviour on all ${LOOK_NAMES.length} looks${knobDrift.length ? ' — drift: ' + knobDrift.join(', ') : ''}`, knobDrift.length === 0);
+
+  // A knob the look cannot apply is refused, not dropped (core/fx/index.js reasoning, one level up).
+  ok('looks: a knob the look cannot use throws', (() => {
+    try { resolveComposite('neon', { grain: 0.5 }); return false; } catch (e) { return /does not use/.test(e.message); }
+  })());
+
+  // 2. NO LOOK MAY BLUR THE ALPHA CHANNEL. #112 stated this rule and fixed one call site; `hStreak`
+  // and `chromaPair` carried it for another two hundred entries. Stated once, for the whole registry.
+  const alphaBlur = LOOK_NAMES.filter((n) => resolveComposite(n).filter.includes('drop-shadow('));
+  ok(`looks: no look blurs the ALPHA channel (drop-shadow)${alphaBlur.length ? ' — ' + alphaBlur.join(', ') : ''}`, alphaBlur.length === 0);
+  ok('looks: vintageAnamorphic streaks the HIGHLIGHTS via a directional bloom (wide x, narrow y)',
+    /f-bloom-[\d_]+-t[\d_]+-r[\d_]+-ry[\d_]+/.test(resolveComposite('vintageAnamorphic').filter));
+  ok('looks: chromatic looks use a per-pixel channel split', resolveComposite('cyberpunk').filter.includes('#f-chroma-'));
+
+  // 3. DISTINCT FILTER PARAMETERS MUST PRODUCE DISTINCT DEF IDS. ensureFilterDef caches by id, so a
+  // parameter missing from the id means the second caller silently renders the first caller's filter.
+  const idOf = (name, o) => ensureFilterDef(name, o);
+  const bloomIds = [
+    idOf('bloom', { radius: 10 }), idOf('bloom', { radius: 10, ry: 2 }), idOf('bloom', { radius: 10, ry: 4 }),
+    idOf('bloom', { radius: 10, color: '#f00' }), idOf('bloom', { radius: 10, intensity: 2 }),
+    idOf('bloom', { radius: 10, threshold: 0.3 }), idOf('bloom', { radius: 10, key: 'value' }),
+  ];
+  ok('filters: every bloom parameter reaches the def id (incl. the new ry)', new Set(bloomIds).size === bloomIds.length);
+  const chromaIds = [
+    idOf('chromaSplit', {}), idOf('chromaSplit', { px: 4 }),
+    idOf('chromaSplit', { px: 4, warm: '#ff0000' }), idOf('chromaSplit', { px: 4, warm: 'rgba(255,0,0,0.5)' }),
+    idOf('chromaSplit', { px: 4, cool: '#0000ff' }),
+  ];
+  ok('filters: every chromaSplit parameter reaches the def id (colour AND its alpha)', new Set(chromaIds).size === chromaIds.length);
 }
 
 // ---- canvas FX (core/canvas-fx.js) — pure pixel math (the DOM passes bake in the browser) ----

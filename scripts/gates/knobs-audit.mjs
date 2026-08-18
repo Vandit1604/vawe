@@ -8,6 +8,15 @@ import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { KNOBS, knobsFor } from '../../core/knobs.js';
 import { PRESETS } from '../../core/type.js';
+import { resolveComposite, LOOK_NAMES } from '../../core/looks.js';
+
+// COVERAGE, stated so nobody reads a pass as more than it is. core/knobs.js has SIX families and this
+// guard can only prove the ones whose resolution is a pure function: `kinetic` (u, opts → keyframes)
+// and `look` (name, opts → filter + overlays). `three`, `raymarch`, `ambient` and `sting` resolve
+// inside a live scene, so a knob of theirs that does nothing still passes here.
+// `look` was added in docs/MISTAKES.md #351, after four of its six advertised knobs turned out to
+// change NOTHING on any of the 31 looks. The manifest had been lying to authors for a year, in the
+// same file this guard reads, one family across — and the guard was scoped to `kinetic` alone.
 
 // ---- drift guard: kinetic knobs are pure functions, so we can prove each one moves the output ----
 function driftGuard() {
@@ -31,6 +40,23 @@ function driftGuard() {
               : (Number(k.default) || 1) * 2 + 3;
       if (sig(fn, { [k.name]: probe }) === base) dead.push(`${preset}.${k.name} does not change the output`);
     }
+  }
+  return dead.concat(lookDrift());
+}
+
+// `look` is a UNIFORM family: one dial set advertised for all 31 looks, and no look uses every dial
+// (a look with no grain pass cannot take `grain`). So the claim a knob has to earn is weaker than
+// kinetic's — at least ONE look must respond to it — and that is exactly the claim that failed.
+function lookDrift() {
+  const dead = [];
+  const sig = (name, opts) => { const r = resolveComposite(name, opts); return r.filter + '||' + JSON.stringify(r.overlays); };
+  for (const k of KNOBS.look._shared || []) {
+    if (k.name === 'strength') continue; // proved by the positional-arg tests in lib-test
+    const probe = k.name === 'colors' ? ['#111111', '#eeeeee'] : k.type === 'color' ? '#123456' : 0.9;
+    const users = LOOK_NAMES.filter((n) => {
+      try { return sig(n, {}) !== sig(n, { [k.name]: probe }); } catch { return false; } // refused = not a user
+    });
+    if (!users.length) dead.push(`look.${k.name} changes NO look — core/knobs.js advertises a dial that does not exist`);
   }
   return dead;
 }
@@ -90,7 +116,8 @@ if (isMain) {
     for (const d of drift) console.error(`    ${d}`);
     process.exit(1);
   }
-  console.log('✓ every advertised kinetic knob changes the output');
+  console.log('✓ every advertised kinetic and look knob changes the output'
+    + '  (three/raymarch/ambient/sting resolve inside a live scene and are NOT proved here)');
 
   const file = process.argv[2];
   if (file) {

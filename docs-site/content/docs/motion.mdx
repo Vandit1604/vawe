@@ -73,7 +73,7 @@ A **look** is a named cinematic grade applied to any layer or group with `filter
 { "type": "group", "filter": "neon", "children": [ /* ... */ ] }
 ```
 
-A strength rides on the name (`"neon:0.6"`), and `lookOpts` overrides properties (many looks default their colour to the brand accent, so a look reskins per theme). Reach for one look per beat, on real content, never as decoration on empty space.
+A strength rides on the name (`"neon:0.6"`), and `lookOpts` overrides properties (many looks default their colour to the brand accent, so a look reskins per theme). `strength` works on every look; the other knobs (`color`, `color2`, `colors`, `grain`, `vignette`) depend on the passes that look is built from, and one it cannot apply is refused with a message rather than ignored. Reach for one look per beat, on real content, never as decoration on empty space.
 
 ## Motion personality per theme
 

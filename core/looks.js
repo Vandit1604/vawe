@@ -10,16 +10,17 @@
 // the vignette gets recoloured.
 //
 // CUSTOMIZATION: every look works with ZERO config by reskinning to the theme (colours default to
-// var(--accent)/tokens). Override via `lookOpts: { color, color2, strength, grain, vignette, ... }`,
+// var(--accent)/tokens). Override via `lookOpts: { color, color2, colors, grain, vignette, strength }`,
 // or the quick `filter: "neon:0.9"` where the ONE positional arg is always `strength` (0..1). A single
 // `strength` dial is threaded into every pass, so one number scales the whole look.
+// A knob a look cannot use is an ERROR, not a no-op — see KNOB_ROUTES below and docs/MISTAKES.md #351.
 //
 // A pass is `(o, s) => { fns?: string[], overlays?: [{ bg, blend?, opacity?, radius? }] }`:
-//   o = merged options (look defaults ← lookOpts ← per-pass fixed args), s = strength 0..1.
+//   o = merged options (look defaults ← per-pass fixed args ← the author's routed knobs), s = 0..1.
 //   fns      → CSS filter functions, concatenated in order onto the layer's `filter`.
 //   overlays → inset child divs (texture/vignette), appended in order, ungraded stacking on top.
 
-import { resolveFilter, bloomFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
+import { resolveFilter, bloomFilter, chromaSplitFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
 
 const n2 = (x) => (+x).toFixed(2);
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -53,14 +54,25 @@ const bloomStack = (size, color, s, key) => {
   const k = size * (0.5 + 0.7 * s);
   return bloomFilter({ color, radius: 14 * k, intensity: 0.55 + 0.75 * s, key });
 };
-// horizontal-only streak (anamorphic)
+// horizontal-only streak (anamorphic). The SAME luminance bloom, made directional: wide in x, narrow
+// in y. It was a `drop-shadow` pair until #351 — the construct #112 removed from `bloom` two hundred
+// entries earlier for blurring the ALPHA channel, left in place here with no caveat. On an opaque
+// photo the alpha is the rectangle, so it streaked the frame's EDGE while its own blurb promised
+// "horizontal blue streaks off the highlights". Now it streaks the highlights.
 const hStreak = (size, color, s) => {
   const k = size * (0.6 + 0.8 * s);
-  return `drop-shadow(${(22 * k).toFixed(1)}px 0 ${(10 * k).toFixed(1)}px color-mix(in srgb, ${color} 60%, transparent)) drop-shadow(${(-22 * k).toFixed(1)}px 0 ${(10 * k).toFixed(1)}px color-mix(in srgb, ${color} 60%, transparent))`;
+  // Wide in x, near-flat in y. Tuned against the reel: the first attempt used the old drop-shadow's
+  // 22px OFFSET as a blur RADIUS, which is not the same number — a 26px sigma smeared the headline
+  // into an unreadable bar. A streak is long and THIN, and it must not eat its own source.
+  // A real anamorphic streak is long, thin and FAINT, and only the very brightest pixels throw one —
+  // hence the high threshold and the low intensity. Tuned against the reel: at the bloom's default
+  // 0.62 threshold and a normal intensity the flare swallowed the headline it was supposed to flatter.
+  return bloomFilter({ color, radius: 34 * k, ry: Math.max(0.6, 1.1 * k), threshold: 0.90, intensity: 0.09 + 0.11 * s });
 };
-// uniform chromatic split as a coloured drop-shadow pair (cheap, pure CSS — a hint, not a true per-pixel split)
-const chromaPair = (px, cWarm, cCool) =>
-  `drop-shadow(${n2(px)}px 0 0 ${cWarm}) drop-shadow(${n2(-px)}px 0 0 ${cCool})`;
+// uniform chromatic split. Also a drop-shadow pair until #351: it at least admitted in a comment that
+// it was "a hint, not a true per-pixel split", but a documented approximation that paints a coloured
+// bar down the edge of every opaque layer is still the alpha bug. Now a real channel split.
+const chromaPair = (px, cWarm, cCool) => chromaSplitFilter({ px, warm: cWarm, cool: cCool });
 
 // ---- the pass library ----------------------------------------------------------------------------
 // Each returns { fns, overlays }. `s` = strength. Colours accept var() tokens directly (reskin free).
@@ -100,7 +112,37 @@ const PASSES = {
   lightLeak: (o, s) => ({ overlays: [{ bg: leakGrad(o.corner || 'tr', o.leakColor || '#ff9a3d', (o.leak ?? o.amt ?? 0.4) * (0.5 + 0.7 * s)), blend: 'screen' }] }),
   // -- vignette / frame --
   vignette: (o, s) => ({ overlays: [{ bg: vignetteGrad(o.vignetteColor || '#000', (o.vignette ?? o.strengthV ?? 0.45) * (0.5 + 0.8 * s)) }] }),
-  vignetteInvert: (o, s) => ({ overlays: [{ bg: vignetteInvGrad((o.vignette ?? 0.4) * (0.5 + 0.8 * s)) }], }),
+  vignetteInvert: (o, s) => ({ overlays: [{ bg: vignetteInvGrad((o.vignette ?? 0.4) * (0.5 + 0.8 * s)) }] }),
+};
+
+// ---- the author's knobs, and where each one lands ------------------------------------------------
+// A look's `p` entries carry FIXED per-pass arguments; they are what give the look its identity, and
+// they are PRIVATE. `lookOpts` is the author's half, and the two used to collide in silence: the merge
+// put `fixed` LAST, so `dreamyHaze` fixing the bloom's `glowColor` meant `lookOpts.color` rode into
+// every pass and was read by none. Measured across all 31 looks, five of the six documented knobs
+// changed nothing on any look and `color` worked on three. See docs/MISTAKES.md #351.
+//
+// A public knob therefore NAMES the private arguments it controls, and supplying it writes them last.
+// Routing is broad on purpose: fadedPolaroid, lomo, heatWarp, watercolor and letterpress carry no
+// bloom at all, so routing `color` to the glow alone would have left their `color` dead a second time.
+// `color` means "recolour this look"; `strength` stays the fine dial.
+export const KNOB_ROUTES = {
+  color: ['glowColor', 'streakColor', 'leakColor', 'lightColor', 'color', 'cool'],
+  color2: ['warm'],
+  colors: ['colors'],
+  grain: ['grain'],
+  vignette: ['vignette', 'strengthV'],
+};
+
+// The other half of KNOB_ROUTES: which routed argument each pass can actually READ. Without it a knob
+// that lands nowhere (`grain` on a look with no grain pass) would be accepted and ignored — the same
+// bug one level up. With it, `liveKnobs` can say what a given look takes, so an unusable knob throws.
+// lib-test proves this table against BEHAVIOUR, so it cannot drift from the passes above.
+const PASS_READS = {
+  bloom: ['glowColor', 'color'], hBloom: ['streakColor', 'color'], wash: ['color'],
+  lightLeak: ['leakColor', 'color'], relief: ['lightColor', 'color'], gradientMap: ['colors'],
+  chromatic: ['warm', 'cool'], grain: ['grain'], vignette: ['vignette', 'strengthV'],
+  vignetteInvert: ['vignette'], grid: ['gridColor'],
 };
 
 // ---- the look registry ---------------------------------------------------------------------------
@@ -117,7 +159,9 @@ export const LOOKS = {
   glitchGlow: { d: { strength: 0.85 }, p: [['chromatic', { px: 3 }], ['bloom', { size: 0.9, key: 'value' }], ['brightness', { k: 1.04 }], ['scanlines', { gap: 5, alpha: 0.3 }]] },
   // --- analog / retro ---
   vhs: { d: { strength: 0.7 }, p: [['chromatic', { px: 3 }], ['saturate', { k: 1.2 }], ['blurSoft', { px: 0.4 }], ['scanlines', { gap: 4, alpha: 0.22 }], ['grain', { grain: 0.3 }]] },
-  super8: { d: { strength: 0.7, color: '#ffcf9a' }, p: [['sepia', { a: 0.4 }], ['saturate', { k: 1.2 }], ['brightness', { k: 1.05 }], ['grain', { grain: 0.32 }], ['vignette', { vignette: 0.5 }]] },
+  // no `color`: super8's passes are sepia/saturate/brightness/grain/vignette, and not one of them
+  // reads a colour. It declared one for a year and nothing could have applied it.
+  super8: { d: { strength: 0.7 }, p: [['sepia', { a: 0.4 }], ['saturate', { k: 1.2 }], ['brightness', { k: 1.05 }], ['grain', { grain: 0.32 }], ['vignette', { vignette: 0.5 }]] },
   crt: { d: { strength: 0.75 }, p: [['brightness', { k: 1.05 }], ['chromatic', { px: 1.5 }], ['bloom', { size: 0.6, glowColor: '#ffffff' }], ['scanlines', { gap: 3, alpha: 0.34 }], ['vignette', { vignette: 0.45 }]] },
   filmNoir: { d: { strength: 0.7 }, p: [['grayscale', { a: 1 }], ['contrast', { k: 1.3 }], ['bloom', { size: 0.5, glowColor: '#ffffff' }], ['grain', { grain: 0.3 }], ['vignette', { vignette: 0.55 }]] },
   fadedPolaroid: { d: { strength: 0.65, color: '#ffd9a8' }, p: [['sepia', { a: 0.35 }], ['desaturate', { amt: 0.2 }], ['contrast', { k: 0.95 }], ['brightness', { k: 1.05 }], ['wash', { color: '#3a2c1a', amt: 0.12, blend: 'screen' }], ['lightLeak', { corner: 'tr', leak: 0.35 }], ['grain', { grain: 0.24 }], ['vignette', { vignette: 0.4 }]] },
@@ -229,20 +273,52 @@ function mergeOpts(look, opts = {}, positional) {
   return merged;
 }
 
+// Which knobs this look can actually use: `strength` always, plus every routed knob at least one of
+// its passes reads. Derived from the recipe, never restated, so adding a pass to a look widens what
+// the look accepts without anyone remembering to update a list.
+export function liveKnobs(name) {
+  const look = LOOKS[name];
+  if (!look) return [];
+  const readable = new Set(look.p.flatMap(([passName]) => PASS_READS[passName] || []));
+  return ['strength', ...Object.keys(KNOB_ROUTES).filter((k) => KNOB_ROUTES[k].some((t) => readable.has(t)))];
+}
+
+// A knob this look cannot use is an ERROR. Silently accepting it is how `color` came to do nothing on
+// nineteen looks while three documents promised otherwise; the same reasoning, and the same wording,
+// as the unknown-modifier throw in core/fx/index.js.
+function assertKnobs(name, opts) {
+  const keys = Object.keys(opts || {});
+  if (!keys.length) return;
+  const live = liveKnobs(name);
+  const bad = keys.filter((k) => !live.includes(k));
+  if (bad.length)
+    throw new Error(`lookOpts: "${name}" does not use ${bad.map((k) => `\`${k}\``).join(', ')} — it takes: `
+      + `${live.join(', ')}. A knob a look cannot apply would render a frame that looks plausible and `
+      + `differs from what was asked, so it is refused rather than dropped.`);
+}
+
 // resolveComposite(name, opts, positional) → { filter, overlays } | null.
 //   filter:   the CSS `filter` string (fns concatenated in pipeline order)
 //   overlays: [{ bg, blend?, opacity?, radius? }] appended as inset child divs, in order
 export function resolveComposite(name, opts = {}, positional) {
   const look = LOOKS[name];
   if (!look) return null;
+  assertKnobs(name, opts);
   const o = mergeOpts(look, opts, positional);
   const s = o.strength;
+  // The author's knobs, expanded into the private arguments they control. Written AFTER the fixed
+  // bag, which is the whole fix: an override has to beat a default it does not share a spelling with
+  // (`color` vs the bloom's `glowColor`). Empty unless the author passed something, so a scene with
+  // no lookOpts resolves byte-identically to before.
+  const routed = {};
+  for (const knob of Object.keys(opts || {}))
+    for (const target of KNOB_ROUTES[knob] || []) routed[target] = opts[knob];
   const fns = [];
   const overlays = [];
   for (const [passName, fixed] of look.p) {
     const pass = PASSES[passName];
     if (!pass) continue;
-    const out = pass({ ...o, ...(fixed || {}) }, s);
+    const out = pass({ ...o, ...(fixed || {}), ...routed }, s);
     if (out.fns) fns.push(...out.fns.filter(Boolean));
     if (out.overlays) overlays.push(...out.overlays);
   }

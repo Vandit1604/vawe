@@ -380,6 +380,25 @@ export function parseColor(c) {
   return null;
 }
 
+// The alpha parseColor deliberately drops, for the one caller that needs it: an SVG filter cannot use
+// a CSS colour, so a tint written `rgba(255,60,60,0.75)` has to arrive as components AND a weight.
+// Same grammar as above, read off the source string exactly as that header instructs. 1 when absent.
+export function colorAlpha(c) {
+  const s = String(c ?? '').trim();
+  const hex = /^#([0-9a-f]{4}|[0-9a-f]{8})$/i.exec(s);
+  if (hex) {
+    const h = hex[1];
+    const a = h.length === 4 ? h[3] + h[3] : h.slice(6, 8);
+    return parseInt(a, 16) / 255;
+  }
+  const m = /^rgba?\(([^)]*)\)$/i.exec(s);
+  if (m) {
+    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
+    if (p.length >= 4 && Number.isFinite(p[3])) return Math.max(0, Math.min(1, p[3]));
+  }
+  return 1;
+}
+
 // {r,g,b} adapter. The gate and the lightfield read named channels; the engine reads the tuple.
 // One parser, two shapes, so neither side had to be rewritten to share the grammar.
 export function parseColorRGB(c) {

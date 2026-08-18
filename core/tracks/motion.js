@@ -63,7 +63,15 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // layer with a motion track pays this on every frame it is on screen, and the great majority of them
   // never carry a blur at all — an authored `filter`, or nothing. `replace` on a string with no match
   // returns the string, so the guarded form is the same value by construction, without the scan.
-  const cur = el.style.filter || '';
+  // `none` is the KEYWORD for "no filter", not a filter function, so it may never be concatenated with
+  // one: this line used to write the literal `none` on an unblurred frame, and the next frame that DID
+  // blur produced `none blur(2.97px)` — an invalid declaration the browser drops WHOLE, so the layer
+  // rendered with no filter at all. Silent, and invisible until the snap signature learned to record
+  // `filter` (docs/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
+  // and which frames those were depended on RENDER ORDER, so it was a purity bug as well as a dropped
+  // effect. Treat the keyword as the empty base it means.
+  const raw = el.style.filter || '';
+  const cur = raw === 'none' ? '' : raw;
   const fBase = (cur.includes('blur(') ? cur.replace(/blur\([^)]*\)/g, '') : cur).trim();
   el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
 }

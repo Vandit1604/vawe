@@ -9651,6 +9651,13 @@ substitution: it should either apply or throw.
 `lightLeak` and `wash` all read `o.amt`, so one `lookOpts: { amt: 0.5 }` moves four passes at once, in
 different directions.
 
+> **AMENDED by #351 — this half is wrong, and the direction matters.** Measured across all 31 looks,
+> every `amt`-consuming pass in every look fixes its own key, so the fixed argument shadows the author's
+> and a user `amt` reached **nothing**. It was inert, not cross-talking. The namespace collision is real
+> but latent, and the fix is to REFUSE the knob, not to rename the passes. Recorded rather than silently
+> corrected: a finding written from reading code is a hypothesis, and this one read plausibly for two
+> years while being backwards.
+
 **3. `hStreak` blurs the ALPHA channel** — a `drop-shadow` pair, which is exactly the construct
 `docs/MISTAKES.md` #112 replaced for `bloomStack`. **That fix landed on `bloom` only.** On an opaque photo
 the alpha is the rectangle, so `vintageAnamorphic` streaks the frame's edge rather than its highlights.
@@ -9726,6 +9733,133 @@ always available from the registry it was describing.
 
 `docs/PRIMITIVES.md` also said "14 canvas presets" and listed 15, against a registry of 22. Six were
 missing from that prose entirely. Corrected to 22.
+
+---
+
+## #351 — Five of the six documented look knobs did nothing, and the guard for exactly that was scoped to one family
+
+Fixing `#348`. Measuring it first made it much bigger than logged, and turned one of its four findings
+around completely.
+
+**What was claimed.** Three places — `core/looks.js:13`, `core/knobs.js:96`, `docs/PRIMITIVES.md:668` —
+told authors a look takes `strength · color · color2 · grain · vignette · warmth`. Resolved against all
+31 looks:
+
+| knob | looks it changed |
+|---|---|
+| `strength` | **31 / 31** |
+| `color` | **3 / 31** — `neon`, `glitchGlow`, `edgeGlow` |
+| `color2` · `grain` · `vignette` · `warmth` | **0 / 31** |
+
+Nineteen looks declared `color` in their OWN defaults and no pass read it. `warmth` was read by nothing,
+anywhere, and never had been.
+
+**Root cause, one line.** `resolveComposite` merged `pass({ ...o, ...(fixed || {}) })`. The look's private
+per-pass arguments went LAST, so they beat the author's public option every time. `dreamyHaze` fixes the
+bloom's `glowColor`, so `lookOpts.color` rode into every pass and was read by none. The three that worked
+are the three whose bloom fixes no colour and falls through to `o.color`.
+
+**Why no gate saw it, twice over.**
+1. `lib-test:970` proved the feature — on `neon`. One of the exact three where it happened to work. A test
+   that picks one member of a registry proves one member.
+2. `scripts/gates/knobs-audit.mjs` exists to assert "every knob `core/knobs.js` advertises must actually
+   change the render, or the manifest is lying to authors". Its `driftGuard()` iterates
+   `Object.entries(KNOBS.kinetic)` — **one of six families.** The lying knobs sat in the same file, one
+   family across, and it never looked. Extended to `look`, and its pass message now names the four
+   families it still cannot prove instead of implying it checked everything.
+
+**Fix.** A public knob NAMES the private arguments it controls (`KNOB_ROUTES`) and is written after the
+fixed bag. Routing is broad — `color` reaches glow, streak, leak, wash and light — because `fadedPolaroid`,
+`lomo`, `heatWarp`, `watercolor` and `letterpress` carry no bloom, so a glow-only route would have left
+their `color` dead a second time. `PASS_READS` is the other half, so `liveKnobs(name)` can say what a given
+look takes, and **a knob a look cannot apply now throws** rather than being dropped (the reasoning, and the
+wording, of the unknown-modifier throw in `core/fx/index.js:55`). `warmth` and `super8`'s `color` are gone:
+neither had any destination. All 31 looks resolve byte-identically at every strength with no `lookOpts`, so
+no shipped pixel moved.
+
+**#348's bug 2 was backwards, and worth recording as such.** It said one `lookOpts:{amt:0.5}` "moves four
+passes at once, in different directions". Measured: every `amt`-consuming pass in every look fixes its own
+key, so a user `amt` reached *nothing*. It was inert, not cross-talking. The fix is therefore refusal, not
+renaming. A finding written from reading is a hypothesis; this one survived two years and one careful
+author and was still wrong about the direction of the effect.
+
+**The alpha blur, finally removed from the registry (`#348` bug 3, and `#112` before it).** `hStreak` was a
+`drop-shadow` pair — the construct `#112` replaced on `bloom` for blurring the ALPHA channel. On an opaque
+photo the alpha IS the rectangle: `vintageAnamorphic` drew a lavender halo round the whole card and put no
+streak on the picture at all, while its own blurb promised "horizontal blue streaks off the highlights".
+`chromaPair` was the same construct feeding 8 looks; it admitted in a comment that it was "a hint, not a
+true per-pixel split", which is a documented approximation that still paints a coloured bar down the edge
+of every opaque layer. Both are gone:
+- `bloom` gained an `ry` (a separate vertical sigma), so `hStreak` is now the same luminance bloom made
+  directional — wide in x, near-flat in y.
+- `chromaSplit` is a new SVG preset: three per-channel copies of the source, two offset, summed. The
+  diagonals partition each channel, so at zero offset the sum reconstructs the source and the pass costs
+  no exposure.
+
+**Two things that had to be measured, not reasoned.** Both were wrong on the first render and neither was
+visible in any number:
+- Scaling each copy's ALPHA by its own weight greyed the entire picture. SVG filters composite
+  PREMULTIPLIED, so dimming a copy's alpha dims its colour a second time. Alpha is left alone.
+- `screen` looked like the right combiner and washed the frame pale: it is `a+b-ab`, which over-brightens
+  wherever two tints share a channel. An arithmetic sum is what a partition wants.
+- The streak used the old drop-shadow's 22px OFFSET as a blur RADIUS. Those are not the same number, and a
+  26px sigma smeared the headline into an unreadable bar. A streak is long, thin and FAINT: a large sigma
+  with a low intensity spreads the energy so letter gaps stay open.
+
+**Other consumers, checked and cleared** (`#348` is itself the record of what happens when one call site is
+fixed and the rule is not). `chromaGlow` and the `chroma` TEXT preset both follow the alpha deliberately —
+correct on glyphs, where the alpha IS the shape. `chromaGlow` is wrong on an opaque picture and nothing
+gates that; its blurb now says so. `core/fx/shadow.js` explains why it avoids `drop-shadow` entirely.
+
+**Guards, all derived from `LOOKS` and all proven to fail before being trusted.** Every knob a look declares
+must change its output; no look may emit `drop-shadow(`; distinct filter parameters must produce distinct
+def ids (`ensureFilterDef` caches by id, so a parameter missing from the id means the second caller silently
+renders the first caller's filter); and `liveKnobs` must match behaviour in both directions, so the routing
+table cannot drift from the passes.
+
+**Two more found on the way, both the same shape as the main one.**
+- `make frame` and `make look` accepted `D=<scene>` and **silently previewed `sample.json`.** The Makefile
+  never forwarded it and `preview.mjs` only took a data file in a third positional slot. This is the defect
+  the Makefile already records fixing for `make motion` ("without it the target silently audited sample.json
+  instead of your scene") — the fix went to one call site. It cost real work here: the first before/after
+  comparison of this very change came back byte-identical and was worthless. Both targets now forward
+  `--data`, and a data file that does not exist is an error instead of a fallback.
+- The `Filter presets` family had **no blurb map**, and the catalog's gap check skips any family without one
+  (`if (!meta || !meta.blurbs) continue`). So `chromaSplit` shipped as a blank row on the day it was added.
+  A family with no map cannot be found incomplete. `FILTER_BLURBS` now closes it.
+
+**The snap signature could not see a grade at all, and that hid a second, worse bug.** `make snap-all`
+reported `identical: 102, changed: 0` both BEFORE and AFTER a change that rewrote how 8 looks render across
+3 scenes. `scripts/gates/snap-signature.mjs` recorded position, transform, opacity, font, colour, text,
+clip-path and a canvas hash — not `filter`. Its own header already records this exact gap being closed
+twice (`cp`, because a mis-pointed wipe read "identical" for months; `cv`, because every background change
+was invisible). This is the third instance, so `ft` now joins them.
+
+Adding it immediately quarantined **three scenes as NON-DETERMINISTIC** — `cadence-film`, `creed-launch`,
+`rec3-skill` — with the same shape: `blur(2.97px)` rendering ascending, nothing rendering descending.
+That is a real `renderFrame(n)` purity violation which `make probe` also passed, because it too never
+looked at `filter`.
+
+The cause is one line in `core/tracks/motion.js`. On a frame with no motion blur the track wrote the
+literal **`none`**; on the next frame that DID blur it concatenated onto it and produced
+`none blur(2.97px)`. `none` is the KEYWORD for "no filter", not a filter function, so the declaration is
+invalid and the browser drops it WHOLE — the layer rendered with no filter at all. So automatic motion
+blur silently failed on every frame that followed an unblurred one, and *which* frames those were depended
+on render order. The code around it is careful and correct: it samples the track at `t` and `t-1frame`,
+both pure, and its comment explains that the write must be authoritative so a cold render equals a warm
+one, citing `#41`. The purity it was protecting was defeated by the sentinel it chose for "empty".
+
+**The reusable part.** `#348` was found by describing code; this entry was found by *measuring* what that
+description claimed; and the motion-blur bug was found by *widening a signature* so a gate could see a
+property it had never recorded. All three beat the tests. The common thread across `#342`, `#345`, `#349`,
+`#350` and this one is now unmistakable: **a green gate is a claim about the subset it looked at.** Here
+the subset was one preset out of three that worked, one knob family out of six, and every visual property
+except the one being changed.
+
+**And the cheapest lesson: an effect nobody can see is not the same as an effect nobody has.** Motion blur
+was made automatic precisely because opt-in meant one layer in the whole library used it. It then failed
+on most of the frames it was meant to fix, and every gate stayed green, because the property it writes was
+outside every signature in the repo.
 
 ---
 

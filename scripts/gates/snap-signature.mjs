@@ -14,11 +14,17 @@
 //   cv (canvas hash)     — the background is painted into <canvas id="cv">, and a DOM signature cannot
 //                          see canvas pixels. Without this, any change of bg preset, colour, speed or
 //                          direction was invisible.
+//   ft (filter)          — a GRADE is invisible to every field above it. Rebuilding the anamorphic
+//                          streak and the chromatic split changed how 8 composite looks render across
+//                          3 scenes, and the whole-library net reported "identical: 102, changed: 0"
+//                          both before and after. Same shape as `cp` and `cv`, third time: a property
+//                          that carries a whole class of visual change sat outside the signature, so
+//                          the gate was green about something it was not looking at. MISTAKES #351.
 
 /** Field key → human name, used for both the diff labels and the field list itself. */
 export const SIG_FIELDS = {
   x: 'x', y: 'y', w: 'w', h: 'h', tf: 'transform', op: 'opacity', fs: 'font', c: 'color', t: 'text',
-  cp: 'clip-path', cv: 'canvas',
+  cp: 'clip-path', cv: 'canvas', ft: 'filter',
 };
 
 // The browser-side capture. Passed whole to page.evaluate, so it may not reference anything outside
@@ -94,6 +100,13 @@ function capture(frames) {
         tf: s.transform === 'none' ? '' : s.transform,
         op: Math.round(+s.opacity * 1000) / 1000, fs: s.fontSize, c: s.color,
         cp: !s.clipPath || s.clipPath === 'none' ? '' : s.clipPath,
+        // A composite look resolves to a `filter` string, and on an IMAGE layer it is set on the inner
+        // <img> rather than the wrap (core/looks.js applyComposite), so read that when it is there.
+        ft: (() => {
+          const target = el.classList && el.classList.contains('hs-img-wrap') ? el.querySelector('img') : null;
+          const v = target ? getComputedStyle(target).filter : s.filter;
+          return !v || v === 'none' ? '' : v;
+        })(),
         t: isWrapper ? '' : (el.textContent || '').trim().slice(0, 24),
       };
     }

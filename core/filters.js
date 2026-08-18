@@ -28,7 +28,7 @@
 //   "vignette" | "vignette:0.6" | "vignette:#001a33,0.5" → strength 0..1 (+ optional colour)
 //   anything else                  → passed through as a raw CSS filter string.
 
-import { parseColor } from './motion.js';
+import { parseColor, colorAlpha } from './motion.js';
 
 const LUMA = '0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -44,10 +44,31 @@ export const FILTER_PRESETS = {
   chromaGlow: { kind: 'css', mode: 'glow' },
   displace: { kind: 'svg', mode: 'displace' },
   bloom: { kind: 'svg', mode: 'bloom' },
+  chromaSplit: { kind: 'svg', mode: 'chroma' },   // per-pixel colour fringing (see buildChromaSplit)
   convolve: { kind: 'svg', mode: 'convolve' },     // arbitrary kernel: emboss, edge, sharpen
   morph: { kind: 'svg', mode: 'morph' },           // dilate / erode: fatten or thin the ink
   relief: { kind: 'svg', mode: 'relief' },         // 3D lighting off a luminance bump map
   vignette: { kind: 'overlay' },
+};
+
+// One line per preset, beside the registry it describes (the `blurb` pattern of blocks/catalog.mjs).
+// This family had NO blurb map, so the catalog's gap check skipped it entirely and `chromaSplit`
+// shipped as a blank row the day it was added. A family with no map cannot be found incomplete.
+// These are the PRIMITIVES; the composite looks in core/looks.js stack them into a house style.
+export const FILTER_BLURBS = {
+  sepia: 'the plain CSS sepia, an amount 0..1 — the cheapest warm-and-dated pass there is',
+  duotone: 'luminance remapped to TWO colours, shadows to highlights — the poster/press look; defaults to --ink and --accent, so it reskins per theme',
+  tritone: 'duotone with a third stop in the middle, which is what stops the midtones going muddy',
+  gradientMap: 'luminance remapped across any number of stops — the general case the two above are special cases of: a heat ramp, a risograph, a false-colour read',
+  posterize: 'each channel quantised to N discrete levels IN PLACE, hues kept — banding as a decision, not an artefact',
+  chromaGlow: 'a stack of zero-offset drop-shadows: white core, warm mid halo, cool outer. It follows the ALPHA, so it is right on GLYPHS and wrong on an opaque picture, where it haloes the rectangle. For a photo use `bloom`',
+  displace: 'static turbulence drives a displacement map — the pixels are pushed around by a fixed noise field. `freq` sets lump size (low = few big lumps), `scale` sets how far',
+  bloom: 'thresholds LUMINANCE and blooms the bright parts at two scales — light comes out of the picture, so a dark edge emits nothing. `ry` makes it directional (an anamorphic streak)',
+  chromaSplit: 'the colour channels pulled apart per pixel and summed back — real fringing on the picture, not a coloured silhouette of its alpha. `warm`/`cool` tint each direction',
+  convolve: 'a 3x3 kernel reading NEIGHBOURING pixels: emboss (a lit rubbing), edge (flat areas cancel to black, only boundaries survive), sharpen',
+  morph: 'dilate or erode — swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight',
+  relief: 'a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite',
+  vignette: 'NOT a filter — a darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges',
 };
 
 // chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape — a clean
@@ -164,7 +185,7 @@ export function glowRGB(color) {
 //   3. bloom = Σ blur(mask · tint, σᵢ)               → two scales, natural falloff
 //   4. out   = source + intensity · bloom            → feComposite arithmetic (additive)
 // Pure in the frame number: no clock, no feedback, one static def shared by every layer using it.
-function buildBloom(f, { rgb, threshold, radius, intensity, key }) {
+function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
   const el = (tag, attrs) => {
     const n = document.createElementNS(SVG_NS, tag);
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
@@ -209,8 +230,11 @@ function buildBloom(f, { rgb, threshold, radius, intensity, key }) {
   } else {
     f.appendChild(el('feComposite', { in: 'SourceGraphic', in2: 'mask', operator: 'in', result: 'lit' }));
   }
-  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: radius.toFixed(2), result: 'b1' }));
-  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: (radius * 2.6).toFixed(2), result: 'b2' }));
+  // stdDeviation takes "x y": one number is a round halo, two are a directional one. Both scales use
+  // the same aspect so a streak stays a streak as the wide pass opens up.
+  const sd = (k) => (ry == null ? (radius * k).toFixed(2) : `${(radius * k).toFixed(2)} ${(ry * k).toFixed(2)}`);
+  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: sd(1), result: 'b1' }));
+  f.appendChild(el('feGaussianBlur', { in: 'lit', stdDeviation: sd(2.6), result: 'b2' }));
   // sum the two scales (arithmetic, not feMerge: merge composites OVER, and light adds)
   f.appendChild(el('feComposite', { in: 'b1', in2: 'b2', operator: 'arithmetic', k1: 0, k2: 0.6, k3: 0.5, k4: 0, result: 'glow' }));
   // additive back over the picture: out = intensity·glow + source
@@ -220,10 +244,59 @@ function buildBloom(f, { rgb, threshold, radius, intensity, key }) {
   }));
 }
 
+// chromatic split — the same lesson as bloom, one primitive over. `drop-shadow(2px 0 0 red)` paints a
+// flat silhouette of the ALPHA channel, offset: on an opaque photo the alpha is the whole rectangle,
+// so it drew a red bar down one edge and never looked at the picture. See docs/MISTAKES.md #112, #351.
+//
+// A real split moves the picture's own COLOUR CHANNELS apart:
+//   1. three copies of the source, each scaled per channel by a diagonal feColorMatrix
+//   2. the warm copy offset +px, the cool copy -px, the middle copy left where it is
+//   3. summed additively (feComposite arithmetic k2=k3=1)
+// The three diagonals PARTITION each channel (warm + cool + mid = 1 per channel), so at px=0 the sum
+// reconstructs the source exactly and the pass costs no exposure — the old drop-shadow pair painted
+// BEHIND the layer and lightening was not an issue, so this is the property that had to be designed
+// in rather than tuned. With warm=red and cool=blue it degenerates to a true R/B split; the signature
+// magenta/cyan of cyberpunk and hologram are just a different partition of the same three copies.
+// Each copy's alpha carries its own weight, so the alphas also sum to 1 and a translucent layer keeps
+// its transparency instead of going solid at the fringes.
+// Static, build-time, no clock: pure in the frame number.
+function buildChromaSplit(f, { px, warm, cool }) {
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+    return n;
+  };
+  for (const [k, v] of [['x', '-15%'], ['y', '-15%'], ['width', '130%'], ['height', '130%']]) f.setAttribute(k, v);
+
+  const w = warm.rgb.map((c) => (c / 255) * warm.a);
+  const c = cool.rgb.map((v) => (v / 255) * cool.a);
+  const mid = w.map((v, i) => Math.max(0, 1 - v - c[i]));
+  // ALPHA IS LEFT ALONE (row `0 0 0 1 0`). Scaling it per copy was the first attempt and it greyed
+  // the whole picture: SVG filters composite PREMULTIPLIED, so dimming a copy's alpha dims its colour
+  // a second time. Every copy keeps the source's alpha; only the colour channels are partitioned.
+  const diag = ([r, g, b]) => `${r} 0 0 0 0  0 ${g} 0 0 0  0 0 ${b} 0 0  0 0 0 1 0`;
+  f.appendChild(el('feColorMatrix', { in: 'SourceGraphic', type: 'matrix', values: diag(w), result: 'wc' }));
+  f.appendChild(el('feColorMatrix', { in: 'SourceGraphic', type: 'matrix', values: diag(c), result: 'cc' }));
+  f.appendChild(el('feColorMatrix', { in: 'SourceGraphic', type: 'matrix', values: diag(mid), result: 'mc' }));
+  f.appendChild(el('feOffset', { in: 'wc', dx: px, dy: 0, result: 'wo' }));
+  f.appendChild(el('feOffset', { in: 'cc', dx: -px, dy: 0, result: 'co' }));
+  // An arithmetic SUM, not `screen`. The three diagonals partition each channel, so summing them at
+  // zero offset returns the source exactly; screen is a+b-ab, which over-brightens wherever the two
+  // tints share a channel — with the default red/blue that washed the whole picture pale.
+  f.appendChild(el('feComposite', { in: 'wo', in2: 'co', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'wc2' }));
+  f.appendChild(el('feComposite', { in: 'wc2', in2: 'mc', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0 }));
+}
+
+// chromaSplitFilter — the CSS filter value for a per-pixel colour split. `px` is the separation, and
+// `warm`/`cool` are the two directions' tints (alpha included, and it acts as that side's strength).
+export function chromaSplitFilter({ px, warm, cool } = {}) {
+  return `url(#${ensureFilterDef('chromaSplit', { px, warm, cool })})`;
+}
+
 // bloomFilter — the CSS filter value for a luminance bloom. Injects the def on first use and returns
 // `url(#id)`, so it drops straight into a filter list beside saturate()/contrast().
-export function bloomFilter({ color, threshold, radius, intensity, key } = {}) {
-  return `url(#${ensureFilterDef('bloom', { color, threshold, radius, intensity, key })})`;
+export function bloomFilter({ color, threshold, radius, ry, intensity, key } = {}) {
+  return `url(#${ensureFilterDef('bloom', { color, threshold, radius, ry, intensity, key })})`;
 }
 
 // Named 3x3 kernels for feConvolveMatrix. A kernel is just "how much each neighbour contributes",
@@ -321,7 +394,16 @@ export function ensureFilterDef(name, opts = {}) {
     key: opts.key === 'value' ? 'value' : 'luma', // value = max(R,G,B): saturated colours glow fully
     threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
     radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
+    // a SEPARATE vertical sigma makes the bloom directional: wide in x and narrow in y is an
+    // anamorphic streak. null = isotropic, the shape every existing caller gets.
+    ry: opts.ry == null ? null : +Math.max(0.1, opts.ry).toFixed(2),
     intensity: Math.max(0, opts.intensity ?? 1),
+  } : null;
+  const tint = (v, dflt) => ({ rgb: parseColor(v) || parseColor(dflt), a: +colorAlpha(v == null ? dflt : v).toFixed(3) });
+  const chroma = preset.mode === 'chroma' ? {
+    px: +Math.max(0, Math.min(40, opts.px ?? 2)).toFixed(2),
+    warm: tint(opts.warm, 'rgba(255,60,60,0.75)'),
+    cool: tint(opts.cool, 'rgba(40,120,255,0.75)'),
   } : null;
   const conv = preset.mode === 'convolve' ? {
     kernel: KERNELS[opts.kernel] ? opts.kernel : 'emboss',
@@ -337,11 +419,14 @@ export function ensureFilterDef(name, opts = {}) {
     surface: +(+(opts.surface ?? 2)).toFixed(2), exponent: +(opts.exponent ?? 20).toFixed(1),
     constant: +(opts.constant ?? 1).toFixed(2), rgb: glowRGB(opts.color || '#ffffff'),
   } : null;
-  const id = disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
+  // EVERY parameter above must reach the id. Two calls that differ in any of them and collide here
+  // would silently share one def, and the second caller would render the first caller's filter.
+  const id = chroma ? `f-chroma-p${chroma.px}-${chroma.warm.rgb.join('_')}a${chroma.warm.a}-${chroma.cool.rgb.join('_')}a${chroma.cool.a}`.replace(/\./g, '_')
+    : disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
     : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
     : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
     : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
-    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}-i${bloom.intensity}`.replace(/\./g, '_')
+    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}${bloom.ry == null ? '' : `-ry${bloom.ry}`}-i${bloom.intensity}`.replace(/\./g, '_')
     : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
@@ -358,6 +443,12 @@ export function ensureFilterDef(name, opts = {}) {
 
   if (bloom) {
     buildBloom(f, bloom);
+    defsHost().appendChild(f);
+    return id;
+  }
+
+  if (chroma) {
+    buildChromaSplit(f, chroma);
     defsHost().appendChild(f);
     return id;
   }

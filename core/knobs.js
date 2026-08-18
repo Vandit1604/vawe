@@ -97,11 +97,14 @@ export const KNOBS = {
   look: {
     _shared: [
       n('strength', 0.7, 'master 0..1; also the positional "neon:0.8"', [0, 1]),
-      col('color', null, 'primary tint (per-look default)'),
-      col('color2', null, 'secondary tint'),
+      col('color', null, 'recolour the look: glow, streak, leak, wash and light all follow it'),
+      col('color2', null, 'the opposite side of a colour split (looks with a `chromatic` pass)'),
+      col('colors', null, 'gradient-map ramp stops (thermal, chrome)'),
       n('grain', null, 'grain amount'),
       n('vignette', null, 'vignette strength'),
-      n('warmth', null, 'colour warmth'),
+      // No `warmth`: it was listed here, in core/looks.js and in docs/PRIMITIVES.md, and no pass in
+      // any of the 31 looks ever read it. Not every look takes every knob either — `liveKnobs(name)`
+      // says which, and passing one a look cannot apply now throws. docs/MISTAKES.md #351.
     ],
   },
 };

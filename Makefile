@@ -165,13 +165,14 @@ render: build
 all: build
 	./bin/vawe --all
 
-# make look M=scene         — storyboard (key frames) for visual review
+# make look M=scene [D=<file.json>]  — storyboard (key frames) for visual review
+# D forwards to --data; without it both targets silently previewed sample.json while naming your scene.
 look:
-	node scripts/author/preview.mjs $(M)
+	node scripts/author/preview.mjs $(M) "" $(if $(D),--data $(D))
 
-# make frame M=scene N=560  — one exact frame
+# make frame M=scene N=560 [D=<file.json>]  — one exact frame
 frame:
-	node scripts/author/preview.mjs $(M) $(N)
+	node scripts/author/preview.mjs $(M) $(N) $(if $(D),--data $(D))
 
 # make assets D=formats/x/topic.json [WRITE=1]  — fill missing icons: country→flag, brand→logo,
 # else a generated topic card. Dry-run without WRITE.

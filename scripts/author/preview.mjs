@@ -3,6 +3,13 @@
 //   node scripts/author/preview.mjs higherlower            (storyboard)
 //   node scripts/author/preview.mjs higherlower 560         (single exact frame)
 //   node scripts/author/preview.mjs higherlower 560 mydata.json   (custom data file)
+//   node scripts/author/preview.mjs higherlower --data mydata.json          (any position)
+//
+// `--data` exists because the positional slot is THIRD, so `make look M=scene D=x.json` had nowhere
+// to put it and the Makefile silently dropped it: both targets rendered sample.json while reporting
+// the scene you asked for. That is the same defect the Makefile records fixing for `make motion`
+// ("without it the target silently audited sample.json instead of your scene") — it survived here
+// because the fix went to one call site. docs/MISTAKES.md #351.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,11 +19,24 @@ import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const format = process.argv[2];
-const single = process.argv[3] != null ? Number(process.argv[3]) : null;
-const dataArg = process.argv[4];
+const argv = process.argv.slice(2);
+const flagIdx = argv.indexOf('--data');
+const flagData = flagIdx >= 0 ? argv[flagIdx + 1] : undefined;
+if (flagIdx >= 0) argv.splice(flagIdx, flagData === undefined ? 1 : 2);
+const format = argv[0];
+const single = argv[1] != null && argv[1] !== '' ? Number(argv[1]) : null;
+const dataArg = flagData ?? argv[2];
+if (flagIdx >= 0 && flagData === undefined) {
+  console.error('preview.mjs: --data needs a file path after it');
+  process.exit(1);
+}
+if (dataArg && !fs.existsSync(path.resolve(dataArg))) {
+  // Falling back to sample.json here is exactly how this bug hid: a missing scene must be loud.
+  console.error(`preview.mjs: no such data file "${dataArg}"`);
+  process.exit(1);
+}
 if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
-  console.error('usage: node scripts/author/preview.mjs <format> [frame] [data.json]');
+  console.error('usage: node scripts/author/preview.mjs <format> [frame] [data.json | --data f.json]');
   console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
   process.exit(1);
 }
