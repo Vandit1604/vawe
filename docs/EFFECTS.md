@@ -311,27 +311,27 @@
 
 | name | what / when |
 |---|---|
-| `accent` | — |
-| `accentPlain` | — |
+| `accent` | the brand accent as a radial with rippling dots and a slow spotlight (moves) — the loud brand field |
+| `accentPlain` | the brand accent as a clean full-bleed field, grain only — FLAT, for plain sites whose hero is one colour |
 | `aurora` | drifting colour aurora (moves) |
-| `blobs` | — |
+| `blobs` | the airier light wash: smaller separated pools with a technical grid reading through the white (moves) |
 | `brandglow` | breathing accent glow |
 | `constellation` | drifting connected nodes (moves) — telemetry/data feel |
-| `dark` | — |
-| `deep` | — |
+| `dark` | a plain dark radial, no dots — FLAT, the quiet backdrop for busy content |
+| `deep` | the deepest plain radial, no dots — FLAT, when the content must own the whole frame |
 | `dotmatrix` | dot matrix grid |
-| `gradientWash` | — |
-| `ink` | — |
-| `liquid` | — |
+| `gradientWash` | one big saturated pool bleeding off a corner into white, a mesh gradient (moves) — light and premium |
+| `ink` | dark radial with slow accent-tinted dots pulsing in place (moves) — for a clean flat dark use `plain` + value:"dark" |
+| `liquid` | folds of the brand hue against true black (moves) — it OWNS the frame, so quiet type on it and nothing else |
 | `mesh` | soft gradient mesh (dark/saturated — check contrast) |
 | `metallic` | vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured |
-| `metallicSheen` | — |
-| `paper` | — |
+| `metallicSheen` | the quieter metallic: fewer, slower rods with a sweep crossing them (moves) — a dark field type can sit on |
+| `paper` | the paper gradient with grain only — FLAT, the white-first default when the motion lives in the content |
 | `paperDots` | faint drifting dot grid (light) |
 | `paperShapes` | faint drifting geometric shapes (light, subtle) |
 | `plain` | flat theme field |
-| `shapes` | — |
-| `soft` | — |
+| `shapes` | accent rings and discs drifting over paper or dark (moves) — `value` picks the treatment |
+| `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | radial spotlight glow |
 
 ## Per-frame accent layers  `[per-frame]`
@@ -392,7 +392,7 @@
 
 | name | what / when |
 |---|---|
-| `commaSplit` | — |
+| `commaSplit` | a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure |
 | `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
 
 ## Layer types  `[layer]`
@@ -453,14 +453,14 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `bitCrush` | — |
-| `chromaShift` | — |
-| `dissolve` | time/place change |
-| `fisheye` | — |
-| `macroblock` | — |
-| `refract` | — |
-| `spinBlur` | — |
-| `zoomBlur` | — |
+| `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth — a degrade beat, never decoration |
+| `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
+| `dissolve` | noise-thresholded erosion lit by an ember front — the way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
+| `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity — outside the source reads empty, never a stretched edge |
+| `macroblock` | the flat blocks and dropped tiles of a starved codec — a glitch/degrade beat, never decoration |
+| `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint — what a blur cannot do |
+| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp — a rotating badge or seal |
+| `zoomBlur` | radial smear out from the centre, near samples kept crisp — an impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
 
 ## Ambient shader fields  `[per-frame]`
 
@@ -598,10 +598,10 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `clipWipe` | — |
+| `clipWipe` | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
 | `highlight` | marker highlight sweep |
-| `pillKaraoke` | — |
-| `weightShift` | — |
+| `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
+| `weightShift` | the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix |
 
 ## Drawn icons  `[asset]`
 
@@ -676,32 +676,32 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 
 | name | what / when |
 |---|---|
-| `arch` | — |
-| `bottom` | — |
-| `bottom-left` | — |
-| `bottom-right` | — |
+| `arch` | a sine hump — it leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome |
+| `bottom` | as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward |
+| `bottom-left` | a diagonal fall away to the bottom left — light rarely leaves along an axis, and no edge keyword says this |
+| `bottom-right` | a diagonal fall away to the bottom right — light rarely leaves along an axis, and no edge keyword says this |
 | `breathe` | idle breathe |
-| `center` | — |
-| `circle` | — |
-| `crescent` | — |
-| `drift` | — |
-| `full` | — |
-| `hills` | — |
-| `left` | — |
-| `left-and-right` | — |
-| `ramp` | — |
-| `right` | — |
-| `rings` | — |
-| `scallops` | — |
-| `shards` | — |
-| `shimmer` | — |
-| `slats` | — |
-| `still` | — |
-| `top` | — |
-| `top-and-bottom` | — |
-| `top-left` | — |
-| `top-right` | — |
-| `valley` | — |
+| `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
+| `circle` | the unit semicircular arc, which leaves the baseline UPRIGHT — a symmetric dome, a planet limb, an eclipse |
+| `crescent` | one circular arc with a second equal arc bitten out of it — a moon horn: empty on one side, a concave inner edge, a point at the tip |
+| `drift` | the field travels as one body, the cells holding station against each other |
+| `full` | the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does |
+| `hills` | three gaussians of unequal width and height summed — rolling ground: three summits with soft saddles between them |
+| `left` | a linear fall away to the left — a direction and no centre, so only the move along it reaches the fall |
+| `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
+| `ramp` | a straight climb across the row, so the extents rise steadily from one side to the other |
+| `right` | a linear fall away to the right — the default bearing |
+| `rings` | concentric bands round a point, like light on water — the eye travels outwards |
+| `scallops` | the same semicircle repeated five times. Odd, so one arc sits centred — a scalloped horizon when shallow, an arcade when tall |
+| `shards` | a fan of rays from a pivot below the frame — the eye travels up and out |
+| `shimmer` | the cells slide against each other, so the seams open and close |
+| `slats` | a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge — the eye travels across |
+| `still` | nothing moves: the output reads no clock at all |
+| `top` | as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward |
+| `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides — the shape a low sun makes |
+| `top-left` | a diagonal fall away to the top left — light rarely leaves along an axis, and no edge keyword says this |
+| `top-right` | a diagonal fall away to the top right — light rarely leaves along an axis, and no edge keyword says this |
+| `valley` | the sine hump run upside down: a dip in the middle with both ends tall |
 | `wave` | sinusoidal wave across units |
 
 ---

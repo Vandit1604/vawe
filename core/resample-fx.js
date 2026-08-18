@@ -22,6 +22,24 @@
 
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift'];
 
+// RESAMPLE_BLURBS — one line per fx, next to the list the shader switches on (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
+// no fx, or an fx with no key, is a bug the effects catalog reports.
+// THE STANDING CAUTION, true of every entry: each resampled layer takes its own GL context (see
+// createResampler below), so this is a HERO-SHOT effect — one per film, not decoration on fifty layers.
+// And a constant `amount` is usually the wrong call: half of these only read as motion while they MOVE,
+// so ramp them across the layer's window.
+export const RESAMPLE_BLURBS = {
+  zoomBlur: 'radial smear out from the centre, near samples kept crisp — an impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp',
+  spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp — a rotating badge or seal',
+  fisheye: 'real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity — outside the source reads empty, never a stretched edge',
+  bitCrush: 'quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth — a degrade beat, never decoration',
+  macroblock: 'the flat blocks and dropped tiles of a starved codec — a glitch/degrade beat, never decoration',
+  dissolve: 'noise-thresholded erosion lit by an ember front — the way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
+  refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint — what a blur cannot do',
+  chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
+};
+
 const VERT = 'attribute vec2 a; varying vec2 v; void main(){ v = a*0.5+0.5; gl_Position = vec4(a,0.0,1.0); }';
 
 const FRAG = `precision highp float;

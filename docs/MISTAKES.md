@@ -9699,6 +9699,36 @@ always the same: the claim in the summary line is wider than the measurement beh
 
 ---
 
+## #350 — A flat dark backdrop escaped the flat-backdrop warning
+
+`beat-check` warns `static-bg` on a film built entirely from flat presets, because CLAUDE.md's rule is that
+the backdrop is always a decision and a still field must be a deliberate one. Its `STATIC_PRESETS` set
+listed `plain`, `accentPlain` and `paper`.
+
+`dark` and `deep` were missing. Their case arms in `core/backgrounds.js` are the same shape as `plain` —
+a base gradient and `fx: [grain]`, nothing that reads the clock:
+
+```
+case 'plain':  { base: solid,  fx: [grain] }
+case 'dark':   { base: radial, fx: [grain] }
+case 'deep':   { base: radial, fx: [grain] }
+```
+
+So the identical film was flagged on `plain` and waved through on `dark`. **Three shipped scenes were
+built entirely on one flat field and never told**: `chromatic` (`dark`), `glass` (`deep`), `looks-reel`
+(`dark`). All three now warn, correctly, and it is a warning rather than a blocker because a flat field is
+a legitimate choice — the point is that it be a choice.
+
+**Found by writing the descriptions, not by testing the gate.** Marking each background as FLAT or moving
+meant asking, per preset, whether any of its fx reads `t` — and the answer disagreed with a set some other
+file had written by hand. The gate had a hardcoded list where a derived predicate belonged; the truth was
+always available from the registry it was describing.
+
+`docs/PRIMITIVES.md` also said "14 canvas presets" and listed 15, against a registry of 22. Six were
+missing from that prose entirely. Corrected to 22.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

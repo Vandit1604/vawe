@@ -210,3 +210,11 @@ function commaSplit(ctx) {
 
 export const COMPOSITIONS = { pipelineFlow, commaSplit };
 export const COMPOSITION_NAMES = Object.keys(COMPOSITIONS);
+
+// COMPOSITION_BLURBS — one line per comp, next to the registry (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
+// no comp, or a comp with no key, is a bug the effects catalog reports.
+export const COMPOSITION_BLURBS = {
+  pipelineFlow: 'staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline)',
+  commaSplit: 'a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure',
+};

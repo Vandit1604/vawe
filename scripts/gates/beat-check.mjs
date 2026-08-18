@@ -194,7 +194,10 @@ if (emptyBeats.length) {
 // ---------- 4. static-bg ----------
 // The flat presets are honest choices, so a single flat window is never flagged. Two things are flagged:
 // a whole film with no moving window anywhere, and hand-authored markup that has no clock to move on.
-const STATIC_PRESETS = new Set(['plain', 'accentPlain', 'paper']);
+//  and  were missing, and their case arms in core/backgrounds.js are byte-for-byte the same
+// shape as `plain`: a base gradient and `fx: [grain]`. So a film built entirely on a flat dark field
+// escaped the warning that exists to catch exactly that, while the same film on `plain` was flagged.
+const STATIC_PRESETS = new Set(['plain', 'accentPlain', 'paper', 'dark', 'deep']);
 const bgs = (Array.isArray(d.bg) ? d.bg : []).filter((b) => b && typeof b === 'object');
 const deadHtml = bgs.filter((b) => typeof b.html === 'string' && !/var\(\s*--t\b/.test(b.html) && !/var\(\s*--p\b/.test(b.html));
 if (deadHtml.length) {

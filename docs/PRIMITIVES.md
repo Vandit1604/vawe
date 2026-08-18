@@ -188,7 +188,7 @@ byte-identical across render order. Mixed case is preserved from the input.
   fallback). Edges stay near-axis-aligned on purpose: steeper diagonal cuts rasterise
   non-deterministically under the per-glyph rotation. Reel: ransom-demo.mp4 · ransom-color-demo.mp4.
 
-## Backgrounds (`core/backgrounds.js`) — 14 canvas presets, theme-recolored
+## Backgrounds (`core/backgrounds.js`) — 22 canvas presets, theme-recolored
 
 Light: `paper` `paperShapes` `paperDots` `soft` `accent` `accentPlain` `dotmatrix` `plain` · Dark:
 `ink` `aurora` `mesh` `constellation` `spotlight` `brandglow` `shapes`. Every preset reads the brand's

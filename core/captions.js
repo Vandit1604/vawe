@@ -79,3 +79,15 @@ export const CAP_STYLES = {
 };
 
 export const CAP_STYLE_NAMES = Object.keys(CAP_STYLES);
+
+// CAPTION_BLURBS — one line per style, next to the styles themselves (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
+// no style, or a style with no key, is a bug the effects catalog reports.
+// Each blurb carries the style's own contrast fact, because that is the half an author cannot see in a
+// still: every styled line sits on the 78% var(--bg) scrim plate and dims by colour mix, never opacity.
+export const CAPTION_BLURBS = {
+  highlight: 'marker highlight sweep',
+  pillKaraoke: 'a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant',
+  weightShift: 'the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix',
+  clipWipe: 'LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time',
+};

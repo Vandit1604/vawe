@@ -319,6 +319,37 @@ export const PAL = PAL_PLINTH; // back-compat
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
   'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
   'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
+
+// BG_BLURBS — one line per preset, next to the switch that paints it (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
+// with no preset, or a preset with no key, is a bug the effects catalog reports.
+// EVERY blurb says whether the field MOVES, because that is the fact an author cannot read off a still
+// and scripts/gates/beat-check.mjs warns on a whole film built from flat ones. FLAT = base gradient +
+// film grain and no moving fx: `plain` `paper` `accentPlain` `dark` `deep`. Everything else animates.
+export const BG_BLURBS = {
+  plain: 'flat theme field',
+  paper: 'the paper gradient with grain only — FLAT, the white-first default when the motion lives in the content',
+  paperDots: 'faint drifting dot grid (light)',
+  paperShapes: 'faint drifting geometric shapes (light, subtle)',
+  soft: 'gentle light radial with faint accent rings and discs drifting over it (moves)',
+  accent: 'the brand accent as a radial with rippling dots and a slow spotlight (moves) — the loud brand field',
+  accentPlain: 'the brand accent as a clean full-bleed field, grain only — FLAT, for plain sites whose hero is one colour',
+  shapes: 'accent rings and discs drifting over paper or dark (moves) — `value` picks the treatment',
+  dotmatrix: 'dot matrix grid',
+  aurora: 'drifting colour aurora (moves)',
+  mesh: 'soft gradient mesh (dark/saturated — check contrast)',
+  constellation: 'drifting connected nodes (moves) — telemetry/data feel',
+  brandglow: 'breathing accent glow',
+  spotlight: 'radial spotlight glow',
+  dark: 'a plain dark radial, no dots — FLAT, the quiet backdrop for busy content',
+  deep: 'the deepest plain radial, no dots — FLAT, when the content must own the whole frame',
+  ink: 'dark radial with slow accent-tinted dots pulsing in place (moves) — for a clean flat dark use `plain` + value:"dark"',
+  metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured',
+  metallicSheen: 'the quieter metallic: fewer, slower rods with a sweep crossing them (moves) — a dark field type can sit on',
+  gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves) — light and premium',
+  blobs: 'the airier light wash: smaller separated pools with a technical grid reading through the white (moves)',
+  liquid: 'folds of the brand hue against true black (moves) — it OWNS the frame, so quiet type on it and nothing else',
+};
 export function bgPreset(name, value, P = PAL_PLINTH) {
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };

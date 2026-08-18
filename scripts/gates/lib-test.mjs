@@ -9,6 +9,10 @@ import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
 import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
+import { BG_NAMES, BG_BLURBS } from '../../core/backgrounds.js';
+import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
+import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
+import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
@@ -1248,6 +1252,10 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['FX_TYPES', FX_TYPES, FX_BLURBS],
     ['GSAP_FX', GSAP_FX, GSAP_BLURBS],
     ['EXIT_FX', EXIT_FX, GSAP_EXIT_BLURBS],
+    ['BG_NAMES', BG_NAMES, BG_BLURBS],
+    ['RESAMPLE_FX', RESAMPLE_FX, RESAMPLE_BLURBS],
+    ['CAP_STYLE_NAMES', CAP_STYLE_NAMES, CAPTION_BLURBS],
+    ['COMPOSITION_NAMES', COMPOSITION_NAMES, COMPOSITION_BLURBS],
   ];
   for (const [label, keys, map] of families) {
     const miss = keys.filter((k) => !map[k]);
