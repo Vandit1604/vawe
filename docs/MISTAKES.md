@@ -10606,6 +10606,78 @@ same shape as `ANIM[name] || fade` answering "absent" and "wrong" identically, o
 
 `node scripts/gates/lib-test.mjs` — "every DEFAULT a look declares reaches the frame".
 
+## #367 — A warning printed once, from one of eight workers, into a log nobody reads
+
+Found while reporting #366, in `lib-test`'s own output: `ease: unknown easing "nope" — using
+easeOutCubic`. Two consumers of one vocabulary, giving opposite answers to the same wrong input.
+
+- `core/fx/progress.js:44` **throws** on an unknown easing.
+- `core/motion.js:131` **warned once, then substituted** `easeOutCubic`.
+
+The comment above the second recorded that it had already been half-fixed once: it used to substitute
+in silence, a typo (`ease:"eastOutQuart"`) rendered the wrong curve, and the repair was to add a warning.
+But `_easeWarned` dedupes per process, so across eight render workers that is one line, in a headless log,
+next to nothing that reads it. **The frame still rendered on a curve nobody chose.** This repo already
+makes exactly that argument, in `formats/scene/scene.js`, about `fx`:
+
+> `console.warn` and continue meant the effect simply did not happen, and a warning in a headless render
+> nobody reads is the same as silence.
+
+### The premise that kept it, and the measurement that removed it
+
+`progress.js` did not merely disagree — it wrote down why, and the reason was fear of the library:
+
+> resolveEasing WARNS on an unknown name and falls back to easeOutCubic. That is right for a prop
+> **authored in a hundred scenes** and wrong for this registry.
+
+That is a testable claim, so I tested it before touching anything. Across **151 scene files and 35
+themes**: 22 distinct easing names in use, **zero unknown**. Every engine-emitted `ease` literal in
+`core/` is valid too. The blast radius of throwing was empty, and had been the whole time.
+
+### The two vocabularies, which is the part that actually matters
+
+The census turned up exactly two odd values: `power2.inOut` in `showcase-lumen`'s `parts[].ease`, and
+`power3.inOut` in `showcase-type-labour`'s `morph.ease`. Neither is a bug. **This engine has two easing
+vocabularies**, and the FIELD decides which is in force: `parts`, `morph`, `fx`, `fxOut`, `splitText`,
+`motionPath` go straight to `gsap.fromTo` and take GSAP names; everything else runs on the engine's own
+interpolator and takes an `EASINGS` name. Both are right.
+
+Which makes a GSAP name in an engine-driven field the **#355 wrong-slot mistake** — a real name written
+into the neighbouring vocabulary, the most-repeated defect in this log. So the error says so instead of
+printing 41 names the author is not looking for:
+
+> unknown easing "power2.inOut". "power2.inOut" is a GSAP ease, and GSAP eases are real here but only on
+> GSAP-driven fields (`parts[].ease`, `morph.ease`, `fx:{ease}`). This field is driven by the engine's
+> own interpolator, so it takes an engine easing.
+
+### The fix
+
+- `resolveEasing`: ABSENT → `easeOutCubic` (documented, unchanged). WRONG NAME → throw, with the
+  cross-registry hint. Different questions, different answers.
+- `progress.js`'s hand-rolled membership test deleted. It asks `resolveEasing` now. Two hand-kept copies
+  of one rule is #159, and this is the third time this run that removing a copy WAS the fix.
+- `core/validate.mjs` gained `easeErrors(cfg)`, so it fails in a second at author-check rather than
+  mid-render on whichever frame first samples that key. The exclusion list is the whole rule and it can
+  rot in silence, because getting it wrong reads as a stricter gate — so it is exported and asserted in
+  both directions.
+
+### Verification, and the one that mattered
+
+**Validate over the whole library before and after: 14 failures, identical set.** Had the exclusion list
+been wrong, `showcase-lumen` and `showcase-type-labour` would have gone PASS to FAIL, which is a
+regression and not a discovery. snap-all 104, 0 changed, 0 errored — no runtime path names an unknown
+easing either. Both new `resolveEasing` assertions were run against `git show HEAD:core/motion.js` and
+fail there.
+
+I also wrote, and then deleted, `ok('easeErrors: the whole shipped library is clean', true)` — an
+assertion whose condition is the literal `true`. Coverage-shaped and proving nothing, which is #363
+reproduced by hand inside the commit that cites it.
+
+### The gate that now catches it
+
+`node core/validate.mjs <file>` (and `make author-check`) — before the render.
+`node scripts/gates/lib-test.mjs` — the exclusion list, asserted in both directions.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

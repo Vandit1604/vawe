@@ -120,16 +120,37 @@ export const EASINGS = {
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
   spring: (t) => spring(t), springStiff: (t) => springStiff(t),
 };
-// resolveEasing — an easing name or a function → a pure easing function. An unknown name used to fall
-// back to easeOutCubic SILENTLY, so a typo (`ease:"eastOutQuart"`) rendered the wrong curve with no
-// error — the silent-substitution the doctrine forbids. Now it WARNS once per bad name, then falls back.
-const _easeWarned = new Set();
+// GSAP's easing vocabulary, which this engine also carries — `parts[].ease` and `morph.ease` go
+// straight to gsap.fromTo and never arrive here. Detected only to give a WRONG-SLOT name a useful
+// error instead of a list of 41 names it is not in. Same cross-registry hint as core/type.js.
+const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/;
+
+// resolveEasing — an easing name or a function → a pure easing function.
+//
+// ABSENT → easeOutCubic. A WRONG NAME → throw. Those are different questions and this used to answer
+// them the same way: first silently, then (after the typo `ease:"eastOutQuart"` rendered the wrong
+// curve) with a warn-once-and-substitute. But a warning printed once per process, from one of eight
+// render workers, into a log nobody reads, is the same as silence — the argument this repo already
+// makes at formats/scene/scene.js about `fx`. The frame still rendered on the wrong curve.
+//
+// core/fx/progress.js saw this and hand-rolled its own membership test above its call, with the note
+// that warn-and-substitute is "right for a prop authored in a hundred scenes and wrong for this
+// registry". That fear was measurable and it was unfounded: across 151 scene files and 35 themes,
+// 22 distinct easing names are in use and NOT ONE is unknown. The only two odd values in the library
+// are `power2.inOut` and `power3.inOut`, and both sit on GSAP-driven fields that never reach here.
+// So the check is one copy again, and it lives where the vocabulary does. docs/MISTAKES.md #367.
 export const resolveEasing = (e) => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return easeOutCubic;
   if (EASINGS[e]) return EASINGS[e];
-  if (!_easeWarned.has(e)) { _easeWarned.add(e); console.warn(`ease: unknown easing "${e}" — using easeOutCubic. Valid names: ${Object.keys(EASINGS).join(', ')}.`); }
-  return easeOutCubic;
+  const hint = GSAP_EASE.test(String(e))
+    ? ` "${e}" is a GSAP ease, and GSAP eases are real here but only on GSAP-driven fields `
+      + '(`parts[].ease`, `morph.ease`, `fx:{ease}`). This field is driven by the engine\'s own '
+      + 'interpolator, so it takes an engine easing.'
+    : '';
+  throw new Error(`unknown easing ${JSON.stringify(e)}.${hint} One of: ${Object.keys(EASINGS).join(', ')}. `
+    + 'A curve quietly swapped for another renders a plausible frame that is not the one asked for, '
+    + 'so it is refused rather than substituted.');
 };
 
 // ---------- motion primitives — all PURE in their input (no state); safe for the purity probe ----------

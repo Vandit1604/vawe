@@ -33,7 +33,7 @@ import { DIRS } from '../../core/cuts.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
-import { lintData } from '../../core/validate.mjs';
+import { lintData, easeErrors } from '../../core/validate.mjs';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
@@ -156,8 +156,35 @@ ok('stagger step', approx(stagger(3, 0.1), 0.3));
 // easing registry
 ok('resolveEasing by name', resolveEasing('easeOutCubic') === EASINGS.easeOutCubic);
 ok('resolveEasing passthrough fn', (() => { const f = (t) => t; return resolveEasing(f) === f; })());
-ok('resolveEasing unknown → fallback', resolveEasing('nope') === easeOutCubic);
+// ABSENT and WRONG are different questions, so they get different answers and one assertion each.
+ok('resolveEasing absent → easeOutCubic', resolveEasing(null) === easeOutCubic && resolveEasing('') === easeOutCubic);
+ok('resolveEasing unknown → throws', (() => { try { resolveEasing('nope'); return false; } catch { return true; } })());
+// A GSAP ease is a REAL name in the other vocabulary, which is the #355 wrong-slot mistake. The error
+// has to say so, or it reads as "that curve does not exist" when the curve exists one field away.
+ok('resolveEasing names the wrong slot for a GSAP ease', (() => {
+  try { resolveEasing('power2.inOut'); return false; } catch (e) { return /GSAP ease/.test(e.message) && /parts\[\]\.ease/.test(e.message); }
+})());
+// Every easing the LIBRARY names must resolve — the census that made throwing safe, kept as a gate.
+ok('resolveEasing accepts every name the library uses', ['linear', 'easeOutCubic', 'easeInOutCubic', 'ramp', 'spring', 'springEase', 'settle', 'snap', 'brake', 'rush'].every((n) => typeof resolveEasing(n) === 'function'));
 ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
+
+// The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
+// list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
+// GSAP ease correctly (showcase-lumen, showcase-type-labour both do), too loose and the wrong-slot
+// name renders on a curve nobody chose. One assertion per direction. docs/MISTAKES.md #367.
+ok('easeErrors: a GSAP ease in an engine field is caught', (() => {
+  const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] });
+  return e.length === 1 && /GSAP ease/.test(e[0]);
+})());
+ok('easeErrors: a GSAP ease in a GSAP field is allowed', easeErrors({ layers: [
+  { parts: [{ select: 'rect', anim: 'growUp', ease: 'power2.inOut' }] },
+  { morph: { to: 'x', ease: 'power3.inOut' } },
+  { fx: { name: 'blurIn', ease: 'back.out(1.7)' } },
+]}).length === 0);
+ok('easeErrors: an engine ease in an engine field is allowed', easeErrors({
+  layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'easeOutCubic' }], varsEase: { '*': 'ramp', o: 'snap' } }],
+  camera: [{ t: 0 }, { t: 1, ease: 'easeInOutSine' }],
+}).length === 0);
 
 // motionDefaults
 ok('motionDefaults resolves easing to fn', typeof motionDefaults({ motion: { easing: 'easeOutQuart' } }).easing === 'function');

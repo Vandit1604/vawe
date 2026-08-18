@@ -19,7 +19,7 @@
 // CSS, an inline `calc()`, or an SVG attribute reads it and the modifier never touches layout. Written
 // in full every frame and never read back, so a cold render and a warm one agree.
 
-import { EASINGS, resolveEasing } from '../motion.js';
+import { resolveEasing } from '../motion.js';
 
 export const PROGRESS_KEYS = ['var', 'ease'];
 
@@ -37,11 +37,11 @@ function resolve(spec) {
   if (typeof name !== 'string' || !name.startsWith('--'))
     throw new Error(`progress: \`var\` must be a CSS custom property, so it starts with "--" — got `
       + `${JSON.stringify(s.var)}. Anything else is silently discarded by the CSS parser.`);
-  // resolveEasing WARNS on an unknown name and falls back to easeOutCubic. That is right for a prop
-  // authored in a hundred scenes and wrong for this registry, where an unknown name is a hard error
-  // (core/fx/index.js): a curve silently swapped is a bar that eases wrongly and reports nothing.
-  if (s.ease != null && typeof s.ease !== 'function' && !EASINGS[s.ease])
-    throw new Error(`progress: unknown easing ${JSON.stringify(s.ease)} — one of: ${Object.keys(EASINGS).join(', ')}.`);
+  // This used to re-implement the membership test because resolveEasing warned-and-substituted, and
+  // the note here said that was "right for a prop authored in a hundred scenes and wrong for this
+  // registry". The premise was measured and was false — no scene in the library names an unknown
+  // easing — so resolveEasing throws for everyone now and this asks it instead of copying it. Two
+  // hand-kept copies of one rule is #159. docs/MISTAKES.md #367.
   const ease = s.ease == null ? null : resolveEasing(s.ease);
   return { name, ease };
 }
