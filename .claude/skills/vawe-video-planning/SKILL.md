@@ -89,22 +89,44 @@ site back: WHICH of the brand's own pitches leads, WHICH product surfaces appear
 claims/stats/customers count as proof, WHICH of their CTAs ends it. The better the questions are
 grounded in the site's content, the better the result.
 
-## Step 1b — The brief itself (ask only what the study can't answer)
+## Step 1b — The brief itself (`make quiz`, not prose)
 
-If any of these are unknown, ask the user (AskUserQuestion, one round, ≤4 questions). Skip
-anything already stated or derivable from the repo/DNA.
+This step used to be five bullets, and five bullets in a skill run differently every session. It is a
+script now, and the script is the one that knows what the gates require:
 
-1. **Goal** — launch announcement / product walkthrough / feature drop / brand film / meme-fact
-   short? (Decides format vs open canvas.)
-2. **Platform + orientation** — X/LinkedIn/site hero → landscape 1920×1080 · Shorts/Reels/TikTok
-   → portrait 1080×1920. (Never assume; it changes every coordinate.)
-3. **Duration** — 15s teaser / 30s launch / 60s walkthrough.
-4. **What real material exists** — site URL (→ `make sections` + `make palette`), a UI worth capturing
-   (→ `make capture`), stats that are TRUE (→ `dna.stats`), logo/assets. Never invent numbers.
-5. **CTA** — the exact end action (url, "start free", date).
+```bash
+make quiz NAME=<brand> URL=<url>          # → the AskUserQuestion payload, as JSON
+# ask it, collect the answers into a JSON file, then:
+make quiz-apply ANSWERS=<file.json> NAME=<brand>    # → a STORYBOARD.md that passes storyboard-check
+make quiz-look SB=<the storyboard> N=3             # → the directions DRAWN, pick one from pictures
+```
 
-Tone is NOT asked: it is derived from the brand's own site (Step 2). If the user volunteers
-a tone, it overrides.
+`make quiz` **refuses to run genericly** (exit 2) when a URL is known and `make sections` has not been
+run — Step 1's rule, as an exit code rather than a paragraph. Its options are built from the site's own
+headings and from the engine's registries, so it cannot offer something the engine cannot do.
+
+Three things it does that the bullets did not:
+
+- **Placement is ONE question.** Platform, orientation and duration together, because splitting them is
+  how a 60s vertical happens.
+- **It asks the negative, bounded by category.** "What would make you say that is not us" returns a
+  decision; "what do you hate" returns nothing. Anti-references narrow faster than aspirations, which
+  all collapse onto the same premium-calm answer.
+- **It asks what holds the film** when the cut is under 15s. `storyboard-check` hard-ERRORS without
+  `threads:`, and that decision was in none of the five bullets — the one thing no site study can guess.
+
+**It never asks about motion or effects.** Of 23 published studio briefs, not one asks a client to
+describe motion in the abstract; it is elicited as clips, as a per-shot field, or against a rough cut.
+`make quiz-look` is that: two or three directions rendered as panels, and the question is which picture.
+
+Tone is still not asked. It is derived from the brand's own site (Step 2), and a volunteered tone
+overrides.
+
+**If the script is unavailable**, the five questions it replaced are: goal · platform+orientation ·
+duration · what real material exists (never invent a number) · the exact CTA.
+
+**A no-URL film** has no site study, so `--apply` stops rather than guessing. That branch (the taste
+anchor, Step 0.5) is not built yet: storyboard it by hand.
 
 ## Step 2 — Derive the design language FROM the site (no canned styles)
 
@@ -257,18 +279,24 @@ earns the frame*, not just the copy. If a beat's only artifact is a word in a bo
 Write the full spec in the reply as a table and get explicit approval before touching JSON. Every
 row is a decision the JSON will transcribe, not reinterpret:
 
-| Field | Locked value |
-|---|---|
-| Orientation / duration / theme | e.g. landscape · 22s · `themes/creed.json` |
-| **Taste anchor** (no-site videos) | the reference **`profile`** (`apple`/`linear`/…) + which real site was `vawe_reflect`ed for colour |
-| **Story spine** | the named arc + each beat's role (hook/build/proof/payoff/CTA) |
-| Palette + fonts | the exact hexes + face names (from the study OR the profile's reflected reference) |
-| Motion personality | `{easing, bounce, settle, enter, stagger}` — from the profile, written into the theme |
-| **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used |
-| Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in (relationship + transition + WHY, per TRANSITIONS.md) · motion · feeling` |
-| Assets | which real logos / photos / uploads (NOT bare rects), and their treatment |
-| Sound | `audio.auto` on? captions? |
-| CTA | the exact end action + url |
+**Which rows the brief already filled.** If Step 1b ran, `make quiz-apply` locked orientation, duration,
+the arc and `threads:` into the storyboard's frontmatter, and `make quiz-look` settled the direction from a
+drawn panel sheet. Those rows are DECIDED — carry them across rather than re-deciding them here, and mark
+the rest as still owed. Everything below the line is the author's: palette, per-beat copy, the treatment of
+each image, and every cut's reason.
+
+| Field | Locked value | Filled by |
+|---|---|---|
+| Orientation / duration / theme | e.g. landscape · 22s · `themes/creed.json` | **the brief** (placement) |
+| **Taste anchor** (no-site videos) | the reference **`profile`** (`apple`/`linear`/…) + which real site was `vawe_reflect`ed for colour | the brief (anti-reference) |
+| **Story spine** | the named arc + each beat's role (hook/build/proof/payoff/CTA) | **the brief** (job → arc) |
+| Palette + fonts | the exact hexes + face names (from the study OR the profile's reflected reference) | the study |
+| Motion personality | `{easing, bounce, settle, enter, stagger}` — from the profile, written into the theme | the profile |
+| **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used | **the brief** (thread) + quiz-look |
+| Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in (relationship + transition + WHY, per TRANSITIONS.md) · motion · feeling` | you |
+| Assets | which real logos / photos / uploads (NOT bare rects), and their treatment | you |
+| Sound | `audio.auto` on? captions? | you |
+| CTA | the exact end action + url | the brief, when the study found one |
 
 For a no-site video, the first four rows ARE the four manufactured things from Step 0.5. If any is
 blank, the plan is not locked — you have not replaced what a site would have given, and the output
