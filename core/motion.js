@@ -458,7 +458,10 @@ export function sequence(n, fps, segments, { transition = 0.4, holdLast = true }
 export function wipe(t, dir = 'left') {
   const p = (1 - clamp01(t)) * 100;
   const m = { left: `inset(0 ${p}% 0 0)`, right: `inset(0 0 0 ${p}%)`, up: `inset(0 0 ${p}% 0)`, down: `inset(${p}% 0 0 0)` };
-  const c = m[dir] || m.left;
+  // `m[dir] || m.left` silently wiped leftward for any unrecognised direction. core/cuts.js owns the
+  // vocabulary; this is the same rule at the other call site (docs/MISTAKES.md #360).
+  const c = m[dir];
+  if (!c) throw new Error(`wipe: unknown direction "${dir}" — one of: ${Object.keys(m).join(', ')}`);
   return { clipPath: c, WebkitClipPath: c };
 }
 export function circleWipe(t, cx = 50, cy = 50) {

@@ -107,4 +107,11 @@ export function safeArea(W, H, destination = 'web') {
 
 // The aspect a destination serves, or null for the canvas-agnostic ones. A caller can use this to say
 // "you asked for tiktok chrome on a 16:9 canvas" out loud instead of quietly producing a strange box.
-export const nativeAspect = (destination) => (DESTINATIONS[destination] || {}).native ?? null;
+// `(DESTINATIONS[d] || {}).native ?? null` until now, so an UNKNOWN destination returned the same
+// `null` as a destination that legitimately has no fixed aspect (web/feed) - the one input validated
+// two different ways nine lines apart from safeArea, which throws. docs/MISTAKES.md #360.
+export const nativeAspect = (destination) => {
+  const d = DESTINATIONS[destination];
+  if (!d) throw new Error(`unknown destination "${destination}" — known: ${DESTINATION_NAMES.join(', ')}`);
+  return d.native ?? null;   // null still means "this destination serves any canvas"
+};

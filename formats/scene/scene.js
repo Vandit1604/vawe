@@ -5,7 +5,7 @@ import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEas
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
-import { FX_DUR } from '/core/gsap-effects.js';
+import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds.js';
@@ -290,8 +290,14 @@ boot((data, fps, theme, canvas) => {
       const targets = (units && units.length) ? units : el; // split → per unit (staggered), else the layer
       for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
         const spec = typeof item === 'string' ? { name: item } : (item || {});
+        // `console.warn` and continue meant the effect simply did not happen, and a warning in a
+        // headless render nobody reads is the same as silence. validate.mjs rejects an unknown name
+        // at author-check time, so this only bit under NOCHECK=1 - which is exactly when a render is
+        // least supervised. docs/MISTAKES.md #360.
+        GSAP_REGISTRY.pick(spec.name);
         const fn = window.gsap.effects[spec.name];
-        if (!fn) { console.warn(`fx: unknown GSAP effect "${spec.name}"`); continue; }
+        if (!fn) throw new Error(`fx "${spec.name}" is registered but GSAP has no such effect — the `
+          + `effect registry and the GSAP registration have drifted apart.`);
         const { name, dur, ease, delay, stagger, ...rest } = spec;
         fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
           ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
@@ -301,9 +307,10 @@ boot((data, fps, theme, canvas) => {
     // immediateRender:false (set at registration) holds the layer until then. Exclusive with `out` (validate).
     if (L.fxOut && window.gsap) {
       const spec = typeof L.fxOut === 'string' ? { name: L.fxOut } : (L.fxOut || {});
+      GSAP_EXIT_REGISTRY.pick(spec.name);   // was console.warn-and-skip; see `fx` above
       const fn = window.gsap.effects[spec.name];
-      if (!fn) console.warn(`fxOut: unknown GSAP effect "${spec.name}"`);
-      else {
+      if (!fn) throw new Error(`fxOut "${spec.name}" is registered but GSAP has no such effect.`);
+      {
         const { name, dur, ease, stagger, ...rest } = spec;
         const d = dur ?? FX_DUR[spec.name] ?? 0.5;
         const end = (L.start ?? 0) + (L.duration ?? 2);
@@ -1006,16 +1013,22 @@ boot((data, fps, theme, canvas) => {
   // are a function of the JSON, so the mix is reproducible; it does NOT touch renderFrame, so frames
   // stay byte-identical (audio is a separate track). `auto` gates only the DERIVED cues — author
   // cues and keystrokes always fire (MISTAKES #70, where `auto` used to gate everything).
+  // An explicit `null` in CUT_CUE means SILENCE and must survive the fallback; only a MISSING key
+  // (a presentation nobody has voiced yet) falls back, and lib-test now fails when one exists.
+  const cutCue = (style) => {
+    const v = CUT_CUE[style];
+    return v === null ? null : (v || 'whoosh');
+  };
   function buildSfx() {
     let sfx = [];
     const audioCfg = data.audio || {};
     // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js — one
     // shared source of truth, so the render mix and the baked catalogue cannot drift.
     const cues = [];
-    if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: CUT_CUE[L.cut] || 'whoosh' });
+    if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: cutCue(L.cut) });
     // TOP-LEVEL cuts / seams were once silently dropped from sound design — they are how a scene
     // actually cuts between beats, so an auto-scored film came out with no transition sound at all.
-    if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: CUT_CUE[c.style] || 'whoosh' });
+    if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: cutCue(c.style) });
     if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
     if (audioCfg.auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
     // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }

@@ -28,6 +28,8 @@ import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf } from '../../core/junctions.js';
 import { BEATS } from '../../blueprints/index.mjs';
+import { CUT_REGISTRY } from '../../core/cuts.js';
+import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
@@ -1106,6 +1108,17 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+}
+
+// ---- sound: a CUT must have a voicing, exactly as a SEAM does ----
+// lib-test already asserted "SEAM_CUE covers every SEAM_FX (no silent seam)". CUT_CUE had no equivalent,
+// so the next presentation added to core/cuts.js would silently play the generic `whoosh`. The gate for
+// one half of a pair and not the other is how a family goes quietly out of sync. docs/MISTAKES.md #360.
+{
+  // an explicit null is a DECISION (silence); only a missing KEY is a gap.
+  const missing = CUT_REGISTRY.names.filter((n) => !(n in CUT_CUE));
+  ok(`sound: CUT_CUE voices every one of the ${CUT_REGISTRY.names.length} cut presentations`
+    + `${missing.length ? ' — missing: ' + missing.join(', ') : ''}`, missing.length === 0);
 }
 
 // ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #359) ----

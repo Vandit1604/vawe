@@ -26,8 +26,19 @@ export const TIMINGS = {
 
 const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
 const style = (over) => ({ ...IDENT, ...over });
-const sign = (dir) => (dir === 'right' || dir === 'down' ? -1 : 1);
-const axis = (dir) => (dir === 'up' || dir === 'down' ? 'Y' : 'X');
+// `dir` used to fall through to left/X for ANY unrecognised value, so `dir:"top"` on a wipe cut gave a
+// leftward wipe with no signal - the same collapse of "absent" and "wrong" that cutStyle's own comment
+// below argues against for `name` and `timing`. A cut is a junction; it is the worst place to guess.
+// docs/MISTAKES.md #360.
+export const DIRS = ['left', 'right', 'up', 'down'];
+const okDir = (dir) => {
+  if (dir == null) return 'left';                       // absent has a documented default
+  if (DIRS.includes(dir)) return dir;
+  throw new Error(`unknown direction "${dir}" — one of: ${DIRS.join(', ')}. A direction the engine does `
+    + `not know would otherwise travel LEFT and look deliberate.`);
+};
+const sign = (dir) => (okDir(dir) === 'right' || okDir(dir) === 'down' ? -1 : 1);
+const axis = (dir) => (okDir(dir) === 'up' || okDir(dir) === 'down' ? 'Y' : 'X');
 const mask = (img) => ({ maskImage: img, WebkitMaskImage: img });
 // gradient angle that reveals FROM the given edge (mask black side leads)
 const gradAngle = (dir) => (dir === 'right' ? '270deg' : dir === 'up' ? '0deg' : dir === 'down' ? '180deg' : '90deg');

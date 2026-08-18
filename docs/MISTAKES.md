@@ -10023,6 +10023,12 @@ TIMINGS[timing]   || TIMINGS.smooth          // core/cuts.js, the next line
 PRESETS[preset]   || PRESETS.up              // core/type.js  (fixed in #354)
 PARTS[p.anim]     || PARTS.fadeUp            // formats/scene/scene.js, INSIDE the build path
 ICONS[name]       || ''                      // core/icons.js — renders an empty <svg>
+
+> **AMENDED by #360 — `core/icons.js` was listed here and NEVER TOUCHED.** `git show c49ea03 --stat`
+> contains no `core/icons.js`, and `ICONS[name] || ''` was still on line 22 when a review found it. The
+> entry claimed a fix that did not exist, in the entry about claiming things that are not so. Recorded
+> rather than quietly corrected, because a log that edits its own misses is worth less than one that
+> keeps them. Fixed for real in #360.
 ```
 
 **What it cost, measured.** Across all 146 scene files, **19 layers in two shipped scenes named an `anim`
@@ -10234,6 +10240,54 @@ first read of them ("it sits perfectly still") was wrong and reading the source 
 "32 effects unused" is true, "the vocabulary is 86% dead" is the inference, and the inference was wrong:
 about a third of that 32 duplicates something the engine already does well. The finding underneath it —
 30 held layers with nothing happening — was never in the census, and is the one an author would feel.
+
+---
+
+## #360 — The review found the fix I had recorded but never made
+
+Two reviewers were run over the framework plan (`c49ea03..f70358d`). The general one approved: no
+purity violation, back-compat verified including `0` as a valid scalar in the new per-channel `vars`
+helper. The silent-failure hunter found six things, and the first is the one worth the entry.
+
+**`core/icons.js` was listed as fixed in #355 and was never opened.** `svgIcon()` still did
+`${ICONS[name] || ''}`, which renders a complete but EMPTY `<svg>` — an icon-shaped hole, no error,
+nothing in the console. There are 15 icons; `svgIcon('rocket')` is a plausible thing to write and there
+is no rocket. `git show c49ea03 --stat` contains no `core/icons.js` at all.
+
+So the commit message and the log both asserted a fix that did not exist, **in the change whose entire
+subject was code that claims one thing and does another.** #355 is amended in place rather than edited
+silently: a log that quietly repairs its own misses is worth less than one that keeps them.
+
+The lesson is narrow and repeatable: **I enumerated the nine call sites by reading, then fixed eight and
+wrote down nine.** Nothing checked the list against the work — `git show --stat` would have, in one
+command, and I never ran it. Every other claim in that entry was measured; this one was remembered.
+
+**The rest of what the review found, all now fixed:**
+
+- **`dir` collapsed absence into wrongness** (`core/cuts.js` `sign`/`axis`, `core/motion.js:461`
+  `m[dir] || m.left`). `dir:"top"` on a wipe cut gave a leftward wipe with no signal — the same collapse
+  `cutStyle`'s own comment argues against for `name` and `timing`, three lines above it. And
+  `cuts[].dir` in the schema names the four directions in its LABEL while carrying no `enum`, where the
+  sibling `seams[].dir` has one. It slipped the runtime guard and the schema guard at once.
+- **`fx`/`fxOut` warned and continued** (`formats/scene/scene.js`). The effect simply did not happen, and
+  a `console.warn` in a headless render nobody reads is silence with extra steps. `validate.mjs` rejects
+  an unknown name at author-check time, so it only bit under `NOCHECK=1` — which is exactly when a render
+  is least supervised.
+- **`nativeAspect`** returned `null` for an unknown destination, indistinguishable from a destination
+  that legitimately serves any canvas — nine lines below `safeArea`, which throws on the same input.
+- **`CUT_CUE` had no completeness gate** while its twin `SEAM_CUE` did ("no silent seam"). Adding one
+  showed `none` had no entry. That was NOT live — both call sites already filter `none` — but the
+  decision now lives in the data as an explicit `none: null` rather than only in two duplicated guards.
+
+**Deliberately not fixed, with reasons:** `CORNERS[corner] || CORNERS.tr` in `core/looks.js` (a typo
+relocates a light leak; `lookOpts` has no per-key schema, so this needs the knob-routing work of #351
+extended rather than a one-line throw), and `renderBg`'s `fx.type` chain having no final `else` (I could
+not establish whether `fx.type` is ever author-settable or always compiled from the validated preset
+enum, and a guess there is what this entry is about).
+
+**The reusable part.** A reviewer is not a formality at the end. This one found, in one pass, a fix I had
+recorded and not made — which no amount of re-reading my own diff would have surfaced, because I would
+have re-read it with the same belief that put the line in the log.
 
 ---
 

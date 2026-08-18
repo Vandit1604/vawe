@@ -38,6 +38,12 @@ const WAIVED = new Map(Object.entries({
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   KNOBS: 'playground control metadata, not an effect a scene can name',
+  ICON_REGISTRY: 'the registry object wrapping ICONS, which IS catalogued as "Drawn icons"',
+  ICON_NAMES: 'the same list the Drawn icons section already renders from ICONS',
+  DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '
+    + 'cut or seam, and the schema carries it as an enum on both — this is the shared constant behind those, '
+    + 'not a vocabulary of its own',
+
   JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name — each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
   ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
   CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',

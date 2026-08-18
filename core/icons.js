@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // icons.js — inline stroke SVG icons (currentColor, deterministic, no network). Premium 24px grid.
 // Use in scenes: svgIcon('bolt', { size: 40, color: '#1f3bff' }). Named separately from motion.js icon()
 // (which renders image paths) to avoid collision.
@@ -19,5 +20,15 @@ export const ICONS = {
   layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5M3 16.5l9 5 9-5"/>',
 };
 export function svgIcon(name, { size = 24, color = 'currentColor', stroke = 1.9, fill = 'none' } = {}) {
-  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="${fill}" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" style="display:block">${ICONS[name] || ''}</svg>`;
+  // `ICONS[name] || ''` until now, which rendered a complete but EMPTY <svg>: an icon-shaped hole,
+  // no error, nothing in the console. `svgIcon('rocket')` is a plausible thing to write and there is
+  // no rocket. docs/MISTAKES.md #355 listed this among the fallbacks it removed and it was never
+  // touched - the record said closed while the file said otherwise. See #360.
+  const glyph = ICON_REGISTRY.pick(name);
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="${fill}" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" style="display:block">${glyph}</svg>`;
 }
+
+// Registered so an unknown icon is refused, and so a name that exists in ANOTHER vocabulary is
+// diagnosed rather than silently drawn as nothing.
+export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()' });
+export const ICON_NAMES = ICON_REGISTRY.names;

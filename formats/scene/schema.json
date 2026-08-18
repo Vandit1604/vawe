@@ -242,7 +242,13 @@
         },
         "dir": {
           "type": "string",
-          "label": "Direction the cut travels (left|right|up|down)"
+          "label": "Direction the cut travels (left|right|up|down)",
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ]
         },
         "dist": {
           "type": "number",

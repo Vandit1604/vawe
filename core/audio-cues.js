@@ -8,7 +8,11 @@
 // already lost `push` from CUT_CUE and had no SEAM_CUE at all (every seam rendered silent).
 
 // Cut style -> cue. Consumed for layer `cut` and top-level `cuts`.
+// `none` maps to SILENCE explicitly. It was simply absent, so `CUT_CUE[style] || 'whoosh'` gave a
+// no-transition cut a whoosh - a sound for something the audience never sees. An entry of `null` is a
+// stated decision; a missing key is a gap that the fallback fills with a guess. docs/MISTAKES.md #360.
 export const CUT_CUE = {
+  none: null,
   punch: 'press', whip: 'whisper', skewWhip: 'whisper', jitter: 'tick',
   softwipe: 'whisper', wipe: 'whisper', softiris: 'bloom', iris: 'bloom',
   rise: 'bloom', riseBlur: 'bloom', drop: 'droplet', zoom: 'droplet',
