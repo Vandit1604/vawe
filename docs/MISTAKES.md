@@ -10489,6 +10489,50 @@ test — just checking where a thing already happens before proposing to move it
 
 ---
 
+## #365 — `author-check` read as the safety net, and it is not one
+
+B2, and the smallest change of the run with the clearest reason.
+
+Asked whether a make target should be what fails early, I checked instead of answering. `core/boot.js:7`
+imports `validateAll` and validates BEFORE building; every vocabulary registry throws during layer build.
+**The engine validates itself. `make author-check` is a convenience.**
+
+But its verdict printed one flat list:
+
+```
+✓ validate   ok
+✓ beats      ok
+✓ assets     ok
+```
+
+Read that and `NOCHECK=1` looks like it turns off safety. It does not. It turns off the CRAFT half and
+the early warning; a scene with a broken schema or an unknown name still fails at boot, with or without
+the target. The two kinds of finding were indistinguishable, and the cost of that is a person believing
+a skip is more dangerous than it is — or, worse, that running the target is what makes a render safe.
+
+The verdict now separates them, and says what the flag actually costs:
+
+```
+THE ENGINE WOULD REFUSE THIS — not skippable, NOCHECK=1 included:
+  ✓ validate   ok
+CRAFT JUDGEMENTS — this target's opinion; the engine renders these regardless:
+  ✓ beats      ok
+  ✓ assets     ok
+
+NOCHECK=1 skips this target, NOT the engine.
+```
+
+**Only `validate` is in the first group, and that is deliberate.** It is the one step that runs the exact
+code the engine runs at boot. `assets` looks like it belongs there — a missing file is surely fatal — but
+it is not: `icon()` falls back and an `<img>` 404s to nothing, so the film renders, wrongly. Putting it
+in the refusal group would have been a comfortable lie, and this entry exists because of one of those.
+
+**The reusable part.** A tool that reports two different KINDS of thing in one list teaches the reader
+that they are one kind. That is the same defect as a fallback answering two different questions with one
+answer (#361) — the shape recurs at every scale, in code and in output.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

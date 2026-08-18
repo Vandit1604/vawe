@@ -231,12 +231,31 @@ if (fs.existsSync(sidecar)) {
 const failed = results.filter((r) => r.failed);
 const waivers = results.filter((r) => r.waived);
 console.log(`\n════════ author-check · ${path.basename(file)} ════════`);
-for (const r of results) {
+// TWO KINDS OF FINDING, and reading them as one list is why NOCHECK=1 looks like it skips safety.
+// `validate` runs the SAME validator the engine runs at boot (core/boot.js imports validateAll), and
+// every vocabulary registry throws during layer build. Those cannot be skipped by anything: a scene
+// that fails them will not render, with or without this target. Everything else here is this target's
+// own judgement about craft, and the engine will happily render a film that fails all of it.
+// docs/MISTAKES.md #365.
+const ENGINE_REFUSES = new Set(['validate']);
+const line = (r) => {
   const mark = r.failed ? '✗' : r.waived ? '○' : '✓';
   const note = r.failed ? `BLOCKS (${r.unwaived.join(', ') || 'exit ' + 1})` : r.waived ? `waived (${r.blockCodes.join(', ')})` : 'ok';
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
+};
+const refusals = results.filter((r) => ENGINE_REFUSES.has(r.name));
+const judgements = results.filter((r) => !ENGINE_REFUSES.has(r.name));
+if (refusals.length) {
+  console.log('\n  THE ENGINE WOULD REFUSE THIS — not skippable, NOCHECK=1 included:');
+  refusals.forEach(line);
+}
+if (judgements.length) {
+  console.log('\n  CRAFT JUDGEMENTS — this target\'s opinion; the engine renders these regardless:');
+  judgements.forEach(line);
 }
 if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
+console.log(`\n  NOCHECK=1 skips this target, NOT the engine: a scene with a bad name or a broken schema`);
+console.log(`  still fails at boot. What you lose by skipping is the craft half, and the early warning.`);
 if (skippedTaste.length) {
   console.log(`\n  ⚠ ${skippedTaste.length} TASTE gate(s) NOT RUN: ${skippedTaste.join(', ')}.`);
   console.log(`      These check house style, not breakage, so they are opt-in. Nothing above says anything`);
