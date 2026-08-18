@@ -9671,6 +9671,34 @@ not separate from correctness work — it is a slow read of code nobody has read
 
 ---
 
+## #349 — The storyboard gate had never heard of the repo's own placeholder token
+
+`<fill: …>` is this repo's convention for "a decision a person still owes". `intent-from-storyboard.mjs`
+knows it and refuses to emit a `mustShow` for one. `storyboard-check` had **zero** occurrences of the
+string, so a storyboard in which every single line was still a placeholder came back as:
+
+> ✓ storyboard is a complete proposal — present it and get sign-off before the JSON
+
+That is the one thing it certainly was not. The gate reads SHAPE, every field was structurally present,
+and it announced shape as readiness.
+
+Found by building the no-site branch of `make quiz-apply`, which writes a skeleton of placeholders by
+design — so the tool I had just written made a false verdict trivially reachable. A skeleton is a
+legitimate artefact and is not a failure; calling it ready for sign-off is.
+
+**Fix.** The verdict counts unfilled placeholders and says so: *"STRUCTURALLY complete … but N decision(s)
+are still `<fill: …>`. It is a skeleton, not a proposal."* Exit code stays 0, because a skeleton has broken
+no rule. Of the 11 storyboards in the repo exactly one changed verdict, and it is the one that is a
+skeleton.
+
+**The pattern this belongs to.** Three times this week a gate has been green about something it was not
+looking at: `storyboard-check` had only half a timeline rule (`#345`), `craft-coverage` could be satisfied
+by prose instead of its table (`#342`), and here a gate had no knowledge of a convention two other tools in
+the same pipeline already enforce. **A green gate is a claim about what it measured, and the failure mode is
+always the same: the claim in the summary line is wider than the measurement behind it.**
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

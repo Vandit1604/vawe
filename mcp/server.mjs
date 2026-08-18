@@ -219,6 +219,18 @@ server.registerTool('vawe_capabilities', {
     ``,
     `cuts (${c.cuts.length}) — one family per film; the ten that only MASK need sceneUnits:`,
     ...c.cuts.map((x) => `  ${x.name.padEnd(12)} ${x.blurb || ''}`.trimEnd()),
+    // The rest of the vocabulary a caller has to choose from. Listed with meanings for the same reason as
+    // the three above: a name on its own is not a choice.
+    `seams (${c.seams.length}) — the only mechanism that samples BOTH beats; one earned blend at the payoff:`,
+    ...c.seams.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
+    `stings (${c.stings.length}) — a shader AT the cut; the register each says:`,
+    ...c.stings.map((x) => `  ${x.name.padEnd(18)} ${x.blurb || ''}`.trimEnd()),
+    `layer entrances/exits (${c.anims.length}) — anim / out:`,
+    ...c.anims.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
+    `gsap effects (${c.gsap.length}) — fx on a layer; the LOOPS never settle, so never use one as an entrance:`,
+    ...c.gsap.map((x) => `  ${x.name.padEnd(18)} ${x.blurb || ''}`.trimEnd()),
+    `gsap exits (${c.gsapExits.length}) — fxOut:`,
+    ...c.gsapExits.map((x) => `  ${x.name.padEnd(16)} ${x.blurb || ''}`.trimEnd()),
     ``,
     `blocks (${c.blocks.length} across ${c.blockFamilies.length} families):`,
     ...c.blocks.map((b) => `  ${b.name.padEnd(18)} ${b.blurb}`),

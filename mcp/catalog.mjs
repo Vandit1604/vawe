@@ -30,12 +30,18 @@ export function example(name) {
 
 /** The full vocabulary, read live from the registries so a count can never lie. */
 export async function capabilities() {
-  const [{ LOOK_NAMES }, { PRESETS, PRESET_BLURBS }, { PRESENTATIONS, CUT_BLURBS }, { registersOf }, { CATALOG }] = await Promise.all([
+  const [{ LOOK_NAMES }, { PRESETS, PRESET_BLURBS }, { PRESENTATIONS, CUT_BLURBS }, { registersOf }, { CATALOG },
+    { SHADER_FX }, { SEAM_FX, SEAM_BLURBS }, { ANIM_NAMES, ANIM_BLURBS },
+    { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS }] = await Promise.all([
     import(path.join(repoRoot, 'core/looks.js')),
     import(path.join(repoRoot, 'core/type.js')),
     import(path.join(repoRoot, 'core/cuts.js')),
     import(path.join(repoRoot, 'scripts/gates/craft-coverage.mjs')),
     import(path.join(repoRoot, 'blocks/catalog.mjs')),
+    import(path.join(repoRoot, 'core/stings.js')),
+    import(path.join(repoRoot, 'core/seams.js')),
+    import(path.join(repoRoot, 'core/clips.js')),
+    import(path.join(repoRoot, 'core/gsap-effects.js')),
   ]);
   // A look's meaning is its REGISTER — the era it evokes — which is what an author picks between, and it
   // is already complete and gated in docs/CRAFT/SELECTION.md §4.
@@ -50,6 +56,14 @@ export async function capabilities() {
     looks: LOOK_NAMES.map((n) => ({ name: n, blurb: REGISTERS.look[n] || null })),
     presets: Object.keys(PRESETS).map((n) => ({ name: n, blurb: PRESET_BLURBS[n] || null })),
     cuts: Object.keys(PRESENTATIONS).map((n) => ({ name: n, blurb: CUT_BLURBS[n] || null })),
+    // The rest of the transition and entrance vocabulary, which was still going over as nothing at all.
+    // A caller choosing between `whipPan` and `crossWarp`, or between `rise` and `defocus`, had the names
+    // and no way to tell them apart — so it picked by the sound of the word.
+    stings: SHADER_FX.map((n) => ({ name: n, blurb: REGISTERS.sting[n] || null })),
+    seams: SEAM_FX.map((n) => ({ name: n, blurb: SEAM_BLURBS[n] || null })),
+    anims: ANIM_NAMES.map((n) => ({ name: n, blurb: ANIM_BLURBS[n] || null })),
+    gsap: GSAP_FX.map((n) => ({ name: n, blurb: GSAP_BLURBS[n] || null })),
+    gsapExits: EXIT_FX.map((n) => ({ name: n, blurb: GSAP_EXIT_BLURBS[n] || null })),
     blockFamilies: families,
     blocks: blocks.map((e) => ({ name: e.name, family: e.family, blurb: e.blurb })),
     knobs: KNOBS,

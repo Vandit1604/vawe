@@ -208,12 +208,62 @@ export function frontmatter(a) {
   };
 }
 
+// THE NO-SITE BRANCH. A topic film has no sections to walk, so `storyboard-draft` — which is one beat per
+// real section, in the site's order — has nothing to iterate. This is a SECOND writer, deliberately, for a
+// genuinely different input: there the structure comes from the site, here it comes from the arc and the
+// chosen pace. Keeping one writer would have meant faking a sections.json, which is a lie on disk.
+//
+// It writes a SKELETON and says so. Every line a person must own is a `<fill:>`, because a brief can lock
+// the shape of a film and cannot invent its words — and the honesty rule in CLAUDE.md means the tool must
+// not put a claim on screen that nobody has stood behind.
+const ROLES = {
+  'hook → build → proof → payoff → CTA': ['hook', 'build', 'proof', 'payoff', 'cta'],
+  'problem → mechanism → result': ['problem', 'mechanism', 'mechanism', 'result'],
+  'question → escalation → answer': ['question', 'escalation', 'escalation', 'answer'],
+  'image → turn → mark': ['image', 'turn', 'mark'],
+};
+function applyNoStudy({ a, fm, name, out }) {
+  const dest = out || path.join(ROOT, 'formats/scene', `${(name || 'untitled').replace(/[^a-z0-9-]/gi, '-')}.storyboard.md`);
+  const dur = parseInt(fm.duration, 10);
+  const n = fm.beats || Math.max(2, Math.round(dur / 2.5));
+  const roles = ROLES[fm.arc] || ROLES['hook → build → proof → payoff → CTA'];
+  const per = +(dur / n).toFixed(1);
+  const L = ['---'];
+  L.push(`message: ${a.message || '<fill: the ONE sentence this film lands — the spine, not a feature list>'}`);
+  L.push(`audience: ${a.audience || '<fill: who this is for — role and context>'}`);
+  L.push(`arc: ${fm.arc}`);
+  if (fm.framework) L.push(`framework: ${fm.framework}`);
+  if (fm.threads) L.push(`threads: ${fm.threads}`);
+  L.push(`format: ${fm.format}`);
+  L.push(`duration: ${dur}s`);
+  L.push('---', '');
+  L.push(`# ${name || 'untitled'} — storyboard SKELETON (from the brief, no site study)`);
+  L.push('');
+  L.push('> The brief fixed the shape: arc, duration, beat count and what holds it across the cuts. Every');
+  L.push('> `<fill:>` below is a decision a person still owes. Blueprints: `make blueprints`.');
+  L.push('');
+  for (let i = 0; i < n; i++) {
+    const role = roles[Math.min(i, roles.length - 1)];
+    const start = +(i * per).toFixed(1), end = +((i + 1) * per).toFixed(1);
+    L.push(`## Beat ${i + 1} — <fill: name this beat>  (${start}s–${end}s)`, '');
+    L.push(`- type: ${role}`);
+    L.push(`- onscreen: "<fill: the exact words on screen${i === 0 ? ', ≤12 and front-load the strong one' : ''}>"`);
+    L.push(`- why: <fill: what this beat PROVES that no other does — cut it, and what is lost?>`);
+    L.push(`- becomes: <fill: the change at this junction, as "the X becomes the Y">`);
+    L.push(`- picture: <fill: what is SHOWN here — a graphic is the subject at ~8% of the frame or more>`);
+    L.push('');
+  }
+  fs.writeFileSync(dest, L.join('\n'));
+  const g = spawnSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
+  return { dest, fm, draft: `✓ wrote ${dest} — ${n} beat skeleton from the brief (no site study)`, warnings: '',
+    gate: `${(g.stdout || '').trim()}\n${(g.stderr || '').trim()}`.trim(), gateOk: g.status === 0 };
+}
+
 function apply({ answersPath, name, slug, out }) {
   const a = JSON.parse(fs.readFileSync(answersPath, 'utf8'));
   const fm = frontmatter(a);
   const st = study(name);
-  if (!st) return { error: 'no-study', message: `--apply needs a site study for now (assets/brands/${name || '<brand>'}/sections/sections.json). `
-    + `A no-URL film takes the taste-anchor branch, which is not built yet.` };
+  if (!st) return applyNoStudy({ a, fm, name, out });
   const dest = out || path.join(ROOT, 'assets/brands', name, 'STORYBOARD.md');
   const env = { ...process.env, NAME: name, DUR: String(parseInt(fm.duration, 10)),
     FORMAT: fm.format, ARC: fm.arc, OUT: dest };

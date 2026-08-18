@@ -178,4 +178,14 @@ if (message) console.log(`  message: "${message}"`);
 for (const e of errs) console.error(`    ✗ ${e}`);
 for (const w of warns) console.log(`    ~ ${w}`);
 if (errs.length) { console.error(`\n✗ storyboard incomplete — ${errs.length} blocker(s). Fill them, then present the proposal for approval before authoring JSON.`); process.exit(1); }
+// `<fill: …>` IS the repo's placeholder convention — `intent-from-storyboard.mjs` already refuses to emit
+// a `mustShow` for one — and this gate had never heard of it. So a storyboard where every single line was
+// still a placeholder came back as "a complete proposal", which is the one thing it certainly was not. A
+// skeleton is a legitimate artefact and is not a failure; announcing it as ready for sign-off is.
+const unfilled = (src.match(/<fill:/g) || []).length;
+if (unfilled) {
+  console.log(`\n~ storyboard is STRUCTURALLY complete — every field the gate can check is present — but ${unfilled} decision(s) are still \`<fill: …>\`.`);
+  console.log(`  It is a skeleton, not a proposal. Fill them before presenting: the gate reads shape, and shape is not the film.`);
+  process.exit(0);
+}
 console.log(`\n✓ storyboard is a complete proposal — present it ("This video tells <audience> that <message>") and get sign-off before the JSON.`);
