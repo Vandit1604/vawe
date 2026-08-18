@@ -38,6 +38,9 @@ const WAIVED = new Map(Object.entries({
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   KNOBS: 'playground control metadata, not an effect a scene can name',
+  KNOB_ROUTES: 'the map from a lookOpts knob to the private pass arguments it sets. The KNOBS themselves are '
+    + 'catalogued in the Composite looks section and PRIMITIVES.md; this is the wiring under them, and a scene '
+    + 'names a knob, never a route',
   LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued — a subset named so a gate can tell an entrance from something that never settles',
   ONESHOT_FX: 'the other half of the same split',
   LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look — the words, not a vocabulary of their own',

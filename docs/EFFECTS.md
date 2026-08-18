@@ -242,7 +242,7 @@
 
 ## Composite looks (static)  `[static]`
 
-`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).
+`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes** — `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
 
 | name | what / when |
 |---|---|
