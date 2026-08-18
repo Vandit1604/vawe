@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/gsap-effects.js — a NAMED library of GSAP effects, registered via gsap.registerEffect so a scene
 // can reference one by name: `"fx": "popIn"` or `"fx": { "name": "elasticIn", "dur": 1.2 }` or an array
 // `"fx": ["blurIn", "float"]` (an entrance + a loop). Exits go in the sibling field `"fxOut": "blurOut"`.
@@ -185,3 +186,10 @@ export const EXIT_FX = Object.keys(EXITS);
 // default duration per effect, so scene.html can anchor an exit so it ENDS exactly at the layer's end.
 export const FX_DUR = Object.fromEntries(
   Object.entries({ ...ONESHOT, ...EXITS, ...LOOPS }).map(([k, v]) => [k, v.dur]));
+
+// Registered so a name in the WRONG SLOT is diagnosable: `anim:"popIn"` is told popIn is a gsap effect.
+// Three shipped layers made exactly that mistake and silently faded for months (docs/MISTAKES.md #355).
+export const GSAP_REGISTRY = defineRegistry('gsap effect',
+  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx' });
+export const GSAP_EXIT_REGISTRY = defineRegistry('gsap exit',
+  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut' });

@@ -2,6 +2,7 @@
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
+import { defineRegistry } from './registry.js';
 
 // mix two hex colours. Pure. (colorWave now uses color-mix so it can take theme TOKENS, not just hex.)
 const _hx = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
@@ -276,9 +277,7 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
   // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
   // throw in core/fx/index.js. docs/MISTAKES.md #354.
-  const fn = PRESETS[preset];
-  if (!fn) throw new Error(`unknown kinetic preset "${preset}" - known: ${Object.keys(PRESETS).join(', ')}. `
-    + `A name the registry does not know would otherwise animate as \`up\` and look deliberate.`);
+  const fn = PRESET_REGISTRY.pick(preset);
   units.forEach((el, i) => {
     if (loop || preset === 'wave' || preset === 'shimmerWave') {
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
@@ -301,3 +300,7 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     }
   });
 }
+
+// Defined after PRESETS so the map is complete. Gives the cross-registry hint: `preset:"popIn"`
+// is told that popIn is a gsap effect, which is the mistake three shipped layers actually made.
+export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS });

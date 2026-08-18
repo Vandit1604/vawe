@@ -9,6 +9,7 @@
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick — byte-identical DOM for any render order.
 import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp } from './motion.js';
+import { defineRegistry } from './registry.js';
 
 export const TIMINGS = {
   linear: (p) => clamp01(p),
@@ -224,10 +225,18 @@ export function soloCutStyle(name, seqState, opts) {
 // cutStyle(name, seqState, opts) → style object for the ACTIVE scene root at this frame.
 // seqState is the return of sequence(); opts: {timing, dir, dist, cx, cy}.
 export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist = 90, cx = 50, cy = 50 } = {}) {
-  const P = PRESENTATIONS[name] || PRESENTATIONS.fade;
-  const T = typeof timing === 'function' ? timing : TIMINGS[timing] || TIMINGS.smooth;
+  // Both used to fall back silently (to `fade` and `smooth`). A cut is a JUNCTION - the one moment the
+  // viewer is guaranteed to be looking - so a mistyped one quietly becoming a dissolve is the worst
+  // place in the engine to substitute. core/registry.js, docs/MISTAKES.md #355.
+  // absent → the documented default; NAMED-BUT-UNKNOWN → throw. See core/clips.js for why they differ.
+  const P = name == null ? PRESENTATIONS.fade : CUT_REGISTRY.pick(name);
+  const T = typeof timing === 'function' ? timing : timing == null ? TIMINGS.smooth : TIMING_REGISTRY.pick(timing);
   const o = { dir, dist, cx, cy };
   if (seqState.exit > 0) return P.exit(T(seqState.exit), o);
   if (seqState.enter < 1) return P.enter(T(seqState.enter), o);
   return P.enter(1, o); // steady state = identity (must not leave cut styles stuck)
 }
+
+// Built at the END so both maps are fully defined. `slot` is how an author writes it in a scene.
+export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut' });
+export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming' });

@@ -38,6 +38,16 @@ const WAIVED = new Map(Object.entries({
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   KNOBS: 'playground control metadata, not an effect a scene can name',
+  ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
+  CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
+  TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS — the cut timing curve, catalogued with the cuts',
+  GSAP_REGISTRY: 'as ANIM_REGISTRY, for GSAP_FX ("GSAP named effects")',
+  GSAP_EXIT_REGISTRY: 'as ANIM_REGISTRY, for EXIT_FX ("GSAP exits")',
+  PRESET_REGISTRY: 'as ANIM_REGISTRY, for PRESETS ("Kinetic text presets")',
+  PARTS: 'the raw [setup, from, to] tuples behind the part entrances, which ARE catalogued by name',
+  PART_BLURBS: 'the blurb map the Part entrances section renders',
+  PART_REGISTRY: 'the registry object; PART_NAMES is what the catalogue lists',
+
   KNOB_ROUTES: 'the map from a lookOpts knob to the private pass arguments it sets. The KNOBS themselves are '
     + 'catalogued in the Composite looks section and PRIMITIVES.md; this is the wiring under them, and a scene '
     + 'names a knob, never a route',

@@ -23,6 +23,9 @@ import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
+import { defineRegistry, registries } from '../../core/registry.js';
+import { ANIM_REGISTRY } from '../../core/clips.js';
+import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
@@ -1064,6 +1067,41 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !t.bg && !bgPaletteFrom(t.palette);
   });
   ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ' — ' + noPal.join(', ') : ''}`, noPal.length === 0);
+}
+
+// ---- the registry primitive (core/registry.js) ----
+// Every named vocabulary resolves through `pick()`, which takes no fallback parameter, so a silent
+// default is not expressible. docs/MISTAKES.md #355.
+{
+  const r = defineRegistry('widget', { alpha: 1, beta: 2 }, { slot: 'widget' });
+  ok('registry: a known name resolves', r.pick('alpha') === 1);
+  ok('registry: an unknown name THROWS rather than defaulting', (() => {
+    try { r.pick('nope'); return false; } catch (e) { return /unknown widget/.test(e.message); }
+  })());
+  ok('registry: the error lists what the vocabulary does know', (() => {
+    try { r.pick('nope'); return false; } catch (e) { return /alpha, beta/.test(e.message); }
+  })());
+  // The part that the evidence demanded: three of the five stranded names were real names in a
+  // NEIGHBOURING registry, so a failed pick says where the name actually lives.
+  ok('registry: a name from another registry is diagnosed, not just rejected', (() => {
+    try { ANIM_REGISTRY.pick('popIn'); return false; }
+    catch (e) { return /gsap effect/.test(e.message) && /fx: "popIn"/.test(e.message); }
+  })());
+  ok('registry: `preset` names are diagnosed when written into `anim`', (() => {
+    try { ANIM_REGISTRY.pick('down'); return false; }
+    catch (e) { return /kinetic preset/.test(e.message) && /preset: "down"/.test(e.message); }
+  })());
+  // ABSENCE is not an error - a layer with no anim fades, a cut with no name dissolves. That half is
+  // proven by snap-all rather than here: 102 shipped scenes render byte-identically through this change,
+  // and most of their layers declare no anim at all. Collapsing absence into "unknown" is exactly the
+  // mistake that made the first cut of this change error on 18 scenes.
+  ok('registry: every core vocabulary is built through the primitive', (() => {
+    const kinds = registries().map((x) => x.kind);
+    return ['anim', 'cut', 'kinetic preset', 'part entrance'].every((k) => kinds.includes(k));
+  })());
+  // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
+  ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
+  ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
 }
 
 // ---- canvas FX (core/canvas-fx.js) — pure pixel math (the DOM passes bake in the browser) ----

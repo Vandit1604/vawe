@@ -1,4 +1,5 @@
 import { boot } from '/core/boot.js';
+import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText } from '/core/type.js';
@@ -330,22 +331,15 @@ boot((data, fps, theme, canvas) => {
     // with a stagger), built on our seeked GSAP so it stays pure in n. Applies to any layer with children
     // (html inline-SVG, group, svg). `parts: { select, anim, each, stagger, delay, ease }`.
     if (L.parts && window.gsap) {
-      // named part entrances: [staticSetup(t), fromVars, toVars]. Kept tiny + local — the vocabulary an
-      // author reaches for on a figure; every one is a compositor-friendly transform/opacity/dashoffset.
-      const PARTS = {
-        growUp: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 100%'; }, { scaleY: 0 }, { scaleY: 1 }],
-        widen: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '0% 50%'; }, { scaleX: 0 }, { scaleX: 1 }],
-        popIn: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 50%'; }, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }],
-        fadeUp: [null, { y: 24, opacity: 0 }, { y: 0, opacity: 1 }],
-        riseIn: [null, { y: 48, opacity: 0 }, { y: 0, opacity: 1 }],
-        drawOn: [(t) => { try { t.setAttribute('pathLength', '1'); } catch (e) {} t.style.strokeDasharray = '1 1'; }, { strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
-      };
+      // The PARTS vocabulary used to be declared right here, inside the build path, which is why it was
+      // the one registry with no name, no catalogue entry and no gate: core/parts.js now owns it.
       // one spec or an ARRAY of specs — a figure can grow its bars, THEN draw its line, THEN pop its dots.
       for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
         const sel = p.select || 'rect, circle, path, polyline, line, [data-part]';
         const targets = [...el.querySelectorAll(sel)];
         if (!targets.length) continue;
-        const spec = PARTS[p.anim] || PARTS.fadeUp;
+        // absent → fadeUp (the documented default); named-but-unknown → throw (was `|| PARTS.fadeUp`)
+        const spec = p.anim == null ? PARTS.fadeUp : PART_REGISTRY.pick(p.anim);
         if (spec[0]) targets.forEach(spec[0]);
         window.gsap.fromTo(targets, { ...spec[1] }, {
           ...spec[2], duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07,

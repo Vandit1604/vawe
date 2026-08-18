@@ -10011,6 +10011,68 @@ for every other theme — which is what "extract the mechanism, not the brand" m
 
 ---
 
+## #355 — Nine name→thing maps, each with its own silent fallback, and one film that never played as written
+
+F1 of the framework plan: stop writing gates for the silent-substitution class and remove the ability to
+express it. The engine had NINE named vocabularies and every one resolved by hand:
+
+```js
+ANIM[name]        || fade                    // core/clips.js
+PRESENTATIONS[n]  || PRESENTATIONS.fade      // core/cuts.js — a CUT, the one moment the viewer is looking
+TIMINGS[timing]   || TIMINGS.smooth          // core/cuts.js, the next line
+PRESETS[preset]   || PRESETS.up              // core/type.js  (fixed in #354)
+PARTS[p.anim]     || PARTS.fadeUp            // formats/scene/scene.js, INSIDE the build path
+ICONS[name]       || ''                      // core/icons.js — renders an empty <svg>
+```
+
+**What it cost, measured.** Across all 146 scene files, **19 layers in two shipped scenes named an `anim`
+the engine does not have** and silently cross-faded instead. Eighteen of them are in `vawe-identity.json`
+— *the repo's own identity film* — which sets `out: "blur"` on every layer in it. `blur` is a KINETIC
+PRESET, not an anim; the anim that leaves through blur is `defocus`, whose blurb says exactly that. So the
+film's entire exit vocabulary has never once played as written. The nineteenth is `cadence-film`'s chrome
+panel, set to `out:"down"` (a preset name) instead of `slide-down`.
+
+**The fix is a primitive, not a check.** `core/registry.js` exports `defineRegistry(kind, entries)`
+returning a `pick()` that throws — **and takes no fallback parameter**, so a silent default is not
+expressible through it. A lint finds the fourth instance; this makes the fifth unwritable.
+
+**The cross-registry hint, which the evidence demanded.** Three of the stranded names — `popIn`, `down`,
+`blur` — are real names in a NEIGHBOURING registry. The author reached for something that exists and put
+it in the wrong slot. So a failed pick asks every other registry and answers:
+
+> unknown anim "popIn" — but that IS a real name somewhere else: `fx: "popIn"` (a gsap effect).
+
+"Unknown anim" is a dead end. That is a fix.
+
+**PARTS had no name.** The `parts` vocabulary — `growUp` `widen` `popIn` `fadeUp` `riseIn` `drawOn` — was
+declared inline inside `scene.js`'s build path, which is why it was the only vocabulary in the engine with
+no catalogue entry, no blurb map and no gate: **nothing could import it to enumerate it.** It now lives in
+`core/parts.js`. It also cost me a false positive: my own pre-flight counted `showcase-lumen`'s three
+`parts` anims as stranded, because I searched for `anim` anywhere in the tree rather than `anim` on a
+layer. Three of the five names in the plan were fine.
+
+**ABSENCE IS NOT AN ERROR, and collapsing the two is what the old code did.** `ANIM[name] || fade`
+answered both "this name is unknown" and "no name was given" with `fade`. The first cut of this change
+kept only the throw and **errored on 18 scenes** — every scene with a layer that simply declares no anim.
+Each call site now says which it means:
+
+```js
+const resolveAnim = (name) => (name == null ? fade : ANIM_REGISTRY.pick(name));
+```
+
+That distinction is the whole design. A default for absence is a decision; a default for a name you did
+not recognise is a guess wearing a decision's clothes.
+
+**One consumer explicitly cleared.** `resolveEasing` also substitutes on an unknown name — but it PRINTS
+`ease: unknown easing "nope" — using easeOutCubic` first. It is not silent, which is the property this
+entry is about, so it stays as designed.
+
+**Result.** 102 of 104 scenes byte-identical. The two that moved are the two that were broken: cadence's
+panel now travels downward on exit, and `vawe-identity` finally performs the focus pull between beats that
+its author wrote eighteen times and never once saw.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

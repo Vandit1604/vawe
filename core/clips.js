@@ -5,6 +5,7 @@
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
 import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
+import { defineRegistry } from './registry.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
 // Exported so `make lib-test` can hold the DIRECTION contract of each name as a pure assertion — a
@@ -44,7 +45,8 @@ export const ANIM = {
 // Exported so the schema and the conformance sweep can DERIVE the valid names instead of restating
 // them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
 // and therefore silently resolved to fade (MISTAKES #21).
-export const ANIM_NAMES = Object.keys(ANIM);
+export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim' });
+export const ANIM_NAMES = ANIM_REGISTRY.names;
 
 // One line per enter/exit anim, beside the registry itself. docs/EFFECTS.md renders these, and
 // scripts/gates/lib-test.mjs fails when a name has no blurb — a name with no description is a
@@ -87,8 +89,16 @@ export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
  */
 export const opacityEnvelope = (enterT, exitT = 0) =>
   easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);
-/** Unknown names fall back to fade SILENTLY — that is why `make conformance` asserts each is distinct. */
-const resolveAnim = (name) => ANIM[name] || fade;
+// Unknown names used to fall back to `fade` SILENTLY, and the comment here pointed at `make conformance`
+// as the mitigation — but conformance asserts each anim is DISTINCT, which is a different property than
+// "the name the author wrote exists". Five layers in three shipped scenes were silently fading because of
+// it. Now it throws, and because three of those five were real names from a NEIGHBOURING registry, the
+// error says where the name does live. See core/registry.js and docs/MISTAKES.md #355.
+// ABSENCE and a WRONG NAME are different questions, and the old `ANIM[name] || fade` answered both with
+// `fade`. A layer that declares no anim legitimately fades; a layer that names one the engine does not
+// have is a mistake. Splitting them is the whole point - and collapsing them is what let five layers in
+// three shipped scenes ask for an entrance that does not exist and get a cross-fade instead.
+const resolveAnim = (name) => (name == null ? fade : ANIM_REGISTRY.pick(name));
 // invert an enter transition into an exit (reverse the progress: 1→hidden).
 // Play an entrance BACKWARDS to make an exit: progress 1 (settled) -> 0 (offset/hidden).
 // Takes exitT (0 at the start of the exit, 1 at the end), NOT exitMul — passing the already-inverted

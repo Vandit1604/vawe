@@ -501,6 +501,19 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `tilt` | turn the layer out of the picture plane and hold it there — a card leaning away, a phone at an angle, panels receding |
 
+## Part entrances  `[per-layer]`
+
+`parts: [{ select, anim, each, stagger, delay }]` on a hand-authored html/svg layer — named entrances for its SUB-ELEMENTS, so a figure can grow its bars, then draw its line, then pop its dots. Selectors default to `rect, circle, path, polyline, line, [data-part]`.
+
+| name | what / when |
+|---|---|
+| `drawOn` | an SVG stroke draws itself along its own path (pathLength=1, no measurement) |
+| `fadeUp` | a short rise with a fade — the quiet default for any part |
+| `growUp` | scales up from its own bottom edge — a bar growing to its reading |
+| `popIn` | scales from nothing at its centre with a fade — dots, chips, markers |
+| `riseIn` | a longer rise with a fade — for parts that should feel like they arrive |
+| `widen` | scales out from its left edge — a row, a rule, a progress track filling |
+
 ## Blend modes  `[per-layer]`
 
 `mixBlend` — how a layer composites with what is beneath it.
@@ -706,4 +719,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_466 effects across 31 families. Regenerate: `make effects`._
+_472 effects across 32 families. Regenerate: `make effects`._

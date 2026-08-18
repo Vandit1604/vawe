@@ -49,6 +49,7 @@ import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { FX_TYPES } from '../../core/fx/index.js';
+import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { FILTER_PRESETS, FILTER_BLURBS } from '../../core/filters.js';
 import { EASINGS } from '../../core/motion.js';
@@ -157,6 +158,7 @@ const sections = [
   ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.', names(RESAMPLE_FX), 'per-frame', { blurbs: RESAMPLE_BLURBS }],
   ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame'],
   ['Per-layer fx', '`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.', names(FX_TYPES), 'per-layer', { blurbs: FX_BLURBS }],
+  ['Part entrances', '`parts: [{ select, anim, each, stagger, delay }]` on a hand-authored html/svg layer — named entrances for its SUB-ELEMENTS, so a figure can grow its bars, then draw its line, then pop its dots. Selectors default to `rect, circle, path, polyline, line, [data-part]`.', names(PART_NAMES), 'per-layer', { blurbs: PART_BLURBS }],
   ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it — MDN `mix-blend-mode`' }],
   ['Filter presets', '`filter:"<name>"` — a named colour grade. Composite LOOKS are the richer set above; these are the primitives.', names(Object.keys(FILTER_PRESETS)), 'static', { blurbs: FILTER_BLURBS }],
   ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
