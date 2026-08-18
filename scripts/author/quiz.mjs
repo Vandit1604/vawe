@@ -231,6 +231,44 @@ function apply({ answersPath, name, slug, out }) {
   return { dest, fm, draft: (r.stdout || '').trim(), warnings: (r.stderr || '').trim() };
 }
 
+// ── look ──────────────────────────────────────────────────────────────────────────────────────────
+// THE LOOK IS SETTLED BY PICTURE, NOT BY QUESTION. Of 23 published studio briefs, not one asks a client
+// to describe motion in the abstract: it is elicited as clips on a board, as a per-shot field beside
+// framing, or as a reaction to a rough cut. The governing rule across all of them is that every good
+// instrument replaces an adjective with an artefact, and style frames are the contract — "if the client
+// approves the styleframe, they have approved the look".
+//
+// So this renders the candidate directions and asks which, rather than naming an effect at anybody. The
+// pieces all existed: `concept` generates N directions that each commit to a thread, a pace and a look,
+// and MEASURES their divergence with similarity.mjs; `panels` draws the storyboard stop as a picture.
+// Nothing had put them in one line.
+//
+// TWO OR THREE, NEVER FIVE — "one polished concept and one meaningful alternative" is the published
+// standard, and a fourth option is where a decision turns back into a menu.
+function look({ sb, n = 3 }) {
+  if (!sb || !fs.existsSync(sb)) return { error: 'no-storyboard', message: `--look needs a storyboard (got ${sb || 'nothing'}). Run --apply first.` };
+  const N = Math.min(3, Math.max(2, +n || 3));
+  const run = (args) => spawnSync(process.execPath, args, { encoding: 'utf8', cwd: ROOT });
+  const c = run([path.join(ROOT, 'scripts/author/concept.mjs'), sb, '--n', String(N)]);
+  if (c.status !== 0) return { error: 'concept-failed', message: (c.stderr || c.stdout || '').trim() };
+  const stem = path.basename(sb).replace(/\.storyboard\.md$/, '');
+  const dir = path.join(ROOT, 'formats/scene/_concepts');
+  const variants = fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.startsWith(`${stem}-`) && f.endsWith('.storyboard.md'))
+    : [];
+  if (!variants.length) return { error: 'no-variants', message: `concept wrote no variants for ${stem}` };
+  const sheets = [];
+  for (const v of variants) {
+    const slug = v.slice(stem.length + 1).replace(/\.storyboard\.md$/, '');
+    const r = run([path.join(ROOT, 'scripts/author/panels.mjs'), path.join(dir, v)]);
+    const m = (r.stdout || '').match(/(\/[^\s]*\.png)/);
+    const d = DIRECTIONS.find((x) => x.slug === slug);
+    sheets.push({ slug, sheet: m ? m[1] : null, thread: d ? d.thread : slug, why: d ? d.why : '', pace: d ? d.pace : null,
+      ok: r.status === 0, err: r.status === 0 ? null : (r.stderr || '').trim().split('\n')[0] });
+  }
+  return { stem, sheets: sheets.filter((s) => s.sheet), failed: sheets.filter((s) => !s.sheet) };
+}
+
 // ── self-test ─────────────────────────────────────────────────────────────────────────────────────
 // Every option must resolve in the registry it claims to come from, so a renamed direction or profile
 // fails HERE rather than rendering a question about something the engine cannot do.
@@ -268,6 +306,15 @@ if (isMain) {
   if (argv.includes('--self-test')) { selfTest(); }
   else if (argv.includes('--round') && flag('--round') === '2') {
     console.log(JSON.stringify(round2({ placement: flag('--placement'), job: flag('--job') }), null, 2));
+  } else if (argv.includes('--look')) {
+    const res = look({ sb: flag('--sb'), n: flag('--n', '3') });
+    if (res.error) { console.error(`✗ ${res.message}`); process.exit(2); }
+    for (const f of res.failed) console.error(`  ⚠ ${f.slug}: panels failed — ${f.err || 'no sheet'}`);
+    console.log(`\n  ${res.sheets.length} direction(s) drawn. READ THE SHEETS, then pick one:\n`);
+    for (const s of res.sheets) console.log(`  ${s.thread.padEnd(24)} ${s.sheet}\n      ${s.why}\n`);
+    console.log(JSON.stringify({ questions: [{ header: 'Direction', question: 'Which of these is the film?',
+      options: res.sheets.map((s) => ({ label: s.thread, description: `${s.why} Drawn at ${s.pace}s a beat — see ${s.sheet}.` })) }] }, null, 2));
+    console.log(`\n  then: make concept-pick SB=<storyboard> OPTION=<direction>`);
   } else if (argv.includes('--apply')) {
     const res = apply({ answersPath: flag('--answers'), name: flag('--name'), slug: flag('--slug'), out: flag('--out') });
     if (res.error) { console.error(`✗ ${res.message}`); process.exit(2); }

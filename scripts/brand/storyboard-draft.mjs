@@ -52,7 +52,7 @@ const beats = sections.map((s, i) => {
   const blueprint = first ? 'kineticHook' : last ? 'ctaEnd' : (s.kind === 'canvas' ? 'screenDive (clipped image + ken)' : 'component capture (live UI) + a re-typed headline');
   const type = first ? 'text (kinetic hook)' : last ? 'text + logo (end card)' : (s.kind === 'canvas' ? 'image (clipped section screenshot) + ken' : 'component (make capture) + text');
   const cap = s.capture ? s.capture.split('\n').pop().trim() : `make capture URL=${doc.url || '<url>'} SEL='${s.sel || '<selector>'}' OUT=assets/brands/${NAME}/caps/${String(i + 1).padStart(2, '0')}.json`;
-  return { i: i + 1, label: s.label, start, dur: per, blueprint, type, shot: s.shot, sel: s.sel, kind: s.kind, cap, first, last };
+  return { i: i + 1, label: s.label, title: s.title, start, dur: per, blueprint, type, shot: s.shot, sel: s.sel, kind: s.kind, cap, first, last };
 });
 
 const L = [];
@@ -73,10 +73,13 @@ L.push('> One beat per real section, in the site\'s order. This is a SKELETON: s
 L.push('> `message:` above, then present it for sign-off before authoring the JSON. Blueprints: `make blueprints`.');
 L.push('');
 for (const b of beats) {
-  L.push(`## Beat ${b.i} — ${nice(b.label)}  (${b.start}s–${(b.start + b.dur).toFixed(1)}s)`);
+  // `title` is the site's own heading; `label` is its 28-char filename slug. Titling a beat from the slug
+  // put "Built For The Future Availab" on the panels sheet — a truncation shown to whoever approves the
+  // plan. Falls back to the slug for studies captured before `title` existed.
+  L.push(`## Beat ${b.i} — ${b.title || nice(b.label)}  (${b.start}s–${(b.start + b.dur).toFixed(1)}s)`);
   L.push('');
   L.push(`- type: ${b.type}`);
-  L.push(`- onscreen: ${b.first ? '<fill: the ≤12-word hook, front-load the strong word>' : b.last ? `<fill: the exact CTA + ${NAME} logo + url>` : `the real "${nice(b.label)}" section — capture it, re-type any headline with a \`type\` layer`}`);
+  L.push(`- onscreen: ${b.first ? '<fill: the ≤12-word hook, front-load the strong word>' : b.last ? `<fill: the exact CTA + ${NAME} logo + url>` : `the real "${b.title || nice(b.label)}" section — capture it, re-type any headline with a \`type\` layer`}`);
   L.push(`- why: <fill: what this beat PROVES or teaches that no other beat does — cut it and what is lost?>`);
   L.push(`- blueprint: ${b.blueprint}`);
   // `becomes:` is a BLOCKER on any film under 15s and this writer emitted it never, so every short draft

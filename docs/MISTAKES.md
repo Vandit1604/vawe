@@ -9579,6 +9579,34 @@ in the day: a value produced, carried to a boundary, and dropped without a word.
 
 ---
 
+## #346 — A field enumerated by hand at a boundary, four times in one day
+
+Four separate files today collected a value, carried it to a boundary that lists its fields by hand, and
+dropped it. Nothing errored in any of them. Each was invisible until something downstream tried to USE
+the value, and each took a different debugging session to find:
+
+| where | what died |
+|---|---|
+| `mcp/server.mjs` `knobLine` | 79 dial `desc` strings, fetched from `core/knobs.js` and mapped away |
+| `scripts/brand/sections.mjs:127` | the real page heading, read into `raw` and never put in the manifest |
+| `scripts/author/quiz.mjs` `apply` | the child process's stderr, so its overrun warning was swallowed |
+| `scripts/brand/storyboard-draft.mjs:54` | `title` again, one layer on, so beats were titled from the slug |
+
+The last is the sharpest: after `sections.mjs` was fixed to keep the heading, the beat mapper enumerated
+`{ i, label, start, dur, … }` and dropped it a SECOND time, so panels sheets shown to whoever approves
+the plan still read `Built For The Future Availab` — a truncation, presented as a title, at an approval
+stop.
+
+**The shape.** `{ a: x.a, b: x.b, c: x.c }` at a serialisation boundary is where data goes to die quietly.
+A spread plus an explicit omit list fails loudly when the shape changes; an inclusion list fails silently
+and forever. The engine's own registries already know this — `LAYER_PROPS` derives from each module's
+exported `PROPS` and THROWS when a type declares none — but the brand and MCP tooling never adopted it.
+
+Not proposing a sweep. Proposing the rule: **at any boundary where a field list is written by hand, the
+question is what you are dropping, and the answer has to be one you meant.**
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

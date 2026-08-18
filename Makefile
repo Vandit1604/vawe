@@ -455,6 +455,14 @@ quiz-round2:
 quiz-apply:
 	node scripts/author/quiz.mjs --apply --answers $(ANSWERS) --name $(NAME) $(if $(OUT),--out $(OUT)) $(if $(SLUG),--slug $(SLUG))
 
+# make quiz-look SB=<storyboard.md> [N=3]  — THE LOOK, SETTLED BY PICTURE. Runs `concept` for N directions
+# (each committing to a thread, a pace and a look, with their divergence MEASURED by similarity.mjs), draws
+# `panels` for each, and prints the pick-one question with a sheet path per option. Of 23 published studio
+# briefs not one asks a client to describe motion in words: every good instrument replaces an adjective
+# with an artefact. Two or three options, never five. READ THE SHEETS.
+quiz-look:
+	node scripts/author/quiz.mjs --look --sb $(SB) $(if $(N),--n $(N))
+
 # make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
 # decisions that make a video good were made and written down BEFORE the JSON. Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
