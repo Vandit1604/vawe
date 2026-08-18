@@ -9,8 +9,10 @@
 // Grade first, glow third, grain/overlay last, framing on top — get it wrong and the grain blooms or
 // the vignette gets recoloured.
 //
-// CUSTOMIZATION: every look works with ZERO config by reskinning to the theme (colours default to
-// var(--accent)/tokens). Override via `lookOpts: { color, color2, colors, grain, vignette, strength }`,
+// CUSTOMIZATION: every look works with ZERO config, but "reskins to the theme" is true of SOME of them,
+// not all — a pass that names no colour falls to var(--accent), while a look whose identity is a palette
+// (hologram, cyberpunk, nightVision, thermal) stays that colour on every theme, by design.
+// Override any of them via `lookOpts: { color, color2, colors, grain, vignette, strength }`,
 // or the quick `filter: "neon:0.9"` where the ONE positional arg is always `strength` (0..1). A single
 // `strength` dial is threaded into every pass, so one number scales the whole look.
 // A knob a look cannot use is an ERROR, not a no-op — see KNOB_ROUTES below and docs/MISTAKES.md #351.
@@ -156,22 +158,34 @@ export const KNOB_ROUTES = {
 // lib-test proves this table against BEHAVIOUR, so it cannot drift from the passes above.
 const PASS_READS = {
   bloom: ['glowColor', 'color'], hBloom: ['streakColor', 'color'], wash: ['color'],
-  lightLeak: ['leakColor', 'color'], relief: ['lightColor', 'color'], gradientMap: ['colors'],
+  // `relief` reads o.lightColor and NOT o.color (see the relief pass above). Listing `color` here was
+  // wrong and it mattered in one direction only: an author's `color` still reaches relief, because
+  // KNOB_ROUTES expands it into `lightColor`. What the wrong entry hid is the OTHER reader of this
+  // table — a look's own `d.color` is never routed, so on letterpress and chrome it resolved against a
+  // pass that does not read it and rendered nothing. docs/MISTAKES.md #366.
+  lightLeak: ['leakColor', 'color'], relief: ['lightColor'], gradientMap: ['colors'],
   chromatic: ['warm', 'cool'], grain: ['grain'], vignette: ['vignette', 'strengthV'],
   vignetteInvert: ['vignette'], grid: ['gridColor'],
 };
 
 // ---- the look registry ---------------------------------------------------------------------------
 // A look: { d: default knobs, p: [[passName, fixedArgs?], …] in canonical pipeline order }.
-// `strength` default lives in d.strength; colours default to theme tokens unless the look's identity
-// is a fixed palette (cyberpunk/nightVision/thermal), which set signature hexes but still take overrides.
+// `strength` default lives in d.strength. A colour belongs in ONE of two places and the choice is the
+// whole design: a pass that names no colour follows the theme (`wash` and `hBloom` fall to var(--accent)),
+// and a look whose identity IS a palette — hologram's cyan, cyberpunk's magenta, thermal's ramp — fixes
+// it in that pass's argument bag, where it renders.
+//
+// `d` IS NOT THE PLACE FOR ONE. `d` is merged BEFORE the fixed bag, so a pass that names the same key
+// shadows it and the declared colour never reaches a frame. Sixteen looks carried a `d.color` in exactly
+// that position; every one was a decision nobody could see the result of, and deleting all sixteen moved
+// zero pixels across 104 scenes. `d` holds knobs the passes leave open. docs/MISTAKES.md #366.
 export const LOOKS = {
   // --- glow family ---
   neon: { d: { strength: 0.8 }, p: [['saturate', { k: 1.3 }], ['bloom', { size: 1.1, key: 'value' }], ['brightness', { k: 1.05 }]] },
-  dreamyHaze: { d: { strength: 0.7, color: '#ffffff' }, p: [['blurSoft', { px: 0.5 }], ['bloom', { size: 1.4, glowColor: '#ffffff' }], ['brightness', { k: 1.05 }], ['wash', { color: '#ffe7c0', amt: 0.1 }]] },
-  halationFilm: { d: { strength: 0.7, color: '#ffdcb0' }, p: [['contrast', { k: 1.05 }], ['bloom', { size: 1.2, glowColor: '#ffd0a0' }], ['grain', { grain: 0.25 }]] },
-  angelic: { d: { strength: 0.8, color: '#ffffff' }, p: [['overexpose', { amt: 0.5 }], ['bloom', { size: 1.6, glowColor: '#ffffff' }], ['desaturate', { amt: 0.3 }], ['vignetteInvert', { vignette: 0.4 }]] },
-  hologram: { d: { strength: 0.8, color: '#57ffe0' }, p: [['chromatic', { px: 2, warm: 'rgba(255,60,120,0.7)', cool: 'rgba(60,220,255,0.75)' }], ['bloom', { size: 0.8, glowColor: '#57ffe0' }], ['brightness', { k: 1.05 }], ['scanlines', { gap: 3, alpha: 0.3 }]] },
+  dreamyHaze: { d: { strength: 0.7 }, p: [['blurSoft', { px: 0.5 }], ['bloom', { size: 1.4, glowColor: '#ffffff' }], ['brightness', { k: 1.05 }], ['wash', { color: '#ffe7c0', amt: 0.1 }]] },
+  halationFilm: { d: { strength: 0.7 }, p: [['contrast', { k: 1.05 }], ['bloom', { size: 1.2, glowColor: '#ffd0a0' }], ['grain', { grain: 0.25 }]] },
+  angelic: { d: { strength: 0.8 }, p: [['overexpose', { amt: 0.5 }], ['bloom', { size: 1.6, glowColor: '#ffffff' }], ['desaturate', { amt: 0.3 }], ['vignetteInvert', { vignette: 0.4 }]] },
+  hologram: { d: { strength: 0.8 }, p: [['chromatic', { px: 2, warm: 'rgba(255,60,120,0.7)', cool: 'rgba(60,220,255,0.75)' }], ['bloom', { size: 0.8, glowColor: '#57ffe0' }], ['brightness', { k: 1.05 }], ['scanlines', { gap: 3, alpha: 0.3 }]] },
   glitchGlow: { d: { strength: 0.85 }, p: [['chromatic', { px: 3 }], ['bloom', { size: 0.9, key: 'value' }], ['brightness', { k: 1.04 }], ['scanlines', { gap: 5, alpha: 0.3 }]] },
   // --- analog / retro ---
   vhs: { d: { strength: 0.7 }, p: [['chromatic', { px: 3 }], ['saturate', { k: 1.2 }], ['blurSoft', { px: 0.4 }], ['scanlines', { gap: 4, alpha: 0.22 }], ['grain', { grain: 0.3 }]] },
@@ -183,23 +197,23 @@ export const LOOKS = {
   fadedPolaroid: { d: { strength: 0.65, color: '#ffd9a8' }, p: [['sepia', { a: 0.35 }], ['desaturate', { amt: 0.2 }], ['contrast', { k: 0.95 }], ['brightness', { k: 1.05 }], ['wash', { color: '#3a2c1a', amt: 0.12, blend: 'screen' }], ['lightLeak', { corner: 'tr', leak: 0.35 }], ['grain', { grain: 0.24 }], ['vignette', { vignette: 0.4 }]] },
   nostalgia: { d: { strength: 0.7, color: '#ffcf9a' }, p: [['sepia', { a: 0.3 }], ['desaturate', { amt: 0.15 }], ['bloom', { size: 0.8, glowColor: '#ffdcae' }], ['lightLeak', { corner: 'tl', leak: 0.3 }], ['grain', { grain: 0.2 }]] },
   // --- sci-fi / hud ---
-  cyberpunk: { d: { strength: 0.8, color: '#08f0e0', color2: '#ff2fd0' }, p: [['contrast', { k: 1.1 }], ['saturate', { k: 1.4 }], ['chromatic', { px: 2, warm: 'rgba(255,47,208,0.7)', cool: 'rgba(8,240,224,0.7)' }], ['bloom', { size: 0.9, glowColor: '#ff2fd0' }], ['scanlines', { gap: 4, alpha: 0.2 }], ['vignette', { vignette: 0.4 }]] },
+  cyberpunk: { d: { strength: 0.8 }, p: [['contrast', { k: 1.1 }], ['saturate', { k: 1.4 }], ['chromatic', { px: 2, warm: 'rgba(255,47,208,0.7)', cool: 'rgba(8,240,224,0.7)' }], ['bloom', { size: 0.9, glowColor: '#ff2fd0' }], ['scanlines', { gap: 4, alpha: 0.2 }], ['vignette', { vignette: 0.4 }]] },
   nightVision: { d: { strength: 0.75 }, p: [['grayscale', { a: 1 }], ['sepia', { a: 1 }], ['hueRotate', { deg: 65 }], ['saturate', { k: 4 }], ['bloom', { size: 0.6, glowColor: '#8dff8d' }], ['scanlines', { gap: 3, alpha: 0.25 }], ['grain', { grain: 0.3 }], ['vignette', { vignette: 0.5 }]] },
   thermal: { d: { strength: 0.7, colors: ['#05010f', '#3a0aa0', '#e0207a', '#ff8a00', '#ffe45e', '#ffffff'] }, p: [['gradientMap', {}], ['blurSoft', { px: 0.6 }], ['vignette', { vignette: 0.4 }]] },
   // --- camera / lens ---
   lomo: { d: { strength: 0.8, color: '#ff9a3d' }, p: [['saturate', { k: 1.5 }], ['contrast', { k: 1.15 }], ['lightLeak', { corner: 'tr', leak: 0.3 }], ['grain', { grain: 0.25 }], ['vignette', { vignette: 0.6 }]] },
   droneCinematic: { d: { strength: 0.5 }, p: [['contrast', { k: 1.08 }], ['saturate', { k: 1.1 }], ['bloom', { size: 0.4, glowColor: '#ffffff' }], ['grain', { grain: 0.12 }], ['vignette', { vignette: 0.3 }]] },
-  vintageAnamorphic: { d: { strength: 0.75, color: '#a9c8ff' }, p: [['hBloom', { size: 1, streakColor: '#7fb0ff' }], ['bloom', { size: 0.5, glowColor: '#ffffff' }], ['chromatic', { px: 2 }], ['grain', { grain: 0.2 }], ['vignette', { vignette: 0.5 }]] },
+  vintageAnamorphic: { d: { strength: 0.75 }, p: [['hBloom', { size: 1, streakColor: '#7fb0ff' }], ['bloom', { size: 0.5, glowColor: '#ffffff' }], ['chromatic', { px: 2 }], ['grain', { grain: 0.2 }], ['vignette', { vignette: 0.5 }]] },
   // --- motion-emphasis (static "hit" looks; pair with shake/stings for motion) ---
-  impact: { d: { strength: 0.9, color: '#ffffff' }, p: [['overexpose', { amt: 0.6 }], ['chromatic', { px: 4 }], ['bloom', { size: 0.8, glowColor: '#ffffff' }], ['vignette', { vignette: 0.5 }]] },
-  timeFreeze: { d: { strength: 0.7, color: '#bcd6ff' }, p: [['desaturate', { amt: 0.4 }], ['wash', { color: '#5a8cff', amt: 0.12, blend: 'screen' }], ['bloom', { size: 0.5, glowColor: '#bcd6ff' }], ['chromatic', { px: 1.5 }], ['vignette', { vignette: 0.4 }]] },
+  impact: { d: { strength: 0.9 }, p: [['overexpose', { amt: 0.6 }], ['chromatic', { px: 4 }], ['bloom', { size: 0.8, glowColor: '#ffffff' }], ['vignette', { vignette: 0.5 }]] },
+  timeFreeze: { d: { strength: 0.7 }, p: [['desaturate', { amt: 0.4 }], ['wash', { color: '#5a8cff', amt: 0.12, blend: 'screen' }], ['bloom', { size: 0.5, glowColor: '#bcd6ff' }], ['chromatic', { px: 1.5 }], ['vignette', { vignette: 0.4 }]] },
   // --- Tier B: distortion looks (static feDisplacementMap — deterministic, no frame hook) ---
-  glassWarp: { d: { strength: 0.6, color: '#ffffff' }, p: [['displace', { freq: 0.02, scale: 9 }], ['blurSoft', { px: 0.4 }], ['bloom', { size: 0.4, glowColor: '#ffffff' }]] },
-  heatWarp: { d: { strength: 0.6, color: '#ffb060' }, p: [['displace', { freq: 0.01, scale: 12 }], ['wash', { color: '#ff8a2b', amt: 0.1, blend: 'screen' }], ['brightness', { k: 1.04 }]] },
+  glassWarp: { d: { strength: 0.6 }, p: [['displace', { freq: 0.02, scale: 9 }], ['blurSoft', { px: 0.4 }], ['bloom', { size: 0.4, glowColor: '#ffffff' }]] },
+  heatWarp: { d: { strength: 0.6 }, p: [['displace', { freq: 0.01, scale: 12 }], ['wash', { color: '#ff8a2b', amt: 0.1, blend: 'screen' }], ['brightness', { k: 1.04 }]] },
   melt: { d: { strength: 0.7 }, p: [['displace', { freq: 0.006, scale: 24 }], ['blurSoft', { px: 0.5 }], ['contrast', { k: 1.05 }]] },
-  watercolor: { d: { strength: 0.6, color: '#eef0e8' }, p: [['displace', { freq: 0.015, scale: 11 }], ['desaturate', { amt: 0.25 }], ['contrast', { k: 0.95 }], ['wash', { color: '#f2ede0', amt: 0.12, blend: 'multiply' }], ['grain', { grain: 0.15 }]] },
-  dreamSequence: { d: { strength: 0.7, color: '#ffe7c0' }, p: [['displace', { freq: 0.01, scale: 7 }], ['blurSoft', { px: 0.5 }], ['bloom', { size: 0.7, glowColor: '#ffe7c0' }], ['wash', { color: '#ffd9a8', amt: 0.1, blend: 'screen' }], ['grain', { grain: 0.16 }]] },
-  rippleGlass: { d: { strength: 0.55, color: '#bfe0ff' }, p: [['displace', { freq: 0.03, scale: 8 }], ['bloom', { size: 0.35, glowColor: '#bfe0ff' }], ['vignette', { vignette: 0.3 }]] },
+  watercolor: { d: { strength: 0.6 }, p: [['displace', { freq: 0.015, scale: 11 }], ['desaturate', { amt: 0.25 }], ['contrast', { k: 0.95 }], ['wash', { color: '#f2ede0', amt: 0.12, blend: 'multiply' }], ['grain', { grain: 0.15 }]] },
+  dreamSequence: { d: { strength: 0.7 }, p: [['displace', { freq: 0.01, scale: 7 }], ['blurSoft', { px: 0.5 }], ['bloom', { size: 0.7, glowColor: '#ffe7c0' }], ['wash', { color: '#ffd9a8', amt: 0.1, blend: 'screen' }], ['grain', { grain: 0.16 }]] },
+  rippleGlass: { d: { strength: 0.55 }, p: [['displace', { freq: 0.03, scale: 8 }], ['bloom', { size: 0.35, glowColor: '#bfe0ff' }], ['vignette', { vignette: 0.3 }]] },
 
   // --- relief family: the SVG primitives (feConvolveMatrix / feMorphology / fe*Lighting) ---
   // These read NEIGHBOURING pixels, which no CSS filter function can do, so they are the only looks
@@ -211,13 +225,13 @@ export const LOOKS = {
   // where it falls away from the lamp. Warm paper wash and grain sell the stock.
   // The brightness lift is not taste, it is arithmetic: diffuse light MULTIPLIES, so without it the
   // whole picture walks toward black and reads as moody stone rather than ink on pale stock.
-  letterpress: { d: { strength: 0.7, color: '#f3ece0' },
+  letterpress: { d: { strength: 0.7 },
     p: [['relief', { mode: 'diffuse', azimuth: 225, elevation: 62, surface: 2.2, constant: 1.9 }],
         ['brightness', { k: 1.5 }], ['desaturate', { amt: 0.6 }], ['contrast', { k: 1.04 }],
         ['wash', { color: '#efe6d6', amt: 0.16, blend: 'screen' }], ['grain', { grain: 0.14 }]] },
   // chrome — specular light ADDS instead of multiplying, so highlights sit on top of the metal. The
   // cool tritone under it is what stops it reading as "a shiny photo" and starts it reading as metal.
-  chrome: { d: { strength: 0.85, color: '#dfe8ff' },
+  chrome: { d: { strength: 0.85 },
     p: [['relief', { mode: 'specular', azimuth: 235, elevation: 40, surface: 4, exponent: 24, constant: 1.15, lightColor: '#ffffff' }],
         ['gradientMap', { colors: ['#0b1020', '#8c9bb5', '#f2f6ff'] }], ['contrast', { k: 1.15 }]] },
   // edgeGlow — the edge kernel cancels flat areas to black and keeps only boundaries, which is a

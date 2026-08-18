@@ -1015,6 +1015,29 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   }
   ok(`looks: every knob a look declares changes its output${deadKnobs.length ? ' — dead: ' + deadKnobs.join(', ') : ''}`, deadKnobs.length === 0);
 
+  // 1b. A VALUE A LOOK DECLARES MUST RENDER. The check above asks whether an AUTHOR can move the knob;
+  // this asks whether the look's OWN default reaches the frame. They are different questions, because
+  // the two travel by different routes: the author's knob is expanded into private argument names and
+  // written AFTER the per-pass fixed bag (so it wins), while `d.color` is merged BEFORE it (so a pass
+  // that fixes the same spelling silently shadows it). Sixteen looks declared a colour that never
+  // rendered, including vintageAnamorphic's `#a9c8ff` — the exact hex the comment in core/looks.js
+  // records finding dead and fixing, where the fix went to the pass and left the look entry behind.
+  // Setting letterpress's to pure red moved zero pixels. docs/MISTAKES.md #366.
+  const shadowed = [];
+  for (const n of LOOK_NAMES) {
+    for (const k of Object.keys(LOOKS[n].d)) {
+      if (k === 'strength' || PROBE[k] === undefined) continue;
+      const saved = LOOKS[n].d[k];
+      const before = sig(resolveComposite(n, {}));
+      LOOKS[n].d[k] = PROBE[k];
+      let moved = false;
+      try { moved = sig(resolveComposite(n, {})) !== before; } catch { moved = false; }
+      LOOKS[n].d[k] = saved;
+      if (!moved) shadowed.push(`${n}.${k}`);
+    }
+  }
+  ok(`looks: every DEFAULT a look declares reaches the frame${shadowed.length ? ' — shadowed: ' + shadowed.join(', ') : ''}`, shadowed.length === 0);
+
   // The routing table must agree with what the passes actually read, in BOTH directions, or the
   // "this look does not take that knob" error starts lying.
   const knobDrift = [];

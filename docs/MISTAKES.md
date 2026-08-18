@@ -10534,6 +10534,78 @@ answer (#361) — the shape recurs at every scale, in code and in output.
 ---
 
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
+## #366 — Sixteen looks declared a colour that never rendered, and the test for it asked the wrong question
+
+Chasing the `make unused` census, which names itself a test backlog: three never-used effects had turned
+out to be BROKEN the moment anything exercised them, so the never-named vocabulary is really untested
+vocabulary. I exercised all of it — the eight GSAP names I had argued for KEEPING one commit earlier, the
+four unused looks, five camera moves, three part entrances.
+
+**All of it works.** The `char*` effects fold and tilt per glyph, the idle loops oscillate and re-render
+frame 10 after frame 55 byte-identically, `widen` scales X on a fill-box, the camera moves emit sane
+tracks with every `linear` documented and deliberate. The backlog came back clean, which is worth writing
+down because the three prior cases predicted the opposite.
+
+Then LETTERPRESS rendered into a grey rectangle instead of into the page. Its paper is `#f3ece0`, on a
+theme whose paper is `#ffffff`. Setting it to pure red **moved zero pixels**.
+
+### The two routes, and why only one arrives
+
+A colour reaches a pass by one of two paths, and they have opposite precedence:
+
+```js
+const out = pass({ ...o, ...(fixed || {}), ...routed }, s);
+//                  ^^^ the look's own d      ^^^^^^ the author's knob, expanded
+```
+
+The author's `lookOpts.color` is written AFTER the per-pass fixed bag, so it wins — that was the #351
+fix and it is correct. The look's own `d.color` is merged BEFORE it, so any pass naming the same key
+shadows it silently. `letterpress` fixes `wash.color`, so its `d.color` never resolved against anything.
+
+Measured across the registry by perturbation rather than by reading the table: **16 of 31 looks.**
+`dreamyHaze · halationFilm · angelic · hologram · cyberpunk (both) · vintageAnamorphic · impact ·
+timeFreeze · glassWarp · heatWarp · watercolor · dreamSequence · rippleGlass · letterpress · chrome`
+
+`halationFilm` is the sharpest: `d.color: '#ffdcb0'` beside a bloom fixing `glowColor: '#ffd0a0'`. Two
+different warms, one of them fiction.
+
+### The half-fix, provable with its own hex
+
+`vintageAnamorphic.color` is `#a9c8ff`. That is the exact value the comment in `core/looks.js` records
+finding dead and repairing:
+
+> `#a9c8ff` was the default here and it was DEAD: the one look with an hBloom fixes streakColor, so
+> nothing ever resolved it. A dead default is still a decision nobody made, so it follows the theme now.
+
+The repair went to the PASS and left the LOOK ENTRY sitting two dozen lines below, still dead, still
+`#a9c8ff`. **FIX THE RULE, NOT THE CALL SITE**, failing on the file that best states the rule.
+
+### Why the existing guard was green
+
+`lib-test` already carried an assertion for this, added by #351, and its comment says a hand-written list
+"is what let `color` be dead on nineteen looks". It perturbs `resolveComposite(n, {k: probe})` — the
+author's knob. That is the ROUTED path, the one that wins. It could never see the unrouted one.
+
+One answer to two different questions: *can an author move this knob* and *does this declared value
+render* are not the same question, and the routing precedence is exactly what makes them differ. The
+same shape as `ANIM[name] || fade` answering "absent" and "wrong" identically, one level up.
+
+### The fix
+
+- `PASS_READS` claimed `relief` reads `color`; it reads `o.lightColor` only. Corrected. `liveKnobs` is
+  byte-identical for all 31 looks afterwards, because `KNOB_ROUTES` expands the author's `color` into
+  `lightColor` anyway — so the wrong entry only ever hid the OTHER reader of the table.
+- The 16 shadowed defaults deleted. **104 scenes, 0 changed** — the proof they were unreachable.
+- A new `lib-test` assertion perturbs `LOOKS[n].d[k]` itself. It fails on the old tree naming all 16
+  independently, and `d`'s contract is now written at the registry: a colour goes in the pass that uses
+  it, or it follows the theme; `d` holds knobs the passes leave open.
+- Two header claims corrected. The file promised "every look reskins to the theme"; hologram is cyan on
+  every theme, by design, and saying otherwise is how a reader concludes a dead default should have worked.
+
+### The gate that now catches it
+
+`node scripts/gates/lib-test.mjs` — "every DEFAULT a look declares reaches the frame".
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
