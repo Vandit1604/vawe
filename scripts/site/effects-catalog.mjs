@@ -21,6 +21,11 @@ import { SEAM_BLURBS } from '../../core/seams.js';
 import { PRESET_BLURBS } from '../../core/type.js';
 import { ANIM_BLURBS } from '../../core/clips.js';
 import { FX_BLURBS } from '../../core/fx/index.js';
+// Read off blueprints/index.mjs's own trailing comments — the registry line that declares each beat IS
+// the description, and blueprints-catalog.mjs already fails when one is missing. The hand-kept copy that
+// used to live in DESC had drifted: 3 of 12 beats were absent from it.
+import { BEAT_BLURBS } from './blueprints-catalog.mjs';
+import { GSAP_BLURBS, GSAP_EXIT_BLURBS } from '../../core/gsap-effects.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
@@ -111,9 +116,15 @@ const REGISTERS = registersOf(fs.readFileSync(path.join(root, 'docs/CRAFT/SELECT
 // `meta` is the section's own vocabulary: { blurbs } for a family that keeps its descriptions beside its
 // registry, { kind } for one classified by register in SELECTION.md §4. Sections with neither pass nothing
 // and fall through to DESC exactly as before.
+// `meta.skip` is a DECISION, rendered instead of a blank. A dash reads as "nobody got to it" and invites
+// somebody to spend a day writing 41 descriptions of standard easing curves; a reason reads as "this was
+// considered" and points at the doc that actually helps. The families below are self-describing — the CSS
+// spec defines a blend mode, `9:16` is its own definition, a drawn icon called `check` draws a check — or
+// are better served at a level other than per-entry, which is true of easings.
 const d = (n, meta = {}) => (meta.blurbs && meta.blurbs[n])
   || DESC[n]
   || (meta.kind && REGISTERS[meta.kind] && REGISTERS[meta.kind][n])
+  || meta.skip
   || '—';
 const table = (rows) => ['| name | what / when |', '|---|---|', ...rows.map(([n, x]) => `| \`${n}\` | ${x} |`)].join('\n');
 const names = (arr) => [...new Set(arr)].sort();
@@ -121,8 +132,8 @@ const names = (arr) => [...new Set(arr)].sort();
 const sections = [
   ['Kinetic text presets', '`split`+`preset` on a text layer — words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`', names(Object.keys(PRESETS)), 'text', { blurbs: PRESET_BLURBS }],
   ['Enter / exit anims', '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`', names(ANIM_NAMES), 'per-layer', { blurbs: ANIM_BLURBS }],
-  ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text'],
-  ['GSAP exits', '`fxOut` — pair every entrance with a directional exit.', names(EXIT_FX), 'exit'],
+  ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text', { blurbs: GSAP_BLURBS }],
+  ['GSAP exits', '`fxOut` — pair every entrance with a directional exit.', names(EXIT_FX), 'exit', { blurbs: GSAP_EXIT_BLURBS }],
   ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition', { blurbs: CUT_BLURBS }],
   ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', { kind: 'sting' }],
   ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition', { blurbs: SEAM_BLURBS }],
@@ -132,7 +143,7 @@ const sections = [
   ['Backgrounds', '`bg:[{preset,from,to}]` — the field behind everything; moving ones (aurora/constellation/mesh/…) animate.', names(BG_NAMES), 'background'],
   ['Per-frame accent layers', '`{ "type":"beam", ... }` — a light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }` — a path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
-  ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }` — a whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint'],
+  ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }` — a whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
   ['Camera moves', '`"cameraMove": { "move":"<name>", ... }` — a calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`', names(CAMERA_MOVE_NAMES), 'camera'],
   ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }` — a FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition'],
   ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer'],
@@ -141,13 +152,13 @@ const sections = [
   ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.', names(RESAMPLE_FX), 'per-frame'],
   ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame'],
   ['Per-layer fx', '`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.', names(FX_TYPES), 'per-layer', { blurbs: FX_BLURBS }],
-  ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer'],
+  ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it — MDN `mix-blend-mode`' }],
   ['Filter presets', '`filter:"<name>"` — a named colour grade. Composite LOOKS are the richer set above; these are the primitives.', names(Object.keys(FILTER_PRESETS)), 'static'],
-  ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing'],
+  ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
   ['Caption styles', '`captions:{ style:"<name>" }` — how burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.', names(CAP_STYLE_NAMES), 'captions'],
-  ['Drawn icons', '`svgIcon("<name>")` — a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.', names(Object.keys(ICONS)), 'asset'],
-  ['Ransom faces', '`ransom` on a text layer — per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text'],
-  ['Output targets', '`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.', names([...Object.keys(ASPECTS), ...DESTINATION_NAMES]), 'canvas'],
+  ['Drawn icons', '`svgIcon("<name>")` — a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.', names(Object.keys(ICONS)), 'asset', { skip: 'the name is the drawing' }],
+  ['Ransom faces', '`ransom` on a text layer — per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface — see it, do not read about it' }],
+  ['Output targets', '`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.', names([...Object.keys(ASPECTS), ...DESTINATION_NAMES]), 'canvas', { skip: 'an aspect or a platform; core/safe.js holds the safe area each implies' }],
   ['Generators (the playground)', 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.', names(GENERATORS.map((g) => g.name)), 'generator'],
   ['Lightfield dials', 'The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.', names([...PATTERNS, ...SHAPES, ...ANCHORS, ...DIRECTIONS, ...MOTIONS]), 'generator'],
 ];

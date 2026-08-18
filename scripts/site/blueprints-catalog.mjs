@@ -2,6 +2,7 @@
 // Introspects blueprints/index.mjs (no render): each beat's name, props it accepts, and what it emits.
 // Token-efficient by design — it's the "reach for a blueprint" priming step (docs/CRAFT/BLUEPRINTS.md).
 //   node scripts/site/blueprints-catalog.mjs   ·   make blueprints
+import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { BEATS } from '../../blueprints/index.mjs';
 
@@ -39,19 +40,27 @@ function propsOf(fn) {
   return parts.map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean).join(', ');
 }
 
-const DESC = descriptions();
+// Exported so the effects catalog reads the registry's own trailing comments instead of keeping a second
+// hand-written copy. It had one, and it had drifted: 3 of the 12 beats were missing from it entirely.
+export const BEAT_BLURBS = descriptions();
+const DESC = BEAT_BLURBS;
 const missing = Object.keys(BEATS).filter((n) => !DESC[n]);
 if (missing.length) {
   console.error(`! blueprints/index.mjs declares no description comment for: ${missing.join(', ')}`);
   process.exit(1);
 }
 
-console.log(`\n  BEAT BLUEPRINTS · ${Object.keys(BEATS).length} directed beats  (compose a video as a sequence of these)\n`);
-console.log(`  Place one as:  { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props }   → make expand\n`);
-for (const [name, fn] of Object.entries(BEATS)) {
-  console.log(`  • ${name}`);
-  console.log(`      ${DESC[name]}`);
-  console.log(`      props: ${propsOf(fn)}\n`);
+
+const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
+if (isMain) {
+  console.log(`\n  BEAT BLUEPRINTS · ${Object.keys(BEATS).length} directed beats  (compose a video as a sequence of these)\n`);
+  console.log(`  Place one as:  { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props }   → make expand\n`);
+  for (const [name, fn] of Object.entries(BEATS)) {
+    console.log(`  • ${name}`);
+    console.log(`      ${DESC[name]}`);
+    console.log(`      props: ${propsOf(fn)}\n`);
+  }
+  console.log('  A blueprint fixes MOTION + structure, never copy/colour — two brands using one still differ.');
+  console.log('  Full doctrine + the reference reel: docs/CRAFT/BLUEPRINTS.md\n');
+  
 }
-console.log('  A blueprint fixes MOTION + structure, never copy/colour — two brands using one still differ.');
-console.log('  Full doctrine + the reference reel: docs/CRAFT/BLUEPRINTS.md\n');

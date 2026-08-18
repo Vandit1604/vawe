@@ -88,43 +88,43 @@
 
 | name | what / when |
 |---|---|
-| `backIn` | — |
-| `blurIn` | unblur in |
-| `bounceIn` | — |
-| `breathe` | idle breathe |
-| `charBlurCascade` | per-letter blur cascade |
-| `charFold` | per-letter 3D fold |
-| `charOvershoot` | per-letter overshoot |
-| `charTilt` | — |
-| `clipUp` | — |
-| `drift` | — |
-| `driftIn` | — |
-| `dropIn` | — |
-| `elasticIn` | — |
-| `expandIn` | — |
-| `fadeDown` | — |
-| `fadeIn` | — |
-| `fadeUp` | — |
-| `flipInX` | — |
-| `flipInY` | — |
-| `float` | idle float loop |
-| `flyLeft` | — |
-| `flyRight` | — |
-| `foldIn` | — |
-| `glitchIn` | — |
-| `heartbeat` | — |
-| `maskReveal` | — |
-| `popIn` | scale pop |
-| `pulse` | idle pulse |
-| `revealUp` | — |
-| `rollIn` | — |
-| `skewIn` | — |
-| `spinIn` | — |
-| `swing` | — |
-| `tiltIn` | — |
-| `wobble` | — |
-| `zoomBlur` | — |
-| `zoomIn` | — |
+| `backIn` | rises 90px and overshoots past its mark before settling — as fadeUp with a spring on the end |
+| `blurIn` | resolves out of heavy defocus in place — calm, premium, no travel at all |
+| `bounceIn` | drops in from above and bounces on landing — cartoon weight, for a punchline |
+| `breathe` | LOOP, never settles: a slow 2.2s swell with a slight dim — ambient, calmer than pulse |
+| `charBlurCascade` | each glyph rises out of blur in turn — the calm, premium per-letter reveal |
+| `charFold` | each glyph unfolds up from its own baseline with a small overshoot — kinetic type, warm |
+| `charOvershoot` | each glyph pops up from small and springs past its mark — the loudest per-letter reveal |
+| `charTilt` | each glyph swings in about its vertical axis and straightens — kinetic type, needs 3D perspective |
+| `clipUp` | a hard bottom-to-top wipe that uncovers the layer in place, opacity untouched — type reveals behind a mask |
+| `drift` | LOOP, never settles: a very slow 3s sideways wander — background parallax, easy to miss on purpose |
+| `driftIn` | floats a short diagonal out of soft blur, slowly — the quietest entrance here, for atmosphere |
+| `dropIn` | as bounceIn but falling from much further up, so it lands harder |
+| `elasticIn` | springs from tiny and wobbles several times before it stills, over a slow 1.1s — only ever playful, never for a serious brand |
+| `expandIn` | letters start crushed together and spread out of blur to their real tracking — a title-card open |
+| `fadeDown` | as fadeUp but settling downward from above — for anything hanging off a header |
+| `fadeIn` | plain opacity fade, nothing moves — the neutral default when motion would distract |
+| `fadeUp` | lifts 60px into place while fading — the workhorse entrance for body copy and cards |
+| `flipInX` | hinges up into the frame about its horizontal axis — cards and panels, needs 3D perspective |
+| `flipInY` | hinges in about its vertical axis, like a page turning — cards and panels, needs 3D perspective |
+| `float` | LOOP, never settles: rises and sinks 18px forever — idle life for a hero object |
+| `flyLeft` | travels in from off the left edge and decelerates hard — pair with a leftward exit |
+| `flyRight` | travels in from off the right edge and decelerates hard — pair with a rightward exit |
+| `foldIn` | unfolds downward from its top edge and springs level — dropdowns, panels, receipts; needs 3D perspective |
+| `glitchIn` | snaps in through five hard steps, sheared and offset — no smoothing at all, alarm and glitch beats only |
+| `heartbeat` | LOOP, never settles: a fast 12% throb twice a second — urgency, live counts, recording dots |
+| `maskReveal` | a hard left-to-right wipe, fast then a long settle — the premium editorial reveal for a headline |
+| `popIn` | springs up from 60% and overshoots slightly past full size before settling — playful, for badges and chips |
+| `pulse` | LOOP, never settles: breathes 6% larger and back every second — draws the eye to a CTA |
+| `revealUp` | clipUp plus a short lift and fade, so the layer rises as it is uncovered — the fuller version of clipUp |
+| `rollIn` | rolls in from the left, its rotation unwinding as it travels — reads as a wheel arriving |
+| `skewIn` | slides in sheared and straightens as it lands — velocity you can read in the letterforms |
+| `spinIn` | rotates a half turn anticlockwise while growing, overshooting on the settle — logos, badges, seals |
+| `swing` | LOOP, never settles: a slow pendulum rock — hanging objects; needs 3D perspective |
+| `tiltIn` | swings open about its left edge, like a door facing the camera — needs 3D perspective |
+| `wobble` | LOOP, never settles: rocks 3 degrees each way — restless, for a warning or a toy |
+| `zoomBlur` | rushes back from too close while the defocus resolves — a camera pulling focus, premium hero beat |
+| `zoomIn` | grows from a fifth of its size on a plain decelerate, no overshoot — bigger travel than popIn, calmer landing |
 
 ## GSAP exits  `[exit]`
 
@@ -132,17 +132,17 @@
 
 | name | what / when |
 |---|---|
-| `blurOut` | — |
-| `collapseOut` | — |
-| `dropOut` | — |
-| `fadeOut` | — |
-| `fadeOutDown` | — |
-| `fadeOutUp` | — |
-| `flyOutLeft` | — |
-| `flyOutRight` | — |
-| `popOut` | — |
-| `spinOut` | — |
-| `zoomOut` | — |
+| `blurOut` | defocuses away without moving — correct for faces, cards and dense grids, where sliding reads as chaos |
+| `collapseOut` | folds down flat to a line from its top edge — terminal output, rows, receipts |
+| `dropOut` | falls out of the bottom of the frame under gravity — a thing discarded |
+| `fadeOut` | plain opacity fade to nothing — the neutral exit, safe under any cut |
+| `fadeOutDown` | accelerates downward as it fades — the exit that pairs with fadeUp |
+| `fadeOutUp` | accelerates upward off its mark as it fades — the exit that pairs with fadeDown |
+| `flyOutLeft` | throws off the left edge, gathering speed — the exit that pairs with flyRight |
+| `flyOutRight` | throws off the right edge, gathering speed — the exit that pairs with flyLeft |
+| `popOut` | shrinks away with a small anticipation swell first — the mirror of popIn, playful |
+| `spinOut` | rotates a half turn while shrinking away, winding up before it goes — the mirror of spinIn |
+| `zoomOut` | swells past the camera as it fades — product focus, the leaving beat gets out of the way |
 
 ## Scene cuts  `[transition]`
 
@@ -358,18 +358,18 @@
 
 | name | what / when |
 |---|---|
-| `cardCascade` | title + cards pop in one after another |
-| `chipGrid` | — |
-| `ctaEnd` | held end card: mark + install chip + url |
-| `kineticHook` | hook: eyebrow + hero count-up|word + kinetic subline |
-| `logoLockup` | mark pops + wordmark travels + kinetic headline |
-| `logoReveal` | mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
-| `morphButton` | — |
-| `screenDive` | kinetic title + UI shot ken-pushes in |
-| `statReveal` | hero count-up + kinetic label |
-| `terminalReveal` | typing command + cursor + rising output + result |
-| `typedHook` | — |
-| `verdictProof` | typing command + tone verdict chip |
+| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
+| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
+| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
+| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
+| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
+| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
+| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
+| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
+| `statReveal` | payoff: hero count-up + kinetic label |
+| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
+| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
+| `verdictProof` | claim proven: typing command + note + tone verdict chip |
 
 ## Camera moves  `[camera]`
 
@@ -507,23 +507,23 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `color` | — |
-| `color-burn` | — |
-| `color-dodge` | — |
-| `darken` | — |
-| `difference` | — |
-| `exclusion` | — |
-| `hard-light` | — |
-| `hue` | — |
-| `lighten` | — |
-| `luminosity` | — |
-| `multiply` | — |
-| `normal` | — |
-| `overlay` | — |
-| `plus-lighter` | — |
-| `saturation` | — |
-| `screen` | — |
-| `soft-light` | — |
+| `color` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `color-burn` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `color-dodge` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `darken` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `difference` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `exclusion` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `hard-light` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `hue` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `lighten` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `luminosity` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `multiply` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `normal` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `overlay` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `plus-lighter` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `saturation` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `screen` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
+| `soft-light` | the CSS compositing spec defines it — MDN `mix-blend-mode` |
 
 ## Filter presets  `[static]`
 
@@ -550,47 +550,47 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `brake` | — |
-| `easeInBack` | — |
-| `easeInBounce` | — |
-| `easeInCirc` | — |
-| `easeInCubic` | — |
-| `easeInElastic` | — |
-| `easeInExpo` | — |
-| `easeInOutBack` | — |
-| `easeInOutBounce` | — |
-| `easeInOutCirc` | — |
-| `easeInOutCubic` | — |
-| `easeInOutElastic` | — |
-| `easeInOutExpo` | — |
-| `easeInOutQuad` | — |
-| `easeInOutQuart` | — |
-| `easeInOutQuint` | — |
-| `easeInOutSine` | — |
-| `easeInQuad` | — |
-| `easeInQuart` | — |
-| `easeInQuint` | — |
-| `easeInSine` | — |
-| `easeOutBack` | — |
-| `easeOutBounce` | — |
-| `easeOutCirc` | — |
-| `easeOutCubic` | — |
-| `easeOutElastic` | — |
-| `easeOutExpo` | — |
-| `easeOutQuad` | — |
-| `easeOutQuart` | — |
-| `easeOutQuint` | — |
-| `easeOutSine` | — |
-| `linear` | — |
-| `ramp` | — |
-| `rush` | — |
-| `settle` | — |
-| `snap` | — |
-| `spring` | — |
-| `spring-bouncy` | — |
-| `spring-stiff` | — |
-| `springEase` | — |
-| `springStiff` | — |
+| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 
 ## Caption styles  `[captions]`
 
@@ -609,21 +609,21 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `agent` | — |
-| `arrowRight` | — |
-| `bolt` | — |
-| `braces` | — |
-| `check` | — |
-| `clock` | — |
-| `cube` | — |
-| `dollar` | — |
-| `file` | — |
-| `globe` | — |
-| `layers` | — |
-| `link` | — |
-| `plug` | — |
-| `shield` | — |
-| `spark` | — |
+| `agent` | the name is the drawing |
+| `arrowRight` | the name is the drawing |
+| `bolt` | the name is the drawing |
+| `braces` | the name is the drawing |
+| `check` | the name is the drawing |
+| `clock` | the name is the drawing |
+| `cube` | the name is the drawing |
+| `dollar` | the name is the drawing |
+| `file` | the name is the drawing |
+| `globe` | the name is the drawing |
+| `layers` | the name is the drawing |
+| `link` | the name is the drawing |
+| `plug` | the name is the drawing |
+| `shield` | the name is the drawing |
+| `spark` | the name is the drawing |
 
 ## Ransom faces  `[text]`
 
@@ -631,14 +631,14 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `Anybody` | — |
-| `Archivo` | — |
-| `Caveat` | — |
-| `Fraunces` | — |
-| `Hanken Grotesk` | — |
-| `Instrument Serif` | — |
-| `JetBrains Mono` | — |
-| `Space Grotesk` | — |
+| `Anybody` | a typeface — see it, do not read about it |
+| `Archivo` | a typeface — see it, do not read about it |
+| `Caveat` | a typeface — see it, do not read about it |
+| `Fraunces` | a typeface — see it, do not read about it |
+| `Hanken Grotesk` | a typeface — see it, do not read about it |
+| `Instrument Serif` | a typeface — see it, do not read about it |
+| `JetBrains Mono` | a typeface — see it, do not read about it |
+| `Space Grotesk` | a typeface — see it, do not read about it |
 
 ## Output targets  `[canvas]`
 
@@ -646,17 +646,17 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `16:9` | — |
-| `1:1` | — |
-| `4:3` | — |
-| `4:5` | — |
-| `9:16` | — |
-| `broadcast` | — |
-| `feed` | — |
-| `reels` | — |
-| `shorts` | — |
-| `tiktok` | — |
-| `web` | — |
+| `16:9` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `1:1` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `4:3` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `4:5` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `9:16` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `broadcast` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `feed` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `reels` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `shorts` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `tiktok` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `web` | an aspect or a platform; core/safe.js holds the safe area each implies |
 
 ## Generators (the playground)  `[generator]`
 

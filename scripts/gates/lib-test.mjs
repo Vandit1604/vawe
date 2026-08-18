@@ -8,6 +8,7 @@ import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '.
 import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
+import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
@@ -1245,6 +1246,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['PRESENTATIONS', Object.keys(PRESENTATIONS), CUT_BLURBS],
     ['SEAM_FX', SEAM_FX, SEAM_BLURBS],
     ['FX_TYPES', FX_TYPES, FX_BLURBS],
+    ['GSAP_FX', GSAP_FX, GSAP_BLURBS],
+    ['EXIT_FX', EXIT_FX, GSAP_EXIT_BLURBS],
   ];
   for (const [label, keys, map] of families) {
     const miss = keys.filter((k) => !map[k]);
@@ -1252,6 +1255,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok(`every ${label} entry has a blurb` + (miss.length ? ` — missing ${miss.join(', ')}` : ''), miss.length === 0);
     ok(`no blurb for a ${label} entry that does not exist` + (extra.length ? ` — ${extra.join(', ')}` : ''), extra.length === 0);
   }
+  // A LOOP IS NOT AN ENTRANCE. GSAP_FX is one flat list of both, so a layer given `float` as its entrance
+  // never settles and reads as a hung render. The two sets must stay disjoint and must together BE the
+  // list, or a gate reasoning about either half is reasoning about the wrong names.
+  ok('the GSAP loops and one-shots are disjoint and cover GSAP_FX',
+    LOOP_FX.every((n) => !ONESHOT_FX.includes(n)) && LOOP_FX.length + ONESHOT_FX.length === GSAP_FX.length);
+  ok('every GSAP loop says it never settles', LOOP_FX.every((n) => /LOOP|never settles/i.test(GSAP_BLURBS[n] || '')));
+
   // THE CAUTION IS DERIVABLE, so it must not drift. SOLO_BLIND is computed at load by probing every
   // presentation for a transform/filter that ever leaves identity, and scene.js throws on those styles
   // when sceneUnits is off. A blurb that names the caution for a different set than the runtime one is

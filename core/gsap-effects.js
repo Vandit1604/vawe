@@ -109,8 +109,78 @@ export function registerGsapEffects(gsap) {
   gsap.__vaweEffects = true;
 }
 
+// GSAP_BLURBS — one line per named effect, next to the registry that defines it (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
+// with no effect, or an effect with no key, is a bug. Character comes from the ease: back overshoots and
+// settles, elastic/bounce wobble, power4/expo are fast-then-long-settle, sine.inOut never stops.
+export const GSAP_BLURBS = {
+  // entrances
+  fadeIn: 'plain opacity fade, nothing moves — the neutral default when motion would distract',
+  fadeUp: 'lifts 60px into place while fading — the workhorse entrance for body copy and cards',
+  fadeDown: 'as fadeUp but settling downward from above — for anything hanging off a header',
+  flyLeft: 'travels in from off the left edge and decelerates hard — pair with a leftward exit',
+  flyRight: 'travels in from off the right edge and decelerates hard — pair with a rightward exit',
+  popIn: 'springs up from 60% and overshoots slightly past full size before settling — playful, for badges and chips',
+  zoomIn: 'grows from a fifth of its size on a plain decelerate, no overshoot — bigger travel than popIn, calmer landing',
+  zoomBlur: 'rushes back from too close while the defocus resolves — a camera pulling focus, premium hero beat',
+  blurIn: 'resolves out of heavy defocus in place — calm, premium, no travel at all',
+  elasticIn: 'springs from tiny and wobbles several times before it stills, over a slow 1.1s — only ever playful, never for a serious brand',
+  bounceIn: 'drops in from above and bounces on landing — cartoon weight, for a punchline',
+  backIn: 'rises 90px and overshoots past its mark before settling — as fadeUp with a spring on the end',
+  dropIn: 'as bounceIn but falling from much further up, so it lands harder',
+  spinIn: 'rotates a half turn anticlockwise while growing, overshooting on the settle — logos, badges, seals',
+  rollIn: 'rolls in from the left, its rotation unwinding as it travels — reads as a wheel arriving',
+  skewIn: 'slides in sheared and straightens as it lands — velocity you can read in the letterforms',
+  flipInX: 'hinges up into the frame about its horizontal axis — cards and panels, needs 3D perspective',
+  flipInY: 'hinges in about its vertical axis, like a page turning — cards and panels, needs 3D perspective',
+  clipUp: 'a hard bottom-to-top wipe that uncovers the layer in place, opacity untouched — type reveals behind a mask',
+  maskReveal: 'a hard left-to-right wipe, fast then a long settle — the premium editorial reveal for a headline',
+  revealUp: 'clipUp plus a short lift and fade, so the layer rises as it is uncovered — the fuller version of clipUp',
+  expandIn: 'letters start crushed together and spread out of blur to their real tracking — a title-card open',
+  tiltIn: 'swings open about its left edge, like a door facing the camera — needs 3D perspective',
+  driftIn: 'floats a short diagonal out of soft blur, slowly — the quietest entrance here, for atmosphere',
+  glitchIn: 'snaps in through five hard steps, sheared and offset — no smoothing at all, alarm and glitch beats only',
+  foldIn: 'unfolds downward from its top edge and springs level — dropdowns, panels, receipts; needs 3D perspective',
+  // per-letter text (ride the split-layer units path, so they stagger glyph by glyph)
+  charFold: 'each glyph unfolds up from its own baseline with a small overshoot — kinetic type, warm',
+  charTilt: 'each glyph swings in about its vertical axis and straightens — kinetic type, needs 3D perspective',
+  charBlurCascade: 'each glyph rises out of blur in turn — the calm, premium per-letter reveal',
+  charOvershoot: 'each glyph pops up from small and springs past its mark — the loudest per-letter reveal',
+  // loops (repeat forever, never settle — never use one as an entrance)
+  float: 'LOOP, never settles: rises and sinks 18px forever — idle life for a hero object',
+  pulse: 'LOOP, never settles: breathes 6% larger and back every second — draws the eye to a CTA',
+  breathe: 'LOOP, never settles: a slow 2.2s swell with a slight dim — ambient, calmer than pulse',
+  wobble: 'LOOP, never settles: rocks 3 degrees each way — restless, for a warning or a toy',
+  swing: 'LOOP, never settles: a slow pendulum rock — hanging objects; needs 3D perspective',
+  drift: 'LOOP, never settles: a very slow 3s sideways wander — background parallax, easy to miss on purpose',
+  heartbeat: 'LOOP, never settles: a fast 12% throb twice a second — urgency, live counts, recording dots',
+};
+
+// GSAP_EXIT_BLURBS — one line per EXITS entry, i.e. the values valid in `fxOut`. Exits use `.in` eases,
+// so they ACCELERATE away rather than decelerating in.
+export const GSAP_EXIT_BLURBS = {
+  fadeOut: 'plain opacity fade to nothing — the neutral exit, safe under any cut',
+  fadeOutUp: 'accelerates upward off its mark as it fades — the exit that pairs with fadeDown',
+  fadeOutDown: 'accelerates downward as it fades — the exit that pairs with fadeUp',
+  flyOutLeft: 'throws off the left edge, gathering speed — the exit that pairs with flyRight',
+  flyOutRight: 'throws off the right edge, gathering speed — the exit that pairs with flyLeft',
+  popOut: 'shrinks away with a small anticipation swell first — the mirror of popIn, playful',
+  zoomOut: 'swells past the camera as it fades — product focus, the leaving beat gets out of the way',
+  blurOut: 'defocuses away without moving — correct for faces, cards and dense grids, where sliding reads as chaos',
+  dropOut: 'falls out of the bottom of the frame under gravity — a thing discarded',
+  collapseOut: 'folds down flat to a line from its top edge — terminal output, rows, receipts',
+  spinOut: 'rotates a half turn while shrinking away, winding up before it goes — the mirror of spinIn',
+};
+
 // the names, for the schema/docs to derive instead of restating. EXIT_FX are the ones valid in `fxOut`.
 export const GSAP_FX = [...Object.keys(ONESHOT), ...Object.keys(LOOPS)];
+
+// The loops, NAMED, because the flat list above cannot tell an entrance from something that never
+// settles. `float`/`pulse`/`breathe`/`wobble`/`swing`/`drift`/`heartbeat` repeat forever by design, and a
+// layer given one as its entrance simply never arrives — it reads as a render that hung, and no gate can
+// currently say so because nothing distinguishes the two halves of GSAP_FX. Exported so one can.
+export const LOOP_FX = Object.keys(LOOPS);
+export const ONESHOT_FX = Object.keys(ONESHOT);
 export const EXIT_FX = Object.keys(EXITS);
 // default duration per effect, so scene.html can anchor an exit so it ENDS exactly at the layer's end.
 export const FX_DUR = Object.fromEntries(
