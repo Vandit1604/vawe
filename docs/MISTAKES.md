@@ -10392,6 +10392,48 @@ stated warning, and a check that watches for the tenth.
 
 ---
 
+## #363 — The gate written to catch blind spots had one, and its waiver list hid it
+
+A reviewer over `25746ee..08d9c36` cleared the three things that could have gone badly: no new throw
+fires on an ABSENT value, none sits on a per-frame path (every one is scene-build-time), `validate.mjs`
+is fully guarded so it still REPORTS a bad scene instead of crashing, and the nine new registrations
+introduce no import cycle. Then it found the one real defect, in `make silent-check` itself.
+
+**The pattern could not see optional chaining.** `MAP?.[name] || dflt` is the same lookup and the same
+bug, and the regex required whitespace only between the identifier and the bracket. Verified directly:
+
+```
+MISSES   const v = MAP?.[name] || dflt;
+MATCHES  const v = MAP[name] || dflt;
+```
+
+So any hand-rolled fallback written in the modern syntax would have shipped under a green gate — a FALSE
+NEGATIVE, the worse direction for a check whose whole job is to be a backstop.
+
+**And the waiver list was the evidence, which is the part worth keeping.** Three waivers described
+`o?.[k]` code the gate had therefore never once matched. They read as "inspected and cleared" and meant
+nothing. A blind spot with an explanation next to it looks considered.
+
+**Two fixes, and the second is the one that matters.** The pattern now tolerates `?.`. And a waiver that
+matches NOTHING is now itself a failure: the gate records which waivers fired and reports the rest.
+Turning that on immediately failed with **7 of 19 waivers stale** — more than a third of a list I had
+written an hour earlier was fiction. Most were keys the positional filter already handled; two were keys
+I had guessed rather than read off the gate's own output.
+
+The corrected list is 12, and every one of them matched something on this run.
+
+**Widening the pattern also surfaced two lookups nobody had ever seen, and one was mine** —
+`core/junctions.js:65`, from the junction work three commits earlier. It is legitimate (a film with no
+seams has no `seams` key, and `[]` is the true answer) but I had not known it was there.
+
+**The reusable part, and it is the whole week in one line.** I built a check to find code that is green
+about what it cannot see, and shipped it green about what it could not see, with a waiver list that made
+the gap look examined. **A gate needs a test that its exemptions are real**, or the exemption list
+becomes the hiding place. The fix is small and general: record which waivers fire, and fail on the ones
+that never do.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
