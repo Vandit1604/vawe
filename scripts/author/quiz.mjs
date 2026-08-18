@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { parseStoryboard } from './storyboard-parse.mjs';
 import { DIRECTIONS } from './directions.mjs';
 import { PROFILES } from './profiles.mjs';
 
@@ -225,10 +226,26 @@ function apply({ answersPath, name, slug, out }) {
   // of the same artifact, and the two would drift.
   const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts/brand/storyboard-draft.mjs')], { env, encoding: 'utf8' });
   if (r.status !== 0) return { error: 'draft-failed', message: (r.stderr || r.stdout || '').trim() };
+  // READ BACK WHAT WE WROTE, through the parser the gate and `make intent` also use. Writing a field and
+  // assuming it parsed is how a brief silently loses the decision it was asked for: `threads:` is the whole
+  // reason this step exists and nothing downstream would have noticed its absence until storyboard-check
+  // failed on a film nobody had run the gate on yet.
+  // The parser exposes the named fields at the top level and everything else through `field(name)`.
+  // `threads` is NOT one of the named ones, which is worth knowing: the field this whole step exists to
+  // supply is the one the parser has no first-class accessor for.
+  const parsed = parseStoryboard(fs.readFileSync(dest, 'utf8'));
+  const lost = ['arc', 'format', 'duration'].filter((k) => !String(parsed[k] ?? '').trim())
+    .concat(fm.threads && !String(parsed.field('threads') || '').trim() ? ['threads'] : []);
+  if (lost.length) return { error: 'round-trip', message: `wrote ${dest} but ${lost.join(', ')} did not parse back out of it — `
+    + `the brief's decision was lost between here and storyboard-parse.mjs.` };
+  // …and run the gate rather than telling the author to. It never claims a green plan: whatever the gate
+  // says is passed straight through, blockers included.
+  const g = spawnSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
   // The child's WARNINGS go to stderr, and printing only stdout swallowed them: the draft warns when the
   // sections cannot fit the duration, which is the single most useful thing it says to a short film, and
   // this function was eating it. A wrapper that hides its child's warnings is worse than no wrapper.
-  return { dest, fm, draft: (r.stdout || '').trim(), warnings: (r.stderr || '').trim() };
+  return { dest, fm, draft: (r.stdout || '').trim(), warnings: (r.stderr || '').trim(),
+    gate: `${(g.stdout || '').trim()}\n${(g.stderr || '').trim()}`.trim(), gateOk: g.status === 0 };
 }
 
 // ── look ──────────────────────────────────────────────────────────────────────────────────────────
@@ -324,7 +341,9 @@ if (isMain) {
     console.log(`\n  brief → ${shown(res.dest)}`);
     console.log(`  locked: ${res.fm.format} · ${res.fm.duration} · arc "${res.fm.arc}"${res.fm.threads ? ` · threads "${res.fm.threads}"` : ''}`);
     if (res.fm.beats) console.log(`  the chosen thread paces this at ~${res.fm.beats} beats (${res.fm.pace}s each)`);
-    console.log(`\n  next: make storyboard-check SB=${shown(res.dest)}`);
+    console.log(`\n${res.gate}`);
+    console.log(res.gateOk ? '' : `  ↑ the gate's blockers are yours to fill; the brief locked the frontmatter, not the copy.`);
+    console.log(`\n  next: make intent SB=${shown(res.dest)} D=<scene.json>   → then make plan-check`);
     console.log(`        then make concept SB=${shown(res.dest)} N=3 — three directions, rendered, so the LOOK is picked from pictures`);
   } else if (argv.includes('--ask')) {
     const payload = ask({ name: flag('--name'), url: flag('--url'), slug: flag('--slug') });
