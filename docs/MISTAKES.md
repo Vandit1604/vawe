@@ -9607,6 +9607,33 @@ question is what you are dropping, and the answer has to be one you meant.**
 
 ---
 
+## #347 — `vawe_capabilities` shipped names and kept the meanings at home
+
+An MCP client asking what this engine can do got `looks (31): neon dreamyHaze crt …` and
+`cuts (26): none fade slide …` — bare strings. One family in the same payload, `blocks`, carried a
+`blurb` per entry, so the shape was already there and three of the four families did not use it.
+
+The result is a client that knows a name exists and nothing about when to reach for it, which for an LLM
+is the difference between choosing and guessing. It would pick `glitch` for an `apple` beat because both
+words are in the list.
+
+**Fixed.** `looks`, `presets` and `cuts` now cross the wire as `{ name, blurb }`, 31/31 · 27/27 · 26/26.
+The look's meaning is its REGISTER from `SELECTION.md` §4 — the era it evokes — because that is the level
+an author picks at, and it is already complete and gated. Presets and cuts carry the blurbs added
+yesterday beside their registries. The renderer prints them one per line instead of joining names, so a
+cut now arrives as `whip — motion-blurred directional throw, momentum, between same-background beats only`.
+
+**Also gated at generation.** `scripts/site/effects-catalog.mjs` now exits 1 when a family that declares a
+blurb map has an entry missing from it, mirroring `blueprints-catalog.mjs:44`. `make lib-test` asserts the
+same thing; this is the copy that fires when somebody adds an effect and regenerates the docs without
+running the tests. Proved by deleting the `portal` seam's blurb and watching `make effects` fail by name.
+
+**And the smoke test has a target now.** `mcp/smoke.mjs` is the only thing that exercises the MCP path end
+to end, and it was wired to no `make` target — which is why it sat failing (its scene declared no `bg`,
+which the validator requires) until this work happened to run it. `make mcp-smoke`.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

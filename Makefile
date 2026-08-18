@@ -665,6 +665,12 @@ impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs)
 	node scripts/site/blueprints-catalog.mjs
 
+# make mcp-smoke  — end-to-end over the real MCP server: connects, reads the guide, refuses three leak
+# vectors, drafts a scene. It is the only thing that exercises that path, and it sat FAILING for a while
+# because it was wired to no target and nobody ran it (its scene declared no `bg`, which is required).
+mcp-smoke:
+	node mcp/smoke.mjs --no-render
+
 effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
 

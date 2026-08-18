@@ -178,6 +178,23 @@ out.push('| A logo to appear | the `logoReveal` beat / path draw-on / shape-morp
 out.push('| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |');
 out.push('');
 let total = 0;
+// A family that keeps a blurb map must keep it COMPLETE. blueprints-catalog.mjs:44 exits 1 when a beat
+// has no trailing comment, for the same reason: a catalog that silently renders a blank is how 379 of 476
+// rows came to be blank in the first place. lib-test asserts this too; this is the copy that fires when
+// somebody adds an effect and regenerates the docs without running the tests.
+const gaps = [];
+for (const [title, , list, , meta] of sections) {
+  if (!meta || !meta.blurbs) continue;
+  const miss = list.filter((n) => !meta.blurbs[n]);
+  if (miss.length) gaps.push(`${title}: ${miss.join(', ')}`);
+}
+if (gaps.length) {
+  console.error('✗ effects-catalog: a family with a blurb map has entries missing from it —');
+  for (const g of gaps) console.error(`    ${g}`);
+  console.error('  Add the blurb beside the registry (that is where it lives), then re-run.');
+  process.exit(1);
+}
+
 for (const [title, intro, list, tag, meta] of sections) {
   total += list.length;
   out.push(`## ${title}  \`[${tag}]\``);

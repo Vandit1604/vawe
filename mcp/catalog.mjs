@@ -30,18 +30,26 @@ export function example(name) {
 
 /** The full vocabulary, read live from the registries so a count can never lie. */
 export async function capabilities() {
-  const [{ LOOK_NAMES }, { PRESETS }, { PRESENTATIONS }, { CATALOG }] = await Promise.all([
+  const [{ LOOK_NAMES }, { PRESETS, PRESET_BLURBS }, { PRESENTATIONS, CUT_BLURBS }, { registersOf }, { CATALOG }] = await Promise.all([
     import(path.join(repoRoot, 'core/looks.js')),
     import(path.join(repoRoot, 'core/type.js')),
     import(path.join(repoRoot, 'core/cuts.js')),
+    import(path.join(repoRoot, 'scripts/gates/craft-coverage.mjs')),
     import(path.join(repoRoot, 'blocks/catalog.mjs')),
   ]);
+  // A look's meaning is its REGISTER — the era it evokes — which is what an author picks between, and it
+  // is already complete and gated in docs/CRAFT/SELECTION.md §4.
+  const REGISTERS = registersOf(fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/SELECTION.md'), 'utf8'));
   const blocks = CATALOG.filter((e) => !e.overlay);
   const families = [...new Set(blocks.map((e) => e.family))];
+  // Names WITH their meanings. These three crossed the wire as bare strings while `blocks` right below
+  // them carried a `blurb` — so a client learned what a block was and never what a look, a preset or a cut
+  // is. The descriptions exist now (each beside its own registry), so shipping the name alone is a choice
+  // to withhold them.
   return {
-    looks: LOOK_NAMES,
-    presets: Object.keys(PRESETS),
-    cuts: Object.keys(PRESENTATIONS),
+    looks: LOOK_NAMES.map((n) => ({ name: n, blurb: REGISTERS.look[n] || null })),
+    presets: Object.keys(PRESETS).map((n) => ({ name: n, blurb: PRESET_BLURBS[n] || null })),
+    cuts: Object.keys(PRESENTATIONS).map((n) => ({ name: n, blurb: CUT_BLURBS[n] || null })),
     blockFamilies: families,
     blocks: blocks.map((e) => ({ name: e.name, family: e.family, blurb: e.blurb })),
     knobs: KNOBS,

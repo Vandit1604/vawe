@@ -201,10 +201,12 @@ server.registerTool('vawe_capabilities', {
     return `  shared dials: ${shared}\n${per.join('\n')}`;
   };
   return text([
-    `looks (${c.looks.length}):   ${c.looks.join(' ')}`,
+    `looks (${c.looks.length}) — the register each evokes; pick the group your story is in, then one member:`,
+    ...c.looks.map((l) => `  ${l.name.padEnd(20)} ${l.blurb || ''}`.trimEnd()),
     `  dials: strength (0..1, or "neon:0.8") · color · color2 · grain · vignette · warmth`,
     ``,
-    `kinetic presets (${c.presets.length}) — set via preset + presetOpts:`,
+    `kinetic presets (${c.presets.length}) — how a line ARRIVES; set via preset + presetOpts:`,
+    ...c.presets.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
     knobLine('kinetic'),
     ``,
     `three scenes — set via three:"name":`,
@@ -215,7 +217,8 @@ server.registerTool('vawe_capabilities', {
     `  ambient:  ${(c.knobs.ambient._shared).map((k) => k.name).join(' ')}`,
     `  sting:    ${(c.knobs.sting._shared).map((k) => k.name).join(' ')}`,
     ``,
-    `cuts (${c.cuts.length}):    ${c.cuts.join(' ')}`,
+    `cuts (${c.cuts.length}) — one family per film; the ten that only MASK need sceneUnits:`,
+    ...c.cuts.map((x) => `  ${x.name.padEnd(12)} ${x.blurb || ''}`.trimEnd()),
     ``,
     `blocks (${c.blocks.length} across ${c.blockFamilies.length} families):`,
     ...c.blocks.map((b) => `  ${b.name.padEnd(18)} ${b.blurb}`),
