@@ -777,7 +777,7 @@ boot((data, fps, theme, canvas) => {
   function drawBg(t) {
     if (!bgWins.length || ALPHA) return; // alpha export: no backdrop, so unpainted pixels stay transparent
     const w = bgWinAt(t);
-    const authored = bgHtml ? bgHtml.frame(t, w) : false;
+    const authored = bgHtml ? bgHtml.frame(t, w, duration) : false;
     cv.style.display = authored ? 'none' : '';
     // CLEAR IT, do not just hide it. Returning early left the canvas holding the last frame it painted,
     // so its pixels were a function of WHICH FRAME RENDERED BEFORE THIS ONE — the one thing renderFrame(n)

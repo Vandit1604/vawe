@@ -2,11 +2,12 @@
  "module": "scene",
  "theme": "default",
  "aspect": "16:9",
- "duration": 30.4,
+ "duration": 33.8,
  "bg": [
   {
    "t": 0,
-   "preset": "soft"
+   "tone": "light",
+   "html": "<style>.tl{position:absolute;inset:0;background:linear-gradient(180deg,#ffffff 0%,#f5f7fb 100%);overflow:hidden}.tl .rows{position:absolute;left:0;right:0;top:-12%;height:124%;background:repeating-linear-gradient(180deg,rgba(37,99,235,.055) 0 2px,transparent 2px 72px);transform:translateY(calc(var(--t,0) * -6px))}.tl .ruler{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(15,22,32,.045) 0 1px,transparent 1px 128px)}.tl .head{position:absolute;top:0;bottom:0;width:3px;background:rgba(37,99,235,.45);left:calc(var(--p,0) * 100%)}.tl .headglow{position:absolute;top:0;bottom:0;width:120px;margin-left:-119px;background:linear-gradient(90deg,rgba(37,99,235,0),rgba(37,99,235,.10));left:calc(var(--p,0) * 100%)}</style><div class='tl'><div class='rows'></div><div class='ruler'></div><div class='headglow'></div><div class='head'></div></div>"
   }
  ],
  "audio": {
@@ -457,6 +458,58 @@
    "exitDur": 0.25
   },
   {
+   "id": "n9",
+   "type": "text",
+   "text": "09 \u00b7 morph",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 26.4,
+   "duration": 3.4,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w9",
+   "type": "text",
+   "text": "HOURS",
+   "x": 160,
+   "y": 400,
+   "w": 780,
+   "align": "center",
+   "size": 150,
+   "weight": 800,
+   "anim": "none",
+   "morph": {
+    "to": "SECONDS",
+    "dur": 1.3,
+    "ease": "power3.inOut"
+   },
+   "start": 26.6,
+   "duration": 3.2,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c9",
+   "type": "text",
+   "text": "In AE: match every character between two words, by hand.",
+   "x": 164,
+   "y": 600,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 27.6,
+   "duration": 2.2,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
    "id": "payoff",
    "type": "text",
    "text": "Here, each one is <b>a single word</b> of JSON.",
@@ -469,7 +522,7 @@
    "preset": "up",
    "each": 0.6,
    "stagger": 0.06,
-   "start": 26.4,
+   "start": 29.799999999999997,
    "duration": 4.0,
    "exitDur": 0,
    "critical": true
@@ -486,7 +539,7 @@
    "font": "mono",
    "color": "var(--accent)",
    "anim": "fade",
-   "start": 27.3,
+   "start": 30.7,
    "duration": 3.1,
    "enterDur": 0.35,
    "exitDur": 0

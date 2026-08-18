@@ -44,7 +44,13 @@ export function createBgHtml(root, windows, table) {
   }
   return {
     // Returns true when a hand-authored window owns time t, so the caller knows to hide the canvas.
-    frame(t, active) {
+    // `filmDur` is the scene's own length, and it is what a window with no explicit `to` ends at.
+    // Without it `--p` was pinned to 0 for the whole film: the fallback `to` is the sentinel 1e9, so
+    // `span < 1e9` was false and the guard returned 0 — while this file's header promised "0 -> 1
+    // across this bg's own window". One backdrop spanning the film is the COMMONEST shape there is,
+    // so the variable was frozen exactly where it was most likely to be used, and a page written
+    // against it rendered a still. docs/MISTAKES.md #353.
+    frame(t, active, filmDur) {
       // EVERY element is written EVERY frame, including the inactive ones. An early return that leaves
       // a stale display/opacity on a window we are no longer in is precisely the glow×sceneUnits bug
       // (MISTAKES #152): pixels that depend on which frames were rendered before this one.
@@ -52,7 +58,12 @@ export function createBgHtml(root, windows, table) {
         const on = w === active;
         el.style.display = on ? 'block' : 'none';
         if (!on) continue;
-        const span = (w.to ?? 1e9) - (w.from ?? 0);
+        // `>= 1e9`, not `?? `: scene.js normalises every window to `to: b.to ?? 1e9` before we see it,
+        // so `to` is NEVER nullish here and a `??` fallback can never fire. 1e9 is a sentinel meaning
+        // "no end declared", and a sentinel that downstream code cannot tell from a real value is how
+        // this stayed broken: the guard below tested `span < 1e9` and silently returned 0.
+        const end = (w.to == null || w.to >= 1e9) ? (filmDur > 0 ? filmDur : 1e9) : w.to;
+        const span = end - (w.from ?? 0);
         const p = span > 0 && span < 1e9 ? Math.min(1, Math.max(0, (t - (w.from ?? 0)) / span)) : 0;
         el.style.setProperty('--t', t.toFixed(4));
         el.style.setProperty('--p', p.toFixed(4));

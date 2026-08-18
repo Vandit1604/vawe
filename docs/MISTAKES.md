@@ -9925,6 +9925,49 @@ found all five was not "what is broken" but **"who chose this?"** — and the an
 
 ---
 
+## #353 — `--p` was frozen at 0 for every backdrop that spans its film, and a sentinel is why
+
+Told that reaching for framework presets caps what you can build, the fix was to stop picking a
+background off a list and hand-author one. The first hand-authored backdrop written after that used
+`var(--p)` for a playhead. The playhead never moved.
+
+`core/bg-html.js` documents `--p` as *"0→1 across this bg's own window"*. It computed:
+
+```js
+const span = (w.to ?? 1e9) - (w.from ?? 0);
+const p = span > 0 && span < 1e9 ? … : 0;
+```
+
+A window with no explicit `to` therefore has `span === 1e9`, the guard is false, and **`p` is 0 for the
+entire film**. One backdrop covering the whole film is the commonest shape there is, so the variable
+was dead exactly where it was most likely to be used, and a page written against it rendered a still.
+
+**Two bugs, and the second is the interesting one.** The first fix passed the film's duration in as the
+fallback end — and changed nothing. Because `formats/scene/scene.js:145` normalises every window to
+`{ to: b.to ?? 1e9 }` **before** bg-html sees it, so `w.to` is never nullish and a `?? filmDur`
+fallback can never fire. **1e9 is a sentinel meaning "no end declared", and downstream code could not
+tell it from a real value.** That is the whole defect: a magic number standing in for absence, read by
+a module that had no way to know it was reading absence. The guard `span < 1e9` was someone noticing
+the sentinel and defending against it by returning 0 — silently — rather than resolving it.
+
+Now `end` is `(w.to == null || w.to >= 1e9) ? filmDur : w.to`, and `frame(t, active, filmDur)` takes
+the film's own length.
+
+**How it was found, which is the point.** Not by a gate — no gate looks at a hand-authored backdrop's
+custom properties. By making the playhead 60px wide and pure red and rendering one frame. It sat at
+x=0 at the halfway mark, which is unambiguous in a way that squinting at a 2px line at 30% alpha never
+was. **When an effect does not appear, make it absurd before you conclude anything**: three earlier
+reads in this same session mistook a downscaled comparison strip for a missing effect, and this one
+was real. The difference took one render to establish and no reasoning at all.
+
+**The context it belongs to.** This session had already logged #352, where the engine's default
+background palette turned out to be another brand's colours. The measurement that prompted this entry:
+**164 background windows in this library use a preset; 14 are hand-authored.** The path away from
+inherited defaults was 92% untravelled, and the first person down it hit a variable that does not work.
+A capability nobody uses is a capability nobody has tested.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
