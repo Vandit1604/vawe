@@ -9546,6 +9546,39 @@ being a handle rather than a quotation. Re-run `make sections` and the real word
 
 ---
 
+## #345 — The storyboard writer claimed to pass the gate and never had, at any duration
+
+`scripts/brand/storyboard-draft.mjs` turns a site study into a storyboard skeleton, and its header says
+plainly: *"Output passes storyboard-check structurally."* Running the two against each other for the first
+time — which is what `make quiz-apply` does — it failed at every duration, two different ways.
+
+**1. Every draft ended short.** The beat budget was `DUR / (sections.length + 1)`. The `+ 1` reserved a
+slot for a CTA that no beat was ever emitted for, so the timeline always stopped `DUR/(n+1)` before the
+end and `storyboard-check` blocked it: *"your beats stop at 26.4s of a 30s film"*. Every draft this writer
+has ever produced carried that hole.
+
+**2. It never wrote `becomes:`, which is a BLOCKER under 15s.** `storyboard-check:105` routes that finding
+to `errs` on a short film and `warns` on a long one, so the writer's default of 30s hid it completely.
+Ask for a 12s timeline cut and the same writer produces eight blockers at once. The field is the author's
+sentence to write, not the tool's to guess, but it has to be PRESENT or the plan cannot be checked at all.
+
+Both fixed. A bare `make storyboard-draft NAME=…` now passes `storyboard-check` for the first time.
+
+**3. And the gate had only half a rule.** It failed beats that stop EARLY (`timeline-hole`) and said
+nothing about beats that run PAST the declared duration. So the 12s film whose beats ran to 16s was called
+*"a complete proposal"*. The overrun is the more expensive direction: every beat after the clock runs out
+is work that gets cut at author time, and the cut lands wherever the JSON stops rather than where the
+story should end. `plan-vs-render` already fails `plan-overruns-render` one stage later; `timeline-overrun`
+is that check at the stage where it is still free to fix. All 11 storyboards in the repo are unchanged.
+
+**And one of mine, the third time today.** `--apply` runs the writer as a child process and printed only
+its stdout, so the child's *"8 sections × the 2s floor is 16.0s, longer than the 12s you asked for"* — the
+single most useful thing it says to a short film — went to stderr and was swallowed. A wrapper that hides
+its child's warnings is worse than no wrapper. Same shape as the MCP `desc` and the section `title` earlier
+in the day: a value produced, carried to a boundary, and dropped without a word.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

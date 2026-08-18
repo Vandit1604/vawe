@@ -151,6 +151,15 @@ if (timed.length && timed.length < spans.length) {
   if (durSec != null && durSec - last.end > 0.5) {
     errs.push(`timeline-hole — your beats stop at ${last.end}s of a ${durSec}s film: ${(durSec - last.end).toFixed(2)}s of the film is unplanned. The last seconds are where the payoff lands; a storyboard that runs out early ships a film that ends on a claim it never demonstrated.`);
   }
+  // …and the MIRROR, which was missing: beats that run PAST the declared duration. Only the short side
+  // was checked, so a plan could declare 12s and storyboard 16s of beats and be called complete. The
+  // overrun is the more expensive direction, because every beat after the clock runs out is work that
+  // gets cut at author time, and the cut lands wherever the JSON happens to stop rather than where the
+  // story should end. `plan-vs-render` fails `plan-overruns-render` for the same reason one stage later;
+  // this is that check at the stage where it is still free to fix.
+  if (durSec != null && last.end - durSec > 0.5) {
+    errs.push(`timeline-overrun — your beats run to ${last.end}s of a ${durSec}s film: ${(last.end - durSec).toFixed(2)}s more is storyboarded than the film has. Either raise \`duration:\` to ${Math.ceil(last.end)}s, or cut beats until they fit — whichever you do, decide it here rather than letting the JSON run out mid-beat.`);
+  }
 }
 
 // ── did anybody LOOK at it ────────────────────────────────────────────────────────────────────────

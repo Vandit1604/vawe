@@ -447,6 +447,14 @@ quiz:
 quiz-round2:
 	node scripts/author/quiz.mjs --round 2 --placement $(PLACEMENT) --job $(JOB)
 
+# make quiz-apply ANSWERS=<file.json> NAME=<brand> [OUT=<path>]  — the answers become a STORYBOARD.
+# It delegates the beats to storyboard-draft (one writer, one beat per real section) and locks the
+# frontmatter the brief decided: arc, format, duration, and `threads:` — the field storyboard-check
+# hard-errors on for a short film. It does NOT write the .intent.json sidecar; `make intent` does, through
+# the parser the gate and the animatic share.
+quiz-apply:
+	node scripts/author/quiz.mjs --apply --answers $(ANSWERS) --name $(NAME) $(if $(OUT),--out $(OUT)) $(if $(SLUG),--slug $(SLUG))
+
 # make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
 # decisions that make a video good were made and written down BEFORE the JSON. Template: docs/CRAFT/STORYBOARD-TEMPLATE.md

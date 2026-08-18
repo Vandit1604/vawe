@@ -32,6 +32,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { DIRECTIONS } from './directions.mjs';
 import { PROFILES } from './profiles.mjs';
 
@@ -182,6 +183,54 @@ export function round2({ placement, job } = {}) {
   return { questions: out, note: out.length ? null : 'nothing left to ask — round 1 and the study decided it all' };
 }
 
+// ── apply ─────────────────────────────────────────────────────────────────────────────────────────
+// Answers in, a storyboard out. It does NOT write the .intent.json sidecar: that comes from
+// `make intent` through storyboard-parse.mjs, the one reader the gate and the animatic also use. Writing
+// it here would bypass the shared parser, which is the exact drift storyboard-parse exists to prevent.
+export function frontmatter(a) {
+  const pl = PLACEMENT.find((p) => p.key === a.placement) || PLACEMENT[0];
+  const job = JOBS.find((j) => j.key === a.job) || JOBS[0];
+  const dir = DIRECTIONS.find((d) => d.slug === a.thread) || null;
+  // A SECOND thread is paired automatically, because storyboard-check warns on a short film held by one
+  // device and docs/CRAFT/FILM-STRUCTURE.md is explicit that one thread has to be literal and obvious to
+  // work alone. The pairing follows the job: a claim bookends, a number escalates, a mood asks.
+  const second = { claim: 'bookend', number: 'escalation', feel: 'open question', how: 'through-line' }[job.key];
+  return {
+    arc: job.arc,
+    format: pl.dims,
+    duration: `${pl.duration}s`,
+    threads: dir ? `${dir.thread} · ${second}` : null,
+    framework: a.framework || null,
+    pace: dir ? dir.pace : null,
+    beats: dir ? Math.max(2, Math.round(pl.duration / dir.pace)) : null,
+    profile: a.not || null,          // the ELIMINATED one; the caller narrows from it
+  };
+}
+
+function apply({ answersPath, name, slug, out }) {
+  const a = JSON.parse(fs.readFileSync(answersPath, 'utf8'));
+  const fm = frontmatter(a);
+  const st = study(name);
+  if (!st) return { error: 'no-study', message: `--apply needs a site study for now (assets/brands/${name || '<brand>'}/sections/sections.json). `
+    + `A no-URL film takes the taste-anchor branch, which is not built yet.` };
+  const dest = out || path.join(ROOT, 'assets/brands', name, 'STORYBOARD.md');
+  const env = { ...process.env, NAME: name, DUR: String(parseInt(fm.duration, 10)),
+    FORMAT: fm.format, ARC: fm.arc, OUT: dest };
+  if (fm.threads) env.THREADS = fm.threads;
+  if (fm.framework) env.FRAMEWORK = fm.framework;
+  if (a.message) env.MSG = a.message;
+  if (a.audience) env.AUDIENCE = a.audience;
+  // ONE WRITER. storyboard-draft.mjs already emits one beat per real section in the site's order, which
+  // is what CLAUDE.md asks a reflecting film to be. Emitting beats here as well would be a second writer
+  // of the same artifact, and the two would drift.
+  const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts/brand/storyboard-draft.mjs')], { env, encoding: 'utf8' });
+  if (r.status !== 0) return { error: 'draft-failed', message: (r.stderr || r.stdout || '').trim() };
+  // The child's WARNINGS go to stderr, and printing only stdout swallowed them: the draft warns when the
+  // sections cannot fit the duration, which is the single most useful thing it says to a short film, and
+  // this function was eating it. A wrapper that hides its child's warnings is worse than no wrapper.
+  return { dest, fm, draft: (r.stdout || '').trim(), warnings: (r.stderr || '').trim() };
+}
+
 // ── self-test ─────────────────────────────────────────────────────────────────────────────────────
 // Every option must resolve in the registry it claims to come from, so a renamed direction or profile
 // fails HERE rather than rendering a question about something the engine cannot do.
@@ -219,6 +268,17 @@ if (isMain) {
   if (argv.includes('--self-test')) { selfTest(); }
   else if (argv.includes('--round') && flag('--round') === '2') {
     console.log(JSON.stringify(round2({ placement: flag('--placement'), job: flag('--job') }), null, 2));
+  } else if (argv.includes('--apply')) {
+    const res = apply({ answersPath: flag('--answers'), name: flag('--name'), slug: flag('--slug'), out: flag('--out') });
+    if (res.error) { console.error(`✗ ${res.message}`); process.exit(2); }
+    if (res.warnings) console.error(res.warnings);
+    console.log(res.draft);
+    const shown = (f) => { const r = path.relative(ROOT, f); return r.startsWith('..') ? f : r; };
+    console.log(`\n  brief → ${shown(res.dest)}`);
+    console.log(`  locked: ${res.fm.format} · ${res.fm.duration} · arc "${res.fm.arc}"${res.fm.threads ? ` · threads "${res.fm.threads}"` : ''}`);
+    if (res.fm.beats) console.log(`  the chosen thread paces this at ~${res.fm.beats} beats (${res.fm.pace}s each)`);
+    console.log(`\n  next: make storyboard-check SB=${shown(res.dest)}`);
+    console.log(`        then make concept SB=${shown(res.dest)} N=3 — three directions, rendered, so the LOOK is picked from pictures`);
   } else if (argv.includes('--ask')) {
     const payload = ask({ name: flag('--name'), url: flag('--url'), slug: flag('--slug') });
     if (payload.error) { console.error(`✗ ${payload.message}`); process.exit(2); }
