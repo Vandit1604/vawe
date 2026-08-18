@@ -27,6 +27,7 @@ import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf } from '../../core/junctions.js';
+import { BEATS } from '../../blueprints/index.mjs';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
@@ -1105,6 +1106,19 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+}
+
+// ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #359) ----
+{
+  const cta = BEATS.ctaEnd({ mark: '/a.svg', command: 'npm i', sub: 's', url: 'u' });
+  const mark = cta.find((l) => l.type === 'image');
+  ok('blueprints: the end card\'s mark carries an idle loop, not a freeze', LOOP_FX.includes(mark.fx));
+  // The measurement behind it: across the 12 beats, 33 layers are held >=2.5s and only 3 had ANY idle
+  // motion. This asserts the one that is unambiguous — a mark on a held end card. It deliberately does
+  // NOT assert the other 30: most are TEXT, and drifting type is harder to read, so "add idle
+  // everywhere" would be the wrong lesson drawn from a true measurement.
+  ok('blueprints: idle is on the MARK, not on the copy around it',
+    cta.filter((l) => l.type === 'text').every((l) => !l.fx));
 }
 
 // ---- junctions: name a moment by its JOINT, never by its time (core/junctions.js) ----

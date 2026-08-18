@@ -149,7 +149,7 @@ export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, promp
 // sub, the URL. Everything holds to the final frame (exitDur 0) — never fade the payoff.
 export function ctaEnd({ mark, markX = 895, markY = 250, markW = 130, command, sub, url, start = 0, dur = 3.6 } = {}) {
   return [
-    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.1, duration: dur - 0.1, anim: 'pop', enterDur: 0.6, exitDur: 0 },
+    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.1, duration: dur - 0.1, anim: 'pop', enterDur: 0.6, exitDur: 0, fx: 'breathe' },
     command && { type: 'text', text: command, x: 660, y: 470, w: 600, align: 'center', size: 60, weight: 600, font: 'mono', color: INK, bg: 'var(--surface)', pad: '22px 40px', radius: 14, border: `2px solid ${ACCENT}`, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, exitDur: 0 },
     sub && { type: 'text', text: sub, x: 160, y: 640, w: 1600, align: 'center', size: 38, weight: 500, font: 'mono', color: DIM, start: start + 0.7, duration: dur - 0.7, anim: 'fade', enterDur: 0.6, exitDur: 0 },
     url && { type: 'text', text: url, x: 160, y: 730, w: 1600, align: 'center', size: 44, weight: 700, color: ACCENT, start: start + 1.0, duration: dur - 1.0, anim: 'pop', enterDur: 0.5, exitDur: 0 },

@@ -10198,6 +10198,45 @@ second by a validator throwing — which is the argument for both of them being 
 
 ---
 
+## #359 — F5, and what measuring "unused" actually showed
+
+The last item of the framework plan, and the one whose premise did not survive contact. The plan said:
+32 of 37 GSAP effects and 5 of 8 camera moves never appear in a shipped scene, the diagnosis is
+REACHABILITY, so fold them into the blueprints an author already picks from. Two of those three clauses
+turned out to be wrong.
+
+**A beat cannot carry a camera move, structurally.** A blueprint beat returns an ARRAY OF LAYERS.
+`cameraMove` is a scene-level key. So the plan's remedy was not available for the camera half at all
+without changing what a beat IS, which is a different and larger change than the one that was approved.
+Recorded rather than forced.
+
+**Most of the unused effects are unused because they are REDUNDANT, not because they are hidden.**
+`fadeIn` is `anim:"fade"`. `fadeUp` is `rise`. `flyLeft`/`flyRight` are `slide-left`/`slide-right`.
+`zoomIn` is `scale`. `revealUp` and `clipUp` are the `riseClip` preset. Folding those into beats would put
+two ways to do one thing in front of every author and add motion for its own sake, which is exactly what
+`direction-floor` blocks as `effect-soup`. **A census counts names, not capability**, and the right
+question for that group is whether they should be retired, not how to get them used.
+
+**What the measurement DID show, and it is worth more than the census.** Across the 12 beats, **33 layers
+are held for 2.5s or longer and only 3 of them carry any idle motion at all.** Thirty land and then sit
+perfectly still. That is what the four never-used idle loops (`float`, `breathe`, `wobble`, `heartbeat`)
+exist for, and nothing in the authoring surface ever suggests one.
+
+**One change, not thirty.** `ctaEnd`'s mark now breathes: an end card is held to the last frame, so a mark
+that lands and freezes is the deadest thing in the film. The other 30 are deliberately untouched — most
+are TEXT, and drifting type is harder to read. "Add idle everywhere" is the wrong lesson to draw from a
+true measurement, so the test asserts the mark has idle AND that the copy around it does not.
+
+`logoLockup` and `screenDive` were already fine: their held elements drift via `ken`, which is why my
+first read of them ("it sits perfectly still") was wrong and reading the source corrected it.
+
+**The reusable part.** A number that is easy to measure is not automatically the number worth moving.
+"32 effects unused" is true, "the vocabulary is 86% dead" is the inference, and the inference was wrong:
+about a third of that 32 duplicates something the engine already does well. The finding underneath it —
+30 held layers with nothing happening — was never in the census, and is the one an author would feel.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
