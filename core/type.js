@@ -125,10 +125,31 @@ export const PRESETS = {
   gradient: (u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
   // highlight: marker band grows behind the unit (emphasis mid-sentence)
   highlight: (u, { color = 'rgba(255,220,90,0.35)' } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% 78%`, backgroundPosition: '0 60%', transform: 'none' }; },
-  // inkflash: the unit appears in the ACCENT colour and settles to its base ink. Split by word with a
-  // stagger (or staggered per-layer), a wave of accent sweeps THROUGH the phrase word-by-word — the
-  // reference's "each word lights orange in turn" highlight. flash = accent, to = the resting colour.
-  inkflash: (u, { flash = '#ff742e', to = '#1c1613', hold = 0.5 } = {}) => { const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold))); return { opacity: clamp01(u * 4), color: mixHex(flash, to, e), transform: 'none' }; },
+  // inkflash: a wave of accent sweeps THROUGH a phrase word by word — each unit takes the flash colour,
+  // BLEEDS outward the way wet ink spreads into stock, then absorbs and settles to the resting colour.
+  //
+  // Two things were wrong with the first version and both are the same bug one level apart. It defaulted
+  // `flash` to a hardcoded #ff742e and `to` to a hardcoded #1c1613 — one brand's orange settling onto one
+  // brand's near-black, in a preset every theme is invited to use, so on any other palette it flashed a
+  // colour the theme does not contain and settled to a colour that may be invisible against the backdrop.
+  // Both now default to the THEME (var(--accent), var(--ink)), which is what "the accent colour" meant.
+  // And it was a linear crossfade with no ink in it: the name promises pigment hitting paper, the code
+  // recoloured a glyph. The bleed is what makes it ink. docs/MISTAKES.md #352.
+  inkflash: (u, { flash, to, hold = 0.5, bleed = 14 } = {}) => {
+    const p = clamp01(u);
+    const e = easeOutCubic(clamp01((p - hold) / (1 - hold)));            // the settle, after the hold
+    const wet = Math.sin(clamp01(p / Math.max(0.001, hold)) * Math.PI);  // 0 -> 1 -> 0 across the hit
+    const f = flash || 'var(--accent)', rest = to || 'var(--ink)';
+    return {
+      opacity: clamp01(p * 4),
+      // color-mix keeps this working with TOKENS, which a hex-only mixer could not do — the resting
+      // colour is usually the theme's, and the theme is only known as a CSS variable at render time.
+      color: `color-mix(in srgb, ${f} ${((1 - e) * 100).toFixed(1)}%, ${rest})`,
+      // the spread: widest at the moment of contact, gone once the ink has soaked in
+      textShadow: wet > 0.01 ? `0 0 ${(bleed * wet).toFixed(2)}px color-mix(in srgb, ${f} ${(55 * wet).toFixed(0)}%, transparent)` : 'none',
+      transform: 'none',
+    };
+  },
   // underline: draws left -> right beneath the unit
   underline: (u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
   // shadow: poster lift — long shadow collapses as the word settles

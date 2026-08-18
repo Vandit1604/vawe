@@ -22,6 +22,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
+import fsMod from 'node:fs';
+import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
@@ -1038,6 +1040,30 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     idOf('chromaSplit', { px: 4, cool: '#0000ff' }),
   ];
   ok('filters: every chromaSplit parameter reaches the def id (colour AND its alpha)', new Set(chromaIds).size === chromaIds.length);
+}
+
+// ---- themes: `default` IS the brand, and must stay identical to it ----
+// `default` is the name every author reaches for by habit. It used to hold a mono+lime palette that
+// belonged to no site of ours, so films shipped in a colour nobody chose (docs/MISTAKES.md #352). It
+// now mirrors themes/vawe.json, and two files holding the same palette is exactly the shape that
+// drifts — so the drift is a test, not a comment.
+{
+  const readTheme = (n) => JSON.parse(fsMod.readFileSync(new URL(`../../themes/${n}.json`, import.meta.url), 'utf8'));
+  const def = readTheme('default'), vawe = readTheme('vawe'), neutral = readTheme('neutral');
+  ok('themes: default mirrors the vawe brand palette exactly',
+    JSON.stringify(def.palette) === JSON.stringify(vawe.palette));
+  ok('themes: default carries the brand background pack too',
+    JSON.stringify(def.bg || null) === JSON.stringify(vawe.bg || null));
+  ok('themes: default is white-first cobalt, not the old lime', def.palette.accent === '#2563eb' && def.palette.bg === '#ffffff');
+  ok('themes: the neutral reference still exists for a fork to copy, and is NOT the brand',
+    neutral && neutral.palette && neutral.palette.accent !== vawe.palette.accent);
+  // Every theme must resolve a background palette, whether it authors one or derives it.
+  const themeDir = new URL('../../themes/', import.meta.url);
+  const noPal = fsMod.readdirSync(themeDir).filter((f) => f.endsWith('.json')).filter((f) => {
+    const t = JSON.parse(fsMod.readFileSync(new URL(f, themeDir), 'utf8'));
+    return !t.bg && !bgPaletteFrom(t.palette);
+  });
+  ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ' — ' + noPal.join(', ') : ''}`, noPal.length === 0);
 }
 
 // ---- canvas FX (core/canvas-fx.js) — pure pixel math (the DOM passes bake in the browser) ----

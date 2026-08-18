@@ -1,46 +1,97 @@
 {
   "name": "default",
-  "note": "Mirrors DEFAULT_MOTION in core/motion.js (mono + lime). Authoring reference — a scene with no data.theme already renders exactly this. Copy this file to start a new brand kit.",
+  "note": "THE DEFAULT LOOK, and it is deliberately the vawe brand: white-first with one cobalt accent, mirroring the real site (site/app/globals.css). `default` is the name every author reaches for by habit, so it must not be a palette that belongs to nobody - it used to hold mono+lime, which is why films kept shipping in a colour no site of ours uses. The neutral starting point for a fork or a new brand kit now lives in themes/neutral.json. This file MIRRORS themes/vawe.json and lib-test fails if the two palettes drift apart.",
   "palette": {
-    "bg": "#0a0a0c",
-    "bg2": "#0d0e11",
-    "surface": "#16181d",
-    "surface2": "#101216",
-    "line": "rgba(244, 245, 242, 0.07)",
-    "lineStrong": "rgba(244, 245, 242, 0.12)",
-    "text": "#f4f5f2",
-    "text2": "#b9bcc2",
-    "dim": "#6e7178",
-    "up": "#3fd07a",
-    "up2": "#6ff0a4",
-    "down": "#ff5a6e",
-    "accent": "#c2f23b",
-    "accentDim": "rgba(194, 242, 59, 0.16)",
-    "accentGlow": "rgba(194, 242, 59, 0.4)",
-    "accent2": "#4de3ff",
-    "grid": "rgba(194, 242, 59, 0.2)",
-    "grid2": "rgba(77, 227, 255, 0.26)",
-    "glass": "rgba(21, 22, 26, 0.6)",
-    "highlight": "rgba(244, 245, 242, 0.6)",
-    "ink": "#191917"
+    "bg": "#ffffff",
+    "bg2": "#f6f8fb",
+    "surface": "#ffffff",
+    "surface2": "#f6f8fb",
+    "line": "#e7eaf0",
+    "lineStrong": "#d7dce4",
+    "text": "#0f1620",
+    "text2": "#454f5e",
+    "dim": "#697182",
+    "accent": "#2563eb",
+    "accentDim": "rgba(37,99,235,0.10)",
+    "accentGlow": "rgba(37,99,235,0.30)",
+    "up": "#2f7d55",
+    "down": "#a3282d",
+    "ink": "#0f1620"
   },
   "gradient": [
-    "#0d0e11",
-    "#0b0c0e",
-    "#0a0a0c"
+    "#ffffff",
+    "#f8fafc",
+    "#f1f4f9"
   ],
   "type": {
-    "sans": "Inter",
-    "num": "Space Grotesk",
-    "serif": "Instrument Serif",
-    "mono": "Geist Mono"
+    "sans": "Anybody",
+    "serif": "Anybody",
+    "mono": "JetBrains Mono",
+    "num": "JetBrains Mono"
   },
   "motion": {
-    "easing": "easeOutCubic",
-    "bounce": 0.3,
-    "settle": 0.6,
-    "enter": 48,
-    "durationScale": 1,
-    "stagger": 0.06
+    "easing": "easeOutExpo",
+    "bounce": 0.08,
+    "settle": 0.5,
+    "enter": 36,
+    "durationScale": 0.88,
+    "stagger": 0.045
+  },
+  "bg": {
+    "accent": "37,99,235",
+    "tint": "180,190,205",
+    "tint2": "205,214,226",
+    "dotLight": "150,163,182",
+    "paperBase": [
+      "#ffffff",
+      "#f6f8fb"
+    ],
+    "softBase": [
+      "#f8fafc",
+      "#eef2f8"
+    ],
+    "accentBase": [
+      "#eef3ff",
+      "#f8fafc"
+    ],
+    "inkBase": [
+      "#0f1620",
+      "#0a0f16"
+    ],
+    "border": "#e7eaf0",
+    "dark": [
+      "#0f1620",
+      "#0a0f16"
+    ],
+    "darkMesh": [
+      "#141d2a",
+      "#0a0f16"
+    ],
+    "deep": [
+      "#0f1620",
+      "#080c12"
+    ],
+    "light": [
+      "#ffffff",
+      "#f6f8fb"
+    ],
+    "ink": [
+      "#0f1620",
+      "#0a0f16"
+    ],
+    "paper": "#ffffff"
+  },
+  "vars": {
+    "--ink": "#0f1620",
+    "--paper": "#ffffff",
+    "--muted": "#697182",
+    "--em": "#2563eb",
+    "--on-light": "#0f1620",
+    "--on-dark": "#ffffff",
+    "--border": "#e7eaf0",
+    "--accent-soft": "rgba(37,99,235,0.10)"
+  },
+  "bgDefault": {
+    "preset": "plain"
   }
 }

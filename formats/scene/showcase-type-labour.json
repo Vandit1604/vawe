@@ -6,7 +6,7 @@
  "bg": [
   {
    "t": 0,
-   "preset": "ink"
+   "preset": "soft"
   }
  ],
  "audio": {
@@ -41,7 +41,7 @@
    "w": 1400,
    "size": 40,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "split": "word",
    "preset": "up",
    "each": 0.4,
@@ -92,7 +92,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 4.2,
    "duration": 1.7,
@@ -145,7 +145,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 7.0,
    "duration": 1.7,
@@ -178,11 +178,6 @@
    "weight": 800,
    "split": "word",
    "preset": "inkflash",
-   "presetOpts": {
-    "flash": "#ff742e",
-    "to": "#f4f2ee",
-    "hold": 0.45
-   },
    "each": 1.1,
    "stagger": 0.22,
    "start": 9.1,
@@ -199,7 +194,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 9.8,
    "duration": 1.7,
@@ -251,7 +246,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 12.6,
    "duration": 1.7,
@@ -304,7 +299,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 15.4,
    "duration": 1.7,
@@ -356,7 +351,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 18.2,
    "duration": 1.7,
@@ -381,7 +376,7 @@
   {
    "id": "w7",
    "type": "text",
-   "text": "<svg viewBox=\"0 0 120 40\" width=\"780\" height=\"260\" fill=\"none\" style=\"display:block\"><path d=\"M4 22 Q16 2 28 22 T52 22 T76 22 T100 12 T116 20\" stroke=\"#ff742e\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><path d=\"M4 34 L116 34\" stroke=\"#f4f2ee\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>",
+   "text": "<svg viewBox=\"0 0 120 40\" width=\"780\" height=\"260\" fill=\"none\" style=\"display:block\"><path d=\"M4 22 Q16 2 28 22 T52 22 T76 22 T100 12 T116 20\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><path d=\"M4 34 L116 34\" stroke=\"var(--text-2)\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>",
    "x": 160,
    "y": 300,
    "split": "path",
@@ -406,7 +401,7 @@
    "w": 1400,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 21.2,
    "duration": 1.8,
@@ -454,7 +449,7 @@
    "w": 1500,
    "size": 38,
    "weight": 500,
-   "color": "var(--muted)",
+   "color": "var(--text-2)",
    "anim": "fade",
    "start": 24.3,
    "duration": 2.1,
@@ -496,5 +491,13 @@
    "enterDur": 0.35,
    "exitDur": 0
   }
- ]
+ ],
+ "authoring": {
+  "allow": [
+   "numbered-section-markers"
+  ],
+  "_why": {
+   "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..08 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names."
+  }
+ }
 }

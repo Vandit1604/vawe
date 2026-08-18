@@ -6,7 +6,7 @@
   ]
  },
  "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
- "theme": "default",
+ "theme": "neutral",
  "aspect": "9:16",
  "destination": "tiktok",
  "duration": 12.5,
@@ -260,7 +260,7 @@
   },
   {
    "type": "text",
-   "text": "vawe · scene engine",
+   "text": "vawe \u00b7 scene engine",
    "start": 11.0,
    "duration": 1.5,
    "pin": "center",

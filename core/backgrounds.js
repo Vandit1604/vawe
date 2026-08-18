@@ -3,7 +3,7 @@
 // particle seeds come from the seeded random() in motion.js). Composed per scene so no two scenes
 // share a background (the variety rule). Techniques + parameter ranges are from motion-design refs:
 // dot-matrix wave/ripple, particle field, constellation, aurora blobs, spotlight sweep, grain.
-import { random, clamp01 } from './motion.js';
+import { random, clamp01, parseColor, isLightBg } from './motion.js';
 
 // ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat.
 export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '#05061a', cx = 0.6, cy = 0.4, color } = {}) {
@@ -313,6 +313,55 @@ export const PAL_PLINTH = {
   light: ['#ffffff', '#f4f4f1'], ink: ['#2f37a8', '#242a72'], paper: '#ffffff',
 };
 export const PAL = PAL_PLINTH; // back-compat
+
+// bgPaletteFrom(palette) — build the background palette OUT OF the theme's own palette.
+//
+// WHY THIS EXISTS. The presets above are palette-driven so that one colours-pack reskins every
+// background, and 30 of the 34 themes in this repo hand-author a `bg` block to supply it. The four
+// that do not fell through to `PAL_PLINTH` — one specific brand's blue — and one of the four is
+// `default`, the theme an author gets when they declare nothing. So the engine's OWN default painted
+// `dark` and `deep` as plinthai.xyz indigo against a near-black `#0a0a0c` palette that calls itself
+// "mono + lime", and `ink` scattered dots in plinth BLUE at 6% alpha over near-black, where they read
+// as sensor dirt rather than as anything anyone chose. Reaching for the defaults gave you another
+// brand's colours. docs/MISTAKES.md #352.
+//
+// Derived, not hand-written, because themes/default.json's own note says "Copy this file to start a
+// new brand kit" — a second palette that must be kept in sync with the first is a palette that drifts.
+// A theme may still declare `bg` explicitly and it wins; this is only the floor.
+const _rgb = (hex) => parseColor(hex) || [0, 0, 0];
+const _hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const _mix = (a, b, t) => { const x = _rgb(a), y = _rgb(b); return _hex(x.map((v, i) => v + (y[i] - v) * t)); };
+const _s = (hex) => _rgb(hex).join(',');
+
+export function bgPaletteFrom(palette) {
+  const p = palette;
+  if (!p || !p.bg || !p.text || !p.accent) return null;   // not a palette we can read; caller falls back
+  const accent = p.accent, text = p.text, bg = p.bg;
+  const bg2 = p.bg2 || bg, surface = p.surface || bg2, surface2 = p.surface2 || surface;
+  const light = isLightBg(bg);
+  // The DARK end and the LIGHT end of the theme, whichever way round the theme itself is. A light
+  // theme still needs somewhere for `dark`/`deep`/`ink` to go, and a dark theme still needs `paper`
+  // to be paper — the preset names describe the FIELD, not the brand's dominance.
+  const deepEnd = light ? (p.ink || p.text) : bg;
+  const paleEnd = light ? bg : text;
+  return {
+    accent: _s(accent),
+    tint: _s(p.text2 || text),
+    tint2: _s(p.accent2 || accent),
+    dotLight: _s(p.dim || p.text2 || text),
+    // dark bases, from the theme's own shadows
+    inkBase: [light ? _mix(deepEnd, accent, 0.06) : surface, deepEnd],
+    dark: [light ? _mix(deepEnd, paleEnd, 0.08) : bg2, deepEnd],
+    deep: [deepEnd, _mix(deepEnd, '#000000', 0.45)],
+    darkMesh: [_mix(light ? deepEnd : surface, accent, 0.12), light ? deepEnd : bg2],
+    ink: [_mix(light ? deepEnd : surface, accent, 0.07), deepEnd],
+    // light bases: paper is paper on any theme
+    paperBase: [paleEnd, _mix(paleEnd, deepEnd, 0.05)],
+    light: [paleEnd, _mix(paleEnd, deepEnd, 0.05)],
+    softBase: [_mix(paleEnd, accent, 0.10), _mix(paleEnd, accent, 0.04)],
+    accentBase: [accent, _mix(accent, deepEnd, 0.42)],
+  };
+}
 // BG_NAMES — the background presets bgPreset() understands. Keep in sync with the switch below (there's
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
@@ -365,7 +414,10 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
     case 'accent': return { base: { kind: 'radial', from: P.accentBase[0], to: P.accentBase[1], cx: 0.5, cy: 0.42 }, fx: [
       { type: 'dots', mode: 'ripple', color: '255,255,255', baseAlpha: 0.05, peakAlpha: 0.22, spacing: 60, cx: 0.5, cy: 0.42, k: 0.024, period: 4, driftX: 6, driftY: -6 }, { type: 'spotlight', intensity: 0.08, period: 7, y: 0.42 }, grain ] };
     case 'ink': return { base: { kind: 'radial', from: P.inkBase[0], to: P.inkBase[1], cx: 0.5, cy: 0.44 }, fx: [
-      { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.06, peakAlpha: 0.2, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
+      // baseAlpha is a FLOOR, not a starting point: at 0.06 the grid pulsed all the way to invisible and
+      // back, so it read as flicker rather than as a field that breathes. It has to be present at the
+      // trough for the pulse to be a modulation of something.
+      { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.11, peakAlpha: 0.22, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
     case 'plain': return { base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] };
     // accentPlain — the brand's accent colour as a clean full-bleed field (grain only, no dots/spotlight).
     // For PLAIN sites whose hero is a flat/gradient colour, not a textured one: match plain with plain.

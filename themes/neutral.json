@@ -1,0 +1,46 @@
+{
+  "name": "neutral",
+  "note": "The NEUTRAL reference palette (mono + lime). Not anybody's brand - it exists so a fork, or a new brand kit, has a complete theme to copy that carries no house colours. `default` is the vawe brand; copy THIS one when you want a blank slate. docs/MISTAKES.md #352.",
+  "palette": {
+    "bg": "#0a0a0c",
+    "bg2": "#0d0e11",
+    "surface": "#16181d",
+    "surface2": "#101216",
+    "line": "rgba(244, 245, 242, 0.07)",
+    "lineStrong": "rgba(244, 245, 242, 0.12)",
+    "text": "#f4f5f2",
+    "text2": "#b9bcc2",
+    "dim": "#6e7178",
+    "up": "#3fd07a",
+    "up2": "#6ff0a4",
+    "down": "#ff5a6e",
+    "accent": "#c2f23b",
+    "accentDim": "rgba(194, 242, 59, 0.16)",
+    "accentGlow": "rgba(194, 242, 59, 0.4)",
+    "accent2": "#4de3ff",
+    "grid": "rgba(194, 242, 59, 0.2)",
+    "grid2": "rgba(77, 227, 255, 0.26)",
+    "glass": "rgba(21, 22, 26, 0.6)",
+    "highlight": "rgba(244, 245, 242, 0.6)",
+    "ink": "#191917"
+  },
+  "gradient": [
+    "#0d0e11",
+    "#0b0c0e",
+    "#0a0a0c"
+  ],
+  "type": {
+    "sans": "Inter",
+    "num": "Space Grotesk",
+    "serif": "Instrument Serif",
+    "mono": "Geist Mono"
+  },
+  "motion": {
+    "easing": "easeOutCubic",
+    "bounce": 0.3,
+    "settle": 0.6,
+    "enter": 48,
+    "durationScale": 1,
+    "stagger": 0.06
+  }
+}

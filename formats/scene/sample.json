@@ -9,8 +9,8 @@
    "text": "Motion graphics",
    "x": 100,
    "y": 340,
-   "w": 790,
-   "size": 92,
+   "w": 860,
+   "size": 84,
    "weight": 800,
    "split": "word",
    "preset": "up",
@@ -24,8 +24,8 @@
    "text": "from pure <b>data.</b>",
    "x": 100,
    "y": 470,
-   "w": 790,
-   "size": 92,
+   "w": 860,
+   "size": 84,
    "weight": 800,
    "split": "word",
    "preset": "up",
@@ -84,5 +84,10 @@
  "audio": {
   "silent": true
  },
-  "bg": [{ "t": 0, "preset": "aurora" }]
+ "bg": [
+  {
+   "t": 0,
+   "preset": "soft"
+  }
+ ]
 }

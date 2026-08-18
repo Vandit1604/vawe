@@ -6,7 +6,7 @@ import { buildMorph } from '/core/morph.js';
 import { FX_DUR } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
-import { renderBg, bgPreset, applyBgOver } from '/core/backgrounds.js';
+import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
 import { htmlSource } from '/core/sanitize-html.js';
 import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
@@ -143,7 +143,7 @@ boot((data, fps, theme, canvas) => {
     // picker, bgAt) keeps asking the one question it already asks: does this window have `html`?
     if (b.html != null || b.src != null)
       return { from: b.from ?? 0, to: b.to ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
-    const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || undefined), b.opts);
+    const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts);
     // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
     if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');

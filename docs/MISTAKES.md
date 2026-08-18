@@ -9863,6 +9863,68 @@ outside every signature in the repo.
 
 ---
 
+## #352 — The engine's defaults were another brand's colours, and nobody had ever chosen them
+
+Asked why a film I had just authored was dark-with-lime-green and scattered with dots that looked like
+dirt, the honest answer turned out to be: **I chose almost none of it.** I wrote `"theme": "default"` and
+`"bg": "ink"` and took whatever fell out. Every colour below is a value someone inherited and nobody picked.
+
+**1. The background palette defaulted to a different brand.** `bgPreset(name, value, P = PAL_PLINTH)`,
+and `PAL_PLINTH` is, in its own comment, *"the REAL plinthai.xyz palette"*. The presets are palette-driven
+on purpose so a colours-pack reskins every background, and **30 of the 34 themes hand-author a `bg` block**
+to supply one. The four that do not fell through to plinth's blue, and one of the four was `default`.
+
+So on the engine's own default theme, whose palette is `#0a0a0c` and calls itself "mono + lime":
+`dark` and `deep` painted **indigo**, and `ink` scattered dots in **plinth blue** at 6% alpha over
+near-black, where they read as sensor noise. The dots were not even the theme's accent. That is why they
+looked like dirt: they were the wrong colour, at an alpha too low to be anything.
+
+**Fix.** `bgPaletteFrom(palette)` derives the whole background palette from the theme's own, and
+`scene.js` uses it whenever a theme authors no `bg`. Derived rather than hand-written because
+`themes/default.json`'s own note says *"Copy this file to start a new brand kit"* — a second palette that
+must be kept in sync with the first is a palette that drifts. lib-test now asserts **every** theme
+resolves a background palette, authored or derived.
+
+**2. The dot field pulsed to nothing.** `baseAlpha: 0.06, peakAlpha: 0.2` with `mode:'pulse'` took the
+grid all the way to invisible and back every 5 seconds, which reads as flicker rather than as a field that
+breathes. `baseAlpha` is a FLOOR: it has to be present at the trough for the pulse to be a modulation of
+something. Now 0.11.
+
+**3. `default` was a palette belonging to nobody.** Mono + lime is not this project's brand — the real one
+is white-first with a cobalt accent, and `themes/vawe.json` already mirrored the live site correctly. But
+`default` is the name every author reaches for by habit, and `resolveTheme` THROWS without an explicit
+theme, so there is no code-level fallback to redirect: the trap was simply that the habitual name held the
+wrong palette. `themes/default.json` now mirrors the brand; the neutral starting point a fork or a new
+brand kit copies moved to `themes/neutral.json` and says so. lib-test fails if the two palettes drift.
+
+**4. `inkflash` hardcoded two brands' colours and had no ink in it.** `flash = '#ff742e'`, `to =
+'#1c1613'` — one brand's orange settling onto one brand's near-black, in a preset every theme is invited
+to use. On any other palette it flashed a colour the theme does not contain and settled to one that may be
+invisible against the backdrop. Both now default to the theme (`var(--accent)`, `var(--ink)`) through
+`color-mix`, which a hex-only mixer could not do because the resting colour is only known as a CSS
+variable at render time. And the motion was a linear crossfade: the name promises pigment hitting paper,
+the code recoloured a glyph. It now bleeds outward at the moment of contact and absorbs as it settles.
+
+**5. `var(--muted)` is defined by nothing.** The theme sets `--text-2`; there is no `--muted`. CSS answers
+an undefined custom property by INHERITING, so a layer using it renders as whatever its parent was,
+silently. I put it on nine captions in a scene authored the same day I spent removing exactly this class of
+bug from `core/looks.js` (#351). `make designspec-check` names it `dead-token` and had been saying so.
+
+**The regression this nearly shipped.** Changing `default` restyled ten scenes, and `sample.json` — the
+authoring reference — went from **0 hard audit issues to 19**. `aurora` is a dark-FIELD preset, so it
+keeps a dark ground even on a white-first theme, and the theme's text is dark: 1.6:1. Caught only by
+running the audit on every affected scene BEFORE and AFTER, which is the rule this file already carries
+for gate changes and which applies just as much to a palette. All four affected scenes are back at their
+exact baselines: 7, 1, 1 and 0 hard, unchanged.
+
+**The reusable part, and it is the whole entry: a default is a decision nobody made.** Every finding here
+was an inherited value wearing the costume of a choice — a fallback parameter, a preset's hardcoded hex, a
+theme file's name, an alpha floor. None was a bug in the sense of code doing the wrong thing; each was code
+doing exactly what it said, having been handed a value from somewhere nobody was looking. The question that
+found all five was not "what is broken" but **"who chose this?"** — and the answer, five times, was nobody.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
