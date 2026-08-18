@@ -1,4 +1,13 @@
 import { defineRegistry } from './registry.js';
+import { glowRGB } from './filters.js';
+import { lit } from './color.js';
+
+// A canvas cannot read a CSS custom property, so a theme token has to be resolved to components.
+// glowRGB does that against the live theme and caches it (core/filters.js), so the theme is read once
+// at build and never per frame. `#ffffff`/`#111111` were here before: "what colour is the paper" is a
+// BRAND decision, not a physical fact, and it was answered for every brand. docs/MISTAKES.md #364.
+const THEME_PAPER = () => `rgb(${glowRGB('var(--bg)').join(',')})`;
+const THEME_INK = () => `rgb(${glowRGB('var(--ink)').join(',')})`;
 // core/canvas-fx.js — Tier 2 Canvas-2D per-pixel image passes (halftone, dither, mosaic, …).
 //
 // DETERMINISM: these are BAKED ONCE at build (boot.js, inside the awaited image-preload phase) into a
@@ -56,7 +65,7 @@ export const CANVAS_FX = {
   },
   // Bayer ordered dither: per-pixel luma thresholded against the 4x4 matrix → 2-tone (ink on paper)
   dither(srcCtx, dstCtx, W, H, o) {
-    const paper = o.paper || '#ffffff', ink = o.ink || '#111111';
+    const paper = o.paper || THEME_PAPER(), ink = o.ink || THEME_INK();
     dstCtx.fillStyle = paper; dstCtx.fillRect(0, 0, W, H);
     const { data } = srcCtx.getImageData(0, 0, W, H);
     dstCtx.fillStyle = ink;
@@ -71,7 +80,7 @@ export const CANVAS_FX = {
   // halftone: on a paper ground, one ink dot per cell, radius ∝ darkness
   halftone(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(3, Math.round(o.cell ?? 8));
-    const paper = o.paper || '#ffffff', ink = o.ink || '#111111';
+    const paper = o.paper || THEME_PAPER(), ink = o.ink || THEME_INK();
     dstCtx.fillStyle = paper; dstCtx.fillRect(0, 0, W, H);
     dstCtx.fillStyle = ink;
     const { data } = srcCtx.getImageData(0, 0, W, H);
@@ -87,8 +96,8 @@ export const CANVAS_FX = {
   // stipple: seeded dots on paper, denser where the source is dark (deterministic via hash01)
   stipple(srcCtx, dstCtx, W, H, o, seed) {
     const cell = Math.max(3, Math.round(o.cell ?? 5));
-    dstCtx.fillStyle = o.paper || '#ffffff'; dstCtx.fillRect(0, 0, W, H);
-    dstCtx.fillStyle = o.ink || '#141414';
+    dstCtx.fillStyle = o.paper || THEME_PAPER(); dstCtx.fillRect(0, 0, W, H);
+    dstCtx.fillStyle = o.ink || THEME_INK();
     const { data } = srcCtx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y += cell) {
       for (let x = 0; x < W; x += cell) {
@@ -106,8 +115,11 @@ export const CANVAS_FX = {
   ascii(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(6, Math.round(o.cell ?? 10));
     const ramp = o.ramp || ' .:-=+*#%@';
-    dstCtx.fillStyle = o.paper || '#0b0b0b'; dstCtx.fillRect(0, 0, W, H);
-    dstCtx.fillStyle = o.ink || '#d8ffd0';
+    // NOT tokenised: this pass IS the dark-terminal look, and a near-black ground under phosphor green
+    // is the effect, not a default standing in for the theme's. lit() records that as a decision.
+    dstCtx.fillStyle = o.paper || lit('#0b0b0b', 'the dark ground this pass IS — a phosphor screen, not the theme paper');
+    dstCtx.fillRect(0, 0, W, H);
+    dstCtx.fillStyle = o.ink || lit('#d8ffd0', 'phosphor green, the other half of the same look');
     dstCtx.font = `${cell}px monospace`; dstCtx.textBaseline = 'top';
     const { data } = srcCtx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y += cell) {
@@ -180,8 +192,8 @@ export const CANVAS_FX = {
   // crosshatch: diagonal strokes whose density steps with darkness (pencil/engraving)
   crosshatch(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(4, Math.round(o.cell ?? 6));
-    dstCtx.fillStyle = o.paper || '#f4f1e8'; dstCtx.fillRect(0, 0, W, H);
-    dstCtx.strokeStyle = o.ink || '#20242c'; dstCtx.lineWidth = 1;
+    dstCtx.fillStyle = o.paper || lit('#f4f1e8', 'a warm paper STOCK this pass simulates, like film stock — not the brand\'s white');
+    dstCtx.strokeStyle = o.ink || lit('#20242c', 'the plate ink of that same stock'); dstCtx.lineWidth = 1;
     const { data } = srcCtx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y += cell) {
       for (let x = 0; x < W; x += cell) {

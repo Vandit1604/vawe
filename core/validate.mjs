@@ -20,7 +20,7 @@ import { onScreenText, glyphText } from './on-screen-text.js';
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
-import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
+import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
 import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../core/backgrounds.js';
 import { mergePan } from './pan-resolve.mjs';
@@ -383,17 +383,21 @@ export function fxErrors(cfg) {
   const nameOf = (item) => (typeof item === 'string' ? item : (isObj(item) ? item.name : undefined));
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
+    // ASK THE REGISTRY, do not keep a second copy of what it knows. This used to import GSAP_FX and
+    // re-implement the membership test, so the vocabulary lived in two places — the shape that made the
+    // snap signature go blind (#159) and the silent-fallback gate miss its own blind spot (#363).
+    // GSAP_REGISTRY.has() is the same knowledge, asked rather than duplicated. docs/MISTAKES.md #364.
     if (L.fx != null) {
       for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
         const nm = nameOf(item);
         if (nm == null) { out.push(`layers[${i}].fx entry needs a name (string or {name})`); continue; }
-        if (!GSAP_FX.includes(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect.${nearest(nm, GSAP_FX)}`);
+        if (!GSAP_REGISTRY.has(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect.${nearest(nm, GSAP_FX)}`);
       }
     }
     if (L.fxOut != null) {
       const nm = nameOf(L.fxOut);
       if (nm == null) out.push(`layers[${i}].fxOut needs a name (string or {name})`);
-      else if (!EXIT_FX.includes(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
+      else if (!GSAP_EXIT_REGISTRY.has(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
       if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut" — they both own the exit. Keep one.`);
     }
     // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did — the two
@@ -465,6 +469,17 @@ function noEmdash(v, path, errors) {
 // every existing gate. Pure. Scene layers only.
 export function lintData(data) {
   const warns = [];
+  // A DEPRECATED entrance still renders, so it is a warning, not an error. It names its replacement,
+  // because "deprecated" without one is just a scolding. The engine carries four vocabularies for an
+  // entrance and these sixteen duplicate `anim` exactly. docs/MISTAKES.md #364.
+  for (const [i, L] of (data.layers || []).entries()) {
+    const names = L.fx == null ? [] : (Array.isArray(L.fx) ? L.fx : [L.fx]).map((x) => (typeof x === 'string' ? x : x && x.name));
+    for (const nm of names) if (nm && DEPRECATED_FX[nm])
+      warns.push(`layers[${i}].fx "${nm}" is deprecated — use ${DEPRECATED_FX[nm]}. It does the same thing, works on any layer type, and there are four vocabularies for an entrance already (#364).`);
+    const outNm = L.fxOut == null ? null : (typeof L.fxOut === 'string' ? L.fxOut : L.fxOut.name);
+    if (outNm && DEPRECATED_EXIT[outNm])
+      warns.push(`layers[${i}].fxOut "${outNm}" is deprecated — use ${DEPRECATED_EXIT[outNm]} (#364).`);
+  }
   // `becomes` overwrites the incoming layer's opening keys: during the handover the layer is not itself
   // yet, so `resolveBecomes` replaces everything it declared inside the window with the computed
   // open/settle pair. That is right, and it is DATA THE AUTHOR WROTE BEING DISCARDED, which has to be

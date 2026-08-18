@@ -193,3 +193,31 @@ export const GSAP_REGISTRY = defineRegistry('gsap effect',
   Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx' });
 export const GSAP_EXIT_REGISTRY = defineRegistry('gsap exit',
   Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut' });
+
+// ---- DEPRECATED: names that duplicate an `anim` exactly ------------------------------------------
+//
+// The engine has FOUR vocabularies for "how does this appear": `anim` (19), kinetic `preset` (27),
+// `fx` (37) and `parts[].anim` (6) — 89 names for one idea, with FIVE spelled identically in two of
+// them at once (`up`, `scale`, `swing`, `fadeUp`, `popIn`). That overlap is not cosmetic: three of the
+// five layers stranded in docs/MISTAKES.md #355 were real names written into the wrong slot, because an
+// author who learns one vocabulary reasonably expects its words in the next field along.
+//
+// These 16 are the ones that can go without losing a capability. Each has an exact `anim`/`out`
+// equivalent that works on ANY layer type. The rest STAY, and the reason is worth stating: a kinetic
+// preset only works on a TEXT layer with `split`, so `bounceIn` is NOT a duplicate of `preset:"bounce"`
+// on an image — it is the only way to bounce one. `blurIn`, `elasticIn`, `dropIn`, `spinIn`, `rollIn`,
+// `skewIn`, `flipInX/Y`, `clipUp`, `maskReveal`, `revealUp`, `tiltIn`, `driftIn`, `glitchIn`, `foldIn`,
+// the four `char*` effects and every idle loop all survive that test.
+//
+// Deprecated, not deleted. Nothing in this library names one, but a fork might; the notice ships first
+// and the removal comes after. docs/MISTAKES.md #364.
+export const DEPRECATED_FX = {
+  fadeIn: 'anim:"fade"', fadeUp: 'anim:"rise"', fadeDown: 'anim:"slide-down"',
+  flyLeft: 'anim:"slide-left"', flyRight: 'anim:"slide-right"',
+  popIn: 'anim:"pop"', zoomIn: 'anim:"scale"', expandIn: 'anim:"scale"',
+};
+export const DEPRECATED_EXIT = {
+  fadeOut: 'out:"fade"', fadeOutUp: 'out:"slide-up"', fadeOutDown: 'out:"slide-down"',
+  flyOutLeft: 'out:"slide-left"', flyOutRight: 'out:"slide-right"',
+  popOut: 'out:"pop"', zoomOut: 'out:"scale"', blurOut: 'out:"defocus"',
+};

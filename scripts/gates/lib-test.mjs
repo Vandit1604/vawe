@@ -32,6 +32,8 @@ import { bakeCanvasFx } from '../../core/canvas-fx.js';
 import { DIRS } from '../../core/cuts.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
+import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
+import { lintData } from '../../core/validate.mjs';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
@@ -1153,6 +1155,26 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('vocab: an ABSENT canvasFx is a no-op, not an error', bakeCanvasFx({ naturalWidth: 0, naturalHeight: 0 }, {}) === null);
   // The three junction kinds are the ones a viewer always watches; all three now refuse.
   ok('vocab: the direction vocabulary has ONE definition', DIRS.length === 4 && DIRS.join() === 'left,right,up,down');
+}
+
+// ---- deprecation: 16 gsap names that duplicate an `anim` exactly (#364) ----
+{
+  ok('deprecated: every deprecated name STILL resolves — a notice, not a removal',
+    Object.keys(DEPRECATED_FX).every((n) => GSAP_FX.includes(n))
+    && Object.keys(DEPRECATED_EXIT).every((n) => EXIT_FX.includes(n)));
+  ok('deprecated: each one names a REPLACEMENT, because "deprecated" alone is a scolding',
+    Object.values({ ...DEPRECATED_FX, ...DEPRECATED_EXIT }).every((v) => /^(anim|out):"/.test(v)));
+  // The ones that survive do something no `anim` can. A kinetic preset only works on a TEXT layer with
+  // `split`, so bounceIn is NOT a duplicate of preset:"bounce" on an image — it is the only way.
+  ok('deprecated: the per-character effects and idle loops are KEPT',
+    ['charFold', 'charTilt', 'charBlurCascade', 'charOvershoot', 'float', 'breathe', 'wobble', 'heartbeat']
+      .every((n) => !DEPRECATED_FX[n]));
+  ok('deprecated: using one is a WARNING, not an error — it still renders', (() => {
+    const w = lintData({ layers: [{ type: 'text', fx: 'popIn' }] });
+    return w.some((m) => /deprecated/.test(m) && /anim:"pop"/.test(m));
+  })());
+  ok('deprecated: a kept effect produces no notice',
+    !lintData({ layers: [{ type: 'text', fx: 'charFold' }] }).some((m) => /deprecated/.test(m)));
 }
 
 // ---- junctions: name a moment by its JOINT, never by its time (core/junctions.js) ----

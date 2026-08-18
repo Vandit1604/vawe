@@ -10434,6 +10434,61 @@ that never do.
 
 ---
 
+## #364 — Eighty-nine words for one idea, and the answer to "should we remove every default?"
+
+Three things, from one planning pass. The first is a question I was asked and answered with a measurement
+rather than an opinion.
+
+**"Should we remove every default colour, so nothing default ever ships?" No — and the reason is a
+distinction, not a preference.** Every colour default found this week fell into one of two groups. Group
+one carried somebody's BRAND: `PAL_PLINTH` painted every unthemed background in one company's blue
+(#352), `inkflash` flashed another's orange (#354). Those are always bugs. Group two carries a PHYSICAL
+fact: a vignette is black because a lens falls off to black; a chromatic split fringes red and blue
+because that is what a lens does. **Removing group two would lower quality, not raise it** — sixteen more
+required fields nobody has an opinion about, and the predictable result is copying another scene's JSON,
+which is exactly how one brand's colours spread in the first place. Friction does not produce thought.
+
+The enforceable rule is the one `core/color.js` already carries: **no default may encode a brand
+decision, and every constant must state why it is constant.** `lit()` throws without a reason.
+
+Applying it finished the job: `core/canvas-fx.js`'s paper/ink pairs were `#ffffff`/`#111111` — "what
+colour is the paper" IS a brand decision, answered for every brand — and now follow `--bg`/`--ink`. Two
+pairs stayed literal WITH reasons, because they are the look rather than a stand-in: the phosphor-green
+terminal and the warm paper stock a pass simulates.
+
+**The complexity worth removing, measured.** The engine has FOUR vocabularies for "how does this appear":
+`anim` 19, kinetic `preset` 27, `fx` 37, `parts[].anim` 6. **Eighty-nine names for one idea**, and FIVE
+spelled identically in two of them at once — `up`, `scale`, `swing`, `fadeUp`, `popIn`.
+
+That overlap is not cosmetic. **Three of the five layers stranded in #355 were real names written into
+the wrong slot.** An author who learns one vocabulary reasonably expects its words in the next field
+along, and the engine had five words that are genuinely in two.
+
+Sixteen `fx`/`fxOut` names are now deprecated: the ones with an exact `anim`/`out` equivalent that works
+on ANY layer. **The nuance that halved my first list:** a kinetic preset only works on a TEXT layer with
+`split`, so `bounceIn` is NOT a duplicate of `preset:"bounce"` on an image — it is the only way to bounce
+one. `blurIn`, `elasticIn`, the four `char*` effects and every idle loop survive that test. My plan said
+"about 20 redundant"; the honest number is 16, and it is 16 because of a distinction I had not made when
+I wrote the plan.
+
+Deprecated, not deleted: nothing here names one, but a fork might, so the notice ships first. And a
+notice names its REPLACEMENT, because "deprecated" without one is a scolding.
+
+**The plan section I had to throw away.** I wrote "move vocabulary validation into `make author-check` so
+it fails early" — then checked, and `core/boot.js:7` already imports `validateAll` and validates before
+building. Every registry already throws at layer build. **The make target is a convenience, not the
+correctness boundary**, and moving validation into it would have added a second copy of a rule the engine
+owns — the duplication behind #159 and #363.
+
+What replaced it is the opposite change: `core/validate.mjs` imported `GSAP_FX` and re-implemented a
+membership test. It now ASKS `GSAP_REGISTRY.has()`. Same behaviour, one copy, and a registry added later
+extends the validator for free.
+
+**Three times this week a measurement corrected a plan I had already written down.** Not a review, not a
+test — just checking where a thing already happens before proposing to move it.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
