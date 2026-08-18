@@ -676,6 +676,28 @@ vignette`), applied via `filter:` like any grade. All pure CSS (filter functions
   overrides. Apply a full-frame look to a `group`/full-frame layer; a text look (`neon`, glow) to the text.
   Reel: looks-reel.mp4. (More looks needing Canvas/WebGL passes are wave-4.)
 
+## Naming a moment by its JOINT — `"cut@1"` (`core/junctions.js`)
+
+A film already knows where it turns. Anywhere a time is expected you may instead write a **junction
+reference** and let the joint own the number:
+
+```json
+"bg": [ { "preset": "paper", "from": 0,        "to": "cut@0" },
+        { "preset": "dark",  "from": "cut@0",  "to": "cut@1" } ]
+```
+
+Grammar: `"<kind>@<index>"` where kind is `cut` · `seam` · `sting` · `junction` (all kinds merged,
+time-ordered), and the index counts within that kind from 0. An unknown kind or an index past the end
+THROWS and lists every junction the film actually has, because `cut@3` on a two-cut film is a typo.
+
+**Why.** `brew-launch-act1` cuts its backdrop per beat, which is its main structural device, and wrote
+every boundary twice: once in `bg`, once in `transitions`. Nothing kept them equal, so moving a cut
+silently detached the register change from the junction that was punctuating it. Bound to `cut@N` the
+film renders byte-identically and there is only one copy of each number.
+
+Audio said it first: `audio.bridges[].at` has used this grammar since sound shipped ("the junction is
+NAMED, never timed"). Backgrounds now share the same resolver rather than a second copy of it.
+
 ## Canvas image passes (`core/canvas-fx.js`) — `canvasFx` on an image layer
 
 Per-pixel Tier-2 looks BAKED ONCE at build (in boot's awaited image-preload) into a static PNG, so

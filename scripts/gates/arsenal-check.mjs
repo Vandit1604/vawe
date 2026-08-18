@@ -38,6 +38,7 @@ const WAIVED = new Map(Object.entries({
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   KNOBS: 'playground control metadata, not an effect a scene can name',
+  JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name — each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
   ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
   CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
   TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS — the cut timing curve, catalogued with the cuts',

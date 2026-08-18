@@ -26,6 +26,7 @@ import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
+import { junctionTable, resolveJunction, isJunctionRef, marksOf } from '../../core/junctions.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
@@ -1104,6 +1105,34 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+}
+
+// ---- junctions: name a moment by its JOINT, never by its time (core/junctions.js) ----
+{
+  const marks = [{ t: 1.6, kind: 'cut' }, { t: 4.4, kind: 'cut' }, { t: 7.8, kind: 'sting' }];
+  const table = junctionTable(marks);
+  ok('junctions: per-kind lists are time-ordered', JSON.stringify(table.cut) === '[1.6,4.4]');
+  ok('junctions: `junction` merges every kind', JSON.stringify(table.junction) === '[1.6,4.4,7.8]');
+  ok('junctions: a ref resolves to the joint\'s own time', resolveJunction('cut@1', table) === 4.4);
+  ok('junctions: `sting@0` is indexed within its kind', resolveJunction('sting@0', table) === 7.8);
+  // Nothing is guessed: "cut@3" on a two-cut film is a typo, not a hint.
+  ok('junctions: an index past the end throws and names what the film HAS', (() => {
+    try { resolveJunction('cut@9', table, 'bg[2].from'); return false; }
+    catch (e) { return /does not exist/.test(e.message) && /cut@0\.\.1/.test(e.message); }
+  })());
+  ok('junctions: an unknown kind throws', (() => {
+    try { resolveJunction('beat@0', table); return false; } catch (e) { return /unknown junction kind/.test(e.message); }
+  })());
+  ok('junctions: a time is not mistaken for a ref, and vice versa',
+    !isJunctionRef(1.6) && !isJunctionRef('1.6') && isJunctionRef('cut@0'));
+  ok('junctions: marksOf reads a LOWERED scene\'s cuts/seams/stings',
+    JSON.stringify(marksOf({ cuts: [{ t: 2 }], stings: [{ t: 1 }] })) === '[{"t":1,"kind":"sting"},{"t":2,"kind":"cut"}]');
+  // The grammar has ONE definition now. audio-bridges established it and backgrounds reuse it; two
+  // hand-kept copies of a definition is MISTAKES #159 exactly.
+  ok('junctions: audio bridges resolve through the same table', (() => {
+    const out = resolveBridges({ bridges: [{ bridge: 'j', sound: 'tense', at: 'cut@1', lead: 0.5 }] }, marks, 20);
+    return out.length === 1 && out[0].at === 4.4;
+  })());
 }
 
 // ---- vars track: PER-CHANNEL timing (core/tracks/vars.js) ----

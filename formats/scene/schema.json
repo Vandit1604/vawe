@@ -147,12 +147,12 @@
           ]
         },
         "from": {
-          "type": "number",
-          "label": "Window start (s)"
+          "type": "number|string",
+          "label": "Window start: seconds, OR a junction reference like \"cut@1\" so the joint owns the number (core/junctions.js)"
         },
         "to": {
-          "type": "number",
-          "label": "Window end (s)"
+          "type": "number|string",
+          "label": "Window end: seconds, OR a junction reference like \"cut@2\""
         },
         "value": {
           "type": "string",
@@ -1578,17 +1578,17 @@
           "label": "Animate CSS custom properties over the layer's window: { \"--p\": [from, to] }"
         },
         "varsDur": {
-          "type": ["number", "object"],
+          "type": "number|object",
           "label": "Seconds the `vars` sweep takes (default 1). A NUMBER applies to every channel; an OBJECT keyed by channel name gives each its own, with `*` as that map's default",
           "min": 0
         },
         "varsDelay": {
-          "type": ["number", "object"],
+          "type": "number|object",
           "label": "Seconds into the layer before the `vars` sweep starts",
           "min": 0
         },
         "varsEase": {
-          "type": ["string", "object"],
+          "type": "string|object",
           "label": "Easing for the `vars` sweep (default easeOutCubic). A STRING applies to every channel; an OBJECT keyed by channel name gives each its own curve, with `*` as that map's default"
         },
         "crt": {

@@ -10162,6 +10162,42 @@ rendered comparison instead.
 
 ---
 
+## #358 — Every background boundary was written twice, and nothing kept the two equal
+
+F4 of the framework plan. `brew-launch-act1` cuts its backdrop per beat — paper, dark, paper, accent,
+paper — and that is the film's main structural device. It was authored as six windows with hand-written
+times, and four of the five internal boundaries appear a SECOND time in `transitions`:
+
+```json
+"bg":          [{"preset":"paper","from":0,"to":1.6}, {"preset":"dark","from":1.6,"to":4.4}, …]
+"transitions": [{"at":1.6,…}, {"at":4.4,…}, {"at":7.8,…}, {"at":11.8,…}]
+```
+
+Move one and the register change silently detaches from the junction that was punctuating it.
+
+**The engine already had the answer, for sound.** `core/audio-bridges.js` opens with "The junction is
+NAMED, never timed. The film already knows where it turns", and `audio.bridges[].at` takes `"cut@1"`.
+Backgrounds now accept the same reference — and rather than copy the grammar, it moved to
+`core/junctions.js` and audio-bridges imports it. Two hand-kept copies of one definition is MISTAKES
+#159 exactly, which is the entry about the snap signature drifting into blindness.
+
+`brew-launch-act1` renders **byte-identically** with eight of its numbers replaced by `cut@N`.
+
+**Two mistakes on the way, both mine, both the shape this file keeps recording.**
+
+1. **I patched one call site.** `bgWins` has TWO returns — one for a hand-authored `html` window, one for
+   a preset window — and I resolved the reference in the first only. brew uses presets, so its windows
+   compared against raw strings and 27 canvas hashes moved. "Fix the rule, not the call site" is in
+   CLAUDE.md and I had grepped for the pattern that morning.
+2. **The schema takes a union as `"number|string"`, not `["number","string"]`.** I wrote the array form
+   in three places; `spec.type.split` is what reads it, so it threw. The pipe form was already used at
+   `schema.json:618`. I invented a syntax next to one that existed.
+
+Neither was caught by reasoning. The first was caught by the library diff being 27 instead of 0, the
+second by a validator throwing — which is the argument for both of them being loud.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

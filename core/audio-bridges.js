@@ -11,28 +11,9 @@
 // Everything here throws rather than coerces. A bridge that resolves to the wrong span does not look
 // wrong, it SOUNDS slightly off, which is the failure nobody catches in review.
 
-const KINDS = ['cut', 'seam', 'sting'];
-
-// junctionTable groups marks ([{t, kind}], as built by the scene) into per-kind time-ordered lists
-// plus the merged `junction` list, so `cut@2` and `junction@5` resolve through one lookup.
-function junctionTable(marks) {
-  const table = { junction: [] };
-  for (const k of KINDS) table[k] = [];
-  for (const m of marks || []) {
-    if (!Number.isFinite(m?.t)) continue;
-    if (table[m.kind]) table[m.kind].push(+m.t);
-    table.junction.push(+m.t);
-  }
-  for (const k of Object.keys(table)) table[k].sort((a, b) => a - b);
-  return table;
-}
-
-function describe(table) {
-  return Object.keys(table)
-    .filter((k) => table[k].length)
-    .map((k) => `${k}@0..${table[k].length - 1} (${table[k].map((t) => t.toFixed(2)).join(', ')})`)
-    .join(' · ') || 'none — this film has no cuts, seams or stings to hang a bridge on';
-}
+// The grammar moved to core/junctions.js when BACKGROUNDS needed it too — one copy, because two
+// hand-kept copies of a definition is MISTAKES #159 exactly.
+import { JUNCTION_KINDS as KINDS, junctionTable, describeJunctions as describe } from './junctions.js';
 
 // resolveBridges turns `audio.bridges` into concrete spans the Go mixer can lay down.
 //   marks:    [{t, kind}] — the film's joints (scene.js MARKS)

@@ -1,4 +1,5 @@
 import { boot } from '/core/boot.js';
+import { junctionTable, marksOf, isJunctionRef, resolveJunction } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
@@ -132,7 +133,13 @@ boot((data, fps, theme, canvas) => {
   // ---- bg windows: [{preset, from, to, value}] drawn on canvas from the THEME's palette ----
   // bg seed: default = hash(theme name + preset) so the SAME preset looks different across brands;
   // override per-window with b.seed. Injected into every fx (dots/aurora/shapes/particles read it).
-  const bgWins = (data.bg || []).map((b0) => {
+  // A bg window may bind its edges to a JOINT instead of a time: `"from": "cut@1"`. brew-launch-act1
+  // cuts its backdrop per beat - paper, dark, paper, accent - and wrote every boundary twice, once here
+  // and once in `transitions`, with nothing keeping the two equal. Now the cut owns the number.
+  // core/junctions.js, docs/MISTAKES.md #358.
+  const BG_JUNCTIONS = junctionTable(marksOf(data));
+  const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
+  const bgWins = (data.bg || []).map((b0, bi) => {
     // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault) —
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
@@ -143,14 +150,14 @@ boot((data, fps, theme, canvas) => {
     // `src` is resolved to markup HERE, once, so every downstream reader of a window (bg-html, the ink
     // picker, bgAt) keeps asking the one question it already asks: does this window have `html`?
     if (b.html != null || b.src != null)
-      return { from: b.from ?? 0, to: b.to ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
+      return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
     const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts);
     // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
     if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');
     const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
     for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;
-    return { from: b.from ?? 0, to: b.to ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
+    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
   });
   // --alpha exports a compositable OVERLAY, so the backdrop is the compositor's job, not the scene's.
   // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
