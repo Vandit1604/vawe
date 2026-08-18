@@ -84,7 +84,7 @@ JSON *is* the video.
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `inkflash` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
+`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.

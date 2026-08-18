@@ -157,7 +157,7 @@
   {
    "id": "n3",
    "type": "text",
-   "text": "03 \u00b7 inkflash",
+   "text": "03 \u00b7 colorWave",
    "x": 164,
    "y": 320,
    "size": 34,
@@ -179,7 +179,7 @@
    "size": 150,
    "weight": 800,
    "split": "word",
-   "preset": "inkflash",
+   "preset": "colorWave",
    "each": 1.1,
    "stagger": 0.22,
    "start": 9.1,

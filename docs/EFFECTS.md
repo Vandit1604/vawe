@@ -31,6 +31,7 @@
 | `blur` | resolve out of blur — calm, premium |
 | `bounce` | springy bounce in — playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
+| `colorWave` | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour |
 | `decode` | scramble→settle, techy |
 | `down` | words/chars drop into place from above — the mirror of `up` |
 | `draw` | stroke draw-on for SVG paths |
@@ -40,7 +41,6 @@
 | `focus` | focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium |
 | `gradient` | gradient sweeps through letterforms |
 | `highlight` | marker highlight sweep |
-| `inkflash` | per-word accent colour-wave |
 | `riseClip` | mask-rise reveal |
 | `scale` | punch in from small (overshoot) |
 | `shadow` | a long poster shadow collapses as the word settles — poster statements |

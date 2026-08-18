@@ -69,7 +69,7 @@ const DESC = {
   up: 'words/chars rise into place — the default kinetic headline', scale: 'punch in from small (overshoot)',
   blur: 'resolve out of blur — calm, premium', decode: 'scramble→settle, techy', tilt: '3D tilt-in',
   wave: 'sinusoidal wave across units', shimmerWave: 'looping light wave (per-unit)', draw: 'stroke draw-on for SVG paths',
-  riseClip: 'mask-rise reveal', inkflash: 'per-word accent colour-wave', highlight: 'marker highlight sweep',
+  riseClip: 'mask-rise reveal', colorWave: 'per-word accent colour-wave', highlight: 'marker highlight sweep',
   underline: 'underline draws on', gradient: 'gradient sweeps through letterforms',
   // anims
   rise: 'translate up + fade in', pop: 'scale overshoot', fade: 'opacity only', defocus: 'leave through blur (dense/faces)',

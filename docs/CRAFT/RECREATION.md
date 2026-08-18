@@ -71,7 +71,7 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
 - **Smooth the camera.** One monotonic move, no reversals; `ease:"linear"` on interior camera
   keyframes (the default easeInOutCubic zeroes velocity at each keyframe and pulses — MISTAKES #125).
 - **The premium type tells:** `gradient:{from,to,angle}` fill on heroes; `typing:true` for input beats;
-  `preset:"inkflash"` for a per-word accent colour-wave. (See the map in REFERENCE-STUDY.md.)
+  `preset:"colorWave"` for a per-word accent colour-wave. (See the map in REFERENCE-STUDY.md.)
 
 ### 4. Score it (sound is part of the recreation)
 - `audio:{auto:true}` derives a cue per cut, seam and sting; add a bed (`audio.music`,

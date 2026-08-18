@@ -9968,6 +9968,49 @@ A capability nobody uses is a capability nobody has tested.
 
 ---
 
+## #354 — `inkflash` was a colour wave wearing a name nobody had built
+
+Asked where `inkflash` came from, the answer was in the repo's own history. Commit `3a0a368`:
+
+> The reference collage lights **EACH word orange in turn** (a highlight wave through the phrase);
+> ours only coloured the one accent word.
+
+It was extracted from the **Brew launch film** by the study pipeline in `docs/CRAFT/REFERENCE-STUDY.md`.
+What was measured off that reference was a COLOUR WAVE, and a colour wave is faithfully what was built.
+The name promised pigment hitting paper and the code was a hex lerp between two colours.
+
+**The defaults were the reference's palette.** `flash = '#ff742e'`, `to = '#1c1613'` — open
+`themes/brew.json` and they are its `accent` and its `ink`, verbatim. One film's brand colours frozen
+into a preset every theme may use, which is the same defect as `#352`'s `PAL_PLINTH` and has the same
+cause: someone reproduced a real film faithfully and never separated *that brand's colour* from *the
+mechanism*. Both now default to the theme through `color-mix`, which a hex-only mixer could not do
+because a theme colour is only known as a CSS variable at render time.
+
+**And I made the naming worse before I made it better.** Told the effect did not look like ink, I added
+a bleed so the code would match the word — designing backwards from a label. The right move was to fix
+the label. Renamed `colorWave`, and the bleed removed along with the name that asked for it. A real ink
+effect is still unbuilt and should be built as itself, not reverse-engineered out of a noun.
+
+**The rename found a live bug that a rename should not have been able to find.** `animateUnits` did
+`PRESETS[preset] || PRESETS.up` — an unknown name silently animated as `up`. The schema does not
+enumerate preset names either, so a typo, or a preset renamed out from under a scene, rendered a
+plausible frame nobody would question. It now throws, listing the known names, exactly as
+`core/fx/index.js` does for an unknown modifier.
+
+**My own pre-check for the rename was a false negative.** I walked the library for `preset` values the
+registry did not know and reported "every kinetic preset is a name the registry knows" — because the
+walker only looked at objects carrying `split` or `type:"text"`, and `brew-launch-act1` carries it in a
+shape that test missed. The new hard error caught it on the first render after the rename. **A check I
+wrote to make a change safe was less reliable than making the failure loud**, which is the argument for
+loud failure in one sentence.
+
+**Behaviour is preserved where it should be.** `brew-launch-act1` renders byte-identical after the
+change, because its theme IS Brew: `var(--accent)` and `var(--ink)` resolve to the very hexes that were
+hardcoded. The tokenised version reproduces the original for the film it was taken from, and is correct
+for every other theme — which is what "extract the mechanism, not the brand" means when it works.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

@@ -31,7 +31,7 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 ## Text effect vocabulary (`split` + `preset`, or GSAP `fx`)
 
 - **Presets** (`core/type.js`): `up` (default kinetic headline), `scale` (punch), `blur` (premium/calm),
-  `decode` (techy scramble), `wave`/`shimmerWave`, `draw` (SVG stroke-on), `riseClip`, `inkflash`,
+  `decode` (techy scramble), `wave`/`shimmerWave`, `draw` (SVG stroke-on), `riseClip`, `colorWave`,
   `highlight`, `underline`, `gradient`, `chroma`. Choose by mood, not habit.
 - **GSAP char fx** (`core/gsap-effects.js`): `charOvershoot`, `charBlurCascade`, `charFold`, `charTilt` on a
   `split` layer; idle loops `float`/`pulse`/`breathe`. Pair with `anim:"none"`.

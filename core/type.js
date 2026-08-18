@@ -3,7 +3,7 @@
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
 
-// mix two hex colours (for the inkflash colour-wave preset). Pure.
+// mix two hex colours. Pure. (colorWave now uses color-mix so it can take theme TOKENS, not just hex.)
 const _hx = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const mixHex = (a, b, t) => { const pa = _hx(a), pb = _hx(b); return `rgb(${Math.round(pa[0] + (pb[0] - pa[0]) * t)},${Math.round(pa[1] + (pb[1] - pa[1]) * t)},${Math.round(pa[2] + (pb[2] - pa[2]) * t)})`; };
 
@@ -125,28 +125,27 @@ export const PRESETS = {
   gradient: (u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
   // highlight: marker band grows behind the unit (emphasis mid-sentence)
   highlight: (u, { color = 'rgba(255,220,90,0.35)' } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% 78%`, backgroundPosition: '0 60%', transform: 'none' }; },
-  // inkflash: a wave of accent sweeps THROUGH a phrase word by word — each unit takes the flash colour,
-  // BLEEDS outward the way wet ink spreads into stock, then absorbs and settles to the resting colour.
+  // colorWave: a wave of the accent sweeps THROUGH a phrase word by word - each unit appears in the
+  // accent colour and settles to the resting one. Split by word with a stagger (or staggered per-layer)
+  // so the wave travels along the line.
   //
-  // Two things were wrong with the first version and both are the same bug one level apart. It defaulted
-  // `flash` to a hardcoded #ff742e and `to` to a hardcoded #1c1613 — one brand's orange settling onto one
-  // brand's near-black, in a preset every theme is invited to use, so on any other palette it flashed a
-  // colour the theme does not contain and settled to a colour that may be invisible against the backdrop.
-  // Both now default to the THEME (var(--accent), var(--ink)), which is what "the accent colour" meant.
-  // And it was a linear crossfade with no ink in it: the name promises pigment hitting paper, the code
-  // recoloured a glyph. The bleed is what makes it ink. docs/MISTAKES.md #352.
-  inkflash: (u, { flash, to, hold = 0.5, bleed = 14 } = {}) => {
-    const p = clamp01(u);
-    const e = easeOutCubic(clamp01((p - hold) / (1 - hold)));            // the settle, after the hold
-    const wet = Math.sin(clamp01(p / Math.max(0.001, hold)) * Math.PI);  // 0 -> 1 -> 0 across the hit
+  // IT WAS CALLED `inkflash`, and the name was the only ink in it. The effect was extracted from the
+  // Brew launch film (docs/CRAFT/REFERENCE-STUDY.md), where a collage "lights EACH word orange in turn";
+  // what was measured off that reference was a COLOUR WAVE, and that is faithfully what was built. The
+  // name promised pigment hitting paper, so a bleed was later added to make the code match the word -
+  // which is designing backwards from a label. Renamed to what it does, and the bleed removed with the
+  // name that asked for it. A real ink effect is still unbuilt and should be built as itself.
+  //
+  // The two colours were `#ff742e` and `#1c1613`: the reference brand's accent and ink (themes/brew.json),
+  // frozen into a preset every theme may use. They default to the THEME now. docs/MISTAKES.md #354.
+  colorWave: (u, { flash, to, hold = 0.5 } = {}) => {
+    const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold)));
     const f = flash || 'var(--accent)', rest = to || 'var(--ink)';
     return {
-      opacity: clamp01(p * 4),
-      // color-mix keeps this working with TOKENS, which a hex-only mixer could not do — the resting
-      // colour is usually the theme's, and the theme is only known as a CSS variable at render time.
+      opacity: clamp01(u * 4),
+      // color-mix, not a hex lerp: the resting colour is usually the theme's, and a theme colour is only
+      // known as a CSS variable at render time. The original mixHex could only take literals.
       color: `color-mix(in srgb, ${f} ${((1 - e) * 100).toFixed(1)}%, ${rest})`,
-      // the spread: widest at the moment of contact, gone once the ink has soaked in
-      textShadow: wet > 0.01 ? `0 0 ${(bleed * wet).toFixed(2)}px color-mix(in srgb, ${f} ${(55 * wet).toFixed(0)}%, transparent)` : 'none',
       transform: 'none',
     };
   },
@@ -221,7 +220,7 @@ export const PRESET_BLURBS = {
   stretch: 'horizontal smear that snaps true — impact words',
   gradient: 'gradient sweeps through letterforms',
   highlight: 'marker highlight sweep',
-  inkflash: 'per-word accent colour-wave',
+  colorWave: 'the accent sweeps word by word along a line, each unit lighting then settling to the resting colour',
   underline: 'underline draws on',
   shadow: 'a long poster shadow collapses as the word settles — poster statements',
   riseClip: 'mask-rise reveal',
@@ -273,7 +272,13 @@ export function circleText(el, units, { radius = 220 } = {}) {
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
 export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
-  const fn = PRESETS[preset] || PRESETS.up;
+  // An unknown name is a HARD ERROR. It used to fall back to `up`, so a typo - or a preset renamed out
+  // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
+  // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
+  // throw in core/fx/index.js. docs/MISTAKES.md #354.
+  const fn = PRESETS[preset];
+  if (!fn) throw new Error(`unknown kinetic preset "${preset}" - known: ${Object.keys(PRESETS).join(', ')}. `
+    + `A name the registry does not know would otherwise animate as \`up\` and look deliberate.`);
   units.forEach((el, i) => {
     if (loop || preset === 'wave' || preset === 'shimmerWave') {
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));

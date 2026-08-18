@@ -32,7 +32,7 @@ for (const t of starts) { const last = beats[beats.length - 1]; if (last == null
 
 // HERO = a big, short text word (the thing that should dolly). Not a sentence, not a chip, not already moving.
 const isHero = (l) => l.type === 'text' && (l.size ?? 96) >= 180 && wordCount(l.text) <= 2 && !l.motion && l.text != null;
-// PHRASE = a multi-word text line (candidate for typing / inkflash colour-wave)
+// PHRASE = a multi-word text line (candidate for typing / colorWave colour-wave)
 const isPhrase = (l) => l.type === 'text' && wordCount(l.text) >= 2 && !l.typing && l.preset == null && l.text != null;
 
 // the dolly: enter oversized → SNAP to rest (spring settle, slight overshoot) → drift → exit bigger
@@ -59,7 +59,7 @@ if (!heroes.length) console.log('    · (no hero words detected — nothing to d
 console.log('');
 console.log('  RECOMMENDS (compose these yourself — they are content choices, not pure motion):');
 console.log('    · CENTER hero/sentence words (the reference is centered; the MOTION gives the dynamism, not asymmetry).');
-for (const p of phrases.slice(0, 6)) console.log(`    · "${stripHtml(p.text).slice(0, 24)}" → typing:true or preset:"inkflash" (a typewriter / colour-wave reveal)`);
+for (const p of phrases.slice(0, 6)) console.log(`    · "${stripHtml(p.text).slice(0, 24)}" → typing:true or preset:"colorWave" (a typewriter / colour-wave reveal)`);
 console.log('    · Verify with `make reveal` — read the GREEN cells: does every beat animate IN?');
 
 if (WRITE) {
@@ -74,7 +74,7 @@ if (WRITE) {
   const out = file.replace(/\.json$/, '.cinematic.json');
   fs.writeFileSync(out, JSON.stringify(d, null, 2));
   console.log(`\n  ✓ scaffold applied → ${out}  (${n} dollies${hasCamera ? '' : ' + camera'})`);
-  console.log(`    Now: refine (center, typing/inkflash), then \`make reveal D=${out}\` and render.\n`);
+  console.log(`    Now: refine (center, typing/colorWave), then \`make reveal D=${out}\` and render.\n`);
 } else {
   console.log('\n  suggest-only. Re-run with WRITE=1 to apply → <file>.cinematic.json\n');
 }
