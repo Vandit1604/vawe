@@ -246,37 +246,37 @@
 
 | name | what / when |
 |---|---|
-| `angelic` | premium / glamour / energy |
-| `chrome` | premium / glamour / energy |
-| `crt` | analog nostalgia (warm, dated) |
-| `cyberpunk` | sci-fi / data / digital |
-| `dreamSequence` | cinematic / film |
-| `dreamyHaze` | dreamy / soft-focus |
-| `droneCinematic` | cinematic / film |
-| `edgeGlow` | premium / glamour / energy |
-| `emboss` | print / editorial |
-| `fadedPolaroid` | analog nostalgia (warm, dated) |
-| `fatten` | distortion / physical FX |
-| `filmNoir` | cinematic / film |
-| `glassWarp` | distortion / physical FX |
-| `glitchGlow` | sci-fi / data / digital |
-| `halationFilm` | cinematic / film |
-| `heatWarp` | distortion / physical FX |
-| `hologram` | sci-fi / data / digital |
-| `impact` | print / editorial |
-| `letterpress` | print / editorial |
-| `lomo` | analog nostalgia (warm, dated) |
-| `melt` | distortion / physical FX |
-| `neon` | premium / glamour / energy |
-| `nightVision` | sci-fi / data / digital |
-| `nostalgia` | analog nostalgia (warm, dated) |
-| `rippleGlass` | distortion / physical FX |
-| `super8` | analog nostalgia (warm, dated) |
-| `thermal` | sci-fi / data / digital |
-| `timeFreeze` | distortion / physical FX |
-| `vhs` | analog nostalgia (warm, dated) |
-| `vintageAnamorphic` | analog nostalgia (warm, dated) |
-| `watercolor` | dreamy / soft-focus |
+| `angelic` | blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners — heaven light, heavy-handed by design |
+| `chrome` | specular highlights ADDED on top, then remapped to a navy/steel/white tritone — polished metal; two SVG filter passes, the most expensive look here |
+| `crt` | half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down — a lit phosphor tube: vhs glows and closes in |
+| `cyberpunk` | saturated hard, magenta/cyan split, magenta bloom over faint scanlines — a fixed neon-noir palette laid over your colours |
+| `dreamSequence` | the mildest warp plus defocus, cream bloom and a warm wash — dreamyHaze with the picture set drifting |
+| `dreamyHaze` | half-pixel defocus under a wide white bloom and a cream wash — soft-focus romance, no grain and no edges |
+| `droneCinematic` | every dial turned down (0.5 default strength, faint grain, shallow vignette) — a grade rather than a look, safe under type and product UI |
+| `edgeGlow` | flat areas cancel to black and only boundaries survive, amplified 6x and bloomed — a neon wire drawing; six passes, and a smooth subject can come out empty |
+| `emboss` | the kernel turns the picture into a grey lit rubbing and half the colour is thrown away — carved surface, per-pixel and not cheap |
+| `fadedPolaroid` | eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette — a print left in the sun, the flattest look here |
+| `fatten` | dilation swells the bright pixels into their neighbours — type gains weight and a photo goes chunky and poster-like |
+| `filmNoir` | full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette — monochrome drama |
+| `glassWarp` | medium-frequency turbulence pushes the image around behind a faint white bloom — seen through thick glass, still readable |
+| `glitchGlow` | wide 3px red/blue split, source-coloured bloom, sparse scanlines — hologram with the tint removed and the split doubled: a signal fault, not a projection |
+| `halationFilm` | warm amber bloom off the highlights plus grain, contrast barely touched — the restrained glow: no blur, no vignette, colours survive |
+| `heatWarp` | coarser, larger displacement under an orange wash and a lift — air over tarmac |
+| `hologram` | pink/cyan split, cyan flood-bloom and tight scanlines — a projected image, colour forced to teal |
+| `impact` | overexposed with the widest colour split here (4px) and a white bloom — the frame taking a punch, for one frozen hit only |
+| `letterpress` | diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black — ink pressed into stock |
+| `lomo` | the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain — plastic-camera punch: no glow, no split, just crush and corners |
+| `melt` | the lowest frequency and by far the largest displacement here — big slow lumps that destroy legibility, so never under type |
+| `neon` | the bright parts bloom in their OWN colours, nothing is tinted — real sign-light, the one glow look that keeps the palette |
+| `nightVision` | grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette — image intensifier; the original colour is gone, not tinted |
+| `nostalgia` | fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom — same memory register, lighter and open at the edges |
+| `rippleGlass` | the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom — water on the lens |
+| `super8` | sepia, lifted, the heaviest grain here and a deep vignette — warmth and dirt only, no split and no lines: film stock, not video |
+| `thermal` | luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened — a heat camera; three passes, the cheapest sci-fi look and the most total recolour |
+| `timeFreeze` | drained of colour, washed cold blue with a matching bloom and a hairline split — the world stopped |
+| `vhs` | colour split 3px, slight defocus, scanlines and heavy grain — tape: no vignette and no glow, so the frame stays flat and dirty |
+| `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette — old spherical glass |
+| `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain — pigment on stock |
 
 ## Canvas image passes (baked)  `[static]`
 

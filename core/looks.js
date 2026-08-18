@@ -174,6 +174,53 @@ export const LOOKS = {
   fatten: { d: { strength: 0.6 }, p: [['morph', { op: 'dilate', radius: 1.6 }], ['contrast', { k: 1.08 }], ['saturate', { k: 1.1 }]] },
 };
 
+// LOOK_BLURBS — one line per look, next to the recipe it describes (the `blurb` pattern of
+// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
+// with no look, or a look with no key, is a bug the effects catalog reports.
+// docs/CRAFT/SELECTION.md §4 groups these by REGISTER (the era each evokes) — that picks the group.
+// These lines pick the MEMBER: what the pass stack visibly does, and where it is expensive (a bloom is
+// an SVG blur, a displace is turbulence + a displacement map, relief/convolve read neighbouring pixels).
+export const LOOK_BLURBS = {
+  // --- glow family ---
+  neon: 'the bright parts bloom in their OWN colours, nothing is tinted — real sign-light, the one glow look that keeps the palette',
+  dreamyHaze: 'half-pixel defocus under a wide white bloom and a cream wash — soft-focus romance, no grain and no edges',
+  halationFilm: 'warm amber bloom off the highlights plus grain, contrast barely touched — the restrained glow: no blur, no vignette, colours survive',
+  angelic: 'blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners — heaven light, heavy-handed by design',
+  hologram: 'pink/cyan split, cyan flood-bloom and tight scanlines — a projected image, colour forced to teal',
+  glitchGlow: 'wide 3px red/blue split, source-coloured bloom, sparse scanlines — hologram with the tint removed and the split doubled: a signal fault, not a projection',
+  // --- analog / retro ---
+  vhs: 'colour split 3px, slight defocus, scanlines and heavy grain — tape: no vignette and no glow, so the frame stays flat and dirty',
+  super8: 'sepia, lifted, the heaviest grain here and a deep vignette — warmth and dirt only, no split and no lines: film stock, not video',
+  crt: 'half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down — a lit phosphor tube: vhs glows and closes in',
+  filmNoir: 'full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette — monochrome drama',
+  fadedPolaroid: 'eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette — a print left in the sun, the flattest look here',
+  nostalgia: 'fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom — same memory register, lighter and open at the edges',
+  vintageAnamorphic: 'the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette — old spherical glass',
+  // --- sci-fi / hud ---
+  cyberpunk: 'saturated hard, magenta/cyan split, magenta bloom over faint scanlines — a fixed neon-noir palette laid over your colours',
+  nightVision: 'grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette — image intensifier; the original colour is gone, not tinted',
+  thermal: 'luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened — a heat camera; three passes, the cheapest sci-fi look and the most total recolour',
+  // --- camera / lens ---
+  lomo: 'the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain — plastic-camera punch: no glow, no split, just crush and corners',
+  droneCinematic: 'every dial turned down (0.5 default strength, faint grain, shallow vignette) — a grade rather than a look, safe under type and product UI',
+  // --- motion-emphasis (static "hit" looks; pair with shake/stings for motion) ---
+  impact: 'overexposed with the widest colour split here (4px) and a white bloom — the frame taking a punch, for one frozen hit only',
+  timeFreeze: 'drained of colour, washed cold blue with a matching bloom and a hairline split — the world stopped',
+  // --- Tier B: distortion looks (static feDisplacementMap — deterministic, no frame hook) ---
+  glassWarp: 'medium-frequency turbulence pushes the image around behind a faint white bloom — seen through thick glass, still readable',
+  heatWarp: 'coarser, larger displacement under an orange wash and a lift — air over tarmac',
+  melt: 'the lowest frequency and by far the largest displacement here — big slow lumps that destroy legibility, so never under type',
+  watercolor: 'displaced, desaturated, contrast lowered under a multiplied paper wash and grain — pigment on stock',
+  dreamSequence: 'the mildest warp plus defocus, cream bloom and a warm wash — dreamyHaze with the picture set drifting',
+  rippleGlass: 'the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom — water on the lens',
+  // --- relief family: the SVG primitives (feConvolveMatrix / feMorphology / fe*Lighting) ---
+  emboss: 'the kernel turns the picture into a grey lit rubbing and half the colour is thrown away — carved surface, per-pixel and not cheap',
+  letterpress: 'diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black — ink pressed into stock',
+  chrome: 'specular highlights ADDED on top, then remapped to a navy/steel/white tritone — polished metal; two SVG filter passes, the most expensive look here',
+  edgeGlow: 'flat areas cancel to black and only boundaries survive, amplified 6x and bloomed — a neon wire drawing; six passes, and a smooth subject can come out empty',
+  fatten: 'dilation swells the bright pixels into their neighbours — type gains weight and a photo goes chunky and poster-like',
+};
+
 // merge look defaults ← lookOpts ← positional strength; strength stays a clamped master dial.
 function mergeOpts(look, opts = {}, positional) {
   const merged = { ...look.d, ...opts };

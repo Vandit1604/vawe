@@ -9,7 +9,7 @@ import { PRESETS } from '../../core/type.js';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
-import { LOOK_NAMES } from '../../core/looks.js';
+import { LOOK_NAMES, LOOK_BLURBS } from '../../core/looks.js';
 import { registersOf } from '../gates/craft-coverage.mjs';
 // The per-family blurb maps, each living beside the registry it describes (the pattern blocks/catalog.mjs
 // proves at 70/70). They take PRECEDENCE over DESC below, and that ordering is the point: DESC is a FLAT
@@ -137,7 +137,7 @@ const sections = [
   ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition', { blurbs: CUT_BLURBS }],
   ['Shader stings', '`stings:[{t,fx}]` — a full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', { kind: 'sting' }],
   ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition', { blurbs: SEAM_BLURBS }],
-  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static', { kind: 'look' }],
+  ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC).', names(LOOK_NAMES), 'static', { kind: 'look', blurbs: LOOK_BLURBS }],
   ['Canvas image passes (baked)', '`canvasFx` — a one-time baked image pass (cannot move).', names(CANVAS_FX_NAMES), 'static'],
   ['Generative paint FX (per-frame)', '`{ "type":"paint", "paint":"<name>" }` — a full-canvas animated field, pure in t.', names(PAINT_FX_NAMES), 'per-frame'],
   ['Backgrounds', '`bg:[{preset,from,to}]` — the field behind everything; moving ones (aurora/constellation/mesh/…) animate.', names(BG_NAMES), 'background'],

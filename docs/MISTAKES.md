@@ -9634,6 +9634,43 @@ which the validator requires) until this work happened to run it. `make mcp-smok
 
 ---
 
+## #348 — Describing the looks found four bugs in the looks
+
+Writing one line per composite look meant reading all 31 recipes. Four defects fell out, and the first is
+the worst class this repo logs. **None is fixed — they are recorded here so the next pass has them.**
+
+**1. `lookOpts` is silently ignored on most looks.** `resolveComposite` merges `pass({ ...o, ...(fixed
+|| {}) })`, so the registry's fixed arguments WIN over the author's options. Every look whose bloom fixes
+`glowColor` — `dreamyHaze`, `halationFilm`, `angelic`, `hologram`, `crt`, `filmNoir`, `nostalgia`,
+`cyberpunk`, `nightVision`, `vintageAnamorphic`, `droneCinematic`, `impact`, `timeFreeze`, `glassWarp`,
+`dreamSequence`, `rippleGlass` — accepts `lookOpts.color` and does nothing with it. `chrome` does the same
+with its gradient-map colours. **The file header promises the opposite.** Sixteen looks, one silent
+substitution: it should either apply or throw.
+
+**2. `amt` is a shared namespace across unrelated passes.** `desaturate`, `overexpose`, `grain`,
+`lightLeak` and `wash` all read `o.amt`, so one `lookOpts: { amt: 0.5 }` moves four passes at once, in
+different directions.
+
+**3. `hStreak` blurs the ALPHA channel** — a `drop-shadow` pair, which is exactly the construct
+`docs/MISTAKES.md` #112 replaced for `bloomStack`. **That fix landed on `bloom` only.** On an opaque photo
+the alpha is the rectangle, so `vintageAnamorphic` streaks the frame's edge rather than its highlights.
+`chromaPair` has the same shape and at least admits it in a comment; `hStreak` carries no caveat. This is
+the "fix the rule, not the call site" pattern in CLAUDE.md, found still open two hundred entries later.
+
+**4.** A stray trailing comma in `vignetteInvert`'s return object. Cosmetic.
+
+**And what the looks turned out to differ BY,** which no register could express: the five warps are ordered
+by `freq` — `melt` 0.006 → `heatWarp` 0.01 → `watercolor` 0.015 → `glassWarp` 0.02 → `rippleGlass` 0.03.
+Low frequency is a few large lumps, high is many small ripples, and `scale` sets amplitude independently.
+Three pairs are one recipe at two settings (`glassWarp`/`rippleGlass`, `dreamyHaze`/`dreamSequence`,
+`nostalgia`/`fadedPolaroid`), and the last two sit in DIFFERENT registers in SELECTION.md while the code
+does not support the split.
+
+**The reusable part:** the only way to find any of this was to describe the thing. Documentation work is
+not separate from correctness work — it is a slow read of code nobody has read in a while.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
