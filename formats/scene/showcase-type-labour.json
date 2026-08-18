@@ -7,7 +7,8 @@
   {
    "t": 0,
    "tone": "light",
-   "html": "<style>.tl{position:absolute;inset:0;background:linear-gradient(180deg,#ffffff 0%,#f5f7fb 100%);overflow:hidden}.tl .rows{position:absolute;left:0;right:0;top:-12%;height:124%;background:repeating-linear-gradient(180deg,rgba(37,99,235,.055) 0 2px,transparent 2px 72px);transform:translateY(calc(var(--t,0) * -6px))}.tl .ruler{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(15,22,32,.045) 0 1px,transparent 1px 128px)}.tl .head{position:absolute;top:0;bottom:0;width:3px;background:rgba(37,99,235,.45);left:calc(var(--p,0) * 100%)}.tl .headglow{position:absolute;top:0;bottom:0;width:120px;margin-left:-119px;background:linear-gradient(90deg,rgba(37,99,235,0),rgba(37,99,235,.10));left:calc(var(--p,0) * 100%)}</style><div class='tl'><div class='rows'></div><div class='ruler'></div><div class='headglow'></div><div class='head'></div></div>"
+   "html": "<style>.tl{position:absolute;inset:0;background:linear-gradient(180deg,#ffffff 0%,#f5f7fb 100%)}.tl .rows{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(37,99,235,.05) 0 2px,transparent 2px 72px)}.tl .ruler{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(15,22,32,.04) 0 1px,transparent 1px 128px)}</style><div class='tl'><div class='rows'></div><div class='ruler'></div></div>",
+   "_why": "DELIBERATELY STILL. This is a motion reference: the viewer compares one entrance against the last, so the only thing moving in frame must be the effect under examination. A travelling playhead lived here and was cut - it carried no information (progress through a 34s reel is not something anyone needs to track) and it pulled the eye sideways during every beat. The grid stays because a still workspace ground gives the white frame texture without competing."
   }
  ],
  "audio": {
@@ -547,10 +548,12 @@
  ],
  "authoring": {
   "allow": [
-   "numbered-section-markers"
+   "numbered-section-markers",
+   "static-bg"
   ],
   "_why": {
-   "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..08 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names."
+   "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..09 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names.",
+   "static-bg": "a motion REFERENCE, and the rule's own reasoning inverts here. The backdrop is normally the largest area of the frame and a frozen one reads as a slide - but this film's whole job is that you watch one entrance at a time and compare it to the last, so a second moving object anywhere in frame competes with the only thing worth watching. A travelling playhead lived here and was cut for exactly that. The film is not static: nine type effects animate in it."
   }
  }
 }
