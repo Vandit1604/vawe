@@ -1578,18 +1578,18 @@
           "label": "Animate CSS custom properties over the layer's window: { \"--p\": [from, to] }"
         },
         "varsDur": {
-          "type": "number",
-          "label": "Seconds the `vars` sweep takes (default 1)",
+          "type": ["number", "object"],
+          "label": "Seconds the `vars` sweep takes (default 1). A NUMBER applies to every channel; an OBJECT keyed by channel name gives each its own, with `*` as that map's default",
           "min": 0
         },
         "varsDelay": {
-          "type": "number",
+          "type": ["number", "object"],
           "label": "Seconds into the layer before the `vars` sweep starts",
           "min": 0
         },
         "varsEase": {
-          "type": "string",
-          "label": "Easing for the `vars` sweep (default easeOutCubic)"
+          "type": ["string", "object"],
+          "label": "Easing for the `vars` sweep (default easeOutCubic). A STRING applies to every channel; an OBJECT keyed by channel name gives each its own curve, with `*` as that map's default"
         },
         "crt": {
           "type": "boolean|object",

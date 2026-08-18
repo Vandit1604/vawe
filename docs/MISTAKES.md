@@ -10118,6 +10118,50 @@ to see. That is not four mistakes; it is one missing rule, applied four times to
 
 ---
 
+## #357 — One ease for every channel, so the second curve had to be hand-written in CSS
+
+F2 of the framework plan. `core/tracks/vars.js` animates CSS custom properties, which is how a block
+animates what it DOES rather than merely entering. It computed ONE ease for every channel:
+
+```js
+const e = resolveEasing(L.varsEase || 'easeOutCubic')(u);
+for (const [name, range] of Object.entries(L.vars)) …
+```
+
+So a layer wanting width on one curve and radius on another had nowhere to put the second.
+`higgsfield-recreation.json` layer 4 morphs a rounded rect into a pill and needed exactly that, so its
+author set `varsEase: "linear"` and hand-wrote the easing as polynomials inside CSS:
+
+```css
+width:  calc(392px - (var(--p)*0.35 + var(--p)*var(--p)*0.65) * 205px)
+border-radius: calc(30px + var(--p)*var(--p)*var(--p) * 900px)
+opacity: calc(1 - var(--p)*var(--p) * 3.2)
+```
+
+That is a workaround, and by this repo's own rule a workaround is a bug report.
+
+**The capability.** `varsEase`, `varsDur` and `varsDelay` each take a scalar (every channel, the original
+meaning, byte-identical) OR a map keyed by channel with `'*'` as its own default.
+
+**Re-authoring the reference proved the design, including a part I had not planned.** Of the four
+hand-written curves, three are expressible EXACTLY: `p³` is `easeInCubic` (measured max error 0.0000),
+`p` is `linear`, and — the interesting one — `1 − 3.2p²` is `1→0` on `easeInQuad` over `dur/√3.2`. That
+last one is not a different EASE, it is a different DURATION, which is why per-channel `varsDur` had to
+ship alongside per-channel easing. Building only what the plan asked for would have left it unexpressible.
+
+The fourth, `0.35p + 0.65p²`, has no exact match in the 40 named easings; `easeInSine` fits to 0.055 max
+error, about 11px on a 205px travel. Judged side by side at the midpoint of the morph: the same object at
+the same stage, a few pixels narrower. Accepted, and recorded rather than hidden — the polynomial was more
+precise than any named curve, and that is a real limit of a named-easing vocabulary, not a defect.
+
+**What the library diff could NOT tell me.** `snap-all` reported 104 identical, and that is not evidence:
+the morphing div lives INSIDE a hand-authored `html` layer, and the signature captures only top-level
+layer elements. Unlike #351's `filter` and #356's `bgc`, this one is not a hole to close — an html layer's
+inner DOM is arbitrary by definition. It is a stated limit, and the evidence for this change is the
+rendered comparison instead.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

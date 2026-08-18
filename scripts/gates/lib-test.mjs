@@ -25,6 +25,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../.
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
+import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
@@ -1103,6 +1104,39 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+}
+
+// ---- vars track: PER-CHANNEL timing (core/tracks/vars.js) ----
+{
+  const drive = (L, t) => { const out = {}; varsFrame(null, { style: { setProperty: (k, v) => { out[k] = +v; } } }, L, null, t, 0, 0); return out; };
+  const two = { vars: { '--a': [0, 1], '--b': [0, 1] } };
+  ok('vars: a scalar varsEase still drives every channel identically (back-compat)', (() => {
+    const o = drive({ ...two, varsEase: 'linear', varsDur: 1 }, 0.5); return o['--a'] === 0.5 && o['--b'] === 0.5;
+  })());
+  ok('vars: a per-channel varsEase gives each channel its own curve', (() => {
+    const o = drive({ ...two, varsEase: { '--a': 'linear', '--b': 'easeInCubic' }, varsDur: 1 }, 0.5);
+    return o['--a'] === 0.5 && Math.abs(o['--b'] - 0.125) < 1e-6;
+  })());
+  ok('vars: a per-channel varsDur lets one channel finish before another', (() => {
+    const o = drive({ ...two, varsEase: 'linear', varsDur: { '*': 1, '--b': 0.5 } }, 0.5);
+    return o['--a'] === 0.5 && o['--b'] === 1;
+  })());
+  ok('vars: `*` is the map\'s own default', (() => {
+    const o = drive({ ...two, varsEase: { '*': 'linear' }, varsDur: 1 }, 0.25);
+    return o['--a'] === 0.25 && o['--b'] === 0.25;
+  })());
+  // The acceptance test from the plan: higgsfield's morph had FOUR hand-written curves in CSS calc().
+  // Three are expressible exactly; `1 - 3.2p²` is `1→0` on easeInQuad over dur/√3.2, which is why
+  // per-channel DURATION had to ship alongside per-channel easing.
+  ok('vars: the label fade `1 - 3.2p^2` is exactly easeInQuad over dur/sqrt(3.2)', (() => {
+    const D = 0.4, d = D / Math.sqrt(3.2);
+    for (const t of [0.05, 0.1, 0.15, 0.2]) {
+      const poly = 1 - 3.2 * (t / D) ** 2;
+      const o = drive({ vars: { '--o': [1, 0] }, varsEase: 'easeInQuad', varsDur: d }, t);
+      if (poly > 0 && Math.abs(o['--o'] - poly) > 1e-3) return false;
+    }
+    return true;
+  })());
 }
 
 // ---- colour defaults: a token or a stated constant, never an unexplained hex (core/color.js) ----
