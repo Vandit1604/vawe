@@ -14,6 +14,11 @@
 //   cv (canvas hash)     — the background is painted into <canvas id="cv">, and a DOM signature cannot
 //                          see canvas pixels. Without this, any change of bg preset, colour, speed or
 //                          direction was invisible.
+//   bgc (background)     — the FOURTH instance of the same gap, found the same way. A composite look's
+//                          vignette, grain, scanlines and light leak are all overlay DIVS, so changing
+//                          `lightLeak`'s default colour altered two shipped looks and the whole-library
+//                          net reported "identical: 104, changed: 0". If a property can carry a visual
+//                          change, it belongs here; that is the only rule this list has.
 //   ft (filter)          — a GRADE is invisible to every field above it. Rebuilding the anamorphic
 //                          streak and the chromatic split changed how 8 composite looks render across
 //                          3 scenes, and the whole-library net reported "identical: 102, changed: 0"
@@ -24,7 +29,7 @@
 /** Field key → human name, used for both the diff labels and the field list itself. */
 export const SIG_FIELDS = {
   x: 'x', y: 'y', w: 'w', h: 'h', tf: 'transform', op: 'opacity', fs: 'font', c: 'color', t: 'text',
-  cp: 'clip-path', cv: 'canvas', ft: 'filter',
+  cp: 'clip-path', cv: 'canvas', ft: 'filter', bgc: 'background',
 };
 
 // The browser-side capture. Passed whole to page.evaluate, so it may not reference anything outside
@@ -102,6 +107,13 @@ function capture(frames) {
         cp: !s.clipPath || s.clipPath === 'none' ? '' : s.clipPath,
         // A composite look resolves to a `filter` string, and on an IMAGE layer it is set on the inner
         // <img> rather than the wrap (core/looks.js applyComposite), so read that when it is there.
+        // Overlay children carry the look's texture; the layer's own background carries a rect's fill.
+        bgc: (() => {
+          const own = s.backgroundImage && s.backgroundImage !== 'none' ? s.backgroundImage : (s.backgroundColor || '');
+          const ovs = [...el.querySelectorAll(':scope > .hs-look-ov, :scope > .hs-vignette')]
+            .map((o) => { const c = getComputedStyle(o); return (c.backgroundImage !== 'none' ? c.backgroundImage : c.backgroundColor) + '|' + c.opacity; });
+          return (own + (ovs.length ? '::' + ovs.join('::') : '')).slice(0, 400);
+        })(),
         ft: (() => {
           const target = el.classList && el.classList.contains('hs-img-wrap') ? el.querySelector('img') : null;
           const v = target ? getComputedStyle(target).filter : s.filter;

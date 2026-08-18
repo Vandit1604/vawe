@@ -21,6 +21,14 @@
 //   overlays → inset child divs (texture/vignette), appended in order, ungraded stacking on top.
 
 import { resolveFilter, bloomFilter, chromaSplitFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
+import { lit } from './color.js';
+
+// The theme's accent as a CSS value — every pass here writes CSS, so `var()` resolves for free.
+const CSS = { accent: 'var(--accent, #ffffff)' };
+// Deliberate constants, each with its reason recorded by core/color.js's `literal()`.
+const WARM_FRINGE = lit('rgba(255,60,60,0.75)', 'the red side of a channel split — physics, not brand');
+const COOL_FRINGE = lit('rgba(40,120,255,0.75)', 'the blue side of the same split');
+const VIGNETTE_BLACK = lit('#000', 'a lens falls off to black; a coloured vignette is a different effect');
 
 const n2 = (x) => (+x).toFixed(2);
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -102,16 +110,24 @@ const PASSES = {
   // no glowColor/color → a source-coloured bloom (the glow keeps the image's own colours, real neon);
   // an explicit colour floods a uniform tint (dreamyHaze/halationFilm/hologram set one on purpose).
   bloom: (o, s) => ({ fns: [bloomStack(o.size ?? 1, o.glowColor || o.color, s, o.key)] }),
-  hBloom: (o, s) => ({ fns: [hStreak(o.size ?? 1, o.streakColor || '#a9c8ff', s)] }),
+  // `#a9c8ff` was the default here and it was DEAD: the one look with an hBloom fixes streakColor, so
+  // nothing ever resolved it. A dead default is still a decision nobody made, so it follows the theme now.
+  hBloom: (o, s) => ({ fns: [hStreak(o.size ?? 1, o.streakColor || o.color || CSS.accent, s)] }),
   overexpose: (o) => ({ fns: [`brightness(${n2(1 + 0.3 * (o.amt ?? 1))})`] }),
-  chromatic: (o, s) => ({ fns: [chromaPair((o.px ?? 2) * (0.5 + s), o.warm || 'rgba(255,60,60,0.75)', o.cool || 'rgba(40,120,255,0.75)')] }),
+  // Red one way and blue the other is the PHYSICS of a channel split, not a brand decision - so these
+  // are literals on purpose, and say so. That is the distinction core/color.js exists to make visible.
+  chromatic: (o, s) => ({ fns: [chromaPair((o.px ?? 2) * (0.5 + s), o.warm || WARM_FRINGE, o.cool || COOL_FRINGE)] }),
   // -- texture --
   scanlines: (o, s) => ({ overlays: [{ bg: scanGrad(o.gap ?? 3, (o.alpha ?? 0.28) * (0.4 + 0.9 * s)), blend: 'multiply' }] }),
   grid: (o) => ({ overlays: [{ bg: gridGrad(o.gap ?? 44, o.gridColor || 'color-mix(in srgb, var(--accent) 30%, transparent)', 0.15), blend: 'screen' }] }),
   grain: (o, s) => ({ overlays: [{ bg: grainDataUri(o.seed ?? 7), blend: 'overlay', opacity: clamp((o.grain ?? o.amt ?? 0.3) * (0.5 + 0.9 * s), 0, 0.9) }] }),
-  lightLeak: (o, s) => ({ overlays: [{ bg: leakGrad(o.corner || 'tr', o.leakColor || '#ff9a3d', (o.leak ?? o.amt ?? 0.4) * (0.5 + 0.7 * s)), blend: 'screen' }] }),
+  // Falls through to the LOOK'S OWN declared colour before any constant. This is the unfinished half of
+  // #351: routing made a user's `color` reach the leak, but the DEFAULT still landed on one fixed orange,
+  // so fadedPolaroid and nostalgia each declared a warm colour and leaked a different one regardless.
+  lightLeak: (o, s) => ({ overlays: [{ bg: leakGrad(o.corner || 'tr', o.leakColor || o.color || CSS.accent, (o.leak ?? o.amt ?? 0.4) * (0.5 + 0.7 * s)), blend: 'screen' }] }),
   // -- vignette / frame --
-  vignette: (o, s) => ({ overlays: [{ bg: vignetteGrad(o.vignetteColor || '#000', (o.vignette ?? o.strengthV ?? 0.45) * (0.5 + 0.8 * s)) }] }),
+  // A vignette is black because a vignette IS black - the lens falls off, it does not take a brand colour.
+  vignette: (o, s) => ({ overlays: [{ bg: vignetteGrad(o.vignetteColor || VIGNETTE_BLACK, (o.vignette ?? o.strengthV ?? 0.45) * (0.5 + 0.8 * s)) }] }),
   vignetteInvert: (o, s) => ({ overlays: [{ bg: vignetteInvGrad((o.vignette ?? 0.4) * (0.5 + 0.8 * s)) }] }),
 };
 

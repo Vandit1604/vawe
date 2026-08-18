@@ -10073,6 +10073,51 @@ its author wrote eighteen times and never once saw.
 
 ---
 
+## #356 — A colour default is a decision about the theme, or a deliberate constant, and nothing could tell them apart
+
+F3 of the framework plan. Twice this week a brand's colours turned out to be the engine's defaults:
+`PAL_PLINTH` painted every unthemed background in plinthai.xyz blue (#352), and `inkflash` flashed
+themes/brew.json's `#ff742e` onto its `#1c1613` in a preset every theme may use (#354). Both were fixed by
+hand. The cause is structural and would have produced a third: an effect author writes the colour they are
+looking at, and **the source gives no way to say whether that hex is "the accent" or "this blue on purpose"**.
+
+`core/color.js` makes the distinction expressible:
+
+```js
+token('--accent')                        // follows the theme, reskins
+lit('#000', 'a lens falls off to black') // a constant ON PURPOSE — the reason is REQUIRED
+```
+
+Both are legal. `lit()` throws without a reason, because a constant with no stated reason is exactly what
+a forgotten tokenisation looks like. Resolution is late and context-aware: a CSS property gets
+`var(--accent)`, an SVG attribute and a canvas get components, since neither can resolve a custom property
+(`glowRGB` has done that translation since bloom shipped, so this reuses it and keeps the theme read once).
+
+**What converting found.** `hStreak`'s `#a9c8ff` was DEAD — the only look with an `hBloom` fixes the
+colour, so nothing ever resolved it. A dead default is still a decision nobody made. And `lightLeak`'s
+`#ff9a3d` was the **unfinished half of #351**: routing made a user's `color` reach the leak, but the
+DEFAULT still landed on one fixed orange, so `fadedPolaroid` declared `#ffd9a8` and `nostalgia` declared
+`#ffcf9a` and both leaked orange regardless. They now leak their own colour. `lomo` is unchanged, because
+its declared colour IS that orange.
+
+Marked as deliberate, with reasons now in the source: the red/blue chromatic fringes (physics of a channel
+split), the vignette's black (a lens falls off to black), the Matrix rain's green (an homage), and the
+white-hot heads of a spark and a meteor trail.
+
+**And a FOURTH signature hole, found the same way as the other three.** After changing two looks' leak
+colour, `make snap-all` reported **"identical: 104, changed: 0"**. A light leak is an overlay DIV's
+`background`, and the signature had no field for one — so the vignette, grain, scanlines and leak of every
+composite look were outside it, exactly as `filter` was this morning (#351), `clip-path` and the canvas
+hash before that. `bgc` now records a layer's own background and its overlay children's. Proven by
+reverting `looks.js` with the field in place: `looks-reel` and `looks` surface immediately, 24 and 5
+changes, and nothing else moves.
+
+**The list has one rule now, written into the file: if a property can carry a visual change, it belongs in
+the signature.** Four omissions, four separate discoveries, each found by a change that the net then failed
+to see. That is not four mistakes; it is one missing rule, applied four times too late.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

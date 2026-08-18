@@ -24,6 +24,7 @@ import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
+import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
@@ -1102,6 +1103,25 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+}
+
+// ---- colour defaults: a token or a stated constant, never an unexplained hex (core/color.js) ----
+{
+  ok('color: a token resolves to var() in a CSS context', resolveColor(token('--accent'), 'css') === 'var(--accent, #ffffff)');
+  ok('color: a token resolves to components where var() cannot go (SVG attrs, canvas)',
+    JSON.stringify(resolveColor(token('--accent', { fallback: '#c2f23b' }), 'rgb', () => null)) === '[194,242,59]');
+  ok('color: a plain string still works, so every old call site keeps its meaning',
+    resolveColor('#ff0000', 'css') === '#ff0000');
+  // The reason is the mechanism: a constant with no stated reason is indistinguishable from a brand
+  // colour somebody forgot to tokenise, which is exactly how brew's orange ended up in a shared preset.
+  ok('color: a deliberate constant MUST state why', (() => {
+    try { lit('#000'); return false; } catch (e) { return /pass a reason/.test(e.message); }
+  })());
+  ok('color: literal() carries its reason with it', literal('#000', 'a vignette is black').why === 'a vignette is black');
+  // The unfinished half of #351: a look's leak now follows the look's OWN declared colour.
+  const leakOf = (n) => (resolveComposite(n).overlays.find((o) => /radial-gradient\(60%/.test(o.bg)) || {}).bg || '';
+  ok('looks: fadedPolaroid leaks its OWN declared colour, not a fixed orange', leakOf('fadedPolaroid').includes('#ffd9a8'));
+  ok('looks: nostalgia likewise', leakOf('nostalgia').includes('#ffcf9a'));
 }
 
 // ---- canvas FX (core/canvas-fx.js) — pure pixel math (the DOM passes bake in the browser) ----

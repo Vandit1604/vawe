@@ -1,3 +1,10 @@
+import { glowRGB } from './filters.js';
+import { lit } from './color.js';
+
+// These draw to a CANVAS, which cannot read a CSS custom property, so a token has to be resolved to
+// components. glowRGB already does exactly that against the live theme and caches it (core/filters.js),
+// so the theme is read once at build and never per frame — the determinism contract is unchanged.
+const ACCENT = () => `rgb(${glowRGB('var(--accent)').join(',')})`;
 // core/paint-fx.js — GENERATIVE Canvas 2D effects: draw(ctx, w, h, lt, seed, opts), pure in `lt`.
 //
 // WHY THIS EXISTS, separately from core/canvas-fx.js: canvasFx transforms a SOURCE IMAGE and is baked
@@ -33,7 +40,7 @@ export const PAINT_FX = {
   // The glyph in a cell changes on a quantised clock, so it flickers without being random per frame.
   matrix(ctx, w, h, lt, seed, o = {}) {
     const size = o.size ?? 20, cols = Math.ceil(w / size), rows = Math.ceil(h / size) + 2;
-    const color = o.color || '#3ddc84', tail = o.tail ?? 14, rate = o.rate ?? 12;
+    const color = o.color || lit('#3ddc84', 'glyph rain is green because the film it quotes is green — an homage, not a brand colour'), tail = o.tail ?? 14, rate = o.rate ?? 12;
     ctx.font = `${size - 4}px ui-monospace, monospace`;
     ctx.textBaseline = 'top';
     for (let c = 0; c < cols; c++) {
@@ -47,7 +54,7 @@ export const PAINT_FX = {
         const tick = Math.floor(lt * rate);
         const g = GLYPHS[Math.floor(hash01(c * 8191 + r * 131 + tick, seed) * GLYPHS.length)];
         ctx.globalAlpha = k === 0 ? 1 : a * 0.75;
-        ctx.fillStyle = k === 0 ? (o.headColor || '#eafff2') : color;
+        ctx.fillStyle = k === 0 ? (o.headColor || lit('#eafff2', 'the leading glyph is white-hot; a trail cools BEHIND its head')) : color;
         ctx.fillText(g, c * size, r * size);
       }
     }
@@ -58,7 +65,7 @@ export const PAINT_FX = {
   // computed directly from lt rather than advanced frame by frame.
   starfield(ctx, w, h, lt, seed, o = {}) {
     const n = o.count ?? 220, cx = w / 2, cy = h / 2, maxR = Math.hypot(cx, cy);
-    ctx.fillStyle = o.color || '#ffffff';
+    ctx.fillStyle = o.color || lit('#ffffff', 'stars are white');
     for (let i = 0; i < n; i++) {
       const ang = hash01(i, seed) * Math.PI * 2;
       const sp = (0.25 + hash01(i + 313, seed) * 0.9) * (o.speed ?? 1) * maxR * 0.25;
@@ -104,7 +111,7 @@ export const PAINT_FX = {
   // integration). The tail is a gradient stroke drawn BEHIND the head each frame — a deterministic echo,
   // not accumulated pixels. Head fades in/out at the path ends so streaks don't pop at the wrap.
   meteor(ctx, w, h, lt, seed, o = {}) {
-    const n = o.count ?? 14, sp = o.speed ?? 1, color = o.color || '#eaf2ff';
+    const n = o.count ?? 14, sp = o.speed ?? 1, color = o.color || lit('#eaf2ff', 'the cool edge of a spark, not a brand tint');
     const ang = ((o.angle ?? 28) * Math.PI) / 180, dx = Math.cos(ang), dy = Math.sin(ang);
     const span = Math.hypot(w, h) * 1.3, len = o.length ?? 220;
     for (let i = 0; i < n; i++) {
@@ -124,7 +131,7 @@ export const PAINT_FX = {
       ctx.globalAlpha = (o.opacity ?? 0.9) * edge;
       ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
       ctx.globalAlpha = edge;
-      ctx.fillStyle = o.headColor || '#ffffff';
+      ctx.fillStyle = o.headColor || lit('#ffffff', 'a meteor head is white-hot, like the trail above');
       ctx.beginPath(); ctx.arc(hx, hy, (o.weight ?? 2) * 0.9, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -138,7 +145,7 @@ export const PAINT_FX = {
       const y0 = ((l + 0.5) / lines) * h;
       const ph = hash01(l, seed) * Math.PI * 2;
       ctx.globalAlpha = (o.opacity ?? 0.5) * (0.35 + 0.65 * Math.sin((l / lines) * Math.PI));
-      ctx.strokeStyle = o.color || '#2563eb';
+      ctx.strokeStyle = o.color || ACCENT();   // was '#2563eb' — literally this project's accent, frozen into an effect
       ctx.beginPath();
       for (let x = 0; x <= w; x += 8) {
         const u = x / w;
