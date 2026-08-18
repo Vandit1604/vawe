@@ -9519,6 +9519,33 @@ self-evident, ransom faces are font names, and a drawn icon called `check` needs
 
 ---
 
+## #344 — The site study read every heading and then threw the words away
+
+Building the quiz's one site-grounded question — "which part of your product does the convincing?" — meant
+rendering its options from `sections.json`. They came out as `Move work forward across tea` and
+`Make product operations self`: truncated mid-word, because the only human-readable field in the manifest
+is `label`, and `label` is a **filename slug** sliced to 28 characters.
+
+The real heading was never missing. `scripts/brand/sections.mjs:93` reads it into `raw`, uses it to derive
+the slug, and drops it. Then `:127` builds each manifest entry by enumerating fields by hand, so even
+after `raw` was carried forward as `title` it was **collected and discarded a second time** — the same
+accepted-then-ignored shape as the MCP `desc` fixed this morning, in a different file, on the same day.
+
+**Fix.** `title` is the heading as the site wrote it, kept beside the slug, with the whitespace collapsed
+(a heading that wraps in the page arrives as `"Make product \noperations self-driving"`, and a heading is
+one string). The question now reads back `Move work forward across teams and agents`, which is the site's
+own sentence.
+
+**The general shape, worth keeping.** A field enumerated by hand at a boundary is a place where data goes
+to die quietly: nothing errors, the consumer just never sees it. Both of today's instances were invisible
+until something downstream tried to USE the value. That is the argument for spreading rather than listing
+at a serialisation boundary, and failing that, for a consumer that says what it expected.
+
+Older studies predate `title`, so the quiz falls back to de-slugging the label — legible, and honest about
+being a handle rather than a quotation. Re-run `make sections` and the real words return.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

@@ -436,6 +436,17 @@ panels:
 styleframes:
 	node scripts/author/styleframes.mjs $(D) $(if $(N),--n $(N))
 
+# make quiz [NAME=<brand>] [URL=<url>]  — THE BRIEF, before anything is authored. Prints an
+# AskUserQuestion payload built from the brand's own sections + the DIRECTIONS/PROFILES registries, so the
+# options are the site's real words and the engine's real vocabulary. Refuses to ask genericly when a URL
+# is known and no site study exists (a generic question wastes the answer). Never names an effect.
+quiz:
+	node scripts/author/quiz.mjs --ask $(if $(NAME),--name $(NAME)) $(if $(URL),--url $(URL)) $(if $(SLUG),--slug $(SLUG))
+
+# make quiz-round2 PLACEMENT=<k> JOB=<k>  — the branched follow-ups, which emit NOTHING already decided.
+quiz-round2:
+	node scripts/author/quiz.mjs --round 2 --placement $(PLACEMENT) --job $(JOB)
+
 # make storyboard-check SB=path/to/STORYBOARD.md  — the storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
 # decisions that make a video good were made and written down BEFORE the JSON. Template: docs/CRAFT/STORYBOARD-TEMPLATE.md

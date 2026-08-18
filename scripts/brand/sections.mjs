@@ -90,7 +90,7 @@ const found = await page.evaluate((VW) => {
     if (seen.has(el)) continue; seen.add(el);
     // human label: aria-label > first heading > tag
     const heading = el.querySelector('h1, h2, h3');
-    const raw = (el.getAttribute('aria-label') || heading?.textContent || el.tagName.toLowerCase()).trim();
+    const raw = (el.getAttribute('aria-label') || heading?.textContent || el.tagName.toLowerCase()).replace(/\s+/g, ' ').trim();
     const label = raw.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 28) || el.tagName.toLowerCase();
     // kind hint: what's inside decides how to capture it
     const hasCanvasGl = !!el.querySelector('canvas, video, [style*="webgl"], iframe');
@@ -99,7 +99,11 @@ const found = await page.evaluate((VW) => {
     const note = hasCanvasGl ? 'canvas/video — capture as clipped screenshot image layer + ken, DOM capture will miss it'
       : imgs >= 3 ? 'image-rich — capture-component keeps its real assets; animate as one component'
       : 'mostly text — capture-component, then overlay our own type layer to re-type the copy';
-    out.push({ label, sel: cssPath(el), x: Math.round(row.left), y: Math.round(row.top), w: row.w, h: row.h, kind, note });
+    // `label` is sliced to 28 chars because it names a FILE. `title` is the heading as the site actually
+    // wrote it, kept because a question that quotes the site back cannot quote a filename: the label for
+    // "Move work forward across teams and agents" truncates to "move-work-forward-across-tea", and asking
+    // somebody to choose "Move work forward across tea" is not quoting them, it is showing them a slug.
+    out.push({ label, title: raw, sel: cssPath(el), x: Math.round(row.left), y: Math.round(row.top), w: row.w, h: row.h, kind, note });
   }
   return out;
 }, VW);
@@ -120,7 +124,7 @@ for (let i = 0; i < found.length; i++) {
   const capture = s.kind === 'canvas'
     ? `# canvas — screenshot ${path.relative(ROOT, file)} into a clipped image layer (ken burns)`
     : `make capture URL="${url}" SEL='${s.sel}' NAME=${brand} LABEL=${s.label.replace(/-/g, '') || 'sec' + (i + 1)}`;
-  manifest.push({ i: i + 1, label: s.label, sel: s.sel, x: s.x, y: s.y, w: s.w, h: s.h, kind: s.kind, note: s.note, shot: path.relative(ROOT, file), capture });
+  manifest.push({ i: i + 1, label: s.label, title: s.title, sel: s.sel, x: s.x, y: s.y, w: s.w, h: s.h, kind: s.kind, note: s.note, shot: path.relative(ROOT, file), capture });
 }
 await browser.close();
 
