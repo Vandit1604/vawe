@@ -27,6 +27,10 @@ import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf } from '../../core/junctions.js';
+import { applyComposite } from '../../core/looks.js';
+import { bakeCanvasFx } from '../../core/canvas-fx.js';
+import { DIRS } from '../../core/cuts.js';
+import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
@@ -1132,6 +1136,23 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // everywhere" would be the wrong lesson drawn from a true measurement.
   ok('blueprints: idle is on the MARK, not on the copy around it',
     cta.filter((l) => l.type === 'text').every((l) => !l.fx));
+}
+
+// ---- every vocabulary refuses a WRONG name and keeps its default for an ABSENT one (#361) ----
+{
+  const refuses = (label, fn) => ok(`vocab: ${label} refuses an unknown name`, (() => {
+    try { fn('zzz-not-real'); return false; } catch (e) { return /unknown/i.test(e.message); }
+  })());
+  refuses('background preset', (n) => bgPreset(n));
+  refuses('composite look', (n) => { const el = { classList: { contains: () => false }, style: {}, appendChild() {} }; applyComposite(el, n); });
+  refuses('canvas fx', (n) => bakeCanvasFx({ naturalWidth: 10, naturalHeight: 10 }, { fx: n }));
+  refuses('seam direction', (n) => seamDir(n));
+  // ...and ABSENCE still resolves to the documented default, which is the half that broke 18 scenes
+  // when the first cut of this work collapsed the two questions into one answer.
+  ok('vocab: an ABSENT background preset still defaults to paper', !!bgPreset(undefined).base);
+  ok('vocab: an ABSENT canvasFx is a no-op, not an error', bakeCanvasFx({ naturalWidth: 0, naturalHeight: 0 }, {}) === null);
+  // The three junction kinds are the ones a viewer always watches; all three now refuse.
+  ok('vocab: the direction vocabulary has ONE definition', DIRS.length === 4 && DIRS.join() === 'left,right,up,down');
 }
 
 // ---- junctions: name a moment by its JOINT, never by its time (core/junctions.js) ----

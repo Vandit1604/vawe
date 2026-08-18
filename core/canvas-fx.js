@@ -219,6 +219,10 @@ export function resolveFxSpec(spec) {
 // Runs at build (boot) on an already-decoded image. Caps the working width so huge photos stay cheap.
 export function bakeCanvasFx(img, spec) {
   const o = resolveFxSpec(spec);
+  // Absence and a WRONG NAME shared one `return null`, so a typo baked no pass and said nothing.
+  // Absence keeps its meaning; an unknown name is refused. #361.
+  if (o.fx != null && !Object.prototype.hasOwnProperty.call(CANVAS_FX, o.fx))
+    throw new Error(`unknown canvasFx "${o.fx}" — one of: ${Object.keys(CANVAS_FX).join(', ')}`);
   const pass = CANVAS_FX[o.fx];
   if (!pass || typeof document === 'undefined') return null;
   const nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height;

@@ -10291,6 +10291,57 @@ have re-read it with the same belief that put the line in the log.
 
 ---
 
+## #361 — Seven vocabularies still answered a wrong name with a plausible substitute
+
+The review that produced #360 prompted a full sweep: probe every named vocabulary in the engine with a
+nonsense name, then read what each CALLER does with the result.
+
+**The sweep corrected a claim I had just made.** I had said "13 vocabularies are not registries, so 13
+need work". Wrong. Being a registry and being guarded are different things: camera moves, caption styles,
+paint fx, raymarch and ambient shaders all refuse an unknown name already, each with its own message.
+The real number was SEVEN, and three of the seven sit at a junction — the moment a viewer always watches.
+
+| vocabulary | what a wrong name did |
+|---|---|
+| background | became `aurora` — `case 'aurora': default:` |
+| seam | became `fade` |
+| sting | was DROPPED and never happened |
+| look | applied no look at all |
+| canvas fx | applied no pass |
+| composition | warned, then skipped the whole hand-authored timeline |
+| direction (seams) | became `left` |
+
+**The two that are worth naming.**
+
+The **sting** is the quietest failure of the three junction kinds. `data.stings.filter(s =>
+SHADER_FX.includes(s.fx))` removed it from the list, so the effect did not degrade — it ceased to exist,
+with no frame anywhere to look at and wonder about.
+
+The **seam** sat two lines below a guard that already throws on an unknown seam TIMING. One half of the
+same object was checked and the other was not, in the same expression, by the same author.
+
+**The direction fallback was in a THIRD file.** I fixed `[dir] || left` in `core/cuts.js` and
+`core/motion.js` earlier the same day and did not search for a third copy. `core/seams.js:337` had it.
+`DIRS` now has one definition and all three ask it. This is the third time in one day that "fix the rule,
+not the call site" caught me after the fact rather than before.
+
+**Absence is not wrongness, and a default belongs in one place.** Writing the assertions found that
+`bgPreset` had no default for `name` at all: every one of its three callers wrote `b.preset || 'paper'`
+separately. The default now lives in the function, once.
+
+**The validator had to be taught to report rather than crash.** `core/validate.mjs` calls `bgPreset` to
+check a window's `opts`, so a throwing `bgPreset` would have made a typo'd preset kill the validator
+instead of producing the message it exists to produce. It now resolves only names the registry knows —
+the enum check above it has already recorded the error for anything else. **A guard that turns a good
+error message into a stack trace is not an improvement**, and this is the shape to watch for whenever a
+resolver starts throwing.
+
+**Result: 104 of 104 scenes byte-identical.** That is the expected outcome and it is worth stating why:
+every scene passes `validate`, so no scene names a vocabulary item that does not exist. This change
+alters nothing that works and refuses everything that never did.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

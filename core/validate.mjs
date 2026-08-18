@@ -22,7 +22,7 @@ import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism } from '../core/transitions-lower.js';
 import { GSAP_FX, EXIT_FX } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
-import { bgPreset, bgOverErrors, bgOptKeys } from '../core/backgrounds.js';
+import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../core/backgrounds.js';
 import { mergePan } from './pan-resolve.mjs';
 import { motionAt } from './sequence.js';
 
@@ -337,7 +337,11 @@ export function bgErrors(cfg) {
       // render (docs/MISTAKES.md #157). Say which keys this preset actually has.
       // A `use:"theme"` window names no preset here (it comes from themes/<name>.json), so it cannot be
       // resolved without the theme; applyBgOver throws on it at build time instead.
-      if (isObj(b.opts) && b.use == null)
+      // bgPreset now THROWS on an unknown preset (#361). The validator must REPORT a bad name, never
+      // crash on one, so it only resolves a preset the registry knows — the enum check above has
+      // already recorded the error for anything else.
+      const bgKnown = BG_NAMES.includes(b.preset || 'paper');
+      if (isObj(b.opts) && b.use == null && bgKnown)
         out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
       // ...AND THE SAME KEY ONE LEVEL UP. #157 made an unknown key INSIDE `opts` throw. Nothing checked
       // a real fx parameter written OUTSIDE it: `{"preset":"gradientWash","intensity":0.3}` is read by
@@ -346,7 +350,7 @@ export function bgErrors(cfg) {
       // identical failure the earlier fix was written for, at the level nobody looked at: I authored one
       // myself, changed the numbers twice, and got a byte-identical contact sheet both times before
       // reading the call site (docs/MISTAKES.md #327).
-      if (b.use == null) {
+      if (b.use == null && bgKnown) {
         const known = new Set(bgOptKeys(bgPreset(b.preset || 'paper', b.value)));
         const stray = Object.keys(b).filter((k) => known.has(k) && !BG_WINDOW_KEYS.has(k));
         if (stray.length)

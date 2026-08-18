@@ -1,3 +1,4 @@
+import { DIRS } from './cuts.js';
 // core/seams.js — SEAM D: two-scene shader transitions.
 //
 // A `sting` (core/stings.js) paints a GENERATIVE overlay on top of one beat; a `cut` (core/cuts.js)
@@ -281,6 +282,10 @@ function buildProgram(gl, fxIndex) {
 // The shader's uv.y is GL y-UP (uv.y=1 is the top of the frame), so "up" is +y and "down" is -y here.
 // (Screen-space y-down would invert the vertical seams — up would push down. MISTAKES: seam y-flip.)
 const DIR_VEC = { left: [-1, 0], right: [1, 0], up: [0, 1], down: [0, -1] };
+// One direction vocabulary for the whole engine (core/cuts.js). This file held the third copy of the
+// same four names and the same silent fall back to left.
+export const okDir = (d) => { if (d == null) return 'left'; if (DIRS.includes(d)) return d;
+  throw new Error(`unknown seam direction "${d}" — one of: ${DIRS.join(', ')}`); };
 
 // createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
 // caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
@@ -334,7 +339,8 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
       const fromTex = uploadTex(from), toTex = uploadTex(to);
       if (!fromTex || !toTex) return this.clear(); // nothing baked → show live stage (safer than black)
       const seed = +opts.seed || 0, intensity = opts.intensity != null ? +opts.intensity : 1;
-      const dir = DIR_VEC[opts.dir] || DIR_VEC.left;
+      // The third copy of `[dir] || left`. core/cuts.js owns the vocabulary; this asks it. #361.
+      const dir = DIR_VEC[okDir(opts.dir)];
       const key = idx + ':' + progress.toFixed(4) + ':' + seed + ':' + intensity + ':' + dir.join(',') + ':' + (from.__seamId || '') + ':' + (to.__seamId || '');
       if (canvas.style.display !== 'block') canvas.style.display = 'block';
       if (key === last) return; last = key;

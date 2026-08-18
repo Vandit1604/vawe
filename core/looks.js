@@ -356,7 +356,10 @@ export function applyComposite(el, spec, lookOpts) {
   const after = String(spec).slice(name.length + 1).trim();
   const positional = after !== '' && !isNaN(+after) ? +after : undefined;
   const resolved = resolveComposite(name, lookOpts || {}, positional);
-  if (!resolved) return;
+  // `if (!resolved) return;` until now: a mistyped look applied NO look and left the layer ungraded,
+  // with nothing said. util.js only routes here when isLook() already matched, so reaching this with a
+  // null means the two disagree — which is worth a loud error, not a shrug. #361.
+  if (!resolved) throw new Error(`unknown look "${name}" — one of: ${LOOK_NAMES.join(', ')}`);
   el.__lookApplied = name;
   // On an IMAGE layer the picture is the <img> inside the wrap, and the wrap already clips (it sets
   // overflow:hidden for `radius`/`ken`). Filtering the wrap put the glow passes OUTSIDE the picture:

@@ -195,6 +195,11 @@ boot((data, fps, theme, canvas) => {
 
   // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}] — boundary effects on a WebGL overlay ----
   const hex01 = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; };
+  // `.filter(s => SHADER_FX.includes(s.fx))` until now: a sting with an unknown fx was DROPPED and
+  // simply never happened, which is the quietest failure of the three junction kinds. #361.
+  for (const s of data.stings || [])
+    if (s && s.fx != null && !SHADER_FX.includes(s.fx))
+      throw new Error(`unknown sting fx "${s.fx}" at t=${s.t} — one of: ${SHADER_FX.join(', ')}`);
   const stings = (data.stings || []).filter((s) => SHADER_FX.includes(s.fx))
     .map((s) => ({ ...s, _tint: s.color ? hex01(s.color) : null, _intensity: s.intensity ?? 1, _pal: Array.isArray(s.colors) ? s.colors.map(hex01) : null }));
   const fxo = createShaderOverlay($('root'), W, H);
@@ -758,7 +763,12 @@ boot((data, fps, theme, canvas) => {
     .map((s) => {
       if (s.timing != null && !CUT_TIMINGS[s.timing])
         throw new Error(`unknown seam timing "${s.timing}" at t=${s.t} — known: ${Object.keys(CUT_TIMINGS).join(', ')}`);
-      return { t: +s.t, fx: SEAM_FX.includes(s.fx) ? s.fx : 'fade', dur: +(s.dur ?? 0.5),
+      // `SEAM_FX.includes(s.fx) ? s.fx : 'fade'` until now — a silent swap at a JUNCTION, two lines
+      // below a guard that already throws on an unknown seam TIMING. One half of the same object was
+      // checked and the other was not. docs/MISTAKES.md #361.
+      if (s.fx != null && !SEAM_FX.includes(s.fx))
+        throw new Error(`unknown seam fx "${s.fx}" at t=${s.t} — one of: ${SEAM_FX.join(', ')}`);
+      return { t: +s.t, fx: s.fx ?? 'fade', dur: +(s.dur ?? 0.5),
         dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, timing: s.timing || 'smooth',
         _from: null, _to: null, _fallback: false };
     })

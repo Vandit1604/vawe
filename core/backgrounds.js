@@ -399,7 +399,10 @@ export const BG_BLURBS = {
   blobs: 'the airier light wash: smaller separated pools with a technical grid reading through the white (moves)',
   liquid: 'folds of the brand hue against true black (moves) — it OWNS the frame, so quiet type on it and nothing else',
 };
-export function bgPreset(name, value, P = PAL_PLINTH) {
+// `name` defaults to `paper` HERE rather than at each call site, where `b.preset || 'paper'` was
+// written three times. Absence has one documented answer; a WRONG name throws (#361).
+export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
+  if (name == null) name = 'paper';
   const dark = value === 'dark' || value === 'ink';
   const grain = { type: 'grain', alpha: dark ? 0.035 : 0.02, fps: 30 };
   switch (name) {
@@ -462,8 +465,14 @@ export function bgPreset(name, value, P = PAL_PLINTH) {
     // full-bleed by design: it OWNS the frame, so put quiet type on it, nothing else.
     case 'liquid': return { base: { kind: 'solid', color: '#000000' }, fx: [
       { type: 'liquid', color: P.accent }, { type: 'grain', alpha: 0.03 } ] };
-    case 'aurora': default: return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
+    // `case 'aurora': default:` until now, so ANY unknown name returned aurora, byte-identically.
+    // The backdrop is the largest area of the frame, and the schema enum only catches a typo when the
+    // author-check runs - under NOCHECK=1 the render is unsupervised. docs/MISTAKES.md #361.
+    case 'aurora': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
+    default:
+      throw new Error(`unknown background preset "${name}" — one of: ${BG_NAMES.join(', ')}. `
+        + `An unknown name used to render aurora, which looks deliberate and is not what was asked for.`);
   }
 }
 
