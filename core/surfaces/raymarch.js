@@ -3,7 +3,7 @@
 // Unlike `shader`, this is a LIT SUBJECT with a silhouette, not an ambient field: give it a box
 // roughly the size you want the object to occupy and let its transparent surround do the compositing.
 // That is why its default box is a square rather than the frame.
-import { createRaymarchLayer, RAYMARCH_FX } from '../raymarch-fx.js';
+import { createRaymarchLayer, RAYMARCH_FX, RAYMARCH_REGISTRY } from '../raymarch-fx.js';
 import { palette } from './palette.js';
 
 export const size = () => [720, 720];   // a subject, not a field: a square you place, not a backdrop
@@ -13,7 +13,7 @@ export const resamplable = false;       // one WebGL context already; the resamp
 export const PROPS = { raymarch: {}, seed: {}, intensity: {}, spin: {}, colors: {} };
 
 export function validate(L) {
-  if (!RAYMARCH_FX.includes(L.raymarch)) throw new Error(`unknown raymarch "${L.raymarch}" — one of: ${RAYMARCH_FX.join(', ')}`);
+  RAYMARCH_REGISTRY.pick(L.raymarch);   // throws, and diagnoses a wrong-slot name
 }
 
 export function create(kit, L, w, h) {

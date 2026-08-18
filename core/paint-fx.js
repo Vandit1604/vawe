@@ -1,4 +1,5 @@
 import { glowRGB } from './filters.js';
+import { defineRegistry } from './registry.js';
 import { lit } from './color.js';
 
 // These draw to a CANVAS, which cannot read a CSS custom property, so a token has to be resolved to
@@ -161,3 +162,7 @@ export const PAINT_FX = {
 };
 
 export const PAINT_FX_NAMES = Object.keys(PAINT_FX);
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a paint fx" when someone writes it somewhere else. core/registry.js.
+export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint' });

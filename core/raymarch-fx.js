@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/raymarch-fx.js — REAL 3D, without a 3D engine. A fullscreen quad plus a distance field is a
 // renderer: march a ray per pixel, hit an implicit surface, shade it. No geometry, no scene graph, no
 // three.js, and no new determinism story, because a raymarched frame is already a pure function of
@@ -273,3 +274,7 @@ export function createRaymarchLayer(w = 1080, h = 1080) {
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a raymarch" when someone writes it somewhere else. core/registry.js.
+export const RAYMARCH_REGISTRY = defineRegistry('raymarch', Object.fromEntries(RAYMARCH_FX.map((n) => [n, n])), { slot: 'raymarch' });

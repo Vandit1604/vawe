@@ -1,4 +1,5 @@
 import { DIRS } from './cuts.js';
+import { defineRegistry } from './registry.js';
 // core/seams.js — SEAM D: two-scene shader transitions.
 //
 // A `sting` (core/stings.js) paints a GENERATIVE overlay on top of one beat; a `cut` (core/cuts.js)
@@ -565,3 +566,7 @@ export function isBlankRaster(canvas) {
     return opaque / n < 0.02 || nonUniform / n < 0.005;
   } catch (e) { return false; } // unreadable (tainted) → assume it painted; the GL path can still use it
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a seam fx" when someone writes it somewhere else. core/registry.js.
+export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam' });

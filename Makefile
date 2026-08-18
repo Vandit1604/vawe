@@ -300,6 +300,18 @@ measure:
 lib-test:
 	node scripts/gates/lib-test.mjs
 
+# make silent-check  — is any named vocabulary still resolved with a silent default? A wrong name must
+# not become a plausible substitute; absence may keep its documented default. core/registry.js removes
+# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #362.
+silent-check:
+	node scripts/gates/silent-fallback.mjs
+
+# make unused  — which registered effects has no shipped scene ever named? A REPORT, not a rule: it
+# always exits 0. Read a zero as "nobody can find it", "it does not work", or "something else does it
+# better" — three effects nobody used turned out to be broken. Do NOT treat the count as a target (#359).
+unused:
+	node scripts/gates/unused.mjs
+
 # make lookbook URL=https://site.com NAME=brand  — screenshot the site (full page + viewports) for
 # art direction study: derive the video's design language from the brand's own look, no canned styles.
 lookbook:

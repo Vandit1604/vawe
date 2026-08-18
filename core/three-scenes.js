@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/three-scenes.js — the `three` scene NAME registry, and nothing else.
 //
 // It is split out for one concrete reason: core/three-fx.js imports the vendored three.js by its
@@ -12,3 +13,7 @@
 // actually implements match it name for name. Splitting the file does not get to mean splitting the
 // source of truth.
 export const THREE_FX = ['deviceShowcase', 'uiParallax', 'pointCloud', 'extrudeText', 'globe'];
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a three scene" when someone writes it somewhere else. core/registry.js.
+export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three' });

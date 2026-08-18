@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/shaders-ambient.js — smooth LOOPING ambient shaders for the `shader` layer primitive. Where
 // core/stings.js is transient cut-covers, these are continuous, slow, low-contrast colour fields you
 // place behind content. Pure in (time, seed) so renderFrame(n) stays deterministic.
@@ -541,3 +542,7 @@ export function createAmbientLayer(w = 1920, h = 1080) {
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a ambient shader" when someone writes it somewhere else. core/registry.js.
+export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader' });

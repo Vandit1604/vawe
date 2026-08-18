@@ -4,6 +4,7 @@
 // share a background (the variety rule). Techniques + parameter ranges are from motion-design refs:
 // dot-matrix wave/ripple, particle field, constellation, aurora blobs, spotlight sweep, grain.
 import { random, clamp01, parseColor, isLightBg } from './motion.js';
+import { defineRegistry } from './registry.js';
 
 // ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat.
 export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '#05061a', cx = 0.6, cy = 0.4, color } = {}) {
@@ -573,3 +574,7 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
   }
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a background preset" when someone writes it somewhere else. core/registry.js.
+export const BG_REGISTRY = defineRegistry('background preset', Object.fromEntries(BG_NAMES.map((n) => [n, n])), { slot: 'bg[].preset' });

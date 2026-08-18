@@ -10342,6 +10342,56 @@ alters nothing that works and refuses everything that never did.
 
 ---
 
+## #362 — A rule the framework cannot enforce, and the census that reads its own limits
+
+P3, P4 and P5 of the plan, and the end of the silent-substitution work.
+
+**P3 — every vocabulary is a registry now: 8 became 17.** Five of them (camera move, caption style, paint
+fx, raymarch, ambient shader) already refused an unknown name with their own message, so this was tidying
+rather than repair. The gain is the CROSS-REGISTRY HINT, which only works for lists the registry knows:
+
+```
+anim: "aurora"    → but that IS a real name somewhere else: `bg[].preset: "aurora"` (a background
+                    preset) or `shader: "aurora"` (an ambient shader)
+anim: "metaballs" → `raymarch: "metaballs"`
+anim: "diveIn"    → `cameraMove: "diveIn"`
+```
+
+Before, the engine could diagnose a wrong-slot name in 8 of 21 vocabularies. Now it does it in all of
+them, which matters because three of the five layers stranded in `#355` were real names in the wrong slot.
+
+**P4 — the one thing the framework genuinely cannot do.** `core/registry.js` removes the ability to BUILD
+a registry with a fallback: `pick()` takes no such parameter. It cannot stop somebody writing a fresh
+plain object and indexing it by hand. That needs a reader, so `make silent-check` is a real gate, and it
+is the only gate in this whole run.
+
+It found eight name-keyed fallbacks left. **All eight turned out to be legitimate**, and writing the
+reasons was the useful part:
+
+- `FX_PARAMS[t] || []` — "this preset takes no options" is a true answer about ABSENCE
+- `PASS_READS[passName] || []`, `KNOB_ROUTES[knob] || []` — the key was validated one call earlier
+- `FX_DUR[spec.name] ?? 0.5` — the NAME is validated immediately above by `GSAP_EXIT_REGISTRY.pick`
+- **`CORNERS[corner] || CORNERS.tr`** — the one my own plan deferred as "needs the lookOpts schema work".
+  It needs nothing: `corner` is not a routed knob, so `assertKnobs` (#351) already refuses it from a
+  scene, and only the in-repo recipes can set it. **I had planned work for a defect that a previous fix
+  had already closed**, and only found that out by being made to write down why it was safe.
+
+**P5 — `make unused`, and it reads its own limits out loud.** A report, never a rule; it always exits 0.
+The full census is worse than the sample I took by hand: **220/276**, with `gsap exit` at **0 of 11** —
+an entire family no film has ever named.
+
+The header states why the count is not a target, because the trap is live: about a third of the unused
+GSAP effects duplicate an `anim` the engine already does well (`fadeIn` is `fade`, `zoomIn` is `scale`,
+`revealUp` is `riseClip`). Driving the number down by folding those into blueprints would put two ways to
+do one thing in front of every author. So the report tells the reader to interpret a zero three ways —
+nobody can find it, it does not work, or something else does it better — and to pick one.
+
+**Where this run ends.** `104/104` scenes byte-identical across all of P1 to P5. Nothing that worked
+changed. What changed is that eleven ways of failing quietly are now nine ways of failing loudly, one
+stated warning, and a check that watches for the tenth.
+
+---
+
 <!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

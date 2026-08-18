@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/stings.js — procedural WebGL boundary effects (the "shader transition" layer another engine ships
 // as GLSL blocks and another engine as shader presentations), adapted to the pure model: one fullscreen
 // quad, one compiled program, and draw(effect, progress, seed) that depends ONLY on its arguments.
@@ -381,3 +382,7 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
     clear() { if (last === '') return; last = ''; gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },
   };
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a sting fx" when someone writes it somewhere else. core/registry.js.
+export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting' });

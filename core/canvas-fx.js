@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/canvas-fx.js — Tier 2 Canvas-2D per-pixel image passes (halftone, dither, mosaic, …).
 //
 // DETERMINISM: these are BAKED ONCE at build (boot.js, inside the awaited image-preload phase) into a
@@ -241,3 +242,7 @@ export function bakeCanvasFx(img, spec) {
 export const canvasFxKey = (src, spec) => JSON.stringify([src, typeof spec === 'string' ? { fx: spec } : spec]);
 
 export const CANVAS_FX_NAMES = Object.keys(CANVAS_FX);
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.
+export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx' });

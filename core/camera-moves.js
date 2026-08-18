@@ -1,3 +1,4 @@
+import { defineRegistry } from './registry.js';
 // core/camera-moves.js — CAMERA CHOREOGRAPHY generators: pure (params) → camera-keyframe array, the same
 // shape core/sequence.js `cameraAt` interpolates ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move
 // is smooth and CALCULATED instead of hand-typed, and the multi-keyframe ones emit interior `ease:"linear"`
@@ -202,7 +203,7 @@ const targetsAPoint = (name, params) => TARGETING.has(name)
 export function buildCameraMove(spec, canvas = null) {
   if (!spec || !spec.move) throw new Error('cameraMove needs a "move" name');
   const f = CAMERA_MOVES[spec.move];
-  if (!f) throw new Error(`unknown cameraMove "${spec.move}". one of: ${CAMERA_MOVE_NAMES.join(', ')}`);
+  if (!f) CAMERA_REGISTRY.pick(spec.move);   // throws, and names the other list if the word belongs to one
   const { move, ...params } = spec;
   // A KEY THIS MOVE DOES NOT READ IS A TYPO, and a silently dropped param is the worst failure class in
   // this engine: `station:` for `stations:` reached travel as an ignored extra and threw about a missing
@@ -225,3 +226,7 @@ export function buildCameraMove(spec, canvas = null) {
   }
   return f(params);
 }
+
+// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
+// can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
+export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove' });

@@ -46,6 +46,17 @@ const WAIVED = new Map(Object.entries({
 
   JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name — each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
   ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
+  BG_REGISTRY: 'as ANIM_REGISTRY, for BG_NAMES ("Backgrounds")',
+  SEAM_REGISTRY: 'as ANIM_REGISTRY, for SEAM_FX ("Seams")',
+  SHADER_REGISTRY: 'as ANIM_REGISTRY, for SHADER_FX ("Shader stings")',
+  CANVAS_REGISTRY: 'as ANIM_REGISTRY, for CANVAS_FX_NAMES ("Canvas image passes")',
+  PAINT_REGISTRY: 'as ANIM_REGISTRY, for PAINT_FX_NAMES ("Generative paint FX")',
+  RAYMARCH_REGISTRY: 'as ANIM_REGISTRY, for RAYMARCH_FX ("Raymarched surfaces")',
+  AMBIENT_REGISTRY: 'as ANIM_REGISTRY, for AMBIENT_FX ("Ambient shader fields")',
+  THREE_REGISTRY: 'as ANIM_REGISTRY, for THREE_FX ("three.js scenes")',
+  CAMERA_REGISTRY: 'as ANIM_REGISTRY, for CAMERA_MOVE_NAMES ("Camera moves")',
+  okDir: 'the direction guard seams shares with core/cuts.js DIRS; a scene names a direction, not a guard',
+
   CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
   TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS — the cut timing curve, catalogued with the cuts',
   GSAP_REGISTRY: 'as ANIM_REGISTRY, for GSAP_FX ("GSAP named effects")',

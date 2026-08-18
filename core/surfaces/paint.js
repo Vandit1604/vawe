@@ -1,6 +1,6 @@
 // core/surfaces/paint.js — GENERATIVE Canvas 2D. The `paint` layer type's pixels.
 // See core/paint-fx.js for the determinism contract each effect keeps.
-import { PAINT_FX, PROPS as FX_PROPS } from '../paint-fx.js';
+import { PAINT_FX, PROPS as FX_PROPS, PAINT_REGISTRY } from '../paint-fx.js';
 import { mergeProps } from '../props.js';
 
 export const size = (kit) => [kit.W, kit.H];   // an ambient field: fills the frame unless boxed
@@ -15,7 +15,7 @@ export const resamplable = true;
 export const PROPS = mergeProps({ paint: {}, bg: {}, seed: {} }, FX_PROPS);
 
 export function validate(L) {
-  if (!PAINT_FX[L.paint]) throw new Error(`unknown paint "${L.paint}" — one of: ${Object.keys(PAINT_FX).join(', ')}`);
+  PAINT_REGISTRY.pick(L.paint);   // throws, and diagnoses a name that belongs to a different vocabulary
 }
 
 export function create(kit, L, w, h) {
