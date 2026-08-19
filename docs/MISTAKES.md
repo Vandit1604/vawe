@@ -10812,6 +10812,64 @@ byte-identical.
 None, and that is the honest answer. `color` works now; the type-agnostic prop check that let it through
 silently is unchanged.
 
+## #370 — The same frame paints differently depending on which worker tab drew it
+
+The user said the contribution grid was blinking. It was, and it took three wrong hypotheses to find.
+
+**Measured, heatmap region, mean luminance over consecutive frames:**
+
+```
+31.1  18.2 18.3 18.6 18.4 18.6   32.0  18.9 19.1 19.3 19.4 19.5   33.0 ...
+ ^bright      five dim frames     ^bright
+```
+
+A 70% spike every SIXTH frame, five times a second.
+
+### Three wrong guesses, each killed by a measurement
+
+1. **"The encoder is crushing a fine dark grid."** Plausible: x264's default AQ raises QP in dark areas.
+   I set `aq-mode=3`, re-rendered, and the spread moved from 14.96 to 14.92. **Reverted** rather than
+   leave an unjustified encoder setting in the tree for a defect it does not fix.
+2. **"popIn's back.out overshoot is making 366 cells twinkle."** Measured scale across the grid: max
+   1.000 on every frame. No overshoot.
+3. **"It is JPEG capture."** The empty band, the top edge and the headline band are all flat to 0.00-0.01
+   in the same JPEGs. Only the heatmap band moves.
+
+### What it actually is
+
+The render uses `max(1, min(NumCPU-1, 6))` capture tabs. On this machine that is **6**, and the bright
+frames are exactly `n ≡ 0 (mod 6)`. One tab in six paints the grid correctly; the other five paint it at
+about 57% brightness, consistently, for the whole film.
+
+Confirmed by the one test that settles it:
+
+| | heatmap-band spread, f300-311 |
+|---|---|
+| `--workers 6` (default) | **13.79**, hard 6-frame period |
+| `--workers 1` | **2.10**, monotonic — the scene legitimately brightening |
+
+So `renderFrame(n)` is a pure function of `n` in the DOM and **not in the pixels**. Two tabs given
+identical DOM produce different rasterisations of the same 366 small SVG rects.
+
+### Why nothing caught it
+
+`make probe` compares the **DOM** across render orders and passes. `VAWE_KEEP_FRAMES`'s own comment
+already names this gap exactly — "without the frames nobody can tell a non-deterministic DRAW from a
+non-deterministic ENCODE. `make probe` compares the DOM, which is a different claim" — and there is no
+gate on the other half. `seam-check` samples transitions, not held frames. The audit reads geometry.
+**Nothing in this repo compares PIXELS across workers.**
+
+### Status: worked around, not fixed
+
+The delivered film is rendered `--workers 1` and is clean (spread 2.42). That is a workaround, and by
+this repo's own rule a workaround is a bug report. The real fix is in the capture path and is not yet
+found: what differs between tab 0 and tabs 1-5 is still unknown, and `cmd/render/main.go:39` records
+that compositor determinism has been fought here before ("Compositor determinism flags, doubling the
+rAF settle wait").
+
+**The gate that should exist:** render N frames known to be visually identical across all workers and
+compare the PIXELS, not the DOM. That would have caught this on the first film that used a fine grid.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
