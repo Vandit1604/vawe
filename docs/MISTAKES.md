@@ -10678,6 +10678,75 @@ reproduced by hand inside the commit that cites it.
 `node core/validate.mjs <file>` (and `make author-check`) — before the render.
 `node scripts/gates/lib-test.mjs` — the exclusion list, asserted in both directions.
 
+## #368 — The gate for hand-authored fragments painted the brand colour black
+
+Building a GitHub-wrapped heatmap, I previewed the fragment and every cell came out grey. The SVG was
+right: 32 cells carried the top-quartile class. The FILL was not arriving.
+
+`scripts/author/preview-fragment.mjs` accepted `--theme` and read exactly one thing out of it:
+
+```js
+bg = JSON.parse(fs.readFileSync(`themes/${themeName}.json`)).palette.bg;
+```
+
+**One of fifteen palette entries.** No `--accent`, no `--text`, no `--surface-2`, no fonts. An undefined
+custom property makes the declaration invalid at computed-value time, so `fill: var(--accent)` fell to
+the initial value and painted black.
+
+### Why nobody noticed for as long as it has existed
+
+The page hard-coded `color:#f7f8f8` on the body. So text in a fragment always looked like sane
+light-on-dark — not the theme's `--text`, but close enough that the tool read as working. A minimal
+probe is what separated them: `var(--text)` appeared to resolve and `var(--accent)` obviously did not,
+and the reason was that the first was inheriting a hard-coded colour rather than resolving at all.
+
+That is the whole shape. **A fallback that looks plausible is worse than one that looks broken**, and
+this is the fourth entry this run about the same thing.
+
+### Why it is worse here than in an ordinary tool
+
+CLAUDE.md makes this the gate:
+
+> Preview every hand fragment before rendering: `make preview HTML=frag.html THEME=<brand>` →
+> `/tmp/preview.png` (Read it, fix, repeat).
+
+So the instruction is to judge a fragment by this picture, and the picture was of a DIFFERENT fragment:
+one where every themed colour is black or absent. Any author following the documented loop was checking
+their work against a lie. `--theme` was accepted and then 14 of 15 entries were dropped, which is the
+silent-substitution rule stated at the top of the framework-harvest table.
+
+It also swallowed a bad theme name: `catch { bg = '#0a0a0c'; }` meant `THEME=vaw-dark` previewed on a
+near-black default and said nothing.
+
+### The proof it was real
+
+The vendored slop detector runs over this same page and had been **silent about colour on every
+fragment ever previewed**, because there was no colour to see. The first run after the fix immediately
+fired `ai-color-palette: cyan neon text on dark background` — a finding it could not previously reach.
+A gate downstream of a broken gate inherits the blindness.
+
+### The fix
+
+The page now calls the ENGINE's own `applyTheme` (`core/boot.js`) in a module script, so the token names
+cannot drift from what a real render sets. That mattered immediately: the palette key is `surface2` and
+the token is `--surface-2`, and my own fragment had it wrong. A second copy of the mapping here is
+exactly how it would drift again (#159).
+
+- `color:#f7f8f8` → `var(--text)`. The hard-coded colour was the concealment, so it goes.
+- A missing theme now exits 1 and lists the 35 that exist.
+- The screenshot waits on `window.__themed`, because `applyTheme` lands after `load` and photographing
+  before it would reintroduce the same wrong picture as a race. A theme that fails to apply is fatal.
+
+### Blast radius
+
+Every fragment previewed from now on looks DIFFERENT, and that is the point — they were all previewed
+untokenised. Existing fragments still render (`_lightfield-colonnade`, `_showcase-stings-panel` both
+pass), and the bad-theme path exits 1.
+
+### The gate that now catches it
+
+Itself. `make preview HTML=<frag> THEME=<name>` applies the real palette or fails loudly.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

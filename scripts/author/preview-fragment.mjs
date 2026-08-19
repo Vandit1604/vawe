@@ -31,9 +31,29 @@ const tSec = parseFloat(flag('--t', '0'));
 // a backdrop should not have to know this tool's layout; the choice is PRINTED so it is never silent.
 const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
 const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
+// THE THEME IS APPLIED, NOT SAMPLED. This used to read `palette.bg` and nothing else, so `--theme`
+// was accepted and then 14 of the 15 palette entries were ignored: a fragment written against
+// var(--accent) previewed BLACK, because an undefined custom property makes the declaration invalid
+// and the colour falls to the initial value. The body then hard-coded `color:#f7f8f8`, which is what
+// hid it — text looked plausible, so the tool read as working.
+//
+// That matters more here than almost anywhere, because CLAUDE.md makes this the gate: "Preview every
+// hand fragment before rendering." A gate that paints the brand colour black is not checking the
+// fragment, it is checking a different fragment. The page now calls the ENGINE's own applyTheme
+// (core/boot.js), so the token names cannot drift from what a real render sets — and they had already
+// drifted, since the palette key is `surface2` while the token is `--surface-2`.
+// docs/MISTAKES.md #368.
 const themeName = flag('--theme', 'default');
-let bg = flag('--bg', null);
-if (!bg) { try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch { bg = '#0a0a0c'; } }
+const themeFile = path.join(ROOT, 'themes', themeName + '.json');
+// A missing theme was swallowed by a `catch` that substituted a near-black. Naming a theme that does
+// not exist is a typo, and a typo that silently previews on someone else's colours is the whole bug.
+if (!fs.existsSync(themeFile)) {
+  console.error(`preview: no theme "${themeName}" — themes/${themeName}.json does not exist.`);
+  console.error(`  available: ${fs.readdirSync(path.join(ROOT, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).join(', ')}`);
+  process.exit(1);
+}
+const theme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
+const bg = flag('--bg', null) || theme.palette.bg;
 
 // pull the fragment out of raw HTML or a captured JSON ({html} | {parts:[{html}]})
 let raw = fs.readFileSync(src, 'utf8');
@@ -57,12 +77,21 @@ const page$html = `<!doctype html><html><head><meta charset="utf-8">
    photographs, and html/body grow rather than clip, so --serve still scrolls and the PNG path clips
    through the screenshot rect as the comment below says. */
 :root{--vw:1920px;--vh:1080px}
-html,body{margin:0;background:${bg};color:#f7f8f8;width:auto;height:auto;overflow:visible}
+/* color was hard-coded #f7f8f8, which is exactly what made the missing palette invisible: text kept
+   looking right while every var(--…) colour resolved to nothing. It follows the theme now. */
+html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;overflow:visible}
 /* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
    1920x1080 via the screenshot clip, so it's unaffected. */
 #stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
 #frag{--t:${tSec};--p:0;${fullBleed ? 'width:1920px;height:1080px' : `width:${boxW}px`};position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
-<body><div id="stage"><div id="frag">${raw}</div></div></body></html>`;
+<body><div id="stage"><div id="frag">${raw}</div></div>
+<script type="module">
+  // ONE definition of what a theme means. Importing the engine's own applyTheme is the point: a second
+  // copy of the palette-to-token mapping here is how it drifted the first time (#159, #368).
+  import { applyTheme } from '/core/boot.js';
+  try { applyTheme(${JSON.stringify(theme)}); window.__themed = true; }
+  catch (e) { window.__themed = 'error: ' + e.message; }
+</script></body></html>`;
 
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split('?')[0]);
@@ -86,6 +115,12 @@ if (argv.includes('--serve')) {
 const page = await browser.newPage();
 await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/__frag`, { waitUntil: 'load' });
+// applyTheme runs in a module script, so the tokens land AFTER `load`. Screenshotting without this
+// wait photographs the untokenised frame, which is the bug this fix exists to remove, reintroduced as
+// a race. A theme that fails to apply is fatal: the picture would be judged against the wrong colours.
+await page.waitForFunction('window.__themed !== undefined', { timeout: 10000 });
+const themed = await page.evaluate(() => window.__themed);
+if (themed !== true) { console.error(`preview: theme "${themeName}" failed to apply — ${themed}`); process.exit(1); }
 await page.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
 const out = '/tmp/preview.png';
 // The PNG is the canvas, so anything outside it is not in the picture you are about to judge. Say so:
