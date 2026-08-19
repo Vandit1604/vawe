@@ -246,7 +246,21 @@ export async function preloadGsap(data) {
   if (!/"(gsap|morph|fx|fxOut|motionPath|physics|splitText|parts|comp)"\s*:/.test(json)) return;
   if (!window.gsap) await loadScript('/assets/vendor/gsap.min.js');
   if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load — gsap/fx/morph layers render unanimated'); return; }
-  try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); registerGsapEffects(window.gsap); } catch (e) {}
+  // autoRemoveChildren=false IS THE PURITY OF renderFrame(n), not a memory tweak. GSAP's ROOT timeline
+  // ships with autoRemoveChildren:true: the instant a tween's playhead passes its end, GSAP unlinks it
+  // from the timeline. For a PLAYING page that is right (a finished tween is garbage). For a SEEKED page
+  // it is fatal — the tween is gone, so a later seek back to before its start can never restore the
+  // from-state, and its targets stay frozen at the end values for every earlier frame drawn afterwards.
+  // renderFrame(n) is then a function of n AND of the highest n this tab has already drawn.
+  //
+  // That is not hypothetical and it is not about one feature. The capture's dedup pre-pass calls
+  // frameSig() over EVERY frame, in order, on the meta tab (internal/scene/scene.go) — and worker 0
+  // then borrows that same tab and draws frames 0, 6, 12, … from a timeline whose playhead has already
+  // been at the last frame. So one frame in six came back with every completed tween stuck at its end
+  // state, which read as a 366-cell grid blinking five times a second (docs/MISTAKES.md #370).
+  // It hits every GSAP-driven field alike (fx · fxOut · motionPath · physics · splitText · parts · comp);
+  // `parts` only made it loud by putting 80 elements on one tween.
+  try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.autoRemoveChildren = false; registerGsapEffects(window.gsap); } catch (e) {}
   for (const [field, p] of Object.entries(GSAP_PLUGINS)) {
     if (!new RegExp(`"${field}"\\s*:`).test(json)) continue;
     if (!window[p.global]) await loadScript('/assets/vendor/' + p.file);

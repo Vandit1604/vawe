@@ -10888,7 +10888,7 @@ scene animates a handful of SVG shapes rather than 366, so whether it diverges i
 scales with target count, and `docs/CRAFT/` recommends `parts` for exactly the dense-choreography case
 that makes it worst.
 
-### Status: worked around, not fixed
+### Status: worked around, not fixed — SUPERSEDED, see the amendment below
 
 The delivered film is rendered `--workers 1` and is clean (spread 2.42). That is a workaround, and by
 this repo's own rule a workaround is a bug report. The real fix is in how `parts` builds its tweens, and
@@ -10898,6 +10898,64 @@ rAF settle wait").
 
 **The gate that should exist:** render N frames known to be visually identical across all workers and
 compare the PIXELS, not the DOM. That would have caught this on the first film that used a fine grid.
+
+### AMENDED — the real root cause, and the fix
+
+Everything above the ROOT CAUSE heading is sound. The ROOT CAUSE heading is not, and neither is the
+gate it asked for. Three of its claims were wrong and each cost a render:
+
+- **"It is the staggered fromTo."** No. `stagger: 0` was measured and moved nothing: the 80 cells still
+  diverged, exactly as before.
+- **"One tab in six paints the grid correctly."** Backwards. Worker 0 is the tab that is WRONG. It
+  showed 80 `.lit` cells lit at t=3.4s, 1.6 seconds before their tween starts, and the other five tabs
+  were right. Reading the two crops instead of the two means would have shown that in a minute: frame
+  204 carries a bright block that frame 205 does not.
+- **"Nothing in this repo compares PIXELS across workers, and that is the gap."** The gap is not pixels.
+  The DOM already differed. `probe-purity` compares the DOM and passed anyway, for a reason worth
+  writing down: it renders n, scrambles, renders n again, and compares the two. Both reads came AFTER a
+  scramble, so both carried the same wrong values and the diff was empty. It compared two dirty states
+  and called their agreement purity.
+
+**GSAP's root timeline auto-removes a child the moment it completes.** `gsap.globalTimeline` ships with
+`autoRemoveChildren: true`, which is right for a page that plays: a finished tween is garbage. It is
+fatal for a page that SEEKS. Once the playhead passes a tween's end the tween is unlinked, so a later
+seek back to before its start can no longer restore the from-state, and its targets stay frozen at the
+end values on every earlier frame drawn afterwards. `renderFrame(n)` becomes a function of n and of the
+highest n this tab has already drawn.
+
+The capture then walks straight into it. The dedup pre-pass calls `frameSig()` over EVERY frame, in
+order, on the meta tab, and `internal/scene/scene.go` hands that same tab to worker 0 — which then draws
+frames 0, 6, 12, … from a timeline whose playhead has already been at the last frame. Hence the exact
+6-frame period. The mid-run ANCHOR re-shoot does the same thing on the other five, in miniature: shoot
+frame f, shoot a much later anchor, carry on at f+6.
+
+It is not a `parts` bug. It hits every GSAP-driven field alike (`fx` · `fxOut` · `motionPath` ·
+`physics` · `splitText` · `parts` · `comp`); `parts` only made it loud by putting 80 elements on one
+tween.
+
+**Fix** (`core/preload.js`, beside the existing `ticker.sleep()` / `globalTimeline.pause()`):
+
+```js
+window.gsap.globalTimeline.autoRemoveChildren = false;
+```
+
+Measured, heatmap band, 6 workers, the same command both times:
+
+| | frames 200-211 | frames 300-311 |
+|---|---|---|
+| before | 19.23 / **33.02** alternating, period 6 | spread **13.79** |
+| after | flat 19.23, spread **0.001** | spread **1.23**, monotonic |
+
+**Blast radius.** `snap-scenes` is 103 identical, 0 changed, because it renders forward-only and the
+defect only exists after a backward seek. The rendered mp4 of `showcase-lumen` DOES change, and the
+change is the fix: its `growUp` bars used to appear fully grown on a subset of frames in the middle of
+their own growth (`scaleY` 0.97/0.89/0.67/0.22 forward-only against 1/1/1/1 seeked), and now they grow.
+
+**The gate now catches it.** `probe-purity` opens a SECOND page that only ever moves forwards and
+compares every sample against it. That page holds what frame n looks like to a tab that has not yet
+seen any later frame, which is the only reading that is right by construction. Proven against the old
+code before it was trusted: 5 of 25 frames on `gh-wrapped`, 4 of 25 on `showcase-lumen`, while the
+old self-comparison stayed green on both.
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

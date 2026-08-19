@@ -41,11 +41,24 @@ await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const port = server.address().port;
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
-const page = await browser.newPage();
-await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
-if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
+const url = `http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`;
+const openPage = async () => {
+  const p = await browser.newPage();
+  await p.goto(url, { waitUntil: 'load' });
+  await p.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  const e = await p.evaluate(() => window.__engineError || null);
+  if (e) { console.error('SCENE ERROR:', e); await browser.close(); server.close(); process.exit(1); }
+  return p;
+};
+const page = await openPage();
+// THE FORWARD-ONLY TRUTH. `page` above is deliberately dirtied by the scrambler, so comparing it with
+// itself proves only that two dirty states agree — which is exactly how #370 passed this gate for as
+// long as it existed. GSAP's root timeline used to unlink a tween the moment it completed, so every
+// frame drawn AFTER the playhead had once reached the end kept that tween's end values; both the `a`
+// and the `b` read below carried the same wrong values and the diff was empty. `ref` never seeks
+// backwards, so it holds what frame n looks like on a tab that has not yet seen any later frame — the
+// single-worker render, and the only reading that is right by construction.
+const ref = await openPage();
 
 const meta = await page.evaluate(() => window.__engine.meta);
 const total = meta.totalFrames;
@@ -60,9 +73,9 @@ const total = meta.totalFrames;
 //   - it's a DOM signature, so GPU/AA rasterization noise (which flakes SVG formats like
 //     growth on a pixel probe) can't cause a false failure
 // (A format drawing to <canvas> with hidden state would escape this — none do; note it if one does.)
-const dom = async (n) => {
-  await page.evaluate((f) => window.__engine.renderFrame(f), n);
-  return page.evaluate(() => {
+const domOn = async (p, n) => {
+  await p.evaluate((f) => window.__engine.renderFrame(f), n);
+  return p.evaluate(() => {
     const out = [];
     const walk = (el) => {
       const cs = getComputedStyle(el);
@@ -78,15 +91,26 @@ const dom = async (n) => {
     return out.join('\n');
   });
 };
+const dom = (n) => domOn(page, n);
 
 // sample ~24 frames evenly + the last; segment boundaries are where impurity hides
 const samples = [];
 for (let i = 0; i < 24; i++) samples.push(Math.floor((i / 24) * total));
 samples.push(total - 1);
 
+samples.sort((x, y) => x - y); // `ref` may only ever move forwards
+
 let fails = 0;
 for (const n of samples) {
+  const truth = await domOn(ref, n);
   const a = await dom(n);
+  if (a !== truth) {
+    fails++;
+    const dir = '/tmp/purity_fail'; fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, `f${n}_forward.html`), truth);
+    fs.writeFileSync(path.join(dir, `f${n}_seeked.html`), a);
+    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) differs from the FORWARD-ONLY render — a later frame left state behind; diff: ${dir}/f${n}_{forward,seeked}.html`);
+  }
   // Dirty the state with frames that actually RUN something, not just far-away ones. The old
   // scrambler used frame 0 or the last frame; at both, a layer mid-timeline is off-window and
   // driveClips returns before writing any style — so nothing got dirtied and a genuinely sticky
