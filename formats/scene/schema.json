@@ -11,7 +11,7 @@
       "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
       "image": ["canvasFx", "edgeFade", "edgeFadeColor", "h", "ken", "radius", "resample", "seed", "src", "w"],
       "group": ["children"],
-      "rect": ["fill", "h"],
+      "rect": ["color", "fill", "h"],
       "glow": ["angle", "beam", "color", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
       "beam": ["angle", "color", "glow", "h", "intensity", "mode", "period", "radius", "speed", "tail", "thickness", "w"],
       "svg": ["d", "draw", "fill", "h", "morph", "stroke", "strokeWidth", "viewBox", "w"],
