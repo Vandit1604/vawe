@@ -10747,6 +10747,71 @@ pass), and the bad-theme path exits 1.
 
 Itself. `make preview HTML=<frag> THEME=<name>` applies the real palette or fails loudly.
 
+## #369 — A bar chart rendered white, because `color` is the third name for a rect's fill
+
+Authoring a GitHub-wrapped, I wrote the obvious thing:
+
+```json
+{ "type": "rect", "w": 820, "h": 76, "color": "var(--accent)" }
+```
+
+The bars rendered **white**. `core/layers/rect.js` reads `bg`, and `fill` as an alias. It did not read
+`color`, and an unread colour falls to the layer's `#fff` default.
+
+### The same bug, already logged, under a different obvious name
+
+The header of that exact file says:
+
+> `fill` is accepted as an alias for `bg` … It used to be swallowed: the validator's unknown-prop check
+> is **type-agnostic**, so `fill` counted as known because svg uses it, and a rect written
+> `{fill:'#d33'}` silently rendered the default white.
+
+That is #213, and `color` reaches the same end by the same road: TEXT layers declare `color`, the
+unknown-prop check does not know which type it is looking at, so `color` on a rect passes validation and
+is then dropped. The fix in #213 went to `fill` and stopped there. The failure mode is the worst
+available: the default is white, and **"it rendered white" is indistinguishable from "I asked for
+white"**.
+
+A rect carries no text (the first line of the file says so), so on this layer `color` can only mean the
+colour of the shape. Unambiguous, which is the test the file itself sets:
+
+> here the input is unambiguous, so the right answer is to honour it rather than to add an error.
+
+So `color` joins `bg` and `fill`. Three spellings of one idea is not a vocabulary problem of the kind
+C-1 removed; those were four competing entrance SYSTEMS. This is one concept and the names an author
+actually reaches for.
+
+### What found it
+
+Not a gate. `make beats`, and my own eyes on a contact sheet, on the second film authored against this
+engine in a year. `scripts/gates/gate-mutation.mjs` already carries a mutation named "a prop accepted
+and never read" pointed at this very file, so the CLASS was known and covered while this INSTANCE was
+live. A rule can be enforced and still be enforced only where somebody thought to look.
+
+### The root cause is still open, and deliberately
+
+The real defect is that the unknown-prop check is type-agnostic. Making it per-type would catch every
+future instance of this at author-check, and it would also be a change that could invent findings across
+112 shipped scenes, so it wants its own pass with a before/after library diff rather than a ride-along.
+Recorded here so it is not mistaken for finished work.
+
+### Blast radius: it was not only my scene
+
+The library diff came back **1 of 104 changed**, and that one is the point. `linear-agents.json` carries
+a single 1760x4 rule written `{"type":"rect","color":"var(--em)"}`. `--em` is `#5e6ad2`, declared in the
+`linear` theme's own `vars`. A shipped film had asked for a brand-coloured hairline under its headline
+and had been painting it **white** for as long as it has existed, and every gate was green on it because
+white is a colour and the frame rendered.
+
+Rendered and looked at before accepting: the rule is now Linear's indigo under "You assign the issue.",
+which is plainly what its author asked for. Baseline re-saved for that one scene; the other 103 are
+byte-identical.
+
+### The gate that now catches it
+
+None, and that is the honest answer. `color` works now; the type-agnostic prop check that let it through
+silently is unchanged.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

@@ -8,11 +8,19 @@
 // `fill` is an alias for `bg`, accepted because it was set on real scenes and silently thrown away
 // (docs/MISTAKES.md #213). `h` is read here rather than by the shared box helper. Everything else this
 // layer paints comes through kit.chipBox, which declares its own.
-export const PROPS = { fill: {}, h: {} };
+// `color` is the THIRD name for this, and it was still swallowed after `fill` was fixed. A rect carries
+// no text (see the line at the top of this file), so on this layer `color` can only mean the colour of
+// the shape — and it passed the unknown-prop check for exactly the reason `fill` did, because TEXT
+// layers declare it and that check is type-agnostic. A bar written `{type:"rect", color:"var(--accent)"}`
+// rendered WHITE, which is the default, which is the one outcome indistinguishable from "I meant white".
+// Found by authoring a bar chart, not by a gate. Same reasoning and same resolution as #213: the input
+// is unambiguous, so honour it. docs/MISTAKES.md #369.
+export const PROPS = { fill: {}, color: {}, h: {} };
 
 export function build(kit, el, L) {
   if (L.h != null) el.style.height = L.h + 'px';
-  const spec = L.fill != null && L.bg == null ? { ...L, bg: L.fill } : L;
+  const paint = L.bg ?? L.fill ?? L.color;
+  const spec = paint != null && L.bg == null ? { ...L, bg: paint } : L;
   if (spec.bg == null && !spec.elevation) el.style.background = '#fff';
   kit.chipBox(el, spec);
 }

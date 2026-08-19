@@ -67,6 +67,15 @@ formats/scene/*.json
 !formats/scene/hero-site.json
 !formats/scene/showcase-*.json
 !formats/scene/site-backdrop.json
+# gh-wrapped is a TEMPLATE, not a video: it carries {{placeholders}} and renders nothing on its own.
+# scripts/media/gh-wrapped.mjs is tracked, and an untracked template would leave a clean clone holding
+# a generator with no consumer, which is the "not reproducible from the repo" case this section exists
+# to prevent. The RENDERED instance (formats/scene/_batch/) stays ignored, because that is content.
+!formats/scene/gh-wrapped.template.json
+# ...but its DATA is one account's stats at one moment: regenerable from the API, stale the next day,
+# and somebody's record rather than the framework. Same policy as assets/gen.
+formats/scene/_data/
+formats/scene/_batch/
 # motion-test: the before/after snap demo — a permanent engine demo AND a motion regression fixture.
 !formats/scene/motion-test.json
 # flagship examples + their registry — the showcase the repo ships (make gallery).
