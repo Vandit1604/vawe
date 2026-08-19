@@ -1,7 +1,7 @@
 import { boot } from '/core/boot.js';
-import { junctionTable, marksOf, isJunctionRef, resolveJunction } from '/core/junctions.js';
+import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
-import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults } from '/core/motion.js';
+import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
@@ -139,7 +139,9 @@ boot((data, fps, theme, canvas) => {
   // core/junctions.js, docs/MISTAKES.md #358.
   const BG_JUNCTIONS = junctionTable(marksOf(data));
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
-  const bgWins = (data.bg || []).map((b0, bi) => {
+  // Windows that declare NO times at all bind to the film's own joints, in order — see
+  // bindWindowsToJunctions. Untouched when there is one window, or when any window names an edge.
+  const bgWins = bindWindowsToJunctions(data.bg || [], BG_JUNCTIONS).map((b0, bi) => {
     // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault) —
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
@@ -181,16 +183,42 @@ boot((data, fps, theme, canvas) => {
     for (const b of bgWins) if (t >= b.from && t < b.to) w = b;
     return w;
   };
+  // THE COLOUR FOR TEXT OVER A DARK WINDOW, MEASURED RATHER THAN NAMED. `var(--text)` was hard-coded
+  // here on the assumption that a theme's `text` is its LIGHT one. That is true of a dark-first theme
+  // and false of a white-first one: `themes/vawe.json` sets text AND ink to the same #0f1620, so a dark
+  // bg window rendered dark-on-dark and the beat simply was not there. Nothing failed and nothing
+  // warned — the same invisible-output class as #213 and #369, and Phase-4 per-beat backdrops make it
+  // the common case rather than the rare one. So ask the palette instead of trusting the token name:
+  // use `--text` when it really is light, and otherwise the theme's own light ground.
+  // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light — the same
+  // one backgrounds.js and produce.js ask. A second hand-kept copy of that question is MISTAKES #159.
+  const P = (theme && theme.palette) || {};
+  const ON_DARK = isLightBg(P.text) ? 'var(--text)'
+    : isLightBg(P.bg) ? 'var(--bg)'
+    : isLightBg(P.surface) ? 'var(--surface)' : '#ffffff';
+
+  // IS THIS WINDOW LIGHT? Measured off the colour the preset actually resolved to, not off its name.
+  // LIGHT_BGS is a hand-kept list of preset names, and a preset's lightness is not a property of the
+  // name: `bgPreset` builds every base out of the THEME's own ramp, so `accent` is a pale tint in a
+  // white-first brand and a saturated field in a dark one. Naming it light or dark once, globally, is
+  // right for whichever family the list was written against and silently wrong for the other — which
+  // is how `three` rendered white-on-pale in the very first film that used a per-beat backdrop.
+  // Returns null for a hand-authored backdrop with no `tone`: the engine cannot read lightness out of
+  // somebody's CSS, and guessing there is how a frame ends up white-on-white.
+  const baseColorOf = (spec) => spec?.base?.color ?? spec?.base?.from ?? null;
+  const windowIsLight = (w) => {
+    if (w.html != null) return w.tone === 'light' ? true : w.tone === 'dark' ? false : null;
+    if (w.value === 'dark' || w.value === 'ink') return false;
+    const c = baseColorOf(w.spec);
+    return c == null ? LIGHT_BGS.includes(w.preset) : isLightBg(c);
+  };
+
   const inkAt = (t) => {
     const w = bgWinAt(t);
     if (!w) return null; // theme-gradient stage: keep the theme's own text color
-    // A hand-authored backdrop is opaque to the engine — it cannot read the lightness out of somebody's
-    // CSS. Guessing here would silently pick a text colour, and a wrong guess is invisible until the
-    // frame is white-on-white. The author declares `tone`; without it we defer to the theme rather than
-    // invent an answer.
-    if (w.html != null) return w.tone === 'light' ? 'var(--ink)' : w.tone === 'dark' ? 'var(--text)' : null;
-    const light = LIGHT_BGS.includes(w.preset) && w.value !== 'dark';
-    return light ? 'var(--ink)' : 'var(--text)';
+    const light = windowIsLight(w);
+    if (light == null) return null; // authored backdrop, no tone declared: defer to the theme
+    return light ? 'var(--ink)' : ON_DARK;
   };
 
   // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}] — boundary effects on a WebGL overlay ----
@@ -660,9 +688,9 @@ boot((data, fps, theme, canvas) => {
     const w = bgWinAt(t);
     if (!w) return null;                       // no bg windows: the .hs-stage theme gradient
     const authored = w.html != null;
-    const light = authored ? (w.tone === 'light' ? true : w.tone === 'dark' ? false : null)
-      : LIGHT_BGS.includes(w.preset) && w.value !== 'dark';
-    return Object.freeze({ authored, light, accent: !authored && ACCENT_BGS.includes(w.preset) });
+    // ONE derivation, shared with inkAt. This used to be a second copy of the LIGHT_BGS test, which is
+    // the duplicate-vocabulary shape the paragraph above warns about, written directly beneath it.
+    return Object.freeze({ authored, light: windowIsLight(w), accent: !authored && ACCENT_BGS.includes(w.preset) });
   };
   // duration: explicit, else the last clip's end (+0.4 tail)
   const lastEnd = layers.reduce((m, { L }) => Math.max(m, (L.start ?? 0) + (L.duration ?? 2)), 0);

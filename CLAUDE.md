@@ -266,7 +266,13 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    good. How: **[`docs/CRAFT/SOUND.md`](docs/CRAFT/SOUND.md)**.
 2a0. **THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE.** `bg` is a required field, so the backdrop
    is always your decision. Make it a living one, a preset or hand-authored (`{"html":…}` driven by
-   `var(--t)`); a static field is not a default, it is a choice you have to justify. Then **judge it across
+   `var(--t)`); a static field is not a default, it is a choice you have to justify.
+   **A backdrop that changes PER BEAT is now the cheap thing to write.** List the windows in the order
+   the film turns and give none of them a `from`/`to`, and the engine binds window i to the joint after
+   it, so the cuts you already wrote own the numbers (`core/junctions.js`, `docs/MISTAKES.md` #371).
+   This is the single strongest lever in the file: brew inverts the tone of the world on four of its
+   five cuts, and 134 of 144 scenes here paint ONE window for the whole runtime. A pictorial beat on a
+   dead backdrop is still a slide. Then **judge it across
    frames, never on one still**: pull the same 4+ timestamps and compare them as a strip. A still hides
    speed, scale and direction of the motion. Recreating a reference? Strip the reference and your render
    side by side and match the pace and the size of the shapes before touching colour. This is written down

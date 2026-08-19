@@ -8497,6 +8497,7 @@ DELETED, and the entry has to say what was deleted. A waiver here means the sent
 thing is gone on purpose. It never means a reference was not worth fixing: the nine that were merely
 stale were corrected instead.
 
+
 <!-- doc-refs-allow: make schema-drift · #256 quotes the stale name it was chartered to correct -->
 ## #318 — The two tools that FIT a seed have never once run
 
@@ -10956,6 +10957,104 @@ compares every sample against it. That page holds what frame n looks like to a t
 seen any later frame, which is the only reading that is right by construction. Proven against the old
 code before it was trusted: 5 of 25 frames on `gh-wrapped`, 4 of 25 on `showcase-lumen`, while the
 old self-comparison stayed green on both.
+
+## #371 — Two backdrop windows, and only the last one ever painted
+
+`bg` is a required field, so the backdrop is always the author's decision. The measured library says
+the decision is almost never made: **134 of 144 scenes paint ONE window for the whole runtime.** The
+two films this repo is proudest of do the opposite. `brew-launch-act1` inverts the tone of the world
+on four of its five cuts and spends its one accent window on the logo reveal; the film the user
+rejected twice ran one window for 28 seconds under five blur cuts.
+
+That is not taste, it is cost. Writing a per-beat backdrop meant naming the same boundary twice, once
+in `bg` and once in `transitions`, with nothing keeping them equal. #358 fixed half of it by letting a
+window say `"from": "cut@1"` so the joint owns the number. The other half stayed expensive, and the
+expensive thing is the thing nobody writes.
+
+**And the cheap thing was silently broken.** A window with no `from`/`to` defaults to `0..1e9`. Write
+three windows and name no times and all three cover the whole film, `bgWinAt` keeps the last match,
+and the first two are accepted and then never drawn. Documented-looking input taken and discarded:
+#213 and #369 again, in the one field every scene is required to fill.
+
+**The fix.** `bindWindowsToJunctions` (`core/junctions.js`): when there are 2+ windows and not one of
+them names an edge, window i runs from junction i-1 to junction i and the last runs to the end. List
+the windows in the order the film turns, and the cuts already written own the numbers. A single window
+still means the whole film. A window that names an edge still means exactly what it said. Too few
+joints throws and names every junction the film has, in `core/validate.mjs` as well as at render,
+because the render answer arrives 60 seconds and one ffmpeg pass later and it is the same answer.
+
+**Blast radius: none, by census.** Zero of 144 scenes had a multi-window `bg` with no times, so the
+change is purely additive. `snap-all` 104 identical / 0 changed; the whole library re-validated with
+0 new failures; `lib-test` 746 → 753, and the four new assertions were proven to fail against a
+no-op `bindWindowsToJunctions` before they were trusted.
+
+**Second bug, found on the way.** `lowerScene` MUTATES what it is given and `delete`s `transitions`
+off it. That is right for the renderer, which lowers once at the top, and wrong for a validator: a
+check that rewrites the object it is grading changes what every later check sees, and the author's
+own data with it. `bgErrors` clones first, and a test asserts the caller's `transitions` survive.
+
+## #372 — The renderer segfaulted instead of telling you why the scene would not load
+
+A six-second test scene with `"fx": "fade"` on a boundary killed the process:
+
+```
+panic: runtime error: invalid memory address or nil pointer dereference
+vawe/internal/scene.Capture(...)  internal/scene/scene.go:765
+```
+
+Line 765 is the closing brace of a 300-line function, which is a stack trace that names nothing.
+
+**The cause is two lines in the wrong order.** `newTab` returns `(nil, nil, err)` on every failure
+path. `Capture` wrote `ctx0, cancel0, err := newTab(...)` and then `defer cancel0()` BEFORE checking
+`err`, so a failed load scheduled a call to a nil func: the return ran, the deferred nil call panicked,
+and Go attributed it to the function's last line.
+
+**What that destroyed.** `newTab` had already built the right message and was returning it. With the
+defer moved below the check, the same scene says:
+
+> scene error: Error: cut style "fade" at t=1.5 transitions only by fading/masking, which a whole-frame
+> cut cannot do (there is nothing underneath, the frame would go empty). Either set "sceneUnits": true
+> so the two beats cross-fade as units, or use a style that moves: slide, whip, punch, flip, rise, …
+
+That is a first-rate error, and it was being replaced by a segfault on the ONE path whose entire job is
+to report why a scene would not load. Every author who ever hit a scene-load failure saw the crash
+instead of the reason. The other `newTab` call, in the worker loop, already had the order right; this
+was one site, and it was the site that mattered.
+
+## #373 — Dark text on a dark backdrop, because the token name lied
+
+The first film built on per-beat backdrops (#371) rendered three beats over paper, dark and accent.
+The middle beat was blank. The text was there, at `#0f1620`, on a `#0f1620` field.
+
+**Cause one: a token name assumed a theme family.** `inkAt` returned `var(--ink)` over a light window
+and `var(--text)` over a dark one, on the assumption that a theme's `text` is its LIGHT colour. True of
+a dark-first theme. False of a white-first one: `themes/vawe.json` sets `text` AND `ink` to the same
+`#0f1620`, so the dark branch handed back the dark colour. Fixed by measuring the palette instead of
+trusting the name: use `--text` when `isLightBg` says it really is light, else the theme's own light
+ground.
+
+**Cause two, found by fixing cause one: a preset's lightness is not a property of its name.** With the
+ink flipped, the THIRD beat went white-on-pale. `LIGHT_BGS` is a hand-kept list of preset names, and
+`bgPreset` builds every base out of the THEME's ramp, so `accent` is a pale tint in a white-first brand
+and a saturated field in a dark one. One global answer is right for whichever family the list was
+written against and silently wrong for the other. Fixed by reading the colour the preset actually
+resolved to (`spec.base.color ?? spec.base.from`) and asking `isLightBg`, the same single definition
+`backgrounds.js` and `produce.js` ask (#159). The name list survives only as the fallback for a spec
+that carries no base colour.
+
+**And there were two copies of the test.** `inkAt` and `bgAt` each derived `light` from `LIGHT_BGS`,
+twenty lines apart, directly under a comment warning against exactly that duplication. Now one
+`windowIsLight(w)` and both call it.
+
+**Blast radius.** `snap-all`: 102 identical, 2 changed — `motion-reel` and `motion-reel-v2`, both of
+which paint `preset:"dark"` for their whole runtime under the white-first `vawe` theme, which is the
+bug. Every change is one layer's `color` going `rgb(15,22,32)` → `rgb(255,255,255)`. Pixel-diffed at
+five of the flagged frames: YMAX 0, 0, 0, 0 and 1 out of 255, so the layer is not visible at the
+sampled frames and no rendered pixel in the shipped library moves. The direction is not in question.
+
+**No gate sees this.** `make audit` checks WCAG contrast and would catch it on a frame it samples;
+nothing checks that the ink an untinted layer inherits contrasts with the window under it. That is the
+open half.
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

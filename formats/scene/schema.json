@@ -148,11 +148,11 @@
         },
         "from": {
           "type": "number|string",
-          "label": "Window start: seconds, OR a junction reference like \"cut@1\" so the joint owns the number (core/junctions.js)"
+          "label": "Window start: seconds, OR a junction reference like \"cut@1\" so the joint owns the number. OMIT IT on EVERY window and the engine binds them to the film's cuts in order, one window per beat, which is how a backdrop changes without naming a boundary twice (core/junctions.js)"
         },
         "to": {
           "type": "number|string",
-          "label": "Window end: seconds, OR a junction reference like \"cut@2\""
+          "label": "Window end: seconds, OR a junction reference like \"cut@2\". Omitted on every window = bound to the joints; see `from`"
         },
         "value": {
           "type": "string",

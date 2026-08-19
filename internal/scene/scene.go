@@ -521,10 +521,16 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// one tab for meta — and it is the tab that owns the browser, so it is cancelled here, not by the
 	// worker that borrows it.
 	ctx0, cancel0, err := newTab(allocCtx, url, ss)
-	defer cancel0()
+	// THE ERROR CHECK COMES FIRST. newTab returns (nil, nil, err) on every failure path, so deferring
+	// cancel0 before checking err scheduled a call to a nil func: the return ran, the deferred nil call
+	// panicked, and the process died with a SIGSEGV attributed to this function's closing brace. That
+	// crash REPLACED the message newTab had already built — "scene error: <what the engine actually
+	// said>" — with a stack trace naming a line that has nothing to do with the fault, on the one path
+	// whose whole job is to report why a scene would not load (docs/MISTAKES.md #372).
 	if err != nil {
 		return meta, err
 	}
+	defer cancel0()
 	if err := chromedp.Run(ctx0, chromedp.Evaluate("window.__engine.meta", &meta)); err != nil {
 		cancel0()
 		return meta, fmt.Errorf("meta eval: %w", err)

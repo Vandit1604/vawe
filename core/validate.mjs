@@ -19,7 +19,8 @@
 import { onScreenText, glyphText } from './on-screen-text.js';
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
-import { boundaryMechanism } from '../core/transitions-lower.js';
+import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
+import { junctionTable, marksOf, bindWindowsToJunctions } from '../core/junctions.js';
 import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
 import { EASINGS } from '../core/motion.js';
@@ -313,7 +314,21 @@ const BG_WINDOW_KEYS = new Set(['preset', 'use', 'value', 'html', 'src', 'from',
 // backdrop introduced alongside the canvas presets.
 export function bgErrors(cfg) {
   const out = [];
-  (Array.isArray(cfg.bg) ? cfg.bg : []).forEach((b, i) => {
+  // Windows that name no times at all are bound to the film's own joints, one each, in order
+  // (core/junctions.js bindWindowsToJunctions). That needs one junction fewer than there are windows.
+  // Checked HERE as well as at render because the render throw arrives 60 seconds and one ffmpeg pass
+  // later, and the answer is the same either way. Lowered first: a scene written with the unified
+  // `transitions` surface has no `cuts` key yet, and counting the raw form would refuse a film whose
+  // cuts are real (docs/MISTAKES.md #358 is the same grammar, one layer up).
+  const bgList = Array.isArray(cfg.bg) ? cfg.bg : [];
+  if (bgList.length > 1 && bgList.every((b) => isObj(b) && b.from == null && b.to == null)) {
+    // CLONED. lowerScene mutates and `delete`s `transitions` off what it is given, which is right for
+    // the renderer (it lowers once, at the top) and wrong here: a validator that rewrites the object it
+    // is grading changes what every later check sees, and the author's own data with it.
+    const table = junctionTable(marksOf(lowerScene(structuredClone(cfg))));
+    try { bindWindowsToJunctions(bgList, table); } catch (e) { out.push(e.message); }
+  }
+  bgList.forEach((b, i) => {
     if (!isObj(b)) return;
     const at = `bg[${i}]`;
     // ONE source per window. `html` paints in the DOM and `preset` paints on canvas; a window naming

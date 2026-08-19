@@ -58,6 +58,40 @@ export function resolveJunction(ref, table, where = 'junction reference') {
   return times[+idx];
 }
 
+/**
+ * bindWindowsToJunctions(windows, table) → the same windows with `from`/`to` filled from the film's
+ * own joints: window i runs from junction i-1 to junction i, and the last one runs to the end.
+ *
+ * WHY THIS IS THE DEFAULT AND NOT A FEATURE. `bg` is a required field, so the backdrop is always a
+ * decision — and the measured library says the decision is almost never made: 134 of 144 scenes paint
+ * ONE window for the whole runtime. The two films this repo is proudest of do the opposite; brew
+ * inverts the tone of the world on four of its five cuts. Writing that by hand meant naming the same
+ * boundary twice, so the cheap thing to write was the flat backdrop, and the flat backdrop is what
+ * got written 134 times. Here the cheap thing to write is the right one: list the windows in order,
+ * declare no times, and the cuts you already wrote own the numbers.
+ *
+ * It applies ONLY when there are 2+ windows and not one of them declares an edge, which is today a
+ * SILENT BUG rather than a style: every window defaults to 0..1e9, `bgWinAt` keeps the last match, so
+ * all but the final window are accepted and then never drawn. Input taken and discarded is the failure
+ * this codebase hates most (docs/MISTAKES.md #213, #369). A single window still means "the whole film",
+ * and any window that names an edge still means exactly what it said.
+ */
+export function bindWindowsToJunctions(windows, table) {
+  if (!Array.isArray(windows) || windows.length < 2) return windows;
+  if (windows.some((b) => b?.from != null || b?.to != null)) return windows;
+  const j = table.junction;
+  if (j.length < windows.length - 1)
+    throw new Error(`bg: ${windows.length} windows declare no times, so each one is bound to the joint `
+      + `after it — that needs ${windows.length - 1} junctions and this film has ${j.length}. `
+      + `Either cut the film where the backdrop should turn, or give each window its own from/to. `
+      + `This film has: ${describeJunctions(table)}`);
+  return windows.map((b, i) => ({
+    ...b,
+    from: i === 0 ? 0 : j[i - 1],
+    ...(i === windows.length - 1 ? {} : { to: j[i] }),
+  }));
+}
+
 /** marks from a LOWERED scene (cuts/seams/stings already normalised by transitions-lower). */
 export function marksOf(data) {
   const out = [];

@@ -26,14 +26,14 @@ import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
-import { junctionTable, resolveJunction, isJunctionRef, marksOf } from '../../core/junctions.js';
+import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions } from '../../core/junctions.js';
 import { applyComposite } from '../../core/looks.js';
 import { bakeCanvasFx } from '../../core/canvas-fx.js';
 import { DIRS } from '../../core/cuts.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
-import { lintData, easeErrors } from '../../core/validate.mjs';
+import { lintData, easeErrors, bgErrors } from '../../core/validate.mjs';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
@@ -1247,6 +1247,37 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     !isJunctionRef(1.6) && !isJunctionRef('1.6') && isJunctionRef('cut@0'));
   ok('junctions: marksOf reads a LOWERED scene\'s cuts/seams/stings',
     JSON.stringify(marksOf({ cuts: [{ t: 2 }], stings: [{ t: 1 }] })) === '[{"t":1,"kind":"sting"},{"t":2,"kind":"cut"}]');
+  // bg windows that name NO times bind to the film's own joints, one each, in order. Before this,
+  // every one of them defaulted to 0..1e9 and bgWinAt kept the last, so all but the final window were
+  // accepted and never drawn — silent substitution, the same shape as #213 and #369.
+  {
+    const T = junctionTable([{ t: 2, kind: 'cut' }, { t: 5, kind: 'cut' }, { t: 8, kind: 'sting' }]);
+    const w = bindWindowsToJunctions([{ preset: 'paper' }, { preset: 'dark' }, { preset: 'accent' }], T);
+    ok('bg/junctions: unbounded windows take the joints in order',
+      w[0].from === 0 && w[0].to === 2 && w[1].from === 2 && w[1].to === 5);
+    ok('bg/junctions: the last window runs to the end (no `to`)', w[2].to === undefined && w[2].from === 5);
+    ok('bg/junctions: one window is still the whole film',
+      bindWindowsToJunctions([{ preset: 'paper' }], T).length === 1
+      && bindWindowsToJunctions([{ preset: 'paper' }], T)[0].from === undefined);
+    ok('bg/junctions: a window that names an edge is left alone', (() => {
+      const src = [{ preset: 'paper' }, { preset: 'dark', from: 3 }];
+      return bindWindowsToJunctions(src, T)[0].from === undefined;
+    })());
+    ok('bg/junctions: too few joints throws and names what the film has', (() => {
+      const thin = junctionTable([{ t: 2, kind: 'cut' }]);
+      try { bindWindowsToJunctions([{}, {}, {}], thin); return false; }
+      catch (e) { return /needs 2 junctions and this film has 1/.test(e.message) && /cut@0\.\.0/.test(e.message); }
+    })());
+    ok('bg/junctions: the validator catches it without a render', (() => {
+      const errs = bgErrors({ bg: [{ preset: 'paper' }, { preset: 'dark' }], transitions: [] });
+      return errs.some((e) => /needs 1 junctions and this film has 0/.test(e));
+    })());
+    ok('bg/junctions: the validator lowers `transitions` first, and does not eat them', (() => {
+      const cfg = { bg: [{ preset: 'paper' }, { preset: 'dark' }], transitions: [{ at: 2, fx: 'fade' }] };
+      const errs = bgErrors(cfg);
+      return errs.length === 0 && Array.isArray(cfg.transitions) && cfg.transitions.length === 1;
+    })());
+  }
   // The grammar has ONE definition now. audio-bridges established it and backgrounds reuse it; two
   // hand-kept copies of a definition is MISTAKES #159 exactly.
   ok('junctions: audio bridges resolve through the same table', (() => {
