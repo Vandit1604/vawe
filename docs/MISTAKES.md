@@ -10859,11 +10859,40 @@ non-deterministic ENCODE. `make probe` compares the DOM, which is a different cl
 gate on the other half. `seam-check` samples transitions, not held frames. The audit reads geometry.
 **Nothing in this repo compares PIXELS across workers.**
 
+### ROOT CAUSE, found by bisection
+
+Two clean experiments settled it. Both rendered at 6 workers, both measuring the same band.
+
+| variant | spread |
+|---|---|
+| as authored (`parts` + `color-mix` fills) | **13.79** |
+| `color-mix()` replaced by `fill` + `fill-opacity` | **13.79** — identical, hypothesis dead |
+| **`parts` removed entirely** | **2.10** — exactly the single-worker truth |
+
+It is the **GSAP `parts` tweens**. A staggered `fromTo` over 366 targets, built once at page setup with
+`immediateRender: true`, does not render identically across tabs that are each seeking a different
+subset of frames. Nothing about the SVG, the CSS colour function, the JPEG capture or the encoder is
+involved; all three were tested and cleared.
+
+Note the first attempt at the `color-mix` test was INVALID and looked like a fix: a CSS comment inside
+the injected `<style>` killed the whole rule block, the grid rendered at luminance 7.01 against an
+empty-band 6.2, and the spread went to 0.00 because there was nothing left to diverge. A gate reporting
+"no variance" on an empty region is the same defect as #363, reproduced by hand mid-investigation. The
+re-run put the comment in JS, outside the template literal, and confirmed 33.05 in a single render
+before trusting the 6-worker number.
+
+### Blast radius
+
+`parts` is a first-party feature and **one shipped scene uses it** (`showcase-lumen`, 1 layer). That
+scene animates a handful of SVG shapes rather than 366, so whether it diverges is untested. The defect
+scales with target count, and `docs/CRAFT/` recommends `parts` for exactly the dense-choreography case
+that makes it worst.
+
 ### Status: worked around, not fixed
 
 The delivered film is rendered `--workers 1` and is clean (spread 2.42). That is a workaround, and by
-this repo's own rule a workaround is a bug report. The real fix is in the capture path and is not yet
-found: what differs between tab 0 and tabs 1-5 is still unknown, and `cmd/render/main.go:39` records
+this repo's own rule a workaround is a bug report. The real fix is in how `parts` builds its tweens, and
+the remaining unknown is why a staggered fromTo is order-dependent under seek, given `cmd/render/main.go:39` records
 that compositor determinism has been fought here before ("Compositor determinism flags, doubling the
 rAF settle wait").
 

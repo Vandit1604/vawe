@@ -107,16 +107,19 @@ const cells = weeks.map((w, x) => w.contributionDays.map((d) => {
 }).join('')).join('');
 // width:100% + viewBox, so the LAYER's `w` sizes the map. A fixed px width here would make the
 // fragment's size a property of the data (53 weeks vs 52) rather than of the composition.
+// Solid fill + fill-opacity rather than color-mix(): the grid was the only region of the frame that
+// differed between worker tabs, and color-mix in an SVG fill is the only thing here the rest of the
+// scene does not also do. See docs/MISTAKES.md #370.
 const heat = `<div style="width:100%">
 <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block">
 <style>
  /* hyphenated: the palette KEY is surface2, the TOKEN core/boot.js sets is --surface-2. Written wrong
     here first, and the fragment preview could not have caught it while it applied no tokens (#368). */
  .c{fill:var(--surface-2)}
- .l1{fill:color-mix(in srgb, var(--accent) 28%, transparent)}
- .l2{fill:color-mix(in srgb, var(--accent) 52%, transparent)}
- .l3{fill:color-mix(in srgb, var(--accent) 76%, transparent)}
- .l4{fill:var(--accent)}
+ .l1{fill:var(--accent);fill-opacity:0.28}
+ .l2{fill:var(--accent);fill-opacity:0.52}
+ .l3{fill:var(--accent);fill-opacity:0.76}
+ .l4{fill:var(--accent);fill-opacity:1}
 </style>${cells}</svg></div>`;
 
 fs.mkdirSync('assets/gen', { recursive: true });
