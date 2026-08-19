@@ -45,6 +45,41 @@ video (e.g. `linear-launch.json`) first as working references, then compose — 
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
 
+## THE BRIEF: what the person asking is allowed to say, and what is YOUR job
+
+The person asking for a film should never have to name a colour, an easing, a layer type or a preset.
+If they find themselves reaching for one, that is your failure, not their prompt. Their whole request is
+five lines, and any of them may be missing:
+
+```
+SUBJECT   what it is about, in one line
+DATA      where the facts come from (a URL, a file, an API, or "here they are")
+PAYOFF    the one thing to remember, and it lands LAST
+AUDIENCE  who watches, and where they see it
+FEELING   one reference, or one word ("brew act 1", "cinematic", "loud")
+```
+
+**Everything else is yours to decide and defend:** palette, typography, layout, motion, camera, cuts,
+backdrop, sound, pacing, structure. If a missing field would change the film, ASK BEFORE BUILDING, not
+after — one small forced-choice question with real consequences beats a rebuild.
+
+**And DO NOT hand-author a film from a blank JSON.** That is the #1 failure named two sections below,
+and it has been committed here: a 28s film of 31 hand-written layers, 74% of them text, `anim:"fade"`
+on nearly every one, one backdrop window for the whole runtime, and one hand-keyed motion track. It was
+rejected twice by the person who asked for it, and it was not below the house standard — the library
+median is 13% picture and 0% hand-keyed motion, so it was AT it. Compose from `make blueprints`.
+Measured against the two films this repo is proudest of:
+
+| | brew-launch-act1 | higgsfield-recreation | that film | library median |
+|---|---|---|---|---|
+| pictorial layers | **46%** | 38% | 3% | 13% |
+| layers with a hand-keyed `motion` track | 4 | **75%** | 3% | **0%** |
+| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | — |
+
+The backdrop line is the strongest single lever: brew inverts the whole tone of the world on four of its
+five cuts and spends its one accent window on the logo reveal. A pictorial beat on a dead backdrop is
+still a slide.
+
 ## Content philosophy (what makes these good — follow it)
 
 Every video is built on **hook → suspense → payoff**. The data must earn attention:
