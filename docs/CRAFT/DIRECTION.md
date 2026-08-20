@@ -75,6 +75,17 @@ Source: **School of Motion; Shaw ("less, but better")**; enforced locally in [`T
 
 - **One motion idea per beat.** A dolly, OR a colour-wave, OR a stagger — not all three. Stacking them
   is maximalism that reads as a demo reel, not a film. `[gated]` direct: `effect-soup`
+- **Two properties on one layer must make ONE claim.** This is the finer cut of the rule above, and it
+  is about a single element rather than a beat. *"A confirmation that slides up AND fades in reads as one
+  idea: this is arriving. A sheet that rises AND rotates makes two unrelated claims about one object."*
+  Rise plus fade is arriving. Rise plus rotate is arriving and also tumbling, which is two things the
+  viewer has to reconcile about one object, and the reconciling is what reads as amateur.
+  The test is a sentence: say out loud what the layer is doing, in one clause. If the clause needs an
+  "and" joining two unrelated verbs, drop one. `slide-up` + `fade` passes. `slide-up` + `spin` does not.
+  **No gate can hold this** and none should try: whether two properties say the same thing is a semantic
+  judgement, and a gate that guessed would manufacture findings on every deliberate exception. It is
+  yours, and it costs one sentence to check.
+  Borrowed from a reference system whose films measurably read better than ours (`../MISTAKES.md`).
 - **Effects are seasoning, not wallpaper.** 2-3 earned moments across a film, not a texture on every
   beat. Content/proof beats stay clean so the content reads. `[gated]` direct: `effect-soup`
 - **One cut family per film.** Rotate *within* a family (soft/motion/shape/spatial); mixing families
