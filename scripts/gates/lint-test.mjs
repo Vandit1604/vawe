@@ -49,8 +49,14 @@ ok(fxBad.some((e) => /both "split" and "splitText"/.test(e)), 'fxErrors: split +
 const fxClean = fxErrors({ layers: [{ type: 'text', text: 'a', anim: 'none', fx: ['blurIn', 'float'], fxOut: 'flyOutLeft', duration: 2 }] });
 ok(fxClean.length === 0, `fxErrors: valid fx/fxOut is silent (got ${fxClean.join('; ') || 'none'})`);
 
-// --- resolveEasing: unknown name FALLS BACK to easeOutCubic (was silent; now warns) — never throws (#83) ---
-ok(resolveEasing('nope-not-real') === easeOutCubic, 'resolveEasing: unknown name → easeOutCubic fallback');
+// --- resolveEasing: an unknown name THROWS. #83 made it fall back to easeOutCubic and this assertion
+// pinned that; #367 reversed it, because a curve quietly swapped for another renders a plausible frame
+// that is NOT the one asked for, which is the silent-substitution class this repo logs most. The
+// decision moved and the test did not, so `lint-test` could not pass in a tree that had both. A stale
+// assertion is worse than a missing one: it fails honest work and teaches the next author to distrust
+// the suite. It now pins the CURRENT contract, and names the entry that set it.
+ok((() => { try { resolveEasing('nope-not-real'); return false; } catch (e) { return /unknown easing/.test(e.message); } })(),
+  'resolveEasing: unknown name THROWS and names itself (#367 superseded #83)');
 ok(resolveEasing('spring') !== easeOutCubic && typeof resolveEasing('spring') === 'function', 'resolveEasing: known name resolves to its own curve');
 ok(resolveEasing('easeOutQuart')(1) === 1 && resolveEasing('easeOutQuart')(0) === 0, 'resolveEasing: resolved curve holds endpoints');
 

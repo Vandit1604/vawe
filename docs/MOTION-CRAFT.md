@@ -24,10 +24,10 @@ gates enforces each rule — everything else is judgment the ledger can't save y
 
 | # | Rule | What it means in practice | Enforced by |
 |---|---|---|---|
-| 1 | **Timing is a voice, not a constant** | Entry pace varies per beat with intent: ambient drifts 0.8–1.2s, payoffs snap 0.25–0.35s, thesis lines 0.5s+. Uniform 0.45s everywhere = monotone narration. | `motion-audit (ix) rhythm-monotony` warns |
+| 1 | **Timing is a voice, not a constant** | Entry pace varies per beat with intent: ambient drifts 0.8–1.2s, payoffs snap 0.25–0.35s, thesis lines 0.5s+. Uniform 0.45s everywhere = monotone narration. | `motion-audit (ix) rhythm-monotony` + `direct: tempo-flat` warn |
 | 2 | **Ease-out in, accelerate out** | Entrances decelerate (arrivals are landings); exits accelerate (departures are launches). Never linear on a visible move. Springs only where personality wants overshoot. | judgment (+ theme.motion sets the family) |
-| 3 | **Hierarchy through offset** | Related elements stagger 60–120ms "one after another"; the beat's hero element moves last or largest. Motion order = reading order. | judgment |
-| 4 | **Choreograph arrivals** | Elements sharing a beat arrive as one phrase (stagger chains via relative starts), not as independent events. Anticipation = the tiny pre-move (upbeat) before the main move. | relative timing exists; judgment |
+| 3 | **Hierarchy through offset** | Related elements stagger 60–120ms "one after another"; the beat's hero element moves last or largest. Motion order = reading order. | `direct: shared-start` + `uneven-cascade` warn |
+| 4 | **Choreograph arrivals** | Elements sharing a beat arrive as one phrase (stagger chains via relative starts), not as independent events. Anticipation = the tiny pre-move (upbeat) before the main move. | `direct: stagger-total` warns; the rest is judgment |
 | 5 | **Settle and hold** | Every payoff finishes ≥HOLD before its exit and stays put. Sub-pixel drift on settled text reads as shaking. | `motion contract (iii)` + `shimmer (viii)` |
 | 6 | **One hero motion per beat** | One element owns the motion; everything else supports quietly. Two competing animations = zero read. | judgment |
 | 7 | **Rotate layout archetypes** | Never the same archetype twice in a row (split / centered-top / full-bleed / card-over-board). | ledger flags SAME-SKELETON cross-video; per-video = storyboard rule |
@@ -46,6 +46,7 @@ a 30fps render.
 |---|---|---|---|---|---|
 | Per-unit reveal | `each` | 0.25-0.35s | 0.5s | 0.75-1.2s | payoff / thesis / ambient (Rule 1) |
 | Reveal stagger | `stagger` | 0.04s | 0.06s | 0.10-0.12s | Rule 3's 60-120ms; below 0.04 the sweep stops reading as a sweep |
+| **Stagger sequence total** | `(units - 1) x stagger` | — | — | **cap 0.5s** | the per-item band above has no ceiling; 8 items at 0.10s take 0.8s. See "Arrival rhythm" |
 | Cut length | `cutTiming` | `snappy`/`pop` | `smooth` | `out` | velocity contrast between beats (Rule 8) |
 | **Ransom re-roll** | `ransom.cycle` | 0.5s | **1.2s** | 1.6-2.0s | see below |
 | **Ransom re-roll offset** | `ransom.stagger` | 0.08s | 0.16s | 0.2s | keeps letters from flipping in unison |
@@ -59,6 +60,57 @@ more letters on screen, the more total churn per second at the same cycle.
 
 Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blur"` with `each` 0.75 and
 `stagger` 0.06 gives a left-to-right defocus sweep that resolves over ~0.7s (see ransom-internal.json).
+
+## Arrival rhythm — four measures, and the tension between two of them
+
+Rules 1, 3 and 4 above were judgment for a year. These four measures make them countable. All four
+**warn**; none blocks. Run them with `make direct D=<file>` (also inside `TASTE=1 make author-check`).
+They read the authored JSON, so they cost about a second and change no pixel.
+
+| Finding | What it counts | Warns at | Why that number |
+|---|---|---|---|
+| `shared-start` | top-level layers that begin on one exact `start` | **3 or more** | two together is a pair (a card and the label on it); three is a row that arrives as a block |
+| `stagger-total` | `(units - 1) x stagger` on one staggered layer | **over 0.5s** | past half a second the last unit lands in a different beat from the first |
+| `uneven-cascade` | interval drift inside one cascade of like layers | **maxDrift ≥ 30% of the average**, and ≥ 40ms | 40ms is over a frame at 30fps, so below it the unevenness is not on screen |
+| `tempo-flat` | slowest `enterDur` ÷ fastest, over 4 or more | **under 1.5x** | the speed dials span 0.25s to 1.2s, about 3x; 1.5x is the floor, 3x is the target |
+
+**What each one does NOT see.** `stagger-total` skips a RATE: `preset:"type"` is a typewriter and
+`preset:"wave"` is a looping phase (`core/type.js`), so for both the step is the effect's speed and its
+total is the shot length by design. It also cannot count `parts`, which selects its children at render
+time. `tempo-flat` reads only an explicit `enterDur`; a scene that leans on the engine default has one
+tempo and says nothing about it, and stays silent here. `shared-start` counts top-level layers only,
+because a group child inherits its parent's window and would be counted twice.
+
+### Irregular ACROSS a beat, even WITHIN a cascade
+
+`shared-start` wants entrances irregular. `uneven-cascade` wants them even. Both are right, because
+they measure different scopes.
+
+- **Across a beat**, between things that are not the same thing: irregular. A headline, a card and a
+  chip that all begin on the same frame give the eye no order to read them in. Offset them by
+  different amounts, and start the next one while the last is still settling.
+- **Within one cascade**, among things that ARE the same thing: even. Six bullets, eight cards, a row
+  of logos read as one sweep only if the interval holds. A cascade at 40 / 260 / 40ms reads as a stall,
+  not as a rhythm.
+
+The two can never fire on the same run, and the arithmetic says so: a shared start is an interval of
+zero, and `uneven-cascade` skips any run whose average interval is zero. A cascade is also defined
+narrowly on purpose — three or more sibling layers of the same `type`, `anim`, `preset`, `enterDur` and
+`split`, each within 0.3s of the last, the whole run inside 1.2s. Anything looser is a running order,
+not an arrival, and grading a film's running order for evenness would be wrong.
+
+### Two element-level checks that watch the render
+
+`make motion` adds two findings that read the rendered frames rather than the JSON, both WARN:
+
+- **`xi:degenerate`** — an element laid out for every frame of its life that never once has both a
+  width and a height. It animates with no box.
+- **`xii:invisible`** — an element with a box for every frame of its life that never reaches 1%
+  opacity. It animates its whole life and is never seen.
+
+`dead-air` in `beat-check` asks whether a FRAME is empty and passes any frame that holds other content.
+These ask about an ELEMENT across its whole life, which is a different question, and it is the question
+that catches a layer nobody has ever seen.
 
 ## Snap — the overshoot-and-settle (what separates ours from real motion graphics)
 

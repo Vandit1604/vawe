@@ -9,6 +9,12 @@
 //   FAIL  (v)   typing completes  — typewriter text reaches its full length before the exit
 //   WARN  (vi)  frozen span       — nothing tracked changes for >15% of the runtime (capped 0.6-2s)
 //   WARN  (vii) velocity spike    — >80px/frame jumps outside segment boundaries
+//   WARN  (xi)  degenerate       — an element laid out for its whole life that never has a box
+//   WARN  (xii) invisible        — an element boxed for its whole life that never reaches 1% opacity
+//
+// (xi)/(xii) are per ELEMENT, not per frame: `dead-air` in beat-check asks whether a FRAME is empty and
+// passes a frame full of content, so a layer that animates from first breath to last while contributing
+// nothing to any frame has never had a reader.
 //
 // Exemptions are declarative: elements (or ancestors) with data-motion="loop" (carets, spinners,
 // pulsing chrome) are skipped by (ii)/(iii). Segment windows come from meta.segments (each format
@@ -70,16 +76,35 @@ async function audit(format) {
     const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
     const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
     const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
-    const out = { keys, loop, frames: [], rows: keys.map(() => []) };
+    // Markup that is not meant to paint: the SVG filter-definition host (core/filters.js stamps it
+    // aria-hidden, 0x0), anything inside <defs>, and script/style/template. It is boxless by design, so
+    // asking whether it ever had a box is asking the wrong question of it.
+    const nonVisual = els.map((el) => el.getAttribute('aria-hidden') === 'true'
+      || !!el.closest('defs') || ['STYLE', 'SCRIPT', 'TEMPLATE', 'DEFS'].includes(el.tagName));
+    // life tallies, alongside the per-frame rows: how many sampled frames this element was laid out for,
+    // had a real box for, and was above 1% opacity for. The rows answer "what happened at 4.2s"; these
+    // answer "was this element ever anything", which no per-frame check can ask.
+    const out = { keys, loop, nonVisual, frames: [], rows: keys.map(() => []), live: keys.map(() => 0), box: keys.map(() => 0), zero: keys.map(() => 0), seen: keys.map(() => 0) };
     for (let f = 0; f < total; f += stride) {
       window.__engine.renderFrame(f);
       out.frames.push(f);
       els.forEach((el, i) => {
         const b = el.getBoundingClientRect();
-        if ((b.width < 1 && b.height < 1) || !el.getClientRects().length) { out.rows[i].push(null); return; }
+        const laidOut = el.getClientRects().length > 0;
         let eop = 1, hidden = false;
-        for (const node of chains[i]) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; } eop *= +s.opacity; }
-        if (hidden) { out.rows[i].push(null); return; }
+        if (laidOut) for (const node of chains[i]) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; } eop *= +s.opacity; }
+        if (laidOut && !hidden && !nonVisual[i]) {
+          out.live[i]++;
+          // A wrapper whose own rect collapses is not boxless if something inside it occupies space: a
+          // `morph` text layer measures 780x0 while its glyphs paint. The pixels are on screen, and the
+          // question this tally exists to answer is whether ANY were. The descendant walk only runs on
+          // the rare frame where the element's own rect is degenerate, so it costs nothing in the common case.
+          let boxed = b.width >= 1 && b.height >= 1;
+          if (!boxed) for (const kid of el.querySelectorAll('*')) { const kb = kid.getBoundingClientRect(); if (kb.width >= 1 && kb.height >= 1) { boxed = true; break; } }
+          if (boxed) out.box[i]++; else out.zero[i]++;
+          if (eop >= 0.01) out.seen[i]++;
+        }
+        if (!laidOut || hidden || (b.width < 1 && b.height < 1)) { out.rows[i].push(null); return; }
         const t = (el.textContent || '').trim();
         // A layer can be busy inside its own box: an svg whose bars scale on var(--t) animates hard while
         // its bounding rect, opacity and text all sit perfectly still. Measuring only the outside made
@@ -252,6 +277,18 @@ async function audit(format) {
   K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
   if (gAny && gMax < 0.9) findings.unshift({ level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` });
 
+  // (xi)/(xii) per-ELEMENT life. Judged over the whole render, not inside a segment window: an element
+  // that is on the timeline start to finish and never lands a pixel is invisible to every frame-level
+  // check, because every frame it spoils is full of other content.
+  K.forEach((k, i) => {
+    if (!content[i]) return;
+    if (series.live[i] === 0) return;                     // never laid out at all — it has no life to judge
+    if (series.box[i] === 0 && series.zero[i] > 0)
+      findings.push({ level: 'WARN', check: 'xi:degenerate', seg: '(video)', key: k, msg: `laid out for all ${series.live[i]} sampled frame(s) of its life and never has both a width and a height. It animates with no box` });
+    else if (series.box[i] > 0 && series.seen[i] === 0)
+      findings.push({ level: 'WARN', check: 'xii:invisible', seg: '(video)', key: k, msg: `boxed for ${series.box[i]} sampled frame(s) and never once reaches 1% opacity. It animates its whole life and is never seen` });
+  });
+
   // (ix) rhythm monotony — timing is a voice, not a constant (MOTION-CRAFT rule 1)
   if (ENTRIES.length >= 8) {
     const buckets = {};
@@ -294,5 +331,8 @@ else {
   }
 }
 const failed = results.some((r) => r.error || r.findings.some((x) => x.level === 'FAIL'));
-console.log(failed ? '\n✗ motion audit found hard failures' : '\n✓ motion contract holds across all checked formats');
+// Under --json the verdict goes to stderr: stdout is the machine-readable channel, and appending a
+// prose line to it made the documented flag emit something no consumer could parse. The exit code and
+// the sentence both survive; only the stream changes.
+(JSON_OUT ? console.error : console.log)(failed ? '\n✗ motion audit found hard failures' : '\n✓ motion contract holds across all checked formats');
 process.exit(failed ? 1 : 0);

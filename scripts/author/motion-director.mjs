@@ -12,11 +12,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { PROFILES } from './profiles.mjs';
+import { lowerScene } from '../../core/transitions-lower.js';
+import { glyphText, snippet } from '../lib/text.mjs';
 
 const file = process.argv[2];
 if (!file) { console.error('usage: node scripts/author/motion-director.mjs <scene.json> [--write]'); process.exit(2); }
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
-const d = JSON.parse(fs.readFileSync(file, 'utf8'));
+// `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
+// renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+// documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
+const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const layers = d.layers || [];
 // flatten nested children so the mechanical motion tells see every layer, not just the top level.
 const allLayers = (() => { const out = []; const rec = (ls) => { for (const l of ls || []) if (l && typeof l === 'object') { out.push(l); if (l.children) rec(l.children); } }; rec(layers); return out; })();
@@ -188,6 +193,109 @@ if (linearHits.length) warn('linear-motion', `${linearHits.length} move(s) use e
 const explicitDurs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number');
 if (explicitDurs.length >= 6 && new Set(explicitDurs).size === 1)
   warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]} — uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`);
+
+// ---- ARRIVAL RHYTHM: four measures nothing else here can see (docs/MOTION-CRAFT.md rules 1, 3, 4) --
+// All four are WARN. They grade rhythm, which is an argument; and the library trips the first one on
+// roughly a third of its scenes, so blocking would teach the reflex waive that repeals a rule silently.
+const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(String(l.text))}"` : ''}`;
+
+// (1) shared-start: three or more layers that begin on the SAME frame arrive as one block, so the beat
+// states no reading order. Two together is a pair (a card and the label sitting on it); three is a row.
+// `monotone-timing` above measures identical DURATIONS and is blind to this — those layers may each run
+// a different length and still all leave the gate together.
+const startClumps = new Map();
+for (const l of layers) {
+  if (l.track === 0) continue;
+  const s = r2(l.start ?? 0);
+  if (!startClumps.has(s)) startClumps.set(s, []);
+  startClumps.get(s).push(l);
+}
+const blocked = [...startClumps.entries()].filter(([, ls]) => ls.length >= 3).sort((a, b) => b[1].length - a[1].length);
+if (blocked.length) {
+  const [t0, ls0] = blocked[0];
+  const rest = blocked.length > 1 ? ` (and ${blocked.length - 1} more start${blocked.length > 2 ? 's' : ''} carrying 3+)` : '';
+  warn('shared-start', `${ls0.length} layers all start at ${t0}s${rest}. They arrive as one block, so nothing tells the eye what to read first. Stagger entrances at irregular offsets; begin the next while the last is still settling (MOTION-CRAFT rule 3). At ${t0}s: ${[...new Set(ls0.map(label))].slice(0, 4).join(' · ')}`);
+}
+
+// (2) stagger-total: a per-unit step inside the 0.04-0.12s band still overruns when the unit count is
+// high — 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
+// MOTION-CRAFT gives the per-item band and no total, which is exactly the hole this closes. The measure
+// is the STAGGER SEQUENCE, first unit start to last unit start: (n-1) x stagger.
+// A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type.js), so for
+// both the step IS the effect's speed and its total is the shot length by design.
+const RATE_PRESET = new Set(['type', 'wave']);
+const staggerUnits = (l) => {
+  if (l.split) {
+    const t = glyphText(String(l.text ?? ''));
+    const mode = String(l.split);
+    if (/char/.test(mode)) return t.replace(/\s/g, '').length;
+    if (/line/.test(mode)) return t.split('\n').length;
+    return t.trim().split(/\s+/).filter(Boolean).length;
+  }
+  if (Array.isArray(l.children) && l.each != null) return l.children.length;
+  return 0;                                   // `parts` selects at render time; the count is unknowable here
+};
+const STAGGER_CAP = 0.5;
+const longStaggers = [];
+for (const l of allLayers) {
+  const step = l.stagger;
+  if (typeof step !== 'number' || step <= 0) continue;
+  if (l.loop || l.typing || RATE_PRESET.has(l.preset)) continue;
+  const n = staggerUnits(l);
+  if (n < 2) continue;
+  const total = (n - 1) * step;
+  if (total > STAGGER_CAP) longStaggers.push({ l, n, step, total });
+}
+if (longStaggers.length) {
+  longStaggers.sort((a, b) => b.total - a.total);
+  const w = longStaggers[0];
+  warn('stagger-total', `${longStaggers.length} staggered arrival(s) run past ${STAGGER_CAP}s end to end. Worst, ${label(w.l)}: ${w.n} units x ${w.step}s = ${w.total.toFixed(2)}s. Past about half a second the last unit lands in a different beat from the first. Cut the step, or split the group.`);
+}
+
+// (3) uneven-cascade: WITHIN one cascade the interval must be even. A cascade is a run of sibling layers
+// of the same kind, entering the same way, close together — one list arriving, hand-keyed instead of
+// authored with `stagger`. Reference test: consistent = maxDrift < avgInterval * 0.3.
+// This does NOT contradict (1). Different scopes: (1) wants DIFFERENT elements to arrive at irregular
+// offsets across a beat; (3) wants ONE cascade of like elements to keep its own metre. Both stated in
+// docs/MOTION-CRAFT.md. The two can never fire on the same run — an exact clump has a zero interval.
+const CASCADE_GAP = 0.3;      // a wider hole is a new beat, not the next item
+const CASCADE_SPAN = 1.2;     // an arrival, not the film's whole running order
+const DRIFT_FLOOR = 0.04;     // one frame at 30fps rounds; under ~40ms unevenness is not seen
+const cascadeKey = (l) => [l.type || 'text', l.anim || '', l.preset || '', l.enterDur ?? '', l.split || ''].join('|');
+const cascadeGroups = new Map();
+for (const l of layers) { if (l.track === 0) continue; const k = cascadeKey(l); if (!cascadeGroups.has(k)) cascadeGroups.set(k, []); cascadeGroups.get(k).push(l); }
+const uneven = [];
+for (const [, ls] of cascadeGroups) {
+  const st = [...new Set(ls.map((l) => l.start ?? 0))].sort((a, b) => a - b);
+  const runs = []; let cur = [st[0]];
+  for (let i = 1; i < st.length; i++) { if (st[i] - st[i - 1] <= CASCADE_GAP) cur.push(st[i]); else { runs.push(cur); cur = [st[i]]; } }
+  runs.push(cur);
+  for (const run of runs) {
+    if (run.length < 3 || run[run.length - 1] - run[0] > CASCADE_SPAN) continue;
+    const iv = run.slice(1).map((t, i) => t - run[i]);
+    const avg = iv.reduce((a, b) => a + b, 0) / iv.length;
+    if (avg <= 0.001) continue;
+    const drift = Math.max(...iv.map((v) => Math.abs(v - avg)));
+    if (drift >= avg * 0.3 && drift >= DRIFT_FLOOR) uneven.push({ run, iv, avg, drift, layer: ls.find((l) => (l.start ?? 0) === run[0]) });
+  }
+}
+if (uneven.length) {
+  uneven.sort((a, b) => b.drift - a.drift);
+  const u = uneven[0];
+  const ms = (v) => `${Math.round(v * 1000)}ms`;
+  warn('uneven-cascade', `${uneven.length} cascade(s) of like layers keep an uneven beat. Worst, ${u.run.length} x ${label(u.layer)} from ${r2(u.run[0])}s at ${u.iv.map(ms).join(' / ')} (average ${ms(u.avg)}, drift ${ms(u.drift)}). One cascade holds ONE interval; vary the offset BETWEEN beats, not inside a single sweep (MOTION-CRAFT rule 3).`);
+}
+
+// (4) tempo-flat: `monotone-timing` fires only on a dead heat (every enterDur identical) and names no
+// target. This measures the SPREAD. The speed-dial table already gives the band a directed film speaks
+// in — payoffs 0.25-0.35s, ambient 0.75-1.2s — which is about 3x end to end.
+const TEMPO_TARGET = 3, TEMPO_FLOOR = 1.5;
+const durs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number' && v > 0);
+if (durs.length >= 4 && new Set(durs).size > 1) {   // a dead heat is monotone-timing's finding, not this one
+  const lo = Math.min(...durs), hi = Math.max(...durs), ratio = hi / lo;
+  if (ratio < TEMPO_FLOOR)
+    warn('tempo-flat', `${durs.length} entrances span only ${lo}s to ${hi}s (${ratio.toFixed(2)}x). One speed for the whole film reads as narration. Aim for about ${TEMPO_TARGET}x between the slowest and the fastest: payoffs snap 0.25-0.35s, ambient drifts 0.75-1.2s (MOTION-CRAFT rule 1 + the speed dials).`);
+}
 
 // enter-and-retreat: a layer that enters from a side and leaves back the SAME side. Pro motion travels
 // one continuous direction (enter right → exit left) — the launch rule + staging continuity.
