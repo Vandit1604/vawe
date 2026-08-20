@@ -24,6 +24,9 @@
 //   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
 //   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme
 //   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
+//   hero      — the one LAYOUT finding that can run pre-render: `thin-hero`, via verify/audit.mjs --hero.
+//               Landscape only, advisory, and it costs a browser launch (1.4s measured). A landscape film
+//               that skips it is TOLD it was skipped and where the check otherwise happens.
 //
 // `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
 // single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
@@ -44,6 +47,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync } from 'node:child_process';
+import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
@@ -183,6 +187,48 @@ tasteGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
+// 4g. hero fill — the one LAYOUT finding that can be moved before the render.
+//
+// WHY IT WAS LATE. `thin-hero` lives in verify/audit.mjs, which runs under `make audit` after the mp4
+// exists, so a hero line set at web scale was reported once the render had been paid for. Every other
+// rule in that file needs the rendered page for a reason this one shares: it measures INK width, and the
+// declared `w` is not the ink. The audit says so in its own comment, with the numbers: the boxes are
+// about right (70% median) and the glyphs fill 67.5% of them, so a static check on `w` would call the
+// library healthy and report nothing. A weaker approximation would therefore not be a rougher version
+// of this finding, it would be a different and mostly silent one, and a gate that is quiet where the
+// real check is loud is worse than the documented absence.
+//
+// So the PAGE moves earlier, not the rule. `verify/audit.mjs --hero` runs the same browser, the same
+// sampled frames and the same in-page function, with the contrast screenshots and the overlay shot
+// skipped. Measured on argus-launch (23s, 16:9): 4.60s for the full audit, 1.44s for --hero.
+//
+// It sits with the TASTE gates for the honest reason, and the reason is the cost rather than the noise.
+// DOSE, measured by running --hero over the library: 29 of the 91 landscape scenes carry a thin-hero
+// finding (32%). That is a usable warning rate, well under the "four landscape films in five" the audit's
+// own comment cites, which counted sampled FRAMES under the 60% reference rather than films under the 55%
+// floor with the split-frame exemption applied. What keeps it opt-in is that the always-on half of this
+// ladder catches BROKEN in about a second, and a browser launch triples that for a house-style warning.
+// Portrait scenes never reach it: the rule only fires when the frame is wider than it is tall.
+{
+  const [vw, vh] = sceneDims(scene, '');
+  if (vw > vh) {
+    if (taste) runGate('hero fill (thin-hero, pre-render)', 'verify/audit.mjs', ['--hero']);
+    else {
+      skippedTaste.push('hero');
+      // NAME THE ABSENCE. A landscape film that skips this gets told where the check lives and when it
+      // will run, so a missing finding is a known gap rather than a silence that reads as a pass.
+      console.log(`\n──────── hero fill (thin-hero) ────────`);
+      console.log(`  ⚠ NOT CHECKED. This is a ${vw}x${vh} landscape film, and nothing above measured whether its`);
+      console.log(`      hero line is set at video scale. Pre-render:  TASTE=1 make author-check D=${file}`);
+      console.log(`      (about 1.4s: it launches a browser). Otherwise it is reported post-render by \`make audit\`,`);
+      console.log(`      after the mp4 is paid for.`);
+    }
+  } else {
+    console.log(`\n──────── hero fill (thin-hero) ────────`);
+    console.log(`  ○ portrait canvas (${vw}x${vh}); thin-hero is a landscape rule and has nothing to say here.`);
+  }
+}
+
 // 4e. treatment — the film's own rationale. ADVISORY, always: a treatment is an argument a person
 //     makes, so a gate can only check that one exists and still describes THIS storyboard. It goes
 //     stale the moment the plan moves, and a stale rationale is worse than none because it reads as
@@ -225,6 +271,13 @@ if (fs.existsSync(sidecar)) {
     `      A sidecar states, per beat, the artifact that earns the frame + what must show/animate;\n` +
     `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n`);
   if (strict) results.push({ name: 'inspect', failed: true, waived: false, unwaived: ['no-intent-sidecar'], blockCodes: [] });
+  // AND RUN plan vs render ANYWAY. Skipping it here meant the film with no plan was the one film never
+  // asked whether it nominates a peak, which is the film most likely not to have one. The gate itself
+  // says plainly that it has no plan to check against; the one question it can still answer without a
+  // plan is `no-spectacle-nominated`, and that question is worth asking of exactly this film.
+  // Not recorded as a result: with no sidecar it can only advise, and a step that can only advise has
+  // no verdict to put in the ladder's table.
+  runGate('plan vs render (no plan, so: does the film nominate a peak)', 'scripts/gates/plan-vs-render.mjs', strict ? ['--strict'] : []);
 }
 
 // ---- verdict ----

@@ -22,7 +22,10 @@ import { execFileSync } from 'node:child_process';
 const argv = process.argv.slice(2);
 const aspectAt = argv.indexOf('--aspect');
 const aspect = aspectAt >= 0 ? argv[aspectAt + 1] : null;
-const filter = argv.find((a, i) => !a.startsWith('--') && i !== aspectAt + 1) || '';
+// `i !== aspectAt + 1` was meant to skip the value that follows `--aspect`. With no `--aspect` present
+// indexOf returns -1, so the guard became `i !== 0` and threw away the first positional argument, which
+// is the filter itself. `audit-scenes.mjs argus` therefore swept all 110 scenes and never said why.
+const filter = argv.find((a, i) => !a.startsWith('--') && !(aspectAt >= 0 && i === aspectAt + 1)) || '';
 
 const DIR = 'formats/scene';
 // The same exclusions the other library sweeps use: a sidecar is not a film, and an un-expanded source
@@ -61,7 +64,10 @@ for (const f of scenes) {
   // Count from the audit's own summary lines rather than re-deriving them here: a second copy of the
   // pass/fail rule would drift from the one that printed it (docs/MISTAKES.md #159).
   const hard = [...out.matchAll(/·\s*(\d+)\s+hard/g)].reduce((n, m) => n + +m[1], 0);
-  const warn = [...out.matchAll(/·\s*(\d+)\s+warn/g)].reduce((n, m) => n + +m[1], 0);
+  // `warn` with nothing alphabetic after it. The audit ends with `· 9 warning(s)`, a restatement of the
+  // same nine findings the per-scene row already reported, so an unanchored `warn` counted every warning
+  // twice and this sweep printed exactly double. `hard` never had the bug: the closing line says HARD.
+  const warn = [...out.matchAll(/·\s*(\d+)\s+warn(?![a-z])/g)].reduce((n, m) => n + +m[1], 0);
   const findings = out.split('\n').filter((l) => /^\s{5}\[/.test(l)).map((l) => l.trim());
   const errored = code !== 0 && hard === 0 && !findings.length;
   rows.push({ f, hard, warn, findings, errored, out });

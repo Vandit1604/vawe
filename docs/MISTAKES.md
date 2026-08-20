@@ -11639,6 +11639,41 @@ from each of the ten, and should expect real width movement, which is the point.
 discarded two different upstream decisions. Anything that writes `letterSpacing` after `styleText` will
 be the third. That is an argument for the write happening once, not for a third comment.
 
+## #389 — Three checks that could not be reached, and a fourth still blind
+
+**A check nothing runs is not a check.** Three reachability holes, closed, plus one reported.
+
+**The spectacle check never ran on an unplanned film.** `plan-vs-render` needed an intent sidecar or a
+storyboard, and without one it printed "write the storyboard" and did nothing. So the film least likely
+to have a nominated peak was the film never asked about it. `author-check` now invokes it regardless.
+
+**The dose was measured before the trigger was chosen, and that is the part to copy.** With no trigger,
+110 of 110 scenes warn, because not one declares a spectacle. That is a report about the library, not a
+gate. Narrowed to films over 12s with two or more boundaries: 24 of 110, 22%. Proven on
+`showcase-vocabulary`, where four beats carry the SAME headline at the same size and position and only
+the backdrop colour changes, so beats 2 and 4 are one frame in two colours and no instant is loudest.
+
+**`thin-hero` only existed after the render.** The obvious fix was a static approximation from the JSON,
+and it was rejected for a reason worth keeping: the declared box is already about right at 70% and the
+GLYPHS fill only 67.5% of it, so a check on `w` would call the library healthy and see nothing. It would
+not be a rougher `thin-hero`, it would be **a mostly silent different rule**. So the page moved earlier
+instead: `verify/audit.mjs --hero` runs the same browser and the same in-page function, skipping the
+contrast screenshots. 1.44s against 4.60s, proven to return identical findings on three scenes. A
+landscape film with TASTE off now prints when it WILL be checked rather than silently skipping.
+
+**Two bugs in `audit-scenes.mjs`, both verified first-hand rather than taken second-hand.** Its filter
+argument was silently discarded: with no `--aspect`, `indexOf` returns -1 and the guard `i !== aspectAt
++ 1` becomes `i !== 0`, which throws away the first positional argument. `audit-scenes.mjs argus` swept
+all 103 scenes and never said why. And every warn total printed exactly double, because the counting
+regex also matched the closing `· 9 warning(s)` line, a restatement of the same findings. `hard` never
+had it, because that line says HARD in capitals.
+
+**Still blind, reported not smuggled:** `sceneTiming()` does not lower `transitions`, so
+`plan-vs-render` reads a film declaring its boundaries the documented way as a film with no boundaries.
+`brew-launch-act1` has four and an empty `d.cuts`. This is #380 again, in a gate #380 did not reach: the
+unified surface is invisible to yet another consumer. Fixing it changes existing findings across the
+library, so it wants its own before-and-after run rather than a ride-along.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

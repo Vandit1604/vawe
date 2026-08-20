@@ -11,6 +11,10 @@
 //   • tight     — sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
+//   node verify/audit.mjs <scene.json> --hero    thin-hero alone, no screenshots, exit 0. This is the
+//     slice `author-check` runs BEFORE the render under TASTE=1, so a hero set at web scale is caught
+//     while it is still cheap to fix. Same frames and same numbers as the full run, proven on three
+//     scenes; it just skips the contrast pictures and the overlay. 1.44s vs 4.60s on argus-launch.
 //
 // --aspect 16:9,9:16,1:1,4:5 (or `all`) audits the SAME canvas list the renderer would ship, mirroring
 // `bin/vawe --aspect a,b,c`. This exists because a scene renders "fine" at every aspect and can be wrong
@@ -43,6 +47,15 @@ const SAMPLES = 14;                                    // frames sampled across 
 
 
 const argv = process.argv.slice(2);
+// --hero: the PRE-RENDER slice of this audit. `thin-hero` was reachable only through `make audit`, which
+// is a post-render step, so the finding arrived after the mp4 was paid for. The measurement itself needs
+// a real page (it reads INK width, and a check on the declared `w` would call the library healthy and
+// see nothing, which is why there is no static approximation of it). So the page is what moves earlier,
+// not the rule: same browser, same frames, same in-page function, with the contrast screenshots and the
+// overlay shot skipped, thin-hero the only finding reported, and exit 0 always because it is a warning.
+// Everything else about this file is untouched when the flag is absent.
+const heroOnly = argv.includes('--hero');
+if (heroOnly) argv.splice(argv.indexOf('--hero'), 1);
 const aspectAt = argv.findIndex((a) => a === '--aspect' || a.startsWith('--aspect='));
 let aspectArg = '';
 if (aspectAt !== -1) {
@@ -1129,7 +1142,7 @@ for (const spec of modules) {
   const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
 
   // source checks are aspect-independent (they're about the JSON, not a canvas) — report them once
-  const si = sourceIssues(cfg);
+  const si = heroOnly ? [] : sourceIssues(cfg);
   if (si.length) rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [source]`,
     hard: si.filter((i) => HARD.has(i.kind)).length, warn: si.filter((i) => !HARD.has(i.kind)).length, crit: 0, items: si });
 
@@ -1224,7 +1237,10 @@ for (const aspectKey of askedAspects) {
     // viewer would see it under the glyphs. Deliberately page.screenshot() and not a cached frame
     // buffer: a cache is keyed on the frame, knows nothing of the DOM mutation just made, and would
     // hand back a picture that predates it (the same trap the reference implementation carries).
-    if (probes && probes.length) {
+    // --hero grades no text, so it needs no picture of the backdrop. The glyph restore still runs: the
+    // page function hid them, and leaving them hidden would poison every frame measured after this one.
+    if (probes && probes.length && heroOnly) await page.evaluate(restoreHiddenFn);
+    else if (probes && probes.length) {
       let shot = null, shotErr = null;
       try { shot = await page.screenshot({ type: 'png', optimizeForSpeed: true }); }
       catch (e) { shotErr = e.message; }
@@ -1248,6 +1264,7 @@ for (const aspectKey of askedAspects) {
   // the row is composited into a gap the wall reserves for it: the boxes overlap by design, the content
   // never does, and with no card there is no opaque surface for the overlap check's own exemption to
   // find. A waived issue is still PRINTED, tagged, and counted separately, so waiving stays visible.
+  if (heroOnly) for (let i = all.length - 1; i >= 0; i--) if (all[i].kind !== 'thin-hero') all.splice(i, 1);
   const waived = all.filter((i) => allow.has(i.kind));
   const hard = all.filter((i) => HARD.has(i.kind) && !allow.has(i.kind));
   const warn = all.filter((i) => !HARD.has(i.kind) && !allow.has(i.kind));
@@ -1263,6 +1280,7 @@ for (const aspectKey of askedAspects) {
   const label = `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`;
   rows.push({ m: label, hard: hu.length, warn: wu.length, waived: vu.length, crit: critMax, items: [...hu, ...wu, ...vu] });
 
+  if (heroOnly) { await page.close(); continue; }   // no overlay: nothing here is worth a picture yet
   await page.evaluate(overlayFn, worst.f, safe);
   // one overlay per audited canvas — the whole point is comparing where the SAME scene breaks per ratio
   // named for the SCENE, not the module: every scene audits as module `scene`, so `scene.png` was one
@@ -1274,6 +1292,22 @@ for (const aspectKey of askedAspects) {
 }
 await browser.close(); server.close();
 
+// --hero prints its own short report and exits 0. It is ONE warning out of this file's 18 kinds, so
+// printing the full LAYOUT AUDIT banner under it would claim a sweep that did not happen.
+if (heroOnly) {
+  const items = rows.flatMap((r) => (r.items || []).map((i) => ({ ...i, m: r.m })));
+  // A scene that never loaded measured NOTHING, and a tick over it would be the worst outcome this
+  // whole change could have: the finding moved earlier only to become a false green.
+  for (const r of rows.filter((x) => x.note)) console.log(`  ! ${r.m}: ${r.note}. Hero fill was NOT measured.`);
+  if (!items.length && !rows.some((r) => r.note)) {
+    console.log(`  ✓ hero fill: no landscape frame sampled sets its hero line at web scale.`);
+  } else {
+    for (const i of items) console.log(`  ~ [thin-hero]${i.waived ? ' (waived)' : ''} ${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''} — ${i.detail}`);
+  }
+  console.log(`  (hero fill only: 1 of the 18 finding kinds in this file. Every contrast, overlap, clipping`);
+  console.log(`   and safe-zone check still runs post-render, under \`make audit\`.)`);
+  process.exit(0);
+}
 console.log('\n==================== LAYOUT AUDIT ====================');
 let hardTotal = 0, warnTotal = 0;
 for (const r of rows) {

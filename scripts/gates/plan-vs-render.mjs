@@ -37,6 +37,10 @@
 //       pace-not-chosen.
 //       All block under --strict. `held-through-the-change` is the sharp one: it reads a hold the author
 //       WROTE (two identical motion keys) rather than inferring one from an absence.
+// ADVISORY, and never blocking, not even under --strict: no-spectacle-nominated. It is the one finding
+//       here that needs NO plan, so it also runs on a film with no sidecar and no storyboard, which is
+//       exactly the film most likely to have no peak. See "the peak, asked about even when there is no
+//       plan" below for its trigger and the measured dose behind it.
 // Waive a deliberate break with {"authoring":{"allow":["beat-holds-still", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -52,15 +56,6 @@ if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process
 let d;
 try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
 if (d.module !== 'scene') { console.log(`  plan vs render · ${file}: not a scene module, nothing to check.`); process.exit(0); }
-// No sidecar is not a pass and not a failure: there is no plan to check the film against. Say which,
-// and how to make one, rather than printing a tick for work nobody did.
-if (!fs.existsSync(intentPath)) {
-  console.log(`\n  plan vs render · ${file}`);
-  console.log(`  ○ no plan to check against: no sidecar at ${intentPath}.`);
-  console.log(`    Write the storyboard, then \`make intent SB=<storyboard.md> D=${file}\`.\n`);
-  process.exit(0);
-}
-const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // ---------- the storyboard, for the fields the sidecar drops ----------
@@ -82,6 +77,72 @@ const OVERRUN = 0.5;     // how far the plan's total may sit from the film's bef
 
 const T = sceneTiming(d);
 const s = (n) => `${(+n).toFixed(2)}s`;
+
+// ---------- the peak, asked about even when there is no plan ----------
+// THE GAP THIS CLOSES. Everything else in this file needs a sidecar, so the film most likely to have no
+// peak — the one nobody storyboarded — was the one film never asked about it. Whether a scene NOMINATES
+// its loud moment needs no plan at all: the `spectacle` block is either in the JSON or it is not.
+//
+// WHY THE QUESTION IS WORTH ASKING. `effect-soup` fails a film that shouts on every beat and
+// `plain-slideshow` fails one that never shouts at all. Neither asks WHICH moment is the loudest, so a
+// film can sit safely between the two bounds, pass both, and still be flat: evenly loud is not the same
+// as shaped. Nominating a peak is also a promise the rest stays restrained, which is what core/spectacle.js
+// enforces once the block exists.
+//
+// THE TRIGGER IS NARROW ON PURPOSE. Measured over the 110 scenes in formats/scene, EVERY one of them
+// lacks a `spectacle` block, so warning on all of them would be a report about the library rather than a
+// gate, and a finding on every file teaches the reader to skip the section. It fires only where the
+// author has already declared structure the peak could sit in: at least 2 declared boundaries and at
+// least 12s of runtime, which is 24 of the 110 (18 distinct films, the rest .expanded.json siblings).
+// The two dials were chosen against that measurement: boundaries>=2 with no length floor is 31 scenes,
+// and boundaries>=3 is 19. 24 is the point where the finding still reads as a finding.
+// A one-shot 6s hook does not need a nominated peak; a 20s film across six cuts that never says which
+// instant is the loudest is shapeless, and no other gate here will say so.
+const SPECTACLE_MIN_BOUNDARIES = 2, SPECTACLE_MIN_DUR = 12;
+function nominationNote() {
+  if (d.spectacle != null) return null;                    // nominated; core/spectacle.js takes it from here
+  if (sb && sb.spectacle) return null;                     // the storyboard names one, so `spectacle-not-built` owns this
+  // COUNT `transitions` TOO. It is the documented unified surface and it lowers to cuts/seams/stings
+  // before the engine renders, so a film that declares its boundaries the documented way has structure
+  // even though `d.cuts` is empty. brew-launch-act1 is exactly that film: four boundaries, none of them
+  // in `d.cuts`. (The rest of this gate reads raw `cuts` and shares the blind spot, via sceneTiming;
+  // that is a wider fix than one finding, and it is reported rather than smuggled in here.)
+  const boundaries = new Set([
+    ...(Array.isArray(d.cuts) ? d.cuts : []).filter((c) => c && typeof c === 'object' && num(c.t, null) !== null).map((c) => num(c.t, 0)),
+    ...(Array.isArray(d.transitions) ? d.transitions : []).filter((c) => c && typeof c === 'object' && num(c.at, null) !== null).map((c) => num(c.at, 0)),
+  ]);
+  const cuts = boundaries.size;
+  if (cuts < SPECTACLE_MIN_BOUNDARIES || T.duration < SPECTACLE_MIN_DUR) return null;
+  // The waiver is read AFTER the trigger, so a scene that waives a rule it never trips stays silent
+  // rather than announcing a waiver nobody needed.
+  if (allow.has('no-spectacle-nominated')) return { waived: true };
+  return { msg: `this film runs ${s(T.duration)} across ${cuts} declared boundaries and names no peak: there is no \`spectacle\` block in ${path.basename(file)} `
+    + `and no plan naming one. Nothing else in the ladder asks this. \`effect-soup\` fails a film that shouts on every beat and \`plain-slideshow\` fails one `
+    + `that never shouts, so a film can sit between them, pass both, and still be evenly loud, which is not the same as shaped. `
+    + `Name the one moment the film is allowed to shout, and buy it by quietening the rest: `
+    + `\`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` (core/spectacle.js). `
+    + `If this film is deliberately flat, say so: {"authoring":{"allow":["no-spectacle-nominated"],"_why":{"no-spectacle-nominated":"..."}}}.` };
+}
+// It PRINTS, and it never counts. This finding is advisory in both directions: it is a question about
+// the author's intent, and a question that can block is a question people answer with a waiver.
+function printNomination() {
+  const n = nominationNote();
+  if (!n) return;
+  if (n.waived) { console.log(`  ○ [no-spectacle-nominated] waived via authoring.allow\n`); return; }
+  console.log(`  ~ [no-spectacle-nominated] ${n.msg}\n`);
+  console.log(`    (advisory, and it stays advisory under --strict.)\n`);
+}
+
+// No sidecar is not a pass and not a failure: there is no plan to check the film against. Say which,
+// and how to make one, rather than printing a tick for work nobody did. The peak question survives it.
+if (!fs.existsSync(intentPath)) {
+  console.log(`\n  plan vs render · ${file}`);
+  console.log(`  ○ no plan to check against: no sidecar at ${intentPath}.`);
+  console.log(`    Write the storyboard, then \`make intent SB=<storyboard.md> D=${file}\`.\n`);
+  printNomination();
+  process.exit(0);
+}
+const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
 const findings = [];
 const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
 const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
@@ -310,6 +371,9 @@ const waived = findings.filter((f) => allow.has(f.code));
 for (const f of fails) console.log(`  ✗ [${f.code}] ${f.msg}\n`);
 for (const f of warns) console.log(`  ~ [${f.code}] ${f.msg}\n`);
 for (const f of waived) console.log(`  ○ [${f.code}] waived via authoring.allow`);
+// The peak question runs on a planned film too. A sidecar carries beats and `becomes:` lines and never
+// a spectacle, so a film can be fully planned, fully checked here, and still nominate nothing.
+printNomination();
 if (!fails.length && !warns.length) console.log('  ✓ the film has a moment where the plan promised one, and no planned beat sits still.');
 console.log(`\n  ${fails.length} fail · ${warns.length} warn`);
 // The honesty line prints on GREEN too. A gate that only qualifies itself when it fails teaches the
