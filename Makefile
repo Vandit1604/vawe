@@ -190,6 +190,13 @@ verify:
 audit:
 	node verify/audit.mjs $(if $(D),$(D),$(M)) $(if $(ASPECT),--aspect $(ASPECT))
 
+# make audit-all [SCENE=<name-substring>] [ASPECT=16:9,9:16]  — the same layout audit, over the WHOLE
+# library. `make audit` grades the one scene you have open, which is a check against NEW defects only:
+# two scenes shipped dark-on-dark and stayed that way because nothing ever asked them again
+# (docs/MISTAKES.md #373). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
+audit-all:
+	node scripts/gates/audit-scenes.mjs $(SCENE) $(if $(ASPECT),--aspect $(ASPECT))
+
 # make audit-test  — regression on both edges of `make audit`. contrast-regression proves it still
 # CATCHES invisible emphasis (blue-on-blue). measure-regression proves it measures the DRAWN ink and
 # not the box the author declared, which is the error this repo logged four times (#214/#216/#217/#242).

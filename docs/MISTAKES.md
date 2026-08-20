@@ -11052,9 +11052,24 @@ bug. Every change is one layer's `color` going `rgb(15,22,32)` → `rgb(255,255,
 five of the flagged frames: YMAX 0, 0, 0, 0 and 1 out of 255, so the layer is not visible at the
 sampled frames and no rendered pixel in the shipped library moves. The direction is not in question.
 
-**No gate sees this.** `make audit` checks WCAG contrast and would catch it on a frame it samples;
-nothing checks that the ink an untinted layer inherits contrasts with the window under it. That is the
-open half.
+**The gate was never the problem, and the first draft of this entry said it was.** `make audit` catches
+this exactly. Probed with a deliberate `#0f1620` headline over `preset:"dark"` in the white-first theme:
+
+```
+✗ FAIL  scene · _inkprobe.json  [1920x1080]  (1 critical elems · 2 hard · 0 warn)
+     [contrast] f3 hs-layer "invisible headline" — 110px 1.0:1 (want 3:1)
+     [weak-headline] f10 hs-layer "invisible headline" — headline 110px at 1.0:1 (want ≥7:1)
+```
+
+1.0:1, hard fail, named. The check samples the bg canvas under the element's own ink box and computes
+WCAG against it, which is the right measurement and it works.
+
+**What failed is that nobody ran it.** `make audit` takes ONE scene. It is a post-render step
+(`CLAUDE.md` item 4), it is not part of `make author-check`, and there is no library sweep, so it only
+ever grades the scene the author has open. `motion-reel` and `motion-reel-v2` were dark-on-dark for
+their whole runtime and stayed that way, because after they shipped nothing ever asked them again.
+A check that is only ever run against the file you are editing cannot find a defect that is already in
+the library. Fixed by `make audit-all` (#374).
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
