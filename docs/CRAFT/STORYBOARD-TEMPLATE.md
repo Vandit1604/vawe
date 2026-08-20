@@ -11,6 +11,7 @@ object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
 duration: 29s
+pace: "showreel | explainer | held — CHOSEN before any beat is written, with a seconds-per-idea budget"
 ---
 
 <!--
@@ -21,6 +22,14 @@ duration: 29s
   (the direction-floor's `front-loaded` check enforces the floor of this). No two beats move alike.
 
   WHAT HOLDS THE FILM. Under ~15s the gate requires you to NAME it in the frontmatter, and it takes
+  PACE IS DECIDED BEFORE ANIMATION, NOT DISCOVERED DURING IT. "Pace is a genre decision made before
+  animation work begins", and a showreel runs 1.5 to 4 seconds per IDEA. Ours is measured at 5.15
+  seconds per shot against their 5.68, so the cut rate is not our problem: the problem is how many ideas
+  are inside a shot. The film the owner rejected put three ideas in six seconds and read as frantic;
+  brew gives one idea a whole beat and reads as confident. Write `pace:` first, in seconds per idea, and
+  then let the beat count fall out of the runtime. A beat that carries two ideas is two beats or one
+  cut, never one crowded frame.
+
   EVERY BEAT DECLARES ITS STYLE AND ITS REST, and both are consumed rather than graded.
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for

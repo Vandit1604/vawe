@@ -4,7 +4,7 @@
 //   node scripts/site/blueprints-catalog.mjs   ·   make blueprints
 import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { BEATS } from '../../blueprints/index.mjs';
+import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
 
 const REGISTRY = new URL('../../blueprints/index.mjs', import.meta.url);
 
@@ -48,6 +48,10 @@ function propsOf(fn) {
 export const BEAT_BLURBS = descriptions();
 const DESC = BEAT_BLURBS;
 const missing = Object.keys(BEATS).filter((n) => !DESC[n]);
+// Same completeness rule as the descriptions, for the same reason: a hand-kept second list goes stale
+// the moment a beat is added, and the failure is silent.
+const noReq = Object.keys(BEATS).filter((n) => !REQUESTS[n]);
+if (noReq.length) { console.error(`! blueprints/index.mjs declares no REQUESTS entry for: ${noReq.join(', ')}`); process.exit(1); }
 if (missing.length) {
   console.error(`! blueprints/index.mjs declares no description comment for: ${missing.join(', ')}`);
   process.exit(1);
@@ -61,6 +65,7 @@ if (isMain) {
   for (const [name, fn] of Object.entries(BEATS)) {
     console.log(`  • ${name}`);
     console.log(`      ${DESC[name]}`);
+    console.log(`      ask:   "${REQUESTS[name]}"`);
     console.log(`      props: ${propsOf(fn)}\n`);
   }
   console.log('  A blueprint fixes MOTION + structure, never copy/colour — two brands using one still differ.');

@@ -39,3 +39,29 @@ export const BEATS = {
   echoRing: Track.echoRing,             // a stroked ring replaying another layer's path one beat late, fading as it grows
   wordBlast: Punct.wordBlast,           // scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame
 };
+
+// HOW TO ASK FOR ONE, in prose. Their catalog entry ships as a SENTENCE you paste into a brief; ours
+// shipped as JSON you paste into a scene. The difference matters at the moment a film is being planned,
+// which is before any JSON exists: a storyboard beat can name a blueprint and say how it is adapted
+// ("Use `slotSwap`, three passes, the right slot changes type each pass"), and the author then has a
+// starting point instead of a blank beat. A description says what a beat IS; this says how to REACH for
+// it. Kept beside BEATS, one map, checked for completeness the same way the descriptions are.
+export const REQUESTS = {
+  kineticHook: 'Open on a kinetic hook: eyebrow, one hero number or word that counts up, a subline that arrives word by word.',
+  statReveal: 'Land the payoff as a hero stat that counts up under a kinetic label, and hold it.',
+  cardCascade: 'Show the feature set as cards that pop in one after another under a kinetic title.',
+  chipGrid: 'List the named things as mono pills that pop in staggered, with an accent footer.',
+  terminalReveal: 'Show it working in a terminal: the command types itself, output rises, the result lands in the accent.',
+  screenDive: 'Push the camera into the real product surface under a kinetic title.',
+  logoLockup: 'Lock up the brand: the mark pops, the wordmark travels in, a kinetic headline over a sub.',
+  logoReveal: 'Reveal the brand by DRAWING the mark on stroke by stroke, bloom, then cascade the wordmark.',
+  verdictProof: 'Prove the claim: type the command, note the result, pop a tone-coloured verdict chip after it.',
+  ctaEnd: 'End on a held card: the mark, the install line, the url, and no exit.',
+  typedHook: 'Open with a line that types itself in and then UN-types faster than it arrived. It never fades.',
+  morphButton: 'Make the button BECOME the next thing: it shrinks, rounds and sheds its label until it is a dot.',
+  propSentence: 'Write one sentence across the frame with real objects as the nouns: word, photo, chip, card, word, on a rolling stagger.',
+  slotSwap: 'Fix a row of slots and turn its contents over N times at the same offsets. The right slot changes TYPE each pass so it never reads as a table.',
+  recordedPan: 'Pan a surface wider than the frame on an irregular linear track so it reads as a screen recording, with the cursor and callouts welded to it.',
+  echoRing: 'Keep the frame alive through the slow change: a stroked ring replays the subject\'s path one beat late, fading as it grows.',
+  wordBlast: 'Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.',
+};
