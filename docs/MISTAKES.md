@@ -11475,6 +11475,35 @@ acceptance test: a scene with no `spectacle` returns on the resolver's first lin
 resolved per preset inside `presetSpec`, and copying that default into the attenuator would be a second
 copy of it in a second file, which is the duplicate-vocabulary shape this file keeps logging.
 
+## #386 — A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
+
+Two bugs found by an agent doing unrelated work. Both were in its way, both are the kind that stay
+hidden because the thing they break is the thing nobody looks at.
+
+**`motion-audit --json` printed the human verdict line to stdout AFTER the JSON.** So the documented
+machine-readable output was never machine-readable. The agent's own sweep reported **all 154 scenes as
+crashed** and it believed that until it read the parse error rather than the count. The verdict now goes
+to stderr under `--json`; the sentence and the exit code both survive.
+
+**Grepped every consumer before closing it**, which is this file's own standing rule. Three scripts offer
+`--json`: `motion-audit`, `fonts-discover`, `invent-look`. `fonts-discover`'s stdout parses clean. The
+class is contained and this was the only instance.
+
+**`scripts/gates/lint-test.mjs` could not pass in this tree.** Line 53 asserted `resolveEasing` FALLS
+BACK to `easeOutCubic` on an unknown name and "never throws (#83)". #367 deliberately reversed that: a
+curve quietly swapped for another renders a plausible frame that is not the one asked for, which is the
+silent-substitution class this file logs more than any other. The decision moved and the assertion did
+not.
+
+**A stale assertion is worse than a missing one.** It fails honest work, and it teaches the next author
+that the suite is unreliable and can be ignored. It now pins the CURRENT contract and names the entry
+that set it, so the next reversal has to argue with #367 rather than quietly break a test.
+
+**The shape worth remembering:** when a rule is reversed, the test that pinned the old rule is a second
+call site. #211's lesson ("fix the rule, not the call site, grep every consumer") applies to assertions
+too, and an assertion is the consumer easiest to forget, because it lives in a file nobody edits while
+changing behaviour.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
