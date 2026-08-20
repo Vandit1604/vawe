@@ -11164,6 +11164,78 @@ The library went 33 to 57 on the second attempt, and `brew-launch-act1` was amon
 What a real fix needs is the composited pixel under the glyphs, not a search through the DOM for
 something that ought to be behind them.
 
+### CLOSED — the backdrop is now measured, not searched for
+
+`bgFor` is gone. Per sampled frame the audit now names every contrast SUBJECT, hides that subject's
+own paint (`color`, `-webkit-text-fill-color`, `-webkit-text-stroke-color`, `fill`, `text-shadow`;
+`opacity` for a raster), takes ONE `page.screenshot()`, restores, and reads the MEDIAN of a 12x6 grid
+inside each subject's ink box. Deliberately `page.screenshot()` and never a cached frame buffer — a
+cache is keyed on the frame and knows nothing of the DOM mutation just made. The method is lifted from
+`~/.claude/skills/another engine-creative/scripts/contrast-report.mjs`, which carries the same trap in its
+own header. The WCAG arithmetic, the size-aware bars and the `-soft` tiering are untouched; they moved
+next to the pixels. There is no image library here, so `verify/audit.mjs` carries a 60-line PNG decoder
+(`node:zlib` plus the five scanline filters); an unsupported PNG THROWS and the caller turns that into a
+HARD `contrast-unmeasurable`, because a contrast check that goes quiet is this entry's whole subject.
+
+**Every finding now names the colour that would pass.** `suggestColour` keeps the hue and saturation
+and walks lightness the shortest distance to the bar: `19px 3.0:1 (want 4.5:1) on #fd6434 → try #2e2e2e
+(4.6:1)`. When the backdrop is a mid-tone that no ink clears it says so, because then the thing to
+change is the backdrop. A WCAG failure that names the passing colour gets fixed; one that only reports
+a ratio gets waived.
+
+**Three defects the pixel method surfaced, and each needed its own fix.**
+
+1. *Its own paint contaminating its own backdrop.* `core/ransom.js` sets `text-shadow: 0 0 4px <ink>,
+   0 0 9px <ink>` — a neon glow in the INK colour. Chromium paints a text-shadow even for transparent
+   text, so a hidden glyph still smeared its own colour over the box the backdrop is read from and the
+   ratio collapsed toward 1:1: the old bug's exact shape, in a new place. `ransom-internal` and
+   `chromatic` each reported two hard failures that did not exist. Hiding `text-shadow` cleared both.
+2. *Grading through a full-frame overlay.* A sting and a seam paint a generative overlay ON TOP of
+   everything, and the frame list samples sting times on purpose. `cuts-demo`'s "sting: burn" measured
+   1.1:1 against `#080301` and the frame is a wall of fire — true about the pixel, false about the
+   film, and the same error as this entry's opening finding. Contrast is no longer graded inside a
+   sting or seam window. That cleared `cuts-demo`, `showcase-vocabulary`, `showcase-intro`, `ditherkit`
+   and `ab-control-shotcode`.
+3. *`onOwnFill` could not see a fill the layer paints for itself.* Two halves. Structurally it skipped
+   anything containing the element (`p.contains(el)`), so it now walks the element and its ancestors up
+   to the layer first; that loop can only return true, so it can only relax a bar. But tpot's chip is a
+   DESCENDANT of the layer, and brew's is not a chip at all — it is a full-bleed brand field. So the
+   decisive half is the pixel: display type is on a COMMITTED FILL when the measured backdrop is
+   saturated and the ink is a neutral extreme (near-white or near-black), and then the WCAG large-text
+   bar governs, exactly as #44 argued for a chip. A pale-orange heading on orange IS the washout defect
+   the 7:1 bar names, so it tests the ink and not only the field and stays at 7:1.
+
+**The library, measured before and after: 21 scenes with hard findings → 36.** That is not the shape
+this entry demanded, and the reason is worth writing down rather than hiding: **the old check was
+BLIND, not merely wrong.** `bgFor` returned null on any backdrop it could not resolve — a hand-authored
+`html` gradient, a WebGL field, a translucent overlay panel — and a null backdrop SKIPPED the element
+silently. Sixteen scenes were therefore never contrast-checked at all, and they are the scenes built on
+glows and gradients. Every one that newly fails was checked by rendering the frame and reading it:
+
+- `linear-launch` f54 — "and agents." in indigo on the violet bloom; the word literally disappears.
+- `brew-launch` f159 — a grey headline on an orange glow, the washed-out heading the 7:1 bar exists for.
+- `playhead` f257 — the ruler's "13s 390f" under a translucent panel, unreadable.
+- `ledgerline-neon` f64 — orange row text inside the green bloom.
+- `looks-reel` f28/f145 — "neon" and "angelic" blown out by the very look each one names.
+- `kanban-drag` f21 — "In Progress" in pale lavender on the violet glow.
+- `process` f16 — the eyebrow crossing a bright teal ripple; its right half vanishes.
+
+And the false ones went. `search-demo.expanded` is clean: nine hard failures on crisp dark-blue-on-white
+search results. `tpot-launch` went 5 hard to 1 — "This" (white on the brand-blue chip) and "tpot.cc"
+(dark mono on white) were both manufactured. `ab-skill-shotcode`'s white-on-orange button now reads
+3.0:1 against `#fd6434` instead of 1.0:1 against a white panel it is not on. `brew-launch-act1` stays
+clean, which is the regression bar this entry set.
+
+**Cost, since it is real.** One screenshot plus one decode per sampled frame. A single scene goes from
+~1.4s to ~4s; the whole-library sweep from **148s to 370s**. `audit-scenes.mjs` already says it is slow
+on purpose. `AUDIT_BG_FRAME=<n>` writes the hidden-glyph frame to `/tmp/audit/bg.f<n>.png`, because the
+whole point of this method is that the evidence is a picture you can look at.
+
+**What is still open.** The bars themselves were fitted to a library that was two thirds unchecked, so
+the 7:1 house bar has now met sixteen films it never judged before. Nothing above adjusts a bar to make
+a number move; if one of those films is right and the bar is wrong, that is a separate argument, made
+with a frame in hand.
+
 ## #377 — A worktree fan-out over films silently throws the work away
 
 Four agents were sent to fix contrast findings across 32 scenes, one worktree each, split so no two

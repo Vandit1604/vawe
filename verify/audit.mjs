@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
@@ -26,6 +27,7 @@ import { layoutErrors } from '../core/validate.mjs';
 // <style> body as glyphs (docs/MISTAKES.md #216/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
+import { lowerScene } from '../core/transitions-lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -80,7 +82,7 @@ function startServer() {
 }
 
 // runs in-page: render frame n, measure every visible [data-layer=critical] box, return issues.
-function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
+function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
   // effOpacity — the product of every opacity down the paint tree, which is what the VIEWER sees.
@@ -337,6 +339,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // de-duping on it collapsed N distinct off-frame layers into one reported failure.
   [...document.querySelectorAll('.hs-layer')].forEach((el, li) => {
     if (!vis(el)) return;
+    // `critical: false` — the author's explicit "this layer is not legible content, do not judge its
+    // edges". It already suppressed the critical-scoped checks below; it was silently inert here, which
+    // is the whole reason a frame-wide field had no way to declare itself. Opt-out only: it can remove a
+    // finding and never add one, so no scene can newly fail because of this line.
+    if (el.dataset && el.dataset.audit === 'off') return;
     const b = el.getBoundingClientRect();
     if (b.width <= 1 || b.height <= 1) return;
     if (b.width >= FW * 0.9 && b.height >= FH * 0.9) return; // full-bleed backdrop — meant to bleed
@@ -591,9 +598,22 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
         t: inkText(el).trim().slice(0, 18),
         detail: `${Math.round(covered / total * 100)}% of this headline sits under an opaque layer` });
   }
-  // contrast (WCAG-ish) on critical TEXT: effective bg = nearest ancestor solid background-color,
-  // else sampled from the bg <canvas> under the element's box, else the body/stage color.
-  const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+  // ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #376) ────────────────────
+  // No rule below decides anything. Each one names its SUBJECT — the ink box, the declared ink
+  // colour, the size, the structural flags — and the caller measures the backdrop from the
+  // composited frame with every subject's own paint hidden. The WCAG arithmetic, the size-aware
+  // bars and the -soft tiering are unchanged and live in `contrastFindings` at the bottom of this
+  // file, next to the pixels.
+  //
+  // What went away, and why it had to. `bgFor` SEARCHED the DOM for something that ought to be
+  // behind the text: ancestors first, then `elementsFromPoint`, then the bg canvas, then the body.
+  // Every ordering of that walk is wrong for some real film, and three of them were measured:
+  // an absolutely positioned mockup paints its button fill as a SIBLING of the label, so the
+  // ancestor walk found the white panel behind both and called a legible white-on-orange button
+  // 1.0:1; probing first walked a label out of its own white card; `elementsFromPoint` is
+  // HIT-TESTING, so the `pointer-events:none` bg canvas never appears in it; and stopping at the
+  // canvas fails whenever a hand-authored `html` backdrop hides the canvas outright. The search has
+  // no correct order because the question is not a DOM question. The composited pixel is.
   // parse: rgb()/rgba() AND color(srgb r g b / a). The second form is what Chromium returns as the
   // COMPUTED value of any color-mix() — and the blocks library mixes colours everywhere (accentSoft
   // pills, card tints, artwork squares). Before this, every such backgroundColor failed to parse, the
@@ -607,73 +627,21 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     if (m) return [Math.round(+m[1] * 255), Math.round(+m[2] * 255), Math.round(+m[3] * 255), m[4] === undefined ? 1 : +m[4]];
     return null;
   };
-  const cratio = (a, b) => { const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)]; return (hi + 0.05) / (lo + 0.05); };
-  const cv = document.querySelector('canvas#cv'); // ONLY the bg canvas convention — grain/fx canvases are decoration, not backdrop
-  const cvCtx = cv ? cv.getContext('2d') : null; // webgl canvases return null here — safely skipped
-  const bgFor = (el, bx) => {
-    for (let p = el; p; p = p.parentElement) {
-      if (cv && p.contains(cv)) break; // this ancestor's bg sits BEHIND the bg canvas — not the backdrop
-      const c = parse(getComputedStyle(p).backgroundColor);
-      if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
-    }
-    // flat-layer scenes (scene): the visual backdrop may be a SIBLING rect OR a full-bleed image
-    // (a photographic hero), not an ancestor — probe the actual paint stack under the element's centre.
-    const bgProbe = document.createElement('canvas'); bgProbe.width = bgProbe.height = 20;
-    const bpc = bgProbe.getContext('2d', { willReadFrequently: true });
-    for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
-      if (p === el || el.contains(p) || p.contains(el)) continue;
-      // elementsFromPoint reports hit-testable GEOMETRY, which includes a box that is fully
-      // TRANSPARENT. A beat that cross-fades between two full-bleed panels keeps both in the tree with
-      // one at opacity 0, and counting the invisible one as the backdrop reports dark-on-dark for text
-      // that is plainly dark-on-white. The colour's own alpha was already required to be opaque; the
-      // ELEMENT's effective opacity has to be too, and for the same reason (#376).
-      if (effOpacity(p) < ARRIVED) continue;
-      const c = parse(getComputedStyle(p).backgroundColor);
-      if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
-      // a covering <img> (sky/photo backdrop): its opaque-pixel average IS the effective bg colour,
-      // so white/emphasis text over a photo isn't false-flagged as invisible-on-the-canvas-behind-it.
-      // A <canvas> counts for exactly the same reason and was not handled: the `shader` and `paint`
-      // layers both paint into one, so every headline over a generated backdrop measured 1.0:1 against
-      // a backdrop the gate could not see. drawImage (not getContext('2d')) so a WebGL canvas works too.
-      const cvEl = p.tagName === 'CANVAS' ? p : (p.querySelector && p.querySelector('canvas'));
-      if (cvEl && cvEl.width && cvEl.height) {
-        try {
-          bpc.clearRect(0, 0, 20, 20); bpc.drawImage(cvEl, 0, 0, 20, 20);
-          const d = bpc.getImageData(0, 0, 20, 20).data;
-          let r = 0, g = 0, b = 0, k = 0;
-          for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
-          // Only a canvas that actually COVERS counts as the backdrop. A `waves` layer is a few
-          // translucent lines over a transparent field, so averaging its handful of opaque pixels
-          // reported "the backdrop is blue" when the backdrop is the white scene behind it. Require
-          // most of the sample to be opaque; otherwise fall through to whatever is really behind.
-          if (k >= 280) return [r / k, g / k, b / k];   // 280/400 ≈ 70% coverage
-        } catch { /* tainted → fall through */ }
-      }
-      const im = p.tagName === 'IMG' ? p : (p.querySelector && p.querySelector('img'));
-      if (im && im.complete && im.naturalWidth) {
-        try {
-          bpc.clearRect(0, 0, 20, 20); bpc.drawImage(im, 0, 0, 20, 20);
-          const d = bpc.getImageData(0, 0, 20, 20).data;
-          let r = 0, g = 0, b = 0, k = 0;
-          for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
-          if (k > 20) return [r / k, g / k, b / k];
-        } catch (e) {} // cross-origin taint → fall through
-      }
-    }
-    if (cvCtx) {
-      const pts = [[bx.x + bx.w / 2, bx.y + bx.h / 2], [bx.x + 6, bx.y + 6], [bx.x + bx.w - 6, bx.y + 6], [bx.x + 6, bx.y + bx.h - 6], [bx.x + bx.w - 6, bx.y + bx.h - 6]];
-      let r = 0, g = 0, b = 0, k = 0;
-      for (const [px, py] of pts) {
-        const sx = Math.max(0, Math.min(cv.width - 1, px | 0)), sy = Math.max(0, Math.min(cv.height - 1, py | 0));
-        const d = cvCtx.getImageData(sx, sy, 1, 1).data;
-        if (d[3] > 10) { r += d[0]; g += d[1]; b += d[2]; k++; }
-      }
-      if (k) return [r / k, g / k, b / k];
-    }
-    const st = parse(getComputedStyle(document.body).backgroundColor);
-    if (st && st[3] > 0.85) return [st[0], st[1], st[2]];
-    return null; // gradient/image backdrops: no confident color → don't guess, don't flag
-  };
+  // A probe is a SUBJECT plus the box its backdrop will be read from. `hide` is the element whose
+  // own paint has to come off before the screenshot — the text holder itself, or the raster for an
+  // image probe. Same element can be probed twice (a headline is both `text` and `headline`); the
+  // hide list de-dups, because hiding twice would capture the already-transparent inline style as
+  // the value to restore and leave the frame permanently blank.
+  const probes = [], hideList = [];
+  const boxOf = (r) => ({ x: r.left, y: r.top, w: r.width ?? (r.right - r.left), h: r.height ?? (r.bottom - r.top) });
+  // A STING and a SEAM paint a full-frame generative overlay ON TOP of everything (core/stings.js,
+  // core/seams.js). Nothing under one can be graded, and the frame list SAMPLES sting times on
+  // purpose, so the composited pixel under a headline mid-burn is the burn. cuts-demo's "sting:
+  // burn" measured 1.1:1 against #080301 and the frame is a wall of fire: true about the pixel,
+  // false about the film. The same shape as #376's opening finding — a verdict passed on a frame
+  // that is motion, not design — so it gets the same answer: do not judge.
+  const inOverlay = (OVERLAYS || []).some((o) => Math.abs(tNow - o.t) < o.half + 0.02);
+  const probe = (hide, box, p) => { if (inOverlay) return; probes.push({ box, ...p }); if (hide) hideList.push(hide); };
   // Contrast (WCAG AA, size-aware) on EVERY rendered text element, not just [data-layer=critical].
   // Muted labels and captions are exactly where low-contrast gray-on-white slips through, so check any
   // element that carries its own text node. A video is usually watched scaled DOWN (not fullscreen), so
@@ -689,48 +657,35 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     // Only ARRIVED text is graded: mid-entrance the element composites toward the backdrop, so the
     // measured ratio is a fact about the ramp and not about the design (#376).
     if (effOpacity(el) < ARRIVED) continue;
-    const fg = parse(getComputedStyle(el).color);
+    const cs = getComputedStyle(el);
+    const fg = parse(cs.color);
     if (!fg || fg[3] < 0.5) continue;
-    // Sample the backdrop UNDER THE GLYPHS. `bgFor` probes the centre of the box it is handed, and a
-    // text layer's box is a declared `w` (pin centres a box, so a placed layer must have one). With
-    // `align:"left"` the glyphs sit against one edge and the box centre is empty slack that may be over
-    // an entirely different surface — so the ratio came out against a backdrop the text is not on.
-    const pb = (!paintsBox(getComputedStyle(el)) && inkRect(el)) || b;
-    const bg = bgFor(el, { x: pb.left, y: pb.top, w: pb.width ?? (pb.right - pb.left), h: pb.height ?? (pb.bottom - pb.top) });
-    if (!bg) continue;
-    const rt = cratio([fg[0], fg[1], fg[2]], bg);
-    const px = parseFloat(getComputedStyle(el).fontSize) || 0;
-    const large = px >= 48;            // large display type gets the WCAG large-text bar
-    const want = large ? 3.0 : 4.5;    // WCAG AA pass bar: 4.5 normal, 3.0 large
-    const hardBar = large ? 2.5 : 3.0; // below this the text is unreadable -> hard fail (else soft-warn)
-    if (rt < want) {
-      const id = el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName);
-      issues.push({ kind: rt < hardBar ? 'contrast' : 'contrast-soft', a: id, t: inkText(el).trim().slice(0, 18), detail: `${px | 0}px ${rt.toFixed(1)}:1 (want ${want}:1)` });
-    }
+    // Read the backdrop UNDER THE GLYPHS, so the ink box and not the declared box. `pin` centres a
+    // box, so a placed text layer must have a `w`; with `align:"left"` the glyphs sit against one
+    // edge and the rest of that box is empty slack that may be over an entirely different surface.
+    const pb = (!paintsBox(cs) && inkRect(el)) || b;
+    probe(el, boxOf(pb), { rule: 'text', px: parseFloat(cs.fontSize) || 0, fg,
+      a: el.id || (typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName),
+      t: inkText(el).trim().slice(0, 18) });
   }
   // EMPHASIS + WIDE contrast: the loop above reads each layer's TOP-level colour only. A layer's
   // <b>/<em> spans carry their OWN colour (--em) — an accent <b> on an accent bg vanishes (the
   // blue-on-blue bug the old audit missed). Also widen past [data-layer=critical] to ANY headline-
   // scale text (≥60px), soft-tier when the layer isn't critical so existing videos don't newly HARD-fail.
-  const near = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60; // ≈ same colour = invisible
   const checkSpan = (span, critical, label) => {
     // inkText, not textContent: this `t` is a GATE as well as a label, and `checkSpan` is called with a
     // whole layer when it is headline-scale — a layer that carries only an inline stylesheet would pass
     // the emptiness test on its own CSS source (docs/MISTAKES.md #214/#216/#217, same rule again).
     const t = inkText(span).trim(); if (!t || !vis(span)) return;
     const b = span.getBoundingClientRect(); if (b.width < 2 || b.height < 2) return;
-    if ((parseFloat(getComputedStyle(span).fontSize) || 0) < 40) return; // ignore small captions/labels
-    const fg = parse(getComputedStyle(span).color); if (!fg || fg[3] < 0.5) return;
-    // Sample the backdrop under the GLYPHS. An inline <b>/<em> box already hugs its run, but the loop
-    // below also hands this whole LAYER when the layer is headline-scale, and a layer's box is the
-    // declared `w` — mostly empty slack that can sit over a different surface entirely.
-    const pb = (!paintsBox(getComputedStyle(span)) && inkRect(span)) || b;
-    const bg = bgFor(span, { x: pb.left, y: pb.top, w: pb.width ?? (pb.right - pb.left), h: pb.height ?? (pb.bottom - pb.top) }); if (!bg) return;
-    const rt = cratio([fg[0], fg[1], fg[2]], bg), invisible = near([fg[0], fg[1], fg[2]], bg);
-    if (rt >= 3.5 && !invisible) return;
-    const hard = critical && (invisible || rt < 2.5);
-    issues.push({ kind: hard ? 'contrast' : 'contrast-soft', a: label, t: t.slice(0, 18),
-      detail: invisible ? `${label} ≈ bg colour (invisible)` : `${label} ${parseFloat(getComputedStyle(span).fontSize) | 0}px at ${rt.toFixed(1)}:1` });
+    const cs = getComputedStyle(span);
+    const px = parseFloat(cs.fontSize) || 0;
+    if (px < 40) return; // ignore small captions/labels
+    const fg = parse(cs.color); if (!fg || fg[3] < 0.5) return;
+    // The ink box again. An inline <b>/<em> box already hugs its run, but the loop below also hands
+    // this whole LAYER when the layer is headline-scale, and a layer's box is the declared `w`.
+    const pb = (!paintsBox(cs) && inkRect(span)) || b;
+    probe(span, boxOf(pb), { rule: 'span', a: label, label, critical, t: t.slice(0, 18), fg, px });
   };
   for (const tx of document.querySelectorAll('.hs-text')) {
     if (!vis(tx) || tx.closest('[data-logotype]')) continue; // WCAG 1.4.3 logotype exemption
@@ -744,6 +699,23 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   // the headline rule below would otherwise conflate. It is a structural question, not a colour one,
   // so it is answered structurally: is there an opaque sibling element in the paint stack under it.
   const onOwnFill = (el, bx) => {
+    // A layer that paints its OWN fill is a chip too, and the stack walk below could never see one:
+    // it skips anything containing the element (`p.contains(el)`), which is right for the scene field
+    // behind a component and wrong for the pill a layer draws for itself. tpot's brand-blue chip is
+    // ONE div with a background and a white word inside it, so "is there an opaque SIBLING under the
+    // glyphs" answered no and a deliberate white-on-brand-blue chip was held to the 7:1 field bar
+    // (docs/MISTAKES.md #376, second face). Walk the element and its ancestors up to the layer first.
+    // A full-bleed surface is the FIELD, not a chip, so it does not count — but it does not veto the
+    // sibling walk either: this loop can only ever return true, so it can only relax a bar.
+    const stop = el.closest('.hs-layer');
+    for (let p = el; p; p = p.parentElement) {
+      const c = parse(getComputedStyle(p).backgroundColor);
+      if (c && c[3] > 0.85 && effOpacity(p) >= ARRIVED) {
+        const pb = p.getBoundingClientRect();
+        if (pb.width < window.innerWidth * 0.9 || pb.height < window.innerHeight * 0.9) return true;
+      }
+      if (p === stop) break;
+    }
     for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
       if (p === el || el.contains(p) || p.contains(el)) continue;
       const c = parse(getComputedStyle(p).backgroundColor);
@@ -770,18 +742,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       const fg = parse(getComputedStyle(e.el).color);
       if (!fg || fg[3] < 0.85) continue;
       const bx = { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y };
-      const bg = bgFor(e.el, bx);
-      if (!bg) continue;
-      const rt = cratio([fg[0], fg[1], fg[2]], bg);
       // The 7:1 bar exists for display type on the SCENE FIELD, where a low-saturation tint of the
       // background reads as a washed-out grey heading. Text on a filled chip cannot wash out — it is
       // a deliberate, saturated block, and WCAG judges exactly that case at the large-text bar. Held
       // to 7:1, the gate rejected white on a brand's own button blue, which is a treatment the brand
       // ships on its real site. Same rule, the right bar for the situation (MISTAKES #44).
-      const chip = onOwnFill(e.el, bx);
-      const bar = chip ? 3 : 7;
-      if (rt < bar) issues.push({ kind: rt < (chip ? 2.5 : 3.5) ? 'weak-headline' : 'weak-headline-soft', a: e.id, t: e.t,
-        detail: `headline ${px | 0}px at ${rt.toFixed(1)}:1 (want ≥${bar}:1${chip ? ', large text on a filled chip' : ''})` });
+      probe(e.el, bx, { rule: 'headline', a: e.id, t: e.t, fg, px, chip: onOwnFill(e.el, bx) });
     }
   }
   // IMAGE contrast: a critical logo/icon can vanish into a same-hue backdrop (orange-on-orange) —
@@ -801,15 +767,54 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
       if (k < 20) continue; // nearly empty raster — nothing to judge
       avg = [r / k, g / k, b / k];
     } catch { continue; } // cross-origin taint → skip, never guess
-    // the backdrop wanted is the LAYER's, whether the raster is the layer itself or a child <img>.
-    // This was written as `im === e.el ? e.el : e.el`, a ternary with identical arms — correct output,
-    // but it reads as though it decides something. Found by `make dead-branch` on its first run.
-    const bg = bgFor(e.el, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y });
-    if (!bg) continue;
-    const rt = cratio(avg, bg);
-    if (rt < 3) issues.push({ kind: rt < 1.7 ? 'contrast' : 'contrast-soft', a: e.id || 'img', t: (im.getAttribute('src') || '').split('/').pop().slice(0, 18), detail: `image vs bg ${rt.toFixed(1)}:1` });
+    // The backdrop wanted is the LAYER's, whether the raster is the layer itself or a child <img>,
+    // and the raster is what has to come off the frame for that backdrop to be visible at all.
+    probe(im, { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y }, { rule: 'image', avg,
+      a: e.id || 'img', t: (im.getAttribute('src') || '').split('/').pop().slice(0, 18) });
   }
-  return { issues, count: info.length };
+  // HIDE EVERY SUBJECT'S OWN PAINT. Layout-neutral, and `transition:none` alongside it so the hide
+  // is atomic: a transition on `color` would animate it and the screenshot taken immediately after
+  // would catch a half-transparent glyph, contaminating the very sample it was taken for.
+  // `-webkit-text-fill-color` is set as well as `color` because it WINS over it, and gradient-filled
+  // display type sets exactly that.
+  const store = [], already = new Set();
+  window.__auditHidden = store;
+  for (const el of hideList) {
+    if (already.has(el)) continue;
+    already.add(el);
+    const rec = { el, props: [] };
+    const set = (prop, val) => {
+      rec.props.push([prop, el.style.getPropertyValue(prop), el.style.getPropertyPriority(prop)]);
+      el.style.setProperty(prop, val, 'important');
+    };
+    set('transition', 'none');
+    if (el.tagName === 'IMG') set('opacity', '0');
+    else {
+      set('color', 'transparent');
+      set('-webkit-text-fill-color', 'transparent');
+      set('-webkit-text-stroke-color', 'transparent');
+      // A text-shadow is the TEXT's paint, not the backdrop's, and here it is often the ink colour
+      // itself: `core/ransom.js` sets `0 0 4px <ink>, 0 0 9px <ink>` as a neon glow. Left standing,
+      // a transparent glyph still smears its own colour across the box the backdrop is read from,
+      // and the ratio collapses toward 1:1 — the old bug's shape, in a new place. Chromium paints a
+      // text-shadow even for transparent text, so it has to come off explicitly.
+      set('text-shadow', 'none');
+      if (el.ownerSVGElement) set('fill', 'transparent');
+    }
+    store.push(rec);
+  }
+  return { issues, count: info.length, probes };
+}
+
+// Undo the hide above. Always called, in a finally: leaving the frame with its text transparent
+// would poison the overlay screenshot and every later frame on the same page.
+function restoreHiddenFn() {
+  const store = window.__auditHidden;
+  if (!store) return;
+  for (const rec of store) for (const [prop, val, pri] of rec.props) {
+    if (val) rec.el.style.setProperty(prop, val, pri); else rec.el.style.removeProperty(prop);
+  }
+  window.__auditHidden = null;
 }
 
 // re-render the worst frame and draw an overlay (safe box + offending element outlines), for the screenshot.
@@ -853,7 +858,192 @@ function sourceIssues(cfg) {
   return out;
 }
 
-const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'buried', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component']);
+// ── THE COMPOSITED PIXEL UNDER THE GLYPHS (docs/MISTAKES.md #376) ────────────────────────────
+// The page function above names each contrast SUBJECT and takes its own paint off the frame. What
+// follows measures the backdrop that reveals, which is the thing a viewer actually sees: no DOM
+// search, no paint-order guess, no `pointer-events` trap, and no way for a `pointer-events:none`
+// canvas or a hidden-canvas hand-authored backdrop to be missed. The effective-opacity guard on
+// anything counted as a backdrop is not repeated here because it cannot be needed: a transparent
+// element contributes nothing to a composited pixel, which is what "effective opacity" was an
+// estimate OF. The guard on the TEXT stays, in the page function, where the ink colour is read.
+
+// A PNG decoder, because a screenshot has to become numbers and this repo ships no image library.
+// Chromium emits 8-bit non-interlaced PNG. Anything else THROWS rather than guessing, and the
+// caller turns that throw into a loud finding: a contrast check that silently measures nothing is
+// exactly the failure this entry is about.
+function decodePNG(buf) {
+  if (buf.length < 8 || buf.readUInt32BE(0) !== 0x89504e47) throw new Error('not a PNG');
+  let pos = 8, w = 0, h = 0, depth = 0, ctype = 0, interlace = 0, palette = null;
+  const idat = [];
+  while (pos + 8 <= buf.length) {
+    const len = buf.readUInt32BE(pos);
+    const type = buf.toString('latin1', pos + 4, pos + 8);
+    const data = buf.subarray(pos + 8, pos + 8 + len);
+    if (type === 'IHDR') { w = data.readUInt32BE(0); h = data.readUInt32BE(4); depth = data[8]; ctype = data[9]; interlace = data[12]; }
+    else if (type === 'IDAT') idat.push(data);
+    else if (type === 'PLTE') palette = data;
+    else if (type === 'IEND') break;
+    pos += 12 + len;
+  }
+  const CH = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 };
+  if (depth !== 8 || interlace !== 0 || !CH[ctype]) throw new Error(`unsupported PNG (depth ${depth}, colour type ${ctype}, interlace ${interlace})`);
+  const ch = CH[ctype], stride = w * ch;
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const out = Buffer.alloc(h * stride);
+  let p = 0;
+  for (let y = 0; y < h; y++) {
+    const ft = raw[p++];
+    const line = raw.subarray(p, p + stride); p += stride;
+    const cur = out.subarray(y * stride, (y + 1) * stride);
+    const prev = y ? out.subarray((y - 1) * stride, y * stride) : null;
+    for (let i = 0; i < stride; i++) {
+      const a = i >= ch ? cur[i - ch] : 0;
+      const b = prev ? prev[i] : 0;
+      const c = (prev && i >= ch) ? prev[i - ch] : 0;
+      let v = line[i];
+      if (ft === 1) v = (v + a) & 255;
+      else if (ft === 2) v = (v + b) & 255;
+      else if (ft === 3) v = (v + ((a + b) >> 1)) & 255;
+      else if (ft === 4) {
+        const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+        v = (v + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c)) & 255;
+      } else if (ft !== 0) throw new Error(`bad PNG filter ${ft}`);
+      cur[i] = v;
+    }
+  }
+  return { width: w, height: h, ch, ctype, palette, data: out };
+}
+
+const pixelAt = (img, x, y) => {
+  const i = (y * img.width + x) * img.ch, d = img.data;
+  if (img.ctype === 3) { const k = d[i] * 3; return [img.palette[k], img.palette[k + 1], img.palette[k + 2]]; }
+  if (img.ch <= 2) return [d[i], d[i], d[i]];
+  return [d[i], d[i + 1], d[i + 2]];
+};
+const median = (a) => { a.sort((x, y) => x - y); return a[a.length >> 1]; };
+
+// The MEDIAN over a bounded 12x6 grid inside the subject's own ink box, inset a pixel to dodge
+// anti-aliased edges. Median, not mean, and a grid, not one point: one stray pixel must not decide
+// a verdict, and a mean across the seam of two panels invents a colour that is on the frame
+// nowhere. Bounded, so a full-width caption bar costs the same as a word.
+function sampleBg(img, box, sx, sy) {
+  const x0 = Math.max(0, Math.round(box.x * sx) + 1), x1 = Math.min(img.width - 1, Math.round((box.x + box.w) * sx) - 1);
+  const y0 = Math.max(0, Math.round(box.y * sy) + 1), y1 = Math.min(img.height - 1, Math.round((box.y + box.h) * sy) - 1);
+  if (x1 <= x0 || y1 <= y0) return null;
+  const stepX = Math.max(1, Math.floor((x1 - x0) / 12)), stepY = Math.max(1, Math.floor((y1 - y0) / 6));
+  const r = [], g = [], b = [];
+  for (let y = y0; y <= y1; y += stepY) for (let x = x0; x <= x1; x += stepX) {
+    const px = pixelAt(img, x, y); r.push(px[0]); g.push(px[1]); b.push(px[2]);
+  }
+  return r.length ? [median(r), median(g), median(b)] : null;
+}
+
+// WCAG arithmetic, unchanged from the in-page version it replaces — same relative-luminance curve
+// core/motion.js uses. It moved here because the pixels are here.
+const relLum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const cratio = (a, b) => { const [hi, lo] = relLum(a) > relLum(b) ? [relLum(a), relLum(b)] : [relLum(b), relLum(a)]; return (hi + 0.05) / (lo + 0.05); };
+const nearColour = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60; // ≈ same colour = invisible
+const hex = (c) => '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const rgbToHsl = ([r, g, b]) => {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+  if (mx === mn) return [0, 0, l];
+  const d = mx - mn, s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  const h = mx === r ? ((g - b) / d + (g < b ? 6 : 0)) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h / 6, s, l];
+};
+const hslToRgb = (h, s, l) => {
+  if (s === 0) return [l * 255, l * 255, l * 255];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const k = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return [k(h + 1 / 3) * 255, k(h) * 255, k(h - 1 / 3) * 255];
+};
+
+// A WCAG failure that names the passing colour gets fixed; one that only reports a ratio gets
+// waived. So every finding carries the nearest ink that would PASS: same hue, same saturation,
+// lightness walked the shortest distance in whichever direction reaches the bar. When no ink
+// clears it — a 7:1 bar on a mid-tone backdrop is unreachable from any colour — it says so, which
+// is the more useful answer, because then the thing to change is the BACKDROP.
+function suggestColour(fg, bg, want) {
+  const [h, s, l] = rgbToHsl(fg);
+  let best = null;
+  for (const dir of [-1, 1]) {
+    for (let k = 1; k <= 100; k++) {
+      const nl = Math.max(0, Math.min(1, l + dir * k / 100));
+      const c = hslToRgb(h, s, nl);
+      if (cratio(c, bg) >= want) { if (!best || k < best.k) best = { k, c }; break; }
+      if (nl === 0 || nl === 1) break;
+    }
+  }
+  if (best) return { hex: hex(best.c), ratio: cratio(best.c, bg), reachable: true };
+  const black = cratio([0, 0, 0], bg), white = cratio([255, 255, 255], bg);
+  const c = black >= white ? [0, 0, 0] : [255, 255, 255];
+  return { hex: hex(c), ratio: Math.max(black, white), reachable: false };
+}
+const withFix = (detail, ink, bg, want) => {
+  const s = suggestColour(ink, bg, want);
+  return {
+    detail: `${detail} on ${hex(bg)} → ${s.reachable ? `try ${s.hex} (${s.ratio.toFixed(1)}:1)`
+      : `no ink clears ${want}:1 on this backdrop, ${s.hex} is the best at ${s.ratio.toFixed(1)}:1 — change the backdrop`}`,
+    suggested: s.hex,
+  };
+};
+
+// The four contrast rules. Their bars, their hard/soft tiering and their wording are unchanged;
+// only the backdrop is measured rather than searched for.
+function contrastFindings(probes, img, vw, vh) {
+  const sx = img.width / vw, sy = img.height / vh;
+  const out = [];
+  for (const p of probes) {
+    const bg = sampleBg(img, p.box, sx, sy);
+    if (!bg) continue;                       // box off-frame: safe-zone owns that failure, not this one
+    const ink = p.rule === 'image' ? p.avg : [p.fg[0], p.fg[1], p.fg[2]];
+    const rt = cratio(ink, bg);
+    if (p.rule === 'image') {
+      if (rt < 3) out.push({ kind: rt < 1.7 ? 'contrast' : 'contrast-soft', a: p.a, t: p.t,
+        ...withFix(`image vs bg ${rt.toFixed(1)}:1`, ink, bg, 3) });
+    } else if (p.rule === 'text') {
+      const large = p.px >= 48;              // large display type gets the WCAG large-text bar
+      const want = large ? 3.0 : 4.5;        // WCAG AA pass bar: 4.5 normal, 3.0 large
+      const hardBar = large ? 2.5 : 3.0;     // below this the text is unreadable -> hard fail (else soft-warn)
+      if (rt < want) out.push({ kind: rt < hardBar ? 'contrast' : 'contrast-soft', a: p.a, t: p.t,
+        ...withFix(`${p.px | 0}px ${rt.toFixed(1)}:1 (want ${want}:1)`, ink, bg, want) });
+    } else if (p.rule === 'span') {
+      const invisible = nearColour(ink, bg);
+      if (rt >= 3.5 && !invisible) continue;
+      const hard = p.critical && (invisible || rt < 2.5);
+      out.push({ kind: hard ? 'contrast' : 'contrast-soft', a: p.a, t: p.t,
+        ...withFix(invisible ? `${p.label} ≈ bg colour (invisible)` : `${p.label} ${p.px | 0}px at ${rt.toFixed(1)}:1`, ink, bg, 3.5) });
+    } else if (p.rule === 'headline') {
+      // A COMMITTED FILL, decided on the measured pixel rather than on structure. The 7:1 bar is
+      // there for one defect, named where it is declared: display type that is "a low-saturation
+      // tint of the background", which reads as a washed-out grey heading. White on a brand's
+      // saturated orange is the opposite of that, and #44 already made the argument for a chip:
+      // deliberate, saturated block, WCAG's large-text bar governs. It could only ever say "chip"
+      // structurally, so a full-bleed brand FIELD — the same treatment, painted larger — was still
+      // held to 7:1. That never surfaced while the backdrop was searched for, because `bgFor`
+      // returned null on a hand-authored `html` backdrop and the rule silently skipped; measuring
+      // the pixel makes it visible, and brew-launch-act1's 400px white "Meet" on brand orange, the
+      // film this repo holds up as its reference, is the case. Read at f258: plainly legible.
+      // The ink has to be a NEUTRAL EXTREME for this. A pale-orange heading on orange is the
+      // washout defect itself and stays at 7:1, which is why this tests the ink and not only the
+      // field (docs/MISTAKES.md #376, second face).
+      const bgSat = rgbToHsl(bg)[1];
+      const [, inkSat, inkL] = rgbToHsl(ink);
+      const committed = bgSat >= 0.35 && inkSat <= 0.15 && (inkL >= 0.85 || inkL <= 0.15);
+      const bar = (p.chip || committed) ? 3 : 7;
+      const filled = p.chip || committed;
+      if (rt < bar) out.push({ kind: rt < (filled ? 2.5 : 3.5) ? 'weak-headline' : 'weak-headline-soft', a: p.a, t: p.t,
+        ...withFix(`headline ${p.px | 0}px at ${rt.toFixed(1)}:1 (want ≥${bar}:1${filled ? `, large text on a ${p.chip ? 'filled chip' : 'saturated field'}` : ''})`, ink, bg, bar) });
+    }
+  }
+  return out;
+}
+
+// `contrast-unmeasurable` is HARD on purpose. If the screenshot or the decode fails, the contrast
+// rules measured NOTHING that frame, and a gate that goes quiet when it stops working is worse
+// than one that fails.
+const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'buried', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component', 'contrast-unmeasurable']);
 const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
@@ -870,7 +1060,10 @@ for (const spec of modules) {
   const sample = path.isAbsolute(raw) ? path.relative(repoRoot, raw) : raw;
   const absPath = path.join(repoRoot, sample);
   if (sample.startsWith('..') || !fs.existsSync(absPath)) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
-  const cfg = (() => { try { return JSON.parse(fs.readFileSync(absPath, 'utf8')); } catch { return {}; } })();
+  // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
+  // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+  // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
+  const cfg = (() => { try { return lowerScene(JSON.parse(fs.readFileSync(absPath, 'utf8'))); } catch { return {}; } })();
   const m = isData ? (cfg.module || spec) : spec;
   // the scene's own waiver list, read the same way every other gate reads it.
   const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
@@ -890,6 +1083,12 @@ for (const aspectKey of askedAspects) {
   // the TOTAL window split evenly around t)
   const cutWindows = (cfg.cuts || []).filter((c) => c && c.style && c.style !== 'none')
     .map((c) => ({ t: +c.t, half: (c.dur ?? 0.36) / 2 }));
+  // Full-frame generative overlays, mirroring what scene.js builds: a sting spans `dur ?? 1.0`
+  // centred on t, a seam `dur ?? 0.5`. Contrast is not graded inside one — see `inOverlay`.
+  const overlayWindows = [
+    ...(cfg.stings || []).filter((s) => s && s.fx && s.fx !== 'none').map((s) => ({ t: +s.t, half: (+(s.dur ?? 1.0)) / 2 })),
+    ...(cfg.seams || []).filter((s) => s && s.fx !== 'none').map((s) => ({ t: +s.t, half: (+(s.dur ?? 0.5)) / 2 })),
+  ].filter((o) => Number.isFinite(o.t) && o.half > 0);
   await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 1 });
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
@@ -959,8 +1158,26 @@ for (const aspectKey of askedAspects) {
   const all = [];
   let critMax = 0, worst = { f: frames[0] || 0, n: -1 };
   for (const f of frames) {
-    const { issues, count } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows);
+    const { issues, count, probes } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows, overlayWindows);
     critMax = Math.max(critMax, count);
+    // The frame with every contrast subject's own paint hidden — the backdrop, composited, as the
+    // viewer would see it under the glyphs. Deliberately page.screenshot() and not a cached frame
+    // buffer: a cache is keyed on the frame, knows nothing of the DOM mutation just made, and would
+    // hand back a picture that predates it (the same trap the reference implementation carries).
+    if (probes && probes.length) {
+      let shot = null, shotErr = null;
+      try { shot = await page.screenshot({ type: 'png', optimizeForSpeed: true }); }
+      catch (e) { shotErr = e.message; }
+      finally { await page.evaluate(restoreHiddenFn); }
+      // AUDIT_BG_FRAME=<n> writes the hidden-glyph frame the contrast rules measured. The whole
+      // point of this method is that the evidence is a picture, so leave a way to look at it.
+      if (shot && +process.env.AUDIT_BG_FRAME === f) fs.writeFileSync(path.join(OUT, `bg.f${f}.png`), shot);
+      let img = null;
+      if (shot) { try { img = decodePNG(Buffer.from(shot)); } catch (e) { shotErr = e.message; } }
+      if (img) issues.push(...contrastFindings(probes, img, vw, vh));
+      else issues.push({ kind: 'contrast-unmeasurable', a: 'contrast', t: '',
+        detail: `could not read the frame under the glyphs, so no text was graded: ${shotErr || 'unknown'}` });
+    }
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
     for (const i of issues) { if (i.kind === 'safe' && camMoving(f)) continue; all.push({ f, ...i }); }
