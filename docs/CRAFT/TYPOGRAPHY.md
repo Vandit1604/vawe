@@ -55,8 +55,11 @@ before you argue with any of it.
   headlines 60px+, data labels 16px. **In a phone feed** (`"destination": "tiktok" | "reels" | "shorts"`)
   the video plays small inside a scrolling column, so scale up: body ≥32px, headlines ≥90px, labels ≥24px.
 - **Fill the frame. Hero text: 60 to 80% of frame width. You will try to use web-sized elements. Don't.**
-  Measured on our landscape films, the hero ink averages **44.7%** of frame width and **79% of frames sit
-  below the 60% floor**. That is not a house style anybody chose.
+  Measured over the library, landscape hero ink sits at a **40.4% median** and **82.9% of sampled frames
+  fall below the 60% floor** (1090 samples across 88 landscape scenes; `[data-layer="critical"]` ink width
+  against frame width, sampled 14 frames per scene). That is not a house style anybody chose: it is §4's
+  measure rule applied to display type, which §4 now exempts. **Portrait is already in band at a 66.4%
+  median, so this is a landscape problem.** `make audit` warns on it (`thin-hero`).
 - **Tracking tighter than web.** Their number is **-0.03em to -0.05em** on display sizes, against the
   -0.02 to -0.03 in §4 below. Video encoding compresses letter detail. Theirs is the more extreme claim
   and it is theirs, not a measurement of ours; §4 stays as written until somebody measures it here.
@@ -117,12 +120,25 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
   open UPPERCASE and small caps; never letterspace lowercase. The engine's `trackingFor(px)` already scales this
   when `theme.type.optical` is on; otherwise set `tracking` per layer.
 - **Leading:** body **1.2–1.45×**; tighter for big headlines (1.02–1.1), looser for long measure.
-- **Measure (line length):** 45–75 chars, ~66 ideal — set the text layer `w` so lines don't run edge to edge.
-  **This rule and the frame-fill guardrail in §0a disagree, and the disagreement is unresolved.** Butterick's
-  measure is a rule for a body PARAGRAPH; applied to a six-word hook it forces the hero box narrow, which is
-  one mechanical route to the 44.7% figure above. [LAYOUT.md](LAYOUT.md) §5 repeats the same 45-75 without an
-  exemption either. Until display type is exempted properly, read the measure as binding on body copy and the
-  60-80% frame fill as binding on a hero line, and do not use one to excuse the other.
+- **Measure (line length): 45-75 chars, ~66 ideal — BODY AND CAPTIONS ONLY. Display type is exempt.**
+  Set the text layer `w` on a paragraph, a caption, a card body or any label so the lines don't run edge to
+  edge. Butterick's measure protects the RETURN SWEEP: the eye has to find the start of the next line, and
+  past about 75 characters it loses its place. **A line nobody returns from has no sweep to protect.**
+  - **Where the exemption starts: type at 60px or larger, or any layer the engine marks
+    `data-layer="critical"`, or any line short enough to read in one fixation (roughly under 12 words).**
+    That is a hook, a headline, a payoff line, a stat, an end-card line. For those the governing rule is
+    §0a: **fill 60-80% of frame width.**
+  - **Where it still binds: anything under 60px, and anything the viewer reads line after line** — a
+    paragraph, a quote body, a caption stack, a list of rows. There the measure is right and widening the
+    box makes the text worse.
+  - **Why this needed writing down.** Applied to display type the measure is one mechanical route to a thin
+    hero: a six-word hook set to a 66-character measure lands near 45% of 1920 by construction. Measured
+    over the library, landscape hero ink sits at a **40.4% median** with **82.9% of sampled frames under
+    the 60% floor** (1090 samples, 88 landscape scenes). The declared boxes are close to right at a 70%
+    median; the GLYPHS fill only 67.5% of them. So the fix is rarely a wider `w`. It is bigger type.
+  - **The two rules never both apply to one layer, so neither excuses the other.** `make audit` reports a
+    landscape hero under 55% frame fill as a `thin-hero` warning. It warns and never blocks, because four
+    landscape films in five currently trip it.
 
 ## 4b. The face must actually LOAD (engine gotcha)
 Referencing a face isn't enough — it must be **loaded before the first frame** or it silently falls back

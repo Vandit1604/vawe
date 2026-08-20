@@ -6,6 +6,8 @@
 //   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
 //   • buried    — >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
+//   • thin-hero — a LANDSCAPE hero line's ink fills <55% of frame width, and nothing else on the
+//                 frame reaches out past it (a split frame is exempt)     (warn)
 //   • tight     — sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
@@ -597,6 +599,64 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS) {
       issues.push({ kind: 'buried', a: el.id || `headline@y${r.top | 0}`, li: layerIdx.get(el.closest('.hs-layer')),
         t: inkText(el).trim().slice(0, 18),
         detail: `${Math.round(covered / total * 100)}% of this headline sits under an opaque layer` });
+  }
+  // THIN HERO. The reference standard is a hero line filling 60-80% of frame width, and our landscape
+  // films sit at a 40.4% median ink with 82.9% of sampled frames under the floor (1090 samples, 88
+  // scenes). The cause is doctrine, not accident: TYPOGRAPHY.md and LAYOUT.md both applied Butterick's
+  // 45-75 character measure to display type, and a six-word hook at 66 characters lands near 45% of
+  // 1920 by construction. Both docs now exempt display type; this reports the frames still short.
+  //
+  // Measure the INK, never the declared box. The box is already about right (70% median) and the glyphs
+  // fill only 67.5% of it, so a check on `w` would call the library healthy and see nothing.
+  //
+  // WARN ONLY, and it must stay that way. Four landscape films in five trip this, and a gate that
+  // blocks four in five is a gate everyone waives; a rule waived by reflex has already been repealed.
+  if (FW > FH) {
+    let hero = null;
+    for (const el of document.querySelectorAll('[data-layer="critical"]')) {
+      if (!vis(el) || midMove(el) || effOpacity(el) < ARRIVED) continue;
+      const s = getComputedStyle(el);
+      if (paintsBox(s)) continue;                    // a chip or card sets its own width; the box IS the design there
+      const txt = inkText(el).trim();
+      // A short payoff is exempt on purpose. "2.5B" cannot reach 60% of the frame without type nobody
+      // would set, so demanding it would make the film worse to move a number (CLAUDE.md: suspect the
+      // gate). The rule is about a HOOK LINE that was set at web size, and a hook has words in it.
+      if (txt.length < 12) continue;
+      const r = inkRect(el);
+      if (!r || r.width < 4) continue;
+      const px = parseFloat(s.fontSize) || 0;
+      // The hero is the largest type on the frame; a supporting line under it is not this rule's
+      // subject, and reporting both would make one thin beat read as two findings.
+      if (!hero || px > hero.px || (px === hero.px && r.width > hero.w)) hero = { el, px, w: r.width, left: r.left, t: txt };
+    }
+    // 55, not the 60 floor itself: a frame a hair under the floor is a judgement call, and a warn that
+    // fires there says nothing an author can act on. Below 55 the type is web-sized, not marginal.
+    const HERO_FILL_MIN = 0.55;
+    // A SPLIT FRAME is not a thin hero. LAYOUT.md §6 calls "headline left, artifact right" the workhorse
+    // archetype and §0 asks for two focal points, so in a split the hero owns a column by design and
+    // stretching it to 60% of the FRAME would drive it into the artifact. Found by rendering the first
+    // findings and looking: argus-launch f173 sets its hook against a live dashboard, reads well, and was
+    // reported at 37%. So the subject is the frame's whole content extent: if the hero plus the other
+    // content beside it already spans the frame, the frame is composed and this rule has nothing to say.
+    let spanL = Infinity, spanR = -Infinity;
+    if (hero) {
+      spanL = hero.left; spanR = hero.left + hero.w;
+      const MIN_AREA = FW * FH * 0.015;              // ignore specks; a hairline or a corner tick is not a focal point
+      for (const el of document.querySelectorAll('.hs-layer')) {
+        if (el.contains(hero.el) || hero.el.contains(el)) continue;
+        if (!vis(el) || effOpacity(el) < ARRIVED || !carriesContent(el)) continue;
+        const b = el.getBoundingClientRect();
+        if (b.width * b.height < MIN_AREA) continue;
+        // Clamp to the canvas: a decorative field that bleeds off both edges is not evidence that the
+        // frame is composed, and unclamped it would silence this rule on every scene that has one.
+        spanL = Math.min(spanL, Math.max(b.left, 0)); spanR = Math.max(spanR, Math.min(b.right, FW));
+      }
+    }
+    const composed = (spanR - spanL) / FW >= 0.6;
+    if (hero && !composed && hero.w / FW < HERO_FILL_MIN)
+      issues.push({ kind: 'thin-hero', a: hero.el.id || `hero@${hero.px | 0}px`, li: layerIdx.get(hero.el.closest('.hs-layer')),
+        t: hero.t.slice(0, 18),
+        detail: `hero ink is ${Math.round(hero.w / FW * 100)}% of frame width, want 60-80%. Set it at video scale, not web scale.` });
   }
   // ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #376) ────────────────────
   // No rule below decides anything. Each one names its SUBJECT — the ink box, the declared ink

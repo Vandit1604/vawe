@@ -19,10 +19,13 @@ arguing with these.
   floating in empty space."* That single floating block is what [DENSITY.md](DENSITY.md) calls the slide
   tell, said from the composition side.
 - **Fill the frame. Hero text: 60 to 80% of frame width. You will try to use web-sized elements. Don't.**
-  Measured on our landscape films the hero ink averages **44.7%**, and **79% of frames sit below the 60%
-  floor**. See the measure contradiction flagged in [TYPOGRAPHY.md](TYPOGRAPHY.md) §4 before you fix this
-  by widening a text box: §5 below repeats the 45-75 character rule with no exemption for display type,
-  and that rule is one mechanical route to 44.7%.
+  Measured over the library, landscape hero ink sits at a **40.4% median** with **82.9% of sampled frames
+  below the 60% floor** (1090 samples, 88 landscape scenes). Portrait is already in band at 66.4%.
+  **Do not fix this by widening the text box.** The declared boxes are near right already (70% median) and
+  the glyphs fill only 67.5% of them, so the answer is bigger type, not a bigger `w`. The 45-75 character
+  measure in §5 below is a BODY rule and no longer applies to display type; see
+  [TYPOGRAPHY.md](TYPOGRAPHY.md) §4 for where the exemption starts. `make audit` warns `thin-hero` on a
+  landscape hero under 55%.
 - **Anchor to edges.** *"Pin content to left/top or right/bottom. Centered-and-floating is a web layout
   pattern."* This is §2 below, stated as an accusation rather than as a tradition.
 - **Three layers minimum per scene.** Background treatment, foreground content, accent elements. This is
@@ -77,7 +80,11 @@ arguing with these.
   outer ~10-12% (captions/UI overlap there). `make audit` enforces the safe box (`SAFE` / `SAFE_LAND`).
 - **Portrait 9:16:** anchor the hero in the **upper-middle third** (the lower third gets covered by captions/UI).
 - **Landscape 16:9:** hero on a thirds intersection, never hugging edges.
-- **Measure:** set text-layer `w` so lines are 45-75 chars (~66 ideal); full-bleed text loses the return sweep.
+- **Measure, on BODY and captions only:** set text-layer `w` so lines are 45-75 chars (~66 ideal);
+  full-bleed body text loses the return sweep. **Display type is exempt** — 60px and up, anything
+  `data-layer="critical"`, or any line read in one fixation. A hook has no return sweep to protect, so it
+  is governed by the 60-80% frame fill in §0 instead. Full rule and the boundary:
+  [TYPOGRAPHY.md](TYPOGRAPHY.md) §4.
 
 ## 6. Archetype → intent (pick by the beat's job, then rotate)
 
