@@ -12,6 +12,7 @@
 //
 // Routing is a LOOKUP, not a heuristic: core/transitions.js already maps every fx to its mechanism(s).
 import { TRANSITIONS } from './transitions.js';
+import { resolveSeconds } from './vocab.js';
 
 // The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it
 // and deletes it before any builder sees the layer, so no registry declares it and the schema was
@@ -47,6 +48,20 @@ export function boundaryMechanism(fx, mech) {
 
 const clean = (o) => { for (const k of Object.keys(o)) if (o[k] === undefined) delete o[k]; return o; };
 
+// DURATION WORDS are resolved HERE and nowhere else, because this is the one pass every consumer of a
+// scene already runs (the renderer at formats/scene/scene.js, the validator, six gates) and it is a
+// pure data→data transform in array order, so determinism is unchanged. Resolving instead at each of
+// the eleven read sites would be eleven chances to miss one, and a missed one is a NaN in a timeline.
+// A number passes through itself, so a scene that names 0.42 keeps naming 0.42 and re-lowering stays
+// a no-op. An unknown word throws out of resolveSeconds; it is never defaulted. core/vocab.js.
+//
+// LAYER TIMING ONLY, and the boundary is a real one rather than a first cut. A junction `dur` (a cut,
+// a seam, a sting) carries min/max in the schema, and the schema's range check switches on the
+// declared type — a string value would pass through unranged, so `instant` (0.08s) would slip under a
+// cut's own 0.1s floor with nothing to say so. The layer slots below declare no range, so widening
+// them to accept a word loses no check at all.
+const durs = (o, keys) => { for (const k of keys) if (o && o[k] != null) o[k] = resolveSeconds(o[k]); return o; };
+
 // lowerScene(data): expand the unified surface into the raw fields, in place, and CONSUME the unified
 // keys so re-lowering is a no-op (idempotent — validate and the engine may each call it). Hand-written
 // raw fields are preserved; a unified entry is appended alongside them (a beat carrying both is an
@@ -73,9 +88,19 @@ export function lowerScene(data) {
     delete data.transitions;
   }
 
+  // A group's children are layers with the same timing props, so the words have to reach them too —
+  // a word that works at the top level and silently NaNs one nesting level down is worse than no word.
+  const timings = (L) => {
+    if (!L || typeof L !== 'object') return;
+    durs(L, ['enterDur', 'exitDur', 'duration']);
+    for (const c of L.children || []) timings(c);
+  };
+
   for (const L of data.layers || []) {
+    timings(L);
     const tr = L && L.transition;
     if (!tr || typeof tr !== 'object') continue;
+    durs(tr, ['dur']);
     if (tr.in != null && L.anim == null) L.anim = tr.in;      // layer entrance
     if (tr.out != null && L.out == null) L.out = tr.out;      // layer exit
     if (tr.dir != null && L.dir == null) L.dir = tr.dir;

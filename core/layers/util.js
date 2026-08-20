@@ -355,6 +355,9 @@ export function createKit(ctx) {
     }
     decorate(c, C);   // both paths: mask / filter / look / fade / reflect / logotype
     if (C.critical) c.setAttribute('data-layer', 'critical');
+    // the group-child twin of the opt-out in formats/scene/scene.js: `critical:false` must mean the same
+    // thing at both depths, or a card that bleeds by design can be excused only when it is top-level.
+    if (C.critical === false) c.setAttribute('data-audit', 'off');
     if (parentEl.dataset.free) { c.style.position = 'absolute'; c.style.left = (C.x || 0) + 'px'; c.style.top = (C.y || 0) + 'px'; }
     if (!isGroup) parentEl.appendChild(c);   // a group appended itself above, before recursing
     // `delay` staggers a child WITHIN its group's window (it still ends with the group, so the exit

@@ -22,6 +22,7 @@ import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
+import { normalizeIdle } from '/core/idle.js';
 const $ = (id) => document.getElementById(id);
 
 // resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
@@ -419,6 +420,11 @@ boot((data, fps, theme, canvas) => {
     el.dataset.track = String(L.track ?? idx);
     el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
     if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
+    // Resolve this layer's idle AT BUILD, and throw the result away. The idle track resolves it again
+    // for itself; what this call buys is WHEN a misspelled name is refused. Left to the track alone,
+    // `idle: "breath"` would first throw on whichever frame that layer reaches its settled middle,
+    // which is a dead render one third of the way in with a stack trace instead of an authoring error.
+    normalizeIdle(L.idle !== undefined ? L.idle : data.idle);
     if (L.split) el.dataset.enter = '0';
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
     if (L.out) el.dataset.out = L.out;
@@ -462,6 +468,14 @@ boot((data, fps, theme, canvas) => {
     renderer.build(el, L); // dispatch to the primitive (core/layers/<type>.js)
     // audit visibility: text layers ≥60px are critical unless opted out; anything can opt in
     if (L.critical === true || (L.critical !== false && !['rect', 'image', 'group', 'glow', 'shader', 'paint', 'board', 'doc', 'component', 'html', 'clip', 'cursor'].includes(L.type) && (L.size ?? 96) >= 60)) el.setAttribute('data-layer', 'critical');
+    // `critical: false` is documented as "force EXCLUDE from layout audit", and for the overlap/contrast
+    // checks it was: those are scoped to [data-layer=critical], which this branch withholds. The
+    // safe-zone and overflow walk reads every .hs-layer and consulted the flag nowhere, so an author who
+    // opted a layer out was told it was out and it was not — documented input accepted and ignored, the
+    // failure this codebase logs most. A deliberately frame-wide FIELD (a terrain strip, a bleeding
+    // figure) has no other way to say so: the walk's own escape is a full-bleed box ≥90% of BOTH
+    // dimensions, which a wide short band can never satisfy. Marked here so the audit can honour it.
+    if (L.critical === false) el.setAttribute('data-audit', 'off');
     // scene units: a top-level layer lives inside its beat's wrapper (which owns the scene transform);
     // otherwise it attaches flat to cam exactly as before.
     const bi = beatIndexOf(L);
@@ -841,7 +855,10 @@ boot((data, fps, theme, canvas) => {
   // used to be this function: nine statements whose sequence WAS the composition order, so adding any
   // cross-cutting per-frame behaviour meant editing the right paragraph of a 940-line file and the
   // order lived only in the reader's memory of having scrolled past it.
-  const trackKit = createTrackKit({ renderer, theme, M, fps });
+  // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
+  // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
+  // rather than on whichever frame the first layer happens to reach its settled middle.
+  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle) });
 
   function renderFrame(f) {
     const t = f / fps;

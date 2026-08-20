@@ -57,6 +57,16 @@ function elsewhere(self, name) {
   return ALL.filter((r) => r !== self && r.has(name));
 }
 
+/**
+ * nearMisses(written, known) — the names close enough to be worth printing beside a rejection.
+ * Exported because core/motion.js resolveEasing rejects by hand (its registry predates this file and
+ * carries a cross-registry hint of its own), and two spellings of "did you mean" is one too many.
+ */
+export const nearMisses = (written, known, max = 4) => {
+  const head = String(written).slice(0, 3).toLowerCase();
+  return known.filter((n) => n.toLowerCase().startsWith(head)).slice(0, max);
+};
+
 function hint(reg, name) {
   const shown = String(name);
   const other = elsewhere(reg, shown);
@@ -68,7 +78,7 @@ function hint(reg, name) {
       + `resolved to a default that would look deliberate.`;
   }
   const names = reg.names;
-  const near = names.filter((n) => n.toLowerCase().startsWith(shown.slice(0, 3).toLowerCase())).slice(0, 4);
+  const near = nearMisses(shown, names);
   return `${head}${near.length ? ` — did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''} `
     + `Known ${reg.kind}s: ${names.join(', ')}. A name this registry does not know would otherwise `
     + `resolve to a default and render a frame that looks deliberate.`;

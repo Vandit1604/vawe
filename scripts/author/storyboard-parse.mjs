@@ -71,6 +71,13 @@ export function parseStoryboard(src) {
       // all: a storyboard stating a HUD corner on every beat still drew centred boxes labelled
       // "placement not stated", which is a declaration accepted and ignored.
       placement: f('placement'),
+      // style · layout · rest — the three slots their beat formula has (Element · Motion · Layout ·
+      // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
+      // an author is told to fill and nothing reads is worse than no slot, because the storyboard looks
+      // complete and the film is unchanged. `rest` is what MOVES during the hold, which is the half of
+      // pacing this repo had no word for: `dead-air` blocks a held frame and nothing on the other side
+      // ever asked a held frame to be alive.
+      style: f('style'), layout: f('layout'), rest: f('rest'),
       // narration: what is SPOKEN over this beat. Optional, and separate from `onscreen` because the
       // two are different channels: a line can be said and not shown, or shown and not said. The
       // animatic reads this when present and falls back to the on-screen copy as a reading-time proxy.
@@ -82,6 +89,11 @@ export function parseStoryboard(src) {
     message: field('message'), audience: field('audience'), arc: field('arc'),
     framework: field('framework'), theme: field('theme'), format: field('format'),
     object: field('object'), beats,
+    // pace is a GENRE decision, made before any beat is written rather than discovered while animating.
+    // spectacle names the one exaggerated moment and is two-sided: naming it promises every other beat
+    // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
+    // it is an un-excluded default.
+    pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
   };
 }
 

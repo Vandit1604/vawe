@@ -25,27 +25,47 @@
 // 0.55, naming the two options and the axis they collapsed on. An option set that cannot pass its own
 // distinctness check is not a set of options.
 //
-//   node scripts/author/concept.mjs <STORYBOARD.md> [--n 3] [--strict]
-//   make concept SB=<storyboard.md> [N=3]
+// WHY THE ROUND IS FORCED INTO THE TAIL. Generating N directions and handing them over is not a choice,
+// it is a menu of medians: the first thing anybody proposes for a subject is what every process
+// proposes for it, so a round with no improbable member is a round with one idea in it. So every option
+// carries a computed PROBABILITY (how likely is this the first answer), at least two of the round must
+// sit under `IMPROBABLE`, two options with the same SILHOUETTE count as one, and a round that fails
+// either test is REGENERATED rather than shipped. The reasoning is written down in docs/CRAFT/SELECTION.md.
+//
+//   node scripts/author/concept.mjs <STORYBOARD.md> [--n 3] [--seed 0] [--tail-min 2] [--strict]
+//   make concept SB=<storyboard.md> [N=3] [SEED=0]
 // then: make compare ARGS="…"   ·   make concept-pick SB=… OPTION=<slug>
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { parseStoryboard } from './storyboard-parse.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { DIRECTIONS } from './directions.mjs';   // the table moved so the quiz can read it too
+import { beatStarts } from '../gates/beats-of.mjs';   // the repo's ONE beat model, not a second one
+import { SCENE_DIR } from '../gates/paths.mjs';
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
 const SB = args.find((a) => !a.startsWith('--'));
 const flag = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
 const STRICT = args.includes('--strict');
 const N = Math.max(2, Math.min(7, +flag('--n', 3) || 3));
+// Every ordering below is a pure function of this. No Math.random, no Date.now: two runs of the same
+// command on the same library have to produce the same round, or nobody can argue with the result.
+const SEED = Math.abs(Math.trunc(+flag('--seed', 0) || 0));
 if (!SB || !fs.existsSync(SB)) {
-  console.error('usage: concept <STORYBOARD.md> [--n 3] [--strict]');
+  console.error('usage: concept <STORYBOARD.md> [--n 3] [--seed 0] [--tail-min 2] [--strict]');
   process.exit(2);
 }
 
 const OUTDIR = 'formats/scene/_concepts';
 const CLOSE = 0.55;                 // similarity.mjs's own "too close" line; not a new number
+const IMPROBABLE = 0.10;            // the tail line. Where the number comes from: docs/CRAFT/SELECTION.md
+// How many of the round must be under it. RAISE ONLY: a knob that can lower this is a knob that turns
+// the constraint off, and the constraint is the feature. Raising it is how the exhaustion path gets
+// exercised on a library where two tail concepts are still easy to find.
+const TAIL_MIN = Math.max(2, +flag('--tail-min', 2) || 2);
 
 
 // ── pick: promote one direction and RECORD THE ONES TURNED DOWN ────────────────────────────────────
@@ -181,13 +201,255 @@ function buildOption(dir) {
     t = end;
   });
 
+  // The SILHOUETTE is the concept's shape with its content removed: how many beats, in what order of
+  // beat types, and how much of it is a picture rather than words. Two concepts with the same silhouette
+  // are the same concept wearing two palettes, which is the failure this whole stage exists to prevent.
+  const shape = Array.from({ length: count }, (_, i) => typeAt(i, count, dir.thread));
+  const pictured = beats.filter((b) => !b._new && strip(b.picture)).length;
+
   return { dir, count, span, preset, md: lines.join('\n') + '\n',
+    silhouette: `${count} beats · ${shape.join('>')} · ${pictured}/${count} pictured`,
     placeholders: (lines.join('\n').match(/<[^>]+>/g) || []).length };
 }
 
-const options = DIRECTIONS.slice(0, N).map(buildOption);
+// ── EVIDENCE: what this library already does, measured off the library ─────────────────────────────
+// A concept cannot be asked how novel it is. A generator scoring its own output rates everything novel,
+// which is the same failure as a film grading its own beats, so the number has to come from somewhere
+// the generator does not control. Three sources, all of them files on disk:
+//
+//   PACE   every shipped scene's median beat span, read through scripts/gates/beats-of.mjs — the beat
+//          model the judge and the A/B harness already use. A second beat model here would mean this
+//          stage and every later gate disagreed about where the beats are.
+//   LOOK   every shipped scene's theme background luminance, so "dark" and "light" are measured rather
+//          than declared. A direction's preset states its own dominance.
+//   THREAD the hand-written storyboard corpus. Storyboards this tool generated are EXCLUDED by their
+//          own marker: counting them would let the round inflate the frequency of whatever it proposed
+//          last time, and the tell would compound instead of being caught.
+const lum = (hex) => {
+  const h = String(hex).replace('#', '');
+  const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h.slice(0, 6);
+  const ch = (i) => parseInt(n.slice(i, i + 2), 16) / 255;
+  const f = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(ch(0)) + 0.7152 * f(ch(2)) + 0.0722 * f(ch(4));
+};
+const GENERATED = '<!-- DIRECTION:';   // the marker buildOption writes; see the header block it emits
+
+function libraryEvidence() {
+  const spans = [];
+  let dark = 0, light = 0;
+  const dir = path.join(ROOT, SCENE_DIR);
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith('.json') || /^(schema|sample)/.test(f)) continue;
+    let data;
+    try { data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { continue; }
+    try {
+      const { beats, duration } = beatStarts(data);
+      if (beats.length >= 2) {
+        const gaps = [];
+        for (let i = 1; i < beats.length; i++) gaps.push(beats[i] - beats[i - 1]);
+        gaps.push(Math.max(0.2, duration - beats[beats.length - 1]));
+        gaps.sort((a, b) => a - b);
+        spans.push(gaps[gaps.length >> 1]);
+      }
+    } catch { /* a scene the beat model cannot read is not evidence either way */ }
+    try {
+      const bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', `${data.theme}.json`), 'utf8'))?.palette?.bg;
+      if (typeof bg === 'string' && bg.startsWith('#')) (lum(bg) < 0.2 ? dark++ : light++);
+    } catch { /* an inline or missing theme has no measurable dominance */ }
+  }
+
+  const threads = new Map();
+  let corpus = 0;
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.storyboard.md')) {
+        const src = fs.readFileSync(p, 'utf8');
+        if (src.includes(GENERATED)) continue;
+        const fm = /^---\n([\s\S]*?)\n---/.exec(src);
+        if (!fm) continue;
+        const named = /^thread:\s*(.+)$/mi.exec(fm[1]);
+        const obj = /^object:\s*(.+)$/mi.exec(fm[1]);
+        // A storyboard naming a prop and no thread IS an object film; that is the device it chose.
+        let t = named ? named[1].trim() : (obj && !/^(none|<)/i.test(obj[1].trim()) ? 'transforming object' : null);
+        if (!t || /^none/i.test(t)) continue;
+        corpus++;
+        threads.set(t, (threads.get(t) || 0) + 1);
+      }
+    }
+  };
+  walk(ROOT);
+
+  return { spans, dark, light, threads, corpus, scenes: spans.length };
+}
+
+// FAIL LOUD, NEVER SHIP UNSCORED. An unscored round is exactly today's behaviour, so falling back to it
+// would reinstate the bug quietly. If the evidence is not there, say which piece and stop.
+function requireEvidence(ev) {
+  const missing = [];
+  if (ev.scenes < 20) missing.push(`only ${ev.scenes} shipped scene(s) in ${SCENE_DIR} carry readable beats; the pace evidence would be noise`);
+  if (!ev.dark && !ev.light) missing.push('no shipped scene resolved to a theme with a palette.bg, so dominance cannot be measured');
+  if (!ev.corpus) missing.push('no hand-written storyboard declares a thread, so thread frequency cannot be measured');
+  if (missing.length) {
+    console.error('\n  ✗ [unscorable] concept cannot score this round, and will not ship an unscored one:');
+    for (const m of missing) console.error(`      ${m}`);
+    console.error('');
+    process.exit(3);
+  }
+}
+
+// ── THE TELLS: the defaults this repo has already written down as defaults ─────────────────────────
+// Each tell cites the line that says it, and the citation is CHECKED at startup. A tell whose source
+// sentence has been rewritten is no longer a rule this repo holds, and a scorer that keeps enforcing it
+// is scoring from memory. Better to fail and be re-read than to be quietly stale.
+const TELLS = [
+  { id: 'habitual-pace', doc: 'docs/CRAFT/FILM-STRUCTURE.md',
+    anchor: 'Our films sit at 2.5 to 4 seconds a beat',
+    says: 'this library already cuts at 2.5 to 4s, so that pace is the house habit',
+    hit: (o) => o.dir.pace >= 2.5 && o.dir.pace <= 4 },
+  { id: 'the-free-device', doc: 'CLAUDE.md',
+    anchor: 'a keyed `w`/`h` on a rectangle passes and a motif does not',
+    says: 'the transforming object is the device the tooling made free, so it is the one reached for first',
+    hit: (o) => o.dir.thread === 'transforming object' },
+  { id: 'slideshow-shape', doc: 'CLAUDE.md',
+    anchor: 'plain-slideshow',
+    says: 'few beats over a FULL runtime is the shape the ambition floor exists to catch',
+    // The runtime clause is load-bearing. Four beats in six seconds is a fast film; four beats in
+    // twenty is a stack of cards read aloud, and only the second one is the tell.
+    hit: (o) => o.count <= 4 && DUR >= 10 },
+];
+for (const t of TELLS) {
+  const src = fs.readFileSync(path.join(ROOT, t.doc), 'utf8');
+  if (!src.includes(t.anchor)) {
+    console.error(`\n  ✗ [tell-lost-its-source] the tell "${t.id}" cites ${t.doc} for:\n      "${t.anchor}"\n` +
+      '      That sentence is no longer there. Re-read the doc and update the tell, or drop it. A scorer\n' +
+      '      enforcing a rule its own source has dropped is scoring from memory.\n');
+    process.exit(3);
+  }
+}
+
+// ── SCORING ONE ROUND ──────────────────────────────────────────────────────────────────────────────
+// p is "how likely is this the FIRST direction anybody proposes for this brief". Low is the good end.
+// It is round-dependent on purpose: a concept surrounded by its own neighbours IS more predictable than
+// the same concept standing alone, and that is the property that makes a round of near-twins score badly
+// as a round rather than three times as a concept.
+const PACE_BANDS = [1.5, 2.0, 2.5, 4.0];
+const bandOf = (pace) => PACE_BANDS.findIndex((b) => pace < b) + 1 || PACE_BANDS.length + 1;
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+function scoreRound(round, ev) {
+  const lightShare = ev.light / (ev.light + ev.dark);
+  return round.map((o) => {
+    // PACE: the share of shipped films cutting at roughly this rate. A raw frequency.
+    const paceEcho = ev.spans.filter((s) => s >= o.dir.pace * 0.75 && s <= o.dir.pace * 1.25).length / ev.spans.length;
+    // LOOK: only the LEAN counts. An even split between dark and light says nothing about either, so the
+    // echo is the library's excess over even, which is zero for the side it does not favour.
+    const share = o.preset.dominance === 'light' ? lightShare : 1 - lightShare;
+    const lookEcho = clamp01((share - 0.5) * 2);
+    // THREAD: the share of the hand-written corpus already using this thread.
+    const threadEcho = (ev.threads.get(o.dir.thread) || 0) / ev.corpus;
+    const libraryEcho = 0.40 * paceEcho + 0.30 * lookEcho + 0.30 * threadEcho;
+
+    // ROUND: how much of its shape this concept shares with its neighbours. One shared dimension out of
+    // three is a coincidence, so it costs nothing; two or three is a rhyme, and a rhyming round is a
+    // narrower round than its option count claims.
+    const others = round.filter((x) => x !== o);
+    const roundEcho = others.length
+      ? others.reduce((a, x) => {
+        const shared = (x.count === o.count ? 1 : 0)
+          + (x.preset.dominance === o.preset.dominance ? 1 : 0)
+          + (bandOf(x.dir.pace) === bandOf(o.dir.pace) ? 1 : 0);
+        return a + (shared >= 2 ? shared / 3 : 0);
+      }, 0) / others.length
+      : 0;
+
+    const tells = TELLS.filter((t) => t.hit(o));
+    // The floor is not zero. Nothing is impossible, and a scorer that returns 0 invites the reading that
+    // one option is certainly novel, which no measurement here supports.
+    const p = clamp01(0.02 + 0.50 * libraryEcho + 0.20 * roundEcho + 0.28 * (tells.length / TELLS.length));
+    return { ...o, p, paceEcho, lookEcho, threadEcho, roundEcho, tells };
+  });
+}
+
+// ── PICKING THE ROUND: the tail constraint, and regenerating when it is not met ────────────────────
+// The candidate pool is the direction table, so "regenerate" means take a DIFFERENT subset of it, not
+// re-roll a random. The table order is tried first, so the default round is unchanged whenever it is
+// good enough, and every rejection is printed with its reason.
+const combinations = (n, k) => {
+  const out = [];
+  const walk = (start, acc) => {
+    if (acc.length === k) { out.push(acc.slice()); return; }
+    for (let i = start; i < n; i++) { acc.push(i); walk(i + 1, acc); acc.pop(); }
+  };
+  walk(0, []);
+  return out;
+};
+// A seeded integer hash so the order after the table's own subset is fixed by --seed and by nothing else.
+const keyOf = (ids, seed) => {
+  let h = (2166136261 ^ seed) >>> 0;
+  for (const i of ids) { h = Math.imul(h ^ (i + 1), 16777619) >>> 0; }
+  return h;
+};
+
+function chooseRound(all, ev) {
+  const rejected = [];
+  const candidates = combinations(all.length, N)
+    .map((ids) => ({ ids, key: keyOf(ids, SEED), first: ids.every((v, i) => v === i) }))
+    .sort((a, b) => (b.first - a.first) || (a.key - b.key) || (a.ids.join() < b.ids.join() ? -1 : 1));
+
+  let best = null;
+  for (const c of candidates) {
+    const scored = scoreRound(c.ids.map((i) => all[i]), ev);
+    const label = scored.map((o) => o.dir.slug).join(', ');
+    const tail = scored.filter((o) => o.p < IMPROBABLE);
+
+    const twins = [];
+    for (let i = 0; i < scored.length; i++) for (let j = i + 1; j < scored.length; j++) {
+      if (scored[i].silhouette === scored[j].silhouette) twins.push([scored[i], scored[j]]);
+    }
+    if (twins.length) {
+      rejected.push(`${label}: ${twins[0][0].dir.slug} and ${twins[0][1].dir.slug} have one silhouette (${twins[0][0].silhouette}), so the round holds ${N - 1} concepts, not ${N}.`);
+      continue;
+    }
+    if (tail.length < TAIL_MIN) {
+      rejected.push(`${label}: ${tail.length} of ${N} under ${IMPROBABLE.toFixed(2)} (${scored.map((o) => o.p.toFixed(2)).join(' · ')}); every pitch is the median.`);
+      if (!best || tail.length > best.tail) best = { scored, tail: tail.length };
+      continue;
+    }
+    return { scored, rejected };
+  }
+  console.error(`\n  ✗ [all-median] no round of ${N} from the ${all.length} directions available puts ${TAIL_MIN} concepts under ${IMPROBABLE.toFixed(2)}.`);
+  console.error('     Every subset is the median, which is a fact about the direction table, not about this brief.');
+  for (const r of rejected.slice(0, 6)) console.error(`      rejected: ${r}`);
+  if (rejected.length > 6) console.error(`      ...and ${rejected.length - 6} more`);
+  console.error('     Widen scripts/author/directions.mjs, or ask for fewer options.\n');
+  process.exit(1);
+}
+
+const evidence = libraryEvidence();
+requireEvidence(evidence);
+const built = DIRECTIONS.map(buildOption);
+const { scored: options, rejected } = chooseRound(built, evidence);
 
 fs.mkdirSync(OUTDIR, { recursive: true });
+// A direction dropped by the tail constraint must not leave its file behind: `make quiz-look` reads this
+// directory by filename, so a stale variant would come back as an option nobody chose.
+// A COMMITTED variant is never deleted, only named: seven of them are the reference set for the seven
+// threads, and a routine `make concept` that silently removed tracked files would be the worst kind of
+// helpful. Untracked leftovers are this tool's own litter and go.
+const kept = new Set(options.map((o) => `${NAME}-${o.dir.slug}.storyboard.md`));
+const tracked = new Set(
+  spawnSync('git', ['ls-files', OUTDIR], { cwd: ROOT, encoding: 'utf8' })
+    .stdout?.split('\n').filter(Boolean).map((p) => path.basename(p)) || [],
+);
+const stale = [];
+for (const f of fs.readdirSync(OUTDIR)) {
+  if (!f.startsWith(`${NAME}-`) || !f.endsWith('.storyboard.md') || kept.has(f)) continue;
+  if (!fs.readFileSync(path.join(OUTDIR, f), 'utf8').includes(GENERATED)) continue;
+  if (tracked.has(f)) stale.push(f); else fs.unlinkSync(path.join(OUTDIR, f));
+}
 for (const o of options) {
   fs.writeFileSync(path.join(OUTDIR, `${NAME}-${o.dir.slug}.storyboard.md`), o.md);
 }
@@ -231,18 +493,49 @@ for (let i = 0; i < options.length; i++) {
 }
 
 console.log(`\n  CONCEPT · ${path.basename(SB)} → ${options.length} directions for a ${DUR}s film`);
-console.log(`  message: ${sb.message || '(none stated)'}\n`);
-console.log(`  ${'direction'.padEnd(15)} ${'thread'.padEnd(22)} ${'beats'.padEnd(14)} ${'look'.padEnd(11)} open`);
-console.log(`  ${'─'.repeat(15)} ${'─'.repeat(22)} ${'─'.repeat(14)} ${'─'.repeat(11)} ────`);
+console.log(`  message: ${sb.message || '(none stated)'}`);
+console.log(`  measured against ${evidence.scenes} shipped scenes and ${evidence.corpus} hand-written storyboards · seed ${SEED}\n`);
+
+// Every rejected round, before the surviving one, because a round that regenerated silently is a round
+// nobody can argue with. This is the whole point of the stage being loud.
+for (const r of rejected) console.log(`  ↻ regenerated: ${r}`);
+if (rejected.length) console.log('');
+
+console.log(`  ${'direction'.padEnd(15)} ${'thread'.padEnd(22)} ${'beats'.padEnd(14)} ${'look'.padEnd(11)} ${'p'.padEnd(5)} open`);
+console.log(`  ${'─'.repeat(15)} ${'─'.repeat(22)} ${'─'.repeat(14)} ${'─'.repeat(11)} ${'─'.repeat(5)} ────`);
 for (const o of options) {
-  console.log(`  ${o.dir.slug.padEnd(15)} ${o.dir.thread.padEnd(22)} ${`${o.count} @ ${o.span}s`.padEnd(14)} ${`${o.dir.preset}/${o.preset.dominance}`.padEnd(11)} ${o.placeholders}`);
+  console.log(`  ${o.dir.slug.padEnd(15)} ${o.dir.thread.padEnd(22)} ${`${o.count} @ ${o.span}s`.padEnd(14)} ${`${o.dir.preset}/${o.preset.dominance}`.padEnd(11)} ${o.p.toFixed(2).padEnd(5)} ${o.placeholders}`);
+}
+console.log('\n  p is how likely this is the FIRST direction anybody proposes. Low is the good end.');
+console.log(`  Where each number comes from (pace · look · thread are shares of the real library):`);
+for (const o of options) {
+  console.log(`    ${o.dir.slug.padEnd(15)} pace ${o.paceEcho.toFixed(2)} · look ${o.lookEcho.toFixed(2)} · thread ${o.threadEcho.toFixed(2)} · round ${o.roundEcho.toFixed(2)}`
+    + `${o.tells.length ? ` · tells: ${o.tells.map((t) => t.id).join(', ')}` : ' · no tells'}`);
 }
 console.log(`\n  ${OUTDIR}/${NAME}-<direction>.storyboard.md  ·  "open" counts the decisions left to you\n`);
 
+if (stale.length) {
+  console.log(`  ~ [stale-variant] ${stale.length} committed variant(s) are not in this round, and were left`);
+  console.log('      alone rather than deleted. Remove them yourself if they are no longer wanted:');
+  console.log(`      ${stale.join(', ')}\n`);
+}
 for (const p of problems) console.log(`  ✗ [options-collapse] ${p}`);
 for (const c of closePace) console.log(`  ~ [close-pace] ${c} — fine if the thread and look carry it, worth changing if they do not.`);
 if (problems.length) { console.log(''); process.exit(1); }
-console.log('  ✓ every direction commits to a different thread and a different look.\n');
+console.log('  ✓ every direction commits to a different thread, a different look and a different silhouette.');
+console.log(`  ✓ ${options.filter((o) => o.p < IMPROBABLE).length} of ${options.length} sit under ${IMPROBABLE.toFixed(2)}, so the round is not all median.\n`);
+
+// THE RECOMMENDATION COMES LAST, AND ONLY HERE. A recommendation stated first anchors everything after
+// it: the other pitches get read as reasons the first one was right. So the round is presented whole,
+// and only then does this line say which one and why.
+const pick = [...options].sort((a, b) => a.p - b.p || a.placeholders - b.placeholders || (a.dir.slug < b.dir.slug ? -1 : 1))[0];
+const left = [...options].sort((a, b) => b.p - a.p)[0];
+console.log(`  RECOMMENDED: ${pick.dir.slug} (p ${pick.p.toFixed(2)}, the least likely thing to propose here).`);
+console.log(`    ${pick.dir.why}`);
+console.log(`    Left behind: ${left.dir.slug} (p ${left.p.toFixed(2)}) is the most typical answer available`
+  + `${left.tells.length ? `, and it carries ${left.tells.length} of this repo's own named tells` : ''}.`);
+console.log('    A low p buys nothing on its own. It says the idea is unusual, never that it is good.\n');
+
 console.log('  These are STARTING POINTS, not finished films: whether the one you pick ends up too close');
 console.log('  to something already shipped is a question about a real scene, and `make ledger` answers it.\n');
 console.log('  next: fill the <…> slots in the direction you believe in, then');

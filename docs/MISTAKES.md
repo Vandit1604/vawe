@@ -11219,6 +11219,196 @@ entry, a preset default, a blueprint, gets reported once per instance, so the bi
 is often the smallest fix. `plinth-ad` was the same shape: 18 findings, of which 12 were one `x: 60`
 against a safe box that starts at 65.
 
+## #379 — A gate threw away a declared width and invented an empty frame
+
+`camera-aimed-at-nothing` (scripts/gates/beat-check.mjs) asks, at 20Hz, whether the camera is pointed at
+anything alive. It answers with `inView` (scripts/gates/scene-timing.mjs), which takes the layer's box
+from `boxOf`. `boxOf` returns `{w: 0, h: 0, how: 'unknown'}` when it cannot derive ONE axis, and
+`inView` read that as a whole-layer verdict: `const w = b.how === 'unknown' ? 0 : b.w`.
+
+An `html` fragment layer declares `w` and no `h`, because its height comes from the fragment's own
+viewBox and no gate can read it. So `gh-wrapped`'s contribution heatmap, 1600px wide and filling the
+frame, was measured as a zero-area POINT at its top-left corner. Its left edge sits at x=160; the camera,
+pushed in on it, sees from x=206. Point outside rectangle, so the grid was "not being looked at" for the
+1.4s of the film where it is the only layer on screen, and the gate reported emptiness over the two shots
+that are most deliberately about that grid.
+
+`inView`'s own docstring says the failure could not happen: "this predicate only ever REMOVES things
+from a count, so erring toward visible cannot invent a finding." That was true of the POSITION rule it
+was written for and false of the SIZE rule sitting next to it. Zeroing an axis that was declared is not
+erring toward visible.
+
+**Fix.** Unknown is per axis, not per layer: when `boxOf` cannot derive the extent, `inView` reads each
+axis's declared value back and defaults only the axis that is genuinely missing. `boxOf` is unchanged, so
+its contract still holds everywhere else; the box can only ever grow, so the change can delete a false
+finding and cannot create a true one.
+
+**Blast radius, measured.** `inView` has two consumers, `beat-check` and `critique`. Both were run over
+all 154 scenes before and after. `critique`: no scene changes. `beat-check`: exactly one scene changed,
+`gh-wrapped`, WARN to clear. `linear-journey` keeps its `camera-aimed-at-nothing` finding, which is the
+real one this gate was built for.
+
+**What this does not fix.** `inView` still reads a layer's DECLARED x/y and ignores its `motion` track,
+so a layer that travels 500px during a camera move is judged where it was authored. That did not matter
+here once the width was honoured, and it is a bigger change than this finding justifies. It is written
+down so the next person who meets it knows it is known.
+
+
+## #380 — The documented way to declare a transition was invisible to every gate
+
+`transitions: [{at, fx, dur}]` is the UNIFIED boundary surface. `core/transitions-lower.js` lowers it to
+`cuts` / `seams` / `stings`, and the header of that file states the contract: "This is PURE SUGAR ... the
+existing parsers take over untouched." The renderer lowers. `core/validate.mjs` lowers a clone. Nothing
+else did.
+
+So every tool that reads `d.cuts` read a film with `transitions` as a film with NO boundaries:
+
+- `beat-check` credited no cut window, so nothing could be `ownedBy` a transition.
+- `direction-floor` counted `(d.seams||[]).length + (d.cuts||[]).length` and warned `no-transition` at
+  `brew-launch-act1`, the film this repo holds up as its reference for cutting.
+- `critique` and `motion-director` inferred beat boundaries from content turnover instead of reading the
+  ones the author wrote, and the director printed a suggested cut schedule against times the film does
+  not cut at.
+- `make beats` merged two of `gh-wrapped`'s beats into one panel, so the contact sheet an author is told
+  to READ was showing a structure the film does not have.
+
+Six scenes in the library declare `transitions`. Two of them are `brew-launch-act1` and this repo's own
+A/B skill exemplar, which means the two films most likely to be copied were the two being mis-graded.
+
+**Fix.** `lowerScene()` at the point of parse in `beat-check`, `critique`, `direction-floor`,
+`pace-check`, `beats`, `reveal`, `motion-director` and `verify/audit.mjs`. Lowering is idempotent and a
+no-op for a scene that writes raw `cuts`.
+
+**Blast radius, measured over all 154 scenes.** `critique`: no scene changes. `beat-check`: no scene
+changes. `direction-floor`: two scenes, `brew-launch-act1` and `gh-wrapped`, both losing a
+`no-transition` warning they never deserved. `verify/audit.mjs`: byte-identical on both scenes that
+declare `transitions`. Nothing went from pass to fail.
+
+**The general shape.** A sugar layer is only pure sugar if EVERY reader lowers. One lowering call site
+looks exactly like a finished feature until a second reader asks the raw question, and the failure is
+silent in the direction that matters least to the renderer and most to the gates.
+
+## #381 — A slot swap that cross-faded two words in the same box
+
+`slotSwap` holds three fixed boxes while their contents turn over. It shipped with every pass but the
+last OVERHANGING its successor by one `exitDur`, on this reasoning, quoted from the source: a layer's
+exit is the last `exitDur` of its window, so butt-jointed passes leave one frame with the old row gone
+and the new row still at zero.
+
+That cured a hole and caused a worse defect. Every slot here is a FIXED BOX, so an overhang paints both
+passes' contents at the same coordinates. `gh-wrapped` beat 3 rendered "days that shipped" arriving over
+"contributions" leaving as **daysributions**, with 1822 ghosting through "0 of 366" in the box beside it.
+Four frames, and unreadable in every one. A cross-fade in a fixed box is a double exposure, not a swap.
+
+The hole it was preventing was not real for the LABEL either. `scene.js` sets `data-enter=0` on any
+`split` layer, and `colorWave` only repaints `color` — it has no opacity ramp at all, so an incoming
+label is FULLY PAINTED on its first frame. Butt-jointed, the outgoing label's last frame and the
+incoming label's first frame are adjacent and the slot is never blank.
+
+**A wrong fix first, and why it looked right.** The first attempt gave the outgoing pass
+`out: "slide-up"`, which is the correct idea and does nothing here: `core/motion.js` `slide` travels a
+fixed 60px on an ease-out, so at the middle of a 0.15s exit the word has moved five pixels under a
+92px cap height. The prop was accepted, applied, and invisible. Verified in a rendered frame rather
+than in the expanded JSON, which is the only place the difference shows.
+
+**Fix.** `over = 0`. Passes butt. The payload slot, which does pop, blinks for its `payload` offset,
+and a slot visibly re-filling is what this beat is a picture of. `hold` is unchanged and still means the
+deliberate gap brew leaves between its passes.
+
+**How it was caught.** Not by a gate. `make audit` reported zero overlaps, because it measures authored
+boxes and both labels are authored at the same box legitimately, one after the other. `make beats`
+samples the middle of a beat and the collision lives at the joint. It was caught by reading the
+`make judge` sheet, which samples elsewhere again, and then by pulling the exact frame.
+
+
+## #382 — `critical: false` said "exclude from the layout audit" and excluded nothing from it
+
+**What.** A film whose subject is a 366-cell contribution map placed it as one 1640x217 strip and
+pushed the camera in on it. `make audit` HARD-failed `safe`: under a 1.22x push the strip's ends left
+the safe box, which is what a terrain shot does. The schema documents `critical` as "Force
+include/exclude from layout audit", so the layer declared `critical: false`. The finding did not move.
+
+**Root cause.** The flag had exactly one consumer. `formats/scene/scene.js` reads it to decide whether
+to write `data-layer="critical"`, and the overlap, contrast and tight checks are scoped to that
+attribute, so opting OUT worked for them by never opting in. The safe-zone and overflow walk in
+`verify/audit.mjs` is deliberately wider ("every top-level layer, not just critical") and consulted the
+flag nowhere. So half the audit honoured the knob, half could not see it, and the schema promised the
+whole thing. Documented input accepted and ignored: the failure this codebase logs most.
+
+There was no other way to say it. The walk's own escape hatch is a box at least 90% of BOTH canvas
+dimensions ("full-bleed backdrop — meant to bleed"), which a wide, short field can never satisfy
+whatever its aspect. A 7.5:1 strip that fills the frame edge to edge is 100% of one axis and 20% of the
+other, and the rule had no name for it.
+
+**Fix.** `critical: false` now writes `data-audit="off"` (`formats/scene/scene.js`, and the group-child
+twin in `core/layers/util.js` so the flag means the same at both depths), and the safe/overflow walk
+skips those elements. Opt-out only: it can remove a finding and can never add one, so no scene can
+newly fail. The four other scenes in the library that declare `critical: false` were audited before and
+after and are unchanged (`stripe`, `threadcite-3s`, `vawe-intro`, `zerochrome` — 0 hard either way).
+
+**Which gate catches it now.** The same one. `make audit` is the gate; the change is that the layer can
+finally answer it. What is NOT claimed: the flag is still an author's assertion, not a measurement. A
+layer that is genuinely illegible content and opts out is simply unjudged, which is why the knob is
+explicit per layer and never inferred from a shape.
+
+
+## #383 — The validator kept its own copy of "is this a real easing", and it was already one behind
+
+**What.** `core/vocab.js` gave the engine a word layer: `ease: "snappy"`, `enterDur: "fast"`,
+`cameraMove: {move: "pull back"}`. `resolveEasing` resolved the feel words and every frame rendered.
+`make validate` reported all eleven of them as unknown easings and refused the scene.
+
+**Root cause.** `easeNames` in `core/validate.mjs` tested membership with `EASINGS[nm]` written out by
+hand. That is a second copy of a rule that lives in `core/motion.js`, and a second copy only has to be
+right on the day it is written. #367 made `resolveEasing` throw for exactly this reason and left the
+copy standing. So the renderer and the gate disagreed about what the engine accepts, and the gate was
+the one saying no.
+
+**Fix.** `core/motion.js` exports `isEasingName(n)` — the one membership test — and the validator asks
+it. The near-miss list in the rejection now draws from both vocabularies too. `core/registry.js`
+exports `nearMisses()` for the same reason: `resolveEasing` rejects by hand (it carries a
+cross-registry hint of its own) and was about to grow a second spelling of "did you mean".
+
+**Not fixed, and named so it is not lost.** `checkField` in `core/validate.mjs` switches on the
+DECLARED type, so a field typed `"number|string"` matches neither `case` and BOTH members' constraints
+are skipped. Three fields lose a real check to this today: `modifiers[].mixBlend` (its `enum`),
+`varsDur` and `varsDelay` (their `min`). Dispatching on the value's own type would fix it and would
+also newly check three fields across 156 scenes, so it needs its own before/after run rather than a
+ride-along. The duration words route around it instead: they are accepted only in the four layer slots
+that declare no range, and a junction `dur` (`cuts`/`seams`/`stings`, all range-checked) still takes a
+number.
+
+**Which gate catches it now.** `make lib-test` — `easeErrors` accepts a feel word in an engine-driven
+field, and every word is asserted to resolve to the same function its target name resolves to.
+`make vocab-check` fails if `docs/CRAFT/VOCABULARY.md` drifts from the registry.
+
+## #384 — A track compared the transform it wrote against the one the browser gives back
+
+**What.** The new idle track (`core/tracks/idle.js`) composes a small ambient transform on top of
+whatever the entrance and the motion track already put on a layer. Most entrances rewrite `transform`
+from scratch every frame, so composing onto the live value is safe; `wipe`, `iris` and `clock` write
+only `clipPath` and never touch transform, so on those layers the string on the element is the one the
+idle track itself wrote on whichever frame the worker rendered before. The track guarded against that
+by stashing its own output beside the base it composed from, and peeling back to the base whenever the
+element still held that exact output. The guard could never fire. A drift layer walked 300px off its
+layout by the end of its window, and where it landed depended on render order.
+
+**Root cause.** CSSOM re-serialises an inline style value on the way in. The track wrote
+`translate(3.00px, 1.00px) scale(1.000000)` and the getter returned `translate(3px, 1px) scale(1)`, so
+`cur === prior.out` compared two spellings of the same declaration and answered no. Every frame then
+took the previous frame's idle as its base and added to it. The two properties this repo already
+composes this way are safe by accident rather than by design: `core/tracks/motion.js` strips a prior
+`blur()` with a regex over the read-back form, and `core/tracks/box.js` writes `width` outright.
+Checked every other consumer for the same shape (a written CSS string compared to a read-back one);
+there is none.
+
+**Fix.** Store the browser's own spelling, not the author's: `el.__hsIdle = { out: el.style.transform,
+base }` after the write. The two sides of the comparison are then in the same language.
+
+**Which gate catches it now.** `make probe` — `probe-purity` on a scene carrying `anim: "wipe-right"`
+with an idle failed 41 of 25 sampled frames, both as render-order dependence and as a forward-render
+mismatch. It named the defect before a frame was ever looked at. Nothing new was needed.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

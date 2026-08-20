@@ -6,6 +6,9 @@
 // core/ is self-contained: the validator lives here too (core/validate.mjs), because boot.js
 // imports it and the browser must be able to resolve it. It is engine code, not tooling.
 
+import { FEEL } from './vocab.js';
+import { nearMisses } from './registry.js';
+
 export const FPS = 30;
 
 export const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
@@ -125,6 +128,11 @@ export const EASINGS = {
 // error instead of a list of 41 names it is not in. Same cross-registry hint as core/type.js.
 const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/;
 
+// isEasingName(n) — would resolveEasing accept this string? The ONE membership test, so a gate can ask
+// instead of re-deriving it. core/validate.mjs held its own copy and it was already one registry behind.
+export const isEasingName = (n) => typeof n === 'string'
+  && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n));
+
 // resolveEasing — an easing name or a function → a pure easing function.
 //
 // ABSENT → easeOutCubic. A WRONG NAME → throw. Those are different questions and this used to answer
@@ -143,13 +151,21 @@ export const resolveEasing = (e) => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return easeOutCubic;
   if (EASINGS[e]) return EASINGS[e];
+  // A FEEL WORD is a spelling of a curve this registry already holds, so it resolves here and not in
+  // a pass above: the words have to be accepted wherever the value is, or reaching for the right
+  // curve still costs a document read and the default stays `fade`. core/vocab.js.
+  if (Object.prototype.hasOwnProperty.call(FEEL, e)) return EASINGS[FEEL[e]];
   const hint = GSAP_EASE.test(String(e))
     ? ` "${e}" is a GSAP ease, and GSAP eases are real here but only on GSAP-driven fields `
       + '(`parts[].ease`, `morph.ease`, `fx:{ease}`). This field is driven by the engine\'s own '
       + 'interpolator, so it takes an engine easing.'
     : '';
-  throw new Error(`unknown easing ${JSON.stringify(e)}.${hint} One of: ${Object.keys(EASINGS).join(', ')}. `
-    + 'A curve quietly swapped for another renders a plausible frame that is not the one asked for, '
+  const near = nearMisses(String(e), [...Object.keys(EASINGS), ...Object.keys(FEEL)]);
+  throw new Error(`unknown easing ${JSON.stringify(e)}.${hint}`
+    + `${near.length ? ` Did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''}`
+    + ` One of: ${Object.keys(EASINGS).join(', ')}.`
+    + ` Or a feel word: ${Object.keys(FEEL).join(', ')}.`
+    + ' A curve quietly swapped for another renders a plausible frame that is not the one asked for, '
     + 'so it is refused rather than substituted.');
 };
 

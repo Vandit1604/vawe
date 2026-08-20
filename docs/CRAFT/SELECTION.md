@@ -1,6 +1,6 @@
 ---
-when: picking the transition/font/look/sting for a feeling
-answers: intent→effect (cited) · complete look/sting coverage · 8 named reference profiles
+when: picking the transition/font/look/sting for a feeling, or picking between whole directions
+answers: intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make concept` forces a round off the median
 group: story
 ---
 
@@ -11,8 +11,9 @@ feeling a beat wants, and it tells you which transition, font, look, easing and 
 with the reason traced to a design principle. Use it so choices are predictable and explainable, not
 taste-by-vibes. `TASTE-RULES.md` says what's good; this says what to pick.
 
-Two parts: **the decision procedures** (how to pick within one family) and **the reference profiles**
-(a whole coordinated look, named after a real brand so the target is concrete, not an adjective).
+Three parts: **the decision procedures** (how to pick within one family), **the reference profiles**
+(a whole coordinated look, named after a real brand so the target is concrete, not an adjective), and
+**choosing between whole directions** (how `make concept` forces a round of options off the median).
 
 ---
 
@@ -171,6 +172,117 @@ Maximum restraint, maximum contrast. Bounce: never.
 **How to use a profile:** name it in the brief ("make it feel like `apple`"), or point `vawe_reflect`
 at the real site to pull its exact palette + face, then apply the profile's motion/cut/effect policy.
 The profile is the coordination; `vawe_reflect` is the colour precision.
+
+---
+
+## Part 3 — Choosing between whole directions (`make concept`)
+
+Everything above picks WITHIN a family once the film is decided. This part is the step before: you have
+a storyboard, and several different films could be made from it. `make concept SB=<storyboard.md> N=3`
+generates that round.
+
+### The failure it exists to prevent
+
+A generator handed a brief produces the first thing anybody would produce for that brief. Ask it for
+three and it produces the first thing three times, in three palettes. Nobody notices, because the three
+are read side by side, where small differences look large. So the round is a menu of medians, the author
+picks one, and the film regresses to the mean before a single line of JSON is written. `CLAUDE.md` names
+this as the number one authoring failure. The ledger catches it afterwards, on a finished film, which is
+the most expensive place to catch anything.
+
+The fix is a constraint, not an instruction. **At least two of the N options must be improbable, or the
+round is thrown away and a different one is generated.**
+
+### How a concept's probability is computed
+
+`p` answers one question: how likely is this the FIRST direction anybody proposes for this brief? Low is
+the good end. It is **computed, never asserted**, and that distinction is the whole design. A generator
+scoring its own output rates everything novel, for the same reason a film grading its own beats passes
+itself. So `p` comes from three places the generator does not control, all of them files on disk:
+
+| Term | Weight | Measured from |
+|---|---|---|
+| **pace echo** | 0.40 of the library term | the share of shipped scenes cutting at roughly this direction's rate, read through `scripts/gates/beats-of.mjs`, the beat model the judge already uses |
+| **look echo** | 0.30 | the share of shipped scenes whose theme background is this direction's dominance, from the measured luminance of `themes/<name>.json` `palette.bg` |
+| **thread echo** | 0.30 | the share of the hand-written storyboard corpus already using this thread |
+| **round echo** | 0.20 of `p` | how much shape this concept shares with the OTHER concepts in the same round |
+| **tells** | 0.28 of `p` | the defaults this repo has already written down as defaults |
+
+`p = 0.02 + 0.50 · library + 0.20 · round + 0.28 · tells`, clamped to `[0,1]`.
+
+Three details are deliberate:
+
+- **The look echo counts only the lean.** An even split between dark and light says nothing about
+  either, so the echo is the library's excess over even, and it is zero for the side the library does
+  not favour. Without this, every concept inherits a flat 0.5 and the score stops discriminating.
+- **The thread echo excludes storyboards this tool generated.** They carry a marker, and they are
+  skipped. Count them and the round inflates the frequency of whatever it proposed last time, so the
+  tell compounds instead of being caught.
+- **`p` depends on the round.** A concept surrounded by its own neighbours really is more predictable
+  than the same concept standing alone. This is what makes a round of near-twins score badly as a
+  round, rather than three times as a concept.
+
+**The tells** are the third input, and each one cites the line in this repo that says it. The citation is
+checked at startup: if the sentence has been rewritten, the tool exits rather than enforcing a rule from
+memory. Today there are three.
+
+| Tell | Fires when | Source |
+|---|---|---|
+| `habitual-pace` | pace sits in 2.5 to 4s | `FILM-STRUCTURE.md`: "Our films sit at 2.5 to 4 seconds a beat" |
+| `the-free-device` | the thread is the transforming object | `CLAUDE.md`: "a keyed `w`/`h` on a rectangle passes and a motif does not" |
+| `slideshow-shape` | four beats or fewer across a full runtime | `CLAUDE.md`, the `plain-slideshow` floor |
+
+### The threshold is 0.10, and why that number
+
+It is the source's number: the pitch-round discipline this is modelled on sets the tail at 0.10 and says
+that if all five clear it, every pitch is the median and the round starts over. It also survives contact
+with the measured library. At the time of writing, the seven directions split cleanly around it: the
+three this library has never shipped (`fast-sentence` 0.03, `rhymed` 0.08, `pulsed` 0.08) sit below, and
+the four it leans on (`travelled` 0.18, `counted` 0.19, `asked` 0.23, `held-object` 0.57) sit above. The
+line falls in a real gap rather than through the middle of a cluster.
+
+`held-object` scoring 0.57 is the finding, not a bug. It is the transforming object: the habitual pace,
+the library's dominant look, seven of the nine hand-written storyboards, and every one of the three
+tells. That is what the default looks like when it is measured.
+
+### The two constraints, and what "regenerate" means
+
+1. **The tail constraint.** At least two of N must score under 0.10. If not, the round is not shipped.
+2. **Silhouette dedupe.** A silhouette is the concept with its content removed: beat count, the order of
+   beat types, and how much of it is a picture rather than words. Two concepts with the same silhouette
+   are one concept wearing two palettes, so the round is rejected and one of them is replaced.
+
+The candidate pool is the direction table in `scripts/author/directions.mjs`, so "regenerate" means take
+a **different subset of it**, not re-roll a random. The table's own order is tried first, so the default
+round is unchanged whenever it is good enough. Every rejection is printed with the scores that caused it:
+
+```
+↻ regenerated: held-object, fast-sentence, travelled: 1 of 3 under 0.10 (0.57 · 0.03 · 0.18)
+↻ regenerated: held-object, fast-sentence, travelled: held-object and travelled have one
+   silhouette (3 beats · hook>build>payoff · 0/3 pictured), so the round holds 2 concepts, not 3
+```
+
+Ordering after the table's own subset is fixed by `--seed` (default 0) and by nothing else. Two runs of
+the same command on the same library produce the same round, or nobody can argue with the result.
+
+If no subset of the table can satisfy the constraints, the tool **exits non-zero**. It never ships an
+unscored or all-median round, because that is exactly the behaviour it was built to remove. The same is
+true when the evidence is missing: too few readable scenes, no measurable dominance, or an empty
+storyboard corpus each stop the run and name which piece is absent.
+
+### Present all N, then recommend
+
+The round is printed whole, with every score, before any recommendation. A recommendation stated first
+anchors everything after it: the other options get read as reasons the first one was right. Only after
+the full round does the tool name one, with its argument, and name the most typical direction it left
+behind so the road not taken is on the record.
+
+### What this does not prove
+
+`p` measures unusualness against this library. It does not measure quality, and the tool says so on
+every run. An improbable direction is one nobody would reach for first, which is a good place to start
+looking and a terrible place to stop thinking. The recommendation is an argument, not a ruling. Judging
+whether the film is any good stays where it has always been: `make judge` and your eyes.
 
 ---
 

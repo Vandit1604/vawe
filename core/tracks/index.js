@@ -48,11 +48,12 @@ import * as tReact from './react.js';
 import * as tBox from './box.js';
 import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
+import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 
 const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive,
   borderTrail: tBorderTrail, circle: tCircle, vars: tVars, react: tReact, box: tBox,
-  follow: tFollow, motion: tMotion, modifiers: tModifiers };
+  follow: tFollow, motion: tMotion, idle: tIdle, modifiers: tModifiers };
 
 // Exported so a gate can DERIVE the pipeline instead of restating it — the contract LAYER_TYPES and
 // FX_TYPES already have. A hand-typed copy of this list is how `make coverage` reported 14/14 while a
@@ -81,6 +82,7 @@ export const SLOTS = Object.freeze([
   'box',        // w / h / depth over time — the layer's SIZE, not its scale
   'follow',     // pin to another layer's live box, before that layer's own choreography plays
   'transform',  // the motion track and motion blur
+  'idle',       // ambient motion across the settled middle, riding outside the choreography above
   'post',       // modifiers (core/fx) — always last, on a finished frame
 ]);
 
@@ -132,6 +134,11 @@ export function runTracks(kit, el, L, units, t, f, scene) {
 // motionDefaults), which supplies the default stagger a layer did not set. Frozen because a track
 // writing into it would be writing into the next layer's inputs, and renderFrame(n) has to stay pure
 // in n.
-export function createTrackKit({ renderer, theme, M, fps }) {
-  return Object.freeze({ renderer, theme, M, fps });
+//
+// `idle` is the film's scene-level idle, so a whole cast opts in on one line instead of per layer.
+// It belongs here rather than on the layer because it is a property of the FILM, and the alternative
+// (copying it onto every layer at build) would make a scene default indistinguishable from an author
+// who wrote it out fifty times.
+export function createTrackKit({ renderer, theme, M, fps, idle = null }) {
+  return Object.freeze({ renderer, theme, M, fps, idle });
 }

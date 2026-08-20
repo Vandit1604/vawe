@@ -20,6 +20,7 @@ import { CUT_BLURBS } from '../../core/cuts.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
 import { PRESET_BLURBS } from '../../core/type.js';
 import { ANIM_BLURBS } from '../../core/clips.js';
+import { IDLE_NAMES, IDLE_BLURBS } from '../../core/idle.js';
 import { FX_BLURBS } from '../../core/fx/index.js';
 // Read off blueprints/index.mjs's own trailing comments — the registry line that declares each beat IS
 // the description, and blueprints-catalog.mjs already fails when one is missing. The hand-kept copy that
@@ -59,6 +60,7 @@ import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS, DESTINATION_NAMES } from '../../core/safe.js';
 import { GENERATORS } from '../../core/generators.js';
 import { PATTERNS, SHAPES, ANCHORS, DIRECTIONS, MOTIONS } from '../../core/lightfield/options.js';
+import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -135,9 +137,19 @@ const d = (n, meta = {}) => (meta.blurbs && meta.blurbs[n])
 const table = (rows) => ['| name | what / when |', '|---|---|', ...rows.map(([n, x]) => `| \`${n}\` | ${x} |`)].join('\n');
 const names = (arr) => [...new Set(arr)].sort();
 
+// The plain words, rendered as word → the concrete value it resolves to. The blurb IS the mapping,
+// because that is the only thing worth knowing here; the "when to reach for it" column lives in the
+// dedicated doc (`make vocab` → docs/CRAFT/VOCABULARY.md), generated from the same registry.
+const VOCAB_BLURBS = Object.fromEntries([
+  ...Object.entries(FEEL).map(([w, t]) => [w, `feel → \`ease: "${t}"\``]),
+  ...Object.entries(DURATION).map(([w, s]) => [w, `duration → \`${s}\` seconds`]),
+  ...Object.entries(CAMERA_WORDS).map(([w, t]) => [w, `camera → \`move: "${t}"\``]),
+]);
+
 const sections = [
   ['Kinetic text presets', '`split`+`preset` on a text layer — words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`', names(Object.keys(PRESETS)), 'text', { blurbs: PRESET_BLURBS }],
   ['Enter / exit anims', '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`', names(ANIM_NAMES), 'per-layer', { blurbs: ANIM_BLURBS }],
+  ['Idles (ambient hold motion)', '`idle` on a layer, or scene-level `idle` for the whole cast. Runs across the SETTLED MIDDLE only, between the enter ramp and the exit ramp, so it never fights an entrance. Off unless asked; `idle:"none"` on a layer opts one back out of a scene default. `{ "idle":"breathe" }` or `{ "idle":{"name":"drift","amp":14,"period":9} }`', names(IDLE_NAMES), 'per-layer/scene', { blurbs: IDLE_BLURBS }],
   ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text', { blurbs: GSAP_BLURBS }],
   ['GSAP exits', '`fxOut` — pair every entrance with a directional exit.', names(EXIT_FX), 'exit', { blurbs: GSAP_EXIT_BLURBS }],
   ['Scene cuts', '`cuts:[{t,style}]` — the beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition', { blurbs: CUT_BLURBS }],
@@ -162,6 +174,7 @@ const sections = [
   ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it — MDN `mix-blend-mode`' }],
   ['Filter presets', '`filter:"<name>"` — a named colour grade. Composite LOOKS are the richer set above; these are the primitives.', names(Object.keys(FILTER_PRESETS)), 'static', { blurbs: FILTER_BLURBS }],
   ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
+  ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
   ['Caption styles', '`captions:{ style:"<name>" }` — how burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.', names(CAP_STYLE_NAMES), 'captions', { blurbs: CAPTION_BLURBS }],
   ['Drawn icons', '`svgIcon("<name>")` — a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.', names(Object.keys(ICONS)), 'asset', { skip: 'the name is the drawing' }],
   ['Ransom faces', '`ransom` on a text layer — per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface — see it, do not read about it' }],

@@ -19,6 +19,16 @@ fonts:
 fonts-discover:
 	node scripts/author/fonts-discover.mjs --seed $(SEED) $(if $(COUNT),--count $(COUNT)) $(if $(CATEGORY),--category $(CATEGORY)) $(if $(filter 1,$(JSON)),--json)
 
+# make invent-look SB=<storyboard.md> [SEED=7] [COUNT=5] [PICK=n NAME=<theme>] [JSON=1]
+# — AUTHOR a look instead of picking one. Reads the storyboard's brief, proposes 4 to 6 complete
+# candidate looks that each tell a DIFFERENT story about that subject (palette named after the subject's
+# world + a type pairing from `make fonts-discover` + a texture stance + one sentence), photographs each
+# one through the engine's own applyTheme → /tmp/invent-look/<name>-sheet.png. READ the sheet, then
+# PICK=<n> writes themes/<NAME>.json and vendors its faces.
+# Every other look tool here reflects a real brand or selects an existing theme; this is the third move.
+invent-look:
+	node scripts/author/invent-look.mjs $(SB) $(if $(SEED),--seed $(SEED)) $(if $(COUNT),--count $(COUNT)) $(if $(PICK),--pick $(PICK)) $(if $(NAME),--name $(NAME)) $(if $(FORCE),--force) $(if $(filter 1,$(JSON)),--json)
+
 # make audio  — bake every cue + music bed from PARAMETERS (core/audio-kit.mjs). No network, no
 # licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
 audio:
@@ -395,7 +405,7 @@ treatment:
 # change a film — and leaves every word to you, because a tool that invents copy produces options that
 # are all wrong alike. docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md has the threads.
 concept:
-	node scripts/author/concept.mjs $(SB) $(if $(N),--n $(N)) $(if $(filter 1,$(STRICT)),--strict)
+	node scripts/author/concept.mjs $(SB) $(if $(N),--n $(N)) $(if $(SEED),--seed $(SEED)) $(if $(filter 1,$(STRICT)),--strict)
 
 # make concept-pick SB=<storyboard.md> OPTION=<slug> — promote one direction and record the rest.
 # The rejected set is what a treatment argues against; it is only available at the moment of choosing.
@@ -720,6 +730,12 @@ arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never 
 
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
+
+vocab: ## regenerate docs/CRAFT/VOCABULARY.md — the plain words (feel/duration/camera) from core/vocab.js
+	node scripts/site/vocab-catalog.mjs
+
+vocab-check: ## fail if docs/CRAFT/VOCABULARY.md is stale vs core/vocab.js
+	node scripts/site/vocab-catalog.mjs --check
 
 critique: ## TASTE: value-gate, flag hollow/low-value beats (D=<file>)
 	node scripts/gates/critique.mjs $(D)

@@ -58,6 +58,9 @@ const WAIVED = new Map(Object.entries({
   AMBIENT_REGISTRY: 'as ANIM_REGISTRY, for AMBIENT_FX ("Ambient shader fields")',
   THREE_REGISTRY: 'as ANIM_REGISTRY, for THREE_FX ("three.js scenes")',
   CAMERA_REGISTRY: 'as ANIM_REGISTRY, for CAMERA_MOVE_NAMES ("Camera moves")',
+  FEEL_REGISTRY: 'as ANIM_REGISTRY, for FEEL — the words themselves ARE catalogued under "Plain words", and in full in docs/CRAFT/VOCABULARY.md',
+  DURATION_REGISTRY: 'as FEEL_REGISTRY, for DURATION',
+  CAMERA_WORD_REGISTRY: 'as FEEL_REGISTRY, for CAMERA_WORDS',
   okDir: 'the direction guard seams shares with core/cuts.js DIRS; a scene names a direction, not a guard',
 
   CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
@@ -104,6 +107,13 @@ const WAIVED = new Map(Object.entries({
   LOOKS: 'the look implementations behind LOOK_NAMES, which IS catalogued',
   PAINT_FX: 'the implementations behind PAINT_FX_NAMES, which IS catalogued',
   ANIM: 'the anim implementations behind ANIM_NAMES, which IS catalogued',
+  IDLE: 'the idle generators behind IDLE_NAMES, which IS catalogued',
+  IDLE_REGISTRY: 'as IDLE — the registry object, not a name a scene can write',
+  // A scene names a BEAT, and every beat is already catalogued by `make blueprints`. REQUESTS is the
+  // prose sentence for asking for one in a STORYBOARD, which is a plan and not a scene, so there is
+  // nothing here for a scene to write. It is surfaced where it is used: `make blueprints` prints an
+  // `ask:` line per beat and refuses to run if any beat lacks one.
+  REQUESTS: 'the plain-language ask line per beat, printed by `make blueprints`; a storyboard names it, a scene never does',
   PAL: 'the colour tables the background presets draw from, and those ARE catalogued',
   PAL_PLINTH: 'as PAL, for one brand',
   SCHEMA: 'the lightfield option schema. It drives narrow() and the playground panel; its user-facing dials are PATTERNS/SHAPES/ANCHORS/DIRECTIONS/MOTIONS, which ARE catalogued',

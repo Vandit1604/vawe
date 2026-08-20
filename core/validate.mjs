@@ -23,7 +23,8 @@ import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../core/junctions.js';
 import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
-import { EASINGS } from '../core/motion.js';
+import { EASINGS, isEasingName } from '../core/motion.js';
+import { resolveSeconds, FEEL } from '../core/vocab.js';
 import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../core/backgrounds.js';
 import { mergePan } from './pan-resolve.mjs';
 import { motionAt } from './sequence.js';
@@ -235,6 +236,7 @@ export function validateData(schema, data) {
   walk(schema.fields, data || {}, '', errors);
   noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
   errors.push(...easeErrors(data)); // engine-driven fields take an EASINGS name, not a GSAP one (#367)
+  errors.push(...durationWordErrors(data || {})); // a timing slot's word must be one the engine knows
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
@@ -448,6 +450,28 @@ export function seamErrors(cfg) {
 // UNIFIED TRANSITIONS: the fx must route to a real boundary mechanism (cut/seam/sting). The schema
 // checks shape (at/dur/timing); only the router knows whether a name is a boundary transition at all,
 // so a typo or a layer-only name (e.g. `pop`) used as a boundary is caught here, loudly, not silently.
+// A duration slot may name a WORD instead of a number (core/vocab.js), and core/transitions-lower.js
+// resolves it. That resolve THROWS on an unknown word, which is right at render and wrong as the first
+// thing an author hears: the throw arrives from inside a lowering pass, out of one of eight workers.
+// Caught here so the same refusal is a validation line, at the entry point, in a second.
+const DUR_WORD_SLOTS = ['duration', 'enterDur', 'exitDur'];
+export function durationWordErrors(cfg) {
+  const out = [];
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    for (const k of DUR_WORD_SLOTS) {
+      if (typeof L[k] !== 'string') continue;
+      try { resolveSeconds(L[k]); } catch (e) { out.push(`${at}.${k}: ${e.message}`); }
+    }
+    if (isObj(L.transition) && typeof L.transition.dur === 'string') {
+      try { resolveSeconds(L.transition.dur); } catch (e) { out.push(`${at}.transition.dur: ${e.message}`); }
+    }
+    (L.children || []).forEach((c, i) => visit(c, `${at}.children[${i}]`));
+  };
+  (cfg.layers || []).forEach((L, i) => visit(L, `layers[${i}]`));
+  return out;
+}
+
 export function transitionErrors(cfg) {
   const out = [];
   const list = Array.isArray(cfg.transitions) ? cfg.transitions : [];
@@ -504,11 +528,14 @@ function easeNames(v, path, errors, underGsap = false) {
       ? (typeof x === 'string' ? [x] : (isObj(x) ? Object.values(x).filter((s) => typeof s === 'string') : []))
       : [];
     if (!gsap) for (const nm of leaves) {
-      if (EASINGS[nm]) continue;
+      // ASK THE RESOLVER'S OWN PREDICATE. This used to test `EASINGS[nm]` by hand, which is a second
+      // copy of the membership rule — and the day feel words became resolvable, the copy would have
+      // reported every one of them as unknown while the renderer accepted it. Same argument as #367.
+      if (isEasingName(nm)) continue;
       errors.push(`${at}: unknown easing "${nm}". This field is driven by the engine's own interpolator, `
         + `so it takes an EASINGS name.${/^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/.test(nm)
           ? ` "${nm}" is a GSAP ease — real here, but only on a GSAP-driven field (parts[].ease, morph.ease, fx:{ease}).`
-          : nearest(nm, Object.keys(EASINGS))}`);
+          : nearest(nm, [...Object.keys(EASINGS), ...Object.keys(FEEL)])}`);
     }
     easeNames(x, at, errors, gsap);
   }

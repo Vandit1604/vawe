@@ -36,12 +36,18 @@ const wave = (rest) => ({ color: rest, split: 'word', preset: 'colorWave',
 // one clean departure. Props leave through `defocus` because a dozen objects sliding at once reads as
 // chaos (CLAUDE.md launch rule 4); words fade, since a word has nothing to blur.
 //
+// `wordOut` makes that last clause a DEFAULT rather than a decision the blueprint keeps for itself.
+// The exit was hardcoded, so a film whose whole rule is "nothing fades" had no way to say so and its
+// only three fades were ones its author could not reach. Default unchanged ('fade'), so every scene
+// already shipped renders byte-identical; pass `wordOut: "defocus"` to let the words leave with the
+// props, or set `out` on a single item to override just that word.
+//
 // Placed by x/y and not by `pin`, because a wrapping sentence has no height until it is laid out and
 // `pin` needs a declared `h` (core/validate.mjs says so). The default y suits the two-row sentence this
 // beat is sized for; move it up for three rows, down for one, and look at the frame either way.
 export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44, size = 170,
-  weight = 600, wordColor = INK, propW = 380, radius = 22, stagger = 0.08, justify = 'flex-start',
-  start = 0, dur = 1.6, enterDur = 0.32, exitDur = 0.2 } = {}) {
+  weight = 600, wordColor = INK, wordOut = 'fade', propW = 380, radius = 22, stagger = 0.08,
+  justify = 'flex-start', start = 0, dur = 1.6, enterDur = 0.32, exitDur = 0.2 } = {}) {
   // one prop's shared timing: it arrives late by its place in the sentence and leaves with everything else
   const timing = (i, it) => ({ delay: +(it.at != null ? it.at : i * stagger).toFixed(3), enterDur, exitDur });
 
@@ -49,7 +55,7 @@ export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44,
     const t = timing(i, it);
     if (it.word != null) {
       return { type: 'text', text: it.word, size: it.size || size, weight: it.weight || weight,
-        ...wave(it.color || wordColor), ...t, out: 'fade' };
+        ...wave(it.color || wordColor), ...t, out: it.out || wordOut };
     }
     if (it.image) {
       const iw = it.w || propW;
@@ -108,13 +114,23 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
   const win = hold ?? (n > 1 ? every : dur);
   const off = { label: 0, tile: 0.1, icon: 0.16, payload: 0.35, ...(offsets || {}) };
   const iconW = Math.round(badge * 0.44);
-  // The outgoing pass has to still be on screen when the next one starts, or the swap renders as a hole:
-  // a layer's exit is the LAST `exitDur` of its window, so butt-jointed passes leave one frame with the
-  // old row already gone and the new row still at zero. Measured as an empty frame at the exact joint,
-  // which is what `make beat-check` calls `dead-air`. Every pass but the last therefore overhangs its
-  // successor by its own exit, so the two ramps cross. An explicit `hold` is left alone: a shorter hold
-  // than the cadence is an author asking for the gap brew has.
-  const over = hold == null ? exitDur : 0;
+  // PASSES BUTT. They used to OVERHANG their successor by one `exitDur`, so the two ramps crossed and
+  // the row was never empty at a joint. That was the wrong cure for a real disease, and it produced a
+  // worse symptom: every slot here is a FIXED BOX, so crossing two passes paints both contents at the
+  // same coordinates. "days that shipped" arriving over "contributions" leaving rendered as
+  // "daysributions" for four frames, and 1822 ghosted through 0 of 366 beside it. A cross-fade in a
+  // fixed box is a double exposure, not a swap, and it is illegible however short it is.
+  //
+  // Nor was the hole it was preventing real for the LABEL. A `colorWave` label has no opacity ramp at
+  // all: scene.js sets `data-enter=0` on any split layer and the preset only repaints `color`, so the
+  // incoming label is fully painted on its first frame. Butt-jointed, the outgoing label's last frame
+  // and the incoming label's first frame are adjacent and the slot is never blank. The PAYLOAD, which
+  // pops, blinks for its `payload` offset (0.35s by default, and that is a dial) — a slot visibly
+  // re-filling, which is the device this beat is a picture of.
+  //
+  // `hold` still means what it always meant: a shorter hold than the cadence is the deliberate gap brew
+  // leaves between its passes. docs/MISTAKES.md #381.
+  const over = 0;
 
   const L = [];
   passes.forEach((p, i) => {

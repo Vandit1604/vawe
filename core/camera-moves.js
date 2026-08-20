@@ -1,4 +1,5 @@
 import { defineRegistry } from './registry.js';
+import { resolveCameraMove } from './vocab.js';
 // core/camera-moves.js — CAMERA CHOREOGRAPHY generators: pure (params) → camera-keyframe array, the same
 // shape core/sequence.js `cameraAt` interpolates ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move
 // is smooth and CALCULATED instead of hand-typed, and the multi-keyframe ones emit interior `ease:"linear"`
@@ -202,9 +203,13 @@ const targetsAPoint = (name, params) => TARGETING.has(name)
 // `canvas` is [W, H] from the scene's own aspect (scripts/author/expand-blocks.mjs passes sceneDims(d)).
 export function buildCameraMove(spec, canvas = null) {
   if (!spec || !spec.move) throw new Error('cameraMove needs a "move" name');
-  const f = CAMERA_MOVES[spec.move];
-  if (!f) CAMERA_REGISTRY.pick(spec.move);   // throws, and names the other list if the word belongs to one
-  const { move, ...params } = spec;
+  // A SHOT WORD resolves to a move name first ("pull back" → workspaceZoomOut), so the description a
+  // director would say is accepted in the slot the code name is accepted (core/vocab.js). A real move
+  // name passes through untouched, so nothing already authored changes.
+  const move = resolveCameraMove(spec.move);
+  const f = CAMERA_MOVES[move];
+  if (!f) CAMERA_REGISTRY.pick(move);        // throws, and names the other list if the word belongs to one
+  const { move: _written, ...params } = spec;
   // A KEY THIS MOVE DOES NOT READ IS A TYPO, and a silently dropped param is the worst failure class in
   // this engine: `station:` for `stations:` reached travel as an ignored extra and threw about a missing
   // array; `too:` for `to:` on slowPush would have rendered a move nobody asked for and said nothing.

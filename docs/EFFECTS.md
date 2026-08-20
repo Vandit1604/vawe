@@ -82,6 +82,16 @@
 | `wipe-right` | clip reveal grows rightward from the left edge |
 | `wipe-up` | clip reveal grows upward from the bottom edge — what a bar chart wants |
 
+## Idles (ambient hold motion)  `[per-layer/scene]`
+
+`idle` on a layer, or scene-level `idle` for the whole cast. Runs across the SETTLED MIDDLE only, between the enter ramp and the exit ramp, so it never fights an entrance. Off unless asked; `idle:"none"` on a layer opts one back out of a scene default. `{ "idle":"breathe" }` or `{ "idle":{"name":"drift","amp":14,"period":9} }`
+
+| name | what / when |
+|---|---|
+| `breathe` | 1.5% scale, ~4.6s — the held frame stays alive without moving |
+| `drift` | slow translate on two periods, ~9px — the frame is never quite parked |
+| `none` | no idle — the layer is truly still on its hold (the default) |
+
 ## GSAP named effects  `[per-layer/text]`
 
 `fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`
@@ -361,15 +371,20 @@
 | `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
 | `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
 | `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
+| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
 | `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
 | `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
 | `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
 | `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
+| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
+| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
 | `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
+| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
 | `statReveal` | payoff: hero count-up + kinetic label |
 | `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
 | `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
 | `verdictProof` | claim proven: typing command + note + tone verdict chip |
+| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
 
 ## Camera moves  `[camera]`
 
@@ -422,6 +437,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `svg` | — |
 | `text` | — |
 | `three` | — |
+| `video` | — |
 
 ## three.js scenes (real geometry)  `[layer]`
 
@@ -606,6 +622,38 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 
+## Plain words (feel · duration · camera)  `[timing]`
+
+The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).
+
+| name | what / when |
+|---|---|
+| `bouncy` | feel → `ease: "spring-bouncy"` |
+| `circle` | camera → `move: "orbit"` |
+| `dive` | camera → `move: "diveIn"` |
+| `elastic` | feel → `ease: "easeOutElastic"` |
+| `fast` | duration → `0.18` seconds |
+| `follow` | camera → `move: "panFollow"` |
+| `gentle` | feel → `ease: "easeInOutSine"` |
+| `heavy` | feel → `ease: "easeInOutQuint"` |
+| `instant` | duration → `0.08` seconds |
+| `luxurious` | duration → `1.2` seconds |
+| `mechanical` | feel → `ease: "linear"` |
+| `medium` | duration → `0.3` seconds |
+| `pop` | feel → `ease: "easeOutBack"` |
+| `pull back` | camera → `move: "workspaceZoomOut"` |
+| `push in` | camera → `move: "slowPush"` |
+| `sharp` | feel → `ease: "easeOutExpo"` |
+| `slow` | duration → `0.6` seconds |
+| `slow push-in` | camera → `move: "slowPush"` |
+| `smooth` | feel → `ease: "easeInOutCubic"` |
+| `snappy` | feel → `ease: "easeOutQuart"` |
+| `soft` | feel → `ease: "settle"` |
+| `stiff` | feel → `ease: "spring-stiff"` |
+| `sweep` | camera → `move: "truck"` |
+| `tour` | camera → `move: "travel"` |
+| `zoom out` | camera → `move: "workspaceZoomOut"` |
+
 ## Caption styles  `[captions]`
 
 `captions:{ style:"<name>" }` — how burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
@@ -719,4 +767,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_472 effects across 32 families. Regenerate: `make effects`._
+_506 effects across 34 families. Regenerate: `make effects`._

@@ -6,6 +6,8 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
 import { unitProgress, PRESETS, PRESET_BLURBS } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
 import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
+import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
+  normalizeIdle, settledGain } from '../../core/idle.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
 import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
@@ -33,7 +35,9 @@ import { DIRS } from '../../core/cuts.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
-import { lintData, easeErrors, bgErrors } from '../../core/validate.mjs';
+import { lintData, easeErrors, bgErrors, durationWordErrors } from '../../core/validate.mjs';
+import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/vocab.js';
+import { BASE_ENTER } from '../../core/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
@@ -167,6 +171,94 @@ ok('resolveEasing names the wrong slot for a GSAP ease', (() => {
 // Every easing the LIBRARY names must resolve — the census that made throwing safe, kept as a gate.
 ok('resolveEasing accepts every name the library uses', ['linear', 'easeOutCubic', 'easeInOutCubic', 'ramp', 'spring', 'springEase', 'settle', 'snap', 'brake', 'rush'].every((n) => typeof resolveEasing(n) === 'function'));
 ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
+
+// ---- core/vocab.js: the plain words, accepted where the concrete value is ----
+// The words are ALIASES. Three things have to hold or the whole idea is a second vocabulary that lies:
+// every word resolves, every word resolves to the SAME thing its target does, and a concrete value is
+// untouched by their existence. The fourth is that a typo is refused with its near misses.
+{
+  ok('vocab: every FEEL word resolves to its own target curve',
+    Object.entries(FEEL).every(([w, t]) => typeof resolveEasing(w) === 'function' && resolveEasing(w) === EASINGS[t]));
+  ok('vocab: every DURATION word is a positive number of seconds',
+    Object.values(DURATION).every((s) => typeof s === 'number' && s > 0 && s <= 3));
+  ok('vocab: every CAMERA word names a move that exists',
+    Object.values(CAMERA_WORDS).every((t) => CAMERA_MOVE_NAMES.includes(t)));
+  // The far side of every alias, asked of the real registries. A rename over there is caught here,
+  // because core/vocab.js is a leaf (core/motion.js imports it) and cannot check itself at import.
+  ok('vocab: verifyVocab finds no dangling target',
+    verifyVocab({ easings: Object.keys(EASINGS), cameraMoves: CAMERA_MOVE_NAMES }).length === 0);
+  // A word that shadows a curve would be unreachable: resolveEasing finds EASINGS first, so the word
+  // would silently mean the curve. That is the substitution this file exists to prevent, one level up.
+  ok('vocab: no FEEL word shadows an EASINGS name', Object.keys(FEEL).every((w) => !(w in EASINGS)));
+  // Same argument across families: `pop` in two of them would render one meaning in the catalogue.
+  ok('vocab: the three families share no word', (() => {
+    const all = [...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)];
+    return new Set(all).size === all.length;
+  })());
+  // `medium` is BASE_ENTER. Asserted rather than imported: core/clips.js imports core/motion.js, which
+  // imports core/vocab.js, and the cycle is not worth one constant.
+  ok('vocab: `medium` is the engine\'s own default entrance (BASE_ENTER)', DURATION.medium === BASE_ENTER);
+
+  // PASSTHROUGH — the non-negotiable. A scene naming a number or a real name is untouched.
+  ok('vocab: a concrete duration passes through unchanged',
+    resolveSeconds(0.42) === 0.42 && resolveSeconds(0) === 0 && resolveSeconds(null) === null && resolveSeconds(undefined) === undefined);
+  ok('vocab: a concrete easing name still wins over the word list', resolveEasing('settle') === EASINGS.settle);
+  ok('vocab: a real camera move name passes through', resolveCameraMove('slowPush') === 'slowPush');
+  ok('vocab: a shot word becomes its move name', resolveCameraMove('pull back') === 'workspaceZoomOut');
+
+  // REFUSAL, with the near misses named. Never a fallback.
+  ok('vocab: an unknown feel word throws and names the near misses', (() => {
+    try { resolveEasing('snapy'); return false; }
+    catch (e) { return /unknown easing/.test(e.message) && /Did you mean/.test(e.message) && /"snappy"/.test(e.message); }
+  })());
+  ok('vocab: an unknown duration word throws and names the near misses', (() => {
+    try { resolveSeconds('fastt'); return false; }
+    catch (e) { return /unknown duration word/.test(e.message) && /did you mean "fast"/.test(e.message); }
+  })());
+  ok('vocab: resolveSeconds never substitutes a default', (() => {
+    try { resolveSeconds('quick'); return false; } catch { return true; }
+  })());
+  // A feel word written into a slot that takes a different vocabulary is DIAGNOSED, not just rejected —
+  // the cross-registry hint core/registry.js exists for.
+  ok('vocab: a feel word in the `anim` slot is named as a feel word', (() => {
+    try { ANIM_REGISTRY.pick('snappy'); return false; }
+    catch (e) { return /feel word/.test(e.message) && /ease: "snappy"/.test(e.message); }
+  })());
+
+  // The LOWERING pass is where a duration word becomes seconds for a layer. Idempotent, and it must
+  // reach a group's children or a word works at one nesting level and NaNs at the next.
+  ok('vocab: lowerScene resolves the layer timing words', (() => {
+    const d = lowerScene({ layers: [{ text: 'A', enterDur: 'fast', exitDur: 'instant', duration: 'slow' }] });
+    const L = d.layers[0];
+    return L.enterDur === DURATION.fast && L.exitDur === DURATION.instant && L.duration === DURATION.slow;
+  })());
+  ok('vocab: lowerScene resolves words inside a group\'s children', (() => {
+    const d = lowerScene({ layers: [{ type: 'group', children: [{ text: 'A', enterDur: 'medium' }] }] });
+    return d.layers[0].children[0].enterDur === DURATION.medium;
+  })());
+  ok('vocab: lowerScene carries a word through transition.dur', (() => {
+    const d = lowerScene({ layers: [{ text: 'A', transition: { in: 'rise', out: 'fade', dur: 'fast' } }] });
+    return d.layers[0].enterDur === DURATION.fast && d.layers[0].exitDur === DURATION.fast;
+  })());
+  ok('vocab: lowering is idempotent (a resolved number stays itself)', (() => {
+    const d = lowerScene({ layers: [{ text: 'A', enterDur: 'fast' }] });
+    return lowerScene(d).layers[0].enterDur === DURATION.fast;
+  })());
+  // The validator must accept what the renderer accepts and refuse what it refuses, at the entry point.
+  ok('vocab: validate accepts a known duration word',
+    durationWordErrors({ layers: [{ enterDur: 'fast', transition: { dur: 'slow' } }] }).length === 0);
+  ok('vocab: validate refuses an unknown one, naming the slot', (() => {
+    const e = durationWordErrors({ layers: [{ enterDur: 'quick' }] });
+    return e.length === 1 && /layers\[0\]\.enterDur/.test(e[0]) && /unknown duration word/.test(e[0]);
+  })());
+  ok('vocab: easeErrors accepts a feel word in an engine-driven field',
+    easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'snappy' }] }] }).length === 0);
+  // The camera sugar takes the shot word and builds the same keyframes the move name builds.
+  ok('vocab: buildCameraMove takes a shot word', (() => {
+    const a = JSON.stringify(buildCameraMove({ move: 'push in' }));
+    return a === JSON.stringify(buildCameraMove({ move: 'slowPush' }));
+  })());
+}
 
 // The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
 // list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
@@ -1604,6 +1696,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const families = [
     ['PRESETS', Object.keys(PRESETS), PRESET_BLURBS],
     ['ANIM_NAMES', ANIM_NAMES, ANIM_BLURBS],
+    ['IDLE_NAMES', IDLE_NAMES, IDLE_BLURBS],
     ['PRESENTATIONS', Object.keys(PRESENTATIONS), CUT_BLURBS],
     ['SEAM_FX', SEAM_FX, SEAM_BLURBS],
     ['FX_TYPES', FX_TYPES, FX_BLURBS],
@@ -1897,6 +1990,94 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   throws({ bridge: 'j', at: 'cut@0', sound: 'a' }, /defined by its lead/, 'a J-cut without a lead is refused');
   throws({ bridge: 'l', at: 'cut@0', sound: 'a' }, /defined by its lag/, 'an L-cut without a lag is refused');
   throws({ bridge: 'j', at: 'cut@0', lead: 0.5, span: 0.2, fade: 1, sound: 'a' }, /does not fit/, 'a fade that does not fit the span is refused');
+}
+
+// ---- idle (core/idle.js) --------------------------------------------------------------------------
+// An idle runs on EVERY frame of a layer's hold, so the two things that can go wrong are the two things
+// that are expensive: it is not pure in the frame, or it does something when nobody asked. Both are
+// asserted here rather than left to the render, because both are invisible in a still.
+{
+  const EPS = 1e-12;
+  const near = (a, b, e = EPS) => Math.abs(a - b) <= e;
+
+  // PURE IN THE TIME. The reference guide's idle is built from sin of the clock, and the wrong reading
+  // of that sentence is a real clock. Same input twice, same output, is what separates the two.
+  for (const name of IDLE_NAMES) {
+    let same = true;
+    for (const u of [0, 0.37, 1.5, 4.6, 11, 97.31]) {
+      const a = idleAt(name, u, 0.41), b = idleAt(name, u, 0.41);
+      if (!near(a.dx, b.dx) || !near(a.dy, b.dy) || !near(a.scale, b.scale) || !near(a.rot, b.rot)) same = false;
+    }
+    ok(`idle "${name}" is pure — same time, same delta`, same);
+  }
+
+  // A TRUE NO-OP, on all four channels. `none` exists so an author can opt one layer out of a scene
+  // default; an idle that moved anything at all through that name would be the opposite of the ask.
+  {
+    // BOTH DOORS. `idleAt` short-circuits on the name before the generator is reached, so asserting
+    // only through it would prove the short-circuit and say nothing about IDLE.none itself — and the
+    // generator is what a future caller reaching into the registry would get.
+    let flat = true;
+    for (const u of [0, 0.9, 3.3, 12.7]) {
+      for (const d of [idleAt('none', u, 0.6), { ...IDLE_IDENTITY, ...IDLE.none(u, {}) }])
+        if (d.dx !== 0 || d.dy !== 0 || d.scale !== 1 || d.rot !== 0) flat = false;
+    }
+    ok('idle "none" is a true no-op (dx=dy=rot=0, scale=1)', flat);
+    ok('idle "none" normalizes to nothing, so the track never runs', normalizeIdle('none') === null);
+    ok('an absent idle normalizes to nothing', normalizeIdle(undefined) === null && normalizeIdle(null) === null && normalizeIdle(false) === null);
+    ok('IDLE.none returns the shared identity, not a fresh object per frame', IDLE.none() === IDLE_IDENTITY);
+    ok('none writes no transform at any gain', idleTransform(idleAt('none', 3, 0.2), 1) === '');
+  }
+
+  // The AMPLITUDE the reference asks for by name: a 1-2% breathing scale. A breathe that reached 8%
+  // would be a pulse animation, and one that reached 0.2% would be the sub-pixel shimmer core/motion.js
+  // snaps its easing endpoints to avoid.
+  {
+    let lo = Infinity, hi = -Infinity;
+    for (let u = 0; u < 12; u += 0.01) { const s = idleAt('breathe', u, 0).scale; lo = Math.min(lo, s); hi = Math.max(hi, s); }
+    ok(`breathe stays inside the 1-2% band it is named for (${((hi - 1) * 100).toFixed(2)}%)`, hi - 1 >= 0.01 && hi - 1 <= 0.02 && near(hi - 1, 1 - lo, 1e-6));
+    ok('breathe moves nothing but scale', idleAt('breathe', 2.2, 0).dx === 0 && idleAt('breathe', 2.2, 0).dy === 0);
+    ok('drift translates and does not scale', idleAt('drift', 3, 0).scale === 1 && Math.abs(idleAt('drift', 3, 0).dx) > 0);
+  }
+
+  // THE PHASE IS THE LAYER'S, and it is stable. Two layers breathing in lockstep read as one mechanism
+  // driving both; the same layer breathing differently on a re-render is a purity bug wearing a costume.
+  ok('idlePhase is deterministic', idlePhase('hero') === idlePhase('hero'));
+  ok('idlePhase separates two layers', idlePhase('hero') !== idlePhase('sub'));
+  ok('idlePhase is a turn in [0,1)', IDLE_NAMES.every(() => idlePhase('x') >= 0 && idlePhase('x') < 1));
+  ok('a phase shifts the wave', !near(idleAt('breathe', 1, 0).scale, idleAt('breathe', 1, 0.5).scale, 1e-6));
+
+  // THE SETTLED MIDDLE. Zero through the entrance and through the exit — an idle that overlapped either
+  // would be fighting the very ramp driveClips is animating, for the same pixels.
+  {
+    const w = { dur: 4, enterDur: 0.4, exitDur: 0.3 };
+    ok('no idle before the entrance has landed', settledGain(0, w) === 0 && settledGain(0.39, w) === 0);
+    ok('no idle once the exit has begun', settledGain(3.7, w) === 0 && settledGain(4, w) === 0);
+    ok('full idle across the middle', near(settledGain(2, w), 1, 1e-9));
+    ok('the gain eases in rather than stepping', settledGain(0.5, w) > 0 && settledGain(0.5, w) < 1);
+    ok('the gain is symmetric about the middle', near(settledGain(0.4 + 0.2, w), settledGain(3.7 - 0.2, w), 1e-9));
+    ok('the gain never leaves [0,1]', (() => { for (let u = -1; u < 5; u += 0.01) { const g = settledGain(u, w); if (!(g >= 0 && g <= 1)) return false; } return true; })());
+    // A layer whose ramps eat its whole window has no settled middle at all, and must idle nowhere
+    // rather than compress a breath into two frames.
+    ok('a window with no settled middle carries no idle', settledGain(0.3, { dur: 0.6, enterDur: 0.3, exitDur: 0.3 }) === 0);
+    ok('an open-ended window still settles', settledGain(9, { dur: Infinity, enterDur: 0.3, exitDur: 0.26 }) > 0);
+  }
+
+  // GAIN ZERO IS THE IDENTITY, which is what makes the joins continuous: the idle grows out of rest
+  // instead of appearing at full amplitude on the settle frame.
+  ok('gain 0 contributes no transform', idleTransform(idleAt('breathe', 2, 0.3), 0) === '' && idleTransform(idleAt('drift', 2, 0.3), 0) === '');
+  ok('the transform names translate and scale, in that order', /^translate\([^)]*\) scale\(/.test(idleTransform({ dx: 3, dy: 1, scale: 1.01, rot: 0 }, 1)));
+
+  // A NAME THE REGISTRY DOES NOT KNOW IS REFUSED, never resolved to `none`. A silently ignored idle
+  // looks exactly like a working one from the JSON, which is this repo's most expensive bug class.
+  {
+    let msg = '';
+    try { normalizeIdle('breath'); } catch (e) { msg = e.message; }
+    ok('a misspelled idle is refused and names what exists', /unknown idle "breath"/.test(msg) && /breathe/.test(msg));
+    let msg2 = '';
+    try { normalizeIdle({ amp: 3 }); } catch (e) { msg2 = e.message; }
+    ok('an idle object without a name is refused', /expected a name/.test(msg2));
+  }
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

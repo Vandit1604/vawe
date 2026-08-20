@@ -81,6 +81,15 @@ export const ANIM_BLURBS = {
 // scale them by the theme's motion.durationScale from ONE source (no duplicated literal).
 export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
 
+// The two ramp lengths driveClips drives an element's entrance and exit from, read off the element
+// itself. Exported because a second reader has appeared — the idle track needs the SETTLED MIDDLE, and
+// the settled middle is defined as "not either of these". Re-deriving them there would be two copies of
+// the defaulting rule, and the copy that goes stale is invisible until an entrance and an idle overlap.
+// Two functions rather than one returning a pair: this runs for every clip on every frame, and an
+// object literal here is an allocation the render pays ~50,000 times a minute of video.
+export const enterDurOf = (el) => (el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER);
+export const exitDurOf = (el) => (el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : BASE_EXIT);
+
 /**
  * The opacity envelope every layer fades through. Eased, and MIRRORED: the exit curve is the
  * complement of the entrance curve, so two layers handing over the same pixels sum to exactly 1.
@@ -136,8 +145,8 @@ export function driveClips(clips, t) {
     const start = parseFloat(el.dataset.start) || 0;
     const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
     const end = start + dur;
-    const enterDur = el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER;
-    const exitDur = el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : BASE_EXIT;
+    const enterDur = enterDurOf(el);
+    const exitDur = exitDurOf(el);
     if (el.dataset.track != null) el.style.zIndex = el.dataset.track;
 
     // OFF-WINDOW MUST BE A STATE, NOT AN ABSENCE. This branch used to zero opacity and `continue`,
