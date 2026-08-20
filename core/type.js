@@ -141,7 +141,12 @@ export const PRESETS = {
   // frozen into a preset every theme may use. They default to the THEME now. docs/MISTAKES.md #354.
   colorWave: (u, { flash, to, hold = 0.5 } = {}) => {
     const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold)));
-    const f = flash || 'var(--accent)', rest = to || 'var(--ink)';
+    // The resting colour DEFAULTS TO THE LAYER'S OWN, not to `var(--ink)`. This preset paints `color` on
+    // every unit every frame, so it overrides the per-window automatic ink that core/layers/util.js just
+    // resolved — and `--ink` is the dark one in a white-first theme, so a colour-wave headline over a
+    // dark bg window settled to invisible while the same headline without the preset read fine.
+    // `--layer-ink` is that layer's settled colour, published by util.js. An explicit `to` still wins.
+    const f = flash || 'var(--accent)', rest = to || 'var(--layer-ink, var(--ink))';
     return {
       opacity: clamp01(u * 4),
       // color-mix, not a hex lerp: the resting colour is usually the theme's, and a theme colour is only

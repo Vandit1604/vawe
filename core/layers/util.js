@@ -92,6 +92,14 @@ export function createKit(ctx) {
     const layerColor = L.color || auto || 'var(--text)';
     const emDefault = w && ACCENT_BGS.includes(w.preset) ? layerColor : 'var(--accent)';
     el.style.setProperty('--em', L.emColor || emDefault);
+    // --layer-ink: the colour this layer ACTUALLY settled on, published for the kinetic presets.
+    // `colorWave` sweeps the accent through a phrase and settles each word to a "resting colour" that
+    // defaulted to `var(--ink)`. A preset writes `color` on every unit span every frame, so it wins over
+    // whatever `auto` put on the layer — which means a colour-wave headline over a DARK bg window
+    // settled to the dark ink and was not there, while the identical headline without the preset was
+    // fine. Same shape as #373: a token name standing in for a decision that depends on the window.
+    // The resting colour is not the preset's to choose; it is the colour this layer would have had.
+    el.style.setProperty('--layer-ink', layerColor);
     el.innerHTML = L.type === 'count' ? '' : (L.text || '');
     if (L.type === 'count') { el.style.fontVariantNumeric = 'tabular-nums'; el.textContent = (L.prefix || '') + (L.from ?? 0).toFixed(L.decimals ?? 0) + (L.suffix || ''); }
   }

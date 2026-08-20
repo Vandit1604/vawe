@@ -11071,6 +11071,53 @@ their whole runtime and stayed that way, because after they shipped nothing ever
 A check that is only ever run against the file you are editing cannot find a defect that is already in
 the library. Fixed by `make audit-all` (#374).
 
+## #374 — A check that only grades the file you have open
+
+`make audit` is a good check. It samples the bg canvas under a text element's own ink box, computes
+WCAG against it, and names the layer. It takes ONE scene.
+
+That is a check against NEW defects. It is not a check against the library, and the library is where
+defects live once they ship: `motion-reel` and `motion-reel-v2` rendered dark text on a dark backdrop
+for their whole runtime and stayed that way, because after they shipped nothing ever asked them again
+(#373). The audit could have answered in one second at any point in those months. Nobody put the
+question.
+
+`make audit-all` sweeps every shipped scene and exits 1 on any hard issue. First run:
+
+```
+==== AUDIT-ALL · 102 scenes ====
+✓ clean: 69   ✗ hard: 33   ! errored: 0   ·warn-only: 33
+```
+
+**A third of the library has hard contrast failures.** That number is the point of the entry. It was
+not created by the sweep and it is not new; it is what the library has been shipping while every gate
+stayed green, because the one gate that could see it was never pointed at anything but the open file.
+
+Deliberately NOT wired into `make author-check`: it renders sampled frames for 100+ scenes, and a
+per-edit ladder that takes fifteen minutes is a ladder authors route around. On demand, and honest
+about what it found.
+
+## #375 — The colour wave settled to invisible, one level under #373
+
+#373 fixed the ink a layer inherits from its bg window. A blueprint author then hit the same wall one
+level down and wrote a workaround into the blueprint, which is how it surfaced: a `colorWave` label
+over a dark window vanished, and the fix in that file was to thread a resting colour through
+`presetOpts.to` on every call.
+
+**A workaround is a bug report.** `colorWave` sweeps the accent through a phrase and settles each word
+to a resting colour that defaulted to `var(--ink)`. The preset writes `color` on every unit span on
+every frame, so it OVERRIDES the per-window automatic ink that `core/layers/util.js` had just resolved.
+The same headline without the preset read fine; adding a kinetic reveal made it disappear. And `--ink`
+is the dark one in a white-first theme, which is #373's assumption verbatim.
+
+**The resting colour is not the preset's to choose.** It is the colour that layer would have had.
+`util.js` already computes `layerColor = L.color || auto || var(--text)` for the `--em` emphasis guard,
+so it now publishes that as `--layer-ink`, and `colorWave` defaults to `var(--layer-ink, var(--ink))`.
+An explicit `to` still wins. The blueprint's workaround becomes optional rather than required.
+
+**Blast radius: none.** `snap-all` 104 identical, 0 changed. No shipped scene had a colour wave whose
+resting colour disagreed with its window, so this closes a trap rather than changing a film.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
