@@ -21,8 +21,9 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
 ### 1. Break the reference down (measure, don't eyeball)
 - **Map the beats.** `make filmstrip VIDEO=ref.mp4` → a labelled contact sheet. One idea per beat;
   note the copy, layout, palette per beat.
-- **Judge the REVEAL, not the hold.** The single most repeated failure: sampling a beat's *middle*,
-  which shows the settled state and hides the motion that carries the craft (MISTAKES #124). Sample
+- **You will sample the middle of the beat. Don't.** It is the single most repeated failure here: the
+  middle shows the settled state and hides the motion that carries the craft (MISTAKES #124), and for a
+  continuously moving field it is the exact frame where a wrong speed looks right (#155). Sample
   the **entrance** (high fps, first ~0.5s): is the word oversized + blurred, settling (a dolly-in)?
   the **exit**: does it scale UP + blur to leave (a dolly-out)? a **zoomed crop of the text**: flat
   fill or a GRADIENT / colour-wave? For OUR renders, [`make reveal`](../../scripts/author/reveal.mjs)

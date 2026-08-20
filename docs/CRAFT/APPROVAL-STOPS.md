@@ -38,8 +38,12 @@ structure, not only in colour: a different message, a different object, a differ
 
 The reviewer picks one, kills one, or says none of these. A wrong call costs minutes.
 
-Do not show one direction and ask whether it is good. That is not a choice, it is a request for
-permission, and it gets approved by default.
+**You will build the one direction you already like, show it, and ask whether it is good. Don't.** That is
+not a choice, it is a request for permission, and it gets approved by default. Three genuinely different
+directions or you have not run this stop. And "different" is measured, not asserted: `make concept` scores
+how likely each direction is to be the FIRST thing anybody proposes for the brief, and **throws the round
+away unless two of them score under 0.10** ([SELECTION.md](SELECTION.md) Part 3). Asked for three, a
+generator produces the first thing three times in three palettes.
 
 ### 1a. Storyboard panels — before any JSON exists
 

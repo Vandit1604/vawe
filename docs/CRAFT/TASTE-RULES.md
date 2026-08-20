@@ -24,6 +24,48 @@ Every rule below is a corollary. When two rules collide, this one wins.
 
 ---
 
+## Guardrails: you know these rules but you violate them. Stop.
+
+Borrowed close to verbatim from the reference system's
+`another engine-creative/references/motion-principles.md`. Their sentences, our engine's names, and the
+receipts from this repo where we have them. Everything below this block is the reasoning; this block is
+the part you skip.
+
+- **Don't use the same ease on every tween. You default to `power2.out` on everything.** Ours is
+  `easeOutCubic`, which the table below calls *"the default for almost everything"*, and that phrasing is
+  how a table entry becomes a habit. *"Vary eases like you vary font weights: no more than 2 independent
+  tweens with the same ease in a scene."*
+- **Don't use the same speed on everything. You default to 0.4-0.5s for everything.** *"The slowest scene
+  should be 3x slower than the fastest. Vary duration deliberately."* This is the same defect the
+  failure catalog below already names as **the monotone** ("every entrance is the same 0.45s"), and it is
+  gated as `monotone-timing`. Two independent systems arrived at the same number about you.
+- **Don't enter everything from the same direction. You default to `y: 30, opacity: 0` on every element.**
+  Our version of that default is `anim: "fade"`. A 28s film shipped here with 31 hand-written layers and
+  `anim: "fade"` on nearly every one (`../../CLAUDE.md`, the #1 authoring failure). *"Vary: from left,
+  from right, from scale, opacity-only, letter-spacing."*
+- **Don't use the same stagger on every scene.** *"Each scene needs its own rhythm."*
+- **Don't use ambient zoom on every scene.** *"Pick different ambient motion per scene: slow pan, subtle
+  rotation, scale push, colour shift, or nothing. Stillness after motion is powerful."*
+- **Don't start at t=0.** *"Offset the first animation 0.1-0.3s. Zero-delay feels like a jump cut."*
+- **Ease-out for entering, ease-in for leaving, ease-in-out for moving between positions. You get this
+  backwards constantly.** *"Ease-in for entrances feels sluggish. Ease-out for exits feels reluctant."*
+- **Entrances take longer than exits.** *"A card takes 0.4s to appear but 0.25s to disappear."* The engine
+  has a field for exactly this: `theme.motion.exitRatio`, which defaults to `1` and is set to `0.45` by
+  exactly one theme ([KEYED-MOTION.md](KEYED-MOTION.md)).
+- **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
+  films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
+  and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #322).
+  `make pace-check` fails below 1.0.
+
+**One accusation this repo has to add for itself, because their engine has no counter layer:** you will
+put a spring or an overshoot ease on a `count`. Don't. `core/layers/count.js` runs the value through
+whatever ease it is handed, so overshoot paints a number that is **not true** for several frames. The
+house motion guide recommended it, twice, for a year ([`../MISTAKES.md`](../MISTAKES.md) #385).
+`countEaseErrors` in `core/validate.mjs` now refuses it. Overshoot is a claim about MASS, and a number
+has none.
+
+---
+
 ## Cause → feeling: the ease + duration table
 
 The single highest-leverage taste control is the easing curve, and authors reach for the wrong one by

@@ -58,6 +58,22 @@ Adapted from another engine' design-spec; the values come from the brand study (
 | `motion` | easing character · bounce · stagger (the brand's `motion`) | `easeOutCubic`, settle 0.7, stagger 60ms |
 | `components` | which surfaces this brand uses (glass? mesh? plain?) | glass over aurora; no card soup |
 
+### Check the frame against the spec AFTER you build it
+
+Borrowed close to verbatim from the reference system's
+`another engine-creative/references/design-adherence.md`. Run it after building, before the preview, because
+a spec nobody re-reads is a spec that was decoration.
+
+1. **Colours**: every hex in the composition appears in the spec's palette. **Flag any invented colour.**
+2. **Typography**: families and weights match the spec. **No substitutions.** This engine has substituted
+   a face silently more than once ([`../MISTAKES.md`](../MISTAKES.md) #10, #22, #317).
+3. **Corners**: `border-radius` values match the declared radius scale.
+4. **Spacing**: padding and gap fall inside the declared density range.
+5. **Depth**: shadow usage matches the declared level. Flat means none.
+6. **The negative list**: verify none of the things the spec said it would NOT do are present.
+
+`make designspec-check D=<file>` automates points 1 and 2 against the theme lock. Points 3 to 6 are yours.
+
 ### The 8 visual styles (mood-first picker)
 
 Pick ONE as the register; it sets colors/typography/components together. Don't mix.

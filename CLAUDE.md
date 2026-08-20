@@ -98,8 +98,11 @@ The backdrop line is the strongest single lever: brew inverts the whole tone of 
 five cuts and spends its one accent window on the logo reveal. A pictorial beat on a dead backdrop is
 still a slide.
 
-> **THE 46% IS A COUNT OF LAYERS AND IT IS NOT WHAT IT SOUNDS LIKE.** brew carries 11 `image` layers out
-> of 30, so 46% of its layers are pictorial. Measured by the share of the FRAME carrying real pictorial
+> **THE 46% IS A COUNT OF LAYERS AND IT IS NOT WHAT IT SOUNDS LIKE.** brew carries **35** layers: 13
+> text, 11 image, 5 rect, 5 html, 1 count. The 46% is 16 of 35 with `html` counted as pictorial. (An
+> earlier attempt to correct this line said "11 image layers of 30" and was wrong twice over, which is
+> the hazard exactly: a number in this file gets quoted downstream faster than it gets checked.)
+> higgsfield's 38% is 3 of 8, and every one of those three is `html` — it has NO image layers at all. Measured by the share of the FRAME carrying real pictorial
 > detail, brew is **10.3%, the lowest of nine films compared** — against 23.8% for the reference films
 > and 20.6% for ours. Eleven small marks is not a picture. This is the same layer-count-versus-area
 > error that killed the `visual-vocabulary` gate, whose size helper squared a 590x18 rule into 590x590
@@ -313,7 +316,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    (`{type:"beat","beat":"kineticHook",…}`, `docs/CRAFT/BLUEPRINTS.md`). Drop one per beat + fill brand
    content so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT, then `make expand`.
    Authoring plain `rise`+`fade` from a blank JSON is the #1 failure — blueprints + the floor prevent it.
-0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (245 effects, 16 families,
+0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (518 effects, 35 families,
    generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
    aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
    shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves
@@ -349,9 +352,14 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    never moves. Every gate stayed green until this one existed. Even plan-vs-render only proves the film is not
    empty where it promised to be full, never that it kept the promise: that is `make judge` and your eyes.
    Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
-   By default it **blocks** on schema/em-dash and on timeline holes. Under `TASTE=1` it also blocks on
-   hollow/unbacked beats, the direction tells (`linear-motion` · `monotone-timing` · `enter-and-retreat` ·
-   `effect-soup` · ≥3 cut families) and the **ambition floor** (`plain-slideshow` — too little motion).
+   By default it **blocks** on schema/em-dash and on timeline holes.
+   **THE DIRECTION TELLS DO NOT BLOCK, AND THIS FILE SAID THEY DID.** `linear-motion`,
+   `monotone-timing`, `enter-and-retreat` and `effect-soup` are every one of them `warn()` in
+   `scripts/author/motion-director.mjs`; that gate exits only on `fails`, and the string `strict` does
+   not appear in it. Only `≥3 cut families` blocks. So the backstop this paragraph promised for months
+   does not exist, and a film can carry all four tells and pass `TASTE=1` clean. Treat them as what they
+   are: a report you have to read, not a wall that stops you. The ambition floor (`plain-slideshow`) is
+   in the same position.
    Two-sided: `effect-soup` is the ceiling, `plain-slideshow` the floor; directed lives between.
    There is **no show floor**: `visual-vocabulary` was deleted for measuring size wrongly (see 2a0000).
    Reach past every WARN; waive a *deliberate* break with

@@ -11,6 +11,34 @@ how to turn those pixels into a full `theme.palette` and use it well. Maps to th
 `bg, bg2, surface, surface2, line, lineStrong, text, text2, dim, ink, accent, accentDim, accentGlow, up, down`
 + 3 `gradient` stops.
 
+## 0. Lazy defaults to question: the first thing every LLM reaches for
+
+Borrowed close to verbatim from the reference system's `another engine-creative/references/house-style.md`.
+*"If you're about to use one, pause and ask: is this a deliberate choice for THIS content, or am I
+defaulting?"* The goal is intentionality, not avoidance: if the content genuinely calls for one, use it
+and be able to say why.
+
+- Gradient text (`background-clip: text` + a gradient).
+- Left-edge accent stripes on cards and callouts.
+- Cyan-on-dark · purple-to-blue gradients · neon accents.
+- Pure `#000` or `#fff` (§4 below says the same thing: tint toward the accent hue).
+- Identical card grids, every card the same size.
+- Everything centred with equal weight. Lead the eye somewhere.
+
+Two more of theirs, and both are rules we did not have:
+
+- **Muted is fine. Flat is not.** *"Every scene should have at least one colour that pulls the eye. Brand
+  accent should be VISIBLE, not a 5% opacity glow lost in compression. 15-25% for atmospheric, full
+  saturation for focal elements."*
+- **A light canvas is not a dark one with the values swapped.** *"On dark, accent glows pop naturally. On
+  light, use bolder borders (2px+ solid), stronger structural elements, and full-saturation accent hits.
+  Light backgrounds need texture to avoid the blank-slide feel. Don't switch to dark. Make light
+  cinematic."* This repo has the receipts for getting that backwards in both directions: a dark video
+  built for a white site is [`../MISTAKES.md`](../MISTAKES.md) #1, and two beats of dark text on a dark
+  backdrop shipped for their whole runtime because a token name assumed a theme family (#373, #375).
+- **Declare the palette up front. Don't invent colours per element.** Our version is stronger and already
+  written: colours come only from the brand, and `make designspec-check` locks them.
+
 ## 1. Decide dominance FIRST — by looking, never by a field
 A white site gets a **light-first** video; a dark site gets **dark-first**. Decide by looking at the hero
 (confirm with `make palette`'s luminance read). A mislabeled dominance is how the worst videos happen

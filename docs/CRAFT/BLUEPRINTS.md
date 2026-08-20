@@ -6,10 +6,20 @@ group: crosscutting
 
 # BLUEPRINTS — compose a video from directed beats, don't re-derive motion
 
-The recurring failure, proven twice on the TokenJam launch: even with the full arsenal in hand, authoring
-a beat from a blank JSON regresses to `rise`+`fade` — a plain slideshow that passes every gate. Blocks
-fixed that for *components* (a card, a chart). **Blueprints fix it for MOTION** — each is a whole beat's
-directed choreography, so the good motion is the *default* you start from, not something you remember to add.
+**You will open a blank JSON and write `anim: "rise"` and `anim: "fade"`, and it will pass every gate.
+Don't. Run `make blueprints` FIRST and start from a directed beat.** This is not a suggestion about
+efficiency. It is the #1 authoring failure in this repo, named as such in `CLAUDE.md`, proven twice on the
+TokenJam launch, and committed again in a 28s film of 31 hand-written layers, 74% of them text, with
+`anim: "fade"` on nearly every one and one backdrop window for the whole runtime. That film was rejected
+twice by the person who asked for it and it was not below the house standard, it was AT it.
+
+The reference system says the same thing about the same reflex: *"Don't enter everything from the same
+direction. You default to `y: 30, opacity: 0` on every element"*
+(`another engine-creative/references/motion-principles.md`). `anim: "fade"` is our `y: 30, opacity: 0`.
+
+Blocks fixed the blank-page problem for *components* (a card, a chart). **Blueprints fix it for MOTION**:
+each is a whole beat's directed choreography, so the good motion is the *default* you start from, not
+something you remember to add.
 
 > A blueprint fixes **motion + structure**, never copy/colour/brand. Two brands using `kineticHook` still
 > differ (their words, palette, and faces differ). The ledger + similarity gate still enforce uniqueness —

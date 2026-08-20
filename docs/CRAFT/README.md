@@ -21,8 +21,9 @@ build, it's cut. **Load the relevant guide before you author.**
 
 ## The layering order — decide in this sequence, hand off down the chain
 
-The single biggest reason a from-scratch video comes out as effect-soup is deciding effects *first*.
-Decide in this order instead. Each layer sets constraints the next one fills; a choice upstream makes
+**You will decide the effects first, because effects are the fun part and the table below is admin.
+Don't.** That is the single biggest reason a from-scratch video comes out as effect-soup. Decide in this
+order instead. Each layer sets constraints the next one fills; a choice upstream makes
 the downstream choices for you.
 
 | # | Decide | Load | It hands the next layer… |

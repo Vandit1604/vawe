@@ -65,6 +65,10 @@ to bolt a graphic onto a slogan.
 
 ## 3. The graphic must be the subject, not a garnish
 
+**You will add a logo, an icon or a mark, and count it as showing something. Don't.** `creed-launch`
+carries 19 pictorial layers and fails this anyway, because every one of them is a small logo. The house
+habit is shipping icons, not shipping explanations.
+
 A layer type is not enough. Put a 60px logo beside a headline and you have added punctuation, not a
 picture. The gate draws the line at **8% of the canvas**, which is about a 400 by 400 box on either the
 portrait or the landscape frame. Below that, it counts as a mark and buys nothing.

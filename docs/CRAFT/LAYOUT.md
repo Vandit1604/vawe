@@ -9,6 +9,38 @@ group: look
 Layout is where hand-authored work most often regresses to slop (centered everything, equal card grid). This is
 how to place layers and compose an `html` layer with intent.
 
+## 0. Guardrails: you build for the web. Video frames are not pages.
+
+Borrowed close to verbatim from the reference system's
+`another engine-creative/references/video-composition.md` and `motion-principles.md`. Read those before
+arguing with these.
+
+- **Two focal points minimum per scene.** *"The eye needs somewhere to travel. Never a single text block
+  floating in empty space."* That single floating block is what [DENSITY.md](DENSITY.md) calls the slide
+  tell, said from the composition side.
+- **Fill the frame. Hero text: 60 to 80% of frame width. You will try to use web-sized elements. Don't.**
+  Measured on our landscape films the hero ink averages **44.7%**, and **79% of frames sit below the 60%
+  floor**. See the measure contradiction flagged in [TYPOGRAPHY.md](TYPOGRAPHY.md) §4 before you fix this
+  by widening a text box: §5 below repeats the 45-75 character rule with no exemption for display type,
+  and that rule is one mechanical route to 44.7%.
+- **Anchor to edges.** *"Pin content to left/top or right/bottom. Centered-and-floating is a web layout
+  pattern."* This is §2 below, stated as an accusation rather than as a tradition.
+- **Three layers minimum per scene.** Background treatment, foreground content, accent elements. This is
+  the same three-plane depth rule this file already carries at the bottom, and most films here have one
+  plane.
+- **Background is not empty.** *"Pure solid #000 reads as 'nothing loaded.'"*
+- **Split frames, not centered stacks.** *"Data panel on the left, content on the right. Top bar with
+  metadata, full-width below."*
+- **Use structural elements.** *"Rules, dividers, border panels. They create paths for the eye and animate
+  well."* In this engine that is a `rect` with a `motion` track on `w`, or `parts` with `drawOn`.
+- **Web sizes are invisible on video.** Their table, which is the register to author at:
+  headlines 64-120px (web 32-48) · body 28-42px (web 14-16) · labels 18-24px (web 12) · decorative opacity
+  12-25% (web 3-8) · borders 2-4px (web 1) · padding 60-140px (web 16-32). *"If you're writing a font-size
+  under 24px in a video composition, justify it. If you're writing decorative opacity under 10%, it's
+  invisible."* [TASTE-RULES.md](TASTE-RULES.md) already names the same failure from the other end and
+  calls it **the invisible effect**: if it does not read at its size and duration, it is not a feature.
+  An effect nobody can see is not restraint.
+
 ## 1. One thing dominant — scale contrast
 - **Make ONE element the hero** via *scale contrast*: one huge headline + one tiny caption beats three medium
   things. Emphasize with **size, then weight, then colour/contrast**; de-emphasize secondary text with lower

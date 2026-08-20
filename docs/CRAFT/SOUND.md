@@ -42,6 +42,10 @@ doctrine, and the doctrine outlived the bug by a year.
 
 So:
 
+**You will ship it mute and never notice you decided anything.** Five films in six here did exactly that,
+and not one of the 90 says why. Silence closes a whole quarter of the structural vocabulary, including the
+sound bridge, which is a continuous object the picture never has to carry.
+
 > **Give every film sound. If it is better mute, say so in one line and mean it.**
 >
 > ```jsonc

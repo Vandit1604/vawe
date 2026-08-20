@@ -23,6 +23,10 @@ first and hands off to all four.
 
 > **Never spoil the payoff. Pose the question in the first 3 seconds, answer it last.**
 
+**You will put the best number in the hook, because it is the best number.** That spends the film's only
+open loop in its first three seconds and leaves the payoff with nothing to land. The hook TEASES the
+number; the number lands last.
+
 Every video is one open loop. The hook opens it; the best, most counterintuitive fact closes it at the
 end. A beat that has no job in opening, sustaining, or closing that loop is not a beat, it is time
 being spent. Cut it. (This is the value gate in `vawe-video-planning` and the required per-beat fields

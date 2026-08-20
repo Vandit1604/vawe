@@ -17,6 +17,14 @@ Ladder, lightest first — go heavier only if it adds meaning, not decoration:
 A clean gradient beats a mismatched photo. If a beat reads fine on a plain field, don't add an image.
 
 ## 2. Treat every image so it feels intentional
+
+> **Never embed a raw flat image. Every image must have motion treatment.** Borrowed verbatim from the
+> reference system's `another engine-creative/references/motion-principles.md`, which lists five and we have
+> all five: a perspective tilt (camera `rx`/`ry`, `three:"uiParallax"`), a slow Ken Burns zoom (`ken`), a
+> device frame (clip + `radius`), a floating extracted element at another depth, and a scroll reveal
+> (`recordedPan`). You will drop the screenshot in flat and move on. The `ken` row below is their rule in
+> our own words, and it is the DEFAULT for a reason.
+
 A raw, untreated, off-brand photo reads as slop and fails the beats fidelity gate. Pick the treatment by what the
 image needs to DO, not by habit:
 

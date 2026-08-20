@@ -55,6 +55,12 @@ layer's children (an `html` inline-SVG, a `group`, an `svg`). No `<script>` in t
   ] }
 ```
 
+**You will write the SVG, put one `anim` on the whole layer, and let the figure land in a single frame.
+Don't.** A static figure that arrives as one block is the flat tell `parts` exists to kill, and it is the
+same reflex the reference system names as *"you dump everything in the build"*
+(`another engine-creative/references/motion-principles.md`). Author figures with `parts` BY DEFAULT: bars
+grow, then the line draws, then the dots pop.
+
 Named entrances: **growUp** (bars from a baseline), **widen** (bars left→right), **popIn** (scale+fade),
 **fadeUp** / **riseIn**, **drawOn** (SVG stroke draws itself). Pass one spec or an ARRAY (bars, THEN line,
 THEN dots) so a single figure develops across its beat instead of arriving as one block. **Author figures

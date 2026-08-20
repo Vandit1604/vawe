@@ -69,6 +69,12 @@ used as a boundary (`pop`), is rejected at validate with the catalog — never s
 The hard cut is the default and the overwhelming majority of professional edits. You *earn* anything
 more by naming what it does. "It looks smoother" is not a reason — it is the blur-spam tell.
 
+> **You crossfade everything. Use hard cuts for disruption and register shifts.** Borrowed verbatim from
+> the reference system's `another engine-creative/references/motion-principles.md`, which also states what
+> each seam MEANS in three lines: *"Crossfade = this continues. Hard cut = wake up / disruption. Slow
+> dissolve = drift with me."* That is the taxonomy below in three words, and it names the exact wrong
+> move: reaching for the soft one because it is soft.
+
 ---
 
 ## Emotion first — Walter Murch's Rule of Six

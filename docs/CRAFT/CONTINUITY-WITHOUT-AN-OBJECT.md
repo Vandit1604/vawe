@@ -50,8 +50,11 @@ strictly more permissive.
 
 ## The forms the thread can take
 
-Reach past the first one you think of. If your answer to "what carries the continuity" is always "the layer
-resizes", you are writing the gate's minimum.
+**You will key `w` and `h` on a rectangle and call it the thread. Don't.** Eighteen short films here have
+already answered the question that way, three of them consecutively, and all three passed every gate while
+being visually inert. It is the cheapest device available and Murch ranks the register it belongs to LAST,
+at 4%. Reach past the first one you think of. If your answer to "what carries the continuity" is always
+"the layer resizes", you are writing the gate's minimum, not a film.
 
 | Thread | What survives the cut | Costs you |
 |---|---|---|

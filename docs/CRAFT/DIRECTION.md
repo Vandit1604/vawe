@@ -30,6 +30,12 @@ Every rule is tagged:
 
 ---
 
+> **The accusing version of §1 and §2 lives in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails".** It
+> names the exact defaults an author here reaches for (one ease everywhere, one duration everywhere, one
+> entrance direction everywhere, everything starting at t=0, entrances slower than exits) and forbids each
+> one, borrowed close to verbatim from the reference system. This file is the reasoning under those
+> guardrails. Read the guardrails first; read this when you need to know why.
+
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
 Source: **Thomas & Johnston, _The Illusion of Life: Disney Animation_ (1981)** — the 12 principles;

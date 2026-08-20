@@ -20,12 +20,15 @@ video starts ahead.
 
 1. **Map the beats.** `ffmpeg -vf "fps=3,scale=…,drawtext=…timestamp…,tile=…"` → a labelled contact
    sheet. Read it: one beat per idea, note the copy, the layout, the palette per beat.
-   **Then look at the RIGHT frames — this is where I went wrong repeatedly.** A beat-MIDDLE frame shows
-   the settled state and hides the motion. You MUST also sample: (a) the **entrance** at high fps
+   **You will sample the middle of each beat, and the middle is the one frame that hides everything you
+   came to learn.** A beat-MIDDLE frame shows the settled state, which is where nothing is moving. Doing
+   this missed the dolly, the gradient fill AND the orange colour-wave on one film, three separate times
+   (`../MISTAKES.md` #124). A still frame carries composition and colour and nothing about time; for a
+   continuous effect it is the least informative test there is, because it is exactly the frame where a
+   wrong speed looks right (#155). You MUST also sample: (a) the **entrance** at high fps
    (`fps=12`, first ~0.5s) — is the word oversized/blurred and settling (a dolly-in)?; (b) the **exit**
    (`fps=12`, last ~0.5s) — does it scale UP + blur to leave (a dolly-out)?; (c) a **hard-zoomed crop of
-   the text** (`crop=…,scale=up`) — is the fill a flat colour or a GRADIENT / colour-wave? Sampling only
-   middles is how I missed the dolly, the gradient fill, AND the orange colour-wave — three separate times.
+   the text** (`crop=…,scale=up`) — is the fill a flat colour or a GRADIENT / colour-wave?
    **For OUR renders, `make reveal D=<scene.json>` does this automatically** — it renders each beat's
    ENTER arc + settled + EXIT arc from the exact layer start-times, so the reveal is never hidden. It is
    the standing fix for the "judged the hold, missed the reveal" trap; run it every render.

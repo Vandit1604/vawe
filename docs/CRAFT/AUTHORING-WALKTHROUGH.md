@@ -24,10 +24,12 @@ No client, no site. Portrait 1080×1920 for a phone feed.
 
 ## Step 0 — Load the spine before the blank page
 
-Read, in order, so you compose from craft not priors:
+**You will open the JSON first, because that is where the work looks like work. Don't.** A blank JSON is
+the exact condition this repo's #1 authoring failure needs: 31 hand-written layers, 74% of them text,
+`anim: "fade"` on nearly every one. Read, in order, so you compose from craft not priors:
 [`../TASTE.md`](../TASTE.md) (the one law + the three spines) → [`DIRECTION.md`](DIRECTION.md) (pacing,
 restraint, story placement) → [`README.md`](README.md) (the 7-step layering order). Then the planning
-skill owns the plan→lock→execute contract. Do **not** open the JSON yet.
+skill owns the plan→lock→execute contract.
 
 ## Step 1 — Manufacture the four things a site would have given you
 

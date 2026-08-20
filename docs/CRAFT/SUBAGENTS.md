@@ -13,6 +13,9 @@ parallel, each returning a verdict in a fixed shape.** This is a rule, not a sug
 
 ## Why dedicated beats generalist
 
+**You will look at your own render and decide it is fine. You picked every part of it.** Do not grade your
+own film. Run the panel.
+
 **A self-grading agent grades kindly.** The thread that wrote the scene has already anchored on its own
 choices. It picked that easing, that crop, that headline, and every look at the render is a look at a
 decision it already defended. Ask it "is beat 4 good?" and it answers "yes, because I chose it." A fresh
@@ -62,9 +65,9 @@ Notes that matter per critic:
 **One message, several `Agent` calls, so they run at once.** Launching them one at a time turns a
 30-second panel into five minutes and tempts you to skip four of them.
 
-1. **Hand each agent file paths, never your summary of the images.** The moment you write "the sheet
-   shows a clean grid" you have replaced its eye with yours and bought nothing. Say: read this path,
-   answer this question.
+1. **You will describe the sheet to the agent instead of handing it the path. Don't.** The moment you
+   write "the sheet shows a clean grid" you have replaced its eye with yours and bought nothing. Say:
+   read this path, answer this question.
 2. **Demand the verdict shape in the prompt.** Fixed keys make six replies comparable and stop a critic
    drifting into an essay. Reject a reply that arrives as prose.
 3. **Critics report, the main thread fixes.** No critic edits the scene JSON. Six agents writing to one

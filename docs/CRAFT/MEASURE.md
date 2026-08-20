@@ -6,10 +6,14 @@ group: story
 
 # MEASURE — read a transition's real motion, in our own vocabulary
 
-Eyeballing frames tells you "a slide with some easing." It does not tell you `duration: 0.43s, ease:
-easeOutSine`. Those are **measured, not seen** — and if you guess them you will confabulate. `make measure`
-measures them, and (the part that matters for us) reports the answer as **the nearest preset the engine
-actually has**, not an arbitrary bezier we can't use.
+**You will watch the reference, write "a slide with some easing", and then name a duration and a curve
+that you did not measure. That is confabulation, and it is indistinguishable from knowing.** Run `make
+measure`. `duration: 0.43s, ease: easeOutSine` is **measured, not seen**, and the tool reports the answer
+as **the nearest preset the engine actually has**, not an arbitrary bezier we can't use.
+
+The second half of the same discipline: **you will read `residual > 0.07` and author the named preset
+anyway.** Don't. A loose fit is the tool refusing to invent a curve for motion that is not one, and that
+refusal is the most useful thing it says. Read §"Reading the result" and re-author by intent.
 
 Two jobs, one tool:
 - **Reference analysis** — "what is this transition in a video I want to reproduce, and which of our

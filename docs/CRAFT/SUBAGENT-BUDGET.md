@@ -39,8 +39,9 @@ dominates the total. Cost rises faster than the number of tool calls.
 
 ## Rules
 
-1. **Use fewer, larger agents.** One agent that covers four areas pays the startup cost once. Four agents
-   pay it four times. Published guidance says 3 to 5 subagents suits most work.
+1. **You will start one agent for each item, because it is the obvious mapping. Don't.** One agent that
+   covers four areas pays the startup cost once. Four agents pay it four times. Published guidance says 3
+   to 5 subagents suits most work.
 2. **Batch a fan-out.** For many items, group them into batches of 5 to 10. Do not start one agent for
    each item.
 3. **Put the file contents in the prompt.** Then the agent does not search for them. A search costs more
@@ -95,3 +96,12 @@ waves, not four agents carrying two and a half scenes each.
 **And re-run the gate yourself, in the main tree, after copying anything back.** Every number in the
 contrast pass was re-measured after the files landed rather than taken from the agent's own report. Two
 of them did not match.
+
+**You will read a gate's finding count and dispatch agents to fix the films. Look at ONE first.** The
+contrast gate reported 33 scenes with hard failures; the first one examined was flagged at 1.0:1 for a
+button that was 0.067 seconds into its fade-in and completely legible two frames later
+([`../MISTAKES.md`](../MISTAKES.md) #376). Fixing the gate took the number 33 to 32 with zero scenes newly
+failing. Two further attempts at the second, real defect in the same gate each took the library to 57 and
+broke a worse case than they fixed, and neither shipped. **A single scene going PASS to FAIL is a
+regression until proven otherwise**, and a fan-out launched off an unexamined finding count spends 65,000
+tokens per agent deforming films to satisfy a measurement nobody checked.

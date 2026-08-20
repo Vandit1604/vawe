@@ -51,6 +51,13 @@ That is how you stay directed without re-deriving motion or copying a template.
 
 ## Part 3 — The reveal model (anti-front-load) — now gated
 
+> **Every scene has three phases: build · breathe · resolve. You dump everything in the build and leave
+> nothing for breathe or resolve.** Borrowed verbatim from the reference system's
+> `another engine-creative/references/motion-principles.md`. Their split: **build 0-30%** (elements enter,
+> staggered, not all at once) · **breathe 30-70%** (content visible, alive with ONE ambient motion) ·
+> **resolve 70-100%** (exit or a decisive end, faster than the entrance). Our `front-loaded` gate fires on
+> exactly the first half of that sentence.
+
 A directed video weights its cues **across its length**; the two failure modes, banned by name:
 - **slideshow** — everything dumped in the first ~25%, then frozen.
 - **screensaver** — elements floating independently to fake life during a hold.

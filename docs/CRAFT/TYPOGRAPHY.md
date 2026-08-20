@@ -11,12 +11,55 @@ the face is decided for you — use the site's real font. This guide is for choo
 sizing/spacing well either way. Maps to the theme's `type.{sans, serif, mono, num}` keys.
 
 ## 0. MEASURE first — never guess the weight/face
-When reflecting a brand, **run `make brandspec URL=…` before authoring the theme.** It reads the site's
-real CSS + computed styles and reports the actual faces, **the weights they're set at**, sizes, tracking,
-and declared `--font-*`/`--color-*` tokens. Eyeballing "big headline = 800" is how the wrong weight ships
-(creed's headline is **600**, not 800). Eyedrop (`make palette`) reads pixels — good for dominance, but it
-read creed's accent as the *sky-photo* blue; the CSS says `#2563eb`. **CSS tokens beat pixels for anything
-declared.** See [`../MISTAKES.md`](../MISTAKES.md) #11.
+**You will look at the site's big headline, decide it is 800, and type 800. Don't. Run `make brandspec
+URL=…` BEFORE you author the theme.** That is not a suggested first step, it is the step that makes the
+rest of this file true. Creed's headline is **600**. It was authored as 800 by eye and shipped wrong
+([`../MISTAKES.md`](../MISTAKES.md) #11).
+
+`make brandspec` reads the site's real CSS + computed styles and reports the actual faces, **the weights
+they're set at**, sizes, tracking, and declared `--font-*`/`--color-*` tokens. Eyedrop (`make palette`)
+reads pixels — good for dominance, but it read creed's accent as the *sky-photo* blue; the CSS says
+`#2563eb`. **CSS tokens beat pixels for anything declared.**
+
+## 0a. Guardrails: you know these rules but you violate them. Stop.
+
+Borrowed close to verbatim from the reference system's `another engine-creative/references/typography.md`,
+whose films measurably read better than ours. Their sentences, our measurements. Go and read the source
+before you argue with any of it.
+
+- **RUN `make fonts-discover` BEFORE you pick a pairing. This is not optional.** *"You will otherwise
+  reach for the same 8 fonts every time. That's your training data default, not a contextual choice."*
+  They keep two lists. The BANNED faces (`typography.md`): Inter, Roboto, Open Sans, Noto Sans, Arimo,
+  Lato, Source Sans, PT Sans, Nunito, Poppins, Outfit, Sora, Playfair Display, Cormorant Garamond, Bodoni
+  Moda, EB Garamond, Cinzel, Prata, Syne, with Syne singled out as *"the most overused 'distinctive'
+  display font. It is an instant AI design tell."* And the eight a generator reaches for when asked for
+  something distinctive (`design-picker.md`): Bricolage Grotesque, Instrument Serif, Fraunces, Archivo
+  Black, DM Serif Display, Space Grotesk, Fredoka. **Six of those names are bundled in `core/tokens.css`:
+  Inter, Bricolage Grotesque, Instrument Serif, Fraunces, Archivo and Space Grotesk.** Being bundled is
+  not an argument for using one. Instrument Serif was picked here for a real film and rejected by the
+  person who asked for it as *"a saturated AI-default face"* ([APPROVAL-STOPS.md](APPROVAL-STOPS.md)).
+- **Reject your first instinct.** *"The first font that feels right is usually your training-data default
+  for that register. If you picked it last time too, find something else."*
+- **Don't pair two sans-serifs.** *"You do this constantly, one for headlines, one for body. Cross the
+  boundary: serif + sans, or sans + mono."* Our own §2 already says a superfamily (Geist + Geist Mono) is
+  the safest 2-face system, and that IS the crossing: sans + mono.
+- **One expressive font per scene.** *"You pick two interesting fonts trying to make it 'better.' One
+  performs, one recedes."*
+- **Weight contrast must be extreme. You default to 400 vs 700. Video needs 300 vs 900.** *"The difference
+  must be visible in motion at a glance."* Measured here across the 138 scene files that declare a font
+  weight: every one of the 2,417 declarations sits between **400 and 800**, and the two commonest values
+  are 500 and 600. **Zero declarations at or below 300. Zero at or above 900.** Eleven `@font-face` rules
+  in `core/tokens.css` load the full `100 900` range, so the light and black ends are paid for, loaded,
+  and never used.
+- **Video sizes, not web sizes. You will try to use 14px. Don't.** Full-screen viewing: body 20px minimum,
+  headlines 60px+, data labels 16px. **In a phone feed** (`"destination": "tiktok" | "reels" | "shorts"`)
+  the video plays small inside a scrolling column, so scale up: body ≥32px, headlines ≥90px, labels ≥24px.
+- **Fill the frame. Hero text: 60 to 80% of frame width. You will try to use web-sized elements. Don't.**
+  Measured on our landscape films, the hero ink averages **44.7%** of frame width and **79% of frames sit
+  below the 60% floor**. That is not a house style anybody chose.
+- **Tracking tighter than web.** Their number is **-0.03em to -0.05em** on display sizes, against the
+  -0.02 to -0.03 in §4 below. Video encoding compresses letter detail. Theirs is the more extreme claim
+  and it is theirs, not a measurement of ours; §4 stays as written until somebody measures it here.
 
 ## 0b. The font SYSTEM — 1 to 3 faces, like the colour system
 Pick a small, deliberate set of faces with roles, exactly like primary/secondary/accent colours. **Three is
@@ -46,9 +89,12 @@ accidental one.
 | Mono | technical, precise, code/data | filenames, counts, terminal, `num` | Geist Mono, JetBrains Mono |
 | Handwriting | human, annotation, warmth | ONE marker note, sparingly | Caveat |
 
-\* **Avoid Inter / Space Grotesk / Poppins for *generic* work** — they're the default on every AI/landing page,
-so they read as "template". Commit to a face with a viewpoint, or the real brand font. (This is also an
-`impeccable` rule — `make designspec-check` flags overused faces.)
+\* **You will reach for Inter. Or Space Grotesk, or Poppins, or whichever face the last theme you opened
+used. Don't.** Those three are the default on every AI landing page, so they read as "template", and
+reaching for the theme you saw most recently is recall, not a decision. Neither is a choice you made about
+this brand. Reflecting a real site? The face is already decided and `make brandspec` has told you what it
+is. Nothing to reflect? Pick from the table above by the SIGNAL you want, name the signal out loud, and
+commit. (This is also an `impeccable` rule — `make designspec-check` flags overused faces.)
 
 ## 2. Pair with contrast, not conflict
 - **Two faces max; one is often enough.** Differ *clearly* by class or weight (serif + sans, or black + regular),
@@ -72,6 +118,11 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
   when `theme.type.optical` is on; otherwise set `tracking` per layer.
 - **Leading:** body **1.2–1.45×**; tighter for big headlines (1.02–1.1), looser for long measure.
 - **Measure (line length):** 45–75 chars, ~66 ideal — set the text layer `w` so lines don't run edge to edge.
+  **This rule and the frame-fill guardrail in §0a disagree, and the disagreement is unresolved.** Butterick's
+  measure is a rule for a body PARAGRAPH; applied to a six-word hook it forces the hero box narrow, which is
+  one mechanical route to the 44.7% figure above. [LAYOUT.md](LAYOUT.md) §5 repeats the same 45-75 without an
+  exemption either. Until display type is exempted properly, read the measure as binding on body copy and the
+  60-80% frame fill as binding on a hero line, and do not use one to excuse the other.
 
 ## 4b. The face must actually LOAD (engine gotcha)
 Referencing a face isn't enough — it must be **loaded before the first frame** or it silently falls back
