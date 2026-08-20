@@ -64,19 +64,32 @@ not: "the defaults this film refuses, in your own words"
   Layout · Style · Timing, and ours had no Layout: composition was decided per layer at JSON time and
   never at beat time, so a plan could be approved without anyone saying WHERE anything sits. `layout:`
   asks for a coarse region and how much of the frame it fills ("filling the lower half", "top-left
-  against the UI"), never coordinates. That is the level a reviewer can actually approve, and it is
-  checkable later: `make audit` already knows every layer's box, so a beat that says "filling the lower
-  half" and renders a line at 6% of the frame is a plan-vs-render finding.
-  Be careful with that arithmetic when it is built. Measuring a picture's SIZE is what killed the
-  `visual-vocabulary` gate, whose helper squared a 590x18 rule into 590x590 and credited a hairline with
-  a tenth of the frame. Area, and only area.
+  against the UI"), never coordinates. That is the level a reviewer can actually approve.
 
-  EVERY BEAT DECLARES ITS STYLE AND ITS REST. Be clear about which of these three is wired, because a
-  field nobody reads is worse than no field: `rest:` is consumed, and `style:` and `layout:` are PARSED
-  AND CONSUMED BY NOTHING. They are read by `scripts/author/storyboard-parse.mjs` and no gate and no
-  renderer does anything with them today. Fill them because a reviewer approving the plan needs to know
-  the treatment and the region, not because any tool will check that the film kept them. Their intended
-  consumer is `make panels`, which draws the beat; until that join exists, treat them as notes to a human.
+  `layout:` IS NOW DRAWN. `make panels SB=<this file>` reads the line, tints the region it names inside
+  the panel frame, and sizes or centres the subject box against it, so a beat that says "the UI fills
+  the lower two thirds" stops being drawn as a medium box dead centre. What it reads: halves, thirds,
+  two-thirds and quarters ("lower half", "middle third", "top-left"), plus a stated share ("60% of frame
+  width", "8% of the frame"). It reads the FIRST region you name, it ignores any clause that says a
+  region is EMPTY ("the lower half deliberately empty" places nothing), and it treats "full-bleed" as a
+  fallback so a narrower region named beside it wins. A line it cannot read is named in the report as
+  unread, never quietly centred. Say WHERE and HOW MUCH: a line that says only where leaves the mass of
+  the panel to `shot:`, and the panel says so.
+  When the two disagree, the panel draws `layout:`, because a region is the more specific statement, and
+  the report names the disagreement. It is worth settling: an "extreme wide" beat whose type fills the
+  middle third is two different beats written on one card.
+  THE ARITHMETIC. Measuring a picture's SIZE is what killed the `visual-vocabulary` gate, whose helper
+  squared a 590x18 rule into 590x590 and credited a hairline with a tenth of the frame. Area is width
+  times height and nothing else, and a share stated on ONE axis stays on that axis and produces no area
+  at all. `node scripts/author/panels.mjs --self-test` asserts both against that same hairline.
+
+  EVERY BEAT DECLARES ITS STYLE AND ITS REST. Be clear about what reads which, because a field nobody
+  reads is worse than no field. `rest:` is consumed. `layout:` is consumed by `make panels`, as above,
+  and by nothing else: no gate and no renderer compares it against the film, so writing the region down
+  is not building it. `style:` is consumed by `make panels` as WORDS ONLY. It is carried onto the panel
+  and listed beat by beat under the report, where five beats declaring one treatment is visible at a
+  glance. It is NOT drawn, and it must not be: panels are grey on purpose and the look is judged at
+  `make styleframes`. Nothing anywhere grades the prose in either line.
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
   the whole film and every beat inherits it, which is how a film ends up looking like one long shot.
@@ -160,7 +173,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
 - becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
-- layout: full-bleed, type filling the middle third, nothing else in frame
+- layout: type in the middle third, the rest of the frame deliberately empty
 - style: hard contrast, one colour, type is the only object
 - rest: 1.5% breathing scale on the headline through the hold
 - why: open loop, pose the question the payoff answers (curiosity before any claim)
