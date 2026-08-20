@@ -9,10 +9,12 @@ import * as Beats from './beats.mjs';
 // agents on one file is how a merge eats somebody's work. Split by where the motion was harvested
 // FROM, which is also how they group: `beats-track` is higgsfield's hand-keyed tracks, `beats-punct`
 // is brew's scale punctuation. `beats-collage` is brew's dense object layouts.
+import * as Collage from './beats-collage.mjs';
 import * as Track from './beats-track.mjs';
 import * as Punct from './beats-punct.mjs';
 
 export * from './beats.mjs';
+export * from './beats-collage.mjs';
 export * from './beats-track.mjs';
 export * from './beats-punct.mjs';
 export * from './kit.mjs';
@@ -31,6 +33,8 @@ export const BEATS = {
   ctaEnd: Beats.ctaEnd,                 // held end card: mark + install chip + sub + url (exitDur 0)
   typedHook: Beats.typedHook,           // hook that ERASES itself: types in, un-types ~2x faster, never fades
   morphButton: Beats.morphButton,       // the object that BECOMES the next thing: button shrinks/rounds to a dot
+  propSentence: Collage.propSentence, // a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger
+  slotSwap: Collage.slotSwap,           // three fixed slots whose contents turn over N times; the right slot changes TYPE each pass
   recordedPan: Track.recordedPan,       // a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded
   echoRing: Track.echoRing,             // a stroked ring replaying another layer's path one beat late, fading as it grows
   wordBlast: Punct.wordBlast,           // scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame
