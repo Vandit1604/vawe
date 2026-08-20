@@ -42,6 +42,11 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '---',
   'message: "The record pill turns a voice note into a structured note."',
   'audience: "People who take notes on a phone."',
+  // spectacle + not are PRESENCE-blocking in storyboard-check, so every fixture needs them or five
+  // must-pass cases fail for a reason that has nothing to do with the rule each one is proving.
+  // A fixture that fails for an unrelated reason stops being evidence that its rule can fire.
+  'spectacle: "beat 2 · the pill · flash · the note lands"',
+  'not: "no centred type, no even grid"',
   'arc: "one continuous action: the record pill is pressed and becomes a finished note"',
   ...(threads ? ['threads: "a metric cut rate at 1.6s, and a motif: the same green dot opens and closes"'] : []),
   ...(object ? ['object: "the record pill"', 'object_t0: "a dark pill on the note list"',

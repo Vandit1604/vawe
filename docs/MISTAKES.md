@@ -11576,6 +11576,39 @@ call site. #211's lesson ("fix the rule, not the call site, grep every consumer"
 too, and an assertion is the consumer easiest to forget, because it lives in a file nobody edits while
 changing behaviour.
 
+## #387 — `make reveal` crashed on any single-beat film, and sampled every layer window a third too wide
+
+Two pre-existing bugs in `scripts/author/reveal.mjs`, found by an agent adding a ghost mode and verified
+against `git show HEAD:` before either was touched.
+
+**It crashed on a one-beat film.** ffmpeg rejects `hstack`/`vstack` with `inputs=1`, so a single-beat
+scene rendered every frame, spent the whole cost, and then blew up on the final stack. The tool that
+`CLAUDE.md` calls mandatory for judging a reveal simply did not run on the shortest films, which are
+exactly the ones whose entrances are hardest to read. A one-item stack is now the identity.
+
+**Its `--layers` window was ~33% too wide.** It carried a hand-written `l.enterDur ?? 0.4` while the
+engine's `BASE_ENTER` has been 0.3 since the snap band moved, and it ignored the theme's
+`motion.durationScale`, which `scene.js` applies before writing `dataset.enter`. So the sheet sampled a
+window the render does not use, and an author judging an entrance was judging the wrong span. Both now
+come from `enterDurOf` in `core/clips.js`, fed the dataset the renderer actually wrote.
+
+**The shape, again:** a second hand-written copy of a number the engine owns. Same as #159, same as the
+ramps before `clips.js` exported them. A constant duplicated into a tool drifts silently, because the
+tool keeps producing an image and nobody compares it to the render.
+
+**Also worth recording: the first ghost implementation was wrong and looking at it is what said so.**
+Averaging the poses at `1/(k+1)` is the obvious reading of "ghosted", and it gives each intermediate
+position an eighth of its contrast, about 3% at 340px. Only 2 of 15 cells showed any trail. Rebuilt on
+darken/lighten with the mode chosen per cell from the settled pose's luminance, because half this
+library is white-first. A number would not have caught that; reading the image did.
+
+**Known limit, stated rather than discovered later:** the ghost sheet makes the PRESENCE and SHAPE of
+travel obvious, and it cannot count keys. A two-key linear tween reads as an even straight smear and a
+multi-key move bends or reverses, which is a judgement about spacing, not a key count.
+
+`reveal.mjs` is also not byte-deterministic run to run. That is pre-existing, it means the default sheet
+cannot be proven unchanged by hash, and it is worth someone's attention.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

@@ -22,7 +22,57 @@
 // nobody can trust, and that is not theoretical here: the detector we are replacing shipped a rule
 // whose catalogue entry says "more than two em-dashes" over an implementation that requires five.
 // `make designspec-check SELFTEST=1` runs both samples through every rule.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { onScreenText as plain } from './text.mjs';
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+/** Every face's DECLARED weight axis, read from the one place that registers them.
+ *
+ *  WHY THIS IS SOURCED AND NOT A LIST. `core/tokens.css` is where a face is paid for: the `@font-face`
+ *  `font-weight` descriptor says what the loaded file can actually draw. A hand-copied table would go
+ *  stale the first time somebody swaps a static face for a variable one, and the rule below would then
+ *  be measuring a font nobody has. The same argument BUZZ_PHRASES makes for owning its data, except the
+ *  authority for this data already exists in the repo, so it is read rather than restated.
+ *
+ *  A face registered twice (Space Grotesk ships as two static files) is merged into the span it covers.
+ *  On any read failure the map is empty and the rule below goes quiet, which is the correct failure
+ *  direction for a warning: it can never invent a finding out of missing evidence. */
+function loadFaceWeightAxes() {
+  const out = new Map();
+  let css;
+  try { css = fs.readFileSync(path.join(REPO, 'core/tokens.css'), 'utf8'); } catch { return out; }
+  for (const block of css.match(/@font-face\s*\{[^}]*\}/g) || []) {
+    const fam = /font-family:\s*['"]([^'"]+)['"]/.exec(block);
+    const wt = /font-weight:\s*(\d{3})(?:\s+(\d{3}))?/.exec(block);
+    if (!fam || !wt) continue;
+    const lo = +wt[1], hi = wt[2] ? +wt[2] : +wt[1];
+    const prev = out.get(fam[1]);
+    out.set(fam[1], prev ? [Math.min(prev[0], lo), Math.max(prev[1], hi)] : [lo, hi]);
+  }
+  return out;
+}
+export const FACE_WEIGHT_AXES = loadFaceWeightAxes();
+
+/** theme name → its primary sans, from `themes/<name>.json`. Same sourcing argument as above: the
+ *  theme file is the lock `designspec-check` already enforces the face against, so the rule and the
+ *  lock cannot disagree about which face a scene is set in. */
+function loadThemeSans() {
+  const out = new Map();
+  let files;
+  try { files = fs.readdirSync(path.join(REPO, 'themes')); } catch { return out; }
+  for (const f of files) {
+    if (!f.endsWith('.json')) continue;
+    try {
+      const t = JSON.parse(fs.readFileSync(path.join(REPO, 'themes', f), 'utf8'));
+      if (t && t.type && typeof t.type.sans === 'string') out.set(f.slice(0, -5), t.type.sans);
+    } catch { /* a theme that will not parse is designspec-check's finding to report, not this rule's */ }
+  }
+  return out;
+}
+export const THEME_SANS = loadThemeSans();
 
 /** A phrase list is an opinion, so it is DATA and it sits where it can be argued with.
  *  These are PHRASES. `copy-check.mjs` already carries 43 single WORDS (`seamless`, `leverage`,
@@ -224,6 +274,64 @@ export const RULES = [
     fires: { layers: [{ type: 'text', text: 'Crushed', size: 100, tracking: '-0.06em' }] },
     clean: { layers: [{ type: 'text', text: 'Tight', size: 100, tracking: '-0.04em' }, { type: 'text', text: 'Px', size: 100, ls: '-4px' }] },
   },
+  {
+    id: 'unused-weight-range',
+    category: 'type',
+    scope: 'scene',
+    severity: 'warn',
+    needs: 'scene',
+    // MEASURED BEFORE WRITTEN. Across the 154 scene files here, 137 declare a `weight` at all and the
+    // whole library sits inside 400-800: not one declaration at or below 300, not one at or above 900,
+    // and the widest spread any single scene reaches is 400. Meanwhile eleven faces in core/tokens.css
+    // register a full `100 900` axis. The light and the black ends are downloaded on every render and
+    // never drawn. That is the lazy default named exactly, and nothing here measured it.
+    //
+    // TWO SHAPES WERE AVAILABLE AND THIS ONE IS THE SPREAD. "Never leaves the 400-800 band" was the
+    // other, and it is the wrong question: it would clear a scene that used 400 and 420 on the grounds
+    // that 400 is a band edge, and it would fire on a scene deliberately built out of 350 and 850. What
+    // a viewer reads in the second a frame gets is the DIFFERENCE between two weights on screen, so the
+    // difference is what gets measured.
+    //
+    // THE THRESHOLD IS THE FACE'S OWN AXIS, not a number. A scene is asked to use a quarter of the range
+    // its face ships; below that the type is one voice at slightly different volumes. Deriving it from
+    // the axis is also the only honest way to keep it off a face that has no light or black end: the
+    // gate below exempts any face registering under 600 of range, so Geist (400 800), Plus Jakarta Sans
+    // (400 800) and Archivo (300 700) can never be flagged for weights they cannot draw. On the library
+    // this fires on 21 of 137, which is a rate an author can act on rather than learn to skip past.
+    //
+    // DECLARED weights only. core/layers/util.js:76 defaults an undeclared layer to 800 (400 for serif),
+    // and reproducing that defaulting rule here would be a second copy of it, going stale invisibly. The
+    // subject is the type system the author wrote down, so three declarations is the floor for having
+    // one at all — the same reasoning `flat-type-hierarchy` uses for sizes.
+    why: 'Weight contrast has to survive motion, and a frame is on screen for about a second. One step '
+      + 'apart on the 400/500/600/700/800 ladder is not a hierarchy, it is the same voice twice. The '
+      + 'light and black ends of the face are already loaded and paid for.',
+    test(scene) {
+      const face = THEME_SANS.get(scene && scene.theme);
+      const axis = face && FACE_WEIGHT_AXES.get(face);
+      if (!axis) return null;
+      const span = axis[1] - axis[0];
+      // A face that ships no light or black end cannot be accused of ignoring one.
+      if (span < 600) return null;
+      const w = [];
+      // `parts` as well as `children`: a kinetic beat sets its weights on the parts, and a walk that
+      // reads one and not the other checks half a scene while looking complete.
+      const walk = (a) => { for (const l of Array.isArray(a) ? a : []) {
+        if (!l || typeof l !== 'object') continue;
+        if (Number.isFinite(+l.weight)) w.push(+l.weight);
+        if (l.children) walk(l.children);
+        if (l.parts) walk(l.parts);
+      } };
+      walk(scene && scene.layers);
+      if (w.length < 3) return null;
+      const lo = Math.min(...w), hi = Math.max(...w), spread = hi - lo;
+      const need = span / 4;
+      if (spread >= need) return null;
+      return `${w.length} declared weights span ${lo} to ${hi} (${spread}) on ${face}, which ships ${axis[0]} to ${axis[1]}`;
+    },
+    fires: { theme: 'vawe', layers: [{ type: 'text', text: 'a', weight: 700 }, { type: 'text', text: 'b', weight: 700 }, { type: 'text', text: 'c', weight: 800 }] },
+    clean: { theme: 'vawe', layers: [{ type: 'text', text: 'a', weight: 200 }, { type: 'text', text: 'b', weight: 500 }, { type: 'text', text: 'c', weight: 900 }] },
+  },
 ];
 
 /** Run every rule over a scene's text UNITS — one per layer, one per fragment file.
@@ -237,7 +345,10 @@ export const RULES = [
  *  `unit` — the tell lives inside one piece of copy. Never let it span two.
  *  `document` — the tell IS the relationship between pieces (01 / 02 / 03 across three layers).
  *
- *  Pure: no files, no DOM, no globals. That is what makes the self-test meaningful. */
+ *  No DOM, no globals, and every `test` is a pure function of what it is handed. That is what makes the
+ *  self-test meaningful. The one exception is stated where it happens: FACE_WEIGHT_AXES and THEME_SANS
+ *  read `core/tokens.css` and `themes/` ONCE at module load, because that data has an authority in this
+ *  repo already and copying it here is how it goes stale. Nothing reads a file per run. */
 export function runRules(units, { allow = [], scene = null } = {}) {
   const list = (Array.isArray(units) ? units : [units]).map((u) => plain(String(u || ''))).filter((u) => u.trim());
   const doc = list.join('\n');

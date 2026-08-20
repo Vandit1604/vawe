@@ -61,6 +61,23 @@ if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'obje
   if (!field(k)) warns.push(`missing \`${k}:\` — a declared object spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
 }
 
+// ── the two decisions that are made ONCE, for the whole film ──────────────────────────────────────
+// PRESENCE ONLY, AND DELIBERATELY SO. This gate cannot tell a good spectacle from a bad one, and a check
+// that pretended to would manufacture findings — the failure mode this repo logs hardest against. What it
+// can tell is whether the decision was made at all, and both of these are decisions that vanish if nobody
+// forces them. `spectacle:` names the one exaggerated moment, which is two-sided: naming it is at the same
+// time a promise every other beat stays restrained, and a film that names none has quietly chosen "all of
+// it, evenly", which is the flat register everything here comes out in by default. `not:` is the exclusion
+// line, because most generic output is not a wrong decision, it is an un-excluded default.
+//
+// The film-side half is `make plan-check D=<file>` (scripts/gates/plan-vs-render.mjs): it reads the same
+// `spectacle:` line and warns when the scene builds no `spectacle` block, or builds one in another beat.
+// Writing the peak down is not building it, exactly as with `becomes:`.
+const spectacle = field('spectacle');
+const not = field('not');
+if (!spectacle) errs.push('missing `spectacle:`. NAME THE ONE EXAGGERATED MOMENT: which beat, which layer, which device, and what it is for. It is two-sided, and that is the point: naming the peak is a promise that every other beat stays restrained. A film that names none has not chosen restraint, it has chosen one flat volume for the whole runtime. Then build it in the scene as `"spectacle": { "at", "of", "device", "why" }` (core/spectacle.js), which `make plan-check` checks against this line.');
+if (!not) errs.push('missing `not:`. NAME WHAT THIS FILM IS NOT. Most generic output is not a wrong decision, it is an un-excluded default: the centred type, the even grid, the fade on everything. Write the defaults you are refusing here, in your own words, so the beats below have something to be measured against. Nothing grades the prose; the line exists so the decision gets made.');
+
 // ── beats: each must state its job ────────────────────────────────────────────────────────────────
 const beats = [...src.matchAll(/^##\s+(?:Beat\s+)?(\d+|[A-Za-z].*?)\s*[—:-].*$/gmi)];
 const blocks = blocksOf(src);

@@ -12,6 +12,8 @@ format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
 duration: 29s
 pace: "showreel | explainer | held — CHOSEN before any beat is written, with a seconds-per-idea budget"
+spectacle: "beat N · which layer · which device · what the moment is for — the ONE loud moment"
+not: "the defaults this film refuses, in your own words"
 ---
 
 <!--
@@ -30,6 +32,34 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
   then let the beat count fall out of the runtime. A beat that carries two ideas is two beats or one
   cut, never one crowded frame.
 
+  THE PEAK AND THE EXCLUSION, BOTH REQUIRED, BOTH PRESENCE-CHECKED ONLY. `spectacle:` names the one
+  exaggerated moment: which beat, which layer, which device, what it is for. It is two-sided and that is
+  the whole point — naming the peak is at the same time a promise that every other beat stays restrained,
+  so a film that names none has not chosen restraint, it has chosen one flat volume for its whole runtime.
+  `not:` names the defaults this film refuses. Most generic output is not a wrong decision, it is an
+  un-excluded default: the centred type, the even grid, the fade on everything.
+
+  `storyboard-check` FAILS a storyboard missing either line, and checks nothing else about them. It cannot
+  tell a good peak from a bad one, and a check that pretended to would manufacture findings. Nothing grades
+  the prose in `not:` at all, ever; the line exists so the decision gets made.
+
+  BUT WRITING THE PEAK DOWN IS NOT BUILDING IT, exactly as with `becomes:` below. The film-side half is a
+  scene block, `"spectacle": { "at", "of", "device", "why" }` (core/spectacle.js), which writes the device
+  as a sting at `at` and pulls every competing amplitude dial in the film down around it.
+  `make plan-check D=<file>` reads this line and the scene together: it warns `spectacle-not-built` when
+  the plan names a peak the JSON never builds, and `spectacle-in-wrong-beat` when the block's `at` lands
+  outside the beat named here. So NAME THE BEAT in this line, as "beat 4" or by the beat's own title, or
+  the two cannot be compared and the gate says so.
+
+  `pace:` IS JOINED THE SAME WAY. `plan-check` lays the declared seconds-per-idea over the film's real
+  runtime and warns `pace-not-kept` when the film gives its planned ideas more or fewer seconds than the
+  budget. Keep exactly ONE of showreel · explainer · held: leave the template's menu of three in place and
+  the gate warns `pace-not-chosen`, because reading the first word as your choice would invent a decision
+  nobody made. The bands are showreel 1.5-4s per idea, explainer 3-8s, held 6s and up; an explicit budget
+  written into the line ("2.5s per idea") wins over the band. It counts the PLAN's ideas against the
+  RENDER's clock, so it catches a film that grew past its budget and cannot see two ideas crowded into one
+  beat. That one is yours.
+
   LAYOUT IS A BEAT DECISION, NOT A LAYER DECISION. Their beat formula has five slots, Element · Motion ·
   Layout · Style · Timing, and ours had no Layout: composition was decided per layer at JSON time and
   never at beat time, so a plan could be approved without anyone saying WHERE anything sits. `layout:`
@@ -41,7 +71,12 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
   `visual-vocabulary` gate, whose helper squared a 590x18 rule into 590x590 and credited a hairline with
   a tenth of the frame. Area, and only area.
 
-  EVERY BEAT DECLARES ITS STYLE AND ITS REST, and both are consumed rather than graded.
+  EVERY BEAT DECLARES ITS STYLE AND ITS REST. Be clear about which of these three is wired, because a
+  field nobody reads is worse than no field: `rest:` is consumed, and `style:` and `layout:` are PARSED
+  AND CONSUMED BY NOTHING. They are read by `scripts/author/storyboard-parse.mjs` and no gate and no
+  renderer does anything with them today. Fill them because a reviewer approving the plan needs to know
+  the treatment and the region, not because any tool will check that the film kept them. Their intended
+  consumer is `make panels`, which draws the beat; until that join exists, treat them as notes to a human.
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
   the whole film and every beat inherits it, which is how a film ends up looking like one long shot.

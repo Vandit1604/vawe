@@ -22,15 +22,26 @@
 // the pixels, and it belongs to `make judge` and to your eyes. A green run here means the film is not
 // EMPTY where it promised to be full. It does not mean the promise was kept.
 //
-//   node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--strict]
+// THE PROSE FIELDS. The intent sidecar carries the beat spans and the `becomes:` lines and nothing else.
+// Two frontmatter decisions never reach it, and both are decisions ABOUT the render: `spectacle:` names
+// the film's one loud moment, and `pace:` budgets its seconds per idea. So this gate reads the storyboard
+// itself as a second input, alongside the sidecar, and joins those two lines to the film. Without that
+// they are fields an author fills and no code reads, which is worse than no field at all — the plan looks
+// complete and the film is unchanged (docs/MISTAKES.md #213, #369, #373, #386).
+//
+//   node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
 //   make plan-check D=<file>
 // FAIL: plan-overruns-render · junction-is-static.
-// WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans.
+// WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
+//       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·
+//       pace-not-chosen.
 //       All block under --strict. `held-through-the-change` is the sharp one: it reads a hold the author
 //       WROTE (two identical motion keys) rather than inferring one from an absence.
 // Waive a deliberate break with {"authoring":{"allow":["beat-holds-still", ...]}}.
 import fs from 'node:fs';
+import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
+import { parseStoryboard } from '../author/storyboard-parse.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -51,6 +62,18 @@ if (!fs.existsSync(intentPath)) {
 }
 const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
+
+// ---------- the storyboard, for the fields the sidecar drops ----------
+// An explicit `--sb` that does not exist is an error, never a silent skip: a flag the author typed and
+// the gate ignored is the same defect the spectacle join exists to close.
+const sbFlag = (() => { const i = process.argv.indexOf('--sb'); return i >= 0 ? process.argv[i + 1] : null; })();
+if (sbFlag && !fs.existsSync(sbFlag)) { console.error(`✗ no such storyboard: ${sbFlag}`); process.exit(2); }
+const sbPath = sbFlag || (() => {
+  const dir = path.dirname(file), base = path.basename(file).replace(/\.json$/, '');
+  return [path.join(dir, '_concepts', `${base}.storyboard.md`), path.join(dir, `${base}.storyboard.md`)]
+    .find((p) => fs.existsSync(p)) || null;
+})();
+const sb = sbPath ? parseStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
 
 const NEAR = 0.5;        // how far from a planned junction an event still counts as being AT it
 const STILL = 2.5;       // a stretch inside one beat with no event that stops reading as a hold
@@ -118,7 +141,13 @@ const moverSpans = T.content.filter(CONTINUOUS).map((L) => {
 // ---------- the plan ----------
 const beats = (Array.isArray(intent.beats) ? intent.beats : []).filter((b) => b && typeof b === 'object');
 console.log(`\n  plan vs render · ${file} vs ${intentPath}`);
-console.log(`  ${beats.length} planned beat(s) · film runs ${s(T.duration)} · ${events.length} render event(s)\n`);
+console.log(`  ${beats.length} planned beat(s) · film runs ${s(T.duration)} · ${events.length} render event(s)`);
+// Say out loud whether the prose half of the plan is in play. The sidecar drops `spectacle:` and `pace:`,
+// so with no storyboard those two decisions go unchecked, and an unchecked decision should never look
+// like a passed one.
+if (sbPath) console.log(`  storyboard: ${sbPath} (spectacle + pace joined)`);
+else console.log(`  ○ no storyboard found beside this scene, so \`spectacle:\` and \`pace:\` are not checked. Pass --sb <storyboard.md> to join them.`);
+console.log('');
 
 const spanned = beats.filter((b) => Array.isArray(b.span) && b.span.length === 2 && b.span.every((x) => Number.isFinite(x)));
 if (!spanned.length) {
@@ -202,6 +231,78 @@ if (!spanned.length) {
   }
 }
 
+// ---------- the storyboard's prose decisions, against the film ----------
+const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
+
+// Which beat did the SPECTACLE line name? Two ways, both literal: an ordinal ("beat 4"), or exactly one
+// beat name quoted inside the line. Anything else is unresolved and SAID to be unresolved — guessing
+// which beat the author meant would put a finding on a film for a sentence this gate misread.
+function plannedSpectacleBeat(line, list) {
+  const m = /\bbeat\s*#?\s*(\d+)\b/i.exec(line);
+  if (m) {
+    const i = +m[1] - 1;
+    return (i >= 0 && i < list.length) ? { i, how: `it says "beat ${m[1]}"` } : null;
+  }
+  const low = line.toLowerCase();
+  const hits = list.map((b, i) => ({ b, i })).filter(({ b }) => b.name && b.name.length >= 4 && low.includes(b.name.toLowerCase()));
+  return hits.length === 1 ? { i: hits[0].i, how: `it names the beat "${hits[0].b.name}"` } : null;
+}
+
+if (sb && sb.spectacle) {
+  if (!isObj(d.spectacle)) {
+    warn('spectacle-not-built', `${sbPath} declares a spectacle: ${sb.spectacle}. ${file} has no \`spectacle\` block, so the film has no peak. `
+      + `The plan names the one moment the film is allowed to shout, and naming it is also a promise that every other beat stays restrained; neither half was built. `
+      + `Add \`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` to the scene (core/spectacle.js), or drop the line from the plan.`);
+  } else if (spanned.length) {
+    const loc = plannedSpectacleBeat(sb.spectacle, spanned);
+    if (!loc) {
+      warn('spectacle-beat-unnamed', `${sbPath} declares a spectacle: ${sb.spectacle}. The scene puts its peak at ${s(d.spectacle.at)}, `
+        + `but the line names no beat this gate can find, so the two cannot be compared. Write the beat into it, as "beat 4" or with the beat's own title, `
+        + `and this check starts telling you whether the peak landed where you planned it.`);
+    } else {
+      const [a, z] = spanned[loc.i].span;
+      const at = num(d.spectacle.at, null);
+      if (at !== null && (at < a - NEAR || at > z + NEAR)) {
+        warn('spectacle-in-wrong-beat', `${sbPath} puts the spectacle in beat ${loc.i + 1} "${spanned[loc.i].name || ''}" (${s(a)}-${s(z)}), because ${loc.how}. `
+          + `The scene fires it at ${s(at)}, outside that beat. The loudest instant of the film lands somewhere the plan did not budget for it, `
+          + `and the whole rest of the film has been quietened to buy a peak in the other place. Move \`spectacle.at\` into the beat, or re-plan the beat around where the peak really is.`);
+      }
+    }
+  }
+}
+
+// PACE. The plan budgets seconds per IDEA before any beat is written; the film has a runtime and a beat
+// count. This lays one over the other. It counts the PLAN's ideas against the RENDER's clock, so it
+// catches a film that grew past its budget; it cannot see two ideas crowded into one beat, which is a
+// judgement `make judge` makes and no arithmetic here can.
+const PACE_BANDS = { showreel: [1.5, 4], explainer: [3, 8], held: [6, Infinity] };
+if (sb && sb.pace && spanned.length) {
+  const raw = sb.pace;
+  const named = Object.keys(PACE_BANDS).filter((g) => new RegExp(`\\b${g}\\b`, 'i').test(raw));
+  // The template's own placeholder lists all three genres. An author who never deleted the other two has
+  // not chosen a pace, and reading the first one as their choice would invent a decision nobody made.
+  if (named.length !== 1) {
+    warn('pace-not-chosen', `${sbPath} carries \`pace: ${raw}\`. That is the template's menu, not a choice. `
+      + `Pace is a genre decision made before any beat is written: keep exactly one of showreel · explainer · held and give it a seconds-per-idea budget.`);
+  } else {
+    const genre = named[0].toLowerCase();
+    // An explicit budget in the line wins over the genre's band: "2.5s per idea", "2-4 s/idea".
+    const two = /(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)\s*s(?:ec)?\b[^.]{0,24}?\bidea/i.exec(raw);
+    const one = /(\d+(?:\.\d+)?)\s*s(?:ec)?\b[^.]{0,24}?\bidea/i.exec(raw);
+    const band = two ? [+two[1], +two[2]] : one ? [+one[1] * 0.6, +one[1] * 1.4] : PACE_BANDS[genre];
+    const source = two ? `its own ${two[1]}-${two[2]}s budget` : one ? `its own ${one[1]}s budget (±40%)` : `a ${genre}'s ${band[0]}-${band[1] === Infinity ? '∞' : band[1]}s band`;
+    const real = T.duration / spanned.length;
+    const shots = T.duration / (T.cutTimes.length + 1);
+    if (real < band[0] || real > band[1]) {
+      warn('pace-not-kept', `${sbPath} declares \`pace: ${raw}\`, and the film gives its ${spanned.length} planned idea(s) ${s(T.duration)}, `
+        + `which is ${real.toFixed(2)}s per idea against ${source}. Its shots average ${shots.toFixed(2)}s. `
+        + `${real > band[1] ? 'The film is slower than the pace it was planned at: cut the duration before adding beats, because a slow film is almost always a film that is too long.'
+          : 'The film is faster than the pace it was planned at: a beat carrying two ideas is two beats or one cut, never one crowded frame.'} `
+        + `Either re-cut to the budget, or change \`pace:\` to the genre this film really is.`);
+    }
+  }
+}
+
 // ---------- report ----------
 const fails = findings.filter((f) => f.sev === 'FAIL' && !allow.has(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
@@ -214,5 +315,8 @@ console.log(`\n  ${fails.length} fail · ${warns.length} warn`);
 // The honesty line prints on GREEN too. A gate that only qualifies itself when it fails teaches the
 // reader that a tick means more than it does.
 console.log(`  (this gate proves a change HAPPENS at each promised junction. That the change is the one named,`);
-console.log(`   and that the object survives it, is what \`make judge\` and your eyes are for.)\n`);
+console.log(`   and that the object survives it, is what \`make judge\` and your eyes are for.`);
+console.log(`   It proves the spectacle was BUILT and sits in the planned beat, never that the moment is worth the`);
+console.log(`   silence it bought; and it counts the plan's ideas against the film's clock, never how many ideas are`);
+console.log(`   crowded into one beat.)\n`);
 process.exit(fails.length || (strict && warns.length) ? 1 : 0);
