@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { writeReceipt } from '../lib/receipt.mjs';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -30,7 +31,10 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 const vs = flag('--vs', null);
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/beats.mjs <data.json> [--vs brand]'); process.exit(1); }
-const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+// `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
+// renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+// documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
+const data = lowerScene(JSON.parse(fs.readFileSync(dataArg, 'utf8')));
 const format = data.module;
 if (!format || !fs.existsSync(path.join(ROOT, 'formats', format, 'scene.html'))) { console.error(`✗ unknown module "${format}" in ${dataArg}`); process.exit(1); }
 const dataUrl = '/' + path.relative(ROOT, path.resolve(dataArg)).split(path.sep).join('/');

@@ -208,9 +208,17 @@ const scene = {
   aspect: ASPECT,
   duration: total,
   authoringNote: `PANELS of ${path.basename(SB)}: blocking only. Grey by design; judge WHERE things sit and HOW BIG they are, never the look.`,
-  authoring: { allow: ['dead-air', 'ends-on-nothing', 'plain-slideshow', 'no-continuous-object',
-    'no-continuous-object-inferred', 'static-bg', 'overlap', 'contrast', 'safe', 'no-visual-vocabulary'],
-    _why: { panels: 'Generated blocking panels, never a deliverable. The taste gates are waived by construction rather than by an author arguing themselves into it.' } },
+  // WAIVE ONLY CODES A GATE STILL EMITS, AND KEY THE REASON BY CODE. This block used to carry
+  // 'no-visual-vocabulary', which `waiver-drift.mjs:49-53` classifies as RETIRED, so every generated
+  // panel scene self-inflicted a DEAD WAIVER finding on the census the repo reads as evidence. Its
+  // `_why` was also keyed 'panels' rather than per-code, which is not the shape `author-check.mjs:74-80`
+  // requires, so these scenes would have failed the always-on half on their own waivers.
+  authoring: (() => {
+    const allow = ['dead-air', 'ends-on-nothing', 'plain-slideshow', 'no-continuous-object',
+      'no-continuous-object-inferred', 'static-bg', 'overlap', 'contrast', 'safe'];
+    const why = 'Generated blocking panels, never a deliverable. Waived by construction, not by an author arguing themselves into it.';
+    return { allow, _why: Object.fromEntries(allow.map((c) => [c, why])) };
+  })(),
   layers,
   bg: [{ t: 0, preset: 'plain', from: 0, to: total }],
 };

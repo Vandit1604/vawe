@@ -117,12 +117,18 @@ const stack = rows.length > 1 ? `;${rows.map((_, i) => `[r${i * cols}]`).join(''
 spawnSync('ffmpeg', ['-v', 'error', '-y', ...inputs, '-filter_complex', `${chain};${rows.join(';')}${stack}`, '-map', '[v]', sheet]);
 
 // ── the LOOK gates, and only the look gates ────────────────────────────────────────────────────────
-// slop (41 craft rules) and designspec (palette + font lock) are the two that judge appearance rather
-// than motion. Running the motion gates here would be wrong: at this stage there is nothing to say
-// about pacing, and a stage that reports failures it cannot act on teaches people to skip it.
+// designspec (palette + font lock) judges appearance rather than motion. Running the motion gates here
+// would be wrong: at this stage there is nothing to say about pacing, and a stage that reports failures
+// it cannot act on teaches people to skip it.
+// `slop` used to run here too. It was retired in 2026-08 (docs/MISTAKES.md #326) and its script deleted,
+// but this loop kept spawning it, so node exited 1 on a missing module and every run of this stage
+// printed a phantom "✗ slop" and exited non-zero. A gate name that does not resolve to a file is a bug,
+// never a finding, so resolve it first and say so loudly.
 const look = [];
-for (const g of ['slop', 'designspec-check']) {
-  const r = spawnSync('node', [`scripts/gates/${g}.mjs`, D], { encoding: 'utf8' });
+for (const g of ['designspec-check']) {
+  const script = `scripts/gates/${g}.mjs`;
+  if (!fs.existsSync(script)) { console.error(`✗ styleframes: gate script ${script} does not exist. Fix the list, do not report it as a failing gate.`); process.exit(2); }
+  const r = spawnSync('node', [script, D], { encoding: 'utf8' });
   look.push({ gate: g, code: r.status, out: (r.stdout || '') + (r.stderr || '') });
 }
 

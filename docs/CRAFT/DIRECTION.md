@@ -52,7 +52,7 @@ motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and 
 | **Staging** | One clear idea per shot; one focal point. | One headline-scale message per beat; everything else subordinate in size/opacity/motion. | `[eye]` + `[gated]` critique: `scattered-beat` |
 | **Secondary action** | A supporting motion that never competes. | At most one quiet secondary motion per beat (bg drift, glow, cursor), lower-contrast, offset in time. | `[eye]` |
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
-| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + slop |
+| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
 
 *(Squash-&-stretch, arcs, straight-ahead, solid drawing don't apply to flat type — omitted.)*
 

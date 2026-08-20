@@ -76,13 +76,21 @@ effect-soup video can no longer ship silently:
 ```bash
 make author-check D=<file> [VS=<brand>]           # THE LADDER. Always on, about a second:
                                                   #   validate (schema + em-dash) · beats (timeline holes)
-                                                  #   assets (referenced files exist) · inspect + plan-vs-render
-                                                  # These catch BROKEN. Waive a deliberate break with
-                                                  # {"authoring":{"allow":[...]}}. STRICT=1 makes warnings block.
+                                                  #   assets (referenced files exist) · treatment · waiver-drift
+                                                  #   inspect + plan-vs-render
+                                                  # These catch BROKEN. assets is advisory unless STRICT=1;
+                                                  # treatment and waiver-drift are advisory always.
+                                                  # Waive a deliberate break with the FULL shape. A bare
+                                                  # allow array blocks (author-check.mjs:74-83):
+                                                  #   {"authoring":{"allow":["dead-air"],
+                                                  #     "_why":{"dead-air":"why this film is the exception"}}}
+                                                  # STRICT=1 makes warnings block.
 
-TASTE=1 make author-check D=<file> [VS=<brand>]   # ...plus the STYLE gates, which are opinions:
-                                                  #   critique · direct · floor · dissolve · slop
-                                                  #   designspec · copy
+TASTE=1 make author-check D=<file> [VS=<brand>]   # ...plus the SEVEN STYLE gates, which are opinions:
+                                                  #   critique · direct · floor · dissolve
+                                                  #   designspec · copy · pace
+                                                  # (`slop` was retired in 2026-08 and its script deleted.
+                                                  #  `pace` measures events/second: is the film asleep.)
 ```
 
 The style half is **off by default**. The run tells you it skipped them and how to run them. Read the
@@ -117,13 +125,19 @@ answered with an area. The area came from `boxOf` in `scripts/gates/scene-timing
 `proxy` tier: a layer declaring one axis and carrying no readable intrinsic aspect was **squared**.
 A 590x18 decorative underline was measured as 590x590 and credited with about a tenth of the frame.
 So the gate passed the exact defect it existed to catch, on the exact quantity it existed to measure.
-It was also waived by 30 of 130 films. Making the measurement honest would have made the rule true and
-then failed about 52 films nobody is going to rebuild, which is another way of saying the rule was
-already repealed and nobody wrote it down. The `proxy` tier went with it.
+It was also waived by 30 of 130 films at the time of the cull. Making the measurement honest would have
+made the rule true and then failed dozens of films nobody is going to rebuild, which is another way of
+saying the rule was already repealed and nobody wrote it down. The `proxy` tier went with it. Both
+figures are HISTORICAL and neither can be re-run: the gate is gone and the scenes were cleaned, so
+`node scripts/gates/waiver-drift.mjs` finds one `no-visual-vocabulary` waiver left today, flagged DEAD.
 
 **Seven gates were switched OFF BY DEFAULT, not deleted:** `critique`, `direct` (motion-director),
-`floor` (direction-floor), `dissolve`, `slop`, `designspec`, `copy`. Every file is still here and
-still runs under `TASTE=1`. Nothing about them is dishonest. They are *fitted*, to a library this
+`floor` (direction-floor), `dissolve`, `designspec`, `copy`, `pace`. Every file is still here and
+still runs under `TASTE=1`.
+<!-- doc-refs-allow: scripts/gates/slop.mjs · this line records that the script is gone -->
+`slop` is not among them: it was RETIRED, not switched off, its script `scripts/gates/slop.mjs` was
+deleted, and this list named it as a live opt-in step for months.
+Nothing about them is dishonest. They are *fitted*, to a library this
 repo's own doctrine calls debt, and a fitted rule left switched on stops raising the floor and starts
 teaching the waiver keyword. `direction-floor` blocked 38 of 130 shipped scenes.
 

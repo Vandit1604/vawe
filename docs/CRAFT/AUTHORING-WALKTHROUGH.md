@@ -86,21 +86,44 @@ copy a structure wholesale (the ledger flags it). Build in the [`README.md`](REA
    [`SOUND.md`](SOUND.md) (silence + crisp SFX is a fine default).
 
 Hand-writing any HTML fragment (a hook, a CTA)? Load `taste-skill` + `impeccable` first, then
-`make designspec-check D=<frag>` before you trust it.
+`make preview HTML=<frag> THEME=<brand>` before you trust it. That is the gate that reads a FRAGMENT,
+in a real browser with real computed styles. `make designspec-check D=<file>` is a SCENE gate and takes
+a scene JSON, not raw HTML; pointing it at a fragment measures nothing.
 
 ## Step 4 — The mandatory ladder (this is what stops effect-soup)
 
 ```bash
-make author-check D=formats/scene/passwords.json      # validate · critique · direct · floor · slop · inspect
+make author-check D=formats/scene/passwords.json           # validate · beats · assets · inspect · plan-vs-render
+TASTE=1 make author-check D=formats/scene/passwords.json  # ...+ critique · direct · floor · dissolve
+                                                          #     designspec · copy · pace
 ```
 
-One command runs the whole static quality loop. It **blocks** on correctness (schema, em-dash), value
-(placeholder/unbacked/thin beats), direction (≥3 cut families, profile contradictions, and the book tells:
-`linear-motion`, `monotone-timing`, `enter-and-retreat`, `effect-soup`), and the **ambition floor**
-(`plain-slideshow` — too little motion; the inverse of effect-soup). Directed lives between soup and slideshow. WARN-tier findings
-you read and reach past. A deliberate rule break you stand behind → waive it in the scene:
-`{"authoring":{"allow":["cut-families"]}}`. `make video` runs this automatically (skip only with an
-explicit `NOCHECK=1`).
+**The style gates are OPT-IN.** A bare `make author-check` runs only the always-on half, which catches a
+film that is BROKEN: schema and em-dash (`validate`), timeline holes (`beats`), missing referenced files
+(`assets`, advisory unless `STRICT=1`), the value contract (`inspect` + `plan-vs-render`), plus two
+advisory notes (`treatment`, `waiver-drift`). It says nothing at all about whether the film is any good,
+and the run prints which gates it skipped. `TASTE=1` adds the seven style gates. `slop` is not one of
+them: it was retired in 2026-08 and its script deleted.
+
+Under `TASTE=1` the ladder **blocks** on value (placeholder / unbacked / thin beats), on direction
+(≥3 cut families, profile contradictions), on crossfade mud, on the designspec colour and font lock, and
+on the **ambition floor** (`plain-slideshow`, too little motion; the inverse of effect-soup). **The four
+book tells do NOT block.** `linear-motion`, `monotone-timing`, `enter-and-retreat` and `effect-soup` are
+every one of them `warn()` in `scripts/author/motion-director.mjs`, which exits only on FAIL-tier codes
+and has no `--strict` path. This page said they blocked, and they never did. Directed lives between soup
+and slideshow. WARN-tier findings
+you read and reach past. A deliberate rule break you stand behind → waive it in the scene, **with its
+reason**, because a bare `allow` array blocks in the always-on half (`author-check.mjs:74-83` wants a
+`_why` of at least 12 characters per waived code):
+
+```json
+"authoring": {
+  "allow": ["cut-families"],
+  "_why": { "cut-families": "the third family is the sting on the payoff and it is the point" }
+}
+```
+
+`make video` runs this automatically (skip only with an explicit `NOCHECK=1`).
 
 Then see it move, not just the settled frames:
 ```bash
@@ -116,7 +139,7 @@ make judge D=formats/scene/passwords.json             # preps /tmp/judge/sheet.p
 ```
 
 `make judge` is the required post-render step the static ladder structurally cannot be: read
-`/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame on all seven dimensions
+`/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame on all six dimensions
 (readability · hierarchy · composition · brand + asset fidelity · produced-not-generated · value).
 **If your eye catches a flaw, it is a FIX** — never rationalize one you noticed
 ([`../JUDGE.md`](../JUDGE.md), [`../MISTAKES.md`](../MISTAKES.md) #15). Fix the JSON, re-render.

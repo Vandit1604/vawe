@@ -1,9 +1,13 @@
 # CLAUDE.md — authoring videos for this engine
 
-This repo turns **one self-describing JSON → one rendered video** (30fps mp4, portrait 1080×1920 or
-landscape 1920×1080). There is exactly **one module: `scene`** — an open canvas of composable
-primitives (text · image · component · rect · group · glow + camera · cuts · stings · captions). **No
-templates.** You do not pour data into a canned layout; you compose each video from the vocabulary in
+This repo turns **one self-describing JSON → one rendered video** (30fps mp4, at any of **five**
+canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
+the table at `core/safe.js:35`; a ratio it does not name is still honoured, sized to fit the long edge
+at 1920). There is exactly **one module: `scene`**, an open canvas of **18 composable layer types**
+(`ls core/layers/`: beam · board · canvas · clip · component · composition · count · cursor · doc ·
+glow · group · html · image · lottie · rect · svg · text · video) plus camera · cuts · stings ·
+captions. `html` counts as a picture, and that matters: it is what makes the 46% two sections below.
+**No templates.** You do not pour data into a canned layout; you compose each video from the vocabulary in
 `docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a scene JSON**
 (and capture the real assets it needs), then render it. You do **not** edit `scene.html` or the Go
 renderer unless explicitly asked.
@@ -16,11 +20,29 @@ renderer unless explicitly asked.
 
 ## The loop
 
+Three targets, and you will spend nearly all of your time in the first two. They are named nowhere else
+in this file, so read them here.
+
 ```bash
-make list                              # shows the scene module + its schema/sample
-./bin/vawe path/to/video.json     # module read from JSON → out/<name>.mp4
-make video D=path/to/video.json        # same, via make   (add --draft to bin/vawe for fast no-grain)
+make list                       # shows the scene module + its schema/sample
+make dev   D=path/to/video.json # THE ITERATION LOOP. Build, draft-render, open. No gates, no audit.
+make check D=path/to/video.json # every gate, every finding, ZERO consequence. Nothing blocks.
+make ship  D=path/to/video.json # the ladder with its teeth in: author-check → render → audit → seams.
 ```
+
+`make ship` (`Makefile:168`) is steps 2b, 3, 4 and 5a of the ladder below, in order, and it is the one
+command that says a film is done. The section "After writing a JSON" explains what each of those steps
+MEANS; it is not a second list of commands to type by hand.
+
+Single-shot forms, when you want one thing and not the ladder:
+
+```bash
+./bin/vawe path/to/video.json          # module read from JSON → out/<name>.mp4  (--draft = fast, no grain)
+make video D=path/to/video.json        # author-check → render → audit. NOCHECK=1 / NOAUDIT=1 skip a half.
+```
+
+`make video` already runs `make audit` for you (`Makefile:149`) unless `NOAUDIT=1`. `MODE=iterate`
+(`Makefile:163`, what `make check` sets) is the see-everything-block-on-nothing mode.
 
 Every JSON **must** start with `"module": "scene"`. Save new videos as
 `formats/scene/<topic>.json` (siblings of `sample.json`). Always read `sample.json` and an existing
@@ -85,14 +107,24 @@ un-excluded default: nothing said "no gradient hero", so a gradient hero was fre
 and it has been committed here: a 28s film of 31 hand-written layers, 74% of them text, `anim:"fade"`
 on nearly every one, one backdrop window for the whole runtime, and one hand-keyed motion track. It was
 rejected twice by the person who asked for it, and it was not below the house standard — the library
-median is 13% picture and 0% hand-keyed motion, so it was AT it. Compose from `make blueprints`.
-Measured against the two films this repo is proudest of:
+median is **8% picture and 0% hand-keyed motion**, so it was AT it. Compose from `make blueprints`.
+Measured against the two films this repo is proudest of. **Every cell is a percentage of that film's
+top-level layers**, because the row below used to mix counts and percentages and read as nonsense
+either way:
 
 | | brew-launch-act1 | higgsfield-recreation | that film | library median |
 |---|---|---|---|---|
-| pictorial LAYERS (see the warning below) | 46% | 38% | 3% | 13% |
-| layers with a hand-keyed `motion` track | 4 | **75%** | 3% | **0%** |
-| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | — |
+| pictorial LAYERS (see the warning below) | 46% (16/35) | 38% (3/8) | 3% (unverified) | **8%** |
+| layers with a hand-keyed `motion` track | 11% (4/35) | **75%** (6/8) | 10% (unverified) | **0%** |
+| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | 1 in 92% of films |
+
+**The population, named once so every figure here can be re-run.** "The library" means the **132
+gate-visible scenes** the gates themselves reason over: `formats/scene/*.json` with `module=="scene"`,
+minus derivatives and `schema.json`, `_`-prefixed scratch included. `node scripts/gates/waiver-drift.mjs`
+prints that count on its first line, so it is one command away and it is the number to quote. Three
+other populations exist (98 without scratch, 154 raw files in the directory) and mixing them is how this
+file once cited 93, 130 and 144 as the size of the same library in three sentences. **"that film" is not
+named anywhere and I could not identify it, so its two cells are unverified and marked so.**
 
 The backdrop line is the strongest single lever: brew inverts the whole tone of the world on four of its
 five cuts and spends its one accent window on the logo reveal. A pictorial beat on a dead backdrop is
@@ -102,9 +134,13 @@ still a slide.
 > text, 11 image, 5 rect, 5 html, 1 count. The 46% is 16 of 35 with `html` counted as pictorial. (An
 > earlier attempt to correct this line said "11 image layers of 30" and was wrong twice over, which is
 > the hazard exactly: a number in this file gets quoted downstream faster than it gets checked.)
-> higgsfield's 38% is 3 of 8, and every one of those three is `html` — it has NO image layers at all. Measured by the share of the FRAME carrying real pictorial
-> detail, brew is **10.3%, the lowest of nine films compared** — against 23.8% for the reference films
-> and 20.6% for ours. Eleven small marks is not a picture. This is the same layer-count-versus-area
+> higgsfield's 38% is 3 of 8, and every one of those three is `html`: it has NO image layers at all.
+> Measured by the share of the FRAME carrying real pictorial detail, brew was **10.3%, the lowest of nine
+> films compared**, against 23.8% for the reference films and 20.6% for ours. **THAT AREA FIGURE CANNOT
+> BE RE-RUN TODAY.** It came from a one-off comparison, and the only tool that ever measured layer area
+> was `visual-vocabulary`, which was deleted for measuring it wrongly. Nothing in the repo measures area
+> now, so treat 10.3% as a recorded observation, not a live metric, and do not quote it as one.
+> Eleven small marks is still not a picture. This is the same layer-count-versus-area
 > error that killed the `visual-vocabulary` gate, whose size helper squared a 590x18 rule into 590x590
 > and credited a hairline with a tenth of the frame (`docs/TASTE.md`). Read the row above as "brew
 > places many pictorial ELEMENTS", never as "brew's frame is half picture", and when you want the second
@@ -174,7 +210,9 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 > `make slop` was RETIRED in 2026-08 (`docs/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
 > dump that inlined three CSS properties — `font-family`, `color`, `background` — so every rule about a
 > border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
-> the whole library. Of the 38 borrowed rules examined for the fork, **6 were worth keeping**: most were
+> the whole library. The two counts in this paragraph are different things, and reading them as one is
+> why they look contradictory: the retired gate RAN **41** rules, and **38** were then examined
+> one by one for the fork (`docs/MISTAKES.md` #326). Of those 38, **6 were worth keeping**: most were
 > already measured better here, four had no subject in our artifacts at all, and five would have fired on
 > the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
 > blueprint prop, the blinds-wipe mask in `core/cuts.js:130` that `lib-test` asserts).
@@ -208,20 +246,27 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    content: **DECORATION** dresses the frame and carries no information (a glow, a gradient, a hairline
    rule, a corner tick, a scanline, a logo mark beside a wordmark); **EXPLANATION** does work the words
    cannot. A film can be drowning in the first and have none of the second, and all three Ledgerline cuts
-   were. Size is the whole point: `creed-launch` carries 19 pictorial layers and every one is a small logo,
-   so a graphic is only the subject at roughly 8% of the canvas or more. How to decide what to show and how:
-   **[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md)**. 52 of the 93 scenes in this library
-   carried no large picture at all when this was last measured. That was nobody's decision, and it is debt,
-   not a pattern to copy.
+   were. Size is the whole point: `creed-launch` carries **18 `image` layers (20 counting its two
+   `component`s) of 106**, and every one is a small logo, so a graphic is only the subject at roughly 8% of
+   the canvas or more. **That 8% is a deleted gate's constant and no derivation for it survives**, so use it
+   as a rule of thumb you argue with, never a threshold you satisfy. How to decide what to show and how:
+   **[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md)**. The old claim here was "52 of the 93
+   scenes carried no large picture", and it is not checkable: 93 matches no population, and "large" needs an
+   area measurement no tool in this repo performs any more. What IS checkable, and says the same thing:
+   **50 of the 132 gate-visible scenes carry ZERO pictorial layers of any size**, and the median film gives
+   8% of its layers to picture. That was nobody's decision, and it is debt, not a pattern to copy.
 
    **NOTHING ENFORCES THIS. There is no show floor any more, and you should know why.** A gate called
    `visual-vocabulary` used to fail `no-visual-vocabulary` here, and it was deleted in 2026-08. It measured
    a layer's area, and its size helper squared any layer that declared one axis and had no readable
    intrinsic aspect: a 590x18 decorative underline was scored as 590x590 and credited with a tenth of the
    frame. So the one gate whose entire job was to tell a mark from a picture handed a pass to a hairline.
-   It was also waived by 30 of 130 films, which is a rule that has already been repealed with nobody
-   writing it down. Fixing the arithmetic would have made it true and then failed about 52 shipped films,
-   so it went. `docs/TASTE.md` records the cull and what would have to be true to bring it back.
+   It was also waived by 30 of 130 films at the time of the cull, which is a rule that has already been
+   repealed with nobody writing it down. Fixing the arithmetic would have made it true and then failed
+   dozens of shipped films, so it went. **Both of those are historical figures and neither can be re-run**:
+   the gate is gone and the scenes were cleaned, so today `node scripts/gates/waiver-drift.mjs` finds one
+   `no-visual-vocabulary` waiver left, flagged DEAD. `docs/TASTE.md` records the cull and what would have
+   to be true to bring it back.
    The reasoning above is unchanged and still worth following. What changed is who checks: **you do, with
    `make judge` and your eyes.** No green tick will tell you a film is only type. That was always the case,
    because even at its best the gate could prove a picture was on screen and large and could never prove it
@@ -255,8 +300,11 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    on the junction, or a metric-cut list film. It will be wrong about all four.
    **Know the limit.** The gate can see that a prop survives a junction and moves. It cannot see whether
    that prop BECOMES the next thing, which is the difference between a travelling card and a subject.
-   **Read the eighteen waivers as evidence about the rule, not about the films.** Eighteen short films here
-   carry a `no-continuous-object` waiver. A rule waived by reflex has already been repealed and nobody
+   **Read the waivers as evidence about the rule, not about the films.** **14 films, 11% of the 132
+   gate-visible scenes**, carry a `no-continuous-object` waiver (`node scripts/gates/waiver-drift.mjs`;
+   this line said "eighteen" and that was the raw file count, derivatives included). It is the
+   most-waived rule in the library by a distance, and the only one within sight of the 15% threshold
+   `waiver-drift.mjs:58` calls habitual. A rule waived by reflex has already been repealed and nobody
    wrote it down. It did not merely fail to see the alternatives: it made one alternative free and the
    other seventeen expensive, because a keyed `w`/`h` on a rectangle passes and a motif does not.
    Planning follows the same shape. `storyboard-check` asks a short film to NAME what holds it, in
@@ -287,8 +335,11 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    when the scene has changed since you last looked. Editing a scene and skipping the sheet is therefore
    visible. A `dead-air` waiver is for a deliberate held frame, never for "I did not look".
 
-2a2. **SILENCE IS A DEVICE, NOT A DEFAULT.** Five films in six here ship mute and not one says why,
-   which closes the whole aural family of structural device (`docs/CRAFT/FILM-STRUCTURE.md`): the sound
+2a2. **SILENCE IS A DEVICE, NOT A DEFAULT.** **114 of the 132 gate-visible scenes ship mute, 86%**: 17
+   carry no `audio` key at all and 97 declare `silent: true`. Of those 97, **only 9 say why**. So the
+   sentence to remember is not "nobody declares the silence", it is **"nearly everybody declares it and
+   almost nobody justifies it"**. `audio-check` accepts a bare `silent: true`, and 88 films took the
+   offer. That closes the whole aural family of structural device (`docs/CRAFT/FILM-STRUCTURE.md`): the sound
    bridge, music-led structure, the unfinished sentence. A sound bridge is also a continuous object the
    picture never has to carry. Give every film sound, or state the silence:
    `"audio": {"silent": true, "_why": "…"}`. `make audio-check D=<file>` grades it; `make audio-check`
@@ -301,7 +352,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    the film turns and give none of them a `from`/`to`, and the engine binds window i to the joint after
    it, so the cuts you already wrote own the numbers (`core/junctions.js`, `docs/MISTAKES.md` #371).
    This is the single strongest lever in the file: brew inverts the tone of the world on four of its
-   five cuts, and 134 of 144 scenes here paint ONE window for the whole runtime. A pictorial beat on a
+   five cuts, and **122 of the 132 gate-visible scenes, 92%**, paint ONE window for the whole runtime. A pictorial beat on a
    dead backdrop is still a slide. Then **judge it across
    frames, never on one still**: pull the same 4+ timestamps and compare them as a strip. A still hides
    speed, scale and direction of the motion. Recreating a reference? Strip the reference and your render
@@ -328,10 +379,17 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
 2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
    static quality loop. It has two halves.
-   **ALWAYS ON** (validate · beats · **assets** · inspect · **plan-vs-render**): these catch a film that is
-   BROKEN, and cost about a second.
-   **OPT-IN, behind `TASTE=1`** (critique · direct · **direction-floor** · dissolve · slop · **designspec** ·
-   **copy**): these check house style, which is an argument rather than a fact, and they were fitted to a
+   **ALWAYS ON**, in the order they run: **validate · beats · assets · treatment · waiver-drift · inspect ·
+   plan-vs-render**. These catch a film that is BROKEN, and cost about a second. Three of the seven do not
+   block: `assets` is advisory unless `STRICT=1` (`author-check.mjs:184`), and `treatment` and
+   `waiver-drift` are advisory always, by design: a gate that blocked on waiver drift would itself be
+   waived. Two more things block here that this list used to hide: **a waiver with no `_why` blocks**
+   (see the shape below), and under `STRICT=1` a **missing `.intent.json` blocks** as `no-intent-sidecar`.
+   **OPT-IN, behind `TASTE=1`**, seven gates: **critique · direct · direction-floor · dissolve · designspec ·
+   copy · pace**. (`slop` is NOT one of them. It was retired in 2026-08, its script is deleted, and this
+   line listed it as live for months.) `pace` (`scripts/gates/pace-check.mjs`) measures events per second:
+   it is the gate that catches a film that is asleep, and it was named nowhere in this file.
+   These check house style, which is an argument rather than a fact, and they were fitted to a
    library this file calls debt. Run them on anything you intend to ship:
    `TASTE=1 make author-check D=<file>`. The run names what it skipped. Why they are opt-in, and what would
    have to be true to switch one back on: **`docs/TASTE.md` · "What was culled, and why"**.
@@ -356,14 +414,32 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    **THE DIRECTION TELLS DO NOT BLOCK, AND THIS FILE SAID THEY DID.** `linear-motion`,
    `monotone-timing`, `enter-and-retreat` and `effect-soup` are every one of them `warn()` in
    `scripts/author/motion-director.mjs`; that gate exits only on `fails`, and the string `strict` does
-   not appear in it. Only `≥3 cut families` blocks. So the backstop this paragraph promised for months
-   does not exist, and a film can carry all four tells and pass `TASTE=1` clean. Treat them as what they
-   are: a report you have to read, not a wall that stops you. The ambition floor (`plain-slideshow`) is
-   in the same position.
-   Two-sided: `effect-soup` is the ceiling, `plain-slideshow` the floor; directed lives between.
+   not appear in it. Its only two FAIL-tier codes are `cut-families` (at ≥3) and `profile`. So the backstop
+   this paragraph promised for months does not exist, and a film can carry all four tells and pass
+   `TASTE=1` clean. Treat them as what they are: a report you have to read, not a wall that stops you.
+   **The ambition floor is NOT in that position: `plain-slideshow` really does block**, in
+   `direction-floor.mjs:118-120,349-359`, alongside `no-continuous-object`. So does `crossfade-mud`
+   (dissolve), and so do the designspec codes, which `author-check.mjs:175` hardcodes to `--strict`.
+   Two-sided: `effect-soup` is the ceiling and only warns, `plain-slideshow` the floor and it stops you;
+   directed lives between.
    There is **no show floor**: `visual-vocabulary` was deleted for measuring size wrongly (see 2a0000).
-   Reach past every WARN; waive a *deliberate* break with
-   `{"authoring":{"allow":[...]}}`. Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
+   Reach past every WARN. **A waiver must state its reason or the always-on half stops the render**
+   (`author-check.mjs:74-83`, blocking, ≥12 characters per waived code). The bare `allow` array this line
+   used to show is not a working incantation. The shape is:
+
+   ```json
+   "authoring": {
+     "allow": ["dead-air"],
+     "_why": { "dead-air": "the held frame IS the beat: the room empties and nothing replaces it" }
+   }
+   ```
+
+   One `_why` key per code in `allow`; a missing or too-short one names itself and exits non-zero.
+   Measured today: **33 of the 44 scenes carrying waivers have at least one bare code** and therefore fail
+   author-check as they stand, which is what a documented incantation that skips half the contract buys
+   you. Nothing judges whether the reason is GOOD; the cost of one sentence is the whole mechanism, because
+   that cost is what turns a reflex back into a decision.
+   Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
 3. **Render:** `make video D=formats/scene/<topic>.json` (runs author-check first unless `NOCHECK=1`).
 3a. **IS THE EMPTY PART OF THE FRAME DOING A JOB?** Whitespace is ACTIVE (isolating the subject,
    directing the eye) or PASSIVE (what merely happened between two things placed independently). Passive
