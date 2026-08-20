@@ -73,9 +73,16 @@ This is not a new capability — the engine ships it — it just has to be USED.
   only when you deliberately want calm.
 - **Snap lands in the 0.2-0.3s band.** Default enter is now **0.30s** (was 0.45), exit **0.26s** (was 0.4).
   A move that takes half a second reads floaty; a third of a second reads confident. Stretch only with intent.
-- **Overshoot on ANY keyframe track.** On a `motion[]`/count/camera keyframe, set `ease:"spring"` (or
-  `"spring-bouncy"`/`"spring-stiff"`) and the value overshoots-and-settles instead of gliding. Same for
-  cut timing `pop`. This is how a card, a bar, or a number arrives with weight.
+- **Overshoot on a TRANSFORM track, never on a counter.** On a `motion[]`/camera keyframe, set
+  `ease:"spring"` (or `"spring-bouncy"`/`"spring-stiff"`) and the value overshoots-and-settles instead of
+  gliding. Same for cut timing `pop`. This is how a card, a bar, or a camera arrives with weight.
+  **A COUNTER IS NOT A PHYSICAL OBJECT AND MUST NEVER OVERSHOOT.** Overshoot is a claim about mass: a
+  thing with weight passes its target and settles back. A number has no mass, and a count that springs
+  flies PAST its true figure and falls back to it, so for a few frames the film shows a number that is
+  not true. A film that says 1,822 contributions and paints 1,900 on the way has broken the one content
+  rule this repo does not bend ("use real, accurate figures"). This line used to say the opposite, and
+  said it twice; `core/layers/count.js` obeys whatever ease it is given, so the doc was the whole bug.
+  Reach for `easeOutExpo` or `easeOutQuart` on a count: the deceleration IS the weight.
 - **The theme owns the personality — and it now applies.** `theme.motion`
   `{easing,bounce,settle,enter,durationScale,stagger}` scales every default at render time (a punchy brand
   tightens `durationScale`/`stagger`; a calm one stretches them). It was defined-but-unwired before; it is
@@ -122,7 +129,7 @@ pure and land exactly at rest. Reach into this table by the FEELING you want, th
 
 **How to pick, in one line:** entrances → `settle` (calm) or `snap` (directed); exits → leave them to the
 engine's mirror, or `rush` for a hard launch; ambient → `easeInOutSine`; a value that should feel physical
-(number, bar, camera) → `spring`. Everything else is a deviation you should be able to justify by intent.
+(bar, card, camera) → `spring`; a COUNTER → `easeOutExpo`, never a spring (see above). Everything else is a deviation you should be able to justify by intent.
 
 > A name the registry does not know now **warns** (`resolveEasing`) instead of silently rendering
 > `easeOutCubic`, so a typo'd or imagined ease (including GSAP names like `power3.out` — we don't use that

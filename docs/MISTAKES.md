@@ -11409,6 +11409,36 @@ base }` after the write. The two sides of the comparison are then in the same la
 with an idle failed 41 of 25 sampled frames, both as render-order dependence and as a forward-render
 mismatch. It named the defect before a frame was ever looked at. Nothing new was needed.
 
+## #385 — The doctrine told authors to render a false number
+
+`docs/MOTION-CRAFT.md` recommended, twice, that "a value that should feel physical (number, bar, camera)"
+use `ease:"spring"`. `core/layers/count.js` runs the counter through whatever ease it is handed, so a
+spring makes the value **fly past its true figure and fall back**. A film that says 1,822 contributions
+would paint 1,900 for a few frames on the way there.
+
+That is not a motion defect wearing a content defect's clothes, it is the other way round. "Use real,
+accurate figures" is the one line in the content philosophy with no exceptions, and this was the house
+motion guide instructing authors to break it.
+
+**Overshoot is a claim about MASS.** A thing with weight passes its target and settles back. A number
+has no mass, so the claim is false and the frame is false with it. Springs stay right on a `motion` or
+camera track, where the thing moving is a thing.
+
+Found by reading a reference system's motion rules, which state it directly: "A number is not a physical
+object. A counter must never fly past its value and fall back." Ours said the opposite and nobody had
+noticed, because the failure only appears for a handful of frames mid-count and every gate samples
+settled frames.
+
+**No shipped scene trips it** (checked across all 156), so this closes a trap rather than fixing a film.
+The doc is corrected and `countEaseErrors` in `core/validate.mjs` now refuses it, with the arithmetic in
+the message rather than a rule number.
+
+**And the fix broke every scene for one run.** `core/validate.mjs` is also a CLI, so its main block runs
+during module evaluation; the new check was appended BELOW it with a module-level `const`, which was
+still in the temporal dead zone when the main called through. 45 scenes died with a ReferenceError
+instead of being validated. Caught because the library count jumped from 15 failures to 45 and the
+number was checked rather than assumed. The regex now lives inside the function.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
