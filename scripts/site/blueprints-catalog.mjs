@@ -13,7 +13,10 @@ const REGISTRY = new URL('../../blueprints/index.mjs', import.meta.url);
 function descriptions() {
   const out = {};
   for (const line of readFileSync(REGISTRY, 'utf8').split('\n')) {
-    const m = /^\s*(\w+):\s*Beats\.\w+,\s*\/\/\s*(.+?)\s*$/.exec(line);
+    // ANY namespace, not `Beats.` alone. The registry grew a second and third module the moment more
+    // than one author worked on beats at once, and a pattern that names one of them reports the others
+    // as undocumented while they sit two lines below, correctly commented.
+    const m = /^\s*(\w+):\s*\w+\.\w+,\s*\/\/\s*(.+?)\s*$/.exec(line);
     if (m) out[m[1]] = m[2];
   }
   return out;
