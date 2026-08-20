@@ -13,8 +13,12 @@ export const PROPS = {
   untype: { when: 'typing' }, untypeRate: { when: 'typing' },
 };
 
+// The second the layer's settled look is judged at. Both styleText and microType ask the same question
+// about the ground under this layer, so they must ask it at the same instant or they disagree.
+const midT = (L) => (L.start ?? 0) + (L.duration ?? 2) / 2;
+
 export function build(kit, el, L) {
-  kit.styleText(el, L, (L.start ?? 0) + (L.duration ?? 2) / 2);
+  kit.styleText(el, L, midT(L));
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
   microType(kit, el, L); // pro-grade type refinements, on by default (opt out with raw:true)
   gradientFill(el, L); // static gradient text fill (dark→light vertical, etc.), the premium display look
@@ -103,7 +107,13 @@ function microType(kit, el, L) {
   // `tracking`, and this guard used to name only `ls`: styleText applied the author's `tracking`
   // and then this line immediately overwrote it. So `tracking` was accepted, applied, and discarded
   // one statement later — silently, in 12 shipped scenes. (MISTAKES #28; found by `make conformance`.)
-  if (L.ls == null && L.tracking == null && !mono && kit.trackingFor) el.style.letterSpacing = kit.trackingFor(size);
+  // The polarity argument is the other half of the same lesson: a one-argument call here discards what
+  // styleText resolved one statement earlier. #28 was the author's `tracking`; #388 was the light-on-dark
+  // optical correction. Light ink irradiates into the dark counters around it, so the same face reads
+  // heavier and tighter inverted and needs the gaps opened back up at display sizes.
+  if (L.ls == null && L.tracking == null && !mono && kit.trackingFor) {
+    el.style.letterSpacing = kit.trackingFor(size, kit.onDark?.(L, midT(L)) ?? false);
+  }
   // widow/orphan control: balance headlines (even line lengths), pretty on body (no lone last word).
   if (!mono && !L.split) el.style.textWrap = size >= 40 ? 'balance' : 'pretty';
   // legibility: real kerning + ligatures on display type; crisp rasterization.

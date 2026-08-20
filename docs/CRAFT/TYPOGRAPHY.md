@@ -118,7 +118,24 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
   not merely smaller. Body never below 400.
 - **Tracking is optical:** tighten large display (negative letter-spacing, ~-0.02 to -0.03em on big headings);
   open UPPERCASE and small caps; never letterspace lowercase. The engine's `trackingFor(px)` already scales this
-  when `theme.type.optical` is on; otherwise set `tracking` per layer.
+  when `theme.type.optical` is on; otherwise set `tracking` per layer. (On a `text`/`count` layer the ramp is
+  applied by `microType` in `core/layers/text.js` and reaches every non-`mono`, non-`raw` layer, whether or not
+  the theme sets `optical`.)
+- **Light ink on a dark ground gets its gaps opened back up, automatically.** A bright letterform bleeds into
+  the dark counters around it, so the same face at the same size reads heavier and tighter inverted than it
+  does black-on-white. `trackingFor(px, dark)` adds a lift on top of the size ramp: nothing at 14px body,
+  +0.010em by 120px hero, and it never reverses the ramp, so bigger type is still tighter type. The engine
+  decides `dark` from the layer's settled ink colour, at the midpoint of the layer's own window.
+  - **It is a DEFAULT.** An explicit `tracking` or `ls` on the layer wins outright and suppresses the whole
+    ramp, lift included. Set one when you want a specific value and you will get exactly it.
+  - **Expect to see it at hero sizes only.** At 24px the compensated and uncompensated settings are
+    indistinguishable, and that is the intent. Below roughly 40px, treat this as a number that moved rather
+    than a look that changed.
+  - **The other two thirds of the source rule are NOT implemented, and nothing plans to be.** The full
+    inverted-type correction also drops body weight (400 → 350) and opens leading (+0.05 to 0.1× line-height).
+    The engine does neither. It ships the tracking third alone. Do those two by hand, per layer, when a dark
+    scene needs them, and note that the weight advice fights the "body never below 400" line above: 350 is a
+    correction for white-on-black only, not a floor to lower everywhere.
 - **Leading:** body **1.2–1.45×**; tighter for big headlines (1.02–1.1), looser for long measure.
 - **Measure (line length): 45-75 chars, ~66 ideal — BODY AND CAPTIONS ONLY. Display type is exempt.**
   Set the text layer `w` on a paragraph, a caption, a card body or any label so the lines don't run edge to
