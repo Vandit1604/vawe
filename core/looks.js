@@ -357,6 +357,13 @@ export function resolveComposite(name, opts = {}, positional) {
 
 export const LOOK_NAMES = Object.keys(LOOKS);
 
+// The strength this look WOULD resolve to, given what resolveComposite would be given. Exported so a
+// caller that has to SCALE a look (core/spectacle.js, pulling every competing dial down) multiplies
+// the number the look really uses instead of keeping a second copy of the 0.7 default over there.
+// null for an unknown name, so the caller can say so rather than silently scaling nothing.
+export const baseStrength = (name, opts, positional) =>
+  (LOOKS[name] ? mergeOpts(LOOKS[name], opts, positional).strength : null);
+
 // base name of a filter spec ("neon:0.9" → "neon"); isLook tells util.js whether to route here.
 export const lookName = (spec) => String(spec || '').split(':')[0].trim();
 export const isLook = (spec) => Object.prototype.hasOwnProperty.call(LOOKS, lookName(spec));

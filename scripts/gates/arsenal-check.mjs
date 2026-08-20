@@ -38,6 +38,7 @@ const WAIVED = new Map(Object.entries({
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   KNOBS: 'playground control metadata, not an effect a scene can name',
+  SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in docs/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',
   DEPRECATED_FX: 'the sixteen gsap entrances that duplicate an anim exactly, mapped to their replacement. Every one is ALREADY catalogued under "GSAP named effects"; this marks which to stop using (#364)',
   DEPRECATED_EXIT: 'as DEPRECATED_FX, for the exits',
 

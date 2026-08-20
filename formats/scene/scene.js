@@ -23,6 +23,7 @@ import { resolvePans } from '/core/pan-resolve.mjs';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
 import { normalizeIdle } from '/core/idle.js';
+import { resolveSpectacle } from '/core/spectacle.js';
 const $ = (id) => document.getElementById(id);
 
 // resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
@@ -121,6 +122,10 @@ boot((data, fps, theme, canvas) => {
   // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
   // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
   data = lowerScene(data);
+  // The film's nominated loud moment: write the device as a sting at `at` and pull every competing
+  // amplitude dial in the film down around it (core/spectacle.js). BEFORE the sting/seam/layer parses
+  // below, because those are its subject; a no-op when the scene declares no `spectacle`.
+  resolveSpectacle(data);
   // canvas W,H come from boot (aspect-resolved). Fallback keeps standalone use working.
   const [W, H] = [canvas?.width || 1080, canvas?.height || 1920];
   const cam = $('cam'), cv = $('cv');

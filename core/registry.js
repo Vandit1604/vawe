@@ -79,7 +79,7 @@ function hint(reg, name) {
   }
   const names = reg.names;
   const near = nearMisses(shown, names);
-  return `${head}${near.length ? ` — did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''} `
+  return `${head}${near.length ? ` — did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : '.'} `
     + `Known ${reg.kind}s: ${names.join(', ')}. A name this registry does not know would otherwise `
     + `resolve to a default and render a frame that looks deliberate.`;
 }

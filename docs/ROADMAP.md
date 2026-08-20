@@ -192,7 +192,7 @@ than none.
 
 ## Tier 3 — GLSL (one new SHADER_FX each)
 
-**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 35 entries and `AMBIENT_FX` 17; between
+**MOSTLY SHIPPED — audited 2026-07-19.** `SHADER_FX` holds 35 entries and `AMBIENT_FX` 18; between
 them the families below are majority-built. This section used to read as a wish-list and sent two
 consecutive planning passes at work that already existed.
 

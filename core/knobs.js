@@ -11,6 +11,9 @@
 // string. Families whose presets share ONE dial set list it under `_shared` with no per-preset block;
 // families with genuinely different dials per preset list each.
 
+import { defineRegistry } from './registry.js';
+import { SHADER_FX } from './stings.js';
+
 const n = (name, def, desc, range) => ({ name, type: 'number', default: def, desc, ...(range ? { range } : {}) });
 const col = (name, def, desc) => ({ name, type: 'color', default: def, desc });
 const en = (name, values, def, desc) => ({ name, type: 'enum', values, default: def, desc });
@@ -130,3 +133,74 @@ export function knobsFor(family, preset) {
   if (!fam) return [];
   return [...(fam._shared || []), ...(fam[preset] || [])];
 }
+
+// ── THE SPECTACLE DIAL: one loud moment, and everything else pulled down ─────────────────────────
+//
+// WHY IT LIVES HERE. Every knob above answers "what can this preset be told". The spectacle answers
+// the question one level up: of all the dials a film sets, which ONE is allowed to sit at the top of
+// its range. A film that shouts on four beats has no loud moment, it has a volume setting, and
+// neither `effect-soup` (the ceiling) nor `plain-slideshow` (the floor) ever asks the author to
+// NOMINATE the peak — so a film can sit safely between them and still be shapeless.
+//
+// The clause is two-sided and that is the whole point. Naming the loud moment is simultaneously a
+// promise that every other beat stays restrained, and a promise nobody enforces is a comment. So the
+// author declares the peak once and the ENGINE pulls the rest down, which makes one loud moment the
+// cheap thing to write. That is the actual lack: authors were not failing to be restrained, they had
+// no way to say WHERE the restraint was being spent.
+//
+// The walk that applies these numbers to a scene is core/spectacle.js; the vocabulary and the
+// arithmetic are here, beside the other dials, and they are pure so a gate can test them.
+
+// THE DEVICES, and every one of them already ships. `device` names a SHADER STING (core/stings.js) —
+// the engine's existing vocabulary for a loud instant at an arbitrary time, which is exactly the
+// shape of the thing being declared. No new effect: the twelve below are the subset of SHADER_FX
+// that read as a PEAK rather than as a transition, and a name outside it is refused rather than
+// substituted (core/registry.js — a `pick` takes no fallback).
+const DEVICE_BLURBS = {
+  flash: 'a single bright bloom over the whole frame, up and gone — the plainest peak there is',
+  chromaticSplit: 'the frame tears into red/green/blue and snaps back — impact, energy, a hard landing',
+  glitch: 'a stepped horizontal shear, no smoothing — alarm, breakage, a system under load',
+  streak: 'a bright bar sweeps the frame — a specular pass over a mark, the cheapest premium peak',
+  whipPan: 'the frame smears sideways as if the camera whipped to it — motion the picture cannot carry alone',
+  ripple: 'a ring travels out from the centre and distorts what it crosses — an impact you can watch spread',
+  sdfIris: 'a hard iris opens from the centre — a shutter on the moment, theatrical and exact',
+  vortex: 'the frame twists about its centre and unwinds — the loudest of the radial family',
+  lens: 'a wide optical bulge and release — the frame bending under the weight of the moment',
+  dispersion: 'the picture separates into its spectrum and reassembles — glass, prisms, luxury',
+  iridescence: 'an oil-slick sheen washes across the frame once — colour as the event',
+  cinematicZoom: 'a fast push with the blur that comes off it — the frame lunging at the subject',
+};
+
+// A device that is not a real sting would resolve to nothing at render, so the list is asserted
+// against its source at load rather than trusted to stay in step with a rename.
+for (const d of Object.keys(DEVICE_BLURBS))
+  if (!SHADER_FX.includes(d))
+    throw new Error(`spectacle device "${d}" is not a shader sting — core/knobs.js and core/stings.js have drifted.`);
+
+export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
+  Object.fromEntries(Object.keys(DEVICE_BLURBS).map((k) => [k, k])),
+  { blurbs: DEVICE_BLURBS, slot: 'spectacle.device' });
+
+// THE TWO NUMBERS. `peak` is what the declared moment's own sting is set to, over the sting default
+// of 1; `rest` is what every competing amplitude dial elsewhere in the film is multiplied by.
+//
+// 0.55 rather than something gentler because the gesture has to survive being watched once. A film
+// that drops its other effects by a tenth has not made room for anything, and the author will simply
+// go back to hand-tuning — which is the behaviour this dial exists to replace. Roughly half is the
+// point at which a beat stops competing and starts supporting.
+export const SPECTACLE_GAIN = Object.freeze({ peak: 1.35, rest: 0.55 });
+
+// The default sting span. Stated here because the spectacle WRITES a sting rather than reading one,
+// so it cannot inherit scene.js's `s.dur ?? 1.0` by omission and still be legible in the JSON.
+export const SPECTACLE_DUR = 0.9;
+
+const r3 = (v) => +(+v).toFixed(3);
+
+/** An amplitude dial pulled down. `def` is the value the engine would have used had it been unset. */
+export const attenuated = (v, def) => r3((v == null ? def : v) * SPECTACLE_GAIN.rest);
+
+/**
+ * A KICK pulled down. `kick.scale` is a multiplier about 1, not an amount, so scaling it directly
+ * would attenuate a 0.94 kick-IN into a stronger one. The distance FROM 1 is the amplitude.
+ */
+export const attenuatedKick = (scale) => r3(1 + (scale - 1) * SPECTACLE_GAIN.rest);

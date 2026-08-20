@@ -11439,6 +11439,42 @@ still in the temporal dead zone when the main called through. 45 scenes died wit
 instead of being validated. Caught because the library count jumped from 15 failures to 45 and the
 number was checked rather than assumed. The regex now lives inside the function.
 
+## #386 — A `SPECTACLE` field was added to the brief, read by the parser, and consumed by nothing
+
+**What.** `CLAUDE.md`'s brief gained a `SPECTACLE` line and `scripts/author/storyboard-parse.mjs` was
+taught to read it. No code downstream did anything with it. An author filled the field, the storyboard
+looked complete, and the film was byte-identical to one that had never named a loud moment.
+
+**Root cause.** The same shape as #213, #369 and #373: input accepted and then ignored. It is worse than
+a missing field, because a missing field prompts a question and a dead one answers it wrongly. The
+authoring template already documents this failure by name in its `becomes:` slot, where "the author wrote
+the change down, did not build it, and every gate stayed green."
+
+**Fix.** A scene-level block, `"spectacle": { at, of, device, why }`, resolved by `core/spectacle.js`
+before any DOM exists. It is deliberately TWO-SIDED, because that is what the rule says and half of it is
+what nobody builds: naming the loud moment is at the same time a promise the rest of the film stays
+restrained. So the peak is written as a shader sting at `at` (no new effect — the twelve legal devices are
+already in `SHADER_FX`), and every competing amplitude dial in the film is multiplied by 0.55: other
+stings' and seams' `intensity`, composite-look strength, an authored `intensity` on a glow or beam, a
+`kick` modifier's `scale`. The layer named by `of` is exempt, which is what makes it a peak rather than a
+raised floor.
+
+**Why a dial and not a gate.** A gate saying "four beats shout" teaches the author to hand-tune four
+beats. A dial makes one loud moment the cheap thing to write, which is the actual lack — authors were not
+failing to be restrained, they had no way to say WHERE the restraint was being spent.
+
+**What now catches it.** `schema-drift` checks the device enum against `SPECTACLE_DEVICES` by exact path
+(the first draft addressed it as `spectacle.device` rather than `spectacle.fields.device` and the check
+silently skipped, which is the very defect this entry is about — the enum count going 15 → 16 is what
+proved it was really running). `arsenal-check` refused the change until the devices were in
+`docs/EFFECTS.md`. `lib-test` asserts the attenuation arithmetic and all three refusals, and was proved
+to fail by setting `rest` to 1.0. `snap-scenes` reports 104 identical before and after, which is the
+acceptance test: a scene with no `spectacle` returns on the resolver's first line.
+
+**Stated limit.** A glow's `intensity` is attenuated only when the author SET it. Its unset default is
+resolved per preset inside `presetSpec`, and copying that default into the attenuator would be a second
+copy of it in a second file, which is the duplicate-vocabulary shape this file keeps logging.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

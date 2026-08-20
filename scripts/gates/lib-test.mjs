@@ -32,6 +32,8 @@ import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJu
 import { applyComposite } from '../../core/looks.js';
 import { bakeCanvasFx } from '../../core/canvas-fx.js';
 import { DIRS } from '../../core/cuts.js';
+import { SPECTACLE_GAIN, attenuated, attenuatedKick } from '../../core/knobs.js';
+import { resolveSpectacle } from '../../core/spectacle.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
@@ -2078,6 +2080,65 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     try { normalizeIdle({ amp: 3 }); } catch (e) { msg2 = e.message; }
     ok('an idle object without a name is refused', /expected a name/.test(msg2));
   }
+}
+
+// ---- the spectacle dial (core/knobs.js arithmetic + core/spectacle.js walk) -----------------------
+//
+// The half that can be proved without a DOM: what the attenuation DOES to a number, and that a scene
+// with no `spectacle` comes back untouched. Whether the film reads better is a question for eyes.
+{
+  const { rest, peak } = SPECTACLE_GAIN;
+  ok('spectacle: an unset dial attenuates from its stated default', approx(attenuated(undefined, 1), rest));
+  ok('spectacle: an authored dial attenuates from what was authored', approx(attenuated(0.8, 1), 0.8 * rest));
+  ok('spectacle: attenuation is idempotent in the sense that it compounds, never grows', attenuated(1, 1) < 1);
+  // A kick is a multiplier ABOUT 1, so the amplitude is the distance from 1 and not the value.
+  ok('spectacle: a kick OUT is pulled toward 1', approx(attenuatedKick(1.06), 1 + 0.06 * rest));
+  ok('spectacle: a kick IN is also pulled toward 1, not made stronger', (() => {
+    const a = attenuatedKick(0.94); return a > 0.94 && a < 1;
+  })());
+  ok('spectacle: the peak sits above the sting default of 1', peak > 1);
+
+  ok('spectacle: no block leaves the scene identical', (() => {
+    const d = { stings: [{ t: 1, fx: 'burn' }], layers: [{ id: 'a', type: 'glow', intensity: 0.9 }] };
+    const before = JSON.stringify(d);
+    resolveSpectacle(d);
+    return JSON.stringify(d) === before;
+  })());
+
+  {
+    const d = {
+      stings: [{ t: 1, fx: 'burn' }, { t: 3, fx: 'leak', intensity: 0.8 }],
+      seams: [{ t: 2, fx: 'fade' }],
+      layers: [
+        { id: 'hero', type: 'glow', intensity: 0.9, filter: 'neon', modifiers: [{ kick: true }] },
+        { id: 'chorus', type: 'glow', intensity: 0.9, filter: 'neon:0.9', modifiers: [{ kick: { scale: 1.2 } }] },
+      ],
+    };
+    resolveSpectacle({ ...d, spectacle: { at: 6, of: 'hero', device: 'flash', why: 'the mark lands' } });
+    const [s1, s2, added] = d.stings;
+    ok('spectacle: an unset sting intensity is pulled off its default of 1', approx(s1.intensity, rest));
+    ok('spectacle: an authored sting intensity is pulled off what was authored', approx(s2.intensity, 0.8 * rest));
+    ok('spectacle: the seam is pulled down too', approx(d.seams[0].intensity, rest));
+    ok('spectacle: the device is appended as a sting at `at`, at the peak',
+      added && added.t === 6 && added.fx === 'flash' && added.intensity === peak);
+    ok('spectacle: the named layer keeps every dial it had',
+      d.layers[0].intensity === 0.9 && d.layers[0].filter === 'neon' && d.layers[0].modifiers[0].kick === true);
+    ok('spectacle: every other layer is quietened', approx(d.layers[1].intensity, 0.9 * rest));
+    ok('spectacle: a look with no positional strength resolves through the look before scaling',
+      d.layers[1].filter === `neon:${+(0.9 * rest).toFixed(3)}`);
+    ok('spectacle: a kick elsewhere is pulled toward 1', approx(d.layers[1].modifiers[0].kick.scale, attenuatedKick(1.2)));
+  }
+
+  // REFUSED, NEVER SUBSTITUTED. Each of the three names what is legal, because a spectacle that
+  // silently did nothing would be the very defect the block exists to close.
+  const refuses = (scene, rx) => { let m = ''; try { resolveSpectacle(scene); } catch (e) { m = e.message; } return rx.test(m); };
+  const film = () => ({ layers: [{ id: 'logo', type: 'text', text: 'x' }] });
+  ok('spectacle: an unknown device is refused and the legal ones are listed',
+    refuses({ ...film(), spectacle: { at: 1, of: 'logo', device: 'sparkle', why: 'w' } }, /unknown spectacle device "sparkle"[\s\S]*chromaticSplit/));
+  ok('spectacle: an unknown layer id is refused and the film\'s ids are listed',
+    refuses({ ...film(), spectacle: { at: 1, of: 'nope', device: 'flash', why: 'w' } }, /no layer has id "nope"[\s\S]*logo/));
+  ok('spectacle: a sting already on that instant is refused',
+    refuses({ ...film(), stings: [{ t: 1.02, fx: 'burn' }], spectacle: { at: 1, of: 'logo', device: 'flash', why: 'w' } }, /collides with the sting "burn"/));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

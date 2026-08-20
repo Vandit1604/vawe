@@ -86,6 +86,40 @@ Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4) — the leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
+## The spectacle (`core/spectacle.js`) — nominate ONE loud moment, and the engine quietens the rest
+
+```json
+"spectacle": { "at": 6.6, "of": "logo", "device": "flash", "why": "the mark lands" }
+```
+
+A film that shouts on four beats has no loud moment, it has a volume setting. `effect-soup` is the
+ceiling and `plain-slideshow` the floor, and neither asks the author to NAME the peak, so a film can sit
+safely between them and still be shapeless. This block asks. It is **two-sided, and that is the whole
+point**: naming the loud moment is at the same time a promise that every other beat stays restrained,
+and the engine keeps that promise rather than trusting the author to.
+
+- **The peak.** `device` is written as a shader sting at `at`, at 1.35 against the sting default of 1.
+  Twelve devices, every one already in `SHADER_FX` — nothing new was added for this:
+  `flash` `chromaticSplit` `glitch` `streak` `whipPan` `ripple` `sdfIris` `vortex` `lens` `dispersion`
+  `iridescence` `cinematicZoom`. `make effects` lists them under **Spectacle devices**.
+- **The floor.** Every competing amplitude dial in the film is multiplied by **0.55**: other stings'
+  and seams' `intensity`, composite-look strength (`filter: "neon"` and `"neon:0.9"` alike, resolved
+  through the look's own default), an authored `intensity` on a `glow` or `beam` layer, and a `kick`
+  modifier's `scale` (pulled toward 1, since a kick is a multiplier about 1 rather than an amount).
+- **`of` is the exemption.** The layer it names keeps every dial it had while the film quietens around
+  it. That is the difference between a peak and a raised floor.
+
+Refused, never substituted: an unknown device, a layer id no layer has, and an authored sting already
+sitting on `at` (the spectacle owns its moment). `why` is required, because a peak nobody can name is a
+volume setting and this block spends the whole rest of the film to buy it.
+
+**A scene with no `spectacle` renders byte-identically** — the resolver returns on its first line, and
+all 104 snapshotted scenes prove it.
+
+**What it does not touch, said plainly**: a glow's `intensity` when the author never set one, because
+that default lives per preset inside `presetSpec` and copying it here would put a second copy of it in a
+second file. Anything unset keeps the preset's own resting value.
+
 ## Seams (`core/seams.js`) — two-scene shader transitions (blend BOTH beats)
 
 A sting paints a generative overlay ON TOP of one beat; a cut transforms ONE root. A **seam** is the
@@ -125,7 +159,7 @@ fields at load, so it is pure sugar — determinism and every gate are unchanged
 - **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
 
-## Ambient shader looks (`core/shaders-ambient.js`) — 17 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/shaders-ambient.js`) — 18 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:

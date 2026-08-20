@@ -489,6 +489,33 @@
     "cameraMove": {
       "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase (core/camera-moves.js)."
     },
+    "spectacle": {
+      "type": "object",
+      "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom) written at `at`. The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/spectacle.js.",
+      "fields": {
+        "at": {
+          "type": "number",
+          "label": "The second the moment lands on",
+          "required": true
+        },
+        "of": {
+          "type": "string",
+          "label": "The id of the layer the moment is ABOUT. It is the one layer the attenuation exempts.",
+          "required": true
+        },
+        "device": {
+          "type": "string",
+          "label": "The gesture, from what the engine already ships",
+          "required": true,
+          "enum": ["flash", "chromaticSplit", "glitch", "streak", "whipPan", "ripple", "sdfIris", "vortex", "lens", "dispersion", "iridescence", "cinematicZoom"]
+        },
+        "why": {
+          "type": "string",
+          "label": "What the moment is for, in one line. Required: a peak nobody can name is a volume setting.",
+          "required": true
+        }
+      }
+    },
     "lighting": {
       "type": "object",
       "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point — so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",

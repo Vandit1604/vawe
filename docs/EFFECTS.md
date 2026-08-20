@@ -229,6 +229,25 @@
 | `whipPan` | momentum swipe between beats |
 | `wipe` | playful "notice the cut" (shape wipes) |
 
+## Spectacle devices  `[scene]`
+
+`"spectacle": { "at", "of", "device", "why" }` — the film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/spectacle.js`.
+
+| name | what / when |
+|---|---|
+| `chromaticSplit` | the frame tears into red/green/blue and snaps back — impact, energy, a hard landing |
+| `cinematicZoom` | a fast push with the blur that comes off it — the frame lunging at the subject |
+| `dispersion` | the picture separates into its spectrum and reassembles — glass, prisms, luxury |
+| `flash` | a single bright bloom over the whole frame, up and gone — the plainest peak there is |
+| `glitch` | a stepped horizontal shear, no smoothing — alarm, breakage, a system under load |
+| `iridescence` | an oil-slick sheen washes across the frame once — colour as the event |
+| `lens` | a wide optical bulge and release — the frame bending under the weight of the moment |
+| `ripple` | a ring travels out from the centre and distorts what it crosses — an impact you can watch spread |
+| `sdfIris` | a hard iris opens from the centre — a shutter on the moment, theatrical and exact |
+| `streak` | a bright bar sweeps the frame — a specular pass over a mark, the cheapest premium peak |
+| `vortex` | the frame twists about its centre and unwinds — the loudest of the radial family |
+| `whipPan` | the frame smears sideways as if the camera whipped to it — motion the picture cannot carry alone |
+
 ## Seams (2-scene blends)  `[transition]`
 
 `seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.
@@ -767,4 +786,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_506 effects across 34 families. Regenerate: `make effects`._
+_518 effects across 35 families. Regenerate: `make effects`._
