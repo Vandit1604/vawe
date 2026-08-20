@@ -41,10 +41,98 @@ blocks use). Browse the set first: **`make blueprints`**.
 | `ctaEnd` | held end card | mark + install chip + sub + url (exitDur 0) |
 | `typedHook` | a hook that erases itself | types in, un-types ~2x faster, caret throughout, never fades ([KEYED-MOTION.md](KEYED-MOTION.md)) |
 | `morphButton` | the object that BECOMES the next thing | a labelled button shrinks, rounds and sheds its label until it is a dot — one `--p` clock, a different power per property |
+| `recordedPan` | a surface wider than the frame | scrolls on an IRREGULAR **linear** track so it reads as a screen recording, with rider layers (cursor, callout, highlight) welded to the same track |
+| `echoRing` | keep the frame alive through a slow change | a stroked ring that replays another layer's path one beat late, fading as it grows |
+| `wordBlast` | punctuation, one stressed word or mark | arrives oversized, settles, creeps, then grows THROUGH the frame. `anim:"none"`, four keys, `motionBlur` |
 
 Each takes `{ x?, y?, w?, start, dur, ...content }`. Defaults target the 1920×1080 stage; override to place.
 A beat emits LAYER motion; pair it with the scene-level transition it wants (a `cinematicZoom` seam into a
 `screenDive`, a `dissolve` into a `logoLockup`) — `make direct` suggests these.
+
+
+## The three pictorial beats
+
+The library median is 13% pictorial layers and ZERO hand-keyed motion tracks. The two films this repo is
+proudest of run 46% and 38% pictorial, and higgsfield hand-keys 75% of its layers. These three beats
+exist so that gap is one line of JSON rather than an afternoon, and all three were measured off those
+two films rather than invented.
+
+### `recordedPan` — the surface that scrolls like a recording
+
+A surface WIDER than the frame, moved on a multi-key linear track whose keys are IRREGULARLY spaced. The
+irregularity is the whole device: a human scrolling a page surges and gives up, and an eased track reads
+as an animation of a page rather than as a page. Rider layers (a cursor, a callout, a highlight box) weld
+to the same track with a time offset, so they travel WITH the surface instead of floating over it.
+
+Measured off `higgsfield-recreation` beat 2, where three layers shared one track byte for byte. That
+duplication is what `riders` replaces.
+
+**Reach for it when:** the subject is a real product surface and you want the viewer to believe they are
+watching someone use it. **Do NOT** when the surface fits the frame, since there is nothing to pan; use
+`screenDive` and let the camera move instead.
+
+### `echoRing` — motion during a change too slow to watch
+
+A stroked ring that replays another layer's path one beat late, fading as it grows. Its job is not
+decoration: when the subject morphs slowly, the eye has nothing to track, and the echo supplies the
+motion the beat needs without adding a second subject. It takes the path it is echoing as a prop, so it
+hangs off any layer.
+
+Measured off `higgsfield-recreation` beat 4, whose five keys are all cubic and none linear, the
+deliberate opposite of that film's mechanical layers.
+
+**Reach for it when:** a beat's subject changes shape over more than about a second. **Do NOT** when the
+frame is already busy; an echo in a dense frame is one more thing to read.
+
+### `wordBlast` — the four-key scale punctuation
+
+One word, or one mark, about a second long, sized to fill the frame. It does not fade in. It arrives
+already too big and falls into its reading on `easeOutCubic`, holds with a creep, then leaves by growing
+past the camera on `easeInCubic`. The deceleration IS the impact, which is why `anim:"none"` is not an
+omission: the engine's entrance presets would cross-fade this, and a cross-fade is how a slide starts.
+
+Measured off `brew-launch-act1` beats 1, 6, 7 and 9 ("Today." · "Meet" · the logo · "Faster"). The
+defaults reproduce those tracks exactly.
+
+**Reach for it when:**
+- the film needs a beat that reads as a spoken word, not as a screen. A title card is read; this is heard.
+- a logo has to sit in a sentence. Pass the mark as `src` and it takes the same track as the words on
+  either side, one notch gentler, so it reads as the next WORD rather than as a badge. This is the launch
+  rule about giving a mark prominence, written as motion instead of as a size.
+- you need a hard beat between two dense shots. A frame with one huge word in it is a breath.
+
+**Do NOT reach for it when:**
+- **you have already used it twice in a row.** A beat that punctuates everything punctuates nothing: three
+  of these in sequence is not emphasis, it is a rhythm, and the fourth word lands with no more weight than
+  the first. Spend it on the words that carry the sentence and let the beats between them be pictures.
+- the content is a claim that needs proof. This shows a word; `verdictProof`, `terminalReveal` and
+  `screenDive` show a thing.
+- the beat runs longer than about 2 seconds. The hold is a creep, not a scene; a long `dur` stretches the
+  settle and the frame goes dead in the middle.
+- the layer has to survive a cut. It is built to leave, and `exitDur: 0` means it leaves completely.
+
+**Props**
+
+| Prop | Type | Default | What |
+|---|---|---|---|
+| `text` | string | — | the word. Pass this or `src`; passing neither throws. |
+| `src` | string | — | a mark (logo/wordmark) to punctuate with instead of a word. |
+| `x`, `y` | number | `160`, `380` | stage position (1920x1080). |
+| `w` | number | `1600` for text, unset for a mark | text box width; the mark's rendered width. |
+| `h` | number | — | mark height only. |
+| `size` | number | `380` | type size. Text only. |
+| `weight` | number | `600` | type weight. Text only. |
+| `color` | string | `var(--text)` | text colour, semantic. Text only. |
+| `align` | string | `center` | text alignment inside `w`. Text only. |
+| `font` | string | — | font role, omitted unless given. Text only. |
+| `arrive` | number | `1.5` text, `1.4` mark | scale on the first key. A wide mark cannot take the word's amplitude. |
+| `settle` | number | `1` | the settled scale, i.e. the reading. |
+| `drift` | number | `settle + 0.04` text, `+0.03` mark | the creep. Drop it and the hold reads as a freeze frame. |
+| `exit` | number | `1.9` text, `1.7` mark | scale on the last key. It leaves by growing, never by fading alone. |
+| `settleAt` | number | `0.42` | seconds from layer start to the reading. |
+| `driftFor` | number | `0.3` | seconds of creep before the exit begins. |
+| `motionBlur` | bool\|number | `true` | streaks the two fast ends, crisp across the hold. |
+| `start`, `dur` | number | `0`, `1.5` | placement and length. |
 
 ## The floor that enforces this
 
