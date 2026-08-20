@@ -75,3 +75,23 @@ For anything else, one agent and a better prompt is cheaper and often better.
 - [Multi-Agent AI Systems in 2026: What the Research Actually Says](https://www.flowhunt.io/blog/multi-agent-ai-system/)
 - [LLM Token Optimization Strategies (2026)](https://www.tokenoptimize.dev/guides/llm-token-optimization-strategies)
 - [Token Optimization for Agentic AI](https://sombrainc.com/blog/token-optimization)
+
+## Waiting: the artifact, never the notification
+
+Two rules borrowed from a reference system's dispatch doc, both learned here the hard way today.
+
+**WAIT ON THE EXPECTED FILE EXISTING ON DISK, never on the harness's completion notification.** An agent
+can report success and have delivered nothing: the authored films in `formats/scene/` are GITIGNORED, so
+a worktree fan-out over scenes merges cleanly, reports success, and brings back only the tracked files.
+Four agents did exactly that, and it was caught only because one of them said so in its report
+(`../MISTAKES.md` #377). If the artifact is not on disk where you expect it, re-dispatch once; do not
+treat "the agent finished" as "the work exists".
+
+**Dispatch in WAVES of the concurrency cap. Never merge two units of work into one agent to fit the
+cap.** Merging is how one agent ends up with two jobs and does both worse, which is the same failure the
+critic roster exists to avoid: one context grading its own work. Ten scenes and a cap of four is three
+waves, not four agents carrying two and a half scenes each.
+
+**And re-run the gate yourself, in the main tree, after copying anything back.** Every number in the
+contrast pass was re-measured after the files landed rather than taken from the agent's own report. Two
+of them did not match.

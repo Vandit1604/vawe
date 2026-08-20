@@ -30,6 +30,17 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
   then let the beat count fall out of the runtime. A beat that carries two ideas is two beats or one
   cut, never one crowded frame.
 
+  LAYOUT IS A BEAT DECISION, NOT A LAYER DECISION. Their beat formula has five slots, Element · Motion ·
+  Layout · Style · Timing, and ours had no Layout: composition was decided per layer at JSON time and
+  never at beat time, so a plan could be approved without anyone saying WHERE anything sits. `layout:`
+  asks for a coarse region and how much of the frame it fills ("filling the lower half", "top-left
+  against the UI"), never coordinates. That is the level a reviewer can actually approve, and it is
+  checkable later: `make audit` already knows every layer's box, so a beat that says "filling the lower
+  half" and renders a line at 6% of the frame is a plan-vs-render finding.
+  Be careful with that arithmetic when it is built. Measuring a picture's SIZE is what killed the
+  `visual-vocabulary` gate, whose helper squared a 590x18 rule into 590x590 and credited a hairline with
+  a tenth of the frame. Area, and only area.
+
   EVERY BEAT DECLARES ITS STYLE AND ITS REST, and both are consumed rather than graded.
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
@@ -114,6 +125,7 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
 - becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
+- layout: full-bleed, type filling the middle third, nothing else in frame
 - style: hard contrast, one colour, type is the only object
 - rest: 1.5% breathing scale on the headline through the hold
 - why: open loop, pose the question the payoff answers (curiosity before any claim)
@@ -131,6 +143,7 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
 - onscreen: "what it is" / "the category line"
 - mechanism: svg draw-on · glow flash · per-word reveal
 - becomes: the number becomes the thing that produced it, and the drawn mark becomes the wordmark
+- layout: mark centre, wordmark under it, lower half deliberately empty
 - style: the brand ground arrives, mark at full weight, everything else muted
 - rest: slow drift on the mark, 6px over the hold
 - why: name the thing, give the hook a cause with a name
@@ -145,6 +158,7 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
 - onscreen: "the claim" / "the number that backs it"
 - mechanism: diveIn camera · count-up · border-beam card
 - becomes: the resting product becomes a product mid-use, and the empty field becomes a filled row
+- layout: the UI fills the lower two thirds, the claim sits top-left against it
 - style: the real UI at full fidelity, chrome dimmed so the claim reads
 - rest: 1% scale on the captured surface, nothing else moves
 - why: show-don't-tell, the product doing the thing, not a slogan about it
@@ -159,6 +173,7 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
 - onscreen: "the shocker line" / "the payoff figure"
 - mechanism: hero count-up · kinetic label · a single accent rule
 - becomes: the filled row becomes the finished result, and the open loop becomes an answer
+- layout: the number owns the centre at 60% of frame width
 - style: the loudest frame of the film. THIS is the spectacle beat
 - rest: none, the spectacle carries it
 - why: land the counterintuitive result, pay off the open loop from Beat 1 (the bookend)
@@ -173,6 +188,7 @@ pace: "showreel | explainer | held — CHOSEN before any beat is written, with a
 - onscreen: "the action" / "the url" / "the offer"
 - mechanism: mark pop · install chip · held still (no exit)
 - becomes: the result becomes an address you can type, and the mark becomes the last frame
+- layout: mark and url stacked centre, generous margin on all four sides
 - style: quiet, one line, the mark and nothing competing
 - rest: 1% breathe on the mark only
 - why: one clear next step; remove the risk

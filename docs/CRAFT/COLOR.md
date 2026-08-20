@@ -70,6 +70,16 @@ with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md)
 - **Only use a gradient the real site has.** A flat/minimal brand gets a flat field; inventing an `aurora` for a brand
   that has none is off-brand (see [../MISTAKES.md](../MISTAKES.md)). The theme's 3 `gradient` stops feed these presets, so
   a gradient always stays inside the brand's family.
+- **A FULL-SCREEN LINEAR GRADIENT ON A DARK GROUND WILL BAND, and the banding is the encoder, not the design.**
+  h264 quantises a slow luminance ramp into visible steps, and it is worst exactly where a dark backdrop is
+  most attractive: a large area, a shallow slope, few edges for the encoder to spend bits on. The frame looks
+  clean in the browser and in `make frame`, and the stripes appear only in the mp4, which is why nothing here
+  ever caught it — every gate we own samples the PAGE, not the encode.
+  Prefer a radial over a full-width linear on dark, keep the ramp short, or break it with texture the encoder
+  can hold: the `grain` fx, `paperDots`, `dotmatrix`, or a `dither`/`posterize` filter
+  ([../EFFECTS.md](../EFFECTS.md)). Grain is the cheapest fix and it is what film did for the same reason.
+  Borrowed from a reference system that states it as a flat rule ("no full-screen linear gradients on dark
+  backgrounds"); we had no caveat anywhere, and we ship gradient backdrops and encode to mp4.
 
 ## 8. Cohesion
 One accent across the whole piece · vary **hue only within the brand's family**, flip **value** (light↔dark) for
