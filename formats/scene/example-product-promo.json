@@ -47,7 +47,7 @@
     { "type": "text", "text": "builds shipped this month", "start": 11.65, "duration": 2.57, "x": 1302, "y": 596, "w": 500, "align": "left", "size": 30, "weight": 500, "font": "mono", "color": "#8a8f98", "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
     { "type": "text", "text": "Start shipping.", "start": 14.25, "duration": 3.25, "pin": "center", "y": 420, "w": 1600, "align": "center", "size": 150, "weight": 800, "color": "#f7f8f8", "split": "word", "preset": "riseClip", "stagger": 0.07, "each": 0.5, "anim": "none" },
-    { "type": "text", "text": "free at <em>your.app</em>", "start": 15.0, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 56, "weight": 600, "color": "#5e6ad2", "anim": "fade", "enterDur": 0.5 }
+    { "type": "text", "text": "free at <em style=\"color:#f7f8f8\">your.app</em>", "start": 15.0, "duration": 2.5, "x": 160, "y": 640, "w": 1600, "align": "center", "size": 56, "weight": 600, "color": "color-mix(in srgb, #5e6ad2 60%, #f7f8f8)", "anim": "fade", "enterDur": 0.5 }
   ],
   "bg": [{ "t": 0, "preset": "aurora" }]
 }

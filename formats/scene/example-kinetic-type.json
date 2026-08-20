@@ -208,7 +208,7 @@
    "size": 88,
    "weight": 700,
    "font": "mono",
-   "color": "#8a8f80",
+   "color": "#f4f5f2",
    "anim": "rise",
    "enterDur": 0.3,
    "out": "fade",
@@ -270,7 +270,7 @@
    "size": 46,
    "weight": 600,
    "font": "mono",
-   "color": "#8a8f80",
+   "color": "#b9bcc2",
    "anim": "fade",
    "enterDur": 0.5
   }

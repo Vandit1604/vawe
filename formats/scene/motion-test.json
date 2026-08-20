@@ -6,7 +6,7 @@
   "duration": 5.2,
   "audio": { "silent": true, "_why": "a motion regression fixture, not a film: it exists to be diffed frame by frame, and a bed would only add bytes that nothing compares." },
   "layers": [
-    { "type": "text", "text": "BEFORE", "start": 0.0, "duration": 5.2, "x": 200, "y": 150, "w": 700, "align": "left", "size": 66, "weight": 800, "color": "#6b6259", "anim": "fade", "enterDur": 0.4 },
+    { "type": "text", "text": "BEFORE", "start": 0.0, "duration": 5.2, "x": 200, "y": 150, "w": 700, "align": "left", "size": 66, "weight": 800, "color": "#a49b92", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "easeOutCubic, 0.45s, floaty", "start": 0.0, "duration": 5.2, "x": 200, "y": 236, "w": 700, "align": "left", "size": 34, "weight": 500, "font": "mono", "color": "#8a8078", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "AFTER", "start": 0.0, "duration": 5.2, "x": 1060, "y": 150, "w": 700, "align": "left", "size": 66, "weight": 800, "color": "#ff742e", "anim": "fade", "enterDur": 0.4 },
     { "type": "text", "text": "spring snap, 0.30s, overshoots + settles", "start": 0.0, "duration": 5.2, "x": 1060, "y": 236, "w": 800, "align": "left", "size": 34, "weight": 500, "font": "mono", "color": "#c9bfb4", "anim": "fade", "enterDur": 0.4 },

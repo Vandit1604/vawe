@@ -41,14 +41,20 @@ export function ransomSwatches(accent = '#c8342b') {
     { bg: accent, ink: '#ffffff', w: 1 },    // accent block
   ];
 }
+// EVERY PAIR IN THIS TABLE HAS TO BE READABLE. It is a house palette: two scenes drew the pink/blue
+// pair and the audit reported it once per CHARACTER, which reads as fifteen problems and is one. Cobalt
+// ink on pink stock measured 1.92:1 and cream on grass green 2.96:1, both under the large-text bar of
+// 3.0. Deepening the two inks keeps the ransom-note look (the hues are unchanged, a blue ink on pink
+// stock is still a blue ink on pink stock) and makes the letters legible. Checked in linear light with
+// the same relative-luminance formula core/motion.js and verify/audit.mjs use. docs/MISTAKES.md #378.
 export function ransomColorSwatches(accent = '#d62828') {
   return [
     { bg: '#131313', ink: '#ff2d8b', w: 2, mat: 'neon' }, // black card, hot-pink neon outline
     { bg: '#d62828', ink: '#f4ecd0', w: 2 },              // pillar-box red
-    { bg: '#2a9d3f', ink: '#f4ecd0', w: 2 },              // grass green, cream ink
+    { bg: '#238a35', ink: '#f4ecd0', w: 2 },              // grass green, cream ink · darkened from #2a9d3f, which put cream at 2.96:1
     { bg: '#7a4a1e', ink: '#f0e2c0', w: 2, mat: 'wood' }, // wood type, cream ink
     { bg: '#efe3c0', ink: '#7a4a1e', w: 2 },              // cream stock, brown ink
-    { bg: '#e86aa6', ink: '#2f5fd0', w: 2 },              // pink stock, blue ink
+    { bg: '#e86aa6', ink: '#1e3270', w: 2 },              // pink stock, blue ink · the cobalt #2f5fd0 read 1.92:1 here
     { bg: '#f2c14e', ink: '#141414', w: 2 },              // mustard, black ink
     { bg: '#2f5fd0', ink: '#f4ecd0', w: 1 },              // cobalt, cream ink
     { bg: accent, ink: '#ffffff', w: 1 },                 // theme accent

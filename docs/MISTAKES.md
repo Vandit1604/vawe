@@ -11194,6 +11194,31 @@ This is not an argument against worktrees here: three agents editing scenes in o
 blanket-git hook's warning becomes real damage. It is an argument for knowing which half of the repo is
 tracked before choosing how work comes back.
 
+## #378 — Two swatches in the ransom palette were never readable
+
+`ransomColorSwatches` is a HOUSE table: every ransom-note scene draws from it. Two of its nine pairs
+failed the large-text bar, measured in linear light with the same formula `core/motion.js` and
+`verify/audit.mjs` use:
+
+| stock | ink | ratio | bar |
+|---|---|---|---|
+| `#e86aa6` pink | `#2f5fd0` cobalt | **1.92:1** | 3.0 |
+| `#2a9d3f` green | `#f4ecd0` cream | **2.96:1** | 3.0 |
+
+**Fifteen findings, one cause, and the shape hid it.** A ransom layer colours per CHARACTER, so the
+audit reported the pink/blue pair once per letter that happened to draw it: 1 hard on
+`ransom-color-demo`, 7 on `ransom-internal`, 7 soft for the green. Read as a list it looks like fifteen
+problems in two films. It is two hexes in one engine file, and the agent auditing those scenes correctly
+refused to fork the house palette scene-side to work around it.
+
+Inks deepened to `#1e3270` (4.04:1) and `#238a35` (3.73:1). The hues are unchanged, so a blue ink on
+pink stock is still a blue ink on pink stock; both scenes now report no hard issues.
+
+**The general point.** A finding count is not a defect count. Anything the engine repeats, a palette
+entry, a preset default, a blueprint, gets reported once per instance, so the biggest number in a report
+is often the smallest fix. `plinth-ad` was the same shape: 18 findings, of which 12 were one `x: 60`
+against a safe box that starts at 65.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

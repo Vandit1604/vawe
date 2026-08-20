@@ -417,7 +417,7 @@
     },
     {
       "type": "text",
-      "text": "free at <em>your.app</em>",
+      "text": "free at <em style=\"color:#f7f8f8\">your.app</em>",
       "start": 15,
       "duration": 2.5,
       "x": 160,
@@ -426,7 +426,7 @@
       "align": "center",
       "size": 56,
       "weight": 600,
-      "color": "#5e6ad2",
+      "color": "color-mix(in srgb, #5e6ad2 60%, #f7f8f8)",
       "anim": "fade",
       "enterDur": 0.5
     }
