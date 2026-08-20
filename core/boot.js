@@ -3,6 +3,7 @@
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
+import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
@@ -132,6 +133,29 @@ async function preloadImages(data) {
     im.onload = () => (im.decode ? im.decode().then(res, res) : res());
     im.onerror = () => res();
     im.src = src;
+  })));
+}
+
+// Footage has to be DECODED before the first seek, for the same reason images are decoded before the
+// first paint: a capture that starts on an unloaded source shoots a blank box and says nothing. Waits
+// for `loadeddata` (frame 0 available), not `canplaythrough`, because this engine seeks and never plays,
+// so buffering ahead buys nothing and would stall a render on a long clip.
+async function preloadVideos(data) {
+  const urls = new Set();
+  const isVid = (v) => typeof v === 'string' && /\.(mp4|webm|mov|m4v)$/i.test(v);
+  const walk = (o) => {
+    if (Array.isArray(o)) o.forEach(walk);
+    else if (o && typeof o === 'object') Object.values(o).forEach(walk);
+    else if (isVid(o)) urls.add(o);
+  };
+  walk(data);
+  await Promise.all([...urls].map((src) => new Promise((res) => {
+    const v = document.createElement('video');
+    v.muted = true; v.preload = 'auto';
+    // Resolve on error too. A missing clip is caught by the assets preflight with a path in the message;
+    // hanging the boot here would report it as a dead scene instead.
+    v.onloadeddata = res; v.onerror = res;
+    v.src = src;
   })));
 }
 
@@ -350,6 +374,7 @@ export async function boot(build) {
     // runtime or a missing fragment leaves nothing to render — the rest degrade quietly.
     await preloadSpectrum(data);
     await preloadImages(data); // web/local images ready before any frame is captured
+    await preloadVideos(data); // and footage decoded to its first frame, so the first seek has a source
     await preloadThree(data);
     await preloadCobe(data);
     await preloadCanvasFx(data);

@@ -659,6 +659,17 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				return nil, err
 			}
 			t1 := time.Now()
+			// DRAIN THE ASYNC WORK, THEN WAIT FOR PAINT. The two rAFs below are a PAINT barrier and are
+			// enough for a DOM write or a CSS transform, which was everything the engine did until
+			// footage arrived. A <video> seek is different: setting currentTime starts a decode that
+			// fires `seeked` whenever it is ready, routinely longer than two frames. Shooting without
+			// waiting captures whatever the decoder had lying around, which varies by worker and by
+			// machine, i.e. a frame that is not a function of n (docs/MISTAKES.md #370, #383).
+			// __frameSettle is installed by core/frame-settle.js for every scene, so the guard is about
+			// an older page in a stale tab, not about whether this film uses video.
+			if err := chromedp.Run(ctx, chromedp.Evaluate(`window.__frameSettle ? window.__frameSettle() : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+				return nil, err
+			}
 			if err := chromedp.Run(ctx, chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
 				return nil, err
 			}

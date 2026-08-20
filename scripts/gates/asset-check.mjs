@@ -7,6 +7,7 @@
 //   node scripts/gates/asset-check.mjs <scene.json> [--strict]   ·   make asset-check D=<file>
 // WARN by default (with the command to get each asset); --strict blocks.
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,10 +25,16 @@ const ASSET_EXT = /\.(png|jpe?g|webp|gif|svg|mp4|webm|wav|mp3|m4a|json|html|woff
 const isPathish = (s) => typeof s === 'string' && !/\s/.test(s) && (/^\/?(assets|formats|themes)\//.test(s) || (s.includes('/') && ASSET_EXT.test(s)));
 const remote = (s) => /^(https?:)?\/\//.test(s) || s.startsWith('data:');
 // a scene resolves an asset path against a few bases (repo root, the scene's own dir); accept any hit.
-const resolvesToFile = (p) => {
+// Returns the RESOLVED PATH, not a boolean. It used to return a bare true, which is fine for a
+// yes/no existence test and useless to any caller that then wants to OPEN the file — the keyframe probe
+// below handed `true` to ffprobe and got "true: No such file or directory". Truthy either way, so every
+// existing caller is unchanged.
+const fileFor = (p) => {
   const bases = [p, path.join(ROOT, p.replace(/^\/+/, '')), path.join(sceneDir, p)];
-  return bases.some((b) => { try { return fs.existsSync(b) && fs.statSync(b).isFile(); } catch { return false; } });
+  for (const b of bases) { try { if (fs.existsSync(b) && fs.statSync(b).isFile()) return b; } catch { /* unreadable */ } }
+  return null;
 };
+const resolvesToFile = (p) => fileFor(p) != null;
 
 // collect [where, value] for every string in the scene, tagged by a readable location.
 const refs = [];
@@ -86,6 +93,35 @@ if (fs.existsSync(cssPath)) {
   }
 }
 const missingFonts = [...fonts].filter(([u]) => !resolvesToFile(u));
+
+// FOOTAGE MUST BE SEEKABLE. `core/layers/video.js` never plays a clip; it seeks to a source time
+// computed from the frame number, which is what keeps renderFrame(n) pure. A seek is only as accurate
+// as the source's keyframes: Chrome lands on one and decodes forward, so a clip encoded with a sparse
+// GOP returns a frame from somewhere BEFORE the time asked for, silently. Measured on a 6s test clip
+// with a single keyframe: scene frame 150 rendered source frame 144, a fifth of a second early, with
+// no error anywhere. Re-encoded all-intra, the same scene rendered 30/90/150 exactly.
+//
+// So this is checked, not documented and hoped for. The bar is one keyframe per second: enough that a
+// forward decode from the nearest one lands inside a frame at any normal rate.
+const videoRefs = refs.filter(([, v]) => /\.(mp4|webm|mov|m4v)$/i.test(v) && resolvesToFile(v));
+const sparse = [];
+for (const [where, v] of videoRefs) {
+  const f = fileFor(v);
+  try {
+    const out = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v',
+      '-show_entries', 'packet=flags', '-of', 'csv=p=0', f], { encoding: 'utf8', maxBuffer: 64 << 20 });
+    const keys = (out.match(/K_/g) || []).length;
+    const dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration',
+      '-of', 'csv=p=0', f], { encoding: 'utf8' }).trim() || 0;
+    if (dur > 0 && keys / dur < 1) sparse.push([where, v, keys, dur]);
+  } catch { /* no ffprobe on this machine: not a reason to fail an authoring check */ }
+}
+if (sparse.length) {
+  console.log(`  ${sparse.length} clip(s) with SPARSE KEYFRAMES — a seek lands early and the wrong frame renders, silently:`);
+  for (const [w, v, k, d] of sparse)
+    console.log(`    ✗ ${v}  [${w}]  ${k} keyframe(s) in ${d.toFixed(1)}s\n`
+      + `        → ffmpeg -i ${v} -c:v libx264 -pix_fmt yuv420p -g 1 -crf 18 <out>.mp4   (all-intra; bigger file, exact seeks)`);
+}
 
 console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s))`);
 if (missingFonts.length) {

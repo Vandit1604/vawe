@@ -10,6 +10,7 @@
       "text": ["caret", "caretHold", "fit", "fitH", "font", "gradient", "h", "ls", "maxLines", "raw", "size", "text", "tracking", "typing", "untype", "untypeRate", "w", "weight"],
       "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
       "image": ["canvasFx", "edgeFade", "edgeFadeColor", "h", "ken", "radius", "resample", "seed", "src", "w"],
+      "video": ["fit", "h", "in", "out", "poster", "radius", "rate", "src", "w"],
       "group": ["children"],
       "rect": ["color", "fill", "h"],
       "glow": ["angle", "beam", "color", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
@@ -567,6 +568,7 @@
           "enum": [
             "text",
             "image",
+            "video",
             "component",
             "rect",
             "count",
@@ -1249,6 +1251,7 @@
               "enum": [
                 "text",
                 "image",
+                "video",
                 "count",
                 "group",
                 "rect",
@@ -1573,7 +1576,15 @@
         },
         "rate": {
           "type": "number",
-          "label": "Glyph changes per second (paint matrix)"
+          "label": "Glyph changes per second (paint matrix) · on a `video` layer: how fast the source runs against the scene clock (1 = real time, 0.5 = half speed)"
+        },
+        "in": {
+          "type": "number",
+          "label": "video: the IN point in the source, seconds. Where the clip starts, not where the layer starts."
+        },
+        "poster": {
+          "type": "string",
+          "label": "video: a still shown before the first seek resolves. Optional; the engine seeks on frame one, so this is rarely visible."
         },
         "react": {
           "type": "object|array",
