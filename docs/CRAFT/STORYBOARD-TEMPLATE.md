@@ -21,7 +21,17 @@ duration: 29s
   (the direction-floor's `front-loaded` check enforces the floor of this). No two beats move alike.
 
   WHAT HOLDS THE FILM. Under ~15s the gate requires you to NAME it in the frontmatter, and it takes
-  either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md — a
+  EVERY BEAT DECLARES ITS STYLE AND ITS REST, and both are consumed rather than graded.
+  `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
+  (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
+  the whole film and every beat inherits it, which is how a film ends up looking like one long shot.
+  `rest:` says what moves during the HOLD. Their films are near-static 41% of the runtime against our
+  20%, and that is not stillness, it is authored idle: "Nothing ever fully stops. Every hold carries a
+  little ambient idle motion, a 1-2% breathing scale, a slow drift." We had a gate that BLOCKS a held
+  frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion rather
+  than better motion. `rest: none` is a legal answer and it is the right one on the spectacle beat.
+
+    either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md — a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
   question. Carry two, not one. `object:` is the one device the scene-side gate can also see: one noun
   stays on screen across the cuts and every cut is a state change of it. Declare `object:` only if that
@@ -95,6 +105,8 @@ duration: 29s
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
 - becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
+- style: hard contrast, one colour, type is the only object
+- rest: 1.5% breathing scale on the headline through the hold
 - why: open loop, pose the question the payoff answers (curiosity before any claim)
 - emotion: curiosity
 - duration: 6s
@@ -110,6 +122,8 @@ duration: 29s
 - onscreen: "what it is" / "the category line"
 - mechanism: svg draw-on · glow flash · per-word reveal
 - becomes: the number becomes the thing that produced it, and the drawn mark becomes the wordmark
+- style: the brand ground arrives, mark at full weight, everything else muted
+- rest: slow drift on the mark, 6px over the hold
 - why: name the thing, give the hook a cause with a name
 - emotion: clarity
 - duration: 6s
@@ -122,6 +136,8 @@ duration: 29s
 - onscreen: "the claim" / "the number that backs it"
 - mechanism: diveIn camera · count-up · border-beam card
 - becomes: the resting product becomes a product mid-use, and the empty field becomes a filled row
+- style: the real UI at full fidelity, chrome dimmed so the claim reads
+- rest: 1% scale on the captured surface, nothing else moves
 - why: show-don't-tell, the product doing the thing, not a slogan about it
 - emotion: trust
 - duration: 7s
@@ -134,6 +150,8 @@ duration: 29s
 - onscreen: "the shocker line" / "the payoff figure"
 - mechanism: hero count-up · kinetic label · a single accent rule
 - becomes: the filled row becomes the finished result, and the open loop becomes an answer
+- style: the loudest frame of the film. THIS is the spectacle beat
+- rest: none, the spectacle carries it
 - why: land the counterintuitive result, pay off the open loop from Beat 1 (the bookend)
 - emotion: inevitability
 - duration: 6s
@@ -146,6 +164,8 @@ duration: 29s
 - onscreen: "the action" / "the url" / "the offer"
 - mechanism: mark pop · install chip · held still (no exit)
 - becomes: the result becomes an address you can type, and the mark becomes the last frame
+- style: quiet, one line, the mark and nothing competing
+- rest: 1% breathe on the mark only
 - why: one clear next step; remove the risk
 - emotion: urgency
 - duration: 4s

@@ -63,6 +63,24 @@ FEELING   one reference, or one word ("brew act 1", "cinematic", "loud")
 backdrop, sound, pacing, structure. If a missing field would change the film, ASK BEFORE BUILDING, not
 after — one small forced-choice question with real consequences beats a rebuild.
 
+**Two more lines, and they are YOURS to fill, not theirs to supply.** Write them into the storyboard
+before you author, every time, even when the requester says nothing about either:
+
+```
+SPECTACLE  the ONE exaggerated moment, named: which beat, which layer, which device
+NOT        what this film explicitly does not do (no narration, no stock photos, no gradient hero)
+```
+
+Both are borrowed from the reference system whose films measurably read better than ours, where every
+worked example ends with a spectacle clause and every one carries an exclusion line. The spectacle line
+is TWO-SIDED and that is the whole point: naming the loud moment is also a promise that **every other
+beat stays restrained**. A film where four beats shout has no loud moment, it has a volume setting.
+`effect-soup` and `plain-slideshow` gate the two extremes and neither asks you to NOMINATE the peak,
+which is why a film can sit safely between them and still be shapeless.
+
+The `NOT` line is cheaper than it looks. Most generic output is not a wrong decision, it is an
+un-excluded default: nothing said "no gradient hero", so a gradient hero was free.
+
 **And DO NOT hand-author a film from a blank JSON.** That is the #1 failure named two sections below,
 and it has been committed here: a 28s film of 31 hand-written layers, 74% of them text, `anim:"fade"`
 on nearly every one, one backdrop window for the whole runtime, and one hand-keyed motion track. It was
@@ -72,13 +90,22 @@ Measured against the two films this repo is proudest of:
 
 | | brew-launch-act1 | higgsfield-recreation | that film | library median |
 |---|---|---|---|---|
-| pictorial layers | **46%** | 38% | 3% | 13% |
+| pictorial LAYERS (see the warning below) | 46% | 38% | 3% | 13% |
 | layers with a hand-keyed `motion` track | 4 | **75%** | 3% | **0%** |
 | `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | — |
 
 The backdrop line is the strongest single lever: brew inverts the whole tone of the world on four of its
 five cuts and spends its one accent window on the logo reveal. A pictorial beat on a dead backdrop is
 still a slide.
+
+> **THE 46% IS A COUNT OF LAYERS AND IT IS NOT WHAT IT SOUNDS LIKE.** brew carries 11 `image` layers out
+> of 30, so 46% of its layers are pictorial. Measured by the share of the FRAME carrying real pictorial
+> detail, brew is **10.3%, the lowest of nine films compared** — against 23.8% for the reference films
+> and 20.6% for ours. Eleven small marks is not a picture. This is the same layer-count-versus-area
+> error that killed the `visual-vocabulary` gate, whose size helper squared a 590x18 rule into 590x590
+> and credited a hairline with a tenth of the frame (`docs/TASTE.md`). Read the row above as "brew
+> places many pictorial ELEMENTS", never as "brew's frame is half picture", and when you want the second
+> thing, measure area.
 
 ## Content philosophy (what makes these good — follow it)
 
