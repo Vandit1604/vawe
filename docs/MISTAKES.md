@@ -11609,6 +11609,36 @@ multi-key move bends or reverses, which is a judgement about spacing, not a key 
 `reveal.mjs` is also not byte-deterministic run to run. That is pre-existing, it means the default sheet
 cannot be proven unchanged by hash, and it is worth someone's attention.
 
+## #388 — The same statement discarded a tracking value for the second time
+
+`core/layers/text.js` `microType` re-writes `el.style.letterSpacing` from `kit.trackingFor(size)` one
+statement after `styleText` has already set it. That line carries a comment about **#28**, where it
+overwrote the author's `tracking` and the value was "accepted, applied, and discarded one statement
+later, silently, in 12 shipped scenes."
+
+It now does the same thing to the light-on-dark compensation. `styleText` resolves the polarity and the
+lift, and this statement throws it away one line down, so the compensation reaches only `mono` and `raw`
+layers: **one layer across 104 scenes.** Same file, same statement, same shape, twice.
+
+**The plumbing is built and correct and is NOT wired**, deliberately. `trackingFor(px, dark)` is in
+`core/motion.js`, `kit.onDark(L, midT)` is in `core/layers/util.js`, and both are proven by `lib-test`,
+including a 1px-step monotonicity assertion over 14 to 140px that caught the first arithmetic: a flat
++0.010em above 32px cancels the base ramp, which only travels 0.010em across that span, so 64px type
+came out LOOSER than 32px type.
+
+**Why it is not wired.** Passing the polarity through is one line, and it moves **10 scenes**. The
+compensation was proven better in isolation, on an A/B card at 96px where the old tracking closes "sy"
+almost to touching. It has NOT been proven better on those ten films, and this repo's rule is that a
+library diff may only be "no scenes changed" or "these N changed, here is why each was correct". Ten
+scenes I have not read is neither.
+
+The exact replacement is left at the call site in `text.js`. Whoever wires it owns reading a hero frame
+from each of the ten, and should expect real width movement, which is the point.
+
+**The general lesson is about the FILE, not the fix.** One statement in one file has now silently
+discarded two different upstream decisions. Anything that writes `letterSpacing` after `styleText` will
+be the third. That is an argument for the write happening once, not for a third comment.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

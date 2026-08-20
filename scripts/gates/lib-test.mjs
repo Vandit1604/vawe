@@ -411,6 +411,43 @@ ok('trackingFor em string', trackingFor(16).endsWith('em'));
 ok('trackingFor tightens', parseFloat(trackingFor(120)) < parseFloat(trackingFor(16)));
 ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-6 && Math.abs(parseFloat(trackingFor(120)) - -0.022) < 1e-6);
 
+// LIGHT-ON-DARK OPTICAL COMPENSATION — trackingFor(px, dark). A light glyph on a dark ground irradiates,
+// so it reads heavier and its gaps read tighter than the same pair inverted; the correction opens the
+// tracking back up at display sizes. Three things have to stay true, and each one is a way this could
+// silently go wrong:
+//   1. the ONE-ARGUMENT form is byte-identical, or 21 dark themes get re-tracked by an unrelated change;
+//   2. the TWO-ARGUMENT form actually differs, or the feature is inert and nothing says so;
+//   3. it is PURE — same input, same string, no clock and no randomness anywhere in the ramp.
+{
+  const sizes = [12, 14, 20, 28, 32, 40, 48, 64, 96, 120, 200];
+  ok('trackingFor 1-arg unchanged by the dark term',
+    sizes.every((p) => trackingFor(p) === trackingFor(p, false)));
+  // the exact strings the ramp shipped before polarity existed
+  ok('trackingFor 1-arg ramp is the measured one',
+    trackingFor(14) === '-0.0080em' && trackingFor(32) === '-0.0120em'
+    && trackingFor(64) === '-0.0170em' && trackingFor(120) === '-0.0220em');
+  ok('trackingFor dark differs at display sizes',
+    parseFloat(trackingFor(96, true)) > parseFloat(trackingFor(96)));
+  ok('trackingFor dark opens, never tightens',
+    sizes.every((p) => parseFloat(trackingFor(p, true)) >= parseFloat(trackingFor(p)) - 1e-9));
+  // body type is left alone on purpose: the source rule fixes body with weight and line-height, not
+  // tracking, and a 14px caption that moves is a diff with no visible cause.
+  ok('trackingFor dark is a no-op at body size',
+    trackingFor(14, true) === trackingFor(14) && trackingFor(12, true) === trackingFor(12));
+  ok('trackingFor dark lift reaches, and is capped at, 0.010em',
+    Math.abs((parseFloat(trackingFor(120, true)) - parseFloat(trackingFor(120))) - 0.010) < 1e-6
+    && Math.abs((parseFloat(trackingFor(200, true)) - parseFloat(trackingFor(200))) - 0.010) < 1e-6);
+  // the dent a flat lift would put in the size ramp: dark type must still tighten as it grows.
+  ok('trackingFor dark still tightens with size', (() => {
+    let prev = Infinity;
+    for (let p = 14; p <= 140; p += 1) { const v = parseFloat(trackingFor(p, true)); if (v > prev + 1e-9) return false; prev = v; }
+    return true;
+  })());
+  ok('trackingFor is pure', sizes.every((p) => trackingFor(p, true) === trackingFor(p, true)
+    && trackingFor(p) === trackingFor(p)));
+  ok('trackingFor always an em string', sizes.every((p) => /^-?\d+\.\d{4}em$/.test(trackingFor(p, true))));
+}
+
 // transitions kit: every presentation lands at full visibility (enter(1)); fade-out family exits hidden
 {
   const opts = { dir: 'left', dist: 90, cx: 50, cy: 50 };

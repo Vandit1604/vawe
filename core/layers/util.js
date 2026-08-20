@@ -4,6 +4,10 @@
 
 import { applyLayerFilter } from '../filters.js';
 import { isLook, applyComposite } from '../looks.js';
+// isLightBg is core/motion.js's single definition of light-versus-dark, in linear light. Every part of
+// this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
+// copy of the question is docs/MISTAKES.md #159.
+import { isLightBg, parseColor } from '../motion.js';
 
 // hexA('#5e6ad2', .25) → rgba string (glow/beam colours come as brand hex)
 export function hexA(hex, a) {
@@ -64,6 +68,26 @@ export function createKit(ctx) {
   const { theme, inkAt, bgWinAt, ACCENT_BGS, trackingFor, splitText, icon } = ctx;
   const extra = ctx.extra;
 
+  // inkIsLight(c) — is the colour this layer settled on a LIGHT one? Asked of a real colour, never of a
+  // token name: `inkAt` hands back theme tokens (`var(--ink)` over a light window, the theme's own light
+  // ground over a dark one), and a token name is not a lightness. `themes/vawe.json` sets `text` and
+  // `ink` to the same dark hex, so reading the name would call that theme's light-on-dark type dark-on-
+  // light — the same trap formats/scene/scene.js documents at its ON_DARK. So resolve the token back
+  // through the palette first, then ask core/motion.js.
+  //
+  // Unresolvable → false, NOT isLightBg's own "unreadable → light" default. This answer only ever adds
+  // an optical correction, so the safe direction when the colour cannot be read is to leave the type
+  // exactly as it renders today.
+  const paletteOf = (v) => {
+    const m = /^var\(--([a-z-]+)\)$/i.exec(String(v ?? ''));
+    return m ? (theme?.palette || {})[m[1]] : v;
+  };
+  const inkIsLight = (c) => { const r = paletteOf(c); return parseColor(r) != null && isLightBg(r); };
+  // onDark(L, midT) — TRUE when this layer's type is light ink on a dark ground at second `midT`. It is
+  // the layer's settled colour asked of the palette, and it is one named function rather than an inline
+  // expression because more than one place has to ask the same question and get the same answer.
+  const onDark = (L, midT) => inkIsLight(L.color || inkAt(midT) || 'var(--text)');
+
   function styleText(el, L, midT) {
     const serif = L.font === 'serif', mono = L.font === 'mono', num = L.font === 'num';
     // `num` is the theme's TABULAR face (theme.type.num, --font-num). It was declared by every theme and
@@ -79,17 +103,31 @@ export function createKit(ctx) {
     // only ever read inside a guard in text.js that suppresses auto-tracking. Setting it removed the
     // optical default and applied nothing (docs/MISTAKES.md #79). Found by `make layer-props` on its
     // first run, which is the whole reason that gate exists.
-    el.style.letterSpacing = L.tracking ?? L.ls ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96) : '-0.03em'));
+    // The ink is resolved BEFORE the tracking because the tracking now depends on it. `inkAt(midT)` is
+    // the engine's own answer to "what colour must type be at this second", and it is chosen for
+    // contrast against the ground — so a light answer means a dark ground underneath it, and that is
+    // the polarity the optical correction needs. Where there is no bg window to ask (a theme-gradient
+    // stage, or a hand-authored backdrop that declared no tone) `inkAt` returns null and the layer
+    // falls back to the theme's own text colour, which is the right ground to judge against there.
+    const auto = inkAt(midT);
+    const layerColor = L.color || auto || 'var(--text)';
+    // An explicit `tracking`/`ls` always wins. This is a DEFAULT, never an override.
+    //
+    // KNOWN GAP, and it is not this file's to close: for a `text`/`count` layer the value written here
+    // is overwritten one statement later. core/layers/text.js build() calls styleText, then microType,
+    // and microType re-writes letter-spacing from the ONE-argument trackingFor with no polarity. So the
+    // correction below currently reaches only the layers microType skips — mono, and `raw:true`. The
+    // one-line fix belongs in microType, and `onDark` is exported on the kit so that it is one line:
+    //   kit.trackingFor(size, kit.onDark(L, (L.start ?? 0) + (L.duration ?? 2) / 2))
+    el.style.letterSpacing = L.tracking ?? L.ls ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96, onDark(L, midT)) : '-0.03em'));
     el.style.fontSize = (L.size ?? 96) + 'px';
     if (L.w != null) el.style.width = L.w + 'px';
     if (L.align) el.style.textAlign = L.align;
-    const auto = inkAt(midT);
     if (L.color) el.style.color = L.color; else if (auto) el.style.color = auto;
     // <b> emphasis colour: explicit emColor wins; else the brand accent for the POP — EXCEPT over an
     // accent-coloured field, where accent-on-accent vanishes, so emphasis falls back to the layer's OWN
     // colour (bold, always visible). Guard against blue-on-blue. (Must be a real colour, not `inherit`.)
     const w = bgWinAt(midT);
-    const layerColor = L.color || auto || 'var(--text)';
     const emDefault = w && ACCENT_BGS.includes(w.preset) ? layerColor : 'var(--accent)';
     el.style.setProperty('--em', L.emColor || emDefault);
     // --layer-ink: the colour this layer ACTUALLY settled on, published for the kinetic presets.
@@ -381,6 +419,6 @@ export function createKit(ctx) {
     extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
-  const api = { ...ctx, hexA, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
+  const api = { ...ctx, hexA, onDark, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
   return api;
 }

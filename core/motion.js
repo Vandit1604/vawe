@@ -316,9 +316,32 @@ export function shake(t, { amp = 14, freq = 11, decay = 3.2, seed = 0 } = {}) {
 // pulse(t, {period, amt}) — continuous breathing scale for idle chrome (logos, badges, CTAs).
 export const pulse = (t, { period = 2.4, amt = 0.03 } = {}) => 1 + amt * Math.sin((t / period) * Math.PI * 2);
 
-// trackingFor(px) — optical letter-spacing: display type tightens as it grows (measured off
+// trackingFor(px, dark) — optical letter-spacing: display type tightens as it grows (measured off
 // linear.app's real ramp: −0.008em body → −0.022em hero). Themes opt in via type.optical.
-export const trackingFor = (px) => interpolate(px, [14, 32, 64, 120], [-0.008, -0.012, -0.017, -0.022]).toFixed(4) + 'em';
+//
+// `dark` is the POLARITY of the type: true when light ink sits on a dark ground. That is not a taste
+// dial, it is an optics fact about the eye and about the encoder. A light glyph on a dark ground
+// spreads — the bright form irradiates into the dark counters around it — so it reads heavier and the
+// gaps between letters read smaller than the identical pair inverted. The ramp above was measured on
+// dark-on-light type, so on a dark ground it is already too tight before the size term is applied.
+// The correction OPENS the tracking again, and it grows with the type: 0 at 14px body, the full
+// +0.010em the rule names by 120px hero. Body is left alone on purpose — the source fixes body for a
+// dark ground with weight and line-height, not with tracking.
+//
+// The lift rides the SAME knots as the base ramp, and rises more slowly than the base falls, so dark
+// tracking is still monotone: bigger type is still tighter type. A flat +0.010em above 32px is the
+// obvious first shape and it is wrong — the base only travels 0.010em across that whole span, so a
+// flat lift cancels it and re-expands it, and 64px type came out LOOSER than 32px type. That reads as
+// a size ramp with a dent in it.
+//
+// The one-argument form is byte-identical to the ramp it always was: the `dark` branch is not taken,
+// so no caller that has not opted in can move a single glyph. That is deliberate — 21 of 37 themes
+// here carry a dark palette, and a silent global re-tracking of the library is not a bug fix.
+const DARK_TRACK_LIFT = (px) => interpolate(px, [14, 32, 64, 120], [0, 0.002, 0.006, 0.010]);
+export const trackingFor = (px, dark = false) => {
+  const base = interpolate(px, [14, 32, 64, 120], [-0.008, -0.012, -0.017, -0.022]);
+  return (dark ? base + DARK_TRACK_LIFT(px) : base).toFixed(4) + 'em';
+};
 
 // kenBurns(t, dur, {from, to, fx, fy, easing}) — the tasteful photo/image zoom: a slow continuous
 // scale from → to over the layer's window, anchored at focus point (fx, fy in 0..1). Rules that
