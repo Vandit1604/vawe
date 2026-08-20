@@ -10,6 +10,15 @@
 fonts:
 	node scripts/media/fonts.mjs
 
+# make fonts-discover SEED=7 [COUNT=12] [CATEGORY=serif|sans-serif|display|monospace|handwriting] [JSON=1]
+# — sample the live Google Fonts catalogue by popularity band and by recency, minus every family already
+# named in themes/*.json and the training-data defaults (Inter, Poppins, Space Grotesk and the rest).
+# Seeded and deterministic: the same seed returns the same faces, so a look stays reproducible.
+# (Distinct from `make fonts`, which DOWNLOADS a fixed vendored set, and from `make font-audit`, which
+# verifies those vendored faces painted. Neither can name a face you have not already used.)
+fonts-discover:
+	node scripts/author/fonts-discover.mjs --seed $(SEED) $(if $(COUNT),--count $(COUNT)) $(if $(CATEGORY),--category $(CATEGORY)) $(if $(filter 1,$(JSON)),--json)
+
 # make audio  — bake every cue + music bed from PARAMETERS (core/audio-kit.mjs). No network, no
 # licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
 audio:
