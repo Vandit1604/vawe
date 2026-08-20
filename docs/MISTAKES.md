@@ -11164,6 +11164,36 @@ The library went 33 to 57 on the second attempt, and `brew-launch-act1` was amon
 What a real fix needs is the composited pixel under the glyphs, not a search through the DOM for
 something that ought to be behind them.
 
+## #377 — A worktree fan-out over films silently throws the work away
+
+Four agents were sent to fix contrast findings across 32 scenes, one worktree each, split so no two
+shared a file. The split was right and the isolation was right. The delivery was not: **a worktree is
+merged by git, and the authored films are not in git.**
+
+`.gitignore` says so deliberately, and the reason is good:
+
+```
+# Video/data instances are NOT the framework (framework = scene.html + schema.json + sample.json).
+formats/scene/*.json
+!formats/scene/sample.json
+!formats/scene/schema.json
+```
+
+So of the eight files in the first batch, exactly ONE was tracked. The agent committed that one, could
+not commit the other seven, and said so. Had it not said so, `git merge` would have reported success
+and brought back a single file, and the other seven fixes would have existed only inside a worktree
+that gets deleted on cleanup. Nothing would have failed. The audit would simply have kept reporting the
+same findings, and the obvious conclusion would have been that the agents did not do the work.
+
+**The rule: when a fan-out edits gitignored files, the deliverable is the FILE, not the commit.** Copy
+each agent's outputs out of its worktree explicitly, diff them, re-run the gate in the main tree, and
+only then believe the numbers. Every result in that pass was re-audited in the main tree after copying,
+not trusted from the agent's own report.
+
+This is not an argument against worktrees here: three agents editing scenes in one tree is how the
+blanket-git hook's warning becomes real damage. It is an argument for knowing which half of the repo is
+tracked before choosing how work comes back.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
