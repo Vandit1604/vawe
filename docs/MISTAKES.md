@@ -11118,6 +11118,52 @@ An explicit `to` still wins. The blueprint's workaround becomes optional rather 
 **Blast radius: none.** `snap-all` 104 identical, 0 changed. No shipped scene had a colour wave whose
 resting colour disagreed with its window, so this closes a trap rather than changing a film.
 
+## #376 — The contrast gate graded frames 0.067s into their entrance
+
+`make audit-all` (#374) reported 33 scenes with hard contrast failures. Before editing 33 films, I
+looked at one. `ab-skill-shotcode` was flagged for a "Get started" button at **1.0:1**. At the sampled
+frame the entire browser mockup was 0.067 seconds into its fade-in; two frames later the button is full
+orange with white type and completely legible.
+
+**The rule already existed, sixty lines below, and was already written down.** The weak-headline check
+guards with `if (opacity < 0.85) continue; // judge only ARRIVED headlines (mid-fade is motion, not a
+verdict)`. The contrast check had no guard at all: `vis()` passes anything above 5% opacity. And the
+guard that did exist read the element's OWN opacity, while in a captured component or any grouped beat
+the fade lives on an ANCESTOR, so it never fired where it mattered.
+
+Both now share one `effOpacity(el)`, the product of every opacity down the paint tree, which is what the
+viewer sees. The paint-stack probe got the same guard for the same reason: `elementsFromPoint` reports
+hit-testable GEOMETRY, so a fully transparent full-bleed panel from a cross-fade was being counted as
+the backdrop.
+
+Result: 33 hard to 32, **zero scenes newly failing**, `showcase-vocabulary` newly clean.
+
+**A second, REAL defect in the same gate is still open, and it is written down here rather than fixed
+because two attempts to fix it made things worse.** The backdrop probe walks ANCESTORS first. In an
+absolutely positioned mockup the backdrop is usually a SIBLING: a button is one div painting the fill
+and a second div carrying the label, at the same coordinates. The ancestor walk then finds the white
+panel behind BOTH and reports white-on-white for a legible white-on-orange button. A sibling probe
+already exists in the file and is correct; it simply runs second, and the ancestor walk never returns
+empty.
+
+Reordering them fixed that case and broke worse ones. Measured, so the next attempt does not
+re-discover it:
+- Probe-first, ancestors skipped: a label inside a white card walked past its own card to a scene layer
+  behind the whole component. `Northbeam` went to 1.1:1.
+- Probe-first, ancestors included: `elementsFromPoint` is hit-testing, not paint order, and the bg
+  canvas is `pointer-events:none`, so it never appears in the stack and the white stage div behind it
+  wins. `brew-launch-act1`'s "Meet" (white on full-bleed orange) went to 1.0:1.
+- Stopping at anything preceding the canvas in document order: `scene.js` HIDES the canvas whenever a
+  hand-authored `html` backdrop owns the frame, and that backdrop precedes the canvas too, so the real
+  backdrop was discarded and the probe fell through to the body's white. brew's "4 days" (near-white on
+  near-black) went to 1.2:1.
+- Gating that on the canvas actually painting: still wrong, cause not yet found.
+
+The library went 33 to 57 on the second attempt, and `brew-launch-act1` was among the newly failing.
+**A single scene going PASS to FAIL is a regression until proven otherwise**, so none of that shipped.
+What a real fix needs is the composited pixel under the glyphs, not a search through the DOM for
+something that ought to be behind them.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

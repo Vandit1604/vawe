@@ -83,6 +83,17 @@ function startServer() {
 function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
+  // effOpacity — the product of every opacity down the paint tree, which is what the VIEWER sees.
+  // A judgement about how something LOOKS is only a judgement once the thing has ARRIVED. The
+  // weak-headline check knew this and said so ("mid-fade is motion, not a verdict"), but it read the
+  // element's OWN opacity, and in a captured component or any grouped beat the fade lives on an
+  // ANCESTOR, so the guard never fired where it mattered. The contrast check 80 lines above it had no
+  // guard at all and graded anything over 5% opacity, so a whole browser mockup 0.067s into its
+  // entrance was reported as a contrast defect and the "fix" would have been to recolour a correct
+  // frame. A gate that measures the wrong thing does not merely miss defects, it manufactures them.
+  // docs/MISTAKES.md #376.
+  const effOpacity = (el) => { let a = 1; for (let p = el; p && p !== document.body; p = p.parentElement) a *= (+getComputedStyle(p).opacity || 0); return a; };
+  const ARRIVED = 0.85;
   // OVERLAP looked only at [data-layer="critical"] — text >=60px — so a headline that WRAPPED onto a
   // second line and landed on the small mono caption beneath it was never compared with it. Measured
   // on the reproduction: the headline occupied y 400-681 and the caption sat at 500-525, entirely
@@ -611,6 +622,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const bpc = bgProbe.getContext('2d', { willReadFrequently: true });
     for (const p of document.elementsFromPoint(bx.x + bx.w / 2, bx.y + bx.h / 2)) {
       if (p === el || el.contains(p) || p.contains(el)) continue;
+      // elementsFromPoint reports hit-testable GEOMETRY, which includes a box that is fully
+      // TRANSPARENT. A beat that cross-fades between two full-bleed panels keeps both in the tree with
+      // one at opacity 0, and counting the invisible one as the backdrop reports dark-on-dark for text
+      // that is plainly dark-on-white. The colour's own alpha was already required to be opaque; the
+      // ELEMENT's effective opacity has to be too, and for the same reason (#376).
+      if (effOpacity(p) < ARRIVED) continue;
       const c = parse(getComputedStyle(p).backgroundColor);
       if (c && c[3] > 0.85) return [c[0], c[1], c[2]];
       // a covering <img> (sky/photo backdrop): its opaque-pixel average IS the effective bg colour,
@@ -669,6 +686,9 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     const b = el.getBoundingClientRect();
     if (b.width < 2 || b.height < 2) continue;
     if (el.closest('[data-logotype]')) continue; // WCAG 1.4.3 logotype exemption, declared per layer
+    // Only ARRIVED text is graded: mid-entrance the element composites toward the backdrop, so the
+    // measured ratio is a fact about the ramp and not about the design (#376).
+    if (effOpacity(el) < ARRIVED) continue;
     const fg = parse(getComputedStyle(el).color);
     if (!fg || fg[3] < 0.5) continue;
     // Sample the backdrop UNDER THE GLYPHS. `bgFor` probes the centre of the box it is handed, and a
@@ -746,7 +766,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS) {
     for (const e of texts) {
       const px = parseFloat(getComputedStyle(e.el).fontSize) || 0;
       if (px < 56) continue;
-      if (+getComputedStyle(e.el).opacity < 0.85) continue; // judge only ARRIVED headlines (mid-fade is motion, not a verdict)
+      if (effOpacity(e.el) < ARRIVED) continue; // judge only ARRIVED headlines (mid-fade is motion, not a verdict)
       const fg = parse(getComputedStyle(e.el).color);
       if (!fg || fg[3] < 0.85) continue;
       const bx = { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y };
