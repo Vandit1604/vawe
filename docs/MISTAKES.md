@@ -11997,6 +11997,73 @@ straight across the panel, over the playhead and two cut markers. Read, not infe
 overlap goes unreported, so the band is the floor of the keep-out and not the whole of it. It is a WARN,
 never a block, and it is one of the 19 finding kinds in `verify/audit.mjs`.
 
+## #396 — Half the authoring ladder was behind a flag, so half the authoring ladder did not exist
+
+`make author-check` ran seven of its steps only when `TASTE=1` was set: `critique`, `direct`,
+`direction-floor`, `dissolve`, `designspec`, `copy`, `pace`. The flag was added in the 2026-08 cull with
+a good argument, and the argument was about SEVERITY. It got applied to EXISTENCE, which is a different
+thing and a worse one. A step that does not run cannot be read, cannot be argued with, and cannot be
+found to be wrong; it only stops costing anything. Alongside it, `plan-vs-render` printed "write the
+storyboard" at a film that had none and no step anywhere asked whether one existed, so every frontmatter
+field the storyboard carries was optional in the only sense that matters.
+
+**The fix separates the two decisions the flag had welded together.** Every step now runs on every
+scene, every time, and prints what it checked and what it found. Findings sit in one of two tiers:
+BLOCKS (validate, beats, inspect, plan-vs-render, plus assets under `STRICT=1`) or REPORTS (the seven
+above, plus the new storyboard step, hero, treatment and waiver-drift). `TASTE=1` no longer decides
+whether the style steps run. It decides whether their findings block.
+
+**Why the severities did not move, with the number.** Exit codes across all 141 scenes in
+`formats/scene/`, before any edit:
+
+| run | pass | fail |
+|---|---|---|
+| default ladder (7 steps skipped) | 93 | 48 |
+| every step with teeth (`TASTE=1`) | 25 | **116** |
+
+Four films in five. `CLAUDE.md` already names what happens to a rule that fires on most of the library:
+it gets waived by reflex, and a rule waived by reflex has already been repealed with nobody writing it
+down. So the steps became mandatory and the tiers stayed.
+
+**The storyboard link.** A scene declares its plan with a top-level `"storyboard": "<path>"`, resolved
+against the repo root or the scene's directory; without the field the step falls back to the existing
+convention (`<base>.storyboard.md` beside the scene, then `_concepts/<base>.storyboard.md`). When it
+resolves, `storyboard-check` runs over the plan and the path is passed to `plan-vs-render` as `--sb`, so
+a DECLARED plan now feeds `spectacle:` and `pace:` instead of only a conventionally-named one. When it
+does not resolve, the step reports `no-storyboard`. It never says nothing.
+
+`no-storyboard` REPORTS rather than blocks because **130 of the 141 scenes have no storyboard** (92%).
+Blocking on day one is a purge, not a standard. The promotion condition is written down instead of
+wished for: when fewer than a quarter of `formats/scene/` is missing a plan, `no-storyboard` moves to
+BLOCKS. Count it:
+
+```bash
+y=0; n=0; for f in formats/scene/*.json; do case "$f" in *.intent.json|*.expanded.json) continue;; esac; \
+  b=$(basename "$f" .json); \
+  if [ -f "formats/scene/$b.storyboard.md" ] || [ -f "formats/scene/_concepts/$b.storyboard.md" ]; \
+  then y=$((y+1)); else n=$((n+1)); fi; done; echo "$n of $((y+n)) have no plan"
+```
+
+**A second defect fell out of making the steps speak.** `runGate` used `execFileSync`, which throws
+stderr away when a child exits 0. Several gates print warnings to stderr and exit 0, so a step with a
+visible `⚠` above it summarised itself as clean the moment the summary line was added. It now uses
+`spawnSync` and reads both streams. Nothing about exit codes changed; what changed is that the count
+under each step is true.
+
+**And one that did not fall out, but was next to it.** The `treatment` step looked for
+`<base>.storyboard.md` beside the scene and only there, so a plan kept in `_concepts/` never had its
+rationale checked. It now runs against whichever path step 2 resolved.
+
+**Measured, after.** Full ladder on `brew-launch-act1.json` (19.6s, 16:9): 1.4s wall, browser launch for
+the `hero` step included. The always-on half used to cost about a second, so the whole process now costs
+what most of it used to.
+
+**What this does not claim.** Every one of these steps was already capable of being run; nobody was
+prevented from typing `TASTE=1`. The finding is that for weeks nobody did, and a mechanism that depends
+on someone remembering a flag is a mechanism with a usage rate, not a guarantee. Gate: the ladder itself,
+which now names all 15 steps before it runs and reports the tier of every one.
+
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

@@ -144,7 +144,7 @@ build: fonts
 # renders, then the layout/contrast/size audit (set NOAUDIT=1 to skip). The ladder is what stops an
 # effect-soup video shipping silently; NOCHECK=1 is the explicit, logged waiver.
 video: build
-	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (schema · timeline · assets · plan; TASTE=1 adds the style gates) …" && node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS)))
+	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (every step, every time; TASTE=1 gives the style findings teeth) …" && node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS)))
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)) — then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
@@ -522,7 +522,7 @@ intent:
 
 # make designspec-check D=<scene.json> [STRICT=1] — THE DESIGN-SPEC LOCK: the theme is the locked visual
 # system; flag any layer using an off-palette chromatic colour or a non-role font. The look twin of the
-# storyboard gate. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.
+# storyboard gate. Runs inside author-check every time; TASTE=1 makes its findings block.
 # Optional radii/shadow lock via scene "spec".
 # ONE gate, one name. Beside the colour/font lock it runs OUR anti-slop rule table
 # (scripts/lib/designspec-rules.mjs): copy tells and effect doses, over the scene's words AND the html
@@ -535,7 +535,7 @@ designspec-check:
 
 # make copy-check D=<scene.json> [STRICT=1] — THE COPY GATE: on-screen writing tells (hook >12 words /
 # weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The
-# words are the video's voice. A TASTE gate: not in the default ladder, `TASTE=1 make author-check` runs it.
+# words are the video's voice. Runs inside author-check every time; TASTE=1 makes its findings block.
 copy-check:
 	node scripts/gates/copy-check.mjs $(D) $(if $(STRICT),--strict,)
 
@@ -685,11 +685,13 @@ install-hooks:
 clean:
 	rm -rf bin out/*.mp4
 
-author-check: ## authoring ladder: validate+beats+assets+inspect+plan (D=<file> [STRICT=1] [TASTE=1] [VS=<brand>])
+# make author-check D=<file>  — THE LADDER. Every step runs, every time; there is no opt-in half.
+# TASTE=1 does not decide whether the style steps run. It decides whether their findings BLOCK.
+author-check: ## the whole authoring ladder, every step every time (D=<file> [STRICT=1] [TASTE=1=block on style] [VS=<brand>])
 	node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 
-# TASTE gate: not in the default ladder. `TASTE=1 make author-check` runs it, or run it here directly.
-direction-floor: ## TASTE: ambition floor, fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
+# Runs inside author-check every time. Here on its own when you want only this finding.
+direction-floor: ## ambition floor, fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
 	node scripts/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead backdrop (D=<file> [STRICT=1])
@@ -737,7 +739,7 @@ vocab: ## regenerate docs/CRAFT/VOCABULARY.md — the plain words (feel/duration
 vocab-check: ## fail if docs/CRAFT/VOCABULARY.md is stale vs core/vocab.js
 	node scripts/site/vocab-catalog.mjs --check
 
-critique: ## TASTE: value-gate, flag hollow/low-value beats (D=<file>)
+critique: ## value-gate, flag hollow/low-value beats (D=<file>)
 	node scripts/gates/critique.mjs $(D)
 
 compare: ## variant selection: tile candidate frames to pick the best (args in ARGS)
@@ -778,7 +780,7 @@ blocks-scenes: ## per-block scene JSON + poster still for the site (no render ne
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
-direct: ## TASTE: direction gate + motion director, suggest cuts/stings (D=<file> [WRITE=1])
+direct: ## direction gate + motion director, suggest cuts/stings (D=<file> [WRITE=1])
 	node scripts/author/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
@@ -790,7 +792,7 @@ inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 plan-check: ## plan vs render: does the film change where the storyboard promised it would (D=<file>)
 	node scripts/gates/plan-vs-render.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
-dissolve: ## TASTE: transition gate, is any text state cross-dissolved into another (D=<file>)
+dissolve: ## transition gate, is any text state cross-dissolved into another (D=<file>)
 	node scripts/gates/dissolve-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 scrub: ## preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)

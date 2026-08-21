@@ -5,17 +5,26 @@
 // command chains them so `make video` can REQUIRE the loop (it runs author-check unless NOCHECK=1).
 // See docs/MISTAKES.md (authoring-gates-were-optional) and docs/CRAFT/DIRECTION.md.
 //
-// The ladder (all PRE-render, so it can gate the render). It has two halves, and the split is whether a
-// step can be WRONG about a film it has never seen:
+// EVERY STEP RUNS, EVERY TIME. There is no opt-in half any more. A mechanism nobody is made to use is a
+// mechanism that does not exist, and half this ladder sat behind TASTE=1 where almost nobody set it.
 //
-// ALWAYS ON — these catch BROKEN, and cost about a second:
+// What is NOT uniform is SEVERITY, and that separation is the whole design:
+//   BLOCKS  — the film is broken. A schema error, a hole in the clock, a plan the render does not deliver.
+//   REPORTS — the film may be off the house style. Always printed, never a wall, promoted by TASTE=1.
+// Measured before this was written: turning the REPORTS half into blocks fails 116 of the 141 scenes in
+// this library, four films in five, which is the exact shape CLAUDE.md warns about — a rule waived by
+// reflex has already been repealed and nobody wrote it down. So the steps became mandatory and the
+// severities did not move. See docs/TASTE.md · "One process, two severities".
+//
+// BLOCKS:
 //   validate  — schema + em-dash (correctness; never waivable)
 //   beats     — the TIMELINE gate: dead air, an empty last frame, an empty cut/seam window, a dead backdrop
-//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (advisory)
+//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (STRICT only)
 //   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
 //   plan      — plan vs render, off the same sidecar
 //
-// OPT-IN, behind TASTE=1 (or --taste) — these check HOUSE STYLE, which is an argument, not a fact:
+// REPORTS (always run and always print; TASTE=1 gives them teeth):
+//   storyboard— is there a plan this film came from, and does the plan hold together
 //   critique  — the value gate: hollow/placeholder/unbacked/thin/mis-centre beats
 //   direct    — the direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
@@ -24,9 +33,12 @@
 //   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
 //   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme
 //   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
+//   pace      — is anything happening, and how often
 //   hero      — the one LAYOUT finding that can run pre-render: `thin-hero`, via verify/audit.mjs --hero.
-//               Landscape only, advisory, and it costs a browser launch (1.4s measured). A landscape film
-//               that skips it is TOLD it was skipped and where the check otherwise happens.
+//               Landscape only, and it costs a browser launch (1.4s measured), so it announces the cost
+//               before it pays it. Portrait films are told the rule has nothing to say about them.
+//   treatment — is the film's written rationale current with its storyboard
+//   drift     — how many other films excuse the same waiver
 //
 // `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
 // single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
@@ -42,11 +54,13 @@
 //
 // Usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]
 //        make author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
+// TASTE=1 no longer decides WHETHER the style gates run. They always run. It decides whether their
+// findings BLOCK, which is the only decision that was ever really behind that flag.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readReceipt } from '../lib/receipt.mjs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -58,6 +72,9 @@ const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 // render, so the cost was never the runtime; it was being interrupted. So iterate reports everything
 // and exits 0, and says plainly what WOULD block, while ship keeps the teeth.
 const iterate = process.argv.includes('--iterate') || process.env.MODE === 'iterate';
+// TASTE no longer decides whether the style gates RUN. They always run. It decides whether their findings
+// block, which is the only decision that flag was ever really carrying.
+const taste = process.argv.includes('--taste') || process.env.TASTE === '1';
 const vsArg = (() => { const i = process.argv.indexOf('--vs'); return i >= 0 ? process.argv[i + 1] : null; })();
 if (!file) { console.error('usage: node scripts/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
@@ -108,25 +125,99 @@ if (hasSugar(scene.layers)) {
   console.log(`  (block/comp sugar expanded for the gates → ${target}; findings refer to ${path.basename(file)})`);
 }
 
+// ---- WHERE THE STORYBOARD COMES FROM ----------------------------------------------------------------
+// A scene declares its plan one of two ways, and the explicit one wins:
+//   1. `"storyboard": "path/to/x.storyboard.md"` in the scene JSON, relative to the repo root or to the
+//      scene. This is the declaration: it survives a rename and it says out loud that a plan exists.
+//   2. the naming convention already used by plan-vs-render — <base>.storyboard.md beside the scene, or
+//      in _concepts/ next to it.
+// A scene with neither is not silently fine. It gets a finding (`no-storyboard`), because the alternative
+// is what this ladder used to do: print "write the storyboard" into a void and check nothing.
+const declaredSb = typeof scene.storyboard === 'string' ? scene.storyboard
+  : (scene.authoring && typeof scene.authoring.storyboard === 'string' ? scene.authoring.storyboard : null);
+const sbDir = path.dirname(file), sbBase = path.basename(file, '.json');
+const sbCandidates = declaredSb
+  ? [path.resolve(repoRoot, declaredSb), path.resolve(sbDir, declaredSb)]
+  : [path.join(sbDir, `${sbBase}.storyboard.md`), path.join(sbDir, '_concepts', `${sbBase}.storyboard.md`)];
+const sbPath = sbCandidates.find((p) => fs.existsSync(p)) || null;
+const sidecarPath = file.replace(/\.json$/, '.intent.json');
+const hasSidecar = fs.existsSync(sidecarPath);
+const [sceneW, sceneH] = sceneDims(scene, '');
+const landscape = sceneW > sceneH;
+
+// ---- THE LADDER, DECLARED BEFORE IT RUNS -------------------------------------------------------------
+// A person watching this needs to know where it is and what is left. So the whole run is listed first,
+// with what each step reads and whether it can stop you, and every step then announces its own position.
+const LADDER = [
+  ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
+  ['storyboard', 'reports', 'whether this film has a written plan, and whether the plan holds together'],
+  ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
+  ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
+  ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
+  ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
+  ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
+  ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
+  ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
+  ['pace', 'reports', 'whether anything happens, and how often'],
+  ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
+  ...(landscape ? [['hero', 'reports', 'whether the hero line is set at video scale (launches a browser)']] : []),
+  ...(sbPath ? [['treatment', 'reports', 'whether the written rationale still describes this plan']] : []),
+  ['drift', 'reports', 'how many other films excuse the same waivers this one does'],
+  // Both of these need the intent sidecar to have a contract to verify. Without one they still run and
+  // still speak, but they can only advise, so the listing must not promise teeth they do not have here.
+  ['inspect', hasSidecar || strict ? 'blocks' : 'reports', hasSidecar ? 'the per-beat value contract in the intent sidecar' : 'the per-beat value contract (there is no sidecar, so: that there is none)'],
+  ['plan', hasSidecar ? 'blocks' : 'reports', hasSidecar ? 'whether the film puts an event where the plan promised one' : 'whether the film nominates a peak at all (no sidecar to check spans against)'],
+];
+const TOTAL = LADDER.length;
+console.log(`\n▶ author-check · ${path.basename(file)} · ${TOTAL} steps, all of them, every time.`);
+console.log(`  ${LADDER.filter((s) => s[1] === 'blocks').length} can stop you; ${LADDER.filter((s) => s[1] === 'reports').length} report and do not.`);
+for (const [i, [name, tier, what]] of LADDER.entries()) {
+  console.log(`   ${String(i + 1).padStart(2)}. ${name.padEnd(11)} ${tier === 'blocks' ? 'BLOCKS ' : 'reports'}  ${what}`);
+}
+console.log(`  Style findings report by default and BLOCK under TASTE=1. Why: docs/TASTE.md.`);
+
+let stepNo = 0;
+const describe = (name) => (LADDER.find((s) => s[0] === name) || [null, null, ''])[2];
+// Open a step: say which one it is, what it reads, and warn BEFORE a slow one rather than after.
+const openStep = (name, label, { slow } = {}) => {
+  stepNo += 1;
+  process.stdout.write(`\n──────── step ${stepNo}/${TOTAL} · ${label} ────────\n`);
+  process.stdout.write(`  checks: ${describe(name)}\n`);
+  if (slow) process.stdout.write(`  this one is slow: it launches a browser, about 1.4s. Everything above cost milliseconds.\n`);
+};
+
 // run one gate as a child; stream its output; return {code, blockCodes}. A "blocking" finding is a line
 // the gate marks with ✗ and a [code] tag (critique errors, direct FAILs use exactly this format).
-const runGate = (label, script, args) => {
-  process.stdout.write(`\n──────── ${label} ────────\n`);
-  let out = '', code = 0;
-  try { out = execFileSync("node", [path.join(repoRoot, script), target, ...args], { encoding: 'utf8', cwd: repoRoot }); }
-  catch (e) { code = e.status ?? 1; out = `${e.stdout || ''}${e.stderr || ''}`; }
+const runGate = (name, label, script, args, opts = {}) => {
+  openStep(name, label, opts);
+  // spawnSync, not execFileSync: a gate that PASSES can still print a warning, and it prints it to
+  // stderr, which execFileSync throws away on success. That is how a step with a visible ⚠ above it
+  // could summarise itself as "nothing found".
+  const r = spawnSync('node', [path.join(repoRoot, script), target, ...args], { encoding: 'utf8', cwd: repoRoot });
+  const out = `${r.stdout || ''}${r.stderr || ''}`;
+  const code = r.status ?? 1;
   process.stdout.write(out.endsWith('\n') ? out : out + '\n');
   const blockCodes = [...out.matchAll(/✗\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
+  // A STEP THAT FINDS NOTHING MUST SAY SO. Silence and a clean run look identical in a log, and a person
+  // reading this cannot tell a gate that passed from a gate that fell over.
+  const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
+  process.stdout.write(findings === 0 && code === 0
+    ? `  → nothing found.\n`
+    : `  → ${findings} finding(s)${blockCodes.length ? `: ${[...new Set(blockCodes)].join(', ')}` : ''}.\n`);
   return { code, out, blockCodes };
 };
 
 const results = [];
-const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true }) => {
-  const failed = exitMeansFail ? code !== 0 : false;
+// tier decides what a finding COSTS, and it is the only thing TASTE=1 moves. `reports` steps still run,
+// still print and still land in the verdict table; they simply cannot fail the build unless asked to.
+const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
+  const teeth = tier === 'blocks' || taste;
+  const failed = exitMeansFail && teeth ? code !== 0 : false;
   // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver.
   const unwaived = waivable ? blockCodes.filter((c) => !allow.has(c)) : blockCodes;
   const waived = waivable && failed && blockCodes.length > 0 && unwaived.length === 0;
-  results.push({ name, failed: failed && !waived, waived, unwaived, blockCodes });
+  const reported = tier === 'reports' && !teeth && code !== 0;
+  results.push({ name, tier, failed: failed && !waived, waived, reported, unwaived, blockCodes });
 };
 
 // TASTE GATES ARE OPT-IN. Seven of the steps below do not check that a film is BROKEN; they check that
@@ -136,35 +227,70 @@ const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true }) 
 // wrong thing. A rule that is waived by reflex has already been repealed; leaving it switched on only
 // hides that fact behind a green tick.
 //
-// So they run when you ask for them, and the run says plainly that they were skipped otherwise:
+// THAT REASONING IS ABOUT SEVERITY, AND IT WAS APPLIED TO EXISTENCE. Skipping the step does not protect
+// an author from a rule fitted to the wrong library; it protects the rule from ever being read. So the
+// steps run and print, always, and `taste` now decides one thing only: whether their findings block.
 //   TASTE=1 make author-check D=<file>      · or `--taste`
-// The default ladder keeps every step that catches BROKEN — a schema error, a hole in the timeline, a
-// missing asset, a plan the render does not deliver. Nothing here was deleted; see docs/TASTE.md for
-// what was culled, why, and what would have to be true to switch one back on by default.
-const taste = process.argv.includes('--taste') || process.env.TASTE === '1';
-const skippedTaste = [];
-const tasteGate = (name, label, script, args, opts) => {
-  if (!taste) { skippedTaste.push(name); return; }
-  record(name, runGate(label, script, args), opts);
-};
+// Measured on this library the day the flag changed meaning: with teeth, 116 of 141 scenes fail. That is
+// the number that keeps this a report rather than a wall. docs/TASTE.md carries what would have to change.
+const styleGate = (name, label, script, args, opts) =>
+  record(name, runGate(name, label, script, args), { ...opts, tier: 'reports' });
 
 // 1. validate — correctness, never waivable.
-record('validate', runGate('validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
+record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
+
+// 1a. storyboard — DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?
+//
+// This step exists because the previous answer was a printed sentence and nothing else: plan-vs-render
+// said "write the storyboard" to a film that had none, and no step anywhere asked whether one existed.
+// Every frontmatter field the storyboard carries (`spectacle:`, `pace:`, `threads:`) was therefore
+// optional in the only sense that matters, which is that skipping it cost nothing and said nothing.
+//
+// SEVERITY, ARGUED. 130 of the 141 scenes in this library have no storyboard. Blocking on day one would
+// fail 92% of the library on its first run, and CLAUDE.md already names what happens next: everyone adds
+// a waiver and the rule is repealed without anyone writing it down. So `no-storyboard` REPORTS. It is
+// promoted to a block when the shape of the library makes that a rule rather than a purge — the
+// condition is written into docs/TASTE.md, not left as a wish: once fewer than a quarter of the scenes
+// in formats/scene/ are missing a plan, `no-storyboard` moves to the blocking tier.
+{
+  openStep('storyboard', 'storyboard (is there a plan, and does it hold)');
+  if (!sbPath) {
+    console.log(`  ✗ [no-storyboard] this scene declares no storyboard, and none was found beside it.`);
+    console.log(`      Looked for: ${sbCandidates.map((p) => path.relative(repoRoot, p)).join('  ·  ')}`);
+    console.log(`      A film with no written plan has no spectacle, no pace budget and no named thread, so three`);
+    console.log(`      of this ladder's checks have nothing to compare the render against and stay quiet.`);
+    console.log(`      Write one from docs/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
+    console.log(`      Then point this scene at it, so a rename cannot break the link:`);
+    console.log(`        "storyboard": "formats/scene/${sbBase}.storyboard.md"`);
+    console.log(`  → 1 finding: no-storyboard.`);
+    const excused = allow.has('no-storyboard');
+    results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
+  } else {
+    console.log(`  plan: ${path.relative(repoRoot, sbPath)}${declaredSb ? ' (declared by the scene)' : ' (found by name)'}`);
+    const sbRun = spawnSync('node', [path.join(repoRoot, 'scripts/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8', cwd: repoRoot });
+    const out = `${sbRun.stdout || ''}${sbRun.stderr || ''}`, code = sbRun.status ?? 1;
+    process.stdout.write(out.endsWith('\n') ? out : out + '\n');
+    const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
+    console.log(findings === 0 && code === 0 ? `  → nothing found.` : `  → ${findings} finding(s) in the plan itself.`);
+    record('storyboard', { code, blockCodes: code !== 0 ? ['storyboard-incomplete'] : [] }, { waivable: true, tier: 'reports' });
+  }
+}
+
 // 1b. beats — the TIMELINE gate: dead air, an empty closing plate, a transition window with nothing in it,
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
-record('beats', runGate('beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
-// 2. critique — value gate; errors block, waivable by rule code. TASTE.
-tasteGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
-// 3. direct — direction gate; FAILs block, waivable by code. TASTE.
-tasteGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
-// 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow. TASTE.
-tasteGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
+record('beats', runGate('beats', 'beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
+// 2. critique — value gate; errors report, waivable by rule code.
+styleGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
+// 3. direct — direction gate; FAILs report, waivable by code.
+styleGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
+// 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
+styleGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
 
 // 4c. dissolve — the TRANSITION gate. Everything else here samples settled frames by construction, so a
 //     crossfade between two text states (a double exposure: both strings at half strength through the
-//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174. TASTE.
-tasteGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
+//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
+styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 4. slop — RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
 // properties those rules read, so most of them had no evidence to work from and their silence read as
 // a pass across the whole library (docs/MISTAKES.md #326). Its replacement is the designspec rule
@@ -176,16 +302,15 @@ tasteGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-
 // gate whose finding is precise and whose severity is advisory teaches the author that warnings are
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
 // so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #323).
-tasteGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
-// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers. TASTE.
-tasteGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
-// PACE. It sits with the taste gates rather than the always-on ones because a still film is sometimes
-// right, and it is opt-in for the same reason the rest of this half is. What it is NOT is a matter of
-// opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
+styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
+// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
+styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// PACE. A still film is sometimes right, so this reports rather than blocks. What it is NOT is a matter
+// of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
 // measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #322).
-tasteGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+styleGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
-{ const r = runGate('asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
+{ const r = runGate('assets', 'asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
 // 4g. hero fill — the one LAYOUT finding that can be moved before the render.
 //
@@ -202,82 +327,74 @@ tasteGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/
 // sampled frames and the same in-page function, with the contrast screenshots and the overlay shot
 // skipped. Measured on argus-launch (23s, 16:9): 4.60s for the full audit, 1.44s for --hero.
 //
-// It sits with the TASTE gates for the honest reason, and the reason is the cost rather than the noise.
+// It REPORTS rather than blocks for the honest reason, and the reason is the cost rather than the noise.
 // DOSE, measured by running --hero over the library: 29 of the 91 landscape scenes carry a thin-hero
 // finding (32%). That is a usable warning rate, well under the "four landscape films in five" the audit's
 // own comment cites, which counted sampled FRAMES under the 60% reference rather than films under the 55%
-// floor with the split-frame exemption applied. What keeps it opt-in is that the always-on half of this
-// ladder catches BROKEN in about a second, and a browser launch triples that for a house-style warning.
+// floor with the split-frame exemption applied. It now runs every time, and it announces its cost first,
+// because a step that surprises you with a browser launch is a step you learn to route around.
 // Portrait scenes never reach it: the rule only fires when the frame is wider than it is tall.
-{
-  const [vw, vh] = sceneDims(scene, '');
-  if (vw > vh) {
-    if (taste) runGate('hero fill (thin-hero, pre-render)', 'verify/audit.mjs', ['--hero']);
-    else {
-      skippedTaste.push('hero');
-      // NAME THE ABSENCE. A landscape film that skips this gets told where the check lives and when it
-      // will run, so a missing finding is a known gap rather than a silence that reads as a pass.
-      console.log(`\n──────── hero fill (thin-hero) ────────`);
-      console.log(`  ⚠ NOT CHECKED. This is a ${vw}x${vh} landscape film, and nothing above measured whether its`);
-      console.log(`      hero line is set at video scale. Pre-render:  TASTE=1 make author-check D=${file}`);
-      console.log(`      (about 1.4s: it launches a browser). Otherwise it is reported post-render by \`make audit\`,`);
-      console.log(`      after the mp4 is paid for.`);
-    }
-  } else {
-    console.log(`\n──────── hero fill (thin-hero) ────────`);
-    console.log(`  ○ portrait canvas (${vw}x${vh}); thin-hero is a landscape rule and has nothing to say here.`);
-  }
+if (landscape) {
+  runGate('hero', 'hero fill (thin-hero, pre-render)', 'verify/audit.mjs', ['--hero'], { slow: true });
+} else {
+  console.log(`\n──────── hero fill (thin-hero) ────────`);
+  console.log(`  ○ portrait canvas (${sceneW}x${sceneH}); thin-hero is a landscape rule and has nothing to say here.`);
 }
 
-// 4e. treatment — the film's own rationale. ADVISORY, always: a treatment is an argument a person
+// 4e. treatment — the film's own rationale. It REPORTS, always: a treatment is an argument a person
 //     makes, so a gate can only check that one exists and still describes THIS storyboard. It goes
 //     stale the moment the plan moves, and a stale rationale is worse than none because it reads as
-//     current. Silent when there is no storyboard to have a treatment for.
-{
-  const sbPath = file.replace(/\.json$/, '.storyboard.md');
-  if (fs.existsSync(sbPath)) {
-    const t = readReceipt('treatment', sbPath);
-    console.log(`\n──────── treatment (why this film looks like this) ────────`);
-    if (!t.exists) {
-      console.log(`  ~ no treatment for ${path.basename(sbPath)}. The argument for this direction, and against`);
-      console.log(`    the ones you turned down, is not written anywhere. \`make treatment SB=${sbPath}\``);
-    } else if (t.stale) {
-      console.log(`  ~ the treatment is STALE: ${path.basename(sbPath)} has changed since ${t.rel} was written.`);
-      console.log(`    Re-run \`make treatment SB=${sbPath}\` — it refreshes the measured block and leaves your prose.`);
-    } else {
-      console.log(`  ✓ treatment current (${t.receipt.treatment || 'recorded'}).`);
-    }
+//     current. It runs against whichever storyboard step 2 resolved, so a declared plan is checked too;
+//     it used to look only for a sibling file and therefore never fired on a plan kept in _concepts/.
+if (sbPath) {
+  const t = readReceipt('treatment', sbPath);
+  openStep('treatment', 'treatment (why this film looks like this)');
+  if (!t.exists) {
+    console.log(`  ~ no treatment for ${path.basename(sbPath)}. The argument for this direction, and against`);
+    console.log(`    the ones you turned down, is not written anywhere. \`make treatment SB=${sbPath}\``);
+    console.log(`  → 1 finding: no treatment written.`);
+  } else if (t.stale) {
+    console.log(`  ~ the treatment is STALE: ${path.basename(sbPath)} has changed since ${t.rel} was written.`);
+    console.log(`    Re-run \`make treatment SB=${sbPath}\` — it refreshes the measured block and leaves your prose.`);
+    console.log(`  → 1 finding: the rationale describes an older plan.`);
+  } else {
+    console.log(`  ✓ treatment current (${t.receipt.treatment || 'recorded'}).`);
+    console.log(`  → nothing found.`);
   }
 }
 
-// 4f. waiver drift — is this waiver a decision or a habit? ADVISORY, and never blocking, because a gate
+// 4f. waiver drift — is this waiver a decision or a habit? REPORTS, and never blocks, because a gate
 //     that blocked on this would itself be waived. It reads the whole library and reports how many other
 //     films excuse the same rule, which is the only level at which "we keep letting ourselves off" is
 //     visible. Written after a gate blocked two films on the same day and the second one was waived.
-runGate('waiver drift (is this a decision or a habit)', 'scripts/gates/waiver-drift.mjs', []);
+runGate('drift', 'waiver drift (is this a decision or a habit)', 'scripts/gates/waiver-drift.mjs', []);
 
 // 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.
-const sidecar = file.replace(/\.json$/, '.intent.json');
-if (fs.existsSync(sidecar)) {
-  record('inspect', runGate('inspect (per-beat value contract)', 'scripts/gates/inspect.mjs', strict ? ['--strict'] : []), { waivable: true });
+const sidecar = sidecarPath;
+// Hand the storyboard to plan-vs-render explicitly. It resolves one by name on its own, but a scene that
+// DECLARES its plan should have that declaration honoured, and only this step knows what was declared.
+const planArgs = [...(strict ? ['--strict'] : []), ...(sbPath ? ['--sb', sbPath] : [])];
+if (hasSidecar) {
+  record('inspect', runGate('inspect', 'inspect (per-beat value contract)', 'scripts/gates/inspect.mjs', strict ? ['--strict'] : []), { waivable: true });
   // 5b. plan vs render — inspect reads the scene at ONE instant per beat, so it cannot see a beat that
   //     stalls. This one lines the plan's beat spans up against the film's clock: a promised junction
   //     with no event at it, and a beat the author froze while the plan says it turns.
-  record('plan', runGate('plan vs render (does the film do what the plan said)', 'scripts/gates/plan-vs-render.mjs', strict ? ['--strict'] : []), { waivable: true });
+  record('plan', runGate('plan', 'plan vs render (does the film do what the plan said)', 'scripts/gates/plan-vs-render.mjs', planArgs), { waivable: true });
 } else {
-  process.stdout.write(`\n──────── inspect (per-beat value contract) ────────\n`);
+  openStep('inspect', 'inspect (per-beat value contract)');
   process.stdout.write(`  ⚠ no .intent.json sidecar — this scene declares no per-beat value contract.\n` +
     `      A sidecar states, per beat, the artifact that earns the frame + what must show/animate;\n` +
-    `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n`);
-  if (strict) results.push({ name: 'inspect', failed: true, waived: false, unwaived: ['no-intent-sidecar'], blockCodes: [] });
+    `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n` +
+    `  → 1 finding: no value contract to verify.\n`);
+  if (strict) results.push({ name: 'inspect', tier: 'blocks', failed: true, waived: false, reported: false, unwaived: ['no-intent-sidecar'], blockCodes: [] });
   // AND RUN plan vs render ANYWAY. Skipping it here meant the film with no plan was the one film never
   // asked whether it nominates a peak, which is the film most likely not to have one. The gate itself
   // says plainly that it has no plan to check against; the one question it can still answer without a
   // plan is `no-spectacle-nominated`, and that question is worth asking of exactly this film.
   // Not recorded as a result: with no sidecar it can only advise, and a step that can only advise has
   // no verdict to put in the ladder's table.
-  runGate('plan vs render (no plan, so: does the film nominate a peak)', 'scripts/gates/plan-vs-render.mjs', strict ? ['--strict'] : []);
+  runGate('plan', 'plan vs render (no sidecar, so: does the film nominate a peak)', 'scripts/gates/plan-vs-render.mjs', planArgs);
 }
 
 // ---- verdict ----
@@ -292,8 +409,11 @@ console.log(`\n════════ author-check · ${path.basename(file)} �
 // docs/MISTAKES.md #365.
 const ENGINE_REFUSES = new Set(['validate']);
 const line = (r) => {
-  const mark = r.failed ? '✗' : r.waived ? '○' : '✓';
-  const note = r.failed ? `BLOCKS (${r.unwaived.join(', ') || 'exit ' + 1})` : r.waived ? `waived (${r.blockCodes.join(', ')})` : 'ok';
+  const mark = r.failed ? '✗' : r.waived ? '○' : r.reported ? '~' : '✓';
+  const note = r.failed ? `BLOCKS (${r.unwaived.join(', ') || 'exit ' + 1})`
+    : r.waived ? `waived (${r.blockCodes.join(', ')})`
+    : r.reported ? `reported, does not block (${r.blockCodes.join(', ') || 'see above'})`
+    : 'nothing found';
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
 };
 const refusals = results.filter((r) => ENGINE_REFUSES.has(r.name));
@@ -307,14 +427,18 @@ if (judgements.length) {
   judgements.forEach(line);
 }
 if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
+console.log(`\n  Every one of the ${TOTAL} steps ran. ${results.length} returned a verdict; the rest print and advise.`);
+const reported = results.filter((r) => r.reported);
+if (reported.length) {
+  console.log(`\n  ~ ${reported.length} step(s) found something and did not stop you: ${reported.map((r) => r.name).join(', ')}.`);
+  console.log(`      These are house-style findings. They are real and they are printed in full above.`);
+  console.log(`      Give them teeth:  TASTE=1 make author-check D=${file}`);
+  console.log(`      Why they report rather than block: docs/TASTE.md · "One process, two severities".`);
+} else if (!taste) {
+  console.log(`\n  ✓ the house-style steps found nothing either. Nothing above is being held back from you.`);
+}
 console.log(`\n  NOCHECK=1 skips this target, NOT the engine: a scene with a bad name or a broken schema`);
 console.log(`  still fails at boot. What you lose by skipping is the craft half, and the early warning.`);
-if (skippedTaste.length) {
-  console.log(`\n  ⚠ ${skippedTaste.length} TASTE gate(s) NOT RUN: ${skippedTaste.join(', ')}.`);
-  console.log(`      These check house style, not breakage, so they are opt-in. Nothing above says anything`);
-  console.log(`      about whether this film is any good.  Run them:  TASTE=1 make author-check D=${file}`);
-  console.log(`      Why they are off by default: docs/TASTE.md · "What was culled, and why".`);
-}
 
 // ---- the required post-render step the static ladder structurally cannot be ----
 console.log(`\n  ▶ REQUIRED after render (the ladder is not complete without it):`);

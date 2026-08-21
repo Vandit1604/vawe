@@ -290,14 +290,17 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    six-question decision aid: **[`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md)**.
    Count your threads before you author, and carry two. One thread has to be literal and obvious to work,
    which is exactly how a film ends up as a resizing box.
-   **The gate is OPT-IN**: `TASTE=1 make author-check D=<file>`, or `make direction-floor D=<file>`. When
-   you run it, `no-continuous-object` blocks; if the film declares no cuts, boundaries are INFERRED from
-   where the visible content set turns over wholesale, and that half warns (`no-continuous-object-inferred`,
-   promoted to a block under `STRICT=1`), because a build should not fail over a cut the author never wrote.
-   **Run it when the CONTENT is continuous**: a single-subject product film, a process shown end to end, a
-   demo where the UI is the subject. There the rule is right, and it is right because of the content, not
-   because films must be that shape. Do not run it on a manifesto, a vignette anthology, a comparison built
-   on the junction, or a metric-cut list film. It will be wrong about all four.
+   **The gate now RUNS on every scene and REPORTS**: it is step 6 of `make author-check`, and
+   `make direction-floor D=<file>` runs it alone. Inside the gate `no-continuous-object` is a FAIL, so
+   `TASTE=1` turns it into a wall; if the film declares no cuts, boundaries are INFERRED from where the
+   visible content set turns over wholesale, and that half warns (`no-continuous-object-inferred`,
+   promoted under `STRICT=1`), because a build should not fail over a cut the author never wrote.
+   **Believe it when the CONTENT is continuous**: a single-subject product film, a process shown end to
+   end, a demo where the UI is the subject. There the rule is right, and it is right because of the
+   content, not because films must be that shape. Read past it on a manifesto, a vignette anthology, a
+   comparison built on the junction, or a metric-cut list film. It will be wrong about all four, and it
+   reports rather than blocks precisely so being wrong about four film shapes costs you a paragraph of
+   reading instead of a waiver.
    **Know the limit.** The gate can see that a prop survives a junction and moves. It cannot see whether
    that prop BECOMES the next thing, which is the difference between a travelling card and a subject.
    **Read the waivers as evidence about the rule, not about the films.** **14 films, 11% of the 132
@@ -377,22 +380,35 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    timeline in `core/compositions/index.js`, named from the JSON (`{type:"composition","comp":…,"props":…}`)
    so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
-2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command runs the
-   static quality loop. It has two halves.
-   **ALWAYS ON**, in the order they run: **validate · beats · assets · treatment · waiver-drift · inspect ·
-   plan-vs-render**. These catch a film that is BROKEN, and cost about a second. Three of the seven do not
-   block: `assets` is advisory unless `STRICT=1` (`author-check.mjs:184`), and `treatment` and
-   `waiver-drift` are advisory always, by design: a gate that blocked on waiver drift would itself be
-   waived. Two more things block here that this list used to hide: **a waiver with no `_why` blocks**
-   (see the shape below), and under `STRICT=1` a **missing `.intent.json` blocks** as `no-intent-sidecar`.
-   **OPT-IN, behind `TASTE=1`**, seven gates: **critique · direct · direction-floor · dissolve · designspec ·
-   copy · pace**. (`slop` is NOT one of them. It was retired in 2026-08, its script is deleted, and this
-   line listed it as live for months.) `pace` (`scripts/gates/pace-check.mjs`) measures events per second:
-   it is the gate that catches a film that is asleep, and it was named nowhere in this file.
-   These check house style, which is an argument rather than a fact, and they were fitted to a
-   library this file calls debt. Run them on anything you intend to ship:
-   `TASTE=1 make author-check D=<file>`. The run names what it skipped. Why they are opt-in, and what would
-   have to be true to switch one back on: **`docs/TASTE.md` · "What was culled, and why"**.
+2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command, one process,
+   **every step, every time** (15, or 16 when an intent sidecar or a landscape canvas adds one). There is no opt-in half. The run lists every step before it
+   starts, numbers each one as it goes, says what that step reads, warns before the one slow step, and
+   prints "nothing found" when a step is clean. Measured end to end on a 19.6s film: **1.4s**, browser
+   launch included.
+   What is not uniform is what a finding COSTS, and that separation is the design:
+   **BLOCKS** — **validate · beats · inspect · plan-vs-render** (plus **assets** under `STRICT=1`). These
+   say the film is broken. Two more things block that this list used to hide: **a waiver with no `_why`
+   blocks** (see the shape below), and under `STRICT=1` a **missing `.intent.json` blocks** as
+   `no-intent-sidecar`.
+   **REPORTS** — **storyboard · critique · direct · direction-floor · dissolve · designspec · copy · pace ·
+   hero · treatment · waiver-drift**. They run on every scene and print in full; they do not stop you.
+   `TASTE=1 make author-check D=<file>` gives them teeth. (`slop` is NOT among them. It was retired in
+   2026-08, its script is deleted, and this line listed it as live for months.) `pace`
+   (`scripts/gates/pace-check.mjs`) measures events per second: it catches a film that is asleep.
+   **Why they report rather than block, measured rather than argued:** give the REPORTS tier teeth and
+   **116 of the 141 scenes in this library fail**, four films in five, which is the reflex-waiver trap this
+   file already names two sections up. These gates were opt-in until 2026-08-21, and that was the same
+   reasoning applied to the wrong thing: skipping a step never protected an author from a rule fitted to a
+   debt-ridden library, it only protected the rule from being read. Full record: **`docs/TASTE.md` · "One
+   process, two severities"**.
+   **The storyboard is part of the process now, not a printed suggestion.** Step 2 always looks for the
+   plan this film came from and always says what it found. A scene declares it explicitly with a
+   top-level `"storyboard": "formats/scene/<topic>.storyboard.md"`; without that field the step falls back
+   to `<base>.storyboard.md` beside the scene, then `_concepts/<base>.storyboard.md`. Found, it runs
+   `storyboard-check` over the plan and hands the path to plan-vs-render so `spectacle:` and `pace:` are
+   joined to the film. Not found, it reports `no-storyboard` — never silence. It REPORTS rather than blocks
+   because **130 of 141 scenes have no plan**, and it is promoted to BLOCKS on a written condition, not a
+   wish: when fewer than a quarter of `formats/scene/` is missing a storyboard (`docs/TASTE.md`).
    The **designspec lock** flags off-palette colours / non-role fonts (the
    theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
    restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
@@ -410,18 +426,18 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    never moves. Every gate stayed green until this one existed. Even plan-vs-render only proves the film is not
    empty where it promised to be full, never that it kept the promise: that is `make judge` and your eyes.
    Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
-   By default it **blocks** on schema/em-dash and on timeline holes.
+   It **blocks** on schema/em-dash and on timeline holes.
    **THE DIRECTION TELLS DO NOT BLOCK, AND THIS FILE SAID THEY DID.** `linear-motion`,
    `monotone-timing`, `enter-and-retreat` and `effect-soup` are every one of them `warn()` in
    `scripts/author/motion-director.mjs`; that gate exits only on `fails`, and the string `strict` does
    not appear in it. Its only two FAIL-tier codes are `cut-families` (at ≥3) and `profile`. So the backstop
    this paragraph promised for months does not exist, and a film can carry all four tells and pass
    `TASTE=1` clean. Treat them as what they are: a report you have to read, not a wall that stops you.
-   **The ambition floor is NOT in that position: `plain-slideshow` really does block**, in
+   **The ambition floor is sharper inside its own gate: `plain-slideshow` really does fail**, in
    `direction-floor.mjs:118-120,349-359`, alongside `no-continuous-object`. So does `crossfade-mud`
-   (dissolve), and so do the designspec codes, which `author-check.mjs:175` hardcodes to `--strict`.
-   Two-sided: `effect-soup` is the ceiling and only warns, `plain-slideshow` the floor and it stops you;
-   directed lives between.
+   (dissolve), and so do the designspec codes, which author-check hardcodes to `--strict`. All three sit
+   in the REPORTS tier of the ladder, so they name the defect on every run and stop you only under
+   `TASTE=1`. Two-sided: `effect-soup` is the ceiling, `plain-slideshow` the floor; directed lives between.
    There is **no show floor**: `visual-vocabulary` was deleted for measuring size wrongly (see 2a0000).
    Reach past every WARN. **A waiver must state its reason or the always-on half stops the render**
    (`author-check.mjs:74-83`, blocking, ≥12 characters per waived code). The bare `allow` array this line

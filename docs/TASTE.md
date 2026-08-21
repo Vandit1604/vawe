@@ -74,27 +74,61 @@ static loop** — and `make video` runs it for you (skip only with an explicit `
 effect-soup video can no longer ship silently:
 
 ```bash
-make author-check D=<file> [VS=<brand>]           # THE LADDER. Always on, about a second:
-                                                  #   validate (schema + em-dash) · beats (timeline holes)
-                                                  #   assets (referenced files exist) · treatment · waiver-drift
-                                                  #   inspect + plan-vs-render
-                                                  # These catch BROKEN. assets is advisory unless STRICT=1;
-                                                  # treatment and waiver-drift are advisory always.
+make author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, every time (15 or 16 of
+                                                  # them: the intent sidecar and a landscape canvas each
+                                                  # add one).
+                                                  # BLOCKS:  validate · beats · inspect · plan-vs-render
+                                                  #          (assets joins them under STRICT=1)
+                                                  # REPORTS: storyboard · critique · direct · floor ·
+                                                  #          dissolve · designspec · copy · pace · hero ·
+                                                  #          treatment · waiver-drift
+                                                  # The run lists them all before it starts, numbers each
+                                                  # one as it goes, and says "nothing found" when a step
+                                                  # is clean. Measured: 1.4s end to end on a 19.6s film,
+                                                  # browser launch included.
                                                   # Waive a deliberate break with the FULL shape. A bare
-                                                  # allow array blocks (author-check.mjs:74-83):
+                                                  # allow array blocks (author-check.mjs):
                                                   #   {"authoring":{"allow":["dead-air"],
                                                   #     "_why":{"dead-air":"why this film is the exception"}}}
                                                   # STRICT=1 makes warnings block.
 
-TASTE=1 make author-check D=<file> [VS=<brand>]   # ...plus the SEVEN STYLE gates, which are opinions:
-                                                  #   critique · direct · floor · dissolve
-                                                  #   designspec · copy · pace
-                                                  # (`slop` was retired in 2026-08 and its script deleted.
-                                                  #  `pace` measures events/second: is the film asleep.)
+TASTE=1 make author-check D=<file> [VS=<brand>]   # same steps; the style findings now BLOCK.
 ```
 
-The style half is **off by default**. The run tells you it skipped them and how to run them. Read the
-next section before you assume that is a lowered bar: it is the opposite.
+## One process, two severities
+
+There is no optional half any more. Every step runs on every scene, every time, and prints what it
+checked and what it found. What is not uniform is what a finding **costs**:
+
+| Tier | Steps | Effect |
+|---|---|---|
+| **BLOCKS** | validate · beats · inspect · plan (+ assets under `STRICT=1`) | the film is broken; the run stops |
+| **REPORTS** | storyboard · critique · direct · floor · dissolve · designspec · copy · pace · hero · treatment · waiver-drift | printed in full, never a wall; `TASTE=1` promotes them |
+
+**Why the second row is not a lowered bar.** Measured on this library the day the split was written:
+give the REPORTS tier teeth and **116 of 141 scenes fail**. Four films in five. `CLAUDE.md` already
+names what happens next, and it has happened here twice: a rule that fires on most of the library gets
+waived by reflex, and a rule waived by reflex has already been repealed with nobody writing it down.
+So the step became mandatory and the severity did not move. Making a step optional protected the rule
+from ever being read; it never protected the author from a rule fitted to the wrong library.
+
+**The storyboard step, and its promotion condition.** `plan-vs-render` used to print "write the
+storyboard" at a film that had none, and nothing anywhere asked whether one existed. Now step 2 looks
+for it, every time, and says what it found. A scene declares its plan explicitly:
+
+```json
+{ "storyboard": "formats/scene/my-film.storyboard.md" }
+```
+
+Without that field the step falls back to the naming convention: `<base>.storyboard.md` beside the
+scene, then `_concepts/<base>.storyboard.md`. Find one and it runs `storyboard-check` over it. Find
+none and it reports `no-storyboard`.
+
+`no-storyboard` REPORTS today because **130 of 141 scenes have no plan**. Blocking on day one fails 92%
+of the library on its first run, which is the reflex-waiver trap and not a standard.
+**Promotion condition, written down rather than wished for: when fewer than a quarter of the scenes in
+`formats/scene/` are missing a storyboard, `no-storyboard` moves to the BLOCKS tier.** Count it with
+the one-liner in `docs/MISTAKES.md` #395. Nothing else needs to be true; it is a measurement, not a vote.
 
 Then the eyeball + memory rungs (not chained — you must look):
 
@@ -132,8 +166,12 @@ figures are HISTORICAL and neither can be re-run: the gate is gone and the scene
 `node scripts/gates/waiver-drift.mjs` finds one `no-visual-vocabulary` waiver left today, flagged DEAD.
 
 **Seven gates were switched OFF BY DEFAULT, not deleted:** `critique`, `direct` (motion-director),
-`floor` (direction-floor), `dissolve`, `designspec`, `copy`, `pace`. Every file is still here and
-still runs under `TASTE=1`.
+`floor` (direction-floor), `dissolve`, `designspec`, `copy`, `pace`.
+**That opt-in was REVERSED in 2026-08-21, and only halfway on purpose.** All seven run on every scene
+again. What did not come back is their teeth: their findings report, and `TASTE=1` promotes them. The
+cull's reasoning was about severity and it had been applied to existence, which is a different and
+worse thing — a step nobody runs is a step nobody reads, and the seven had been silent for weeks. See
+"One process, two severities" above for the measured cost of promoting them (116 of 141 scenes fail).
 <!-- doc-refs-allow: scripts/gates/slop.mjs · this line records that the script is gone -->
 `slop` is not among them: it was RETIRED, not switched off, its script `scripts/gates/slop.mjs` was
 deleted, and this list named it as a live opt-in step for months.
