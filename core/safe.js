@@ -105,6 +105,61 @@ export function safeArea(W, H, destination = 'web') {
   };
 }
 
+// ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
+// A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
+// HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the
+// DESTINATION, not of the shape. formats/scene/scene.css pins `.hs-cap` with
+// `bottom: max(<skin offset>, var(--safe-bottom))`, and core/boot.js:325 writes --safe-bottom from
+// safeArea(). So the band reads the same numbers the caption itself is placed against; a second table
+// would drift from the CSS exactly the way the four safe boxes drifted from each other.
+//
+// The skins are scene.css verbatim. `plain` is captionMode sentence/word; `pop` is captionMode "pop";
+// `styled` is any captionStyle (it rides the pop layout and adds the scrim plate's padding).
+export const CAPTION_SKINS = {
+  plain:  { bottomPx: 300, bottomFrac: 0,    fontPx: 46, padPx: 0 },
+  pop:    { bottomPx: 0,   bottomFrac: 0.12, fontPx: 64, padPx: 0 },
+  styled: { bottomPx: 0,   bottomFrac: 0.12, fontPx: 64, padPx: 14 },
+};
+
+// How many caption lines the band reserves. TWO, because that is what a burnt-in caption is written
+// to be, and a band sized for the longest line a scene could hold would reserve a third of the frame
+// and stop being a keep-out anyone respects. Measured at 1080x1920: a 46px caption lays out at 48px
+// per line and a 64px one at 66px, so 1.05 is `line-height: normal` rounded UP — a band that is a
+// pixel generous is a band, a band that is a pixel short is a near miss nobody sees.
+export const CAPTION_LINES = 2;
+const CAPTION_LEADING = 1.05;
+
+// captionSkin(cfg) — which skin a scene's caption settings select. One mapping, read by anyone who
+// needs the band, so `captionStyle` overriding `captionMode` is not re-guessed per caller
+// (formats/scene/scene.js:909 is the renderer's own copy of this precedence).
+export const captionSkin = (cfg = {}) =>
+  cfg.captionStyle ? 'styled' : cfg.captionMode === 'pop' ? 'pop' : 'plain';
+
+/**
+ * captionBand(W, H, destination?, skin?) → { y0, y1, height, skin, destination }
+ * The horizontal strip a burnt-in caption occupies. Vertical only: a caption is centred and its width
+ * follows its text, so the useful keep-out is the strip, not a box.
+ *
+ * skin defaults to 'any', the UNION of the three skins — the widest strip a caption could occupy on
+ * this canvas. Pass a named skin when the scene has declared one and the answer can be exact.
+ */
+export function captionBand(W, H, destination = 'web', skin = 'any') {
+  const safe = safeArea(W, H, destination);       // throws on an unknown destination, once, here
+  const chromeBottom = H - safe.y1;
+  const names = skin === 'any' ? Object.keys(CAPTION_SKINS) : [skin];
+  if (names.some((k) => !CAPTION_SKINS[k]))
+    throw new Error(`unknown caption skin "${skin}". Known: ${Object.keys(CAPTION_SKINS).join(', ')}, or "any"`);
+  let y0 = H, y1 = 0;
+  for (const k of names) {
+    const s = CAPTION_SKINS[k];
+    // The CSS max(): the skin's own offset, or the platform's chrome when that is deeper.
+    const bottom = H - Math.max(s.bottomPx, Math.round(H * s.bottomFrac), chromeBottom);
+    const top = bottom - (CAPTION_LINES * Math.ceil(s.fontPx * CAPTION_LEADING) + 2 * s.padPx);
+    y0 = Math.min(y0, top); y1 = Math.max(y1, bottom);
+  }
+  return { y0, y1, height: y1 - y0, skin, destination };
+}
+
 // The aspect a destination serves, or null for the canvas-agnostic ones. A caller can use this to say
 // "you asked for tiktok chrome on a 16:9 canvas" out loud instead of quietly producing a strange box.
 // `(DESTINATIONS[d] || {}).native ?? null` until now, so an UNKNOWN destination returned the same

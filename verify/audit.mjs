@@ -3,6 +3,8 @@
 //   • overlap   — two TEXT inks intersect (any size, not just critical)  (HARD fail)
 //   • overflow  — text clipped (scrollW/H > clientW/H)    (HARD fail)
 //   • safe-zone — element outside the SAFE box            (HARD fail)
+//   • caption-band — content inside the strip a burnt-in caption will be painted into, on a film that
+//                 declares captions (core/safe.js captionBand)     (warn)
 //   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
 //   • buried    — >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
@@ -27,7 +29,7 @@ import http from 'node:http';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { safeArea, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
+import { safeArea, captionBand, captionSkin, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
 import { layoutErrors } from '../core/validate.mjs';
 // The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
 // <style> body as glyphs (docs/MISTAKES.md #216/#217); this file went on doing exactly that when it
@@ -84,6 +86,23 @@ const dimsFor = (key, cfg) => sceneDims(cfg, key);
 // decides it; `web` (margin only) is the default.
 const safeFor = (vw, vh, cfg) => safeArea(vw, vh, cfg.destination || 'web');
 
+// The caption keep-out, or null for a film that declares no captions. CAPTIONED FILMS ONLY, and that
+// is a decision rather than an oversight: the reference system holds its band even with captions
+// disabled, and held always here it fires on 69 of 103 shipped scenes. A finding two films in three
+// carry is a report about the library, not a gate, and authors learn to ignore it. Measured both ways
+// before choosing (docs/MISTAKES.md #395).
+// Held for the whole runtime, not only inside a caption window: the strip is a layout commitment the
+// author makes once, and this file samples 14 frames plus layer midpoints, so a window-scoped rule
+// would be a check that only sometimes looks.
+// A tolerance of 8px, the same hairline MIN_GAP already calls "touching", so a descender box grazing
+// the top of the band is not reported as a collision.
+const CAP_TOL = 8;
+const capBandFor = (vw, vh, cfg) => {
+  if (!Array.isArray(cfg.captions) || !cfg.captions.length) return null;
+  const b = captionBand(vw, vh, cfg.destination || 'web', captionSkin(cfg));
+  return { ...b, tol: CAP_TOL };
+};
+
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4' };
 function startServer() {
@@ -97,7 +116,7 @@ function startServer() {
 }
 
 // runs in-page: render frame n, measure every visible [data-layer=critical] box, return issues.
-function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS) {
+function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
   // effOpacity — the product of every opacity down the paint tree, which is what the VIEWER sees.
@@ -390,6 +409,17 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS) {
     const sb = ink || b;
     if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
       issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
+    // CAPTION BAND. The safe box says where content may live; it says nothing about the strip a
+    // burnt-in caption is about to be painted into, so a headline could land squarely on the caption
+    // and every rule above stayed green. Same subject and same measurement as the safe walk — settled
+    // content, ink box, an image or real text — over a band core/safe.js derives from the same
+    // destination numbers the caption itself is placed against.
+    if (CAPBAND && !midMove(el) && carriesContent(el)) {
+      const deep = Math.min(sb.bottom, CAPBAND.y1) - Math.max(sb.top, CAPBAND.y0);
+      if (deep > CAPBAND.tol)
+        issues.push({ kind: 'caption-band', a: id, li, t,
+          detail: `sits ${deep | 0}px into the caption band (y ${CAPBAND.y0}..${CAPBAND.y1}, ${CAPBAND.skin} skin): the caption will be painted over it` });
+    }
   });
   // image legibility floor: a standalone logo/image layer must not be smaller than ~5% of the frame
   // height (a 44px logo in a 1080p frame is unreadable). Frame-relative, so it scales to any orientation.
@@ -1152,6 +1182,7 @@ for (const aspectKey of askedAspects) {
   // 1080x1920) mis-fires safe-zone and the tiny-text floor on every landscape video.
   const [vw, vh] = dimsFor(aspectKey, cfg);
   const safe = safeFor(vw, vh, cfg);
+  const capBand = capBandFor(vw, vh, cfg);
   // cut windows the renderer will actually apply (mirrors scene.html: `none` is filtered, `dur` is
   // the TOTAL window split evenly around t)
   const cutWindows = (cfg.cuts || []).filter((c) => c && c.style && c.style !== 'none')
@@ -1231,7 +1262,7 @@ for (const aspectKey of askedAspects) {
   const all = [];
   let critMax = 0, worst = { f: frames[0] || 0, n: -1 };
   for (const f of frames) {
-    const { issues, count, probes } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows, overlayWindows);
+    const { issues, count, probes } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows, overlayWindows, capBand);
     critMax = Math.max(critMax, count);
     // The frame with every contrast subject's own paint hidden — the backdrop, composited, as the
     // viewer would see it under the glyphs. Deliberately page.screenshot() and not a cached frame
@@ -1256,7 +1287,9 @@ for (const aspectKey of askedAspects) {
     }
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
-    for (const i of issues) { if (i.kind === 'safe' && camMoving(f)) continue; all.push({ f, ...i }); }
+    // A moving camera displaces every box on the frame, so neither the safe box nor the caption band
+    // is where the layer will settle. Same exemption, same reason.
+    for (const i of issues) { if ((i.kind === 'safe' || i.kind === 'caption-band') && camMoving(f)) continue; all.push({ f, ...i }); }
   }
   // WAIVERS. Every other gate in this repo honours {"authoring":{"allow":[...]}}; this one did not, so
   // a DELIBERATE composition had no way past it and the only options were to contort the scene or to
@@ -1304,7 +1337,7 @@ if (heroOnly) {
   } else {
     for (const i of items) console.log(`  ~ [thin-hero]${i.waived ? ' (waived)' : ''} ${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''} — ${i.detail}`);
   }
-  console.log(`  (hero fill only: 1 of the 18 finding kinds in this file. Every contrast, overlap, clipping`);
+  console.log(`  (hero fill only: 1 of the 19 finding kinds in this file. Every contrast, overlap, clipping`);
   console.log(`   and safe-zone check still runs post-render, under \`make audit\`.)`);
   process.exit(0);
 }

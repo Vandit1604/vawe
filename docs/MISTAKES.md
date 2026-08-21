@@ -11952,6 +11952,51 @@ hiding a pixel diff inside a gate fix.
 `data.stings` and never `data.cuts`, so brew fingerprints with no boundary vocabulary at all. Widening
 it re-tunes every ledger score in the library.
 
+## #395 — Nothing stopped a headline landing on the caption
+
+#392 fixed WHERE a burnt-in caption sits: `.hs-cap` reads `--safe-bottom`, so it clears the platform's
+own strip. It closed with a line naming what was still open, and this is that: the placement was right
+and the COLLISION was unguarded. A caption owns real estate at the bottom of the frame, and no rule
+compared any content against it. The safe box says where content may live; it says nothing about the
+strip a caption is about to be painted into.
+
+**The band lives in `core/safe.js`, beside the safe area, and never as a second table.** `captionBand(W,
+H, destination, skin)` reads the same destination chrome `safeArea()` reads, because the CSS pins the
+caption with `bottom: max(<skin offset>, var(--safe-bottom))` and `core/boot.js:325` writes that
+variable from `safeArea()`. A band derived anywhere else drifts from the caption the way the four safe
+boxes drifted from each other. The skins are `formats/scene/scene.css` verbatim. Verified against the
+rendered element rather than read off the stylesheet: `plain` measured y1=1620 at 1080x1920 web and 1340
+on tiktok, `pop` 1690, and the function returns those numbers.
+
+**The judgement: captioned films only.** The reference system holds its band *even when captions are
+disabled*, arguing a film may be captioned later by the platform or the viewer. Measured here both ways
+across 103 shipped scenes:
+
+| | scenes flagged |
+|---|---|
+| held always (union of the three skins) | **69 of 103** |
+| held only on films that declare `captions` | **0** |
+
+Two films in three is a report about the library, not a gate; a warning that common is one authors learn
+to scroll past, and it would have arrived attached to films that ship without a caption anywhere. So it
+is scoped to films that declare `captions`, and today that is **one scene in the library (`sample.json`,
+which is clean)**. A guard rather than a catch, and that is said out loud rather than dressed up: the
+value is the next captioned film, not this one.
+
+The landscape number explains most of the always-on dose. `plain` sits `300px` up, which is 28% of a
+1080-tall frame, so the union band swallows y 682..950 of every 16:9 scene and any lower-third label
+lands in it. That band is real for a `sentence` caption on landscape; it is not a defect in a film that
+has no captions.
+
+**Proven real, not assumed.** No shipped film trips the rule, so the finding was proven on one that
+does: `example-kinetic-type.json` (tiktok, 9:16) with a caption window added over frame 288. The audit
+reported the waveform panel 75px inside the band, and the rendered frame shows the caption line painted
+straight across the panel, over the playhead and two cut markers. Read, not inferred.
+
+**What it still cannot see.** The band reserves TWO lines. A longer caption wraps upward past it and the
+overlap goes unreported, so the band is the floor of the keep-out and not the whole of it. It is a WARN,
+never a block, and it is one of the 19 finding kinds in `verify/audit.mjs`.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

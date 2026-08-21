@@ -23,7 +23,7 @@ import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims } from '../../core/safe.js';
+import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
@@ -738,6 +738,22 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const tt = safeArea(1080, 1920, 'tiktok');
   ok(`safe: tiktok 9:16 keeps the historic chrome (y0=${tt.y0} y1=${tt.y1} x1=${tt.x1})`,
     tt.y0 === 240 && tt.y1 === 1340 && tt.x1 === 900);
+
+  // captionBand: the strip a burnt-in caption occupies, so a headline can be kept off it. Derived from
+  // safeArea rather than from a second table, because the platform's chrome is not a property of the
+  // aspect and one definition of that has to be enough (docs/MISTAKES.md #392, #159).
+  {
+    const web = captionBand(1080, 1920, 'web');
+    const tik = captionBand(1080, 1920, 'tiktok');
+    ok('captionBand: it sits at the bottom and has real height',
+      web.y1 <= 1920 && web.y0 < web.y1 && web.height > 0);
+    // The band must RISE with the platform's chrome. tiktok reserves 0.302 of the bottom against web's
+    // smaller box, so the same caption sits higher, and a band that ignored destination would place a
+    // keep-out over pixels the caption cannot use.
+    ok(`captionBand: tiktok sits above web (tiktok y1=${tik.y1} < web y1=${web.y1})`, tik.y1 < web.y1);
+    // It must agree with safeArea's own bottom edge rather than drifting from it.
+    ok('captionBand: never reaches below the destination safe area', tik.y1 <= safeArea(1080, 1920, 'tiktok').y1);
+  }
   ok('safe: tiktok reserves more than web (chrome is real)', tt.y1 < web.y1 && tt.x1 < web.x1);
 
   // max(), never sum: a platform rail already reaches the frame edge, so adding margin double-counts.

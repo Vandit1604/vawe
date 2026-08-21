@@ -86,6 +86,35 @@ arguing with these.
   is governed by the 60-80% frame fill in §0 instead. Full rule and the boundary:
   [TYPOGRAPHY.md](TYPOGRAPHY.md) §4.
 
+### 5a. The caption band — where a burnt-in caption will be painted
+
+The safe box says where content MAY live. It says nothing about the strip a caption lands in, so a
+headline could sit squarely under one and every layout check stayed green. `core/safe.js` now exports
+that strip beside the safe box, derived from the same destination numbers:
+
+```js
+captionBand(W, H, destination, skin)   // → { y0, y1, height, skin, destination }
+captionSkin(cfg)                       // 'plain' | 'pop' | 'styled', from captionMode/captionStyle
+```
+
+It is vertical only. A caption is centred and its width follows its text, so the useful keep-out is a
+strip, not a box. The three skins are `formats/scene/scene.css` verbatim: **plain** (`captionMode`
+sentence/word) sits `300px` up at 46px type; **pop** and **styled** (any `captionStyle`) sit `12%` up at
+64px, and `styled` adds its scrim plate's padding. Each takes the deeper of its own offset and the
+destination's bottom chrome, which is the `max()` the CSS itself uses against `--safe-bottom`. The band
+reserves **two lines**; a caption longer than that grows UPWARD past it, so treat the band as the floor
+of the keep-out and not the whole of it.
+
+At 1080x1920: `web` reserves y 1522..1690 across all three skins, `tiktok` 1176..1340. The whole band
+moves up with the chrome, because on TikTok the caption itself moves up with it (#392).
+
+`make audit` warns **`caption-band`** when settled content overlaps the strip by more than 8px, **on a
+film that declares `captions`**, and holds the band for the whole runtime rather than only inside a
+caption window. Held on every film instead, it fires on **69 of 103** shipped scenes, which is a report
+about the library rather than a gate; scoped to captioned films it fires on **none** of them today, so
+it guards the next captioned film rather than catching an existing one. The measurement and the
+argument: `docs/MISTAKES.md` #395.
+
 ## 6. Archetype → intent (pick by the beat's job, then rotate)
 
 No layout archetype twice in a row; the storyboard names each beat's archetype. Pick it by what the
