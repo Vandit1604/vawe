@@ -1,6 +1,7 @@
 // scripts/author/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
+import { boundaryMechanism } from '../../core/transitions-lower.js';
 const p = 'formats/scene/vawe-launch.json';
 const d = JSON.parse(fs.readFileSync(p, 'utf8'));
 const T = B.TOKENS;
@@ -35,7 +36,15 @@ rm((l) => l.type === 'text' && l.text === 'scene' && (l.y ?? 0) === 430);
 
 // cuts beat ── kill the false "22 shader stings" claim; relabel the invisible "blinds"
 L().forEach((l) => { if (has(l, '26 cuts')) l.text = 'every cut, deterministic'; if (l.type === 'text' && l.text === 'blinds') l.text = 'push'; });
+// Both surfaces, because a boundary can be declared raw or through the unified `transitions` list, and
+// a rewrite that saw only one of them left the invisible blinds on screen (docs/MISTAKES.md #391b).
+// This script WRITES the scene back, so it edits the authored surface in place instead of lowering:
+// lowering here would silently convert an author's `transitions` into raw cuts and stings.
+// `boundaryMechanism` decides what a unified entry IS, so the rule is not duplicated here.
 (d.stings || []).forEach((s) => { if (s.fx === 'blinds') s.fx = 'wipe'; });
+(d.transitions || []).forEach((t) => {
+  if (t.fx === 'blinds' && boundaryMechanism(t.fx, t.mech) === 'sting') t.fx = 'wipe';
+});
 
 // 12 ── backdrops: remove the "14 backdrops" claim + fake player; show 3 LIVE micro-demos
 rm((l) => has(l, '14 live backdrops') || (l.type === 'group' && (l.start ?? 0) >= 30 && (l.start ?? 0) < 32.5 && (l.y ?? 0) === 620));

@@ -11852,6 +11852,106 @@ should sit.
 exactly rather than unifying it, because unifying it would re-track every serif layer and every
 non-optical theme in the library. That is a taste decision somebody should make deliberately.
 
+## #394 — The last readers of `transitions`, and the one that was policing the seams blind
+
+#380 closed eight consumers of the unified `transitions` surface. #391 found the ninth and its required
+grep found seven more. This closes five of those seven; the other two are named below and deliberately
+left, because fixing them moves a committed pixel baseline.
+
+**`scripts/gates/seam-snap.mjs` is the one that mattered.** `make seam-check` pulls the frames
+straddling every boundary out of the rendered mp4 and looks for a black flash in the overlap. It
+collected those boundaries from `data.cuts | seams | stings`, which are all EMPTY on a film that
+declares its boundaries the documented way. So on `brew-launch-act1` it sampled seven boundaries, and
+every one of them came from the fallback heuristic that guesses a beat start from a cluster of layer
+starts. Not one of the four cuts the author wrote was among them. The gate ran, printed a clean verdict
+and wrote a contact sheet, and the cheapest catch this repo has for its worst class of bug had never
+looked at a single authored cut on the film it holds up as its best. Lowered, brew samples ELEVEN
+boundaries: the same seven plus 1.6s, 4.4s, 7.8s and 11.8s. The 7.8s tile is the orange ground the film
+punches to, which is the boundary #391 proved is real in the picture and this gate could not see.
+
+**Nothing was flashing.** brew, `gh-wrapped` and `ab-skill-shotcode` are all clean at their real cuts.
+That is the correct outcome and not a reason to shrug: the gate was reporting a pass it had not earned,
+and a pass that cannot fail is worth nothing on the day the seam breaks.
+
+**`coverage.mjs` moved, and the move is the tool finally seeing something.** `ridgedBurn` sat in the
+"unexercised vocabulary (nothing renders these, so nothing would notice a regression)" list while
+`gh-wrapped` burns it across the frame at 2.6s. Frames 156 to 168 of `out/gh-wrapped.mp4` are an orange
+ridged-noise wipe eating the contribution grid. Shader sting coverage reads 22/35 instead of 21/35.
+`scripts/author/coverage-reel.mjs` shares that scan, so the reel it generates was demoing an effect the
+library already ships.
+
+**Coverage lowers a CLONE and keeps the raw scene, which is not fussiness.** Two questions live in that
+file and they want different inputs. "Which vocabulary does the engine render" is a question about the
+LOWERED scene. "Which authored prop does no scene set" is a question about the file as written, and
+lowering CONSUMES `transitions` and a layer's `transition`, so answering it off the lowered copy would
+declare both of them dead the moment somebody used them. The report would have grown a new lie while
+losing an old one.
+
+**`similarity.mjs` lowers inside `fingerprint()`, not at its CLI.** `scripts/gates/ledger.mjs` imports
+that function, so a fix at the call site would have left `make ledger` fingerprinting films with no
+stings at all. `gh-wrapped` gains `fx:ridgedBurn` and `ab-skill-shotcode` gains `fx:chromaticSplit`. No
+pair's verdict moved, and no scene went from distinct to SAME.
+
+**`similarity.mjs` also had a second, louder failure: the whole library audit was dead.**
+`gh-wrapped.template.json` holds mustache placeholders, so it is not JSON, and `JSON.parse` threw out of
+the scan and killed the run before a single pair was scored. `make similar` with no arguments printed a
+stack trace, which is at least honest, and printed it in a repo where the anti-template gate is the
+point. It now names the skip and scores the other 97 pairs; a file listed explicitly on the command line
+still throws, because there the parse error is the answer.
+
+**`reimagine.mjs` does NOT lower, on purpose.** It rewrites `formats/scene/vawe-launch.json` and writes
+the file back, so lowering would silently convert an author's `transitions` into raw cuts and stings and
+commit that rewrite to disk. It walks both surfaces instead, and asks `boundaryMechanism()` which of the
+unified entries is a sting rather than re-deciding that here. Same rule, one owner.
+
+**Left alone, and this is the reason.** `scripts/gates/scene-snap.mjs` and
+`scripts/gates/snap-scenes.mjs` do not lower either, so the three `transitions` films' pixel snapshots
+never straddle their own cuts. Teaching them to lower makes them sample DIFFERENT frames, which moves a
+committed baseline. That is a change with its own before and after, and folding it in here would have
+hidden a pixel diff inside a gate fix.
+
+**The shape, for the third time.** A sugar layer is only sugar if every reader lowers, and "every
+reader" is a grep, not a memory. What made this one survive nine consumers and two closures is that
+only 3 of 149 scenes use the surface, so each miss costs almost nothing measurable and the tool that is
+blind still exits 0. The library diff for this pass is one line of a coverage report. The defect was a
+safety gate that could not fail.
+
+## #394 — The seam gate printed a pass it had never earned, and the ledger scan was dead
+
+Five more consumers of the unified `transitions` surface, found by the grep #391 was required to run.
+
+**`make seam-check` on `brew-launch-act1` sampled SEVEN boundaries and not one was a cut.** All seven
+came from its layer-start fallback heuristic; the four authored cuts at 1.6 / 4.4 / 7.8 / 11.8s were
+invisible to it. It printed clean every time.
+
+And the honest finding is not a hidden flash. Once it could see them, there is no flash at any of the
+four. **The defect was a safety gate that could not fail** on the film this repo holds up as its best.
+`CLAUDE.md` calls that gate "the cheapest catch for the worst bugs"; it was a pass nobody had earned.
+A gate that cannot fail reports green forever and everyone believes it (#26, again).
+
+**`make ledger`'s library scan was DEAD, not inaccurate.** One `.template.json` full of mustache
+placeholders threw before a single pair was scored, so the anti-sameness sweep across the whole library
+returned nothing at all. Fixed with a named skip line, and it now scores 97 pairs and reports **3 SAME
+pairs that need differentiating**. That is a pre-existing finding set surfacing, not one this pass
+created, and somebody should look at them.
+
+**`coverage.mjs` said "nothing renders these" about an effect that renders.** `ridgedBurn` sat in the
+unexercised list while `gh-wrapped` fires it at 2.6s, proven by reading four frames: an orange ridged
+burn eating the contribution grid. The reel generator was demoing an effect the library already ships.
+
+**One consumer must NOT lower, and knowing which is the point.** `reimagine.mjs` writes a scene back to
+disk, so lowering would silently convert an author's `transitions` into raw cuts and stings and commit
+that. It now walks the authored surface and asks `boundaryMechanism()` rather than re-deciding.
+**Lower where you READ; never where you WRITE.**
+
+`snap-scenes` and `scene-snap` are still unlowered, deliberately: they sample frames AROUND each cut, so
+teaching them to lower moves the committed pixel baseline and needs its own before-and-after rather than
+hiding a pixel diff inside a gate fix.
+
+**Still open, and refused twice on purpose:** `fingerprint()` reads a layer's `cut` prop and
+`data.stings` and never `data.cuts`, so brew fingerprints with no boundary vocabulary at all. Widening
+it re-tunes every ledger score in the library.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

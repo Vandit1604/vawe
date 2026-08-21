@@ -12,11 +12,18 @@
 // with itself; it shouldn't retell the same skeleton).
 import fs from 'node:fs';
 import path from 'node:path';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
 // ---------- fingerprint ----------
-export function fingerprint(data) {
+export function fingerprint(input) {
+  // Lowered HERE rather than at each caller, so `make ledger` (scripts/gates/ledger.mjs imports this)
+  // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
+  // all, so two films could share a sting vocabulary and the ledger would score them as further apart
+  // than they are (docs/MISTAKES.md #391b). Cloned: lowerScene mutates and deletes what it is handed,
+  // and a fingerprint must never rewrite the scene its caller goes on to grade.
+  const data = lowerScene(structuredClone(input));
   const vocab = new Set(), structure = [], layout = [], colors = new Set();
   const word = (v) => { if (typeof v === 'string' && v) vocab.add(v); };
   if (Array.isArray(data.scenes)) {
@@ -75,10 +82,17 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
         .filter((f) => f.endsWith('.json') && !/^(schema|sample|cuts-demo)\.json$|^sample/.test(f))
         .map((f) => path.join('formats', d.name, f)));
   }
-  const fps = files.map((f) => {
-    const data = JSON.parse(fs.readFileSync(path.resolve(ROOT, f), 'utf8'));
-    return { f, fp: fingerprint(data) };
-  });
+  // A `.template.json` holds mustache placeholders, so it is not JSON and never was a video. One of
+  // them threw out of the scan and killed the WHOLE library audit, which is why `make similar` with no
+  // arguments reported nothing at all. Name the skip; an explicitly listed file still throws.
+  const explicit = process.argv.length > 2;
+  const fps = [];
+  for (const f of files) {
+    let data;
+    try { data = JSON.parse(fs.readFileSync(path.resolve(ROOT, f), 'utf8')); }
+    catch (e) { if (explicit) throw e; console.log(`   · skipped ${path.basename(f)} (not parseable JSON)`); continue; }
+    fps.push({ f, fp: fingerprint(data) });
+  }
   let hard = 0, warn = 0;
   console.log('==================== SIMILARITY AUDIT ====================');
   for (let i = 0; i < fps.length; i++) for (let j = i + 1; j < fps.length; j++) {

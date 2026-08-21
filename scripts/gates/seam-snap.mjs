@@ -18,11 +18,16 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../lib/layers.mjs';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
-const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+// LOWERED, because `transitions: [{at, fx}]` is the documented way to declare a boundary and it lowers
+// to cuts/seams/stings only at render time. Reading the raw file found NO boundaries on the three films
+// that declare them that way, so this gate ran and reported nothing on the exemplar it exists to protect
+// (docs/MISTAKES.md #380 · #391 · #391b). Cloned: lowerScene mutates and deletes what it is handed.
+const data = lowerScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at out/${name}.mp4 — render first (make video D=${dataArg})`); process.exit(2); }

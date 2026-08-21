@@ -22,11 +22,19 @@ import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { SCENE_DIR } from './paths.mjs';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, SCENE_DIR);
 const scenes = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !['schema.json'].includes(f))
-  .map((f) => { try { return { f, j: JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) }; } catch { return null; } })
+  // Two views of the same scene. `j` is LOWERED, because a boundary declared as `transitions` carries a
+  // cut style and a sting fx that this report otherwise scores as unexercised, so the library looked
+  // like it used less of the engine than it does (docs/MISTAKES.md #391b). `raw` is the authored file,
+  // because lowering CONSUMES the unified keys, and the prop census below asks which authored props no
+  // scene sets — answering that off the lowered copy would report `transition` and `mech` as dead the
+  // moment somebody used them.
+  .map((f) => { try { const raw = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    return { f, raw, j: lowerScene(structuredClone(raw)) }; } catch { return null; } })
   .filter((x) => x && x.j.module === 'scene');
 
 // walk every layer, including group children — a primitive used only inside a group is still used
@@ -37,11 +45,13 @@ const layersOf = (j) => { const out = [];
 const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Set(), look: new Set(),
   canvasFx: new Set(), paint: new Set(), bg: new Set(), type: new Set(), prop: new Set() };
 
-for (const { j } of scenes) {
+for (const { j, raw } of scenes) {
   // Props live on cuts/stings/bg/camera ITEMS too, not just layers. Collecting only layer keys made
   // the report claim `t`, `dur`, `style` and `timing` were unused — they are used constantly. A
   // coverage report that cries wolf gets ignored exactly like a gate that does.
-  for (const arr of [j.cuts, j.stings, j.bg, j.camera]) for (const it of arr || []) if (it && typeof it === 'object') Object.keys(it).forEach((k) => used.prop.add(k));
+  // Read off `raw`: this census is about what an AUTHOR writes, and `transitions` is one of the things
+  // an author writes, so it is counted here and not through the cuts it lowers to.
+  for (const arr of [raw.cuts, raw.stings, raw.bg, raw.camera, raw.transitions]) for (const it of arr || []) if (it && typeof it === 'object') Object.keys(it).forEach((k) => used.prop.add(k));
   for (const c of j.cuts || []) if (c?.style) used.cut.add(c.style);
   for (const s of j.stings || []) if (s?.fx) used.sting.add(s.fx);
   for (const b of j.bg || []) if (b?.preset) used.bg.add(b.preset);
@@ -56,8 +66,10 @@ for (const { j } of scenes) {
     if (l.canvasFx) used.canvasFx.add(typeof l.canvasFx === 'string' ? l.canvasFx : l.canvasFx.fx);
     if (l.paint) used.paint.add(l.paint);
     if (l.filter) used.look.add(String(l.filter).split(':')[0].trim());
-    for (const k of Object.keys(l)) used.prop.add(k);
   }
+  // Same split again: the vocabulary above is what the ENGINE renders (lowered), the props are what the
+  // author wrote. A layer's `transition` is gone from the lowered copy by the time this runs.
+  for (const l of layersOf(raw)) for (const k of Object.keys(l)) used.prop.add(k);
 }
 
 const schemaProps = (() => { const s = JSON.parse(fs.readFileSync(path.join(dir, 'schema.json'), 'utf8'));
