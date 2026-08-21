@@ -110,6 +110,12 @@ const WAIVED = new Map(Object.entries({
   ANIM: 'the anim implementations behind ANIM_NAMES, which IS catalogued',
   IDLE: 'the idle generators behind IDLE_NAMES, which IS catalogued',
   IDLE_REGISTRY: 'as IDLE — the registry object, not a name a scene can write',
+  // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
+  // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
+  // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate
+  // is right to have asked (docs/MISTAKES.md #392).
+  CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
+  CAPTION_LINES: 'as CAPTION_SKINS — how many lines the band reserves, not a name a scene can write',
   // A scene names a BEAT, and every beat is already catalogued by `make blueprints`. REQUESTS is the
   // prose sentence for asking for one in a STORYBOARD, which is a plan and not a scene, so there is
   // nothing here for a scene to write. It is surfaced where it is used: `make blueprints` prints an
