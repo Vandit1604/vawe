@@ -11778,7 +11778,27 @@ ledger fingerprint from `stings`, so two films can look more alike than they are
 `scripts/author/reimagine.mjs` rewrites `blinds` to `wipe` on stings and misses a unified one.
 `scripts/media/beatsync.mjs` needs no fix: it snaps `data.transitions[].at` as a first-class list.
 
-## #390 — Burnt-in captions rendered underneath the platform's own caption strip
+## #391b — SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
+
+#391 closed the ninth consumer. The grep it was required to run before closing found seven more, which
+is the point of that rule and the reason #380's "eight consumers, fixed" was wrong.
+
+**The sharp one: `scripts/gates/seam-snap.mjs`.** `make seam-check` collects boundaries from
+`data.cuts|seams|stings` only, so on a film declaring them the documented way it finds NONE and the
+black-flash check reports nothing. `CLAUDE.md` calls that gate "the cheapest catch for the worst bugs"
+and it is silently inert on `brew-launch-act1`, the film this repo holds up as its best.
+
+Also unlowered: `snap-scenes.mjs` and `scene-snap.mjs` (cut frames never sampled for those films, and
+fixing it MOVES the committed pixel baseline, so it must be its own change), `coverage.mjs` and
+`coverage-reel.mjs` (a unified zoom scores as an unused cut style), `similarity.mjs` (the ledger
+fingerprint misses a unified sting), and `reimagine.mjs`. `beatsync.mjs` does not lower and is CORRECT
+not to: it snaps `data.transitions[].at` as a first-class list.
+
+**Why the library diff was zero.** Only 3 of 149 scenes use `transitions`, and none has an intent
+sidecar. So this fixed a gate that was blind on the repo's exemplar and changed nothing measurable,
+which is exactly the shape that lets a defect survive nine consumers and two closures.
+
+## #392 — Burnt-in captions rendered underneath the platform's own caption strip
 
 `core/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`. `formats/scene/scene.css`
 hardcoded `.hs-cap { bottom: 300px }` and never read it. On `destination:"tiktok"` the bottom chrome is
@@ -11802,7 +11822,7 @@ noticed in passing while comparing.
 headline landing on the caption band. They keep content in the top ~83% and export a caption band per
 skin. That is the real gap and it is a keep-out rule, not a typography one.
 
-## #391 — `letterSpacing` had two writers, and now it has one that cannot become two
+## #393 — `letterSpacing` had two writers, and now it has one that cannot become two
 
 #388 recorded that one statement in `core/layers/text.js` had silently discarded two upstream decisions:
 the author's own `tracking` (#28, in 12 shipped scenes) and the dark-ground polarity. Both were fixed by

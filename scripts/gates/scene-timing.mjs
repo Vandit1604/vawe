@@ -24,11 +24,13 @@
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
 //   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
 //   T.unitEnd(L)   // where the engine actually drops the layer: unitCut + that cut's window
+//   T.scene        // the scene LOWERED (see sceneTiming below) — read cuts/seams/stings from here
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/safe.js';
 import { cameraView } from '../../core/sequence.js';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 
@@ -201,6 +203,15 @@ export function sceneView(d, t, CW, CH) {
 // x/y and given no size, which can keep a layer whose top-left sits just outside a view its body is in.
 // That direction is deliberate: this predicate only ever REMOVES things from a count, so erring toward
 // "visible" cannot invent a finding.
+//
+// UNKNOWN IS PER AXIS, NOT PER LAYER. `boxOf` returns {0,0,'unknown'} whenever ONE axis cannot be
+// derived, so an html fragment that declares `w: 1600` and no `h` (its height comes from the fragment's
+// own aspect, which no gate can read) was judged as a zero-area POINT at its top-left corner. A 1600px
+// grid whose left edge sat 46px outside the view was therefore "not being looked at" while it filled
+// the frame, and `camera-aimed-at-nothing` invented 1.4s of emptiness in gh-wrapped — the exact
+// direction the paragraph above says this predicate must never take. Reading each axis's declared value
+// back keeps boxOf's contract (the extent it could not derive is still unknown) and only ever grows the
+// box, so it can delete a false finding and cannot create a true one. docs/MISTAKES.md.
 export function inView(L, view, root = ROOT) {
   if (!view) return true;
   // x/y are NOT always numbers: `x:"center"` and the `pin` keywords are resolved by the engine against
@@ -210,11 +221,23 @@ export function inView(L, view, root = ROOT) {
   // cannot manufacture a finding.
   if (!Number.isFinite(L?.x) || !Number.isFinite(L?.y)) return true;
   const b = boxOf(L, root);
-  const w = b.how === 'unknown' ? 0 : b.w, h = b.how === 'unknown' ? 0 : b.h;
+  const known = b.how !== 'unknown';
+  const w = known ? b.w : (num(L.w, null) ?? 0), h = known ? b.h : (num(L.h, null) ?? 0);
   return L.x <= view.x + view.w && L.x + w >= view.x && L.y <= view.y + view.h && L.y + h >= view.y;
 }
 
-export function sceneTiming(d) {
+// LOWER FIRST. The unified `transitions` surface is the documented way to declare a boundary, and the
+// engine expands it to cuts/seams/stings before it renders anything (core/transitions-lower.js). A model
+// of the clock that reads raw `cuts` therefore says brew-launch-act1 has no boundaries when it has four,
+// and every gate built on this model inherits that. #380 fixed eight consumers one at a time and missed
+// the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #380, #391.
+//
+// CLONED, because lowerScene mutates and `delete`s `transitions` off what it is given. That is right for
+// the renderer, which lowers once at the top, and wrong for a gate: a check that rewrites the object it
+// is grading changes what every later check sees. core/validate.mjs clones for the same reason.
+// Lowering is idempotent, so a caller that already lowered pays a copy and nothing else.
+export function sceneTiming(input) {
+  const d = lowerScene(structuredClone(input));
   const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
 
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
@@ -279,5 +302,7 @@ export function sceneTiming(d) {
   // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
   const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
 
-  return { layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
+  // `scene` is the LOWERED clone. A gate that reads `d.cuts` off its own copy is reading the authored
+  // surface, not the rendered one; this is the same scene with the sugar already expanded.
+  return { scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
 }

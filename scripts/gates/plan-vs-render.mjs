@@ -75,7 +75,12 @@ const STILL = 2.5;       // a stretch inside one beat with no event that stops r
 const DRIFT = 0.6;       // how far a real cut may sit from any planned boundary before it is unplanned
 const OVERRUN = 0.5;     // how far the plan's total may sit from the film's before the spans are fiction
 
+// T.scene is this scene with the unified `transitions` surface already lowered to cuts/seams/stings, on
+// a clone, so nothing below rewrites the object it is grading. Every boundary read in this file goes
+// through it: reading raw `d.cuts` is how a film that declared four boundaries the documented way was
+// graded as a film with none. docs/MISTAKES.md #380, #391.
 const T = sceneTiming(d);
+const BOUNDARY_KEYS = ['cuts', 'seams', 'stings'];
 const s = (n) => `${(+n).toFixed(2)}s`;
 
 // ---------- the peak, asked about even when there is no plan ----------
@@ -105,8 +110,14 @@ function nominationNote() {
   // COUNT `transitions` TOO. It is the documented unified surface and it lowers to cuts/seams/stings
   // before the engine renders, so a film that declares its boundaries the documented way has structure
   // even though `d.cuts` is empty. brew-launch-act1 is exactly that film: four boundaries, none of them
-  // in `d.cuts`. (The rest of this gate reads raw `cuts` and shares the blind spot, via sceneTiming;
-  // that is a wider fix than one finding, and it is reported rather than smuggled in here.)
+  // in `d.cuts`. This was the one reader here that already saw them; the rest of the gate now sees them
+  // too, through `T.scene`.
+  //
+  // IT STAYS ON THE AUTHORED SURFACE, deliberately. `T.scene.cuts` would carry the lowered transitions,
+  // and adding seams and stings to it would read as the same tidy-up — but it is not one. A raw `stings`
+  // block has never counted as structure here, and folding those in re-tunes a trigger #389 measured on
+  // purpose (24 of 110 scenes; the seams/stings set adds 16 more). That is a decision about how loud this
+  // advisory should be, not about lowering, and it does not get made in passing.
   const boundaries = new Set([
     ...(Array.isArray(d.cuts) ? d.cuts : []).filter((c) => c && typeof c === 'object' && num(c.t, null) !== null).map((c) => num(c.t, 0)),
     ...(Array.isArray(d.transitions) ? d.transitions : []).filter((c) => c && typeof c === 'object' && num(c.at, null) !== null).map((c) => num(c.at, 0)),
@@ -156,8 +167,8 @@ const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
 const events = [];
 const ev = (t, what) => { if (Number.isFinite(t)) events.push({ t: +(+t).toFixed(3), what }); };
 for (const [a, b] of T.spans) { ev(a, 'layer in'); ev(b, 'layer out'); }
-for (const key of ['cuts', 'seams', 'stings']) {
-  for (const c of (Array.isArray(d[key]) ? d[key] : [])) {
+for (const key of BOUNDARY_KEYS) {
+  for (const c of (Array.isArray(T.scene[key]) ? T.scene[key] : [])) {
     if (c && typeof c === 'object' && num(c.t, null) !== null) ev(num(c.t, 0), key.replace(/s$/, ''));
   }
 }
