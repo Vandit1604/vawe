@@ -16,6 +16,7 @@ import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
+import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs } from '../../core/layers/util.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
@@ -446,6 +447,88 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('trackingFor is pure', sizes.every((p) => trackingFor(p, true) === trackingFor(p, true)
     && trackingFor(p) === trackingFor(p)));
   ok('trackingFor always an em string', sizes.every((p) => /^-?\d+\.\d{4}em$/.test(trackingFor(p, true))));
+}
+
+// LETTER-SPACING HAS EXACTLY ONE WRITER. This is the contract MISTAKES #28 and #388 were both breaches
+// of: styleText resolved the value, microType overwrote it one statement later, and that one statement
+// silently discarded the author's `tracking` (12 shipped scenes) and then the light-on-dark polarity.
+// Each repair threaded another argument into the second writer, which fixed the symptom and left the
+// trap. Two things are pinned below, and BOTH are needed:
+//   1. the SOURCE test — no file in core/ may assign letter-spacing except the resolver. A second
+//      writer now fails here rather than in a film nobody diffs.
+//   2. the BEHAVIOUR tests — the one resolver really does fold in every opinion (author prop, size
+//      ramp, polarity, mono, raw), so nobody has to add a second write to get one of them honoured.
+{
+  // 1. THE SOURCE TEST.
+  const coreFiles = [];
+  const walkCore = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walkCore(p);
+      else if (e.name.endsWith('.js')) coreFiles.push(p);
+    }
+  };
+  walkCore(path.join(repoRoot, 'core'));
+  // Assignment forms only. A tween that ANIMATES letter-spacing (core/gsap-effects.js `expandIn`) is a
+  // motion over the settled value, not a second opinion about what the settled value is.
+  const WRITE = /\.style\.letterSpacing\s*=|setProperty\(\s*['"]letter-spacing['"]/;
+  // The allowlist is a list of REASONS, not of files. A file may only be here if it writes a value it
+  // did not decide.
+  const ALLOWED = {
+    'core/layers/util.js': 'the resolver: trackingCss decides, styleText writes, once',
+    'core/morph.js': 'copies the ALREADY-RESOLVED computed value onto a wrapper (getComputedStyle → wrap), so the glyphs keep their spacing through the morph. It forms no opinion.',
+  };
+  const writers = coreFiles
+    .filter((p) => WRITE.test(fs.readFileSync(p, 'utf8')))
+    .map((p) => path.relative(repoRoot, p).split(path.sep).join('/'))
+    .sort();
+  const rogue = writers.filter((p) => !(p in ALLOWED));
+  ok(`letter-spacing has one writer (rogue: ${rogue.join(', ') || 'none'})`, rogue.length === 0);
+  ok('the resolver is still the writer', writers.includes('core/layers/util.js'));
+
+  // 2. THE BEHAVIOUR TESTS. createKit needs no DOM to build the kit, and styleText needs no real
+  // element: it only assigns onto `el.style`. So the exact string a layer settles on is testable here,
+  // which is what makes "one writer" a property worth having rather than a tidiness argument.
+  const kitFor = (theme, ink) => createKit({
+    theme, inkAt: () => ink, bgWinAt: () => null, ACCENT_BGS: [], trackingFor,
+    splitText: () => null, icon: () => '', extra: [],
+  });
+  const spacingOf = (L, { theme = { type: { optical: true }, palette: { text: '#111111', ink: '#f4f4f4' } }, ink = null } = {}) => {
+    const el = { style: { setProperty() {} } };
+    kitFor(theme, ink).styleText(el, L, 1);
+    return el.style.letterSpacing;
+  };
+  const DARK_GROUND = '#f4ecd0'; // a LIGHT ink → the ground under it is dark
+  const LIGHT_GROUND = '#111111';
+
+  ok('author `tracking` survives the whole pass (#28)', spacingOf({ text: 'A', size: 150, tracking: '0.42em' }) === '0.42em');
+  ok('author `ls` survives the whole pass (#79)', spacingOf({ text: 'A', size: 150, ls: '0.31em' }) === '0.31em');
+  ok('author prop wins over the polarity lift too',
+    spacingOf({ text: 'A', size: 150, ls: '0.31em' }, { ink: DARK_GROUND }) === '0.31em');
+  ok('the size ramp is the default', spacingOf({ text: 'A', size: 120 }) === trackingFor(120));
+  ok('the dark lift reaches the settled value (#388)',
+    spacingOf({ text: 'A', size: 120 }, { ink: DARK_GROUND }) === trackingFor(120, true)
+    && spacingOf({ text: 'A', size: 120 }, { ink: LIGHT_GROUND }) === trackingFor(120));
+  // mono and raw take the older kit rule; pinned so a "tidy-up" cannot quietly re-track code blocks.
+  ok('mono is not optically tracked by the micro rule',
+    spacingOf({ text: 'A', size: 120, font: 'mono' }, { theme: { palette: {} } }) === '-0.03em');
+  ok('raw serif keeps its own fit',
+    spacingOf({ text: 'A', size: 120, font: 'serif', raw: true }) === '0');
+
+  // 3. POLARITY IS NOT THE LAYER'S TO ANSWER WHEN AN EFFECT REPAINTS EVERY GLYPH. `ransom` cuts each
+  // letter onto its own light paper chip, so a ransom layer whose LAYER ink is light is dark-on-light
+  // everywhere the eye can see. The lift must not fire. False is the conservative answer: the polarity
+  // term only ever ADDS, so declining to answer renders exactly as no effect would.
+  ok('paintsOwnGlyphs names ransom', paintsOwnGlyphs({ ransom: true }) && !paintsOwnGlyphs({ text: 'A' }));
+  ok('every GLYPH_PAINTERS key is a layer prop that flips it',
+    GLYPH_PAINTERS.length > 0 && GLYPH_PAINTERS.every((k) => paintsOwnGlyphs({ [k]: true })));
+  ok('a ransom layer over a dark ground takes NO dark lift',
+    spacingOf({ text: 'A', size: 150, ransom: true }, { ink: DARK_GROUND }) === trackingFor(150));
+  ok('a non-ransom layer over the same ground still does',
+    spacingOf({ text: 'A', size: 150 }, { ink: DARK_GROUND }) === trackingFor(150, true));
+  ok('onDark itself is the thing that declines',
+    kitFor({ palette: {} }, DARK_GROUND).onDark({ ransom: true }, 1) === false
+    && kitFor({ palette: {} }, DARK_GROUND).onDark({ text: 'A' }, 1) === true);
 }
 
 // transitions kit: every presentation lands at full visibility (enter(1)); fade-out family exits hidden

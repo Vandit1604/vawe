@@ -11674,6 +11674,164 @@ had it, because that line says HARD in capitals.
 unified surface is invisible to yet another consumer. Fixing it changes existing findings across the
 library, so it wants its own before-and-after run rather than a ride-along.
 
+## #389 — Closing #388: the letter-spacing write happens once, and a second one fails a test
+
+#388 ended with an argument rather than a fix: "anything that writes `letterSpacing` after `styleText`
+will be the third [to discard something]. That is an argument for the write happening once." It is one
+write now.
+
+**What moved.** `core/layers/util.js` gained `trackingCss(L, midT)`, the single resolution of a layer's
+settled letter-spacing. It folds in everything that has an opinion: the author's `tracking`, the author's
+`ls`, the size ramp, the light-on-dark lift, `mono`, `raw`, and the theme's `type.optical` flag.
+`styleText` writes what it returns and nothing else writes the property. The statement in
+`core/layers/text.js` `microType` that had eaten a value twice (#28, then #388) is gone; the pass still
+does its wrap, kerning and ligature work.
+
+**Parity was the hard part, and the rule as SHIPPED is not the rule either site described.** The two
+writers disagreed, and which one won depended on the layer: `microType` skipped `mono` and `raw:true`
+and otherwise applied the optical ramp *unconditionally*, ignoring both the serif case and
+`theme.type.optical` that `styleText` was consulting one line above. `trackingCss` reproduces that split
+exactly rather than picking the tidier of the two rules, because tidying it is a taste decision about
+every serif and every non-optical theme in the library, and it is not part of making the write single.
+`snap-scenes`: 105 identical before, 104 identical after, one changed, and that one is the fix below.
+
+**What now makes a second writer impossible rather than discouraged.** `make lib-test` walks every
+`.js` file under `core/` and fails on any assignment to `.style.letterSpacing` or
+`setProperty('letter-spacing')` outside an allowlist of two, where the allowlist is a list of REASONS:
+the resolver, and `core/morph.js`, which copies an already-resolved computed value onto a wrapper and
+forms no opinion. Adding the statement back to `text.js` was tried and the test named the file. Twelve
+behaviour assertions sit beside it, proving the one resolver really does honour `tracking`, `ls`, the
+ramp, the polarity, `mono` and `raw`, so nobody ever needs a second write to get one of them applied.
+A comment asking for care was tried twice here and lost twice.
+
+## #390 — `onDark` asked the layer, and `ransom` paints every glyph on its own paper
+
+`onDark(L, midT)` answered polarity from the LAYER's resolved ink. `core/ransom.js` cuts each character
+onto its own light paper swatch with dark ink on it, so a ransom headline whose layer colour is light is
+dark-on-light everywhere the eye can see, and the layer read light-on-dark. The dark lift fired on type
+that is not light-on-dark: `ransom-demo` carried roughly +1.5px of extra gap per chip.
+
+**The fix is a refusal, and that is the honest shape.** `GLYPH_PAINTERS` in `core/layers/util.js` names
+the effects that repaint every character against a ground of their own — today, exactly `ransom` — and
+`onDark` returns `false` for a layer that declares one. False is not a guess: the polarity term only ever
+ADDS an optical lift, so declining to answer renders identically to the effect not existing. Answering
+per glyph would be the complete fix and cannot be done from the layer: the tiles are painted after build,
+by an effect that owns them, from a per-glyph table. A conservative correct answer beats a clever wrong
+one. Any future effect that paints its own per-character ground adds its layer prop to that one list.
+
+**Read before and after, frame 27 of `ransom-demo`.** Before, the paper chips of "READ THE" stand apart
+with black showing between several of them and the line runs to x≈1250. After, the chips sit shoulder to
+shoulder the way cut letters glued to a page do, and the line ends about 17px earlier. Signature widths:
+1105.6 → 1093.6 and 1445.1 → 1428.1. It is the only scene in 105 that moved, and it moved back toward
+its pre-lift widths, which is the point.
+
+## #391 — The ninth consumer of a defect that was declared closed
+
+**#380 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug.**
+`beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director` and
+`verify/audit` each grew their own `lowerScene(d)` line at the top of their own file. Every one of them
+is right. The count is the problem: eight identical edits are eight chances to miss the ninth, and the
+ninth was missed. `plan-vs-render` reads its clock through `sceneTiming()`, which read raw `d.cuts`, so
+`brew-launch-act1` (four boundaries, every one of them written as `transitions`, `d.cuts` empty) was
+graded as a film with no cuts at all. `unplanned-junction` could not fire on it. Neither could
+`junction-is-static`, because a cut was not an event. The entry before this one found it and reported it
+rather than smuggling it into another change; this is the fix.
+
+**The fix goes into the shared model, not into the tenth call site.** `sceneTiming()` lowers now, so
+every gate built on it inherits the correct clock and no future consumer has to remember. It also
+returns the lowered scene as `T.scene`, because a gate that reads `d.cuts` off its own copy is reading
+the authored surface and not the rendered one. Three scenes in the library declare boundaries this way
+(`brew-launch-act1`, `gh-wrapped`, `gh-wrapped.expanded`); all three now read their cuts, and
+`gh-wrapped.expanded` also gains the `ridgedBurn` sting at 2.6s in the event list, because a sting is a
+moment the frame provably changes.
+
+**It clones first, and that is not a detail.** `lowerScene` mutates and `delete`s `transitions` off what
+it is handed. That is right for the renderer, which lowers once at the top. It is wrong for a gate: a
+check that rewrites the object it is grading changes what every later check sees, and `sceneTiming()` is
+called from the middle of files that go on reading their own copy afterwards. `core/validate.mjs` had
+already met this and clones; so does this. Lowering is idempotent, so the eight gates that lower for
+themselves pay one copy and nothing else.
+
+**Before and after, over 149 scenes by 4 gates: zero findings moved.** Not because the fix does nothing,
+but because no film that uses `transitions` has an intent sidecar, and the planned half of
+`plan-vs-render` needs one. Proven against a sidecar written for the run: with a beat boundary planted
+at 9.5s, brew's event count goes 72 to 76 and `unplanned-junction` names the real cut at 7.80s the old
+gate could not see. The cut is real in the picture. Frame 231 (7.7s) is the cream ground with "Let's
+change that" blurring out; frame 237 (7.9s) is the orange dotted ground with the type gone. So is
+gh-wrapped's at 5.5s: frame 162 holds "Then June." and 502 mid-blur, frame 168 is a new beat,
+"contributions" over a settled grid.
+
+**One tidy-up refused on purpose.** Counting seams and stings as declared boundaries in
+`no-spectacle-nominated` looks like the same cleanup and is not one. It adds the finding to 16 more
+scenes and re-tunes a trigger that was measured deliberately (24 of 110). How loud an advisory should be
+is a separate decision from what a boundary is, and it does not get made in passing.
+
+**Still not lowering, named rather than left silent** (none of them in this pass's file list):
+`scripts/gates/seam-snap.mjs` is the sharpest. `make seam-check` pulls the frames straddling every
+boundary out of the rendered mp4, and on a `transitions` film it finds no boundaries, so the flash check
+runs and reports nothing on the three films most likely to need it. `scripts/gates/scene-snap.mjs` and
+`scripts/gates/snap-scenes.mjs` sample frames around each cut, so those three films' pixel snapshots
+never straddle their own cuts; fixing either MOVES a committed baseline and has to be its own change.
+`scripts/gates/coverage.mjs` and `scripts/author/coverage-reel.mjs` count which cut styles and sting fx
+the library exercises, and score a unified `zoom` as unused. `scripts/gates/similarity.mjs` builds the
+ledger fingerprint from `stings`, so two films can look more alike than they are.
+`scripts/author/reimagine.mjs` rewrites `blinds` to `wipe` on stings and misses a unified one.
+`scripts/media/beatsync.mjs` needs no fix: it snaps `data.transitions[].at` as a first-class list.
+
+## #390 — Burnt-in captions rendered underneath the platform's own caption strip
+
+`core/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`. `formats/scene/scene.css`
+hardcoded `.hs-cap { bottom: 300px }` and never read it. On `destination:"tiktok"` the bottom chrome is
+`0.302`, which is **580px of a 1920 canvas**, so a caption sat at 300px and rendered UNDER TikTok's own
+caption strip.
+
+Declaring a destination is the ONE thing that is supposed to prevent this. `CLAUDE.md` states the rule
+directly: the safe area is not a property of the shape, 9:16 for a website hero and 9:16 for TikTok are
+the same canvas with different keep-out. And `core/boot.js:315` names `.hs-cap` as the element that
+broke this way before.
+
+Fixed with `max()` in all three caption rules, so a film declaring no destination keeps its 300px
+exactly and `snap-scenes` shows no scene changed.
+
+**Found by inventorying somebody else's captions.** The owner asked whether we could have all of their
+text and caption styles. The answer was that we already ship 20 of their 24 mechanisms and our caption
+timing and contrast are better. The valuable part of the study was not a style we lacked; it was this,
+noticed in passing while comparing.
+
+**What has no gate.** Nothing checks that a caption clears the destination's chrome, and nothing stops a
+headline landing on the caption band. They keep content in the top ~83% and export a caption band per
+skin. That is the real gap and it is a keep-out rule, not a typography one.
+
+## #391 — `letterSpacing` had two writers, and now it has one that cannot become two
+
+#388 recorded that one statement in `core/layers/text.js` had silently discarded two upstream decisions:
+the author's own `tracking` (#28, in 12 shipped scenes) and the dark-ground polarity. Both were fixed by
+threading another argument through, which leaves the trap set for the next writer. Its closing argument
+was that the right shape is one write, not a third comment.
+
+`trackingCss(L, midT)` in `core/layers/util.js` is now the single resolution: author `tracking`, then
+author `ls`, then the micro rule, then the kit rule for mono, raw and group children. `styleText` writes
+what it returns. The statement in `microType` is deleted.
+
+**What makes it stick is not the refactor, it is the test.** `lib-test` walks every `.js` under `core/`
+and FAILS on any `.style.letterSpacing =` or `setProperty('letter-spacing'` outside a two-entry
+allowlist with stated reasons. An animated tween over the settled value is deliberately not matched: a
+motion over a value is not an opinion about it. Proven by re-adding the write and watching three
+assertions fail.
+
+**And the polarity hole, closed conservatively.** `onDark` asked the layer's ink, but `ransom` paints
+dark glyphs on light chips per character, so the lift fired on type that was never light-on-dark.
+Answering per glyph is not possible from the layer, so `paintsOwnGlyphs` refuses instead: the polarity
+term only ever ADDS a lift, so declining renders exactly as if it did not exist. `ransom-demo` is the
+one scene that moved, its chips shrinking back shoulder to shoulder the way cut letters glued to a page
+should sit.
+
+**One honest note carried forward:** the rule as SHIPPED was not the rule either site described.
+`microType` applied the optical ramp unconditionally, ignoring both the serif case and
+`theme.type.optical` that `styleText` was consulting one line above. The resolver reproduces that split
+exactly rather than unifying it, because unifying it would re-track every serif layer and every
+non-optical theme in the library. That is a taste decision somebody should make deliberately.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

@@ -102,18 +102,13 @@ function microType(kit, el, L) {
   if (L.raw) return;
   const size = L.size ?? 96;
   const mono = L.font === 'mono';
-  // Per-size optical tracking (tighter as type scales up) — only when the author set NEITHER
-  // letter-spacing prop. The schema declares two synonyms for this one CSS property, `ls` and
-  // `tracking`, and this guard used to name only `ls`: styleText applied the author's `tracking`
-  // and then this line immediately overwrote it. So `tracking` was accepted, applied, and discarded
-  // one statement later — silently, in 12 shipped scenes. (MISTAKES #28; found by `make conformance`.)
-  // The polarity argument is the other half of the same lesson: a one-argument call here discards what
-  // styleText resolved one statement earlier. #28 was the author's `tracking`; #388 was the light-on-dark
-  // optical correction. Light ink irradiates into the dark counters around it, so the same face reads
-  // heavier and tighter inverted and needs the gaps opened back up at display sizes.
-  if (L.ls == null && L.tracking == null && !mono && kit.trackingFor) {
-    el.style.letterSpacing = kit.trackingFor(size, kit.onDark?.(L, midT(L)) ?? false);
-  }
+  // NO LETTER-SPACING HERE, EVER. This pass used to re-write it one statement after styleText had
+  // resolved it, and that single statement silently discarded two different upstream decisions: the
+  // author's own `tracking` in 12 shipped scenes (MISTAKES #28) and the light-on-dark optical
+  // correction (#388). Both were patched by threading one more argument into this line, which left the
+  // trap set for whoever wrote the third. The resolution now happens exactly once, in `trackingCss` in
+  // core/layers/util.js, and it already knows about mono, `raw`, `ls`/`tracking` and the polarity.
+  // A new opinion about tracking belongs in that function. `make lib-test` fails if it is written here.
   // widow/orphan control: balance headlines (even line lengths), pretty on body (no lone last word).
   if (!mono && !L.split) el.style.textWrap = size >= 40 ? 'balance' : 'pretty';
   // legibility: real kerning + ligatures on display type; crisp rasterization.

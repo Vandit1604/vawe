@@ -17,6 +17,20 @@ export function hexA(hex, a) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
+// GLYPH_PAINTERS — the effects that repaint every CHARACTER against a ground of their own, so the
+// layer's resolved ink is not the ink any glyph is actually drawn in.
+//   • `ransom` (core/ransom.js) cuts each letter as a tile: a dark ink on a light paper swatch, chosen
+//     per glyph from a fixed table. A ransom headline whose LAYER colour is a light one is therefore
+//     dark-on-light everywhere the eye can see, and the layer reads light-on-dark.
+// Polarity questions asked of such a layer get `false`, which is today's rendered behaviour and the
+// conservative direction: the polarity term only ever ADDS an optical lift, so declining to answer
+// leaves the type exactly as it renders with no lift at all. Answering per glyph would be the complete
+// fix, and it cannot be done from here: the tiles are painted after build, by an effect that owns them.
+//
+// Adding an effect that paints its own per-character ground? Add its layer prop to this list.
+export const GLYPH_PAINTERS = ['ransom'];
+export const paintsOwnGlyphs = (L) => !!L && GLYPH_PAINTERS.some((k) => L[k]);
+
 // The props the SHARED KIT reads, for every layer type that calls it — the type styling, the chip box,
 // the decoration pass, the group layout, and a group child's own timing. A prop honoured here is honoured
 // everywhere, which is why it is one flat set and not a per-type one.
@@ -86,7 +100,40 @@ export function createKit(ctx) {
   // onDark(L, midT) — TRUE when this layer's type is light ink on a dark ground at second `midT`. It is
   // the layer's settled colour asked of the palette, and it is one named function rather than an inline
   // expression because more than one place has to ask the same question and get the same answer.
-  const onDark = (L, midT) => inkIsLight(L.color || inkAt(midT) || 'var(--text)');
+  //
+  // It answers about the LAYER's ink, and that is only the ink the glyphs are drawn in while nothing
+  // repaints them. GLYPH_PAINTERS below names the effects for which it is not, and there the honest
+  // answer is "this layer cannot say".
+  const onDark = (L, midT) => (paintsOwnGlyphs(L) ? false : inkIsLight(L.color || inkAt(midT) || 'var(--text)'));
+
+  // trackingCss(L, midT) — THE ONE RESOLUTION of a layer's settled letter-spacing, and the only thing
+  // `styleText` writes into `el.style.letterSpacing`. Everything with an opinion is folded in here:
+  // the author's prop, the size ramp, the light-on-dark lift, mono, `raw`, and the theme's optical flag.
+  //
+  // WHY IT IS ONE FUNCTION. This value used to be written twice: here, and again one statement later by
+  // microType in core/layers/text.js. The second write ate the author's own `tracking` in 12 shipped
+  // scenes (MISTAKES #28) and then ate the light-on-dark polarity (#388). Both were repaired by
+  // threading one more argument into the second writer, which left the trap set for a third. It is one
+  // write now. A new opinion goes in this function, not in a new statement somewhere else.
+  //
+  // `trackingFor` is a RAMP, not a decision — it turns (size, polarity) into ems. The decision is here.
+  function trackingCss(L, midT) {
+    // An explicit `tracking`/`ls` always wins: everything below is a DEFAULT, never an override.
+    // They are two declared names for one CSS property. The old guard in microType named only `ls`,
+    // so a `tracking` the author set was applied and then discarded (MISTAKES #28, #79).
+    if (L.tracking != null) return L.tracking;
+    if (L.ls != null) return L.ls;
+    const size = L.size ?? 96;
+    // The micro-typography path: every text/count layer except mono (tracking is wrong for code) and
+    // `raw:true` (the author asked for no refinements). It takes the optical ramp unconditionally —
+    // it does not consult `theme.type.optical` or the serif case, and that is the rule as SHIPPED,
+    // preserved deliberately. Changing it is a taste decision, not part of making the write single.
+    if (L.font !== 'mono' && !L.raw) return trackingFor(size, onDark(L, midT));
+    // Everything else (mono · raw · a group child built without the text primitive) keeps the older
+    // kit rule: serif sets its own fit, and the ramp applies only where the theme opted in.
+    if (L.font === 'serif') return '0';
+    return theme?.type?.optical ? trackingFor(size, onDark(L, midT)) : '-0.03em';
+  }
 
   function styleText(el, L, midT) {
     const serif = L.font === 'serif', mono = L.font === 'mono', num = L.font === 'num';
@@ -98,12 +145,7 @@ export function createKit(ctx) {
     // `italic:true` slants any face). Non-breaking: omitted → current behaviour.
     el.style.fontStyle = (L.italic != null ? L.italic : serif) ? 'italic' : 'normal';
     el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
-    // `ls` and `tracking` are the same property under two names. `ls` was DECLARED in the schema,
-    // documented as "Letter-spacing (e.g. -0.03em)", used in 18 places across shipped scenes — and
-    // only ever read inside a guard in text.js that suppresses auto-tracking. Setting it removed the
-    // optical default and applied nothing (docs/MISTAKES.md #79). Found by `make layer-props` on its
-    // first run, which is the whole reason that gate exists.
-    // The ink is resolved BEFORE the tracking because the tracking now depends on it. `inkAt(midT)` is
+    // The ink is resolved BEFORE the tracking because the tracking depends on it. `inkAt(midT)` is
     // the engine's own answer to "what colour must type be at this second", and it is chosen for
     // contrast against the ground — so a light answer means a dark ground underneath it, and that is
     // the polarity the optical correction needs. Where there is no bg window to ask (a theme-gradient
@@ -111,15 +153,10 @@ export function createKit(ctx) {
     // falls back to the theme's own text colour, which is the right ground to judge against there.
     const auto = inkAt(midT);
     const layerColor = L.color || auto || 'var(--text)';
-    // An explicit `tracking`/`ls` always wins. This is a DEFAULT, never an override.
-    //
-    // KNOWN GAP, and it is not this file's to close: for a `text`/`count` layer the value written here
-    // is overwritten one statement later. core/layers/text.js build() calls styleText, then microType,
-    // and microType re-writes letter-spacing from the ONE-argument trackingFor with no polarity. So the
-    // correction below currently reaches only the layers microType skips — mono, and `raw:true`. The
-    // one-line fix belongs in microType, and `onDark` is exported on the kit so that it is one line:
-    //   kit.trackingFor(size, kit.onDark(L, (L.start ?? 0) + (L.duration ?? 2) / 2))
-    el.style.letterSpacing = L.tracking ?? L.ls ?? (serif ? '0' : (theme?.type?.optical ? trackingFor(L.size ?? 96, onDark(L, midT)) : '-0.03em'));
+    // THE ONE WRITE. Everything that has an opinion about letter-spacing is folded in trackingCss
+    // below; nothing else in the engine may assign it. `make lib-test` scans core/ and fails on a
+    // second writer, because two writers is not a hypothetical here: it happened twice.
+    el.style.letterSpacing = trackingCss(L, midT);
     el.style.fontSize = (L.size ?? 96) + 'px';
     if (L.w != null) el.style.width = L.w + 'px';
     if (L.align) el.style.textAlign = L.align;
@@ -419,6 +456,8 @@ export function createKit(ctx) {
     extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
-  const api = { ...ctx, hexA, onDark, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
+  // `trackingCss` is exported so anything that needs to KNOW the settled letter-spacing can ask the
+  // one resolver instead of re-deriving it. Reading it is free; writing it is styleText's alone.
+  const api = { ...ctx, hexA, onDark, trackingCss, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
   return api;
 }
