@@ -1,0 +1,38 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 260,
+      "w": 1500,
+      "align": "left",
+      "size": 120,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "Second thoughts, in public.",
+      "typing": 22,
+      "untype": 2,
+      "untypeRate": 44,
+      "caret": true,
+      "caretHold": true,
+      "y": 408
+    }
+  ]
+}

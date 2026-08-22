@@ -1,0 +1,39 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 210,
+      "w": 1500,
+      "align": "center",
+      "size": 160,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "never settles",
+      "split": "char",
+      "preset": "wave",
+      "stagger": 0,
+      "each": 0.55,
+      "phaseStep": 0.45,
+      "speed": 0.6,
+      "y": 447
+    }
+  ]
+}

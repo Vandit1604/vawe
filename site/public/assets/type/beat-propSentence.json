@@ -1,0 +1,125 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 120,
+      "y": 400,
+      "w": 1680,
+      "layout": "row",
+      "wrap": true,
+      "gap": 44,
+      "items": "center",
+      "justify": "flex-start",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "children": [
+        {
+          "type": "text",
+          "text": "One",
+          "size": 170,
+          "weight": 600,
+          "color": "var(--text)",
+          "split": "word",
+          "preset": "colorWave",
+          "presetOpts": {
+            "hold": 0.5,
+            "to": "var(--text)"
+          },
+          "each": 0.7,
+          "anim": "none",
+          "delay": 0,
+          "enterDur": 0.32,
+          "exitDur": 0.2,
+          "out": "fade"
+        },
+        {
+          "type": "text",
+          "text": "JSON",
+          "font": "mono",
+          "size": 34,
+          "weight": 500,
+          "color": "var(--text)",
+          "bg": "var(--surface-2)",
+          "pad": "18px 30px",
+          "radius": 12,
+          "border": "1.5px solid var(--line)",
+          "anim": "pop",
+          "out": "defocus",
+          "delay": 0.08,
+          "enterDur": 0.32,
+          "exitDur": 0.2
+        },
+        {
+          "type": "text",
+          "text": "in, one",
+          "size": 170,
+          "weight": 600,
+          "color": "var(--text)",
+          "split": "word",
+          "preset": "colorWave",
+          "presetOpts": {
+            "hold": 0.5,
+            "to": "var(--text)"
+          },
+          "each": 0.7,
+          "anim": "none",
+          "delay": 0.16,
+          "enterDur": 0.32,
+          "exitDur": 0.2,
+          "out": "fade"
+        },
+        {
+          "type": "text",
+          "text": "video",
+          "font": "mono",
+          "size": 34,
+          "weight": 500,
+          "color": "var(--text)",
+          "bg": "var(--surface-2)",
+          "pad": "18px 30px",
+          "radius": 12,
+          "border": "1.5px solid var(--line)",
+          "anim": "pop",
+          "out": "defocus",
+          "delay": 0.24,
+          "enterDur": 0.32,
+          "exitDur": 0.2
+        },
+        {
+          "type": "text",
+          "text": "out.",
+          "size": 170,
+          "weight": 600,
+          "color": "var(--text)",
+          "split": "word",
+          "preset": "colorWave",
+          "presetOpts": {
+            "hold": 0.5,
+            "to": "var(--text)"
+          },
+          "each": 0.7,
+          "anim": "none",
+          "delay": 0.32,
+          "enterDur": 0.32,
+          "exitDur": 0.2,
+          "out": "fade"
+        }
+      ]
+    }
+  ]
+}

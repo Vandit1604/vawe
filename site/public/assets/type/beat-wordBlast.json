@@ -1,0 +1,59 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "IT CAUGHT",
+      "w": 1600,
+      "align": "center",
+      "size": 260,
+      "weight": 600,
+      "color": "var(--text)",
+      "x": 160,
+      "y": 400,
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0,
+      "motion": [
+        {
+          "t": 0,
+          "scale": 1.5,
+          "opacity": 0,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 0.42,
+          "scale": 1,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 3.7,
+          "scale": 1.04,
+          "ease": "linear"
+        },
+        {
+          "t": 4,
+          "scale": 1.9,
+          "opacity": 0,
+          "ease": "easeInCubic"
+        }
+      ],
+      "motionBlur": true
+    }
+  ]
+}

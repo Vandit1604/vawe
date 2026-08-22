@@ -1,0 +1,43 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 210,
+      "w": 1500,
+      "align": "center",
+      "size": 130,
+      "weight": 800,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "fade",
+      "exitDur": 0.22,
+      "text": "Painted through the letterforms",
+      "enterDur": 0.5,
+      "gradient": {
+        "colors": [
+          "#2563eb",
+          "#8b5cf6",
+          "#06b6d4"
+        ],
+        "animate": "spin",
+        "speed": 0.35
+      },
+      "y": 397
+    }
+  ]
+}

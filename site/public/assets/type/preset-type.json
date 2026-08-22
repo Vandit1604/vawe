@@ -1,0 +1,37 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 210,
+      "w": 1500,
+      "align": "center",
+      "size": 130,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "Type it. Do not fade it in.",
+      "split": "char",
+      "preset": "type",
+      "stagger": 0.055,
+      "each": 0.55,
+      "y": 397
+    }
+  ]
+}

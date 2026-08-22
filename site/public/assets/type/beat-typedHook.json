@@ -1,0 +1,38 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Six months of nothing. Then June.",
+      "x": 368,
+      "y": 459,
+      "w": 1400,
+      "align": "left",
+      "size": 126,
+      "weight": 700,
+      "color": "var(--text)",
+      "ls": "0.04em",
+      "typing": 33,
+      "untype": 3.5,
+      "untypeRate": 66,
+      "caret": true,
+      "caretHold": true,
+      "start": 0.25,
+      "duration": 4,
+      "exitDur": 0
+    }
+  ]
+}
