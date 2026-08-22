@@ -103,7 +103,11 @@
         "highlight",
         "pillKaraoke",
         "weightShift",
-        "clipWipe"
+        "clipWipe",
+        "neonEdge",
+        "kineticSlam",
+        "underlineDraw",
+        "readerFocus"
       ]
     },
     "bg": {

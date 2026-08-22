@@ -328,6 +328,45 @@ is a lie; cut it.
 | `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |
 | `make pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
 
+### Caption styles: eight, and what each one uses to say "here"
+
+`"captionStyle": "<name>"` layers a word-timed treatment on the pop caption layout. The words come
+from `capWords()` (`core/captions.js`): the author's own `words:[{t0,t1}]` when a line carries them,
+otherwise windows distributed by word length, which reads as speech and needs no timing file. Every
+style is a pure function of one word's progress, so a cold seek and a warm one paint the same frame.
+
+Each style carries **three** word states, and a viewer must be able to tell all three apart in a
+single frame: what is coming, what is being said, and what has already been said. A style with only
+two states is a progress bar with no memory. Pick by the channel you want the caption to speak in.
+
+| Style | The channel | Reach for it when |
+|---|---|---|
+| `highlight` | a marker band behind the word | you want the loudest possible read trail |
+| `pillKaraoke` | a pill that fills left to right | the film is playful and the line is short |
+| `weightShift` | type weight, 600 to 700 to 800 | the film is typographic and nothing else should move |
+| `clipWipe` | a line-level accent wipe | the whole line is one thought, not six words |
+| `neonEdge` | light only, never ink | the film is dark and the accent should glow rather than print |
+| `kineticSlam` | size, landing at 1.22 | one word per beat, and the cut is on the word |
+| `underlineDraw` | a 4px rule under the ink | you want a read trail that costs the text no contrast |
+| `readerFocus` | depth: three inks, three scales | a long narrated line, where the eye needs steering, quietly |
+
+**Contrast is not negotiable and it is why these look the way they do.** An inactive word dims by a
+colour mix toward the theme background, **never by opacity**, and the whole line sits on a 78%
+background plate, so the ratio is computed against a known backdrop instead of unknown video. Both
+rules were written after this repo shipped sub-4.5:1 captions. The darkest palette in `themes/` puts
+the dimmest state at 4.8:1, which clears AA with room to spare.
+
+**Know the gap before you trust a green audit.** `make audit` grades elements marked
+`data-layer=critical`, and a caption is not a layer, so **the audit has never measured a caption's
+contrast**. `lib-test` proves each style keeps three distinct states and never reaches for opacity;
+the ratio itself is arithmetic over the theme palette. Neither is a picture. Read a frame.
+
+**The band.** `captionBand()` (`core/safe.js`) describes the strip a caption paints, and the audit
+warns when other content lands there. No style may make that strip taller than the skin it declares,
+so every value that could grow the line is bounded to the `styled` plate's own 14px padding: the
+`neonEdge` halo stops at 14px and the `kineticSlam` overshoot stops at 1.22, which at 64px adds 7px
+a side. A style that wants more has to move the band first, and moving the band moves every scene.
+
 **The trap, in bold, because it has bitten twice.** `music:"auto"` is resolved at **authoring** time by
 `core/audio-select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
 mixer is read as a filename, matches nothing, and plays **silence**. Always

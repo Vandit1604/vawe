@@ -52,3 +52,14 @@
   background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
 .hs-cap.clipWipe .cw.base { color: color-mix(in srgb, var(--text) 76%, var(--bg)); }
 .hs-cap.clipWipe .cw.over { position: absolute; inset: 14px 30px; color: var(--accent); }
+/* wave 2 (neonEdge · kineticSlam · underlineDraw · readerFocus). Three of the four add no rule here:
+   every value they need is an inline prop written on the word span every frame, and a static rule
+   beside them would be a second place to look for the same look. What they DO take from this file is
+   the box they are bounded against: the `styled` plate above pads 14px, and that is the ceiling wave
+   2 keeps its halo and its overshoot inside, so the caption band stays the height core/safe.js
+   CAPTION_SKINS says it is. Change that padding and the bounds in core/captions.js are the second edit.
+   kineticSlam is the exception, because the two ways to make a word bigger are not equivalent: a
+   transform cannot move its neighbours and cannot be given room by its neighbours either, so the
+   settled 4% would sit on the following space. The margin is the room. It is static, so it costs the
+   line one constant re-lay at build and none per frame. */
+.hs-cap.kineticSlam .ku { margin: 0 0.10em; }
