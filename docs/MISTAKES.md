@@ -12147,6 +12147,48 @@ default ladder, identical, and identical again under `TASTE=1`. A legacy film ex
 the day before the rule existed, which is the only version of grandfathering that is not just a
 disabled rule.
 
+## #399 — `gradient` + `split` painted nothing, and a comment said it could not happen
+
+A `text` layer with `gradient` AND `split` rendered an INVISIBLE line. It was live in a shipped film:
+`formats/scene/example-product-promo.json` opens on `Ship faster.` at 210px with `split:"word"`, and the
+first 3 seconds of that film were a subline over an empty frame.
+
+**Root cause: an inheritance assumption, written down as a fact.** `gradientFill`
+(`core/layers/text.js`) paints the container's `background-image`, sets `background-clip:text` and makes
+the glyph fill transparent. `split` then moves every glyph out of the container into `<span class="ku">`
+children, and it runs AFTER the build (`formats/scene/scene.js` calls `core/type.js splitText` once the
+primitive has been built). `color` and `-webkit-text-fill-color` are inherited properties.
+`background-image` is not. So each unit inherited the transparency and none of the paint. The comment
+above the function claimed the split spans "inherit" the fill, which is why nobody looked: the code read
+as if the case had been considered.
+
+**Why no gate saw it.** A transparent glyph still measures as a full-size opaque box. Every DOM check in
+this repo asks about geometry, so the layout audit, the beat sheet's dead-air check and the snap
+signature all passed a blank headline. This is the same shape as #351 and `cp`/`cv`/`bgc`: a property
+that carries a whole class of visual change sitting outside what anything measures.
+
+**Fix: paint the fill per unit, offset back to the container.** `splitFillCss(css, box, offset)` resolves
+the image box against the CONTAINER and shifts it by the unit's own position, so the units sample one
+continuous field instead of restarting the ramp inside every word. The offset is read through
+`offsetLeft`/`offsetTop`, never `getBoundingClientRect`, because the kinetic presets transform the units
+every frame and a rect would move with the animation. It runs in `frame()` rather than `build()` because
+the units do not exist yet at build, and it stays pure in `t`.
+
+Proven on a side-by-side probe: the same line split and unsplit, red-to-blue at 90deg, renders one
+identical sweep in both, for the static, `flow` and `spin` modes and for a `char` split.
+
+**What now catches it: `make lib-test`, asserting on the RESOLVED PAINT and never on the box.** Each unit
+must carry a background-image, the text clip, a transparent fill, and a position equal to minus its own
+offset. Breaking the offset term fails five assertions. Asserting that "the glyphs are on screen" would
+have passed the whole time this bug was live, which is the point.
+
+**Blast radius: one layer in the library.** `gradient` with a split (or the `ransom`/`circle` splits that
+imply one) appears exactly once, in `example-product-promo`. Its pixels change, correctly.
+`snap-scenes` reports 103 of 103 identical and that is a REPORT OF ITS OWN BLINDNESS, not parity: the
+signature's selector is `[id], [data-layer="critical"], [data-start]` and a `.ku` unit span carries none
+of the three, so the units are outside the capture. The scene whose frames provably changed is one the
+gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

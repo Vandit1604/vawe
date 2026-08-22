@@ -74,9 +74,15 @@ export function gradientCss(g, t = 0) {
   return { backgroundImage: `linear-gradient(${g.angle ?? 180}deg, ${cols.join(', ')})`, backgroundSize: '100% 100%', backgroundPosition: '0 0' };
 }
 
-// gradientFill: the gradient text fill via background-clip:text. Applied to the container so it clips
-// across the whole line (incl. split spans, which inherit). Animated modes are re-applied per frame in
-// frame() below; the build only establishes the clip + the t=0 image.
+// gradientFill: the gradient text fill via background-clip:text, on the container. Animated modes are
+// re-applied per frame in frame() below; the build only establishes the clip + the t=0 image.
+//
+// THE CONTAINER IS NOT ENOUGH WHEN THE LAYER IS SPLIT, and this comment used to claim it was. `split`
+// moves every glyph into a child span AFTER this runs (scene.js calls core/type.js splitText post-build),
+// and `background-image` is not an inherited property while `color`/`-webkit-text-fill-color` are. So the
+// units inherited the transparency and none of the paint, and `gradient` + `split` rendered NOTHING —
+// live in a shipped film, and invisible to every gate because a transparent glyph still measures as a
+// full-size opaque box (docs/MISTAKES.md #399). paintSplitUnits below gives each unit its own copy.
 export function gradientFill(el, L) {
   const g = L.gradient;
   const css = gradientCss(g, 0);
@@ -93,6 +99,54 @@ export function gradientFill(el, L) {
   el.style.backgroundClip = 'text';
   el.style.color = 'transparent';
   el.style.webkitTextFillColor = 'transparent';
+}
+
+// splitFillCss(css, box, offset): the fill ONE split unit must carry, resolved in the CONTAINER's
+// coordinates. PURE, and exported so `make lib-test` can assert the resolved paint with no browser —
+// the trap this bug set is that a DOM check passes on transparent glyphs, so geometry proves nothing.
+//
+// The offset is the whole point. A unit painted with the raw gradient restarts the ramp inside every
+// word, which reads as stripes rather than one sweep. Resolving the image box against the container and
+// then shifting it back by the unit's own position makes every unit sample the same continuous field.
+export function splitFillCss(css, { w, h }, { dx, dy }) {
+  // percentages in `background-size` resolve against the box; in `background-position`, against the
+  // slack between box and image. gradientCss only ever emits `<n>% <n>%` and `<n>% 0`, so both parse.
+  const pct = (v, base) => (String(v).trim().endsWith('%') ? (parseFloat(v) / 100) * base : parseFloat(v) || 0);
+  const [sw, sh] = String(css.backgroundSize || '100% 100%').trim().split(/\s+/);
+  const bw = pct(sw, w), bh = pct(sh ?? sw, h);
+  const [px, py] = String(css.backgroundPosition || '0 0').trim().split(/\s+/);
+  const x0 = pct(px, w - bw), y0 = pct(py ?? '0', h - bh);
+  return {
+    backgroundImage: css.backgroundImage,
+    backgroundSize: `${bw.toFixed(2)}px ${bh.toFixed(2)}px`,
+    backgroundPosition: `${(x0 - dx).toFixed(2)}px ${(y0 - dy).toFixed(2)}px`,
+    backgroundRepeat: 'no-repeat',
+    webkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+    webkitTextFillColor: 'transparent',
+  };
+}
+
+// offset of a node in the page's offset chain. Read through offsetLeft/offsetTop and NOT through
+// getBoundingClientRect, because the units are transformed every frame by the kinetic presets: a rect
+// would move with the animation and the fill would swim, an offset does not.
+const offsetXY = (n) => { let x = 0, y = 0; for (let p = n; p; p = p.offsetParent) { x += p.offsetLeft; y += p.offsetTop; } return { x, y }; };
+
+// paintSplitUnits: hand every `.ku` unit its own copy of the container's fill. Runs per frame rather
+// than at build because the units do not exist yet when build() runs, and it stays pure in t: the
+// offsets come from layout, which is fixed once the layer is built.
+function paintSplitUnits(el, L, t) {
+  const units = el.querySelectorAll('.ku');
+  if (!units.length) return;
+  const css = gradientCss(L.gradient, t);
+  if (!css) return;
+  const box = { w: el.clientWidth, h: el.clientHeight };
+  const base = offsetXY(el);
+  for (const u of units) {
+    const o = offsetXY(u);
+    Object.assign(u.style, splitFillCss(css, box, { dx: o.x - base.x, dy: o.y - base.y }));
+  }
 }
 
 // microType: the micro-typography pass — refinements that separate produced from generated, applied to
@@ -145,6 +199,9 @@ export function frame(kit, el, L, t) {
     const css = gradientCss(L.gradient, t);
     if (css) { el.style.backgroundImage = css.backgroundImage; el.style.backgroundPosition = css.backgroundPosition; }
   }
+  // Static fills come through here too: for a split layer the container's paint reaches no glyph, so
+  // this is not a refresh of an already-correct frame, it is the only thing that paints one.
+  if (L.gradient) paintSplitUnits(el, L, t);
   if (!L.typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;

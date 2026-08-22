@@ -51,7 +51,7 @@ import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
-import { typedLen } from '../../core/layers/text.js';
+import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
 import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
@@ -1787,6 +1787,55 @@ ok('beamAngle wraps 0..360', beamAngle(10, 0.5) >= 0 && beamAngle(10, 0.5) < 360
 ok('beamAngle deterministic', beamAngle(1.23, 0.7) === beamAngle(1.23, 0.7));
 ok('shinePos travels -20..120', (() => { const p = shinePos(0.8, 1.6); return p >= -20 && p <= 120; })());
 ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-gradient(from 45.0deg'));
+// ---- gradient + split: the fill each unit carries (core/layers/text.js) --------------------------
+// `gradient` + `split` rendered NOTHING for as long as both existed. gradientFill paints the container
+// and sets the text transparent; splitText then moves every glyph into a child span, and while `color`
+// and `-webkit-text-fill-color` inherit, `background-image` does not. So the glyphs were transparent
+// with no paint of their own, and a shipped film's headline was invisible (docs/MISTAKES.md #399).
+//
+// ASSERT ON THE RESOLVED PAINT, NEVER ON THE BOX. That is the trap the bug set: a transparent glyph
+// still measures as a full-size opaque box, so every DOM-geometry check in this repo passed a blank
+// frame. Each unit must carry an IMAGE, the text clip, and an offset that keeps the ramp continuous.
+{
+  const STATIC = gradientCss({ from: '#ff0000', to: '#0000ff', angle: 90 }, 0);
+  const box = { w: 1000, h: 200 };
+  const at = (dx, dy = 0) => splitFillCss(STATIC, box, { dx, dy });
+  const first = at(0), later = at(400);
+
+  ok('split unit carries its own background-image', /gradient\(/.test(first.backgroundImage));
+  ok('split unit clips the image to its glyphs',
+    first.backgroundClip === 'text' && first.webkitBackgroundClip === 'text');
+  ok('split unit keeps the glyph fill transparent so the image shows through',
+    first.color === 'transparent' && first.webkitTextFillColor === 'transparent');
+  // The container's own paint is NOT the unit's paint. If this ever equals the raw css again, the
+  // per-unit pass has been reduced to a copy and the ramp restarts inside every word.
+  ok('the unit image box is the CONTAINER, sized in px', first.backgroundSize === '1000.00px 200.00px');
+  ok('a unit further along the line is offset back by its own position',
+    first.backgroundPosition === '0.00px 0.00px' && later.backgroundPosition === '-400.00px 0.00px');
+  ok('the offset is the unit position, so the sweep is continuous not per-word',
+    parseFloat(at(250).backgroundPosition) - parseFloat(at(100).backgroundPosition) === -150);
+  ok('a second line offsets vertically too', at(0, 120).backgroundPosition === '0.00px -120.00px');
+
+  // `flow` and `shimmer` size the image past the box and slide it with a PERCENTAGE position, which
+  // resolves against (box - image) and therefore means something different in a unit's smaller box.
+  // Resolving it against the container first is what keeps a moving fill in step across the units.
+  const FLOW = gradientCss({ from: '#ff0000', to: '#0000ff', animate: 'flow', speed: 0.5 }, 1);
+  ok('flow keeps its 200% image, in container px', splitFillCss(FLOW, box, { dx: 0, dy: 0 }).backgroundSize === '2000.00px 200.00px');
+  ok('flow resolves its percentage against the CONTAINER slack', (() => {
+    const p = parseFloat(FLOW.backgroundPosition); // 50% at t=1, speed 0.5
+    return approx(parseFloat(splitFillCss(FLOW, box, { dx: 0, dy: 0 }).backgroundPosition), (p / 100) * (box.w - 2000), 0.01);
+  })());
+  ok('every unit of a flow fill shares one moving field', (() => {
+    const a = parseFloat(splitFillCss(FLOW, box, { dx: 0, dy: 0 }).backgroundPosition);
+    const b = parseFloat(splitFillCss(FLOW, box, { dx: 300, dy: 0 }).backgroundPosition);
+    return approx(a - b, 300, 0.01);
+  })());
+  // spin is a conic gradient at 100% 100%: no slack, so the unit offset is the only shift.
+  const SPIN = gradientCss({ colors: ['#f00', '#0f0', '#00f'], animate: 'spin' }, 2);
+  ok('spin units shift by position alone', splitFillCss(SPIN, box, { dx: 120, dy: 40 }).backgroundPosition === '-120.00px -40.00px');
+
+  ok('splitFillCss is pure', JSON.stringify(at(77, 33)) === JSON.stringify(at(77, 33)));
+}
 // ---- typing / untype character count (core/layers/text.js, pure in local t) -----------------------
 {
   const VIS = 20;
