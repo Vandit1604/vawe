@@ -12189,6 +12189,52 @@ signature's selector is `[id], [data-layer="critical"], [data-start]` and a `.ku
 of the three, so the units are outside the capture. The scene whose frames provably changed is one the
 gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`.
 
+## #400 — A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
+
+Three separate findings, all surfaced by adding four styles to `core/captions.js`. Each one is the same
+shape: a vocabulary with a second, unchecked copy of itself, or a doctrine nothing measures.
+
+**1. The schema enum was a hand-written second copy of `CAP_STYLE_NAMES`.** `formats/scene/schema.json`
+lists the caption styles by hand. Add a style to the registry and the validator rejects it as unknown,
+so the feature is complete, correct, exported, catalogued in `docs/EFFECTS.md`, and unusable. Nothing
+compared the two lists: `schema-drift` has no caption subject at all, and `lib-test` checked only that
+every name has a blurb. The error message is at least honest (`unknown captionStyle "neonEdge" — known:
+highlight, pillKaraoke, weightShift, clipWipe`), which is how this took one render to find rather than
+an afternoon. **The fix** adds the four names, and adds the assertion that should have existed first:
+`lib-test` now fails when the schema enum and the registry disagree, in either direction. Put in
+`lib-test` rather than `schema-drift` because that is the file that already owns "every registry has a
+blurb", and a caption style is not a layer prop.
+
+**2. `weightShift` rendered an already-spoken word identically to one not yet spoken.** It branched on
+`active` alone, so the line said "this word" and "not this word" and never "already read". That is a
+karaoke with no memory: the viewer cannot tell how far through the line the voice is, which is most of
+what a word-timed caption is for. Found by a new assertion, not by eye, and the assertion was written
+for the four NEW styles. It now holds weight 700 at an 88% text-mix for a spoken word, against 600 at
+76% for an upcoming one. **No film moves**: no scene in `formats/scene/` declares `captionStyle` at all,
+which is its own finding and the reason this sat unnoticed.
+
+**3. `make audit` has never measured a caption's contrast, and the contrast doctrine lives only in
+comments.** `core/captions.js` opens with a rule written after this repo shipped sub-4.5:1 captions
+twice: an inactive word dims by a colour mix toward the background, never by opacity. The enforcement
+named in that comment is "the audit's contrast pass". It is not: the audit measures elements marked
+`data-layer=critical` (`verify/audit.mjs:118`), a caption is not a layer, and `.hs-cap` appears once in
+that file, in the clipped-text check. So the doctrine was guarded by a comment claiming a gate that does
+not see the subject. All five probe scenes audit clean, and that proves nothing about their captions.
+**The fix is partial and the limit is stated on purpose**: `lib-test` now asserts, per style, that the
+three word states differ, that no state carries an opacity below 1, and that every colour it names is a
+theme token rather than a literal. That is the doctrine made mechanical. The RATIO is arithmetic over
+the 35 theme palettes, worst case 4.82:1 on `plinth` for the dimmest state, and it was computed, not
+gated. Teaching the audit to judge captions is the real fix and it belongs to whoever owns that file.
+
+**A fourth thing, fixed before it shipped rather than after, and worth the line.** The first
+`kineticSlam` keyed `letter-spacing` alongside its scale, because opening the tracking on impact is what
+the reference does. Tracking is a LAYOUT property. Rewriting it every frame re-lays the line every
+frame, so every word after the current one slides, and a two-line caption can re-wrap mid-word. The
+frame showed it as `theroom` with no gap. `transform` is the only size channel that cannot move its
+neighbours, so the slam is now transform-only, and the settled 4% is paid for by a STATIC margin on
+`.ku` in `formats/scene/scene.css`. The general rule, which is not caption-specific: **a per-frame style
+function may write paint, never layout.**
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

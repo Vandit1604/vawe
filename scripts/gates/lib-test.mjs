@@ -926,6 +926,65 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('captions: weightShift dims via color-mix, never opacity', (() => { const st = CAP_STYLES.weightShift(1, false); return st.opacity === undefined && st.color.includes('color-mix'); })());
   ok('captions: weightShift bump settles to 1', CAP_STYLES.weightShift(1, true).transform === 'scale(1.000)');
   ok('captions: clipWipe hidden at 0, full at 1', CAP_STYLES.clipWipe(0).clipPath.includes('100.00%') && CAP_STYLES.clipWipe(1).clipPath.includes('0.00%'));
+
+  // THE THREE STATES, once per style. A caption style whose upcoming and already-spoken words look
+  // identical is a progress bar with no memory: the viewer cannot tell what has been read from what
+  // is coming. Every style must therefore emit three DISTINCT declarations, and none of the three may
+  // reach for opacity (the contrast doctrine at the top of core/captions.js).
+  // clipWipe is exempt and cannot be tested this way: it is LINE-level, one argument, no word states.
+  const st = (name, u, active) => JSON.stringify(CAP_STYLES[name](u, active));
+  for (const name of CAP_STYLE_NAMES.filter((n) => n !== 'clipWipe')) {
+    const upcoming = st(name, 0, false), current = st(name, 0.5, true), spoken = st(name, 1, false);
+    ok(`captions: ${name} — upcoming, current and spoken all differ`,
+      new Set([upcoming, current, spoken]).size === 3);
+    // `undefined` or a flat 1 both mean "this style does not reach for opacity". PRESETS.highlight
+    // writes 1 authoritatively, which is the opposite of the failure and must not read as one.
+    ok(`captions: ${name} — no state dims by opacity`,
+      [0, 0.5, 1].every((u) => [true, false].every((a) => {
+        const o = CAP_STYLES[name](u, a).opacity;
+        return o === undefined || Number(o) === 1;
+      })));
+    ok(`captions: ${name} — every colour it names is a theme token`,
+      [upcoming, current, spoken].every((s) => !/#[0-9a-f]{3}|rgba?\(|hsla?\(/i.test(s)));
+    ok(`captions: ${name} — pure in u`, st(name, 0.37, true) === st(name, 0.37, true));
+  }
+  // The wave-2 bound that keeps captionBand() honest: nothing may scale past 1.22, which at the
+  // styled skin's 64px stays inside its 14px pad. A style that wants more must move the band first.
+  ok('captions: no style outgrows the caption band', CAP_STYLE_NAMES.every((name) => {
+    for (let u = 0; u <= 1.0001; u += 0.02) for (const a of [true, false]) {
+      const m = /scale\(([\d.]+)\)/.exec(CAP_STYLES[name](u, a).transform || '');
+      if (m && parseFloat(m[1]) > 1.22) return false;
+    }
+    return true;
+  }));
+  ok('captions: neonEdge halo stays on the plate', (() => {
+    for (let u = 0; u <= 1.0001; u += 0.02) {
+      const radii = [...CAP_STYLES.neonEdge(u, true).textShadow.matchAll(/([\d.]+)px/g)].map((m) => +m[1]);
+      if (radii.some((r) => r > 14)) return false;
+    }
+    return CAP_STYLES.neonEdge(0, false).textShadow === 'none';
+  })());
+  ok('captions: underlineDraw rule grows 0 -> 100% and never covers the ink',
+    CAP_STYLES.underlineDraw(0, false).backgroundSize.startsWith('0.0')
+    && CAP_STYLES.underlineDraw(1, false).backgroundSize === '100.0% 4px'
+    && CAP_STYLES.underlineDraw(0.5, true).backgroundPosition === '0 100%');
+  ok('captions: readerFocus orders its three ink levels 76 < 88 < full',
+    CAP_STYLES.readerFocus(0, false).color.includes('76%')
+    && CAP_STYLES.readerFocus(1, false).color.includes('88%')
+    && CAP_STYLES.readerFocus(0.5, true).color === 'var(--text)');
+  // The schema's enum is a hand-written second copy of this vocabulary and nothing compared the two,
+  // so a style added to the registry validated as an unknown name and the feature stayed unreachable.
+  // Checked here rather than in schema-drift, which has no caption subject at all. MISTAKES #400.
+  ok('captions: the schema enum IS the registry', (() => {
+    const sch = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+    const en = sch.fields.captionStyle.enum;
+    return en.length === CAP_STYLE_NAMES.length && CAP_STYLE_NAMES.every((n) => en.includes(n));
+  })());
+  // It must NOT settle to 1 while it is still the current word, or a still shows two states, not three.
+  ok('captions: kineticSlam lands at 1.22 and holds above rest while current',
+    CAP_STYLES.kineticSlam(0, true).transform === 'scale(1.220)'
+    && CAP_STYLES.kineticSlam(1, true).transform === 'scale(1.040)'
+    && CAP_STYLES.kineticSlam(1, false).transform === 'scale(1)');
 }
 
 // ---- shader stings ----
