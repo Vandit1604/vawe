@@ -116,3 +116,6 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 @font-face { font-family: 'Big Shoulders Stencil'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/BigShouldersStencil.woff2') format('woff2'); }
 @font-face { font-family: 'Finlandica Text'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/FinlandicaText.woff2') format('woff2'); }
 @font-face { font-family: 'Datatype'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Datatype.woff2') format('woff2'); }
+@font-face { font-family: 'Stack Sans Headline'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/StackSansHeadline.woff2') format('woff2'); }
+@font-face { font-family: 'Assistant'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Assistant.woff2') format('woff2'); }
+@font-face { font-family: 'Iosevka Charon'; font-weight: 400; font-display: block; src: url('/assets/fonts/IosevkaCharon.woff2') format('woff2'); }

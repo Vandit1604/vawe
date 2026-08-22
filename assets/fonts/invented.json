@@ -1,0 +1,17 @@
+{
+  "StackSansHeadline.woff2": {
+    "family": "Stack Sans Headline",
+    "url": "https://cdn.jsdelivr.net/npm/@fontsource-variable/stack-sans-headline/files/stack-sans-headline-latin-wght-normal.woff2",
+    "license": "OFL/Apache (Google Fonts via Fontsource)"
+  },
+  "Assistant.woff2": {
+    "family": "Assistant",
+    "url": "https://cdn.jsdelivr.net/npm/@fontsource-variable/assistant/files/assistant-latin-wght-normal.woff2",
+    "license": "OFL/Apache (Google Fonts via Fontsource)"
+  },
+  "IosevkaCharon.woff2": {
+    "family": "Iosevka Charon",
+    "url": "https://cdn.jsdelivr.net/npm/@fontsource/iosevka-charon/files/iosevka-charon-latin-400-normal.woff2",
+    "license": "OFL/Apache (Google Fonts via Fontsource)"
+  }
+}

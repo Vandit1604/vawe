@@ -12315,6 +12315,43 @@ neighbours, so the slam is now transform-only, and the settled 4% is paid for by
 `.ku` in `formats/scene/scene.css`. The general rule, which is not caption-specific: **a per-frame style
 function may write paint, never layout.**
 
+## #402 — Every count blueprint in the library is frozen at a non-zero start
+
+`blueprints/kit.mjs:31` writes `countStart` as an ABSOLUTE time. It is a LOCAL one.
+
+So every `kineticHook` and every `statReveal` placed at `start > 0` never counts. The number sits at its
+`from` value for the whole beat. `blueprints/beats-collage.mjs:168` gets the same field right, which is
+why the defect survived: one of the two authors read the contract correctly.
+
+`validate` only WARNS. Nothing else looks. **A frozen counter renders a perfectly plausible frame**, and
+every gate this repo owns samples settled frames, where a counter that never moved and a counter that
+finished are the same picture.
+
+Found by building one film that used the blueprints rather than by any check.
+
+**Seven more defects from the same build, all one line, none fixed** (the agent was scoped to four files
+and reported instead of reaching):
+
+- `core/motion.js:27` erases an `<img>` whose `src` is relative rather than root-relative. No message.
+  `asset-check` passes it, because the file exists; only the browser knows the URL resolved elsewhere.
+- `core/layers/util.js:146` makes the `serif` ROLE italic by default. `make invent-look` puts a GROTESK
+  in that role, so **every invented light-first theme silently obliques its display type.**
+- `core/validate.mjs` accepts `idle` as a string only, while `core/idle.js` documents and accepts an
+  object. The documented form is rejected.
+- `validate` builds the junction table BEFORE `resolveSpectacle`, so a `bg` arrangement the renderer
+  accepts is refused by the schema.
+- `scripts/lib/text.mjs` cannot see a `count` layer's number or an `html` fragment's words, so
+  `make intent` writes needles `inspect` can never find. **Two halves of one feature that disagree**, and
+  the only way to green is to weaken the contract.
+- The engine refuses `ease` on an image layer and `validate` accepts it.
+- `.worktreeinclude` carries neither `dna/ledger.json` nor `scripts/lib/theme-bg.mjs`. So `make ledger`
+  in a worktree reports **"distinct from all 0 logged designs"**, which is a confident green against an
+  empty file, and `make invent-look` crashes outright.
+
+**The pattern across all eight: the engine and the validator disagree, and the validator is the one that
+speaks.** An author is told no by the check and yes by the renderer, or the reverse, and in six of the
+eight nothing says anything at all.
+
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
 <!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->

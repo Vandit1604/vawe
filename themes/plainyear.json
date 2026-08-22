@@ -1,0 +1,154 @@
+{
+  "name": "plainyear",
+  "note": "INVENTED (not selected) by scripts/author/invent-look.mjs from formats/scene/_concepts/gh-wrapped.storyboard.md, seed 41. Stance \"instrument\": days is measured rather than felt, and the frame behaves like a calibrated instrument. Texture: no grain at all: hairlines, tabular figures and a lot of air. The flaw would be visible. Accent darkened from the generated #157ca2 to #0e4f67 after make audit: at 4.2:1 every hero number failed the 7:1 headline target on this ground.",
+  "palette": {
+    "bg": "#f0f4f7",
+    "bg2": "#e4e9eb",
+    "surface": "#dde2e4",
+    "surface2": "#bcc4c9",
+    "line": "rgba(129,133,136,0.14)",
+    "lineStrong": "rgba(129,133,136,0.28)",
+    "text": "#192125",
+    "text2": "#5e6568",
+    "dim": "#8f9599",
+    "ink": "#192125",
+    "accent": "#0e4f67",
+    "accentDim": "rgba(14,79,103,0.16)",
+    "accentGlow": "rgba(14,79,103,0.45)",
+    "up": "#0e4f67",
+    "down": "#cf4232"
+  },
+  "gradient": [
+    "#f0f4f7",
+    "#e5eef3",
+    "#e2e5e8"
+  ],
+  "type": {
+    "sans": "Assistant",
+    "serif": "Stack Sans Headline",
+    "mono": "Iosevka Charon",
+    "num": "Iosevka Charon"
+  },
+  "motion": {
+    "easing": "easeOutQuart",
+    "bounce": 0.02,
+    "settle": 0.45,
+    "enter": 26,
+    "durationScale": 0.9,
+    "stagger": 0.04,
+    "exitRatio": 0.6
+  },
+  "bg": {
+    "accent": "14,79,103",
+    "tint": "214,230,237",
+    "tint2": "192,218,228",
+    "dotLight": "129,133,136",
+    "paperBase": [
+      "#f0f4f7",
+      "#e4e9eb"
+    ],
+    "light": [
+      "#f0f4f7",
+      "#e4e9eb"
+    ],
+    "paper": "#f0f4f7",
+    "softBase": [
+      "#f0f4f7",
+      "#dfe4e6"
+    ],
+    "accentBase": [
+      "#d6e5eb",
+      "#e4e9eb"
+    ],
+    "border": "#818588",
+    "dark": [
+      "#0f1620",
+      "#0a0e15"
+    ],
+    "deep": [
+      "#0f1620",
+      "#080b10"
+    ],
+    "ink": [
+      "#0c121a",
+      "#06090d"
+    ],
+    "inkBase": [
+      "#0f1620",
+      "#0a0e15"
+    ],
+    "darkMesh": [
+      "#10202d",
+      "#0a0e15"
+    ]
+  },
+  "bgDefault": {
+    "preset": "paperDots"
+  },
+  "vars": {
+    "--ink": "#192125",
+    "--paper": "#f0f4f7",
+    "--muted": "#5e6568",
+    "--em": "#0e4f67",
+    "--on-light": "#192125",
+    "--on-dark": "#f0f4f7",
+    "--border": "#818588",
+    "--accent-soft": "rgba(14,79,103,0.16)"
+  },
+  "invented": {
+    "tool": "scripts/author/invent-look.mjs",
+    "storyboard": "formats/scene/_concepts/gh-wrapped.storyboard.md",
+    "subject": "GitHub wrapped \u00b7 Vandit1604 \u00b7 20 Aug 2025 to 20 Aug 2026",
+    "seed": 41,
+    "resolvedSeed": 755485821,
+    "subjectFingerprint": 2447404321,
+    "stance": "instrument",
+    "story": "days is measured rather than felt, and the frame behaves like a calibrated instrument",
+    "texture": "no grain at all: hairlines, tabular figures and a lot of air. The flaw would be visible",
+    "fonts": {
+      "display": {
+        "family": "Stack Sans Headline",
+        "category": "Sans Serif",
+        "variable": true,
+        "weights": [
+          200,
+          300,
+          400,
+          500,
+          600,
+          700
+        ]
+      },
+      "body": {
+        "family": "Assistant",
+        "category": "Sans Serif",
+        "variable": true,
+        "weights": [
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800
+        ]
+      },
+      "mono": {
+        "family": "Iosevka Charon",
+        "category": "Monospace",
+        "variable": false,
+        "weights": [
+          300,
+          400,
+          500,
+          700
+        ]
+      }
+    },
+    "chipGate": {
+      "metric": "OKLab dE*100, 0.62*ground + 0.38*accent",
+      "min": 16
+    },
+    "generated": "2026-08-22"
+  }
+}
