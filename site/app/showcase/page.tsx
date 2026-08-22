@@ -95,6 +95,9 @@ export default function Showcase() {
             </span>
             Six brands. One JSON each.
           </h1>
+          {/* The one fact a clip cannot show. It used to sit on all six cards as the word
+              `reflected`, which is six repeats of one idea; it belongs here once. */}
+          <p className="scsub">Each one reflected from the brand&rsquo;s own site.</p>
 
           <div className="filmgrid">
             <div className="film-hero">

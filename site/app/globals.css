@@ -569,6 +569,10 @@ a{color:inherit;text-decoration:none}
 /* Six items, six cells, and three sizes. A grid of six identical tiles gives the eye nowhere to
    start and reads as a template; sixths let one film be the subject and the rest be the set.
    1 hero at 6/6, 2 at 3/6, 3 at 2/6. No empty cell in any row. */
+/* The one fact the clips cannot state, said once. It sat on all six cards as the word `reflected`,
+   which is one idea repeated six times; here it costs a single line above the work. */
+.scsub{margin:-6px 0 22px;color:var(--ink-2);font-size:15px}
+
 .filmgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:30px 26px}
 .film-hero{grid-column:span 6}
 .filmgrid > .film:nth-child(2),.filmgrid > .film:nth-child(3){grid-column:span 3}
