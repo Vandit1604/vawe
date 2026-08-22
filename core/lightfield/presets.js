@@ -135,6 +135,22 @@ export const PRESETS = {
     // `sheen` is 0, and that is the point of the rewrite: the elements are no longer the dark thing.
     // The ridge is, and the panels are only the bright hairlines between them.
     //
+    // `light` IS `emitted`, AND THE SCHEMA'S OWN NOTE ARGUES FOR THE OTHER ONE. options.js says dodge
+    // is right for "a blind, a colonnade and a wall", and that sentence is about a lit PANEL FACE.
+    // This preset draws no faces: `sheen` is 0, so the only lit cell left is the SEAM, and a seam is
+    // not a surface catching light, it is the gap where the sky itself shows through. The schema's own
+    // test settles it: does this element take light, or give it?
+    //
+    // MEASURED, because the picture was wrong and the words next to it were right. Dodge is
+    // field / (1 - source), so 1.5 times black is still black, and every hairline died the moment it
+    // crossed the dark ridge. The preset promised "the elements run full height, and their seams
+    // become the full-height hairlines the reference has" and the render stopped them at the horizon.
+    // Second-derivative energy across the frame, bottom tenth, against ref-b's own 1.29: 0.31 dodged,
+    // 2.56 emitted. The reference draws its panel lines over the masses; so does this now.
+    //
+    // `seam` fell -0.85 to -0.6 with it, and that is arithmetic rather than taste. Plus-lighter ADDS
+    // where dodge scaled, so the same magnitude paints a brighter line: at -0.85 the striping swing
+    // came out 1.34x the reference, and -0.6 is 1.00x. Block error 18.69 to 18.39.
     // `direction` WAS `center`, and a radial fall could not draw this picture. Measured against the
     // reference at 160x104, the render was 27 units too bright at the top edge (29.9 against 56.8)
     // and 16 too dark at the left edge (39.7 against 23.4) in the same frame, because a radial cannot
@@ -142,7 +158,7 @@ export const PRESETS = {
     // lit band with darkness above and below it and nothing taken off the sides. Every depth and
     // softness pair under it beat every pair under `center`, and the best took the block error from
     // 21.5 to 19.1.
-    shadow: { depth: 0.7, softness: 0.5, direction: 'top-and-bottom', seam: -0.85, seamWidth: 0.025, sheen: 0 },
+    shadow: { light: 'emitted', depth: 0.7, softness: 0.5, direction: 'top-and-bottom', seam: -0.6, seamWidth: 0.025, sheen: 0 },
     pattern: { kind: 'slats', count: 12, jitter: 0.02 },
     envelope: { kind: 'valley', from: 0.42, to: 0.72, jitter: 0.3, anchor: 'bottom', taper: 0, softness: 0.35, mass: 0.93 },
     motion: { kind: 'drift', speed: 0.35, amount: 0.5 },

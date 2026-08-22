@@ -80,9 +80,11 @@ function narrow(schema, kind) {
 // `ready` is the gate, and it is a HUMAN'S judgement rather than a number.
 //
 // The first version of this list gated on "has a reference", which only means a look CAN be measured.
-// ember has a reference and scores 64.2: its reference is black with white-hot flames and the render is
+// ember had a reference and scored 64.2: its reference is black with white-hot flames and the render was
 // a pale field with black wedges, the tonal inverse. Measurable and wrong are not opposites, and
 // shipping the second because of the first is how a library fills up with things nobody would defend.
+// (ember has since left this list altogether. The argument is why `ready` exists and it stands; see the
+// note under LOOKS for where the look itself went.)
 //
 // A look is `ready` when somebody has put it beside its reference, looked, and would stand behind it.
 // The score is evidence for that judgement and never a substitute: `lightfield-check.mjs` prints every
@@ -96,14 +98,22 @@ const LOOKS = [
   // improves is the useful kind of stuck, and it says the next work is layout rather than colour.
   { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg', ready: false,
     blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
-  // READY. Was the tonal inverse of its reference at 64.2 and is now the same construction at 22.2:
-  // black ground, flame spikes climbing left to right. The tips are amber where the reference's are
-  // white-hot, which needs an emitter colour that varies with intensity rather than a dial.
-  { name: 'ember', preset: 'ember', ref: 'refs/ref-a.jpg', ready: true,
-    blurb: 'Spires rising along an envelope, tapered, hot at the base.' },
 ];
 
-// `tide` and `fern` are NOT here, and the reason is worth keeping.
+// `ember` is NOT here, and it left for a different reason than tide and fern did.
+//
+// It was never unmeasured: it carries refs/ref-a.jpg and scored 22.2, and it was READY. The owner
+// looked at the library and did not want the card, which is a taste call and the only kind of call
+// that can retire a look that passes. A row was deleted; a capability was not.
+//
+// WHAT STAYS REACHABLE. `PRESETS.ember` in core/lightfield/presets.js, so
+// `make lightfield PRESET=ember` still builds the field, formats/scene/_lightfield-ember.html still
+// renders, and the flame construction that took three passes to find is still readable as a worked
+// example. WHAT WAS LOST: its row in `make lightfield-check`, because that tool walks this list. A
+// look off this list is unscored, so a later change to the shared shadow or envelope code can move
+// ember's picture and no number will say so. Bringing it back is this row plus nothing else.
+
+// `tide` and `fern` are NOT here either, and their reason is different again.
 //
 // They were invented: no reference, never compared to anything, and `lightfield-check.mjs` reported
 // them as unscored rather than passing. The user looked at the library and said everything except
