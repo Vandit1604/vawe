@@ -182,7 +182,13 @@ export function EffectsBrowser({ index }: { index: Index }) {
               <span className="tag">{f.tag}</span>
               {!f.noPreview && <span className="tag fxtag-live">plays live</span>}
             </h2>
-            <p className="fxintro"><Rich text={f.intro} /></p>
+            {/* THE INTRO IS A DETAIL, NOT A HEADING. 35 families meant 35 paragraphs standing between a
+                person and the names they came to scan, and an index is for FINDING. It is still here,
+                one keystroke away, for the reader who has decided they want it. */}
+            <details className="fxabout">
+              <summary>What this family is for</summary>
+              <p className="fxintro"><Rich text={f.intro} /></p>
+            </details>
             {/* An empty description column is a gap in the registry, not a design decision. Saying
                 so is cheaper than 22 rows each repeating that nobody wrote one. */}
             {f.undescribed > 0 && (
