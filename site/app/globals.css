@@ -527,11 +527,10 @@ a{color:inherit;text-decoration:none}
    so width is the only variable and the point ("one scene, three crops") reads instantly.
    That maths was always right; the beat just never had the width to show it. */
 .aspects{padding:44px 0 8px;border-top:1px solid var(--line);margin-top:20px}
-.aspects-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);
-  align-items:end;margin-bottom:26px}
-.aspects-head h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
-  font-weight:800;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin-top:8px}
-.aspects-head p{color:var(--ink-2);font-size:1.02rem;line-height:1.6;max-width:46ch;align-self:end}
+/* The head lost its paragraph ("rendered 16:9, 9:16 and 1:1 from the same source, in one pass").
+   The three ratio captions and the `--aspect` chip in the foot say it in the product's own words. */
+.aspects > h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
+  font-weight:800;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:8px 0 26px}
 .aspects-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
 
 .trio{display:flex;gap:clamp(10px,1.4vw,18px);align-items:flex-end;justify-content:center;padding:0}
@@ -545,7 +544,6 @@ a{color:inherit;text-decoration:none}
 .trio .ar figcaption{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;
   font-size:11px;color:#fff;background:rgba(15,22,32,.94);padding:3px 8px;border-radius:6px}
 @media (max-width:760px){
-  .aspects-head{grid-template-columns:1fr;row-gap:12px}
   .trio{flex-wrap:wrap;justify-content:flex-start}
   .trio .a169{flex:1 1 100%}
   .trio .a916{flex:0 1 30%}
@@ -555,42 +553,65 @@ a{color:inherit;text-decoration:none}
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
 
-/* premium films */
-.films{padding:44px 0 8px}
-/* same void, same fix as .phead: heading left, lead right */
-.films-head{margin-bottom:30px;display:grid;align-items:end;
-  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:clamp(28px,5vw,72px)}
-.films-head p{grid-column:2;align-self:end;padding-bottom:.4em;max-width:46ch}
-@media (max-width:860px){
-  .films-head{grid-template-columns:1fr;row-gap:12px}
-  .films-head p{grid-column:1;padding-bottom:0}
-}
-.films-head h2{font-size:clamp(1.8rem,3.8vw,2.7rem);line-height:1.02;letter-spacing:-.032em;font-weight:700;margin-bottom:13px;text-wrap:balance}
-.films-head p{color:var(--ink-2);font-size:1.05rem;line-height:1.5}
-.filmgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
-.filmcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-1);
+/* ===== THE FILMS ==========================================================================
+   The page opens on a film, not on type. There is ONE headline and no lead paragraph: the page
+   used to carry a hero head plus a lead, then a second head plus a second lead, which pushed the
+   first film 466px down a 1440-wide screen. The kicker rides inside the h1 so it costs no row.
+
+   The 24px top padding is deliberate and small. This is the first block on the page, so its
+   padding is the gap under the masthead, not a gap between two sections. */
+.films{padding:24px 0 8px}
+.films-h1{font-size:clamp(2.1rem,4.4vw,3.2rem);line-height:1;letter-spacing:-.035em;font-weight:700;
+  margin:0 0 26px;text-wrap:balance}
+.films-h1 .kicker{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.films-h1 .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+/* Six items, six cells, and three sizes. A grid of six identical tiles gives the eye nowhere to
+   start and reads as a template; sixths let one film be the subject and the rest be the set.
+   1 hero at 6/6, 2 at 3/6, 3 at 2/6. No empty cell in any row. */
+.filmgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:30px 26px}
+.film-hero{grid-column:span 6}
+.filmgrid > .film:nth-child(2),.filmgrid > .film:nth-child(3){grid-column:span 3}
+.filmgrid > .film:nth-child(4),.filmgrid > .film:nth-child(5),.filmgrid > .film:nth-child(6){grid-column:span 2}
+
+/* No card. The video already has a frame; a bordered box around it is a second frame doing no
+   work, and six of them in a grid is the "equal cards with a button under each" tell. */
+.film{margin:0}
+.fmedia{aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;border:1px solid var(--line);
+  border-radius:14px;box-shadow:var(--shadow-1);
   transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease)}
-.filmcard:hover{transform:translateY(-5px);box-shadow:var(--shadow-3);border-color:var(--accent-line)}
-.fmedia{aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;border-bottom:1px solid var(--line)}
+.film:hover .fmedia{transform:translateY(-4px);box-shadow:var(--shadow-3);border-color:var(--accent-line)}
 .fmedia video{width:100%;height:100%;object-fit:contain;display:block}
-.filmcard figcaption{padding:18px 20px 20px}
-.fbrand{display:flex;align-items:baseline;gap:11px;font-weight:700;font-size:1.08rem;letter-spacing:-.015em;margin-bottom:7px}
+/* brand · runtime · source, on one line. Everything else the clip says better. */
+.film figcaption{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:13px 2px 0}
+.fbrand{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
 .fdur{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.02em}
-.fline{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-bottom:14px}
-.filmcard .tag{margin-top:0}
-.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:44px;
+.film .srcopen{margin:0 0 0 auto;font-size:11.5px;padding:5px 11px}
+.film .srcopen .srclabel{display:none}
+.film-hero .srcopen .srclabel{display:inline}
+
+.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:52px;
   display:grid;align-items:end;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
   column-gap:clamp(28px,5vw,72px)}
-.cap-lead .num{grid-column:1;grid-row:1}
-.cap-lead h2{grid-column:1;grid-row:2}
-.cap-lead p{grid-column:2;grid-row:2;align-self:end;padding-bottom:.4em;max-width:46ch}
+.cap-lead h2{grid-column:1;font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.03;letter-spacing:-.03em;
+  font-weight:700;text-wrap:balance}
 @media (max-width:860px){
   .cap-lead{grid-template-columns:1fr;row-gap:12px}
-  .cap-lead .num,.cap-lead h2,.cap-lead p{grid-column:1;grid-row:auto;padding-bottom:0}
+  .cap-lead h2{grid-column:1}
 }
-.cap-lead h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.03;letter-spacing:-.03em;font-weight:700;margin-bottom:12px;text-wrap:balance}
-.cap-lead p{color:var(--ink-2);font-size:1.02rem;line-height:1.5}
-@media(max-width:760px){.filmgrid{grid-template-columns:1fr}}
+/* A 1/3-column tile is too narrow for a 16:9 film to stay legible, so the small tier goes to
+   halves before the whole grid goes to one. */
+@media (max-width:900px){
+  .filmgrid > .film:nth-child(n){grid-column:span 3}
+}
+@media (max-width:640px){
+  .filmgrid{gap:22px}
+  .film-hero,.filmgrid > .film:nth-child(n){grid-column:span 6}
+  /* One column, so the caption wraps and `margin-left:auto` strands the chip against the right
+     edge under a left-aligned brand. On a phone the caption is a left-aligned stack. */
+  .film figcaption{row-gap:9px}
+  .film .srcopen{margin-left:0}
+}
 
 /* ===== THE AFFORDANCE RULE ================================================================
    A bordered mono chip on --bg-2 meant two opposite things on the same card: `.tag` was inert
@@ -1447,24 +1468,27 @@ a{color:inherit;text-decoration:none}
    Nine capabilities used to be nine full-width alternating rows, each with a 35-word paragraph
    restating the clip beside it. Nine rows is nine screens to see nine clips. As a grid the whole
    vocabulary is one look, and the entry is a title plus the names you type. */
-.capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:28px 0 0}
-.capcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);
-  box-shadow:var(--shadow-1);transition:box-shadow .25s var(--ease),transform .25s var(--ease)}
-.capcard:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
-.capmedia{aspect-ratio:16/9;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px 26px;padding:28px 0 0}
+/* Same treatment as .film: the clip is framed, the caption is not. Two card systems on one page
+   (bordered tiles here, bare clips above) read as two pages stapled together. */
+.capcard{margin:0}
+.capmedia{aspect-ratio:16/9;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow-1);
+  transition:box-shadow .25s var(--ease),transform .25s var(--ease),border-color .25s var(--ease)}
+.capcard:hover .capmedia{box-shadow:var(--shadow-3);transform:translateY(-4px);border-color:var(--accent-line)}
 .capmedia video{width:100%;height:100%;object-fit:contain;display:block}
-.capcard figcaption{padding:15px 17px 17px}
-.capcard h3{font-size:1rem;font-weight:700;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
-.capcard .tag{margin-top:9px}
+.capcard figcaption{padding:13px 2px 0}
+.capcard h3{font-size:.98rem;font-weight:700;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.capcard .tag{margin-top:8px}
 .capnote{margin:22px 0 4px;font-size:13.5px;line-height:1.6;color:var(--muted);max-width:64ch}
 /* the arsenal link takes the column the cut paragraph used to sit in */
-.cap-lead .cap-index{grid-column:2;grid-row:2;margin-top:0}
+.cap-lead .cap-index{grid-column:2;grid-row:1;margin-top:0}
 @media (max-width:1000px){ .capgrid{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:860px){ .cap-lead .cap-index{grid-column:1;grid-row:auto} }
+@media (max-width:860px){ .cap-lead .cap-index{grid-column:1;grid-row:auto;margin-top:4px} }
 @media (max-width:640px){ .capgrid{grid-template-columns:1fr;gap:18px} }
 /* In a 1/3-width tile the full label wraps to three lines, which is a broken button. The tile is
    already titled and tagged, so the chip only has to say "the source is here, and how long it is". */
-.capcard .srcopen{font-size:11px;gap:6px;padding:6px 10px;margin-top:11px;white-space:nowrap;max-width:100%}
+.capcard .srcopen{font-size:11px;gap:6px;padding:5px 10px;margin-top:10px;white-space:nowrap;max-width:100%}
 .capcard .srcopen .srclabel{display:none}
 .capcard .srcopen .srcmeta{font-size:10.5px;padding-left:8px}
 /* The sticky toolbar is one row on desktop and three on a phone, so a family anchored under it
