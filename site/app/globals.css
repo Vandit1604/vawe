@@ -1200,3 +1200,122 @@ a{color:inherit;text-decoration:none}
 /* browsing shows more of the wall, so the cards get more room than they do beside a panel */
 .pgpage .lgrid { grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 16px; }
 .lheld { margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
+
+/* ===== /type — THE TYPOGRAPHIC VOCABULARY =====================================================
+   The same two-media card /blocks uses (a still, and the real engine behind it on press), sized
+   for a full 16:9 stage rather than a measured block rect: a type specimen has no crop, the frame
+   IS the subject. The still is deliberately a MID-ENTRANCE frame, so a grid of them reads as many
+   different states of arrival instead of the same settled word repeated. */
+.tyintro{display:grid;grid-template-columns:1.35fr .9fr;gap:44px;align-items:start;
+  padding:34px 0 6px;border-top:1px solid var(--line)}
+.tyintro h2{font-size:clamp(24px,2.6vw,34px);letter-spacing:-.02em;margin:0 0 12px}
+.tyintro p{color:var(--ink-2);max-width:56ch;margin:0}
+.tyderived{list-style:none;margin:0;padding:16px 18px;background:var(--bg-2);
+  border:1px solid var(--line);border-radius:var(--r)}
+.tyderived li{font-size:12.5px;color:var(--ink-2);padding:5px 0;border-bottom:1px dashed var(--line);
+  word-break:break-word}
+.tyderived li:last-child{border-bottom:0}
+.tyderived-h{font-size:11px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)!important;
+  font-family:inherit;padding-top:0!important}
+
+/* The filter bar sticks, because the grid is long and the group jump is how you use it. */
+.tybar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  padding:16px 0 14px;margin-top:26px;background:var(--bg);border-bottom:1px solid var(--line)}
+.tysearch{flex:1 1 300px;min-width:0;font:inherit;font-size:15px;padding:10px 14px;
+  border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink)}
+.tysearch:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.tyjump{display:flex;flex-wrap:wrap;gap:6px}
+.tyjump a{font-size:12.5px;color:var(--ink-2);text-decoration:none;padding:6px 11px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.tyjump a:hover{border-color:var(--accent-line);color:var(--accent);background:var(--accent-soft)}
+.tycount{color:var(--muted);font-size:14px;margin:16px 0 0}
+
+.tygroup{padding-top:38px}
+.tyghead{max-width:70ch;margin-bottom:20px}
+.tyghead h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.02em;margin:0 0 8px}
+.tyghead p{color:var(--ink-2);margin:0 0 10px}
+.tysrc{font-size:11.5px;color:var(--muted)}
+/* align-items:start — opening one card's JSON must not stretch the two beside it into tall boxes
+   with a hole in the middle. */
+.tygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;align-items:start}
+
+.tycard{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;box-shadow:var(--shadow-1);display:flex;flex-direction:column;
+  transition:box-shadow .3s var(--ease),border-color .3s}
+.tycard:hover{box-shadow:var(--shadow-2);border-color:var(--accent-line)}
+/* Both media in ONE cell so the live render lands exactly where the poster was: same 16:9 box,
+   same width, so pressing play cannot make the specimen jump. */
+.tythumb{position:relative;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);
+  aspect-ratio:16/9;background:#fff;border-bottom:1px solid var(--line);overflow:hidden}
+.tythumb img,.tythumb .tylive{grid-area:1/1;width:100%;height:100%;display:block}
+.tythumb img{object-fit:cover}
+.tylive{position:relative;overflow:hidden;--sp-scale:1;opacity:0;transition:opacity .25s var(--ease);
+  background:#fff}
+.tylive[data-ready]{opacity:1}
+.tylive-stage{position:absolute;inset:0}
+.tylive .sp-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;display:block;
+  transform-origin:top left;transform:scale(var(--sp-scale))}
+
+/* Play carries a WORD as well as a glyph. On /blocks the icon alone is enough because the card is
+   already a link somewhere; here the press is the only thing the card does, so it says so. */
+.typlay{position:absolute;right:10px;bottom:10px;z-index:2;display:inline-flex;align-items:center;gap:7px;
+  padding:6px 13px 6px 10px;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;
+  color:#fff;background:var(--accent);border:1px solid var(--accent);
+  box-shadow:0 2px 10px rgb(15 23 42 / .18);opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.tycard:hover .typlay,.typlay:focus-visible,.typlay[data-on]{opacity:1}
+.typlay:hover{transform:translateY(-1px)}
+.typlay svg{width:13px;height:13px;fill:currentColor}
+.typlay[data-loading]{cursor:progress;opacity:1}
+.typlay .tyspin{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;
+  transform-origin:center;animation:bspin .75s linear infinite}
+.tyboot{position:absolute;left:0;right:0;bottom:0;height:2px;z-index:2;overflow:hidden;
+  background:color-mix(in oklab,var(--accent) 15%,transparent)}
+.tyboot::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;
+  background:var(--accent);animation:bboot 1.15s var(--ease) infinite}
+@media (prefers-reduced-motion:reduce){
+  .typlay .tyspin{animation:bfade 1.3s ease-in-out infinite}
+  .tyboot::after{width:100%;animation:bfade 1.3s ease-in-out infinite}
+}
+@media (any-hover:none){.typlay{opacity:1}}
+
+.tycard figcaption{padding:16px 17px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+.tyname{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.tyname .mono{font-size:15.5px;font-weight:600;color:var(--ink)}
+.tykind{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tyblurb{margin:0;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.tyask{margin:0;font-size:13px;line-height:1.5;color:var(--ink-2);font-style:italic;
+  border-left:2px solid var(--accent-line);padding-left:11px}
+.typrops{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.typrops li{display:flex;gap:9px;font-size:12px;color:var(--muted);line-height:1.45}
+.typrops .mono{color:var(--ink);flex:0 0 auto}
+/* The caution is the engine's own warning about the preset, not a design opinion added here. */
+.tycaution{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);
+  background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.tycaution b{color:var(--ink)}
+
+.tyjson{margin-top:auto;border-top:1px solid var(--line);padding-top:11px;position:relative}
+.tyjson summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-size:12.5px;color:var(--ink-2);list-style:none}
+.tyjson summary::-webkit-details-marker{display:none}
+.tyjson summary:hover{color:var(--accent)}
+.tylines{color:var(--muted);font-size:11.5px}
+.tyjson pre{margin:11px 0 0;padding:12px 13px;background:var(--bg-2);border:1px solid var(--line);
+  border-radius:10px;overflow-x:auto;font-size:11.5px;line-height:1.6}
+.tycopy{position:absolute;right:8px;bottom:8px;font:inherit;font-size:11.5px;font-weight:600;
+  padding:5px 11px;border-radius:8px;cursor:pointer;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line-2)}
+.tycopy:hover{border-color:var(--accent);color:var(--accent)}
+
+.tycoverage{margin-top:64px;padding:30px 0 10px;border-top:1px solid var(--line)}
+.tycoverage h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.02em;margin:0 0 10px}
+.tycoverage > p{color:var(--ink-2);max-width:66ch;margin:0 0 24px}
+.tycovgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+.tycovgrid > div{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.tycovgrid h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+.tycovgrid p{color:var(--ink-2);font-size:14px;margin:0 0 10px}
+.tycovlist{font-size:11.5px;color:var(--muted);line-height:1.7;word-break:break-word}
+
+@media (max-width:900px){
+  .tyintro{grid-template-columns:1fr;gap:22px}
+  .tybar{position:static}
+}
