@@ -12,6 +12,11 @@
 
 # Licensed faces. Without these the engine substitutes silently and every render is subtly wrong.
 assets/fonts/local/**
+# THE VENDORED WEBFONTS TOO. `assets/fonts/*.woff2` is gitignored (make fonts downloads it), and this
+# file listed only `local/**`, so an agent in a fresh worktree rendered EVERY scene in a fallback serif
+# and nothing said so. It found the defect by reading its own contact sheet and mistaking it for a copy
+# problem. That is the silent-substitution class this repo logs most, wearing the worktree's clothes.
+assets/fonts/*.woff2
 
 # The scene library. 108 of 149 scenes are gitignored, so without this a worktree cannot gate the
 # library at all — and says so by finding nothing.
