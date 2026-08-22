@@ -426,7 +426,7 @@ wrong page for a full-bleed field: the field is `position:absolute;inset:0` and 
 |---|---|---|---|---|
 | `formats/scene/_lightfield-ref.html` | orange, magenta, red, navy fill | slats, 58 | dark seam, lit face | none |
 | `formats/scene/_lightfield-ember.html` | orange, scarlet, oxblood, black | slats, 40 | bright hairline seam, EMITTED face | ramp, from the bottom, tapered to points |
-| `formats/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, no face | valley, drawn as a field-wide `mass` |
+| `formats/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, EMITTED, no face | valley, drawn as a field-wide `mass` |
 | `formats/scene/_lightfield-tide.html` | ice blue, steel, navy, black | rings, 120 | dark seam, lit face | none |
 | `formats/scene/_lightfield-fern.html` | acid green, jade, forest, black | shards, 34 | dark seam, lit face | none |
 

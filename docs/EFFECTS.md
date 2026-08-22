@@ -752,7 +752,6 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `bands` | — |
 | `colonnade` | — |
 | `crt` | — |
-| `ember` | — |
 | `spectrum` | — |
 
 ## Lightfield dials  `[generator]`
@@ -790,4 +789,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_522 effects across 35 families. Regenerate: `make effects`._
+_521 effects across 35 families. Regenerate: `make effects`._
