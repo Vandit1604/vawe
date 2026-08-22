@@ -17,27 +17,32 @@ export const metadata: Metadata = {
 
 /* A GALLERY, not an essay.
  *
- * This page used to carry about 620 words of prose: a paragraph under the hero, a paragraph under
- * each of two section heads, a 30-word description on every film card, and a 35-word paragraph
- * beside each of nine capability clips laid out as nine full-width alternating rows. Nine rows of
- * picture-plus-paragraph is nine screens to see nine clips, and every one of those paragraphs said
- * in words what the clip beside it was already showing.
+ * This page has been cut twice. It carried ~620 words, then ~450, and the failure both times was
+ * the same shape: prose in front of the work. Two headlines each with a paragraph beside it, then
+ * a sentence under every film narrating what the clip already shows. At 1440 the first film sat
+ * 466px down the page, so a visitor scrolled past a screen of type to reach a page of films.
  *
- * So the clips became the content. The capability rows are a grid: the whole vocabulary is visible
- * at once, and each entry is a title and the names you type. What is left in prose is the part a
- * clip genuinely cannot say, which is what this page CANNOT show you (two scenes whose source may
- * not be published) and where to go next.
+ * So: ONE headline, no lead paragraph, and the first film opens at full measure directly under it.
+ * A film's caption is its brand, its runtime and its source. The clip is the description.
+ *
+ * The film grid is scale-contrasted rather than six equal tiles: one hero at full width, then two
+ * at half, then three at a third. Six items, six cells, no empty cell, and the eye has somewhere
+ * to start. The cards lost their border too. A bordered box around a video that already has its
+ * own frame is a second frame doing nothing.
+ *
+ * What is left in prose is the part a clip genuinely cannot say: what this page CANNOT show you
+ * (two scenes whose source may not be published) and where to go next.
  */
 
-type Film = { slug: string; brand: string; dur: string; line: string; tag: string };
+type Film = { slug: string; brand: string; dur: string };
 
 const FILMS: Film[] = [
-  { slug: "linear-launch", brand: "Linear", dur: "0:50", line: "An agent session runs live, then Start building.", tag: "reflected · dark + iris" },
-  { slug: "stripe", brand: "Stripe", dur: "0:45", line: "The gradient mesh, one tap, payment complete.", tag: "reflected · gradient mesh" },
-  { slug: "argus-launch", brand: "Argus", dur: "0:23", line: "Posting into the void becomes growth on X.", tag: "reflected · white + cobalt" },
-  { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "A wall of AI tools resolves into one memory file.", tag: "reflected · white + ember" },
-  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30", line: "Buyers ask Reddit. This maps where you appear.", tag: "reflected · white + orange" },
-  { slug: "plinth-ad", brand: "Plinth", dur: "0:27", line: "An MCP endpoint that meters itself, and pays out.", tag: "reflected · white + cobalt" },
+  { slug: "linear-launch", brand: "Linear", dur: "0:50" },
+  { slug: "creed-launch", brand: "Creed", dur: "0:53" },
+  { slug: "stripe", brand: "Stripe", dur: "0:45" },
+  { slug: "argus-launch", brand: "Argus", dur: "0:23" },
+  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30" },
+  { slug: "plinth-ad", brand: "Plinth", dur: "0:27" },
 ];
 
 // `scene` names the JSON the "view source" link opens, defaulting to `showcase-<src>`. It is set to
@@ -48,58 +53,60 @@ const FILMS: Film[] = [
 type Cap = { title: string; tag: string; src: string; scene?: string | null };
 
 const CAPS: Cap[] = [
-  { title: "Type that moves like it reads.", tag: "preset: up · decode · gradient", src: "type" },
-  { title: "Cuts with intent.", tag: "cut: whip · punch · spin · zoom", src: "cuts" },
-  { title: "GPU stings between beats.", tag: "sting: flash · glitch · scan · ripple", src: "stings" },
-  { title: "Charts that draw themselves.", tag: "block: lineChart · statBig · kpiRow", src: "data" },
-  { title: "Product demos, rebuilt.", tag: "block: browserFrame · cursor · toast", src: "ui" },
-  { title: "One frame, ten grades.", tag: "filter: thermal · nightVision · filmNoir", src: "looks", scene: "looks" },
-  { title: "Ransom notes, set per frame.", tag: "ransom: paper · color · sprites", src: "ransom", scene: null },
-  { title: "Ordered dither, baked cold.", tag: "canvasFx: dither · bayer", src: "dither", scene: "ditherkit" },
-  { title: "Gradient fields, downscaled offline.", tag: "image: ken burns · radius", src: "gradients", scene: null },
+  { title: "Kinetic type", tag: "preset: up · decode · gradient", src: "type" },
+  { title: "Cuts", tag: "cut: whip · punch · spin · zoom", src: "cuts" },
+  { title: "GPU stings", tag: "sting: flash · glitch · scan · ripple", src: "stings" },
+  { title: "Charts that draw", tag: "block: lineChart · statBig · kpiRow", src: "data" },
+  { title: "Product demos", tag: "block: browserFrame · cursor · toast", src: "ui" },
+  { title: "Grades", tag: "filter: thermal · nightVision · filmNoir", src: "looks", scene: "looks" },
+  { title: "Ransom notes", tag: "ransom: paper · color · sprites", src: "ransom", scene: null },
+  { title: "Ordered dither", tag: "canvasFx: dither · bayer", src: "dither", scene: "ditherkit" },
+  { title: "Gradient fields", tag: "image: ken burns · radius", src: "gradients", scene: null },
 ];
 
+function FilmTile({ film }: { film: Film }) {
+  return (
+    <figure className="film">
+      <div className="fmedia">
+        <Clip src={`/assets/films/${film.slug}.mp4`} poster={`/assets/films/${film.slug}.jpg`} />
+      </div>
+      <figcaption>
+        <span className="fbrand">{film.brand}</span>
+        <span className="fdur">{film.dur}</span>
+        <SourceViewer name={film.slug} lines={lineCount(film.slug)} />
+      </figcaption>
+    </figure>
+  );
+}
+
 export default function Showcase() {
+  const [hero, ...rest] = FILMS;
+
   return (
     <div className="shell">
       <Header active="showcase" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
-        <section className="phead">
-          <span className="kicker">
-            <span className="dot" /> showcase
-          </span>
-          <h1>What one JSON can render.</h1>
-          <p>Every clip on this page is a single scene file. Open the source on any of them.</p>
-        </section>
-
+        {/* One headline, no lead. The film below it is the lead. */}
         <section className="films">
-          <div className="films-head">
-            <h2>Six brands, six films.</h2>
-            <p>Each one authored as one JSON scene from the brand&apos;s own site.</p>
-          </div>
+          <h1 className="films-h1">
+            <span className="kicker">
+              <span className="dot" /> showcase
+            </span>
+            Six brands. One JSON each.
+          </h1>
+
           <div className="filmgrid">
-            {FILMS.map((f) => (
-              <figure className="filmcard" key={f.slug}>
-                <div className="fmedia">
-                  <Clip src={`/assets/films/${f.slug}.mp4`} poster={`/assets/films/${f.slug}.jpg`} />
-                </div>
-                <figcaption>
-                  <div className="fbrand">
-                    {f.brand}
-                    <span className="fdur">{f.dur}</span>
-                  </div>
-                  <div className="fline">{f.line}</div>
-                  <span className="tag">{f.tag}</span>
-                  <SourceViewer name={f.slug} lines={lineCount(f.slug)} />
-                </figcaption>
-              </figure>
+            <div className="film-hero">
+              <FilmTile film={hero} />
+            </div>
+            {rest.map((f) => (
+              <FilmTile film={f} key={f.slug} />
             ))}
           </div>
         </section>
 
         <div className="cap-lead">
-          <div className="num">the vocabulary</div>
           <h2>And every part, on its own.</h2>
           {/* Nine clips are the tour, not the vocabulary: the engine registers 518 effects. An
               author needs the index open beside them, so it gets the strongest link on the page. */}
@@ -107,7 +114,7 @@ export default function Showcase() {
             <span className="cap-index-n">{EFFECTS.total}</span>
             <span>
               <b>Every effect, indexed</b>
-              <span>{EFFECTS.families} families, searchable, with the JSON that uses each one.</span>
+              <span>{EFFECTS.families} families, with the JSON for each.</span>
             </span>
             <span className="cap-index-go" aria-hidden="true">→</span>
           </Link>
@@ -134,20 +141,15 @@ export default function Showcase() {
         </div>
 
         <p className="capnote">
-          Two of these ship without their source. The gradient and ransom packs are licensed for use,
-          not for redistribution, so the films are here and the scene files are not.
+          Two ship without source. The gradient and ransom packs are licensed for use, not for
+          redistribution.
         </p>
 
         {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
             wide, so the one thing it claims to prove (same scene, three crops) was unprovable.
             Three ratios side by side need the whole measure. */}
         <div className="aspects">
-          <div className="aspects-head">
-            <div>
-              <h2>One scene, every ratio.</h2>
-            </div>
-            <p>Rendered 16:9, 9:16 and 1:1 from the same source, in one pass.</p>
-          </div>
+          <h2>One scene, every ratio.</h2>
           <div className="trio">
             <figure className="ar a169">
               <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
@@ -175,9 +177,6 @@ export default function Showcase() {
           <div className="hero-cta">
             <Link className="btn btn-primary" href="/editor">
               Try the editor
-            </Link>
-            <Link className="btn btn-ghost" href="/">
-              ← Back home
             </Link>
           </div>
         </section>
