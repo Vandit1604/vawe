@@ -1,0 +1,35 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 510,
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "<svg viewBox=\"0 0 46 24\" width=\"900\" height=\"470\" fill=\"none\" style=\"display:block\"><path d=\"M1 12 Q7 1 12 12 T23 12 T34 12 T46 4\" stroke=\"var(--accent)\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>",
+      "split": "path",
+      "preset": "draw",
+      "stagger": 0.05,
+      "each": 2.2,
+      "y": 305,
+      "presetOpts": {
+        "ease": "easeInOutSine"
+      }
+    }
+  ]
+}

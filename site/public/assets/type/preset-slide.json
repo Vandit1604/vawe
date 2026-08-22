@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 210,
+      "w": 1500,
+      "align": "center",
+      "size": 140,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "One JSON in. One video out.",
+      "split": "word",
+      "preset": "slide",
+      "stagger": 0.05,
+      "each": 0.55,
+      "presetOpts": {
+        "dir": "right",
+        "dist": 160
+      },
+      "y": 386
+    }
+  ]
+}

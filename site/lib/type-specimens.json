@@ -1,0 +1,633 @@
+{
+  "_generated": "node scripts/site/type-specimens.mjs — do not hand-edit",
+  "_derivedFrom": [
+    "core/type.js · PRESETS + PRESET_BLURBS",
+    "core/layers/text.js · PROPS (through the generated formats/scene/schema.json)",
+    "blueprints/index.mjs · BEATS + REQUESTS (+ the registry comments, via blueprints-catalog.mjs)"
+  ],
+  "counts": {
+    "specimens": 39,
+    "presetsInEngine": 27,
+    "presetsShown": 27,
+    "beatsInEngine": 17,
+    "beatsShown": 3
+  },
+  "coverage": {
+    "textPropsNotShown": [
+      "fit",
+      "fitH",
+      "font",
+      "h",
+      "maxLines",
+      "raw",
+      "size",
+      "text",
+      "w",
+      "weight"
+    ],
+    "beatsNotShown": [
+      "kineticHook",
+      "statReveal",
+      "cardCascade",
+      "chipGrid",
+      "terminalReveal",
+      "screenDive",
+      "logoLockup",
+      "logoReveal",
+      "verdictProof",
+      "ctaEnd",
+      "morphButton",
+      "slotSwap",
+      "recordedPan",
+      "echoRing"
+    ]
+  },
+  "groups": [
+    {
+      "id": "reveal",
+      "title": "Reveal a line",
+      "intent": "The line arrives and settles. This is the default job of kinetic type, and most of the vocabulary lives here.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-up",
+          "label": "up",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "words/chars rise into place — the default kinetic headline",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.86,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 132,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Nothing. Then June.\",\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 463\n}"
+        },
+        {
+          "id": "preset-down",
+          "label": "down",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "words/chars drop into place from above — the mirror of `up`",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.61,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"It did not restart. It caught.\",\n  \"split\": \"word\",\n  \"preset\": \"down\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-riseClip",
+          "label": "riseClip",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "mask-rise reveal",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.7,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"26 lines. Somebody else's repo.\",\n  \"split\": \"word\",\n  \"preset\": \"riseClip\",\n  \"stagger\": 0.05,\n  \"each\": 0.8,\n  \"y\": 397\n}"
+        },
+        {
+          "id": "preset-blur",
+          "label": "blur",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "resolve out of blur — calm, premium",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.75,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Six months of silence, then one commit.\",\n  \"split\": \"word\",\n  \"preset\": \"blur\",\n  \"stagger\": 0.05,\n  \"each\": 0.8,\n  \"presetOpts\": {\n    \"px\": 30\n  },\n  \"y\": 408\n}"
+        },
+        {
+          "id": "preset-focus",
+          "label": "focus",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.77,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Read the frame, not the file.\",\n  \"split\": \"word\",\n  \"preset\": \"focus\",\n  \"stagger\": 0.05,\n  \"each\": 0.9,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-slide",
+          "label": "slide",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "slides in from one side (`dir`) — pair it with the opposite exit",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.61,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"One JSON in. One video out.\",\n  \"split\": \"word\",\n  \"preset\": \"slide\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"presetOpts\": {\n    \"dir\": \"right\",\n    \"dist\": 160\n  },\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-skew",
+          "label": "skew",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "italic shear that straightens as it lands — editorial, sporty",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.61,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"The cut serves the emotion first.\",\n  \"split\": \"word\",\n  \"preset\": \"skew\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 408\n}"
+        },
+        {
+          "id": "preset-fall",
+          "label": "fall",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "falls from above under gravity and lands with a small squash",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.57,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Every layer lands somewhere.\",\n  \"split\": \"word\",\n  \"preset\": \"fall\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-type",
+          "label": "type",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "typewriter hard on/off, no transform — terminals, timers, code",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.99,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Type it. Do not fade it in.\",\n  \"split\": \"char\",\n  \"preset\": \"type\",\n  \"stagger\": 0.055,\n  \"each\": 0.55,\n  \"y\": 397\n}"
+        }
+      ]
+    },
+    {
+      "id": "punctuate",
+      "title": "Punctuate a word",
+      "intent": "One word carries the beat. These land harder than a reveal, so they cost their welcome fast: one per film, on the word that deserves it.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-scale",
+          "label": "scale",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "punch in from small (overshoot)",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.77,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 170,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Then it caught.\",\n  \"split\": \"char\",\n  \"preset\": \"scale\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 441\n}"
+        },
+        {
+          "id": "preset-stretch",
+          "label": "stretch",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "horizontal smear that snaps true — impact words",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.99,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Wider than the frame.\",\n  \"split\": \"char\",\n  \"preset\": \"stretch\",\n  \"stagger\": 0.05,\n  \"each\": 0.8,\n  \"y\": 397\n}"
+        },
+        {
+          "id": "preset-shadow",
+          "label": "shadow",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "a long poster shadow collapses as the word settles — poster statements",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.75,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 170,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"It has weight.\",\n  \"split\": \"char\",\n  \"preset\": \"shadow\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 441\n}"
+        },
+        {
+          "id": "preset-swing",
+          "label": "swing",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "each unit hinges from its top edge and swings upright — playful, short words",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.79,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 150,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Hung on one word.\",\n  \"split\": \"char\",\n  \"preset\": \"swing\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 453\n}"
+        },
+        {
+          "id": "preset-bounce",
+          "label": "bounce",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "springy bounce in — playful brands only",
+          "caution": "springy bounce in — playful brands only",
+          "ask": null,
+          "props": null,
+          "poster": 0.93,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"It lands, then settles.\",\n  \"split\": \"char\",\n  \"preset\": \"bounce\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 408\n}"
+        },
+        {
+          "id": "preset-elastic",
+          "label": "elastic",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "elastic scale pop with visible wobble — playful brands only",
+          "caution": "elastic scale pop with visible wobble — playful brands only",
+          "ask": null,
+          "props": null,
+          "poster": 0.97,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 115,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Overshoot, then correct.\",\n  \"split\": \"char\",\n  \"preset\": \"elastic\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 414\n}"
+        },
+        {
+          "id": "preset-flip",
+          "label": "flip",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "3D flip-up per unit, letters somersault into place — `axis` picks the hinge",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.86,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 135,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Turn the claim over.\",\n  \"split\": \"char\",\n  \"preset\": \"flip\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 462\n}"
+        },
+        {
+          "id": "preset-tilt",
+          "label": "tilt",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "3D tilt-in",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.88,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Off axis, on purpose.\",\n  \"split\": \"char\",\n  \"preset\": \"tilt\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 397\n}"
+        },
+        {
+          "id": "preset-unfold",
+          "label": "unfold",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "opens from edge-on about its left hinge, a panel turning to face you — premium",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.7,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 170,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Open it out.\",\n  \"split\": \"char\",\n  \"preset\": \"unfold\",\n  \"stagger\": 0.05,\n  \"each\": 0.55,\n  \"y\": 441\n}"
+        }
+      ]
+    },
+    {
+      "id": "resolve",
+      "title": "Resolve out of noise",
+      "intent": "The word is wrong on arrival and corrects itself. The satisfying part is the correction, so give it room to be seen.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-decode",
+          "label": "decode",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "scramble→settle, techy",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 1.04,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 150,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Resolving out of noise.\",\n  \"split\": \"char\",\n  \"preset\": \"decode\",\n  \"stagger\": 0.045,\n  \"each\": 0.9,\n  \"y\": 375\n}"
+        },
+        {
+          "id": "preset-chroma",
+          "label": "chroma",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "R/G/B ghosts split apart and converge to a crisp glyph",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.75,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"The colour separates, then agrees.\",\n  \"split\": \"word\",\n  \"preset\": \"chroma\",\n  \"stagger\": 0.05,\n  \"each\": 0.9,\n  \"y\": 408\n}"
+        }
+      ]
+    },
+    {
+      "id": "paint",
+      "title": "Paint the words",
+      "intent": "The glyphs hold still and the colour does the moving. Nothing travels, so these sit under a camera move or a cut without fighting it.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-gradient",
+          "label": "gradient",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "gradient sweeps through letterforms",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 2.05,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Painted through the glyphs.\",\n  \"split\": \"word\",\n  \"preset\": \"gradient\",\n  \"stagger\": 0.05,\n  \"each\": 1.6,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-highlight",
+          "label": "highlight",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "marker highlight sweep",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.84,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"The one word that matters.\",\n  \"split\": \"word\",\n  \"preset\": \"highlight\",\n  \"stagger\": 0.05,\n  \"each\": 1.1,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "preset-underline",
+          "label": "underline",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "underline draws on",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 0.84,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Draw a line under it.\",\n  \"split\": \"word\",\n  \"preset\": \"underline\",\n  \"stagger\": 0.05,\n  \"each\": 1.1,\n  \"y\": 397\n}"
+        },
+        {
+          "id": "preset-colorWave",
+          "label": "colorWave",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 1.01,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Colour travels word by word.\",\n  \"split\": \"word\",\n  \"preset\": \"colorWave\",\n  \"stagger\": 0.22,\n  \"each\": 0.8,\n  \"y\": 386\n}"
+        }
+      ]
+    },
+    {
+      "id": "ambient",
+      "title": "Never settle",
+      "intent": "A loop, not an entrance. These have no end state, so they are ambient only: never put a line the viewer has to read inside one.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-wave",
+          "label": "wave",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "sinusoidal wave across units — a LOOP that never settles; ambient only",
+          "caution": "sinusoidal wave across units — a LOOP that never settles; ambient only",
+          "ask": null,
+          "props": null,
+          "poster": 1.85,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 160,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"never settles\",\n  \"split\": \"char\",\n  \"preset\": \"wave\",\n  \"stagger\": 0,\n  \"each\": 0.55,\n  \"phaseStep\": 0.45,\n  \"speed\": 0.6,\n  \"y\": 447\n}"
+        },
+        {
+          "id": "preset-shimmerWave",
+          "label": "shimmerWave",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "looping light wave (per-unit) — a 3D crest travelling across the word; never settles",
+          "caution": "looping light wave (per-unit) — a 3D crest travelling across the word; never settles",
+          "ask": null,
+          "props": null,
+          "poster": 2.2,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 108,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"a surface, not a sentence\",\n  \"split\": \"char\",\n  \"preset\": \"shimmerWave\",\n  \"stagger\": 0,\n  \"each\": 0.55,\n  \"phaseStep\": 0.12,\n  \"speed\": 0.5,\n  \"y\": 477\n}"
+        }
+      ]
+    },
+    {
+      "id": "stroke",
+      "title": "Draw it instead of setting it",
+      "intent": "The units are SVG strokes rather than glyphs, so a mark, a signature or a chart line writes itself on.",
+      "source": "core/type.js · PRESETS",
+      "specimens": [
+        {
+          "id": "preset-draw",
+          "label": "draw",
+          "kind": "preset",
+          "source": "core/type.js · PRESETS",
+          "blurb": "stroke draw-on for SVG paths",
+          "caution": null,
+          "ask": null,
+          "props": null,
+          "poster": 1.4,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 510,\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"<svg viewBox=\\\"0 0 46 24\\\" width=\\\"900\\\" height=\\\"470\\\" fill=\\\"none\\\" style=\\\"display:block\\\"><path d=\\\"M1 12 Q7 1 12 12 T23 12 T34 12 T46 4\\\" stroke=\\\"var(--accent)\\\" stroke-width=\\\"2\\\" stroke-linecap=\\\"round\\\"/></svg>\",\n  \"split\": \"path\",\n  \"preset\": \"draw\",\n  \"stagger\": 0.05,\n  \"each\": 2.2,\n  \"y\": 305,\n  \"presetOpts\": {\n    \"ease\": \"easeInOutSine\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "id": "mechanics",
+      "title": "Set it by hand",
+      "intent": "Below the presets, a text layer has its own mechanics: how the characters arrive, how the line is cut up, what paints the glyphs. These are props on the layer, not a preset you name.",
+      "source": "core/layers/text.js · PROPS",
+      "specimens": [
+        {
+          "id": "mech-typing",
+          "label": "typing + caret",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "Characters arrive at a rate you set in characters per second, with a caret trailing the reveal. Pure in the frame number, so it seeks.",
+          "caution": "A typing line is real time you are spending. Past about eight words it stops reading as writing and starts reading as waiting.",
+          "ask": null,
+          "props": [
+            {
+              "name": "typing",
+              "label": "text: type it out at N chars/sec (true = 24) with a blinking caret"
+            },
+            {
+              "name": "caret",
+              "label": "typing: show the blinking caret (default true)"
+            },
+            {
+              "name": "caretHold",
+              "label": "typing: keep the caret after the text finishes"
+            }
+          ],
+          "poster": 1.26,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 260,\n  \"w\": 1500,\n  \"align\": \"left\",\n  \"size\": 78,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"make video D=formats/scene/hook.json\",\n  \"font\": \"mono\",\n  \"typing\": 16,\n  \"caret\": true,\n  \"caretHold\": true,\n  \"y\": 454\n}"
+        },
+        {
+          "id": "mech-untype",
+          "label": "untype",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The line types itself in, holds, then DELETES itself character by character. The \"wrote it, thought better of it\" beat.",
+          "caution": "Faking it with a fade is the tell: a fade removes the whole line at once and the caret stops meaning anything.",
+          "ask": null,
+          "props": [
+            {
+              "name": "untype",
+              "label": "typing: seconds into the layer at which the text starts DELETING backwards (backspace). Omit for forward-only typing."
+            },
+            {
+              "name": "untypeRate",
+              "label": "untype: delete speed in chars/sec (default = the `typing` rate)"
+            }
+          ],
+          "poster": 2.6,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 260,\n  \"w\": 1500,\n  \"align\": \"left\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Second thoughts, in public.\",\n  \"typing\": 22,\n  \"untype\": 2,\n  \"untypeRate\": 44,\n  \"caret\": true,\n  \"caretHold\": true,\n  \"y\": 408\n}"
+        },
+        {
+          "id": "mech-split-word",
+          "label": "split: word",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The line is cut into words and each word animates on its own clock. The stagger is what makes a line read left to right instead of appearing.",
+          "caution": null,
+          "ask": null,
+          "props": [
+            {
+              "name": "split",
+              "label": "Kinetic split ('path' = SVG strokes, for the `draw` preset)"
+            },
+            {
+              "name": "stagger",
+              "label": "Per-unit delay (s)"
+            },
+            {
+              "name": "each",
+              "label": "Per-unit duration (s)"
+            }
+          ],
+          "poster": 0.72,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"The line is cut into words.\",\n  \"split\": \"word\",\n  \"preset\": \"up\",\n  \"stagger\": 0.09,\n  \"each\": 0.6,\n  \"y\": 386\n}"
+        },
+        {
+          "id": "mech-split-char",
+          "label": "split: char",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The same line cut into characters. Words stay unbreakable, so the line still wraps at spaces.",
+          "caution": "Per-character on a long line is 30 staggers of noise. Reserve it for one short phrase.",
+          "ask": null,
+          "props": [
+            {
+              "name": "split",
+              "label": "Kinetic split ('path' = SVG strokes, for the `draw` preset)"
+            }
+          ],
+          "poster": 0.85,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 120,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"Every character, on its own clock.\",\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"stagger\": 0.03,\n  \"each\": 0.5,\n  \"y\": 408\n}"
+        },
+        {
+          "id": "mech-tracking",
+          "label": "tracking",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The optical tracking ramp: display sizes get tightened, small sizes get opened, and light type on a dark ground is opened again to compensate for the way it blooms.",
+          "caution": "Set `tracking` yourself only when you mean to override the ramp. It is already doing the right thing at every size.",
+          "ask": null,
+          "props": [
+            {
+              "name": "tracking",
+              "label": "Letter-spacing"
+            },
+            {
+              "name": "ls",
+              "label": "Letter-spacing (e.g. \"-0.03em\"); unset = auto optical tracking by size"
+            }
+          ],
+          "poster": 0.97,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 150,\n  \"weight\": 800,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"TIGHTENED AT DISPLAY SIZE\",\n  \"tracking\": \"-0.03em\",\n  \"preset\": \"blur\",\n  \"split\": \"char\",\n  \"stagger\": 0.05,\n  \"y\": 375\n}"
+        },
+        {
+          "id": "mech-gradient-fill",
+          "label": "gradient fill",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "A gradient painted THROUGH the letterforms with background-clip. Static by default; `animate` sets it turning, flowing or shimmering.",
+          "caution": "One gradient headline per film. Two and neither is special.",
+          "ask": null,
+          "props": [
+            {
+              "name": "gradient",
+              "label": "STATIC gradient text fill via background-clip (distinct from preset:\"gradient\" which sweeps): { from, to, angle? }. angle 180 = top→bottom (a dark-top→light-bottom hero word). e.g. {\"from\":\"#1c1613\",\"to\":\"#f3763b\",\"angle\":180}"
+            }
+          ],
+          "poster": 2,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 130,\n  \"weight\": 800,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"fade\",\n  \"exitDur\": 0.22,\n  \"text\": \"Painted through the letterforms\",\n  \"enterDur\": 0.5,\n  \"gradient\": {\n    \"colors\": [\n      \"#2563eb\",\n      \"#8b5cf6\",\n      \"#06b6d4\"\n    ],\n    \"animate\": \"spin\",\n    \"speed\": 0.35\n  },\n  \"y\": 397\n}"
+        },
+        {
+          "id": "mech-ransom",
+          "label": "ransom",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "Every letter is cut from a different face and a different paper, picked from a seeded hash. The same seed gives the same note on every render, so the letters can keep changing without ever flickering.",
+          "caution": "It shouts. It is a whole tone of voice, not an emphasis you can apply to one word inside a normal headline.",
+          "ask": null,
+          "props": [],
+          "poster": 1.6,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 140,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"CUT FROM SIX PAPERS\",\n  \"ransom\": {},\n  \"ransomSeed\": \"CUT FROM SIX PAPERS\",\n  \"preset\": \"blur\",\n  \"presetOpts\": {\n    \"px\": 14\n  },\n  \"stagger\": 0.06,\n  \"y\": 459\n}"
+        },
+        {
+          "id": "mech-circle",
+          "label": "circle",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The characters are laid around a ring and the ring turns. A seal, a badge, a stamp.",
+          "caution": null,
+          "ask": null,
+          "props": [],
+          "poster": 2.2,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 960,\n  \"size\": 62,\n  \"weight\": 700,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"VAWE · ONE JSON · ONE VIDEO · \",\n  \"circle\": {\n    \"radius\": 300\n  },\n  \"speed\": 0.15,\n  \"y\": 540\n}"
+        },
+        {
+          "id": "mech-morph",
+          "label": "morph",
+          "kind": "mechanic",
+          "source": "core/layers/text.js · PROPS (via formats/scene/schema.json)",
+          "blurb": "The letters of one word MIGRATE into the letters of another, rather than one fading out under the other.",
+          "caution": "It needs a fixed width and a centre alignment, or the migration lands on a moving target.",
+          "ask": null,
+          "props": [],
+          "poster": 0.95,
+          "json": "{\n  \"type\": \"text\",\n  \"x\": 210,\n  \"w\": 1500,\n  \"align\": \"center\",\n  \"size\": 190,\n  \"weight\": 800,\n  \"color\": \"var(--text)\",\n  \"start\": 0.25,\n  \"duration\": 4,\n  \"anim\": \"none\",\n  \"exitDur\": 0.22,\n  \"text\": \"the draft\",\n  \"morph\": {\n    \"to\": \"the film\",\n    \"dur\": 1.4\n  },\n  \"y\": 430\n}"
+        }
+      ]
+    },
+    {
+      "id": "beats",
+      "title": "A whole beat, in one line",
+      "intent": "A blueprint is not a preset, it is a directed beat: one line in the scene expands into the layers, the stagger and the exit that make the move work. These are the typographic ones.",
+      "source": "blueprints/index.mjs · BEATS",
+      "specimens": [
+        {
+          "id": "beat-typedHook",
+          "label": "typedHook",
+          "kind": "beat",
+          "source": "blueprints/index.mjs · BEATS",
+          "blurb": "hook that ERASES itself: types in, un-types ~2x faster, never fades",
+          "caution": null,
+          "ask": "Open with a line that types itself in and then UN-types faster than it arrived. It never fades.",
+          "props": null,
+          "poster": 1.7,
+          "json": "{\n  \"type\": \"beat\",\n  \"beat\": \"typedHook\",\n  \"start\": 0.25,\n  \"dur\": 4,\n  \"text\": \"Six months of nothing. Then June.\"\n}"
+        },
+        {
+          "id": "beat-wordBlast",
+          "label": "wordBlast",
+          "kind": "beat",
+          "source": "blueprints/index.mjs · BEATS",
+          "blurb": "scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame",
+          "caution": null,
+          "ask": "Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.",
+          "props": null,
+          "poster": 1,
+          "json": "{\n  \"type\": \"beat\",\n  \"beat\": \"wordBlast\",\n  \"start\": 0.25,\n  \"dur\": 4,\n  \"text\": \"IT CAUGHT\",\n  \"size\": 260,\n  \"y\": 400\n}"
+        },
+        {
+          "id": "beat-propSentence",
+          "label": "propSentence",
+          "kind": "beat",
+          "source": "blueprints/index.mjs · BEATS",
+          "blurb": "a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger",
+          "caution": null,
+          "ask": "Write one sentence across the frame with real objects as the nouns: word, photo, chip, card, word, on a rolling stagger.",
+          "props": null,
+          "poster": 1.4,
+          "json": "{\n  \"type\": \"beat\",\n  \"beat\": \"propSentence\",\n  \"start\": 0.25,\n  \"dur\": 4,\n  \"items\": [\n    {\n      \"word\": \"One\"\n    },\n    {\n      \"chip\": \"JSON\"\n    },\n    {\n      \"word\": \"in, one\"\n    },\n    {\n      \"chip\": \"video\"\n    },\n    {\n      \"word\": \"out.\"\n    }\n  ],\n  \"y\": 400\n}"
+        }
+      ]
+    }
+  ]
+}

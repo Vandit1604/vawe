@@ -1,0 +1,40 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 4.4,
+  "audio": {
+    "silent": true,
+    "_why": "a type specimen is judged with the eyes"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "x": 210,
+      "w": 1500,
+      "align": "center",
+      "size": 120,
+      "weight": 700,
+      "color": "var(--text)",
+      "start": 0.25,
+      "duration": 4,
+      "anim": "none",
+      "exitDur": 0.22,
+      "text": "Six months of silence, then one commit.",
+      "split": "word",
+      "preset": "blur",
+      "stagger": 0.05,
+      "each": 0.8,
+      "presetOpts": {
+        "px": 30
+      },
+      "y": 408
+    }
+  ]
+}
