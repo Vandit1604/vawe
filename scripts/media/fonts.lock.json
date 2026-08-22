@@ -1,0 +1,117 @@
+{
+  "_why": "sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node scripts/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.",
+  "faces": {
+    "InterVariable.woff2": {
+      "pkg": "@fontsource-variable/inter",
+      "version": "5.3.0",
+      "file": "inter-latin-wght-normal.woff2",
+      "bytes": 48256,
+      "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
+    },
+    "Geist.woff2": {
+      "pkg": "@fontsource-variable/geist",
+      "version": "5.3.0",
+      "file": "geist-latin-wght-normal.woff2",
+      "bytes": 29400,
+      "sha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1"
+    },
+    "GeistMono.woff2": {
+      "pkg": "@fontsource-variable/geist-mono",
+      "version": "5.2.8",
+      "file": "geist-mono-latin-wght-normal.woff2",
+      "bytes": 29896,
+      "sha256": "af61b969e7f999969f6af576e584ee85dca301a008a76be1251d172d56b9904c"
+    },
+    "JetBrainsMono.woff2": {
+      "pkg": "@fontsource-variable/jetbrains-mono",
+      "version": "5.3.0",
+      "file": "jetbrains-mono-latin-wght-normal.woff2",
+      "bytes": 40404,
+      "sha256": "18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e"
+    },
+    "PlusJakartaSans.woff2": {
+      "pkg": "@fontsource-variable/plus-jakarta-sans",
+      "version": "5.3.0",
+      "file": "plus-jakarta-sans-latin-wght-normal.woff2",
+      "bytes": 27348,
+      "sha256": "153fc85b70298beeb1d61a5f723331649e7f23bb77302a66e61cb3e2fbdb5e79"
+    },
+    "HankenGrotesk.woff2": {
+      "pkg": "@fontsource-variable/hanken-grotesk",
+      "version": "5.3.0",
+      "file": "hanken-grotesk-latin-wght-normal.woff2",
+      "bytes": 34704,
+      "sha256": "e9201eddf1d41d0b62253295d869ce3cf65768f7102b797f02c7f8c876b4a9d5"
+    },
+    "BricolageGrotesque.woff2": {
+      "pkg": "@fontsource-variable/bricolage-grotesque",
+      "version": "5.3.0",
+      "file": "bricolage-grotesque-latin-wght-normal.woff2",
+      "bytes": 41344,
+      "sha256": "a97804dc9fbe5fc972a08018c5eda4dab7ef2346f64c57e61419d05e6de4ea1c"
+    },
+    "Archivo.woff2": {
+      "pkg": "@fontsource-variable/archivo",
+      "version": "5.3.0",
+      "file": "archivo-latin-wght-normal.woff2",
+      "bytes": 34928,
+      "sha256": "8f704806dbedeaaeca334b11ec348bc3ac3a439d6431544b3afb54f534ee4967"
+    },
+    "Caveat.woff2": {
+      "pkg": "@fontsource-variable/caveat",
+      "version": "5.3.0",
+      "file": "caveat-latin-wght-normal.woff2",
+      "bytes": 74932,
+      "sha256": "891951df5e8b5b0f0bc760d31375405e795c666b5add70437de12d4a6482b33f"
+    },
+    "space-500.woff2": {
+      "pkg": "@fontsource/space-grotesk",
+      "version": "5.3.0",
+      "file": "space-grotesk-latin-500-normal.woff2",
+      "bytes": 13312,
+      "sha256": "1b1a8131d9edf975d9decee81e2f2bf504812f7a4f498e5500f28a613e22e64c"
+    },
+    "space-700.woff2": {
+      "pkg": "@fontsource/space-grotesk",
+      "version": "5.3.0",
+      "file": "space-grotesk-latin-700-normal.woff2",
+      "bytes": 12840,
+      "sha256": "35f8aec56cfd5cbfdb03cc68733a54a0b05bb3617ffcd5fd332badc0b045ca55"
+    },
+    "InstrumentSerif-Regular.woff2": {
+      "pkg": "@fontsource/instrument-serif",
+      "version": "5.3.0",
+      "file": "instrument-serif-latin-400-normal.woff2",
+      "bytes": 21032,
+      "sha256": "5eb09b5ac0e28b67c2f041c8ba6d244604ca0c0980d65912ab2d47fed84ddc31"
+    },
+    "InstrumentSerif-Italic.woff2": {
+      "pkg": "@fontsource/instrument-serif",
+      "version": "5.3.0",
+      "file": "instrument-serif-latin-400-italic.woff2",
+      "bytes": 22128,
+      "sha256": "5a51946dfffa82972bc98745359c46761515641fda557c25116459a9f83da4a7"
+    },
+    "Anybody.woff2": {
+      "pkg": "@fontsource-variable/anybody",
+      "version": "5.3.0",
+      "file": "anybody-latin-wght-normal.woff2",
+      "bytes": 24048,
+      "sha256": "3df452b46907169ba89172a1f1a9bdd3bba9b0f1a303661c2addbfc5c7ee9ec7"
+    },
+    "Manrope.woff2": {
+      "pkg": "@fontsource-variable/manrope",
+      "version": "5.3.0",
+      "file": "manrope-latin-wght-normal.woff2",
+      "bytes": 24836,
+      "sha256": "a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972"
+    },
+    "Fraunces.woff2": {
+      "pkg": "@fontsource-variable/fraunces",
+      "version": "5.3.0",
+      "file": "fraunces-latin-wght-normal.woff2",
+      "bytes": 36620,
+      "sha256": "7f9d191d999336d3b9790afa72e1358e50a13b06d4f289341e92a311967a80f9"
+    }
+  }
+}

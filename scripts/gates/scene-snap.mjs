@@ -15,7 +15,7 @@ import { sceneDims } from '../../core/safe.js';
 // ONE shared signature definition (capture + diff), also used by snap-scenes.mjs. Both gates used to
 // keep their own hand-copied version; that duplication is how a field gets added to one and not the
 // other, and how a gate goes blind without saying so (MISTAKES #159).
-import { captureSig, diffSig } from './snap-signature.mjs';
+import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap');
@@ -78,6 +78,9 @@ const frames = [...new Set([
   ...Array.from({ length: 20 }, (_, i) => Math.round(((i + 0.5) / 20) * total)),
 ])].filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
 
+// Prime before measuring, exactly as snap-scenes does. Both gates must describe a page in the same
+// state or the same scene gets two different signatures depending on which gate asked.
+await primeFrames(page, frames);
 const sig = await captureSig(page, frames);
 await browser.close(); server.close();
 
