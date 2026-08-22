@@ -19,6 +19,13 @@
 //                          `lightLeak`'s default colour altered two shipped looks and the whole-library
 //                          net reported "identical: 104, changed: 0". If a property can carry a visual
 //                          change, it belongs here; that is the only rule this list has.
+//   ku (split units)     — NOT a field but a class of ELEMENT, and the same gap one level down. A
+//                          kinetic reveal moves `<span class="ku">` units, which carry no id, no
+//                          data-layer and no data-start, so every split reveal in the library sat
+//                          outside the capture. A real fix to `gradient` + `split` changed one scene's
+//                          pixels and the whole-library net reported 103 of 103 identical, because the
+//                          one scene whose frames provably moved is the one it could not see
+//                          (MISTAKES #399, now #400).
 //   ft (filter)          — a GRADE is invisible to every field above it. Rebuilding the anamorphic
 //                          streak and the chromatic split changed how 8 composite looks render across
 //                          3 scenes, and the whole-library net reported "identical: 102, changed: 0"
@@ -40,7 +47,23 @@ function capture(frames) {
   // rect, image, group, component and glow was outside the signature entirely, which is the other half
   // of why a mis-pointed wipe went unseen: the wipe lived on a rect. `[data-start]` is exactly the set
   // driveClips animates, so the signature now covers every timed layer rather than the text ones.
-  const SEL = '[id], [data-layer="critical"], [data-start]';
+  // `.ku` is a SPLIT UNIT (core/type.js splitText). It carries none of the three attributes above, so
+  // until it was named here every kinetic type reveal in the library was outside the capture.
+  const SEL = '[id], [data-layer="critical"], [data-start], .ku';
+
+  // A split can in principle produce one unit per character, and each unit is one row per sampled
+  // frame. Nothing in the library comes near this today (the biggest single layer splits into 77
+  // units), so the cap does not bite; it exists so a 500-glyph char split cannot make the signature
+  // unreadable without anyone deciding to. Sampling is a fixed stride, first and last always kept, so
+  // the same units are picked every run.
+  const UNIT_CAP = 120;
+  const sampleUnits = (units) => {
+    if (units.length <= UNIT_CAP) return units;
+    const step = (units.length - 1) / (UNIT_CAP - 1);
+    const out = [];
+    for (let i = 0; i < UNIT_CAP; i++) out.push(units[Math.round(i * step)]);
+    return out;
+  };
 
   // Deterministic fingerprint of the background canvas.
   //
@@ -87,19 +110,53 @@ function capture(frames) {
     return `${cls}@${parts.join('.')}`;
   };
 
+  // Which units survive the cap. splitText runs once at build, so the unit set is fixed for the whole
+  // capture and this is decided once rather than per frame.
+  const keptUnits = (() => {
+    const byHost = new Map();
+    for (const u of document.querySelectorAll('.ku')) {
+      const host = (u.parentElement && u.parentElement.closest('[id], [data-layer="critical"], [data-start]')) || document.body;
+      if (!byHost.has(host)) byHost.set(host, []);
+      byHost.get(host).push(u);
+    }
+    const keep = new Set();
+    for (const list of byHost.values()) for (const u of sampleUnits(list)) keep.add(u);
+    return keep;
+  })();
+
   const snap = {};
   for (const f of frames) {
     window.__engine.renderFrame(f);
     const els = {};
+    // VISIBILITY IS A PROPERTY OF THE CHAIN, NOT OF THE ELEMENT. The per-element test below was enough
+    // while every captured element was a layer wrapper, because a layer carries its own opacity. A split
+    // unit does not: its layer holds the fade, and `getComputedStyle(unit).opacity` reads 1 all through
+    // a beat the unit is nowhere near. So the signature recorded units of layers that were off screen,
+    // and an off-screen layer is not re-animated, so what it recorded was whichever frame last touched
+    // them. That is a stale value masquerading as this frame's, and it read as order-dependence in 68
+    // scenes. Cached per frame: the chain is walked once per element and the answers are reused.
+    const hiddenCache = new Map();
+    const hiddenChain = (el) => {
+      if (!el || el === document.body) return false;
+      if (hiddenCache.has(el)) return hiddenCache.get(el);
+      const s = getComputedStyle(el);
+      const v = s.display === 'none' || s.visibility === 'hidden' || +s.opacity === 0 || hiddenChain(el.parentElement);
+      hiddenCache.set(el, v);
+      return v;
+    };
     for (const el of document.querySelectorAll(SEL)) {
+      if (el.classList.contains('ku') && !keptUnits.has(el)) continue;
       const b = el.getBoundingClientRect(); if (b.width < 1 && b.height < 1) continue;
       const s = getComputedStyle(el); if (s.visibility === 'hidden' || +s.opacity === 0) continue;
+      if (hiddenChain(el.parentElement)) continue;
       const key = keyOf(el);
       // Record text ONLY for LEAF content. A scaffold wrapper (root/cam/stage, a group) concatenates all
       // descendant text, so a typing/decode layer mid-reveal makes the wrapper's aggregate text look
       // order-dependent even when every leaf is pure — a false non-determinism signal. Skip it for any
       // element that contains another captured element; leaf text layers keep their text.
-      const isWrapper = !!el.querySelector('[id], [data-layer="critical"]');
+      // `.ku` joins the wrapper test for the same reason: a split container's own text is now carried,
+      // unit by unit, by its children, and the aggregate adds nothing the leaves do not already say.
+      const isWrapper = !!el.querySelector('[id], [data-layer="critical"], .ku');
       els[key] = {
         x: round(b.left), y: round(b.top), w: round(b.width), h: round(b.height),
         tf: s.transform === 'none' ? '' : s.transform,
@@ -132,6 +189,25 @@ function capture(frames) {
 
 /** Capture the signature for `frames`, rendered in the given order (a pure render is order-blind). */
 export const captureSig = (page, frames) => page.evaluate(capture, frames);
+
+/**
+ * Render `frames` once and measure nothing.
+ *
+ * THE FIRST PASS OVER A FRESH PAGE IS NOT LIKE ANY LATER PASS, and until the signature could see split
+ * units nothing here depended on the difference. A kinetic preset writes `transform` (and, for `decode`,
+ * text) onto a unit only while that unit's window is live, and never clears it afterwards. So a unit
+ * carries three distinguishable states at the same frame: never written (`transform: none`), written
+ * this frame, and holding what some other frame left. Only the first of those is unreachable once any
+ * pass has run, which made the ascending pass privileged: it was the only one that ever saw a virgin
+ * unit, and the descending pass then read `matrix(1, 0, 0, 1, 0, 0)` where the ascending pass read
+ * `none`. Same pixels, different string, 68 scenes quarantined for it.
+ *
+ * Priming puts both passes on the same footing, and it deliberately does NOT paper over the leak it
+ * compensates for: a scene whose frame f depends on which frames ran before it still diffs, because the
+ * two passes still arrive at f from opposite directions. What priming removes is the one difference
+ * that is an artefact of the harness rather than of the scene.
+ */
+export const primeFrames = (page, frames) => page.evaluate((fs) => { for (const f of fs) window.__engine.renderFrame(f); }, frames);
 
 /** Diff two signatures. Returns a list of human-readable change lines (empty === identical). */
 export function diffSig(base, sig) {

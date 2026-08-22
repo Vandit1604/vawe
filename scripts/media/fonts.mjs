@@ -3,67 +3,133 @@
 // fresh clone runs `make fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
 // assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
 //
-//   node scripts/media/fonts.mjs            download any missing free faces
+//   node scripts/media/fonts.mjs            download any missing free faces, verify every one
 //   node scripts/media/fonts.mjs --force    redownload everything
+//   node scripts/media/fonts.mjs --relock   rewrite fonts.lock.json from what is on disk
 //
 // Sources: Fontsource (npm, via jsDelivr) — the canonical open mirror for OFL/Apache webfonts.
+//
+// EVERY URL CARRIES AN EXACT VERSION, AND EVERY FACE CARRIES A HASH. These used to be unversioned
+// `@fontsource-variable/<pkg>/files/…` URLs, so the bytes were whatever the CDN published that day and
+// two machines could hold different faces under identical filenames with nothing to tell them apart.
+// That is not a theory: GeistMono.woff2 on this machine is 29896 bytes and the unversioned URL serves
+// 23128 bytes today, because geist-mono shipped 5.3.0 after the file was fetched. Every text width in
+// the library moves with the font set, and `snap-scenes` stamps its baselines with a hash of that set,
+// so an unpinned face turns a cross-machine comparison into noise that reads as a code regression.
+// The versions below are the ones the CURRENT snap baselines were saved against; the hashes are in
+// scripts/media/fonts.lock.json. A mismatch FAILS rather than warns, because a warning about a font is
+// exactly the line a person scrolls past on the way to the gate result they came for.
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DEST = path.join(repoRoot, 'assets/fonts');
+const LOCK = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fonts.lock.json');
 const FORCE = process.argv.includes('--force');
+const RELOCK = process.argv.includes('--relock');
 const CDN = 'https://cdn.jsdelivr.net/npm';
 
-// dest filename (as referenced in core/tokens.css) → { url, license }
+// dest filename (as referenced in core/tokens.css) → npm package · exact version · file in that package.
 const FONTS = [
-  ['InterVariable.woff2',            `${CDN}/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2`,                 'OFL 1.1'],
-  ['Geist.woff2',                    `${CDN}/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2`,                 'OFL 1.1'],
-  ['GeistMono.woff2',                `${CDN}/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2`,       'OFL 1.1'],
-  ['JetBrainsMono.woff2',            `${CDN}/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2`,'OFL 1.1'],
-  ['PlusJakartaSans.woff2',          `${CDN}/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2`, 'OFL 1.1'],
-  ['HankenGrotesk.woff2',            `${CDN}/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2`,'OFL 1.1'],
-  ['BricolageGrotesque.woff2',       `${CDN}/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2`, 'OFL 1.1'],
-  ['Archivo.woff2',                  `${CDN}/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2`,             'OFL 1.1'],
-  ['Caveat.woff2',                   `${CDN}/@fontsource-variable/caveat/files/caveat-latin-wght-normal.woff2`,               'OFL 1.1'],
-  ['space-500.woff2',                `${CDN}/@fontsource/space-grotesk/files/space-grotesk-latin-500-normal.woff2`,           'OFL 1.1'],
-  ['space-700.woff2',                `${CDN}/@fontsource/space-grotesk/files/space-grotesk-latin-700-normal.woff2`,           'OFL 1.1'],
-  ['InstrumentSerif-Regular.woff2',  `${CDN}/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2`,     'OFL 1.1'],
-  ['InstrumentSerif-Italic.woff2',   `${CDN}/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2`,     'OFL 1.1'],
+  ['InterVariable.woff2',           '@fontsource-variable/inter',               '5.3.0', 'inter-latin-wght-normal.woff2',               'OFL 1.1'],
+  ['Geist.woff2',                   '@fontsource-variable/geist',               '5.3.0', 'geist-latin-wght-normal.woff2',               'OFL 1.1'],
+  // 5.2.8, not 5.3.0: 5.3.0 re-subset this face and it is NOT the one the snap baselines were saved
+  // against. Bump it deliberately, re-save the baselines, never as a side effect of a fetch.
+  ['GeistMono.woff2',               '@fontsource-variable/geist-mono',          '5.2.8', 'geist-mono-latin-wght-normal.woff2',          'OFL 1.1'],
+  ['JetBrainsMono.woff2',           '@fontsource-variable/jetbrains-mono',      '5.3.0', 'jetbrains-mono-latin-wght-normal.woff2',      'OFL 1.1'],
+  ['PlusJakartaSans.woff2',         '@fontsource-variable/plus-jakarta-sans',   '5.3.0', 'plus-jakarta-sans-latin-wght-normal.woff2',   'OFL 1.1'],
+  ['HankenGrotesk.woff2',           '@fontsource-variable/hanken-grotesk',      '5.3.0', 'hanken-grotesk-latin-wght-normal.woff2',      'OFL 1.1'],
+  ['BricolageGrotesque.woff2',      '@fontsource-variable/bricolage-grotesque', '5.3.0', 'bricolage-grotesque-latin-wght-normal.woff2', 'OFL 1.1'],
+  ['Archivo.woff2',                 '@fontsource-variable/archivo',             '5.3.0', 'archivo-latin-wght-normal.woff2',             'OFL 1.1'],
+  ['Caveat.woff2',                  '@fontsource-variable/caveat',              '5.3.0', 'caveat-latin-wght-normal.woff2',              'OFL 1.1'],
+  ['space-500.woff2',               '@fontsource/space-grotesk',                '5.3.0', 'space-grotesk-latin-500-normal.woff2',        'OFL 1.1'],
+  ['space-700.woff2',               '@fontsource/space-grotesk',                '5.3.0', 'space-grotesk-latin-700-normal.woff2',        'OFL 1.1'],
+  ['InstrumentSerif-Regular.woff2', '@fontsource/instrument-serif',             '5.3.0', 'instrument-serif-latin-400-normal.woff2',     'OFL 1.1'],
+  ['InstrumentSerif-Italic.woff2',  '@fontsource/instrument-serif',             '5.3.0', 'instrument-serif-latin-400-italic.woff2',     'OFL 1.1'],
   // Anybody = the vawe landing page's real sans. Manrope + Fraunces = tpot.cc's real pair.
-  ['Anybody.woff2',                  `${CDN}/@fontsource-variable/anybody/files/anybody-latin-wght-normal.woff2`,             'OFL 1.1'],
-  ['Manrope.woff2',                  `${CDN}/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2`,             'OFL 1.1'],
-  ['Fraunces.woff2',                 `${CDN}/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2`,           'OFL 1.1'],
+  ['Anybody.woff2',                 '@fontsource-variable/anybody',             '5.3.0', 'anybody-latin-wght-normal.woff2',             'OFL 1.1'],
+  ['Manrope.woff2',                 '@fontsource-variable/manrope',             '5.3.0', 'manrope-latin-wght-normal.woff2',             'OFL 1.1'],
+  ['Fraunces.woff2',                '@fontsource-variable/fraunces',            '5.3.0', 'fraunces-latin-wght-normal.woff2',            'OFL 1.1'],
 ];
 
+const urlOf = (pkg, ver, file) => `${CDN}/${pkg}@${ver}/files/${file}`;
+const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 // woff2 files start with the ASCII magic "wOF2"
 const isWoff2 = (buf) => buf.length > 4 && buf[0] === 0x77 && buf[1] === 0x4f && buf[2] === 0x46 && buf[3] === 0x32;
 
-async function grab(name, url) {
+const lock = (() => { try { return JSON.parse(fs.readFileSync(LOCK, 'utf8')).faces || {}; } catch { return {}; } })();
+
+async function grab([name, pkg, ver, file]) {
   const dest = path.join(DEST, name);
-  if (!FORCE && fs.existsSync(dest) && fs.statSync(dest).size > 0) return { name, status: 'skip' };
+  const want = lock[name];
+  const present = fs.existsSync(dest) && fs.statSync(dest).size > 0;
+
+  if (present && !FORCE) {
+    const got = sha256(fs.readFileSync(dest));
+    if (!want) return { name, status: 'unlocked', got };
+    if (got !== want.sha256) return { name, status: 'mismatch', want: want.sha256, got };
+    return { name, status: 'skip' };
+  }
+
   try {
-    const res = await fetch(url, { redirect: 'follow' });
+    const res = await fetch(urlOf(pkg, ver, file), { redirect: 'follow' });
     if (!res.ok) return { name, status: 'fail', why: `HTTP ${res.status}` };
     const buf = Buffer.from(await res.arrayBuffer());
     if (!isWoff2(buf)) return { name, status: 'fail', why: 'not a woff2 file' };
+    const got = sha256(buf);
+    // The pin is only worth what the check is worth: refuse to WRITE bytes the lock does not name,
+    // so a re-published version cannot enter the tree and be discovered later as 57 changed scenes.
+    if (want && got !== want.sha256) return { name, status: 'mismatch', want: want.sha256, got, remote: true };
     fs.writeFileSync(dest, buf);
-    return { name, status: 'ok', kb: Math.round(buf.length / 1024) };
+    return { name, status: 'ok', kb: Math.round(buf.length / 1024), got };
   } catch (e) {
     return { name, status: 'fail', why: e.message };
   }
 }
 
 fs.mkdirSync(DEST, { recursive: true });
-const results = await Promise.all(FONTS.map(([name, url]) => grab(name, url)));
 
-let ok = 0, skip = 0, fail = 0;
-for (const r of results) {
-  if (r.status === 'ok')   { ok++;   console.log(`  ✓ ${r.name}  (${r.kb} KB)`); }
-  if (r.status === 'skip') { skip++; }
-  if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name}  — ${r.why}`); }
+if (RELOCK) {
+  const faces = {};
+  const missing = [];
+  for (const [name, pkg, ver, file] of FONTS) {
+    const dest = path.join(DEST, name);
+    if (!fs.existsSync(dest)) { missing.push(name); continue; }
+    const buf = fs.readFileSync(dest);
+    faces[name] = { pkg, version: ver, file, bytes: buf.length, sha256: sha256(buf) };
+  }
+  if (missing.length) { console.error(`✗ cannot relock: ${missing.length} face(s) absent from assets/fonts/ · ${missing.join(', ')}`); process.exit(1); }
+  fs.writeFileSync(LOCK, JSON.stringify({
+    _why: 'sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node scripts/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.',
+    faces,
+  }, null, 2) + '\n');
+  console.log(`✓ relocked ${Object.keys(faces).length} faces → scripts/media/fonts.lock.json`);
+  process.exit(0);
 }
-console.log(`fonts: ${ok} downloaded, ${skip} present, ${fail} failed${fail ? '' : ' — all free faces ready'}`);
-console.log('note: Sohne is paid (Klim) — drop your own copy in assets/fonts/local/Sohne.woff2 (gitignored).');
-if (fail) process.exit(1);
+
+const results = await Promise.all(FONTS.map(grab));
+
+let ok = 0, skip = 0, fail = 0, bad = 0, unlocked = 0;
+for (const r of results) {
+  if (r.status === 'ok') { ok++; console.log(`  ✓ ${r.name}  (${r.kb} KB)`); }
+  if (r.status === 'skip') skip++;
+  if (r.status === 'unlocked') { unlocked++; console.error(`  ? ${r.name}  · present but not in fonts.lock.json (sha256 ${r.got.slice(0, 12)})`); }
+  if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name}  · ${r.why}`); }
+  if (r.status === 'mismatch') {
+    bad++;
+    console.error(`  ✗ ${r.name}  — HASH MISMATCH (${r.remote ? 'downloaded bytes' : 'file on disk'})`);
+    console.error(`      locked   ${r.want}`);
+    console.error(`      measured ${r.got}`);
+  }
+}
+console.log(`fonts: ${ok} downloaded, ${skip} verified, ${fail} failed, ${bad} hash-mismatched${fail || bad || unlocked ? '' : ' · all free faces ready'}`);
+console.log('note: Sohne is paid (Klim) · drop your own copy in assets/fonts/local/Sohne.woff2 (gitignored).');
+if (bad) {
+  console.error('\nA face on this machine is NOT the one the library was measured against, so every text width\n'
+    + 'is suspect and `make snap-all` cannot tell a code change from a font change. Delete the named file\n'
+    + 'and re-run `make fonts` to restore the pinned bytes. If the new bytes are the ones you MEAN to have,\n'
+    + 'run `node scripts/media/fonts.mjs --relock` and re-save the snap baselines in the same pass.');
+}
+if (fail || bad || unlocked) process.exit(1);

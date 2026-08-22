@@ -12187,7 +12187,87 @@ imply one) appears exactly once, in `example-product-promo`. Its pixels change, 
 `snap-scenes` reports 103 of 103 identical and that is a REPORT OF ITS OWN BLINDNESS, not parity: the
 signature's selector is `[id], [data-layer="critical"], [data-start]` and a `.ku` unit span carries none
 of the three, so the units are outside the capture. The scene whose frames provably changed is one the
-gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`.
+gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`. **Closed by #400.**
+
+## #400 — The determinism net could not see a single kinetic type reveal
+
+`snap-signature.mjs` captured `[id], [data-layer="critical"], [data-start]`. A split unit is
+`<span class="ku">` (`core/type.js` `splitText`) and carries none of the three, so every kinetic split
+reveal in the library was outside the capture. Measured before touching anything, on
+`example-product-promo.expanded` at frame 30: **13 `.ku` spans in the DOM, 0 matching the selector, 0
+rows in the signature**. That is why #399 could fix `gradient` + `split`, change one scene's pixels, and
+be told 103 of 103 identical.
+
+**Fix, in three parts, because the first one alone made the gate unusable.**
+
+1. **`.ku` joins the selector.** Same scene, same frame: 13 units in the DOM, 13 in the signature.
+2. **Visibility is a property of the CHAIN.** The first sweep after part 1 quarantined **68 of 103
+   scenes** as non-deterministic, with diffs like `transform: matrix(1,0,0,1,0,0) → matrix(1,0,0,1,0,108)`
+   at frame 3. The scenes were innocent. A layer outside its window is not re-animated, so its units hold
+   whatever frame last touched them, and the fade that hides them lives on the LAYER: a unit's own
+   `getComputedStyle(...).opacity` reads 1 all the way through a beat it is nowhere near. The capture's
+   per-element visibility test was written when every captured element was a layer wrapper and carried
+   its own opacity, so it passed those stale units straight through. It now walks the ancestor chain
+   (cached per frame) and skips anything inside a hidden, `display:none` or zero-opacity parent.
+   Quarantines: **68 → 0**. The same test also drops 344 non-unit rows across the library, every one of
+   them an element inside an invisible ancestor and therefore worth no pixels.
+3. **Prime before measuring** (`primeFrames`, used by both snap gates). A preset writes `transform` onto
+   a unit only inside its window and never clears it, so a never-yet-animated unit reads `transform:
+   none` where an already-animated one reads `matrix(1,0,0,1,0,0)`. The ascending pass was the only pass
+   that could ever see a virgin unit, which made the asc/desc comparison unfair to itself. Priming puts
+   both passes in the same state and hides no real order-dependence: the two passes still reach a frame
+   from opposite directions.
+
+**Cost, measured over the whole library (103 scenes).** Rows 79,425 → 103,349, of which **24,268 are
+unit rows**. Baselines 12.6 MB → 16.5 MB. Runtime, save pass: 105.3s → 106.8s. Diff pass: 106.9s →
+102.8s, faster, because the chain test skips work the widened selector added. No sampling was needed:
+the biggest single split layer in the library is 77 units. A `UNIT_CAP` of 120 per container exists as a
+bound on a future 500-glyph char split, is a fixed stride keeping first and last, and **does not bite on
+any scene shipping today**.
+
+**The baselines moved and they had to.** Diffed against baselines saved minutes earlier on the same
+tree, 70 of 103 scenes reported changed. Not one is a regression: the gate is recording something it
+never recorded. The old baselines were incomplete, not wrong. New ones saved, and a clean re-run reports
+**103 identical, 0 changed, 0 quarantined**.
+
+**What now catches it.** The quarantine still fires: with a counter-based jitter injected into the `.ku`
+rows of the capture, `snap-scenes linear-launch` quarantines the scene and names the moved unit rows;
+with the jitter removed, the same scene is clean. And the paint #399 fixed is now in the record:
+`example-product-promo.expanded` carries 247 unit rows, 27 of them with the gradient fill on them.
+
+**Still blind, named here so it is not re-discovered: `scripts/gates/motion-audit.mjs`.** Its series is
+built from `[id], [data-layer="critical"]`, which is the OLD selector minus `[data-start]`, so the motion
+contract is asserted over a set that contains no split unit and no timed non-text layer. Not fixed in
+this pass, to keep out of a file another agent held.
+
+## #401 — Every font came from an unversioned URL, so the whole library measured differently by the day
+
+`scripts/media/fonts.mjs` fetched 16 faces from `cdn.jsdelivr.net/npm/<pkg>/files/…` with no version in
+any URL. The bytes were whatever the CDN published that day, under filenames that never change. Every
+text width in the library moves with the font set, and `snap-scenes` stamps its baselines with a hash of
+that set precisely because it does, so an unpinned face turns a cross-machine or cross-day comparison
+into noise that reads as a code regression.
+
+**Not a theory.** `GeistMono.woff2` on this machine is **29896 bytes and is `@fontsource-variable/geist-mono@5.2.8`**.
+The unversioned URL serves **23128 bytes** today, because 5.3.0 re-subset the face after that file was
+fetched. A `make fonts --force` on this tree would have silently swapped the mono face and moved every
+mono text width in the library, with nothing to say so.
+
+**Fix: an exact version in every URL, and a sha256 per face in `scripts/media/fonts.lock.json`.** The
+lock is generated from disk with `node scripts/media/fonts.mjs --relock`, which is also the only
+sanctioned way to accept a version bump, and the instruction with it is to re-save the snap baselines in
+the same pass. Versions are pinned to WHAT IS ON DISK, not to latest: geist-mono is held at 5.2.8, the
+other 15 at 5.3.0.
+
+**A mismatch FAILS, it does not warn.** `make fonts` hashes every face already present as well as every
+byte it downloads, and refuses to write bytes the lock does not name, so a re-published version cannot
+enter the tree and be discovered later as 57 changed scenes. A warning about a font is the line a person
+scrolls past on the way to the gate result they came for. Proven both ways: deleting `GeistMono.woff2`
+and re-running restores byte-identical bytes from the pinned URL (`af61b969…`), and appending one byte
+to `Caveat.woff2` fails with the locked and measured hashes printed, exit 1.
+
+**The font stamp did not move.** `verify/snap/scenes/.font-state.json` reads 29 faces, `233cbd803052`,
+before and after the pinning, so the baselines saved in #400 are valid against the pinned set.
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

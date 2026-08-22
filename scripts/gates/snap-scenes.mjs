@@ -25,7 +25,7 @@ import { SCENE_DIR } from './paths.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
-import { captureSig, diffSig } from './snap-signature.mjs';
+import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
@@ -159,6 +159,9 @@ for (const scene of scenes) {
     ])].filter((f) => f >= 0 && f < total).sort((a, b) => a - b);
 
     // NON-DETERMINISM: same frames ascending vs descending. A pure render is order-blind.
+    // Prime first, so the ascending pass is not the only one that ever sees a never-yet-animated split
+    // unit — see primeFrames in snap-signature.mjs for what that difference cost.
+    await primeFrames(page, frames);
     const sigAsc = await captureSig(page, frames);
     const sigDesc = await captureSig(page, [...frames].reverse());
     const orderDiffs = diffSig(sigAsc, sigDesc);
