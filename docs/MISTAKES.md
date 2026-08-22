@@ -12083,10 +12083,22 @@ gate, the ambition floor and the pace gate, all of them blind on `brew-launch-ac
 audit tells the next person not to look there. It is the reason this survived three closures, and the
 reason `#211`'s rule says GREP, not "check the list".
 
-Fixed in all four. Exit codes identical across **153 scenes** before and after, which is the expected
-shape: only 3 scenes in the library use `transitions`, and that is exactly why a defect this wide could
-hide for this long. **A change that fixes a blind spot and moves no number is the hardest kind to
-believe and the easiest kind to skip.**
+Fixed in all four. **Re-measured afterwards, gate by gate, because the first pass of this entry quoted a
+scene count nobody could reproduce.** The library holds 154 `.json` files in `formats/scene/` and **132
+of them are scenes** (`module: "scene"`, derivatives and `schema.json` excluded). Each of the four gates
+was run over all 132, at its committed version and at `4b2960f^`, and the outputs compared byte for byte:
+
+| | gate-runs | outputs that moved | exit codes that moved |
+|---|---|---|---|
+| critique · beat-check · direction-floor | 396 | 5 | **0** |
+| pace-check | 132 | 2 | **0** |
+
+All 7 land on the only 3 scenes that use the surface (`ab-skill-shotcode`, `brew-launch-act1`,
+`gh-wrapped`), and every one is a gate seeing a boundary it was blind to: beat-check now counts
+`4 declared transition window(s)` on brew where it counted 0, direction-floor adds `transition×4` to the
+motion vocabulary and correctly stops warning `no-transition` on a film that declares four of them.
+That is exactly why a defect this wide could hide for this long. **A change that fixes a blind spot and
+moves no number is the hardest kind to believe and the easiest kind to skip.**
 
 ## #398 — The ratchet: legacy is not a waiver
 
@@ -12112,6 +12124,28 @@ a silent waiver and the rule is repealed the way `CLAUDE.md` describes.
 It only tightens: `--adopt` freezes a rule's legacy set ONCE, on the day the rule is promoted. A scene
 that appears afterwards is new work and blocks. Proven: a scratch scene copied from a legacy film
 reported `1 NEW failures` and `BLOCKS, this film is new work`, while the 121 stayed silent.
+
+**An edited legacy film loses the status**, and that was the one contested decision. The manifest stores
+a hash of each film's canonicalised content, so reordering keys or reformatting costs nothing and a
+change to what the film IS costs the grandfathering. The argument for it: touching a film is when you
+owe it a plan, because the moment the file is open and decisions are being made about it is the cheapest
+moment there will ever be to write down what it is for. The argument against it, which is real: a
+one-line colour fix should not demand a storyboard. It does not. It demands one sentence in a waiver,
+and a waiver is a decision the next reader can argue with, which is the outcome this whole mechanism
+exists to buy. What is NOT acceptable is the third option, where the edit is silent and the film keeps
+an exemption it was granted for being old.
+
+Proven, on one legacy film, restored afterwards: untouched it printed
+`▪ storyboard LEGACY (no-storyboard, grandfathered 2026-08-21) · nobody has looked yet` and did not
+block. Given a waiver with a reason (which is itself an edit) the same film printed
+`○ storyboard waived (no-storyboard) · somebody decided, and said why`, and the census moved from
+`121 legacy · 11 current · 0 NEW failures` to `120 legacy · 11 current · 1 NEW failures`.
+
+**Exit codes: 0 of 132 scenes changed.** Every scene was run twice, against the pre-ratchet
+`author-check` and the ratcheted one, back to back so both saw the same tree: 93 pass / 39 fail in the
+default ladder, identical, and identical again under `TASTE=1`. A legacy film exits exactly as it did
+the day before the rule existed, which is the only version of grandfathering that is not just a
+disabled rule.
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->

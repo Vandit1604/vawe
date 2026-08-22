@@ -96,6 +96,11 @@ if (file) {
     }
     if (!why) console.log(`      and it carries no \`_why\`, so the argument for breaking it does not exist.`);
   }
+  for (const code of Object.keys(ratchet.rules || {})) {
+    if (!legacyHolder(code, name)) continue;
+    console.log(`  ▪ ${code} · this film holds LEGACY status (grandfathered ${ratchet.rules[code].legacy[name].since}).`);
+    console.log(`      Not a waiver: nobody has looked at this film against that rule, and no reason is recorded.`);
+  }
   console.log('');
   process.exit(0);
 }
@@ -105,6 +110,14 @@ const all = [...tally.entries()].sort((a, b) => b[1].length - a[1].length);
 const dead = all.filter(([c]) => RETIRED.has(c));
 const rows = all.filter(([c]) => !RETIRED.has(c));
 console.log(`\n  WAIVER CENSUS · ${total} scenes\n`);
+const ratcheted = Object.entries(ratchet.rules || {});
+if (ratcheted.length) {
+  console.log(`  ▪ GRANDFATHERED, which is a different thing. These rules were ratcheted on a date, and the`);
+  console.log(`    films that predate them are excused BY THE CALENDAR, not by anyone's argument:\n`);
+  for (const [code, entry] of ratcheted) console.log(`      ${code.padEnd(28)} ${String(legacyCount(code)).padEnd(6)} film(s), adopted ${entry.adopted}`);
+  console.log(`    A legacy film carries no reason because no reason has been made. Edit one and it loses the`);
+  console.log(`    status and must comply. Census: make legacy\n`);
+}
 if (dead.length) {
   console.log(`  ✗ DEAD WAIVERS — no gate emits these codes any more, so they excuse nothing:\n`);
   for (const [c, films] of dead) console.log(`      ${c.padEnd(28)} ${films.length} film(s): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`);

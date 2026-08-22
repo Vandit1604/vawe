@@ -21,20 +21,10 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 
 // ── colour maths (self-contained, pure) ───────────────────────────────────────────────────────────
-const hx = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
-function parse(c) {
-  const m = String(c).trim().replace('#', '');
-  const s = m.length === 3 ? m.split('').map((x) => x + x).join('') : m;
-  return [parseInt(s.slice(0, 2), 16), parseInt(s.slice(2, 4), 16), parseInt(s.slice(4, 6), 16)];
-}
-const toHex = ([r, g, b]) => `#${hx(r)}${hx(g)}${hx(b)}`;
-const mix = (a, b, t) => { const A = parse(a), B = parse(b); return toHex([0, 1, 2].map((i) => A[i] + (B[i] - A[i]) * t)); };
-const lighten = (c, t) => mix(c, '#ffffff', t);
-const darken = (c, t) => mix(c, '#000000', t);
+// The shared half lives in scripts/lib/theme-bg.mjs, because invent-look.mjs writes themes too and a
+// second copy of the bg mapping is how a theme gains a missing key.
+import { parseHex as parse, mix, lighten, darken, rgbStr, relLum, contrast, bgBlock } from '../lib/theme-bg.mjs';
 const rgbaOf = (c, a) => { const [r, g, b] = parse(c); return `rgba(${r},${g},${b},${a})`; };
-const rgbStr = (c) => parse(c).join(',');
-const relLum = (c) => { const s = parse(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * s[0] + 0.7152 * s[1] + 0.114 * s[2]; };
-const contrast = (a, b) => { const L1 = relLum(a), L2 = relLum(b); return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05); };
 const isLight = (c) => relLum(c) > 0.4;
 
 // ── derive the full 15-key palette from a base bg + accent + optional text ─────────────────────────
@@ -100,25 +90,7 @@ const theme = {
   gradient,
   type,
   motion: preset.motion,
-  // the full bg block every bg preset reads (core/backgrounds.js): rgb accents + a LIGHT and a DARK
-  // ground pair, mapped onto every *Base/deep/dark/ink/light/darkMesh key. Both grounds always exist so a
-  // scene can pick ANY bg preset regardless of the theme's dominance (else e.g. `spotlight` reads
-  // P.deep[0] of undefined and the render crashes — the gap that shipped before this was derived).
-  bg: (() => {
-    const lightGround = light ? [palette.bg, palette.bg2] : ['#ffffff', '#f4f5f8'];
-    const darkA = light ? '#0f1620' : palette.bg;
-    const darkGround = [darkA, darken(darkA, 0.35)];
-    return {
-      accent: rgbStr(palette.accent), tint: rgbStr(mix(palette.bg, palette.accent, 0.12)), tint2: rgbStr(mix(palette.bg, palette.accent, 0.22)),
-      dotLight: rgbStr(palette.line),
-      paperBase: lightGround, light: lightGround, paper: lightGround[0],
-      softBase: [lighten(lightGround[0], 0.0), darken(lightGround[1], 0.02)],
-      accentBase: [mix(lightGround[0], palette.accent, 0.08), lightGround[1]],
-      border: palette.line,
-      dark: darkGround, deep: [darkGround[0], darken(darkGround[0], 0.5)], ink: [darken(darkGround[0], 0.2), darken(darkGround[0], 0.6)],
-      inkBase: darkGround, darkMesh: [mix(darkGround[0], palette.accent, 0.1), darkGround[1]],
-    };
-  })(),
+  bg: bgBlock(palette, light),
   bgDefault: preset.bgDefault || (light ? 'plain' : 'dark'),
 };
 

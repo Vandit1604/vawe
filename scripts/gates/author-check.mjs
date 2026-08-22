@@ -202,7 +202,7 @@ if (process.argv.includes('--legacy')) {
   console.log(`\n  RATCHET · ${path.relative(repoRoot, MANIFEST)}\n`);
   for (const rule of Object.keys(RATCHET_RULES)) {
     const entry = m.rules[rule];
-    if (!entry) { console.log(`  ○ ${rule} — not adopted. It has no legacy set, so it blocks every scene it fires on.`); continue; }
+    if (!entry) { console.log(`  ○ ${rule} · not adopted. It has no legacy set, so it blocks every scene it fires on.`); continue; }
     const c = census(rule, m);
     console.log(`  ${rule} (adopted ${entry.adopted}): ${censusLine(rule, c)}`);
     if (c.new) console.log(`      NEW: ${c.newNames.join(', ')}${c.editedNames.length ? `   (edited since grandfathering: ${c.editedNames.join(', ')})` : ''}`);
@@ -577,8 +577,8 @@ const ENGINE_REFUSES = new Set(['validate']);
 const line = (r) => {
   const mark = r.failed ? '✗' : r.waived ? '○' : r.legacy ? '▪' : r.reported ? '~' : '✓';
   const note = r.failed ? `BLOCKS (${r.unwaived.join(', ') || 'exit ' + 1})`
-    : r.waived ? `waived (${r.blockCodes.join(', ')}) — somebody decided, and said why`
-    : r.legacy ? `LEGACY (${r.blockCodes.join(', ')}, grandfathered ${r.legacySince}) — nobody has looked yet`
+    : r.waived ? `waived (${r.blockCodes.join(', ')}) · somebody decided, and said why`
+    : r.legacy ? `LEGACY (${r.blockCodes.join(', ')}, grandfathered ${r.legacySince}) · nobody has looked yet`
     : r.reported ? `reported, does not block (${r.blockCodes.join(', ') || 'see above'})`
     : 'nothing found';
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
@@ -596,7 +596,7 @@ if (judgements.length) {
 if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
 const legacies = results.filter((r) => r.legacy);
 if (legacies.length) {
-  console.log(`  (▪ legacy comes from ${path.relative(repoRoot, MANIFEST)} — the rule arrived after the film did.`);
+  console.log(`  (▪ legacy comes from ${path.relative(repoRoot, MANIFEST)} · the rule arrived after the film did.`);
   console.log(`   No reason is recorded anywhere because nobody has made one. Edit the film and it blocks.)`);
 }
 if (sbCensus) console.log(`\n  ratchet · no-storyboard: ${censusLine('no-storyboard', sbCensus)} across formats/scene/.`);

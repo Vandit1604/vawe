@@ -17,6 +17,7 @@ import puppeteer from 'puppeteer';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
+const has = (n) => argv.includes(n);
 const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
 if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/author/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
 const boxW = parseInt(flag('--w', '1400'), 10);
@@ -43,11 +44,16 @@ const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 // (core/boot.js), so the token names cannot drift from what a real render sets — and they had already
 // drifted, since the palette key is `surface2` while the token is `--surface-2`.
 // docs/MISTAKES.md #368.
-const themeName = flag('--theme', 'default');
-const themeFile = path.join(ROOT, 'themes', themeName + '.json');
+// --theme-file previews a theme that is not (yet) in themes/. It exists for scripts/author/invent-look.mjs,
+// which photographs candidate looks BEFORE one is chosen: without it a generator would have to write
+// five throwaway files into themes/ and remember to delete them.
+const themeFileArg = flag('--theme-file', null);
+const themeName = themeFileArg ? path.basename(themeFileArg, '.json') : flag('--theme', 'default');
+const themeFile = themeFileArg ? path.resolve(themeFileArg) : path.join(ROOT, 'themes', themeName + '.json');
 // A missing theme was swallowed by a `catch` that substituted a near-black. Naming a theme that does
 // not exist is a typo, and a typo that silently previews on someone else's colours is the whole bug.
 if (!fs.existsSync(themeFile)) {
+  if (themeFileArg) { console.error(`preview: --theme-file ${themeFileArg} does not exist.`); process.exit(1); }
   console.error(`preview: no theme "${themeName}" — themes/${themeName}.json does not exist.`);
   console.error(`  available: ${fs.readdirSync(path.join(ROOT, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).join(', ')}`);
   process.exit(1);
@@ -122,7 +128,8 @@ await page.waitForFunction('window.__themed !== undefined', { timeout: 10000 });
 const themed = await page.evaluate(() => window.__themed);
 if (themed !== true) { console.error(`preview: theme "${themeName}" failed to apply — ${themed}`); process.exit(1); }
 await page.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
-const out = '/tmp/preview.png';
+// --out lets a caller photograph several fragments in one run without each overwriting the last.
+const out = flag('--out', '/tmp/preview.png');
 // The PNG is the canvas, so anything outside it is not in the picture you are about to judge. Say so:
 // a fragment that hangs off the edge looks in the shot exactly like a fragment that was designed to
 // end there, which is how a 1344px capture read as a cropped card for as long as #337 was live.
@@ -131,7 +138,10 @@ const overflow = await page.evaluate(() => {
   return { l: Math.round(r.left), t: Math.round(r.top), r: Math.round(r.right), b: Math.round(r.bottom) };
 });
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
-  const findings = await detect(`http://127.0.0.1:${port}/__frag`, browser);
+  // --no-detect: for a caller photographing many generated fragments (invent-look's candidate sheet),
+  // where the craft tells belong to the generator, not to this run. Never pass it for a HAND-written
+  // fragment — that is the one this check exists for.
+  const findings = has('--no-detect') ? null : await detect(`http://127.0.0.1:${port}/__frag`, browser);
   await browser.close(); server.close();
   console.log(`  --t: ${tSec}s (the frame clock; pass --t <seconds> for another moment)`);
   console.log(`  layout: ${fullBleed ? 'FULL BLEED 1920x1080 (the fragment positions itself against its container)' : boxW + 'px centred'}`);
@@ -162,6 +172,7 @@ async function detect(url, browser) {
 }
 
 function report(r) {
+  if (!r) return;  // --no-detect: the caller said so, so there is nothing to report either way
   if (r.skipped) { console.log(`\n  ⚠ anti-pattern check SKIPPED, so this fragment is unchecked, not clean: ${r.skipped}`); return; }
   if (!r.findings.length) { console.log('\n  ✓ impeccable: no anti-patterns detected (it reads craft tells, not whether the idea is right)'); return; }
   console.log(`\n  impeccable · ${r.findings.length} anti-pattern(s) — each is a fix or a reason, never a shrug:`);

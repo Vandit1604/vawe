@@ -105,6 +105,9 @@ checked and what it found. What is not uniform is what a finding **costs**:
 | **BLOCKS** | validate · beats · inspect · plan (+ assets under `STRICT=1`) | the film is broken; the run stops |
 | **REPORTS** | storyboard · critique · direct · floor · dissolve · designspec · copy · pace · hero · treatment · waiver-drift | printed in full, never a wall; `TASTE=1` promotes them |
 
+`storyboard` is the exception in that second row, and the exception has a mechanism: it BLOCKS on any
+film that is not grandfathered, in every mode. See "The ratchet" below.
+
 **Why the second row is not a lowered bar.** Measured on this library the day the split was written:
 give the REPORTS tier teeth and **116 of 141 scenes fail**. Four films in five. `CLAUDE.md` already
 names what happens next, and it has happened here twice: a rule that fires on most of the library gets
@@ -124,11 +127,56 @@ Without that field the step falls back to the naming convention: `<base>.storybo
 scene, then `_concepts/<base>.storyboard.md`. Find one and it runs `storyboard-check` over it. Find
 none and it reports `no-storyboard`.
 
-`no-storyboard` REPORTS today because **130 of 141 scenes have no plan**. Blocking on day one fails 92%
-of the library on its first run, which is the reflex-waiver trap and not a standard.
-**Promotion condition, written down rather than wished for: when fewer than a quarter of the scenes in
-`formats/scene/` are missing a storyboard, `no-storyboard` moves to the BLOCKS tier.** Count it with
-the one-liner in `docs/MISTAKES.md` #395. Nothing else needs to be true; it is a measurement, not a vote.
+### The ratchet: grandfather the past, block new work now
+
+`no-storyboard` fires on **121 of the 132 scenes** in `formats/scene/`. Two answers were considered and
+both rejected. **Backfill** writes 121 storyboards to satisfy a gate, and for a judgement rule that is
+worse than the red: the number goes green and nobody learns anything. **Wait for a threshold** ("promote
+it when under a quarter are missing") leaves the rule toothless for months and depends on a cleanup
+nobody is scheduled to do.
+
+So the rule is **ratcheted**. A film that predates it is recorded as **LEGACY** in a generated manifest,
+`scripts/gates/legacy-manifest.json`, with the rule and the date. Anything not in that manifest must
+comply immediately, and `no-storyboard` BLOCKS on it whether or not `TASTE=1` is set. Legacy films keep
+exactly the severity they had before the ratchet existed: reported by default, promoted by `TASTE=1`.
+Measured across all 132 scenes, the day it was built: **0 exit codes moved**, in either mode.
+
+**Legacy is not a waiver, and if the two ever read the same the rule has been repealed.** A waiver lives
+in the scene, in `authoring.allow` with a `_why`, and it says a person looked at this film and decided
+the rule is wrong for it. Legacy lives in a central generated file, carries no reason, and says nobody
+has looked yet. They print differently on purpose:
+
+```
+  ○ storyboard  waived (no-storyboard) · somebody decided, and said why
+  ▪ storyboard  LEGACY (no-storyboard, grandfathered 2026-08-21) · nobody has looked yet
+```
+
+**Two numbers, not one.** Every run prints `121 legacy · 11 current · 0 NEW failures`. "0 new failures"
+is a thing you can act on. "121 failures" is noise people learn to scroll past, and that habit is the
+disease this exists to treat.
+
+**Editing a legacy film costs it the status.** The manifest stores a hash of each film's canonicalised
+content, so a reformat is free and a change to what the film IS is not. Touching a film is when you owe
+it a plan: the moment the file is open and decisions are being made about it is the cheapest one there
+will ever be to write down what it is for. A one-line colour fix does not force a fake storyboard, it
+forces one sentence in a waiver, which is a decision the next reader can argue with.
+
+**It only tightens.** `--adopt` freezes a rule's legacy set once and refuses to run twice; `--stamp`
+can only remove rows (the film complied, was deleted, or was edited). Nothing adds a row after adoption,
+so nobody can grandfather today's film by re-running the command. A hand-kept list would have gone stale
+the day it was written, which is `#159`.
+
+```bash
+make legacy                       # the census, writes nothing
+make legacy ADOPT=<rule>          # freeze today's failures as legacy, once, on promotion day
+make legacy STAMP=1               # prune rows that no longer qualify
+```
+
+**Any rule can join.** A rule opts in by name in `RATCHET_RULES` (`scripts/gates/author-check.mjs`) with
+a probe that says whether one scene fails it. The probe must be cheap and pure, fs and JSON only: the
+census runs it across the whole library on every author-check run, so a probe that launched a browser
+would cost 132 browsers. A finding that only exists after a child gate has run cannot be ratcheted this
+way, and should not be, because its census would go stale between runs.
 
 Then the eyeball + memory rungs (not chained — you must look):
 

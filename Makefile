@@ -383,6 +383,16 @@ cutout:
 waivers:
 	node scripts/gates/waiver-drift.mjs $(D)
 
+# make legacy [ADOPT=<rule>] [STAMP=1] — THE RATCHET. A new rule fails the whole library on its first
+# run, and both usual answers are worse than the red: backfilling a judgement rule produces fake work,
+# and waiting for a threshold leaves the rule toothless. So the films that predate a rule are recorded
+# as LEGACY in a generated manifest, and everything new must comply at once. Legacy is NOT a waiver: a
+# waiver is a decision with a reason in the scene, legacy means nobody has looked yet.
+# ADOPT freezes a rule's legacy set once, on the day it is promoted, and refuses to run twice. STAMP can
+# only remove rows (fixed, deleted, or EDITED since). Nothing can add one, so the ratchet only tightens.
+legacy:
+	node scripts/gates/author-check.mjs --legacy $(if $(ADOPT),--adopt $(ADOPT)) $(if $(filter 1,$(STAMP)),--stamp)
+
 # make draft D=<scene.json> STAGE=85|95 — hand over a draft at a DECLARED level of finish.
 # Without one, review is a guess: a reviewer who thinks they are seeing a ship candidate flags the
 # placeholder photo, and one who thinks they are seeing a rough cut lets a real defect through. 85% locks
