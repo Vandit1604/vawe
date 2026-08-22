@@ -1,0 +1,106 @@
+name: author-check (changed scenes)
+
+# The per-edit authoring ladder, scoped to what the push actually touched. `make author-check` on one
+# scene costs about 1.6 seconds, so the scoping is not about the gate: it is about the minute the runner
+# spends booting. The paths filter keeps the job off every push that touches no scene at all.
+#
+# WHAT THIS CAN SEE. Almost every scene in this repo is gitignored content, so the tracked set is the
+# repo's own demos: sample, vawe-intro, hero-site, site-backdrop, motion-test, showcase-*, example-*,
+# gh-wrapped.template. 40 renderable scenes in a clone against 146 in the maintainer's tree. This job
+# therefore guards the films the project ships to explain itself, and it cannot guard a brand film that
+# never leaves a laptop. That is the gitignore policy working as intended, not a hole to plug here.
+#
+# TASTE is off, matching `make author-check` with no flags: the style half reports and does not block.
+# Turn it on for a run with the dispatch input when you want the house-style findings to have teeth.
+
+on:
+  push:
+    branches: [main]
+    paths: ["formats/scene/**.json"]
+  pull_request:
+    paths: ["formats/scene/**.json"]
+  workflow_dispatch:
+    inputs:
+      taste:
+        description: "Block on house-style findings too (TASTE=1)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: scene-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  author-check:
+    name: the authoring ladder on every touched scene
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The ladder needs the base commit on disk to diff against it.
+          fetch-depth: 0
+          # .git is 308MB, most of it committed mp4s and the baked ransom sprites. A name-only diff
+          # reads trees, not contents, so the blobs can stay on the server.
+          filter: blob:none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # author-check's hero step opens a browser, and it opens puppeteer's OWN Chromium, not the
+      # google-chrome that ubuntu-latest ships: every launch site in scripts/gates/ calls
+      # puppeteer.launch() with no executablePath. Caching the download keyed on the lockfile is what
+      # keeps that honest and fast at the same time.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - name: which scenes changed
+        id: changed
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          base="$BASE"
+          # A branch's first push reports an all-zero "before", and a dispatch reports none at all.
+          # Falling back to the parent commit keeps the job scoped instead of silently checking nothing.
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1)"
+          fi
+          : > scenes.txt
+          git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- 'formats/scene/*.json' \
+            > candidates.txt || true
+          while IFS= read -r f; do
+            [ -n "$f" ] && [ -f "$f" ] || continue
+            # A file under formats/scene/ is not automatically a film: the examples registry and the
+            # intent sidecars live there too, and the ladder has nothing to say about either.
+            if node -e 'const fs=require("fs");let m;try{m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")).module}catch{};process.exit(m==="scene"?0:1)' "$f"; then
+              echo "$f" >> scenes.txt
+            fi
+          done < candidates.txt
+          echo "count=$(wc -l < scenes.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "Scenes to check against $base:"; cat scenes.txt
+
+      - name: make author-check on each
+        if: steps.changed.outputs.count != '0'
+        env:
+          TASTE: ${{ inputs.taste && '1' || '' }}
+        run: |
+          set -uo pipefail
+          failed=0
+          while IFS= read -r f; do
+            echo "::group::author-check $f"
+            make author-check D="$f" ${TASTE:+TASTE=1} || failed=1
+            echo "::endgroup::"
+          done < scenes.txt
+          exit "$failed"
+
+      - name: nothing to check
+        if: steps.changed.outputs.count == '0'
+        run: echo "No renderable scene changed against ${{ steps.changed.outputs.base }}."

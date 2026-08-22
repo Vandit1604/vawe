@@ -86,3 +86,42 @@ make snap-all [SAVE=1]    # WHOLE-LIBRARY: determinism screen + regression diff 
 make verify               # render integrity + safe-zone + contact sheets (heavy)
 make review               # fast snapshot: lib-test + audit + master sheet (/tmp/review.png)
 ```
+
+## What runs where (CI)
+
+Four workflows in `.github/workflows/`. Every one of them runs a `make` target you can run yourself;
+there is no CI-only command, because a second path is how the two drift apart.
+
+| workflow | trigger | runs | billed |
+|---|---|---|---|
+| `gates.yml` | push to main · PR | `make schema-check lib-test craft-coverage arsenal-check` (0.4s of gate) | 1 min |
+| `scene-check.yml` | push · PR, only when `formats/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
+| `audit-scenes.yml` | Monday 06:17 UTC · manual | `make audit-all` (1m46s over 34 scenes) | 3 min |
+| `snap-scenes.yml` | manual only | `make fonts` then `make snap-all SAVE=1` (16s) | 2 min |
+
+The repo is private, so the free allowance is 2,000 Linux minutes a month. Measured against this
+repo's own rate, 467 commits in the last 30 days and 173 of them touching `formats/scene`, the
+worst case where every commit is its own push comes to about 830 minutes. Batched pushes land nearer
+300. Both workflows cancel a superseded run on the same ref, which is what keeps a burst of commits
+from billing for every one of them.
+
+Nothing renders video. `make all` is the two-hour job and no workflow starts it.
+
+**The browser is puppeteer's own Chromium, not the runner's.** Every launch site in `scripts/gates/`
+calls `puppeteer.launch()` with no `executablePath`, so `npm ci` fetches the browser and the workflows
+cache it against `package-lock.json`. `CHROME_BIN` steers `allocOpts` in `internal/scene/scene.go`, and
+that path belongs to the Go renderer, which no workflow invokes.
+
+**`doc-refs` is missing from CI on purpose, and it is not a softened gate.** `formats/scene/*.json` is
+gitignored, so a clone carries 40 of the 146 scenes a maintainer's tree holds. `doc-refs` resolves every
+repo path the docs cite, and on a fresh clone 20 of its 22 findings are scene files no clone will ever
+have. It keeps its teeth in `.githooks/pre-push`, where the author has the content on disk.
+
+**Snapshot comparison does not work in CI, and `snap-scenes.yml` says so in its own header.** Two
+reasons, both structural. `verify/snap/` is gitignored, so a runner starts with no baselines and diff
+mode has nothing to diff. And a baseline is only valid inside one font state, while
+`scripts/media/fonts.mjs` fetches from jsDelivr with no version in any URL, so two machines can hold
+different bytes under identical filenames. `SAVE=1` still proves something font-independent: it renders
+each scene ascending and descending and quarantines any scene whose signature depends on the order.
+Read a green run as "every scene is deterministic", never as "nothing changed". Pinning the fetcher to
+exact Fontsource versions is what would make cross-machine comparison mean anything.

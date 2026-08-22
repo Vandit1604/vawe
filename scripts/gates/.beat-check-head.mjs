@@ -59,7 +59,6 @@ import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { snippet } from '../lib/text.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -73,11 +72,6 @@ if (!d || typeof d !== 'object') { console.error(`✗ ${file} is not a scene obj
 // this gate reads a scene TIMELINE. A sidecar (.intent.json), a schema, or another module has none, so
 // there is nothing here to be right or wrong about. Say so and pass, rather than inventing findings.
 if (d.module !== 'scene') { console.log(`  beat check · ${file}: not a scene module (module=${d.module ?? 'none'}), nothing to check.`); process.exit(0); }
-// The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
-// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
-// that declared its boundaries the documented way was read as a film with no boundaries at all.
-// Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-lowerScene(d);
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // ---------- the clock ----------

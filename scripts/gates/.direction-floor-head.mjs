@@ -29,7 +29,6 @@ import { sceneDims } from '../../core/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -38,11 +37,7 @@ if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene
 // the baseline at render (core/produce.js), so these WARNs read as "author this deliberately instead of
 // leaning on the injected default." Judging the produced scene would mask the very conditions this gate
 // exists to surface (and defeat gate-mutation's ability to prove the gate can fire).
-// The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
-// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
-// that declared its boundaries the documented way was read as a film with no boundaries at all.
-// Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // flatten every layer, including group children and beat descriptors.

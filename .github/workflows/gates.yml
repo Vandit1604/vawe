@@ -1,0 +1,46 @@
+name: framework gates
+
+# The same five gates .githooks/pre-push runs, minus doc-refs. There is no CI-only list: the point is
+# that a push blocked here is a push that would have been blocked on the developer's machine.
+#
+# doc-refs is DELIBERATELY ABSENT, and this is not a softened gate. formats/scene/*.json is gitignored
+# (see .gitignore: "Video/data instances are NOT the framework"), so a clone carries 40 of the 146
+# scenes this tree holds. doc-refs resolves every repo path the docs cite, and 20 of those paths are
+# scene files that no clone will ever have. Measured on a fresh clone of HEAD: 22 findings, 20 of them
+# gitignored scene content. A job that reports 20 phantom findings on every run teaches everyone to
+# ignore it. It keeps its teeth in pre-push, where the author has the content on disk.
+#
+# Runtime: about a minute, nearly all of it checkout and npm ci. The gates themselves are file reads
+# and finish in under half a second.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast-gates:
+    name: schema-check + lib-test + craft-coverage + arsenal-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # No gate in this job opens a browser, so the 150MB Chromium that puppeteer's postinstall would
+      # fetch is pure wall-clock. The browser jobs install it and cache it.
+      PUPPETEER_SKIP_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: framework gates
+        run: make schema-check lib-test craft-coverage arsenal-check

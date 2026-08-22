@@ -1,0 +1,53 @@
+name: layout audit (whole library, weekly)
+
+# `make audit` grades the one scene an author has open, so it only ever catches NEW defects. Two scenes
+# shipped dark-on-dark and stayed that way because nothing asked them again (docs/MISTAKES.md #373).
+# This is the sweep that asks them again. Weekly, not nightly: it is minutes rather than seconds, and a
+# contrast defect that has been on disk for a month is not urgent enough to pay for daily.
+#
+# Measured on a fresh clone of HEAD: 34 scenes, 1m46s of gate, about 4 minutes billed with the runner
+# boot and npm ci. Roughly 17 minutes a month.
+#
+# The overlays are the point of reading this job, not the log. Every finding names a frame number and a
+# colour, and the annotated PNG under /tmp/audit is what shows you where on the frame it sits.
+
+on:
+  schedule:
+    # Monday 06:17 UTC. Off the hour, because the top of the hour is where every scheduled job on
+    # GitHub queues up and waits.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  audit-all:
+    name: overlap / clipped text / safe zone / contrast, every scene
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - name: make audit-all
+        run: make audit-all
+
+      - name: annotated overlays
+        # The overlays are worth keeping even when the sweep passed, because the next run's diff is
+        # only readable against them.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-overlays
+          path: /tmp/audit
+          retention-days: 14
+          if-no-files-found: warn

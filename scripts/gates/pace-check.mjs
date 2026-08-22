@@ -34,9 +34,14 @@ const strict = process.argv.includes('--strict');
 // backdrop sits nearer 0.15 and is meant to.
 const FLOOR = 1.0;          // below this a film is asleep
 const HOLD = 4.0;           // seconds with nothing arriving or leaving
+import { lowerScene } from '../../core/transitions-lower.js';
 
 function measure(p) {
-  const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+// The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
+// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
+// that declared its boundaries the documented way was read as a film with no boundaries at all.
+// Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
+  const d = lowerScene(JSON.parse(fs.readFileSync(p, 'utf8')));
   if (!d.layers || !d.duration) return null;
   const ev = new Set();
   const walk = (a) => a.forEach((l) => {

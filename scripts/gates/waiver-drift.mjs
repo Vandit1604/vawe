@@ -28,6 +28,16 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const SCENES = path.join(ROOT, 'formats', 'scene');
 const file = process.argv[2];
 
+// LEGACY IS NOT A WAIVER, and this census is the one place they could be confused. A ratcheted rule
+// (scripts/gates/legacy-manifest.json) grandfathers the films that predate it, and a reader who sees
+// "no-storyboard: 2 waivers" here would conclude the rule is barely being dodged, when in fact 121 films
+// are excused from it by date. Both numbers have to be visible, and they have to be visibly different:
+// a waiver is a person's decision with a reason attached, legacy is nobody having looked yet.
+let ratchet = { rules: {} };
+try { ratchet = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/gates/legacy-manifest.json'), 'utf8')); } catch {}
+const legacyCount = (code) => Object.keys(ratchet.rules?.[code]?.legacy || {}).length;
+const legacyHolder = (code, name) => Boolean(ratchet.rules?.[code]?.legacy?.[name]);
+
 // ---- the census ----
 const tally = new Map();      // code -> [scene names]
 let total = 0;

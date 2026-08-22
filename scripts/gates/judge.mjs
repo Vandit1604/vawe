@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import path from 'node:path';
 import { beatsOf, evenSamples } from './beats-of.mjs';
-import { frameTile, tileGrid, tileBox, baseOf } from './tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, renderOf } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
 
 const inp = process.argv[2];
@@ -21,7 +21,7 @@ if (!inp) { console.error('usage: node scripts/gates/judge.mjs <scene.json|mp4> 
 let mp4 = inp, scene = null;
 if (inp.endsWith('.json')) {
   scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
-  mp4 = path.join('out', path.basename(inp).replace(/\.json$/, '.mp4'));
+  mp4 = renderOf(inp);
 }
 if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at ${mp4} — render first (\`make video D=${inp}\`), then judge.`); process.exit(1); }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');

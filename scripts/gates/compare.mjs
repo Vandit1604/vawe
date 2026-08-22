@@ -9,7 +9,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { frameTile, tileGrid } from './tile.mjs';
+import { frameTile, tileGrid, renderOf } from './tile.mjs';
 
 const args = process.argv.slice(2);
 const at = (() => { const i = args.indexOf('--at'); return i >= 0 ? args[i + 1] : '3'; })();
@@ -26,7 +26,7 @@ inputs.forEach((inp, i) => {
   if (inp.endsWith('.json')) {
     console.log(`  rendering ${inp} ...`);
     execFileSync('./bin/vawe', [inp], { stdio: 'inherit' });
-    src = path.join('out', path.basename(inp).replace(/\.json$/, '.mp4'));
+    src = renderOf(inp);
   }
   tiles.push(frameTile(src, at, path.join(tmp, `t${i}.png`), { tw: TW, th: TH }));
   console.log(`  tile ${i + 1}: ${path.basename(inp)}`);

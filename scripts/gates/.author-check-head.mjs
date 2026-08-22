@@ -59,158 +59,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { sceneDims } from '../../core/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-
-// ---- THE RATCHET ------------------------------------------------------------------------------------
-//
-// A rule that is right and new fails the whole library on its first run. `no-storyboard` fires on 88 of
-// the 132 scenes here. Both of the obvious answers are worse than the red:
-//   BACKFILL — write 88 storyboards to satisfy a gate. For a judgement rule that produces 88 fake plans,
-//              the number goes green and nobody learns anything.
-//   WAIT     — "promote it when under a quarter are missing" leaves the rule toothless for months and
-//              depends on a cleanup nobody is scheduled to do.
-// So: grandfather the past EXPLICITLY, block new work immediately. A scene that predates the rule is
-// recorded as LEGACY in a generated manifest, with the rule and the date it was adopted.
-//
-// LEGACY IS NOT A WAIVER, and the difference is the whole point. A waiver says a person looked at this
-// film, decided the rule is wrong for it, and wrote down why (`authoring.allow` + `_why`, in the scene).
-// Legacy says NOBODY HAS LOOKED. It carries no reason because there is no reason yet. If the two ever
-// print the same, legacy has become a silent waiver and the rule is repealed the way CLAUDE.md describes.
-//
-// IT ONLY TIGHTENS. `--adopt` freezes a rule's legacy set once, on the day the rule is promoted, and
-// refuses to run twice. `--stamp` can only REMOVE rows: a scene that now complies, a scene that was
-// deleted, a scene that was EDITED. Nothing can add a row after adoption, so no author can grandfather
-// today's film by re-running the stamp — which is the only way a ratchet stays a ratchet.
-//
-// AN EDITED LEGACY SCENE LOSES ITS LEGACY STATUS. Touching a film is when you owe it a plan: the moment
-// you have the file open and are making decisions about it is the cheapest moment there will ever be to
-// write down what it is for. The escape hatch for a genuine one-line fix is not a fake storyboard, it is
-// a waiver with a sentence in it, which is a decision someone can read and argue with later.
-//
-//   node scripts/gates/author-check.mjs --legacy                  · the census, writes nothing
-//   node scripts/gates/author-check.mjs --legacy --adopt <rule>   · freeze today's failures as legacy
-//   node scripts/gates/author-check.mjs --legacy --stamp          · prune fixed/edited/deleted rows
-const MANIFEST = path.join(repoRoot, 'scripts/gates/legacy-manifest.json');
-const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
-const TODAY = () => new Date().toISOString().slice(0, 10);
-
-// A storyboard is resolved in exactly one place, so the census and the ladder step can never disagree
-// about which films have a plan.
-function resolveStoryboard(sceneFile, sceneJson) {
-  const declared = typeof sceneJson.storyboard === 'string' ? sceneJson.storyboard
-    : (sceneJson.authoring && typeof sceneJson.authoring.storyboard === 'string' ? sceneJson.authoring.storyboard : null);
-  const dir = path.dirname(sceneFile), base = path.basename(sceneFile, '.json');
-  const candidates = declared
-    ? [path.resolve(repoRoot, declared), path.resolve(dir, declared)]
-    : [path.join(dir, `${base}.storyboard.md`), path.join(dir, '_concepts', `${base}.storyboard.md`)];
-  return { declared, candidates, path: candidates.find((p) => fs.existsSync(p)) || null };
-}
-
-// A rule joins the ratchet BY NAME here. `no-storyboard` is the first user, not the only one.
-// `fails` must be CHEAP and PURE — fs and JSON, nothing else. The census runs it over every scene in the
-// library on every author-check run, so a probe that launched a browser would cost 132 browsers. A rule
-// whose finding only exists after a child gate has run cannot be ratcheted this way, and should not be:
-// its census would go stale between runs, which is #159.
-const RATCHET_RULES = {
-  'no-storyboard': {
-    what: 'the film has a written plan (a storyboard, declared or found beside it)',
-    fails: (sceneFile, sceneJson) => !resolveStoryboard(sceneFile, sceneJson).path,
-  },
-};
-
-// The identity of a scene for legacy purposes is its CONTENT, canonicalised, not its bytes. Sorting keys
-// means a reformat or a key reorder does not cost a film its grandfathering, while any change to what the
-// film actually is does.
-const canonical = (v) => Array.isArray(v) ? v.map(canonical)
-  : (v && typeof v === 'object') ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canonical(v[k])]))
-  : v;
-const sceneHash = (sceneJson) => crypto.createHash('sha256').update(JSON.stringify(canonical(sceneJson))).digest('hex').slice(0, 16);
-
-const readManifest = () => {
-  try { return JSON.parse(fs.readFileSync(MANIFEST, 'utf8')); } catch { return { version: 1, rules: {} }; }
-};
-const libraryScenes = () => fs.readdirSync(SCENE_DIR)
-  .filter((f) => f.endsWith('.json') && !/\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f) && f !== 'schema.json')
-  .map((f) => path.join(SCENE_DIR, f))
-  .map((p) => { try { const d = JSON.parse(fs.readFileSync(p, 'utf8')); return d?.module === 'scene' ? { p, d, name: path.basename(p, '.json') } : null; } catch { return null; } })
-  .filter(Boolean);
-
-// One scene, one rule: legacy / new / current. `edited` is reported separately from `absent` because they
-// are different arguments — one film was never looked at, the other was looked at this week.
-function ratchetStatus(rule, sceneFile, sceneJson, manifest = readManifest()) {
-  const spec = RATCHET_RULES[rule];
-  const entry = manifest.rules?.[rule];
-  if (!spec || !entry) return { ratcheted: false, state: 'current' };
-  if (!spec.fails(sceneFile, sceneJson)) return { ratcheted: true, adopted: entry.adopted, state: 'current' };
-  const row = entry.legacy?.[path.basename(sceneFile, '.json')];
-  if (!row) return { ratcheted: true, adopted: entry.adopted, state: 'new', why: 'absent' };
-  if (row.hash !== sceneHash(sceneJson)) return { ratcheted: true, adopted: entry.adopted, state: 'new', why: 'edited', since: row.since };
-  return { ratcheted: true, adopted: entry.adopted, state: 'legacy', since: row.since };
-}
-
-// The two numbers. "0 new failures" is actionable; "88 failures" is noise people learn to scroll past,
-// and that habit is the actual disease.
-function census(rule, manifest = readManifest()) {
-  const c = { legacy: 0, current: 0, new: 0, newNames: [], editedNames: [] };
-  for (const s of libraryScenes()) {
-    const st = ratchetStatus(rule, s.p, s.d, manifest);
-    if (st.state === 'legacy') c.legacy++;
-    else if (st.state === 'new') { c.new++; c.newNames.push(s.name); if (st.why === 'edited') c.editedNames.push(s.name); }
-    else c.current++;
-  }
-  return c;
-}
-const censusLine = (rule, c) => `${c.legacy} legacy · ${c.current} current · ${c.new} NEW failures`;
-
-if (process.argv.includes('--legacy')) {
-  const adopt = (() => { const i = process.argv.indexOf('--adopt'); return i >= 0 ? process.argv[i + 1] : null; })();
-  const stamp = process.argv.includes('--stamp');
-  const m = readManifest();
-  m.version = 1;
-  m._generated = 'GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.';
-  m._stamp = 'node scripts/gates/author-check.mjs --legacy [--adopt <rule>|--stamp]   ·   make legacy';
-  m._legacy_is_not_a_waiver = 'A row here means NOBODY HAS LOOKED at this film against this rule. It carries no reason because there is no reason yet. A waiver is the opposite: a person decided, and wrote why, in the scene\'s own authoring.allow/_why.';
-  m.rules ||= {};
-  if (adopt) {
-    if (!RATCHET_RULES[adopt]) { console.error(`✗ ${adopt} is not a ratcheted rule. Known: ${Object.keys(RATCHET_RULES).join(', ')}`); process.exit(2); }
-    if (m.rules[adopt]) { console.error(`✗ ${adopt} was already adopted on ${m.rules[adopt].adopted}. A ratchet only tightens: re-adopting would grandfather today's films, which is the one thing this mechanism exists to prevent.`); process.exit(2); }
-    const legacy = {};
-    for (const s of libraryScenes()) if (RATCHET_RULES[adopt].fails(s.p, s.d)) legacy[s.name] = { since: TODAY(), hash: sceneHash(s.d) };
-    m.rules[adopt] = { adopted: TODAY(), what: RATCHET_RULES[adopt].what, legacy };
-    console.log(`\n  ADOPTED ${adopt} · ${Object.keys(legacy).length} scene(s) grandfathered on ${TODAY()}.`);
-  }
-  if (stamp) {
-    for (const [rule, entry] of Object.entries(m.rules)) {
-      const spec = RATCHET_RULES[rule];
-      if (!spec) continue;
-      const live = new Map(libraryScenes().map((s) => [s.name, s]));
-      for (const name of Object.keys(entry.legacy || {})) {
-        const s = live.get(name);
-        // Pruning only. A row can leave (the film complied, was edited, or is gone); none can arrive.
-        const gone = !s ? 'deleted' : !spec.fails(s.p, s.d) ? 'now complies' : entry.legacy[name].hash !== sceneHash(s.d) ? 'edited since it was grandfathered' : null;
-        if (gone) { delete entry.legacy[name]; console.log(`  − ${rule}: ${name} loses legacy status (${gone}).`); }
-      }
-      entry.stamped = TODAY();
-    }
-  }
-  if (adopt || stamp) fs.writeFileSync(MANIFEST, JSON.stringify(m, null, 2) + '\n');
-  console.log(`\n  RATCHET · ${path.relative(repoRoot, MANIFEST)}\n`);
-  for (const rule of Object.keys(RATCHET_RULES)) {
-    const entry = m.rules[rule];
-    if (!entry) { console.log(`  ○ ${rule} — not adopted. It has no legacy set, so it blocks every scene it fires on.`); continue; }
-    const c = census(rule, m);
-    console.log(`  ${rule} (adopted ${entry.adopted}): ${censusLine(rule, c)}`);
-    if (c.new) console.log(`      NEW: ${c.newNames.join(', ')}${c.editedNames.length ? `   (edited since grandfathering: ${c.editedNames.join(', ')})` : ''}`);
-  }
-  console.log(`\n  legacy = nobody has looked yet. waived = somebody decided and wrote why. Never the same thing.\n`);
-  process.exit(0);
-}
-
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 // ITERATE MODE: same gates, same findings, no consequence. While a film is still being explored, a
@@ -280,12 +133,13 @@ if (hasSugar(scene.layers)) {
 //      in _concepts/ next to it.
 // A scene with neither is not silently fine. It gets a finding (`no-storyboard`), because the alternative
 // is what this ladder used to do: print "write the storyboard" into a void and check nothing.
-const sbBase = path.basename(file, '.json');
-const { declared: declaredSb, candidates: sbCandidates, path: sbPath } = resolveStoryboard(file, scene);
-// The ratchet decides the SEVERITY of `no-storyboard` for this one film, and it must be known before the
-// ladder prints its own contents: a step that announces itself as a report and then blocks is a liar.
-const sbRatchet = ratchetStatus('no-storyboard', file, scene);
-const sbCensus = sbRatchet.ratcheted ? census('no-storyboard') : null;
+const declaredSb = typeof scene.storyboard === 'string' ? scene.storyboard
+  : (scene.authoring && typeof scene.authoring.storyboard === 'string' ? scene.authoring.storyboard : null);
+const sbDir = path.dirname(file), sbBase = path.basename(file, '.json');
+const sbCandidates = declaredSb
+  ? [path.resolve(repoRoot, declaredSb), path.resolve(sbDir, declaredSb)]
+  : [path.join(sbDir, `${sbBase}.storyboard.md`), path.join(sbDir, '_concepts', `${sbBase}.storyboard.md`)];
+const sbPath = sbCandidates.find((p) => fs.existsSync(p)) || null;
 const sidecarPath = file.replace(/\.json$/, '.intent.json');
 const hasSidecar = fs.existsSync(sidecarPath);
 const [sceneW, sceneH] = sceneDims(scene, '');
@@ -296,7 +150,7 @@ const landscape = sceneW > sceneH;
 // with what each step reads and whether it can stop you, and every step then announces its own position.
 const LADDER = [
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
-  ['storyboard', sbRatchet.state === 'new' ? 'blocks' : 'reports', 'whether this film has a written plan, and whether the plan holds together'],
+  ['storyboard', 'reports', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
@@ -408,26 +262,9 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     console.log(`      Write one from docs/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
     console.log(`      Then point this scene at it, so a rename cannot break the link:`);
     console.log(`        "storyboard": "formats/scene/${sbBase}.storyboard.md"`);
-    if (sbCensus) console.log(`      ratchet · no-storyboard: ${censusLine('no-storyboard', sbCensus)}`);
+    console.log(`  → 1 finding: no-storyboard.`);
     const excused = allow.has('no-storyboard');
-    if (sbRatchet.state === 'legacy') {
-      // LEGACY, printed as its own thing. It must never read like a waiver: nobody argued for this film,
-      // the rule simply arrived after it did.
-      console.log(`      ▪ LEGACY: this film predates the rule (grandfathered ${sbRatchet.since}, adopted ${sbRatchet.adopted}).`);
-      console.log(`        That is NOT a waiver. Nobody has looked at this film yet, and no reason is recorded.`);
-      console.log(`        Edit this scene and it loses legacy status, and then this finding stops you.`);
-      console.log(`  → 1 finding: no-storyboard (legacy, does not block).`);
-      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, legacy: !excused, legacySince: sbRatchet.since, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
-    } else if (sbRatchet.state === 'new') {
-      console.log(`      ▪ THIS FILM IS NOT GRANDFATHERED${sbRatchet.why === 'edited' ? ` ANY MORE: it held legacy status from ${sbRatchet.since} and has been edited since.` : `: it is not in the legacy manifest.`}`);
-      console.log(`        The rule blocks here. Write the plan, or waive it with a reason someone can read:`);
-      console.log(`          {"authoring":{"allow":["no-storyboard"],"_why":{"no-storyboard":"…"}}}`);
-      console.log(`  → 1 finding: no-storyboard (BLOCKS, this film is new work).`);
-      results.push({ name: 'storyboard', tier: 'blocks', failed: !excused, waived: excused, reported: false, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
-    } else {
-      console.log(`  → 1 finding: no-storyboard.`);
-      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
-    }
+    results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
   } else {
     console.log(`  plan: ${path.relative(repoRoot, sbPath)}${declaredSb ? ' (declared by the scene)' : ' (found by name)'}`);
     const sbRun = spawnSync('node', [path.join(repoRoot, 'scripts/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8', cwd: repoRoot });
@@ -571,14 +408,10 @@ console.log(`\n════════ author-check · ${path.basename(file)} �
 // own judgement about craft, and the engine will happily render a film that fails all of it.
 // docs/MISTAKES.md #365.
 const ENGINE_REFUSES = new Set(['validate']);
-// FOUR MARKS, NOT THREE. `○ waived` and `▪ legacy` must never be the same glyph or the same sentence:
-// one says a person decided and wrote why, the other says nobody has looked. Collapse them and legacy
-// becomes a silent waiver, which is how a rule gets repealed with nobody writing it down.
 const line = (r) => {
-  const mark = r.failed ? '✗' : r.waived ? '○' : r.legacy ? '▪' : r.reported ? '~' : '✓';
+  const mark = r.failed ? '✗' : r.waived ? '○' : r.reported ? '~' : '✓';
   const note = r.failed ? `BLOCKS (${r.unwaived.join(', ') || 'exit ' + 1})`
-    : r.waived ? `waived (${r.blockCodes.join(', ')}) — somebody decided, and said why`
-    : r.legacy ? `LEGACY (${r.blockCodes.join(', ')}, grandfathered ${r.legacySince}) — nobody has looked yet`
+    : r.waived ? `waived (${r.blockCodes.join(', ')})`
     : r.reported ? `reported, does not block (${r.blockCodes.join(', ') || 'see above'})`
     : 'nothing found';
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
@@ -594,12 +427,6 @@ if (judgements.length) {
   judgements.forEach(line);
 }
 if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
-const legacies = results.filter((r) => r.legacy);
-if (legacies.length) {
-  console.log(`  (▪ legacy comes from ${path.relative(repoRoot, MANIFEST)} — the rule arrived after the film did.`);
-  console.log(`   No reason is recorded anywhere because nobody has made one. Edit the film and it blocks.)`);
-}
-if (sbCensus) console.log(`\n  ratchet · no-storyboard: ${censusLine('no-storyboard', sbCensus)} across formats/scene/.`);
 console.log(`\n  Every one of the ${TOTAL} steps ran. ${results.length} returned a verdict; the rest print and advise.`);
 const reported = results.filter((r) => r.reported);
 if (reported.length) {

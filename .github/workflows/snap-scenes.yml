@@ -1,0 +1,87 @@
+name: "snap-all: baseline the library (MANUAL, never scheduled)"
+
+# READ THIS BEFORE STARTING IT. Two facts decide what this job can honestly do.
+#
+# 1. THERE ARE NO BASELINES IN A CLONE. `verify/snap/` is gitignored, so a runner starts with an empty
+#    baseline set every time. Diff mode has nothing to diff against: it would print "no-baseline" for
+#    every scene and prove nothing. That is why this job runs SAVE=1.
+#
+# 2. THE FONT SET IS NOT PINNED, AND CANNOT BE PINNED BY `make fonts` AS IT STANDS. A snap baseline is
+#    only valid inside one font state, and snap-scenes.mjs stamps the state precisely because a changed
+#    one silently rewrites every text width in the library (its own words: a "changed" scene is then not
+#    evidence about the code). scripts/media/fonts.mjs fetches 16 faces from jsDelivr with NO VERSION in
+#    any URL, so the bytes are whatever Fontsource published on the day the job ran. A runner and a
+#    laptop can therefore hold different faces under identical filenames and neither will know.
+#    Consequence: DO NOT compare a baseline saved here against one saved anywhere else, or on another
+#    day. Pinning the fetcher to exact Fontsource versions is what would make cross-machine comparison
+#    mean something; until then it does not.
+#
+# WHAT SAVE=1 STILL PROVES, and it is font-independent. The harness renders each scene twice in
+# different frame orders and quarantines any scene whose DOM signature depends on the order. That is
+# the renderFrame(n) purity contract, and it is a comparison INSIDE one run against one font set, so
+# neither fact above touches it. The job exits non-zero on a quarantined or errored scene. Read a green
+# run as "every scene is deterministic", never as "nothing changed".
+#
+# COST, MEASURED, because the number in circulation was wrong by two orders of magnitude. snap-all does
+# not render video. It samples a DOM signature at the frames where the motion is (entrance and exit
+# midpoints, cuts, stings, plus a spread) and compares ascending against descending. Measured: 34 scenes
+# on a fresh clone in 16 seconds; 105 scenes on a full working tree in 64 seconds. Call it 3 minutes
+# billed here, once the runner boot, npm ci and `make fonts` are paid for.
+#
+# It stays manual anyway, and not for the runtime. It stays manual because the two facts above mean a
+# green run says less than a reader will assume, and a job nobody started is better than a tick nobody
+# should trust. The two-hour sweep people have in mind is `make all`, which renders every format to mp4.
+# No workflow in this repo does that.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scene:
+        description: "Sweep one scene only (name substring). Empty sweeps every tracked scene."
+        type: string
+        required: false
+
+jobs:
+  snap-all:
+    name: renderFrame purity across every tracked scene
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - name: fetch the faces
+        # Text widths come out wrong with no faces at all, and "wrong the same way twice" would still
+        # pass the purity check while making the baselines useless to anyone reading them.
+        run: make fonts
+
+      - name: record which faces this run actually got
+        # The one honest thing available given unversioned URLs: say what landed, so a baseline
+        # downloaded from this run can be told apart from one saved on another day.
+        run: |
+          set -euo pipefail
+          ls -l assets/fonts
+          sha256sum assets/fonts/* | sort -k2
+
+      - name: make snap-all SAVE=1
+        run: make snap-all SAVE=1 ${{ inputs.scene && format('SCENE={0}', inputs.scene) || '' }}
+
+      - name: baselines
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-baselines
+          path: verify/snap/scenes
+          retention-days: 14
+          if-no-files-found: warn

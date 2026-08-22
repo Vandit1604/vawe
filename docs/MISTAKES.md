@@ -12063,6 +12063,55 @@ prevented from typing `TASTE=1`. The finding is that for weeks nobody did, and a
 on someone remembering a flag is a mechanism with a usage rate, not a guarantee. Gate: the ladder itself,
 which now names all 15 steps before it runs and reports the tier of every one.
 
+## #397 — The audit that told us which gates were blind was itself wrong
+
+#380 fixed eight consumers of the unified `transitions` surface and declared itself closed. #391 found
+the ninth. #394 found five more. Each time, the fix was closed on the strength of a consumer audit.
+
+**That audit was wrong about four of them.** Measured, not argued:
+
+```
+critique          HEAD: 0 occurrences of lowerScene    beat-check       HEAD: 0
+direction-floor   HEAD: 0                              pace-check       HEAD: 0
+```
+
+The audit reported all four as "lowers: yes". They never did. So four more gates read a film that
+declares its boundaries the documented way as a film with no boundaries: the value gate, the timeline
+gate, the ambition floor and the pace gate, all of them blind on `brew-launch-act1`.
+
+**A wrong entry in that audit is worse than the original defect.** The defect makes one gate quiet; the
+audit tells the next person not to look there. It is the reason this survived three closures, and the
+reason `#211`'s rule says GREP, not "check the list".
+
+Fixed in all four. Exit codes identical across **153 scenes** before and after, which is the expected
+shape: only 3 scenes in the library use `transitions`, and that is exactly why a defect this wide could
+hide for this long. **A change that fixes a blind spot and moves no number is the hardest kind to
+believe and the easiest kind to skip.**
+
+## #398 — The ratchet: legacy is not a waiver
+
+A new rule always fails old films. `no-storyboard` fires on 121 of 132 scenes. Two answers were
+rejected: backfill everything (a storyboard written to satisfy a gate is a fake storyboard, and the
+number goes green while nobody learns anything), and wait for a threshold (toothless for months, and it
+depends on a cleanup nobody is scheduled to do).
+
+**Grandfather explicitly, block new work immediately.** `scripts/gates/legacy-manifest.json` records
+which scenes predate a rule and when it was adopted. The gate reports two numbers:
+
+```
+no-storyboard (adopted 2026-08-21): 121 legacy · 11 current · 0 NEW failures
+```
+
+`0 NEW failures` is actionable. `121 failures` is noise people learn to scroll past, which is the actual
+disease.
+
+**Legacy is not a waiver, and the file says so at the top:** *legacy = nobody has looked yet. waived =
+somebody decided and wrote why. Never the same thing.* If the two ever print the same, legacy has become
+a silent waiver and the rule is repealed the way `CLAUDE.md` describes.
+
+It only tightens: `--adopt` freezes a rule's legacy set ONCE, on the day the rule is promoted. A scene
+that appears afterwards is new work and blocks. Proven: a scratch scene copied from a legacy film
+reported `1 NEW failures` and `BLOCKS, this film is new work`, while the 121 stayed silent.
 
 <!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
 <!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
