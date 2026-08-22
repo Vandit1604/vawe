@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "paint",
+      "paint": "starfield",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "start": 0,
+      "duration": 6
+    },
+    {
+      "type": "text",
+      "text": "starfield",
+      "x": 160,
+      "y": 860,
+      "w": 1600,
+      "size": 96,
+      "weight": 800,
+      "align": "center",
+      "start": 0.4,
+      "duration": 5.2,
+      "anim": "fade"
+    }
+  ]
+}

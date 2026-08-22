@@ -11,11 +11,18 @@ import Link from "next/link";
  */
 export function SourceViewer({ name, lines }: { name: string; lines: number }) {
   return (
-    <Link className="srcopen" href={`/editor?scene=${encodeURIComponent(name)}`}>
+    // The label sits in its own span, and the accessible name is stated, because a narrow tile
+    // hides the words and keeps the chip (.capcard .srcopen on /showcase). A link whose visible
+    // text can be hidden must not depend on that text for its name.
+    <Link
+      className="srcopen"
+      href={`/editor?scene=${encodeURIComponent(name)}`}
+      aria-label={`Open the JSON in the editor, ${lines} lines`}
+    >
       <span className="srcbrace" aria-hidden="true">
         {"{ }"}
       </span>
-      Open the JSON in the editor
+      <span className="srclabel">Open the JSON in the editor</span>
       <span className="srcmeta">{lines} lines</span>
       <span className="arw" aria-hidden="true">
         →

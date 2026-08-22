@@ -1319,3 +1319,155 @@ a{color:inherit;text-decoration:none}
   .tyintro{grid-template-columns:1fr;gap:22px}
   .tybar{position:static}
 }
+
+/* ===== THE EFFECTS INDEX (/showcase/effects) ===============================================
+   518 rows. The atom is a two-column table row (name · what it is for), not a card: a card is a
+   box of chrome around one word, and 518 of them is a wall nobody can read. Judging is a separate
+   job from finding, so it gets a separate surface (the drawer) and the list stays dense.
+   Everything here is prefixed .fx so it cannot reach the blocks browser it borrows .bfilter from. */
+.fxcoverage{margin:28px 0 8px;padding:22px 24px;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--bg-2);display:grid;gap:18px;grid-template-columns:minmax(0,15rem) minmax(0,1fr)}
+.fxcoverage h2{font-size:1.15rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.fxcoverage div{display:grid;gap:10px}
+.fxcoverage p{font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
+.fxcoverage b{color:var(--ink)}
+
+.fxfilter{top:0}
+.fxonly{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono),monospace;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.fxonly input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+
+/* 35 sections is too many to find by scrolling, so the families are also a jump list. */
+.fxrail{display:flex;flex-wrap:wrap;gap:6px;padding:14px 0 4px;border-bottom:1px solid var(--line)}
+.fxrail a{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--ink-2);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;
+  transition:border-color .15s var(--ease),color .15s var(--ease)}
+.fxrail a:hover{border-color:var(--accent);color:var(--accent)}
+.fxrail a span{color:var(--muted);margin-left:5px}
+
+.fxlist{padding-bottom:72px}
+/* the drawer is a fixed column on the right, so the list gives up the width rather than sitting under it */
+@media (min-width:1100px){ .fxlist-open{padding-right:452px} }
+
+.fxfam{padding-top:40px;scroll-margin-top:78px}
+.fxfam h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;font-size:1.3rem;font-weight:700;
+  letter-spacing:-.025em;line-height:1.15}
+.fxfam h2 .fxn{font-family:var(--font-mono),monospace;font-size:13px;font-weight:500;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:1px 9px}
+/* .tag ships a 16px top margin for the clip rows; in a heading it is an inline chip */
+.fxfam h2 .tag{margin:0;display:inline-flex}
+.fxtag-live{color:var(--accent)}
+.fxintro{margin:10px 0 14px;font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:88ch}
+.fxintro code,.fxd-desc code,.fxtable code{font-family:var(--font-mono),monospace;font-size:.9em;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.fxskip{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--muted);max-width:80ch}
+
+.fxtable{width:100%;border-collapse:collapse;table-layout:fixed}
+.fxtable th{text-align:left;font-family:var(--font-mono),monospace;font-size:11px;font-weight:500;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:6px 12px 6px 0;
+  border-bottom:1px solid var(--line-2)}
+.fxtable th:first-child{width:236px}
+.fxtable td{padding:7px 12px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;
+  font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.fxtable tr:hover td{background:var(--bg-2)}
+.fxtable tr[data-on] td{background:var(--accent-soft)}
+
+.fxname{display:inline-flex;align-items:center;gap:7px;max-width:100%;border:0;background:none;padding:0;
+  cursor:pointer;font-family:var(--font-mono),monospace;font-size:13px;color:var(--ink);text-align:left;
+  word-break:break-word}
+.fxname:hover,.fxname:focus-visible{color:var(--accent)}
+.fxdot{flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.fxchips{display:flex;flex-wrap:wrap;gap:6px}
+.fxchips .fxname{border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:#fff}
+.fxchips .fxname:hover{border-color:var(--accent)}
+
+/* ---- the preview drawer: a second surface, because finding and judging are different jobs ---- */
+.fxdrawer{position:fixed;right:0;top:0;bottom:0;width:452px;z-index:40;display:flex;flex-direction:column;
+  background:#fff;border-left:1px solid var(--line);box-shadow:var(--shadow-3)}
+.fxdrawer header{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.fxd-name{font-size:16px;font-weight:600;color:var(--ink);word-break:break-word}
+.fxd-fam{font-size:12.5px;color:var(--muted);margin-top:3px}
+.fxd-fam .tag{display:inline;margin:0;font-size:11.5px}
+.fxd-x{margin-left:auto;flex:0 0 auto;width:28px;height:28px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;color:var(--muted);cursor:pointer;font-size:12px;line-height:1}
+.fxd-x:hover{border-color:var(--accent);color:var(--accent)}
+.fxd-body{flex:1;overflow-y:auto;padding:16px 18px 28px;display:grid;gap:16px;align-content:start}
+.fxd-desc{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.fxd-nope{font-size:13px;line-height:1.6;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
+  border-radius:10px;padding:14px 16px}
+.fxd-nope b{color:var(--ink);display:block;margin-bottom:3px}
+.fxprev{box-shadow:none}
+.fxprev-err{font-size:12.5px;line-height:1.5;color:var(--bad);background:var(--bad-bg);padding:10px 12px;
+  border-top:1px solid var(--line)}
+.fxd-code{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.fxd-code-h{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-2);
+  border-bottom:1px solid var(--line);font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted)}
+.fxcopy{margin-left:auto;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer;
+  font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);padding:3px 9px}
+.fxcopy:hover{border-color:var(--accent);background:var(--accent-soft)}
+.fxd-code pre{margin:0;padding:12px;overflow-x:auto;background:#fff}
+.fxd-code code{font-family:var(--font-mono),monospace;font-size:12px;line-height:1.55;color:var(--ink);
+  white-space:pre}
+
+/* ---- the arsenal card on /showcase ---- */
+.cap-index{display:flex;align-items:center;gap:16px;margin-top:22px;padding:16px 20px;text-decoration:none;
+  border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:var(--r);color:var(--ink);
+  transition:border-color .2s var(--ease),transform .2s var(--ease)}
+.cap-index:hover{border-color:var(--accent);transform:translateY(-1px)}
+.cap-index-n{font-family:var(--font-mono),monospace;font-size:1.7rem;font-weight:700;color:var(--accent);
+  letter-spacing:-.03em;line-height:1}
+.cap-index b{display:block;font-size:15px;margin-bottom:2px}
+.cap-index span span{display:block;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.cap-index-go{margin-left:auto;color:var(--accent);font-size:18px}
+
+/* ---- 430px: a dense table is the easiest thing to break on a phone ---- */
+@media (max-width:760px){
+  .fxcoverage{grid-template-columns:1fr;padding:18px}
+  /* the two columns become one: the name is the row's heading, the description its body. The table
+     stops being a table so a 13px name column cannot squeeze the sentence into one word per line. */
+  .fxtable,.fxtable tbody,.fxtable tr,.fxtable td{display:block;width:auto}
+  .fxtable thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .fxtable tr{border-bottom:1px solid var(--line);padding:9px 0}
+  .fxtable td{border:0;padding:0}
+  .fxtable td:first-child{margin-bottom:2px}
+  .fxtable tr:hover td,.fxtable tr[data-on] td{background:none}
+  .fxtable tr[data-on]{background:var(--accent-soft)}
+  .fxrail{max-height:96px;overflow-y:auto}
+  /* the drawer is a sheet: a 452px panel on a 430px screen is the whole screen with a hole in it */
+  .fxdrawer{width:auto;left:0;top:auto;height:82dvh;border-left:0;border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0}
+  .fxlist-open{padding-bottom:82dvh}
+}
+/* .bnote is inline-flex, which turns a SENTENCE into flex items: the `make effects` chip became its
+   own column and broke the line in three. This one is prose with an inline chip in it. */
+.fxnote{display:block;line-height:1.6;max-width:78ch}
+.fxnote .mono{font-family:var(--font-mono),monospace;font-size:.92em}
+
+/* ===== SHOWCASE: THE VOCABULARY AS A GALLERY ===============================================
+   Nine capabilities used to be nine full-width alternating rows, each with a 35-word paragraph
+   restating the clip beside it. Nine rows is nine screens to see nine clips. As a grid the whole
+   vocabulary is one look, and the entry is a title plus the names you type. */
+.capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:28px 0 0}
+.capcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);
+  box-shadow:var(--shadow-1);transition:box-shadow .25s var(--ease),transform .25s var(--ease)}
+.capcard:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.capmedia{aspect-ratio:16/9;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.capmedia video{width:100%;height:100%;object-fit:contain;display:block}
+.capcard figcaption{padding:15px 17px 17px}
+.capcard h3{font-size:1rem;font-weight:700;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.capcard .tag{margin-top:9px}
+.capnote{margin:22px 0 4px;font-size:13.5px;line-height:1.6;color:var(--muted);max-width:64ch}
+/* the arsenal link takes the column the cut paragraph used to sit in */
+.cap-lead .cap-index{grid-column:2;grid-row:2;margin-top:0}
+@media (max-width:1000px){ .capgrid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:860px){ .cap-lead .cap-index{grid-column:1;grid-row:auto} }
+@media (max-width:640px){ .capgrid{grid-template-columns:1fr;gap:18px} }
+/* In a 1/3-width tile the full label wraps to three lines, which is a broken button. The tile is
+   already titled and tagged, so the chip only has to say "the source is here, and how long it is". */
+.capcard .srcopen{font-size:11px;gap:6px;padding:6px 10px;margin-top:11px;white-space:nowrap;max-width:100%}
+.capcard .srcopen .srclabel{display:none}
+.capcard .srcopen .srcmeta{font-size:10.5px;padding-left:8px}
+/* The sticky toolbar is one row on desktop and three on a phone, so a family anchored under it
+   lands with its heading hidden. The offset is the bar, and the bar is taller here. */
+@media (max-width:760px){ .fxfam{scroll-margin-top:150px} }
+.fxgap{margin:-6px 0 12px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:76ch}

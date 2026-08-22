@@ -5,6 +5,7 @@ import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { SourceViewer } from "../components/SourceViewer";
 import LINES from "../../lib/scene-lines.json";
+import EFFECTS from "../../lib/effects-counts.json";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
@@ -14,33 +15,48 @@ export const metadata: Metadata = {
     "What Vawe can render: kinetic typography, transitions, shader stings, data stories, product UI, and any aspect ratio. Every clip is one JSON scene.",
 };
 
+/* A GALLERY, not an essay.
+ *
+ * This page used to carry about 620 words of prose: a paragraph under the hero, a paragraph under
+ * each of two section heads, a 30-word description on every film card, and a 35-word paragraph
+ * beside each of nine capability clips laid out as nine full-width alternating rows. Nine rows of
+ * picture-plus-paragraph is nine screens to see nine clips, and every one of those paragraphs said
+ * in words what the clip beside it was already showing.
+ *
+ * So the clips became the content. The capability rows are a grid: the whole vocabulary is visible
+ * at once, and each entry is a title and the names you type. What is left in prose is the part a
+ * clip genuinely cannot say, which is what this page CANNOT show you (two scenes whose source may
+ * not be published) and where to go next.
+ */
+
 type Film = { slug: string; brand: string; dur: string; line: string; tag: string };
 
 const FILMS: Film[] = [
-  { slug: "linear-launch", brand: "Linear", dur: "0:50", line: "The product development system for teams and agents. A dark, keynote-register film: an agent session runs live, then Start building.", tag: "reflected · dark + iris" },
-  { slug: "stripe", brand: "Stripe", dur: "0:45", line: "Financial infrastructure to grow your revenue. The signature gradient mesh, a one-tap payment, a Payment complete.", tag: "reflected · gradient mesh" },
-  { slug: "argus-launch", brand: "Argus", dur: "0:23", line: "Posting into the void becomes grow on X, on purpose. An X-native waitlist teaser, drafted in your voice.", tag: "reflected · white + cobalt" },
-  { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "Every agent forgets who you are. A constellation of AI tools resolves into one memory file: stop starting from scratch.", tag: "reflected · white + ember" },
-  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30", line: "Buyers ask Reddit, and AI answers with Reddit. Threads surfaced early, replies coached warm and ban-safe, and a map of where you show up.", tag: "reflected · white + orange" },
-  { slug: "plinth-ad", brand: "Plinth", dur: "0:27", line: "Anyone calls it, you earn on every call. An MCP endpoint that meters itself, priced per request, paid out at eighty percent.", tag: "reflected · white + cobalt" },
+  { slug: "linear-launch", brand: "Linear", dur: "0:50", line: "An agent session runs live, then Start building.", tag: "reflected · dark + iris" },
+  { slug: "stripe", brand: "Stripe", dur: "0:45", line: "The gradient mesh, one tap, payment complete.", tag: "reflected · gradient mesh" },
+  { slug: "argus-launch", brand: "Argus", dur: "0:23", line: "Posting into the void becomes growth on X.", tag: "reflected · white + cobalt" },
+  { slug: "creed-launch", brand: "Creed", dur: "0:53", line: "A wall of AI tools resolves into one memory file.", tag: "reflected · white + ember" },
+  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30", line: "Buyers ask Reddit. This maps where you appear.", tag: "reflected · white + orange" },
+  { slug: "plinth-ad", brand: "Plinth", dur: "0:27", line: "An MCP endpoint that meters itself, and pays out.", tag: "reflected · white + cobalt" },
 ];
 
 // `scene` names the JSON the "view source" link opens, defaulting to `showcase-<src>`. It is set to
-// null for rows whose scene may NOT be published: site-engine ships every asset a published scene
+// null for tiles whose scene may NOT be published: site-engine ships every asset a published scene
 // references, and the gradient and ransom packs are licensed for use but not for redistribution.
-// The rendered mp4 is a use of them; shipping the source files themselves would not be.
-type Row = { num: string; title: string; body: string; tag: string; src: string; flip?: boolean; scene?: string | null };
+// The rendered mp4 is a use of them; shipping the source files themselves would not be. The page
+// says this out loud under the grid rather than leaving two tiles quietly missing a link.
+type Cap = { title: string; tag: string; src: string; scene?: string | null };
 
-const ROWS: Row[] = [
-  { num: "01 / kinetic type", title: "Type that moves like it reads.", tag: "preset: up · decode · gradient", src: "type", body: "Split by word or character, each line enters on its own preset, rise to decode to a focus-and-hold. The motion is part of the meaning." },
-  { num: "02 / transitions", title: "Cuts with intent.", tag: "cut: whip · punch · spin · zoom", src: "cuts", flip: true, body: "Whip, punch, spin, zoom. One cut family per film, chosen by the motion director, each covered by a whoosh from the sound library." },
-  { num: "03 / shader stings", title: "GPU stings between beats.", tag: "sting: flash · glitch · scan · ripple", src: "stings", body: "Flash, glitch, scan, ripple. Real fragment shaders keyed on (progress, seed) only, so they are seek-safe and byte-reproducible." },
-  { num: "04 / data story", title: "Charts that draw themselves.", tag: "block: lineChart · statBig · kpiRow", src: "data", flip: true, body: "A line chart draws on, a number counts up, KPIs land. The easing is the story. All from a data array in the scene JSON." },
-  { num: "05 / product UI", title: "Product demos, rebuilt.", tag: "block: browserFrame · cursor · toast", src: "ui", body: "A dashboard inside a browser frame, a cursor that glides in and clicks, and the click has a consequence: a toast confirms the render." },
-  { num: "06 / composite looks", title: "One frame, ten grades.", tag: "filter: thermal · nightVision · filmNoir", src: "looks", flip: true, scene: "looks", body: "The picture holds still and only the grade changes, so you can read what each one did: bloom off the highlights, phosphor scanlines, value stripped to mono, a heat palette remap. Each is one string on the layer, and a number after it sets the strength." },
-  { num: "07 / cutout type", title: "Ransom notes, set per frame.", tag: "ransom: paper · color · sprites", src: "ransom", scene: null, body: "Every letter is a real scanned cutout, its face, tint and rotation picked from a seeded hash. The same seed gives the same note on every render, so the letters can keep changing without ever flickering." },
-  { num: "08 / dithering", title: "Ordered dither, not a texture overlay.", tag: "canvasFx · baked offline", src: "dither", scene: "ditherkit", body: "A Bayer matrix fills a chart with real ordered dither, so it holds up in light and dark and never turns to mud once the video is compressed. Baked once at build, never at frame time." },
-  { num: "09 / backdrops", title: "Gradient fields, baked cold.", tag: "image: ken burns · radius", src: "gradients", flip: true, scene: null, body: "A library of gradient backgrounds, downscaled once offline so no render ever decodes 4K it is about to throw away. Drop one under a scene and give it a slow push in." },
+const CAPS: Cap[] = [
+  { title: "Type that moves like it reads.", tag: "preset: up · decode · gradient", src: "type" },
+  { title: "Cuts with intent.", tag: "cut: whip · punch · spin · zoom", src: "cuts" },
+  { title: "GPU stings between beats.", tag: "sting: flash · glitch · scan · ripple", src: "stings" },
+  { title: "Charts that draw themselves.", tag: "block: lineChart · statBig · kpiRow", src: "data" },
+  { title: "Product demos, rebuilt.", tag: "block: browserFrame · cursor · toast", src: "ui" },
+  { title: "One frame, ten grades.", tag: "filter: thermal · nightVision · filmNoir", src: "looks", scene: "looks" },
+  { title: "Ransom notes, set per frame.", tag: "ransom: paper · color · sprites", src: "ransom", scene: null },
+  { title: "Ordered dither, baked cold.", tag: "canvasFx: dither · bayer", src: "dither", scene: "ditherkit" },
+  { title: "Gradient fields, downscaled offline.", tag: "image: ken burns · radius", src: "gradients", scene: null },
 ];
 
 export default function Showcase() {
@@ -54,13 +70,13 @@ export default function Showcase() {
             <span className="dot" /> showcase
           </span>
           <h1>What one JSON can render.</h1>
-          <p>Every clip below is a single self-describing scene, rendered deterministically, scored automatically. No timeline, no editor. Hit <span className="mono">View source JSON</span> on any clip to read the exact scene that produced it, and copy it to start from.</p>
+          <p>Every clip on this page is a single scene file. Open the source on any of them.</p>
         </section>
 
         <section className="films">
           <div className="films-head">
-            <h2>Four brands, four films.</h2>
-            <p>End-to-end launch films, each authored as one JSON scene from the brand&apos;s own site: reflected colours, real UI, motion in the brand&apos;s own personality. No two look alike.</p>
+            <h2>Six brands, six films.</h2>
+            <p>Each one authored as one JSON scene from the brand&apos;s own site.</p>
           </div>
           <div className="filmgrid">
             {FILMS.map((f) => (
@@ -85,59 +101,72 @@ export default function Showcase() {
         <div className="cap-lead">
           <div className="num">the vocabulary</div>
           <h2>And every part, on its own.</h2>
-          <p>The films above are composed from these primitives. Each one is a capability you can reach for by name.</p>
+          {/* Nine clips are the tour, not the vocabulary: the engine registers 518 effects. An
+              author needs the index open beside them, so it gets the strongest link on the page. */}
+          <Link className="cap-index" href="/showcase/effects">
+            <span className="cap-index-n">{EFFECTS.total}</span>
+            <span>
+              <b>Every effect, indexed</b>
+              <span>{EFFECTS.families} families, searchable, with the JSON that uses each one.</span>
+            </span>
+            <span className="cap-index-go" aria-hidden="true">→</span>
+          </Link>
         </div>
 
-          {ROWS.map((r) => (
-            <div className={r.flip ? "row flip" : "row"} key={r.src}>
-              <div className="media">
-                <Clip src={`/assets/showcase/${r.src}.mp4`} poster={`/assets/showcase/${r.src}.jpg`} />
+        <div className="capgrid">
+          {CAPS.map((c) => (
+            <figure className="capcard" key={c.src}>
+              <div className="capmedia">
+                <Clip src={`/assets/showcase/${c.src}.mp4`} poster={`/assets/showcase/${c.src}.jpg`} />
               </div>
-              <div className="copy">
-                <div className="num">{r.num}</div>
-                <h2>{r.title}</h2>
-                <p>{r.body}</p>
-                <span className="tag">{r.tag}</span>
-                {r.scene !== null && (
+              <figcaption>
+                <h3>{c.title}</h3>
+                <span className="tag">{c.tag}</span>
+                {c.scene !== null && (
                   <SourceViewer
-                    name={r.scene ?? `showcase-${r.src}`}
-                    lines={lineCount(r.scene ?? `showcase-${r.src}`)}
+                    name={c.scene ?? `showcase-${c.src}`}
+                    lines={lineCount(c.scene ?? `showcase-${c.src}`)}
                   />
                 )}
-              </div>
-            </div>
+              </figcaption>
+            </figure>
           ))}
+        </div>
 
-          {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
-              wide — you could not see the scene, so the one thing it claims to prove (same scene,
-              three crops) was unprovable. Three ratios side by side need the whole measure. */}
-          <div className="aspects">
-            <div className="aspects-head">
-              <div>
-                <div className="num">10 / any aspect</div>
-                <h2>One scene, every ratio.</h2>
-              </div>
-              <p>Relative coordinates resolve per aspect: pin, a 12-column grid, optical centering. Render 16:9, 9:16, and 1:1 from the same source, in one pass.</p>
+        <p className="capnote">
+          Two of these ship without their source. The gradient and ransom packs are licensed for use,
+          not for redistribution, so the films are here and the scene files are not.
+        </p>
+
+        {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
+            wide, so the one thing it claims to prove (same scene, three crops) was unprovable.
+            Three ratios side by side need the whole measure. */}
+        <div className="aspects">
+          <div className="aspects-head">
+            <div>
+              <h2>One scene, every ratio.</h2>
             </div>
-            <div className="trio">
-              <figure className="ar a169">
-                <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
-                <figcaption>16:9</figcaption>
-              </figure>
-              <figure className="ar a916">
-                <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
-                <figcaption>9:16</figcaption>
-              </figure>
-              <figure className="ar a11">
-                <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
-                <figcaption>1:1</figcaption>
-              </figure>
-            </div>
-            <div className="aspects-foot">
-              <span className="tag">--aspect 16:9,9:16,1:1</span>
-              <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
-            </div>
+            <p>Rendered 16:9, 9:16 and 1:1 from the same source, in one pass.</p>
           </div>
+          <div className="trio">
+            <figure className="ar a169">
+              <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
+              <figcaption>16:9</figcaption>
+            </figure>
+            <figure className="ar a916">
+              <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
+              <figcaption>9:16</figcaption>
+            </figure>
+            <figure className="ar a11">
+              <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
+              <figcaption>1:1</figcaption>
+            </figure>
+          </div>
+          <div className="aspects-foot">
+            <span className="tag">--aspect 16:9,9:16,1:1</span>
+            <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
+          </div>
+        </div>
 
         <section className="section end">
           <h2 className="h2">

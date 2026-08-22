@@ -724,6 +724,13 @@ mcp-smoke:
 
 effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
+	node scripts/site/effects-json.mjs
+
+# make effects-json [CHECK=1] — the site's copy of the same arsenal: site/lib/effects.json plus one
+# playable scene per previewable effect. Same family list as docs/EFFECTS.md, imported not restated.
+.PHONY: effects-json
+effects-json: ## regenerate the /showcase/effects index (and its preview scenes) from the registries
+	@node scripts/site/effects-json.mjs $(if $(CHECK),--check,)
 
 # make globe-dots [SPACING=2.2]  — re-bake core/globe-dots.js from Natural Earth. Run this only when
 # the spacing or the source changes; the output is committed and the runtime never fetches anything.

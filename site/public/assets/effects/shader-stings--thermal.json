@@ -1,0 +1,52 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Before the cut",
+      "x": 160,
+      "y": 430,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0,
+      "duration": 2.4,
+      "anim": "rise",
+      "out": "fade"
+    },
+    {
+      "type": "text",
+      "text": "After the cut",
+      "x": 160,
+      "y": 430,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 2.4,
+      "duration": 3.6,
+      "anim": "rise",
+      "color": "#ffd23d"
+    }
+  ],
+  "stings": [
+    {
+      "t": 2.4,
+      "fx": "thermal"
+    }
+  ]
+}
