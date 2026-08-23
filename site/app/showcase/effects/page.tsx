@@ -35,22 +35,16 @@ export default function Effects() {
             </span>
             <h1>{ix.total} effects. All of them, here.</h1>
             <p>
-              Every effect the engine registers, in {ix.families} families, each with the JSON that
-              uses it. This page is generated from the registries themselves, so it cannot describe an
-              effect the engine does not have, or miss one it does.
+              Every effect the engine registers, in {ix.families} families, generated from the
+              registries themselves. <b>{ix.previewed} play live</b>, on demand, in the real engine.
             </p>
-            <div className="bnote fxnote">
-              <b>{ix.previewed} of {ix.total} play live</b> in the real engine, on demand, from a real
-              scene file. The other {ix.total - ix.previewed} are listed with their JSON and say what
-              they would need. <span className="mono">make effects</span> regenerates the lot.
-            </div>
-          </section>
 
-          {/* Coverage, stated rather than implied. A list that quietly shows a preview for some rows
-              and not others reads as breakage; naming the split turns it into information. */}
-          <section className="fxcoverage">
-            <h2>What this page can and cannot show you</h2>
-            <div>
+            {/* THE COVERAGE ESSAY IS A FOOTNOTE, NOT A PREFACE. A list that shows a preview for some
+                rows and not others reads as breakage, so the split has to be stated somewhere; it
+                does not have to be stated in front of the index a person came here to scan. It used
+                to run ~300 words before the first effect name. */}
+            <details className="fxabout">
+              <summary>Which {ix.previewed} play, and why the other {ix.total - ix.previewed} do not</summary>
               <p>
                 <b>It plays</b> {ix.previewed} of {ix.total}, across {live} families. An effect is
                 playable here when one small scene demonstrates it with nothing but its name
@@ -68,9 +62,10 @@ export default function Effects() {
               <p>
                 <b>No preview proves a film.</b> These are six-second swatches on a flat backdrop. What
                 an effect does in a film is a question for <Link href="/editor">the editor</Link> and{" "}
-                <Link href="/showcase">the films on showcase</Link>.
+                <Link href="/showcase">the films on showcase</Link>. <span className="mono">make
+                effects</span> regenerates the lot.
               </p>
-            </div>
+            </details>
           </section>
 
           <EffectsBrowser index={ix} />

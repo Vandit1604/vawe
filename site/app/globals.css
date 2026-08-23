@@ -1361,12 +1361,10 @@ a{color:inherit;text-decoration:none}
    box of chrome around one word, and 518 of them is a wall nobody can read. Judging is a separate
    job from finding, so it gets a separate surface (the drawer) and the list stays dense.
    Everything here is prefixed .fx so it cannot reach the blocks browser it borrows .bfilter from. */
-.fxcoverage{margin:28px 0 8px;padding:22px 24px;border:1px solid var(--line);border-radius:var(--r);
-  background:var(--bg-2);display:grid;gap:18px;grid-template-columns:minmax(0,15rem) minmax(0,1fr)}
-.fxcoverage h2{font-size:1.15rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
-.fxcoverage div{display:grid;gap:10px}
-.fxcoverage p{font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
-.fxcoverage b{color:var(--ink)}
+/* The coverage note reads at footnote size wherever it is folded, including under a hero, where
+   .phead p would otherwise render it at dek size and undo the point of folding it. */
+.fxabout>p{margin-top:10px;font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
+.fxabout>p b{color:var(--ink)}
 
 .fxfilter{top:0}
 .fxonly{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono),monospace;
@@ -1458,7 +1456,6 @@ a{color:inherit;text-decoration:none}
 
 /* ---- 430px: a dense table is the easiest thing to break on a phone ---- */
 @media (max-width:760px){
-  .fxcoverage{grid-template-columns:1fr;padding:18px}
   /* the two columns become one: the name is the row's heading, the description its body. The table
      stops being a table so a 13px name column cannot squeeze the sentence into one word per line. */
   .fxtable,.fxtable tbody,.fxtable tr,.fxtable td{display:block;width:auto}
@@ -1476,8 +1473,6 @@ a{color:inherit;text-decoration:none}
 }
 /* .bnote is inline-flex, which turns a SENTENCE into flex items: the `make effects` chip became its
    own column and broke the line in three. This one is prose with an inline chip in it. */
-.fxnote{display:block;line-height:1.6;max-width:78ch}
-.fxnote .mono{font-family:var(--font-mono),monospace;font-size:.92em}
 
 /* ===== SHOWCASE: THE VOCABULARY AS A GALLERY ===============================================
    Nine capabilities used to be nine full-width alternating rows, each with a 35-word paragraph
