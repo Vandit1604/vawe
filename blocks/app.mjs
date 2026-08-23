@@ -15,7 +15,7 @@
 // CONTENT RULE: no figure a caller cannot stand behind. These surfaces carry counts and metadata by
 // nature, so every count is a PROP that defaults to empty — the block never invents one.
 
-import { TOKENS as T, text, box, r2, R, cardChrome, avatarEl } from './kit.mjs';
+import { TOKENS as T, text, box, r2, R, cardChrome, avatarEl, onColor } from './kit.mjs';
 
 const spacer = () => box({ grow: 1 });
 
@@ -124,9 +124,10 @@ export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body 
       text({ text: title, size: 30, weight: 700, color: T.ink, ls: '-0.02em' }),
       body && text({ text: body, size: 19, weight: 400, color: T.sub }),
     ].filter(Boolean) },
+    // ink on the accent fill: onColor(T.accent) instead of an assumed white.
     cta && { type: 'group', bg: T.accent, radius: R.tight, pad: '12px 0', layout: 'row', justify: 'center', items: 'center',
       start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
-      children: [text({ text: cta, size: 19, weight: 700, color: '#fff' })] },
+      children: [text({ text: cta, size: 19, weight: 700, color: onColor(T.accent) })] },
   ].filter(Boolean) }];
 }
 

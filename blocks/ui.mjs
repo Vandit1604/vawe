@@ -184,7 +184,9 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 12, children: [
       it.done
-        ? text({ ...CHIP, color: '#fff', bg: T.green, border: '2px solid transparent', ...beat(i, { anim: 'pop', delay: 0.34 }) })
+        // ink ON a coloured fill: onColor picks legible text for whatever T.green resolves to, rather
+        // than assuming white always clears the bar (the badge fix showed white fails on some fills).
+        ? text({ ...CHIP, color: onColor(T.green), bg: T.green, border: '2px solid transparent', ...beat(i, { anim: 'pop', delay: 0.34 }) })
         : text({ ...CHIP, color: 'transparent', bg: T.card, border: `2px solid ${T.hair}`, ...beat(i, { anim: 'fade' }) }),
       text({ text: it.text, size: 21, weight: 500, color: it.done ? T.dim : T.ink, ...beat(i) }),
     ] })) }];
@@ -308,10 +310,14 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
     });
   }
   message = title ?? message;
+  // Same defect the badge carried: a hardcoded dark plate ('#0A0A0A') with hardcoded light text
+  // disappears on a dark theme's page background instead of popping off it. T.ink/T.paper is the
+  // theme contract's guaranteed-legible inverted pair, so the plate stays dark-on-light and flips to
+  // light-on-dark exactly where it needs to, instead of merging into the ground on one of the two.
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 16px',
-    bg: '#0A0A0A', radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
-      box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
-      text({ text: message, size: 19, weight: 500, color: '#F5F5F3', grow: 1 }),
+    bg: T.ink, radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+      box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: onColor(accent) })] }),
+      text({ text: message, size: 19, weight: 500, color: T.paper, grow: 1 }),
       action && text({ text: action, size: 18, weight: 600, color: T.accentInk }),
     ].filter(Boolean) }];
 }
