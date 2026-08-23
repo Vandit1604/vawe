@@ -66,7 +66,7 @@
               "weight": 500,
               "text": "▼",
               "size": 15,
-              "color": "#C0362C",
+              "color": "var(--down)",
               "delay": 1.25,
               "anim": "pop",
               "enterDur": 0.3
@@ -76,7 +76,7 @@
               "weight": 600,
               "text": "-8%",
               "size": 17,
-              "color": "#C0362C",
+              "color": "var(--down)",
               "font": "mono",
               "delay": 1.25,
               "anim": "pop",

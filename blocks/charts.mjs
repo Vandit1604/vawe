@@ -132,9 +132,11 @@ export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.3, children: [
       text({ text: label, size: 18, color: T.dim, font: 'mono' }),
       { type: 'count', from, to, unit, font: 'sans', size: 56, weight: 700, color: T.ink, ls: '-0.02em', countStart: 0.2, countDur: 1.2, ease: 'easeOutExpo' },
+      // a negative delta is the down status, not a one-off red: T.down instead of a guessed hex so it
+      // repaints with the theme's own status colour.
       delta && { type: 'group', layout: 'row', items: 'center', gap: 6, children: [
-        text({ text: deltaUp ? '▲' : '▼', size: 15, color: deltaUp ? T.green : '#C0362C', delay: 1.25, anim: 'pop', enterDur: 0.3 }),
-        text({ text: delta, size: 17, weight: 600, color: deltaUp ? T.green : '#C0362C', font: 'mono', delay: 1.25, anim: 'pop', enterDur: 0.3 })] },
+        text({ text: deltaUp ? '▲' : '▼', size: 15, color: deltaUp ? T.green : T.down, delay: 1.25, anim: 'pop', enterDur: 0.3 }),
+        text({ text: delta, size: 17, weight: 600, color: deltaUp ? T.green : T.down, font: 'mono', delay: 1.25, anim: 'pop', enterDur: 0.3 })] },
     ].filter(Boolean) }];
 }
 

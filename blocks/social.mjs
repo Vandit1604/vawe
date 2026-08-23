@@ -28,7 +28,8 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
   // per-message `start` this block used to set was accepted and silently ignored on all four bubbles.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 8, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start', children: [
-      text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink,
+      // the "me" bubble sits on T.accent: pick its ink with onColor rather than assuming white clears it.
+      text({ text: m.text, size: 20, weight: 500, color: m.me ? onColor(T.accent) : T.ink,
         bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 16px',
         ...stagger(i, { step: 0.42, delay: 0.2, anim: m.me ? 'slide-right' : 'slide-left', enterDur: 0.35 }) })] })) }];
 }
@@ -111,12 +112,15 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
   const PAD = 22, innerW = w - 2 * PAD;
   const title = name || track, by = sub || artist;
   // The artwork square is the same identity element as the other blocks' avatars, only square.
+  // SOLID on purpose. A gradient is a background-IMAGE: the computed background-color under the
+  // initials stays transparent, so any contrast probe (ours included) falls through to the white
+  // card behind and reads white-on-white — unmeasurable even when it looks fine. A var() colour
+  // appended to the shorthand does not survive to a computed background-color either (tried).
+  const artBg = 'color-mix(in srgb, var(--accent) 88%, var(--text))';
+  // fill is 88% accent, so it carries the same "always supports white ink" guarantee kit.mjs
+  // documents for accent; onColor falls through to white for a non-literal fill by that same design.
   const artEl = avatarEl({ avatar: avatar || art, initials, name: title, size: 72, radius: 12,
-    // SOLID on purpose. A gradient is a background-IMAGE: the computed background-color under the
-    // initials stays transparent, so any contrast probe (ours included) falls through to the white
-    // card behind and reads white-on-white — unmeasurable even when it looks fine. A var() colour
-    // appended to the shorthand does not survive to a computed background-color either (tried).
-    bg: 'color-mix(in srgb, var(--accent) 88%, var(--text))', color: '#fff' });
+    bg: artBg, color: onColor(artBg) });
   return [{
     type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: PAD,
     ...cardChrome({ radius: R.soft, elevation: 2 }), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
@@ -157,8 +161,9 @@ export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = 
         text({ text: who, size: 22, weight: 700, color: T.ink }),
         count && text({ text: count, font: 'mono', size: 16, color: T.dim }),
       ].filter(Boolean) },
+      // status fill (T.down): pick the ink with onColor instead of assuming white clears it.
       { type: 'group', bg: T.down, radius: 100, pad: '8px 24px', start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
-        children: [text({ text: cta, size: 18, weight: 700, color: '#fff' })] },
+        children: [text({ text: cta, size: 18, weight: 700, color: onColor(T.down) })] },
     ] }];
 }
 

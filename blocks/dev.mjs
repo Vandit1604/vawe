@@ -36,7 +36,9 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
   const P = theme ? CODE_THEMES[theme] : null;
   if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}" — one of ${Object.keys(CODE_THEMES).join(', ')}`);
   const isDark = P ? !P.light : dark;
-  const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? '#E8ECF1' : T.ink);
+  // dark mode's plate is the fixed T.stripeNavy (not a theme var), so its ink must be computed off
+  // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
+  const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? onColor(T.stripeNavy) : T.ink);
   const kids = [];
   if (label) kids.push(text({ text: label, font: 'mono', size: 18, color: P ? P.label : (dark ? T.stripeGrey : T.dim) }));
   // THE CODE WRITES ITSELF IN, line after line, off the top of the block — the motion a code card is
@@ -161,7 +163,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
     ...cardChrome({ border: `1px solid ${T.greenSoft}` }),
     start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop',
     children: [
-      { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: '#fff' })] },
+      { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: onColor(T.green) })] },
       { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
         text({ text: title, size: 22, weight: 700, color: T.ink }),
         text({ text: url, font: 'mono', size: 18, color: T.green }),
