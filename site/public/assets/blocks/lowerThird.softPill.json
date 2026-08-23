@@ -21,7 +21,7 @@
       "layout": "row",
       "items": "center",
       "gap": 12,
-      "pad": "12px 26px",
+      "pad": "12px 24px",
       "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
       "radius": 100,
       "start": 0.2,

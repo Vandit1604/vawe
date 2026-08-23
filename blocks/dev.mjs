@@ -49,7 +49,7 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
     kids.push(text({ ...s, font: 'mono', size, weight: 400, ...stagger(i, { step: 0.14, delay: 0.2, anim: 'slide-left', enterDur: 0.28 }) }));
   });
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 30,
+    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 32,
     bg, radius: 14, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: 1 }),
     start, duration: dur, anim, enterDur, exitDur: 0.35, children: kids,
   }];
@@ -66,10 +66,10 @@ export function terminal({ x, y, w = 720, command, output = [], cps = 18, start 
   const typed = (String(command || '').length) / cps;
   const out = [];
   out.push({
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 10, pad: 26,
+    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 24,
     ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25,
     children: [
-      { type: 'group', layout: 'row', gap: 10, items: 'center', children: [
+      { type: 'group', layout: 'row', gap: 8, items: 'center', children: [
         text({ text: '$', font: 'mono', size: 22, color: T.accent, weight: 600 }),
         text({ text: command, font: 'mono', size: 22, color: T.ink, typing: cps, delay: 0.25, anim: 'fade', enterDur: 0.1 }),
       ] },
@@ -157,7 +157,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
   // success card
   const cy = y + steps.length * rowGap + 30;
   out.push({
-    type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: 16, pad: 22,
+    type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: 16, pad: 24,
     ...cardChrome({ border: `1px solid ${T.greenSoft}` }),
     start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop',
     children: [
@@ -177,7 +177,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
 // diff — a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
 export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   const col = { '+': T.green, '-': T.down, ' ': T.sub };
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 26,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
     ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
     children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: 22, weight: 400, color: col[ln.sign] || T.ink })) }];
 }
@@ -188,12 +188,12 @@ export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {})
   // off the row wrapper and onto the row's own text leaf, because the wrapper is a nested group and
   // the engine never registers one — the lit row would have been lit from the first frame while its
   // label was still arriving.
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 20,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 16,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 8,
       children: [
         box({ w: (it.depth || 0) * 22, h: 18 }),
-        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19, pad: '6px 10px',
+        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19, pad: '6px 8px',
           ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
           weight: it.active ? 600 : 400, color: it.active ? T.accentInk : (it.type === 'dir' ? T.ink : T.sub),
           ...stagger(i, { step: 0.11, delay: 0.2, anim: 'slide-left', enterDur: 0.3 }) }),
@@ -231,7 +231,7 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
       const beat = stagger(i, { step: 0.18, delay: 0.2, anim: 'slide-left', enterDur: 0.32 });
       return [
         i > 0 && box({ h: 1, bg: T.hair }),
-        { type: 'group', layout: 'row', items: 'center', gap: 14, pad: '16px 22px', children: [
+        { type: 'group', layout: 'row', items: 'center', gap: 12, pad: '16px 24px', children: [
           text({ text: c.hash, font: 'mono', size: 17, weight: 600, color: T.accent, ...beat }),
           { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
             text({ text: c.msg, size: 19, weight: 500, color: T.ink, ...beat }),

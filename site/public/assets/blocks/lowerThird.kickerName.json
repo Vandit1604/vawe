@@ -20,7 +20,7 @@
       "y": 160,
       "layout": "column",
       "items": "flex-start",
-      "gap": 7,
+      "gap": 6,
       "start": 0.2,
       "duration": 8,
       "anim": "rise",

@@ -38,7 +38,7 @@
           "layout": "row",
           "items": "center",
           "gap": 8,
-          "pad": "14px 18px",
+          "pad": "12px 16px",
           "children": [
             {
               "type": "group",
@@ -71,7 +71,7 @@
                   "type": "group",
                   "bg": "var(--surface-2)",
                   "radius": 100,
-                  "pad": "6px 20px",
+                  "pad": "6px 16px",
                   "children": [
                     {
                       "type": "text",

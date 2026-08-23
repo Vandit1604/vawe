@@ -32,7 +32,7 @@
         {
           "type": "group",
           "bg": "var(--accent)",
-          "pad": "12px 18px",
+          "pad": "12px 16px",
           "items": "center",
           "children": [
             {
@@ -48,7 +48,7 @@
         },
         {
           "type": "group",
-          "pad": "12px 22px",
+          "pad": "12px 24px",
           "items": "center",
           "children": [
             {

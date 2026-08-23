@@ -22,7 +22,7 @@
       "layout": "row",
       "items": "center",
       "gap": 16,
-      "pad": "16px 20px",
+      "pad": "16px 16px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -56,7 +56,7 @@
           "type": "group",
           "layout": "column",
           "items": "flex-start",
-          "gap": 3,
+          "gap": 2,
           "grow": 1,
           "children": [
             {
@@ -80,7 +80,7 @@
           "type": "group",
           "bg": "var(--down)",
           "radius": 100,
-          "pad": "10px 22px",
+          "pad": "8px 24px",
           "start": 0.4,
           "duration": 8,
           "anim": "rise",

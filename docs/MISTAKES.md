@@ -12764,3 +12764,44 @@ Baselines re-saved against the corrected behaviour.
 
 `probe-purity` clean. `lib-test` 937.
 
+## #412 — 155 blocks, no shared spacing scale, so every one was made to look right on its own
+
+**Measured before anything changed**, by calling every factory and walking its emitted output:
+
+| prop | distinct values | emitted | on a scale |
+|---|---|---|---|
+| gap | 20 | 232 | 58% |
+| pad | 25 | 277 | 45% |
+| size | **29** | 452 | 22% |
+| radius | 17 | 271 | 83% |
+
+Six adjacent integers (19, 22, 18, 20, 17, 21) accounted for **316 of the 452 type sizes**. That is not
+six decisions, it is one decision nudged 316 times.
+
+**Why it matters more than it looks.** With no scale, improving 155 blocks costs 155 separate
+judgements and every new block starts from nothing. With one, a step is CHECKABLE: an off-scale gap is
+a diff, not an opinion. It is also the cheap multiplier, which is the whole reason to do it before any
+taste pass rather than after.
+
+**Shipped:** `SPACE` (0,2,4,6,8,12,16,24,32,48), `TYPE` (14,17,20,24,32,48,64,92) and a widened `R`, in
+`blocks/kit.mjs`. `scripts/gates/block-scale.mjs` reports adoption and takes `--strict` for the sweep.
+Result: gap **98%**, pad **99%**, radius **96%**. `snap-scenes` 105 identical, `lib-test` 937,
+`block-schema` PASS. No scene moved.
+
+**THE DRY RUN CORRECTED THE SCALE TWICE, WHICH IS THE POINT OF HAVING ONE.**
+1. `radius: 50 -> 16` would have squared off a pill. Radius is not linear: past roughly 20px a corner
+   stops meaning "a bit rounded" and starts meaning "fully rounded", so the top of that scale is a
+   jump, not a step. Anything at or above `round` goes to `pill`.
+2. `gap: 14` is equidistant from 12 and 16, and `reduce` was picking by array order. Ties now round
+   DOWN, deliberately: grouping reads from proximity, and a gap two pixels too wide weakens the group
+   while two too narrow does not.
+3. The sweep's numeric pattern never matched `pad: '16px 22px'`, so it reported success having left
+   most of the library's padding untouched while the gate went on counting it. Closed, not noted.
+
+**SIZE WAS DELIBERATELY NOT SWEPT, and the refusal is the finding.** A dry run offered 139 changes,
+and two of them read as: `18 -> 17` and `19 -> 20`. Two adjacent values sent in opposite directions by
+a tie rule. In one block 18 and 19 are the same role that should unify; in another they are a
+deliberate hierarchy. **A nearest-step rule cannot tell those apart**, so sweeping type would be churn
+dressed as a system. Size keeps its scale and its 22% report, and gets fixed per block when that block
+is actually worked on. A mechanical sweep is only honest where the property is mechanical.
+

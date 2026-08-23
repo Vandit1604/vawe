@@ -42,7 +42,7 @@
       "type": "group",
       "x": 160,
       "y": 232,
-      "pad": "7px 24px",
+      "pad": "6px 24px",
       "bg": "var(--accent)",
       "radius": 0,
       "start": 0.32,

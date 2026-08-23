@@ -23,7 +23,7 @@
       "layout": "column",
       "items": "flex-start",
       "gap": 16,
-      "pad": 46,
+      "pad": 48,
       "bg": "radial-gradient(60% 60% at 15% 20%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%), radial-gradient(55% 55% at 85% 15%, color-mix(in srgb, var(--accent-glow, var(--accent)) 40%, transparent), transparent 68%), radial-gradient(70% 70% at 70% 90%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%), linear-gradient(135deg, var(--surface-2), var(--card))",
       "radius": 26,
       "border": "1.5px solid var(--line)",

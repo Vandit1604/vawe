@@ -152,7 +152,7 @@
       "layout": "column",
       "items": "flex-start",
       "justify": "center",
-      "gap": 3,
+      "gap": 2,
       "children": [
         {
           "type": "text",

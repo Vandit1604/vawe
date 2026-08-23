@@ -22,7 +22,7 @@
       "layout": "column",
       "items": "flex-start",
       "gap": 8,
-      "pad": 30,
+      "pad": 32,
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",

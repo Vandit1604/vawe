@@ -20,7 +20,7 @@
       "y": 160,
       "layout": "row",
       "wrap": true,
-      "gap": 10,
+      "gap": 8,
       "items": "center",
       "start": 0.2,
       "duration": 8,
@@ -35,7 +35,7 @@
           "color": "var(--accent)",
           "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
           "radius": 100,
-          "pad": "7px 16px",
+          "pad": "6px 16px",
           "delay": 0.1,
           "anim": "pop",
           "enterDur": 0.26
@@ -48,7 +48,7 @@
           "color": "var(--accent)",
           "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
           "radius": 100,
-          "pad": "7px 16px",
+          "pad": "6px 16px",
           "delay": 0.18,
           "anim": "pop",
           "enterDur": 0.26
@@ -61,7 +61,7 @@
           "color": "var(--accent)",
           "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
           "radius": 100,
-          "pad": "7px 16px",
+          "pad": "6px 16px",
           "delay": 0.26,
           "anim": "pop",
           "enterDur": 0.26

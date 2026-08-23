@@ -15,12 +15,12 @@ const WHITE_HAIR = 'rgba(255,255,255,0.14)';
 export function glassCard({ x, y, w = 640, h = 360, title, desc, kicker, tint = 0.06,
   radius = 22, start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 14, pad: 40,
+    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 32,
     bg: `rgba(255,255,255,${tint})`, radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 16,
     shadow: true, start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
     children: [
       // top sheen — a thin bright gradient bar reading as a light edge on glass
-      { type: 'rect', w: w - 80, h: 2, bg: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)', radius: 2 },
+      { type: 'rect', w: w - 80, h: 2, bg: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)', radius: 0 },
       kicker && text({ text: kicker, font: 'mono', size: 22, weight: 600, color: 'var(--accent)', ls: '0.08em' }),
       title && text({ text: title, size: 52, weight: 700, color: '#fff', ls: '-0.02em' }),
       desc && text({ text: desc, font: 'serif', size: 28, weight: 400, color: 'rgba(255,255,255,0.72)', w: w - 80 }),
@@ -39,7 +39,7 @@ export function meshPanel({ x, y, w = 720, h = 420, title, desc, radius = 26, st
     'linear-gradient(135deg, var(--surface-2), var(--card))',
   ].join(', ');
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 16, pad: 46,
+    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 16, pad: 48,
     bg: mesh, radius, border: `1.5px solid var(--line)`, start, duration: dur, anim, enterDur,
     out: 'defocus', exitDur: 0.4, children: [
       title && text({ text: title, size: 56, weight: 800, color: '#fff', ls: '-0.02em' }),
@@ -56,7 +56,7 @@ export function spotlightCard({ x, y, w = 640, h = 360, title, desc, from = 'top
   const bg = `radial-gradient(120% 90% at ${at}, color-mix(in srgb, var(--accent) 26%, transparent), transparent 60%), ` +
     `linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--bg) 80%, black))`;
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 14, pad: 42,
+    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 48,
     bg, radius, border: `1.5px solid ${WHITE_HAIR}`, shadow: true, start, duration: dur, anim, enterDur,
     out: 'defocus', exitDur: 0.4, children: [
       title && text({ text: title, size: 54, weight: 700, color: '#fff', ls: '-0.02em' }),
@@ -70,7 +70,7 @@ export function spotlightCard({ x, y, w = 640, h = 360, title, desc, from = 'top
 export function borderBeamCard({ x, y, w = 640, h = 300, title, desc, radius = 22, thickness = 2.5,
   speed = 0.55, start = 0, dur = 4 } = {}) {
   return [
-    { type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 14, pad: 42, justify: 'center',
+    { type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 48, justify: 'center',
       bg: 'rgba(255,255,255,0.04)', radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 12,
       start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4, children: [
         title && text({ text: title, size: 46, weight: 700, color: '#fff', ls: '-0.02em' }),

@@ -59,7 +59,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   // ── prompt: native `typing` + `caret` + `caretHold`. The engine reveals the command char by char
   // and keeps the caret blinking after it lands — an `html` block has to reconstruct that from a CSS
   // steps() animation plus a manually-timed `calc(width)`; here it is two layer props.
-  out.push({ type: 'group', x: contentX, y: promptY, layout: 'row', gap: 10, items: 'center',
+  out.push({ type: 'group', x: contentX, y: promptY, layout: 'row', gap: 8, items: 'center',
     start, duration: D, anim: 'fade', enterDur: 0.15, children: [
       text({ text: '$', font: 'mono', size: 22, weight: 700, color: toneColor('ok') }),
       text({ text: command, font: 'mono', size: 22, color: T.ink, typing: cps, caret: true, caretHold: true }),
@@ -79,9 +79,9 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   out.push({ type: 'count', x: contentX + contentW - 60, y: barY, w: 60, align: 'right', font: 'mono', size: 18, weight: 700,
     color: T.ink, from: 0, to: 100, unit: '%', countStart: 0, countDur: barDur,
     start: barStart, duration: runsTo(barStart), anim: 'fade', enterDur: 0.15 });
-  out.push(rect({ x: contentX, y: barY + 24, w: contentW, h: 6, radius: 3, bg: T.surface,
+  out.push(rect({ x: contentX, y: barY + 24, w: contentW, h: 6, radius: 4, bg: T.surface,
     start: barStart, duration: runsTo(barStart), anim: 'fade', enterDur: 0.1 }));
-  out.push(rect({ x: contentX, y: barY + 24, w: contentW, h: 6, radius: 3, bg: toneColor('ok'),
+  out.push(rect({ x: contentX, y: barY + 24, w: contentW, h: 6, radius: 4, bg: toneColor('ok'),
     start: barStart, duration: runsTo(barStart), anim: 'fade', enterDur: 0.1, ...fillRight({ delay: 0.05, dur: barDur }) }));
 
   // ── diff: every file is its OWN top-level row, staggered in on its own start, each +/- a real
@@ -106,7 +106,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   out.push({ type: 'svg', x: contentX, y: tickY, d: 'M 50 5 A 45 45 0 1 1 5 50', viewBox: '0 0 100 100', w: 20, h: 20,
     stroke: toneColor('ok'), strokeWidth: 10, fill: 'none',
     start: spinStart, duration: spinDur, draw: { dur: spinDur }, anim: 'fade', enterDur: 0.1 });
-  out.push({ type: 'group', x: contentX, y: tickY, layout: 'row', gap: 10, items: 'center',
+  out.push({ type: 'group', x: contentX, y: tickY, layout: 'row', gap: 8, items: 'center',
     start: tickStart, duration: runsTo(tickStart), anim: 'rise', enterDur: 0.25, idle: 'breathe', children: [
       text({ text: '✓', font: 'mono', size: 20, weight: 800, color: toneColor('ok') }),
       text({ text: success, font: 'mono', size: 19, weight: 600, color: T.ink }),

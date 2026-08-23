@@ -21,8 +21,8 @@
       "w": 480,
       "layout": "column",
       "items": "stretch",
-      "gap": 14,
-      "pad": 22,
+      "gap": 12,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -62,7 +62,7 @@
               "type": "group",
               "layout": "column",
               "items": "flex-start",
-              "gap": 1,
+              "gap": 0,
               "children": [
                 {
                   "type": "text",
@@ -93,7 +93,7 @@
         {
           "type": "group",
           "layout": "row",
-          "gap": 28,
+          "gap": 24,
           "items": "center",
           "children": [
             {

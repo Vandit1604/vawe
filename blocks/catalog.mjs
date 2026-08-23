@@ -370,7 +370,7 @@ export const CATALOG = [
   // and the proof surfaces proved nothing without a hand-placed caption beside them. Appended at the
   // END for the same reason as every wave before it — the site crops thumbnails by cell index.
   { name: 'splitScreen', family: 'splitScreen', blurb: 'two panes, one geometry · second pane lands behind the first',
-    props: { w: 540, h: 96, split: 0.5, gap: 30, divider: true,
+    props: { w: 540, h: 96, split: 0.5, gap: 32, divider: true,
       left: { block: 'listRow', props: { icon: '✉', title: 'Digest', sub: 'Kite Studio', meta: 'Today' } },
       right: { block: 'listRow', props: { icon: '☰', title: 'Drafts', sub: 'Fieldwork', meta: 'Fri' } } } },
   { name: 'splitScreen.pip', family: 'splitScreen', blurb: 'picture-in-picture · an aside inset over the subject',

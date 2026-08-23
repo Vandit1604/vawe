@@ -18,13 +18,13 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
     type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 0,
     bg: T.card, radius: R.card, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
-      { type: 'group', layout: 'row', items: 'center', gap: 8, pad: '14px 18px', children: [
+      { type: 'group', layout: 'row', items: 'center', gap: 8, pad: '12px 16px', children: [
         ...['#FF5F57', '#FEBC2E', '#28C840'].map((c) => box({ w: 12, h: 12, radius: 100, bg: c })),
         { type: 'group', grow: 1, layout: 'row', justify: 'center', children: [
-          { type: 'group', bg: T.surface, radius: 100, pad: '6px 20px', children: [text({ text: url, font: 'mono', size: 18, color: T.sub })] },
+          { type: 'group', bg: T.surface, radius: 100, pad: '6px 16px', children: [text({ text: url, font: 'mono', size: 18, color: T.sub })] },
         ] },
       ] },
-      ...(children.length ? [{ type: 'group', grow: 1, layout: 'column', items: 'stretch', pad: '0 18px 18px', children }] : []),
+      ...(children.length ? [{ type: 'group', grow: 1, layout: 'column', items: 'stretch', pad: '0 16px 16px', children }] : []),
     ],
   }];
 }
@@ -33,7 +33,7 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 // pillRow — a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {
   // the chips POP IN one after another — a tag row filling, not a slab sliding up
-  return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: 10, items: 'center',
+  return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: 8, items: 'center',
     start, duration: dur, anim: 'fade', enterDur: 0.2, children: items.map((p, i) => ({
       ...pill(p, fg, bg), ...stagger(i, { step: 0.08, delay: 0.1, anim: 'pop', enterDur: 0.26 }) })) }];
 }
@@ -61,7 +61,7 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
     ? box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center',
         children: [text({ text: String(icon), size: 14, weight: 700, color: onColor(accent) })] })
     : box({ w: 12, h: 12, radius: 100, bg: accent });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 14, pad: 20,
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 12, pad: 16,
     // a notification ARRIVES FROM THE EDGE and leaves the way it came — the short, correct entrance
     // for a chip. Nothing inside it should perform; it is one small statement.
     ...cardChrome({ elevation: 2, anim: 'slide-right' }), out: 'slide-right',
@@ -80,9 +80,9 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
   const ac = toneColor(tone);
   // the strip WIPES OPEN from its leading rule, then the message reads in — the short entrance a
   // status strip is for (a plate arrives edge-first; it does not fly)
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '18px 22px',
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 24px',
     bg: T.surface, radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
-      box({ w: 4, h: 30, radius: 2, bg: ac }),
+      box({ w: 4, h: 30, radius: 0, bg: ac }),
       text({ text: msg, size: 22, weight: 500, color: T.ink, delay: 0.2, anim: 'fade', enterDur: 0.28 }),
     ] }];
 }
@@ -100,10 +100,10 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
   if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: '6px 4px 0',
     children: [text({ text: time, size: Math.round(w * 0.045), weight: 600, color: T.ink }),
                text({ text: '▮▮▮', size: Math.round(w * 0.038), color: T.dim })] });
-  if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: 10, pad: '10px 0 0', children });
-  return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 10,
-    bg: '#0A0A0A', radius: 44, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [{ type: 'group', grow: 1, bg: T.card, radius: 34, layout: 'column', items: 'center', pad: 12,
+  if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: 8, pad: '8px 0 0', children });
+  return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 8,
+    bg: '#0A0A0A', radius: 100, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [{ type: 'group', grow: 1, bg: T.card, radius: 100, layout: 'column', items: 'center', pad: 12,
       children: screen }] }];
 }
 
@@ -143,7 +143,7 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
   // travelled — a bold half-word sticking out of a white box. Colour carries the state; the pill
   // carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
   const cell = (t, activeStyle) => `<div style="width:${tabW}px;height:${rowH}px;flex:none;display:flex;`
-    + `flex-direction:column;align-items:center;justify-content:center;gap:3px">`
+    + `flex-direction:column;align-items:center;justify-content:center;gap:2px">`
     + (t.icon ? `<div style="font:400 ${withIcons ? 22 : 18}px var(--font-sans);line-height:1;`
         + `color:${activeStyle ? T.accent : T.dim}">${t.icon}</div>` : '')
     + `<div style="font:600 ${withIcons ? 15 : 18}px var(--font-sans);`
@@ -178,11 +178,11 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
   // leaf child is handed to the clip driver: a nested group child is built and then never registered,
   // so it cannot carry its own timing. Both states are the SAME glyph in the SAME chip, the open one
   // simply unpainted, so a row does not resize at the moment it completes.
-  const CHIP = { text: '✓', size: 16, weight: 700, radius: 8, pad: '5px 7px' };
+  const CHIP = { text: '✓', size: 16, weight: 700, radius: 8, pad: '4px 6px' };
   const beat = (i, extra) => stagger(i, { step: 0.26, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 26,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 24,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 14, children: [
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 12, children: [
       it.done
         ? text({ ...CHIP, color: '#fff', bg: T.green, border: '2px solid transparent', ...beat(i, { anim: 'pop', delay: 0.34 }) })
         : text({ ...CHIP, color: 'transparent', bg: T.card, border: `2px solid ${T.hair}`, ...beat(i, { anim: 'fade' }) }),
@@ -198,7 +198,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
   // the row still reads as a single arrival.
   const cell = (t, head, beat) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink, ...beat });
   const row = (cells, head, beat = {}) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head, beat)) });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '20px 24px',
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '16px 24px',
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: [row(cols, true), box({ h: 1, bg: T.hair }),
       ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }),
@@ -212,14 +212,14 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
   // LEAF (an empty text layer carrying the chip) because a nested group child is never registered
   // with the clip driver and so cannot be timed; the connecting rail stays static, as scaffolding.
   const beat = (i, extra) => stagger(i, { step: 0.3, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 26,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 24,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: 16, children: [
       { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
         text({ text: '', w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair, ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
         i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
       ].filter(Boolean) },
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: '0 0 22px', children: [
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: '0 0 24px', children: [
         text({ text: it.title, size: 20, weight: 600, color: T.ink, ...beat(i, { anim: 'slide-left', delay: 0.3 }) }),
         it.meta && text({ text: it.meta, font: 'mono', size: 15, color: T.dim, ...beat(i, { anim: 'fade', delay: 0.36 }) }),
       ].filter(Boolean) },
@@ -247,9 +247,9 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
   const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
   const done = (i) => lit(i + 1);                                     // ...and passed
   const ring = (i) => `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
-    + `<div style="position:absolute;inset:0;border-radius:50%;background:${T.surface};display:flex;`
+    + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.surface};display:flex;`
     + `align-items:center;justify-content:center;font:700 20px var(--font-sans);color:${T.dim}">${i + 1}</div>`
-    + `<div style="position:absolute;inset:0;border-radius:50%;background:${T.accent};opacity:${lit(i)}"></div>`
+    + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.accent};opacity:${lit(i)}"></div>`
     + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
     + `font:700 20px var(--font-sans);color:${onColor(T.accent)};opacity:calc(${lit(i)} - ${done(i)})">${i + 1}</div>`
     + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
@@ -261,7 +261,7 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
     + `<div style="position:absolute;left:0;top:0;font:600 18px var(--font-sans);color:${T.ink};`
     + `opacity:${lit(i)}">${s}</div></div>`;
   const connector = (i) => `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
-    + `border-radius:1px;background:${T.hair};position:relative;overflow:hidden">`
+    + `border-radius:0px;background:${T.hair};position:relative;overflow:hidden">`
     + `<div style="position:absolute;inset:0;background:${T.accent};transform-origin:left center;`
     + `transform:scaleX(clamp(0, calc(${pos} - ${i}), 1))"></div></div>`;
   const cells = steps.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;flex:none">`
@@ -283,11 +283,11 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
   // Each card is a LEAF with the card chrome on it (a group child is never registered with the clip
   // driver, so a card wrapping its own text could not be timed).
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
-    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 10, children: [
+    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 8, children: [
       text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
       // reading order across the board: card row `ri` in every column lands before row `ri + 1` does
       ...col.cards.map((c, ri) => text({ text: c, size: 18, weight: 500, color: T.ink,
-        bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '14px 16px',
+        bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '12px 16px',
         ...stagger(ri * columns.length + ci, { step: 0.11, delay: 0.4, anim: 'pop', enterDur: 0.3 }) })),
     ] })) }];
 }
@@ -308,7 +308,7 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
     });
   }
   message = title ?? message;
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 20px',
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 16px',
     bg: '#0A0A0A', radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
       box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: '#fff' })] }),
       text({ text: message, size: 19, weight: 500, color: '#F5F5F3', grow: 1 }),
@@ -319,9 +319,9 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
 // logoWall — a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
 export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur = 4 } = {}) {
   const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: 14, items: 'stretch', children:
-      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: 12, items: 'stretch', children:
+      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '24px 0', layout: 'row', justify: 'center', items: 'center',
         children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: 22, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
 }
 
@@ -347,14 +347,14 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
     shadow: true,
     start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
       text({ text: label, font: 'mono', size: 17, weight: 600, color: TOKENS.paper, pad: '4px 12px' }),
-      { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
+      { type: 'group', bg: ac, radius: 4, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
     ] }];
 }
 
 // banner — a full-width accent announcement bar: icon · message · CTA.
 export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   msg = msg || body || title;
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '16px 22px',
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 24px',
     // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
     bg: accent, radius: 12, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3, children: [
       text({ text: icon, size: 20, color: onColor(accent) }), text({ text: msg, size: 20, weight: 600, color: onColor(accent), grow: 1 }),

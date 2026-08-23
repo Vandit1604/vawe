@@ -22,7 +22,7 @@
       "layout": "row",
       "items": "center",
       "gap": 16,
-      "pad": 22,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",

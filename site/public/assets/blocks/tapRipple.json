@@ -19,7 +19,7 @@
       "x": 85,
       "y": 85,
       "w": 150,
-      "html": "<div style=\"position:relative;width:150px;height:150px;pointer-events:none\"><div style=\"position:absolute;left:50%;top:50%;width:calc(var(--p,0) * 150px);height:calc(var(--p,0) * 150px);margin-left:calc(var(--p,0) * -75px);margin-top:calc(var(--p,0) * -75px);border:3px solid var(--accent);border-radius:50%;opacity:calc(1 - var(--p,0))\"></div><div style=\"position:absolute;left:50%;top:50%;width:27px;height:27px;margin:-13.5px 0 0 -13.5px;border-radius:50%;background:var(--accent);opacity:calc(0.8 - var(--p,0) * 0.8)\"></div></div>",
+      "html": "<div style=\"position:relative;width:150px;height:150px;pointer-events:none\"><div style=\"position:absolute;left:50%;top:50%;width:calc(var(--p,0) * 150px);height:calc(var(--p,0) * 150px);margin-left:calc(var(--p,0) * -75px);margin-top:calc(var(--p,0) * -75px);border:3px solid var(--accent);border-radius:100%;opacity:calc(1 - var(--p,0))\"></div><div style=\"position:absolute;left:50%;top:50%;width:27px;height:27px;margin:-13.5px 0 0 -13.5px;border-radius:100%;background:var(--accent);opacity:calc(0.8 - var(--p,0) * 0.8)\"></div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "none",

@@ -22,7 +22,7 @@
       "layout": "column",
       "items": "stretch",
       "gap": 16,
-      "pad": 28,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -69,13 +69,13 @@
           "type": "group",
           "layout": "column",
           "items": "flex-start",
-          "gap": 10,
+          "gap": 8,
           "children": [
             {
               "type": "group",
               "layout": "row",
               "items": "center",
-              "gap": 10,
+              "gap": 8,
               "children": [
                 {
                   "type": "text",
@@ -97,7 +97,7 @@
               "type": "group",
               "layout": "row",
               "items": "center",
-              "gap": 10,
+              "gap": 8,
               "children": [
                 {
                   "type": "text",
@@ -119,7 +119,7 @@
               "type": "group",
               "layout": "row",
               "items": "center",
-              "gap": 10,
+              "gap": 8,
               "children": [
                 {
                   "type": "text",
@@ -142,8 +142,8 @@
         {
           "type": "group",
           "bg": "var(--surface-2)",
-          "radius": 10,
-          "pad": "14px 0",
+          "radius": 8,
+          "pad": "12px 0",
           "layout": "row",
           "justify": "center",
           "children": [

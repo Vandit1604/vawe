@@ -49,7 +49,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
   const rowH = plot + 2 * (CHART_ROW + CHART_GAP_Y);
   const col = (dp) => `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:${CHART_GAP_Y}px;height:100%">`
     + `<div style="font:600 ${CHART_ROW}px var(--font-sans);color:${T.ink}">${dp.value}</div>`
-    + `<div style="width:${r2(bw)}px;height:calc(${Math.round(plot * dp.value / max) + 6}px * var(--p, 1));border-radius:6px;background:${color}"></div>`
+    + `<div style="width:${r2(bw)}px;height:calc(${Math.round(plot * dp.value / max) + 6}px * var(--p, 1));border-radius:4px;background:${color}"></div>`
     + `<div style="font:400 ${CHART_ROW}px var(--font-mono);color:${T.dim}">${dp.label}</div></div>`;
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () =>
     `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:${CHART_GAP}px;height:${rowH}px">`
@@ -95,9 +95,9 @@ export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0
     + ` style="stroke-dasharray:min(${ends[i].toFixed(2)}px, calc(${C.toFixed(2)}px * var(--p, 1))) ${C.toFixed(2)}px"`
     + ` transform="rotate(-90 50 50)"/>`).reverse().join('');
   const ring = (inner) => `<svg viewBox="0 0 100 100" width="${inner}" height="${inner}" style="display:block;margin:0 auto 14px">${arcs}</svg>`;
-  const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
+  const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:100px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span><span style="font:500 18px var(--font-sans);color:${T.sub}">${s.label} · ${Math.round(s.value / total * 100)}%</span></div>`).join('');
   const html = htmlCard({ w, pad: CHART_PAD, label,
-    body: (inner) => ring(inner) + `<div style="display:flex;flex-direction:column;gap:9px">${legend}</div>` });
+    body: (inner) => ring(inner) + `<div style="display:flex;flex-direction:column;gap:8px">${legend}</div>` });
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.3 }) }];
 }
 
@@ -128,7 +128,7 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
 export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '', delta = '', deltaUp = true, start = 0, dur = 4 } = {}) {
   // THE NUMBER COUNTS UP inside a card that is already there, and the delta chip lands after it has
   // settled — the reading first, then the verdict on it.
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 26,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 24,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.3, children: [
       text({ text: label, size: 18, color: T.dim, font: 'mono' }),
       { type: 'count', from, to, unit, font: 'sans', size: 56, weight: 700, color: T.ink, ls: '-0.02em', countStart: 0.2, countDur: 1.2, ease: 'easeOutExpo' },

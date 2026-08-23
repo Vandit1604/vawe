@@ -21,7 +21,7 @@
       "w": 460,
       "layout": "column",
       "items": "stretch",
-      "gap": 10,
+      "gap": 8,
       "start": 0.2,
       "duration": 8,
       "anim": "fade",
@@ -43,7 +43,7 @@
               "border": "1px solid var(--line)",
               "elevation": 1,
               "radius": 16,
-              "pad": "12px 18px",
+              "pad": "12px 16px",
               "delay": 0.2,
               "anim": "slide-left",
               "enterDur": 0.35
@@ -63,7 +63,7 @@
               "color": "#fff",
               "bg": "var(--accent)",
               "radius": 16,
-              "pad": "12px 18px",
+              "pad": "12px 16px",
               "delay": 0.62,
               "anim": "slide-right",
               "enterDur": 0.35
@@ -85,7 +85,7 @@
               "border": "1px solid var(--line)",
               "elevation": 1,
               "radius": 16,
-              "pad": "12px 18px",
+              "pad": "12px 16px",
               "delay": 1.04,
               "anim": "slide-left",
               "enterDur": 0.35
@@ -105,7 +105,7 @@
               "color": "#fff",
               "bg": "var(--accent)",
               "radius": 16,
-              "pad": "12px 18px",
+              "pad": "12px 16px",
               "delay": 1.46,
               "anim": "slide-right",
               "enterDur": 0.35

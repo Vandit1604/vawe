@@ -20,7 +20,7 @@
       "y": 160,
       "layout": "row",
       "items": "center",
-      "gap": 18,
+      "gap": 16,
       "start": 0.2,
       "duration": 8,
       "anim": "rise",
@@ -38,7 +38,7 @@
           "type": "group",
           "layout": "column",
           "items": "flex-start",
-          "gap": 3,
+          "gap": 2,
           "children": [
             {
               "type": "text",

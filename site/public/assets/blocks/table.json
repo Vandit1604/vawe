@@ -22,7 +22,7 @@
       "layout": "column",
       "items": "stretch",
       "gap": 0,
-      "pad": "20px 24px",
+      "pad": "16px 24px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",

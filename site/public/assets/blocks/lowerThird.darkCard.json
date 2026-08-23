@@ -21,7 +21,7 @@
       "layout": "column",
       "items": "flex-start",
       "gap": 4,
-      "pad": "18px 26px",
+      "pad": "16px 24px",
       "bg": "rgba(16,18,24,0.92)",
       "radius": 12,
       "start": 0.2,

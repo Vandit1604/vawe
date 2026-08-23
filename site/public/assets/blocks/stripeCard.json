@@ -21,8 +21,8 @@
       "w": 340,
       "layout": "column",
       "items": "stretch",
-      "gap": 18,
-      "pad": 26,
+      "gap": 16,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 12,
       "elevation": 2,
@@ -109,8 +109,8 @@
         {
           "type": "group",
           "bg": "#635BFF",
-          "radius": 6,
-          "pad": "14px 0",
+          "radius": 4,
+          "pad": "12px 0",
           "layout": "row",
           "justify": "center",
           "children": [

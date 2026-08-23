@@ -21,7 +21,7 @@
       "w": 540,
       "layout": "column",
       "items": "flex-start",
-      "gap": 20,
+      "gap": 16,
       "start": 0.2,
       "duration": 8,
       "anim": "rise",

@@ -72,9 +72,9 @@ export function tapRipple({ x = 0, y = 0, at = 0.4, size = 120, color = T.accent
   const ring = `<div style="position:absolute;left:50%;top:50%;`
     + `width:calc(var(--p,0) * ${s}px);height:calc(var(--p,0) * ${s}px);`
     + `margin-left:calc(var(--p,0) * -${half}px);margin-top:calc(var(--p,0) * -${half}px);`
-    + `border:3px solid ${color};border-radius:50%;opacity:calc(1 - var(--p,0))"></div>`;
+    + `border:3px solid ${color};border-radius:100%;opacity:calc(1 - var(--p,0))"></div>`;
   const contact = `<div style="position:absolute;left:50%;top:50%;width:${dot}px;height:${dot}px;`
-    + `margin:-${r2(dot / 2)}px 0 0 -${r2(dot / 2)}px;border-radius:50%;background:${color};`
+    + `margin:-${r2(dot / 2)}px 0 0 -${r2(dot / 2)}px;border-radius:100%;background:${color};`
     + `opacity:calc(0.8 - var(--p,0) * 0.8)"></div>`;
   const html = `<div style="position:relative;width:${s}px;height:${s}px;pointer-events:none">${ring}${contact}</div>`;
   return [{

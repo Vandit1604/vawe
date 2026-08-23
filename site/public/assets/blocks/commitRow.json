@@ -37,8 +37,8 @@
           "type": "group",
           "layout": "row",
           "items": "center",
-          "gap": 14,
-          "pad": "16px 22px",
+          "gap": 12,
+          "pad": "16px 24px",
           "children": [
             {
               "type": "text",
@@ -93,8 +93,8 @@
           "type": "group",
           "layout": "row",
           "items": "center",
-          "gap": 14,
-          "pad": "16px 22px",
+          "gap": 12,
+          "pad": "16px 24px",
           "children": [
             {
               "type": "text",

@@ -43,7 +43,7 @@
         {
           "type": "group",
           "bg": "var(--accent)",
-          "radius": 6,
+          "radius": 4,
           "pad": "6px 12px",
           "children": [
             {

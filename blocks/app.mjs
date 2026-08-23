@@ -31,7 +31,7 @@ const surface = ({ x, y, w, start, dur, pad, gap, radius = R.card, layout = 'row
 // The generic sibling of tweetCard, minus the engagement counts: a feed item is not always a post.
 export function feedRow({ x, y, w = 520, avatar = '', initials = '', name = '', sub = '', time = '', body = '',
   start = 0, dur = 4 } = {}) {
-  return [{ ...surface({ x, y, w, start, dur, pad: 20, gap: 14, radius: R.soft, items: 'flex-start' }), children: [
+  return [{ ...surface({ x, y, w, start, dur, pad: 16, gap: 12, radius: R.soft, items: 'flex-start' }), children: [
     avatarEl({ avatar, initials, name, size: 48 }),
     { type: 'group', layout: 'column', items: 'stretch', gap: 6, grow: 1, children: [
       { type: 'group', layout: 'row', items: 'center', gap: 8, children: [
@@ -49,10 +49,10 @@ export function feedRow({ x, y, w = 520, avatar = '', initials = '', name = '', 
 // listRow — one row of a generic list (a mail item, a file, a track): leading icon tile · title over
 // sub · trailing meta. The workhorse: three of these stacked read as "an app" faster than any card.
 export function listRow({ x, y, w = 520, icon = '', title = '', sub = '', meta = '', start = 0, dur = 4 } = {}) {
-  return [{ ...surface({ x, y, w, start, dur, pad: '16px 20px', gap: 16 }), children: [
+  return [{ ...surface({ x, y, w, start, dur, pad: '16px 16px', gap: 16 }), children: [
     icon && box({ w: 44, h: 44, radius: R.tight, bg: T.surface, layout: 'row', justify: 'center', items: 'center',
       children: [text({ text: icon, size: 20, weight: 600, color: T.ink })] }),
-    { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+    { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
       text({ text: title, size: 20, weight: 600, color: T.ink }),
       sub && text({ text: sub, size: 16, color: T.sub }),
     ].filter(Boolean) },
@@ -70,7 +70,7 @@ export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'ch
   const on = value !== false;
   // the track is accent when on and neutral when off; `justify` carries the knob's side, so the two
   // states are one shape with one differing property (a scene can cut between them cleanly).
-  const toggle = box({ w: 52, h: 30, radius: 100, bg: on ? T.accent : T.surface, pad: 3,
+  const toggle = box({ w: 52, h: 30, radius: 100, bg: on ? T.accent : T.surface, pad: 2,
     layout: 'row', items: 'center', justify: on ? 'flex-end' : 'flex-start',
     children: [box({ w: 24, h: 24, radius: 100, bg: T.card })] });
   const controls = {
@@ -78,8 +78,8 @@ export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'ch
     chevron: text({ text: '›', size: 26, weight: 600, color: T.dim }),
     value: text({ text: String(value), size: 18, color: T.sub }),
   };
-  return [{ ...surface({ x, y, w, start, dur, pad: '16px 22px', gap: 16 }), children: [
-    { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+  return [{ ...surface({ x, y, w, start, dur, pad: '16px 24px', gap: 16 }), children: [
+    { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
       text({ text: label, size: 20, weight: 600, color: T.ink }),
       sub && text({ text: sub, size: 16, color: T.sub }),
     ].filter(Boolean) },
@@ -92,13 +92,13 @@ export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'ch
 // `stats` is [{value, label}] and defaults to empty: a caller with no counts ships no counts.
 export function profileHeader({ x, y, w = 460, avatar = '', initials = '', name = '', handle = '',
   stats = [], start = 0, dur = 4 } = {}) {
-  return [{ ...surface({ x, y, w, start, dur, pad: 26, gap: 16, radius: R.soft, layout: 'column', items: 'flex-start' }), children: [
+  return [{ ...surface({ x, y, w, start, dur, pad: 24, gap: 16, radius: R.soft, layout: 'column', items: 'flex-start' }), children: [
     avatarEl({ avatar, initials, name, size: 76 }),
-    { type: 'group', layout: 'column', items: 'flex-start', gap: 3, children: [
+    { type: 'group', layout: 'column', items: 'flex-start', gap: 2, children: [
       text({ text: name, size: 28, weight: 700, color: T.ink, ls: '-0.02em' }),
       handle && text({ text: '@' + handle, font: 'mono', size: 17, color: T.dim }),
     ].filter(Boolean) },
-    stats.length && { type: 'group', layout: 'row', gap: 34, items: 'flex-start',
+    stats.length && { type: 'group', layout: 'row', gap: 32, items: 'flex-start',
       start: r2(start + 0.18), duration: dur, anim: 'rise', enterDur: 0.35,
       children: stats.map((s) => ({ type: 'group', layout: 'column', items: 'flex-start', gap: 2, children: [
         text({ text: String(s.value), size: 24, weight: 700, color: T.ink }),
@@ -116,7 +116,7 @@ export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body 
   const at = Math.min(Math.max(1, Math.round(step)), total);
   const dots = Array.from({ length: total }, (_, i) => box({
     w: i === at - 1 ? 22 : 8, h: 8, radius: 100, bg: i === at - 1 ? T.accent : T.surface }));
-  return [{ ...surface({ x, y, w, start, dur, pad: 28, gap: 18, radius: R.soft, layout: 'column', items: 'stretch' }), children: [
+  return [{ ...surface({ x, y, w, start, dur, pad: 24, gap: 16, radius: R.soft, layout: 'column', items: 'stretch' }), children: [
     { type: 'group', layout: 'row', items: 'center', gap: 8, children: [
       ...dots, spacer(), text({ text: `${at} of ${total}`, font: 'mono', size: 15, color: T.dim }),
     ] },
@@ -124,7 +124,7 @@ export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body 
       text({ text: title, size: 30, weight: 700, color: T.ink, ls: '-0.02em' }),
       body && text({ text: body, size: 19, weight: 400, color: T.sub }),
     ].filter(Boolean) },
-    cta && { type: 'group', bg: T.accent, radius: R.tight, pad: '14px 0', layout: 'row', justify: 'center', items: 'center',
+    cta && { type: 'group', bg: T.accent, radius: R.tight, pad: '12px 0', layout: 'row', justify: 'center', items: 'center',
       start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
       children: [text({ text: cta, size: 19, weight: 700, color: '#fff' })] },
   ].filter(Boolean) }];
@@ -134,7 +134,7 @@ export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body 
 // emptyState — the zero state: an icon tile, a line saying what is missing, a line saying what fills
 // it, and the action that does. Dashed chrome and no elevation so the surface itself reads as unfilled.
 export function emptyState({ x, y, w = 460, icon = '', title = '', body = '', cta = '', start = 0, dur = 4 } = {}) {
-  return [{ ...surface({ x, y, w, start, dur, pad: 34, gap: 16, radius: R.soft, layout: 'column', items: 'center',
+  return [{ ...surface({ x, y, w, start, dur, pad: 32, gap: 16, radius: R.soft, layout: 'column', items: 'center',
       border: `1px dashed ${T.hair}`, elevation: 0 }), children: [
     icon && box({ w: 60, h: 60, radius: R.soft, bg: T.surface, layout: 'row', justify: 'center', items: 'center',
       children: [text({ text: icon, size: 26, weight: 600, color: T.sub })] }),
@@ -142,7 +142,7 @@ export function emptyState({ x, y, w = 460, icon = '', title = '', body = '', ct
       text({ text: title, size: 24, weight: 700, color: T.ink }),
       body && text({ text: body, size: 18, weight: 400, color: T.sub, align: 'center' }),
     ].filter(Boolean) },
-    cta && { type: 'group', bg: T.ink, radius: 100, pad: '11px 24px',
+    cta && { type: 'group', bg: T.ink, radius: 100, pad: '12px 24px',
       start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
       children: [text({ text: cta, size: 17, weight: 700, color: T.paper })] },
   ].filter(Boolean) }];

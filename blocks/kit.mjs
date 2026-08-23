@@ -40,7 +40,7 @@ export const text = (o) => ({ type: 'text', weight: 500, ...o });
 export const rect = (o) => ({ type: 'rect', radius: 0, ...o });   // TOP-LEVEL boxes only
 export const box = (o) => ({ type: 'group', radius: 0, ...o });    // a coloured box usable as a GROUP CHILD (rect isn't allowed there)
 export const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
-  text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '7px 16px' });
+  text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '6px 16px' });
 
 // onColor(bg) — pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
 // over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
@@ -66,7 +66,41 @@ export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
 //   soft  — person-facing surfaces. Social, identity and commerce cards a human is meant to read as
 //           an object rather than a panel: a post, a profile, a player, a price.
 // A new block picks the role, never the number.
-export const R = { tight: 12, card: 14, soft: 16 };
+// ── THE SCALES ───────────────────────────────────────────────────────────────────────────────────
+// Measured across every factory's emitted output before these were chosen, because a scale that does
+// not absorb what is already there is a rewrite pretending to be a convention:
+//   gap     232 emitted values, 20 DISTINCT
+//   pad     277 emitted values, 25 DISTINCT
+//   size    452 emitted values, 29 DISTINCT, of which 19/22/18/20/17/21 alone are 316 uses
+//   radius  271 emitted values, 17 distinct, but 216 of those already sit on R.* / 100 / 0
+//
+// Six adjacent integers carrying 316 type sizes is not six decisions, it is one decision nudged 316
+// times. That is what a scale is for: it turns "what number looks right here" into "which step", and a
+// step is checkable in a way a nudge never is. It also makes every future block cheaper to build well,
+// which is the whole argument for having one at all.
+//
+// SPACE is 4-based with fine steps at the bottom, because the small end is where real distinctions
+// live (a dot beside its label is 6, not 4 or 8) and the large end never needs that resolution. The
+// `layout` skill makes the same argument: an 8-only scale misses the useful middle.
+export const SPACE = { none: 0, hair: 2, tight: 4, snug: 6, xs: 8, sm: 12, md: 16, lg: 24, xl: 32, xxl: 48 };
+export const SPACE_STEPS = Object.values(SPACE);
+
+// TYPE collapses the nudge band. Adjacent steps are far enough apart to read as a decision: 20 next to
+// 19 is an accident, 20 next to 24 is a hierarchy.
+export const TYPE = { fine: 14, body: 17, base: 20, lead: 24, head: 32, display: 48, hero: 64, mega: 92 };
+export const TYPE_STEPS = Object.values(TYPE);
+
+// R already existed and is already 80% adopted once `pill` and `none` are named, which they were not:
+// `radius: 100` appears 52 times and `radius: 0` 18 times, both spelled as bare numbers.
+//
+// THE STEPS CAME FROM THE HISTOGRAM, and the first draft of them was wrong in a way a dry run caught:
+// a scale of 0/6/12/14/16/100 snapped `radius: 100` to 16, which squares off a pill. Radius is not a
+// linear quantity. Past a certain fraction of the box it stops meaning "a bit rounded" and starts
+// meaning "fully rounded", so the top of this scale is a jump, not a step. `chip` is 8 rather than 6
+// because 8 is what the library actually reaches for (12 uses against 8), and `micro` exists because
+// 1/2/3/4px radii appear 20 times to take the hard edge off a hairline, which 0 would lose.
+export const R = { none: 0, micro: 4, chip: 8, tight: 12, card: 14, soft: 16, round: 24, pill: 100 };
+export const R_STEPS = Object.values(R);
 
 // cardChrome — the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because

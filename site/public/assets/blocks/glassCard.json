@@ -22,8 +22,8 @@
       "h": 300,
       "layout": "column",
       "items": "flex-start",
-      "gap": 14,
-      "pad": 40,
+      "gap": 12,
+      "pad": 32,
       "bg": "rgba(255,255,255,0.06)",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -41,7 +41,7 @@
           "w": 480,
           "h": 2,
           "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-          "radius": 2
+          "radius": 0
         },
         {
           "type": "text",

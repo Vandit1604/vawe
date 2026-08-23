@@ -12,7 +12,7 @@ const T = TOKENS;
 // initials}, with each block's old prop name kept as an alias — a shared vocabulary is worth nothing
 // if adopting it breaks the callers (MISTAKES #67). `role` is this block's word for `sub`.
 export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', avatar = '', initials = '', start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 22,
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 24,
     ...cardChrome(), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
       avatarEl({ avatar, initials, name, size: 56 }),
       { type: 'group', layout: 'column', items: 'flex-start', gap: 4, children: [
@@ -26,22 +26,22 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
   // appearing. The bubble is a LEAF carrying its own chrome: the row wrapper that used to hold it is
   // a nested group, and a nested group is built but never registered with the clip driver, so the
   // per-message `start` this block used to set was accepted and silently ignored on all four bubbles.
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 10, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 8, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start', children: [
       text({ text: m.text, size: 20, weight: 500, color: m.me ? '#fff' : T.ink,
-        bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 18px',
+        bg: m.me ? T.accent : T.card, ...(m.me ? {} : { border: HAIR, elevation: 1 }), radius: R.soft, pad: '12px 16px',
         ...stagger(i, { step: 0.42, delay: 0.2, anim: m.me ? 'slide-right' : 'slide-left', enterDur: 0.35 }) })] })) }];
 }
 
 // tweetCard — a post card: avatar · name · @handle · body · repost/like counts.
 export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = '', avatar = '', initials = '', likes = '', reposts = '', start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 14, pad: 22,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 24,
     ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.5, exitDur: 0.35, children: [
       { type: 'group', layout: 'row', items: 'center', gap: 12, children: [avatarEl({ avatar, initials, name, size: 48 }),
-        { type: 'group', layout: 'column', items: 'flex-start', gap: 1, children: [
+        { type: 'group', layout: 'column', items: 'flex-start', gap: 0, children: [
           text({ text: name, size: 20, weight: 700, color: T.ink }), text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim })] }] },
       text({ text: body, size: 21, weight: 400, color: T.ink }),
-      { type: 'group', layout: 'row', gap: 28, items: 'center', children: [
+      { type: 'group', layout: 'row', gap: 24, items: 'center', children: [
         text({ text: '↻ ' + reposts, font: 'mono', size: 16, color: T.dim }),
         text({ text: '♥ ' + likes, font: 'mono', size: 16, color: T.dim })] },
     ] }];
@@ -89,7 +89,7 @@ export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption 
     ...avatarStack({ x, y, avatars, extra, size, start, dur }),
     ...(lines.length ? [{
       type: 'group', x: r2(x + stackW + gap), y, h: size, layout: 'column', items: 'flex-start',
-      justify: 'center', gap: 3, children: lines,
+      justify: 'center', gap: 2, children: lines,
       start: said, duration: r2(start + dur - said), anim: 'slide-left', enterDur: 0.35, exitDur: 0.3,
     }] : []),
   ];
@@ -97,8 +97,8 @@ export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption 
 
 // reactionBar — a row of reaction count-pills; `mine:true` highlights the one you picked.
 export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, layout: 'row', gap: 10, items: 'center', start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
-    children: reactions.map((r) => ({ type: 'group', layout: 'row', items: 'center', gap: 7, pad: '7px 14px', radius: 100,
+  return [{ type: 'group', x, y, layout: 'row', gap: 8, items: 'center', start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
+    children: reactions.map((r) => ({ type: 'group', layout: 'row', items: 'center', gap: 6, pad: '6px 12px', radius: 100,
       bg: r.mine ? T.accentSoft : T.surface, ...(r.mine ? { border: `1px solid ${T.accent}` } : {}),
       children: [text({ text: r.emoji, size: 19 }), text({ text: String(r.count), size: 17, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'mono' })] })) }];
 }
@@ -123,7 +123,7 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
     children: [
       { type: 'group', layout: 'row', items: 'center', gap: 16, children: [
         artEl,
-        { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+        { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
           text({ text: title, size: 22, weight: 700, color: T.ink }),
           text({ text: by, size: 17, color: T.sub }),
         ] },
@@ -132,7 +132,7 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
       { type: 'group', layout: 'column', items: 'flex-start', gap: 0, start: r2(start + 0.15), duration: dur, anim: 'wipe', enterDur: 0.4,
         children: [box({ w: innerW, h: 5, radius: 100, bg: T.surface, layout: 'row', justify: 'flex-start', items: 'stretch',
           children: [box({ w: r2(innerW * p), h: 5, radius: 100, bg: T.accent })] })] },
-      { type: 'group', layout: 'row', justify: 'center', items: 'center', gap: 34,
+      { type: 'group', layout: 'row', justify: 'center', items: 'center', gap: 32,
         start: r2(start + 0.25), duration: dur, anim: 'rise', enterDur: 0.35, children: [
           text({ text: '◁', size: 22, weight: 600, color: T.sub }),
           box({ w: 48, h: 48, radius: 100, bg: T.ink, layout: 'row', justify: 'center', items: 'center',
@@ -149,15 +149,15 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
 export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = '', subscribers = '',
   avatar = '', initials = '', cta = 'Subscribe', start = 0, dur = 4 } = {}) {
   const who = name || channel, count = sub || subscribers;
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 20px',
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 16px',
     ...cardChrome({ elevation: 2 }), start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
     children: [
       avatarEl({ avatar, initials, name: who, size: 56 }),
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 3, grow: 1, children: [
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, grow: 1, children: [
         text({ text: who, size: 22, weight: 700, color: T.ink }),
         count && text({ text: count, font: 'mono', size: 16, color: T.dim }),
       ].filter(Boolean) },
-      { type: 'group', bg: T.down, radius: 100, pad: '10px 22px', start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
+      { type: 'group', bg: T.down, radius: 100, pad: '8px 24px', start: r2(start + 0.2), duration: dur, anim: 'rise', enterDur: 0.35,
         children: [text({ text: cta, size: 18, weight: 700, color: '#fff' })] },
     ] }];
 }
@@ -168,7 +168,7 @@ export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = 
 // caller supplies `avatar` or `initials`: a card designed without a portrait must not sprout an
 // invented circle just because it learned the vocabulary.
 export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '', initials = '', cta = 'Follow', start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 14, pad: '18px 22px',
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 24px',
     ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.45, exitDur: 0.3,
     children: [
       ...(avatar || initials ? [avatarEl({ avatar, initials, name, size: 44 })] : []),
@@ -176,7 +176,7 @@ export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '',
         text({ text: name, size: 21, weight: 700, color: T.ink }),
         text({ text: '@' + handle, font: 'mono', size: 16, color: T.dim }),
       ] },
-      { type: 'group', bg: T.ink, radius: 100, pad: '9px 20px', start: r2(start + 0.18), duration: dur, anim: 'rise', enterDur: 0.3,
+      { type: 'group', bg: T.ink, radius: 100, pad: '8px 16px', start: r2(start + 0.18), duration: dur, anim: 'rise', enterDur: 0.3,
         children: [text({ text: cta, size: 17, weight: 700, color: T.paper })] },
     ] }];
 }
@@ -215,16 +215,16 @@ export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rat
     ? (ratings >= 1e6 ? r2(ratings / 1e6) + 'M' : ratings >= 1e3 ? r2(ratings / 1e3) + 'K' : String(Math.round(ratings)))
     : '';
   const meta = [strip, countText && text({ text: countText, font: 'mono', size: 15, color: T.dim })].filter(Boolean);
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 18,
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: 16,
     ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.45, exitDur: 0.3, children: [
       box({ w: 62, h: 62, radius: R.card, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
         children: [text({ text: icon, size: 28, weight: 700, color: T.accentInk })] }),
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 5, grow: 1, children: [
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 4, grow: 1, children: [
         text({ text: name, size: 21, weight: 700, color: T.ink }),
         sub && text({ text: sub, size: 16, color: T.sub }),
-        meta.length && { type: 'group', layout: 'row', items: 'center', gap: 9, children: meta },
+        meta.length && { type: 'group', layout: 'row', items: 'center', gap: 8, children: meta },
       ].filter(Boolean) },
-      cta && { type: 'group', bg: T.accent, radius: 100, pad: '10px 22px',
+      cta && { type: 'group', bg: T.accent, radius: 100, pad: '8px 24px',
         start: r2(start + 0.22), duration: dur, anim: 'pop', enterDur: 0.3,
         children: [text({ text: cta, size: 17, weight: 700, color: onColor(T.accent) })] },
     ].filter(Boolean) }];

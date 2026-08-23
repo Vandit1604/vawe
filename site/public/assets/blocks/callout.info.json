@@ -22,7 +22,7 @@
       "layout": "row",
       "items": "center",
       "gap": 16,
-      "pad": "18px 22px",
+      "pad": "16px 24px",
       "bg": "var(--surface-2)",
       "radius": 12,
       "start": 0.2,
@@ -32,7 +32,7 @@
       "children": [
         {
           "type": "group",
-          "radius": 2,
+          "radius": 0,
           "w": 4,
           "h": 30,
           "bg": "var(--accent)"

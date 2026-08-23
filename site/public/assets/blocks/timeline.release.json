@@ -22,7 +22,7 @@
       "layout": "column",
       "items": "stretch",
       "gap": 0,
-      "pad": 26,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -72,7 +72,7 @@
               "layout": "column",
               "items": "flex-start",
               "gap": 2,
-              "pad": "0 0 22px",
+              "pad": "0 0 24px",
               "children": [
                 {
                   "type": "text",
@@ -138,7 +138,7 @@
               "layout": "column",
               "items": "flex-start",
               "gap": 2,
-              "pad": "0 0 22px",
+              "pad": "0 0 24px",
               "children": [
                 {
                   "type": "text",
@@ -197,7 +197,7 @@
               "layout": "column",
               "items": "flex-start",
               "gap": 2,
-              "pad": "0 0 22px",
+              "pad": "0 0 24px",
               "children": [
                 {
                   "type": "text",

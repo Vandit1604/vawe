@@ -22,7 +22,7 @@
       "layout": "column",
       "items": "flex-start",
       "gap": 16,
-      "pad": 26,
+      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -56,7 +56,7 @@
           "type": "group",
           "layout": "column",
           "items": "flex-start",
-          "gap": 3,
+          "gap": 2,
           "children": [
             {
               "type": "text",
@@ -79,7 +79,7 @@
         {
           "type": "group",
           "layout": "row",
-          "gap": 34,
+          "gap": 32,
           "items": "flex-start",
           "start": 0.38,
           "duration": 8,

@@ -33,13 +33,13 @@ const T = TOKENS;
 export function card({ x, y, w = 740, h = 336, tint = 'color-mix(in srgb, var(--accent) 10%, var(--card))', title, desc, pills = [],
   cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 8, pad: 14,
-    bg: T.card, radius: 18, elevation: 2, start, duration: dur, anim, enterDur, exitDur: 0.35,
+    type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 8, pad: 12,
+    bg: T.card, radius: 16, elevation: 2, start, duration: dur, anim, enterDur, exitDur: 0.35,
     children: [
-      { type: 'group', grow: 1, bg: tint, radius: 12, pad: 26, layout: 'column', items: 'flex-start', gap: 13, children: [
+      { type: 'group', grow: 1, bg: tint, radius: 12, pad: 24, layout: 'column', items: 'flex-start', gap: 12, children: [
         text({ text: title, size: 38, weight: 700, color: T.ink, ls: '-0.02em' }),
         desc && text({ text: desc, size: 20, color: T.sub }),
-        pills.length && { type: 'group', layout: 'row', wrap: true, gap: 10, items: 'center', children: pills.map((p) => pill(p)) },
+        pills.length && { type: 'group', layout: 'row', wrap: true, gap: 8, items: 'center', children: pills.map((p) => pill(p)) },
       ].filter(Boolean) },
       cta && { type: 'group', layout: 'row', justify: 'space-between', items: 'center', pad: '4px 12px', children: [
         text({ text: cta, size: 22, weight: 600, color: T.ink }),
@@ -72,14 +72,14 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
   const bars = [38, 52, 44, 66, 58, 80, 72];
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 18, pad: 26,
+    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 24,
     bg: T.card, radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
       text({ text: 'Net volume', size: 18, color: T.stripeGrey, font: 'mono' }),
       text({ text: (amount || ''), size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
       { type: 'group', layout: 'row', items: 'flex-end', gap: 8, h: 70, children:
         bars.map((b) => box({ w: 26, h: b, radius: 4, bg: T.blurple })) },
-      { type: 'group', bg: T.blurple, radius: 6, pad: '14px 0', layout: 'row', justify: 'center',
+      { type: 'group', bg: T.blurple, radius: 4, pad: '12px 0', layout: 'row', justify: 'center',
         children: [text({ text: (amount ? `Pay ${amount}` : 'Pay'), size: 18, weight: 600, color: '#fff' })] },
     ],
   }];
@@ -87,7 +87,7 @@ export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = 
 
 // quote — a pull quote with attribution. The one place big italic-ish restraint reads as premium.
 export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 20, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 16, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
     text({ text: `“${q}”`, size: 44, weight: 600, color: T.ink, ls: '-0.02em' }),
     author && text({ text: `· ${author}`, size: 22, color: T.sub }),
   ].filter(Boolean) }];
@@ -138,7 +138,7 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
       ...splitScreen({ x, y: r2(y + TITLE_H), w, gap, left: leftScreen, right: rightScreen, start, dur }),
     ];
   }
-  const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'flex-start', gap: 14, pad: 24,
+  const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'flex-start', gap: 12, pad: 24,
     ...cardChrome(), children: [
       text({ text: title, size: 26, weight: 700, color: accent }),
       ...items.map((it) => text({ text: it, size: 20, color: T.sub })),
@@ -152,7 +152,7 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
 // is {t, text, dur?}; `t` is relative to `start`. Deterministic. Pair with a future VO track.
 export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } = {}) {
   return lines.map((ln) => ({ type: 'text', text: ln.text, x, y, size, weight: 600, color: '#fff',
-    bg: 'rgba(10,10,10,0.82)', radius: 10, pad: '8px 20px',
+    bg: 'rgba(10,10,10,0.82)', radius: 8, pad: '8px 16px',
     start: r2(start + ln.t), duration: ln.dur ?? 2.2, anim: 'fade', enterDur: 0.2, exitDur: 0.2 }));
 }
 
@@ -164,17 +164,17 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 // `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
 // set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
 export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 28,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 24,
     bg: T.card, radius: R.soft, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? 2 : 1,
     start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
       text({ text: plan, size: 20, weight: 600, color: highlight ? T.accentInk : T.sub, font: 'mono' }),
       { type: 'group', layout: 'row', items: 'flex-end', gap: 4, children: [
         text({ text: price, size: 56, weight: 700, color: T.ink, ls: '-0.03em' }),
         text({ text: period, size: 20, color: T.dim, font: 'mono' })] },
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 10, children:
-        features.map((f) => ({ type: 'group', layout: 'row', items: 'center', gap: 10, children: [
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 8, children:
+        features.map((f) => ({ type: 'group', layout: 'row', items: 'center', gap: 8, children: [
           text({ text: '✓', size: 18, weight: 700, color: T.green }), text({ text: f, size: 19, color: T.sub })] })) },
-      { type: 'group', bg: highlight ? T.accent : T.surface, radius: 10, pad: '14px 0', layout: 'row', justify: 'center',
+      { type: 'group', bg: highlight ? T.accent : T.surface, radius: 8, pad: '12px 0', layout: 'row', justify: 'center',
         children: [text({ text: cta, size: 19, weight: 600, color: highlight ? '#fff' : T.ink })] },
     ] }];
 }
@@ -229,8 +229,8 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // A plate the colour of the page, hairline-bordered. The quiet one: use it when the frame is busy
     // and the identifier must not compete with it.
     case 'cleanBar':
-      return [{ type: 'group', x, y, ...stackL, gap: 3, pad: '16px 24px', bg: T.card,
-        radius: 6, border: HAIR, ...wipeIn, children: [
+      return [{ type: 'group', x, y, ...stackL, gap: 2, pad: '16px 24px', bg: T.card,
+        radius: 4, border: HAIR, ...wipeIn, children: [
           text({ text: name, ...N, color: T.ink }),
           role && text({ text: role, ...R, color: T.dim }),
         ].filter(Boolean) }];
@@ -239,9 +239,9 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // read: two hard rectangles, no radius, no apology.
     case 'boldBlock':
       return [
-        { type: 'group', x, y, pad: '12px 20px', bg: accent, ...HARD, ...wipeIn,
+        { type: 'group', x, y, pad: '12px 16px', bg: accent, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: '#fff' })] },
-        role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '9px 20px', bg: T.ink, ...HARD,
+        role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '8px 16px', bg: T.ink, ...HARD,
           ...wipeIn, start: s2, children: [text({ text: role, ...R, color: '#fff' })] } : null,
       ].filter(Boolean);
 
@@ -249,7 +249,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // The loudest variant in the set, and it is supposed to be.
     case 'bild':
       return [
-        { type: 'group', x, y, pad: '10px 18px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
+        { type: 'group', x, y, pad: '8px 16px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
           text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: '#fff' }),
         ] },
         role ? { type: 'group', x: r2(x + 14), y: r2(y + 84), pad: '8px 16px', bg: T.ink, ...HARD, ...wipeIn,
@@ -260,7 +260,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
 
     // A dark elevated card. The only variant that works over bright photography without a scrim.
     case 'darkCard':
-      return [{ type: 'group', x, y, ...stackL, gap: 4, pad: '18px 26px', bg: 'rgba(16,18,24,0.92)',
+      return [{ type: 'group', x, y, ...stackL, gap: 4, pad: '16px 24px', bg: 'rgba(16,18,24,0.92)',
         radius: 12, ...riseIn, children: [
           text({ text: name, ...N, color: '#fff' }),
           role && text({ text: role, ...R, color: 'rgba(255,255,255,0.72)' }),
@@ -269,9 +269,9 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // A thick accent rule, then the text. No plate at all: the rule alone carries the identity, so it
     // needs a calm backdrop to land on. (A rule beside text is broadcast grammar, not a card stripe.)
     case 'sideRule':
-      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 18, ...riseIn, children: [
+      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 16, ...riseIn, children: [
         box({ w: 6, h: r2(N.size + (role ? R.size + 14 : 0)), bg: accent }),
-        { type: 'group', ...stackL, gap: 3, children: [
+        { type: 'group', ...stackL, gap: 2, children: [
           text({ text: name, ...N, color: T.ink }),
           role && text({ text: role, ...R, color: T.dim }),
         ].filter(Boolean) },
@@ -280,7 +280,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // Kicker above, name below: the role becomes a small mono label that INTRODUCES the name rather
     // than trailing it. Reverses the usual hierarchy without weakening it.
     case 'kickerName':
-      return [{ type: 'group', x, y, ...stackL, gap: 7, ...riseIn, children: [
+      return [{ type: 'group', x, y, ...stackL, gap: 6, ...riseIn, children: [
         // 18 matches the schema's floor for a top-level text layer. As a group child it would be
         // allowed to go smaller, and a kicker is exactly the element that wants to: don't. Carry the
         // emphasis with tracking and colour, which cost no legibility.
@@ -311,7 +311,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
 
     // Soft accent pill, fully rounded. The friendly one: product tours, not news.
     case 'softPill':
-      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 12, pad: '12px 26px',
+      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 12, pad: '12px 24px',
         bg: T.accentSoft, radius: 100, ...riseIn, children: [
           text({ text: name, size: 34, weight: 700, tracking: '-0.02em', color: T.accentInk }),
           role && text({ text: role, size: 19, weight: 500, color: T.accentInk }),
@@ -321,9 +321,9 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     // labels. The offset is what stops it being `boldBlock` with extra steps.
     case 'colourBlock':
       return [
-        { type: 'group', x, y, pad: '13px 22px', bg: T.ink, ...HARD, ...wipeIn,
+        { type: 'group', x, y, pad: '12px 24px', bg: T.ink, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: '#fff' })] },
-        role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 18px', bg: accent, ...HARD,
+        role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 16px', bg: accent, ...HARD,
           ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
       ].filter(Boolean);
 
@@ -332,7 +332,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
       return [
         { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: T.ink })] },
-        role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '7px 24px', bg: accent, ...HARD, ...wipeIn,
+        role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '6px 24px', bg: accent, ...HARD, ...wipeIn,
           start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
       ].filter(Boolean);
 
@@ -341,10 +341,10 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     case 'newsTicker':
       return [{ type: 'group', x, y, layout: 'row', items: 'stretch', gap: 0, bg: T.ink, radius: 4,
         ...wipeIn, children: [
-          { type: 'group', bg: accent, pad: '12px 18px', items: 'center',
+          { type: 'group', bg: accent, pad: '12px 16px', items: 'center',
             children: [text({ text: String(role || 'LIVE').toUpperCase(), font: 'mono', size: 18,
               weight: 700, tracking: '0.08em', color: '#fff' })] },
-          { type: 'group', pad: '12px 22px', items: 'center',
+          { type: 'group', pad: '12px 24px', items: 'center',
             children: [text({ text: name, size: 30, weight: 600, color: '#fff' })] },
         ] }];
 
