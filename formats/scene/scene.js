@@ -7,7 +7,7 @@ import { splitText, circleText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
-import { capWords, wordU, lineU, CAP_STYLES } from '/core/captions.js';
+import { capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
 import { htmlSource } from '/core/sanitize-html.js';
@@ -909,18 +909,39 @@ boot((data, fps, theme, canvas) => {
     capEl.className = 'hs-cap ' + (capStyle ? 'styled ' + capStyle
       : capMode === 'word' ? 'word' : capMode === 'pop' ? 'pop' : '');
     if (cap) {
-      const key = cap.t0 + '|' + cap.text;
+      // The windows are recomputed every frame rather than cached on the element. capUnitWins is
+      // pure and a caption is a handful of units, and `mode:"one"` needs to know which unit is
+      // active BEFORE deciding whether the DOM has to change, which a cache written by the DOM
+      // rebuild cannot answer without a cycle.
+      const shape = capStyle ? capShape(capStyle) : null;
+      const wins = capStyle ? capUnitWins(cap, shape.unit || 'word') : null;
+      const one = shape && shape.mode === 'one';
+      const activeIdx = wins ? wins.findIndex((w) => t >= w.t0 && t < w.t1) : -1;
+      // A one-word style changes its DOM at every ONSET, not only at every line, so the memo key
+      // carries the active index. It is still a pure function of t, which is the only property
+      // that matters here: the same frame number rebuilds the same DOM whatever order frames run in.
+      const key = cap.t0 + '|' + cap.text + (one ? '|' + activeIdx : '');
       if (capEl.__key !== key) {
         capEl.__key = key;
         if (capStyle === 'clipWipe') {
           capEl.innerHTML = `<div class="cw base">${cap.text}</div><div class="cw over">${cap.text}</div>`;
           capEl.__units = null;
+        } else if (one) {
+          // ONE WORD, built directly rather than split out of the line: the other words are not in
+          // the DOM at all, so there is nothing to hide. The word comes from the window, which is
+          // the MARKUP-STRIPPED text, so a `<b>` around a single word is lost in this mode. That is
+          // the honest trade for a mode whose whole point is that the line is not on screen.
+          const w = wins[activeIdx < 0 ? 0 : activeIdx];
+          const s = document.createElement('span');
+          s.className = 'ku'; s.style.display = 'inline-block'; s.textContent = w ? w.w : '';
+          capEl.replaceChildren(s);
+          capEl.__units = [s];
         } else if (capStyle) {
           capEl.innerHTML = cap.text;
-          capEl.__units = splitText(capEl, 'word'); // the kinetic splitter (core/type.js)
+          capEl.__units = splitText(capEl, shape.unit || 'word'); // the kinetic splitter (core/type.js)
         } else { capEl.innerHTML = cap.text; capEl.__units = null; }
-        capEl.__wins = capStyle ? capWords(cap) : null;
       }
+      capEl.__wins = one && wins ? [wins[activeIdx < 0 ? 0 : activeIdx]] : wins;
       // PLACEMENT, WRITTEN EVERY FRAME. core/boot.js has already resolved this caption's pin / edge
       // keywords / "50%" strings to px against the safe box, so all that is left is to emit them.
       // Every one of the six is assigned on every frame even when the caption places nothing, because

@@ -53,7 +53,7 @@ import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../..
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
 import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
-import { capWords, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
+import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
@@ -926,6 +926,54 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('captions: weightShift dims via color-mix, never opacity', (() => { const st = CAP_STYLES.weightShift(1, false); return st.opacity === undefined && st.color.includes('color-mix'); })());
   ok('captions: weightShift bump settles to 1', CAP_STYLES.weightShift(1, true).transform === 'scale(1.000)');
   ok('captions: clipWipe hidden at 0, full at 1', CAP_STYLES.clipWipe(0).clipPath.includes('100.00%') && CAP_STYLES.clipWipe(1).clipPath.includes('0.00%'));
+
+  // ---- wave 3: the two mechanisms a style function cannot express by returning a value ----
+  // `mode:'one'` and `unit:'char'` are decided by the CALLER before any style runs, so they are
+  // declared in CAP_STYLE_SHAPE and checked here rather than inferred from a style's output.
+  ok('captions: a style with no declared shape is word-level and line-mode',
+    capShape('highlight').unit === 'word' && capShape('highlight').mode === 'line'
+    && capShape('nope-not-a-style').mode === 'line');
+  ok('captions: the one-word styles declare mode:one, typeOn declares unit:char',
+    capShape('wordFlash').mode === 'one' && capShape('wordSlide').mode === 'one'
+    && capShape('typeOn').unit === 'char' && capShape('typeOn').mode !== 'one');
+  // The char windows must align INDEX FOR INDEX with core/type.js splitText('char'), which emits one
+  // unit per non-space character, word by word. There is no DOM here, so the count is the check.
+  const chw = capUnitWins(cap, 'char');
+  ok('captions: char windows are one per non-space character',
+    chw.length === 'Shipthepayofflast'.length && chw.every((w) => w.w.trim().length === 1));
+  ok('captions: char windows are contiguous and stay inside their own word',
+    chw.every((w, i) => i === 0 || approx(w.t0, chw[i - 1].t1, 1e-3))
+    && approx(chw[0].t0, wins[0].t0, 1e-3) && chw[chw.length - 1].t1 <= wins[wins.length - 1].t1 + 1e-6);
+  // SPEECH PACING SURVIVES THE SUBDIVISION, and the honest statement of it is about the WINDOW,
+  // not the word length. Characters fill their own word's window, so a word the voice holds longer
+  // gives its letters longer. Checked against EXPLICIT timings, because that is the design: under
+  // the length-proportional fallback a word's window grows as (len+1) while its letter count grows
+  // as len, so a longer word is fractionally FASTER per letter. That is an artifact of the
+  // estimator and it is small; asserting the opposite of it, as a first draft of this line did, is
+  // asserting a bug that is not there.
+  ok('captions: characters inherit the pacing of the word window they sit in',
+    (() => {
+      const timed = { ...cap, words: [{ t0: 1, t1: 1.2 }, { t0: 1.2, t1: 1.4 }, { t0: 1.4, t1: 2.6 }, { t0: 2.6, t1: 3 }] };
+      const c = capUnitWins(timed, 'char');
+      const d = (w) => w.t1 - w.t0;
+      return d(c[8]) > d(c[4]) && approx(c[7].t0, 1.4, 1e-3);   // 'payoff' is held 1.2s, 'the' 0.2s
+    })());
+  ok('captions: capUnitWins is deterministic and defaults to words',
+    JSON.stringify(capUnitWins(cap)) === JSON.stringify(capWords(cap))
+    && JSON.stringify(capUnitWins(cap, 'char')) === JSON.stringify(capUnitWins(cap, 'char')));
+  // A one-word style paints only the word being spoken, so it needs no colour mix to say what is
+  // unread: the unread words are not in the DOM. It must therefore never dim, in any state.
+  ok('captions: the one-word styles never dim, in any state',
+    ['wordFlash', 'wordSlide'].every((n) => [0, 0.5, 1].every((u) => [true, false].every((a) => {
+      const st2 = CAP_STYLES[n](u, a);
+      return st2.opacity === undefined && !/color-mix/.test(st2.color || '');
+    }))));
+  ok('captions: typeOn hides an unarrived character rather than dimming it, and holds its space',
+    CAP_STYLES.typeOn(0, false).visibility === 'hidden'
+    && CAP_STYLES.typeOn(0.5, true).visibility === 'visible'
+    && CAP_STYLES.typeOn(0.5, true).boxShadow.includes('var(--accent)')
+    && CAP_STYLES.typeOn(1, false).boxShadow === 'none'
+    && CAP_STYLES.typeOn(0, false).opacity === undefined);
 
   // THE THREE STATES, once per style. A caption style whose upcoming and already-spoken words look
   // identical is a progress bar with no memory: the viewer cannot tell what has been read from what

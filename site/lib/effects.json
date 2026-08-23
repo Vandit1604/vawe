@@ -1,5 +1,5 @@
 {
-  "total": 521,
+  "total": 524,
   "previewed": 227,
   "families": 35,
   "tags": [
@@ -25,7 +25,7 @@
     ],
     [
       "captions",
-      8
+      11
     ],
     [
       "composition",
@@ -3602,7 +3602,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "captions need a voice track and cues, which the index does not carry.",
-      "count": 8,
+      "count": 11,
       "undescribed": 0,
       "entries": [
         {
@@ -3648,6 +3648,13 @@
           "noPreview": null
         },
         {
+          "name": "typeOn",
+          "stem": "caption-styles--typeon",
+          "desc": "a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "underlineDraw",
           "stem": "caption-styles--underlinedraw",
           "desc": "a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast",
@@ -3658,6 +3665,20 @@
           "name": "weightShift",
           "stem": "caption-styles--weightshift",
           "desc": "the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordFlash",
+          "stem": "caption-styles--wordflash",
+          "desc": "ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordSlide",
+          "stem": "caption-styles--wordslide",
+          "desc": "the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it",
           "scene": null,
           "noPreview": null
         }

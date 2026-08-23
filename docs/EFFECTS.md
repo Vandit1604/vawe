@@ -685,8 +685,11 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `neonEdge` | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
 | `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
 | `readerFocus` | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
+| `typeOn` | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
 | `underlineDraw` | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
 | `weightShift` | the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix |
+| `wordFlash` | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
+| `wordSlide` | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
 
 ## Drawn icons  `[asset]`
 
@@ -789,4 +792,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_521 effects across 35 families. Regenerate: `make effects`._
+_524 effects across 35 families. Regenerate: `make effects`._

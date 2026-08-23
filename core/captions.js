@@ -143,6 +143,38 @@ export const CAP_STYLES = {
   // spoken, so the eye is told where it is without any colour changing hue. Every scale is <= 1, so
   // this style can never grow the band. The spoken mix is 88%, a step above the 76% upcoming one:
   // both are legible on the plate, and the ORDER of the two is what carries the state.
+  // ONE WORD ON SCREEN, replaced whole at the next onset. `mode:'one'` above, so this function only
+  // ever paints the word being spoken and there is no upcoming or spoken state to dim: the read/
+  // unread distinction is carried by PRESENCE, which is why this needs no colour mix at all.
+  // The word lands at 1.14 and settles cubically, so nearly all the travel is in the first third.
+  // 1.14, not kineticSlam's 1.22: this word is alone on the line and has the whole band to itself,
+  // so the overshoot that reads as impact beside its neighbours reads as a wobble on its own.
+  wordFlash: (u) => {
+    const back = (1 - clamp01(u)) ** 3;
+    return { color: 'var(--text)', transform: `scale(${(1 + 0.14 * back).toFixed(3)})` };
+  },
+
+  // The same one-word swap, arriving from below instead of from scale. Pairs with a film that is
+  // already moving vertically, where a scale pop would be a second unrelated motion.
+  // `translateY` only: a transform cannot move its neighbours, and in `mode:'one'` it has none.
+  wordSlide: (u) => {
+    const back = (1 - clamp01(u)) ** 3;
+    return { color: 'var(--text)', transform: `translateY(${(back * 26).toFixed(1)}px)` };
+  },
+
+  // A TYPEWRITER, per character (`unit:'char'` above). A character that has not arrived is
+  // `visibility:hidden`, NOT dimmed: it occupies its space so the line never reflows mid-word, and
+  // it is absent rather than faint, so the contrast doctrine has no subject to be violated on.
+  // The caret is an INSET box-shadow, not a border: a border would widen the character and re-lay
+  // the line on every frame, which is the same layout trap kineticSlam's comment records for
+  // letter-spacing. It also gives this style its third distinct state honestly, rather than by
+  // exemption: hidden, then typing with the caret, then typed.
+  typeOn: (u, active) => ({
+    color: 'var(--text)',
+    visibility: clamp01(u) > 0 ? 'visible' : 'hidden',
+    boxShadow: active ? 'inset -2px 0 0 0 var(--accent)' : 'none',
+  }),
+
   readerFocus: (u, active) => active
     ? { color: 'var(--text)', transform: 'scale(1)' }
     : clamp01(u) > 0
@@ -151,6 +183,47 @@ export const CAP_STYLES = {
 };
 
 export const CAP_STYLE_NAMES = Object.keys(CAP_STYLES);
+
+// ── STYLE SHAPE: the two things a style cannot say by returning a style object ────────────────────
+// Every style above is a function of (u, active) applied to one word span, and that contract can
+// express any TREATMENT. It cannot express a different set of units or a different set of words on
+// screen, because both are decided before the function is ever called. Two mechanisms the whole
+// short-form industry ships needed exactly that, and are why this map exists:
+//
+//   mode: 'one'   render ONLY the word being spoken, replaced whole at the next word's onset. The
+//                 other words are not dimmed, they are ABSENT. This is the single most-used caption
+//                 style in short-form video and the engine had no way to say it.
+//   unit: 'char'  split the line into characters rather than words, each with its own window.
+//
+// A style with no entry here is `{unit:'word', mode:'line'}`, which is what all eight of the
+// originals are, so nothing about them changes. This is a SEPARATE map rather than a richer value
+// in CAP_STYLES on purpose: `CAP_STYLES[name](u, active)` stays callable, so every assertion in
+// lib-test that walks the registry keeps working unchanged.
+export const CAP_STYLE_SHAPE = {
+  wordFlash: { mode: 'one' },
+  wordSlide: { mode: 'one' },
+  typeOn: { unit: 'char' },
+};
+export const capShape = (name) => CAP_STYLE_SHAPE[name] || { unit: 'word', mode: 'line' };
+
+// capUnitWins(cap, unit) — the windows the renderer styles, one per unit.
+// 'char' subdivides each WORD window across that word's characters, which keeps speech pacing: a
+// long word still holds longer, and its letters land inside its own window rather than at a flat
+// rate across the line. The order matches core/type.js splitText('char') exactly, which emits one
+// unit per non-space character, word by word, so the two lists align index for index.
+export function capUnitWins(cap, unit = 'word') {
+  const wins = capWords(cap);
+  if (unit !== 'char') return wins;
+  const out = [];
+  for (const w of wins) {
+    const chars = [...w.w];
+    const step = (w.t1 - w.t0) / Math.max(1, chars.length);
+    chars.forEach((c, i) => out.push({
+      w: c, t0: +(w.t0 + i * step).toFixed(3), t1: +(w.t0 + (i + 1) * step).toFixed(3),
+    }));
+  }
+  return out;
+}
 
 // CAPTION_BLURBS — one line per style, next to the styles themselves (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
@@ -166,4 +239,7 @@ export const CAPTION_BLURBS = {
   kineticSlam: 'the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still',
   underlineDraw: 'a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast',
   readerFocus: 'a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1',
+  wordFlash: 'ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint',
+  wordSlide: 'the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it',
+  typeOn: 'a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret',
 };

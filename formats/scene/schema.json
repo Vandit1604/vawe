@@ -107,7 +107,10 @@
         "neonEdge",
         "kineticSlam",
         "underlineDraw",
-        "readerFocus"
+        "readerFocus",
+        "wordFlash",
+        "wordSlide",
+        "typeOn"
       ]
     },
     "bg": {

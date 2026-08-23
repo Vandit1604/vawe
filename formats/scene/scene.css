@@ -63,3 +63,12 @@
    settled 4% would sit on the following space. The margin is the room. It is static, so it costs the
    line one constant re-lay at build and none per frame. */
 .hs-cap.kineticSlam .ku { margin: 0 0.10em; }
+/* wave 3, the one-word styles (wordFlash · wordSlide). The scrim plate exists so contrast is
+   computable, and at 8%/8% it is the width of the LINE. With one word on it, that is a full-width
+   bar with a single short word floating in the middle of it, which reads as an empty component
+   rather than a caption. `width:fit-content` shrinks the plate to its word; the left/right pair is
+   still what it centres inside, so the plate stays inside the same safe box every other skin uses
+   and captionBand()'s numbers do not move. Keeping left/right rather than switching to a transform
+   matters: formats/scene/scene.js writes `transform` on this element every frame for the entrance,
+   and a centring transform here would be overwritten on the first one. */
+.hs-cap.wordFlash, .hs-cap.wordSlide { width: fit-content; margin-inline: auto; }

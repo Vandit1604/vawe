@@ -116,6 +116,13 @@ const WAIVED = new Map(Object.entries({
   // is right to have asked (docs/MISTAKES.md #392).
   CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
   CAPTION_LINES: 'as CAPTION_SKINS — how many lines the band reserves, not a name a scene can write',
+  // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
+  // treats that style (one word on screen, or split per character); an author never writes it and
+  // could not use it if they did. The fact it carries IS catalogued, in the place an author actually
+  // reads: every shaped style says so in its own CAPTION_BLURBS line, which is the row `make effects`
+  // prints. A second entry naming the mechanism would be the same fact filed under a word nobody
+  // searches for.
+  CAP_STYLE_SHAPE: 'how the renderer treats a style (one-word / per-character); the scene names the STYLE, and each shaped style says so in its own blurb',
   // A scene names a BEAT, and every beat is already catalogued by `make blueprints`. REQUESTS is the
   // prose sentence for asking for one in a STORYBOARD, which is a plan and not a scene, so there is
   // nothing here for a scene to write. It is surfaced where it is used: `make blueprints` prints an

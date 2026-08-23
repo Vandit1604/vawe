@@ -12436,3 +12436,51 @@ instead of half-applied.
 
 **What did not change.** `snap-scenes` reports 34 identical and 71 changed both WITH and WITHOUT these
 edits: that spread is #401's unversioned fonts, not this. Measured both ways before believing it.
+
+## #404 — The two most-used caption mechanisms in short-form video were unsayable, and the reason was in the contract
+
+**What.** A caption style is `(u, active) => styleObject`, applied to one word span. That expresses any
+TREATMENT and cannot express a different set of units or a different set of words on screen, because
+both are settled before the function is called. Two of the four mechanisms every captioning tool ships
+need exactly that, so the engine had eight styles and neither of the common ones:
+
+- **one word on screen**, swapped whole at the next onset. Ubiquitous. Not a treatment: the other
+  words are ABSENT, not dimmed.
+- **per character**, a typewriter. The unit is the character and the registry's unit was the word.
+
+**Fix.** `CAP_STYLE_SHAPE` in `core/captions.js` declares `mode:'one'` and `unit:'char'` per style, and
+`capUnitWins(cap, unit)` subdivides each WORD window across that word's characters, so speech pacing
+survives the split and the order matches `splitText('char')` index for index. A style with no entry is
+`{unit:'word', mode:'line'}`, which is what all eight originals are.
+
+**Why a separate map and not a richer value in CAP_STYLES.** `CAP_STYLES[name](u, active)` stays
+callable, so every assertion in `lib-test` that walks the registry keeps working. Making the entries
+descriptors would have broken six of them and invited the fix of relaxing what they check.
+
+**THE GATE WAS NOT WEAKENED, AND THAT WAS THE DESIGN CONSTRAINT.** `lib-test` requires of every style:
+three distinct states, no state dimming by opacity, every colour a theme token, pure in u, and no scale
+past 1.22. The obvious first draft of each new style broke one of them, and each time the gate was
+right:
+- a one-word style has no upcoming or spoken state to dim, so it needs no colour mix at all; presence
+  carries the read/unread distinction. `wordFlash` scales 1.14 -> 1.00, `wordSlide` translates 26px.
+- a typewriter's current and already-typed characters look identical, which would have failed the
+  three-state rule. An unarrived character is `visibility:hidden`, not dim, and the current one carries
+  an INSET box-shadow caret. That is a real typewriter AND three honest states. An inset shadow, not a
+  border: a border widens the character and re-lays the line every frame, the same layout trap
+  `kineticSlam` records for letter-spacing.
+915 assertions pass, up from 895, with nothing exempted.
+
+**One defect only the render showed.** The scrim plate is `left:8%; right:8%`, the width of the LINE.
+With one word on it that is a full-width bar with a short word floating in it, which reads as an empty
+component. `width:fit-content; margin-inline:auto` shrinks the plate to its word inside the same box,
+so `captionBand()`'s numbers do not move.
+
+**An assertion I wrote that was wrong.** The first version claimed a longer word gives its characters
+longer windows. Under the length-proportional fallback a word's window grows as `len+1` while its
+letters grow as `len`, so a longer word is fractionally FASTER per letter. The code was right and the
+test was asserting a bug that is not there. It now checks the property that matters, against explicit
+`words` timings: characters inherit the pacing of the window they sit in.
+
+**`arsenal-check` caught the new export the same hour.** `CAP_STYLE_SHAPE` is not a name a scene can
+write, so it is waived with a reason: the fact it carries is already in each shaped style's own
+`CAPTION_BLURBS` line, which is the row `make effects` prints.
