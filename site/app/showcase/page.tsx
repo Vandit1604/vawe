@@ -8,7 +8,10 @@ import { ShowcaseRail, type Category } from "./ShowcaseRail";
 import { resolveTag } from "./tagLinks";
 import LINES from "../../lib/scene-lines.json";
 import EFFECTS from "../../lib/effects-counts.json";
+import TYPE_CATALOGUE from "../../lib/type-specimens.json";
 import "./showcase.css";
+
+const TYPE_SPECIMENS = (TYPE_CATALOGUE as { counts: { specimens: number } }).counts.specimens;
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
@@ -160,6 +163,19 @@ export default function Showcase() {
                   <span className="cap-index-text">
                     <b>Every effect, indexed</b>
                     <span>{EFFECTS.families} families, with the JSON for each.</span>
+                  </span>
+                  <span className="cap-index-go" aria-hidden="true">→</span>
+                </Link>
+                {/* /type moved under /showcase this pass, for the reason showcase/effects/page.tsx
+                    already argues: it is this same question asked exhaustively about one layer, and
+                    as a sixth nav item it made a visitor guess which entry held what they wanted.
+                    Leaving the nav means it needs a door, and this is where a reader is already
+                    looking for the exhaustive version. */}
+                <Link className="cap-index" href="/showcase/type">
+                  <span className="cap-index-n">{TYPE_SPECIMENS}</span>
+                  <span className="cap-index-text">
+                    <b>Every type specimen, moving</b>
+                    <span>Grouped by the job, each one playable in the real engine.</span>
                   </span>
                   <span className="cap-index-go" aria-hidden="true">→</span>
                 </Link>

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useSceneEngine } from "../components/useSceneEngine";
+import { useSceneEngine } from "../../components/useSceneEngine";
 
 /* One specimen, rendered LIVE by the real engine.
  *

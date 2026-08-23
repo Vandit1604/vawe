@@ -1,0 +1,15 @@
+/* ===== /showcase/type — page-local rules ========================================================
+   The disclosure below repeats six lines that showcase/effects/effects.css also carries. That is a
+   deliberate copy, not an oversight: the alternative is one page importing another page's
+   stylesheet, which is a dependency between two routes that have nothing else to do with each
+   other. Six lines of `<details>` chrome is the cheaper of the two. If a third page needs it, it
+   becomes a shared primitive in globals.css and both of these delete their copy. */
+.tyabout { margin: 4px 0 26px; }
+.tyabout > summary { cursor: pointer; list-style: none; font-size: 12.5px; color: var(--muted);
+  padding: 2px 0; width: fit-content; }
+.tyabout > summary::-webkit-details-marker { display: none; }
+.tyabout > summary::before { content: "+ "; font-family: var(--font-mono, monospace); }
+.tyabout[open] > summary::before { content: "- "; }
+.tyabout > summary:hover { color: var(--ink-2); }
+.tyabout > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.tyabout > p { margin-top: 12px; font-size: 14px; line-height: 1.6; color: var(--ink-2); max-width: 66ch; }

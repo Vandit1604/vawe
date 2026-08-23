@@ -12,7 +12,6 @@ const NAV = [
   { href: "/editor", label: "Editor", key: "editor" },
   { href: "/showcase", label: "Showcase", key: "showcase" },
   { href: "/blocks", label: "Blocks", key: "blocks" },
-  { href: "/type", label: "Type", key: "type" },
   { href: "/playground", label: "Playground", key: "playground" },
   { href: "/features", label: "Features", key: "features" },
 ];
