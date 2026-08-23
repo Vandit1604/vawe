@@ -181,10 +181,14 @@ const families = sections.map(([title, intro, list, tag, meta]) => {
     undescribed: list.filter((n) => d(n, meta) === '\u2014').length,
     entries: list.map((name) => ({
       name,
+      // The canonical id for this effect's own page (site/app/showcase/effects/[stem]/page.tsx) and
+      // its preview scene. Generated once here rather than re-slugged in three places (the index
+      // page, the effect page, generateStaticParams): one wrong re-implementation of `slug()` and a
+      // page 404s on a name with a character the copy missed.
+      stem: `${id}--${slug(name)}`,
       // `d()` returns an em-dash when a family keeps no blurb for a name. That is a GAP, not a
       // description, so it becomes empty here and the family counts it out loud below.
       desc: d(name, meta) === '\u2014' ? '' : prose(d(name, meta)),
-      json: usage(name),
       scene: preview && !UNPLAYABLE[`${id}--${slug(name)}`] ? `/assets/effects/${id}--${slug(name)}.json` : null,
       // A family reason, unless this one name has its own.
       noPreview: UNPLAYABLE[`${id}--${slug(name)}`] || null,
@@ -211,6 +215,21 @@ const index = { total, previewed, families: families.length, tags, list: familie
 const counts = { total, previewed, families: families.length };
 const COUNTS = path.join(root, 'site/lib/effects-counts.json');
 
+// The authoring snippet, keyed by `stem`, for EVERY effect (not just the 227 previewable ones — a
+// family with no live preview still gets a page that shows the JSON that uses it). This is what used
+// to be the `json` field on each index entry: 59KB of the 166KB the index shipped in the first byte,
+// for text that /showcase/effects (the list) never renders. It moves here because
+// site/app/showcase/effects/[stem]/page.tsx is a SERVER component — reading it there puts the text
+// straight into that one effect's static HTML and never into the client bundle the list page ships.
+const BODY = path.join(root, 'site/lib/effects-body.json');
+const bodies = Object.fromEntries(
+  sections.flatMap(([title, , list]) => {
+    const id = slug(title);
+    const usage = USAGE[id] || (() => '');
+    return list.map((name) => [`${id}--${slug(name)}`, usage(name)]);
+  }),
+);
+
 // The scenes. Written on change only: they are committed, so an unchanged effect must not churn git.
 const want = new Map();
 for (const [title, , list, , ] of sections) {
@@ -225,8 +244,10 @@ for (const [title, , list, , ] of sections) {
 if (CHECK) {
   const cur = fs.existsSync(INDEX) ? fs.readFileSync(INDEX, 'utf8') : '';
   const curCounts = fs.existsSync(COUNTS) ? fs.readFileSync(COUNTS, 'utf8') : '';
+  const curBody = fs.existsSync(BODY) ? fs.readFileSync(BODY, 'utf8') : '';
   const stale = cur.trim() !== (j(index) + '\n').trim()
     || curCounts.trim() !== (j(counts) + '\n').trim()
+    || curBody.trim() !== (j(bodies) + '\n').trim()
     || [...want].some(([f, body]) => !fs.existsSync(path.join(SCENES, f)) || fs.readFileSync(path.join(SCENES, f), 'utf8') !== body);
   if (stale) { console.error('✗ site/lib/effects.json is stale — run `make effects-json`.'); process.exit(1); }
   console.log(`✓ effects index in sync — ${total} effects, ${previewed} previewable`);
@@ -246,5 +267,7 @@ for (const f of fs.existsSync(SCENES) ? fs.readdirSync(SCENES) : []) {
 }
 fs.writeFileSync(INDEX, j(index) + '\n');
 fs.writeFileSync(COUNTS, j(counts) + '\n');
+fs.writeFileSync(BODY, j(bodies) + '\n');
 console.log(`✓ site/lib/effects.json — ${total} effects across ${families.length} families, ${previewed} previewable`
+  + `\n✓ site/lib/effects-body.json — ${Object.keys(bodies).length} authoring snippets, read only by the per-effect pages`
   + `\n✓ site/public/assets/effects — ${want.size} scenes (${wrote} written, ${gone} removed)`);

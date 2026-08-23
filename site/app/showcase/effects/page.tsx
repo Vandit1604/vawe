@@ -4,6 +4,7 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { EffectsBrowser, type Index } from "./EffectsBrowser";
 import index from "../../../lib/effects.json";
+import "./effects.css";
 
 /* /showcase/effects — the effects library, every registered effect present.
  *

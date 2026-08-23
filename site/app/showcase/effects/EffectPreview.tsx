@@ -8,9 +8,10 @@ import { useSceneEngine } from "../../components/useSceneEngine";
  * to fit, driven by renderFrame(n) from out here. The scene it boots is generated beside the index
  * (scripts/site/effects-json.mjs), so what plays is a real scene file an author could render.
  *
- * ONE ENGINE ON THE PAGE, EVER. 229 previewable effects is 229 iframes if the list carries them, so
- * the list carries none: this mounts only inside the open drawer, and opening another effect
- * unmounts it (useSceneEngine's cleanup tears the browsing context down with it).
+ * ONE ENGINE ON THE PAGE, EVER. 227 previewable effects is 227 iframes if the index mounted them
+ * all, so it mounts none: the index is a `<Link>` to `[stem]/page.tsx`, and that page renders
+ * exactly one of these. The constraint used to be enforced by an open-drawer state machine in the
+ * list; now it is enforced by there being one effect per page.
  *
  * A boot failure is SHOWN. The alternative is a black rectangle that claims to be an effect, and
  * this page's whole promise is that it says what it cannot show.
