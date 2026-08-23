@@ -58,24 +58,46 @@ function tagsFor(family: Family, entry: Entry): { label: string; title?: string 
 
 type RelatedEntry = Entry & { familyId: string; familyTitle: string };
 
-// Adjacency first (the two entries either side of this one in its own family — the cheapest,
-// most literal relation), then topical: other families sharing this one's tag, a couple of entries
-// each, in index order. Capped at 6 so the footer stays a glance, not a second index.
-function relatedFor(family: Family, entry: Entry, prev: Entry | null, next: Entry | null): RelatedEntry[] {
-  const out: RelatedEntry[] = [];
-  const seen = new Set([entry.stem]);
-  const push = (e: Entry, familyId: string, familyTitle: string) => {
-    if (seen.has(e.stem) || out.length >= 6) return;
-    seen.add(e.stem);
-    out.push({ ...e, familyId, familyTitle });
-  };
-  if (prev) push(prev, family.id, family.title);
-  if (next) push(next, family.id, family.title);
+// RELATED, AND NEITHER OF THE TWO CHEAP ANSWERS.
+//
+// The first draft opened with ADJACENCY, the entries either side of this one in its own family. That
+// is not a relation, it is alphabetical order, and prev/next already shows it on this same page: on
+// `blur` it put `bounce` in the footer a second time, one card away from the control that had just
+// offered it. Adjacency is therefore excluded here outright.
+//
+// The second cheap answer is "any family sharing this tag, first two entries". `blur` shares the
+// `text` tag with the ransom typefaces, so a blur preset recommended `anybody` and `archivo`, which
+// are faces and have nothing to do with resolving out of a blur. Sharing a tag makes two entries
+// eligible, not related.
+//
+// So: score by the words the two entries USE, which is the only description of meaning this registry
+// carries. An entry whose blurb says "focus pull, heavy blur" scores against one that says "resolve
+// out of blur"; a typeface name scores zero and drops out. Same tag is a tie-breaker rather than the
+// signal. Stop words are the words every blurb has, and a word under four characters is noise.
+const STOP = new Set(["the", "and", "with", "into", "from", "that", "this", "then", "each", "over",
+  "onto", "when", "than", "them", "they", "its", "for", "not", "but", "one", "two", "per", "out",
+  "text", "word", "layer", "scene", "frame", "effect", "every", "which", "while", "where"]);
+const wordsOf = (e: Entry) => new Set(
+  `${e.name} ${e.desc}`.toLowerCase().split(/[^a-z]+/).filter((w) => w.length >= 4 && !STOP.has(w)),
+);
+
+function relatedFor(family: Family, entry: Entry): RelatedEntry[] {
+  const mine = wordsOf(entry);
+  if (!mine.size) return [];
+  const scored: { e: Entry; familyId: string; familyTitle: string; score: number }[] = [];
   for (const f of ix.list) {
-    if (out.length >= 6 || f.id === family.id || f.tag !== family.tag) continue;
-    for (const e of f.entries.slice(0, 2)) push(e, f.id, f.title);
+    for (const e of f.entries) {
+      if (e.stem === entry.stem) continue;
+      let shared = 0;
+      for (const w of wordsOf(e)) if (mine.has(w)) shared++;
+      if (!shared) continue;
+      // Same tag breaks ties toward the neighbourhood the reader is already in, without letting a
+      // shared tag alone put an unrelated entry on the page.
+      scored.push({ e, familyId: f.id, familyTitle: f.title, score: shared * 2 + (f.tag === family.tag ? 1 : 0) });
+    }
   }
-  return out;
+  scored.sort((a, b) => b.score - a.score || a.e.name.localeCompare(b.e.name));
+  return scored.slice(0, 6).map(({ e, familyId, familyTitle }) => ({ ...e, familyId, familyTitle }));
 }
 
 export function generateStaticParams() {
@@ -100,7 +122,7 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
   const { family, entry, prev, next } = hit;
   const json = BODY[stem] ?? "";
   const { knobs, bodyType } = deriveKnobs(json, entry.name);
-  const related = relatedFor(family, entry, prev, next);
+  const related = relatedFor(family, entry);
 
   return (
     <div className="shell">

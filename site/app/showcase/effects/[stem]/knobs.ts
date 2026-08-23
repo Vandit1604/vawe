@@ -51,7 +51,16 @@ export type KnobPlan = { knobs: Knob[]; bodyType: string | null };
 
 // Schema prose is written for a docs page, not a 200px control: cut at a sentence or word boundary
 // past 160 characters rather than truncating mid-word.
-function trimLabel(label: string): string {
+// THE SAME NORMALISATION effects-json.mjs ALREADY DOES, applied at the second place registry prose
+// crosses onto a page. That file's `prose()` carries the reason: the labels are written for a
+// markdown doc and lean on the em-dash, and no em-dash reaches a user-facing surface here. These
+// labels used to be seen by a validator and an editor field, so nobody had to care; the knob panel
+// put 28 of them onto 528 public pages, and the rule did not follow because the helper lived in a
+// build script this page never runs. The middle dot is what the rest of the site already uses.
+const prose = (s: string) => s.replace(/\s*[—–]\s*/g, " · ");
+
+function trimLabel(raw: string): string {
+  const label = prose(raw);
   if (label.length <= 160) return label;
   const cut = label.slice(0, 160);
   const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(" "));
