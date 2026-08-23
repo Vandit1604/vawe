@@ -12508,3 +12508,39 @@ accident found a real gap, and that is luck, not a process.
 
 **The rule.** Stage by path, not by sweep. `git add <the files this commit is about>`. A commit whose
 diffstat is four times the size of the work it describes is telling you something before you push it.
+
+## #406 — `<b>` around a caption word was accepted, rendered, and had no effect
+
+**What.** `formats/scene/scene.css:50` has painted `.hs-cap.styled b` with the accent since captions
+existed, and `splitText` preserves the `<b>` element and wraps the words inside it. So an author who
+marked the word that matters got the markup honoured on three styles and silently eaten on eight.
+
+**Why those eight.** A per-word style writes `color` INLINE on the `.ku` span, and that span is a CHILD
+of the `<b>`. An inline value on the child beats a rule on the parent every time. `highlight`,
+`pillKaraoke` and `clipWipe` return no `color` at all (they work through background and clip-path), so
+those three were fine and hid the problem: the feature demonstrably worked, on a third of the library.
+
+**Found by rendering, not by reading.** The markup validates, the styles are pure, every gate is green,
+and a still of the frame is the only thing that shows the word is not accented.
+
+**Fix.** Emphasis is a fact about the DOM and not about t, so it is read ONCE at build
+(`u.closest('b, strong, em, i')`) rather than thirty times a second, and the apply loop swaps the
+colour for `var(--accent)` on an emphasised unit.
+
+**It lands when the word arrives, and that is the design, not a limitation.** Painting an emphasised
+word accent while it is still upcoming makes the emphasis the FIRST thing read, which is the opposite
+of what a marked word is for. Before its window it keeps whatever dimmed treatment the style gives
+every other upcoming word. Full accent rather than a mix of it: the 76% mixes are computed against
+`--text`, and a second colour ramp mixed the same way is a contrast claim nobody has checked.
+
+**Checked on three themes** (vawe, vawe-dark, creed): no contrast finding from the accent. The two
+failures that did appear are pre-existing defects of the probe scene, an overlap on dark and
+`sample.json`'s hero text against plinth's palette, and neither is the caption.
+
+**Known limit, stated rather than discovered later.** `mode:'one'` styles (`wordFlash`, `wordSlide`)
+build their single word from the markup-STRIPPED window text, so emphasis cannot apply there. Marking
+one word out of one word on screen carries no information anyway.
+
+**This is the mechanism every captioning tool calls "keyword emphasis" and sells as an ML feature.**
+Here it is the author pointing at the word, which is better: they know which one matters.
+

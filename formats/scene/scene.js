@@ -939,6 +939,15 @@ boot((data, fps, theme, canvas) => {
         } else if (capStyle) {
           capEl.innerHTML = cap.text;
           capEl.__units = splitText(capEl, shape.unit || 'word'); // the kinetic splitter (core/type.js)
+          // EMPHASIS, MARKED ONCE AT BUILD. `<b>`/`<em>` around a word is the author saying "this is
+          // the one that matters", scene.css has painted it with the accent since captions existed,
+          // and eight of the eleven styles silently ate it: splitText preserves the <b> element and
+          // wraps the words INSIDE it, then the per-word style writes `color` inline on that inner
+          // span, and an inline value on the child beats a rule on the parent every time. So the
+          // markup was accepted, rendered, and had no effect, which is the silent-substitution shape
+          // this repo logs more than any other. Whether a unit is emphasised is a fact about the DOM
+          // and not about t, so it is read once here rather than 30 times a second.
+          for (const u of capEl.__units) u.__em = !!u.closest('b, strong, em, i');
         } else { capEl.innerHTML = cap.text; capEl.__units = null; }
       }
       capEl.__wins = one && wins ? [wins[activeIdx < 0 ? 0 : activeIdx]] : wins;
@@ -969,7 +978,15 @@ boot((data, fps, theme, canvas) => {
         // disagree; degrade to the plain styled plate instead of misaligned karaoke.
         capEl.__units.forEach((el, i) => {
           const win = capEl.__wins[i];
-          Object.assign(el.style, CAP_STYLES[capStyle](wordU(t, win), t >= win.t0 && t < win.t1));
+          const u = wordU(t, win), on = t >= win.t0 && t < win.t1;
+          const st = CAP_STYLES[capStyle](u, on);
+          // An emphasised word takes the accent WHEN IT ARRIVES, not before. Painting it accent
+          // while it is still upcoming makes the emphasis the first thing read, which is the
+          // opposite of emphasis: the point of a marked word is that it lands. Before its window it
+          // keeps whatever dimmed treatment the style gives every other upcoming word.
+          // Full accent rather than a mix of it, because the mixes are computed against `--text` and
+          // a second ramp mixed the same way is a contrast claim nobody has checked.
+          Object.assign(el.style, el.__em && (on || u > 0) ? { ...st, color: 'var(--accent)' } : st);
         });
       }
     } else { capEl.style.opacity = '0'; capEl.__key = null; }
