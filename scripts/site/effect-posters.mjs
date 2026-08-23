@@ -57,6 +57,16 @@ const FAMILY_POSTER = {
   'raymarched-surfaces': mid,
   'ambient-shader-fields': mid,
 
+  // A caption style is a KARAOKE state, so the useful frame is one where the line is part-spoken:
+  // some words behind the playhead, some ahead, one under it. Shoot 45% of the way through the
+  // caption's own window, not the scene's, because the caption does not start when the scene does.
+  // Frame 0 of these is an empty plate and the last frame is a line that has finished, and both of
+  // those are pictures of a caption with no state in it.
+  'caption-styles': (scene) => {
+    const c = scene.captions[0];
+    return c.t0 + (c.t1 - c.t0) * 0.45;
+  },
+
   // The junction IS the effect. Shoot just after it fires, not somewhere inside either scene's own
   // entrance (which would show the wrong device entirely).
   'scene-cuts': (scene) => scene.cuts[0].t + 0.25,

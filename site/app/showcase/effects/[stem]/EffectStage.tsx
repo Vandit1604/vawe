@@ -11,7 +11,8 @@ import { EffectPreview } from "../EffectPreview";
  */
 
 type Layer = Record<string, unknown>;
-type Scene = { layers?: Layer[]; [k: string]: unknown };
+type Caption = { text?: string; [k: string]: unknown };
+type Scene = { layers?: Layer[]; captions?: Caption[]; [k: string]: unknown };
 
 // Which layer in the fetched demo scene is "the headline": the biggest top-level text layer, ties
 // broken by earliest start. Every PREVIEW scene effects-json.mjs writes carries at most one layer
@@ -42,8 +43,18 @@ export function EffectStage({ name, scene, json, noPreview }: { name: string; sc
   const parsedJson = useMemo<Layer | null>(() => {
     try { const o = JSON.parse(json); return o && typeof o === "object" ? (o as Layer) : null; } catch { return null; }
   }, [json]);
-  const editableSnippet = !!parsedJson && parsedJson.type === "text" && typeof parsedJson.text === "string";
-  const canEditHeadline = !!scene && editableSnippet;
+  // TWO PLACES A DEMO KEEPS ITS COPY, and the first version of this only knew one. A text layer
+  // (`{"type":"text","text":"…"}`) covers the kinetic presets, the enter/exit anims, the idles and
+  // the GSAP families. A CAPTION keeps its words somewhere else entirely, in `captions[0].text`, and
+  // a caption style is the family where editing the words matters most: the whole style is a
+  // treatment OF those words. Eleven styles shipped with a live player and no way to change what it
+  // said. A cut, a sting, a paint field, a filter and a blend mode still carry no copy at all and
+  // still grow no input.
+  const editKind: "layer" | "caption" | null =
+    parsedJson && parsedJson.type === "text" && typeof parsedJson.text === "string" ? "layer"
+    : parsedJson && Array.isArray((parsedJson as Record<string, unknown>).captions) ? "caption"
+    : null;
+  const canEditHeadline = !!scene && editKind !== null;
 
   const [demo, setDemo] = useState<Scene | null>(null);
   const [layerIdx, setLayerIdx] = useState<number | null>(null);
@@ -57,14 +68,13 @@ export function EffectStage({ name, scene, json, noPreview }: { name: string; sc
     let cancelled = false;
     fetch(scene!).then((r) => r.json()).then((s: Scene) => {
       if (cancelled) return;
-      const i = pickHeadline(s.layers ?? []);
+      const i = editKind === "caption" ? 0 : pickHeadline(s.layers ?? []);
+      const t = editKind === "caption"
+        ? (s.captions?.[0]?.text as string | undefined)
+        : (i !== null ? ((s.layers![i] as Layer).text as string) : undefined);
       setDemo(s);
-      setLayerIdx(i);
-      if (i !== null) {
-        const t = (s.layers![i] as Layer).text as string;
-        initial.current = t;
-        setHeadline(t);
-      }
+      setLayerIdx(t === undefined ? null : i);
+      if (t !== undefined) { initial.current = t; setHeadline(t); }
     });
     return () => { cancelled = true; };
     // scene/canEditHeadline only ever change together (both derive from the same effect id)
@@ -77,8 +87,10 @@ export function EffectStage({ name, scene, json, noPreview }: { name: string; sc
     // engine once for nothing.
     if (headline === initial.current) { setDataUrl(scene); return; }
     const t = setTimeout(() => {
-      const layers = (demo.layers ?? []).map((l, i) => (i === layerIdx ? { ...l, text: headline } : l));
-      const url = URL.createObjectURL(new Blob([JSON.stringify({ ...demo, layers })], { type: "application/json" }));
+      const patched = editKind === "caption"
+        ? { ...demo, captions: (demo.captions ?? []).map((c, i) => (i === 0 ? { ...c, text: headline } : c)) }
+        : { ...demo, layers: (demo.layers ?? []).map((l, i) => (i === layerIdx ? { ...l, text: headline } : l)) };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(patched)], { type: "application/json" }));
       if (blobUrl.current) URL.revokeObjectURL(blobUrl.current);
       blobUrl.current = url;
       setDataUrl(url);
@@ -98,7 +110,9 @@ export function EffectStage({ name, scene, json, noPreview }: { name: string; sc
   // The copy button hands over what is actually on screen: once the headline diverges from the
   // scene's own default, the JSON echoes that edit too.
   const shownJson = canEditHeadline && parsedJson && headline !== null && headline !== initial.current
-    ? JSON.stringify({ ...parsedJson, text: headline }, null, 2)
+    ? JSON.stringify(editKind === "caption"
+        ? { ...parsedJson, captions: ((parsedJson as unknown as Scene).captions ?? []).map((c, i) => (i === 0 ? { ...c, text: headline } : c)) }
+        : { ...parsedJson, text: headline }, null, 2)
     : json;
 
   return (
