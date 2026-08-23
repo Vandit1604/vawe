@@ -732,6 +732,13 @@ effects: ## regenerate docs/EFFECTS.md — the whole arsenal in one place (from 
 effects-json: ## regenerate the /showcase/effects index (and its preview scenes) from the registries
 	@node scripts/site/effects-json.mjs $(if $(CHECK),--check,)
 
+# make effect-posters [ONLY=family-or-name]  · one mid-motion still per previewable effect, shot from
+# the real scenes effects-json just wrote. Run it after `make effects-json` changes which effects are
+# previewable, or to re-shoot one family (ONLY=backgrounds) after tuning its poster frame.
+.PHONY: effect-posters
+effect-posters: ## regenerate the /showcase/effects poster stills (site/public/assets/effects/*.jpg)
+	node scripts/site/effect-posters.mjs $(if $(ONLY),--only $(ONLY),)
+
 # make globe-dots [SPACING=2.2]  — re-bake core/globe-dots.js from Natural Earth. Run this only when
 # the spacing or the source changes; the output is committed and the runtime never fetches anything.
 .PHONY: globe-dots
