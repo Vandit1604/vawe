@@ -12578,10 +12578,16 @@ that produced the better answer.
 
 ## #408 — The pixel-regression gate had been blind for an unknown number of sessions
 
-**What.** `snap-scenes` reported `identical: 34 · changed: 71` on every run, and had been doing so long
-enough that the number read as background noise. 71 of 105 scenes is not a finding, it is a gate that
-has stopped being evidence. Any real regression in those 71 was already indistinguishable from the
-constant.
+**What.** `snap-scenes` reported `identical: 34 · changed: 71` on every run, and 71 of 105 is not a
+finding, it is a gate that has stopped being evidence.
+
+**CORRECTION, written the same hour, because the first version of this entry got the shape wrong.**
+`verify/snap/` is GITIGNORED (`.gitignore:32`), so these baselines are local to one machine and always
+have been. They are not a shared artifact that drifted, they were never shared. A fresh clone, a
+worktree and a CI run each have no baseline at all until they make their own. So `snap-scenes` is a
+LOCAL before-and-after tool, not a repo-wide gate, and the honest reading of "71 changed" was never
+"the library regressed": it was "this machine's baseline is older than this machine's font set".
+Quoting its absolute count across sessions, as an earlier report in this session did, is the error.
 
 **Why it did not hide.** It did not hide at all: the gate names its own condition on every run, in a
 warning block above the count, and says exactly what to do about it. It reported a font-state change
@@ -12607,6 +12613,8 @@ they were font-width shifts, and the eye is the only judge of whether a re-flowe
 set. What it restores is the ability to detect the NEXT change, which is the only thing this gate was
 ever for.
 
-**The standing rule.** A gate whose output is constant is off, whatever it prints. When a count does not
-move between runs that should have moved it, that is the finding.
+**The standing rule, restated for what this gate actually is.** Use `snap-scenes` the way it is built to
+be used: save a baseline, make the change, run it, read the diff, in ONE session on ONE machine. Its
+absolute count carries no meaning across sessions and none at all across machines. And a gate whose
+output does not move between runs that should have moved it is off, whatever it prints.
 
