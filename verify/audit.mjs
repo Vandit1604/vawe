@@ -31,6 +31,8 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { safeArea, captionBand, captionSkin, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
 import { layoutErrors } from '../core/validate.mjs';
+// The renderer's own placement resolver, called rather than re-implemented. See capBandFor below.
+import { resolveCoords } from '../core/boot.js';
 // The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
 // <style> body as glyphs (docs/MISTAKES.md #216/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
@@ -99,7 +101,14 @@ const safeFor = (vw, vh, cfg) => safeArea(vw, vh, cfg.destination || 'web');
 const CAP_TOL = 8;
 const capBandFor = (vw, vh, cfg) => {
   if (!Array.isArray(cfg.captions) || !cfg.captions.length) return null;
-  const b = captionBand(vw, vh, cfg.destination || 'web', captionSkin(cfg));
+  // A caption can now say WHERE it sits, in the layer placement grammar, so the strip is no longer a
+  // property of the skin alone. `pin` and the edge keywords are still strings at this point (the
+  // renderer resolves them at boot, in the browser), so resolve a COPY through the same function the
+  // renderer uses. Reading the grammar a second time here is what would drift; calling it cannot.
+  const caps = JSON.parse(JSON.stringify(cfg.captions));
+  resolveCoords({ layers: [], captions: caps, captionStyle: cfg.captionStyle, captionMode: cfg.captionMode },
+    vw, vh, safeFor(vw, vh, cfg));
+  const b = captionBand(vw, vh, cfg.destination || 'web', captionSkin(cfg), caps);
   return { ...b, tol: CAP_TOL };
 };
 

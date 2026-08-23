@@ -921,6 +921,22 @@ boot((data, fps, theme, canvas) => {
         } else { capEl.innerHTML = cap.text; capEl.__units = null; }
         capEl.__wins = capStyle ? capWords(cap) : null;
       }
+      // PLACEMENT, WRITTEN EVERY FRAME. core/boot.js has already resolved this caption's pin / edge
+      // keywords / "50%" strings to px against the safe box, so all that is left is to emit them.
+      // Every one of the six is assigned on every frame even when the caption places nothing, because
+      // the alternative is a caption inheriting the position of whichever caption the tab happened to
+      // draw before it. That is the same class of bug as #370: a frame that is a function of n AND of
+      // the highest n this tab has drawn. An empty string hands the property back to scene.css, which
+      // is where the defaults live, so a film that places nothing renders exactly as it did.
+      const px = (v) => (v == null ? '' : `${Math.round(v)}px`);
+      capEl.style.left = px(cap.x);
+      capEl.style.top = px(cap.y);
+      capEl.style.right = cap.x == null ? '' : 'auto';   // scene.css pins BOTH edges; an x with a live
+      capEl.style.bottom = cap.y == null ? '' : 'auto';  // right is a box, not a position.
+      capEl.style.width = px(cap.w);
+      capEl.style.textAlign = cap.align || '';
+      capEl.style.fontSize = cap.size ? `${Math.round(cap.size)}px` : '';
+
       const in01 = clamp01((t - cap.t0) / 0.14), out01 = clamp01((cap.t1 - t) / 0.14);
       capEl.style.opacity = (in01 * out01).toFixed(2);
       capEl.style.transform = (capMode === 'pop' || capStyle)

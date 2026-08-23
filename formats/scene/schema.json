@@ -1903,6 +1903,35 @@
           "type": "string",
           "label": "Caption text",
           "required": true
+        },
+        "words": {
+          "type": "array",
+          "label": "Optional per-word timings [{t0,t1}], aligned to this line's markup-stripped word list. Drives every captionStyle. Omit and core/captions.js distributes the line proportionally to word length, which still reads as intentional karaoke. Written for you by scripts/media/vo-captions.mjs from a TTS sidecar."
+        },
+        "pin": {
+          "type": "string",
+          "label": "Where this caption sits, in the SAME placement grammar as a layer (core/boot.js resolveCoords): center | top | bottom | left | right | top-left | top-right | bottom-left | bottom-right | thirds-*. Omit and formats/scene/scene.css places it, which is the bottom band it has always used."
+        },
+        "x": {
+          "type": "number|string",
+          "label": "Left edge in px, or a relative form: \"50%\", \"50%-40\", \"center\", \"left\", \"right\", \"third1\", \"third2\". Edge keywords resolve against the SAFE box for this destination, so an edge-pinned caption can never land under platform chrome. Setting x releases the stylesheet's right edge."
+        },
+        "y": {
+          "type": "number|string",
+          "label": "Top edge in px or a relative form (see x). The two-line caption band (core/safe.js CAPTION_LINES) is the extent \"bottom\" subtracts, so pin:\"bottom\" lands the band inside the safe box rather than hanging it off the line."
+        },
+        "w": {
+          "type": "number|string",
+          "label": "Caption box width in px or \"60%\". Omit and the stylesheet's margins decide."
+        },
+        "align": {
+          "type": "string",
+          "label": "Text alignment inside the box: left | center | right. Default center.",
+          "enum": ["left", "center", "right"]
+        },
+        "size": {
+          "type": "number",
+          "label": "Font size in px for this caption only. Default is the skin's (46 plain, 64 pop/styled, core/safe.js CAPTION_SKINS). Changing it changes the band this caption reserves."
         }
       }
     },

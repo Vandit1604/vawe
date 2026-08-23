@@ -136,28 +136,53 @@ export const captionSkin = (cfg = {}) =>
   cfg.captionStyle ? 'styled' : cfg.captionMode === 'pop' ? 'pop' : 'plain';
 
 /**
- * captionBand(W, H, destination?, skin?) → { y0, y1, height, skin, destination }
- * The horizontal strip a burnt-in caption occupies. Vertical only: a caption is centred and its width
- * follows its text, so the useful keep-out is the strip, not a box.
+ * captionBand(W, H, destination?, skin?, caps?) → { y0, y1, height, skin, destination, placed }
+ * The horizontal strip a burnt-in caption occupies. Vertical only when nothing is placed: an
+ * unplaced caption is centred and its width follows its text, so the useful keep-out is the strip.
  *
  * skin defaults to 'any', the UNION of the three skins — the widest strip a caption could occupy on
  * this canvas. Pass a named skin when the scene has declared one and the answer can be exact.
+ *
+ * `caps` is the scene's caption array WITH PLACEMENT ALREADY RESOLVED (core/boot.js resolveCoords
+ * turns `pin` and the edge keywords into px; this function does no resolving of its own, because a
+ * second copy of that grammar is how the four safe boxes drifted apart in the first place). Pass it
+ * and the band becomes the union of where the captions ACTUALLY sit. Omit it and the answer is
+ * exactly what it was before placement existed, which is why no existing caller moves.
+ *
+ * WHY THIS MATTERS MORE THAN IT LOOKS. verify/audit.mjs reserves this strip and warns when other
+ * content lands in it. The moment a caption can be pinned to the top, a band that still describes
+ * the bottom is wrong in both directions at once: it holds empty space nothing needs, and it misses
+ * the collision that is really there. A keep-out that reports the wrong strip is worse than none.
  */
-export function captionBand(W, H, destination = 'web', skin = 'any') {
+export function captionBand(W, H, destination = 'web', skin = 'any', caps = []) {
   const safe = safeArea(W, H, destination);       // throws on an unknown destination, once, here
   const chromeBottom = H - safe.y1;
   const names = skin === 'any' ? Object.keys(CAPTION_SKINS) : [skin];
   if (names.some((k) => !CAPTION_SKINS[k]))
     throw new Error(`unknown caption skin "${skin}". Known: ${Object.keys(CAPTION_SKINS).join(', ')}, or "any"`);
-  let y0 = H, y1 = 0;
-  for (const k of names) {
-    const s = CAPTION_SKINS[k];
-    // The CSS max(): the skin's own offset, or the platform's chrome when that is deeper.
-    const bottom = H - Math.max(s.bottomPx, Math.round(H * s.bottomFrac), chromeBottom);
-    const top = bottom - (CAPTION_LINES * Math.ceil(s.fontPx * CAPTION_LEADING) + 2 * s.padPx);
-    y0 = Math.min(y0, top); y1 = Math.max(y1, bottom);
+  const bandHeight = (fontPx, padPx) => CAPTION_LINES * Math.ceil(fontPx * CAPTION_LEADING) + 2 * padPx;
+  let y0 = Infinity, y1 = -Infinity;
+  const eat = (top, bottom) => { y0 = Math.min(y0, top); y1 = Math.max(y1, bottom); };
+
+  const list = Array.isArray(caps) ? caps : [];
+  const placed = list.filter((c) => c && typeof c.y === 'number');
+  for (const c of placed) {
+    // A placed caption's own size decides its band, because `size` is per caption and a 120px line
+    // reserves nearly twice what the skin's 64px does.
+    const s = CAPTION_SKINS[names[0]] || CAPTION_SKINS.styled;
+    eat(c.y, c.y + bandHeight(c.size || s.fontPx, s.padPx));
   }
-  return { y0, y1, height: y1 - y0, skin, destination };
+  // The stylesheet's own band still applies whenever ANY caption places nothing, and when the scene
+  // places nothing at all. Both cases go through the identical arithmetic this function always used.
+  if (placed.length < list.length || !list.length) {
+    for (const k of names) {
+      const s = CAPTION_SKINS[k];
+      // The CSS max(): the skin's own offset, or the platform's chrome when that is deeper.
+      const bottom = H - Math.max(s.bottomPx, Math.round(H * s.bottomFrac), chromeBottom);
+      eat(bottom - bandHeight(s.fontPx, s.padPx), bottom);
+    }
+  }
+  return { y0, y1, height: y1 - y0, skin, destination, placed: placed.length };
 }
 
 // The aspect a destination serves, or null for the canvas-agnostic ones. A caller can use this to say

@@ -12306,6 +12306,34 @@ theme token rather than a literal. That is the doctrine made mechanical. The RAT
 the 35 theme palettes, worst case 4.82:1 on `plinth` for the dimmest state, and it was computed, not
 gated. Teaching the audit to judge captions is the real fix and it belongs to whoever owns that file.
 
+> **CORRECTION, 2026-08-23. Finding 3 above is WRONG, and it was wrong the day it was written.** The
+> audit does grade a caption's contrast, and has since commit `35b6fdb` ("audit: contrast-everything",
+> 2026-07-16). The claim rests on one sentence that describes a version of the file that no longer
+> exists: contrast is NOT restricted to `data-layer=critical`. `verify/audit.mjs:753` walks
+> `document.querySelectorAll('body *')` and grades every element carrying a direct text node, and the
+> comment four lines above it says, in as many words, that captions are exactly where low-contrast text
+> slips through. Nothing in that loop excludes `.hs-cap` or the per-word spans inside it. The
+> observation that `.hs-cap` appears only once in the file is true and proves nothing: the loop catches
+> captions without naming them.
+>
+> **Proved by experiment, not by reading, because reading is what produced the error.** Take
+> `formats/scene/sample.json`, the only scene in the library that carries captions at all, and wrap two
+> words of its first caption in `<span style="color:#c9c9c9">` against that scene's `#ffffff` ground.
+> Control: `0 hard · 0 warn`. Injected: `1 hard`. The gate fires.
+>
+> So the doctrine at `core/captions.js:52` is NOT a comment guarding nothing. It names a real gate and
+> the gate works. The `lib-test` assertions added by finding 3 are still worth having, because they
+> check the three word states differ and that no state dims by opacity, which contrast alone cannot see.
+> What was never true is the sentence that sent the next reader looking for a fix that was already
+> shipped.
+>
+> **The real finding underneath, which the false one hid.** One scene out of 132 declares `captions`,
+> and none declares `captionStyle`. So the audit has graded exactly one caption in this library's
+> history, and every "all five probe scenes audit clean" observation is a statement about scenes with no
+> captions in them. The subsystem is not ungated. It is unused. That is a different problem and it
+> wants a different fix: until 2026-08-23 a caption accepted `t0`, `t1` and `text` and nothing else, so
+> where it sat was a CSS constant no JSON could reach.
+
 **A fourth thing, fixed before it shipped rather than after, and worth the line.** The first
 `kineticSlam` keyed `letter-spacing` alongside its scale, because opening the tracking on impact is what
 the reference does. Tracking is a LAYOUT property. Rewriting it every frame re-lays the line every
@@ -12366,3 +12394,45 @@ eight nothing says anything at all.
 <!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->
 <!-- doc-refs-allow: make slop · retired in #326; the entries that cite it are records of what it did -->
 <!-- doc-refs-allow: scripts/gates/slop.mjs · the script #326 records the retirement of -->
+
+## #403 — A caption accepted three fields, so where it sat was a CSS constant no JSON could reach
+
+**What.** `formats/scene/schema.json` declared a caption as `{t0, t1, text}` and nothing else. Position
+came from `formats/scene/scene.css`, one hardcoded band, one `<div id="cap">` for the whole film. So an
+author who wanted a line at the top of the frame, or narrower, or larger, had no way to say so, and
+nothing told them the wish was unsayable. `core/safe.js` modelled the band well (`CAPTION_SKINS`,
+`captionBand`), but it only DESCRIBED that constant.
+
+**How it stayed invisible for so long.** ONE scene in the library carries captions at all
+(`formats/scene/sample.json`) and NONE declares a `captionStyle`. Eight caption styles shipped and no
+film has ever used one. A subsystem nobody can aim is a subsystem nobody uses, and its emptiness then
+reads as "nobody wanted captions" rather than "nobody could place one".
+
+**Fix.** A caption resolves through `resolveCoords` (`core/boot.js`), the SAME function that places a
+layer: `pin`, `x`, `y`, `w`, the `"50%"` and `"center"` and edge keywords, all against the same safe
+box. Inventing a caption placement grammar would have been a second vocabulary for one job, which is
+the shape `core/safe.js` opens by warning about. `formats/scene/scene.js` writes all six properties on
+EVERY frame, empty string when unset, so a caption can never inherit the position of whichever caption
+that tab happened to draw before it, and a film that places nothing renders byte-identical.
+
+**The keep-out had to move with it, or it would have lied in both directions.** `verify/audit.mjs`
+reserves the caption strip and warns when other content lands in it. The moment a caption can be pinned
+to the top, a band still describing the bottom holds empty space nothing needs AND misses the collision
+that is really there. `captionBand` now takes the resolved captions and unions where they actually sit;
+the audit resolves a copy through `resolveCoords` rather than reading the grammar a second time.
+
+**Two silent drops made loud** (`captionErrors` in `core/validate.mjs`). The renderer draws
+`caps.find(c => t >= c.t0 && t < c.t1)` into one element, so two overlapping captions are not two
+captions: the second is dropped for the overlap and nothing says so. And `t1 <= t0` draws nothing ever.
+
+**A third one I wrote myself, and caught only by looking at the frame.** The first version applied a
+pin's x-keyword unconditionally. `pin:"top"` is `['center','top']`, and a caption declares no width, so
+`left` landed on the centre line, `right` was released, the box shrank to fit and the text ran off to
+the right of centre. That is `degenerate-pin`, the failure `CLAUDE.md` already names for layers,
+reproduced on the first frame this hook ever rendered. Every gate was green: validate passed, lib-test
+passed 895, the audit reported no hard issue. **Only the picture showed it.** The x-keyword now waits
+for a `w` to centre against, and a pin naming a horizontal EDGE with no `w` is refused by the validator
+instead of half-applied.
+
+**What did not change.** `snap-scenes` reports 34 identical and 71 changed both WITH and WITHOUT these
+edits: that spread is #401's unversioned fonts, not this. Measured both ways before believing it.

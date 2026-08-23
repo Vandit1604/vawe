@@ -7,7 +7,7 @@ import './frame-settle.js'; // installs window.__frameSettle, the capture's asyn
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline } from './produce.js';
-import { safeArea, ASPECTS, sceneDims } from './safe.js';
+import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
@@ -109,6 +109,41 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
     if (L.x != null) L.x = num(L.x, W, w, safe.x0, safe.x1);
     if (L.y != null) L.y = num(L.y, H, h, safe.y0, safe.y1, hEst);
+  }
+
+  // CAPTIONS PLACE WITH THE SAME GRAMMAR AS LAYERS, and reusing it is the whole point of doing this
+  // here. A caption used to accept t0/t1/text and nothing else (formats/scene/schema.json), so where
+  // it sat was a CSS constant in scene.css that no JSON could reach: an author who wanted a line at
+  // the top of the frame had no way to say so, and nothing told them the wish was unsayable. Giving
+  // captions their own placement words would have been a SECOND grammar for one job, which is the
+  // duplicate-vocabulary shape core/safe.js opens by warning about. So a caption resolves through the
+  // same `pin` table, the same edge keywords, the same "50%" strings and the same safe box.
+  // A caption that declares none of them is left untouched and scene.css still places it, which is
+  // why this cannot move a pixel of any film that has not asked it to.
+  const capDefaults = CAPTION_SKINS[captionSkin(data)];
+  for (const C of data.captions || []) {
+    if (!isObj(C)) continue;
+    // A PIN MOVES THE CAPTION VERTICALLY AND, WITHOUT A WIDTH, ONLY VERTICALLY. `pin` centres a BOX,
+    // and a caption declares no width by default: scene.css pins its left AND right edges, so the box
+    // is the stylesheet's. Applying the pin's x-keyword anyway releases the right edge, leaves the
+    // width to shrink-to-fit, and lands the text's LEFT edge on the centre line — which is exactly the
+    // `degenerate-pin` failure CLAUDE.md already names for layers, reproduced here on the first frame
+    // this hook ever rendered. So the x-keyword waits for a `w` to centre against, and `pin:"top"`
+    // does the obvious thing: same box, moved to the top. A pin that names a horizontal EDGE and
+    // carries no `w` is refused by core/validate.mjs rather than half-applied in silence.
+    if (C.pin && PIN[C.pin]) {
+      const [px, py] = PIN[C.pin];
+      if (C.x == null && C.w != null) C.x = px;
+      if (C.y == null) C.y = py;
+    }
+    if (typeof C.w === 'string') C.w = num(C.w, W, 0, safe.x0, safe.x1);
+    const w = typeof C.w === 'number' ? C.w : 0;
+    // A caption never declares a height and its band is two lines by contract (core/safe.js
+    // CAPTION_LINES), so `pin:"bottom"` has a real extent to subtract instead of hanging the band
+    // off the bottom safe line the way a sizeless layer used to.
+    const hEst = CAPTION_LINES * Math.ceil((C.size || capDefaults.fontPx) * 1.05);
+    if (C.x != null) C.x = num(C.x, W, w, safe.x0, safe.x1);
+    if (C.y != null) C.y = num(C.y, H, 0, safe.y0, safe.y1, hEst);
   }
 }
 
