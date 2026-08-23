@@ -35,7 +35,7 @@
           "radius": 0,
           "w": 4,
           "h": 30,
-          "bg": "#F6A417"
+          "bg": "var(--warn)"
         },
         {
           "type": "text",

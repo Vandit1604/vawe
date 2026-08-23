@@ -42,7 +42,7 @@
         },
         {
           "type": "group",
-          "bg": "#F6A417",
+          "bg": "var(--warn)",
           "radius": 4,
           "pad": "6px 12px",
           "children": [
@@ -52,7 +52,7 @@
               "text": "beta",
               "font": "mono",
               "size": 17,
-              "color": "var(--text)",
+              "color": "#fff",
               "delay": 0.22,
               "anim": "pop",
               "enterDur": 0.26

@@ -12840,3 +12840,38 @@ without knowing why. Six `breathe` idles, three on text and three on images; onl
 flagged and moved to `drift`. The images keep theirs, correctly. One scene changed, justified, and
 re-baselined.
 
+## #414 — Two thirds of a status vocabulary was theme-aware, and a brief demanded a check its worktree could not run
+
+**The token.** Every theme ships `up` and `down`, so `blocks/kit.mjs` TONES could paint ok and danger
+from the palette. `warn` was a hardcoded amber, `#F6A417`, that no brand could ever repaint. A status
+vocabulary needing three states was two thirds theme-aware and one third a literal. **Two independent
+audits found it on the same day**, one auditing the token set and one converting literals, neither
+aware of the other.
+
+**Defaulted, not required.** `core/theme-contract.js` REQUIRED.palette would have failed all 38 shipped
+themes until each was hand-edited, for a colour most of them hold no opinion about. `core/boot.js`
+writes `--warn` from `palette.warn` or falls back, exactly as `--card` has always done two lines above
+it. A theme with an opinion declares one and wins; the other 37 get a working amber and never notice.
+
+## And the brief defect, which is mine
+
+The literal-conversion agent was told its change "must stay 105 identical on `snap-scenes`, or justify
+each change one by one". **It could not run that check at all.** `verify/snap/` is gitignored (#408),
+so a fresh worktree has no baselines: the gate reported 103 no-baseline, 0 identical, 0 changed, and
+would have done so whatever the agent did.
+
+It said so plainly rather than reporting a green it had not earned, and substituted `lib-test`,
+`block-schema` and a light/dark visual pass. The main thread then ran the real diff: **105 identical**.
+
+The lesson is not about the agent. **A brief that demands a check the environment cannot perform
+teaches the agent to report something that looks like the check.** #408 established that these
+baselines are local-only and I wrote the brief anyway, four hours later. Any future worktree brief
+must either say "the main thread runs snap-scenes on merge" or hand the agent a way to get baselines.
+
+**On the conversions themselves: 44 literals found, 10 converted, 34 KEPT, and the keeps are the
+interesting half.** macOS traffic lights, a phone's hardware bezel, twelve named editor themes each
+already WCAG-checked, and the whole `sleek` family which is white-on-dark by construction with its own
+comment saying so. The rule added to `kit.mjs` the same hour ("a literal is legitimate only when the
+colour IS the identity of something outside this theme") held up on first contact: the agent applied
+it and correctly refused most of the work.
+

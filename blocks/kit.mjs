@@ -14,6 +14,10 @@
 // strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
 // Stripe" demo, not a generic surface.
 export const TOKENS = {
+  // `--warn` is written for every theme by core/boot.js, defaulted rather than required so no brand
+  // has to hold an opinion about amber. It exists because TONES.warn was the one status colour with
+  // no token behind it.
+  warn: 'var(--warn)',
   ink: 'var(--text)', sub: 'var(--text-2)', dim: 'var(--dim)',
   paper: 'var(--bg)', card: 'var(--card)', hair: 'var(--line)', surface: 'var(--surface-2)',
   accent: 'var(--accent)',
@@ -216,7 +220,7 @@ export const barWidth = ({ w, n, pad = 22, gap = 14, min = 22, inset = 8 }) =>
 const TONES = {
   ok: T.green, success: T.green,
   info: T.accent, accent: T.accent,
-  warn: '#F6A417', danger: T.down, error: T.down,
+  warn: 'var(--warn)', danger: T.down, error: T.down,
 };
 export function toneColor(tone, fallback = T.accent) { return TONES[tone] || fallback; }
 // The accepted spellings, read off the map itself so a `tone` dial cannot drift from what paints.

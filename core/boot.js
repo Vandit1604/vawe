@@ -219,6 +219,14 @@ export function applyTheme(theme) {
   set('--line', P.line); set('--line-strong', P.lineStrong);
   set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
   set('--up', P.up); set('--up-2', P.up2); set('--down', P.down);
+  // A THIRD STATUS COLOUR, optional to declare and always present. Every theme ships `up` and `down`,
+  // so a status vocabulary that needs three (ok / warn / danger) was two thirds theme-aware and one
+  // third a literal: blocks/kit.mjs TONES.warn was a hardcoded amber no brand could ever repaint.
+  // Two independent audits found the same gap on the same day.
+  // Defaulted rather than REQUIRED, following `--card` two lines up: adding it to the contract's
+  // required list would fail all 38 shipped themes until each was hand-edited, for a colour most of
+  // them have no opinion about. A theme that does have one declares `palette.warn` and wins.
+  set('--warn', P.warn || '#F6A417');
   set('--accent', P.accent); set('--accent-dim', P.accentDim); set('--accent-glow', P.accentGlow);
   set('--accent-2', P.accent2); set('--grid', P.grid); set('--grid-2', P.grid2);
   set('--glass', P.glass); set('--highlight', P.highlight);

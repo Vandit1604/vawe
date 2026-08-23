@@ -84,7 +84,7 @@
                   "weight": 500,
                   "text": "★★★★★",
                   "size": 18,
-                  "color": "#F6A417",
+                  "color": "var(--warn)",
                   "ls": "0.06em",
                   "mask": "linear-gradient(to right, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))",
                   "vars": {
