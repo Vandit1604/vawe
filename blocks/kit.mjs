@@ -33,6 +33,34 @@ export const SERIES = ['var(--accent)', 'var(--up)', 'var(--down)',
 export const seriesAt = (i) => SERIES[i % SERIES.length];
 
 export const HAIR = `1px solid ${T.hair}`;
+// The heavier rule. `--line-strong` is written for EVERY theme (core/boot.js:219, and the theme
+// contract requires `lineStrong`), so this names plumbing that already exists rather than adding any.
+// It was missing, so a block that wanted a divider stronger than a hairline had nowhere on-system to
+// reach and wrote a literal instead. Found by an impeccable audit of the token set.
+export const HAIR_STRONG = '1px solid var(--line-strong)';
+
+// ── ELEVATION, NAMED ─────────────────────────────────────────────────────────────────────────────
+// core/layers/util.js:199 already clamps `elevation` to 1..4 and stacks a heavier shadow per tier, so
+// the model is real and shipped. What was missing is the vocabulary: every call site wrote a bare
+// integer, which is exactly the state `radius` was in before `R` existed. A number does not say what
+// it is FOR, and 2 versus 3 is then a guess rather than a choice.
+export const E = { flat: 1, card: 2, raised: 3, floating: 4 };
+
+// ── WHEN A HEX LITERAL IS LEGITIMATE ─────────────────────────────────────────────────────────────
+// 36 factories emit a raw hex instead of a token, and some of those are CORRECT. The instinct was
+// already in this codebase, scattered: the CODE_THEMES in blocks/dev.mjs and the macOS traffic-light
+// dots in blocks/ui.mjs both carry a comment defending their literals, and both defences hold. What
+// was missing is a single test an author can apply BEFORE adding the thirty-seventh.
+//
+// A literal is legitimate ONLY when the colour IS the identity of something outside this theme:
+//   * a real brand's own palette (Stripe's blurple, in TOKENS below, is Stripe's not ours)
+//   * an operating system's chrome (macOS traffic lights are red/amber/green by definition)
+//   * a named editor theme being reproduced (dev.mjs CODE_THEMES)
+//   * a physical phenomenon (an RGB split is red/green/blue, or it is not an RGB split)
+//   * a value the AUTHOR passed in through a prop
+// Anything else is a token you have not found yet. If no token fits, the gap belongs in TOKENS, not
+// in the block: a literal is a private decision the theme can never repaint.
+
 export const r2 = (n) => Math.round(n * 100) / 100;
 
 // ---- layer primitives ----
