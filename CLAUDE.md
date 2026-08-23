@@ -195,6 +195,19 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
 
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
+> **FIRST: `parts` IS HOW HAND-WRITTEN HTML GETS THE ENGINE'S CLOCK, and almost nobody uses it.**
+> A fragment animated with CSS renders as a DEAD STILL (transition and animation are disabled engine
+> wide, and `core/validate.mjs` refuses it at boot). The usual answer is to drive geometry from
+> `var(--t)` in a `calc()`, which works and is entirely hand-rolled. `parts` is the other answer and
+> it is better: a CSS SELECTOR into your own markup, and every matched element gets an engine-driven,
+> SEEKED entrance with a stagger, plus `out: true` for a paired exit
+> (`{ select, anim, each, stagger, delay, ease, out, exitDur }`, `core/parts.js`). So the markup keeps
+> the whole CSS surface and the CLOCK still owns each piece, which is the one thing a hand-rolled
+> `calc()` never gives back. Measured when the exit was added: **0 of 13 block files and 6 of 161
+> scenes used `parts`, against 61 scenes carrying an `html` layer.** Two agents building the same
+> figure in both media reached for neither, and both reported "an html layer leaves as one card" as a
+> fact about the medium. It was a missing feature (`docs/MISTAKES.md` #410).
+
 Hand-authored HTML regresses to the mean — centered text, Inter, blue/purple gradient, equal card grid.
 Before writing any by hand, **load the relevant [`docs/CRAFT/`](docs/CRAFT/README.md) guide** (how to choose
 a face / palette / layout / image), then the **`taste-skill`** (state the Design Read + set VARIANCE/MOTION/

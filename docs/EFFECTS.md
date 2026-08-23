@@ -538,7 +538,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 ## Part entrances  `[per-layer]`
 
-`parts: [{ select, anim, each, stagger, delay }]` on a hand-authored html/svg layer — named entrances for its SUB-ELEMENTS, so a figure can grow its bars, then draw its line, then pop its dots. Selectors default to `rect, circle, path, polyline, line, [data-part]`.
+THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select, anim, each, stagger, delay, out, exitDur }]` on a hand-authored html/svg layer — a CSS SELECTOR into your own markup, and every matched element gets an engine-driven, SEEKED entrance with a stagger, so a figure can grow its bars, then draw its line, then pop its dots. `out: true` gives each part its paired exit, anchored to the layer's end, so a hand-authored figure leaves piece by piece instead of fading as one card. That is the whole point on an `html` layer: the markup keeps the entire CSS surface AND the clock still owns each piece, which a hand-rolled `calc()` off `var(--t)` never gives back. A translate exit CONTINUES and a scale exit REVERSES, the same never-enter-and-retreat rule layers follow. Selectors default to `rect, circle, path, polyline, line, [data-part]`.
 
 | name | what / when |
 |---|---|
