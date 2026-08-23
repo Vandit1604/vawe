@@ -336,7 +336,7 @@
       "duration": 2.2300000000000004,
       "anim": "rise",
       "enterDur": 0.25,
-      "idle": "breathe",
+      "idle": "drift",
       "children": [
         {
           "type": "text",

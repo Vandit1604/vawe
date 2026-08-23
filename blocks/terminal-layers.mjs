@@ -101,13 +101,17 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   });
 
   // ── spinner → tick: a draw-on arc strokes itself in over its own short life, then EXITS the instant
-  // a settled checkmark ENTERS in its place — a resolve, not a repaint. `idle: 'breathe'` keeps the
+  // a settled checkmark ENTERS in its place — a resolve, not a repaint. An idle keeps the
   // final success line alive through its held middle instead of sitting dead once the motion stops.
   out.push({ type: 'svg', x: contentX, y: tickY, d: 'M 50 5 A 45 45 0 1 1 5 50', viewBox: '0 0 100 100', w: 20, h: 20,
     stroke: toneColor('ok'), strokeWidth: 10, fill: 'none',
     start: spinStart, duration: spinDur, draw: { dur: spinDur }, anim: 'fade', enterDur: 0.1 });
   out.push({ type: 'group', x: contentX, y: tickY, layout: 'row', gap: 8, items: 'center',
-    start: tickStart, duration: runsTo(tickStart), anim: 'rise', enterDur: 0.25, idle: 'breathe', children: [
+    // `drift`, not `breathe`. A scaling idle on TEXT re-rasterises every glyph each frame, so the edges
+  // crawl and it reads as a shimmer rather than as life. That is exactly what a viewer reported seeing
+  // in this block's own render, and core/validate.mjs now refuses it (docs/MISTAKES.md #413). A drift
+  // translates the whole run instead, which is the same intent without the artefact.
+  start: tickStart, duration: runsTo(tickStart), anim: 'rise', enterDur: 0.25, idle: 'drift', children: [
       text({ text: '✓', font: 'mono', size: 20, weight: 800, color: toneColor('ok') }),
       text({ text: success, font: 'mono', size: 19, weight: 600, color: T.ink }),
     ] });
