@@ -143,6 +143,70 @@ export const CAP_STYLES = {
   // spoken, so the eye is told where it is without any colour changing hue. Every scale is <= 1, so
   // this style can never grow the band. The spoken mix is 88%, a step above the 76% upcoming one:
   // both are legible on the plate, and the ORDER of the two is what carries the state.
+  // ── wave 4: four mechanisms the market ships that this engine had only as TEXT presets ──────────
+  // Each one exists in core/type.js and NONE of the four could be called from here, which is worth
+  // recording because a survey of this file reported the opposite. `chroma` names literal rgba, so it
+  // fails the theme-token rule. `flip` dims by opacity. `wave` LOOPS, so u=0 and u=1 return the same
+  // declaration and it has two states where a caption needs three. `decode` returns an inert
+  // `__decode` marker and does its work by side effect on a call path captions never used. So these
+  // are caption-native rewrites, not wrappers, and each one satisfies the doctrine rather than being
+  // exempted from it.
+
+  // The word hinges up from edge-on. An upcoming word is at -90deg, which is INVISIBLE without being
+  // dim: it occupies its slot, it costs no contrast, and it is not a faint version of itself. Same
+  // argument typeOn makes for visibility:hidden, made with a rotation instead.
+  flipUp: (u, active) => {
+    const p = clamp01(u);
+    const deg = -90 * (1 - p) ** 2;
+    return {
+      color: active ? 'var(--text)' : p > 0 ? 'var(--text)' : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+      transform: `perspective(900px) rotateX(${deg.toFixed(1)}deg)`,
+    };
+  },
+
+  // TWO GHOSTS CONVERGING, and deliberately not three. The reference mechanism is an RGB split, and
+  // red/green/blue are literals: on a themed film they are three colours the brand never chose, and
+  // the theme-token rule would have to be waived to write them. A split reads as a split because the
+  // copies are OFFSET and converge, not because of which hues they are, so this offsets the accent
+  // one way and a muted ink the other and lands them together. Offsets stay under 6px so both ghosts
+  // sit inside the plate's 14px pad, the bound neonEdge is held to for the same reason.
+  ghostSplit: (u, active) => {
+    const p = clamp01(u);
+    const d = 5.5 * (1 - p) ** 2;
+    return {
+      color: active || p > 0 ? 'var(--text)' : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+      textShadow: d > 0.05
+        ? `${d.toFixed(2)}px 0 0 var(--accent), ${(-d).toFixed(2)}px 0 0 color-mix(in srgb, var(--text) 55%, var(--bg))`
+        : 'none',
+    };
+  },
+
+  // One crest per word, ridden as the word is spoken. `wave` in core/type.js is a LOOP with no end,
+  // which is why it cannot be a caption: a caption word has a window, and a loop inside a window
+  // stops wherever the window stops. A half-sine peaks in the middle of the window and returns, so
+  // the motion is bounded by the word rather than cut off by it. The three ink levels carry the
+  // read/unread state, because the crest alone returns to zero and would say nothing at u=1.
+  waveRide: (u, active) => {
+    const p = clamp01(u);
+    return {
+      color: active ? 'var(--text)'
+        : p > 0 ? 'color-mix(in srgb, var(--text) 88%, var(--bg))'
+        : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+      transform: `translateY(${(-14 * Math.sin(Math.PI * p)).toFixed(2)}px)`,
+    };
+  },
+
+  // The letters settle out of noise. This is the ONE style that cannot work by returning a value:
+  // the scramble rewrites textContent, and the contract is `Object.assign(el.style, …)`. So it gets
+  // the same carve-out clipWipe has in formats/scene/scene.js, which calls core/type.js decodeText
+  // (pure in u and the unit index, with the final string cached on the element). What this function
+  // returns is only the read/unread ink, which is the half a style object CAN say.
+  scramble: (u, active) => ({
+    color: active ? 'var(--accent)'
+      : clamp01(u) > 0 ? 'var(--text)'
+      : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+  }),
+
   // ONE WORD ON SCREEN, replaced whole at the next onset. `mode:'one'` above, so this function only
   // ever paints the word being spoken and there is no upcoming or spoken state to dim: the read/
   // unread distinction is carried by PRESENCE, which is why this needs no colour mix at all.
@@ -241,5 +305,9 @@ export const CAPTION_BLURBS = {
   readerFocus: 'a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1',
   wordFlash: 'ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint',
   wordSlide: 'the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it',
+  flipUp: 'the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all',
+  ghostSplit: 'two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme',
+  waveRide: 'one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it',
+  scramble: 'the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does',
   typeOn: 'a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret',
 };

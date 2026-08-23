@@ -1,6 +1,6 @@
 {
-  "total": 524,
-  "previewed": 238,
+  "total": 528,
+  "previewed": 242,
   "families": 35,
   "tags": [
     [
@@ -25,7 +25,7 @@
     ],
     [
       "captions",
-      11
+      15
     ],
     [
       "composition",
@@ -3602,7 +3602,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 11,
+      "count": 15,
       "undescribed": 0,
       "entries": [
         {
@@ -3610,6 +3610,20 @@
           "stem": "caption-styles--clipwipe",
           "desc": "LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time",
           "scene": "/assets/effects/caption-styles--clipwipe.json",
+          "noPreview": null
+        },
+        {
+          "name": "flipUp",
+          "stem": "caption-styles--flipup",
+          "desc": "the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all",
+          "scene": "/assets/effects/caption-styles--flipup.json",
+          "noPreview": null
+        },
+        {
+          "name": "ghostSplit",
+          "stem": "caption-styles--ghostsplit",
+          "desc": "two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme",
+          "scene": "/assets/effects/caption-styles--ghostsplit.json",
           "noPreview": null
         },
         {
@@ -3648,6 +3662,13 @@
           "noPreview": null
         },
         {
+          "name": "scramble",
+          "stem": "caption-styles--scramble",
+          "desc": "the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does",
+          "scene": "/assets/effects/caption-styles--scramble.json",
+          "noPreview": null
+        },
+        {
           "name": "typeOn",
           "stem": "caption-styles--typeon",
           "desc": "a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret",
@@ -3659,6 +3680,13 @@
           "stem": "caption-styles--underlinedraw",
           "desc": "a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast",
           "scene": "/assets/effects/caption-styles--underlinedraw.json",
+          "noPreview": null
+        },
+        {
+          "name": "waveRide",
+          "stem": "caption-styles--waveride",
+          "desc": "one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it",
+          "scene": "/assets/effects/caption-styles--waveride.json",
           "noPreview": null
         },
         {

@@ -3,7 +3,7 @@ import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJu
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
-import { splitText, circleText } from '/core/type.js';
+import { splitText, circleText, decodeText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
@@ -987,6 +987,11 @@ boot((data, fps, theme, canvas) => {
           // Full accent rather than a mix of it, because the mixes are computed against `--text` and
           // a second ramp mixed the same way is a contrast claim nobody has checked.
           Object.assign(el.style, el.__em && (on || u > 0) ? { ...st, color: 'var(--accent)' } : st);
+          // `scramble` is the one style whose work is not a style value: the letters settle out of
+          // noise, which means rewriting textContent, and the contract is Object.assign on .style.
+          // Same carve-out clipWipe already has, and the same reason. decodeText is pure in (u, i)
+          // and caches the final string on the element, so a cold seek lands on the same glyphs.
+          if (capStyle === 'scramble') decodeText(el, u, i);
         });
       }
     } else { capEl.style.opacity = '0'; capEl.__key = null; }

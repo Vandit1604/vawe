@@ -12544,3 +12544,35 @@ one word out of one word on screen carries no information anyway.
 **This is the mechanism every captioning tool calls "keyword emphasis" and sells as an ML feature.**
 Here it is the author pointing at the word, which is better: they know which one matters.
 
+## #407 — Four caption mechanisms were reported reachable, and not one of them was callable
+
+**What.** A survey of `core/captions.js` concluded that `chroma`, `flip`, `wave` and `decode` from
+`core/type.js` were "reachable today, no new hook, because they are already pure `(u) => style`". They
+are pure, and none of the four could be a caption style:
+
+| preset | why not |
+|---|---|
+| `chroma` | names literal `rgba(255,0,64,...)`. `lib-test` requires every colour to be a theme token. |
+| `flip` | dims by `opacity: 0.75`. The contrast doctrine forbids opacity outright. |
+| `wave` | LOOPS, so u=0 and u=1 return the same declaration: two states where a caption needs three. |
+| `decode` | returns an inert `__decode` marker and works by side effect on a call path captions never use. |
+
+**The lesson is about the survey, not the presets.** "Same signature" is not "same contract". A caption
+style is bound by four rules a text preset is not, and a reader checking shapes rather than running the
+functions cannot see that. Three lines of node found it: call each preset at u = 0, 0.5, 1 and count
+the distinct results.
+
+**Fix.** Four caption-native styles, each satisfying the doctrine rather than being exempted from it:
+`flipUp` (hinges from -90deg, invisible without being dim, the same argument `typeOn` makes for
+`visibility:hidden`), `ghostSplit`, `waveRide` (a half-sine, bounded BY the word window where a loop is
+merely cut off by it), and `scramble` (the second carve-out in `drawCaptions`, beside `clipWipe`).
+
+**`ghostSplit` is deliberately two ghosts and not three, and that is the interesting one.** The
+reference mechanism is an RGB split. Red, green and blue are literals: on a themed film they are three
+colours the brand never chose, and shipping them means waiving the theme-token rule. A split reads as a
+split because the copies are OFFSET and converge, not because of which hues they are. So it offsets the
+accent one way and a muted ink the other. The gate was not the obstacle here; it was the constraint
+that produced the better answer.
+
+**931 assertions pass, up from 915.** Fifteen caption styles, all fifteen previewable and shot.
+

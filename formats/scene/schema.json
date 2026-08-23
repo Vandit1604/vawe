@@ -110,7 +110,11 @@
         "readerFocus",
         "wordFlash",
         "wordSlide",
-        "typeOn"
+        "typeOn",
+        "flipUp",
+        "ghostSplit",
+        "waveRide",
+        "scramble"
       ]
     },
     "bg": {
