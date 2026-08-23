@@ -34,12 +34,19 @@ const GROUPS: { group: string; items: { id: string; label: string }[] }[] = [
 ];
 const PRESETS = GROUPS.flatMap((g) => g.items);
 
+// THE STARTER MUST BOOT, and for some time it did not. `bg` became a required field (the backdrop is
+// the largest area of the frame, so the engine refuses to choose it for you) and this scene predates
+// that, so /editor loaded, showed its JSON, showed its scrubber, and rendered a blank stage forever.
+// The engine said exactly why in `window.__engineError` inside the iframe, where nothing was reading
+// it: the only outward sign was ten 404s in the console and an empty box.
+// A default that does not render is worse than no default: it is the first thing anyone sees.
 const STARTER = `{
  "module": "scene",
  "aspect": "16:9",
  "theme": "vawe-site",
  "duration": 4,
  "audio": { "silent": true },
+ "bg": [{ "preset": "plain" }],
  "layers": [
   {
    "type": "text",

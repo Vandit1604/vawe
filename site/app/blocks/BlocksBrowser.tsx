@@ -6,11 +6,12 @@ import frames from "../../lib/block-frames.json";
 
 /* Search + family filter over the registry, grouped into sections with a sticky scrollspy rail.
  *
- * 63 families for 148 blocks (site/lib/blocks.json) is a family-per-2.3-blocks ratio, so the
+ * The family-per-block ratio here (see `make catalog` for the live figures) is high enough that the
  * dropdown-picks-one-family filter this page used to stop at was the only way to see a family
  * without a needle in your hand: pick exactly one and every other family disappears, or scroll
  * ~34,000px of an unsorted list hoping to recognise a name. /showcase/effects carried the same
- * defect at 35 families over 521 effects and fixed it with a rail (effects.css's file banner);
+ * same defect appeared on the effects index at a far lower ratio and was fixed with a rail (see
+ * effects.css's file banner);
  * the same fix applies here, at a family count nearly double effects' own. The rail is additive:
  * search and the family select still filter, exactly as before, they just now filter INTO
  * sections instead of one flat list, and the rail tracks which section is on screen.

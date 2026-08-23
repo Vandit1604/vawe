@@ -12899,3 +12899,34 @@ another way of saying the counter had never actually worked anywhere it mattered
 
 Logged as the worst outstanding defect at the start of this session. It was two characters.
 
+## #415 — /editor rendered a blank stage in production, and the engine had been saying why the whole time
+
+**What a visitor saw.** The page loaded. The headline, the scene picker, the JSON, the scrubber: all
+correct. The render surface was empty and the time readout was a dash.
+
+**Cause.** The editor's `STARTER` scene carries no `bg`, and `bg` became a REQUIRED field. The engine
+refused to boot, correctly and loudly:
+
+> `bg is required — the backdrop is the largest area of the frame, so the engine will not pick it for you.`
+
+**Where that message went.** Into `window.__engineError` inside the iframe, which nothing on the parent
+page reads. The only outward symptom was ten 404s in the console and an empty box. A loud refusal
+delivered where nobody is listening is a silent one.
+
+**How it was found.** Not by a gate. By opening the page, seeing a blank rectangle, and reaching into
+the iframe for `__engineError`.
+
+**Fixes, both of them.**
+1. `"bg": [{ "preset": "plain" }]` in the starter.
+2. `site-counts` now runs the starter through the SAME validator the engine calls at boot. Proved by
+   removing the `bg` and watching it fail, then restoring it. **A default that does not render is
+   worse than no default: it is the first thing anyone sees, and it says the engine is broken.**
+
+**Two things found on the way, both of the same shape.**
+- `site-counts` was ALREADY RED and nobody knew: adding two terminal blocks made ten site claims stale
+  (153 components against 155, 68 families against 70, 34 themes against 38). It is not in the
+  pre-push hook, so a gate that exists and is not run is a gate that does not exist. Counts corrected.
+- One of those ten was a FALSE positive. "35 families" in the effects browser is true of EFFECT
+  families and was compared against BLOCK families. Two registries, one word. Recorded as a known
+  limit at the top of the gate so the next reader recognises it rather than argues with it.
+

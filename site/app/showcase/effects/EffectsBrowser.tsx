@@ -225,7 +225,7 @@ export function EffectsBrowser({ index }: { index: Index }) {
                 <span className="tag">{f.tag}</span>
                 {!f.noPreview && <span className="tag fxtag-live">plays live</span>}
               </h2>
-              {/* THE INTRO IS A DETAIL, NOT A HEADING. 35 families meant 35 paragraphs standing between
+              {/* THE INTRO IS A DETAIL, NOT A HEADING. One paragraph per family meant a wall of them standing between
                   a person and the names they came to scan, and an index is for FINDING. It is still
                   here, one keystroke away, for the reader who has decided they want it. */}
               <details className="fxabout">

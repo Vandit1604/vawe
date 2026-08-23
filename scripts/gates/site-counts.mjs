@@ -1,6 +1,13 @@
 // scripts/gates/site-counts.mjs — assert every capability count written on the SITE still matches the
 // registry it describes.  make site-counts
 //
+// KNOWN LIMIT, worth stating so the next false positive is recognised rather than argued with: the
+// word "families" belongs to TWO registries. Blocks have 70, effects have 35, and this gate compares
+// every "<n> families" it finds against the block count wherever the sentence sits. A true statement
+// about effect families therefore reads as a stale block count. The fix so far is to avoid writing a
+// bare family count inside the effects surfaces; scoping the comparison by file path would be better
+// and is not done.
+//
 // WHY THIS EXISTS: the marketing copy said "96 components", "96 blocks across 44 families" and
 // "44 families" while the registry held 148 across 64; vawe-rules.md claimed 22 kinetic presets, 32
 // stings, 16 backgrounds and 16 themes against real counts of 25/35/17/18, and listed names to match
@@ -20,6 +27,7 @@ import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { validateAll } from '../../core/validate.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
@@ -75,6 +83,33 @@ for (const rel of FILES) {
     for (const m of line.matchAll(NUM_FIRST)) check(m[2], m[1]);
     for (const m of line.matchAll(HEADING)) check(m[1], m[2]);
   });
+}
+
+
+// ── THE EDITOR'S STARTER SCENE MUST ACTUALLY BOOT ────────────────────────────────────────────────
+// /editor shipped for some time rendering a blank stage. The page loaded, the JSON showed, the
+// scrubber showed, and the engine refused to boot inside the iframe because `bg` had become required
+// and the starter predated it. The refusal was correct and it was LOUD, in `window.__engineError`
+// inside a frame nothing was reading, so the only outward sign was an empty box.
+//
+// A default that does not render is worse than no default: it is the first thing anyone sees, and it
+// says the engine is broken. This runs the starter through the same validator the engine calls at
+// boot, which is the check that would have caught it on the day.
+{
+  const src = fs.readFileSync(path.join(root, 'site/app/editor/EditorClient.tsx'), 'utf8');
+  const m = src.match(/const STARTER = `([\s\S]*?)`;/);
+  const REL = 'site/app/editor/EditorClient.tsx';
+  const fail = (text) => bad.push({ rel: REL, line: '-', stated: 'a starter that', subject: 'boots', real: 'a scene the engine refuses', text });
+  if (!m) fail('could not find the STARTER scene');
+  else {
+    let scene = null;
+    try { scene = JSON.parse(m[1]); } catch (e) { fail(`the STARTER scene is not valid JSON: ${e.message}`); }
+    if (scene) {
+      const schemaPath = path.join(root, 'formats', scene.module || 'scene', 'schema.json');
+      const schema = fs.existsSync(schemaPath) ? JSON.parse(fs.readFileSync(schemaPath, 'utf8')) : null;
+      for (const err of validateAll(schema, scene)) fail(err);
+    }
+  }
 }
 
 if (!bad.length) {
