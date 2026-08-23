@@ -12673,3 +12673,53 @@ main document only. An animation inside a shadow root or an iframe is not reache
 `document.getAnimations()`, and `animation-delay` with a negative value, `fill-mode`, and
 compositor-accelerated animations were not tested.
 
+## #410 — A part could arrive and never leave, and it was read as a limit of hand-written HTML
+
+**Where it came from.** Two agents built the same terminal, one in layer primitives and one in
+hand-authored `html`, to compare the media. The layer version left the frame piece by piece. The html
+version faded out as ONE card. That was reported, and repeated, as a property of the medium: an `html`
+layer is a single element with a single opacity, so of course it leaves as one thing.
+
+**It was not the medium.** `parts` already bridges the two: it takes a CSS SELECTOR into a layer's own
+children and gives the matched elements engine-driven, seeked, staggered entrances. On an `html` layer
+that is hand-written markup keeping the whole CSS surface AND getting per-element engine timing. The
+schema label has said "Pure (seeked GSAP)" the whole time.
+
+Every entry in `core/parts.js` was `[setup, from, to]`. A one-way tween. **The bridge only ran in one
+direction**, and nothing said so.
+
+**How invisible it was.** Measured before the fix:
+
+| | |
+|---|---|
+| blocks using `parts` | **0 of 13** |
+| scenes using `parts` | **6 of 161** |
+| scenes carrying an `html` layer | **61** |
+
+Sixty-one scenes hand-write HTML. Six use the mechanism that gives it engine timing. Neither agent in
+the head-to-head reached for it, and it was absent from the first draft of the plan written to fix
+exactly this problem.
+
+**Fix.** A fourth slot per entry, the exit, opt-in per spec with `out: true` plus `exitDur`/`exitEase`.
+
+**A translate CONTINUES, a scale REVERSES**, and that is not a detail. CLAUDE.md already states the
+rule for layers: "a layer that enters from the right should leave to the left, one continuous
+direction of travel per beat, never enter-and-retreat". So `fadeUp` rises in from +24 and leaves
+through -24, NOT back down to +24. A scale has no onward direction (a bar that grew from its own
+baseline has nowhere to continue to) so it returns to its origin, and `drawOn` un-draws for the same
+reason. `lib-test` asserts both halves per entry, so a new part entrance cannot be added
+entrance-only, and cannot be added retreating.
+
+**`fromTo` from the settled state, never a bare `to`.** A `to` records its start values when the tween
+first runs, which is a function of playback order and not of n, so a backward seek restores the wrong
+thing. This is the same failure shape as #370, in the same GSAP-driven code path.
+
+**Verified rather than assumed.** Exit frame rendered cold and again after seeking past it:
+byte-identical. `probe-purity` clean across 25 sampled frames. `snap-scenes` 105 identical, 0 changed,
+because `out` is opt-in and no existing scene asked for one. `lib-test` 931 to 934.
+
+**The lesson is about the report, not the code.** Two capable agents and one reviewer all described a
+missing feature as a property of a medium, because the medium's limits were the interesting story and
+the feature was undiscoverable. The schema label now leads with what `parts` is FOR, in the words an
+author would search for.
+

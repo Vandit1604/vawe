@@ -1121,7 +1121,7 @@
           "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
         },
         "parts": {
-          "label": "Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards) so a figure animates piece by piece. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease } OR an array of them (bars, then line, then dots). Pure (seeked GSAP)."
+          "label": "THE BRIDGE BETWEEN HAND-WRITTEN HTML AND THE ENGINE'S CLOCK. Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards, the rows of an `html` fragment) so a figure animates piece by piece. On an `html` layer this is how markup keeps the whole CSS surface AND still gets engine-driven, seekable per-element timing, instead of one opacity on the whole card. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease, out, exitDur, exitEase } OR an array of them (bars, then line, then dots). `out: true` gives each part its paired exit (a translate continues, a scale reverses) anchored to the layer's end. Pure (seeked GSAP)."
         },
         "comp": {
           "type": "string",

@@ -398,6 +398,24 @@ boot((data, fps, theme, canvas) => {
           ...spec[2], duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07,
           ease: p.ease || 'power3.out', delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
         });
+        // A PART CAN NOW LEAVE. Every entry used to be a one-way tween, so a hand-authored html figure
+        // could only ever fade out as ONE card while a native layer stack left piece by piece. That
+        // read as a limit of hand-written HTML in a head-to-head build and it was this line missing.
+        // Opt in with `out: true` (the entrance's own paired exit, core/parts.js slot 4) so an
+        // existing scene cannot grow an exit it never asked for.
+        // `fromTo` from the SETTLED state, never a bare `to`: a `to` records its start values when the
+        // tween first runs, which is a function of playback order rather than of n, and a backward seek
+        // then restores the wrong thing. Anchored to the layer's own end so the parts are gone by the
+        // time the layer is.
+        if (p.out && spec[3]) {
+          const exitDur = p.exitDur ?? p.each ?? 0.45;
+          const span = L.duration ?? 0;
+          window.gsap.fromTo(targets, { ...spec[2] }, {
+            ...spec[3], duration: exitDur, stagger: p.stagger ?? 0.07,
+            ease: p.exitEase || p.ease || 'power2.in',
+            delay: (L.start ?? 0) + Math.max(0, span - exitDur), immediateRender: false,
+          });
+        }
       }
     }
     if (L.splitText && window.gsap && window.SplitText) {

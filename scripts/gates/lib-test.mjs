@@ -44,7 +44,7 @@ import { BASE_ENTER } from '../../core/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
-import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
+import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/parts.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
@@ -1501,6 +1501,33 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
+  // THE EXIT SLOT. A part could arrive and never leave, so a hand-authored html figure faded out as
+  // ONE card while a native layer stack left piece by piece. That was read as a limit of the medium
+  // in a head-to-head build; it was a missing fourth slot. Asserted per entry so a new part entrance
+  // cannot be added entrance-only and quietly reintroduce it.
+  ok('parts: every part entrance carries a paired exit', PART_NAMES.every((n) => {
+    const v = PARTS[n][3];
+    return v && typeof v === 'object' && Object.keys(v).length > 0;
+  }));
+  // A TRANSLATE CONTINUES, A SCALE REVERSES, and the difference is the house rule CLAUDE.md states for
+  // layers: never enter-and-retreat. `fadeUp` rises in from +24 and must leave through NEGATIVE y, not
+  // back down to where it came from. A scale has no onward direction, so it returns to its origin.
+  ok('parts: a translate exit continues past its settled state, it does not retreat', (() => {
+    for (const n of ['fadeUp', 'riseIn']) {
+      const from = PARTS[n][1], out = PARTS[n][3];
+      if (!(typeof from.y === 'number' && typeof out.y === 'number')) return false;
+      if (Math.sign(out.y) === Math.sign(from.y)) return false;   // retreating the way it came
+    }
+    return true;
+  })());
+  ok('parts: a scale exit returns to its own origin', (() => {
+    for (const n of ['growUp', 'widen', 'popIn']) {
+      const out = PARTS[n][3];
+      const vals = Object.entries(out).filter(([k]) => k.startsWith('scale')).map(([, v]) => v);
+      if (!vals.length || vals.some((v) => v !== 0)) return false;
+    }
+    return true;
+  })());
 }
 
 // ---- sound: a CUT must have a voicing, exactly as a SEAM does ----
