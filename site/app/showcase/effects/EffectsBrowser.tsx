@@ -76,6 +76,14 @@ function Poster({ f, e }: { f: Family; e: Entry }) {
       // avoid. Staying at opacity:0 until onLoad means that native fallback is never painted: a
       // 404 always resolves to the striped `fxcard-noimg` swatch before anything shows.
       className={loaded ? "is-loaded" : undefined}
+      // `ref`, not `onLoad` alone. AN IMAGE THAT FINISHED BEFORE REACT ATTACHED ITS HANDLER NEVER
+      // FIRES ONE, and this page is static HTML: the browser starts fetching every in-viewport
+      // still from the markup, and on a warm cache they are all decoded before hydration runs. The
+      // handler then waits for an event that already happened and the card sits at opacity 0
+      // forever. Nineteen cards in one family rendered as empty boxes on a reload while the very
+      // same jpgs opened fine on disk, and the family that happened to be slower still showed. So
+      // ask the element whether it is ALREADY complete, and only then wait for the event.
+      ref={(el) => { if (el?.complete && el.naturalWidth > 0) setLoaded(true); }}
       onLoad={() => setLoaded(true)}
       onError={() => setBroken(true)}
     />

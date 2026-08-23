@@ -122,10 +122,16 @@ export default function Showcase() {
             the one deliberate piece of motion earns the top of the page instead of competing
             with five other things doing it too. */}
         <section className="hero-open">
+          {/* THE HEADLINE COUNTED NINE AND THE FAN HELD FIVE. The fan was cut from nine to five
+              deliberately (see FAN above) and the copy above it was not, so the page opened by
+              stating a number the picture under it contradicted. No count here now: the claim is
+              about RANGE, which is what a fan of unlike frames actually shows, and it cannot go
+              stale the next time the deck is re-dealt. "One JSON each" also belonged to the films
+              section below, and saying it twice on one page made the second one an echo. */}
           <h1 className="hero-open-h1">
-            Nine looks.
+            No house style.
             <br />
-            One JSON each.
+            One JSON format.
           </h1>
 
           {/* .fan-wrap, not .fan, is the positioned ancestor the pills measure against. .fanitem
@@ -162,7 +168,7 @@ export default function Showcase() {
           </div>
 
           <p className="hero-open-sub">
-            Nine different capabilities, every one rendered from the same JSON scene format.
+            {FAN.length} frames, {FAN.length} unlike capabilities, one scene format behind all of them.
           </p>
 
           <div className="hero-cta hero-open-cta">

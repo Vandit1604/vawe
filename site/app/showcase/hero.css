@@ -104,6 +104,11 @@
   font-family:var(--font-mono),monospace;font-size:12px;font-weight:600;letter-spacing:.01em;
   padding:6px 14px;border-radius:999px;
   background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow-1);
+  /* Above every card, including the ones dealt after it. `.fanitem` z-indexes rise with the fan
+     order so each card overlaps its left neighbour, and a pill sitting at the plain sibling level
+     was painted UNDER the card to its right: the first label lost its last four characters behind
+     the next card's edge. 60 clears both the resting stack and the 50 a hovered card takes. */
+  z-index:60;
 }
 .fanpill::after{
   content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:inherit;
