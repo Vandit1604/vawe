@@ -1,15 +1,19 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BlockLive, type Frame } from "./BlockLive";
 import frames from "../../lib/block-frames.json";
 
-/* Search + family filter over the registry.
+/* Search + family filter over the registry, grouped into sections with a sticky scrollspy rail.
  *
- * A flat grid of every block meant scrolling and hoping. The families come from the data itself
- * rather than a hand-kept category list, so adding a block cannot leave the filter behind. There are
- * nearly as many families as blocks, which is exactly why the dropdown alone would not be enough
- * and search carries the real load. (Counts live in the registry, not here: see make site-counts.)
+ * 63 families for 148 blocks (site/lib/blocks.json) is a family-per-2.3-blocks ratio, so the
+ * dropdown-picks-one-family filter this page used to stop at was the only way to see a family
+ * without a needle in your hand: pick exactly one and every other family disappears, or scroll
+ * ~34,000px of an unsorted list hoping to recognise a name. /showcase/effects carried the same
+ * defect at 35 families over 521 effects and fixed it with a rail (effects.css's file banner);
+ * the same fix applies here, at a family count nearly double effects' own. The rail is additive:
+ * search and the family select still filter, exactly as before, they just now filter INTO
+ * sections instead of one flat list, and the rail tracks which section is on screen.
  *
  * Filtering happens client-side over an array that is already in the page. Every card still
  * server-renders, so the grid is in the HTML for anything that does not run JS.
@@ -89,11 +93,32 @@ function BlockThumb({ name, playing, onToggle }: { name: string; playing: boolea
   );
 }
 
+// Family names are already identifier-safe (camelCase, no spaces), so the name doubles as the
+// section id. Prefixed so it can never collide with another id the page happens to carry.
+const famId = (f: string) => `blk-${f}`;
+
+/* The sticky family rail: same scrollspy technique as /showcase/effects (one IntersectionObserver
+ * watching every family heading; whichever last crossed the band under the filter bar is current),
+ * because a second bespoke implementation of the same idea is a second place to get it wrong. */
+function Rail({ families, activeId }: { families: [string, number][]; activeId: string | null }) {
+  return (
+    <nav className="blk-rail" aria-label="Jump to a family">
+      {families.map(([f, n]) => (
+        <a key={f} href={`#${famId(f)}`} aria-current={activeId === famId(f) ? "location" : undefined}>
+          {f} <span>{n}</span>
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
   const [q, setQ] = useState("");
   const [fam, setFam] = useState("");
   // ONE live engine at a time. Each is a full engine boot in an iframe; 148 of them is not viable.
   const [live, setLive] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const families = useMemo(() => {
     const counts = new Map<string, number>();
@@ -118,6 +143,42 @@ export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
       );
     });
   }, [blocks, q, fam]);
+
+  // Group the filtered blocks back into families, in the rail's own alphabetical order, so the
+  // rail and the sections it points at always agree on order and on which families still show.
+  const sections = useMemo(() => {
+    const byFam = new Map<string, Block[]>();
+    for (const b of shown) {
+      const list = byFam.get(b.family);
+      if (list) list.push(b);
+      else byFam.set(b.family, [b]);
+    }
+    return families
+      .map(([f]) => [f, byFam.get(f)] as const)
+      .filter((entry): entry is [string, Block[]] => !!entry[1]?.length);
+  }, [shown, families]);
+
+  const railFamilies = useMemo<[string, number][]>(
+    () => sections.map(([f, list]) => [f, list.length]),
+    [sections],
+  );
+
+  // Re-observe whenever the visible family set changes (a filter can remove sections mid-scroll).
+  useEffect(() => {
+    const root = listRef.current;
+    if (!root) return;
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".blk-fam"));
+    if (!els.length) { setActiveId(null); return; }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) if (en.isIntersecting) setActiveId(en.target.id);
+      },
+      { rootMargin: "-96px 0px -80% 0px", threshold: 0 },
+    );
+    els.forEach((el) => io.observe(el));
+    setActiveId(els[0].id);
+    return () => io.disconnect();
+  }, [sections]);
 
   return (
     <>
@@ -176,21 +237,38 @@ export function BlocksBrowser({ blocks }: { blocks: Block[] }) {
           </button>
         </p>
       ) : (
-        <div className="bgrid">
-          {shown.map((b) => (
-            <Link className="bcard" href={`/blocks/${b.name}`} key={b.name}>
-              <BlockThumb
-                name={b.name}
-                playing={live === b.name}
-                onToggle={() => setLive((cur) => (cur === b.name ? null : b.name))}
-              />
-              <div className="meta">
-                <div className="bn">{b.name}</div>
-                <div className="bf">{b.family}</div>
-                <div className="bp">{b.blurb || propKeys(b.props)}</div>
-              </div>
-            </Link>
-          ))}
+        <div className="blk-layout">
+          <div className="blk-railcol">
+            <Rail families={railFamilies} activeId={activeId} />
+          </div>
+
+          <div className="blk-list" ref={listRef}>
+            {sections.map(([f, list]) => (
+              <section className="blk-fam" id={famId(f)} key={f}>
+                <h2>
+                  {f} <span className="blk-n">{list.length}</span>
+                </h2>
+                <div className="bgrid">
+                  {list.map((b) => (
+                    <Link className="bcard" href={`/blocks/${b.name}`} key={b.name}>
+                      <BlockThumb
+                        name={b.name}
+                        playing={live === b.name}
+                        onToggle={() => setLive((cur) => (cur === b.name ? null : b.name))}
+                      />
+                      {/* No per-card family line: the section heading above already names it, and
+                          repeating it on all fifteen codeBlock cards was the family filling the
+                          slot the blurb should own. */}
+                      <div className="meta">
+                        <div className="bn">{b.name}</div>
+                        <div className="bp">{b.blurb || propKeys(b.props)}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       )}
     </>

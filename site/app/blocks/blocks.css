@@ -1,0 +1,57 @@
+/* ===== /blocks — the family rail ===============================================================
+   148 blocks in 63 families (site/lib/blocks.json) used to render as one flat grid behind a
+   search box and a single-family dropdown: to see a family you either typed its name or picked it
+   from the select and lost every other family from view. /showcase/effects solved the same shape
+   of problem at 35 families with a sticky scrollspy rail (effects.css); this file is that same
+   fix applied here, at a family count nearly double effects' own. Deliberately NOT reusing the
+   `.fx*` classes: those are effects.css's own, and this file owns everything under
+   site/app/blocks/ the same way effects.css owns showcase/effects/ (see that file's banner on why
+   shared classes stay in globals.css and page-specific ones don't). `.bfilter`/`.bsearch`/
+   `.bselect`/`.bcount`/`.bempty`/`.blink`/`.bgrid`/`.bcard`/`.thumb`/`.bplay`/`.meta`/`.bn`/`.bp`
+   all stay exactly as globals.css defines them; only the section/rail wrapper is new. */
+
+.blk-layout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
+.blk-railcol{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
+  padding-right:6px}
+.blk-rail{display:flex;flex-direction:column;gap:2px}
+.blk-rail a{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);text-decoration:none;
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-radius:7px;
+  padding:6px 10px;border:1px solid transparent;white-space:normal;line-height:1.3;
+  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
+.blk-rail a:hover{color:var(--accent)}
+/* The family currently in view (scrollspy, not a route): aria-current="location" carries the same
+   signal to a screen reader that the highlight gives a sighted reader. */
+.blk-rail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
+  font-weight:600}
+.blk-rail a span{color:var(--muted)}
+.blk-rail a[aria-current] span{color:var(--accent)}
+
+.blk-list{min-width:0}
+.blk-fam{padding-top:26px;scroll-margin-top:78px}
+.blk-fam h2{font-size:1.15rem;font-weight:700;letter-spacing:-.02em;display:flex;align-items:baseline;
+  gap:9px;margin-bottom:12px}
+.blk-fam .blk-n{font-family:var(--font-mono),monospace;font-size:12px;font-weight:500;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:1px 9px}
+.blk-fam .bgrid{margin-top:0}
+
+/* Was `.bcard .bf`'s job: 9px of separation between the name and the line under it. The family
+   line moved to the section heading (one .blk-fam h2 for all its cards, not one per card), so the
+   name needs its own gap now that nothing sits between it and the blurb. */
+.bcard .bn{margin-bottom:6px}
+
+@media (max-width:900px){
+  .blk-layout{grid-template-columns:1fr;gap:0}
+  .blk-railcol{position:static;max-height:none;overflow:visible;padding-right:0}
+  .blk-rail{flex-direction:row;flex-wrap:wrap;max-height:96px;overflow-y:auto;gap:6px;
+    padding:12px 0 4px;border-bottom:1px solid var(--line)}
+  .blk-rail a{border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+}
+@media (max-width:760px){
+  /* The sticky toolbar wraps to more than one row on a phone, so a family anchored under it would
+     otherwise land with its own heading hidden underneath. */
+  .blk-fam{scroll-margin-top:150px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .blk-rail a{transition:none}
+}
