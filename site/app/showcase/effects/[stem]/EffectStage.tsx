@@ -1,152 +1,241 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EffectPreview } from "../EffectPreview";
+import type { Knob } from "./knobs";
 
-/* The video + the JSON that produces it, one effect at a time.
- *
- * "ONE ENGINE ON THE PAGE, EVER" (EffectPreview's own constraint) is now satisfied for free: this
- * component mounts exactly one EffectPreview because the PAGE is exactly one effect. No open-state,
- * no drawer, no unmount-on-switch bookkeeping — that machinery lived in EffectsBrowser only because a
- * flat index had to fake having pages. Now it has real ones.
+/* The live player, its knob panel, and the three tabs (Preview / JSON / Scene) that hold them, one
+ * effect at a time. "ONE ENGINE ON THE PAGE, EVER" (EffectPreview's own constraint) is satisfied
+ * for free: this component mounts exactly one EffectPreview because the PAGE is exactly one effect.
  */
 
 type Layer = Record<string, unknown>;
-type Caption = { text?: string; [k: string]: unknown };
-type Scene = { layers?: Layer[]; captions?: Caption[]; [k: string]: unknown };
-
-// Which layer in the fetched demo scene is "the headline": the biggest top-level text layer, ties
-// broken by earliest start. Every PREVIEW scene effects-json.mjs writes carries at most one layer
-// that reads as the film's line of copy (a hero line, a before/after pair, a caption over a field
-// effect), so "biggest text wins" finds it without hand-listing every family's shape here.
-function pickHeadline(layers: Layer[]): number | null {
-  let best = -1, bestSize = -1, bestStart = Infinity;
-  layers.forEach((l, i) => {
-    if (l.type !== "text" || typeof l.text !== "string") return;
-    const size = typeof l.size === "number" ? (l.size as number) : 0;
-    const start = typeof l.start === "number" ? (l.start as number) : 0;
-    if (size > bestSize || (size === bestSize && start < bestStart)) { best = i; bestSize = size; bestStart = start; }
-  });
-  return best === -1 ? null : best;
-}
+type Scene = { layers?: Layer[]; [k: string]: unknown };
 
 // /editor's own debounce for the identical problem (EditorClient.tsx: "rebooting the scene on every
-// keystroke would thrash fonts + theme fetches"). Reused rather than picked fresh, so the two live
-// text editors in this app feel the same.
+// keystroke would thrash fonts + theme fetches"). Reused rather than picked fresh.
 const DEBOUNCE_MS = 500;
 
-export function EffectStage({ name, scene, json, noPreview }: { name: string; scene: string | null; json: string; noPreview: string | null }) {
-  // A headline control is offered only when BOTH are true: there is a live scene to patch, and the
-  // authoring snippet itself IS a text layer (`{"type":"text","text":"…"}`). That is exactly the
-  // families whose JSON is a line of copy: kinetic presets, enter/exit anims, idles, GSAP effects
-  // and exits. A cut, a sting, a paint field, a filter and a blend mode carry no such field, so none
-  // of them grow an input (CLAUDE.md: "not every scene has text").
-  const parsedJson = useMemo<Layer | null>(() => {
-    try { const o = JSON.parse(json); return o && typeof o === "object" ? (o as Layer) : null; } catch { return null; }
-  }, [json]);
-  // TWO PLACES A DEMO KEEPS ITS COPY, and the first version of this only knew one. A text layer
-  // (`{"type":"text","text":"…"}`) covers the kinetic presets, the enter/exit anims, the idles and
-  // the GSAP families. A CAPTION keeps its words somewhere else entirely, in `captions[0].text`, and
-  // a caption style is the family where editing the words matters most: the whole style is a
-  // treatment OF those words. Eleven styles shipped with a live player and no way to change what it
-  // said. A cut, a sting, a paint field, a filter and a blend mode still carry no copy at all and
-  // still grow no input.
-  const editKind: "layer" | "caption" | null =
-    parsedJson && parsedJson.type === "text" && typeof parsedJson.text === "string" ? "layer"
-    : parsedJson && Array.isArray((parsedJson as Record<string, unknown>).captions) ? "caption"
-    : null;
-  const canEditHeadline = !!scene && editKind !== null;
+function setDeep(obj: unknown, path: (string | number)[], value: unknown): unknown {
+  if (path.length === 0) return value;
+  const [head, ...rest] = path;
+  if (typeof head === "number") {
+    const arr = Array.isArray(obj) ? obj.slice() : [];
+    arr[head] = setDeep(arr[head], rest, value);
+    return arr;
+  }
+  const o: Record<string, unknown> = obj && typeof obj === "object" && !Array.isArray(obj) ? { ...(obj as Record<string, unknown>) } : {};
+  o[head] = setDeep(o[head], rest, value);
+  return o;
+}
+
+const pathKey = (path: (string | number)[]) => path.join(".");
+
+// Where a knob's edit lands in the FULL booted scene. A body that carries its own `type` describes
+// ONE LAYER (kinetic presets, idles, paint fields, a beam): find that layer in the fetched demo and
+// patch it. Every other family's body already has the shape of the SCENE ROOT (cuts/stings/seams/bg
+// /captionStyle/captions all live at scene level in both the authoring snippet and the booted
+// scene, because effects-json.mjs's USAGE writes them there directly) — so its own path applies to
+// the scene unchanged.
+type Target = { get: () => unknown; set: (v: unknown) => Scene };
+function resolveTarget(demo: Scene, bodyType: string | null): Target | null {
+  if (bodyType) {
+    const idx = (demo.layers ?? []).findIndex((l) => l.type === bodyType);
+    if (idx === -1) return null;
+    return {
+      get: () => demo.layers![idx],
+      set: (v) => {
+        const layers = demo.layers!.slice();
+        layers[idx] = v as Layer;
+        return { ...demo, layers };
+      },
+    };
+  }
+  return { get: () => demo, set: (v) => v as Scene };
+}
+
+function applyKnobs(node: unknown, editable: Knob[], values: Record<string, string | number | boolean>): unknown {
+  let next = node;
+  for (const k of editable) next = setDeep(next, k.path, values[pathKey(k.path)]);
+  return next;
+}
+
+const TABS = ["preview", "json", "scene"] as const;
+type Tab = (typeof TABS)[number];
+const TAB_LABEL: Record<Tab, string> = { preview: "Preview", json: "JSON", scene: "Scene" };
+
+export function EffectStage({
+  name, scene, json, noPreview, knobs, bodyType,
+}: { name: string; scene: string | null; json: string; noPreview: string | null; knobs: Knob[]; bodyType: string | null }) {
+  const editable = useMemo(() => knobs.filter((k) => !k.locked), [knobs]);
+
+  const [values, setValues] = useState<Record<string, string | number | boolean>>(
+    () => Object.fromEntries(editable.map((k) => [pathKey(k.path), k.value])),
+  );
+  const dirty = editable.some((k) => values[pathKey(k.path)] !== k.value);
 
   const [demo, setDemo] = useState<Scene | null>(null);
-  const [layerIdx, setLayerIdx] = useState<number | null>(null);
-  const [headline, setHeadline] = useState<string | null>(null); // null until the demo scene tells us what is actually on screen
-  const initial = useRef<string | null>(null);
   const [dataUrl, setDataUrl] = useState<string | null>(scene);
   const blobUrl = useRef<string | null>(null);
+  const [tab, setTab] = useState<Tab>("preview");
 
   useEffect(() => {
-    if (!canEditHeadline) return;
+    if (!scene) return;
     let cancelled = false;
-    fetch(scene!).then((r) => r.json()).then((s: Scene) => {
-      if (cancelled) return;
-      const i = editKind === "caption" ? 0 : pickHeadline(s.layers ?? []);
-      const t = editKind === "caption"
-        ? (s.captions?.[0]?.text as string | undefined)
-        : (i !== null ? ((s.layers![i] as Layer).text as string) : undefined);
-      setDemo(s);
-      setLayerIdx(t === undefined ? null : i);
-      if (t !== undefined) { initial.current = t; setHeadline(t); }
-    });
+    fetch(scene).then((r) => r.json()).then((s: Scene) => { if (!cancelled) setDemo(s); });
     return () => { cancelled = true; };
-    // scene/canEditHeadline only ever change together (both derive from the same effect id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene]);
 
+  const target = useMemo(() => (demo ? resolveTarget(demo, bodyType) : null), [demo, bodyType]);
+  const canEdit = !!target;
+
+  // Unedited: play the plain file. Building an identical blob on first load would reboot the
+  // engine once for nothing.
   useEffect(() => {
-    if (!demo || layerIdx === null || headline === null) return;
-    // Unedited: play the plain file. Building an identical blob on first load would reboot the
-    // engine once for nothing.
-    if (headline === initial.current) { setDataUrl(scene); return; }
+    if (!demo || !target) return;
+    if (!dirty) { setDataUrl(scene); return; }
     const t = setTimeout(() => {
-      const patched = editKind === "caption"
-        ? { ...demo, captions: (demo.captions ?? []).map((c, i) => (i === 0 ? { ...c, text: headline } : c)) }
-        : { ...demo, layers: (demo.layers ?? []).map((l, i) => (i === layerIdx ? { ...l, text: headline } : l)) };
+      const patched = target.set(applyKnobs(target.get(), editable, values));
       const url = URL.createObjectURL(new Blob([JSON.stringify(patched)], { type: "application/json" }));
       if (blobUrl.current) URL.revokeObjectURL(blobUrl.current);
       blobUrl.current = url;
       setDataUrl(url);
     }, DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [headline, demo, layerIdx, scene]);
+  }, [values, demo, target, dirty, editable, scene]);
 
   useEffect(() => () => { if (blobUrl.current) URL.revokeObjectURL(blobUrl.current); }, []);
 
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (!copied) return;
-    const t = setTimeout(() => setCopied(false), 1400);
-    return () => clearTimeout(t);
-  }, [copied]);
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedScene, setCopiedScene] = useState(false);
+  useEffect(() => { if (!copiedJson) return; const t = setTimeout(() => setCopiedJson(false), 1400); return () => clearTimeout(t); }, [copiedJson]);
+  useEffect(() => { if (!copiedScene) return; const t = setTimeout(() => setCopiedScene(false), 1400); return () => clearTimeout(t); }, [copiedScene]);
 
-  // The copy button hands over what is actually on screen: once the headline diverges from the
-  // scene's own default, the JSON echoes that edit too.
-  const shownJson = canEditHeadline && parsedJson && headline !== null && headline !== initial.current
-    ? JSON.stringify(editKind === "caption"
-        ? { ...parsedJson, captions: ((parsedJson as unknown as Scene).captions ?? []).map((c, i) => (i === 0 ? { ...c, text: headline } : c)) }
-        : { ...parsedJson, text: headline }, null, 2)
-    : json;
+  const parsedBody = useMemo<unknown>(() => {
+    try { return JSON.parse(json); } catch { return null; }
+  }, [json]);
+
+  // The copy button hands over what is actually on screen: an edited knob echoes into the snippet
+  // the same way it echoes into the live preview.
+  const shownJson = useMemo(() => {
+    if (!parsedBody) return json;
+    return JSON.stringify(applyKnobs(parsedBody, editable, values), null, 2);
+  }, [parsedBody, json, editable, values]);
+
+  const patchedDemo = useMemo(() => {
+    if (!demo || !target || !dirty) return demo;
+    return target.set(applyKnobs(target.get(), editable, values));
+  }, [demo, target, dirty, editable, values]);
+
+  const cyclePanel = (dir: 1 | -1) => {
+    const i = TABS.indexOf(tab);
+    const next = TABS[(i + dir + TABS.length) % TABS.length];
+    setTab(next);
+    document.getElementById(`fxtab-${next}`)?.focus();
+  };
 
   return (
     <div className="fxstage">
-      {scene ? (
-        <EffectPreview key={dataUrl ?? scene} name={name} src={dataUrl ?? scene} />
-      ) : (
-        <p className="fxd-nope"><b>No preview here.</b> {noPreview}</p>
-      )}
-
-      {canEditHeadline && headline !== null && (
-        <label className="fxheadline">
-          <span>Headline</span>
-          <input
-            type="text"
-            name="headline"
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value)}
-            maxLength={80}
-          />
-        </label>
-      )}
-
-      <div className="fxd-code">
-        <div className="fxd-code-h">
-          <span>The JSON that uses it</span>
+      <div className="fxtabs" role="tablist" aria-label="Effect views">
+        {TABS.map((id) => (
           <button
-            className="fxcopy"
-            onClick={() => navigator.clipboard.writeText(shownJson).then(() => setCopied(true), () => setCopied(false))}
+            key={id}
+            role="tab"
+            id={`fxtab-${id}`}
+            aria-selected={tab === id}
+            aria-controls={`fxpanel-${id}`}
+            tabIndex={tab === id ? 0 : -1}
+            className="fxtab"
+            onClick={() => setTab(id)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight") cyclePanel(1);
+              else if (e.key === "ArrowLeft") cyclePanel(-1);
+            }}
           >
-            {copied ? "Copied" : "Copy JSON"}
+            {TAB_LABEL[id]}
           </button>
+        ))}
+      </div>
+
+      <div id="fxpanel-preview" role="tabpanel" aria-labelledby="fxtab-preview" hidden={tab !== "preview"}>
+        {scene ? (
+          <EffectPreview key={dataUrl ?? scene} name={name} src={dataUrl ?? scene} />
+        ) : (
+          <p className="fxd-nope"><b>No preview here.</b> {noPreview}</p>
+        )}
+
+        {knobs.length > 0 && (
+          <div className="fxknobs">
+            <div className="fxknobs-h">
+              <span>Knobs</span>
+              {!canEdit && editable.length > 0 && <span className="fxknobs-note">no live scene to reboot &middot; still updates the JSON tab</span>}
+            </div>
+            <div className="fxknobs-grid">
+              {knobs.map((k) => {
+                const pk = pathKey(k.path);
+                return (
+                  <label className="fxknob" key={pk}>
+                    <span className="fxknob-top">
+                      <span className="fxknob-key mono">{k.key}</span>
+                      {k.locked && <span className="fxknob-lock" title="This value names the effect on this page. Editing it would make the page show a different effect than its title.">locked</span>}
+                    </span>
+                    {k.locked ? (
+                      <span className="fxknob-fixed mono">{String(k.value)}</span>
+                    ) : k.control === "select" ? (
+                      <select value={String(values[pk])} onChange={(e) => setValues((v) => ({ ...v, [pk]: e.target.value }))}>
+                        {k.options!.map((o) => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : k.control === "boolean" ? (
+                      <input type="checkbox" checked={!!values[pk]} onChange={(e) => setValues((v) => ({ ...v, [pk]: e.target.checked }))} />
+                    ) : k.control === "number" ? (
+                      <input
+                        type="number"
+                        step="any"
+                        value={String(values[pk])}
+                        onChange={(e) => setValues((v) => ({ ...v, [pk]: e.target.value === "" ? 0 : Number(e.target.value) }))}
+                      />
+                    ) : (
+                      <input type="text" value={String(values[pk])} maxLength={200} onChange={(e) => setValues((v) => ({ ...v, [pk]: e.target.value }))} />
+                    )}
+                    {k.label && <span className="fxknob-desc">{k.label}</span>}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div id="fxpanel-json" role="tabpanel" aria-labelledby="fxtab-json" hidden={tab !== "json"}>
+        <div className="fxd-code">
+          <div className="fxd-code-h">
+            <span>The JSON that uses it</span>
+            <button className="fxcopy" onClick={() => navigator.clipboard.writeText(shownJson).then(() => setCopiedJson(true), () => setCopiedJson(false))}>
+              {copiedJson ? "Copied" : "Copy JSON"}
+            </button>
+          </div>
+          <pre><code>{shownJson}</code></pre>
         </div>
-        <pre><code>{shownJson}</code></pre>
+        <p className="fxd-hint">Paste it into your composition.</p>
+      </div>
+
+      <div id="fxpanel-scene" role="tabpanel" aria-labelledby="fxtab-scene" hidden={tab !== "scene"}>
+        {scene ? (
+          <div className="fxd-code">
+            <div className="fxd-code-h">
+              <span>The full demo scene this preview boots</span>
+              <button
+                className="fxcopy"
+                disabled={!demo}
+                onClick={() => navigator.clipboard.writeText(JSON.stringify(patchedDemo ?? demo, null, 2)).then(() => setCopiedScene(true), () => setCopiedScene(false))}
+              >
+                {copiedScene ? "Copied" : "Copy scene"}
+              </button>
+            </div>
+            <pre><code>{demo ? JSON.stringify(patchedDemo ?? demo, null, 2) : "Loading…"}</code></pre>
+          </div>
+        ) : (
+          <p className="fxd-nope">No live scene renders this effect. {noPreview}</p>
+        )}
       </div>
     </div>
   );

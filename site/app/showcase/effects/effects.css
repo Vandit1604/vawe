@@ -133,12 +133,45 @@
 .fxpage h1{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.01em;margin-top:2px}
 .fxpage .phead p{color:var(--ink-2);font-size:15px;line-height:1.6;max-width:64ch;margin-top:10px}
 
-.fxstage{margin-top:28px;display:flex;flex-direction:column;gap:16px}
-.fxheadline{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.05em}
-.fxheadline input{font:inherit;font-size:15px;letter-spacing:normal;text-transform:none;color:var(--ink);
-  padding:9px 12px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);outline:none}
-.fxheadline input:focus-visible{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:1px}
+.fxtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.fxtagchip{font-family:var(--font-mono),monospace;font-size:11px;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface)}
+
+/* ---- tabs: Preview / JSON / Scene, real buttons, aria-selected, arrow-key operable ------------- */
+.fxstage{margin-top:20px}
+.fxtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.fxtab{font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--muted);background:none;
+  border:none;border-bottom:2px solid transparent;padding:8px 4px;margin-bottom:-1px;cursor:pointer;
+  transition:color .15s var(--ease),border-color .15s var(--ease)}
+.fxtab+.fxtab{margin-left:14px}
+.fxtab:hover{color:var(--ink-2)}
+.fxtab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.fxtab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+#fxpanel-preview,#fxpanel-json,#fxpanel-scene{display:flex;flex-direction:column;gap:16px}
+
+/* ---- the knob panel: the family's own authoring form, one control per field, derived from the
+   snippet + formats/scene/schema.json (see [stem]/knobs.ts). Never hand-listed per family. ------- */
+.fxknobs{border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px;background:var(--bg-2)}
+.fxknobs-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.fxknobs-note{text-transform:none;letter-spacing:normal;color:var(--muted);font-size:11px}
+.fxknobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.fxknob{display:flex;flex-direction:column;gap:5px}
+.fxknob-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.fxknob-key{font-size:11.5px;color:var(--ink-2)}
+.fxknob-lock{font-family:var(--font-mono),monospace;font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--muted);border:1px solid var(--line);border-radius:999px;
+  padding:1px 7px;cursor:help}
+.fxknob input,.fxknob select{font:inherit;font-size:13.5px;color:var(--ink);padding:7px 9px;
+  border:1px solid var(--line-2);border-radius:8px;background:var(--surface);outline:none;width:100%}
+.fxknob input:focus-visible,.fxknob select:focus-visible{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:1px}
+.fxknob input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent)}
+.fxknob-fixed{font-size:13px;color:var(--ink-2);padding:7px 9px;border:1px dashed var(--line-2);
+  border-radius:8px;background:var(--surface);opacity:.8}
+.fxknob-desc{font-size:11px;line-height:1.5;color:var(--muted)}
+
+.fxd-hint{font-size:12px;color:var(--muted);margin-top:-6px}
 
 .fxd-nope{font-size:13px;line-height:1.6;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
   border-radius:10px;padding:14px 16px}
@@ -159,11 +192,17 @@
 .fxpage-nav a:hover{color:var(--accent)}
 .fxpage-next{margin-left:auto}
 
+/* ---- related: adjacency + shared tag, capped at 6, reusing the index's own .fxcard/.fxgrid ----- */
+.fxrelated{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+.fxrelated-h{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin:0 0 12px}
+
 @media (prefers-reduced-motion:reduce){
   .fxcard{transition:none}
   .fxcard:hover{transform:none}
   .fxrail a{transition:none}
   .fxcard-media img{transition:none}
+  .fxtab{transition:none}
 }
 
 /* The live player's two rules, moved out of globals.css when this page's OLD stylesheet was deleted
