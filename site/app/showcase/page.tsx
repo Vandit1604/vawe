@@ -1,13 +1,14 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { SourceViewer } from "../components/SourceViewer";
+import { ShowcaseRail, type Category } from "./ShowcaseRail";
+import { resolveTag } from "./tagLinks";
 import LINES from "../../lib/scene-lines.json";
 import EFFECTS from "../../lib/effects-counts.json";
-import "./hero.css";
+import "./showcase.css";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
@@ -17,23 +18,18 @@ export const metadata: Metadata = {
     "What Vawe can render: kinetic typography, transitions, shader stings, data stories, product UI, and any aspect ratio. Every clip is one JSON scene.",
 };
 
-/* A GALLERY, not an essay.
+/* A COMPONENT LIBRARY, not a gallery with a poster hero.
  *
- * This page has been cut twice. It carried ~620 words, then ~450, and the failure both times was
- * the same shape: prose in front of the work. Two headlines each with a paragraph beside it, then
- * a sentence under every film narrating what the clip already shows. At 1440 the first film sat
- * 466px down the page, so a visitor scrolled past a screen of type to reach a page of films.
+ * The page carried a hero of five STILL images fanned like a hand of cards. It looked good and did
+ * nothing this page's own medium (video) doesn't do better: five jpgs ahead of eighteen real clips
+ * told a visitor the important thing here is a picture, then spent the next two screens proving
+ * that's wrong. Cut, not shrunk — a smaller deck of stills is still stills first. What replaced it
+ * is one headline and a subline; the first thing that moves on this page is now the first film.
  *
- * So: ONE headline, no lead paragraph, and the first film opens at full measure directly under it.
- * A film's caption is its brand, its runtime and its source. The clip is the description.
- *
- * The film grid is scale-contrasted rather than six equal tiles: one hero at full width, then two
- * at half, then three at a third. Six items, six cells, no empty cell, and the eye has somewhere
- * to start. The cards lost their border too. A bordered box around a video that already has its
- * own frame is a second frame doing nothing.
- *
- * What is left in prose is the part a clip genuinely cannot say: what this page CANNOT show you
- * (two scenes whose source may not be published) and where to go next.
+ * The other half of the rebuild follows /showcase/effects, which already went from a flat scroll to
+ * a rail-plus-work layout this week: a sticky left column names every category and the entries in
+ * it (ShowcaseRail), the catalog sits on the right, and a capability's tag now LINKS to the real
+ * effect pages it names (tagLinks.ts) instead of repeating their names as inert mono text.
  */
 
 type Film = { slug: string; brand: string; dur: string };
@@ -66,33 +62,19 @@ const CAPS: Cap[] = [
   { title: "Gradient fields", tag: "image: ken burns · radius", src: "gradients", scene: null },
 ];
 
-// THE FAN. Five stills, not nine: nine of the capability posters read as a stack of thumbnails
-// because five of the nine are a short line of type on an almost-empty field (`type`, `cuts`,
-// `stings`, `data`, `ransom` were all opened and checked, not assumed from their names or their
-// own capability's title). A card this small has to be full of picture to read as a picture, so
-// the fan keeps only the four capability stills that already are (a browser frame mid-toast, a
-// full-bleed thermal portrait, a dark dither area-chart, a saturated gradient card) and borrows
-// one more from the films: `plinth-ad`'s dense earnings list is fuller than any of the five it
-// would otherwise need to stand in for. That still reappears in the film grid below, which is a
-// real repeat and the reason it is one card, not two.
-type FanCard = { id: string; jpg: string; href: string; alt: string; bubble?: string; bubbleGhost?: boolean };
+type Ratio = { id: string; slug: string; label: string; cls: string };
 
-const FAN: FanCard[] = [
-  { id: "dither", jpg: "/assets/showcase/dither.jpg", href: "#cap-dither", alt: "Ordered dither" },
-  { id: "ui", jpg: "/assets/showcase/ui.jpg", href: "#cap-ui", alt: "Product demos", bubble: "product demos" },
-  { id: "looks", jpg: "/assets/showcase/looks.jpg", href: "#cap-looks", alt: "Color grades", bubble: "color grades", bubbleGhost: true },
-  { id: "plinth-ad", jpg: "/assets/films/plinth-ad.jpg", href: "#film-plinth-ad", alt: "Plinth, a full launch film" },
-  { id: "gradients", jpg: "/assets/showcase/gradients.jpg", href: "#cap-gradients", alt: "Gradient fields" },
+const RATIOS: Ratio[] = [
+  { id: "ratio-169", slug: "aspect-169", label: "16:9", cls: "a169" },
+  { id: "ratio-916", slug: "aspect-916", label: "9:16", cls: "a916" },
+  { id: "ratio-11", slug: "aspect-11", label: "1:1", cls: "a11" },
 ];
 
-// The fan's vertical curve: the middle card rides highest, the two ends sit on the baseline.
-// Five points of 1-((i-2)/2)^2, not a formula in CSS, because calc() has no pow() we can rely
-// on everywhere yet, and five numbers are cheaper than a polyfill.
-const FAN_LIFT = [0, 0.75, 1, 0.75, 0];
-
-function fanVars(i: number): CSSProperties {
-  return { "--i": i, "--liftf": FAN_LIFT[i] } as CSSProperties;
-}
+const CATEGORIES: Category[] = [
+  { id: "cat-films", title: "Launch films", entries: FILMS.map((f) => ({ id: `film-${f.slug}`, label: f.brand })) },
+  { id: "cat-caps", title: "Capabilities", entries: CAPS.map((c) => ({ id: `cap-${c.src}`, label: c.title })) },
+  { id: "cat-ratios", title: "Ratios", entries: RATIOS.map((r) => ({ id: r.id, label: r.label })) },
+];
 
 function FilmTile({ film }: { film: Film }) {
   return (
@@ -109,6 +91,24 @@ function FilmTile({ film }: { film: Film }) {
   );
 }
 
+// Turns "preset: up · decode · gradient" into the prefix plus a run of names, each linked to its
+// real effect page where one resolved (tagLinks.ts) and left as plain text where it didn't — never
+// a link to a page that isn't there.
+function CapTag({ tag }: { tag: string }) {
+  const { prefix, segments } = resolveTag(tag);
+  return (
+    <span className="tag captag">
+      {prefix}:{" "}
+      {segments.map((s, i) => (
+        <span key={s.text}>
+          {i > 0 && " · "}
+          {s.href ? <Link href={s.href}>{s.text}</Link> : s.text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function Showcase() {
   const [hero, ...rest] = FILMS;
 
@@ -117,166 +117,110 @@ export default function Showcase() {
       <Header active="showcase" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
-        {/* THE OPENING. One headline, a fan of five capability stills, then the ask. This is the
-            only thing on the page that moves on load: everything below is a static gallery, so
-            the one deliberate piece of motion earns the top of the page instead of competing
-            with five other things doing it too. */}
-        <section className="hero-open">
-          {/* THE HEADLINE COUNTED NINE AND THE FAN HELD FIVE. The fan was cut from nine to five
-              deliberately (see FAN above) and the copy above it was not, so the page opened by
-              stating a number the picture under it contradicted. No count here now: the claim is
-              about RANGE, which is what a fan of unlike frames actually shows, and it cannot go
-              stale the next time the deck is re-dealt. "One JSON each" also belonged to the films
-              section below, and saying it twice on one page made the second one an echo. */}
-          <h1 className="hero-open-h1">
-            No house style.
-            <br />
-            One JSON format.
-          </h1>
-
-          {/* .fan-wrap, not .fan, is the positioned ancestor the pills measure against. .fanitem
-              carries a `transform` (the entrance animation), and a transformed element becomes
-              the containing block for its own absolutely-positioned descendants, same as
-              `position:relative` would. A pill nested inside .fanitem was measuring itself
-              against that small, rotated box instead of the fan, and landed off-screen. Keeping
-              the pills as .fan's siblings, not .fanitem's children, is the fix, not a patch on
-              top of the bug. */}
-          <div className="fan-wrap">
-            <ul className="fan">
-              {FAN.map((c, i) => (
-                <li className="fanitem" key={c.id} style={fanVars(i)}>
-                  {/* Decoration would be five tab stops going nowhere. These go somewhere: the
-                      same still, full-size, further down the page. */}
-                  <Link className="fancard" href={c.href} aria-label={`${c.alt}. Jump to it below.`}>
-                    <img src={c.jpg} alt="" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {FAN.map((c, i) =>
-              c.bubble ? (
-                <span
-                  key={c.id}
-                  className={`fanpill${c.bubbleGhost ? " fanpill-ghost" : ""}`}
-                  style={fanVars(i)}
-                  aria-hidden="true"
-                >
-                  {c.bubble}
-                </span>
-              ) : null,
-            )}
-          </div>
-
-          <p className="hero-open-sub">
-            {FAN.length} frames, {FAN.length} unlike capabilities, one scene format behind all of them.
-          </p>
-
-          <div className="hero-cta hero-open-cta">
-            <Link className="btn btn-primary" href="/showcase/effects">
-              {EFFECTS.total} effects, indexed
-            </Link>
-            <Link className="btn btn-ghost" href="/editor">
-              Try the editor
-            </Link>
-          </div>
-        </section>
-
-        {/* One headline, no lead. The film below it is the lead. */}
-        <section className="films">
-          <h2 className="films-h1">
+          <section className="phead">
             <span className="kicker">
               <span className="dot" /> showcase
             </span>
-            Six brands. One JSON each.
-          </h2>
-          {/* The one fact a clip cannot show. It used to sit on all six cards as the word
-              `reflected`, which is six repeats of one idea; it belongs here once. */}
-          <p className="scsub">Each one reflected from the brand&rsquo;s own site.</p>
+            <h1>No house style. One JSON format.</h1>
+            <p>
+              Six launch films, nine capabilities and every aspect ratio, browsable like a
+              component library. {EFFECTS.total} effects sit under all of it.
+            </p>
+          </section>
 
-          <div className="filmgrid">
-            <div className="film-hero">
-              <FilmTile film={hero} />
+          <div className="sclayout">
+            <div className="scrailcol">
+              <ShowcaseRail categories={CATEGORIES} />
             </div>
-            {rest.map((f) => (
-              <FilmTile film={f} key={f.slug} />
-            ))}
-          </div>
-        </section>
 
-        <div className="cap-lead">
-          <h2>And every part, on its own.</h2>
-          {/* Nine clips are the tour, not the vocabulary: the engine registers 518 effects. An
-              author needs the index open beside them, so it gets the strongest link on the page. */}
-          <Link className="cap-index" href="/showcase/effects">
-            <span className="cap-index-n">{EFFECTS.total}</span>
-            <span>
-              <b>Every effect, indexed</b>
-              <span>{EFFECTS.families} families, with the JSON for each.</span>
-            </span>
-            <span className="cap-index-go" aria-hidden="true">→</span>
-          </Link>
-        </div>
+            <div className="sclist">
+              <section className="films">
+                <h2 className="films-h1">Six brands.</h2>
+                {/* The one fact a clip cannot show. It used to sit on all six cards as the word
+                    `reflected`, which is six repeats of one idea; it belongs here once. */}
+                <p className="scsub">Each one reflected from the brand&rsquo;s own site.</p>
 
-        <div className="capgrid">
-          {CAPS.map((c) => (
-            <figure className="capcard" id={`cap-${c.src}`} key={c.src}>
-              <div className="capmedia">
-                <Clip src={`/assets/showcase/${c.src}.mp4`} poster={`/assets/showcase/${c.src}.jpg`} />
+                <div className="filmgrid">
+                  <div className="film-hero">
+                    <FilmTile film={hero} />
+                  </div>
+                  {rest.map((f) => (
+                    <FilmTile film={f} key={f.slug} />
+                  ))}
+                </div>
+              </section>
+
+              <div className="cap-lead">
+                <h2>And every part, on its own.</h2>
+                {/* Nine clips are the tour, not the vocabulary: the engine registers {EFFECTS.total}
+                    effects. An author needs the index open beside them, so it gets the strongest
+                    link on the page. */}
+                <Link className="cap-index" href="/showcase/effects">
+                  <span className="cap-index-n">{EFFECTS.total}</span>
+                  <span className="cap-index-text">
+                    <b>Every effect, indexed</b>
+                    <span>{EFFECTS.families} families, with the JSON for each.</span>
+                  </span>
+                  <span className="cap-index-go" aria-hidden="true">→</span>
+                </Link>
               </div>
-              <figcaption>
-                <h3>{c.title}</h3>
-                <span className="tag">{c.tag}</span>
-                {c.scene !== null && (
-                  <SourceViewer
-                    name={c.scene ?? `showcase-${c.src}`}
-                    lines={lineCount(c.scene ?? `showcase-${c.src}`)}
-                  />
-                )}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
 
-        <p className="capnote">
-          Two ship without source. The gradient and ransom packs are licensed for use, not for
-          redistribution.
-        </p>
+              <div className="capgrid">
+                {CAPS.map((c) => (
+                  <figure className="capcard" id={`cap-${c.src}`} key={c.src}>
+                    <div className="capmedia">
+                      <Clip src={`/assets/showcase/${c.src}.mp4`} poster={`/assets/showcase/${c.src}.jpg`} />
+                    </div>
+                    <figcaption>
+                      <h3>{c.title}</h3>
+                      <CapTag tag={c.tag} />
+                      {c.scene !== null && (
+                        <SourceViewer
+                          name={c.scene ?? `showcase-${c.src}`}
+                          lines={lineCount(c.scene ?? `showcase-${c.src}`)}
+                        />
+                      )}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
 
-        {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
-            wide, so the one thing it claims to prove (same scene, three crops) was unprovable.
-            Three ratios side by side need the whole measure. */}
-        <div className="aspects">
-          <h2>One scene, every ratio.</h2>
-          <div className="trio">
-            <figure className="ar a169">
-              <Clip src="/assets/showcase/aspect-169.mp4" poster="/assets/showcase/aspect-169.jpg" />
-              <figcaption>16:9</figcaption>
-            </figure>
-            <figure className="ar a916">
-              <Clip src="/assets/showcase/aspect-916.mp4" poster="/assets/showcase/aspect-916.jpg" />
-              <figcaption>9:16</figcaption>
-            </figure>
-            <figure className="ar a11">
-              <Clip src="/assets/showcase/aspect-11.mp4" poster="/assets/showcase/aspect-11.jpg" />
-              <figcaption>1:1</figcaption>
-            </figure>
-          </div>
-          <div className="aspects-foot">
-            <span className="tag">--aspect 16:9,9:16,1:1</span>
-            <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
-          </div>
-        </div>
+              <p className="capnote">
+                Two ship without source. The gradient and ransom packs are licensed for use, not for
+                redistribution.
+              </p>
 
-        <section className="section end">
-          <h2 className="h2">
-            Compose your own, in <span className="accent">JSON</span>.
-          </h2>
-          <div className="hero-cta">
-            <Link className="btn btn-primary" href="/editor">
-              Try the editor
-            </Link>
+              {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px
+                  wide, so the one thing it claims to prove (same scene, three crops) was unprovable.
+                  Three ratios side by side need the whole measure. */}
+              <div className="aspects">
+                <h2>One scene, every ratio.</h2>
+                <div className="trio">
+                  {RATIOS.map((r) => (
+                    <figure className={`ar ${r.cls}`} id={r.id} key={r.id}>
+                      <Clip src={`/assets/showcase/${r.slug}.mp4`} poster={`/assets/showcase/${r.slug}.jpg`} />
+                      <figcaption>{r.label}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+                <div className="aspects-foot">
+                  <span className="tag">--aspect 16:9,9:16,1:1</span>
+                  <SourceViewer name="showcase-aspect" lines={lineCount("showcase-aspect")} />
+                </div>
+              </div>
+
+              <section className="section end">
+                <h2 className="h2">
+                  Compose your own, in <span className="accent">JSON</span>.
+                </h2>
+                <div className="hero-cta">
+                  <Link className="btn btn-primary" href="/editor">
+                    Try the editor
+                  </Link>
+                </div>
+              </section>
+            </div>
           </div>
-        </section>
         </main>
 
         <Footer note="every clip is one JSON scene" />

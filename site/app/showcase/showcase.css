@@ -1,0 +1,67 @@
+/* ===== SHOWCASE AS A COMPONENT LIBRARY =========================================================
+   Same two-column shape /showcase/effects already shipped this week (a sticky rail, the work to
+   its right) but the rail itself is a different instrument: effects.css's `.fxrail` is 35 flat
+   links, one per family. This page's `.scrail` nests, a category label over the real entries
+   inside it, because "left sidebar with categories and their entries" was the literal ask. Column
+   widths and the collapse breakpoint are copied from `.fxlayout`/`.fxrailcol` on purpose — one
+   rail behaviour across the two catalog pages, not two that happen to look similar. */
+.sclayout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
+.scrailcol{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
+  padding-right:6px}
+.scrail{display:flex;flex-direction:column;gap:20px}
+.scrail-cat{display:flex;flex-direction:column;gap:2px}
+.scrail-cat ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.scrail-catlabel{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--muted);padding:0 10px 3px}
+.scrail a{font-size:12.5px;color:var(--ink-2);text-decoration:none;display:block;
+  border-radius:7px;padding:5px 10px;border:1px solid transparent;line-height:1.3;
+  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
+.scrail a:hover{color:var(--accent)}
+/* The entry currently in view, tracked by an IntersectionObserver in ShowcaseRail: aria-current
+   carries both the visual highlight and the same signal to a screen reader. */
+.scrail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
+  font-weight:600}
+.sclist{min-width:0}
+
+@media (max-width:900px){
+  /* minmax(0,1fr), not 1fr: a grid item's default min-width is its content's min-content, and
+     `.scrail` below scrolls a wide row of chips on purpose. Without the explicit 0 floor the
+     track grew to fit that row instead of clipping it, dragging the whole page 1200px+ wide on a
+     430px viewport (every section under the rail inherited the overflow). */
+  .sclayout{grid-template-columns:minmax(0,1fr);gap:0}
+  .scrailcol{position:static;max-height:none;overflow:visible;padding-right:0;min-width:0}
+  .scrail{flex-direction:row;overflow-x:auto;gap:18px;padding:12px 0 10px;border-bottom:1px solid var(--line)}
+  .scrail-cat{flex-direction:row;align-items:center;gap:6px;flex:0 0 auto}
+  .scrail-catlabel{padding:0}
+  .scrail-cat ul{flex-direction:row;gap:6px}
+  .scrail a{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+}
+
+/* ---- interlinked tags: a capability's tag now names real effect pages, so the names that
+   resolved need to read as links without the tag itself gaining the chrome globals.css's own
+   `.tag` comment explicitly rules out ("no box, no accent, no verb"). An underline under just the
+   linked words is the smallest signal that survives that constraint. Names that did not resolve
+   (site/app/showcase/tagLinks.ts) stay exactly the plain text `.tag` already was. ---- */
+.capcard .tag a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);
+  text-underline-offset:2px}
+.capcard .tag a:hover{color:var(--accent);text-decoration-color:var(--accent)}
+
+/* ---- a defect found on this page, not introduced by the rail: `.cap-index` positions itself
+   inside `.cap-lead`'s grid (globals.css) but was never given its OWN internal layout, so its
+   three spans (count, title+sub, arrow) ran together as one unbroken line of text. It read that
+   way before this rebuild too; the rail just made it visible sooner in the page's flow. Scoped
+   here because the class is unique to this page. ---- */
+.cap-index{display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;
+  padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.cap-index:hover{border-color:var(--accent-line);box-shadow:var(--shadow-1)}
+.cap-index-n{font-family:var(--font-mono),monospace;font-size:1.7rem;font-weight:700;
+  color:var(--accent);flex:0 0 auto}
+.cap-index-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cap-index-text b{font-size:.95rem;letter-spacing:-.01em}
+.cap-index-text > span{font-size:12.5px;color:var(--muted)}
+.cap-index-go{margin-left:auto;flex:0 0 auto;color:var(--accent);font-size:1.1rem}
+
+@media (prefers-reduced-motion:reduce){
+  .scrail a{transition:none}
+}
