@@ -17,6 +17,7 @@
 // Only fields PRESENT in the schema are checked; unknown data keys (module, audio, theme, …) pass.
 
 import { onScreenText, glyphText } from './on-screen-text.js';
+import { IDLE } from './idle.js';
 import { themeErrors } from '../core/theme-contract.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
@@ -245,7 +246,64 @@ export function validateData(schema, data) {
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
   errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
+  errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
   return errors;
+}
+
+// A SCALING IDLE ON TEXT IS A SHIMMER, and it is the same defect `kineticSlam` already refuses
+// `letter-spacing` for: a value rewritten every frame that forces the line to be laid out, or the
+// glyphs to be rasterised, again. `breathe` scales by about 1% forever, which at 44px moves the
+// rendered size by well under a pixel, so nothing MOVES and every glyph edge crawls.
+//
+// Proved rather than argued. Three fully-settled frames of a text layer, nothing else in motion:
+// with `idle:"breathe"` all three differ; with the idle removed all three are byte-identical. A user
+// reported it as "shimmering/glitching" from a rendered video before the cause was known.
+//
+// TRANSLATION IS NOT REFUSED, and the difference is mechanical rather than a matter of degree. A
+// drift moves the whole run two to five pixels: the text travels, which is what ambient motion is
+// FOR and the reason core/idle.js exists. A scale re-rasterises. Only the second one is the bug.
+const idleName = (v) => (typeof v === 'string' ? v : v && typeof v === 'object' ? v.name : null);
+// Which idles change `scale` is read off the registry by CALLING it, not from a hand-kept list: a new
+// idle that scales must be caught the day it lands, not the day someone remembers to update a name.
+function scalingIdles(IDLES) {
+  const out = new Set();
+  for (const [name, fn] of Object.entries(IDLES || {})) {
+    try {
+      const a = fn(0.13), b = fn(0.61);
+      if (typeof a?.scale === 'number' && typeof b?.scale === 'number' && Math.abs(a.scale - b.scale) > 1e-6) out.add(name);
+    } catch { /* an idle that needs options is not checkable here, and says so by absence */ }
+  }
+  return out;
+}
+export function idleErrors(cfg, IDLES = IDLE) {
+  const out = [];
+  const reg = IDLES;
+  // Defaulting to the real registry rather than returning early on a missing one: an optional
+  // argument that silently disables the whole check is a gate that passes because it never ran.
+  if (!reg) return out;
+  const scaling = scalingIdles(reg);
+  if (!scaling.size) return out;
+  // A group counts as text when its subtree carries text and no picture: scaling a card that holds a
+  // photograph is a different decision, and a legitimate one.
+  const isTextish = (L) => {
+    if (!isObj(L)) return false;
+    if (L.type === 'text' || L.type === 'count') return true;
+    if (L.type !== 'group') return false;
+    const kids = L.children || [];
+    return kids.length > 0 && kids.every(isTextish);
+  };
+  (function walk(ls, path) {
+    for (const [i, L] of (ls || []).entries()) {
+      if (!isObj(L)) continue;
+      const n = idleName(L.idle);
+      if (n && scaling.has(n) && isTextish(L))
+        out.push(`${path}[${i}] idle "${n}" scales, and this layer is text: a scale rewritten every frame `
+          + 'rasterises every glyph again, so the edges crawl (it reads as a shimmer, never as motion). '
+          + 'Use idle "drift", which translates the whole run, or move the scale to a wrapper that holds a picture.');
+      if (L.children) walk(L.children, `${path}[${i}].children`);
+    }
+  })(cfg.layers, 'layer');
+  return out;
 }
 
 // CAPTIONS: the two ways a caption line is accepted and then never seen.

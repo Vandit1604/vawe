@@ -12805,3 +12805,38 @@ deliberate hierarchy. **A nearest-step rule cannot tell those apart**, so sweepi
 dressed as a system. Size keeps its scale and its 22% report, and gets fixed per block when that block
 is actually worked on. A mechanical sweep is only honest where the property is mechanical.
 
+## #413 — A scaling idle on text is a shimmer, and it shipped in a film
+
+**How it surfaced.** A user watching a rendered mp4 said two lines were "shimmering/glitching". Nothing
+in the JSON looked wrong and every gate was green.
+
+**Cause, isolated by bisection rather than by reading.** `idle: "breathe"` on a text group. Three
+fully-settled frames, nothing else in motion: with the idle all three differed, with it removed all
+three were byte-identical. That one property was the whole thing.
+
+**Why it reads as crawl and not as motion.** `breathe` scales by about 0.95% forever. Edge
+displacement is roughly `size x 0.0095 / 2`: 0.2px at 44px, 0.85px at 178px. **Both are sub-pixel**, so
+nothing travels and every glyph edge is rasterised slightly differently each frame. It is the same
+defect `kineticSlam` already refuses `letter-spacing` for (`core/captions.js`): a value rewritten every
+frame that forces the text to be laid out or rasterised again.
+
+**TRANSLATION IS NOT REFUSED, and the line is mechanical rather than a matter of degree.** `drift`
+moves the whole run two to five pixels: the text travels, which is what ambient motion is FOR and the
+reason `core/idle.js` exists. Only a scale re-rasterises. Tested both before writing the rule.
+
+**Fix.** `idleErrors` in `core/validate.mjs` refuses a scaling idle on a layer whose subtree is text,
+and names `drift` as the alternative in the message. Which idles scale is read off the registry BY
+CALLING IT rather than from a hand-kept list, so an idle added tomorrow that scales is caught the day
+it lands. A group counts as text when its subtree carries text and no picture: scaling a card that
+holds a photograph is a different decision and a legitimate one.
+
+**A near miss worth recording.** The first draft took `IDLES` as an optional argument and returned
+early when it was absent, and `validateData` called it without one. It would have passed every scene
+by never running. An optional argument that silently disables a whole check is a gate that passes
+because it did nothing.
+
+**It found three on its first run**, all in `gh-wrapped`, which is the film the author rejected twice
+without knowing why. Six `breathe` idles, three on text and three on images; only the text three were
+flagged and moved to `drift`. The images keep theirs, correctly. One scene changed, justified, and
+re-baselined.
+
