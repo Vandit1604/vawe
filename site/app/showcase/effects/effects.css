@@ -1,0 +1,160 @@
+/* ===== THE EFFECTS INDEX + PER-EFFECT PAGES (/showcase/effects, /showcase/effects/[stem]) ======
+   Rebuilt from the flat 22,600px scroll globals.css used to carry (search docs/MISTAKES.md and this
+   file's own git history for the shape it replaced: one long page, a table row per effect, a drawer
+   for detail). Three defects drove the rebuild: no way to find a family without scrolling past it,
+   a "catalog of motion" that never moved until you opened something, and a 166KB JSON payload the
+   list page paid for on every load. This file answers all three:
+     - a sticky family rail so 35 sections stop meaning 35 screens of blind scrolling
+     - a card WITH A PICTURE wherever a still exists, instead of a name + a sentence
+     - every effect on its own URL (site/app/showcase/effects/[stem]/page.tsx), so the heavy JSON
+       body lives in that one static page instead of in the list's first byte
+   Everything here is prefixed .fx so it cannot collide with the blocks browser it borrows .bfilter/
+   .bsearch/.bselect/.bcount/.blink/.bempty from (those stay in globals.css, unedited, on purpose:
+   two other agents are working in that file this pass). */
+
+.fxfilter{top:0}
+.fxonly{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono),monospace;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.fxonly input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+
+.fxabout>p{margin-top:10px;font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
+.fxabout>p b{color:var(--ink)}
+
+/* ---- the two-column layout: a sticky rail, the families to its right -------------------------
+   Column widths are tight on purpose. .wrap caps content at ~1108px regardless of viewport, so
+   every pixel the rail keeps is a pixel the card grid does not get — and the grid's column COUNT,
+   not its card size, is what keeps 463 cards from turning back into a 25-screen scroll. */
+.fxlayout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
+.fxrailcol{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
+  padding-right:6px}
+.fxrail{display:flex;flex-direction:column;gap:2px}
+.fxrail a{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);text-decoration:none;
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-radius:7px;
+  padding:6px 10px;border:1px solid transparent;
+  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
+.fxrail a:hover{color:var(--accent)}
+/* The family currently in view, tracked by an IntersectionObserver in EffectsBrowser (a scrollspy,
+   not a route): aria-current="location" is both the semantic and the visual hook, so a screen
+   reader gets the same signal the highlight gives a sighted reader. */
+.fxrail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
+  font-weight:600}
+.fxrail a span{color:var(--muted)}
+.fxrail a[aria-current] span{color:var(--accent)}
+
+.fxlist{min-width:0}
+.fxfam{padding-top:26px;scroll-margin-top:78px}
+.fxfam h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;font-size:1.3rem;font-weight:700;
+  letter-spacing:-.025em;line-height:1.15}
+.fxfam h2 .fxn{font-family:var(--font-mono),monospace;font-size:13px;font-weight:500;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:1px 9px}
+.fxfam h2 .tag{margin:0;display:inline-flex}
+.fxtag-live{color:var(--accent)}
+.fxintro{margin:10px 0 14px;font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:88ch}
+.fxintro code{font-family:var(--font-mono),monospace;font-size:.9em;background:var(--bg-2);
+  border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.fxskip{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--muted);max-width:80ch}
+.fxgap{margin:-6px 0 12px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:76ch}
+
+.fxdot{flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+/* ---- the card: a still, a name, one line. WHY a card beats the old row is in the file banner
+   above. Both mask states (real image / no image) sit in the same media box so nothing shifts. --- */
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:10px;margin-top:2px}
+.fxcard{display:flex;flex-direction:column;text-decoration:none;color:inherit;overflow:hidden;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-1);
+  transition:box-shadow .2s var(--ease),border-color .2s var(--ease),transform .2s var(--ease)}
+.fxcard:hover{box-shadow:var(--shadow-2);border-color:var(--accent-line);transform:translateY(-2px)}
+.fxcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fxcard-media{position:relative;display:block;aspect-ratio:16/9;background:var(--bg-2);
+  border-bottom:1px solid var(--line);overflow:hidden}
+/* Opacity 0 until React's onLoad fires (.is-loaded). A 404 never gets to paint the browser's own
+   broken-image glyph + overflowing alt text in the meantime — see the Poster component comment. */
+.fxcard-media img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;
+  transition:opacity .2s var(--ease)}
+.fxcard-media img.is-loaded{opacity:1}
+/* No still exists (either the effect has none, or the sibling job generating them missed this one).
+   A deliberate swatch, never a blank grey box or a broken-image glyph: the stripe reads as "this
+   effect has no picture", not as "the site is broken". */
+.fxcard-noimg{display:flex;align-items:center;justify-content:center;width:100%;height:100%;
+  background:repeating-linear-gradient(135deg,var(--bg-2) 0 8px,var(--surface) 8px 16px)}
+.fxcard-noimg .mono{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 7px}
+.fxcard .fxdot{position:absolute;top:6px;right:6px;box-shadow:0 0 0 3px var(--surface)}
+.fxcard-body{padding:8px 9px 9px;display:flex;flex-direction:column;gap:3px;flex:1}
+.fxcard-name{font-size:11.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fxcard-desc{font-size:11px;line-height:1.4;color:var(--ink-2);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---- chips: mode:"chips" families (an easing named by its curve, a blend mode the CSS spec
+   defines) have nothing to picture, so they keep the pre-card pill treatment. ---- */
+.fxchips{display:flex;flex-wrap:wrap;gap:6px}
+.fxchip{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono),monospace;
+  font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:8px;
+  padding:4px 10px;background:var(--surface);transition:border-color .15s var(--ease),color .15s var(--ease)}
+.fxchip:hover{border-color:var(--accent);color:var(--accent)}
+.fxchip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- 900px: no room for a second column, so the rail collapses to the horizontal jump strip this
+   page always had — a wrapped pill list under the filter bar, height-capped and scrollable. ---- */
+@media (max-width:900px){
+  .fxlayout{grid-template-columns:1fr;gap:0}
+  .fxrailcol{position:static;max-height:none;overflow:visible;padding-right:0}
+  .fxrail{flex-direction:row;flex-wrap:wrap;max-height:96px;overflow-y:auto;gap:6px;
+    padding:12px 0 4px;border-bottom:1px solid var(--line)}
+  .fxrail a{border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+}
+@media (max-width:760px){
+  /* The sticky toolbar wraps to three rows on a phone, so a family anchored under it lands with
+     its own heading hidden underneath. */
+  .fxfam{scroll-margin-top:150px}
+  /* The rail no longer eats a column here (it collapsed to a horizontal strip above), so the full
+     width is free — but a 154px card at 430px is only 2 columns, and 2 columns of 463 cards is a
+     49,000px scroll. Smaller cards buy a 3rd column, which is the difference that matters. */
+  .fxgrid{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+  .fxcard-body{padding:6px 7px 7px}
+  .fxcard-name{font-size:11px}
+  .fxcard-desc{font-size:10px;-webkit-line-clamp:2}
+}
+
+/* ===== ONE EFFECT, ONE PAGE (/showcase/effects/[stem]) ========================================
+   The live player + a small headline field + the JSON, in flow — no drawer, because the page IS
+   the drawer now. See [stem]/EffectStage.tsx for why the headline field only shows up sometimes. */
+.fxpage{padding:8px 0 80px;max-width:900px}
+.fxpage .backlink{color:var(--muted);font-family:var(--font-mono),monospace;font-size:13px;
+  display:inline-block;margin-bottom:22px;transition:color .2s}
+.fxpage .backlink:hover{color:var(--accent)}
+.fxpage h1{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.01em;margin-top:2px}
+.fxpage .phead p{color:var(--ink-2);font-size:15px;line-height:1.6;max-width:64ch;margin-top:10px}
+
+.fxstage{margin-top:28px;display:flex;flex-direction:column;gap:16px}
+.fxheadline{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em}
+.fxheadline input{font:inherit;font-size:15px;letter-spacing:normal;text-transform:none;color:var(--ink);
+  padding:9px 12px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);outline:none}
+.fxheadline input:focus-visible{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:1px}
+
+.fxd-nope{font-size:13px;line-height:1.6;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
+  border-radius:10px;padding:14px 16px}
+.fxd-nope b{color:var(--ink);display:block;margin-bottom:3px}
+.fxd-code{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.fxd-code-h{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-2);
+  border-bottom:1px solid var(--line);font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted)}
+.fxcopy{margin-left:auto;border:1px solid var(--line);border-radius:7px;background:var(--surface);cursor:pointer;
+  font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);padding:3px 9px}
+.fxcopy:hover{border-color:var(--accent);background:var(--accent-soft)}
+.fxd-code pre{margin:0;padding:12px;overflow-x:auto;background:var(--surface)}
+.fxd-code code{font-family:var(--font-mono),monospace;font-size:12px;line-height:1.55;color:var(--ink);
+  white-space:pre}
+
+.fxpage-nav{display:flex;justify-content:space-between;gap:16px;margin-top:36px;padding-top:20px;
+  border-top:1px solid var(--line)}
+.fxpage-nav a{font-size:13px;color:var(--ink-2);text-decoration:none}
+.fxpage-nav a:hover{color:var(--accent)}
+.fxpage-next{margin-left:auto}
+
+@media (prefers-reduced-motion:reduce){
+  .fxcard{transition:none}
+  .fxcard:hover{transform:none}
+  .fxrail a{transition:none}
+  .fxcard-media img{transition:none}
+}
