@@ -333,9 +333,20 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   const onAc = onColor(ac);
   // a shield STAMPS IN, and its value chip lands a beat later — the whole motion of a status token.
   // Nothing more: over-animating a static chip is how a registry stops reading as a vocabulary.
-  return [{ type: 'group', x, y, bg: '#3A3A38', radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
+  // THEME TOKENS, NOT LITERALS. The plate was `#3A3A38` and its text `#fff`, so the block rendered a
+  // dark grey rectangle on every theme, including the dark ones where it disappears into the ground.
+  // The site captions this block "theme-aware" directly under the picture, which made the claim false
+  // rather than merely incomplete. `T.ink` on `T.paper` is the theme contract's own guaranteed pair,
+  // used inverted: a dark plate with light text on a light theme, the reverse on a dark one, legible
+  // on both by construction rather than by a colour somebody picked once.
+  // `shadow` and `border` DO apply to a group, which is worth stating because both are labelled
+  // "(rect)" in the schema and the label reads as a restriction. Rendered both ways to be sure: the
+  // flat version reads as two rectangles, this one reads as an object sitting on the frame. A shield
+  // is a pastiche of a physical sticker, and it needs to look stuck ON something.
+  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
+    shadow: true,
     start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
-      text({ text: label, font: 'mono', size: 17, weight: 600, color: '#fff', pad: '4px 12px' }),
+      text({ text: label, font: 'mono', size: 17, weight: 600, color: TOKENS.paper, pad: '4px 12px' }),
       { type: 'group', bg: ac, radius: 6, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
     ] }];
 }
