@@ -392,6 +392,11 @@ export function createKit(ctx) {
     // MISTAKES #69 fixed exactly this and fixed it for LEAVES ONLY; the early return was two lines
     // above the code being written and got missed. A group is a timed element like any other.
     const isGroup = C.type === 'group';
+    // COMPUTED BEFORE the branch, because a group has to know its own window before it can hand it to
+    // its children. It used to be computed at the bottom, after the recursion had already run with the
+    // wrong one.
+    const d = Math.max(0, +C.delay || 0);
+    const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
     if (isGroup) {
       c.className = 'hs-group';
       layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
@@ -415,7 +420,14 @@ export function createKit(ctx) {
         api.buildFx(c, C);
       }
       parentEl.appendChild(c);
-      for (const gc of C.children || []) addGroupChild(c, gc, rootL);
+      // RECURSE WITH THIS GROUP'S OWN WINDOW, not the outermost layer's. `rootL` was threaded
+      // unchanged through every level, so a grandchild's `delay` was an offset from the TOP-LEFT of
+      // the whole layer rather than from its own container. Measured before the fix: a layer starting
+      // at 2s, holding a group with `delay: 1` (correctly resolved to 3s), holding a child with no
+      // delay, scheduled that child at 2s. It appeared a full second BEFORE the group it lives in.
+      // That is not a stagger model, it is an absent one, and the comment below has described the
+      // intended behaviour ("within its group's window") the whole time.
+      for (const gc of C.children || []) addGroupChild(c, gc, { start: cStart, duration: cDur });
     }
     if (!isGroup) c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
     // DELEGATE to the primitive. This file used to re-implement a SUBSET of each type's build inline,
@@ -438,8 +450,6 @@ export function createKit(ctx) {
     // `delay` staggers a child WITHIN its group's window (it still ends with the group, so the exit
     // stays in formation). Group children previously all shared the root's exact window, which is why
     // a wall could only ever arrive as one block. Defaults to 0 → existing groups are unchanged.
-    const d = Math.max(0, +C.delay || 0);
-    const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
     // driveClips owns every timed element and it finds them by `[data-start]` (core/clips.js). A group
     // child never had those attributes, so its ENTRANCE came from the group's window no matter what the
     // child declared: `delay` shifted a start that only the cut/motion/units paths read, and the child

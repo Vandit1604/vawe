@@ -12723,3 +12723,44 @@ missing feature as a property of a medium, because the medium's limits were the 
 the feature was undiscoverable. The schema label now leads with what `parts` is FOR, in the words an
 author would search for.
 
+## #411 — A grandchild was scheduled to appear before the group it lives in
+
+**What.** `core/layers/util.js` threaded `rootL`, the OUTERMOST layer, unchanged through every level of
+`addGroupChild`. So a child's window was always `rootL.start + its own delay`, no matter how deep it
+sat. A nested group's own `delay` moved the group and nothing inside it.
+
+**Measured before the fix**, with a layer starting at 2s holding a group with `delay: 1`:
+
+```
+direct child (no delay)     start 2     correct
+nested group, delay: 1      start 3     correct
+  grandchild, no delay      start 2     ONE SECOND BEFORE ITS PARENT
+  grandchild, delay: 0.5    start 2.5   still before the parent's 3
+```
+
+A child was scheduled to appear before its own container. That is not a stagger model, it is an absent
+one. The comment four lines above the arithmetic has described the intended behaviour the whole time:
+"`delay` staggers a child WITHIN its group's window".
+
+**Why it survived.** The recursion ran BEFORE the element's own window was computed: children were
+added at the top of the `isGroup` branch, `cStart` was worked out thirty lines below. So there was no
+window to hand down at the moment it was needed, and `rootL` was the only thing in scope.
+
+**Fix.** Compute `cStart`/`cDur` above the branch and recurse with `{ start: cStart, duration: cDur }`.
+Durations shrink as they descend, so a child still ends with its container and the exit stays in
+formation.
+
+**The cost while it stood, and this is the part worth remembering.** An agent building a terminal from
+layer primitives hit this, could not explain it, and **abandoned nested groups entirely** — hand
+computing every coordinate and row height rather than using the flex layout that is the whole reason
+to nest. It reported "nested layout groups are a trap" as a property of the engine. It was this.
+
+**Library diff, justified one scene at a time as the rule requires.** `snap-scenes`: 103 identical, 2
+changed. Exactly two scenes in the library contain a delayed nested group, `ab-control-shotcode` (3)
+and `ab2-control-tenor` (4), and those are precisely the two that moved. No collateral. Both are
+staggered pricing walls whose authors wrote `delay: 0.06 / 0.14 / 0.30` on nested groups; every one of
+those staggers was inert, and the frame now shows the card arriving piece by piece as written.
+Baselines re-saved against the corrected behaviour.
+
+`probe-purity` clean. `lib-test` 937.
+
