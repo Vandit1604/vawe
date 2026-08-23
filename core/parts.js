@@ -34,6 +34,17 @@ export const PARTS = {
     fadeUp: [null, { y: 24, opacity: 0 }, { y: 0, opacity: 1 }, { y: -24, opacity: 0 }],
     riseIn: [null, { y: 48, opacity: 0 }, { y: 0, opacity: 1 }, { y: -48, opacity: 0 }],
     drawOn: [(t) => { try { t.setAttribute('pathLength', '1'); } catch (e) {} t.style.strokeDasharray = '1 1'; }, { strokeDashoffset: 1 }, { strokeDashoffset: 0 }, { strokeDashoffset: 1 }],
+    // THESE THREE TAKE THE LAYER'S OWN NAMES, and the casing mismatch beside `fadeUp` is deliberate.
+    // The two vocabularies had ZERO overlap: nineteen layer `anim` names, six part entrances, not one
+    // word shared. So an author who already knew `anim: "fade"` had to learn a second, disjoint set to
+    // animate the pieces of a figure. One name meaning one thing in both slots is worth more than this
+    // file reading consistently.
+    // `fade` is the gap that mattered most: `fadeUp` was the documented "quiet default" and it MOVES,
+    // so there was no way to bring a part in without displacing it.
+    // The slides are the other axis. Every part entrance translated on Y and none on X.
+    fade: [null, { opacity: 0 }, { opacity: 1 }, { opacity: 0 }],
+    'slide-left': [null, { x: -40, opacity: 0 }, { x: 0, opacity: 1 }, { x: 40, opacity: 0 }],
+    'slide-right': [null, { x: 40, opacity: 0 }, { x: 0, opacity: 1 }, { x: -40, opacity: 0 }],
   };
 
 export const PART_BLURBS = {
@@ -43,6 +54,9 @@ export const PART_BLURBS = {
   fadeUp: 'a short rise with a fade — the quiet default for any part',
   riseIn: 'a longer rise with a fade — for parts that should feel like they arrive',
   drawOn: 'an SVG stroke draws itself along its own path (pathLength=1, no measurement)',
+  fade: 'opacity alone, no displacement · the quiet default when a part should arrive without moving',
+  'slide-left': 'enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat',
+  'slide-right': 'enters from its right and, with `out`, keeps going left · the mirror of slide-left',
 };
 
 export const PART_REGISTRY = defineRegistry('part entrance', PARTS, { slot: 'parts[].anim', blurbs: PART_BLURBS });

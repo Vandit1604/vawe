@@ -1499,7 +1499,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return ['anim', 'cut', 'kinetic preset', 'part entrance'].every((k) => kinds.includes(k));
   })());
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
-  ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 6);
+  ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 9);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
   // THE EXIT SLOT. A part could arrive and never leave, so a hand-authored html figure faded out as
   // ONE card while a native layer stack left piece by piece. That was read as a limit of the medium
@@ -1519,6 +1519,25 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       if (Math.sign(out.y) === Math.sign(from.y)) return false;   // retreating the way it came
     }
     return true;
+  })());
+  // ONE NAME, ONE MEANING, ACROSS BOTH SLOTS. The two vocabularies had zero overlap: an author who
+  // knew `anim:"fade"` had to learn a second disjoint set for parts. Any part entrance that shares a
+  // name with a layer anim must mean the same thing, and this asserts the overlap exists at all so a
+  // future addition cannot quietly re-fork the vocabulary.
+  ok('parts: the shared names really are shared with the layer anim vocabulary',
+    ['fade', 'slide-left', 'slide-right'].every((n) => PART_NAMES.includes(n)));
+  ok('parts: a horizontal slide continues past centre rather than retreating', (() => {
+    for (const n of ['slide-left', 'slide-right']) {
+      const from = PARTS[n][1], out = PARTS[n][3];
+      if (!(typeof from.x === 'number' && typeof out.x === 'number')) return false;
+      if (Math.sign(out.x) === Math.sign(from.x)) return false;
+    }
+    return true;
+  })());
+  ok('parts: fade displaces nothing, in or out', (() => {
+    const [, from, to, out] = PARTS.fade;
+    const moves = (v) => Object.keys(v).some((k) => k !== 'opacity');
+    return !moves(from) && !moves(to) && !moves(out);
   })());
   ok('parts: a scale exit returns to its own origin', (() => {
     for (const n of ['growUp', 'widen', 'popIn']) {

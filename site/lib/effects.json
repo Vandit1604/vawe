@@ -1,5 +1,5 @@
 {
-  "total": 528,
+  "total": 531,
   "previewed": 242,
   "families": 35,
   "tags": [
@@ -49,7 +49,7 @@
     ],
     [
       "per-layer",
-      49
+      52
     ],
     [
       "per-layer/scene",
@@ -2823,13 +2823,20 @@
       "mode": "table",
       "note": null,
       "noPreview": "a part entrance staggers across a figure's own children, so it needs your figure.",
-      "count": 6,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
           "name": "drawOn",
           "stem": "part-entrances--drawon",
           "desc": "an SVG stroke draws itself along its own path (pathLength=1, no measurement)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "fade",
+          "stem": "part-entrances--fade",
+          "desc": "opacity alone, no displacement · the quiet default when a part should arrive without moving",
           "scene": null,
           "noPreview": null
         },
@@ -2858,6 +2865,20 @@
           "name": "riseIn",
           "stem": "part-entrances--risein",
           "desc": "a longer rise with a fade · for parts that should feel like they arrive",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "slide-left",
+          "stem": "part-entrances--slide-left",
+          "desc": "enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "slide-right",
+          "stem": "part-entrances--slide-right",
+          "desc": "enters from its right and, with `out`, keeps going left · the mirror of slide-left",
           "scene": null,
           "noPreview": null
         },

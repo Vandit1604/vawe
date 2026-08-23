@@ -543,10 +543,13 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | name | what / when |
 |---|---|
 | `drawOn` | an SVG stroke draws itself along its own path (pathLength=1, no measurement) |
+| `fade` | opacity alone, no displacement · the quiet default when a part should arrive without moving |
 | `fadeUp` | a short rise with a fade — the quiet default for any part |
 | `growUp` | scales up from its own bottom edge — a bar growing to its reading |
 | `popIn` | scales from nothing at its centre with a fade — dots, chips, markers |
 | `riseIn` | a longer rise with a fade — for parts that should feel like they arrive |
+| `slide-left` | enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat |
+| `slide-right` | enters from its right and, with `out`, keeps going left · the mirror of slide-left |
 | `widen` | scales out from its left edge — a row, a rule, a progress track filling |
 
 ## Blend modes  `[per-layer]`
@@ -796,4 +799,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_528 effects across 35 families. Regenerate: `make effects`._
+_531 effects across 35 families. Regenerate: `make effects`._
