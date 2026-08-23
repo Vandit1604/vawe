@@ -22,8 +22,8 @@ export default function Features() {
           </span>
           <h1>What makes the output good.</h1>
           <p>
-            Any static engine can make technically-correct, visually-generic video. Vawe&apos;s differentiator is the
-            system that fights that. Eight pieces, one open canvas.
+            Any static engine can make technically-correct, visually-generic video. Vawe fights that with a
+            system, not a template. Eight pieces, one open canvas.
           </p>
         </section>
 
