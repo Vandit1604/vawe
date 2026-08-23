@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
@@ -6,6 +7,7 @@ import { Footer } from "../components/Footer";
 import { SourceViewer } from "../components/SourceViewer";
 import LINES from "../../lib/scene-lines.json";
 import EFFECTS from "../../lib/effects-counts.json";
+import "./hero.css";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
@@ -64,9 +66,37 @@ const CAPS: Cap[] = [
   { title: "Gradient fields", tag: "image: ken burns · radius", src: "gradients", scene: null },
 ];
 
+// THE FAN. Five stills, not nine: nine of the capability posters read as a stack of thumbnails
+// because five of the nine are a short line of type on an almost-empty field (`type`, `cuts`,
+// `stings`, `data`, `ransom` were all opened and checked, not assumed from their names or their
+// own capability's title). A card this small has to be full of picture to read as a picture, so
+// the fan keeps only the four capability stills that already are (a browser frame mid-toast, a
+// full-bleed thermal portrait, a dark dither area-chart, a saturated gradient card) and borrows
+// one more from the films: `plinth-ad`'s dense earnings list is fuller than any of the five it
+// would otherwise need to stand in for. That still reappears in the film grid below, which is a
+// real repeat and the reason it is one card, not two.
+type FanCard = { id: string; jpg: string; href: string; alt: string; bubble?: string; bubbleGhost?: boolean };
+
+const FAN: FanCard[] = [
+  { id: "dither", jpg: "/assets/showcase/dither.jpg", href: "#cap-dither", alt: "Ordered dither" },
+  { id: "ui", jpg: "/assets/showcase/ui.jpg", href: "#cap-ui", alt: "Product demos", bubble: "product demos" },
+  { id: "looks", jpg: "/assets/showcase/looks.jpg", href: "#cap-looks", alt: "Color grades", bubble: "color grades", bubbleGhost: true },
+  { id: "plinth-ad", jpg: "/assets/films/plinth-ad.jpg", href: "#film-plinth-ad", alt: "Plinth, a full launch film" },
+  { id: "gradients", jpg: "/assets/showcase/gradients.jpg", href: "#cap-gradients", alt: "Gradient fields" },
+];
+
+// The fan's vertical curve: the middle card rides highest, the two ends sit on the baseline.
+// Five points of 1-((i-2)/2)^2, not a formula in CSS, because calc() has no pow() we can rely
+// on everywhere yet, and five numbers are cheaper than a polyfill.
+const FAN_LIFT = [0, 0.75, 1, 0.75, 0];
+
+function fanVars(i: number): CSSProperties {
+  return { "--i": i, "--liftf": FAN_LIFT[i] } as CSSProperties;
+}
+
 function FilmTile({ film }: { film: Film }) {
   return (
-    <figure className="film">
+    <figure className="film" id={`film-${film.slug}`}>
       <div className="fmedia">
         <Clip src={`/assets/films/${film.slug}.mp4`} poster={`/assets/films/${film.slug}.jpg`} />
       </div>
@@ -87,14 +117,72 @@ export default function Showcase() {
       <Header active="showcase" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
+        {/* THE OPENING. One headline, a fan of five capability stills, then the ask. This is the
+            only thing on the page that moves on load: everything below is a static gallery, so
+            the one deliberate piece of motion earns the top of the page instead of competing
+            with five other things doing it too. */}
+        <section className="hero-open">
+          <h1 className="hero-open-h1">
+            Nine looks.
+            <br />
+            One JSON each.
+          </h1>
+
+          {/* .fan-wrap, not .fan, is the positioned ancestor the pills measure against. .fanitem
+              carries a `transform` (the entrance animation), and a transformed element becomes
+              the containing block for its own absolutely-positioned descendants, same as
+              `position:relative` would. A pill nested inside .fanitem was measuring itself
+              against that small, rotated box instead of the fan, and landed off-screen. Keeping
+              the pills as .fan's siblings, not .fanitem's children, is the fix, not a patch on
+              top of the bug. */}
+          <div className="fan-wrap">
+            <ul className="fan">
+              {FAN.map((c, i) => (
+                <li className="fanitem" key={c.id} style={fanVars(i)}>
+                  {/* Decoration would be five tab stops going nowhere. These go somewhere: the
+                      same still, full-size, further down the page. */}
+                  <Link className="fancard" href={c.href} aria-label={`${c.alt}. Jump to it below.`}>
+                    <img src={c.jpg} alt="" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {FAN.map((c, i) =>
+              c.bubble ? (
+                <span
+                  key={c.id}
+                  className={`fanpill${c.bubbleGhost ? " fanpill-ghost" : ""}`}
+                  style={fanVars(i)}
+                  aria-hidden="true"
+                >
+                  {c.bubble}
+                </span>
+              ) : null,
+            )}
+          </div>
+
+          <p className="hero-open-sub">
+            Nine different capabilities, every one rendered from the same JSON scene format.
+          </p>
+
+          <div className="hero-cta hero-open-cta">
+            <Link className="btn btn-primary" href="/showcase/effects">
+              {EFFECTS.total} effects, indexed
+            </Link>
+            <Link className="btn btn-ghost" href="/editor">
+              Try the editor
+            </Link>
+          </div>
+        </section>
+
         {/* One headline, no lead. The film below it is the lead. */}
         <section className="films">
-          <h1 className="films-h1">
+          <h2 className="films-h1">
             <span className="kicker">
               <span className="dot" /> showcase
             </span>
             Six brands. One JSON each.
-          </h1>
+          </h2>
           {/* The one fact a clip cannot show. It used to sit on all six cards as the word
               `reflected`, which is six repeats of one idea; it belongs here once. */}
           <p className="scsub">Each one reflected from the brand&rsquo;s own site.</p>
@@ -125,7 +213,7 @@ export default function Showcase() {
 
         <div className="capgrid">
           {CAPS.map((c) => (
-            <figure className="capcard" key={c.src}>
+            <figure className="capcard" id={`cap-${c.src}`} key={c.src}>
               <div className="capmedia">
                 <Clip src={`/assets/showcase/${c.src}.mp4`} poster={`/assets/showcase/${c.src}.jpg`} />
               </div>

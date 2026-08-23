@@ -1,0 +1,150 @@
+/* ===== THE OPENING: headline, fan, subline, ask =============================================
+   The one new section on this page, and the one place it moves. Everything below stays the
+   static gallery it already was; grep app/globals.css before adding a rule here, this file
+   only carries what that stylesheet does not already say. */
+.hero-open{padding:40px 0 8px;text-align:center}
+/* Display scale, once, matching the homepage hero exactly (globals.css .hero-head h1): this is
+   the page's one Display moment, not a second smaller scale invented for a second hero. */
+.hero-open-h1{
+  color:var(--ink);font-size:clamp(2.9rem,7.2vw,6rem);line-height:1;font-weight:800;letter-spacing:-.022em;
+  font-variation-settings:"wdth" var(--wd-display);
+  text-wrap:balance;margin:0 auto;
+}
+/* The two lines are a hard `<br/>`, not a natural wrap: the reference is a two-line headline and
+   a balanced wrap can't be trusted to land the break in the same place at every width. The 2.9rem
+   clamp floor is right down to about 480px; below that "One JSON each." no longer fits the second
+   line and wraps again, orphaning "each." on a third line. Drop the floor only past that point. */
+@media (max-width:480px){
+  .hero-open-h1{font-size:clamp(2rem,9.6vw,2.6rem)}
+}
+.hero-open-sub{color:var(--ink-2);font-size:1.02rem;line-height:1.5;max-width:46ch;margin:10px auto 0}
+.hero-open .hero-open-cta{margin-top:26px}
+/* The films gallery used to be the first thing on the page, so its own 24px top padding was the
+   masthead gap. It no longer is: give the two sections a real seam instead of letting the fan
+   run straight into a film with 24px between them. */
+.hero-open + .films{margin-top:56px;padding-top:28px;border-top:1px solid var(--line)}
+
+/* ===== THE FAN ==============================================================================
+   Five stills held like a hand of cards, all sharing one grid cell (grid-area:1/1) and pushed
+   apart with transform only, so the deal-in and the hover lift never touch width/height/top/left.
+
+   Two elements per card, on purpose: `.fanitem` owns the SETTLED fan position (the arc, the
+   rotation, the entrance animation) and never changes again after load. `.fancard` owns the
+   HOVER motion only, as a plain transition on its own transform. Putting both on one element
+   meant the hover transition never ran: a `both`-filled keyframe animation keeps owning the
+   `transform` property after it ends, so a later `:hover` transition on the same property and
+   the same element is silently ignored. Splitting the element the animation drives from the
+   element the transition drives sidesteps that rather than fighting it.
+
+   `.fan-wrap` is a third, separate layer: the positioned ancestor the two labelled pills measure
+   against. It is not `.fan` and not `.fanitem`, because `.fanitem` carries a `transform` for its
+   entrance animation, and a transformed element becomes the containing block for its own
+   absolutely-positioned descendants (same rule that makes `position:relative` do it). A pill
+   nested inside `.fanitem` measured itself against that small rotated box instead of the fan and
+   rendered off-screen; keeping the pills as `.fan`'s siblings under `.fan-wrap` is the fix. */
+.fan-wrap{
+  --fan-w:clamp(160px,18vw,260px);
+  --fan-step:clamp(64px,9.6vw,140px);
+  --fan-lift:clamp(18px,3.6vw,42px);
+  --fan-rot:7deg;
+  position:relative;margin:44px auto 8px;max-width:1000px;
+  height:clamp(220px,26vw,300px);
+}
+.fan{position:absolute;inset:0;display:grid;place-items:center;list-style:none}
+.fanitem{
+  grid-area:1/1;
+  --dx:calc((var(--i) - 2) * var(--fan-step));
+  --dl:calc(var(--fan-lift) * -1 * var(--liftf));
+  --dr:calc((var(--i) - 2) * var(--fan-rot));
+  z-index:calc(var(--i) + 1);
+  opacity:0;
+  animation:fanDeal .6s var(--ease) both;
+  animation-delay:calc(var(--i) * 80ms);
+}
+@keyframes fanDeal{
+  from{opacity:0;transform:translateX(var(--dx)) translateY(calc(var(--dl) + 44px)) rotate(var(--dr)) scale(.92)}
+  to{opacity:1;transform:translateX(var(--dx)) translateY(var(--dl)) rotate(var(--dr)) scale(1)}
+}
+
+.fancard{
+  display:block;width:var(--fan-w);aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+  border:1px solid var(--line);background:var(--bg-2);box-shadow:var(--shadow-1);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease);
+  outline-offset:3px;
+}
+/* Fidelity: every source still is 16:9, the same as the card. `cover` never stretches or
+   letterboxes a frame to make it fit; it only crops, and at a matched aspect ratio there is
+   nothing left to crop. `center` keeps the crop honest when a still isn't perfectly 16:9 to the
+   pixel (the film poster in this set is a frame grab, not a generated card). */
+.fancard img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+/* Cancel the parent's rotation, then rise, in the coordinate frame that cancel leaves behind:
+   rotate(-dr) first straightens the card to 0deg on screen, so the translateY after it is a
+   true vertical lift rather than a lift along the tilted card's own axis. */
+.fancard:hover,.fancard:focus-visible{
+  transform:rotate(calc(var(--dr) * -1)) translateY(-16px) scale(1.07);
+  box-shadow:var(--shadow-3);
+  border-color:var(--accent-line);
+}
+.fancard:focus-visible{outline:2px solid var(--accent)}
+/* Raise the whole card above its neighbours, not just its own layer, on the interaction that
+   lifted it. :has() falls back gracefully: without it the card still straightens and lifts, it
+   just settles for sitting under whichever neighbour was dealt after it. */
+.fanitem:has(.fancard:hover),.fanitem:has(.fancard:focus-visible){z-index:50}
+
+/* The two labelled cards, positioned off the exact formula `.fanitem` uses so a label tracks its
+   own card at every breakpoint without being told the breakpoint changed. Siblings of `.fan`
+   under `.fan-wrap`, not children of a card: hovering a card never drags a tail-less pill along
+   for the ride, and the pill never inherits a rotated containing block. */
+.fanpill{
+  position:absolute;left:50%;top:50%;
+  --dx:calc((var(--i) - 2) * var(--fan-step));
+  --dl:calc(var(--fan-lift) * -1 * var(--liftf));
+  transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dl) - 84px));
+  display:inline-flex;align-items:center;white-space:nowrap;pointer-events:none;
+  font-family:var(--font-mono),monospace;font-size:12px;font-weight:600;letter-spacing:.01em;
+  padding:6px 14px;border-radius:999px;
+  background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow-1);
+}
+.fanpill::after{
+  content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:inherit;
+  transform:translateX(-50%) rotate(45deg);border-radius:2px;
+}
+/* The second bubble reads as a pair with the first by TREATMENT (filled vs outlined), not by a
+   second colour. One Voice Rule: cobalt is the only accent this site spends: the reference's
+   blue-and-green pair is not available here, and the outline is what stands in for it. */
+.fanpill-ghost{background:var(--surface);color:var(--accent);border:1px solid var(--accent-line)}
+.fanpill-ghost::after{border:1px solid var(--accent-line);border-top:0;border-left:0}
+
+@media (prefers-reduced-motion:reduce){
+  /* The deal-in never plays; the settled transform from the keyframe's `to` state becomes the
+     card's only transform, so the fan is never blank and never mid-animation. */
+  .fanitem{animation:none;opacity:1;transform:translateX(var(--dx)) translateY(var(--dl)) rotate(var(--dr))}
+  /* No straighten-and-lift either; the shadow still deepens, which is a style change, not motion. */
+  .fancard:hover,.fancard:focus-visible{transform:none}
+}
+
+/* ---- 900px: the fan holds, tighter ---- */
+@media (max-width:900px){
+  .fan-wrap{
+    --fan-w:clamp(120px,20vw,168px);
+    --fan-step:clamp(46px,10vw,76px);
+    --fan-lift:clamp(12px,2.8vw,24px);
+    height:clamp(160px,24vw,210px);
+  }
+  .fanpill{font-size:11px;padding:5px 11px}
+}
+
+/* ---- 560px: a fan this wide has nowhere to fan. It becomes what it actually is on a phone: a
+   swipeable strip of the same five stills, full size, no overlap to fight with a thumb. ---- */
+@media (max-width:560px){
+  .fan-wrap{height:auto;margin:28px auto 4px}
+  .fan{
+    position:static;display:flex;overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;gap:14px;justify-content:flex-start;
+    margin:0 -26px;padding:4px 26px 12px;
+  }
+  .fanitem{animation:none;opacity:1;z-index:auto;flex:0 0 auto;scroll-snap-align:center}
+  .fancard{width:190px}
+  .fancard:hover,.fancard:focus-visible{transform:none}
+  .fanpill{display:none}
+}
