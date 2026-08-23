@@ -11,13 +11,18 @@ bin/
 # verify + previews (generated output)
 verify/out/
 verify/*_contactsheet.png
-out/*.meta.json
-out/*.fonts.json
+out/**/*.meta.json
+out/**/*.fonts.json
 # out/ is the scratch directory every author tool writes to, but only the mp4 and the json sidecars
 # were ignored, so shots and logs sat untracked in `git status` waiting to be committed by accident.
-out/*.png
-out/*.log
-out/*.html
+# `**/`, not a bare `*`: `out/*.png` matches out/shot.png and NOT out/flight/shot.png, so a tool that
+# writes into a SUBDIRECTORY of out/ walked straight past this rule. Fourteen contact-sheet frames
+# from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #405).
+out/**/*.png
+out/**/*.log
+out/**/*.html
+out/**/*.jpg
+out/**/*.webp
 verify/frames/
 # gate-mutation's exclusive lock: it edits tracked source in place, so two runs must not overlap.
 # Removed on exit; a leftover one means a run was killed — check `git status` before trusting the tree.

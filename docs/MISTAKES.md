@@ -12484,3 +12484,27 @@ test was asserting a bug that is not there. It now checks the property that matt
 **`arsenal-check` caught the new export the same hour.** `CAP_STYLE_SHAPE` is not a name a scene can
 write, so it is waived with a reason: the fact it carries is already in each shaped style's own
 `CAPTION_BLURBS` line, which is the row `make effects` prints.
+
+## #405 — `out/*.png` never matched `out/flight/shot.png`, and fourteen render frames reached main
+
+**What.** `.gitignore` carried `out/*.png`, `out/*.log`, `out/*.html` under a comment saying out/ is the
+scratch directory every author tool writes to and that shots and logs were "sitting untracked in
+`git status` waiting to be committed by accident". A bare `*` matches one path segment, so the rule
+covered `out/shot.png` and covered nothing a tool wrote into a SUBDIRECTORY of out/. Fourteen contact
+sheet frames from `out/flight/` and a probe mp4 rode into main inside a commit about caption styles.
+
+**How.** `git add -u` stages every modified TRACKED file, which is why it felt safe. It is not the
+whole story: files that are neither tracked nor ignored are exactly the ones a broad add sweeps up,
+and the gitignore rule that was supposed to cover these did not reach one directory deeper.
+
+**Fix.** `out/**/*.png` and the same for log/html/jpg/webp and the two json sidecars. `**/` matches
+zero or more directories, so it still covers `out/shot.png` and now covers any depth. The frames and
+the probe are removed from the index.
+
+**The half worth keeping.** The same commit also added `site/app/type/*`, and that was not junk: the
+/type page had never been committed at all. It built locally from untracked files and was therefore
+missing from every deploy, which is why it did not appear on the live site when it was checked. An
+accident found a real gap, and that is luck, not a process.
+
+**The rule.** Stage by path, not by sweep. `git add <the files this commit is about>`. A commit whose
+diffstat is four times the size of the work it describes is telling you something before you push it.
