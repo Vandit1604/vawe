@@ -1225,8 +1225,15 @@ a{color:inherit;text-decoration:none}
 .lback button:hover { text-decoration: underline; }
 .lback strong { color: var(--ink); font-size: 15px; }
 .lback span { color: var(--muted); margin-left: auto; font-size: 12.5px; }
-/* browsing shows more of the wall, so the cards get more room than they do beside a panel */
-.pgpage .lgrid { grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 16px; }
+/* browsing shows more of the wall, so the cards get more room than they do beside a panel.
+   TWO UP, NOT FOUR. `minmax(232px, 1fr)` put four generators across at 1440 and each one landed at
+   ~380px, which is a swatch. The subject of this page is a light FIELD: a soft mass under a glow, a
+   ramp over concentric arcs, phosphor bloom under scanlines. None of that survives being shown at
+   thumbnail size, and the page then stopped at 800px with a screen of dead space under it, so the
+   width was being spent on nothing. Four peers do belong in equal cells, that part was right; the
+   cell size was the grid default rather than a decision. The gap grows with them: a 16px gutter
+   between 540px pictures reads as a seam, not a rhythm. */
+.pgpage .lgrid { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 26px; }
 .lheld { margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
 
 /* ===== /type — THE TYPOGRAPHIC VOCABULARY =====================================================

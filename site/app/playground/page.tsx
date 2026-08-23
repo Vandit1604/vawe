@@ -23,7 +23,7 @@ export default function PlaygroundPage() {
         <header className="pghead">
           <h1>Playground</h1>
           <p>
-            The engine&apos;s generators, running here rather than in a render. Every card is the real
+            The engine’s generators, running here rather than in a render. Every card is the real
             thing, drawn still. Open one to turn its dials.
           </p>
         </header>

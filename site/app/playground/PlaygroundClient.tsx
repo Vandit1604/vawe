@@ -425,7 +425,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
       <details className="pgjson">
         <summary>the options, as a scene would carry them</summary>
         <p className="pgabout">
-          Every control here is built from the generator&apos;s own option schema, so what you can turn
+          Every control here is built from the generator’s own option schema, so what you can turn
           is exactly what it accepts, and an option it does not understand says so instead of quietly
           doing nothing. Paste these into a scene, or copy the HTML straight out. If a dial should
           exist and does not, that is worth telling us.
@@ -615,6 +615,12 @@ function LookCard({ gen, engine, active, onPick }:
       // was a different picture, and it looked plausible enough that nobody checked it against one.
       inst!.draw(layer.shader, 0, layer.seed ?? 0, pal, layer.intensity ?? 1,
         layer.params, layer.params2, layer.params3, layer.params4, layer.params5, layer.params6);
+      // aria-hidden, because the canvas sits INSIDE a button that already carries the generator's
+      // name and its description. Without it a screen reader announces the button's label and then
+      // an unlabelled graphic, which is the same thing said twice with the second half empty. Found
+      // by running the Web Interface Guidelines over the rendered page: "decorative media needs
+      // assistive-tech hiding", and decorative is exactly what a picture inside its own label is.
+      inst!.canvas.setAttribute("aria-hidden", "true");
       el.replaceChildren(inst!.canvas);
       inst!.canvas.style.width = "100%";
       inst!.canvas.style.height = "100%";
