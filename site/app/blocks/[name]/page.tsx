@@ -75,7 +75,7 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
                 <h2 className="bd-h2">Drop it in a scene</h2>
                 <p className="bd-note">
                   Blocks are sugar: <span className="mono">make expand</span> resolves this into real layers at
-                  build time. Coordinates are the block&apos;s centre.
+                  build time. Coordinates are the block’s centre.
                 </p>
                 <pre className="bd-code mono">{snippet}</pre>
               </div>

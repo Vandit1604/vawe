@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { BlocksBrowser, type Block } from "./BlocksBrowser";
 import blocks from "../../lib/blocks.json";
+import "./blocks.css";
 
 export const metadata: Metadata = {
   title: "Vawe · blocks",
