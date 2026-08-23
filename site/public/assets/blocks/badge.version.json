@@ -18,12 +18,13 @@
       "type": "group",
       "x": 160,
       "y": 160,
-      "bg": "#3A3A38",
+      "bg": "var(--text)",
       "radius": 8,
       "pad": 4,
       "layout": "row",
       "items": "center",
       "gap": 0,
+      "shadow": true,
       "start": 0.2,
       "duration": 8,
       "anim": "pop",
@@ -36,7 +37,7 @@
           "text": "vawe",
           "font": "mono",
           "size": 17,
-          "color": "#fff",
+          "color": "var(--bg)",
           "pad": "4px 12px"
         },
         {

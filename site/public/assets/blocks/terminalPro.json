@@ -1,0 +1,360 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "rect",
+      "radius": 12,
+      "x": 160,
+      "y": 160,
+      "w": 820,
+      "h": 336,
+      "bg": "var(--card)",
+      "border": "1px solid var(--line)",
+      "shadow": true,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.3
+    },
+    {
+      "type": "rect",
+      "radius": 0,
+      "x": 160,
+      "y": 204,
+      "w": 820,
+      "h": 1,
+      "bg": "var(--line)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2
+    },
+    {
+      "type": "rect",
+      "radius": 100,
+      "x": 178,
+      "y": 176,
+      "w": 12,
+      "h": 12,
+      "bg": "var(--down)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2
+    },
+    {
+      "type": "rect",
+      "radius": 100,
+      "x": 198,
+      "y": 176,
+      "w": 12,
+      "h": 12,
+      "bg": "#F6A417",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2
+    },
+    {
+      "type": "rect",
+      "radius": 100,
+      "x": 218,
+      "y": 176,
+      "w": 12,
+      "h": 12,
+      "bg": "var(--up)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "zsh · deploy",
+      "x": 250,
+      "y": 172,
+      "w": 640,
+      "align": "center",
+      "font": "mono",
+      "size": 18,
+      "color": "var(--dim)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.2
+    },
+    {
+      "type": "group",
+      "x": 182,
+      "y": 226,
+      "layout": "row",
+      "gap": 10,
+      "items": "center",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.15,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "$",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--up)"
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "npm run deploy",
+          "font": "mono",
+          "size": 22,
+          "color": "var(--text)",
+          "typing": 18,
+          "caret": true,
+          "caretHold": true
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "Installing dependencies…",
+      "x": 182,
+      "y": 274,
+      "font": "mono",
+      "size": 19,
+      "color": "var(--text-2)",
+      "start": 1.13,
+      "duration": 1,
+      "anim": "fade",
+      "out": "fade",
+      "exitDur": 0.2
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "✓ Dependencies installed",
+      "x": 182,
+      "y": 274,
+      "font": "mono",
+      "size": 19,
+      "color": "var(--up)",
+      "start": 2.13,
+      "duration": 5.87,
+      "anim": "rise",
+      "enterDur": 0.22
+    },
+    {
+      "type": "text",
+      "weight": 500,
+      "text": "Building bundle",
+      "x": 182,
+      "y": 318,
+      "font": "mono",
+      "size": 18,
+      "color": "var(--dim)",
+      "start": 2.53,
+      "duration": 5.470000000000001,
+      "anim": "fade",
+      "enterDur": 0.15
+    },
+    {
+      "type": "count",
+      "x": 898,
+      "y": 318,
+      "w": 60,
+      "align": "right",
+      "font": "mono",
+      "size": 18,
+      "weight": 700,
+      "color": "var(--text)",
+      "from": 0,
+      "to": 100,
+      "unit": "%",
+      "countStart": 0,
+      "countDur": 1.1,
+      "start": 2.53,
+      "duration": 5.470000000000001,
+      "anim": "fade",
+      "enterDur": 0.15
+    },
+    {
+      "type": "rect",
+      "radius": 3,
+      "x": 182,
+      "y": 342,
+      "w": 776,
+      "h": 6,
+      "bg": "var(--surface-2)",
+      "start": 2.53,
+      "duration": 5.470000000000001,
+      "anim": "fade",
+      "enterDur": 0.1
+    },
+    {
+      "type": "rect",
+      "radius": 3,
+      "x": 182,
+      "y": 342,
+      "w": 776,
+      "h": 6,
+      "bg": "var(--up)",
+      "start": 2.53,
+      "duration": 5.470000000000001,
+      "anim": "fade",
+      "enterDur": 0.1,
+      "mask": "linear-gradient(to right, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))",
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDur": 1.1,
+      "varsDelay": 0.05,
+      "varsEase": "easeOutCubic"
+    },
+    {
+      "type": "group",
+      "x": 182,
+      "y": 370,
+      "layout": "row",
+      "gap": 8,
+      "items": "center",
+      "start": 3.98,
+      "duration": 4.02,
+      "anim": "slide-left",
+      "enterDur": 0.22,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "+12",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--up)",
+          "bg": "color-mix(in srgb, var(--up) 16%, transparent)",
+          "pad": "2px 8px",
+          "radius": 4
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "-3",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--down)",
+          "bg": "color-mix(in srgb, var(--down) 16%, transparent)",
+          "pad": "2px 8px",
+          "radius": 4
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "src/api/routes.ts",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--text-2)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 182,
+      "y": 404,
+      "layout": "row",
+      "gap": 8,
+      "items": "center",
+      "start": 4.2,
+      "duration": 3.8,
+      "anim": "slide-left",
+      "enterDur": 0.22,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "+4",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--up)",
+          "bg": "color-mix(in srgb, var(--up) 16%, transparent)",
+          "pad": "2px 8px",
+          "radius": 4
+        },
+        {
+          "type": "text",
+          "weight": 500,
+          "text": "src/api/handler.ts",
+          "font": "mono",
+          "size": 18,
+          "color": "var(--text-2)"
+        }
+      ]
+    },
+    {
+      "type": "svg",
+      "x": 182,
+      "y": 448,
+      "d": "M 50 5 A 45 45 0 1 1 5 50",
+      "viewBox": "0 0 100 100",
+      "w": 20,
+      "h": 20,
+      "stroke": "var(--up)",
+      "strokeWidth": 10,
+      "fill": "none",
+      "start": 4.97,
+      "duration": 0.8,
+      "draw": {
+        "dur": 0.8
+      },
+      "anim": "fade",
+      "enterDur": 0.1
+    },
+    {
+      "type": "group",
+      "x": 182,
+      "y": 448,
+      "layout": "row",
+      "gap": 10,
+      "items": "center",
+      "start": 5.77,
+      "duration": 2.2300000000000004,
+      "anim": "rise",
+      "enterDur": 0.25,
+      "idle": "breathe",
+      "children": [
+        {
+          "type": "text",
+          "weight": 800,
+          "text": "✓",
+          "font": "mono",
+          "size": 20,
+          "color": "var(--up)"
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "Deployed to production",
+          "font": "mono",
+          "size": 19,
+          "color": "var(--text)"
+        }
+      ]
+    }
+  ]
+}

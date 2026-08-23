@@ -23,6 +23,12 @@ export const CATALOG = [
       { text: '  "theme": "creed",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
   { name: 'terminal', family: 'terminal', blurb: 'command prompt; command types in, output answers after it',
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
+  // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #410), kept as a matched pair
+  // on purpose: same subject, one built from layer primitives and one as a hand-authored surface.
+  { name: 'terminalPro', family: 'terminalPro', blurb: 'a deploy terminal built from layer primitives: every line its own timed, measurable object',
+    props: { w: 820, command: 'npm run deploy' } },
+  { name: 'terminalHtml', family: 'terminalHtml', blurb: 'the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge',
+    props: { w: 820 } },
   { name: 'loadingBar', family: 'loadingBar', blurb: 'determinate fill wipes L→R, lands ✓ done',
     props: { w: 340, fillDur: 1.6, label: 'rendering' } },
   { name: 'deploySuccess', family: 'deploySuccess', blurb: 'CI cascade → green "Deployed to production" card',

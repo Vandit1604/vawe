@@ -1,0 +1,53 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 820,
+      "h": 140,
+      "html": "<div style=\"position:relative;width:820px;height:140px;border-radius:12px;border:1px solid var(--line);overflow:hidden;background:linear-gradient(180deg, color-mix(in srgb, var(--text) 5%, var(--card)) 0%, var(--card) 46%);box-shadow:0 26px 60px -24px color-mix(in srgb, var(--text) 40%, transparent), inset 0 1px 0 color-mix(in srgb, var(--text) 14%, transparent);font-variant-ligatures:none\"><div style=\"position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0.5;background-image:repeating-linear-gradient(180deg, color-mix(in srgb, var(--text) 7%, transparent) 0 1px, transparent 1px 3px);transform:translateY(calc(mod(var(--t,0), 2) * -30px))\"></div><div style=\"position:relative;height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--text) 3%, transparent)\"><div style=\"width:11px;height:11px;border-radius:100px;background:var(--down)\"></div><div style=\"width:11px;height:11px;border-radius:100px;background:#F6A417\"></div><div style=\"width:11px;height:11px;border-radius:100px;background:var(--up)\"></div><div style=\"flex:1;text-align:center;font:600 15px var(--font-mono);letter-spacing:0.04em;color:var(--text-2);margin-right:39px\">zsh · deploy</div></div><div style=\"position:absolute;left:0;top:41px;right:0;height:99px;mask-image:linear-gradient(180deg, transparent 0, black 14px)\"><div style=\"position:absolute;left:26px;top:26px\"><div style=\"position:relative;height:27px;display:flex;align-items:center;font:600 21px var(--font-mono);white-space:pre\"><span style=\"color:var(--accent);margin-right:10px\">$</span><span style=\"position:relative;display:inline-block\"><span style=\"clip-path:inset(0 calc(100% - round(down, var(--type,0), 1) * 1ch) 0 0)\"><span style=\"color:var(--text)\"></span></span><span style=\"position:absolute;top:2px;left:calc(round(down, var(--type,0), 1) * 1ch);width:0.55ch;height:23px;background:var(--accent);opacity:calc((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2))\"></span></span></div></div></div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "vars": {
+        "--type": [
+          0,
+          1
+        ],
+        "--done": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": {
+        "--type": 0,
+        "--done": 0.07
+      },
+      "varsDur": {
+        "--type": 0.05,
+        "--done": 0.04
+      },
+      "varsEase": {
+        "--type": "linear",
+        "--done": "linear"
+      }
+    }
+  ]
+}

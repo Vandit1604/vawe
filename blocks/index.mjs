@@ -586,6 +586,8 @@ const FACTORIES = { ...APP, ...CHARTS, ...DEV, ...SOCIAL, ...UI,
 export const BLOCKS = { ...FACTORIES };
 import * as INTERACT from './interact.mjs'; export * from './interact.mjs'; Object.assign(FACTORIES, INTERACT); Object.assign(BLOCKS, INTERACT); // interaction family: pointer · tap · keyboard · press (blocks/interact.mjs)
 import * as SLEEK from './sleek.mjs'; export * from './sleek.mjs'; Object.assign(FACTORIES, SLEEK); Object.assign(BLOCKS, SLEEK); // sleek surfaces: glassCard · meshPanel · spotlightCard · borderBeamCard · grainOverlay · bento (blocks/sleek.mjs)
+import * as TERMINAL from './terminal-layers.mjs'; export * from './terminal-layers.mjs'; Object.assign(FACTORIES, TERMINAL); Object.assign(BLOCKS, TERMINAL); // terminalPro: a layers-only terminal window (blocks/terminal-layers.mjs)
+import * as TERMHTML from './terminal-html.mjs'; export * from './terminal-html.mjs'; Object.assign(FACTORIES, TERMHTML); Object.assign(BLOCKS, TERMHTML); // terminalHtml: the same subject as one hand-authored surface (blocks/terminal-html.mjs)
 for (const e of CATALOG) {
   if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
   const fam = FACTORIES[e.family];

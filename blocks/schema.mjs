@@ -40,6 +40,8 @@ import { SOCIAL_SCHEMAS } from './social.mjs';
 import { APP_SCHEMAS } from './app.mjs';
 import { INTERACT_SCHEMAS } from './interact.mjs';
 import { SLEEK_SCHEMAS } from './sleek.mjs';
+import { TERMINAL_SCHEMAS } from './terminal-layers.mjs';
+import { TERMINAL_HTML_SCHEMAS } from './terminal-html.mjs';
 
 // Every kind the tables may use. The first seven are lightfield's; the rest are declared above.
 export const KINDS = ['int', 'unit', 'num', 'hex', 'hexlist', 'enum', 'group',
@@ -50,6 +52,7 @@ export const KINDS = ['int', 'unit', 'num', 'hex', 'hexlist', 'enum', 'group',
 export const SCHEMA = {
   ...CORE_SCHEMAS, ...CHART_SCHEMAS, ...DEV_SCHEMAS, ...UI_SCHEMAS,
   ...SOCIAL_SCHEMAS, ...APP_SCHEMAS, ...INTERACT_SCHEMAS, ...SLEEK_SCHEMAS,
+  ...TERMINAL_SCHEMAS, ...TERMINAL_HTML_SCHEMAS,
 };
 
 class BlockOptionError extends Error {

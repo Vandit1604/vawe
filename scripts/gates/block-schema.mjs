@@ -201,6 +201,40 @@ for (const family of Object.keys(SCHEMA)) {
   if (!families.includes(family)) issues.push({ kind: 'orphan-schema', at: family, detail: 'a table for a family no catalog entry names.' });
 }
 
+// ── 7. x and y are the block's TOP-LEFT, and until now that was a convention, not a contract ──────
+// site/app/blocks/[name]/page.tsx told every reader "Coordinates are the block's centre", and it was
+// false for 154 of 155 factories. Nothing enforced either reading: scripts/author/expand-blocks.mjs
+// passes x and y straight through, so the rule was 155 hand-written implementations agreeing by
+// habit. A block that quietly disagrees puts itself half a card away from where the author asked,
+// which is exactly how a terminal ended up in the corner of a frame and got mis-diagnosed as a bug
+// in the block rather than in the sentence.
+//
+// Two real exceptions exist and both must be DECLARED rather than just behave differently. A block
+// that radiates FROM a point is one; a block whose subject is not its topmost element is the other.
+// The reason is the point of the entry: "it is not top-left" is a fact, and an undeclared fact is
+// indistinguishable from a mistake.
+const ANCHOR_EXEMPT = {
+  tapRipple: 'a ripple radiates FROM the touch point, so its x,y IS the centre by definition. Placing its corner there would put the finger in the wrong place.',
+  loadingBar: 'x,y is the BAR, which is the subject; the "done" tick is an annotation that sits 34px above it. Anchoring the block to the tick would move the bar every time the tick was toggled.',
+};
+const PROBE = 4321;
+for (const family of families) {
+  const f = BLOCKS[family];
+  if (typeof f !== 'function') continue;
+  let out;
+  try { out = f({ x: PROBE, y: PROBE, start: 0, dur: 4 }); } catch { continue; } // its own schema row covers a throw
+  if (!Array.isArray(out) || !out.length) continue;
+  const xs = out.map((l) => l && l.x).filter((v) => typeof v === 'number');
+  const ys = out.map((l) => l && l.y).filter((v) => typeof v === 'number');
+  if (!xs.length || !ys.length) continue;                       // nothing positioned: nothing to check
+  const corner = Math.min(...xs) >= PROBE - 1 && Math.min(...ys) >= PROBE - 1;
+  if (corner && ANCHOR_EXEMPT[family]) {
+    issues.push({ kind: 'stale-anchor-exemption', at: family, detail: `declared as an anchor exception and it places its top-left corner. Remove the entry from ANCHOR_EXEMPT in ${path.basename(fileURLToPath(import.meta.url))}.` });
+  } else if (!corner && !ANCHOR_EXEMPT[family]) {
+    issues.push({ kind: 'not-top-left', at: family, detail: `x,y must be the block's TOP-LEFT corner (the site says so, and 154 of 155 blocks do it). This one put its first layer at ${Math.min(...xs)},${Math.min(...ys)} for a requested ${PROBE},${PROBE}. Fix the factory, or add it to ANCHOR_EXEMPT with the reason its anchor is not its corner.` });
+  }
+}
+
 // Every example row in the manifest is a caller. If the ranges are real, the shipped examples pass.
 for (const e of CATALOG) {
   if (!SCHEMA[e.family]) continue;

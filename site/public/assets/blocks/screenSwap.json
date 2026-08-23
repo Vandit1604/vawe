@@ -94,7 +94,7 @@
           ]
         }
       ],
-      "out": "wipe-right"
+      "out": "wipe-left"
     },
     {
       "type": "group",
@@ -166,7 +166,7 @@
           "color": "var(--dim)"
         }
       ],
-      "out": "wipe-right"
+      "out": "wipe-left"
     },
     {
       "type": "group",
@@ -275,7 +275,7 @@
           ]
         }
       ],
-      "out": "wipe-right"
+      "out": "wipe-left"
     }
   ]
 }

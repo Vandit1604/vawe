@@ -17,6 +17,18 @@
     "w": 584,
     "h": 180
   },
+  "terminalPro": {
+    "x": 138,
+    "y": 138,
+    "w": 864,
+    "h": 380
+  },
+  "terminalHtml": {
+    "x": 138,
+    "y": 138,
+    "w": 864,
+    "h": 184
+  },
   "loadingBar": {
     "x": 138,
     "y": 104,
@@ -644,7 +656,7 @@
   "lowerThird.newsTicker": {
     "x": 138,
     "y": 138,
-    "w": 660,
+    "w": 662,
     "h": 99
   },
   "codeBlock.midnight": {
