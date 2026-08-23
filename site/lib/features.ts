@@ -56,7 +56,7 @@ export const FEATURES: Feature[] = [
     demo: "/assets/showcase/type.mp4",
     poster: "/assets/showcase/type.jpg",
     body: [
-      "Split a headline by word or character; each unit enters on its own preset, staggered in reading order. Rise, decode, gradient, focus, riseClip, and more — the hero element moves last or largest.",
+      "Split a headline by word or character; each unit enters on its own preset, staggered in reading order. Rise, decode, gradient, focus, riseClip, and more. The hero element moves last or largest.",
       "Text enters L to R, top to bottom, rises from its own baseline, and settles before it exits. No sub-pixel drift.",
     ],
     tag: "preset: up · decode · gradient",
@@ -70,7 +70,7 @@ export const FEATURES: Feature[] = [
     demo: "/assets/showcase/cuts.mp4",
     poster: "/assets/showcase/cuts.jpg",
     body: [
-      "Whip, punch, spin, zoom, blinds, riseBlur. The motion director picks cuts per transition from the brand's motion personality — covering a hard background jump with a sting, whipping only when the background does not change.",
+      "Whip, punch, spin, zoom, blinds, riseBlur. The motion director picks cuts per transition from the brand's motion personality, covering a hard background jump with a sting, whipping only when the background does not change.",
       "Every cut is covered by a whoosh from the sound library, placed deterministically.",
     ],
     tag: "cut: whip · punch · spin · zoom",
@@ -128,14 +128,14 @@ export const FEATURES: Feature[] = [
     demo: null,
     poster: null,
     body: [
-      "Before a video ships it climbs a ladder: validate (schema + no em-dash), critique (does every beat earn its time), slop (an anti-slop detector), audit (contrast, overlap, safe-zone), and judge — a vision gate that sees the rendered frames and scores composition and brand fidelity.",
-      "Paired with per-brand house style and a 148-block taste library, it keeps output on-brand and un-generic.",
+      "Before a video ships it climbs a ladder: validate (schema + no em-dash), critique (does every beat earn its time), designspec (locks the palette and fonts to the theme), audit (contrast, overlap, safe-zone), and judge, a vision gate that sees the rendered frames and scores composition and brand fidelity.",
+      "Paired with per-brand house style and a 155-block library, it keeps output on-brand and specific.",
     ],
-    code: `<span class="a">make validate</span>  <span class="s">// schema, no em-dash</span>
-<span class="a">make critique</span>  <span class="s">// value of each beat</span>
-<span class="a">make slop</span>      <span class="s">// anti-slop detector</span>
-<span class="a">make audit</span>     <span class="s">// contrast · overlap</span>
-<span class="a">make judge</span>     <span class="s">// vision gate</span>`,
+    code: `<span class="a">make validate</span>     <span class="s">// schema, no em-dash</span>
+<span class="a">make critique</span>     <span class="s">// value of each beat</span>
+<span class="a">make designspec-check</span> <span class="s">// palette + font lock</span>
+<span class="a">make audit</span>        <span class="s">// contrast · overlap</span>
+<span class="a">make judge</span>        <span class="s">// vision gate</span>`,
     codeLabel: "the ladder",
     tag: "validate → judge",
     docs: `${GH}/blob/main/docs/JUDGE.md`,
