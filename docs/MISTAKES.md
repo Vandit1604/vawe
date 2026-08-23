@@ -12576,3 +12576,37 @@ that produced the better answer.
 
 **931 assertions pass, up from 915.** Fifteen caption styles, all fifteen previewable and shot.
 
+## #408 — The pixel-regression gate had been blind for an unknown number of sessions
+
+**What.** `snap-scenes` reported `identical: 34 · changed: 71` on every run, and had been doing so long
+enough that the number read as background noise. 71 of 105 scenes is not a finding, it is a gate that
+has stopped being evidence. Any real regression in those 71 was already indistinguishable from the
+constant.
+
+**Why it did not hide.** It did not hide at all: the gate names its own condition on every run, in a
+warning block above the count, and says exactly what to do about it. It reported a font-state change
+from 30 faces `e724440085e2` to 33 faces `dd6cb2e15984`, and that every text width in the library moves
+with it, so "a changed scene below is NOT evidence about the code". The mechanism that #401 added was
+working perfectly. **What failed is that nobody acted on it**, and a warning nobody acts on is
+indistinguishable from a warning nobody prints.
+
+**How it was confirmed as noise and not a regression.** Before touching anything: run the sweep, revert
+the two runtime files under change, run it again. Identical result both ways, 34 and 71. That is what
+makes re-saving safe rather than a way to erase findings.
+
+**Fix.** `make fonts` first, which verified 16 faces and downloaded none: the extra files are drift from
+`fonts-discover` runs, not a missing set. So the current tree IS the working state, and the baseline was
+re-saved against it. Immediately after: `identical: 105 · changed: 0`.
+
+**Then proved it can still fail**, because a green gate that cannot go red is the same blindness with a
+tick beside it. `line-height: 1.04` to `1.09` on `.hs-text` moved 102 of 105 scenes; restoring it
+returned 105 identical.
+
+**What re-saving does not prove.** It does not prove those 71 scenes LOOK right. Nothing mechanical can:
+they were font-width shifts, and the eye is the only judge of whether a re-flowed line is still well
+set. What it restores is the ability to detect the NEXT change, which is the only thing this gate was
+ever for.
+
+**The standing rule.** A gate whose output is constant is off, whatever it prints. When a count does not
+move between runs that should have moved it, that is the finding.
+
