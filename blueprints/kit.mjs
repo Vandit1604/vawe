@@ -28,7 +28,13 @@ export const dollyNumber = ({ to, from = 0, unit = '', decimals, prefix = '', x 
   out = 'defocus', exitDur = 0.45 }) => ({
   type: 'count', from, to, unit, ...(decimals != null ? { decimals } : {}), ...(prefix ? { prefix } : {}),
   font: 'sans', x, y, w, align, size, weight, color, ls: '-0.03em',
-  countStart: start + 0.1, countDur, ease: 'easeOutExpo',
+  // `0.1`, NOT `start + 0.1`. `countStart` is seconds INTO this layer's own window (the schema says
+  // so: "Count begins (s into window)"), so adding the absolute start pushed it past the end of the
+  // window on any beat that does not begin at zero. A blueprint placed at start: 5 with a 4s window
+  // asked the count to begin 5.1s into 4 seconds, so it never ran and the number sat frozen on its
+  // `from` value for the whole beat. It was right by accident at start: 0 and wrong everywhere else,
+  // which is why it survived: the probe scenes all start at zero. Rendered both ways before and after.
+  countStart: 0.1, countDur, ease: 'easeOutExpo',
   start, duration: dur, anim: 'pop', enterDur: 0.55, out, exitDur,
 });
 

@@ -12875,3 +12875,27 @@ comment saying so. The rule added to `kit.mjs` the same hour ("a literal is legi
 colour IS the identity of something outside this theme") held up on first contact: the agent applied
 it and correctly refused most of the work.
 
+## #402 CLOSED — the frozen counter, fixed and shown
+
+`blueprints/kit.mjs` `dollyNumber` wrote `countStart: start + 0.1`. `countStart` is seconds INTO the
+layer's own window, and the schema says so in as many words: "Count begins (s into window)". Adding the
+absolute start pushed it past the end of the window on any beat not beginning at zero.
+
+**Measured**: a blueprint at `start: 5` with a 4s window asked its count to begin 5.1s into 4 seconds.
+
+**Rendered**: the same frame, before and after.
+
+```
+before   frame 165 (5.5s)   0        frame 180 (6.0s)   0     frozen on `from`
+after    frame 165          ...      frame 180          492   decelerating into 500
+```
+
+**Why it survived so long.** It is correct by accident at `start: 0`, and every probe scene starts at
+zero. A defect that is right in the only case anyone tests is invisible until someone places the beat
+second, which is exactly what a blueprint is for.
+
+`snap-scenes` 105 identical: no shipped scene used the affected path at a non-zero start, which is
+another way of saying the counter had never actually worked anywhere it mattered.
+
+Logged as the worst outstanding defect at the start of this session. It was two characters.
+
