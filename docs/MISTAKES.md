@@ -12618,3 +12618,58 @@ be used: save a baseline, make the change, run it, read the diff, in ONE session
 absolute count carries no meaning across sessions and none at all across machines. And a gate whose
 output does not move between runs that should have moved it is off, whatever it prints.
 
+## #409 — The CSS-animation ban is not required for determinism, and the engine already proves it
+
+**The claim under test.** `core/tokens.css:28` kills every CSS animation globally
+(`* { transition: none !important; animation: none !important }`) under the comment "determinism:
+every frame is set explicitly". `core/validate.mjs` refuses an `html` layer that uses `animation`, and
+its message gives the reason: "both run on wall-clock, and a frame is seeked, not played."
+
+**The contradiction.** `core/clips.js:240` already does this, and has for some time:
+
+```js
+// paused WAAPI animations → deterministic currentTime
+if (typeof document.getAnimations === 'function') {
+  for (const a of document.getAnimations()) { try { a.pause(); a.currentTime = t * 1000; } catch (e) {} }
+}
+```
+
+That is the standard mechanism for making a CSS animation seekable: a CSS animation IS a WAAPI
+`Animation`, `getAnimations()` returns it, and setting `currentTime` positions it. The engine built the
+seeker and then globally disabled its only subject.
+
+**The experiment, run rather than reasoned.** Boot a scene, inject `@keyframes kfspin` and an element
+carrying `animation: kfspin 2s linear infinite !important` AFTER validation so it beats the global
+kill, then drive `renderFrame(n)` and read the computed transform:
+
+| frame | expected | measured |
+|---|---|---|
+| 15 (0.5s of 2s) | 90 degrees | `matrix(0,1,-1,0)` |
+| 45 (1.5s) | 270 degrees | `matrix(0,-1,1,0)` |
+| 15 again, after seeking away | 90 degrees | identical to the first read |
+| 75 (2.5s, wraps) | 90 degrees | `matrix(0,1,-1,0)` |
+| 75 twice | identical | identical |
+
+`getAnimations()` saw it, the seeker positioned it, and it was pure in n on revisit and stable on
+repeat. **A CSS animation is deterministic in this engine today.**
+
+**`transition` is a different case and the ban on it is right.** A transition has no timeline of its
+own: it starts when a property changes. The renderer writes every style authoritatively on every
+frame, so a transition's start time is whenever a write happened, which is not a function of n.
+`getAnimations()` does return `CSSTransition` objects, so they would be seeked, but seeked relative to
+a start the frame number does not determine. That half is reasoned, not measured, and is flagged as
+such.
+
+**What this costs while it stands.** The CSS animation vocabulary is the largest body of motion
+knowledge any language model has, and hand-authored `html` is where an author would reach for it. The
+ban means that fluency is a liability here rather than an asset: the idiom a model reaches for first
+fails, and until #<this> it failed with a global `!important` and no error. The validator refusal is a
+real improvement on silence, but it enforces a rule the engine no longer needs.
+
+**Not changed in this pass, deliberately.** Narrowing that `!important` has a blast radius across every
+scene and wants its own measured sweep. What is established here is only that the stated reason for
+the ban does not hold. Known limits of the experiment: one animation, one element, `linear` timing,
+main document only. An animation inside a shadow root or an iframe is not reached by
+`document.getAnimations()`, and `animation-delay` with a negative value, `fill-mode`, and
+compositor-accelerated animations were not tested.
+
