@@ -12977,10 +12977,11 @@ label states both what it is for and exactly what it refuses (regenerated via
 `node scripts/gates/schema-drift.mjs --write` from the `PROPS` declaration in
 `core/layers/util.js`, not hand-edited).
 
-**Proved, not asserted.** `formats/scene/_css-refuse-probe.json` (`css:{opacity:0.5}`) fails
-`make validate` with the exact refusal message naming `anim`/`motion`.
-`formats/scene/_css-passthrough-probe.json` — a flat control rect beside a rect using
-`css:{background:"linear-gradient(...)", boxShadow:"inset 0 1px 0 rgba(255,255,255,.45), …"}` —
+**Proved, not asserted**, with throwaway probe scenes rather than committed ones (a `_`-prefixed scene
+is scratch, and citing one by name in a permanent record is a dangling reference the moment it is
+cleaned up: `doc-refs` caught exactly that here). A scene setting `css:{opacity:0.5}` fails
+`make validate` with the refusal message naming `anim`/`motion`. A flat control rect beside a rect using
+`css:{background:"linear-gradient(...)", boxShadow:"inset 0 1px 0 rgba(255,255,255,.45), …"}`
 validates clean and rendered a real diagonal box gradient with a visible inset top-edge highlight,
 not two flat rectangles. Re-rendered with `theme:"vawe-dark"` and the gradient's `var(--accent)`
 correctly resolved to the dark theme's mint instead of the light theme's blue: a plain CSS string is
