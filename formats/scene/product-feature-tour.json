@@ -59,7 +59,7 @@
     },
     {
       "type": "text",
-      "text": "Purpose-built for planning and building products. One place, from the first note to the release.",
+      "text": "One workspace for the note, the ticket, the branch and the release.",
       "size": 32,
       "weight": 400,
       "color": "var(--text-2)",
@@ -88,7 +88,7 @@
     },
     {
       "type": "text",
-      "text": "Conversations become issues.",
+      "text": "A message becomes a tracked piece of work.",
       "size": 66,
       "weight": 590,
       "tracking": "-0.02em",
@@ -106,7 +106,7 @@
     },
     {
       "type": "text",
-      "text": "Routed, labeled, and prioritized for the right team.",
+      "text": "Sorted, tagged and queued for whoever owns it.",
       "size": 28,
       "weight": 400,
       "color": "var(--text-2)",
@@ -139,7 +139,7 @@
           "cards": [
             {
               "id": "ENG-926",
-              "title": "Remove UI inconsistencies",
+              "title": "Tidy the spacing scale",
               "labels": [
                 { "t": "Bug", "c": "var(--down)" },
                 { "t": "Design", "c": "var(--accent)" }
@@ -147,12 +147,12 @@
             },
             {
               "id": "ENG-2088",
-              "title": "TypeError: cannot read properties",
+              "title": "Timeout on the export job",
               "labels": [{ "t": "Bug", "c": "var(--down)" }]
             },
             {
               "id": "ENG-1882",
-              "title": "Optimize load times",
+              "title": "Trim the first paint",
               "labels": [{ "t": "Performance", "c": "var(--up)" }]
             }
           ]
@@ -164,7 +164,7 @@
             { "id": "ENG-1487", "title": "Drop legacy fields from the API", "labels": [] },
             {
               "id": "MKT-1028",
-              "title": "Launch page assets",
+              "title": "Draft the release notes",
               "labels": [{ "t": "Design", "c": "var(--accent)" }]
             }
           ]
@@ -190,7 +190,7 @@
       "children": [
         {
           "type": "text",
-          "text": "ENG-2703 · Faster app launch",
+          "text": "NW-1184 · Faster cold start",
           "size": 34,
           "weight": 510,
           "color": "var(--text)",
@@ -255,7 +255,7 @@
     },
     {
       "type": "text",
-      "text": "Define the product direction.",
+      "text": "Set what the quarter is for.",
       "size": 72,
       "weight": 590,
       "tracking": "-0.02em",
@@ -480,7 +480,7 @@
     },
     {
       "type": "text",
-      "text": "Agents work alongside your team, end to end.",
+      "text": "Automations pick up the repeatable half.",
       "size": 28,
       "weight": 400,
       "color": "var(--text-2)",
@@ -523,7 +523,7 @@
       "children": [
         {
           "type": "text",
-          "text": "Agent session · ENG-2703",
+          "text": "Run log · NW-1184",
           "font": "mono",
           "size": 23,
           "weight": 510,
@@ -672,7 +672,7 @@
 
     {
       "type": "text",
-      "text": "Built for the future. <b>Available today.</b>",
+      "text": "Every step in one place. <b>Nothing handed off.</b>",
       "size": 80,
       "weight": 590,
       "tracking": "-0.02em",
@@ -708,7 +708,7 @@
     },
     {
       "type": "text",
-      "text": "Start building.",
+      "text": "See it work.",
       "size": 120,
       "weight": 590,
       "tracking": "-0.02em",
