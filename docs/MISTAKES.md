@@ -13131,3 +13131,45 @@ When writing one, ask what it prints when it finds no subjects, and make that ca
 
 **Verified both ways.** Baselines moved aside → exit 1 with the message. Baselines restored → 105
 identical, exit 0. Proving the red half is the whole point: an untested guard is a guess.
+
+## #421 — retiring 35 agent worktrees, and the five files that nearly went with them
+
+**What.** Agent worktrees had reached **35, at 9.1G**. The harness auto-removes an UNCHANGED worktree,
+which is the cheap half; the ones that changed something are the ones that accumulate, and they are
+also the only ones that can lose work. Auditing them by hand came within one command of destroying
+**five `vawe-verdict-*.storyboard.md` files, ~30KB, that existed in no other checkout**. They were
+untracked in a worktree whose branch looked entirely superseded.
+
+**Two wrong ways to judge "has this landed", both tried here first.**
+
+*By the commit graph.* Five branches carried a commit whose subject was not in main, which reads as
+unmerged work. Every file in all five was already byte-identical in the main tree. Agent work in this
+repo is routinely **copied out rather than merged** — films are gitignored (#377) — so the graph
+systematically under-reports what landed, and trusting it would hoard worktrees forever.
+
+*By `git diff main..branch`.* This flags the whole repo. It also reports every file MAIN moved forward
+since the branch point, so on a long-lived branch it returned hundreds of paths, one of which was
+`CLAUDE.md`. The commit's OWN diff (`HEAD^..HEAD`) is the question; `main..HEAD` is a different one
+that looks identical at the call site. This produced a 375KB tool result before it was noticed.
+
+**The rule: content is the authority.** A worktree is safe to retire only when every file it touches —
+each commit's own files, plus every dirty and untracked path — is proven present and byte-identical in
+the main tree. Anything unproven leaves the worktree alone. Files gitignored in main (`node_modules`,
+`out/*.png`, `.vawe-data`) are build noise, not work, and asking `git check-ignore` once with `--stdin`
+beats asking per file across thousands of paths.
+
+**Tool.** `make worktrees` reports; `make worktrees PRUNE=1` retires the landed ones and their
+branches. Reporting is the default because the failure mode is unrecoverable. A held worktree gets the
+exact rescue command instead of a warning.
+
+**Proven both verdicts before trusting it**, on real fixtures rather than the empty case it happened to
+find: one worktree carrying only an ignored build artifact (correctly SAFE), one carrying a unique file
+committed AND a unique file uncommitted (correctly HELD, both named, and the work still there after a
+`--prune` run removed the other). A cleanup script that has only ever been run on an empty list is a
+guess.
+
+**Also, a Makefile trap worth naming.** Inserting a target by replacing the first `review:` split
+`transition-preview:` into `transition-p` + `review:`, producing a duplicate target and a silently
+broken recipe. Make said `warning: ignoring old commands for target 'review'` and carried on. **A
+target name is a substring of other target names**: anchor an insert on something unique, and read
+make's warnings — that one names the exact damage.

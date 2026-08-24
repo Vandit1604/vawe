@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: dev check ship script animatic panels beats preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
+.PHONY: worktrees dev check ship script animatic panels beats preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -667,6 +667,14 @@ engine-sync:
 .PHONY: docker-check
 docker-check:
 	@node scripts/site/docker-context-check.mjs
+
+.PHONY: worktrees
+# Retire agent worktrees whose work has landed. Reports by default; PRUNE=1 removes.
+# Content is the authority, never the commit graph: agent work here is often copied out rather than
+# merged (films are gitignored), so a branch whose commit never merged can still be fully landed.
+# A worktree holding anything unproven is left alone and told how to rescue it.
+worktrees:
+	@node scripts/dev/worktree-prune.mjs $(if $(PRUNE),--prune,)
 
 # make review  — one-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
