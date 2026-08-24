@@ -136,3 +136,6 @@ assets/cutouts/
 
 # agent worktrees (scripts/dev/worktree.sh)
 .claude/worktrees/
+
+# npm pack output — a build artifact, never committed
+*.tgz

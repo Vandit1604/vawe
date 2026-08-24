@@ -1,13 +1,14 @@
 {
   "name": "vawe",
   "version": "2.0.0",
-  "private": true,
   "type": "module",
-  "description": "Data-driven faceless Shorts/Reels engine — self-contained HTML/CSS format folders, GPU render, ffmpeg grain + audio.",
+  "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "scripts": {
     "setup:audio": "node scripts/media/gen-audio.mjs",
     "verify": "node verify/run.js",
-    "look": "node scripts/author/preview.mjs"
+    "look": "node scripts/author/preview.mjs",
+    "prepublishOnly": "node scripts/dev/pack-check.mjs",
+    "pack-check": "node scripts/dev/pack-check.mjs"
   },
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
@@ -20,5 +21,48 @@
     "fontkit": "^2.0.4",
     "three": "^0.185.1",
     "wawoff2": "^2.0.1"
+  },
+  "bin": {
+    "vawe": "cli/vawe.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vandit1604/vawe.git"
+  },
+  "keywords": [
+    "video",
+    "motion-graphics",
+    "render",
+    "deterministic",
+    "ffmpeg",
+    "headless-chrome",
+    "mp4"
+  ],
+  "files": [
+    "cli/",
+    "core/",
+    "blocks/",
+    "blueprints/",
+    "themes/",
+    "formats/scene/scene.html",
+    "formats/scene/scene.js",
+    "formats/scene/props.js",
+    "formats/scene/scene.css",
+    "assets/vendor/",
+    "formats/scene/schema.json",
+    "formats/scene/sample.json",
+    "scripts/author/expand-blocks.mjs",
+    "scripts/media/fonts.mjs",
+    "assets/fonts/",
+    "bin/",
+    "CREDITS.md",
+    "LICENSE-FAQ.md"
+  ],
+  "optionalDependencies": {
+    "ffmpeg-static": "^5.2.0"
   }
 }
