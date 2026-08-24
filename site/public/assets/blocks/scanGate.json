@@ -1,0 +1,62 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 760,
+      "h": 460,
+      "html": "<div style=\"position:relative;width:760px;height:460px;overflow:hidden;border:1px solid var(--line);border-radius:12px;font:600 20px var(--font-mono);letter-spacing:0.14em;color:var(--text);text-shadow:1px 0 rgba(255,0,0,0.5),-1px 0 rgba(0,255,255,0.5)\"><div style=\"position:absolute;left:24px;right:24px;top:12px;display:flex;justify-content:space-between;align-items:flex-start\"><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span><span data-part style=\"display:block;width:2px;height:12px;background:var(--dim)\"></span></div><div style=\"position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent);box-shadow:0 0 24px 2px color-mix(in srgb, var(--accent) 60%, transparent);opacity:calc(1 - var(--lock,0));transform:translateY(calc(var(--scan,0) * 457px))\"></div><div style=\"position:absolute;left:0;right:0;top:0;height:120px;opacity:calc((1 - var(--lock,0)) * 0.5);background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 40%, transparent));transform:translateY(calc(var(--scan,0) * 457px - 120px))\"></div><div style=\"position:absolute;left:0px;top:0px;width:70px;height:70px;border-radius:4px;border-left:3px solid var(--accent);border-top:3px solid var(--accent);transform:translate(calc(1 * var(--lock,0) * 34px), calc(1 * var(--lock,0) * 34px))\"></div><div style=\"position:absolute;right:0px;top:0px;width:70px;height:70px;border-radius:4px;border-right:3px solid var(--accent);border-top:3px solid var(--accent);transform:translate(calc(-1 * var(--lock,0) * 34px), calc(1 * var(--lock,0) * 34px))\"></div><div style=\"position:absolute;left:0px;bottom:0px;width:70px;height:70px;border-radius:4px;border-left:3px solid var(--accent);border-bottom:3px solid var(--accent);transform:translate(calc(1 * var(--lock,0) * 34px), calc(-1 * var(--lock,0) * 34px))\"></div><div style=\"position:absolute;right:0px;bottom:0px;width:70px;height:70px;border-radius:4px;border-right:3px solid var(--accent);border-bottom:3px solid var(--accent);transform:translate(calc(-1 * var(--lock,0) * 34px), calc(-1 * var(--lock,0) * 34px))\"></div><div style=\"position:absolute;left:50%;bottom:24px;transform:translateX(-50%);opacity:var(--lock,0);padding:6px 16px;border-radius:100px;color:var(--accent);background:color-mix(in srgb, var(--accent) 16%, transparent)\">LOCK · f/1.8</div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.3,
+      "vars": {
+        "--scan": [
+          0,
+          1
+        ],
+        "--lock": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": {
+        "--scan": 0.15,
+        "--lock": 3.85
+      },
+      "varsDur": {
+        "--scan": 3.6,
+        "--lock": 0.45
+      },
+      "varsEase": {
+        "--scan": "linear",
+        "--lock": "easeOutCubic"
+      },
+      "parts": {
+        "select": "[data-part]",
+        "anim": "popIn",
+        "each": 0.3,
+        "stagger": 0.04,
+        "delay": 0.1,
+        "ease": "easeOutCubic",
+        "out": true
+      }
+    }
+  ]
+}

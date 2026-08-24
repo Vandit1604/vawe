@@ -588,6 +588,7 @@ import * as INTERACT from './interact.mjs'; export * from './interact.mjs'; Obje
 import * as SLEEK from './sleek.mjs'; export * from './sleek.mjs'; Object.assign(FACTORIES, SLEEK); Object.assign(BLOCKS, SLEEK); // sleek surfaces: glassCard · meshPanel · spotlightCard · borderBeamCard · grainOverlay · bento (blocks/sleek.mjs)
 import * as TERMINAL from './terminal-layers.mjs'; export * from './terminal-layers.mjs'; Object.assign(FACTORIES, TERMINAL); Object.assign(BLOCKS, TERMINAL); // terminalPro: a layers-only terminal window (blocks/terminal-layers.mjs)
 import * as TERMHTML from './terminal-html.mjs'; export * from './terminal-html.mjs'; Object.assign(FACTORIES, TERMHTML); Object.assign(BLOCKS, TERMHTML); // terminalHtml: the same subject as one hand-authored surface (blocks/terminal-html.mjs)
+import * as CAMCHROME from './camera-chrome.mjs'; export * from './camera-chrome.mjs'; Object.assign(FACTORIES, CAMCHROME); Object.assign(BLOCKS, CAMCHROME); // camcorderHud · scanGate: viewfinder chrome (blocks/camera-chrome.mjs)
 for (const e of CATALOG) {
   if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
   const fam = FACTORIES[e.family];
@@ -605,6 +606,10 @@ export * from './app.mjs';
 // x · y · start · dur are excluded from every table on purpose. They are placement and timing the
 // SCENE supplies, never content an author dials.
 export const CORE_SCHEMAS = {
+  // The camera-chrome tables ride in here rather than in blocks/schema.mjs's import list: that file
+  // spreads CORE_SCHEMAS already, so one entry point is enough for a sibling module's contract.
+  ...CAMCHROME.CAMERA_CHROME_SCHEMAS,
+
   card: {
     w: { kind: 'int', min: 160, max: 1920, def: 740 },
     h: { kind: 'int', min: 120, max: 1080, def: 336 },

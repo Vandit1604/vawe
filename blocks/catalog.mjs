@@ -430,4 +430,10 @@ export const CATALOG = [
     props: { w: 760, h: 420, cells: [
       { kind: 'mesh', title: 'Hero', desc: 'The big one.' }, { kind: 'glass', title: 'Cell', desc: 'Support.' },
       { kind: 'spotlight', title: 'Cell', desc: 'Support.' }] } },
+  // CAMERA CHROME — frame FURNITURE, not camera motion: a viewfinder draws chrome, a camera move
+  // returns keyframes. blocks/camera-chrome.mjs says why they are filed here.
+  { name: 'camcorderHud', family: 'camcorderHud', blurb: 'viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom',
+    props: { w: 1920, h: 1080, zoom: '2.4', battery: 68, label: 'SP' }, overlay: true },
+  { name: 'scanGate', family: 'scanGate', blurb: 'autofocus gate: a band travels the frame, the brackets contract onto the target and lock',
+    props: { w: 760, h: 460, label: 'LOCK · f/1.8' } },
 ];
