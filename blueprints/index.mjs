@@ -37,6 +37,8 @@ export const BEATS = {
   slotSwap: Collage.slotSwap,           // three fixed slots whose contents turn over N times; the right slot changes TYPE each pass
   recordedPan: Track.recordedPan,       // a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded
   echoRing: Track.echoRing,             // a stroked ring replaying another layer's path one beat late, fading as it grows
+  scrollStory: Track.scrollStory,       // a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop
+  focusRack: Track.focusRack,           // a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims
   wordBlast: Punct.wordBlast,           // scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame
 };
 
@@ -63,5 +65,7 @@ export const REQUESTS = {
   slotSwap: 'Fix a row of slots and turn its contents over N times at the same offsets. The right slot changes TYPE each pass so it never reads as a table.',
   recordedPan: 'Pan a surface wider than the frame on an irregular linear track so it reads as a screen recording, with the cursor and callouts welded to it.',
   echoRing: 'Keep the frame alive through the slow change: a stroked ring replays the subject\'s path one beat late, fading as it grows.',
+  scrollStory: 'Scroll a page taller than the frame the way a person scrolls it: hold the frame still, lean the surface on a static tilt, and stop at each real section in turn on one ease.',
+  focusRack: 'Rack the focus between two planes: the near one pulls sharp while the far one blurs AND dims, one exchange, then settle sharp before the cut.',
   wordBlast: 'Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.',
 };
