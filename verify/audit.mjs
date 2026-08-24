@@ -352,9 +352,47 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // m12 m21 (roll) · m13 m31 (yaw) · m23 m32 (pitch), in column-major CSS order
     return [v[1], v[4], v[2], v[8], v[6], v[9]].some((k) => Math.abs(k) > 0.001);
   })();
+  // TRAVELLING. midMove knew only about the enter/exit RAMPS, because those are the only timings the
+  // DOM records. A layer carrying a hand-keyed `motion` track leaves no trace on its element at all, so
+  // a layer crossing the frame on a keyed track read as SETTLED and every frame of its journey was
+  // graded as if it were parked — a prompt panel keyed `y: 0 → -572` on its way off the top reported
+  // as content leaving the safe area, which is the shot the film is there to show. Six of the eight
+  // scenes that failed a frame-bounds measurement failed for exactly this.
+  //
+  // Do not re-derive it from the JSON. The scene file cannot be mapped onto the DOM here: `sceneUnits`
+  // reparents top-level layers into per-beat wrappers, so document order is not authoring order, and no
+  // layer element carries its authored id. ASK THE RENDER instead — renderFrame(n) is pure in n
+  // (core/boot.js), so stepping to the next frame, measuring, and stepping back leaves the page exactly
+  // where it was. One definition of "moving", covering `motion`, motionPath, gsap and ken alike: the box
+  // is not where it is 0.1s either side of here.
+  //
+  // The window is 0.1s and not one frame, and that is the whole difference between this working and not.
+  // A keyed track is a chain of eased segments, and the lead-in of one is arbitrarily slow: higgsfield's
+  // button opens `x: 1132 → 1102` over 0.45s, so at the third frame of a 700px journey across the frame
+  // it is moving 0.07px per frame and a per-frame test calls it parked. Asking where it is 3 frames out
+  // asks the question the check actually needs — is this box where it is going to stay — instead of the
+  // instantaneous velocity, which is a property of the easing and not of the shot.
+  const MOVE_PX = 3;    // >3px across 0.1s ≈ >30px/s — travel, not an ambient hold
+  const MOVE_F = 3;
+  const travelling = (() => {
+    const els = [...document.querySelectorAll('.hs-layer')];
+    const box = (e) => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };
+    const now = els.map(box);
+    const total = (window.__engine.meta && window.__engine.meta.totalFrames) || 0;
+    const moved = new WeakSet();
+    for (const f of [n - MOVE_F, n + MOVE_F]) {
+      if (f < 0 || f >= total) continue;
+      window.__engine.renderFrame(f);
+      const then = els.map(box);
+      els.forEach((e, i) => { if (now[i].some((v, k) => Math.abs(v - then[i][k]) > MOVE_PX)) moved.add(e); });
+    }
+    window.__engine.renderFrame(n);
+    return (e) => moved.has(e);
+  })();
   const midMove = (el) => {
     if (inCut) return true;
     if (!el || !el.dataset) return false;
+    if (travelling(el)) return true;                                                   // mid-journey on a keyed track
     const st = parseFloat(el.dataset.start) || 0;
     const en = el.dataset.enter != null ? parseFloat(el.dataset.enter) : 0.45;
     const du = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
@@ -417,14 +455,24 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // a safe finding, never add one.
     const ink = !paintsBox(s) && inkRect(el);
     const sb = ink || b;
-    if (!midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
+    // A ROTATED stage is skipped here for the reason the overlap pair is skipped (see stageRotated):
+    // once #cam is a preserve-3d rig, every box read here is the AABB of a PROJECTED QUAD, so it is an
+    // OVER-bound — strictly larger than the shape on screen — and the safe check is the one rule an
+    // over-bound can only ever push into failing. A film settled at a tilted pose therefore reported its
+    // whole cast as leaving the frame, and the only way to clear it was to shrink a correct composition.
+    // The comment at stageRotated used to claim safe was safe to leave running; it was not.
+    //
+    // A pure SCALE or TRANSLATE is deliberately NOT exempted. There the rect is exact — a 1600px pill on
+    // a stage settled at s=1.24 really is 1984px wide and really does have both ends cut off. That is a
+    // defect the audit should keep reporting, not a projection artefact.
+    if (!stageRotated && !midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
       issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
     // CAPTION BAND. The safe box says where content may live; it says nothing about the strip a
     // burnt-in caption is about to be painted into, so a headline could land squarely on the caption
     // and every rule above stayed green. Same subject and same measurement as the safe walk — settled
     // content, ink box, an image or real text — over a band core/safe.js derives from the same
     // destination numbers the caption itself is placed against.
-    if (CAPBAND && !midMove(el) && carriesContent(el)) {
+    if (CAPBAND && !stageRotated && !midMove(el) && carriesContent(el)) {
       const deep = Math.min(sb.bottom, CAPBAND.y1) - Math.max(sb.top, CAPBAND.y0);
       if (deep > CAPBAND.tol)
         issues.push({ kind: 'caption-band', a: id, li, t,
@@ -548,8 +596,10 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   };
   // Skipped wholesale on a rotated stage: see stageRotated above. Only these two rules are dropped —
   // they are the pair that reads an intersection OF TWO BOXES, and a projected quad's AABB carries no
-  // information about whether two shapes intersect. safe/clipped/contrast still run: they ask about
-  // one box against the frame, where an over-bound only ever fails safe.
+  // information about whether two shapes intersect. `safe` and `caption-band` are skipped for the same
+  // reason at their own call sites; this line used to say they were fine to leave running, on the
+  // grounds that "an over-bound only ever fails safe" — which is the failure, not the reassurance.
+  // clipped/contrast still run: neither reads a rect against the frame.
   for (let i = 0; i < info.length && !stageRotated; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
     if (A.el.contains(B.el) || B.el.contains(A.el)) continue;          // skip nested pairs
