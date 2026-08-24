@@ -6,6 +6,17 @@
 //
 //   node scripts/gates/asset-check.mjs <scene.json> [--strict]   ·   make asset-check D=<file>
 // WARN by default (with the command to get each asset); --strict blocks.
+//
+// DO NOT DELETE THIS AS REDUNDANT. `preloadImages` in core/boot.js now THROWS on a repo-local image
+// that 404s, which is the right place for that refusal and does close the "missing picture reaches the
+// mp4" hole. It does not replace this file, and the difference is worth stating because the overlap
+// looks total:
+//   · this runs BEFORE a render, on the shell, in milliseconds. The boot throw costs a browser launch
+//     and arrives from inside one of eight workers.
+//   · it names the FIX per asset — the `curl` / `make capture` / `make photos` line that fetches the
+//     thing — where the engine can only say the file is not there.
+//   · it covers what no image preloader ever sees: VO and music (`audio.vo`, `audio.music`), lottie,
+//     captured `component` JSON, spectrum sidecars, and `.html` fragment files.
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';

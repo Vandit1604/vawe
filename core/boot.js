@@ -166,24 +166,52 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
 // URLs — incl. user-supplied web image links) and fully load+decode them BEFORE the scene
 // reports ready. Without this the Go renderer can screenshot a frame mid-download → a missing
 // image on some frames. onerror also resolves so a dead link falls back (icon()) without hanging.
-async function preloadImages(data) {
-  const urls = new Set();
+// A REPO-LOCAL IMAGE THAT 404s IS INVALID INPUT, AND IT THROWS. This used to degrade quietly: the
+// frame simply had a hole in it, and the author found out from a preflight script or from looking at
+// the render. That is the same failure `htmlSource` refuses one file over (a fragment `src` that never
+// loaded), graded differently only because images happened to be preloaded here.
+//
+// WHAT THROWS: a path INSIDE this repo — `/assets/…`, `assets/…`, `./assets/…`. The author wrote a
+// file that is not there, the write site is theirs, and nothing downstream can recover it.
+// WHAT STAYS SOFT, deliberately:
+//   · an `http(s)` URL — a dead CDN or an offline render is not an author error, and hard-failing a
+//     film because a network hiccup ate one logo trades a hole in a frame for no film at all.
+//   · a `data:` URI — it cannot 404; if it fails to decode the string itself is the bug and the
+//     decoder says so.
+//   · anything that is not a repo path. This walk reads EVERY string in the scene, not just image
+//     slots, so a text layer reading "hero.png" is picked up too (one shipped film does exactly that,
+//     formats/scene/ab-skill-shotcode.json). A bare filename is not a path into this repo, so it is
+//     never grounds to refuse a film — the shape of the string is what separates the two, and it is
+//     the only thing this walk knows.
+// Measured across the 147 scenes in formats/scene/: zero of them name a repo-local image that is
+// absent, so nothing shipped changes.
+export async function preloadImages(data) {
+  const urls = new Map(); // src → where it was written, for the refusal
   // an image extension (any source) OR an http(s) URL (web logos can be extensionless).
   // NOT bare assets/ or / paths — those also match audio (assets/music.wav) and aren't images.
   const isImg = (v) => typeof v === 'string' &&
     (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\/\S+$/.test(v));
-  const walk = (o) => {
-    if (Array.isArray(o)) o.forEach(walk);
-    else if (o && typeof o === 'object') Object.values(o).forEach(walk);
-    else if (isImg(o)) urls.add(o);
+  const walk = (o, at) => {
+    if (Array.isArray(o)) o.forEach((v, i) => walk(v, `${at}[${i}]`));
+    else if (o && typeof o === 'object') Object.entries(o).forEach(([k, v]) => walk(v, at ? `${at}.${k}` : k));
+    else if (isImg(o) && !urls.has(o)) urls.set(o, at);
   };
-  walk(data);
-  await Promise.all([...urls].map((src) => new Promise((res) => {
+  walk(data, '');
+  const isRepoPath = (s) => /^\.?\/?assets\//.test(s) || (s.startsWith('/') && !s.startsWith('//'));
+  const missing = [];
+  await Promise.all([...urls.keys()].map((src) => new Promise((res) => {
     const im = new Image();
     im.onload = () => (im.decode ? im.decode().then(res, res) : res());
-    im.onerror = () => res();
+    im.onerror = () => { if (isRepoPath(src)) missing.push(src); res(); };
     im.src = src;
   })));
+  if (missing.length)
+    throw new Error(`${missing.length === 1 ? 'this image was' : 'these images were'} never loaded: `
+      + `${missing.map((s) => `${urls.get(s)} → "${s}"`).join(' · ')}. `
+      + `Either the file does not exist, or its path is outside the roots the render server allows `
+      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
+      + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer — a repo path that `
+      + `404s renders as a hole in the frame and says nothing.`);
 }
 
 // Footage has to be DECODED before the first seek, for the same reason images are decoded before the
@@ -441,8 +469,10 @@ export async function boot(build) {
     // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
     // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
     // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx
-    // → components → clips → lottie). three and html throw loudly if what they need is absent — a missing
-    // runtime or a missing fragment leaves nothing to render — the rest degrade quietly.
+    // → components → clips → lottie). three, html and images throw loudly if what they need is absent —
+    // a missing runtime, a missing fragment or a repo-local file that 404s leaves a hole nothing can
+    // recover — the rest degrade quietly. Images name the write site and the path (preloadImages above);
+    // a REMOTE image stays soft on purpose, since a dead CDN is not the author's mistake.
     await preloadSpectrum(data);
     await preloadImages(data); // web/local images ready before any frame is captured
     await preloadVideos(data); // and footage decoded to its first frame, so the first seek has a source

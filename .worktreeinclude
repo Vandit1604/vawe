@@ -25,3 +25,15 @@ formats/scene/*.json
 # Captured product UI. A missing capture renders a grey placeholder box, not an error.
 assets/brands/**/components/*.json
 assets/brands/**/scenes/*.json
+
+# BRAND IMAGES. `assets/brands/**` is gitignored (captured product UI and marks, per-brand), and 142 of
+# the 196 local image paths the scene library references live there. A worktree without them used to
+# render holes; since core/boot.js started REFUSING a missing repo-local asset, it stops the boot
+# instead — so ~20 scenes became un-runnable in every worktree the moment that refusal landed.
+#
+# The refusal is right (a missing local asset IS invalid input, and rendering a hole is the silent
+# substitution this repo logs most). What was wrong is that the worktree never carried the files. This
+# is the same lesson as the fonts line above, one directory over: a fresh worktree that cannot see what
+# main sees does not find bugs, it invents them.
+assets/brands/**
+assets/cutouts/**

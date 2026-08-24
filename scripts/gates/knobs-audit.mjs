@@ -1,12 +1,19 @@
-// scripts/gates/knobs-audit.mjs — two jobs, one file.
-//   make knobs-audit            → DRIFT GUARD: every knob core/knobs.js advertises must actually
-//                                 change the render, or the manifest is lying to authors.
-//   node …/knobs-audit.mjs f.json → DEAD-KNOB CHECK: a knob set on a preset that ignores it (e.g.
-//                                 pointSize on extrudeText) is reported, turning a silent no-op into
-//                                 a message. Same principle as `make conformance`.
-import fs from 'node:fs';
+// scripts/gates/knobs-audit.mjs — ONE job: the manifest DRIFT GUARD.
+//   make knobs-audit  → every knob core/knobs.js advertises must actually change the render, or the
+//                       manifest is lying to authors.
+//
+// WHAT MOVED OUT, AND WHY. This file also carried a DEAD-KNOB CHECK: a knob set on a preset that
+// ignores it (pointSize on extrudeText) reported as a warning, per scene, if you remembered to run it.
+// That is the same bug class as an unknown layer PROP — a value accepted and then read by nobody —
+// which core/layers/vocabulary.js has refused at boot for a long time, so grading the two differently
+// was an accident of where the code happened to live. It is now `knobErrors()` in core/validate.mjs,
+// which runs at `make validate` AND inside boot() before a frame renders. A scene path handed to this
+// script is accepted and says so rather than being silently ignored.
+//
+// The half that stays cannot move: it proves a claim about the CODE, not about one scene, by probing
+// every advertised dial for an output change. There is no write site for "the manifest is honest".
 import { pathToFileURL } from 'node:url';
-import { KNOBS, knobsFor } from '../../core/knobs.js';
+import { KNOBS } from '../../core/knobs.js';
 import { PRESETS } from '../../core/type.js';
 import { resolveComposite, LOOK_NAMES } from '../../core/looks.js';
 
@@ -61,52 +68,6 @@ function lookDrift() {
   return dead;
 }
 
-// ---- dead-knob check on a scene ----
-// A layer selects a preset in one of a few ways; each maps to a family. We only flag a key that is a
-// REAL knob for some preset in that family but not for THIS preset — so generic layer props (x, y, w,
-// start…) are never touched.
-// `strict` = the opts object holds ONLY knobs (kinetic's presetOpts), so any key that is not a legal
-// knob for this preset is dead — this catches typos too. When the opts object IS the whole layer
-// (three/raymarch/ambient), generic props live alongside the dials, so we can only be sure a key is
-// misused when it is a REAL knob for a sibling preset. Both are precise; neither cries wolf.
-const SELECTORS = [
-  { family: 'kinetic', preset: (L) => L.preset, opts: (L) => L.presetOpts || {}, strict: true },
-  { family: 'three', preset: (L) => L.three, opts: (L) => L, strict: false },
-  { family: 'raymarch', preset: (L) => L.raymarch, opts: (L) => L, strict: false },
-  { family: 'ambient', preset: (L) => L.shader, opts: (L) => L, strict: false },
-];
-
-export function deadKnobs(scene) {
-  const warnings = [];
-  const familyKnobNames = (family) => {
-    const names = new Set();
-    for (const [p, list] of Object.entries(KNOBS[family])) {
-      if (p === '_shared') continue;
-      for (const k of list) names.add(k.name);
-    }
-    return names;
-  };
-  const walk = (node, path) => {
-    if (Array.isArray(node)) return node.forEach((v, i) => walk(v, `${path}[${i}]`));
-    if (!node || typeof node !== 'object') return;
-    for (const sel of SELECTORS) {
-      const preset = sel.preset(node);
-      if (!preset || !KNOBS[sel.family]) continue;
-      const legal = new Set(knobsFor(sel.family, preset).map((k) => k.name));
-      const suspect = sel.strict ? null : familyKnobNames(sel.family);
-      for (const key of Object.keys(sel.opts(node))) {
-        if (legal.has(key)) continue;
-        if (sel.strict || suspect.has(key)) {
-          warnings.push(`${path}: "${key}" does nothing on ${sel.family} preset "${preset}"`);
-        }
-      }
-    }
-    for (const [k, v] of Object.entries(node)) walk(v, `${path}.${k}`);
-  };
-  walk(scene.layers || [], 'layers');
-  return warnings;
-}
-
 // ---- CLI ----
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
@@ -119,15 +80,7 @@ if (isMain) {
   console.log('✓ every advertised kinetic and look knob changes the output'
     + '  (three/raymarch/ambient/sting resolve inside a live scene and are NOT proved here)');
 
-  const file = process.argv[2];
-  if (file) {
-    const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const dead = deadKnobs(scene);
-    if (dead.length) {
-      console.log(`\n~ ${dead.length} dead knob(s) in ${file}:`);
-      for (const w of dead) console.log(`    ${w}`);
-    } else {
-      console.log(`✓ ${file}: no misused knobs`);
-    }
-  }
+  // A scene path used to select the dead-knob check. That check is core/validate.mjs's now, so say so
+  // rather than accept an argument and do nothing with it.
+  if (process.argv[2]) console.log(`\n(the per-scene dead-knob check moved to core/validate.mjs — \`make validate D=${process.argv[2]}\`)`);
 }
