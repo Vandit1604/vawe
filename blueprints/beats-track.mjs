@@ -62,13 +62,7 @@ export function recordedPan({ id = 'recpan', image, capture, html, x = 0, y = 0,
       + 'stops mid-travel, which reads as a dropped frame.');
   }
 
-  // The surface itself. Precedence is stated rather than inferred, and an empty beat is refused: a
-  // blueprint that silently emits nothing is a black hole in a contact sheet with no error anywhere.
-  let surface;
-  if (html) surface = { type: 'html', html, w, ...(h != null ? { h } : {}) };
-  else if (capture) surface = { type: 'component', src: capture.src, ...(capture.part ? { part: capture.part } : {}), w };
-  else if (image) surface = { type: 'image', src: image, w, ...(h != null ? { h } : {}) };
-  else throw new Error('recordedPan needs a surface: `html` (a string), `capture` ({src, part}) or `image` (a path).');
+  const surface = surfaceLayer({ image, capture, html, w, h }, 'recordedPan');
 
   // The lead is a drift into place, not part of the scroll: the page is already moving when the scroll
   // starts, so the scroll never has a standing start. It is the only key here that carries a curve.
@@ -135,3 +129,194 @@ export function echoRing({ path = [], delay = 0, x = 750, y = 330, size = 420, c
     start, duration: dur, motion,
   }];
 }
+
+// ---- THE CAMERA-LED PAIR -------------------------------------------------------------------------
+//
+// Both were measured off the another engine reference library rather than invented, and both do a thing a
+// preset cannot: `scrollStory` moves a surface's CONTENT while the frame stays put, and `focusRack`
+// changes which PLANE is sharp without moving anything at all.
+
+// The engine's own interpolator takes engine easing names (core/motion.js EASINGS); the craft notes for
+// these two beats are written in GSAP's vocabulary, which is real here but only on GSAP-driven fields.
+// Accepting both spellings costs three lines and saves an author a thrown error on the value the doc
+// told them to use. GSAP powers are one off the obvious reading: power2 is cubic, power3 is quartic.
+const GSAP_EASE_ALIAS = { 'power3.out': 'easeOutQuart', 'power2.inOut': 'easeInOutCubic', 'power2.out': 'easeOutCubic' };
+const engineEase = (e) => GSAP_EASE_ALIAS[e] || e;
+
+// The surface a pan or a scroll moves: a captured component, an image, or hand HTML. Precedence is
+// stated rather than inferred, and an empty surface is refused — a blueprint that silently emits
+// nothing is a black hole in a contact sheet with no error anywhere.
+function surfaceLayer({ image, capture, html, w, h }, who) {
+  if (html) return { type: 'html', html, w, ...(h != null ? { h } : {}) };
+  if (capture) return { type: 'component', src: capture.src, ...(capture.part ? { part: capture.part } : {}), w };
+  if (image) return { type: 'image', src: image, w, ...(h != null ? { h } : {}) };
+  throw new Error(`${who} needs a surface: \`html\` (a string), \`capture\` ({src, part}) or \`image\` (a path).`);
+}
+
+// scrollStory — a surface TALLER than the frame whose content scrolls while the frame stays put, so the
+// beat reads as a screen recording of somebody scrolling a page.
+//
+// What makes it read as a recording rather than as an animation, all of it measured:
+//
+//   1. THE TILT IS STATIC. tiltY ±4..12deg, tiltX 0..6, perspective 800..2000px, held for the whole
+//      beat. A tilt that animates is a camera move, and a camera move over a scroll is two ideas at
+//      once. The lean is a `tilt` modifier (core/fx/tilt.js), which is one shared camera, not a
+//      per-layer fisheye. Pass `tilt: false` for a flat-on screen.
+//   2. THE SHADOW LEANS THE SAME WAY. Its x-offset takes the SIGN of tiltY; point them opposite and the
+//      plane stops reading as a plane. Written through `css` because the `shadow` modifier derives its
+//      direction from `scene.lighting` and this one has to follow the tilt.
+//   3. THE STOPS ARE ABSOLUTE, and they come from real cumulative section heights (`sections`), never
+//      from a tunable travel distance. Every step gets a HOLD key at the value the previous step
+//      finished on, so step A is over before step B starts — the interior can never cross-fade two
+//      scrolls into one long drift.
+//   4. ONE EASE ACROSS EVERY SCROLL. `power3.out` reads as a programmatic scroll (a wheel event landing);
+//      `power2.inOut` reads as a camera pan. Mixing them inside one scene reads as jerky, so `ease` is a
+//      single prop and every step takes it.
+//
+// The spotlight, when asked for, is a radial-gradient overlay ABOVE the content and fixed to the FRAME,
+// not welded to the surface, and it fades in only once the last scroll has landed.
+export function scrollStory({ id = 'scrollstory', image, capture, html, x = 0, y = 0, w = 1920, h,
+  sections = [], stops, stepDur = 1.2, dwell = 0.5, lead = 0.35, leadY = 26, ease = 'power3.out',
+  tilt, shadowBlur = 70, spotlight = false, spotlightDur = 0.6, riders = [],
+  anim = 'fade', enterDur = 0.4, out = 'fade', exitDur = 0.25, start = 0, dur = 5 } = {}) {
+  // Cumulative section heights → the absolute offset of each section's top. n sections make n-1 scrolls.
+  const offs = Array.isArray(stops) && stops.length
+    ? stops.slice()
+    : sections.slice(0, -1).map(((sum) => (v) => (sum += v))(0));
+  if (!offs.length) {
+    throw new Error('scrollStory needs somewhere to scroll TO: pass `sections` (the real pixel height of '
+      + 'each section of the surface, top to bottom) or `stops` (absolute offsets from the content '
+      + 'origin). A scroll distance guessed as a tunable lands between two sections every time.');
+  }
+  for (let i = 0; i < offs.length; i++) {
+    if (!(offs[i] > 0) || (i && offs[i] <= offs[i - 1])) {
+      throw new Error(`scrollStory: stop ${i} is ${offs[i]}. Stops are ABSOLUTE distances from the content `
+        + 'origin and must increase; a delta list read as absolutes scrolls backwards.');
+    }
+  }
+
+  const E = engineEase(ease);
+  const surface = surfaceLayer({ image, capture, html, w, h }, 'scrollStory');
+
+  // The lead is a drift into place, so the first scroll never has a standing start. It is the only key
+  // here on a curve of its own; every scroll takes `ease`, and every hold between them is linear.
+  const motion = [{ t: 0, y: leadY }, { t: round(lead), y: 0, ease: 'easeInOutSine' }];
+  let end = lead;
+  offs.forEach((off, i) => {
+    const from = round(lead + i * (stepDur + dwell));
+    if (i) motion.push({ t: from, y: round(-offs[i - 1]), ease: 'linear' });
+    end = round(from + stepDur);
+    motion.push({ t: end, y: round(-off), ease: E });
+  });
+  if (end > dur + 1e-6) {
+    throw new Error(`scrollStory: ${offs.length} scrolls run to ${end}s of a ${dur}s beat. Give the beat a `
+      + 'longer `dur`, or a shorter `stepDur`/`dwell`/`lead`. A scroll cut off by its own layer ending '
+      + 'stops mid-travel, which reads as a dropped frame.');
+  }
+  // Measured against the start of the beat's own EXIT, not against `dur`: a spotlight still fading in
+  // while the surface under it fades out is a vignette nobody ever sees at full strength. Caught by
+  // eye on the first probe, where the two ramps ran over each other and the frame read as empty.
+  if (spotlight && dur - exitDur - end < spotlightDur - 1e-6) {
+    throw new Error(`scrollStory: the spotlight has ${round(dur - exitDur - end)}s between the last scroll `
+      + `landing and this beat's exit, and needs ${spotlightDur}s to fade in. Lengthen \`dur\`, or shorten `
+      + '`spotlightDur` (0.4 to 0.8). A vignette that arrives during the exit is never seen.');
+  }
+
+  // NOT `tilt = {}` in the signature: expand-blocks reads a beat's accepted props off its source
+  // with /\(\s*\{([^}]*)\}/, so the first `}` in the parameter list ends the list it knows about, and an
+  // object default there makes every later prop report as ignored when the beat accepts it fine.
+  const lean = tilt === false ? null : { y: -7, x: 2, dist: 1400, ...(tilt || {}) };
+  const layers = [{
+    ...surface, id, x, y, anim, enterDur, out, exitDur, start, duration: dur, motion,
+    ...(lean ? {
+      modifiers: [{ tilt: lean }],
+      css: { boxShadow: `${Math.sign(lean.y || 1) * 30}px 36px ${shadowBlur}px rgba(12,14,20,0.30)` },
+    } : {}),
+  }];
+
+  for (const r of riders) {
+    const { delay = 0, ...layer } = r;
+    layers.push({
+      ...layer,
+      panWith: id,
+      start: start + delay,
+      duration: layer.duration != null ? layer.duration : round(dur - delay),
+    });
+  }
+
+  if (spotlight) {
+    const k = typeof spotlight === 'number' ? spotlight : 1;
+    layers.push({
+      type: 'rect', x: 0, y: 0, w: 1920, h: 1080, radius: 0,
+      bg: `radial-gradient(ellipse 60% 52% at 50% 46%, rgba(0,0,0,0) 0%, rgba(0,0,0,${round(0.34 * k)}) 62%,`
+        + ` rgba(0,0,0,${round(0.62 * k)}) 100%)`,
+      start: round(start + end), duration: round(dur - end),
+      anim: 'fade', enterDur: spotlightDur, out: 'fade', exitDur,
+    });
+  }
+  return layers;
+}
+
+// focusRack — a rack focus: one plane pulls sharp while the other goes soft. Depth of field, not a
+// camera move, which is the distinction the whole beat turns on. The camera transforms the FRAME, so
+// faking a rack with one is impossible by construction: the two planes have to disagree. So the blur
+// lives on each layer's own `m.blur` channel (core/tracks/motion.js) and nothing here touches a camera.
+//
+//   · Blur 3..6px per depth step, and never past ~8 soft / 16 default / 24 heavy.
+//   · THE SOFT PLANE ALSO DIMS, and the dim does half the work: 0.4 hard / 0.55 default / 0.7 subtle.
+//     Modest blur plus a dim reads more like real depth of field than blur cranked to its cap. Below
+//     0.35 the plane reads as REMOVED rather than defocused, so it is refused.
+//   · Both tweens sit at the SAME position and duration on the same channel, so the exchange is one
+//     event. The incoming plane is PRE-BLURRED from the first frame of the beat, because a plane that
+//     starts sharp and blurs on the way to sharp pops.
+//   · The focal plane ends genuinely sharp (blur 0, opacity 1) and sits LAST, above the soft ones.
+//   · `settle` keeps sharp frames after the rack lands. Cutting away mid-defocus reads as a glitch.
+//
+// `sharp` and `soft` each take one layer or a list of them. Blur the small or grouped layers, never a
+// full-frame one: the cost is radius x area, so a 1920-wide plane at 6px is the whole canvas rasterised
+// through a filter on every frame.
+export function focusRack({ sharp, soft, at = 0.9, rackDur = 0.7, blur = 5, dim = 0.55,
+  ease = 'power2.inOut', settle = 0.3, start = 0, dur = 3 } = {}) {
+  const near = [].concat(sharp || []), far = [].concat(soft || []);
+  if (!near.length || !far.length) {
+    throw new Error('focusRack needs both planes: `sharp` (what pulls INTO focus) and `soft` (what goes '
+      + 'out of it). One plane defocusing alone is `out:"defocus"`, not a rack.');
+  }
+  if (!(dim >= 0.35)) {
+    throw new Error(`focusRack: dim ${dim} reads as REMOVED, not defocused. Depth of field dims to about `
+      + '0.4 (hard) / 0.55 (default) / 0.7 (subtle); below 0.35 the plane has left the shot.');
+  }
+  if (!(blur > 0) || blur > 24) {
+    throw new Error(`focusRack: blur ${blur}px is outside 0..24. A depth step is 3..6px; 8 is soft, 16 is `
+      + 'the usual maximum and 24 is heavy. Past that the plane is a smear and the dim is doing nothing.');
+  }
+  if (at + rackDur + settle > dur + 1e-6) {
+    throw new Error(`focusRack: the rack lands at ${round(at + rackDur)}s and needs ${settle}s settled `
+      + `after it, in a ${dur}s beat. Cutting away from a mid-defocus frame reads as a render glitch, so `
+      + 'give the beat a longer `dur` or move `at` earlier.');
+  }
+  for (const L of far) {
+    if ((L.w ?? 0) >= 1728) {
+      throw new Error(`focusRack: the soft plane is ${L.w}px wide, near the full 1920 canvas. Blur cost is `
+        + 'radius x AREA, so a full-frame plane rasterises the whole canvas through a filter every frame. '
+        + 'Blur the small or grouped layers and let the backdrop carry the rest of the frame.');
+    }
+  }
+
+  const E = engineEase(ease);
+  const t1 = round(at), t2 = round(at + rackDur);
+  const track = (from, to) => {
+    const keys = [{ t: 0, blur: from.blur, opacity: from.opacity }];
+    if (t1 > 0) keys.push({ t: t1, blur: from.blur, opacity: from.opacity, ease: 'linear' });
+    keys.push({ t: t2, blur: to.blur, opacity: to.opacity, ease: E });
+    return keys;
+  };
+  // The beat owns the clock, so a plane's own start/duration would desync its track from the exchange.
+  const plane = (L, keys) => ({ ...L, start, duration: dur, motion: keys });
+
+  return [
+    ...far.map((L) => plane(L, track({ blur: 0, opacity: 1 }, { blur, opacity: dim }))),
+    ...near.map((L) => plane(L, track({ blur, opacity: dim }, { blur: 0, opacity: 1 }))),
+  ];
+}
+
