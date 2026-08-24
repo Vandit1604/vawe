@@ -19,7 +19,19 @@ import { defineRegistry } from './registry.js';
 // heat veil), whipPan (horizontal smear), chromaticSplit (rgb-fringed shock ring),
 // dispersion (prism band), cinematicZoom (dolly punch-in). All generative (uv/progress/seed only) —
 // palette+tint aware.
-export const SHADER_FX = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti', 'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors', 'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan', 'chromaticSplit', 'dispersion', 'gridPixelateWipe', 'iridescence', 'cinematicZoom'];
+// The array POSITION used to BE the shader branch number (`indexOf` fed u_fx), so inserting or
+// reordering a name silently rendered every later effect as a different shader — deterministically,
+// with no crash. The id is written down now; ordering is cosmetic.
+export const SHADER_ID = {
+  flash: 0, burn: 1, leak: 2, grain: 3, dissolve: 4,
+  ink: 5, glitch: 6, streak: 7, pixel: 8, confetti: 9,
+  ripple: 10, scan: 11, warp: 12, bokeh: 13, wipe: 14,
+  circle: 15, blinds: 16, squares: 17, pinwheel: 18, doors: 19,
+  polka: 20, swirl: 21, crossWarp: 22, domainWarp: 23, sdfIris: 24,
+  vortex: 25, ridgedBurn: 26, lens: 27, thermal: 28, whipPan: 29,
+  chromaticSplit: 30, dispersion: 31, gridPixelateWipe: 32, iridescence: 33, cinematicZoom: 34,
+};
+export const SHADER_FX = Object.keys(SHADER_ID);
 
 const FRAG = `
 precision highp float;
@@ -365,8 +377,8 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
     // tint: [r,g,b] 0..1 mono recolour (null = native). intensity scales strength. palette: up to 4
     // [r,g,b] the leak is built from (the seed only arranges them) — art-directable multicolour leaks.
     draw(effect, progress, seed = 0, tint = null, intensity = 1, palette = null) {
-      const idx = SHADER_FX.indexOf(effect);
-      if (idx < 0) return this.clear();
+      const idx = SHADER_ID[effect];
+      if (idx == null) throw new Error(`unknown sting fx "${effect}" — one of: ${SHADER_FX.join(', ')}`);
       const pal = palette && palette.length ? palette.slice(0, 4) : null;
       const key = idx + ':' + progress.toFixed(4) + ':' + seed + ':' + (tint ? tint.join(',') : '') + ':' + intensity + ':' + (pal ? pal.flat().join(',') : '');
       if (key === last) return; last = key;
