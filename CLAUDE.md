@@ -247,9 +247,18 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 
 **Always prefer a real image.** Order of preference:
 1. **Captured real UI** — `make capture` (a live component) is the highest-taste source.
-2. **Free/openly-licensed images** — brand logos `curl https://cdn.simpleicons.org/<slug>/<hex>` →
-   `assets/icons/`; flags `flagcdn.com/<iso2>.svg` → `assets/flags/`; CC0/CC-BY photos
-   via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
+2. **Free/openly-licensed images** — brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
+   CC0/CC-BY photos via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
+   **Use `make assets` for logos, and if you curl one by hand, use `-f`.** This line used to read
+   ``curl https://cdn.simpleicons.org/<slug>/<hex>`` with no failure flag, and `curl -o` writes the
+   response body whatever the status is. Simple Icons has been REMOVING marks on trademark request, so
+   that command now 404s for real brands and leaves a **zero-byte .svg** on disk. The file then exists,
+   passes every path check, and renders as an invisible hole. Two shipped assets were in exactly that
+   state (`assets/icons/amazon.svg`, one of them tracked), breaking three scenes, and nothing said so
+   until `core/boot.js` started refusing an asset that never loaded. `scripts/media/assets.mjs`
+   `tryFetch` already gets this right — it requires 200, a minimum size AND a literal `<svg` before it
+   writes — which is why `make assets` is the answer and a bare curl is not:
+   `curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>`
 3. **Drawn icons** — `svgIcon(name)`. 4. **Generated cards** — `make assets`. 5. **Emoji** — last resort.
 
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film

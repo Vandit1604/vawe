@@ -13314,3 +13314,34 @@ rendered PNGs from `scripts/author/preview.mjs` and found they were not byte-rep
 (#102). The real proof was one command on main, where the baselines live: `snap-scenes` at **105
 identical**, over a library where **28 scenes exercise 21 of the 35 effects**, spanning ids 0 to 31.
 A refactor is pure when the renderer says so, not when a similarity metric is close enough.
+
+## #426 — a documented `curl` that writes a zero-byte file on 404
+
+Three scenes stopped booting the moment `core/boot.js` began refusing an asset that never loaded. The
+paths all EXISTED on disk, so every path check passed and the first read was "the new refusal is a
+regression". They were **zero bytes**. The browser cannot decode an empty file, so "never loaded" was
+exactly right and the refusal had found real breakage.
+
+**Where the empty files came from, and it is not where I looked first.** `scripts/media/assets.mjs`
+`tryFetch` is careful: it requires a 200, a minimum body size AND a literal `<svg>` before writing. It
+could not have produced them. The source was **this repo's own documentation**. CLAUDE.md told authors
+to fetch a logo with `curl https://cdn.simpleicons.org/<slug>/<hex>` — no `-f`, and `curl -o` writes the
+response body whatever the status is. Simple Icons has been removing marks on trademark request, so that
+command now 404s for real brands and leaves a zero-byte `.svg`.
+
+**The failure chain is the interesting part**, because every link looked fine:
+1. the documented command 404s and writes an empty file, silently
+2. the file EXISTS, so `fs.existsSync` and every path-based check pass
+3. the image renders as an invisible hole, which nobody notices in a busy frame
+4. one of them was COMMITTED (`assets/icons/amazon.svg`), so it shipped
+
+**Two rules.**
+- **A documented command is code.** It gets the same failure handling as a script, because it will be
+  run a thousand times by people who trust the doc. If the repo already has a careful implementation
+  (`make assets`), the doc should point at THAT rather than teach a raw fetch that skips its guards.
+- **Existence is not validity.** `existsSync` answers a weaker question than any consumer asks. The
+  agent that built this refusal reported "0 of 147 scenes affected" measured with `existsSync`, and an
+  empty file passes that test. The render is the only authority on whether an asset works.
+
+Fixed: the doc now points at `make assets` and shows `curl -fsS … || rm -f`, both empty files removed,
+and the tracked one untracked. `tryFetch` needed no change and is cited in the doc as the reason.
