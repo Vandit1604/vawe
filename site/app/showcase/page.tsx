@@ -35,12 +35,17 @@ export const metadata: Metadata = {
  * effect pages it names (tagLinks.ts) instead of repeating their names as inert mono text.
  */
 
-type Film = { slug: string; brand: string; dur: string };
+type Film = { slug: string; brand: string; dur: string; template?: boolean };
 
+// Two of these used to be pixel recreations of other companies' marketing pages, shipped whole:
+// their headlines, their gradients, their copy. A recreation is also useless to anybody else, because
+// a finished film of someone else's website is not a starting point. Both were converted rather than
+// deleted: same composition, same timing, same camera, same beat structure, with the borrowed
+// identity taken out and the copy, palette and mark made fillable. They are the templates below.
 const FILMS: Film[] = [
-  { slug: "linear-launch", brand: "Linear", dur: "0:50" },
   { slug: "creed-launch", brand: "Creed", dur: "0:53" },
-  { slug: "stripe", brand: "Stripe", dur: "0:45" },
+  { slug: "saas-hero-launch", brand: "SaaS hero launch", dur: "0:45", template: true },
+  { slug: "product-feature-tour", brand: "Product feature tour", dur: "0:50", template: true },
   { slug: "argus-launch", brand: "Argus", dur: "0:23" },
   { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30" },
   { slug: "plinth-ad", brand: "Plinth", dur: "0:27" },
@@ -87,7 +92,7 @@ function FilmTile({ film }: { film: Film }) {
       </div>
       <figcaption>
         <span className="fbrand">{film.brand}</span>
-        <span className="fdur">{film.dur}</span>
+        <span className="fdur">{film.template ? `template · ${film.dur}` : film.dur}</span>
         <SourceViewer name={film.slug} lines={lineCount(film.slug)} />
       </figcaption>
     </figure>
@@ -126,8 +131,8 @@ export default function Showcase() {
             </span>
             <h1>No house style. One JSON format.</h1>
             <p>
-              Six launch films, nine capabilities and every aspect ratio, browsable like a
-              component library. {EFFECTS.total} effects sit under all of it.
+              Six films, two of them fillable templates, plus nine capabilities and every aspect
+              ratio, browsable like a component library. {EFFECTS.total} effects sit under all of it.
             </p>
           </section>
 
@@ -138,10 +143,13 @@ export default function Showcase() {
 
             <div className="sclist">
               <section className="films">
-                <h2 className="films-h1">Six brands.</h2>
+                <h2 className="films-h1">Six films.</h2>
                 {/* The one fact a clip cannot show. It used to sit on all six cards as the word
                     `reflected`, which is six repeats of one idea; it belongs here once. */}
-                <p className="scsub">Each one reflected from the brand&rsquo;s own site.</p>
+                <p className="scsub">
+                  Four are real products. Two are templates: open the JSON, swap the copy and the
+                  theme, keep the film.
+                </p>
 
                 <div className="filmgrid">
                   <div className="film-hero">

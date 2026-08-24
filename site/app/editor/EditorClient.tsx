@@ -26,9 +26,9 @@ const GROUPS: { group: string; items: { id: string; label: string }[] }[] = [
     group: "films",
     items: [
       { id: "argus-launch", label: "argus · launch film" },
-      { id: "linear-launch", label: "linear · launch film" },
-      { id: "stripe", label: "stripe · launch film" },
       { id: "creed-launch", label: "creed · launch film" },
+      { id: "saas-hero-launch", label: "template · saas hero launch" },
+      { id: "product-feature-tour", label: "template · product feature tour" },
     ],
   },
 ];
