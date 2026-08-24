@@ -2,7 +2,7 @@
 // positioned/animated by the engine). MUST be static: any <script> is stripped so renderFrame(n) stays
 // pure. The sanitiser and the reasoning behind it live in core/sanitize-html.js, shared with the `html`
 // background so the layer and the backdrop cannot drift to different rules.
-import { sanitizeHtml, htmlSource } from '../sanitize-html.js';
+import { sanitizeHtml, htmlSource, droppedDecls } from '../sanitize-html.js';
 
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
@@ -23,7 +23,19 @@ export const PROPS = { html: {}, src: {}, w: {}, h: {} };
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';
-  const src = htmlSource(L, kit.html, `layer${L.id ? ` "${L.id}"` : ''} (html)`);
+  const where = `layer${L.id ? ` "${L.id}"` : ''} (html)`;
+  const src = htmlSource(L, kit.html, where);
+  // REFUSE A DECLARATION THE BROWSER WOULD DROP, at the moment this fragment becomes DOM. The parser
+  // rejects the one declaration, keeps the rest of the rule and renders on, so a hand-authored style
+  // that is subtly malformed produces no error anywhere — the element just never does the thing. That
+  // is the same failure the transition/animation refusal above exists for (CSS that reads correctly and
+  // silently no-ops), so it is refused in the same breath rather than found later by looking at a frame.
+  const bad = droppedDecls(src);
+  if (bad.length)
+    throw new Error(`${where}: the browser drops ${bad.length === 1 ? 'this style declaration' : 'these style declarations'} `
+      + `— ${bad.join(' · ')}. It keeps the rest of the rule and renders on, so nothing fails and the `
+      + `element simply never does it. A leading minus outside calc() is the usual cause: write `
+      + `\`calc(-1 * …)\`, not \`-calc(…)\`.`);
   el.innerHTML = `<div class="hs-html" style="height:100%">${sanitizeHtml(src)}</div>`;
 }
 

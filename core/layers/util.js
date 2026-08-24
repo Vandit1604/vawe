@@ -3,6 +3,7 @@
 // pure-ish file that takes the kit. Ported verbatim from scene.html's inline helpers (byte-identical).
 
 import { applyLayerFilter } from '../filters.js';
+import { droppedProps } from '../sanitize-html.js';
 import { isLook, applyComposite } from '../looks.js';
 // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light. Every part of
 // this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
@@ -376,6 +377,17 @@ export function createKit(ctx) {
   // property IS how a browser accepts a JS write for a hyphenated CSS property — no hand conversion.
   function applyCss(el, L) {
     if (!L.css || typeof L.css !== 'object' || Array.isArray(L.css)) return;
+    // REFUSE A VALUE THE BROWSER WOULD DROP, here, where it is written. Assigning an invalid value to
+    // `el.style` is a silent no-op: the property keeps its old value and the author is told nothing.
+    // That is this engine's cardinal sin, and `css` is the one door through which arbitrary author CSS
+    // reaches the DOM, so it is the door that checks. Build-time only — this runs once per layer, not
+    // per frame, because `css` is a settled style and never a motion channel.
+    const bad = droppedProps(L.css);
+    if (bad.length)
+      throw new Error(`layer${L.id ? ` "${L.id}"` : ''} (type "${L.type || 'text'}"): the browser drops `
+        + `${bad.length === 1 ? 'this css declaration' : 'these css declarations'} — ${bad.join(' · ')}. `
+        + `It would keep the rest and render on, so nothing would fail and the layer would simply never `
+        + `do it. A leading minus outside calc() is the usual cause: write \`calc(-1 * …)\`, not \`-calc(…)\`.`);
     Object.assign(el.style, L.css);
   }
 

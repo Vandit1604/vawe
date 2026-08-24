@@ -72,3 +72,70 @@ export function timeCssUsed(src) {
   const m = TIME_CSS.exec(String(src || ''));
   return m ? (m[1] ? m[1].toLowerCase() : 'keyframes') : null;
 }
+
+// A CSS DECLARATION THE PARSER REJECTS IS NOT AN ERROR ANYWHERE. It drops that one declaration, keeps
+// the rest of the rule, and renders on: nothing throws, nothing warns, and the element simply never
+// does the thing. It is the same family as the `transition`/`animation` ban above — hand-authored CSS
+// that reads correctly and silently no-ops — so it is refused in the same place, at the same moment,
+// rather than by a separate pass that runs after the damage is written.
+//
+// The case that named it: a block emitted `left: -calc(...)`. A leading minus outside calc() is invalid
+// (the valid form is `calc(-1 * ...)`), so three of four focus brackets never moved, with every check
+// green. It took rendering the frame and noticing with an eye.
+//
+// WHY ASK THE BROWSER INSTEAD OF PATTERN-MATCHING. `CSS.supports()` and a regex both encode a model of
+// what CSS accepts, and that model is wrong the day a property is added. Setting the declaration on a
+// scratch element asks the only authority that matters: it either parses or it does not.
+//
+// IN ISOLATION, one declaration at a time, and that detail is the whole correctness of this function.
+// Reading the value back off the REAL element looks equivalent and is not: CSSOM refuses to serialise a
+// SHORTHAND whose longhands are not uniform, so `border: 4px solid rgba(...)` plus any `border-*`
+// override reads back empty while rendering perfectly. Checked that way, this reported six healthy
+// shorthands in this library as broken.
+//
+// Custom properties (`--x`) are skipped because they accept ANY token by design; an invalid value in one
+// only becomes a drop where the variable is USED, and that use is a real declaration this does catch.
+let scratch = null;
+export function droppedDecls(src) {
+  if (typeof document === 'undefined') return []; // not in a browser: nothing to ask
+  scratch ||= document.createElement('div');
+  const out = [];
+  // Style ATTRIBUTES only. A <style> block's rules are the stylesheet's business and are not parsed here.
+  for (const m of String(src || '').matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)) {
+    const raw = m[2] ?? m[3] ?? '';
+    // Split on top-level semicolons: a url() or a data: URI may carry one inside parentheses.
+    const decls = []; let depth = 0, cur = '';
+    for (const ch of raw) {
+      if (ch === '(') depth++; else if (ch === ')') depth--;
+      if (ch === ';' && depth === 0) { decls.push(cur); cur = ''; } else cur += ch;
+    }
+    decls.push(cur);
+    for (const d of decls) {
+      const i = d.indexOf(':');
+      if (i < 0) continue;
+      const prop = d.slice(0, i).trim(), val = d.slice(i + 1).trim();
+      if (!prop || !val || prop.startsWith('--')) continue;
+      scratch.style.cssText = '';
+      try { scratch.style.setProperty(prop, val); } catch { /* a malformed name throws; that is a drop */ }
+      if (scratch.style.getPropertyValue(prop) === '') out.push(`${prop}: ${val}`);
+    }
+  }
+  return out;
+}
+
+// The same question for a style OBJECT (the `css` passthrough on a layer), where the author hands over
+// {prop: value} rather than markup. Same isolation rule, same reason.
+export function droppedProps(css) {
+  if (typeof document === 'undefined' || !css || typeof css !== 'object') return [];
+  scratch ||= document.createElement('div');
+  const out = [];
+  for (const [k, v] of Object.entries(css)) {
+    if (v == null || k.startsWith('--')) continue;
+    // camelCase → kebab, the same conversion `el.style` does when you assign to it.
+    const prop = k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+    scratch.style.cssText = '';
+    try { scratch.style.setProperty(prop, String(v)); } catch { /* malformed name: a drop */ }
+    if (scratch.style.getPropertyValue(prop) === '') out.push(`${k}: ${v}`);
+  }
+  return out;
+}

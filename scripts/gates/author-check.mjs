@@ -298,7 +298,6 @@ const LADDER = [
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
   ['storyboard', sbRatchet.state === 'new' ? 'blocks' : 'reports', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
-  ['css', 'blocks', 'CSS declarations the browser silently drops, so a hand-written rule never applies'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
@@ -444,17 +443,6 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beats', 'beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
-
-// 1c. css — A DECLARATION THE BROWSER DROPS IS NOT AN ERROR ANYWHERE.
-//
-// The parser rejects one declaration, keeps the rest of the rule, and renders on. Nothing throws and
-// nothing warns: the element simply never does the thing. A block shipped `left: -calc(...)` (the valid
-// form is `calc(-1 * ...)`) and three of four focus brackets never moved, with every gate green. It was
-// caught by rendering the frame and noticing with an eye.
-//
-// It BLOCKS rather than reports because there is no taste in it: the declaration either parses or it
-// does not, and a dropped one is never what the author meant.
-record('css', runGate('css', 'dropped CSS declarations', 'scripts/gates/css-dropped.mjs', ['--scene', file]), { waivable: true });
 // 2. critique — value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct — direction gate; FAILs report, waivable by code.
