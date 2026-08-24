@@ -37,7 +37,10 @@ assets/flags
 !assets/brands/threadcite/icon.svg
 !assets/plinth/hero-figure.png
 
-# not part of the site image
+# not part of the site image.
+# NB: blocks/ IS in the context: Dockerfile.cli ships it because expand-blocks.mjs imports
+# blocks/index.mjs, and a CLI image without it dies on any scene that uses a block, which is most of
+# them. It costs the site build 304K of context and nothing else.
 # NB: docs-site IS part of it — the image runs the docs app on 3001 and the site rewrites /docs to
 # it. It was listed here, so the build could not see it and /docs could never have worked in prod.
 # Its node_modules/.next/.source are already covered by the ** rules above; .source in particular
@@ -45,7 +48,6 @@ assets/flags
 bin
 verify
 dna
-blocks
 sims
 scratchpad
 *.mp4
