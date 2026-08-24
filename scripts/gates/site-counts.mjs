@@ -67,7 +67,21 @@ const subjects = Object.keys(TRUTH).sort((a, b) => b.length - a.length).join('|'
 // Two shapes appear in the copy and both must be checked:
 //   "148 blocks", "a 148-block library"   → number first
 //   "## Kinetic presets (25)"             → heading with the count in parentheses
-const NUM_FIRST = new RegExp(`\\b(\\d+)[ \\u00a0-](${subjects})\\b`, 'gi');
+// ADJECTIVES ARE ALLOWED TO SIT BETWEEN THE NUMBER AND ITS NOUN, and until now they hid the claim.
+// "148 vetted, deterministic, theme-aware components" slipped past this gate for as long as it took
+// someone to read the page, because the pattern demanded the digit sit directly beside the word. A
+// count is stale whether or not the author put three adjectives in front of the thing being counted.
+// Bounded to a short run of word characters, commas and hyphens so it cannot leap across a sentence
+// and pair a number with a noun that has nothing to do with it.
+// Two guards on that run, and BOTH were added after the widening invented findings on its first run.
+// Widening it to skip adjectives made it skip other things too:
+//   * "155 blocks across 70 families" matched 155 -> families, leaping over the noun 155 belongs to.
+//     So an intervening word may not itself be one of the subjects: the nearest noun wins.
+//   * "154 of 155 blocks" matched 154 -> blocks, over the top of the number actually attached to it.
+//     So the run may not contain a digit either: the nearest NUMBER wins.
+// A gate change must never invent findings, and this one did until it was tested against real lines
+// rather than against the case it was written for.
+const NUM_FIRST = new RegExp(`\\b(\\d+)[ \\u00a0-](?:(?!${subjects})[a-z-]+,?[ \\u00a0]){0,4}(${subjects})\\b`, 'gi');
 const HEADING = new RegExp(`\\b(${subjects})\\s*\\((\\d+)\\)`, 'gi');
 
 const bad = [];

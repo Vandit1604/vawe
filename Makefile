@@ -751,6 +751,14 @@ globe-dots:
 pace-check:
 	node scripts/gates/pace-check.mjs $(D)
 
+# make paints-nothing [D=scene.json] [STRICT=1]  — did each layer actually paint anything in its own box?
+# Renders the scene, screenshots a layer's box against itself hidden, and diffs the PIXELS (a DOM probe
+# passes a masked-to-nothing layer, this cannot). No D sweeps every formats/scene/*.json. REPORTS-tier:
+# it never blocks without STRICT=1, because the library has never been held to this rule before today.
+.PHONY: paints-nothing
+paints-nothing: ## does each layer paint anything in its own box? pixel diff, not DOM (D=<file> [STRICT=1])
+	node scripts/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
 	node scripts/gates/arsenal-check.mjs
 

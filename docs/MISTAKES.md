@@ -12988,3 +12988,61 @@ still just CSS, so the cascade resolves the token exactly as it would any other 
 extra plumbing needed. `node scripts/gates/probe-purity.mjs scene` stayed green (25 sampled frames,
 identical regardless of render order): `css` is a static object read once, so it cannot break
 `renderFrame(n)`'s purity in `n`.
+
+## #417 — the `paints-nothing` gate, and the sweep that was checking the wrong files
+
+**What it is for.** An `html` layer whose content was masked away rendered as a blank white card, and the
+agent that built it said the truest thing anyone said this week: "the mask bug that blanked the whole
+card would have shipped past every gate that exists." `make audit` measures overlap, safe zones and
+contrast. Nothing asked whether a layer painted ANYTHING.
+
+**How it works.** Per LAYER, not per beat (`beat-check` already covers a hole in the whole frame; a
+blank layer inside a full frame trips nothing). It screenshots the layer's own box, hides the layer,
+screenshots again, and compares the PIXELS. REPORTS tier with `--strict`, and a waiver needs a reason,
+following the `dead-air` precedent.
+
+**Pixels, not the DOM, and the reason is recorded rather than guessed.**
+`scripts/site/type-specimens.mjs` already tried a DOM probe for this and it PASSED a blank frame: a
+`background-clip: text` layer measures as full-size and opaque while painting nothing.
+
+**Proved both directions before being trusted.** A probe with `mask-image` on an auto-height wrapper of
+absolutely-positioned children (the real defect) FAILS: "pixel-identical to itself hidden". Remove the
+mask and the same layer PASSES. The text layer beside it was never flagged either way.
+
+**THE SWEEP WAS READING THE WRONG FILES, and the census hid it.** The file filter EXCLUDED
+`.expanded.json`, which is backwards: an unexpanded source carrying `block`/`beat`/`comp` sugar is not
+renderable at all and the engine refuses it by design. So the sweep spent its time booting scenes that
+could never paint, printed a stack trace for each, and reported a clean census over the survivors. A
+census is the most dangerous shape a gate can take: 0 findings reads as 0 defects whatever the
+denominator was. Fixed by mirroring `snap-scenes:84-88`, which had already solved it, rather than
+inventing a second rule.
+
+## #418 — `css` on a layer, and the eleven properties it refuses
+
+The layer vocabulary is a wrapper over HTML, so a box gradient, a `mask-image`, a `clip-path` and an
+inset `box-shadow` were unreachable while the DOM underneath could do all four. `css: { … }` passes
+them through and keeps everything a hand-written `html` layer gives up: every child stays a node the
+audit walks, tokens still substitute, per-child timing survives, coordinates still resolve per canvas.
+
+**The refusals are the feature.** Eleven properties are rewritten every frame by the engine, so setting
+them here would be silently overwritten, which is the most-logged bug class in this file. Each is
+refused at validation with the file and line that owns it and the alternative named:
+`opacity` (`core/clips.js:220`), `transform`, `left`/`top`/`width`/`height`, `zIndex`,
+`pointerEvents`, `animation`/`transition`, `position`.
+
+**The list I handed the agent was incomplete and it checked instead of trusting.** `height` is written
+by EIGHT per-type builders (`beam`, `image`, `svg`, `video`, `html`, `rect`, `glow`, `doc`) and was not
+on my list. That correction is worth more than the feature.
+
+**camelCase, and not by conversion**: `el.style` is a `CSSStyleDeclaration`, so `Object.assign` on it
+already serialises `boxShadow` to `box-shadow`. No mapping layer was written because none is needed.
+
+**Known caveat, stated rather than discovered later**: `css` applies after the per-type builder, so
+`css.background` silently wins over `L.bg` if an author sets both. That is ordinary cascade behaviour
+rather than a frame-owned trap, so it is documented instead of refused. And `pointerEvents` has no
+author-facing alternative at all: the refusal explains itself but offers nothing, which is honest and
+less helpful than the other ten.
+
+`lib-test` 937 to 942. `probe-purity` clean. `snap-scenes` 105 identical, run on the main tree because
+a worktree has no baselines (#408, #414).
+

@@ -58,6 +58,23 @@
     }
   },
   {
+    "name": "terminalPro",
+    "family": "terminalPro",
+    "blurb": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+    "props": {
+      "w": 820,
+      "command": "npm run deploy"
+    }
+  },
+  {
+    "name": "terminalHtml",
+    "family": "terminalHtml",
+    "blurb": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
+    "props": {
+      "w": 820
+    }
+  },
+  {
     "name": "loadingBar",
     "family": "loadingBar",
     "blurb": "determinate fill wipes L→R, lands ✓ done",
@@ -2239,7 +2256,7 @@
       "w": 540,
       "h": 96,
       "split": 0.5,
-      "gap": 30,
+      "gap": 32,
       "divider": true,
       "left": {
         "block": "listRow",
@@ -2563,6 +2580,78 @@
           "meta": "now"
         }
       }
+    }
+  },
+  {
+    "name": "glassCard",
+    "family": "glassCard",
+    "blurb": "frosted glass panel (blurs the moving bg behind it) + sheen",
+    "props": {
+      "w": 560,
+      "h": 300,
+      "kicker": "GLASS",
+      "title": "Backdrop blur",
+      "desc": "It blurs whatever moves behind it."
+    }
+  },
+  {
+    "name": "meshPanel",
+    "family": "meshPanel",
+    "blurb": "soft mesh-gradient surface (stacked accent blobs)",
+    "props": {
+      "w": 560,
+      "h": 320,
+      "title": "Mesh gradient",
+      "desc": "A calm branded surface behind copy."
+    }
+  },
+  {
+    "name": "spotlightCard",
+    "family": "spotlightCard",
+    "blurb": "dark card with a soft spotlight glow washing from a corner",
+    "props": {
+      "w": 560,
+      "h": 300,
+      "from": "top",
+      "title": "Spotlight",
+      "desc": "The light directs the eye."
+    }
+  },
+  {
+    "name": "borderBeamCard",
+    "family": "borderBeamCard",
+    "blurb": "glass card with a light TRAVELLING its border (animated beam)",
+    "props": {
+      "w": 560,
+      "h": 260,
+      "title": "Border beam",
+      "desc": "A light travels the border."
+    }
+  },
+  {
+    "name": "bento",
+    "family": "bento",
+    "blurb": "asymmetric bento grid: one hero cell + supporting cells (scale contrast)",
+    "props": {
+      "w": 760,
+      "h": 420,
+      "cells": [
+        {
+          "kind": "mesh",
+          "title": "Hero",
+          "desc": "The big one."
+        },
+        {
+          "kind": "glass",
+          "title": "Cell",
+          "desc": "Support."
+        },
+        {
+          "kind": "spotlight",
+          "title": "Cell",
+          "desc": "Support."
+        }
+      ]
     }
   }
 ]
