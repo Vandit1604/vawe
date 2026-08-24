@@ -7,7 +7,7 @@ import './frame-settle.js'; // installs window.__frameSettle, the capture's asyn
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
-import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin } from './safe.js';
+import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
@@ -40,7 +40,7 @@ export const PROPS = {
   aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {},
 };
 
-export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
+export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = null) {
   const inset = safe.margin;
   // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
   //   • EDGES (left/right/top/bottom) resolve against the SAFE BOX. This is the invariant that makes
@@ -145,6 +145,21 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web')) {
     if (C.x != null) C.x = num(C.x, W, w, safe.x0, safe.x1);
     if (C.y != null) C.y = num(C.y, H, 0, safe.y0, safe.y1, hEst);
   }
+
+  // THE BOUNDS CHECK LIVES HERE, at the one funnel where a relative coordinate becomes a pixel, so an
+  // effect never carries placement logic of its own: one check instead of one per factory. It grades
+  // only SETTLED boxes (core/safe.js outOfFrame), because a layer sliding in from off-frame is a
+  // legitimate entrance and grading it manufactures findings (docs/MISTAKES.md #376).
+  //
+  // REPORT ONLY, off by default. It prints under `?bounds` in the browser or FRAME_BOUNDS=1 in node,
+  // and it never throws: whether the engine should REFUSE a settled off-frame box is a decision for a
+  // human holding the count of shipped films it would fail.
+  //
+  // TOP-LEVEL LAYERS ONLY. A group child's x/y is relative to its group, so measuring it against the
+  // canvas would report the wrong number with total confidence.
+  return boundsCheckOn()
+    ? reportBounds((data.layers || []).filter(isObj), frame || { W, H, safe })
+    : [];
 }
 
 // preloadImages: walk the data JSON for image-like strings (local paths, /…, or http(s)
@@ -348,7 +363,12 @@ export async function boot(build) {
     // which sizes its screenshot to them — so one source renders at any aspect with no engine change.
     const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
     const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
-    const [width, height] = sceneDims(data, aspectKey);
+    // ONE FRAME OBJECT, built once, pre-first-frame: size, ratio, destination and the safe box in a
+    // single value that everything downstream RECEIVES. Nothing computes the frame twice — this used
+    // to be a sceneDims() call here and a safeArea() call thirty lines below, which is the shape that
+    // let the audit overlay and resolveCoords disagree about where the bottom edge was.
+    const frame = frameOf(data, aspectKey);
+    const { W: width, H: height, safe } = frame;
     document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
     document.documentElement.dataset.aspect = aspectKey;
     // The canvas is set HERE, from the aspect we just resolved, never inferred from data-orient. It used
@@ -359,11 +379,10 @@ export async function boot(build) {
     const rootStyle = document.documentElement.style;
     rootStyle.setProperty('--vw', width + 'px');
     rootStyle.setProperty('--vh', height + 'px');
-    // ONE safe area, from core/safe.js, written to CSS so the ?debug=safe overlay draws the SAME box the
-    // audit checks and resolveCoords places against. `destination` names the chrome (a phone feed paints
-    // over the frame; a website does not) and defaults to `web`, so a tall canvas no longer inherits
-    // TikTok's caption strip merely for being tall.
-    const safe = safeArea(width, height, data.destination || 'web');
+    // ONE safe area, the frame object's own, written to CSS so the ?debug=safe overlay draws the SAME box
+    // the audit checks and resolveCoords places against. `destination` names the chrome (a phone feed
+    // paints over the frame; a website does not) and defaults to `web`, so a tall canvas no longer
+    // inherits TikTok's caption strip merely for being tall.
     rootStyle.setProperty('--safe-top', safe.y0 + 'px');
     rootStyle.setProperty('--safe-bottom', (height - safe.y1) + 'px');
     rootStyle.setProperty('--safe-left', safe.x0 + 'px');
@@ -384,7 +403,10 @@ export async function boot(build) {
     // keys can be overridden per canvas like any hand-written one.
     bakeCameraMove(data);
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
-    resolveCoords(data, width, height, safe); // relative coords (%, center, edge, pin) → px for THIS canvas
+    // `?bounds` turns on the settled-off-frame REPORT inside resolveCoords. Read before it runs, and it
+    // only prints: nothing about a render changes, so renderFrame(n) stays a pure function of n.
+    if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
+    resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     produceBaseline(data, theme); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
     // scene that didn't specify it — absent-only, theme-aware, additive (never rewrites an authored layer),
@@ -437,8 +459,12 @@ export async function boot(build) {
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     // `safe` rides along so the scene view can hand it to a layer without a second call to safeArea:
     // the safe box is a function of destination as well as size, and two callers computing it is how
-    // the audit overlay and resolveCoords once disagreed about where the bottom edge was.
-    const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe });
+    // the audit overlay and resolveCoords once disagreed about where the bottom edge was. That
+    // instinct is now the law, and `frame` below is the whole of it in one value.
+    // The frame rides along WHOLE, beside the width/height/safe keys the view already reads. That is
+    // what lets createKit hand every layer primitive a frame without a second safeArea() call and
+    // without a signature change at any of the call sites.
+    const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame });
     // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
     // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
     // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.

@@ -195,3 +195,97 @@ export const nativeAspect = (destination) => {
   if (!d) throw new Error(`unknown destination "${destination}" — known: ${DESTINATION_NAMES.join(', ')}`);
   return d.native ?? null;   // null still means "this destination serves any canvas"
 };
+
+// ── THE FRAME OBJECT ────────────────────────────────────────────────────────────────────────────
+// One object, built once at boot, carrying every answer about the canvas an effect could need: how
+// big it is, which ratio it is, where it is going, and where content may live. It exists because an
+// effect author had no way to ask any of those questions — createKit() carried theme and ink and no
+// frame at all, so block factories hardcoded 1920 and the diveIn headroom guard could only fire when
+// a caller remembered to pass the size.
+//
+// THE LAW: nothing computes the frame twice. Everything RECEIVES this object. Two callers deriving
+// the same box independently is exactly how the four safe boxes in the header above drifted apart.
+export function frameOf(cfg = {}, aspectKey = '') {
+  // Pixel dimensions win when a caller already has them (a view built outside boot knows its W and H
+  // and no ratio string reproduces 1440x1080 exactly). Everyone else names a ratio and gets the table.
+  const [W, H] = (Number(cfg.W) > 0 && Number(cfg.H) > 0)
+    ? [Number(cfg.W), Number(cfg.H)] : sceneDims(cfg, aspectKey);
+  const destination = cfg.destination || 'web';
+  const aspect = aspectKey || (typeof cfg.aspect === 'string' ? cfg.aspect : (W > H ? '16:9' : '9:16'));
+  return Object.freeze({ W, H, aspect, destination, safe: safeArea(W, H, destination) });
+}
+
+// ── SETTLED, NOT MID-FLIGHT ─────────────────────────────────────────────────────────────────────
+// A layer that SLIDES IN from off-frame is a legitimate entrance; a layer that SETTLES off-frame is a
+// bug. Grading the first produces constant false failures, which is what verify/audit.mjs learned
+// (docs/MISTAKES.md #376): it grades only ARRIVED content, through midMove() and ARRIVED, after
+// grading mid-entrance boxes reported a correct frame as broken.
+//
+// This is that same rule, read from the JSON instead of from the DOM, and the numbers are audit.mjs's
+// own. midMove() calls a layer moving until `start + enter + 0.06`, and again from
+// `start + duration - exitDur - 0.06` when it has a MOVING `out` (a default exit fades in place and
+// keeps the box on its mark). Its fallbacks for an unset attr are 0.45 enter and 0.4 exit. There is
+// one definition of "arrived" in this engine: change these together with audit.mjs or not at all.
+export const ARRIVED_PAD = 0.06;
+export const DEFAULT_ENTER = 0.45, DEFAULT_EXIT_DUR = 0.4;
+
+// settleWindow(L) → { t0, t1 } the seconds a layer is at rest, or null when it never comes to rest.
+export function settleWindow(L = {}) {
+  const st = Number(L.start ?? 0) || 0;
+  const en = L.split ? 0 : (L.enterDur != null ? Number(L.enterDur) : DEFAULT_ENTER);
+  const du = L.duration != null ? Number(L.duration) : Infinity;
+  const exD = L.fxOut ? 0 : (L.exitDur != null ? Number(L.exitDur) : DEFAULT_EXIT_DUR);
+  const t0 = st + en + ARRIVED_PAD;
+  const t1 = du === Infinity ? Infinity : (L.out ? st + du - exD - ARRIVED_PAD : st + du);
+  return t1 > t0 ? { t0, t1 } : null;
+}
+
+export const isSettled = (L, t) => { const w = settleWindow(L); return !!w && t >= w.t0 && t <= w.t1; };
+
+/**
+ * outOfFrame(L, frame, t?) → null | { type, id, box, frame, over, at }
+ * Does this layer's SETTLED box hang outside the canvas, and by how much? It answers null for
+ * everything that is not a verdict: an unplaced layer (the stylesheet owns it), a layer that never
+ * settles, and any time inside an entrance or a moving exit. Coordinates must already be px — this
+ * reads what resolveCoords produced and resolves nothing of its own, because a second copy of the
+ * placement grammar is how the boxes in the header drifted apart.
+ */
+export function outOfFrame(L, frame, t = null) {
+  if (!L || !frame) return null;
+  if (typeof L.x !== 'number' && typeof L.y !== 'number') return null;
+  const win = settleWindow(L);
+  if (!win) return null;
+  const at = t == null ? win.t0 : t;
+  if (at < win.t0 || at > win.t1) return null;     // mid-entrance / mid-exit is motion, not a verdict
+  const x = typeof L.x === 'number' ? L.x : 0, y = typeof L.y === 'number' ? L.y : 0;
+  const w = typeof L.w === 'number' ? L.w : 0;
+  // Same height fallback resolveCoords uses for `pin:"bottom"`: a text layer rarely declares `h`.
+  const h = typeof L.h === 'number' ? L.h
+    : ((L.type == null || L.type === 'text') && L.size ? L.size * 1.2 : 0);
+  const over = {
+    left: Math.max(0, Math.round(-x)), top: Math.max(0, Math.round(-y)),
+    right: Math.max(0, Math.round(x + w - frame.W)), bottom: Math.max(0, Math.round(y + h - frame.H)),
+  };
+  if (!(over.left || over.right || over.top || over.bottom)) return null;
+  return { type: L.type || 'text', id: L.id || L.name || null, box: { x, y, w, h },
+    frame: { W: frame.W, H: frame.H }, over, at: +at.toFixed(3) };
+}
+
+// REPORT ONLY, and deliberately so. A rule that turns shipped scenes red is a regression until every
+// one of them is proven a real defect, so this prints and never throws. Whether it ever refuses is a
+// decision for a human holding the library-wide count, not for this function.
+export const boundsCheckOn = () => !!(globalThis.__FRAME_BOUNDS_CHECK
+  ?? (typeof process !== 'undefined' && process.env && process.env.FRAME_BOUNDS === '1'));
+
+export function reportBounds(layers, frame, log = console.warn) {
+  const out = [];
+  for (const L of layers || []) {
+    const f = outOfFrame(L, frame);
+    if (!f) continue;
+    out.push(f);
+    const by = Object.entries(f.over).filter(([, v]) => v > 0).map(([k, v]) => `${k} ${v}px`).join(', ');
+    log(`[frame-bounds] ${f.type}${f.id ? ` "${f.id}"` : ''} settles at ${f.box.x},${f.box.y} `
+      + `${f.box.w}x${f.box.h} · outside the ${f.frame.W}x${f.frame.H} frame by ${by} (t=${f.at}s)`);
+  }
+  return out;
+}
