@@ -37,15 +37,15 @@ export const FEATURES: Feature[] = [
   {
     slug: "blocks",
     kicker: "02 / blocks",
-    title: "155 components, theme-aware.",
+    title: "156 components, theme-aware.",
     tagline: "A vetted library you drop into a scene.",
     demo: "/assets/showcase/data.mp4",
     poster: "/assets/showcase/data.jpg",
     body: [
-      "Charts, cards, code, terminals, KPIs, browser frames, tweets, chat bubbles. 155 blocks across 70 families, each deterministic and reskinnable to any brand via CSS variables and a color ramp.",
+      "Charts, cards, code, terminals, KPIs, browser frames, tweets, chat bubbles. 156 blocks across 71 families, each deterministic and reskinnable to any brand via CSS variables and a color ramp.",
       "Browse the full registry on the blocks page. In a scene you reference one by name and `make expand` inlines it into real layers.",
     ],
-    tag: "70 families · make catalog",
+    tag: "71 families · make catalog",
     docs: "/blocks",
   },
   {

@@ -72,9 +72,11 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
 
             <div className="bd-grid">
               <div className="bd-col">
-                {/* IT SAID "CENTRE" AND THAT WAS FALSE FOR 154 OF 155 BLOCKS. Measured by calling every
-                    factory with a known x,y and reading back where its first layer landed: 154 place
-                    their top-left corner there, one (`tapRipple`) centres, seven could not be measured.
+                {/* IT SAID "CENTRE" AND THAT WAS FALSE FOR ALL BUT ONE BLOCK. Measured by calling every
+                    factory with a known x,y and reading back where its first layer landed: all but one
+                    place their top-left corner there, `tapRipple` centres, seven could not be measured.
+                    The counts are deliberately not written here: this is a historical measurement, and
+                    a hard number in it goes stale every time a block is added (site-counts caught it).
                     Nothing enforced either reading: scripts/author/expand-blocks.mjs passes x and y
                     straight to the factory, so the "convention" was 155 hand-written implementations
                     with no gate. block-schema now asserts it. */}
