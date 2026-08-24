@@ -13091,3 +13091,43 @@ for this fix is a rendered frame that was square before and rounded after, plus 
 **105 identical / 0 changed** proving it moved nothing else. A gate is worth building when the
 behaviour has more than one moving part; this one has a single condition, and the honest record of
 "no coverage" is better than a test shaped to pass.
+
+## #420 — the determinism gate exits green on a fresh clone, having compared nothing
+
+**Found while auditing the repo for a public launch, which is exactly the lens that shows it.**
+`verify/snap/` is gitignored (`.gitignore:32`), on purpose: a baseline is a pixel record of one
+machine's fonts and GPU, so committing one would fail for everybody else. The consequence nobody had
+traced is what a CLONE sees. Every scene lands in `nobaseline`, and the exit line only counted
+`changed`, `quarantined` and `errored`:
+
+```js
+process.exit(changed.length || quarantined.length || errored.length ? 1 : 0);
+```
+
+So `make snap-all` on a fresh clone printed 105 scene names and **exited 0**. The first gate a new
+contributor runs passed without comparing one pixel, and this is the engine's flagship guarantee: a
+green tick from it is the strongest claim the repo makes.
+
+**It was not silent, and that is the trap.** The loop above already names every no-baseline scene, and
+carries a comment saying that withholding the names was fixed precisely because a scene with no
+baseline has no net. The names were all there. The EXIT CODE still said pass, and CI reads the exit
+code. Naming a problem and then returning success is worse than silence, because it manufactures
+evidence that someone looked.
+
+**Fix.** Fail only on the all-empty case:
+
+```js
+if (!identical.length && !changed.length && nobaseline.length) { ...exit(1) }
+```
+
+A FEW no-baseline scenes stay soft, deliberately: that is a newly authored film waiting for `SAVE=1`,
+and failing on it would make writing a scene feel like breaking the build. **Zero comparisons is a
+different statement** and it is the one that has to be loud.
+
+**The rule, now hit twice in one day.** #417 was a census over the wrong files reporting clean; this is
+a census over an empty set reporting clean. Any gate that summarises rather than accuses has the same
+failure mode: **a clean result over an empty denominator is not a pass, it is a gate that never ran.**
+When writing one, ask what it prints when it finds no subjects, and make that case fail.
+
+**Verified both ways.** Baselines moved aside → exit 1 with the message. Baselines restored → 105
+identical, exit 0. Proving the red half is the whole point: an untested guard is a guess.

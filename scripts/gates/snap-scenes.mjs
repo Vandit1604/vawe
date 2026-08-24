@@ -210,5 +210,22 @@ if (nobaseline.length) {
 if (quarantined.length) { console.log(`\n✗ NON-DETERMINISTIC (quarantined):`); for (const q of quarantined) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 12)) console.log(`    ${d}`); if (c.diffs.length > 12) console.log(`    … +${c.diffs.length - 12} more`); }
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
+// A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. `verify/snap/` is gitignored (.gitignore:32),
+// so a fresh clone has no baselines at all: every scene lands in `nobaseline`, the loop above prints
+// them, and the exit below used to return 0. The first thing a new contributor runs would therefore
+// pass while checking not one pixel — and this is the engine's flagship determinism gate, so a green
+// tick from it reads as the strongest guarantee the repo makes.
+//
+// A FEW no-baseline scenes stay soft on purpose: that is just a newly authored film waiting for
+// `SAVE=1`, and failing on it would make writing a scene feel like breaking the build. ZERO
+// comparisons is a different statement, and it is the one that must be loud. Same lesson as the
+// `paints-nothing` census (docs/MISTAKES.md #417): a clean result over an empty denominator is not a
+// pass, it is a gate that never ran.
+if (!identical.length && !changed.length && nobaseline.length) {
+  console.error(`\n✗ nothing to compare: all ${nobaseline.length} scene(s) lack a baseline, so this gate checked NOTHING.`);
+  console.error('  verify/snap/ is gitignored, so a fresh clone starts here. Run `make snap-all SAVE=1` to record');
+  console.error('  the baselines for THIS machine first, then re-run to diff against them.');
+  process.exit(1);
+}
 // changed scenes and quarantined scenes both fail the gate; a pure re-run must be all-identical.
 process.exit(changed.length || quarantined.length || errored.length ? 1 : 0);
