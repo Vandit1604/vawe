@@ -6,7 +6,7 @@ import { FPS, isLightBg } from './motion.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { themeErrors } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
-import { produceBaseline } from './produce.js';
+import { produceBaseline, bakeCameraMove } from './produce.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin } from './safe.js';
 import { loadRegistered, auditFonts } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
@@ -380,12 +380,18 @@ export async function boot(build) {
       if (L.children) applyAt(L.children);
     } };
     applyAt(data.layers);
+    // `cameraMove` sugar → real `camera` keys BEFORE the per-aspect override pass, so an authored move's
+    // keys can be overridden per canvas like any hand-written one.
+    bakeCameraMove(data);
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
     resolveCoords(data, width, height, safe); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     produceBaseline(data, theme); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
     // scene that didn't specify it — absent-only, theme-aware, additive (never rewrites an authored layer),
     // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
+    // Nothing downstream reads `cameraMove` (renderFrame reads data.camera). If one survives this far it
+    // is a field written and then ignored — the failure this whole path exists to make impossible.
+    if (data.cameraMove) throw new Error('cameraMove survived produceBaseline — it would render as nothing');
     applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a
     // scene might use — so a brand's face is never silently swapped for the generic fallback. This is

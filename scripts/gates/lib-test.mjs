@@ -38,6 +38,7 @@ import { resolveSpectacle } from '../../core/spectacle.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
+import { produceBaseline } from '../../core/produce.js';
 import { lintData, easeErrors, bgErrors, durationWordErrors, cssErrors } from '../../core/validate.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/vocab.js';
 import { BASE_ENTER } from '../../core/clips.js';
@@ -2609,6 +2610,36 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     refuses({ ...film(), spectacle: { at: 1, of: 'nope', device: 'flash', why: 'w' } }, /no layer has id "nope"[\s\S]*logo/));
   ok('spectacle: a sting already on that instant is refused',
     refuses({ ...film(), stings: [{ t: 1.02, fx: 'burn' }], spectacle: { at: 1, of: 'logo', device: 'flash', why: 'w' } }, /collides with the sting "burn"/));
+}
+
+// ---- produce: cameraMove sugar must BECOME camera keys, on the one path every render takes ---------
+// The produced push was written at boot and read by nobody (only the author-time expander converted it),
+// so a static scene was byte-identical at frame 2 and frame 170. These say the funnel is closed.
+{
+  const base = () => ({ module: 'scene', duration: 6, bg: { preset: 'plain' }, layers: [{ type: 'text', text: 'x' }] });
+  const produced = produceBaseline(base(), {});
+  ok('produce: an un-choreographed scene ends with real camera keys, not cameraMove sugar',
+    produced.cameraMove === undefined && Array.isArray(produced.camera) && produced.camera.length > 1);
+  ok('produce: the injected push is inside the visible band (>5%), and stays modest',
+    (() => { const s = produced.camera.map((k) => k.s); const top = Math.max(...s);
+      return Math.min(...s) === 1 && top >= 1.05 && top <= 1.08; })());
+
+  const authored = produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }, { t: 3, s: 1.4 }] }, {});
+  ok('produce: a scene with its own camera is untouched',
+    authored.camera.length === 2 && authored.camera[1].s === 1.4 && authored.cameraMove === undefined);
+
+  const choreo = produceBaseline({ ...base(), layers: [{ type: 'text', text: 'x', motion: [{ t: 0, x: 0 }, { t: 2, x: 50 }] }] }, {});
+  ok('produce: a choreographed scene gets no camera', choreo.camera === undefined && choreo.cameraMove === undefined);
+
+  const off = produceBaseline({ ...base(), produced: false }, {});
+  ok('produce: "produced": false opts out of the injected push', off.camera === undefined);
+  const offSugar = produceBaseline({ ...base(), produced: false, cameraMove: { move: 'slowPush', dur: 4 } }, {});
+  ok('produce: "produced": false still BAKES the author\'s own sugar (never ignores a written field)',
+    offSugar.cameraMove === undefined && Array.isArray(offSugar.camera) && offSugar.camera.length > 1);
+
+  let msg = '';
+  try { produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }], cameraMove: { move: 'slowPush' } }, {}); } catch (e) { msg = e.message; }
+  ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

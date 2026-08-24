@@ -15,6 +15,8 @@
 // browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
 
 import { isLightBg as bgIsLight } from './motion.js';
+import { buildCameraMove } from './camera-moves.js';
+import { sceneDims } from './safe.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
@@ -22,7 +24,8 @@ import { isLightBg as bgIsLight } from './motion.js';
 export function produceBaseline(data, theme) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
-  if (data.produced === false) return data;                  // explicit opt-out of the whole pass
+  if (data.produced === false) return bakeCameraMove(data);  // opts out of the INJECTED baseline, not of
+  // the author's own `cameraMove` sugar — that must still become real keys or it renders as nothing.
   // NOTE — the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
   // (core/validate.mjs): the author must declare a preset or an explicit `plain`, so the backdrop is
   // always a deliberate choice, never a silent default that can be brand-wrong (the paperShapes lesson).
@@ -36,7 +39,10 @@ export function produceBaseline(data, theme) {
   // 2. CAMERA — a gentle slow push if the scene declares no camera move at all (the frame stays alive).
   const hasCam = (Array.isArray(data.cameraMove) && data.cameraMove.length) || (Array.isArray(data.camera) && data.camera.length);
   if (!hasCam && !choreographed) {
-    data.cameraMove = [{ move: 'slowPush', start: 0, dur: data.duration || 12, from: 1, to: 1.04 }];
+    // 1.06, not 1.04: under a 5% scale change a push is below the perception threshold, so the frame
+    // reads as dead however long it runs (the old 1.04 default did, for every scene that took it).
+    // 5-15% is the comfortable-emphasis band; sit at its bottom so this never fights an authored film.
+    data.cameraMove = [{ move: 'slowPush', start: 0, dur: data.duration || 12, from: 1, to: 1.06 }];
   }
 
   // 3. SCENE-UNIT TRANSITIONS — a film WITH cuts that hasn't opted into unit transitions gets them, so the
@@ -51,5 +57,25 @@ export function produceBaseline(data, theme) {
   // baselines are unsafe to inject blindly; kinetic type is nudged by the direction floor (no-kinetic-type)
   // and authored per-headline instead. The baseline stays ADDITIVE (bg · camera · sceneUnits) — it never
   // rewrites a layer the author already wrote.
+  bakeCameraMove(data);
+  return data;
+}
+
+// THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (formats/scene/scene.js reads
+// `data.camera`). It used to be resolved only by scripts/author/expand-blocks.mjs, at AUTHOR time — so the
+// baseline push produce.js injects at BOOT time, after expansion, was written and never once read: a static
+// scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes
+// through, means the field cannot be written and ignored again. Runs even under `produced: false`, because
+// that opts out of the injected baseline, not out of the author's own sugar.
+export function bakeCameraMove(data) {
+  if (!data || !data.cameraMove) return data;
+  const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
+  if (Array.isArray(data.camera) && data.camera.length)
+    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar — one would silently'
+      + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
+  // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
+  // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
+  data.camera = specs.flatMap((s) => buildCameraMove(s, sceneDims(data)));
+  delete data.cameraMove;
   return data;
 }
