@@ -126,6 +126,19 @@ other populations exist (98 without scratch, 154 raw files in the directory) and
 file once cited 93, 130 and 144 as the size of the same library in three sentences. **"that film" is not
 named anywhere and I could not identify it, so its two cells are unverified and marked so.**
 
+**A FRESH CLONE SEES 36, NOT 132, AND NOTHING IS BROKEN.** Films are gitignored on purpose
+(`.gitignore:61`: a video instance is not the framework), with an allowlist for the handful the site
+needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 132 scenes` on this machine and about a third of
+that on a clean checkout, and EVERY census in this file behaves the same way. If your count is smaller,
+the gates are fine and the number here is not stale: you are looking at a smaller library.
+
+Say the cost plainly, because it is real. **The two films this file argues from,
+`brew-launch-act1` and `higgsfield-recreation`, do not ship.** They are recreations of other companies'
+sites, carrying captured UI and real brand marks, and publishing those is the thing the asset rules two
+sections down already forbid. So the strongest claims here are measured against work a contributor
+cannot open, and that is a deliberate trade, not an oversight. Treat the percentages as the direction
+to author in, and re-derive any number you intend to QUOTE against the library you actually have.
+
 The backdrop line is the strongest single lever: brew inverts the whole tone of the world on four of its
 five cuts and spends its one accent window on the logo reveal. A pictorial beat on a dead backdrop is
 still a slide.
