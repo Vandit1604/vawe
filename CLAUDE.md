@@ -518,6 +518,83 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    `make ledger-add D=<file>` after the user approves it.
 9. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
 
+## ARCHITECTURE: fix it at the root, or fail there. A gate is the last resort.
+
+**The rule, and it is not a preference.** A gate belongs ONLY where the problem cannot be avoided in
+the code at its root, or made to fail there. If it can be fixed at the write site *simply*, it is fixed
+at the write site and no gate is written. A gate is justified only when preventing the thing in code
+would genuinely complicate the code AND it cannot be solved at the root either. Then, and only then,
+build a gate.
+
+**The test, applied to any check you are about to write: where is this value WRITTEN?** If that place
+is reachable, the refusal goes there and the whole class of bug ends. A gate that runs afterwards
+leaves the engine perfectly able to produce the same bad value tomorrow; it only promises to notice.
+
+What a gate IS for, stated so the rule is not read as "never":
+- a property only knowable **after a render** (a luminance flash across a cut, a frame that paints nothing)
+- a property only knowable **across the whole library** (a design repeating a shipped one, a count on the
+  site disagreeing with the registry that produced it)
+- a comparison against a **baseline** (byte-identical frames, purity across render order)
+- a **judgement**, which no code can make (`make judge`, and your eyes)
+
+**The worked example, because it is exactly the reflex to avoid.** A block emitted `left: -calc(...)`.
+Invalid CSS, so the browser dropped that one declaration, kept the rest of the rule, rendered on, and
+three of four focus brackets never moved with every check green. The first fix was a NEW GATE that
+swept every fragment in a browser. It worked, and it was the wrong shape. The right answer was three
+files away: `core/sanitize-html.js` already refuses `transition`/`animation` for the identical reason,
+hand-authored CSS that reads correctly and silently does nothing. The refusal now lives at the two
+places author CSS reaches the DOM (`core/layers/util.js`, `core/layers/html.js`) and throws naming the
+layer. The gate was deleted. Full write-up: `docs/MISTAKES.md` #422.
+
+**Every gate has a running cost, and this repo has paid it twice.** `visual-vocabulary` was deleted for
+measuring size wrongly — it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of
+the frame. `make slop` ran 41 borrowed rules against a DOM dump carrying evidence for three of them and
+reported its silence as a pass. **A gate is another thing that can be quietly wrong, and a wrong gate is
+worse than no gate** because it manufactures confidence. Before adding one, read `docs/TASTE.md` on that
+cull.
+
+## SUGAR MUST NEVER SILENTLY NO-OP
+
+An authoring convenience that needs a build step to work is a trap: the author writes something real,
+skips a step they did not know about, and watches a still frame with nothing to tell them why.
+
+`make expand` resolves four sugars. Three of them — `block`, `beat`, `comp` — become layer TYPES, so a
+scene rendered without expanding is refused by name at boot. That is a build step failing LOUDLY, and it
+is acceptable: expansion imports all 156 block factories, which has no business in every render.
+
+The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
+reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera
+and no error. It now bakes at boot (`bakeCameraMove` in `core/produce.js`), and `core/boot.js` THROWS if
+`cameraMove` survives to render — because the failure was a field written and never read, so the repair
+is not "convert it here", it is "make surviving unconverted impossible" (`docs/MISTAKES.md` #424).
+
+**The rule: sugar either resolves at boot, or its absence fails loudly. Silence is never the third option.**
+
+## LOOSE COUPLING: adding a thing must not mean touching everything
+
+The engine should let you add an effect, a layer type, a block, a beat or a camera move **without
+handling everything again**. Where that is true today it is because of one of three primitives, and a
+new extension point should use one of them rather than invent a fourth:
+
+- **`defineRegistry(...)`** (`core/vocab.js`) — a named vocabulary that refuses an unknown name and says
+  which slot it was reaching for.
+- **`paramsOf`** (`core/camera-moves.js:216`) — refuses an unknown parameter by reading the generator's
+  OWN signature. Nobody maintains that list, so it cannot drift.
+- **`createKit(ctx)`** (`core/layers/util.js`) — dependency injection for layer builders. A capability
+  added to the ctx reaches every primitive at once, with no signature change at any call site. The frame
+  (`frameOf` in `core/safe.js`) arrived exactly this way.
+
+**One fact, one owner, everyone else receives it.** The recurring failure in this codebase is not
+complexity, it is the same fact known in two places and then drifting: the audit graded a camera read
+from the scene file while the renderer baked a different one at boot (#423), and light-versus-dark once
+had two implementations (#159). Before computing something a caller could have handed you, check whether
+an owner already exists. `nothing computes the frame twice` is the shape to copy.
+
+**Deterministic, simple, readable, fail early.** `renderFrame(n)` is a pure function of `n` and every
+suggestion is weighed against that first. Validate at the entry point rather than deep in the call chain.
+Return the error; never log and continue. Prefer the boring, obvious construction: an abstraction with
+one caller is not decoupling, it is a second thing to read.
+
 ## The framework harvest (do this EVERY render — the engine must compound)
 
 Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
