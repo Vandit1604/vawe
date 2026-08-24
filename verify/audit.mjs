@@ -24,6 +24,7 @@
 // 1080. Auditing one aspect while the CLI ships four is a gate that agrees with itself and not with the
 // output. Default stays the scene's own aspect, so a single-aspect scene costs nothing.
 import fs from 'node:fs';
+import { produceBaseline } from '../core/produce.js';
 import path from 'node:path';
 import http from 'node:http';
 import zlib from 'node:zlib';
@@ -1238,7 +1239,16 @@ for (const aspectKey of askedAspects) {
   const CAM_KEYS = [['x', 0], ['y', 0], ['s', 1], ['rx', 0], ['ry', 0], ['roll', 0], ['p', null]];
   let camMoving = () => false;
   try {
-    const kf = JSON.parse(fs.readFileSync(absPath, 'utf8')).camera || [];
+    // ASK THE SAME FUNNEL THE RENDER ASKS, never the file. `camera` is not necessarily IN the scene
+    // file: `cameraMove` sugar and the produced default both become real keyframes at boot, inside the
+    // browser (core/produce.js `bakeCameraMove`, called from core/boot.js). Reading the file therefore
+    // saw no camera for every produced scene, `camMoving()` answered false for all of them, and the
+    // exemption below never fired — so the audit reported content leaving the safe area because of a
+    // camera it could not see. It was measuring a different scene from the one that renders.
+    // `produceBaseline` is that funnel and is pure; its `theme` argument is unused.
+    const raw = JSON.parse(fs.readFileSync(absPath, 'utf8'));
+    produceBaseline(raw);
+    const kf = raw.camera || [];
     const moves = kf.slice(1).map((b, i) => ({ a: kf[i], b }))
       .filter(({ a, b }) => CAM_KEYS.some(([k, d]) => (a[k] ?? d) !== (b[k] ?? d)));
     if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
