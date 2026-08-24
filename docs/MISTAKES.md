@@ -13285,3 +13285,32 @@ is a dead one** — it costs the same to carry and delivers nothing.
 53 of 105 baselined scenes changed as a result, every one of them gaining the push the code always
 promised. See #423 for the audit bug this immediately exposed, and for why the apparent regression that
 followed was not one.
+
+## #425 — an array's ORDER was a shader API, and nothing could have caught it
+
+`core/stings.js:22` declared `SHADER_FX` as a flat list of names. `draw()` did `SHADER_FX.indexOf(effect)`
+and handed that integer to the GLSL uniform `u_fx`, where the fragment shader branched on `0..34` with
+the effect name appearing only in a `/* comment */`.
+
+**So the array position WAS the shader branch number.** Insert a name in the middle, or reorder for
+readability, and every later effect silently renders a different shader. There is no crash, no warning,
+and the output is perfectly deterministic — it is just wrong. `probe-purity` would pass. `snap-scenes`
+would notice only if a baseline already existed for the affected scene, and would report it as a
+regression with no indication of the cause.
+
+**This is the most dangerous shape in the codebase**: a coupling with no error path, between a
+readable-looking list and a number nobody writes down. The comment beside each branch made it look
+documented while documenting nothing enforceable.
+
+Fixed with a named map — `const SHADER_ID = { flash: 0, burn: 1, … }`, `SHADER_FX = Object.keys(SHADER_ID)`,
+and `draw()` reading `SHADER_ID[effect]`. The index is explicit now and ordering stops mattering.
+`draw()` also threw away an unknown name with `this.clear()`, a silent no-op for any caller that is not
+`scene.js`; it throws and lists the known names.
+
+**How the refactor was proven pure, and why the first proof was not good enough.** The agent compared
+rendered PNGs from `scripts/author/preview.mjs` and found they were not byte-reproducible run to run
+(sub-LSB jitter, PSNR 99.6 dB for the SAME code), so it argued from PSNR instead. That is a known trap:
+`preview.mjs` does not wait for GPU raster to settle and is for LOOKING, never for proving determinism
+(#102). The real proof was one command on main, where the baselines live: `snap-scenes` at **105
+identical**, over a library where **28 scenes exercise 21 of the 35 effects**, spanning ids 0 to 31.
+A refactor is pure when the renderer says so, not when a similarity metric is close enough.
