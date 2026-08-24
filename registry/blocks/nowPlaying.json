@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "nowPlaying",
+  "type": "vawe:block",
+  "title": "nowPlaying",
+  "description": "music-player card · artwork, progress, transport",
+  "tags": [
+    "nowPlaying"
+  ],
+  "dimensions": {
+    "width": 424,
+    "height": 245
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "nowPlaying",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 380,
+      "track": "Golden Hour",
+      "artist": "Field Notes",
+      "progress": 0.62
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "name",
+      "track",
+      "sub",
+      "artist",
+      "avatar",
+      "art",
+      "initials",
+      "progress",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/nowPlaying.json",
+      "url": "https://vawe.dev/assets/blocks/nowPlaying.json",
+      "target": "formats/scene/nowPlaying.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/nowPlaying.png"
+  }
+}

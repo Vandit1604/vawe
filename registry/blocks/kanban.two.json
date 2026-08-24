@@ -1,0 +1,65 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "kanban.two",
+  "type": "vawe:block",
+  "title": "kanban.two",
+  "description": "two-column board",
+  "tags": [
+    "kanban"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 213
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "kanban.two",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "columns": [
+        {
+          "title": "Backlog",
+          "cards": [
+            "SFX",
+            "Music"
+          ]
+        },
+        {
+          "title": "Shipped",
+          "cards": [
+            "Blocks",
+            "Lottie",
+            "60fps"
+          ]
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "columns",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/kanban.two.json",
+      "url": "https://vawe.dev/assets/blocks/kanban.two.json",
+      "target": "formats/scene/kanban.two.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/kanban.two.png"
+  }
+}

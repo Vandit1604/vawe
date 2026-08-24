@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "browserFrame",
+  "type": "vawe:block",
+  "title": "browserFrame",
+  "description": "window chrome (traffic dots + URL bar)",
+  "tags": [
+    "browserFrame"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 344
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "browserFrame",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "h": 300,
+      "url": "example.com"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "url",
+      "children",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/browserFrame.json",
+      "url": "https://vawe.dev/assets/blocks/browserFrame.json",
+      "target": "formats/scene/browserFrame.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/browserFrame.png"
+  }
+}

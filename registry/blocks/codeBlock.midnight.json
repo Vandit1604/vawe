@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.midnight",
+  "type": "vawe:block",
+  "title": "codeBlock.midnight",
+  "description": "code theme · cool dark, blue-first cycling",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 212
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.midnight",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "midnight",
+      "label": "app.ts",
+      "size": 19,
+      "lines": [
+        "const scene = load('video.json')",
+        "const frames = render(scene)",
+        "encode(frames, 'out.mp4')"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.midnight.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.midnight.json",
+      "target": "formats/scene/codeBlock.midnight.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.midnight.png"
+  }
+}

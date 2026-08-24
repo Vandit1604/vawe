@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "notification.warn",
+  "type": "vawe:block",
+  "title": "notification.warn",
+  "description": "toast, amber accent",
+  "tags": [
+    "notification"
+  ],
+  "dimensions": {
+    "width": 484,
+    "height": 124
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "notification.warn",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 440,
+      "title": "Grain crawls on text",
+      "body": "opt in only for filmic brands",
+      "accent": "#F6A417"
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "body",
+      "w",
+      "message",
+      "desc",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/notification.warn.json",
+      "url": "https://vawe.dev/assets/blocks/notification.warn.json",
+      "target": "formats/scene/notification.warn.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/notification.warn.png"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminal.build",
+  "type": "vawe:block",
+  "title": "terminal.build",
+  "description": "build output",
+  "tags": [
+    "terminal"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 172
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "terminal.build",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "command": "make video D=launch.json",
+      "output": [
+        "▶ scene : capturing across 8 workers...",
+        "✓ done → out.mp4"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "command",
+      "w",
+      "output",
+      "cps",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminal.build.json",
+      "url": "https://vawe.dev/assets/blocks/terminal.build.json",
+      "target": "formats/scene/terminal.build.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminal.build.png"
+  }
+}

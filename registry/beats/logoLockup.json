@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "logoLockup",
+  "type": "vawe:beat",
+  "title": "logoLockup",
+  "description": "Lock up the brand: the mark pops, the wordmark travels in, a kinetic headline over a sub.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "logoLockup",
+      "start": 0,
+      "dur": 4,
+      "mark": null,
+      "wordmark": null,
+      "headline": null,
+      "sub": null
+    },
+    "requiredProps": [
+      "mark",
+      "wordmark",
+      "headline",
+      "sub"
+    ],
+    "props": [
+      "markX",
+      "markY",
+      "markW",
+      "wordX",
+      "wordY",
+      "wordW"
+    ]
+  }
+}

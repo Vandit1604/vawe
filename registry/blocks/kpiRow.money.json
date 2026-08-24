@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "kpiRow.money",
+  "type": "vawe:block",
+  "title": "kpiRow.money",
+  "description": "KPI row, currency",
+  "tags": [
+    "kpiRow"
+  ],
+  "dimensions": {
+    "width": 640,
+    "height": 133
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "kpiRow.money",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "items": [
+        {
+          "value": "$2.4M",
+          "label": "ARR"
+        },
+        {
+          "value": "$89",
+          "label": "ACV"
+        },
+        {
+          "value": "3.2%",
+          "label": "churn"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "items",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/kpiRow.money.json",
+      "url": "https://vawe.dev/assets/blocks/kpiRow.money.json",
+      "target": "formats/scene/kpiRow.money.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/kpiRow.money.png"
+  }
+}

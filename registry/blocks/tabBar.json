@@ -1,0 +1,59 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tabBar",
+  "type": "vawe:block",
+  "title": "tabBar",
+  "description": "segmented control",
+  "tags": [
+    "tabBar"
+  ],
+  "dimensions": {
+    "width": 544,
+    "height": 96
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "tabBar",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 500,
+      "active": 1,
+      "tabs": [
+        "Design",
+        "Motion",
+        "Export"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "tabs",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "switchAt",
+      "switchDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tabBar.json",
+      "url": "https://vawe.dev/assets/blocks/tabBar.json",
+      "target": "formats/scene/tabBar.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tabBar.png"
+  }
+}

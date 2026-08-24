@@ -1,0 +1,81 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "fileTree",
+  "type": "vawe:block",
+  "title": "fileTree",
+  "description": "indented file/folder tree",
+  "tags": [
+    "fileTree"
+  ],
+  "dimensions": {
+    "width": 404,
+    "height": 217
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "fileTree",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 360,
+      "items": [
+        {
+          "name": "core",
+          "type": "dir",
+          "depth": 0
+        },
+        {
+          "name": "layers",
+          "type": "dir",
+          "depth": 1
+        },
+        {
+          "name": "lottie.js",
+          "type": "file",
+          "depth": 2,
+          "active": true
+        },
+        {
+          "name": "motion.js",
+          "type": "file",
+          "depth": 1
+        },
+        {
+          "name": "blocks",
+          "type": "dir",
+          "depth": 0
+        },
+        {
+          "name": "index.mjs",
+          "type": "file",
+          "depth": 1
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/fileTree.json",
+      "url": "https://vawe.dev/assets/blocks/fileTree.json",
+      "target": "formats/scene/fileTree.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/fileTree.png"
+  }
+}

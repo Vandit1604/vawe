@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminalPro",
+  "type": "vawe:block",
+  "title": "terminalPro",
+  "description": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+  "tags": [
+    "terminalPro"
+  ],
+  "dimensions": {
+    "width": 864,
+    "height": 380
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "terminalPro",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "command": "npm run deploy"
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "title",
+      "command",
+      "diff",
+      "success",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminalPro.json",
+      "url": "https://vawe.dev/assets/blocks/terminalPro.json",
+      "target": "formats/scene/terminalPro.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminalPro.png"
+  }
+}

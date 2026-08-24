@@ -1,0 +1,50 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tapRipple",
+  "type": "vawe:block",
+  "title": "tapRipple",
+  "description": "touch tap · contact dot and an expanding ring, for phone demos",
+  "tags": [
+    "tapRipple"
+  ],
+  "dimensions": {
+    "width": 194,
+    "height": 194
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "tapRipple",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "at": 4.2,
+      "size": 150
+    },
+    "props": [
+      "x",
+      "y",
+      "at",
+      "size",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tapRipple.json",
+      "url": "https://vawe.dev/assets/blocks/tapRipple.json",
+      "target": "formats/scene/tapRipple.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tapRipple.png"
+  }
+}

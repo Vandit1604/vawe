@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "toast.info",
+  "type": "vawe:block",
+  "title": "toast.info",
+  "description": "snackbar, info",
+  "tags": [
+    "toast"
+  ],
+  "dimensions": {
+    "width": 464,
+    "height": 98
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "toast.info",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 420,
+      "message": "3 blocks added to the scene",
+      "action": "Undo",
+      "icon": "i",
+      "accent": "var(--accent)"
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "w",
+      "message",
+      "body",
+      "action",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/toast.info.json",
+      "url": "https://vawe.dev/assets/blocks/toast.info.json",
+      "target": "formats/scene/toast.info.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/toast.info.png"
+  }
+}

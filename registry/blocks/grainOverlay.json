@@ -1,0 +1,37 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "grainOverlay",
+  "type": "vawe:block",
+  "title": "grainOverlay",
+  "description": "fine film-grain texture over the frame (feTurbulence)",
+  "tags": [
+    "grainOverlay",
+    "overlay"
+  ],
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "grainOverlay",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "h": 320,
+      "opacity": 0.12
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "opacity",
+      "freq",
+      "start",
+      "dur"
+    ]
+  }
+}

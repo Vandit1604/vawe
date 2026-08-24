@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "checklist.done",
+  "type": "vawe:block",
+  "title": "checklist.done",
+  "description": "checklist, all complete",
+  "tags": [
+    "checklist"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 202
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "checklist.done",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "items": [
+        {
+          "text": "Blocks library",
+          "done": true
+        },
+        {
+          "text": "Registry + catalog",
+          "done": true
+        },
+        {
+          "text": "Docs auto-gen",
+          "done": true
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/checklist.done.json",
+      "url": "https://vawe.dev/assets/blocks/checklist.done.json",
+      "target": "formats/scene/checklist.done.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/checklist.done.png"
+  }
+}

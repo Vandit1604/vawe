@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminal",
+  "type": "vawe:block",
+  "title": "terminal",
+  "description": "command prompt; command types in, output answers after it",
+  "tags": [
+    "terminal"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 172
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "terminal",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "command": "make video",
+      "output": [
+        "rendering 1950 frames...",
+        "done → out.mp4"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "command",
+      "w",
+      "output",
+      "cps",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminal.json",
+      "url": "https://vawe.dev/assets/blocks/terminal.json",
+      "target": "formats/scene/terminal.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminal.png"
+  }
+}

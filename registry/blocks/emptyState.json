@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "emptyState",
+  "type": "vawe:block",
+  "title": "emptyState",
+  "description": "zero state · icon tile, what is missing, the action that fills it",
+  "tags": [
+    "emptyState"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 293
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "emptyState",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "icon": "☐",
+      "title": "Nothing here yet",
+      "body": "Anything you save shows up in this list.",
+      "cta": "Add the first one"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "icon",
+      "title",
+      "body",
+      "cta",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/emptyState.json",
+      "url": "https://vawe.dev/assets/blocks/emptyState.json",
+      "target": "formats/scene/emptyState.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/emptyState.png"
+  }
+}

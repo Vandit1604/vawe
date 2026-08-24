@@ -1,0 +1,42 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "statReveal",
+  "type": "vawe:beat",
+  "title": "statReveal",
+  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "statReveal",
+      "start": 0,
+      "dur": 4,
+      "to": null,
+      "decimals": null,
+      "prefix": null,
+      "label": null
+    },
+    "requiredProps": [
+      "to",
+      "decimals",
+      "prefix",
+      "label"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "unit"
+    ]
+  }
+}

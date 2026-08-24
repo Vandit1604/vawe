@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "statBig",
+  "type": "vawe:block",
+  "title": "statBig",
+  "description": "scale-contrast stat — huge count + tiny label",
+  "tags": [
+    "statBig"
+  ],
+  "dimensions": {
+    "width": 339,
+    "height": 173
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "statBig",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "to": 1950,
+      "label": "frames",
+      "size": 120
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "to",
+      "from",
+      "unit",
+      "prefix",
+      "size",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/statBig.json",
+      "url": "https://vawe.dev/assets/blocks/statBig.json",
+      "target": "formats/scene/statBig.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/statBig.png"
+  }
+}

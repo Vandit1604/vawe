@@ -1,0 +1,65 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "timeline.release",
+  "type": "vawe:block",
+  "title": "timeline.release",
+  "description": "release timeline",
+  "tags": [
+    "timeline"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 279
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "timeline.release",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "items": [
+        {
+          "title": "v2.0 · registry",
+          "meta": "today",
+          "done": true
+        },
+        {
+          "title": "v1.4 · lottie",
+          "meta": "1w",
+          "done": true
+        },
+        {
+          "title": "v2.1 · captions",
+          "meta": "next",
+          "done": false
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/timeline.release.json",
+      "url": "https://vawe.dev/assets/blocks/timeline.release.json",
+      "target": "formats/scene/timeline.release.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/timeline.release.png"
+  }
+}

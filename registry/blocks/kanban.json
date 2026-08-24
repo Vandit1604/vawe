@@ -1,0 +1,70 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "kanban",
+  "type": "vawe:block",
+  "title": "kanban",
+  "description": "columns of cards",
+  "tags": [
+    "kanban"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 162
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "kanban",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "columns": [
+        {
+          "title": "Todo",
+          "cards": [
+            "captions",
+            "TTS"
+          ]
+        },
+        {
+          "title": "Doing",
+          "cards": [
+            "blocks"
+          ]
+        },
+        {
+          "title": "Done",
+          "cards": [
+            "60fps",
+            "lottie"
+          ]
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "columns",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/kanban.json",
+      "url": "https://vawe.dev/assets/blocks/kanban.json",
+      "target": "formats/scene/kanban.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/kanban.png"
+  }
+}

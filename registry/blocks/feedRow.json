@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "feedRow",
+  "type": "vawe:block",
+  "title": "feedRow",
+  "description": "feed item · avatar, name, timestamp, body",
+  "tags": [
+    "feedRow"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 142
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "feedRow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "name": "Wren Alcott",
+      "sub": "@wren",
+      "time": "just now",
+      "body": "Moved the Fieldwork draft into the shared workspace."
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "avatar",
+      "initials",
+      "name",
+      "sub",
+      "time",
+      "body",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/feedRow.json",
+      "url": "https://vawe.dev/assets/blocks/feedRow.json",
+      "target": "formats/scene/feedRow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/feedRow.png"
+  }
+}

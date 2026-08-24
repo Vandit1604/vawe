@@ -1,0 +1,56 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "statBig.currency",
+  "type": "vawe:block",
+  "title": "statBig.currency",
+  "description": "stat with a $ unit",
+  "tags": [
+    "statBig"
+  ],
+  "dimensions": {
+    "width": 415,
+    "height": 173
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "statBig.currency",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "to": 880,
+      "unit": "$B",
+      "label": "market",
+      "size": 120
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "to",
+      "from",
+      "unit",
+      "prefix",
+      "size",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/statBig.currency.json",
+      "url": "https://vawe.dev/assets/blocks/statBig.currency.json",
+      "target": "formats/scene/statBig.currency.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/statBig.currency.png"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.slate",
+  "type": "vawe:block",
+  "title": "codeBlock.slate",
+  "description": "code theme · neutral dark, muted steel syntax",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 212
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.slate",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "slate",
+      "label": "main.go",
+      "size": 19,
+      "lines": [
+        "frames := render.All(scene)",
+        "enc := encode.H264(frames)",
+        "enc.WriteTo(\"out.mp4\")"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.slate.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.slate.json",
+      "target": "formats/scene/codeBlock.slate.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.slate.png"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "comparison",
+  "type": "vawe:block",
+  "title": "comparison",
+  "description": "two columns (Before/After · Others/Us)",
+  "tags": [
+    "comparison"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 185
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "comparison",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "leftTitle": "Templates",
+      "rightTitle": "Vawe",
+      "left": [
+        "Fixed slots",
+        "Same look"
+      ],
+      "right": [
+        "Open canvas",
+        "Per-brand"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "leftTitle",
+      "rightTitle",
+      "left",
+      "right",
+      "leftScreen",
+      "rightScreen",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/comparison.json",
+      "url": "https://vawe.dev/assets/blocks/comparison.json",
+      "target": "formats/scene/comparison.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/comparison.png"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "verdictProof",
+  "type": "vawe:beat",
+  "title": "verdictProof",
+  "description": "Prove the claim: type the command, note the result, pop a tone-coloured verdict chip after it.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "verdictProof",
+      "start": 0,
+      "dur": 4,
+      "title": null,
+      "command": null,
+      "note": null
+    },
+    "requiredProps": [
+      "title",
+      "command",
+      "note"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "prompt",
+      "verdict",
+      "tone",
+      "cps"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "gauge.full",
+  "type": "vawe:block",
+  "title": "gauge.full",
+  "description": "gauge, complete (green)",
+  "tags": [
+    "gauge"
+  ],
+  "dimensions": {
+    "width": 344,
+    "height": 304
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "gauge.full",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 300,
+      "value": 100,
+      "color": "var(--up)",
+      "label": "passing"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "value",
+      "max",
+      "label",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/gauge.full.json",
+      "url": "https://vawe.dev/assets/blocks/gauge.full.json",
+      "target": "formats/scene/gauge.full.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/gauge.full.png"
+  }
+}

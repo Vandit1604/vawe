@@ -1,0 +1,36 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "captions",
+  "type": "vawe:block",
+  "title": "captions",
+  "description": "timed subtitle chips (bottom overlay)",
+  "tags": [
+    "captions",
+    "overlay"
+  ],
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "captions",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "lines": [
+        {
+          "t": 0.2,
+          "text": "every frame fights for its value"
+        }
+      ]
+    },
+    "props": [
+      "lines",
+      "x",
+      "y",
+      "size",
+      "start"
+    ]
+  }
+}

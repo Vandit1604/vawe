@@ -1,0 +1,43 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminalReveal",
+  "type": "vawe:beat",
+  "title": "terminalReveal",
+  "description": "Show it working in a terminal: the command types itself, output rises, the result lands in the accent.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "terminalReveal",
+      "start": 0,
+      "dur": 4,
+      "title": null,
+      "command": null,
+      "result": null
+    },
+    "requiredProps": [
+      "title",
+      "command",
+      "result"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "prompt",
+      "output",
+      "cps"
+    ]
+  }
+}

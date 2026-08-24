@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "badge.info",
+  "type": "vawe:block",
+  "title": "badge.info",
+  "description": "badge, info",
+  "tags": [
+    "badge"
+  ],
+  "dimensions": {
+    "width": 173,
+    "height": 82
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "badge.info",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "label": "docs",
+      "value": "latest",
+      "tone": "info"
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "value",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/badge.info.json",
+      "url": "https://vawe.dev/assets/blocks/badge.info.json",
+      "target": "formats/scene/badge.info.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/badge.info.png"
+  }
+}

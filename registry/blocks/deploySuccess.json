@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "deploySuccess",
+  "type": "vawe:block",
+  "title": "deploySuccess",
+  "description": "CI cascade → green \"Deployed to production\" card",
+  "tags": [
+    "deploySuccess"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 324
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "deploySuccess",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "w": 520
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "url",
+      "title",
+      "note",
+      "steps",
+      "active",
+      "start",
+      "rowGap"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/deploySuccess.json",
+      "url": "https://vawe.dev/assets/blocks/deploySuccess.json",
+      "target": "formats/scene/deploySuccess.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/deploySuccess.png"
+  }
+}

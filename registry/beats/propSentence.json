@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "propSentence",
+  "type": "vawe:beat",
+  "title": "propSentence",
+  "description": "Write one sentence across the frame with real objects as the nouns: word, photo, chip, card, word, on a rolling stagger.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "propSentence",
+      "start": 0,
+      "dur": 4
+    },
+    "requiredProps": [],
+    "props": [
+      "items",
+      "x",
+      "y",
+      "w",
+      "gap",
+      "size",
+      "weight",
+      "wordColor",
+      "wordOut",
+      "propW",
+      "radius",
+      "stagger",
+      "justify",
+      "enterDur",
+      "exitDur"
+    ]
+  }
+}

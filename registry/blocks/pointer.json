@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "pointer",
+  "type": "vawe:block",
+  "title": "pointer",
+  "description": "mouse pointer · travels to a target and clicks it (ripple)",
+  "tags": [
+    "pointer"
+  ],
+  "dimensions": {
+    "width": 88,
+    "height": 88
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "pointer",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "to": {
+        "dx": 300,
+        "dy": 190
+      },
+      "clickAt": 1.3,
+      "size": 44
+    },
+    "props": [
+      "x",
+      "y",
+      "to",
+      "clickAt",
+      "clicks",
+      "path",
+      "size",
+      "color",
+      "rippleColor",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/pointer.json",
+      "url": "https://vawe.dev/assets/blocks/pointer.json",
+      "target": "formats/scene/pointer.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/pointer.png"
+  }
+}

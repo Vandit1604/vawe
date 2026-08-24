@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "pillRow",
+  "type": "vawe:block",
+  "title": "pillRow",
+  "description": "horizontal row of chip tags",
+  "tags": [
+    "pillRow"
+  ],
+  "dimensions": {
+    "width": 424,
+    "height": 74
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "pillRow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "items": [
+        "deterministic",
+        "pure(n)",
+        "no timeline"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "items",
+      "fg",
+      "bg",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/pillRow.json",
+      "url": "https://vawe.dev/assets/blocks/pillRow.json",
+      "target": "formats/scene/pillRow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/pillRow.png"
+  }
+}

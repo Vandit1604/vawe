@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "recordedPan",
+  "type": "vawe:beat",
+  "title": "recordedPan",
+  "description": "Pan a surface wider than the frame on an irregular linear track so it reads as a screen recording, with the cursor and callouts welded to it.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "recordedPan",
+      "start": 0,
+      "dur": 4,
+      "image": null,
+      "capture": null,
+      "html": null,
+      "h": null
+    },
+    "requiredProps": [
+      "image",
+      "capture",
+      "html",
+      "h"
+    ],
+    "props": [
+      "id",
+      "x",
+      "y",
+      "w",
+      "travel",
+      "lead",
+      "leadDur",
+      "hold",
+      "panDur",
+      "rhythm",
+      "riders",
+      "anim",
+      "enterDur",
+      "out",
+      "exitDur"
+    ]
+  }
+}
