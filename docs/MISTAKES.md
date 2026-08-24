@@ -13173,3 +13173,115 @@ guess.
 broken recipe. Make said `warning: ignoring old commands for target 'review'` and carried on. **A
 target name is a substring of other target names**: anchor an insert on something unique, and read
 make's warnings — that one names the exact damage.
+
+## #422 — a gate is not a fix: the CSS refusal that belonged in the code
+
+**The correction, in the user's words: "dont add gates mf / you get to gates everytime / dont do things
+additively / do them properly in the code where you are writing logic".** They were right, and the
+reflex is worth naming because it is comfortable and it is wrong.
+
+A block emitted `left: -calc(...)`. A leading minus outside `calc()` is invalid CSS, so the browser
+dropped that one declaration, kept the rest of the rule, rendered on, and three of four focus brackets
+never moved. Every gate was green. It was found by rendering a frame and noticing with an eye.
+
+**My first answer was a new gate** — a script that swept every block and scene in a browser and reported
+dropped declarations. It worked. It was still the wrong shape: it ran after the bad value was already
+written, it needed its own sweep, its own make target, its own ladder step, and it left the engine
+perfectly able to write the same value tomorrow.
+
+**The right answer was three files away and already existed.** `core/sanitize-html.js` refuses
+`transition` and `animation` for the identical reason: hand-authored CSS that reads correctly and
+silently does nothing. A dropped declaration is that same failure. It belonged in that function, next
+to its sibling, and the fix is now two refusals at the two places author CSS reaches the DOM:
+`core/layers/util.js` where `css` is assigned, and `core/layers/html.js` where a fragment is inserted.
+Both throw naming the layer. Both run once at build, so nothing costs a frame.
+
+**The general rule.** When a check is about to be added, ask where the value is WRITTEN. If that place
+is reachable, the check goes there and the class of bug ends. A gate is for what cannot be known at the
+write site — a whole-library property, a comparison against a baseline, a judgement about a rendered
+frame. It is not for "this input is invalid", which is always the writer's job.
+
+**A gate also has a cost this repo has already paid twice.** `visual-vocabulary` was deleted for
+measuring the wrong thing, and `make slop` ran 41 rules against evidence that was not there and
+reported silence as a pass. Every added gate is another thing that can be quietly wrong.
+
+**The bug inside the fix, since it nearly shipped.** The first implementation read each declaration back
+off the real element. That flagged six HEALTHY shorthands in this library — CSSOM refuses to serialise
+`border` when its longhands are not uniform, which has nothing to do with a drop. Testing each
+declaration in isolation on a scratch element is what makes it correct, and the reasoning is in the code
+so it does not get re-broken.
+
+---
+
+## #423 — the layout audit graded a camera that was not there
+
+**Found by chasing a regression I thought I had caused, which turned out to be this.**
+
+`core/produce.js` injects a camera push into any un-choreographed scene, and #424 below made that push
+real. Immediately, `make audit-all` went from 21 scenes with hard findings to 43. It looked like the
+push was shoving content out of the title-safe area — a plausible, physical explanation, and a camera
+scale above 1.0 really does move edge content outward.
+
+It was wrong. `verify/audit.mjs` computed its camera like this:
+
+```js
+const kf = JSON.parse(fs.readFileSync(absPath, 'utf8')).camera || [];
+```
+
+**It read `camera` from the scene file on disk.** But `camera` is not necessarily in the file: both
+`cameraMove` sugar and the produced default become keyframes at BOOT, in the browser. So for every
+produced scene the audit saw no camera, `camMoving()` answered false for all of them, and the
+exemption at `audit.mjs:1301` — which exists precisely because "a moving camera displaces every box on
+the frame" — never fired. The audit was grading a different scene from the one that renders.
+
+Fixed by calling the same funnel the renderer calls (`produceBaseline`, pure, its `theme` argument
+unused) instead of reading the file. After the fix the same library reads 68 clean / 35 hard, and the
+push measured against a build with the injection disabled is 66 clean / 37 hard — so the camera change
+is slightly BETTER, not a regression.
+
+**Two rules.**
+- **Grade what renders, never what is on disk.** Any check that re-reads the source is asserting that
+  the source and the render agree, which is exactly the thing worth doubting.
+- **A physical-sounding explanation is not evidence.** "A 6% zoom pushes content out of the safe area"
+  is true in general and was not what happened here. I nearly re-baselined 53 films around it. The
+  discriminating test was cheap and I should have run it first: audit one scene with the push and with
+  `produced:false`, and see which finding moves.
+
+**Also do not compare against a number quoted earlier in a session.** I raised the alarm against "81
+clean / 21 hard" from hours before, when the library, the block count and the audit itself had all
+changed. The only valid before is one measured now, with one variable changed.
+
+## #424 — the produced camera push had never once run
+
+`core/produce.js` gives any scene that declares no camera a gentle slow push, so the frame stays alive.
+It was written, it was commented, and **it had never executed in the history of the engine.**
+
+`produce.js` set `data.cameraMove`. `formats/scene/scene.js:743` reads `data.camera`. Nothing at
+runtime converted one to the other: the only converter, `scripts/author/expand-blocks.mjs`, runs at
+AUTHOR time, and `produceBaseline` runs at BOOT — after it. So the field was written and then read by
+nobody, which is this engine's cardinal sin committed by the engine against itself.
+
+**Proved in pixels before it was touched.** A static one-layer scene rendered at frame 2 and frame 170
+came back byte-identical. Nothing moved. That took one command and settled it; reading the code had
+already suggested it, but a claim about what renders is only worth what a frame says.
+
+**The fix is a funnel, not a patch.** `bakeCameraMove(data)` in `core/produce.js` converts sugar to
+keyframes using the existing `buildCameraMove` (no duplicated math), `produceBaseline` calls it as its
+last act, and `core/boot.js` throws if `data.cameraMove` still exists afterwards. The point of the
+backstop is that the failure was a field being written and never read — so the repair is not "convert
+it here", it is "make surviving unconverted impossible". A scene declaring both `camera` and
+`cameraMove` is now refused by name rather than one silently winning.
+
+**A second bug fell out of the same fix**: any scene declaring `cameraMove` and rendered without
+`make expand` also got no camera at all. Those authors had written a camera move and were watching a
+still frame.
+
+**The default was also invisible, which is its own lesson.** It pushed 1.00 → 1.04. Measured perception
+thresholds put anything under 5% below the visible threshold, with 5-15% the comfortable-emphasis band.
+So even once the plumbing worked, the default bought nothing. It is 1.06 now: inside the band, at its
+bottom, so it never fights an authored film. **A default nobody can perceive is not a safe default, it
+is a dead one** — it costs the same to carry and delivers nothing.
+
+53 of 105 baselined scenes changed as a result, every one of them gaining the push the code always
+promised. See #423 for the audit bug this immediately exposed, and for why the apparent regression that
+followed was not one.
