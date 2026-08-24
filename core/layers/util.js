@@ -47,7 +47,7 @@ export const PROPS = {
   intensity: { when: 'glow' },
   // decoration: glass / crt / progressive blur / border trail / mask / look / reflect / logotype / base opacity
   glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
-  fade: {}, reflect: {}, logotype: {}, opacity: {},
+  fade: {}, reflect: {}, logotype: {}, opacity: {}, css: {},
   // layoutGroup
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
   items: {}, align2: {}, direction: {}, wrap: {}, justify: {}, h: {},
@@ -349,6 +349,28 @@ export function createKit(ctx) {
     // on frame 0 and the prop would do nothing. Two shipped scenes set `opacity` on a paint layer
     // expecting it to dim and got no effect at all, silently. Hand it to the envelope instead.
     if (L.opacity != null) el.dataset.opacity = String(L.opacity);
+    applyCss(el, L);
+  }
+
+  // CSS PASSTHROUGH. A layer is a wrapper over one DOM element, so any CSS property the layer
+  // vocabulary does not name (a box gradient, `mask-image`, `clip-path`, an inset `box-shadow`,
+  // `backdrop-filter`, pseudo-element decoration) is still reachable through `css`, without losing
+  // what a hand-written `html` layer gives up: this stays a real DOM node the audit walks, theme
+  // tokens still resolve (a `var(--line)` value is plain CSS text, so the cascade resolves it exactly
+  // as it would any other declaration), and per-child engine timing survives.
+  //
+  // Written ONCE here, at build time, same as every other decorate() call — never per frame. That is
+  // why `core/validate.mjs`'s `cssErrors` REFUSES any key the engine itself rewrites every frame
+  // (opacity, transform, left/top/width/height, zIndex, pointerEvents) or that core/tokens.css kills
+  // globally (animation, transition): a build-time write to one of those is silently erased the moment
+  // the render advances past frame 0, which is the exact "accepted input the engine then ignores" bug
+  // this feature exists not to be (docs/MISTAKES.md #213, #369, #373, #375).
+  //
+  // camelCase in (`boxShadow`), CSS out: `el.style` is a CSSStyleDeclaration, so assigning its camelCase
+  // property IS how a browser accepts a JS write for a hyphenated CSS property — no hand conversion.
+  function applyCss(el, L) {
+    if (!L.css || typeof L.css !== 'object' || Array.isArray(L.css)) return;
+    Object.assign(el.style, L.css);
   }
 
   function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box, or FREE placement

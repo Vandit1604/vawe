@@ -12930,3 +12930,61 @@ the iframe for `__engineError`.
   families and was compared against BLOCK families. Two registries, one word. Recorded as a known
   limit at the top of the gate so the next reader recognises it rather than argues with it.
 
+
+## #416 — a layer is a wrapper over one DOM element, so give it a CSS passthrough, refuse the frame-owned half
+
+**The idea, and why the obvious version is a trap.** The layer vocabulary cannot express a box
+gradient (`gradient` is a TEXT fill via `background-clip`, not a box background), `mask-image`,
+`clip-path`, an inset/layered `box-shadow`, `backdrop-filter`, or pseudo-element decoration. The
+planned fix was one prop per gap, forever. The actual fix: a `css` prop on any layer, a plain object
+applied once to the layer's own element at build time (`core/layers/util.js` `applyCss`, called from
+`decorate()`, which already runs for both top-level layers and group children — one definition, same
+as `mask`/`filter`/`reflect` beside it).
+
+**Why a naive passthrough breaks everything it touches.** The engine rewrites several style
+properties EVERY FRAME, not once at build time. `css` is written once. So a `css.opacity` would render
+correctly on frame 0 and then be silently overwritten by `core/clips.js:220`'s enter/exit envelope on
+frame 1 — the exact "documented input accepted and then ignored" bug class this repo has logged the
+most (#213, #369, #373, #375).
+
+**The owned-property list, verified against the actual writes, not assumed:**
+
+| property | actually written | where |
+|---|---|---|
+| `opacity` | every frame, from the enter/exit envelope | `core/clips.js:220` |
+| `transform` | every frame, by every named entrance/exit and by GSAP for `motion` tracks | `core/clips.js` (e.g. `none: () => ({transform:'none'})` at :43), `formats/scene/scene.js` GSAP calls |
+| `left` / `top` | once, but from `x`/`y` on every build — a `css` write would just as immediately fight the author's own coordinate | `formats/scene/scene.js:485-486` |
+| `width` | once, from `w`, then AGAIN by several per-type builders (`beam.js`, `image.js`, `svg.js`, `lottie.js`, `video.js`, `html.js`, `clip.js`, `doc.js`) | scattered `core/layers/*.js` |
+| `height` | same shape as `width`, same builders — **not in the brief's original list, added after checking**: `height` is set by the identical per-type builder pattern as `width` and is refused for the identical reason | same files |
+| `zIndex` | every frame, from `track` | `core/clips.js:150` |
+| `pointerEvents` | every frame, from the layer's on/off-window state | `core/clips.js:171,175` |
+| `animation` / `transition` | killed globally with `!important`, so a `css` write would not be silently overwritten, just silently inert | `core/tokens.css:28` |
+
+The brief's list was right on every entry it named; `height` was the one addition, for the same reason
+`width` is owned. `position` is refused too (not written anywhere specific, but it is the coordinate
+system `x`/`y`/`w` already owns, and letting `css.position` fight `left`/`top` is the same trap one
+property up).
+
+**The fix.** `core/validate.mjs` gains `cssErrors(cfg)`: walks every layer and group child (same
+recursion shape as `htmlLayerErrors`), and for every key in `L.css` that appears in a fixed
+`OWNED_CSS` map, refuses with a message naming the alternative (`opacity` → `anim`/`motion`,
+`transform` → `motion`, `animation`/`transition` → `parts`/`vars`, `position`/`left`/`top`/`width`/
+`height` → `x`/`y`/`w`/`h`, `zIndex` → `track`, `pointerEvents` → no override exists). Wired into
+`validateData` beside every other structural check, so it runs both at `make validate` and at boot
+(`core/boot.js` imports `validateAll` which calls `validateData`) — an author sees the refusal before
+spending a render, not after. `formats/scene/schema.json` documents `css` as an `object` field whose
+label states both what it is for and exactly what it refuses (regenerated via
+`node scripts/gates/schema-drift.mjs --write` from the `PROPS` declaration in
+`core/layers/util.js`, not hand-edited).
+
+**Proved, not asserted.** `formats/scene/_css-refuse-probe.json` (`css:{opacity:0.5}`) fails
+`make validate` with the exact refusal message naming `anim`/`motion`.
+`formats/scene/_css-passthrough-probe.json` — a flat control rect beside a rect using
+`css:{background:"linear-gradient(...)", boxShadow:"inset 0 1px 0 rgba(255,255,255,.45), …"}` —
+validates clean and rendered a real diagonal box gradient with a visible inset top-edge highlight,
+not two flat rectangles. Re-rendered with `theme:"vawe-dark"` and the gradient's `var(--accent)`
+correctly resolved to the dark theme's mint instead of the light theme's blue: a plain CSS string is
+still just CSS, so the cascade resolves the token exactly as it would any other declaration — no
+extra plumbing needed. `node scripts/gates/probe-purity.mjs scene` stayed green (25 sampled frames,
+identical regardless of render order): `css` is a static object read once, so it cannot break
+`renderFrame(n)`'s purity in `n`.
