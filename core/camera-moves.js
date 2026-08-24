@@ -1,5 +1,6 @@
 import { defineRegistry } from './registry.js';
 import { resolveCameraMove } from './vocab.js';
+import { shake } from './motion.js';
 // core/camera-moves.js — CAMERA CHOREOGRAPHY generators: pure (params) → camera-keyframe array, the same
 // shape core/sequence.js `cameraAt` interpolates ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move
 // is smooth and CALCULATED instead of hand-typed, and the multi-keyframe ones emit interior `ease:"linear"`
@@ -45,7 +46,7 @@ export function slowPush({ start = 0, dur = 6, from = 1, to = 1.12, ease = 'ease
 // diveIn — zoom INTO a target point (a UI element, a face), which travels to centre as the scale grows.
 // power4.out feel (fast in, long settle) via easeOutQuart. tx/ty in stage coords.
 export function diveIn({ start = 0, dur = 1.6, tx, ty, to = 1.6, canvasW = CENTER.w, canvasH = CENTER.h,
-  ease = 'easeOutQuart' } = {}) {
+  targetW, targetH, headroom = 0.88, ease = 'easeOutQuart' } = {}) {
   // tx/ty have no default and cannot have one: the whole move is "go to THIS point". Omit either and the
   // keyframe carried NaN, cameraAt lerped NaN, and the camera pose was NaN for the entire segment with
   // nothing said — the silent-substitution class this repo logs most. dollyZ already refuses a bad `s`
@@ -54,6 +55,31 @@ export function diveIn({ start = 0, dur = 1.6, tx, ty, to = 1.6, canvasW = CENTE
     if (!Number.isFinite(v)) throw new Error(`diveIn needs a finite "${k}" (the stage coordinate to centre on); got ${JSON.stringify(v)}`);
   }
   span('diveIn', 'dur', dur);
+  // HEADROOM. `to` was accepted at any value, and past a point the thing you dove at is BIGGER than the
+  // frame: the camera lands with the target's edges outside the canvas, cropped, and nothing said a word.
+  // The rule is that the target ends at most `headroom` of the frame on each axis, so
+  // maxScale = min(0.88*W/targetW, 0.88*H/targetH). It REFUSES rather than clamps: a clamp is silent
+  // substitution — the film renders a move nobody authored and the author never learns which — and this
+  // engine's cardinal sin is exactly that (the tx/ty refusal three lines up is the same call).
+  // KNOW THE LIMIT: this can only fire when the CALLER says how big the target is. This module cannot
+  // measure a layer, so without targetW/targetH there is no size to check against and the guard is a
+  // no-op. Pass them from wherever the size is known.
+  if (targetW != null || targetH != null) {
+    if (!(headroom > 0 && headroom <= 1))
+      throw new Error(`diveIn: "headroom" is the share of the frame the target may fill (0 < h <= 1); got ${JSON.stringify(headroom)}`);
+    const lim = [];
+    for (const [k, v, frame] of [['targetW', targetW, canvasW], ['targetH', targetH, canvasH]]) {
+      if (v == null) continue;
+      if (!Number.isFinite(v) || v <= 0)
+        throw new Error(`diveIn: "${k}" must be a positive size in stage units; got ${JSON.stringify(v)}`);
+      lim.push(headroom * frame / v);
+    }
+    const maxScale = Math.min(...lim);
+    if (to > maxScale)
+      throw new Error(`diveIn: "to" ${to} pushes a ${targetW ?? '?'}x${targetH ?? '?'} target past the frame.`
+        + ` At most ${maxScale.toFixed(3)} keeps it inside ${Math.round(headroom * 100)}% of the`
+        + ` ${canvasW}x${canvasH} canvas. Lower "to", or raise "headroom" if you mean to crop.`);
+  }
   return [
     { t: start, s: 1, x: 0, y: 0 },
     { t: start + dur, s: to, x: canvasW / 2 - tx, y: canvasH / 2 - ty, ease },
@@ -163,8 +189,100 @@ export function truck({ start = 0, dur = 3, dx = -1920, s = 1, ease = 'linear' }
   return [{ t: start, s, x: 0, y: 0 }, { t: start + dur, s, x: dx, y: 0, ease }];
 }
 
+// cameraShake — an IMPACT, pre-sampled to keyframes. The randomness is the engine's own deterministic
+// `shake()` (core/motion.js, hashSeed/noise, lib-tested): sampled HERE, at author time, so renderFrame(n)
+// only ever lerps numbers. Nothing stochastic runs at render time — by then the shake is DATA.
+//
+// Why one key PER FRAME instead of two keys per held step: the reference is a stepped table (14 steps of
+// 0.03s, about one frame each at 30fps), and a step held across a lerp needs an arrive key AND a hold key.
+// At fps sampling the two collapse — a key per frame IS the frame the renderer shows, so what the lerp
+// does between adjacent keys is never seen. Half the keyframes for the same picture, and `freq`/`decay`
+// stay real knobs instead of a frozen table.
+//
+// The defaults ARE that reference, restated as an envelope: amp 28 decaying to about 2 over 0.42s gives
+// decay ≈ 6.3, and the table's sign flip every 0.03s is a ~16Hz oscillation. `y` is 0.7 of `x`, as
+// measured. Then 0.1s of recovery to exactly zero, eased out, so the frame LANDS instead of stopping.
+//
+// THE INTERIOR-EASE EXEMPTION, and why it is deliberate: every other move in this file forces
+// `ease:"linear"` on interiors so a chained tween stays velocity-continuous (#125 — an eased curve at
+// every key zeroes velocity and the push pulses). A shake IS that pulse. The samples reverse direction
+// every frame or two, so the velocity discontinuity #125 forbids is here on purpose; the linear interiors
+// below are not the rule being obeyed, they are what a per-frame sample wants between neighbours. The one
+// eased key is the final recovery, because the settle is the only part of an impact that is a MOVE.
+export function cameraShake({ start = 0, dur = 0.42, amp = 28, freq = 16, decay = 6.3, seed = 1,
+  recover = 0.1, fps = 30 } = {}) {
+  span('cameraShake', 'dur', dur);
+  hold('cameraShake', 'recover', recover);
+  if (!Number.isFinite(fps) || fps <= 0)
+    throw new Error(`cameraShake: "fps" must be a positive sample rate; got ${JSON.stringify(fps)}`);
+  const step = 1 / fps;
+  const kf = [{ t: start, s: 1, x: 0, y: 0 }];
+  // n starts at 1: the sample AT the hit is the zero key above (shake(0) is {0,0} by contract).
+  for (let n = 1; n * step <= dur + 1e-9; n++) {
+    const dt = n * step;
+    const o = shake(dt, { amp, freq, decay, seed });
+    kf.push({ t: start + dt, s: 1, x: o.x, y: o.y * 0.7, ease: 'linear' });
+  }
+  if (recover > 0) kf.push({ t: start + dur + recover, s: 1, x: 0, y: 0, ease: 'easeOutQuad' });
+  return kf;
+}
+
+// punchIn — the crash zoom: the frame is THROWN at you, recoils, and rings out. Three legs, and the ease
+// FAMILY is the whole point. Every other move here is a `.out` (fast, then settle) because it is a move.
+// This one accelerates INTO frame, so leg 1 is `easeInExpo`: nothing, nothing, then all of it at once.
+// Leg 2 is the recoil past the resting scale (a squash below `to`), leg 3 rings back with
+// `easeOutElastic`. Both easings already exist in EASINGS (core/motion.js) — nothing was approximated.
+// Interiors are NOT linear and must not be: the velocity break at each key IS the impact, the same
+// deliberate exemption from #125 that cameraShake takes above.
+export function punchIn({ start = 0, dur = 0.32, from = 0.72, to = 1, squash = 0.96, squashDur = 0.08,
+  settleDur = 0.5 } = {}) {
+  span('punchIn', 'dur', dur);
+  span('punchIn', 'squashDur', squashDur);
+  span('punchIn', 'settleDur', settleDur);
+  for (const [k, v] of [['from', from], ['to', to], ['squash', squash]]) {
+    if (!(Number.isFinite(v) && v > 0))
+      throw new Error(`punchIn: "${k}" must be a positive magnification; got ${JSON.stringify(v)}`);
+  }
+  const t1 = start + dur, t2 = t1 + squashDur;
+  return [
+    { t: start, s: from, x: 0, y: 0 },
+    { t: t1, s: to, x: 0, y: 0, ease: 'easeInExpo' },
+    { t: t2, s: squash, x: 0, y: 0, ease: 'easeOutQuad' },
+    { t: t2 + settleDur, s: to, x: 0, y: 0, ease: 'easeOutElastic' },
+  ];
+}
+
+// driftHold — a held frame that is never DEAD. A sine micro-drift, pre-sampled on the same author-time
+// contract as cameraShake (the render only lerps). Two things make it read as breathing rather than as
+// machinery: the amplitude sits under the threshold where the eye reads travel between two frames (2-8px
+// on x, 1-4px on y across seconds), and x/y run at DIFFERENT frequencies. A 1.0 ratio walks a perfect
+// diagonal and looks mechanical; ~1.3 traces a Lissajous that never quite closes inside the window.
+// 10 keys per cycle is plenty: a sine sampled that finely is not distinguishable from the curve.
+export function driftHold({ start = 0, dur = 4, ax = 6, ay = 3, cycles = 1.5, ratio = 1.3, s = 1,
+  keysPerCycle = 10 } = {}) {
+  span('driftHold', 'dur', dur);
+  if (!Number.isFinite(cycles) || cycles <= 0)
+    throw new Error(`driftHold: "cycles" must be a positive number of cycles across the window; got ${JSON.stringify(cycles)}`);
+  // A drift the eye can catch frame to frame is not a drift, it is a shake wearing the wrong name, and
+  // nothing downstream would ever say so. cameraShake is one word away.
+  for (const [k, v] of [['ax', ax], ['ay', ay]]) {
+    if (!Number.isFinite(v) || Math.abs(v) > 12)
+      throw new Error(`driftHold: "${k}" must be a micro-amplitude (|${k}| <= 12px); got ${JSON.stringify(v)}.`
+        + ` Larger and it reads as a discrete shake per frame — use cameraShake if that is what you want.`);
+  }
+  const n = Math.max(2, Math.round(cycles * keysPerCycle));
+  const kf = [];
+  for (let i = 0; i <= n; i++) {
+    const u = i / n, ph = 2 * Math.PI * cycles * u;
+    kf.push({ t: start + dur * u, s, x: ax * Math.sin(ph), y: ay * Math.sin(ph * ratio),
+      ...(i ? { ease: 'linear' } : {}) });
+  }
+  return kf;
+}
+
 // name → generator, so the scene sugar and any catalog derive the vocabulary from the code.
-export const CAMERA_MOVES = { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck };
+export const CAMERA_MOVES = { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck,
+  cameraShake, punchIn, driftHold };
 export const CAMERA_MOVE_NAMES = Object.keys(CAMERA_MOVES);
 
 // The params a move accepts, READ OFF ITS OWN SIGNATURE rather than declared in a table beside it. A

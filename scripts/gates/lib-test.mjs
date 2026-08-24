@@ -52,7 +52,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope 
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
-import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -2223,6 +2223,115 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('buildCameraMove resolves by name', buildCameraMove({ move: 'slowPush', start: 0, dur: 2 }).length === 2);
   ok('buildCameraMove throws on unknown', (() => { try { buildCameraMove({ move: 'nope' }); return false; } catch { return true; } })());
   ok('CAMERA_MOVE_NAMES lists the generators', CAMERA_MOVE_NAMES.includes('diveIn') && CAMERA_MOVE_NAMES.includes('panFollow'));
+
+  // ---- diveIn headroom: a target bigger than the frame is a REFUSAL, never a silent crop -----------
+  // `to` used to be accepted at any value, so a dive could land with the thing it dove at cropped by the
+  // canvas and say nothing. maxScale = min(0.88*W/targetW, 0.88*H/targetH).
+  ok('diveIn: a `to` inside the headroom is allowed', diveIn({ tx: 960, ty: 540, to: 2,
+    targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080 }).length === 2);
+  ok('diveIn: REFUSES a `to` that pushes the target off-frame', (() => {
+    try { diveIn({ tx: 960, ty: 540, to: 5, targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080 }); return false; }
+    catch (e) { return /headroom|past the frame/i.test(e.message); }
+  })());
+  ok('diveIn: the limit is the tighter axis (0.88 * H / targetH here)', (() => {
+    const max = Math.min(0.88 * 1920 / 400, 0.88 * 1080 / 900);   // 4.224 vs 1.056 → 1.056
+    const inside = diveIn({ tx: 0, ty: 0, to: max - 1e-6, targetW: 400, targetH: 900, canvasW: 1920, canvasH: 1080 });
+    try { diveIn({ tx: 0, ty: 0, to: max + 1e-3, targetW: 400, targetH: 900, canvasW: 1920, canvasH: 1080 }); return false; }
+    catch { return inside.length === 2; }
+  })());
+  ok('diveIn: one axis alone still guards', (() => {
+    try { diveIn({ tx: 0, ty: 0, to: 3, targetW: 1200, canvasW: 1920, canvasH: 1080 }); return false; } catch { return true; }
+  })());
+  ok('diveIn: no target size given = nothing to check, unchanged behaviour',
+    diveIn({ tx: 0, ty: 0, to: 9 }).length === 2);
+  ok('diveIn: REFUSES a non-positive target size', (() => {
+    try { diveIn({ tx: 0, ty: 0, targetW: 0 }); return false; } catch { return true; }
+  })());
+
+  // ---- cameraShake: the randomness is SAMPLED at author time, so the render only lerps -------------
+  const sh = cameraShake({ start: 2, dur: 0.42, fps: 30, seed: 5 });
+  ok('cameraShake: opens at rest and returns to exactly zero', sh[0].x === 0 && sh[0].y === 0
+    && sh[sh.length - 1].x === 0 && sh[sh.length - 1].y === 0);
+  ok('cameraShake: one key per frame plus the rest key and the recovery', sh.length === 1 + 12 + 1);
+  ok('cameraShake: t is strictly ascending', sh.every((k, i) => i === 0 || k.t > sh[i - 1].t));
+  ok('cameraShake: ends at start + dur + recover', approx(sh[sh.length - 1].t, 2 + 0.42 + 0.1, 1e-9));
+  ok('cameraShake: never touches scale (it is a translate, not a zoom)', sh.every((k) => k.s === 1));
+  ok('cameraShake: y is 0.7 of the y channel, as measured off the reference', (() => {
+    const raw = shake(1 / 30, { amp: 28, freq: 16, decay: 6.3, seed: 5 });
+    return approx(sh[1].y, raw.y * 0.7, 1e-12) && approx(sh[1].x, raw.x, 1e-12);
+  })());
+  ok('cameraShake: the same seed gives byte-identical keyframes',
+    JSON.stringify(cameraShake({ seed: 5 })) === JSON.stringify(cameraShake({ seed: 5 })));
+  ok('cameraShake: a different seed gives a different shake',
+    JSON.stringify(cameraShake({ seed: 5 })) !== JSON.stringify(cameraShake({ seed: 9 })));
+  // Monotonic decay: an impact gets quieter, it does not swell. Compared as envelopes, not per sample.
+  ok('cameraShake: decays — the late half is quieter than the early half', (() => {
+    const body = sh.slice(1, -1), half = Math.floor(body.length / 2);
+    const peak = (a) => Math.max(...a.map((k) => Math.abs(k.x)));
+    return peak(body.slice(half)) < peak(body.slice(0, half));
+  })());
+  ok('cameraShake: REFUSES a non-positive dur, fps or a negative recover', [
+    () => cameraShake({ dur: 0 }), () => cameraShake({ fps: 0 }), () => cameraShake({ recover: -1 }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+
+  // ---- punchIn: the crash zoom, and the ONE move whose first leg is an ease-IN ---------------------
+  const pi = punchIn({ start: 0, dur: 0.32, from: 0.72, to: 1, squash: 0.96, squashDur: 0.08, settleDur: 0.5 });
+  ok('punchIn: 4 keyframes, from → to → squash → to', pi.length === 4
+    && pi[0].s === 0.72 && pi[1].s === 1 && pi[2].s === 0.96 && pi[3].s === 1);
+  ok('punchIn: t is strictly ascending', pi.every((k, i) => i === 0 || k.t > pi[i - 1].t));
+  ok('punchIn: accelerates INTO frame (easeInExpo), then rings out (easeOutElastic)',
+    pi[1].ease === 'easeInExpo' && pi[3].ease === 'easeOutElastic');
+  ok('punchIn: both easings are real names in EASINGS', ['easeInExpo', 'easeOutElastic', 'easeOutQuad']
+    .every((e) => Object.prototype.hasOwnProperty.call(EASINGS, e)));
+  ok('punchIn: cameraAt reads the endpoints', approx(cameraAt(pi, 0).s, 0.72)
+    && approx(cameraAt(pi, 0.32 + 0.08 + 0.5).s, 1));
+  ok('punchIn: the squash really dips below the resting scale', cameraAt(pi, 0.4).s < 1);
+  ok('punchIn: never pans — it is a scale move', pi.every((k) => k.x === 0 && k.y === 0));
+  ok('punchIn: deterministic', JSON.stringify(punchIn({})) === JSON.stringify(punchIn({})));
+  ok('punchIn: REFUSES a non-positive leg or magnification', [
+    () => punchIn({ dur: 0 }), () => punchIn({ squashDur: -1 }), () => punchIn({ settleDur: 0 }),
+    () => punchIn({ from: 0 }), () => punchIn({ squash: -0.5 }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+
+  // ---- driftHold: a held frame that is never dead --------------------------------------------------
+  const dh = driftHold({ start: 0, dur: 4, ax: 6, ay: 3, cycles: 1.5, ratio: 1.3 });
+  ok('driftHold: spans exactly the window', approx(dh[0].t, 0) && approx(dh[dh.length - 1].t, 4, 1e-9));
+  ok('driftHold: t is strictly ascending', dh.every((k, i) => i === 0 || k.t > dh[i - 1].t));
+  ok('driftHold: opens at the origin and never leaves the declared amplitude',
+    approx(dh[0].x, 0, 1e-12) && approx(dh[0].y, 0, 1e-12)
+    && dh.every((k) => Math.abs(k.x) <= 6 + 1e-9 && Math.abs(k.y) <= 3 + 1e-9));
+  ok('driftHold: it MOVES — the frame is not dead', Math.max(...dh.map((k) => Math.abs(k.x))) > 3);
+  // The whole craft point: x and y at the same frequency walk a straight diagonal. At 1.3 they do not.
+  ok('driftHold: x and y run at different frequencies (a Lissajous, not a diagonal)', (() => {
+    const straight = driftHold({ ratio: 1 }), organic = driftHold({ ratio: 1.3 });
+    const diag = (kf) => kf.every((k) => approx(k.x * (3 / 6), k.y, 1e-9));
+    return diag(straight) && !diag(organic);
+  })());
+  ok('driftHold: holds scale (it is a drift, not a push)', dh.every((k) => k.s === 1));
+  ok('driftHold: deterministic', JSON.stringify(driftHold({})) === JSON.stringify(driftHold({})));
+  ok('driftHold: REFUSES an amplitude big enough to read as a shake', [
+    () => driftHold({ ax: 40 }), () => driftHold({ ay: 30 }), () => driftHold({ cycles: 0 }),
+    () => driftHold({ dur: -1 }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+
+  // The three new tracks obey the same ascending-t contract as the eight that came before.
+  ok('the new camera generators are ascending in t too', [
+    cameraShake({}), punchIn({}), driftHold({}),
+  ].every((kf) => kf.every((k, i) => i === 0 || k.t > kf[i - 1].t)));
+  ok('CAMERA_MOVE_NAMES picks up cameraShake + punchIn + driftHold',
+    ['cameraShake', 'punchIn', 'driftHold'].every((n) => CAMERA_MOVE_NAMES.includes(n)));
+  ok('buildCameraMove resolves the new moves, including through a shot word',
+    JSON.stringify(buildCameraMove({ move: 'punch in', dur: 0.3 })) === JSON.stringify(punchIn({ dur: 0.3 }))
+    && JSON.stringify(buildCameraMove({ move: 'shake', seed: 3 })) === JSON.stringify(cameraShake({ seed: 3 }))
+    && JSON.stringify(buildCameraMove({ move: 'drift hold' })) === JSON.stringify(driftHold({})));
+  // The schema's move list is FREE TEXT and has drifted before — it omitted travel and truck for months.
+  // The code is the source of truth; this is the assertion that says so out loud.
+  ok('the schema cameraMove label names every move the code exports', (() => {
+    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+    const label = JSON.parse(fs.readFileSync(path.join(root, 'formats/scene/schema.json'), 'utf8'))
+      .fields.cameraMove.label;
+    return CAMERA_MOVE_NAMES.every((n) => label.includes(n));
+  })());
 }
 
 
