@@ -430,7 +430,9 @@ boot((data, fps, theme, canvas) => {
   }
 
   // the layer registry (core/layers/*) — one primitive per file; scene.html just dispatches.
-  const renderer = createRenderer({ theme, W, H, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
+  // `frame` is boot's one frame object (core/safe.js frameOf), forwarded whole so createKit hands every
+  // primitive the canvas instead of each one re-deriving or hardcoding it. Nothing recomputes it here.
+  const renderer = createRenderer({ theme, W, H, frame: canvas?.frame, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
     splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
     extra, components: window.__components, clips: window.__clips, lottie: window.__lottie,
     html: window.__html });

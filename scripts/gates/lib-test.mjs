@@ -23,7 +23,7 @@ import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand } from '../../core/safe.js';
+import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
@@ -770,6 +770,62 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ' — ' + bad.join(', ') : ''}`, bad.length === 0);
   ok('safe: nativeAspect is null for the canvas-agnostic ones',
     nativeAspect('web') === null && nativeAspect('feed') === null && nativeAspect('tiktok') === '9:16');
+}
+
+// ---- the frame object, and the settled-off-frame report ----
+// frameOf() is the one builder every consumer RECEIVES from, so what matters is that it agrees with
+// the two functions it is made of, at every ratio and every destination. outOfFrame() is the check at
+// the placement funnel, and the assert that earns its place is the third one: a layer MID-ENTRANCE is
+// legitimately off-frame and must never be reported (the rule verify/audit.mjs learned in #376).
+{
+  const ratios = ['16:9', '9:16', '1:1', '4:5', '4:3'];
+  const wrong = [];
+  for (const key of ratios) for (const dest of DESTINATION_NAMES) {
+    const f = frameOf({ destination: dest }, key);
+    const [w, h] = sceneDims({}, key);
+    const s = safeArea(w, h, dest);
+    if (f.W !== w || f.H !== h || f.aspect !== key || f.destination !== dest) wrong.push(`${key}/${dest}: dims`);
+    if (JSON.stringify(f.safe) !== JSON.stringify(s)) wrong.push(`${key}/${dest}: safe box`);
+  }
+  ok(`frame: frameOf agrees with sceneDims+safeArea at ${ratios.length} ratios x ${DESTINATION_NAMES.length} destinations`
+    + (wrong.length ? ' — ' + wrong.slice(0, 3).join('; ') : ''), wrong.length === 0);
+  ok('frame: a 4:3 canvas is 1440x1080, not the long-edge fallback',
+    frameOf({ aspect: '4:3' }).W === 1440 && frameOf({ aspect: '4:3' }).H === 1080);
+  ok('frame: explicit pixel dims win, so a view outside boot gets its real canvas',
+    (() => { const f = frameOf({ W: 1440, H: 1080, destination: 'web' }); return f.W === 1440 && f.H === 1080; })());
+  ok('frame: destination reaches the safe box (tiktok chrome, not just margin)',
+    frameOf({ destination: 'tiktok' }, '9:16').safe.y1 === 1340);
+  ok('frame: an unknown destination throws here too, never a silent web box',
+    (() => { try { frameOf({ destination: 'nope' }, '9:16'); return false; } catch { return true; } })());
+
+  const F = frameOf({}, '16:9');                                   // 1920x1080
+  const settled = { type: 'text', x: 1700, y: 100, w: 600, h: 120, start: 0, duration: 6 };
+  ok('bounds: a SETTLED box hanging off the right edge is reported, with the overhang',
+    (() => { const r = outOfFrame(settled, F); return !!r && r.over.right === 380 && r.over.left === 0; })());
+  ok('bounds: a box inside the frame reports nothing',
+    outOfFrame({ type: 'text', x: 100, y: 100, w: 600, h: 120, start: 0, duration: 6 }, F) === null);
+
+  // THE ONE THAT MATTERS. Same box, same layer, graded 0.1s in: it is still sliding on, so there is no
+  // verdict to give. A check without this fires on every well-made entrance in the library.
+  ok('bounds: the SAME box mid-entrance is NOT reported (arrived-only, docs/MISTAKES.md #376)',
+    outOfFrame(settled, F, 0.1) === null);
+  ok('bounds: settleWindow uses audit.mjs\'s own numbers (start+enter+pad)',
+    settleWindow({ start: 1, duration: 5 }).t0 === 1 + 0.45 + 0.06);
+  ok('bounds: a MOVING exit ends the settled window early, a fading one does not',
+    settleWindow({ start: 0, duration: 5, out: 'slide-left' }).t1 === 5 - 0.4 - 0.06
+    && settleWindow({ start: 0, duration: 5 }).t1 === 5);
+  ok('bounds: a layer that never comes to rest is never graded',
+    settleWindow({ start: 0, duration: 0.2 }) === null
+    && outOfFrame({ ...settled, duration: 0.2 }, F) === null);
+  ok('bounds: an unplaced layer is the stylesheet\'s business, not the check\'s',
+    outOfFrame({ type: 'text', w: 600, start: 0, duration: 6 }, F) === null);
+
+  // REPORT ONLY. It must return findings and print, and it must not throw — the refusal is a later
+  // decision for a human holding the count of shipped films it would fail.
+  ok('bounds: reportBounds returns findings and never throws',
+    (() => { const lines = []; const out = reportBounds([settled, { type: 'rect', x: 10, y: 10, w: 100, h: 100, start: 0, duration: 6 }], F, (s) => lines.push(s));
+      return out.length === 1 && lines.length === 1 && /frame-bounds/.test(lines[0]); })());
+  ok('bounds: the check is OFF unless asked for', boundsCheckOn() === false);
 }
 
 // ---- the block registry ----

@@ -9,6 +9,8 @@ import { isLook, applyComposite } from '../looks.js';
 // this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
 // copy of the question is docs/MISTAKES.md #159.
 import { isLightBg, parseColor } from '../motion.js';
+// The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
+import { frameOf } from '../safe.js';
 
 // hexA('#5e6ad2', .25) → rgba string (glow/beam colours come as brand hex)
 export function hexA(hex, a) {
@@ -82,6 +84,16 @@ export function crtSpec(o = {}) {
 export function createKit(ctx) {
   const { theme, inkAt, bgWinAt, ACCENT_BGS, trackingFor, splitText, icon } = ctx;
   const extra = ctx.extra;
+  // THE FRAME, in scope for every primitive. Until now this kit carried theme and ink and no canvas at
+  // all, so a layer primitive could not ask how big the frame was: block factories hardcoded 1920 and
+  // the diveIn headroom guard could only fire when a caller remembered to pass the size. It rides in
+  // the ctx object that already exists, so no call site changes signature.
+  //
+  // Built once at boot (core/boot.js frameOf) and RECEIVED here. The fallback covers a kit built
+  // outside boot — a test, a standalone view — and is the only place in the engine allowed to derive
+  // one, because there is no boot to receive it from. It still calls the one builder.
+  const frame = ctx.frame
+    || (ctx.W && ctx.H ? frameOf({ W: ctx.W, H: ctx.H, destination: ctx.destination }) : null);
 
   // inkIsLight(c) — is the colour this layer settled on a LIGHT one? Asked of a real colour, never of a
   // token name: `inkAt` hands back theme tokens (`var(--ink)` over a light window, the theme's own light
@@ -508,6 +520,8 @@ export function createKit(ctx) {
 
   // `trackingCss` is exported so anything that needs to KNOW the settled letter-spacing can ask the
   // one resolver instead of re-deriving it. Reading it is free; writing it is styleText's alone.
-  const api = { ...ctx, hexA, onDark, trackingCss, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
+  // `frame` after the spread, so a kit that derived one still exposes it. Every primitive reads the
+  // canvas from here: `kit.frame.W`, `kit.frame.safe`, never an imported number or a hardcoded 1920.
+  const api = { ...ctx, frame, hexA, onDark, trackingCss, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
   return api;
 }
