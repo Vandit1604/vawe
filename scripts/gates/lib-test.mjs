@@ -2698,5 +2698,84 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));
 }
 
+
+// ---- knobErrors: a dial on a preset that does not read it is a REFUSAL, not a warning --------------
+// It was a warning printed by `scripts/gates/knobs-audit.mjs` if you remembered to run it, while an
+// unknown layer PROP of the same shape has thrown at boot for a long time. These say the two agree now.
+{
+  const { knobErrors } = await import('../../core/validate.mjs');
+  const of = (L) => knobErrors({ layers: [L] });
+
+  ok('knobs: a legal dial on a listed preset is accepted',
+    of({ type: 'text', preset: 'up', presetOpts: { dist: 40, each: 0.05 } }).length === 0);
+
+  const typo = of({ type: 'text', preset: 'up', presetOpts: { dsit: 40 } });
+  ok('knobs: a dial the preset does not read is refused, naming the dial, the preset and what it DOES read',
+    typo.length === 1 && /`dsit`/.test(typo[0]) && /"up"/.test(typo[0]) && /`dist`/.test(typo[0]));
+  ok('knobs: the refusal points at the nearest legal dial', /Did you mean 'dist'/.test(typo[0]));
+
+  // A real dial of a SIBLING preset is the case the manifest exists for: `bounce` is a knob, and `up`
+  // is not one of the presets that reads it.
+  ok('knobs: a sibling preset\'s dial is still dead here',
+    of({ type: 'text', preset: 'up', presetOpts: { bounce: 0.9 } }).length === 1);
+
+  // THE HALF THAT MUST STAY QUIET. core/knobs.js lists no entry for `colorWave`, `shimmerWave` or the
+  // `globe` three scene, yet all three read real per-preset opts in core/type.js / core/three-fx.js.
+  // Grading them against `_shared` alone would refuse four shipped films for a hole in the manifest.
+  ok('knobs: a preset the manifest does not list is not graded at all',
+    of({ type: 'text', preset: 'colorWave', presetOpts: { flash: 1, to: '#fff', hold: 0.5 } }).length === 0
+    && of({ type: 'three', three: 'globe', pointSize: 3, spin: 1 }).length === 0);
+
+  // A three scene's dials sit on the LAYER beside generic props, so only a real sibling dial can be
+  // called misused — anything else is somebody's layout and must never be touched.
+  ok('knobs: on a three layer a generic prop is left alone and a sibling scene\'s dial is refused',
+    of({ type: 'three', three: 'pointCloud', x: 100, start: 2, w: 400 }).length === 0
+    && of({ type: 'three', three: 'pointCloud', yaw: 12 }).length === 1);
+
+  ok('knobs: children are walked, so a dead dial inside a group is found too',
+    knobErrors({ layers: [{ type: 'group', children: [{ type: 'text', preset: 'up', presetOpts: { deg: 8 } }] }] })
+      .some((e) => /children\[0\]\.presetOpts/.test(e)));
+
+  // THE LIBRARY, BEFORE AND AFTER. A new refusal that fires on a shipped scene is a regression until
+  // proven otherwise, so the count is asserted rather than remembered.
+  {
+    const dir = path.join(repoRoot, 'formats', 'scene');
+    const guilty = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json').filter((f) => {
+      let d; try { d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return false; }
+      return d.module === 'scene' && knobErrors(d).length > 0;
+    });
+    ok(`knobs: no shipped scene is refused by the new rule${guilty.length ? ' — ' + guilty.join(', ') : ''}`, guilty.length === 0);
+  }
+}
+
+// ---- preloadImages: a repo-local image that 404s THROWS, a remote one does not ---------------------
+// `core/layers/html.js` has always thrown when a fragment `src` never loaded; a missing PICTURE
+// degraded quietly and the author found out from a preflight or from the frame. These are the same
+// class of input and they are graded the same way now. The loader is faked, so no network is touched.
+{
+  const priorWindow = globalThis.window, priorImage = globalThis.Image, priorDoc = globalThis.document;
+  globalThis.window = globalThis;
+  globalThis.document = globalThis.document || { createElement: () => ({ style: {} }), querySelector: () => null };
+  // Every src fails, which is the interesting direction: what matters is WHICH failures are refused.
+  globalThis.Image = class { set src(v) { queueMicrotask(() => this.onerror && this.onerror()); } };
+  const { preloadImages } = await import('../../core/boot.js');
+  const threw = async (scene) => { try { await preloadImages(scene); return ''; } catch (e) { return e.message; } };
+
+  const local = await threw({ layers: [{ type: 'image', src: '/assets/brands/nope/logo.svg' }] });
+  ok('images: a repo-local image that never loaded is refused, naming the path', /assets\/brands\/nope\/logo\.svg/.test(local));
+  ok('images: the refusal names where it was written', /layers\[0\]\.src/.test(local));
+
+  ok('images: a remote URL stays soft — a dead CDN is not the author\'s mistake',
+    (await threw({ layers: [{ type: 'image', src: 'https://cdn.example.com/logo.svg' }] })) === '');
+  // One shipped film sets a text layer to the literal string "hero.png"; the walk reads every string in
+  // the scene, so a bare filename must never be grounds to refuse a film.
+  ok('images: a bare filename in a text layer is not a repo path and is not refused',
+    (await threw({ layers: [{ type: 'text', text: 'hero.png' }] })) === '');
+  ok('images: every missing repo path is reported in one message, not just the first',
+    /a\.png[\s\S]*b\.png/.test(await threw({ layers: [{ src: '/assets/a.png' }, { src: 'assets/b.png' }] })));
+
+  globalThis.window = priorWindow; globalThis.Image = priorImage; globalThis.document = priorDoc;
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
