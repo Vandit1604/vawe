@@ -13047,3 +13047,47 @@ less helpful than the other ten.
 `lib-test` 937 to 942. `probe-purity` clean. `snap-scenes` 105 identical, run on the main tree because
 a worktree has no baselines (#408, #414).
 
+
+## #419 — `css` painted a box, and `radius` was silently dropped on it
+
+**What.** A layer painting its own background through the new `css` passthrough and asking for
+`radius` rendered with square corners. Nothing said why. `make author-check` was clean, `validate`
+was clean, `lib-test` was clean, and only rendering the frame and looking at it caught it.
+
+**Root cause.** `chipBox` in `core/layers/util.js` is the shared box treatment, and it opens with a
+guard that returns early unless the layer paints something:
+
+```js
+if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow) return;
+```
+
+`radius` is not in that guard, and for the whole life of the engine that was correct: no layer could
+paint a background without one of those five props, so a layer with `radius` alone had nothing to
+round and the omission was invisible. `css` made the combination legal, and the day it landed the
+omission became a silent drop.
+
+**The shape worth remembering.** A new capability can turn old dead code into a live bug without
+touching it. The guard did not change; what changed is which inputs can now reach it. So when adding
+a property that lets an author do something previously impossible, the question is not only "does my
+new property work" but "which existing guards were written assuming this could not happen".
+
+**Fix.** One condition, gated on an EXPLICIT radius so `chipBox`'s own `?? 16` default is never
+substituted into hand-written paint:
+
+```js
+if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
+```
+
+**Why not the wider fix.** The obvious change is to put `radius` in the guard outright. Measured
+first, and that would newly write a `borderRadius` on **329 layers across ~30 films**, almost all of
+them `image`. Those are already correct: `core/layers/image.js:27` writes its own `borderRadius` with
+`overflow:hidden`, which is how a rounded avatar works today. The wide fix would have reached past the
+bug into hundreds of layers that never had one. The library diff is what said so, before the edit.
+
+**Which gate catches it: NONE, and that is stated rather than papered over.** `chipBox` is a closure
+inside `createKit(ctx)`, so asserting on it needs a fake DOM context, and a source-level assertion
+that the guard contains the condition is a tautology that proves nothing about the frame. The evidence
+for this fix is a rendered frame that was square before and rounded after, plus `snap-scenes` at
+**105 identical / 0 changed** proving it moved nothing else. A gate is worth building when the
+behaviour has more than one moving part; this one has a single condition, and the honest record of
+"no coverage" is better than a test shaped to pass.

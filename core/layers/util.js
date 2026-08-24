@@ -180,7 +180,13 @@ export function createKit(ctx) {
   }
 
   function chipBox(el, L) { // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer
-    if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow) return;
+    // `css` can paint a background of its own — a gradient, an image, a conic sweep — and a painted
+    // box is a box, so `radius` has to reach it. Before `css` existed no layer could paint without one
+    // of the props below, so `radius` alone was nothing to round and its absence here was invisible.
+    // The feature made the combination legal and turned the omission into a silent drop: the corners
+    // came out square and nothing said why. Guarded on an EXPLICIT radius so the `?? 16` default below
+    // stays the engine's own box recipe and is never substituted into hand-written paint.
+    if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
     if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
     if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     el.style.borderRadius = (L.radius ?? 16) + 'px';
