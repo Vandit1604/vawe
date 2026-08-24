@@ -21,10 +21,10 @@ import { sceneDims } from './safe.js';
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
 
-export function produceBaseline(data, theme) {
+export function produceBaseline(data, theme, frame) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
-  if (data.produced === false) return bakeCameraMove(data);  // opts out of the INJECTED baseline, not of
+  if (data.produced === false) return bakeCameraMove(data, frame);  // opts out of the INJECTED baseline, not of
   // the author's own `cameraMove` sugar — that must still become real keys or it renders as nothing.
   // NOTE — the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
   // (core/validate.mjs): the author must declare a preset or an explicit `plain`, so the backdrop is
@@ -57,7 +57,7 @@ export function produceBaseline(data, theme) {
   // baselines are unsafe to inject blindly; kinetic type is nudged by the direction floor (no-kinetic-type)
   // and authored per-headline instead. The baseline stays ADDITIVE (bg · camera · sceneUnits) — it never
   // rewrites a layer the author already wrote.
-  bakeCameraMove(data);
+  bakeCameraMove(data, frame);
   return data;
 }
 
@@ -67,7 +67,14 @@ export function produceBaseline(data, theme) {
 // scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes
 // through, means the field cannot be written and ignored again. Runs even under `produced: false`, because
 // that opts out of the injected baseline, not out of the author's own sugar.
-export function bakeCameraMove(data) {
+// `frame` is the ONE frame object (core/safe.js frameOf), and passing it is not optional politeness.
+// Without it this fell back to `sceneDims(data)`, which reads `data.aspect` from the scene and CANNOT
+// see the `?aspect=`/`--aspect` override that boot has already resolved. So rendering a 16:9 scene at
+// 9:16 centred every diveIn/travel/workspaceZoomOut against 1920x1080 on a 1080x1920 canvas: a silent
+// mis-centre of hundreds of pixels per axis, which is the exact failure core/camera-moves.js's
+// "it needs the frame it centres in" refusal exists to prevent. The frame is built at boot.js before
+// this is called; take it from there, and fall back only for callers that have no frame at all.
+export function bakeCameraMove(data, frame) {
   if (!data || !data.cameraMove) return data;
   const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
   if (Array.isArray(data.camera) && data.camera.length)
@@ -75,7 +82,8 @@ export function bakeCameraMove(data) {
       + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
   // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
   // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
-  data.camera = specs.flatMap((s) => buildCameraMove(s, sceneDims(data)));
+  const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
+  data.camera = specs.flatMap((s) => buildCameraMove(s, dims));
   delete data.cameraMove;
   return data;
 }

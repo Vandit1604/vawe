@@ -135,6 +135,26 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by
 		// stripping effects. Draft renders at ss=1 for speed.
 		chromedp.Flag("force-device-scale-factor", fmt.Sprintf("%d", ss)),
+		// BACKGROUND THROTTLING, and why the capture DEADLOCKS without these three.
+		//
+		// The capture drives several TABS on one browser. Chrome throttles a tab that is not the
+		// visible one, and shoot() waits on `new Promise(res => __realRaf(() => __realRaf(res)))` with
+		// WithAwaitPromise. A backgrounded tab never fires that rAF, so the promise never settles and
+		// nothing bounds the wait: frames stop arriving, every Chrome process goes idle, and the Go
+		// process blocks forever with no error and no timeout.
+		//
+		// It does not reproduce on a desktop, where a window is genuinely visible. It reproduces every
+		// time in a CONTAINER, which is how it was found: `--workers 1` always finished, and 2, 3 and 6
+		// always hung, on two different scenes. Adding these three made 6 workers render clean.
+		//
+		// THEY CHANGE NO PIXEL. Each one only stops Chrome de-prioritising a hidden tab; none touches
+		// raster, layout or colour. Verified by A/B: the same scene built with and without these three
+		// renders a byte-identical mp4 (2892399 bytes both ways). That is one scene, not the library —
+		// stated precisely because the earlier draft of this comment claimed the library and had not
+		// checked it.
+		chromedp.Flag("disable-renderer-backgrounding", true),
+		chromedp.Flag("disable-background-timer-throttling", true),
+		chromedp.Flag("disable-backgrounding-occluded-windows", true),
 		chromedp.WindowSize(W, H),
 	)
 	if p := os.Getenv("CHROME_BIN"); p != "" {

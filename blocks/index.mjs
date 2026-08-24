@@ -592,7 +592,13 @@ import * as CAMCHROME from './camera-chrome.mjs'; export * from './camera-chrome
 for (const e of CATALOG) {
   if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
   const fam = FACTORIES[e.family];
-  if (fam) BLOCKS[e.name] = (opts = {}) => fam({ ...(e.props || {}), ...opts });
+  // A catalog row naming a family that does not exist USED TO REGISTER NOTHING, silently. The author
+  // then got "unknown block" from expand-blocks pointing at the name rather than at the typo, which is
+  // the wrong end of the problem. Registration-time silence about a manifest error is the cheapest kind
+  // of silent substitution to remove: it is one throw, at module load, before anything renders.
+  if (!fam) throw new Error(`blocks/catalog.mjs: "${e.name}" names family "${e.family}", which no factory `
+    + `exports. Known families: ${Object.keys(FACTORIES).sort().join(', ')}`);
+  BLOCKS[e.name] = (opts = {}) => fam({ ...(e.props || {}), ...opts });
 }
 
 // APP SURFACES — the app-content families (feed/list/settings/profile/onboarding/empty) live in

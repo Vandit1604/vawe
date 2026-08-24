@@ -108,18 +108,15 @@ function expand(layer, stack) {
 
 d.layers = (d.layers || []).flatMap((l) => expand(l, []));
 
-// cameraMove sugar → data.camera. A calculated move (slowPush/diveIn/panFollow/orbit/…) beats hand-typed
-// keyframes and emits interior ease:"linear" for a smooth, velocity-continuous path (docs/MISTAKES.md #125).
+// cameraMove sugar → data.camera. ONE implementation, in core/produce.js, because there were two and
+// they disagreed: this file used to reimplement the same five lines WITHOUT the refusal that catches a
+// scene declaring both `camera` and `cameraMove`. So the identical scene threw at boot and silently
+// overwrote the author's hand-written keys here. `bakeCameraMove` is idempotent (it deletes the field),
+// so the engine baking again at boot is a no-op.
 let nCam = 0;
 if (d.cameraMove) {
-  const specs = Array.isArray(d.cameraMove) ? d.cameraMove : [d.cameraMove];
-  // Pass the scene's REAL canvas. The pan math is `canvasW/2 - tx`, and core/camera-moves.js can only
-  // default to landscape because it cannot see the scene, so a portrait film mis-centred every target by
-  // 420px on each axis in silence. Every scene here that names a target spells canvasW/canvasH out by
-  // hand, which is the workaround that reports the bug.
-  d.camera = specs.flatMap((s) => buildCameraMove(s, sceneDims(d)));
-  delete d.cameraMove;
-  nCam = specs.length;
+  nCam = Array.isArray(d.cameraMove) ? d.cameraMove.length : 1;
+  bakeCameraMove(d, frameOf(d));
 }
 delete d.comps;
 fs.writeFileSync(out, JSON.stringify(d, null, 2));

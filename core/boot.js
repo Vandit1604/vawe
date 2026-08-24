@@ -401,14 +401,14 @@ export async function boot(build) {
     applyAt(data.layers);
     // `cameraMove` sugar → real `camera` keys BEFORE the per-aspect override pass, so an authored move's
     // keys can be overridden per canvas like any hand-written one.
-    bakeCameraMove(data);
+    bakeCameraMove(data, frame);
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
     // `?bounds` turns on the settled-off-frame REPORT inside resolveCoords. Read before it runs, and it
     // only prints: nothing about a render changes, so renderFrame(n) stays a pure function of n.
     if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
     resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
-    produceBaseline(data, theme); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
+    produceBaseline(data, theme, frame); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
     // scene that didn't specify it — absent-only, theme-aware, additive (never rewrites an authored layer),
     // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
     // Nothing downstream reads `cameraMove` (renderFrame reads data.camera). If one survives this far it

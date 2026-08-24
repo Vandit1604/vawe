@@ -72,22 +72,13 @@ COPY --from=builder /src/bin/vawe ./bin/vawe
 # works — that is how you get host-owned files out of the mount on Linux.
 RUN mkdir -p /engine/out /engine/.vawe-data/scenes && chmod 777 /engine/out /engine/.vawe-data/scenes
 
-# CHROME_BIN points at a three-flag wrapper, not at chromium itself, and this is load-bearing.
-# The renderer captures with several TABS on one browser (internal/scene/scene.go), and Chrome
-# throttles a tab that is not the visible one. Inside a container that throttling is hard: the shoot
-# waits on a double requestAnimationFrame that a backgrounded tab never fires, so the render stops
-# dead partway through with no error and no timeout. Measured on this image: `--workers 1` always
-# finished, `--workers 2`, 3 and 6 always hung, on two different scenes; adding these three flags
-# made 3 workers finish. They only turn OFF background throttling, so they change no pixel.
-#
-# This belongs in the engine's own flag list (allocOpts, internal/scene/scene.go:112) — until it is
-# there, every containerised render needs this wrapper.
-RUN printf '%s\n' '#!/bin/sh' \
-      'exec /usr/bin/chromium --disable-renderer-backgrounding --disable-background-timer-throttling --disable-backgrounding-occluded-windows "$@"' \
-      > /usr/local/bin/vawe-chromium && chmod +x /usr/local/bin/vawe-chromium
+# Chromium is used directly. The background-throttling flags that a containerised, multi-tab render
+# needs are in the engine's own flag list now (allocOpts, internal/scene/scene.go) — verified by A/B to
+# change no pixel. There was a three-flag wrapper here; it is gone, because a workaround left in place
+# is a bug report nobody reads.
 
 ENV REPO=/engine
-ENV CHROME_BIN=/usr/local/bin/vawe-chromium
+ENV CHROME_BIN=/usr/bin/chromium
 
 WORKDIR /work
 ENTRYPOINT ["node", "/engine/cli/vawe.mjs"]
