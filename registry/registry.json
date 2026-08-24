@@ -1,0 +1,1454 @@
+{
+  "$schema": "https://vawe.dev/schema/registry.json",
+  "name": "vawe",
+  "homepage": "https://vawe.dev",
+  "usage": "Each item installs as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur, then `make expand`. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library.",
+  "items": [
+    {
+      "name": "cardCascade",
+      "type": "vawe:beat",
+      "description": "Show the feature set as cards that pop in one after another under a kinetic title.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "chipGrid",
+      "type": "vawe:beat",
+      "description": "List the named things as mono pills that pop in staggered, with an accent footer.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "ctaEnd",
+      "type": "vawe:beat",
+      "description": "End on a held card: the mark, the install line, the url, and no exit.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "echoRing",
+      "type": "vawe:beat",
+      "description": "Keep the frame alive through the slow change: a stroked ring replays the subject's path one beat late, fading as it grows.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "focusRack",
+      "type": "vawe:beat",
+      "description": "Rack the focus between two planes: the near one pulls sharp while the far one blurs AND dims, one exchange, then settle sharp before the cut.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "kineticHook",
+      "type": "vawe:beat",
+      "description": "Open on a kinetic hook: eyebrow, one hero number or word that counts up, a subline that arrives word by word.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "logoLockup",
+      "type": "vawe:beat",
+      "description": "Lock up the brand: the mark pops, the wordmark travels in, a kinetic headline over a sub.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "logoReveal",
+      "type": "vawe:beat",
+      "description": "Reveal the brand by DRAWING the mark on stroke by stroke, bloom, then cascade the wordmark.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "morphButton",
+      "type": "vawe:beat",
+      "description": "Make the button BECOME the next thing: it shrinks, rounds and sheds its label until it is a dot.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "propSentence",
+      "type": "vawe:beat",
+      "description": "Write one sentence across the frame with real objects as the nouns: word, photo, chip, card, word, on a rolling stagger.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "recordedPan",
+      "type": "vawe:beat",
+      "description": "Pan a surface wider than the frame on an irregular linear track so it reads as a screen recording, with the cursor and callouts welded to it.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "screenDive",
+      "type": "vawe:beat",
+      "description": "Push the camera into the real product surface under a kinetic title.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "scrollStory",
+      "type": "vawe:beat",
+      "description": "Scroll a page taller than the frame the way a person scrolls it: hold the frame still, lean the surface on a static tilt, and stop at each real section in turn on one ease.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "slotSwap",
+      "type": "vawe:beat",
+      "description": "Fix a row of slots and turn its contents over N times at the same offsets. The right slot changes TYPE each pass so it never reads as a table.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "statReveal",
+      "type": "vawe:beat",
+      "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "terminalReveal",
+      "type": "vawe:beat",
+      "description": "Show it working in a terminal: the command types itself, output rises, the result lands in the accent.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "typedHook",
+      "type": "vawe:beat",
+      "description": "Open with a line that types itself in and then UN-types faster than it arrived. It never fades.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "verdictProof",
+      "type": "vawe:beat",
+      "description": "Prove the claim: type the command, note the result, pop a tone-coloured verdict chip after it.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "wordBlast",
+      "type": "vawe:beat",
+      "description": "Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "avatarStack",
+      "type": "vawe:block",
+      "description": "overlapping avatars + overflow",
+      "tags": [
+        "avatarStack"
+      ]
+    },
+    {
+      "name": "avatarStack.large",
+      "type": "vawe:block",
+      "description": "larger avatar stack",
+      "tags": [
+        "avatarStack"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "vawe:block",
+      "description": "CI-shield token (label · value)",
+      "tags": [
+        "badge"
+      ]
+    },
+    {
+      "name": "badge.beta",
+      "type": "vawe:block",
+      "description": "beta status badge",
+      "tags": [
+        "badge"
+      ]
+    },
+    {
+      "name": "badge.info",
+      "type": "vawe:block",
+      "description": "badge, info",
+      "tags": [
+        "badge"
+      ]
+    },
+    {
+      "name": "badge.version",
+      "type": "vawe:block",
+      "description": "version badge",
+      "tags": [
+        "badge"
+      ]
+    },
+    {
+      "name": "badge.warn",
+      "type": "vawe:block",
+      "description": "badge, warning",
+      "tags": [
+        "badge"
+      ]
+    },
+    {
+      "name": "banner",
+      "type": "vawe:block",
+      "description": "accent announcement bar",
+      "tags": [
+        "banner"
+      ]
+    },
+    {
+      "name": "banner.info",
+      "type": "vawe:block",
+      "description": "banner, info (blurple)",
+      "tags": [
+        "banner"
+      ]
+    },
+    {
+      "name": "banner.warn",
+      "type": "vawe:block",
+      "description": "banner, warning (amber)",
+      "tags": [
+        "banner"
+      ]
+    },
+    {
+      "name": "barChart",
+      "type": "vawe:block",
+      "description": "labeled bars scaled to max",
+      "tags": [
+        "barChart"
+      ]
+    },
+    {
+      "name": "barChart.green",
+      "type": "vawe:block",
+      "description": "bars in success green",
+      "tags": [
+        "barChart"
+      ]
+    },
+    {
+      "name": "bento",
+      "type": "vawe:block",
+      "description": "asymmetric bento grid: one hero cell + supporting cells (scale contrast)",
+      "tags": [
+        "bento"
+      ]
+    },
+    {
+      "name": "borderBeamCard",
+      "type": "vawe:block",
+      "description": "glass card with a light TRAVELLING its border (animated beam)",
+      "tags": [
+        "borderBeamCard"
+      ]
+    },
+    {
+      "name": "browserFrame",
+      "type": "vawe:block",
+      "description": "window chrome (traffic dots + URL bar)",
+      "tags": [
+        "browserFrame"
+      ]
+    },
+    {
+      "name": "callout",
+      "type": "vawe:block",
+      "description": "info/success/warn strip",
+      "tags": [
+        "callout"
+      ]
+    },
+    {
+      "name": "callout.info",
+      "type": "vawe:block",
+      "description": "info strip (blurple)",
+      "tags": [
+        "callout"
+      ]
+    },
+    {
+      "name": "callout.warn",
+      "type": "vawe:block",
+      "description": "warning strip (terracotta)",
+      "tags": [
+        "callout"
+      ]
+    },
+    {
+      "name": "camcorderHud",
+      "type": "vawe:block",
+      "description": "viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom",
+      "tags": [
+        "camcorderHud",
+        "overlay"
+      ]
+    },
+    {
+      "name": "captions",
+      "type": "vawe:block",
+      "description": "timed subtitle chips (bottom overlay)",
+      "tags": [
+        "captions",
+        "overlay"
+      ]
+    },
+    {
+      "name": "card",
+      "type": "vawe:block",
+      "description": "elevated card · tinted panel · pill tags · CTA arrow",
+      "tags": [
+        "card"
+      ]
+    },
+    {
+      "name": "card.pricing",
+      "type": "vawe:block",
+      "description": "plan · price · features · CTA",
+      "tags": [
+        "pricingCard"
+      ]
+    },
+    {
+      "name": "card.pricing.free",
+      "type": "vawe:block",
+      "description": "pricing, free tier",
+      "tags": [
+        "pricingCard"
+      ]
+    },
+    {
+      "name": "card.pricing.team",
+      "type": "vawe:block",
+      "description": "pricing, team tier",
+      "tags": [
+        "pricingCard"
+      ]
+    },
+    {
+      "name": "card.profile",
+      "type": "vawe:block",
+      "description": "avatar · name · role",
+      "tags": [
+        "profileCard"
+      ]
+    },
+    {
+      "name": "card.stat",
+      "type": "vawe:block",
+      "description": "boxed KPI with delta chip",
+      "tags": [
+        "statCard"
+      ]
+    },
+    {
+      "name": "card.stat.down",
+      "type": "vawe:block",
+      "description": "KPI card, negative delta",
+      "tags": [
+        "statCard"
+      ]
+    },
+    {
+      "name": "card.stat.plain",
+      "type": "vawe:block",
+      "description": "KPI card, no delta",
+      "tags": [
+        "statCard"
+      ]
+    },
+    {
+      "name": "chatBubble",
+      "type": "vawe:block",
+      "description": "a message thread",
+      "tags": [
+        "chatBubble"
+      ]
+    },
+    {
+      "name": "chatBubble.support",
+      "type": "vawe:block",
+      "description": "support thread",
+      "tags": [
+        "chatBubble"
+      ]
+    },
+    {
+      "name": "checklist",
+      "type": "vawe:block",
+      "description": "checked / unchecked items",
+      "tags": [
+        "checklist"
+      ]
+    },
+    {
+      "name": "checklist.done",
+      "type": "vawe:block",
+      "description": "checklist, all complete",
+      "tags": [
+        "checklist"
+      ]
+    },
+    {
+      "name": "checklist.todo",
+      "type": "vawe:block",
+      "description": "checklist, all open",
+      "tags": [
+        "checklist"
+      ]
+    },
+    {
+      "name": "codeBlock",
+      "type": "vawe:block",
+      "description": "code card; syntax-coloured lines",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.aurora",
+      "type": "vawe:block",
+      "description": "code theme · teal dark, mint and violet",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.dusk",
+      "type": "vawe:block",
+      "description": "code theme · plum dark, orchid and rose",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.ember",
+      "type": "vawe:block",
+      "description": "code theme · warm dark, amber and rose",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.forest",
+      "type": "vawe:block",
+      "description": "code theme · deep green, mossy accents",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.frost",
+      "type": "vawe:block",
+      "description": "code theme · cool light, ice-blue syntax",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.ink",
+      "type": "vawe:block",
+      "description": "code theme · indigo dark, violet-blue syntax",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.light",
+      "type": "vawe:block",
+      "description": "code card, light surface",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.linen",
+      "type": "vawe:block",
+      "description": "code theme · warm light, earthen syntax",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.midnight",
+      "type": "vawe:block",
+      "description": "code theme · cool dark, blue-first cycling",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.neon",
+      "type": "vawe:block",
+      "description": "code theme · near-black, vivid signage hues",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.ocean",
+      "type": "vawe:block",
+      "description": "code theme · deep blue, cyan-led",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.paper",
+      "type": "vawe:block",
+      "description": "code theme · warm light, print-ink syntax",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.py",
+      "type": "vawe:block",
+      "description": "code card, python",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "codeBlock.slate",
+      "type": "vawe:block",
+      "description": "code theme · neutral dark, muted steel syntax",
+      "tags": [
+        "codeBlock"
+      ]
+    },
+    {
+      "name": "colorCycle",
+      "type": "vawe:block",
+      "description": "one word cycling through hues",
+      "tags": [
+        "colorCycle"
+      ]
+    },
+    {
+      "name": "commitRow",
+      "type": "vawe:block",
+      "description": "git history list",
+      "tags": [
+        "commitRow"
+      ]
+    },
+    {
+      "name": "comparison",
+      "type": "vawe:block",
+      "description": "two columns (Before/After · Others/Us)",
+      "tags": [
+        "comparison"
+      ]
+    },
+    {
+      "name": "comparison.beforeAfter",
+      "type": "vawe:block",
+      "description": "Before / After columns",
+      "tags": [
+        "comparison"
+      ]
+    },
+    {
+      "name": "comparison.screens",
+      "type": "vawe:block",
+      "description": "before / after as two SCREENS, not two lists",
+      "tags": [
+        "comparison"
+      ]
+    },
+    {
+      "name": "deploySuccess",
+      "type": "vawe:block",
+      "description": "CI cascade → green \"Deployed to production\" card",
+      "tags": [
+        "deploySuccess"
+      ]
+    },
+    {
+      "name": "diff",
+      "type": "vawe:block",
+      "description": "code diff card (+/- coloured)",
+      "tags": [
+        "diff"
+      ]
+    },
+    {
+      "name": "diff.config",
+      "type": "vawe:block",
+      "description": "config diff",
+      "tags": [
+        "diff"
+      ]
+    },
+    {
+      "name": "donutChart",
+      "type": "vawe:block",
+      "description": "ring segments + legend",
+      "tags": [
+        "donutChart"
+      ]
+    },
+    {
+      "name": "donutChart.two",
+      "type": "vawe:block",
+      "description": "two-segment ring",
+      "tags": [
+        "donutChart"
+      ]
+    },
+    {
+      "name": "emptyState",
+      "type": "vawe:block",
+      "description": "zero state · icon tile, what is missing, the action that fills it",
+      "tags": [
+        "emptyState"
+      ]
+    },
+    {
+      "name": "feedRow",
+      "type": "vawe:block",
+      "description": "feed item · avatar, name, timestamp, body",
+      "tags": [
+        "feedRow"
+      ]
+    },
+    {
+      "name": "fileTree",
+      "type": "vawe:block",
+      "description": "indented file/folder tree",
+      "tags": [
+        "fileTree"
+      ]
+    },
+    {
+      "name": "followCard",
+      "type": "vawe:block",
+      "description": "name over handle, pill CTA",
+      "tags": [
+        "followCard"
+      ]
+    },
+    {
+      "name": "gauge",
+      "type": "vawe:block",
+      "description": "semicircular meter",
+      "tags": [
+        "gauge"
+      ]
+    },
+    {
+      "name": "gauge.full",
+      "type": "vawe:block",
+      "description": "gauge, complete (green)",
+      "tags": [
+        "gauge"
+      ]
+    },
+    {
+      "name": "gauge.warn",
+      "type": "vawe:block",
+      "description": "gauge, low (amber)",
+      "tags": [
+        "gauge"
+      ]
+    },
+    {
+      "name": "glassCard",
+      "type": "vawe:block",
+      "description": "frosted glass panel (blurs the moving bg behind it) + sheen",
+      "tags": [
+        "glassCard"
+      ]
+    },
+    {
+      "name": "grainOverlay",
+      "type": "vawe:block",
+      "description": "fine film-grain texture over the frame (feTurbulence)",
+      "tags": [
+        "grainOverlay",
+        "overlay"
+      ]
+    },
+    {
+      "name": "installCard",
+      "type": "vawe:block",
+      "description": "app-store row · stars sweep to the rating, then install",
+      "tags": [
+        "installCard"
+      ]
+    },
+    {
+      "name": "kanban",
+      "type": "vawe:block",
+      "description": "columns of cards",
+      "tags": [
+        "kanban"
+      ]
+    },
+    {
+      "name": "kanban.two",
+      "type": "vawe:block",
+      "description": "two-column board",
+      "tags": [
+        "kanban"
+      ]
+    },
+    {
+      "name": "keyboard",
+      "type": "vawe:block",
+      "description": "phone keyboard · qwerty keys, rises up into frame",
+      "tags": [
+        "keyboard"
+      ]
+    },
+    {
+      "name": "keyboard.numeric",
+      "type": "vawe:block",
+      "description": "phone keypad · numeric grid, rises up into frame",
+      "tags": [
+        "keyboard"
+      ]
+    },
+    {
+      "name": "kpiRow",
+      "type": "vawe:block",
+      "description": "row of stat cells (value + label)",
+      "tags": [
+        "kpiRow"
+      ]
+    },
+    {
+      "name": "kpiRow.money",
+      "type": "vawe:block",
+      "description": "KPI row, currency",
+      "tags": [
+        "kpiRow"
+      ]
+    },
+    {
+      "name": "kpiRow.time",
+      "type": "vawe:block",
+      "description": "latency percentiles",
+      "tags": [
+        "kpiRow"
+      ]
+    },
+    {
+      "name": "lineChart",
+      "type": "vawe:block",
+      "description": "trend line in a hairline card",
+      "tags": [
+        "lineChart"
+      ]
+    },
+    {
+      "name": "lineChart.area",
+      "type": "vawe:block",
+      "description": "trend line with area fill",
+      "tags": [
+        "lineChart"
+      ]
+    },
+    {
+      "name": "lineChart.down",
+      "type": "vawe:block",
+      "description": "declining trend (red)",
+      "tags": [
+        "lineChart"
+      ]
+    },
+    {
+      "name": "listRow",
+      "type": "vawe:block",
+      "description": "generic list item · icon tile, title over sub, trailing detail",
+      "tags": [
+        "listRow"
+      ]
+    },
+    {
+      "name": "loadingBar",
+      "type": "vawe:block",
+      "description": "determinate fill wipes L→R, lands ✓ done",
+      "tags": [
+        "loadingBar"
+      ]
+    },
+    {
+      "name": "logLines",
+      "type": "vawe:block",
+      "description": "log stream (timestamp + level colour)",
+      "tags": [
+        "logLines"
+      ]
+    },
+    {
+      "name": "logLines.errors",
+      "type": "vawe:block",
+      "description": "log stream with errors",
+      "tags": [
+        "logLines"
+      ]
+    },
+    {
+      "name": "logLines.light",
+      "type": "vawe:block",
+      "description": "log stream on a light surface",
+      "tags": [
+        "logLines"
+      ]
+    },
+    {
+      "name": "logoWall",
+      "type": "vawe:block",
+      "description": "grid of wordmarks / logos",
+      "tags": [
+        "logoWall"
+      ]
+    },
+    {
+      "name": "logoWall.four",
+      "type": "vawe:block",
+      "description": "four logos, 2 cols",
+      "tags": [
+        "logoWall"
+      ]
+    },
+    {
+      "name": "lowerThird.accentUnderline",
+      "type": "vawe:block",
+      "description": "underline draws under the name (kinetic)",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.bild",
+      "type": "vawe:block",
+      "description": "tabloid front page · caps, reversed, loud",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.boldBlock",
+      "type": "vawe:block",
+      "description": "name reversed out of a solid accent block",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.cleanBar",
+      "type": "vawe:block",
+      "description": "hairline plate · name over role · the quiet one",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.colourBlock",
+      "type": "vawe:block",
+      "description": "two offset blocks, ink then accent",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.darkCard",
+      "type": "vawe:block",
+      "description": "dark card · the one that survives bright photography",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.kickerName",
+      "type": "vawe:block",
+      "description": "mono kicker above, big name below",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.maskReveal",
+      "type": "vawe:block",
+      "description": "name rises out of a clipped baseline, word by word",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.newsTicker",
+      "type": "vawe:block",
+      "description": "accent chip + line · role IS the chip (LIVE/BREAKING)",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.sideRule",
+      "type": "vawe:block",
+      "description": "thick accent rule, no plate · needs a calm backdrop",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.softPill",
+      "type": "vawe:block",
+      "description": "soft accent pill · product tours, not news",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "lowerThird.stackBars",
+      "type": "vawe:block",
+      "description": "plate over a short accent bar · reads as a mark",
+      "tags": [
+        "lowerThird"
+      ]
+    },
+    {
+      "name": "meshPanel",
+      "type": "vawe:block",
+      "description": "soft mesh-gradient surface (stacked accent blobs)",
+      "tags": [
+        "meshPanel"
+      ]
+    },
+    {
+      "name": "notification",
+      "type": "vawe:block",
+      "description": "toast card (dot + title + body)",
+      "tags": [
+        "notification"
+      ]
+    },
+    {
+      "name": "notification.error",
+      "type": "vawe:block",
+      "description": "toast, error",
+      "tags": [
+        "notification"
+      ]
+    },
+    {
+      "name": "notification.stack",
+      "type": "vawe:block",
+      "description": "alerts that stack and expire, not one that sits",
+      "tags": [
+        "notification"
+      ]
+    },
+    {
+      "name": "notification.warn",
+      "type": "vawe:block",
+      "description": "toast, amber accent",
+      "tags": [
+        "notification"
+      ]
+    },
+    {
+      "name": "nowPlaying",
+      "type": "vawe:block",
+      "description": "music-player card · artwork, progress, transport",
+      "tags": [
+        "nowPlaying"
+      ]
+    },
+    {
+      "name": "onboardCard",
+      "type": "vawe:block",
+      "description": "onboarding pane · progress dots, title, body, CTA",
+      "tags": [
+        "onboardCard"
+      ]
+    },
+    {
+      "name": "phoneFrame",
+      "type": "vawe:block",
+      "description": "phone shell (draw content on top)",
+      "tags": [
+        "phoneFrame"
+      ]
+    },
+    {
+      "name": "pillRow",
+      "type": "vawe:block",
+      "description": "horizontal row of chip tags",
+      "tags": [
+        "pillRow"
+      ]
+    },
+    {
+      "name": "pointer",
+      "type": "vawe:block",
+      "description": "mouse pointer · travels to a target and clicks it (ripple)",
+      "tags": [
+        "pointer"
+      ]
+    },
+    {
+      "name": "pressButton",
+      "type": "vawe:block",
+      "description": "CTA that depresses and releases when it is clicked",
+      "tags": [
+        "pressButton"
+      ]
+    },
+    {
+      "name": "profileHeader",
+      "type": "vawe:block",
+      "description": "account header · avatar over name, handle, stat row",
+      "tags": [
+        "profileHeader"
+      ]
+    },
+    {
+      "name": "progressRing",
+      "type": "vawe:block",
+      "description": "circular progress + % label",
+      "tags": [
+        "progressRing"
+      ]
+    },
+    {
+      "name": "progressRing.done",
+      "type": "vawe:block",
+      "description": "ring, 100% (green)",
+      "tags": [
+        "progressRing"
+      ]
+    },
+    {
+      "name": "progressRing.low",
+      "type": "vawe:block",
+      "description": "ring, low (amber)",
+      "tags": [
+        "progressRing"
+      ]
+    },
+    {
+      "name": "quote",
+      "type": "vawe:block",
+      "description": "pull quote + attribution",
+      "tags": [
+        "quote"
+      ]
+    },
+    {
+      "name": "quote.customer",
+      "type": "vawe:block",
+      "description": "customer quote",
+      "tags": [
+        "quote"
+      ]
+    },
+    {
+      "name": "reactionBar",
+      "type": "vawe:block",
+      "description": "reaction count pills",
+      "tags": [
+        "reactionBar"
+      ]
+    },
+    {
+      "name": "reactionBar.love",
+      "type": "vawe:block",
+      "description": "reactions (love set)",
+      "tags": [
+        "reactionBar"
+      ]
+    },
+    {
+      "name": "scanGate",
+      "type": "vawe:block",
+      "description": "autofocus gate: a band travels the frame, the brackets contract onto the target and lock",
+      "tags": [
+        "scanGate"
+      ]
+    },
+    {
+      "name": "screenSwap",
+      "type": "vawe:block",
+      "description": "screen A becomes screen B in place (wipe, no travel)",
+      "tags": [
+        "screenSwap"
+      ]
+    },
+    {
+      "name": "screenSwap.slide",
+      "type": "vawe:block",
+      "description": "screen change that reads as travel · enters right, leaves left",
+      "tags": [
+        "screenSwap"
+      ]
+    },
+    {
+      "name": "searchEngine.home",
+      "type": "vawe:block",
+      "description": "search home — wordmark + pill, query types in (keys click)",
+      "tags": [
+        "searchEngine"
+      ]
+    },
+    {
+      "name": "searchEngine.results",
+      "type": "vawe:block",
+      "description": "search results — ranked links, cursor clicks one",
+      "tags": [
+        "searchEngine"
+      ]
+    },
+    {
+      "name": "settingsRow",
+      "type": "vawe:block",
+      "description": "settings row · label + toggle, chevron or value",
+      "tags": [
+        "settingsRow"
+      ]
+    },
+    {
+      "name": "socialProof",
+      "type": "vawe:block",
+      "description": "avatar stack + the line it proves (caption owned by the block)",
+      "tags": [
+        "socialProof"
+      ]
+    },
+    {
+      "name": "spinner",
+      "type": "vawe:block",
+      "description": "looping Lottie (deterministic)",
+      "tags": [
+        "spinner"
+      ]
+    },
+    {
+      "name": "spinner.small",
+      "type": "vawe:block",
+      "description": "small looping Lottie",
+      "tags": [
+        "spinner"
+      ]
+    },
+    {
+      "name": "splitScreen",
+      "type": "vawe:block",
+      "description": "two panes, one geometry · second pane lands behind the first",
+      "tags": [
+        "splitScreen"
+      ]
+    },
+    {
+      "name": "splitScreen.pip",
+      "type": "vawe:block",
+      "description": "picture-in-picture · an aside inset over the subject",
+      "tags": [
+        "splitScreen"
+      ]
+    },
+    {
+      "name": "spotlightCard",
+      "type": "vawe:block",
+      "description": "dark card with a soft spotlight glow washing from a corner",
+      "tags": [
+        "spotlightCard"
+      ]
+    },
+    {
+      "name": "stackedBar",
+      "type": "vawe:block",
+      "description": "multi-series stacked bars",
+      "tags": [
+        "stackedBar"
+      ]
+    },
+    {
+      "name": "stackedBar.three",
+      "type": "vawe:block",
+      "description": "three-series stack",
+      "tags": [
+        "stackedBar"
+      ]
+    },
+    {
+      "name": "statBig",
+      "type": "vawe:block",
+      "description": "scale-contrast stat — huge count + tiny label",
+      "tags": [
+        "statBig"
+      ]
+    },
+    {
+      "name": "statBig.currency",
+      "type": "vawe:block",
+      "description": "stat with a $ unit",
+      "tags": [
+        "statBig"
+      ]
+    },
+    {
+      "name": "statBig.time",
+      "type": "vawe:block",
+      "description": "stat, ms unit",
+      "tags": [
+        "statBig"
+      ]
+    },
+    {
+      "name": "stepFlow",
+      "type": "vawe:block",
+      "description": "horizontal numbered steps",
+      "tags": [
+        "stepFlow"
+      ]
+    },
+    {
+      "name": "stepFlow.build",
+      "type": "vawe:block",
+      "description": "the track TRAVELS · rings light and connectors fill in sequence",
+      "tags": [
+        "stepFlow"
+      ]
+    },
+    {
+      "name": "stepFlow.done",
+      "type": "vawe:block",
+      "description": "steps, all complete",
+      "tags": [
+        "stepFlow"
+      ]
+    },
+    {
+      "name": "stepFlow.start",
+      "type": "vawe:block",
+      "description": "steps, at start",
+      "tags": [
+        "stepFlow"
+      ]
+    },
+    {
+      "name": "stripeCard",
+      "type": "vawe:block",
+      "description": "recognizably-Stripe payments card",
+      "tags": [
+        "stripeCard"
+      ]
+    },
+    {
+      "name": "tabBar",
+      "type": "vawe:block",
+      "description": "segmented control",
+      "tags": [
+        "tabBar"
+      ]
+    },
+    {
+      "name": "tabBar.four",
+      "type": "vawe:block",
+      "description": "four-tab control",
+      "tags": [
+        "tabBar"
+      ]
+    },
+    {
+      "name": "tabBar.icons",
+      "type": "vawe:block",
+      "description": "app tab bar · icon over label, selection slides",
+      "tags": [
+        "tabBar"
+      ]
+    },
+    {
+      "name": "tabBar.switch",
+      "type": "vawe:block",
+      "description": "the selection SLIDES from one tab to another",
+      "tags": [
+        "tabBar"
+      ]
+    },
+    {
+      "name": "table",
+      "type": "vawe:block",
+      "description": "data table (header + rows)",
+      "tags": [
+        "table"
+      ]
+    },
+    {
+      "name": "table.pricing",
+      "type": "vawe:block",
+      "description": "table, pricing rows",
+      "tags": [
+        "table"
+      ]
+    },
+    {
+      "name": "tapRipple",
+      "type": "vawe:block",
+      "description": "touch tap · contact dot and an expanding ring, for phone demos",
+      "tags": [
+        "tapRipple"
+      ]
+    },
+    {
+      "name": "terminal",
+      "type": "vawe:block",
+      "description": "command prompt; command types in, output answers after it",
+      "tags": [
+        "terminal"
+      ]
+    },
+    {
+      "name": "terminal.build",
+      "type": "vawe:block",
+      "description": "build output",
+      "tags": [
+        "terminal"
+      ]
+    },
+    {
+      "name": "terminal.git",
+      "type": "vawe:block",
+      "description": "git command",
+      "tags": [
+        "terminal"
+      ]
+    },
+    {
+      "name": "terminal.install",
+      "type": "vawe:block",
+      "description": "install command",
+      "tags": [
+        "terminal"
+      ]
+    },
+    {
+      "name": "terminalHtml",
+      "type": "vawe:block",
+      "description": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
+      "tags": [
+        "terminalHtml"
+      ]
+    },
+    {
+      "name": "terminalPro",
+      "type": "vawe:block",
+      "description": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+      "tags": [
+        "terminalPro"
+      ]
+    },
+    {
+      "name": "timeline",
+      "type": "vawe:block",
+      "description": "vertical rail of events",
+      "tags": [
+        "timeline"
+      ]
+    },
+    {
+      "name": "timeline.release",
+      "type": "vawe:block",
+      "description": "release timeline",
+      "tags": [
+        "timeline"
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "vawe:block",
+      "description": "dark snackbar + action",
+      "tags": [
+        "toast"
+      ]
+    },
+    {
+      "name": "toast.error",
+      "type": "vawe:block",
+      "description": "snackbar, error + retry",
+      "tags": [
+        "toast"
+      ]
+    },
+    {
+      "name": "toast.info",
+      "type": "vawe:block",
+      "description": "snackbar, info",
+      "tags": [
+        "toast"
+      ]
+    },
+    {
+      "name": "toast.stack",
+      "type": "vawe:block",
+      "description": "snackbars that stack and expire",
+      "tags": [
+        "toast"
+      ]
+    },
+    {
+      "name": "tweetCard",
+      "type": "vawe:block",
+      "description": "a post card + counts",
+      "tags": [
+        "tweetCard"
+      ]
+    },
+    {
+      "name": "videoLowerThird",
+      "type": "vawe:block",
+      "description": "creator lower third · avatar, subs, red CTA",
+      "tags": [
+        "videoLowerThird"
+      ]
+    }
+  ]
+}

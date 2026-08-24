@@ -1,0 +1,67 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "donutChart",
+  "type": "vawe:block",
+  "title": "donutChart",
+  "description": "ring segments + legend",
+  "tags": [
+    "donutChart"
+  ],
+  "dimensions": {
+    "width": 364,
+    "height": 487
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "donutChart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 320,
+      "label": "traffic",
+      "segments": [
+        {
+          "value": 52,
+          "color": "var(--accent)",
+          "label": "Direct"
+        },
+        {
+          "value": 30,
+          "color": "var(--up)",
+          "label": "Search"
+        },
+        {
+          "value": 18,
+          "color": "#F6A417",
+          "label": "Social"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "segments",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/donutChart.json",
+      "url": "https://vawe.dev/assets/blocks/donutChart.json",
+      "target": "formats/scene/donutChart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/donutChart.png"
+  }
+}

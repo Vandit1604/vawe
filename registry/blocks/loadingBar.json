@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "loadingBar",
+  "type": "vawe:block",
+  "title": "loadingBar",
+  "description": "determinate fill wipes L→R, lands ✓ done",
+  "tags": [
+    "loadingBar"
+  ],
+  "dimensions": {
+    "width": 384,
+    "height": 115
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "loadingBar",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "w": 340,
+      "fillDur": 1.6,
+      "label": "rendering"
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "w",
+      "h",
+      "start",
+      "fillDur",
+      "color",
+      "settle",
+      "done"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/loadingBar.json",
+      "url": "https://vawe.dev/assets/blocks/loadingBar.json",
+      "target": "formats/scene/loadingBar.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/loadingBar.png"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "morphButton",
+  "type": "vawe:beat",
+  "title": "morphButton",
+  "description": "Make the button BECOME the next thing: it shrinks, rounds and sheds its label until it is a dot.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "morphButton",
+      "start": 0,
+      "dur": 4
+    },
+    "requiredProps": [],
+    "props": [
+      "label",
+      "x",
+      "y",
+      "w",
+      "h",
+      "fill",
+      "ink",
+      "shrink",
+      "at",
+      "over"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "banner.warn",
+  "type": "vawe:block",
+  "title": "banner.warn",
+  "description": "banner, warning (amber)",
+  "tags": [
+    "banner"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 97
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "banner.warn",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "text": "Söhne is licensed, do not commit",
+      "accent": "#F6A417",
+      "icon": "!"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "text",
+      "body",
+      "title",
+      "cta",
+      "icon",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/banner.warn.json",
+      "url": "https://vawe.dev/assets/blocks/banner.warn.json",
+      "target": "formats/scene/banner.warn.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/banner.warn.png"
+  }
+}

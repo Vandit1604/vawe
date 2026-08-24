@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "kpiRow",
+  "type": "vawe:block",
+  "title": "kpiRow",
+  "description": "row of stat cells (value + label)",
+  "tags": [
+    "kpiRow"
+  ],
+  "dimensions": {
+    "width": 598,
+    "height": 133
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "kpiRow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "items": [
+        {
+          "value": "30fps",
+          "label": "frame rate"
+        },
+        {
+          "value": "2×",
+          "label": "supersample"
+        },
+        {
+          "value": "0",
+          "label": "timelines"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "items",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/kpiRow.json",
+      "url": "https://vawe.dev/assets/blocks/kpiRow.json",
+      "target": "formats/scene/kpiRow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/kpiRow.png"
+  }
+}

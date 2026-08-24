@@ -1,0 +1,41 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "ctaEnd",
+  "type": "vawe:beat",
+  "title": "ctaEnd",
+  "description": "End on a held card: the mark, the install line, the url, and no exit.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "ctaEnd",
+      "start": 0,
+      "dur": 4,
+      "mark": null,
+      "command": null,
+      "sub": null,
+      "url": null
+    },
+    "requiredProps": [
+      "mark",
+      "command",
+      "sub",
+      "url"
+    ],
+    "props": [
+      "markX",
+      "markY",
+      "markW"
+    ]
+  }
+}

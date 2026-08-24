@@ -1,0 +1,42 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "camcorderHud",
+  "type": "vawe:block",
+  "title": "camcorderHud",
+  "description": "viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom",
+  "tags": [
+    "camcorderHud",
+    "overlay"
+  ],
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "camcorderHud",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 1920,
+      "h": 1080,
+      "zoom": "2.4",
+      "battery": 68,
+      "label": "SP"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "rec",
+      "zoom",
+      "battery",
+      "label",
+      "from",
+      "start",
+      "dur"
+    ]
+  }
+}

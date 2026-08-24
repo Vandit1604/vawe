@@ -1,0 +1,45 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "kineticHook",
+  "type": "vawe:beat",
+  "title": "kineticHook",
+  "description": "Open on a kinetic hook: eyebrow, one hero number or word that counts up, a subline that arrives word by word.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "kineticHook",
+      "start": 0,
+      "dur": 4,
+      "eyebrow": null,
+      "to": null,
+      "decimals": null,
+      "word": null,
+      "sub": null
+    },
+    "requiredProps": [
+      "eyebrow",
+      "to",
+      "decimals",
+      "word",
+      "sub"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "unit",
+      "wordSize"
+    ]
+  }
+}

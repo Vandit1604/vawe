@@ -1,0 +1,56 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "wordBlast",
+  "type": "vawe:beat",
+  "title": "wordBlast",
+  "description": "Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "wordBlast",
+      "start": 0,
+      "dur": 4,
+      "text": null,
+      "src": null,
+      "w": null,
+      "h": null,
+      "font": null,
+      "arrive": null,
+      "exit": null,
+      "drift": null
+    },
+    "requiredProps": [
+      "text",
+      "src",
+      "w",
+      "h",
+      "font",
+      "arrive",
+      "exit",
+      "drift"
+    ],
+    "props": [
+      "x",
+      "y",
+      "size",
+      "weight",
+      "color",
+      "align",
+      "settle",
+      "settleAt",
+      "driftFor",
+      "motionBlur"
+    ]
+  }
+}

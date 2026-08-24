@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "scrollStory",
+  "type": "vawe:beat",
+  "title": "scrollStory",
+  "description": "Scroll a page taller than the frame the way a person scrolls it: hold the frame still, lean the surface on a static tilt, and stop at each real section in turn on one ease.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "scrollStory",
+      "start": 0,
+      "dur": 4,
+      "image": null,
+      "capture": null,
+      "html": null,
+      "h": null,
+      "stops": null,
+      "tilt": null
+    },
+    "requiredProps": [
+      "image",
+      "capture",
+      "html",
+      "h",
+      "stops",
+      "tilt"
+    ],
+    "props": [
+      "id",
+      "x",
+      "y",
+      "w",
+      "sections",
+      "stepDur",
+      "dwell",
+      "lead",
+      "leadY",
+      "ease",
+      "shadowBlur",
+      "spotlight",
+      "spotlightDur",
+      "riders",
+      "anim",
+      "enterDur",
+      "out",
+      "exitDur"
+    ]
+  }
+}

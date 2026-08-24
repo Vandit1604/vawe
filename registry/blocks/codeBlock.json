@@ -1,0 +1,75 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock",
+  "type": "vawe:block",
+  "title": "codeBlock",
+  "description": "code card; syntax-coloured lines",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 240
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "dark": true,
+      "label": "scene.json",
+      "size": 19,
+      "lines": [
+        {
+          "text": "{",
+          "color": "#8898AA"
+        },
+        {
+          "text": "  \"module\": \"scene\",",
+          "color": "#E8ECF1"
+        },
+        {
+          "text": "  \"theme\": \"creed\",",
+          "color": "var(--up)"
+        },
+        {
+          "text": "}",
+          "color": "#8898AA"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.json",
+      "target": "formats/scene/codeBlock.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.png"
+  }
+}

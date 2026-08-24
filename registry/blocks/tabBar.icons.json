@@ -1,0 +1,75 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tabBar.icons",
+  "type": "vawe:block",
+  "title": "tabBar.icons",
+  "description": "app tab bar · icon over label, selection slides",
+  "tags": [
+    "tabBar"
+  ],
+  "dimensions": {
+    "width": 544,
+    "height": 120
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "tabBar.icons",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 500,
+      "activeFrom": 0,
+      "activeTo": 3,
+      "switchAt": 1.4,
+      "switchDur": 0.8,
+      "tabs": [
+        {
+          "icon": "⌂",
+          "label": "Home"
+        },
+        {
+          "icon": "⌕",
+          "label": "Search"
+        },
+        {
+          "icon": "✦",
+          "label": "Saved"
+        },
+        {
+          "icon": "◔",
+          "label": "You"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "tabs",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "switchAt",
+      "switchDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tabBar.icons.json",
+      "url": "https://vawe.dev/assets/blocks/tabBar.icons.json",
+      "target": "formats/scene/tabBar.icons.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tabBar.icons.png"
+  }
+}

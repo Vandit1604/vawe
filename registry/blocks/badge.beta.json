@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "badge.beta",
+  "type": "vawe:block",
+  "title": "badge.beta",
+  "description": "beta status badge",
+  "tags": [
+    "badge"
+  ],
+  "dimensions": {
+    "width": 173,
+    "height": 82
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "badge.beta",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "label": "status",
+      "value": "beta",
+      "tone": "warn"
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "value",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/badge.beta.json",
+      "url": "https://vawe.dev/assets/blocks/badge.beta.json",
+      "target": "formats/scene/badge.beta.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/badge.beta.png"
+  }
+}

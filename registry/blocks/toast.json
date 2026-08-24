@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "toast",
+  "type": "vawe:block",
+  "title": "toast",
+  "description": "dark snackbar + action",
+  "tags": [
+    "toast"
+  ],
+  "dimensions": {
+    "width": 464,
+    "height": 98
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "toast",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 420,
+      "message": "Video rendered to out.mp4",
+      "action": "Open"
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "w",
+      "message",
+      "body",
+      "action",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/toast.json",
+      "url": "https://vawe.dev/assets/blocks/toast.json",
+      "target": "formats/scene/toast.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/toast.png"
+  }
+}

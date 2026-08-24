@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "callout.warn",
+  "type": "vawe:block",
+  "title": "callout.warn",
+  "description": "warning strip (terracotta)",
+  "tags": [
+    "callout"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 106
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "callout.warn",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "text": "No em-dashes in on-screen copy.",
+      "tone": "warn"
+    },
+    "props": [
+      "x",
+      "y",
+      "text",
+      "w",
+      "body",
+      "title",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/callout.warn.json",
+      "url": "https://vawe.dev/assets/blocks/callout.warn.json",
+      "target": "formats/scene/callout.warn.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/callout.warn.png"
+  }
+}

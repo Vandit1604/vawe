@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.accentUnderline",
+  "type": "vawe:block",
+  "title": "lowerThird.accentUnderline",
+  "description": "underline draws under the name (kinetic)",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 258,
+    "height": 128
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.accentUnderline",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "accentUnderline",
+      "name": "Ana Roth",
+      "role": "Principal engineer"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.accentUnderline.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.accentUnderline.json",
+      "target": "formats/scene/lowerThird.accentUnderline.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.accentUnderline.png"
+  }
+}

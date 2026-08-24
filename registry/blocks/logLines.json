@@ -1,0 +1,71 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "logLines",
+  "type": "vawe:block",
+  "title": "logLines",
+  "description": "log stream (timestamp + level colour)",
+  "tags": [
+    "logLines"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 189
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "logLines",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "lines": [
+        {
+          "t": "12:04",
+          "level": "info",
+          "text": "capturing 1950 frames"
+        },
+        {
+          "t": "12:04",
+          "level": "ok",
+          "text": "encode done"
+        },
+        {
+          "t": "12:05",
+          "level": "warn",
+          "text": "grain skipped (opt-in)"
+        },
+        {
+          "t": "12:05",
+          "level": "ok",
+          "text": "out.mp4 written"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "dark",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/logLines.json",
+      "url": "https://vawe.dev/assets/blocks/logLines.json",
+      "target": "formats/scene/logLines.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/logLines.png"
+  }
+}

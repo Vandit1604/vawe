@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tabBar.four",
+  "type": "vawe:block",
+  "title": "tabBar.four",
+  "description": "four-tab control",
+  "tags": [
+    "tabBar"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 96
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "tabBar.four",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "active": 0,
+      "tabs": [
+        "Scene",
+        "Theme",
+        "Motion",
+        "Audio"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "tabs",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "switchAt",
+      "switchDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tabBar.four.json",
+      "url": "https://vawe.dev/assets/blocks/tabBar.four.json",
+      "target": "formats/scene/tabBar.four.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tabBar.four.png"
+  }
+}

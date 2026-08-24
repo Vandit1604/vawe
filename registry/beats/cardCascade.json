@@ -1,0 +1,38 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "cardCascade",
+  "type": "vawe:beat",
+  "title": "cardCascade",
+  "description": "Show the feature set as cards that pop in one after another under a kinetic title.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "cardCascade",
+      "start": 0,
+      "dur": 4,
+      "title": null
+    },
+    "requiredProps": [
+      "title"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "cards",
+      "cols",
+      "cardW"
+    ]
+  }
+}

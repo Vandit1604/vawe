@@ -1,0 +1,49 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "spinner.small",
+  "type": "vawe:block",
+  "title": "spinner.small",
+  "description": "small looping Lottie",
+  "tags": [
+    "spinner"
+  ],
+  "dimensions": {
+    "width": 100,
+    "height": 100
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "spinner.small",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "size": 56
+    },
+    "props": [
+      "x",
+      "y",
+      "size",
+      "src",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/spinner.small.json",
+      "url": "https://vawe.dev/assets/blocks/spinner.small.json",
+      "target": "formats/scene/spinner.small.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/spinner.small.png"
+  }
+}

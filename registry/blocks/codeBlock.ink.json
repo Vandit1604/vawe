@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.ink",
+  "type": "vawe:block",
+  "title": "codeBlock.ink",
+  "description": "code theme · indigo dark, violet-blue syntax",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 240
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.ink",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "ink",
+      "label": "scene.ts",
+      "size": 19,
+      "lines": [
+        "export const scene = {",
+        "  module: 'scene',",
+        "  layers: [text, image],",
+        "}"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.ink.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.ink.json",
+      "target": "formats/scene/codeBlock.ink.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.ink.png"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassCard",
+  "type": "vawe:block",
+  "title": "glassCard",
+  "description": "frosted glass panel (blurs the moving bg behind it) + sheen",
+  "tags": [
+    "glassCard"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 344
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "glassCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "h": 300,
+      "kicker": "GLASS",
+      "title": "Backdrop blur",
+      "desc": "It blurs whatever moves behind it."
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "desc",
+      "kicker",
+      "w",
+      "h",
+      "tint",
+      "radius",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassCard.json",
+      "url": "https://vawe.dev/assets/blocks/glassCard.json",
+      "target": "formats/scene/glassCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassCard.png"
+  }
+}

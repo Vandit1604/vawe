@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "diff",
+  "type": "vawe:block",
+  "title": "diff",
+  "description": "code diff card (+/- coloured)",
+  "tags": [
+    "diff"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 173
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "diff",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "lines": [
+        {
+          "sign": "-",
+          "text": "const x = fetch()"
+        },
+        {
+          "sign": "+",
+          "text": "const x = await fetch()"
+        },
+        {
+          "sign": " ",
+          "text": "return x.json()"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/diff.json",
+      "url": "https://vawe.dev/assets/blocks/diff.json",
+      "target": "formats/scene/diff.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/diff.png"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.darkCard",
+  "type": "vawe:block",
+  "title": "lowerThird.darkCard",
+  "description": "dark card · the one that survives bright photography",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 351,
+    "height": 150
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.darkCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "darkCard",
+      "name": "Kite Studio",
+      "role": "Lisbon, Portugal"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.darkCard.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.darkCard.json",
+      "target": "formats/scene/lowerThird.darkCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.darkCard.png"
+  }
+}

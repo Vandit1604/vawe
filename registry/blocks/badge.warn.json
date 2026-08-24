@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "badge.warn",
+  "type": "vawe:block",
+  "title": "badge.warn",
+  "description": "badge, warning",
+  "tags": [
+    "badge"
+  ],
+  "dimensions": {
+    "width": 183,
+    "height": 82
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "badge.warn",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "label": "coverage",
+      "value": "62%",
+      "tone": "warn"
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "value",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/badge.warn.json",
+      "url": "https://vawe.dev/assets/blocks/badge.warn.json",
+      "target": "formats/scene/badge.warn.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/badge.warn.png"
+  }
+}

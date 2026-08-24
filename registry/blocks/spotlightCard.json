@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "spotlightCard",
+  "type": "vawe:block",
+  "title": "spotlightCard",
+  "description": "dark card with a soft spotlight glow washing from a corner",
+  "tags": [
+    "spotlightCard"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 344
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "spotlightCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "h": 300,
+      "from": "top",
+      "title": "Spotlight",
+      "desc": "The light directs the eye."
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "desc",
+      "w",
+      "h",
+      "from",
+      "radius",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/spotlightCard.json",
+      "url": "https://vawe.dev/assets/blocks/spotlightCard.json",
+      "target": "formats/scene/spotlightCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/spotlightCard.png"
+  }
+}

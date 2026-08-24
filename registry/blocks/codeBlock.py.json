@@ -1,0 +1,67 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.py",
+  "type": "vawe:block",
+  "title": "codeBlock.py",
+  "description": "code card, python",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 184
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.py",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "dark": true,
+      "label": "render.py",
+      "size": 19,
+      "lines": [
+        {
+          "text": "from vawe import render",
+          "color": "#8898AA"
+        },
+        {
+          "text": "render(\"video.json\")",
+          "color": "#E8ECF1"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.py.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.py.json",
+      "target": "formats/scene/codeBlock.py.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.py.png"
+  }
+}

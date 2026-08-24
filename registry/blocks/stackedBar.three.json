@@ -1,0 +1,88 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "stackedBar.three",
+  "type": "vawe:block",
+  "title": "stackedBar.three",
+  "description": "three-series stack",
+  "tags": [
+    "stackedBar"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 306
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "stackedBar.three",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "h": 260,
+      "series": [
+        {
+          "color": "var(--accent)"
+        },
+        {
+          "color": "var(--up)"
+        },
+        {
+          "color": "#F6A417"
+        }
+      ],
+      "data": [
+        {
+          "label": "Mon",
+          "values": [
+            18,
+            14,
+            8
+          ]
+        },
+        {
+          "label": "Tue",
+          "values": [
+            22,
+            16,
+            10
+          ]
+        },
+        {
+          "label": "Wed",
+          "values": [
+            16,
+            20,
+            12
+          ]
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "series",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/stackedBar.three.json",
+      "url": "https://vawe.dev/assets/blocks/stackedBar.three.json",
+      "target": "formats/scene/stackedBar.three.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/stackedBar.three.png"
+  }
+}

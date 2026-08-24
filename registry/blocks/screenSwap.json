@@ -1,0 +1,86 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "screenSwap",
+  "type": "vawe:block",
+  "title": "screenSwap",
+  "description": "screen A becomes screen B in place (wipe, no travel)",
+  "tags": [
+    "screenSwap"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 293
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "screenSwap",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "hold": 2.4,
+      "transition": "wipe",
+      "screens": [
+        {
+          "block": "emptyState",
+          "props": {
+            "w": 460,
+            "icon": "☐",
+            "title": "Nothing here yet",
+            "body": "Anything you save shows up in this list.",
+            "cta": "Add the first one"
+          }
+        },
+        {
+          "block": "listRow",
+          "props": {
+            "w": 460,
+            "icon": "✓",
+            "title": "Fieldwork draft",
+            "sub": "Saved to this list",
+            "meta": "now"
+          }
+        },
+        {
+          "block": "onboardCard",
+          "props": {
+            "w": 460,
+            "step": 2,
+            "of": 3,
+            "title": "Pick a workspace",
+            "body": "Choose where new drafts are saved.",
+            "cta": "Continue"
+          }
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "screens",
+      "hold",
+      "overlap",
+      "transition",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/screenSwap.json",
+      "url": "https://vawe.dev/assets/blocks/screenSwap.json",
+      "target": "formats/scene/screenSwap.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/screenSwap.png"
+  }
+}

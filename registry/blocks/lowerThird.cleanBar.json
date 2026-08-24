@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.cleanBar",
+  "type": "vawe:block",
+  "title": "lowerThird.cleanBar",
+  "description": "hairline plate · name over role · the quiet one",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 385,
+    "height": 150
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.cleanBar",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "cleanBar",
+      "name": "Ana Roth",
+      "role": "Principal engineer, Platform"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.cleanBar.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.cleanBar.json",
+      "target": "formats/scene/lowerThird.cleanBar.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.cleanBar.png"
+  }
+}

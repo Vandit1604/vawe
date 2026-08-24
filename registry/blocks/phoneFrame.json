@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "phoneFrame",
+  "type": "vawe:block",
+  "title": "phoneFrame",
+  "description": "phone shell (draw content on top)",
+  "tags": [
+    "phoneFrame"
+  ],
+  "dimensions": {
+    "width": 274,
+    "height": 484
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "phoneFrame",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 230,
+      "h": 440
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "children",
+      "status",
+      "time",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/phoneFrame.json",
+      "url": "https://vawe.dev/assets/blocks/phoneFrame.json",
+      "target": "formats/scene/phoneFrame.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/phoneFrame.png"
+  }
+}

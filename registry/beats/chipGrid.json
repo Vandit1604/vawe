@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "chipGrid",
+  "type": "vawe:beat",
+  "title": "chipGrid",
+  "description": "List the named things as mono pills that pop in staggered, with an accent footer.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "chipGrid",
+      "start": 0,
+      "dur": 4,
+      "title": null,
+      "footer": null
+    },
+    "requiredProps": [
+      "title",
+      "footer"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "chips",
+      "cols"
+    ]
+  }
+}

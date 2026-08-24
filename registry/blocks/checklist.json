@@ -1,0 +1,66 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "checklist",
+  "type": "vawe:block",
+  "title": "checklist",
+  "description": "checked / unchecked items",
+  "tags": [
+    "checklist"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 243
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "checklist",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "items": [
+        {
+          "text": "Write scene JSON",
+          "done": true
+        },
+        {
+          "text": "make critique",
+          "done": true
+        },
+        {
+          "text": "make catalog",
+          "done": true
+        },
+        {
+          "text": "Render",
+          "done": false
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/checklist.json",
+      "url": "https://vawe.dev/assets/blocks/checklist.json",
+      "target": "formats/scene/checklist.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/checklist.png"
+  }
+}

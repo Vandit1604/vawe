@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "colorCycle",
+  "type": "vawe:block",
+  "title": "colorCycle",
+  "description": "one word cycling through hues",
+  "tags": [
+    "colorCycle"
+  ],
+  "dimensions": {
+    "width": 264,
+    "height": 111
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "colorCycle",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "word": "colour",
+      "size": 64,
+      "each": 0.4
+    },
+    "props": [
+      "x",
+      "y",
+      "word",
+      "size",
+      "weight",
+      "colors",
+      "start",
+      "dur",
+      "each"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/colorCycle.json",
+      "url": "https://vawe.dev/assets/blocks/colorCycle.json",
+      "target": "formats/scene/colorCycle.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/colorCycle.png"
+  }
+}

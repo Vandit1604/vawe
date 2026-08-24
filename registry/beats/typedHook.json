@@ -1,0 +1,40 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "typedHook",
+  "type": "vawe:beat",
+  "title": "typedHook",
+  "description": "Open with a line that types itself in and then UN-types faster than it arrived. It never fades.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "typedHook",
+      "start": 0,
+      "dur": 4,
+      "text": null
+    },
+    "requiredProps": [
+      "text"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "size",
+      "weight",
+      "color",
+      "cps",
+      "ls"
+    ]
+  }
+}

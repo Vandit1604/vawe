@@ -1,0 +1,74 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "comparison.screens",
+  "type": "vawe:block",
+  "title": "comparison.screens",
+  "description": "before / after as two SCREENS, not two lists",
+  "tags": [
+    "comparison"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 300
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "comparison.screens",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "gap": 24,
+      "leftTitle": "Before",
+      "rightTitle": "After",
+      "leftScreen": {
+        "block": "emptyState",
+        "props": {
+          "icon": "☐",
+          "title": "No drafts",
+          "body": "Nothing has been saved to this list."
+        }
+      },
+      "rightScreen": {
+        "block": "listRow",
+        "props": {
+          "icon": "✓",
+          "title": "Draft saved",
+          "sub": "Fieldwork",
+          "meta": "now"
+        }
+      }
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "leftTitle",
+      "rightTitle",
+      "left",
+      "right",
+      "leftScreen",
+      "rightScreen",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/comparison.screens.json",
+      "url": "https://vawe.dev/assets/blocks/comparison.screens.json",
+      "target": "formats/scene/comparison.screens.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/comparison.screens.png"
+  }
+}

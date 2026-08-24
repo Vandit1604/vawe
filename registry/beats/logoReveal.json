@@ -1,0 +1,46 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "logoReveal",
+  "type": "vawe:beat",
+  "title": "logoReveal",
+  "description": "Reveal the brand by DRAWING the mark on stroke by stroke, bloom, then cascade the wordmark.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "logoReveal",
+      "start": 0,
+      "dur": 4,
+      "x": null,
+      "mark": null,
+      "morphFrom": null,
+      "wordmark": null,
+      "sub": null
+    },
+    "requiredProps": [
+      "x",
+      "mark",
+      "morphFrom",
+      "wordmark",
+      "sub"
+    ],
+    "props": [
+      "y",
+      "size",
+      "viewBox",
+      "spin",
+      "color",
+      "canvasW"
+    ]
+  }
+}

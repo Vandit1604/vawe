@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "notification.error",
+  "type": "vawe:block",
+  "title": "notification.error",
+  "description": "toast, error",
+  "tags": [
+    "notification"
+  ],
+  "dimensions": {
+    "width": 484,
+    "height": 124
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "notification.error",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 440,
+      "title": "Render failed",
+      "body": "em-dash in on-screen copy",
+      "accent": "var(--down)"
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "body",
+      "w",
+      "message",
+      "desc",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/notification.error.json",
+      "url": "https://vawe.dev/assets/blocks/notification.error.json",
+      "target": "formats/scene/notification.error.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/notification.error.png"
+  }
+}

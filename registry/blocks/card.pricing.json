@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "card.pricing",
+  "type": "vawe:block",
+  "title": "card.pricing",
+  "description": "plan · price · features · CTA",
+  "tags": [
+    "pricingCard"
+  ],
+  "dimensions": {
+    "width": 384,
+    "height": 338
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "card.pricing",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 340,
+      "plan": "Pro",
+      "price": "$29",
+      "features": [
+        "Unlimited renders",
+        "Every format",
+        "60fps export"
+      ],
+      "cta": "Start free",
+      "highlight": true
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "plan",
+      "price",
+      "period",
+      "features",
+      "cta",
+      "highlight",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/card.pricing.json",
+      "url": "https://vawe.dev/assets/blocks/card.pricing.json",
+      "target": "formats/scene/card.pricing.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/card.pricing.png"
+  }
+}

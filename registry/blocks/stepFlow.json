@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "stepFlow",
+  "type": "vawe:block",
+  "title": "stepFlow",
+  "description": "horizontal numbered steps",
+  "tags": [
+    "stepFlow"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 116
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "stepFlow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "active": 2,
+      "steps": [
+        "Capture",
+        "Encode",
+        "Mux",
+        "Upload"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "steps",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "buildAt",
+      "buildDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/stepFlow.json",
+      "url": "https://vawe.dev/assets/blocks/stepFlow.json",
+      "target": "formats/scene/stepFlow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/stepFlow.png"
+  }
+}

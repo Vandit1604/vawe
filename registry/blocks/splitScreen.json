@@ -1,0 +1,81 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "splitScreen",
+  "type": "vawe:block",
+  "title": "splitScreen",
+  "description": "two panes, one geometry · second pane lands behind the first",
+  "tags": [
+    "splitScreen"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 120
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "splitScreen",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "h": 96,
+      "split": 0.5,
+      "gap": 32,
+      "divider": true,
+      "left": {
+        "block": "listRow",
+        "props": {
+          "icon": "✉",
+          "title": "Digest",
+          "sub": "Kite Studio",
+          "meta": "Today"
+        }
+      },
+      "right": {
+        "block": "listRow",
+        "props": {
+          "icon": "☰",
+          "title": "Drafts",
+          "sub": "Fieldwork",
+          "meta": "Fri"
+        }
+      }
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "orient",
+      "split",
+      "gap",
+      "left",
+      "right",
+      "pip",
+      "pipScale",
+      "pipInset",
+      "pipCorner",
+      "divider",
+      "lead",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/splitScreen.json",
+      "url": "https://vawe.dev/assets/blocks/splitScreen.json",
+      "target": "formats/scene/splitScreen.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/splitScreen.png"
+  }
+}

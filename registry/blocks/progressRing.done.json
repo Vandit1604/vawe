@@ -1,0 +1,54 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "progressRing.done",
+  "type": "vawe:block",
+  "title": "progressRing.done",
+  "description": "ring, 100% (green)",
+  "tags": [
+    "progressRing"
+  ],
+  "dimensions": {
+    "width": 194,
+    "height": 223
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "progressRing.done",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "size": 150,
+      "value": 100,
+      "color": "var(--up)",
+      "label": "complete"
+    },
+    "props": [
+      "x",
+      "y",
+      "size",
+      "value",
+      "max",
+      "label",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/progressRing.done.json",
+      "url": "https://vawe.dev/assets/blocks/progressRing.done.json",
+      "target": "formats/scene/progressRing.done.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/progressRing.done.png"
+  }
+}

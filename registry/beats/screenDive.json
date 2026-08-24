@@ -1,0 +1,40 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "screenDive",
+  "type": "vawe:beat",
+  "title": "screenDive",
+  "description": "Push the camera into the real product surface under a kinetic title.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "screenDive",
+      "start": 0,
+      "dur": 4,
+      "title": null,
+      "image": null,
+      "caption": null
+    },
+    "requiredProps": [
+      "title",
+      "image",
+      "caption"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "zoom"
+    ]
+  }
+}
