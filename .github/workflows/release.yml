@@ -1,0 +1,107 @@
+name: release
+
+# Tag-triggered. `git tag v2.0.1 && git push --tags` publishes three things, one job each:
+# the standalone renderer binaries, the CLI image, and the npm package.
+#
+# The three jobs are deliberately independent. A registry outage should not be able to hold back the
+# binaries, and a broken package should not take the image with it. What DOES gate the npm half is
+# `prepublishOnly` → scripts/dev/pack-check.mjs, which reads the real `npm pack` file list and refuses
+# a tarball that cannot render — so a broken package fails the job instead of reaching the registry.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # create the release, upload assets
+  packages: write   # push the image to ghcr
+
+jobs:
+  binaries:
+    name: renderer binaries + checksums
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Four targets in one job, not a matrix: the renderer is pure Go with CGO off, so every target
+      # cross-compiles on this runner in seconds. A matrix would spend four checkouts and four Go
+      # installs to save nothing, and would then need a fifth job to collect the files for one
+      # checksum manifest.
+      - name: build
+        run: |
+          mkdir -p dist
+          for target in darwin/arm64 darwin/amd64 linux/arm64 linux/amd64; do
+            os="${target%/*}"; arch="${target#*/}"
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" go build -o "dist/vawe-$os-$arch" ./cmd/render
+          done
+          cd dist && sha256sum vawe-* > SHA256SUMS && cat SHA256SUMS
+
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --generate-notes
+          gh release upload "$tag" dist/* --clobber
+
+  image:
+    name: CLI image → ghcr
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # linux/amd64 and linux/arm64 only: the image is a Linux renderer, and Docker on macOS runs
+      # linux/arm64 anyway.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.cli
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/vawe-cli:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/vawe-cli:latest
+
+  npm:
+    name: npm publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      # `make build` fetches the 16 free faces (they are not committed) and builds bin/vawe. Both are
+      # in the package's `files` allowlist and pack-check fails without them. The binary it produces
+      # is linux/amd64, this runner's platform — the README says so rather than implying otherwise.
+      - run: make build
+
+      - name: publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

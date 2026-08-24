@@ -34,10 +34,37 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
   systems, and a gate ladder (static + a vision judge) that keeps output on-brand and un-generic.
 - **Any aspect, one source.** `--aspect 9:16,1:1,16:9` renders every platform ratio in one pass.
 
-## Quick start
+## Install
+
+Three ways in. Pick by what you already have on the machine.
+
+**npm** — needs Node 18+, a Chrome or Chromium, and ffmpeg (either on `PATH`, or
+`npm i ffmpeg-static` for a bundled copy). The published package carries a renderer binary built for
+**linux x64**, the platform the release job publishes from; on any other platform the CLI says so and
+tells you to build it. Scenes that reference your own image files are not supported yet — the render
+server only serves paths inside the engine (`cli/vawe.mjs`).
 
 ```bash
-# prerequisites: Go 1.21+, Node 18+, ffmpeg, a Chrome/Chromium
+npx vawe my-scene.json --draft     # renders into the current directory
+```
+
+**Docker** — needs nothing but Docker. Chrome, ffmpeg and the free faces are inside the image.
+
+```bash
+docker build -f Dockerfile.cli -t vawe-cli .
+docker run --rm -v "$PWD:/work" vawe-cli my-scene.json --draft
+# on Linux, add --user "$(id -u):$(id -g)" so the mp4 lands owned by you
+```
+
+The image pins its base images by digest and its Chrome (151.0.7922.173) and ffmpeg (5.1.9) by exact
+version, so the same tag renders with the same browser, encoder and fonts. It does **not** pin the
+GPU: nothing in the Chrome flags selects software rasterisation, so rasterised output can still
+differ between hosts. Three of the large variables are fixed. Renders are not byte-identical across
+machines.
+
+**From source** — needs Go 1.26+, Node 18+, ffmpeg, and a Chrome or Chromium.
+
+```bash
 make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
 ./bin/vawe formats/scene/sample.json    # → out/sample.mp4
 make video D=formats/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)

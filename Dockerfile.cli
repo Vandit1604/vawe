@@ -1,0 +1,93 @@
+# The CLI renderer. Build context is the REPO ROOT (same as the site image, Dockerfile).
+#
+#   docker build -f Dockerfile.cli -t vawe-cli .
+#   docker run --rm -v "$PWD:/work" vawe-cli my.json --draft
+#
+# It carries Chrome, ffmpeg, the free faces and the engine, so a machine with no Go, no Node, no
+# ffmpeg and no fonts can render. The entrypoint is cli/vawe.mjs, NOT bin/vawe: the wrapper is what
+# stages the scene into .vawe-data/scenes/, expands block sugar, and copies the mp4 back out. The
+# image supplies what the wrapper looks for (CHROME_BIN, ffmpeg on PATH) and duplicates none of it.
+#
+# WHAT IS PINNED, AND WHY THAT IS THE POINT. Every version below is exact: both base images by
+# multi-arch index digest, both apt packages by full version string. A `:latest` here would make the
+# image a moving target and there would be no reason to prefer it over a local install. Pinned, it is
+# a reference renderer: the same image tag renders with the same Chrome, the same ffmpeg and the same
+# fonts. When Debian rotates a package version out of the archive the build FAILS on the pin rather
+# than drifting to a new browser silently — bump the ARG then, deliberately.
+#
+# WHAT IS NOT PINNED: the GPU. Chrome's flags here fix the colour profile, hinting and compositor
+# stages (internal/scene/scene.go:112-131) but nothing selects software rasterisation, so rasterised
+# output can still differ between hosts with different graphics stacks. This image removes the three
+# largest sources of variation. It does not make renders byte-identical across machines.
+
+# --- the Go renderer ---
+FROM golang:1.26-bookworm@sha256:6ef6e30f0ea5c384f6d111cf856e024e3086bbdcb1779da3f3b3fbba0aea53d2 AS builder
+# /src, not /repo: a BuildKit cache entry for a `WORKDIR /repo` layer went unrecoverable on the deploy
+# host and broke every child layer even under --no-cache (see Dockerfile, docs/MISTAKES.md #101).
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd ./cmd
+COPY internal ./internal
+RUN CGO_ENABLED=0 go build -o bin/vawe ./cmd/render
+
+# --- the runtime ---
+FROM node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
+
+ARG CHROMIUM_VERSION=151.0.7922.173-1~deb12u1
+ARG FFMPEG_VERSION=7:5.1.9-0+deb12u1
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      chromium="${CHROMIUM_VERSION}" \
+      ffmpeg="${FFMPEG_VERSION}" \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /engine
+
+# The engine, and exactly the engine: this is the same path list as `files` in package.json, so the
+# image and the npm package ship the same thing. bin/ and assets/fonts/ are the two entries produced
+# rather than copied — the binary comes from the builder stage, the faces are fetched below.
+COPY cli ./cli
+COPY core ./core
+COPY blocks ./blocks
+COPY blueprints ./blueprints
+COPY themes ./themes
+COPY assets/vendor ./assets/vendor
+COPY scripts/author/expand-blocks.mjs ./scripts/author/expand-blocks.mjs
+COPY scripts/media/fonts.mjs ./scripts/media/fonts.mjs
+COPY formats/scene/scene.html formats/scene/scene.js formats/scene/props.js \
+     formats/scene/scene.css formats/scene/schema.json formats/scene/sample.json ./formats/scene/
+COPY CREDITS.md LICENSE-FAQ.md ./
+
+# Font binaries are deliberately not committed (redistribution), and boot() blocks on document.fonts
+# for every registered face, so an image without this step renders nothing. fonts.mjs uses only node
+# builtins and hash-verifies each download. One paid face (Sohne) is bring-your-own by design.
+RUN node scripts/media/fonts.mjs
+
+COPY --from=builder /src/bin/vawe ./bin/vawe
+
+# The wrapper writes the staged scene and the render output inside the engine root before copying the
+# mp4 to the working directory. Pre-create both world-writable so `docker run --user $(id -u):$(id -g)`
+# works — that is how you get host-owned files out of the mount on Linux.
+RUN mkdir -p /engine/out /engine/.vawe-data/scenes && chmod 777 /engine/out /engine/.vawe-data/scenes
+
+# CHROME_BIN points at a three-flag wrapper, not at chromium itself, and this is load-bearing.
+# The renderer captures with several TABS on one browser (internal/scene/scene.go), and Chrome
+# throttles a tab that is not the visible one. Inside a container that throttling is hard: the shoot
+# waits on a double requestAnimationFrame that a backgrounded tab never fires, so the render stops
+# dead partway through with no error and no timeout. Measured on this image: `--workers 1` always
+# finished, `--workers 2`, 3 and 6 always hung, on two different scenes; adding these three flags
+# made 3 workers finish. They only turn OFF background throttling, so they change no pixel.
+#
+# This belongs in the engine's own flag list (allocOpts, internal/scene/scene.go:112) — until it is
+# there, every containerised render needs this wrapper.
+RUN printf '%s\n' '#!/bin/sh' \
+      'exec /usr/bin/chromium --disable-renderer-backgrounding --disable-background-timer-throttling --disable-backgrounding-occluded-windows "$@"' \
+      > /usr/local/bin/vawe-chromium && chmod +x /usr/local/bin/vawe-chromium
+
+ENV REPO=/engine
+ENV CHROME_BIN=/usr/local/bin/vawe-chromium
+
+WORKDIR /work
+ENTRYPOINT ["node", "/engine/cli/vawe.mjs"]
