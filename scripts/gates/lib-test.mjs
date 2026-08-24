@@ -2698,5 +2698,37 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));
 }
 
+// ---- shader sting ids: the branch number is written down, not inferred from array order ----
+{
+  const { SHADER_ID: ID, SHADER_FX: FX } = await import('../../core/stings.js');
+  // The shipped order, transcribed by hand. If a future edit renumbers an effect, every scene using
+  // shader stings renders a DIFFERENT shader with no crash and no visual error — this catches that.
+  const SHIPPED = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti',
+    'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors',
+    'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan',
+    'chromaticSplit', 'dispersion', 'gridPixelateWipe', 'iridescence', 'cinematicZoom'];
+  const moved = SHIPPED.filter((n, i) => ID[n] !== i);
+  ok(`sting ids: every effect keeps its shipped branch number${moved.length ? ' — moved: ' + moved.map((n) => `${n} ${SHIPPED.indexOf(n)}->${ID[n]}`).join(', ') : ''}`,
+    moved.length === 0);
+  ok('sting ids: no shipped effect was dropped', SHIPPED.every((n) => n in ID));
+  ok('sting ids: SHADER_FX is exactly the keys of SHADER_ID', JSON.stringify(FX) === JSON.stringify(Object.keys(ID)));
+  const ids = Object.values(ID);
+  ok('sting ids: 0..n-1, no gaps, no duplicates',
+    new Set(ids).size === ids.length && Math.min(...ids) === 0 && Math.max(...ids) === ids.length - 1);
+
+  const fragSrc = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
+  const missing = ids.filter((i) => !fragSrc.includes(`u_fx == ${i}`));
+  ok(`sting ids: FRAG branches every id${missing.length ? ' — missing ' + missing.join(', ') : ''}`, missing.length === 0);
+  ok('sting ids: no FRAG branch past the last id', !fragSrc.includes(`u_fx == ${ids.length}`));
+
+  // An unknown name used to be a silent no-op (draw() returned clear()). A real draw() needs WebGL,
+  // so assert on the source: the lookup must throw and name the known effects, never fall back.
+  const drawSrc = fragSrc.slice(fragSrc.indexOf('draw(effect,'), fragSrc.indexOf('clear() {'));
+  ok('sting ids: draw() throws on an unknown effect instead of silently clearing',
+    /throw new Error\(`unknown sting fx/.test(drawSrc) && !/idx < 0/.test(drawSrc));
+  ok('sting ids: the throw lists the known effects', /SHADER_FX\.join/.test(drawSrc));
+  ok('sting ids: an unknown name has no id at all', ID['nope'] === undefined);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
