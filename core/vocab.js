@@ -68,7 +68,12 @@ export const CAMERA_WORDS = {
   follow: 'panFollow',
   sweep: 'truck',
   tour: 'travel',
+  'pan stations': 'travel',
   circle: 'orbit',
+  'ui focus zoom': 'diveIn',
+  'punch in': 'punchIn',
+  shake: 'cameraShake',
+  'drift hold': 'driftHold',
 };
 
 // Registered through the same primitive as every other vocabulary, so a word written into the WRONG

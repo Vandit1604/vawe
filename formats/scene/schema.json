@@ -498,7 +498,7 @@
       }
     },
     "cameraMove": {
-      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase (core/camera-moves.js)."
+      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
     },
     "spectacle": {
       "type": "object",
