@@ -38,7 +38,7 @@ import { resolveSpectacle } from '../../core/spectacle.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
-import { lintData, easeErrors, bgErrors, durationWordErrors } from '../../core/validate.mjs';
+import { lintData, easeErrors, bgErrors, durationWordErrors, cssErrors } from '../../core/validate.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/vocab.js';
 import { BASE_ENTER } from '../../core/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts.js';
@@ -1667,6 +1667,29 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const out = resolveBridges({ bridges: [{ bridge: 'j', sound: 'tense', at: 'cut@1', lead: 0.5 }] }, marks, 20);
     return out.length === 1 && out[0].at === 4.4;
   })());
+}
+
+// ---- css passthrough: `cssErrors` refuses every prop the engine rewrites every frame or kills
+// globally, and stays silent on anything else (core/validate.mjs, core/layers/util.js applyCss) ----
+{
+  ok('css: opacity is refused, and names the alternative', (() => {
+    const errs = cssErrors({ layers: [{ type: 'rect', css: { opacity: 0.5 } }] });
+    return errs.some((e) => /css\.opacity is engine-owned/.test(e) && /`anim` \/ `motion`/.test(e));
+  })());
+  ok('css: transform/left/top/width/height/zIndex/pointerEvents/animation/transition/position are all refused', (() => {
+    const OWNED = ['transform', 'left', 'top', 'width', 'height', 'zIndex', 'pointerEvents', 'animation', 'transition', 'position'];
+    const errs = cssErrors({ layers: [{ type: 'rect', css: Object.fromEntries(OWNED.map((k) => [k, 1])) }] });
+    return OWNED.every((k) => errs.some((e) => e.startsWith(`layer[0]: css.${k} is engine-owned`)));
+  })());
+  ok('css: a group child is walked too, not just top-level layers', (() => {
+    const errs = cssErrors({ layers: [{ type: 'group', children: [{ type: 'rect', css: { opacity: 0.5 } }] }] });
+    return errs.some((e) => /^layer\[0\]\.children\[0\]: css\.opacity/.test(e));
+  })());
+  ok('css: an unowned property (a box gradient, an inset highlight) is silent', (() => {
+    const errs = cssErrors({ layers: [{ type: 'rect', css: { background: 'linear-gradient(0deg, red, blue)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.4)' } }] });
+    return errs.length === 0;
+  })());
+  ok('css: no `css` prop at all is silent', cssErrors({ layers: [{ type: 'rect' }] }).length === 0);
 }
 
 // ---- vars track: PER-CHANNEL timing (core/tracks/vars.js) ----

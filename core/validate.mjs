@@ -245,6 +245,7 @@ export function validateData(schema, data) {
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
   errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
+  errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
   return errors;
@@ -373,6 +374,42 @@ export function htmlLayerErrors(cfg) {
     if (L.html == null) return;
     const timeCss = timeCssUsed(L.html);
     if (timeCss) out.push(`${at} (html) uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Animate the layer with the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or drive your CSS from a \`vars\` custom property.`);
+  };
+  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
+  return out;
+}
+
+// CSS PASSTHROUGH. `css` on a layer reaches CSS the layer vocabulary does not name (a box gradient,
+// `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration) — see
+// core/layers/util.js's `applyCss`, which is the ONLY place that reads it, and reads it ONCE, at build
+// time. That is exactly why a key the ENGINE rewrites every frame must be refused here rather than
+// applied: a build-time write to `opacity`/`transform`/etc. is silently erased the instant the render
+// advances past frame 0, and this repo's most-logged bug class is an accepted prop the engine then
+// ignores (docs/MISTAKES.md #213, #369, #373, #375). Every refusal names the vocabulary that already
+// owns the job, never just "no".
+const OWNED_CSS = {
+  opacity: 'written every frame from the enter/exit envelope (core/clips.js:220) — use `anim` / `motion`',
+  transform: 'written every frame by motion tracks and named entrances (core/clips.js, GSAP) — use `motion`',
+  animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played — use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
+  transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation` — use `parts` or `vars`',
+  position: 'the coordinate system the engine lays the layer out with (formats/scene/scene.js) — use `x` / `y` / `w`',
+  left: "written from the layer's `x` on every build (formats/scene/scene.js) — set `x` instead",
+  top: "written from the layer's `y` on every build (formats/scene/scene.js) — set `y` instead",
+  width: "written from the layer's `w`, and again by the type-specific builder — set `w` instead",
+  height: "written from the layer's `h` by the type-specific builder (core/layers/*.js) — set `h` instead",
+  zIndex: "written every frame from the layer's stacking order (core/clips.js:150, driven by `track`) — set `track` instead",
+  pointerEvents: 'written every frame from the layer\'s on/off-window state (core/clips.js) — there is no authoring override for it',
+};
+
+export function cssErrors(cfg) {
+  const out = [];
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
+    if (!isObj(L.css)) return;
+    for (const k of Object.keys(L.css)) {
+      if (OWNED_CSS[k]) out.push(`${at}: css.${k} is engine-owned — ${OWNED_CSS[k]}.`);
+    }
   };
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
   return out;
