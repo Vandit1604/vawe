@@ -19,6 +19,7 @@
 // Deliberately NOT a rewriter. It reports file:line, the stated number and the real one, and leaves
 // the wording to a human: a count often sits inside a sentence that needs rephrasing, not a substitution.
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS } from '../../core/type.js';
@@ -47,7 +48,20 @@ const TRUTH = {
   'kinetic presets': size(PRESETS),
   cuts: size(PRESENTATIONS),
   'canvas fx': size(CANVAS_FX_NAMES),
-  themes: fs.readdirSync(path.join(root, 'themes')).filter((f) => f.endsWith('.json')).length,
+  // COUNT WHAT SHIPS, not what is on this disk. Three brand themes are deliberately untracked but
+  // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading
+  // "38 themes" would therefore pass on the author's machine and fail for every contributor — the
+  // stale-count failure this gate exists to prevent, inverted. The site describes the PUBLISHED
+  // product, so the published set is the truth. (Same lesson as docs/MISTAKES.md #423: grade the thing
+  // that actually ships, never the copy sitting in the working tree.)
+  themes: (() => {
+    try {
+      const tracked = execFileSync('git', ['ls-files', 'themes'], { cwd: root, encoding: 'utf8' });
+      const n = tracked.split('\n').filter((f) => f.endsWith('.json')).length;
+      if (n) return n;
+    } catch { /* not a git checkout — fall back to disk */ }
+    return fs.readdirSync(path.join(root, 'themes')).filter((f) => f.endsWith('.json')).length;
+  })(),
 };
 
 const FILES = [

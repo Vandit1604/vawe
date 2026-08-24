@@ -116,9 +116,9 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (38)
+## Themes (35)
 
-`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew-dark` · `brew` · `cadence` · `creed-launch` · `creed` · `default` · `ditherkit` · `glassatmos` · `higgsfield` · `ledgerline-cyber` · `ledgerline-neon` · `linear` · `lumen` · `mercury` · `northwind` · `plinth-auto` · `plinth` · `satara` · `stripe` · `threadcite` · `tpot` · `vawe-creed` · `vawe-dark` · `vawe-inter` · `vawe-site` · `vawe`
+`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew` · `brew-dark` · `cadence` · `creed` · `creed-launch` · `default` · `ditherkit` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-creed` · `vawe-dark` · `vawe-inter` · `vawe-site`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.
