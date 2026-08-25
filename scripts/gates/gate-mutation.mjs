@@ -1022,8 +1022,11 @@ for (const c of srcCases) {
   fs.writeFileSync(p, orig); // always restore, even if the gate throws
   inFlight.delete(p);
   if (c.after) c.after();
-  // snap reports rather than fails (an intended change is still a change), so some cases
-  // assert on OUTPUT alone — a gate can speak without exiting non-zero.
+  // Some cases assert on OUTPUT alone, because a gate can speak without exiting non-zero. This used
+  // to say "snap reports rather than fails", which stopped being true when scene-snap was fixed to
+  // exit 1 on a diff like its four siblings. `outputOnly` outlives that: it is for any case where the
+  // mutation is proven by what the gate SAYS, and tying it to one gate's exit code was the reason the
+  // sentence went stale without anything failing.
   const ok = (c.outputOnly ? true : r.code !== 0) && c.match.test(r.out);
   console.log(`   ${ok ? '✓' : '✗'} ${'source'.padEnd(9)} must-fail  ${c.name}`);
   if (ok) pass++; else broken.push({ name: c.name, why: r.code === 0 ? 'gate stayed SILENT after its guard was removed' : 'fired for the wrong reason', out: r.out.split('\n').filter(Boolean).slice(-3).join(' | ').slice(0, 220) });

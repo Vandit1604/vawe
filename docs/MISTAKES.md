@@ -13890,3 +13890,61 @@ was in.
 
 **Still open.** `vawe-launch` asks for -14 LUFS and the mux delivers -16.6, before and after this change.
 Single-pass `loudnorm` undershooting its target is a separate finding and nobody has logged it.
+
+## #450 — six gates stated a verdict they had not earned
+
+**What.** A sweep of the gate library found six checks whose PASS did not mean what it appeared to mean.
+Each is a different route to the same defect, so they are logged together.
+
+- **`scene-snap` printed its diff and exited 0.** 149 real DOM changes, listed, then `△ 149 change(s) —
+  review that each is intended.` and a zero exit. Its four sibling determinism gates (`snap-scenes.mjs:248`,
+  `snap-blocks.mjs:149`, `canvas-purity.mjs:82`, `probe-purity.mjs:131`) all exit 1 on a change. This was
+  the one that reported the change and then certified the render.
+- **`seam-snap` read a missing ffmpeg as a clean film.** Three fallbacks fed it: `fps` defaulted to 30,
+  `total` fell back to the declared duration, and `lumaAt` returned null so every boundary hit `continue`.
+  With no decoder on PATH it printed `✓ seam-snap clean — no luminance flash at any transition` and
+  exited 0, having decoded nothing.
+- **`motion-audit` rewrote every segment-scoped FAIL to WARN** when a scene declared no `segments`. No
+  scene in this repo declares any (`core/boot.js:537` reads `scene.segments || []`; the grep returns
+  zero), so the entire FAIL tier (i final-hold · ii monotonic · iii settle · iv count-up · v typing) had
+  never once been enforced, under a green tick. One clause survived: the whole-video final-hold at
+  `motion-audit.mjs:278` bypasses `add()`.
+- **`inspect --strict` was dead code.** `fail && (strict || true) ? (fail ? 1 : 0) : 0` reduces to
+  `fail ? 1 : 0`. The flag never moved a verdict. Not a lax verdict, a knob that never existed.
+- **`docker-context` divided `du -sk`'s KiB by 1000** and labelled the result MB, so its number was
+  neither MB nor MiB and ran 2.4% high against a 60MB budget. Absent docker exited 0, which reads as
+  "within budget" to `make`, to a shell `&&`, and to CI.
+- **`draft-check`'s carried-warning record could never fire.** `run()` returned `out: ''` on success, so
+  `codes(out)` was `[]` for every passing sub-gate, and any real failure exits before `writeReceipt`.
+  The `CARRIED, knowingly` block was unreachable. On `sample.json` it discarded nine real codes.
+
+**Root cause.** One shape, six instances: **the gate learned something about the ENVIRONMENT and reported
+it as a fact about the SUBJECT.** A missing binary is not a clean film. An absent docker is not a small
+context. An undeclarable window is not a satisfied contract. In every case the honest answer was "I could
+not check this", and none of the six had a way to say it, so each fell back to the only other thing it
+could say.
+
+**Fix.** Each gate now separates cannot-check from checked-and-clean. `seam-snap` and `docker-context`
+preflight their tools and exit 2 naming the binary. `motion-audit` records the tier each check ASKED for,
+names its blindness, says how many findings would have been FAIL, and exits 3 (the `census.mjs` convention)
+only where a would-be-FAIL actually fired. `scene-snap` exits 1 on a diff and names the deliberate
+re-baseline command. `draft-check` reads both streams through `spawnSync` and sorts the codes so the
+receipt diffs between drafts. `inspect`'s dead expression is collapsed and the flag now says it is inert
+rather than pretending.
+
+**Blast radius.** 49 of 56 gates unchanged. One intended verdict change: `motion-audit` 0 → 3, so
+`make review` (`verify/review.mjs:20`) now shows `✗ motion audit`. Nothing about any film changed — the
+findings it prints today were printed yesterday, in the same words, under a tick.
+
+**Which gate catches it now.** None, and that is the honest answer. `scripts/lib/census.mjs` already
+encodes this distinction for populations, including a `soft` mode that returns `{ blind }` instead of
+exiting, and it is the pattern a new gate should copy. What has no owner is the general question "does
+this gate have a way to say it could not check?", and a gate cannot ask that of itself.
+
+**Still open.** `inspect --strict` has no teeth and giving it any is a design decision, not a fix: the
+candidate rule is that a beat whose `at` has no live layers passes today when `mustShow` is empty. It is
+defensible and it would create new failures across the library, which is a decision about the library
+rather than about the gate. Separately, `motion-audit`'s inferred single window may be a bad rule: with
+one window `visEnd == end`, so every ordinary layer exit reads as a mid-scene fade, which is why
+`ii:monotonic` fires on a clean sample. The real repair is scenes declaring `segments`, or `add()`
+deriving windows from `cuts`.
