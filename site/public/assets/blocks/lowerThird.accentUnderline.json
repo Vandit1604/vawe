@@ -48,5 +48,6 @@
       "enterDur": 0.4,
       "exitDur": 0.3
     }
-  ]
+  ],
+  "produced": false
 }

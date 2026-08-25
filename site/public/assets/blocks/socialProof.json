@@ -176,5 +176,6 @@
       "enterDur": 0.35,
       "exitDur": 0.3
     }
-  ]
+  ],
+  "produced": false
 }

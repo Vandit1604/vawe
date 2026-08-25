@@ -36,5 +36,6 @@
       "varsDur": 1.5,
       "varsEase": "easeInOutCubic"
     }
-  ]
+  ],
+  "produced": false
 }

@@ -33,5 +33,6 @@
       "varsDelay": 4.2,
       "varsEase": "easeOutCubic"
     }
-  ]
+  ],
+  "produced": false
 }

@@ -59,6 +59,17 @@ function sceneFor(entry) {
   return {
     module: 'scene', aspect: '16:9', theme: process.env.THEME || 'vawe', duration: DURATION,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: DURATION }], layers,
+    // NOT A FILM. `produceBaseline` injects direction into any scene that declares none — a gentle slow
+    // push so a film's frame stays alive, plus scene-unit transitions (core/produce.js). Correct there,
+    // wrong here: a preview exists so you can JUDGE the block, and the push scales about the frame
+    // centre, drifting a block placed at x:160,y:160 steadily up and to the left while you read it.
+    //
+    // `produced: false` is the engine's own opt-out and has been since before this generator existed
+    // (core/produce.js:27, asserted at scripts/gates/lib-test.mjs:2690). It turns off the whole injected
+    // baseline while still baking an author's explicit `cameraMove` sugar. Reaching for it beats
+    // declaring an empty `camera` here, which would be a second way to say one thing — and a preview
+    // harness rendering one block is exactly what "not a directed film" means.
+    produced: false,
   };
 }
 

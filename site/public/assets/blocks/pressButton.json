@@ -35,5 +35,6 @@
       "varsDelay": 0.78,
       "varsEase": "linear"
     }
-  ]
+  ],
+  "produced": false
 }

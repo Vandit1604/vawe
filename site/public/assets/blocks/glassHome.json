@@ -437,5 +437,6 @@
       "out": "fade",
       "exitDur": 0.3
     }
-  ]
+  ],
+  "produced": false
 }

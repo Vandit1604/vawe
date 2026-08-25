@@ -132,5 +132,6 @@
       "enterDur": 0.12,
       "exitDur": 0.25
     }
-  ]
+  ],
+  "produced": false
 }

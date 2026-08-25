@@ -277,5 +277,6 @@
       ],
       "out": "wipe-left"
     }
-  ]
+  ],
+  "produced": false
 }
