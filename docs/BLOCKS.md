@@ -92,7 +92,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_186 entries across 99 families._
+_188 entries across 100 families._
 
 | Block | For |
 |---|---|
@@ -126,6 +126,8 @@ _186 entries across 99 families._
 | `statBig.currency` | stat with a $ unit |
 | `statBig.time` | stat, ms unit |
 | `colorCycle` | one word cycling through hues |
+| `splitFlapBoard` | a mechanical departure board · a drum per character steps through the alphabet and lands |
+| `splitFlapBoard.small` | the board at caption size, no header rail |
 | `stripeCard` | recognizably-Stripe payments card |
 | `barChart` | labeled bars scaled to max |
 | `barChart.green` | bars in success green |

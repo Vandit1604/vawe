@@ -37,6 +37,7 @@
 | `draw` | stroke draw-on for SVG paths |
 | `elastic` | elastic scale pop with visible wobble — playful brands only |
 | `fall` | falls from above under gravity and lands with a small squash |
+| `flap` | the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns — an airport board, ordered where `decode` is random |
 | `flip` | 3D flip-up per unit, letters somersault into place — `axis` picks the hinge |
 | `focus` | focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium |
 | `gradient` | gradient sweeps through letterforms |
@@ -48,6 +49,7 @@
 | `skew` | italic shear that straightens as it lands — editorial, sporty |
 | `slide` | slides in from one side (`dir`) — pair it with the opposite exit |
 | `stretch` | horizontal smear that snaps true — impact words |
+| `strike` | a rule draws THROUGH the word and it dims behind the line, still legible — the "not X, Y" beat, where the rejection is the content |
 | `swing` | each unit hinges from its top edge and swings upright — playful, short words |
 | `tilt` | 3D tilt-in |
 | `type` | typewriter hard on/off, no transform — terminals, timers, code |
@@ -541,6 +543,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
+| `alongPath` | set the line of type ON A CURVE and, if you ask, send it travelling along one — the general case `circle` is one point of, and the only way to bend a headline |
 | `kick` | hit the layer on the film's own joints — a cut, a seam or a sting shoves it, so the frame feels the edit |
 | `mixBlend` | how this layer's pixels combine with what is already painted behind it — knock a headline out of a photo |
 | `occlude` | hide this layer where another one covers it — put something BEHIND something else without reordering the stack |
@@ -823,4 +826,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_555 effects across 35 families. Regenerate: `make effects`._
+_558 effects across 35 families. Regenerate: `make effects`._

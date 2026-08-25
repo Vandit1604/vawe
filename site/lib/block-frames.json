@@ -65,6 +65,18 @@
     "w": 264,
     "h": 111
   },
+  "splitFlapBoard": {
+    "x": 138,
+    "y": 138,
+    "w": 535,
+    "h": 194
+  },
+  "splitFlapBoard.small": {
+    "x": 138,
+    "y": 138,
+    "w": 214,
+    "h": 106
+  },
   "stripeCard": {
     "x": 138,
     "y": 138,

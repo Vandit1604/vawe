@@ -1,6 +1,6 @@
 {
-  "total": 555,
-  "previewed": 253,
+  "total": 558,
+  "previewed": 255,
   "families": 35,
   "tags": [
     [
@@ -49,7 +49,7 @@
     ],
     [
       "per-layer",
-      53
+      54
     ],
     [
       "per-layer/scene",
@@ -69,7 +69,7 @@
     ],
     [
       "text",
-      36
+      38
     ],
     [
       "timing",
@@ -89,7 +89,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 28,
+      "count": 30,
       "undescribed": 0,
       "entries": [
         {
@@ -153,6 +153,13 @@
           "stem": "kinetic-text-presets--fall",
           "desc": "falls from above under gravity and lands with a small squash",
           "scene": "/assets/effects/kinetic-text-presets--fall.json",
+          "noPreview": null
+        },
+        {
+          "name": "flap",
+          "stem": "kinetic-text-presets--flap",
+          "desc": "the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns · an airport board, ordered where `decode` is random",
+          "scene": "/assets/effects/kinetic-text-presets--flap.json",
           "noPreview": null
         },
         {
@@ -230,6 +237,13 @@
           "stem": "kinetic-text-presets--stretch",
           "desc": "horizontal smear that snaps true · impact words",
           "scene": "/assets/effects/kinetic-text-presets--stretch.json",
+          "noPreview": null
+        },
+        {
+          "name": "strike",
+          "stem": "kinetic-text-presets--strike",
+          "desc": "a rule draws THROUGH the word and it dims behind the line, still legible · the \"not X, Y\" beat, where the rejection is the content",
+          "scene": "/assets/effects/kinetic-text-presets--strike.json",
           "noPreview": null
         },
         {
@@ -2852,9 +2866,16 @@
       "mode": "table",
       "note": null,
       "noPreview": "a modifier acts on whatever layer is already there, so it has nothing to show on its own.",
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "alongPath",
+          "stem": "per-layer-fx--alongpath",
+          "desc": "set the line of type ON A CURVE and, if you ask, send it travelling along one · the general case `circle` is one point of, and the only way to bend a headline",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "kick",
           "stem": "per-layer-fx--kick",

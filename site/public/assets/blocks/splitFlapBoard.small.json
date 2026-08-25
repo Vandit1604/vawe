@@ -1,0 +1,175 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "rect",
+      "radius": 6,
+      "x": 160,
+      "y": 160,
+      "w": 38,
+      "h": 62,
+      "bg": "linear-gradient(180deg, var(--text) 0 calc(50% - 1px), color-mix(in srgb, var(--text) 55%, var(--bg)) calc(50% - 1px) calc(50% + 1px), color-mix(in srgb, var(--text) 88%, var(--bg)) calc(50% + 1px) 100%)",
+      "border": "1.5px solid var(--line-strong)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.28,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "x": 160,
+      "y": 164,
+      "w": 38,
+      "align": "center",
+      "text": "L",
+      "font": "mono",
+      "size": 52,
+      "color": "var(--bg)",
+      "split": "char",
+      "preset": "flap",
+      "presetOpts": {
+        "steps": 10
+      },
+      "each": 0.9,
+      "stagger": 0,
+      "start": 0.4,
+      "duration": 7.8,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "radius": 6,
+      "x": 204,
+      "y": 160,
+      "w": 38,
+      "h": 62,
+      "bg": "linear-gradient(180deg, var(--text) 0 calc(50% - 1px), color-mix(in srgb, var(--text) 55%, var(--bg)) calc(50% - 1px) calc(50% + 1px), color-mix(in srgb, var(--text) 88%, var(--bg)) calc(50% + 1px) 100%)",
+      "border": "1.5px solid var(--line-strong)",
+      "start": 0.23500000000000001,
+      "duration": 7.965,
+      "anim": "pop",
+      "enterDur": 0.28,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "x": 204,
+      "y": 164,
+      "w": 38,
+      "align": "center",
+      "text": "I",
+      "font": "mono",
+      "size": 52,
+      "color": "var(--bg)",
+      "split": "char",
+      "preset": "flap",
+      "presetOpts": {
+        "steps": 10
+      },
+      "each": 0.9,
+      "stagger": 0,
+      "start": 0.47000000000000003,
+      "duration": 7.7299999999999995,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "radius": 6,
+      "x": 248,
+      "y": 160,
+      "w": 38,
+      "h": 62,
+      "bg": "linear-gradient(180deg, var(--text) 0 calc(50% - 1px), color-mix(in srgb, var(--text) 55%, var(--bg)) calc(50% - 1px) calc(50% + 1px), color-mix(in srgb, var(--text) 88%, var(--bg)) calc(50% + 1px) 100%)",
+      "border": "1.5px solid var(--line-strong)",
+      "start": 0.27,
+      "duration": 7.93,
+      "anim": "pop",
+      "enterDur": 0.28,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "x": 248,
+      "y": 164,
+      "w": 38,
+      "align": "center",
+      "text": "V",
+      "font": "mono",
+      "size": 52,
+      "color": "var(--bg)",
+      "split": "char",
+      "preset": "flap",
+      "presetOpts": {
+        "steps": 10
+      },
+      "each": 0.9,
+      "stagger": 0,
+      "start": 0.54,
+      "duration": 7.66,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "rect",
+      "radius": 6,
+      "x": 292,
+      "y": 160,
+      "w": 38,
+      "h": 62,
+      "bg": "linear-gradient(180deg, var(--text) 0 calc(50% - 1px), color-mix(in srgb, var(--text) 55%, var(--bg)) calc(50% - 1px) calc(50% + 1px), color-mix(in srgb, var(--text) 88%, var(--bg)) calc(50% + 1px) 100%)",
+      "border": "1.5px solid var(--line-strong)",
+      "start": 0.30500000000000005,
+      "duration": 7.895,
+      "anim": "pop",
+      "enterDur": 0.28,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "type": "text",
+      "weight": 700,
+      "x": 292,
+      "y": 164,
+      "w": 38,
+      "align": "center",
+      "text": "E",
+      "font": "mono",
+      "size": 52,
+      "color": "var(--bg)",
+      "split": "char",
+      "preset": "flap",
+      "presetOpts": {
+        "steps": 10
+      },
+      "each": 0.9,
+      "stagger": 0,
+      "start": 0.6100000000000001,
+      "duration": 7.59,
+      "out": "defocus",
+      "exitDur": 0.35
+    }
+  ],
+  "produced": false
+}
