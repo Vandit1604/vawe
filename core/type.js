@@ -277,6 +277,49 @@ export const PRESETS = {
     return { opacity: clamp01(u * 2), transformOrigin: 'left center', transform: `perspective(820px) rotateY(${((1 - e) * -deg).toFixed(1)}deg)` };
   },
     'opens from edge-on about its left hinge, a panel turning to face you — premium'),
+  // strike — a rule DRAWS THROUGH the unit and the word dims behind it. This is the "not X, Y" beat,
+  // and it is the half of it the engine could not say: rejecting a word out loud, on screen, so the
+  // replacement means something. `grep strike core/` returned nothing before this entry.
+  //
+  // The rule is a BACKGROUND, not a border and not `text-decoration`: a background can be sized to a
+  // percentage of the unit's own box, so the line grows across the word as a pure function of u, and
+  // it needs no measurement of the glyphs. Same instrument as `underline` and `highlight`, aimed at
+  // the middle of the line box instead of the baseline.
+  //
+  // THE DIM STARTS AFTER THE LINE HAS CROSSED (0.6), because a word that fades while it is being
+  // struck reads as a word disappearing, not as a word being rejected. It must stay legible: "not X"
+  // is only worth showing while X can still be read. `fade: 0` keeps it at full strength.
+  strike: preset((u, { color = 'currentColor', h = 3, fade = 0.45, at = 54 } = {}) => {
+    const p = clamp01(u);
+    const w = (easeOutCubic(p) * 100).toFixed(1);
+    return { opacity: (1 - fade * clamp01((p - 0.6) / 0.4)).toFixed(4),
+      backgroundImage: `linear-gradient(${color}, ${color})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: `${w}% ${h}px`,
+      backgroundPosition: `0 ${at}%`, transform: 'none' };
+  },
+    'a rule draws THROUGH the word and it dims behind the line, still legible — the "not X, Y" beat, where the rejection is the content'),
+  // flap — a SPLIT-FLAP BOARD: the glyph steps FORWARD through the board's own alphabet, one flap at a
+  // time, and lands on its letter. Every unit hinges as it turns, so a staggered line reads as a
+  // mechanical row settling left to right.
+  //
+  // NOT `decode`. decode scrambles at random and resolves; the whole charm of a board is that the
+  // sequence is ORDERED, so a viewer can see the letter coming three flaps out. Different rhythm
+  // (mechanical, not techy) and a different read, which is why it is a second preset and not a knob.
+  //
+  // The character is mutated by flapText in animateUnits — the same seam `decode` uses, because a
+  // preset returns a STYLE and the board's subject is the text. `steps` is how many flaps it runs, so
+  // it is also the speed: the whole run is fitted into `each`, however many flaps you ask for.
+  flap: preset((u, { steps = 12 } = {}) => {
+    const p = clamp01(u);
+    if (p >= 1) return { opacity: 1, transform: 'none' };
+    // the hinge angle inside ONE flap, so the stutter has the same period as the character change
+    const q = (1 - p) * steps;
+    const frac = q - Math.floor(q);
+    return { opacity: 1, transformOrigin: 'center center',
+      transform: `perspective(420px) rotateX(${(-72 * frac).toFixed(2)}deg)` };
+  },
+    'the glyph steps FORWARD through the board\'s alphabet one flap at a time and lands on its letter, hinging as it turns — an airport board, ordered where `decode` is random'),
 };
 
 // Read off the presets themselves; blurbsOf throws at load naming any preset that forgot one.
@@ -294,6 +337,25 @@ export function decodeText(el, u, unitIndex) {
   for (let c = 0; c < n; c++) {
     if (c < settled || fin[c] === ' ') out += fin[c];
     else out += GLYPHS[hashSeed(`${unitIndex}:${c}:${step}`) % GLYPHS.length];
+  }
+  if (el.textContent !== out) el.textContent = out;
+}
+
+// flap support: the split-flap alphabet, and the ordered walk up to the final character. A board only
+// carries the glyphs on its drums, so lowercase is shown as its capital while the drum is turning and
+// the AUTHOR'S text is restored exactly at the end — a lowercase headline still renders as written.
+// A character the board has no drum for (an emoji, a CJK glyph) never flaps: it is simply there.
+const FLAPS = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,:!?-/&$%+#@';
+export function flapText(el, u, steps = 12) {
+  if (el.__final == null) el.__final = el.textContent;
+  const fin = el.__final;
+  if (u >= 1) { if (el.textContent !== fin) el.textContent = fin; return; }
+  // walk BACKWARDS from the target by the flaps still to run, so the drum arrives forward onto it
+  const back = Math.ceil(clamp01(1 - u) * steps);
+  let out = '';
+  for (const ch of fin) {
+    const idx = FLAPS.indexOf(ch.toUpperCase());
+    out += idx < 0 ? ch : FLAPS[((idx - back) % FLAPS.length + FLAPS.length) % FLAPS.length];
   }
   if (el.textContent !== out) el.textContent = out;
 }
@@ -335,6 +397,10 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     } else {
       const u = unitProgress(t, i, units.length, { each, stagger });
       if (preset === 'decode') { decodeText(el, u, i); el.style.opacity = u > 0 ? '1' : '0'; return; }
+      // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
+      // preset's own style still runs. Both live here for the same reason: a preset returns a style
+      // and neither of these two effects is one.
+      if (preset === 'flap') flapText(el, u, popts.steps ?? 12);
       if (preset === 'riseClip' && el.parentElement && !el.parentElement.__clip) {
         // clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged)
         const w = document.createElement('span');

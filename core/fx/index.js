@@ -24,8 +24,9 @@ import * as shadow from './shadow.js';
 import * as tilt from './tilt.js';
 import * as plane from './plane.js';
 import * as wordSlot from './word-slot.js';
+import * as alongPath from './along-path.js';
 
-const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt, wordSlot };
+const REGISTRY = { alongPath, kick, mixBlend, occlude, plane, progress, shadow, tilt, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it — the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -40,6 +41,7 @@ export const FX_TYPES = Object.keys(REGISTRY);
 // layer out of the picture plane and holds it there. Same name, two registries, one shared description,
 // and the wrong one won. A family-scoped map is the only thing that makes that impossible.
 export const FX_BLURBS = {
+  alongPath: 'set the line of type ON A CURVE and, if you ask, send it travelling along one — the general case `circle` is one point of, and the only way to bend a headline',
   kick: 'hit the layer on the film\'s own joints — a cut, a seam or a sting shoves it, so the frame feels the edit',
   mixBlend: 'how this layer\'s pixels combine with what is already painted behind it — knock a headline out of a photo',
   occlude: 'hide this layer where another one covers it — put something BEHIND something else without reordering the stack',
