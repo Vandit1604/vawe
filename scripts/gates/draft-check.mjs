@@ -22,7 +22,7 @@
 //   make draft D=<scene.json> STAGE=85
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readReceipt, writeReceipt } from '../lib/receipt.mjs';
 
@@ -40,8 +40,13 @@ const NAME = path.basename(file, '.json');
 // gate reporting its own miscall as a defect in the film.
 const run = (script, extra = [], pre = []) => {
   const cmd = `node ${script} ${[...pre, file, ...extra].join(' ')}`;
-  try { execFileSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, stdio: 'pipe' }); return { ok: true, out: '', cmd }; }
-  catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}`, cmd }; }
+  // `out: ''` ON SUCCESS was the whole bug in the CARRIED record. A sub-gate that passes still PRINTS —
+  // author-check's REPORTS tier prints nine warning codes on a clean scene — and the output was thrown
+  // away on exactly the branch that reaches the "CARRIED, knowingly" block, so the record of what a
+  // draft knowingly accepted has never once been written. spawnSync, so pass and fail are read the same
+  // way and out of both streams.
+  const r = spawnSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, encoding: 'utf8' });
+  return { ok: r.status === 0, out: `${r.stdout || ''}${r.stderr || ''}`, cmd };
 };
 const codes = (out) => [...new Set((out.match(/\[[a-z-]+\]/g) || []).map((c) => c.slice(1, -1)))];
 
@@ -77,7 +82,7 @@ if (STAGE === '95') {
 // ---- verdict ----
 const bar = checks.filter((c) => c.bar <= +STAGE);
 const failed = bar.filter((c) => !c.ok);
-const carried = [...new Set(bar.flatMap((c) => c.codes))];
+const carried = [...new Set(bar.flatMap((c) => c.codes))].sort();  // sorted: the receipt is diffed between drafts
 
 console.log(`\n  DRAFT ${STAGE}% · ${NAME}\n`);
 // THE BARE WORD `failed` WAS THE WHOLE MESSAGE. Every sub-gate here is run with stdio:'pipe' and then

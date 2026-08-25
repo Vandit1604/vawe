@@ -22,6 +22,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 
 // Generous enough that ordinary growth does not trip it, tight enough that a whole asset directory
 // slipping in does. The context was 15.8M when this was written and 49M when it moved to an allowlist.
+// MiB, matching `du`'s own unit — see the reading of `du -sk` below.
 const BUDGET_MB = 60;
 
 // A throwaway image that copies the context and measures it. `-f -` reads the Dockerfile from stdin,
@@ -33,8 +34,14 @@ const r = spawnSync('docker', ['build', '--no-cache', '--progress=plain', '-f', 
   { input: DF, encoding: 'utf8' });
 const out = String(r.stdout || '') + String(r.stderr || '');
 if (r.error?.code === 'ENOENT' || /Cannot connect to the Docker daemon/i.test(out)) {
-  console.log('docker is not available — the build context cannot be measured here. Skipped.');
-  process.exit(0);
+  // "Skipped" exited 0, and 0 from a budget gate reads as "within budget" to every caller. The docker
+  // daemon is a fact about this machine; the size of the context is a fact about the repo, and the
+  // first has never been evidence for the second. Exit 2 (could not measure), which no caller can
+  // mistake for a pass and which is not the same claim as exit 1 (over budget).
+  console.error('✗ docker is not available here, so the build context was NOT measured.');
+  console.error('  This says nothing about whether the context fits its budget. Start the daemon, or');
+  console.error('  run this where docker is available, and ask again.');
+  process.exit(2);
 }
 
 const lines = out.split('\n').map((l) => l.replace(/^#\d+\s+[\d.]+\s+/, '').trim()).filter(Boolean);
@@ -44,13 +51,16 @@ if (!Number.isFinite(totalKb)) {
   console.error(out.split('\n').slice(-30).join('\n'));
   process.exit(1);
 }
-const mb = totalKb / 1000;
-console.log(`docker build context: ${mb.toFixed(1)}MB (budget ${BUDGET_MB}MB)`);
+// `du -sk` counts 1024-BYTE BLOCKS. Dividing by 1000 gave a figure that was neither MB nor MiB and
+// was then compared against a budget written in MiB (the 15.8M and 49M in the comment above are du's
+// own M, which is MiB) — so the number on screen ran ~2.4% high against its own yardstick.
+const mib = totalKb / 1024;
+console.log(`docker build context: ${mib.toFixed(1)}MiB (budget ${BUDGET_MB}MiB)`);
 for (const l of lines.filter((l) => /^\d+\s+\/ctx\/./.test(l)))
-  console.log(`   ${(Number(l.split(/\s+/)[0]) / 1000).toFixed(1).padStart(7)}MB  ${l.split(/\s+/)[1].replace('/ctx/', '')}`);
+  console.log(`   ${(Number(l.split(/\s+/)[0]) / 1024).toFixed(1).padStart(7)}MiB  ${l.split(/\s+/)[1].replace('/ctx/', '')}`);
 
-if (mb > BUDGET_MB) {
-  console.error(`\n✗ build context is ${mb.toFixed(1)}MB, over the ${BUDGET_MB}MB budget.`);
+if (mib > BUDGET_MB) {
+  console.error(`\n✗ build context is ${mib.toFixed(1)}MiB, over the ${BUDGET_MB}MiB budget.`);
   console.error('  .dockerignore is an ALLOWLIST: something listed there has grown. Find it above, and');
   console.error('  either narrow its `!` line to the files a COPY actually needs, or raise the budget');
   console.error('  deliberately in this file.');
