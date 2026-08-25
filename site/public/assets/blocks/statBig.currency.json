@@ -22,7 +22,7 @@
       "to": 880,
       "unit": "$B",
       "prefix": "",
-      "font": "sans",
+      "font": "num",
       "size": 120,
       "weight": 700,
       "color": "var(--text)",
@@ -37,13 +37,14 @@
     },
     {
       "type": "text",
-      "weight": 500,
+      "weight": 600,
       "text": "market",
       "x": 160,
-      "y": 268,
+      "y": 282.4,
       "font": "mono",
       "size": 20,
-      "color": "var(--dim)",
+      "ls": "0.02em",
+      "color": "var(--text-2)",
       "start": 0.5,
       "duration": 7.7
     }

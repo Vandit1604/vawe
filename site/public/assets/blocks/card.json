@@ -22,22 +22,23 @@
       "h": 300,
       "layout": "column",
       "items": "stretch",
-      "gap": 8,
-      "pad": 12,
+      "gap": 0,
+      "pad": 0,
       "bg": "var(--card)",
-      "radius": 16,
+      "radius": 14,
+      "border": "1px solid var(--line)",
       "elevation": 2,
+      "anim": "rise",
       "start": 0.2,
       "duration": 8,
-      "anim": "rise",
       "enterDur": 0.5,
       "exitDur": 0.35,
       "children": [
         {
           "type": "group",
           "grow": 1,
-          "bg": "color-mix(in srgb, var(--accent) 10%, var(--card))",
-          "radius": 12,
+          "bg": "var(--card)",
+          "radius": 8,
           "pad": 24,
           "layout": "column",
           "items": "flex-start",
@@ -47,7 +48,7 @@
               "type": "text",
               "weight": 700,
               "text": "Layers",
-              "size": 38,
+              "size": 32,
               "color": "var(--text)",
               "ls": "-0.02em"
             },
@@ -70,8 +71,8 @@
                   "weight": 500,
                   "text": "Text",
                   "size": 17,
-                  "color": "var(--accent)",
-                  "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+                  "color": "var(--text-2)",
+                  "bg": "var(--surface-2)",
                   "radius": 100,
                   "pad": "6px 16px"
                 },
@@ -80,8 +81,8 @@
                   "weight": 500,
                   "text": "Image",
                   "size": 17,
-                  "color": "var(--accent)",
-                  "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+                  "color": "var(--text-2)",
+                  "bg": "var(--surface-2)",
                   "radius": 100,
                   "pad": "6px 16px"
                 },
@@ -90,8 +91,8 @@
                   "weight": 500,
                   "text": "Count",
                   "size": 17,
-                  "color": "var(--accent)",
-                  "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+                  "color": "var(--text-2)",
+                  "bg": "var(--surface-2)",
                   "radius": 100,
                   "pad": "6px 16px"
                 }
@@ -101,32 +102,30 @@
         },
         {
           "type": "group",
+          "radius": 0,
+          "h": 1,
+          "bg": "var(--line)"
+        },
+        {
+          "type": "group",
           "layout": "row",
           "justify": "space-between",
           "items": "center",
-          "pad": "4px 12px",
+          "pad": "12px 24px",
           "children": [
             {
               "type": "text",
               "weight": 600,
               "text": "Explore",
-              "size": 22,
-              "color": "var(--text)"
+              "size": 17,
+              "color": "var(--text-2)"
             },
             {
-              "type": "group",
-              "bg": "var(--surface-2)",
-              "radius": 12,
-              "pad": "12px 16px",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 600,
-                  "text": "→",
-                  "size": 22,
-                  "color": "var(--accent)"
-                }
-              ]
+              "type": "text",
+              "weight": 600,
+              "text": "→",
+              "size": 17,
+              "color": "var(--accent)"
             }
           ]
         }

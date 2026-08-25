@@ -35,10 +35,11 @@
       "children": [
         {
           "type": "text",
-          "weight": 500,
+          "weight": 600,
           "text": "blocks",
-          "size": 18,
-          "color": "var(--dim)",
+          "size": 17,
+          "ls": "0.02em",
+          "color": "var(--text-2)",
           "font": "mono"
         },
         {
@@ -46,7 +47,7 @@
           "from": 0,
           "to": 57,
           "unit": "",
-          "font": "sans",
+          "font": "num",
           "size": 56,
           "weight": 700,
           "color": "var(--text)",

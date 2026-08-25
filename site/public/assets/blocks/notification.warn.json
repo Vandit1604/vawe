@@ -39,7 +39,7 @@
           "radius": 100,
           "w": 12,
           "h": 12,
-          "bg": "#F6A417"
+          "bg": "var(--warn)"
         },
         {
           "type": "group",

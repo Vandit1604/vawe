@@ -30,24 +30,23 @@ export const TOKENS = {
 };
 const T = TOKENS;
 
-// SERIES — the CATEGORICAL chart palette: one hue stepping toward the theme's own neutral.
-//
-// It used to be `[accent, up, down, …]`, which spent the SEMANTIC colours on categories that have no
-// semantics. A three-segment donut rendered blue / green / red — a stoplight — and told the viewer that
-// segment two was good and segment three was bad when the data said no such thing. Colour that means
-// something must not be handed out to things that mean nothing; `up` and `down` stay reserved for
-// actual direction, reachable through `toneColor()`.
-//
-// A single-hue ramp is also what a modern product surface does (every serious dashboard reserves red
-// and green), and it is the only option that RESKINS: `accentDim` and `accentGlow` are alpha versions
-// of the accent in every shipped theme, not distinct hues, so they cannot separate categories. Mixing
-// toward `--text-2` adapts on its own — the ramp runs accent→dark on a light theme and accent→light on
-// a dark one, keeping separation either way.
+// SERIES — the CATEGORICAL chart palette, and it is a SINGLE-HUE RAMP on purpose.
+// It used to be [accent, up, down, …], which spent the SEMANTIC colours on categories: a
+// three-segment donut of Direct/Search/Social rendered blue/green/red, so a reader saw a verdict
+// where the data carried none. `up` and `down` mean direction, and only `toneColor()` may spend them.
+// The ramp steps the accent toward `--text-2` instead, which is the only second colour every one of
+// the 38 themes is guaranteed to have (only 4 declare an `accent2`, and accentDim/accentGlow are
+// alpha versions of the accent, not distinct hues). Segments then separate by VALUE, which is what a
+// category legend is for, and every theme keeps one voice.
+// The steps are WIDE (100 / 62 / 34 / 18 / 8) because a one-hue ramp only has lightness to separate
+// with. A first draft stepped 100/72/48/28/14 and steps 2 and 3 were indistinguishable in a
+// three-segment donut on both a dark and a light theme, which is the common case. The tail washes out
+// toward the text colour, which is honest: past four categories a chart wants a legend, not a hue.
 export const SERIES = ['var(--accent)',
-  'color-mix(in srgb, var(--accent) 68%, var(--text-2))',
-  'color-mix(in srgb, var(--accent) 42%, var(--text-2))',
-  'color-mix(in srgb, var(--accent) 22%, var(--text-2))',
-  'var(--text-2)'];
+  'color-mix(in srgb, var(--accent) 62%, var(--text-2))',
+  'color-mix(in srgb, var(--accent) 34%, var(--text-2))',
+  'color-mix(in srgb, var(--accent) 18%, var(--text-2))',
+  'color-mix(in srgb, var(--accent) 8%, var(--text-2))'];
 export const seriesAt = (i) => SERIES[i % SERIES.length];
 
 export const HAIR = `1px solid ${T.hair}`;
@@ -148,6 +147,26 @@ export const TYPE_STEPS = Object.values(TYPE);
 export const R = { none: 0, micro: 4, chip: 8, tight: 12, card: 14, soft: 16, round: 24, pill: 100 };
 export const R_STEPS = Object.values(R);
 
+// needData(prop, value, block) — a block whose SUBJECT is missing refuses instead of rendering a shell.
+//
+// WHY THIS IS NOT PEDANTRY. A catalog row's `props` are the block's documented example, and
+// blocks/index.mjs merges them only for a NAMESPACED name — a BARE name gets the raw factory with
+// nothing in it (docs/MISTAKES.md #429). So the site renders `barChart` WITH its demo data and an
+// author writing {"type":"block","block":"barChart"} gets an empty track, `statBig` counts to 0, and
+// `quote` printed the literal string "undefined" on screen. The site was showing one thing and the
+// engine doing another, silently, for every bare name in the library.
+//
+// Merging the demo props for bare names is the WRONG fix: it would give every field an author left
+// unset some example content, which is the same substitution wearing the other coat. So the block
+// refuses, and the message points at the catalog row that holds a working example.
+export const needData = (what, v, block) => {
+  if (Array.isArray(v) ? v.length : (v != null && v !== '')) return;
+  throw new Error(`block "${block}": \`${what}\` is empty, so there is nothing to draw. `
+    + `A bare block name does NOT inherit the example in blocks/catalog.mjs (only a namespaced one `
+    + `does), so this renders an empty shell rather than the block you saw on the site. `
+    + `Pass \`${what}\`, or copy the example from this block's catalog row.`);
+};
+
 // cardChrome — the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because
 // entrance duration is a per-block motion decision, not chrome.
@@ -212,12 +231,14 @@ export const stackWindows = ({ n = 0, start = 0, dur = 4, step = 0.9, life = 2.2
 // THE INNER WIDTH IS DERIVED FROM THE PAD. It used to be restated by hand and two of the three
 // wrappers were wrong against their own padding (`w - 48` on padding 22, `w - 44` on padding 24).
 // `body` receives the real inner width so a caller cannot restate it either.
-const CARD_LABEL_H = 30;   // the heading row: an 18px mono line + its 14px margin, as rendered below
-export function htmlCard({ w, pad = 22, label = '', align = '', body = () => '' } = {}) {
+const CARD_LABEL_H = 31;   // the heading row: one TYPE.body cap line (17 * 1.2 ≈ 21) + its 10px margin
+export function htmlCard({ w, pad = 22, label: caption = '', align = '', body = () => '' } = {}) {
   const inner = Math.max(0, w - 2 * pad);
+  // The card matches a native `elevation: 1` layer: hairline, R.card, one soft step of depth. It had
+  // no shadow at all, so html charts sat flat beside native stat cards on the same stage.
   return `<div style="background:${T.card};border:${HAIR};border-radius:${R.card}px;padding:${pad}px;`
-    + `box-sizing:border-box;width:${w}px${align ? `;text-align:${align}` : ''}">`
-    + (label ? `<div style="font:600 18px var(--font-mono);color:${T.dim};margin-bottom:14px">${label}</div>` : '')
+    + `box-sizing:border-box;width:${w}px;box-shadow:${SHADOW_CARD}${align ? `;text-align:${align}` : ''}">`
+    + (caption ? `<div style="${capCss()};margin-bottom:10px">${caption}</div>` : '')
     + body(inner) + '</div>';
 }
 // the vertical space htmlCard's own chrome consumes — what a plot area has to subtract from `h`.
@@ -227,6 +248,79 @@ export const cardInsetY = ({ pad = 22, label = '' } = {}) => 2 * pad + (label ? 
 // identical expression with the pad and gap baked in as 44 and 14.
 export const barWidth = ({ w, n, pad = 22, gap = 14, min = 22, inset = 8 }) =>
   Math.max(min, (w - 2 * pad - gap * Math.max(0, n - 1)) / Math.max(1, n) - inset);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA TREATMENT — the product-surface register, owned here so all 176 blocks read as one system.
+//
+// The whole idiom is ONE HUE AT TWO WEIGHTS: a solid mark carries the reading, a soft tint of the
+// SAME hue carries the ground it is read against (a bar's track, a line's area, a ring's remainder).
+// Every family had a private answer to that and they disagreed: lineChart washed a flat
+// `opacity:0.12` polygon, the bar families drew onto empty card with no ground at all, and gauge and
+// progressRing used `--line` — a BORDER colour — for a track, so the unfilled part of a meter was
+// painted with the same ink as a divider and read as chrome instead of as the rest of the reading.
+
+// tint — one hue, lighter. The percentage is the only dial, so a track and an area fill can be
+// deliberately different weights and still be obviously the same system.
+export const tint = (c, pct = 12) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+export const TINT = { track: 8, area: 16, chip: 8 };   // the three weights the families actually need
+
+// DATA_CAP — the radius on a data mark's free end. Named because a bar, its track and a stacked
+// band must agree: a track squarer than the bar inside it shows a sliver of the wrong shape at the
+// top. 6 is one step under R.chip; at 0..4 a bar reads as default chart-library output.
+export const DATA_CAP = 6;
+
+// STROKE — how heavy an arc or a plotted line is drawn. The families each guessed (15 / 10 / 9 / 2.6),
+// which is why a donut read as a thick toy ring beside a hairline-thin trend line in the same film.
+export const STROKE = { line: 2.4, arc: 9 };
+
+// SHADOW_CARD — ONE step of elevation, matching what `elevation: 1` stacks in core/layers/util.js:216
+// for a native layer. html cards had NO shadow at all, so an html chart and a native stat card sat at
+// visibly different depths on the same stage. Drop shadow only: the inset ring the engine adds needs
+// to know light-from-dark, and CSS in a fragment cannot.
+export const SHADOW_CARD = '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)';
+
+// THE THREE TEXT ROLES INSIDE A DATA SURFACE, as CSS `font:` shorthands so an html block and a native
+// `text` layer cannot drift apart on them. The split is the register's: MONO CARRIES NUMBERS, SANS
+// CARRIES WORDS. The library had it exactly backwards — axis ticks ("Mon", "Q3") were set in mono and
+// the figures above them in sans — which loses the one thing mono is for, a column of digits that
+// lines up.
+//   capCss()   the surface's own caption: what this instrument reads. Mono, muted, small.
+//   labelCss() an axis tick or a legend name. Sans, muted, same size as cap so a card has one small step.
+//   numCss()   a figure. Mono, tabular, tight, ink. Never smaller than the label beside it.
+// TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as
+// unreadable, so the scale's smallest step is four hundredths of a pixel below what will pass.
+// THE MUTED COLOUR IS `--text-2`, NOT `--dim`. The charts reached for `--dim` for every caption and
+// tick, and `--dim` is the de-emphasised CHROME role: on higgsfield it measures 2.6:1 against the
+// card and `make audit` fails it HARD, on linear 4.3:1 and it warns. `--text-2` is the secondary
+// TEXT role and clears 4.5:1 on every theme, which is the whole difference between quiet and unread.
+export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 600 } = {}) =>
+  `font:${weight} ${size}px var(--font-mono);color:${color};letter-spacing:0.02em`;
+export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 500 } = {}) =>
+  `font:${weight} ${size}px var(--font-sans);color:${color}`;
+export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = 700 } = {}) =>
+  `font:${weight} ${size}px var(--font-num);color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
+
+// deltaChip — the verdict on a reading: a tinted pill carrying an arrow and a figure, in the tone's
+// own colour. It is a PAIR with the value it sits under and must never outweigh it, so it is one
+// TYPE step down and its fill is the lightest tint weight. `up`/`down` are spent here, on real
+// direction, which is the only place SERIES is forbidden from spending them.
+export function deltaChip({ delta = '', up = true, size = TYPE.body, ...rest } = {}) {
+  const c = up ? TOKENS.green : TOKENS.down;
+  // The GLYPH is pushed toward `--text`, the FILL is not. A tinted pill darkens the ground under its
+  // own text, and `--down` is already the lowest-contrast token most themes ship: on a dark card it
+  // measured 3.1:1 and `make audit` wants 4.5:1. Mixing toward the theme's text colour raises
+  // contrast in BOTH directions — it brightens the red on a dark theme and deepens it on a light one —
+  // without the block ever knowing which kind of theme it is in.
+  const ink = `color-mix(in srgb, ${c} 66%, var(--text))`;
+  return box({ layout: 'row', items: 'center', gap: SPACE.tight, radius: R.chip,
+    bg: tint(c, TINT.chip), pad: '4px 10px', children: [
+      // The arrow is the SAME size as the figure. At 0.8x it came out 13px and `make audit` fails
+      // anything under 14.04px as unreadable, so the glyph that says which way was the one part of
+      // the chip nobody could read.
+      text({ text: up ? '▲' : '▼', size, color: ink }),
+      text({ text: delta, size, weight: 600, color: ink, font: 'num' }),
+    ], ...rest });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TONE. `callout` and `badge` each carried their own map, so "success" and "ok" were the same state

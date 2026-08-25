@@ -349,7 +349,7 @@
       "w": 440,
       "title": "Grain crawls on text",
       "body": "opt in only for filmic brands",
-      "accent": "#F6A417"
+      "accent": "var(--warn)"
     },
     "category": "Interface"
   },
@@ -410,7 +410,6 @@
       "w": 540,
       "h": 240,
       "area": true,
-      "color": "var(--up)",
       "label": "growth",
       "data": [
         {
@@ -443,17 +442,14 @@
       "segments": [
         {
           "value": 52,
-          "color": "var(--accent)",
           "label": "Direct"
         },
         {
           "value": 30,
-          "color": "var(--up)",
           "label": "Search"
         },
         {
           "value": 18,
-          "color": "#F6A417",
           "label": "Social"
         }
       ]
@@ -468,12 +464,8 @@
       "w": 520,
       "h": 260,
       "series": [
-        {
-          "color": "var(--accent)"
-        },
-        {
-          "color": "var(--up)"
-        }
+        {},
+        {}
       ],
       "data": [
         {
@@ -1176,15 +1168,9 @@
       "w": 520,
       "h": 260,
       "series": [
-        {
-          "color": "var(--accent)"
-        },
-        {
-          "color": "var(--up)"
-        },
-        {
-          "color": "#F6A417"
-        }
+        {},
+        {},
+        {}
       ],
       "data": [
         {
@@ -1222,7 +1208,7 @@
     "props": {
       "w": 300,
       "value": 34,
-      "color": "#F6A417",
+      "color": "var(--warn)",
       "label": "health"
     },
     "category": "Data"
@@ -1258,7 +1244,7 @@
     "props": {
       "size": 150,
       "value": 22,
-      "color": "#F6A417",
+      "color": "var(--warn)",
       "label": "battery"
     },
     "category": "Data"
@@ -1710,7 +1696,7 @@
     "props": {
       "w": 560,
       "text": "Söhne is licensed, do not commit",
-      "accent": "#F6A417",
+      "accent": "var(--warn)",
       "icon": "!"
     },
     "category": "Interface"

@@ -24,7 +24,7 @@
       "gap": 16,
       "pad": 24,
       "bg": "var(--card)",
-      "radius": 16,
+      "radius": 14,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "start": 0.2,
@@ -36,10 +36,11 @@
         {
           "type": "text",
           "weight": 600,
-          "text": "Free",
+          "text": "FREE",
           "size": 20,
-          "color": "var(--text-2)",
-          "font": "mono"
+          "font": "mono",
+          "tracking": "0.1em",
+          "color": "var(--dim)"
         },
         {
           "type": "group",
@@ -51,7 +52,7 @@
               "type": "text",
               "weight": 700,
               "text": "$0",
-              "size": 56,
+              "size": 48,
               "color": "var(--text)",
               "ls": "-0.03em"
             },
@@ -59,9 +60,9 @@
               "type": "text",
               "weight": 500,
               "text": "/mo",
-              "size": 20,
-              "color": "var(--dim)",
-              "font": "mono"
+              "size": 17,
+              "font": "mono",
+              "color": "var(--dim)"
             }
           ]
         },
@@ -81,14 +82,14 @@
                   "type": "text",
                   "weight": 700,
                   "text": "✓",
-                  "size": 18,
-                  "color": "var(--up)"
+                  "size": 17,
+                  "color": "var(--accent)"
                 },
                 {
                   "type": "text",
                   "weight": 500,
                   "text": "3 renders / day",
-                  "size": 19,
+                  "size": 17,
                   "color": "var(--text-2)"
                 }
               ]
@@ -103,14 +104,14 @@
                   "type": "text",
                   "weight": 700,
                   "text": "✓",
-                  "size": 18,
-                  "color": "var(--up)"
+                  "size": 17,
+                  "color": "var(--accent)"
                 },
                 {
                   "type": "text",
                   "weight": 500,
                   "text": "Portrait + landscape",
-                  "size": 19,
+                  "size": 17,
                   "color": "var(--text-2)"
                 }
               ]
@@ -125,14 +126,14 @@
                   "type": "text",
                   "weight": 700,
                   "text": "✓",
-                  "size": 18,
-                  "color": "var(--up)"
+                  "size": 17,
+                  "color": "var(--accent)"
                 },
                 {
                   "type": "text",
                   "weight": 500,
                   "text": "Watermarked",
-                  "size": 19,
+                  "size": 17,
                   "color": "var(--text-2)"
                 }
               ]
@@ -151,7 +152,7 @@
               "type": "text",
               "weight": 600,
               "text": "Get started",
-              "size": 19,
+              "size": 17,
               "color": "var(--text)"
             }
           ]

@@ -32,7 +32,7 @@
           "type": "group",
           "w": 260,
           "layout": "column",
-          "items": "flex-start",
+          "items": "stretch",
           "gap": 12,
           "pad": 24,
           "bg": "var(--card)",
@@ -45,8 +45,14 @@
               "type": "text",
               "weight": 700,
               "text": "Before",
-              "size": 26,
+              "size": 24,
               "color": "var(--dim)"
+            },
+            {
+              "type": "group",
+              "radius": 0,
+              "h": 1,
+              "bg": "var(--line)"
             },
             {
               "type": "text",
@@ -68,7 +74,7 @@
           "type": "group",
           "w": 260,
           "layout": "column",
-          "items": "flex-start",
+          "items": "stretch",
           "gap": 12,
           "pad": 24,
           "bg": "var(--card)",
@@ -81,8 +87,14 @@
               "type": "text",
               "weight": 700,
               "text": "After",
-              "size": 26,
+              "size": 24,
               "color": "var(--accent)"
+            },
+            {
+              "type": "group",
+              "radius": 0,
+              "h": 1,
+              "bg": "var(--line)"
             },
             {
               "type": "text",

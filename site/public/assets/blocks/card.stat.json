@@ -35,10 +35,11 @@
       "children": [
         {
           "type": "text",
-          "weight": 500,
+          "weight": 600,
           "text": "frames rendered",
-          "size": 18,
-          "color": "var(--dim)",
+          "size": 17,
+          "ls": "0.02em",
+          "color": "var(--text-2)",
           "font": "mono"
         },
         {
@@ -46,7 +47,7 @@
           "from": 0,
           "to": 1950,
           "unit": "",
-          "font": "sans",
+          "font": "num",
           "size": 56,
           "weight": 700,
           "color": "var(--text)",
@@ -57,32 +58,32 @@
         },
         {
           "type": "group",
+          "radius": 8,
           "layout": "row",
           "items": "center",
-          "gap": 6,
+          "gap": 4,
+          "bg": "color-mix(in srgb, var(--up) 8%, transparent)",
+          "pad": "4px 10px",
           "children": [
             {
               "type": "text",
               "weight": 500,
               "text": "▲",
-              "size": 15,
-              "color": "var(--up)",
-              "delay": 1.25,
-              "anim": "pop",
-              "enterDur": 0.3
+              "size": 17,
+              "color": "color-mix(in srgb, var(--up) 66%, var(--text))"
             },
             {
               "type": "text",
               "weight": 600,
               "text": "+12%",
               "size": 17,
-              "color": "var(--up)",
-              "font": "mono",
-              "delay": 1.25,
-              "anim": "pop",
-              "enterDur": 0.3
+              "color": "color-mix(in srgb, var(--up) 66%, var(--text))",
+              "font": "num"
             }
-          ]
+          ],
+          "delay": 1.25,
+          "anim": "pop",
+          "enterDur": 0.3
         }
       ]
     }

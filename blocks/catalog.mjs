@@ -75,7 +75,7 @@ export const CATALOG = [
   { name: 'comparison.beforeAfter', family: 'comparison', blurb: 'Before / After columns',
     props: { w: 560, leftTitle: 'Before', rightTitle: 'After', left: ['Hand-timed', 'Drifts per run'], right: ['Pure in n', 'Byte-identical'] } },
   { name: 'notification.warn', family: 'notification', blurb: 'toast, amber accent',
-    props: { w: 440, title: 'Grain crawls on text', body: 'opt in only for filmic brands', accent: '#F6A417' } },
+    props: { w: 440, title: 'Grain crawls on text', body: 'opt in only for filmic brands', accent: 'var(--warn)' } },
   { name: 'statBig.currency', family: 'statBig', blurb: 'stat with a $ unit',
     props: { to: 880, unit: '$B', label: 'market', size: 120 } },
 
@@ -85,13 +85,16 @@ export const CATALOG = [
       { label: 'M', value: 32 }, { label: 'T', value: 48 }, { label: 'W', value: 41 },
       { label: 'T', value: 63 }, { label: 'F', value: 58 }, { label: 'S', value: 79 }] } },
   { name: 'lineChart.area', family: 'lineChart', blurb: 'trend line with area fill',
-    props: { w: 540, h: 240, area: true, color: 'var(--up)', label: 'growth', data: [
+    props: { w: 540, h: 240, area: true, label: 'growth', data: [
       { label: 'Q1', value: 12 }, { label: 'Q2', value: 22 }, { label: 'Q3', value: 30 }, { label: 'Q4', value: 55 }] } },
   { name: 'donutChart', family: 'donutChart', blurb: 'ring segments + legend',
     props: { w: 320, label: 'traffic', segments: [
-      { value: 52, color: 'var(--accent)', label: 'Direct' }, { value: 30, color: 'var(--up)', label: 'Search' }, { value: 18, color: '#F6A417', label: 'Social' }] } },
+      // NO per-segment colours. They used to be [accent, --up, #F6A417] — the SEMANTIC green plus a
+      // literal amber that no theme can reskin — so the catalog demo overrode SERIES and rendered the
+      // stoplight the ramp exists to remove. Omitted, the block uses seriesAt() and follows the brand.
+      { value: 52, label: 'Direct' }, { value: 30, label: 'Search' }, { value: 18, label: 'Social' }] } },
   { name: 'stackedBar', family: 'stackedBar', blurb: 'multi-series stacked bars',
-    props: { w: 520, h: 260, series: [{ color: 'var(--accent)' }, { color: 'var(--up)' }], data: [
+    props: { w: 520, h: 260, series: [{}, {}], data: [
       { label: 'Mon', values: [24, 18] }, { label: 'Tue', values: [30, 22] }, { label: 'Wed', values: [20, 28] }, { label: 'Thu', values: [36, 24] }] } },
   { name: 'card.pricing', family: 'pricingCard', blurb: 'plan · price · features · CTA',
     props: { w: 340, plan: 'Pro', price: '$29', features: ['Unlimited renders', 'Every format', '60fps export'], cta: 'Start free', highlight: true } },
@@ -188,16 +191,16 @@ export const CATALOG = [
   { name: 'donutChart.two', family: 'donutChart', blurb: 'two-segment ring',
     props: { w: 320, label: 'pass / fail', segments: [{ value: 88, color: 'var(--up)', label: 'Pass' }, { value: 12, color: 'var(--down)', label: 'Fail' }] } },
   { name: 'stackedBar.three', family: 'stackedBar', blurb: 'three-series stack',
-    props: { w: 520, h: 260, series: [{ color: 'var(--accent)' }, { color: 'var(--up)' }, { color: '#F6A417' }], data: [
+    props: { w: 520, h: 260, series: [{}, {}, {}], data: [
       { label: 'Mon', values: [18, 14, 8] }, { label: 'Tue', values: [22, 16, 10] }, { label: 'Wed', values: [16, 20, 12] }] } },
   { name: 'gauge.warn', family: 'gauge', blurb: 'gauge, low (amber)',
-    props: { w: 300, value: 34, color: '#F6A417', label: 'health' } },
+    props: { w: 300, value: 34, color: 'var(--warn)', label: 'health' } },
   { name: 'gauge.full', family: 'gauge', blurb: 'gauge, complete (green)',
     props: { w: 300, value: 100, color: 'var(--up)', label: 'passing' } },
   { name: 'progressRing.done', family: 'progressRing', blurb: 'ring, 100% (green)',
     props: { size: 150, value: 100, color: 'var(--up)', label: 'complete' } },
   { name: 'progressRing.low', family: 'progressRing', blurb: 'ring, low (amber)',
-    props: { size: 150, value: 22, color: '#F6A417', label: 'battery' } },
+    props: { size: 150, value: 22, color: 'var(--warn)', label: 'battery' } },
   { name: 'kpiRow.money', family: 'kpiRow', blurb: 'KPI row, currency',
     props: { items: [{ value: '$2.4M', label: 'ARR' }, { value: '$89', label: 'ACV' }, { value: '3.2%', label: 'churn' }] } },
   { name: 'statBig.time', family: 'statBig', blurb: 'stat, ms unit',
@@ -247,7 +250,7 @@ export const CATALOG = [
   { name: 'banner.info', family: 'banner', blurb: 'banner, info (blurple)',
     props: { w: 560, text: 'Read the migration guide', cta: 'Open', accent: 'var(--accent)', icon: 'i' } },
   { name: 'banner.warn', family: 'banner', blurb: 'banner, warning (amber)',
-    props: { w: 560, text: 'Söhne is licensed, do not commit', accent: '#F6A417', icon: '!' } },
+    props: { w: 560, text: 'Söhne is licensed, do not commit', accent: 'var(--warn)', icon: '!' } },
   { name: 'spinner.small', family: 'spinner', blurb: 'small looping Lottie',
     props: { size: 56 } },
   { name: 'quote.customer', family: 'quote', blurb: 'customer quote',

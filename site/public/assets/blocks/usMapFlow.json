@@ -26,6 +26,10 @@
       "enterDur": 0.3,
       "exitDur": 0.35,
       "out": "defocus",
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
       "parts": [
         {
           "select": ".arc",

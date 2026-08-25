@@ -21,7 +21,7 @@
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
   R, E, SPACE, TYPE, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows,
+  sweep, stagger, growUp, fillRight, stackWindows, needData,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -107,6 +107,10 @@ export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = 
 
 // quote — a pull quote with attribution. The one place big italic-ish restraint reads as premium.
 export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {}) {
+  // Without this the template literal below stringified `undefined` and printed the WORD
+  // "undefined" in quotation marks, at display size, in the finished film. An empty block is bad;
+  // one that renders a JavaScript artefact as its headline is worse.
+  needData('text', q, 'quote');
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.md, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
     text({ text: `“${q}”`, size: TYPE.display, weight: 600, color: T.ink, ls: '-0.02em' }),
     // The attribution is a label, so it is set like every other label in this file: mono, tracked,

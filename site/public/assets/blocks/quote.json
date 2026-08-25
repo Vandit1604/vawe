@@ -32,15 +32,17 @@
           "type": "text",
           "weight": 600,
           "text": "“One JSON becomes one video.”",
-          "size": 44,
+          "size": 48,
           "color": "var(--text)",
           "ls": "-0.02em"
         },
         {
           "type": "text",
           "weight": 500,
-          "text": "· vawe",
-          "size": 22,
+          "text": "vawe",
+          "size": 17,
+          "font": "mono",
+          "tracking": "0.04em",
           "color": "var(--text-2)"
         }
       ]

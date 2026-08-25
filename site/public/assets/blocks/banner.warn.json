@@ -23,7 +23,7 @@
       "items": "center",
       "gap": 12,
       "pad": "16px 24px",
-      "bg": "#F6A417",
+      "bg": "var(--warn)",
       "radius": 12,
       "start": 0.2,
       "duration": 8,
@@ -36,14 +36,14 @@
           "weight": 500,
           "text": "!",
           "size": 20,
-          "color": "var(--text)"
+          "color": "#fff"
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Söhne is licensed, do not commit",
           "size": 20,
-          "color": "var(--text)",
+          "color": "#fff",
           "grow": 1
         }
       ]

@@ -19,7 +19,7 @@
       "x": 160,
       "y": 160,
       "w": 150,
-      "html": "<div style=\"width:150px\"><svg viewBox=\"0 0 100 100\" width=\"150\" height=\"150\" style=\"display:block\"><circle cx=\"50\" cy=\"50\" r=\"42\" fill=\"none\" stroke=\"var(--line)\" stroke-width=\"9\"/><circle cx=\"50\" cy=\"50\" r=\"42\" fill=\"none\" stroke=\"#F6A417\" stroke-width=\"9\" stroke-linecap=\"round\" stroke-dasharray=\"calc(263.89 * var(--p, 0.2200)) 263.89\" transform=\"rotate(-90 50 50)\"/><text x=\"50\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\" font-family=\"var(--font-sans)\" font-weight=\"700\" font-size=\"22\" fill=\"var(--text)\">22%</text></svg><div style=\"text-align:center;font:600 16px var(--font-mono);color:var(--dim);margin-top:8px\">battery</div></div>",
+      "html": "<div style=\"width:150px\"><svg viewBox=\"0 0 100 100\" width=\"150\" height=\"150\" style=\"display:block\"><circle cx=\"50\" cy=\"50\" r=\"42\" fill=\"none\" stroke=\"color-mix(in srgb, var(--warn) 8%, transparent)\" stroke-width=\"9\"/><circle cx=\"50\" cy=\"50\" r=\"42\" fill=\"none\" stroke=\"var(--warn)\" stroke-width=\"9\" stroke-linecap=\"round\" stroke-dasharray=\"calc(263.89 * var(--p, 0.2200)) 263.89\" transform=\"rotate(-90 50 50)\"/><text x=\"50\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\" font-family=\"var(--font-num)\" font-weight=\"700\" font-size=\"22\" letter-spacing=\"-0.5\" fill=\"var(--text)\">22%</text></svg><div style=\"text-align:center;font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em;margin-top:8px\">battery</div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "fade",

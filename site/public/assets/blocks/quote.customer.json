@@ -32,15 +32,17 @@
           "type": "text",
           "weight": 600,
           "text": "“We shipped a launch film in an afternoon.”",
-          "size": 44,
+          "size": 48,
           "color": "var(--text)",
           "ls": "-0.02em"
         },
         {
           "type": "text",
           "weight": 500,
-          "text": "· a happy user",
-          "size": 22,
+          "text": "a happy user",
+          "size": 17,
+          "font": "mono",
+          "tracking": "0.04em",
           "color": "var(--text-2)"
         }
       ]
