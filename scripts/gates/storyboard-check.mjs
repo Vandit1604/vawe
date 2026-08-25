@@ -95,6 +95,26 @@ const ANIM_VOCAB = /\b(fades?|slides?|wipes?|cuts?|dissolves?|zooms?|blurs?|scal
 // A change verb has to name a thing on the far side of it.
 const CHANGE_VERB = /(becomes?|turns? into|opens? into|collapses?|morphs?|splits?|unfolds?|folds?|resolves? into|hardens? into|→)/gi;
 
+// ── the CAUSE: what MADE this beat happen ────────────────────────────────────────────────────────
+// Three fields now sit beside each other and they answer three different questions. `mechanism:` is
+// HOW the frame moves. `becomes:` is WHAT the thing turned into. `trigger:` is WHAT MADE IT HAPPEN.
+// A film where every beat has a `becomes:` and no beat is caused by the one before it is a run of
+// unrelated changes, which is the slideshow failure read off the plan instead of off the render.
+// `no-continuous-object` cannot see this: it measures a prop surviving a junction, which is spatial,
+// and a cause is not spatial. Named `trigger` because docs/CRAFT/TRANSITIONS.md already calls it that
+// ("motion that emerges from a real trigger, a whip, a touch point"); `because` was rejected for
+// colliding with `why:`, which asks the beat's narrative job and is a third question again.
+//
+// REPORT, NEVER A REQUIREMENT. No storyboard in the library carries this field, so a per-beat presence
+// blocker would fire on all twelve at once and be waived by reflex inside a week. What always prints is
+// the CHAIN: the film's causal spine drawn as a line, every unstated link shown as a break. A plan whose
+// spine is four fragments has learnt something a presence count never tells it.
+//
+// post hoc is not propter hoc: a trigger that only says WHEN is a sequence, and a slideshow already
+// has one of those.
+const TRIGGER_SEQUENCE = /^(then\b|next\b|and then\b|afterwards?\b|later\b|time passes|the (?:beat|shot|scene|cut|film) (?:begins|starts|ends|changes|moves on)|\d+(?:\.\d+)?\s*s\b)/i;
+const TRIGGER_EMPTY = /^(none|nothing|n\/?a|tbd|[-\u2013\u2014.\u00b7]+)$/i;
+
 // The time range the beat headings already carry — the SAME shape intent-from-storyboard reads.
 const RANGE = SB_RANGE;
 const spans = [];
@@ -143,11 +163,43 @@ for (const b of blocks) {
     }
   }
 
+  // The cause, read per beat and recorded on the span so the chain can be drawn below.
+  const trigger = fieldIn(b, 'trigger');
+  const filled = !!trigger && !TRIGGER_EMPTY.test(trigger);
+  spans[n - 1].trigger = filled ? trigger : null;
+  spans[n - 1].caused = filled && !TRIGGER_SEQUENCE.test(trigger);
+  if (filled && TRIGGER_SEQUENCE.test(trigger)) {
+    warns.push(`beat "${title}": trigger-is-a-sequence — "${trigger}". That says WHEN this beat happens, not what made it happen, and every slideshow already has an order. Name the act on screen that forces it: the cursor clicking Send, a number crossing the line, the hand letting go of the card.`);
+  } else if (filled && trigger.split(/\s+/).length <= 6 && ANIM_VOCAB.test(trigger)) {
+    // ponytail: word-count guard, because a long trigger that happens to contain "slides" is usually
+    // describing a real event. Widen it only if short real causes start tripping.
+    warns.push(`beat "${title}": trigger-is-a-mechanism — "${trigger}". A cut or a fade is how the film arrives here, not why it had to. \`mechanism:\` already answers that. \`trigger:\` names the thing in the PREVIOUS beat that made this one necessary.`);
+  }
+
   // A why that says "hook" restates the beat's category. The category is already in `type:`.
   const why = fieldIn(b, 'why');
   if (why && (why.split(/\s+/).length < 5 || /^(the\s+)?(hook|payoff|cta|because|setup|intro|outro)\b[\s.·—-]*$/i.test(why))) {
     warns.push(`beat "${title}": stub-why — "${why}". A why states what the viewer learns or feels HERE and why it belongs at this point in the film, not the beat's category.`);
   }
+}
+
+// ── the CHAIN: the film's causal spine, printed every run ─────────────────────────────────────────
+// One link per junction, so a five-beat film has four. A link is CAUSED when the beat after it states a
+// trigger that names an act rather than a moment. The count that matters is fragments: a spine in one
+// piece is a film where each beat forces the next, and four fragments is four films in a row.
+const links = spans.slice(1);
+const causedLinks = links.filter((s) => s.caused).length;
+const fragments = 1 + (links.length - causedLinks);
+const chainLines = spans.map((s, i) => {
+  const head = `    ${i + 1}. ${s.title}`;
+  if (i === 0) return head;
+  const arrow = s.caused
+    ? `       v because ${s.trigger}`
+    : `       x nothing stated - these two beats only follow each other`;
+  return `${arrow}\n${head}`;
+});
+if (links.length && causedLinks && causedLinks < links.length) {
+  warns.push(`chain-breaks — ${causedLinks} of ${links.length} junctions name what caused them and ${links.length - causedLinks} do not, so this film's causal spine is ${fragments} fragments, not one. The beats you did write a \`trigger:\` for prove the film can carry a cause; the gaps are where it stops and starts again. Fill the missing ones, or move the beat somewhere its cause exists.`);
 }
 
 // ── the clock: the storyboard already carries times, so read them ─────────────────────────────────
@@ -192,6 +244,11 @@ else if (seen.stale) warns.push(`the panels are stale — they were drawn from a
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  storyboard-check · ${f} · ${blocks.length} beat(s)`);
 if (message) console.log(`  message: "${message}"`);
+if (links.length) {
+  console.log(`  causal chain · ${causedLinks}/${links.length} junction(s) caused · ${fragments} fragment(s)`);
+  for (const l of chainLines) console.log(l);
+  if (!causedLinks) console.log(`    (no beat states a \`trigger:\`. It names WHAT MADE THIS BEAT HAPPEN — the act in the beat before that forced it. \`mechanism:\` is how it moves, \`becomes:\` is what it turned into, \`trigger:\` is why it had to.)`);
+}
 for (const e of errs) console.error(`    ✗ ${e}`);
 for (const w of warns) console.log(`    ~ ${w}`);
 if (errs.length) { console.error(`\n✗ storyboard incomplete — ${errs.length} blocker(s). Fill them, then present the proposal for approval before authoring JSON.`); process.exit(1); }

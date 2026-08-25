@@ -107,7 +107,20 @@ not: "the defaults this film refuses, in your own words"
   on every beat are required too, and the scene-side mirror is direction-floor's `no-continuous-object`
   (opt-in, `TASTE=1`). Doctrine for the object device: .claude/skills/vawe-continuous-action/SKILL.md.
 
-  TWO FIELDS, TWO QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
+  THE THIRD QUESTION, AND THE ONE NOTHING USED TO ASK. `trigger:` is WHAT MADE THIS BEAT HAPPEN —
+  the act in the beat before that forced this one. "the cursor hits Send on the card in beat 1". It is
+  not `becomes:` (what the thing turned into) and it is not `mechanism:` (how it moves), and the cheap
+  answer to it is either of those two again. A film where every beat has a `becomes:` and no beat
+  causes the next is a run of unrelated changes, which is the slideshow failure written on paper.
+  OPTIONAL, AND IT WILL STAY OPTIONAL. Not every film has a causal spine: a manifesto, a vignette
+  anthology and a metric-cut list film are held by something else and have no answer to "what caused
+  beat 3". The gate never blocks on it. What it always prints is the CHAIN — one link per junction,
+  every unstated link drawn as a break, and a count of fragments. It warns on `trigger-is-a-sequence`
+  ("then", "next": that says when, not why), on `trigger-is-a-mechanism` ("it cuts to the next shot"),
+  and on `chain-breaks` once some junctions state a cause and others do not. Full register, and what
+  no static gate can see here: docs/CRAFT/FILM-STRUCTURE.md Part 5.
+
+  TWO MORE FIELDS, TWO MORE QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
   `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the
   first question and never the second: "fade · slide · zoom" says nothing changed, only that
   something travelled. Under 15s the gate FAILS a beat with no `becomes:`, and warns when the value
@@ -173,6 +186,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "the strong first line" / "the second cue, revealed later"
 - mechanism: count-up · kinetic word reveal · slow-push camera
 - becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
+- trigger: nothing yet. This beat opens the film, so its cause is the question it asks
 - layout: type in the middle third, the rest of the frame deliberately empty
 - style: hard contrast, one colour, type is the only object
 - rest: 1.5% breathing scale on the headline through the hold
@@ -191,6 +205,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "what it is" / "the category line"
 - mechanism: svg draw-on · glow flash · per-word reveal
 - becomes: the number becomes the thing that produced it, and the drawn mark becomes the wordmark
+- trigger: the count-up in beat 1 lands on its final figure and needs an author
 - layout: mark centre, wordmark under it, lower half deliberately empty
 - style: the brand ground arrives, mark at full weight, everything else muted
 - rest: slow drift on the mark, 6px over the hold
@@ -206,6 +221,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "the claim" / "the number that backs it"
 - mechanism: diveIn camera · count-up · border-beam card
 - becomes: the resting product becomes a product mid-use, and the empty field becomes a filled row
+- trigger: the wordmark makes a claim, and a claim on screen demands the product doing it
 - layout: the UI fills the lower two thirds, the claim sits top-left against it
 - style: the real UI at full fidelity, chrome dimmed so the claim reads
 - rest: 1% scale on the captured surface, nothing else moves
@@ -221,6 +237,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "the shocker line" / "the payoff figure"
 - mechanism: hero count-up · kinetic label · a single accent rule
 - becomes: the filled row becomes the finished result, and the open loop becomes an answer
+- trigger: the row in beat 3 finishes filling, so the result is now available to show
 - layout: the number owns the centre at 60% of frame width
 - style: the loudest frame of the film. THIS is the spectacle beat
 - rest: none, the spectacle carries it
@@ -236,6 +253,7 @@ not: "the defaults this film refuses, in your own words"
 - onscreen: "the action" / "the url" / "the offer"
 - mechanism: mark pop · install chip · held still (no exit)
 - becomes: the result becomes an address you can type, and the mark becomes the last frame
+- trigger: the viewer has the result and nothing left to wait for
 - layout: mark and url stacked centre, generous margin on all four sides
 - style: quiet, one line, the mark and nothing competing
 - rest: 1% breathe on the mark only
