@@ -47,7 +47,7 @@
               "weight": 700,
               "text": "i",
               "size": 14,
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         },

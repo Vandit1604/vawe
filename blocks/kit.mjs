@@ -23,6 +23,11 @@ export const TOKENS = {
   accent: 'var(--accent)',
   accentSoft: 'color-mix(in srgb, var(--accent) 14%, transparent)',
   accentInk: 'var(--accent)',
+  // Text that READS on an accent fill. core/boot.js computes it per theme from that theme's own
+  // accent (25 of 38 could not carry white; higgsfield's lime scored 1.16:1). NOT the same thing as
+  // `accentInk`, which is the accent used AS text — the names invite confusion and five themes already
+  // override `--accent-ink`, which is why this does not reuse that name.
+  onAccent: 'var(--on-accent)',
   green: 'var(--up)', greenBright: 'var(--up)',
   greenSoft: 'color-mix(in srgb, var(--up) 16%, transparent)',
   down: 'var(--down)',
@@ -89,10 +94,20 @@ export const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
 
 // onColor(bg) — pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
 // over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
-// arbitrary `accent` with no check, and on the amber tone that measures 2.05:1. Only literal hexes can
-// be judged at build time; a CSS var resolves at render, and the theme contract already requires its
-// accent to carry white, so a var falls through to white by design rather than by omission.
+// arbitrary `accent` with no check, and on the amber tone that measures 2.05:1.
+//
+// THE ACCENT CASE WAS A GUARD THAT NEVER RAN. `TOKENS.accent` is the STRING 'var(--accent)', so the
+// hex regex below misses it and this returned `light` — '#fff' — every single time. Four blocks called
+// it on the accent believing they were protected, and blocks/social.mjs even carried a comment saying
+// it "picks its ink with onColor rather than assuming white clears it", describing a check that did
+// not happen. The old note here claimed the theme contract requires an accent to carry white; it never
+// did, and 25 of 38 themes could not (higgsfield's lime: 1.16:1).
+//
+// A var still cannot be judged at build time — it resolves in the browser — so the answer is not to
+// measure it here but to defer to the one that was already computed: core/boot.js writes --on-accent
+// per theme from that theme's own accent.
 export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
+  if (bg === TOKENS.accent) return TOKENS.onAccent;
   const m = /^#([0-9a-f]{6})$/i.exec(String(bg || ''));
   if (!m) return light;
   const n = parseInt(m[1], 16);

@@ -124,7 +124,7 @@
               "weight": 700,
               "text": "Install",
               "size": 17,
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         }

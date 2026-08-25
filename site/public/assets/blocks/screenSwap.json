@@ -270,7 +270,7 @@
               "weight": 700,
               "text": "Continue",
               "size": 19,
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         }

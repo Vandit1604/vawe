@@ -101,7 +101,7 @@
               "weight": 700,
               "text": "◆",
               "size": 14,
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         },

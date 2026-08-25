@@ -209,7 +209,10 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
         features.map((f) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.xs, children: [
           text({ text: '✓', size: TYPE.body, weight: 700, color: T.accent }), text({ text: f, size: TYPE.body, color: T.sub })] })) },
       { type: 'group', bg: highlight ? T.accent : T.surface, radius: R.chip, pad: `${SPACE.sm}px 0`, layout: 'row', justify: 'center',
-        children: [text({ text: cta, size: TYPE.body, weight: 600, color: highlight ? '#fff' : T.ink })] },
+        // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime
+        // white measured 1.16:1 — shipped, unreadable. The theme computes a readable ink for its own
+        // accent (core/boot.js); the block asks for it rather than assuming.
+        children: [text({ text: cta, size: TYPE.body, weight: 600, color: highlight ? T.onAccent : T.ink })] },
     ] }];
 }
 

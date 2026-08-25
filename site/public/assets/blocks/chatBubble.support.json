@@ -60,7 +60,7 @@
               "weight": 500,
               "text": "Grain is opt-in, remove \"grain\": true",
               "size": 20,
-              "color": "#fff",
+              "color": "var(--on-accent)",
               "bg": "var(--accent)",
               "radius": 16,
               "pad": "12px 16px",

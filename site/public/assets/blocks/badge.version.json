@@ -52,7 +52,7 @@
               "text": "v2.0",
               "font": "mono",
               "size": 17,
-              "color": "#fff",
+              "color": "var(--on-accent)",
               "delay": 0.22,
               "anim": "pop",
               "enterDur": 0.26

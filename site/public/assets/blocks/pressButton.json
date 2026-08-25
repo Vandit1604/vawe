@@ -19,7 +19,7 @@
       "x": 160,
       "y": 160,
       "w": 280,
-      "html": "<div style=\"width:280px\"><div style=\"box-sizing:border-box;width:280px;padding:16px 22px;border-radius:12px;background:var(--accent);text-align:center;font:700 20px var(--font-sans);color:#fff;letter-spacing:-0.01em;box-shadow:0 calc(8px - min(var(--p,0), 1 - var(--p,0)) * 12px) calc(20px - min(var(--p,0), 1 - var(--p,0)) * 22px) color-mix(in srgb, var(--text) 24%, transparent);transform:translateY(calc(min(var(--p,0), 1 - var(--p,0)) * 10px)) scale(calc(1 - min(var(--p,0), 1 - var(--p,0)) * 0.06))\">Start a project</div></div>",
+      "html": "<div style=\"width:280px\"><div style=\"box-sizing:border-box;width:280px;padding:16px 22px;border-radius:12px;background:var(--accent);text-align:center;font:700 20px var(--font-sans);color:var(--on-accent);letter-spacing:-0.01em;box-shadow:0 calc(8px - min(var(--p,0), 1 - var(--p,0)) * 12px) calc(20px - min(var(--p,0), 1 - var(--p,0)) * 22px) color-mix(in srgb, var(--text) 24%, transparent);transform:translateY(calc(min(var(--p,0), 1 - var(--p,0)) * 10px)) scale(calc(1 - min(var(--p,0), 1 - var(--p,0)) * 0.06))\">Start a project</div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "rise",

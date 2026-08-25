@@ -36,14 +36,14 @@
           "weight": 500,
           "text": "i",
           "size": 20,
-          "color": "#fff"
+          "color": "var(--on-accent)"
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Read the migration guide",
           "size": 20,
-          "color": "#fff",
+          "color": "var(--on-accent)",
           "grow": 1
         },
         {
@@ -57,7 +57,7 @@
               "weight": 600,
               "text": "Open",
               "size": 17,
-              "color": "#fff",
+              "color": "var(--on-accent)",
               "delay": 0.35,
               "anim": "pop",
               "enterDur": 0.3

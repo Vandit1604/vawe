@@ -148,7 +148,11 @@ export function usMapHex({ x, y, w = 1180, data = [], title = '', sub = '', lege
     const f = s.frac(code);
     const fill = f === null ? EMPTY : rampAt(f);
     // Ink over a heavy accent wash stops being readable; the light end keeps the theme's own text.
-    const ink = f !== null && f > 0.55 ? 'var(--accent-ink, #fff)' : T.ink;   // see the halo note in choropleth()
+    // `--accent-ink` is the WRONG TOKEN with the right intent: it is the accent used as text, and on
+    // brew it is #b83a0f — dark orange placed on an orange fill. `--on-accent` is ink FOR an accent
+    // ground. Graded against the full-strength accent, so on a heavy wash it is directionally right
+    // rather than exactly measured.
+    const ink = f !== null && f > 0.55 ? T.onAccent : T.ink;   // see the halo note in choropleth()
     const val = s.map.get(code);
     return `<g class="tile">`
       + `<polygon points="${pts}" fill="${fill}" stroke="${T.hair}" stroke-width="1.5"/>`
@@ -198,7 +202,7 @@ function choropleth({ items, projection, x, y, w, h, data, title, sub, legend, s
       const hot = frac > 0.55;
       if (Number.isFinite(c[0])) marks.push(`<text class="hit" x="${c[0].toFixed(1)}" y="${c[1].toFixed(1)}"`
         + ` text-anchor="middle" dominant-baseline="central" font-family="var(--font-mono)" font-weight="700"`
-        + ` font-size="${TYPE.body}" fill="${hot ? 'var(--accent-ink, #fff)' : T.ink}"`
+        + ` font-size="${TYPE.body}" fill="${hot ? T.onAccent : T.ink}"`
         + (hot ? '' : ` paint-order="stroke" stroke="${T.paper}" stroke-width="3"`)
         + `>${s.map.get(f.id)}${unit}</text>`);
     }
