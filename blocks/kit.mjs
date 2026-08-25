@@ -30,10 +30,24 @@ export const TOKENS = {
 };
 const T = TOKENS;
 
-// SERIES — the theme-derived chart palette (accent → success → danger → two mixes). Charts default
-// their per-series/segment colours from this so multi-series graphics reskin with the brand.
-export const SERIES = ['var(--accent)', 'var(--up)', 'var(--down)',
-  'color-mix(in srgb, var(--accent) 55%, var(--text-2))', 'color-mix(in srgb, var(--up) 55%, var(--text-2))'];
+// SERIES — the CATEGORICAL chart palette: one hue stepping toward the theme's own neutral.
+//
+// It used to be `[accent, up, down, …]`, which spent the SEMANTIC colours on categories that have no
+// semantics. A three-segment donut rendered blue / green / red — a stoplight — and told the viewer that
+// segment two was good and segment three was bad when the data said no such thing. Colour that means
+// something must not be handed out to things that mean nothing; `up` and `down` stay reserved for
+// actual direction, reachable through `toneColor()`.
+//
+// A single-hue ramp is also what a modern product surface does (every serious dashboard reserves red
+// and green), and it is the only option that RESKINS: `accentDim` and `accentGlow` are alpha versions
+// of the accent in every shipped theme, not distinct hues, so they cannot separate categories. Mixing
+// toward `--text-2` adapts on its own — the ramp runs accent→dark on a light theme and accent→light on
+// a dark one, keeping separation either way.
+export const SERIES = ['var(--accent)',
+  'color-mix(in srgb, var(--accent) 68%, var(--text-2))',
+  'color-mix(in srgb, var(--accent) 42%, var(--text-2))',
+  'color-mix(in srgb, var(--accent) 22%, var(--text-2))',
+  'var(--text-2)'];
 export const seriesAt = (i) => SERIES[i % SERIES.length];
 
 export const HAIR = `1px solid ${T.hair}`;
