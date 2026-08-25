@@ -368,6 +368,25 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
     ] })) }];
 }
 
+// OPTICAL_NUDGE — one line of type, centred by eye rather than by box.
+//
+// A line box is not symmetric around its own type. Measured on the toast plate: the row is centred to
+// 0.01px (the 27px status disc sits 16.84 above and 16.84 below), and the words still read high,
+// because inside a 21.9px line box the ascender starts about 1px down and the baseline leaves about
+// 6.5px of descender room under it. Centring the BOX therefore places the ink ~2.8px above centre,
+// and on a 61px plate that is what a reader sees as "more space below than above".
+//
+// The nudge goes on the TEXT and not on the plate, and that is the whole point. Pushing the plate's
+// padding down would take the disc with it, and a disc's optical centre IS its geometric one, so the
+// mark would go wrong to make the words go right. Six pixels of top padding shifts the ink by half
+// that (the taller box re-centres in the row), which lands the type's optical centre on the disc's
+// centre and on the plate's at the same time.
+//
+// It is written as `css` because `pad` cannot do it: core/layers/util.js:202 returns before writing
+// padding on any layer with no background, so `pad` on a plain text layer is silently dropped. That
+// drop is the same bug that clipped the badge's label, and it is worth a fix at the write site.
+const OPTICAL_NUDGE = { paddingTop: `${SPACE.snug}px` };
+
 // toast — a dark snackbar: status dot · message · action link. (notification is the light card variant.)
 // The alert family (notification · toast · callout · banner) now shares ONE vocabulary: `title` and
 // `body`. Each block had invented its own words for the same two slots, so an author relearned the
@@ -379,8 +398,16 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
   if (items && items.length) {
     return stackWindows({ n: items.length, start, dur, step, life, rowH, gap }).flatMap((wnd, i) => {
       const it = items[i];
-      return toast({ x, y: r2(y + wnd.dy), w, title: it.title ?? it.message, body: it.body, action: it.action,
+      const [card] = toast({ x, y: r2(y + wnd.dy), w, title: it.title ?? it.message, body: it.body, action: it.action,
         icon: it.icon ?? icon, accent: it.accent || accent, start: wnd.start, dur: wnd.dur });
+      // A STACK IS DEPTH, NOT A COLUMN. Every card came out at the same width, the same weight and the
+      // same shadow, so three of them read as a list of three things rather than as one thing that
+      // grew. They cannot be inset or overlapped to say so: `w` is a floor here (the row's own content
+      // sets the real width), and cards that overlap bury the older messages and fail the layout
+      // audit. Depth is the register left, and it is the honest one — the newest card holds full
+      // weight and full light, each older one sits back a step.
+      const back = items.length - 1 - i;   // 0 is the newest
+      return [{ ...card, elevation: back ? E.card : E.raised, opacity: r2(1 - Math.min(back, 2) * 0.1) }];
     });
   }
   message = title ?? message;
@@ -400,13 +427,21 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
       // the plate does — and `--bg` on `--text` is the theme contract's own guaranteed pair. The disc
       // still carries the status hue; it just stops pretending it can host arbitrary ink.
       box({ w: 26, h: 26, radius: R.pill, bg: `color-mix(in srgb, ${accent} 45%, ${T.ink})`, layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: icon, size: TYPE.body, weight: 700, color: T.paper })] }),
-      text({ text: message, size: TYPE.base, weight: 500, color: T.paper, grow: 1 }),
+        children: [text({ text: icon, size: TYPE.body, weight: 700, color: T.paper, css: OPTICAL_NUDGE })] }),
+      text({ text: message, size: TYPE.base, weight: 500, color: T.paper, grow: 1, css: OPTICAL_NUDGE }),
       // The plate is INVERTED (`--text` ground, `--bg` ink), so the action link is mixed toward
       // `--bg`, not left as the bare accent. On higgsfield the plate is near-white and a lime accent
       // measured 1.1:1 on it. Mixing toward the plate's OWN text colour lifts the link on a dark
       // plate and a light one alike.
-      action && text({ text: action, size: TYPE.body, weight: 600, color: `color-mix(in srgb, ${T.accent} 55%, var(--bg))` }),
+      // 40%, NOT 55%, AND THE NUMBER WAS MEASURED RATHER THAN CHOSEN. At 55% the link fails 4.5:1 on
+      // 7 of the 38 themes and bottoms out at 3.26:1 on ledgerline-neon — the same near-3:1 a reader
+      // reported off a rendered frame. Mixed at 45% every theme clears, by 0.01, which is not a
+      // margin; at 40% the worst theme in the library measures 5.32:1 and the link is still plainly
+      // the accent. There is no on-dark accent token to reach for: `--on-accent` is ink FOR an accent
+      // fill, and the guaranteed palette carries no second accent, so the plate's own text colour is
+      // the only thing every theme promises will read here.
+      action && text({ text: action, size: TYPE.body, weight: 600, color: `color-mix(in srgb, ${T.accent} 40%, var(--bg))`,
+        css: OPTICAL_NUDGE }),
     ].filter(Boolean) }];
 }
 
@@ -426,7 +461,25 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   const ac = toneColor(tone);
   // White on the amber fill measures 2.05:1. Ink on it measures 8.86:1, and dark-on-amber is what a
   // warning chip looks like anyway — the fix keeps the brand colour and changes the text.
-  const onAc = onColor(ac);
+  //
+  // AND IT HAD TO BE SPELLED OUT, because `onColor` alone never made that swap. Every tone is a CSS
+  // var, a string the browser resolves, so the hex branch misses it and white comes back for all
+  // four. That answer is right for three of them — `up` and `down` are mid-dark by definition, and
+  // `accent` returns the per-theme `--on-accent` core/boot.js computes — and wrong for `warn`, which
+  // is amber in every theme that does not override it. `make audit` failed the badge HARD on it at
+  // 2.1:1, and this line lifts that to 8.9:1 on a light theme.
+  //
+  // KNOW WHAT THIS DOES NOT FIX, because the honest half matters more than the half that worked.
+  // `--text` is dark only on a LIGHT theme; on linear and higgsfield it is nearly white, so amber
+  // still measures 1.9:1 there — no better and no worse than the white it replaced. Nothing in the
+  // guaranteed palette is dark on every theme, and white-or-black chosen per fill is the only rule
+  // that clears all 38 (measured across every theme x tone: best-of-the-two bottoms out at 4.69:1,
+  // black alone fails 40 of 152 pairs and white alone fails a different 48). Making that choice needs
+  // the RESOLVED colour, which a factory never has, which is exactly why `--on-accent` is computed in
+  // core/boot.js and not here. The repair is three more lines beside it — `--on-up`, `--on-down`,
+  // `--on-warn` off the same `ensureContrast` — and `onColor` then deferring to them the way it
+  // already defers for the accent. That is a core change, so it is reported rather than smuggled in.
+  const onAc = ac === TOKENS.warn ? TOKENS.ink : onColor(ac);
   // a shield STAMPS IN, and its value chip lands a beat later — the whole motion of a status token.
   // Nothing more: over-animating a static chip is how a registry stops reading as a vocabulary.
   // THEME TOKENS, NOT LITERALS. The plate was `#3A3A38` and its text `#fff`, so the block rendered a
@@ -438,14 +491,36 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   // `shadow` and `border` DO apply to a group, which is worth stating because both are labelled
   // "(rect)" in the schema and the label reads as a restriction. Rendered both ways to be sure: the
   // flat version reads as two rectangles, this one reads as an object sitting on the frame. A shield
-  // is a pastiche of a physical sticker, and it needs to look stuck ON something.
+  // is a pastiche of a physical sticker, and it needs to look stuck ON something. Weighed against
+  // "shadows for elevation, borders for structure" and KEPT, because that rule endorses it rather
+  // than merely tolerating it: the shadow here separates no two regions and states no boundary, it
+  // says the sticker sits above the frame. A border in its place would be the wrong instrument, and
+  // the seam INSIDE the badge — the one thing here that IS structure — is drawn with a colour change
+  // and no rule at all.
   // Mono on BOTH halves is deliberate and is not the library's inversion: a CI shield is machine
   // chrome end to end ("build | passing", "v2.4.1"), the same register as a terminal.
-  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: R.chip, pad: SPACE.tight, layout: 'row', items: 'center', gap: 0,
+  //
+  // ONE RECTANGLE IN TWO HALVES, which is what a shields.io badge is. The two halves carry the SAME
+  // padding and stretch to one height; the plate owns the only radius and CLIPS them, so the seam
+  // between them is square and the outer corners are the plate's alone. What this replaced was a
+  // rounded chip INSET inside the plate, and at 3x it showed every joint of that construction: a
+  // black gutter above, right and below the coloured chip and none on its left, the chip's own four
+  // corners arguing with the plate's, and the label's last glyph sitting under the chip's left edge.
+  // The clipped glyph was not a spacing choice: `pad` on a layer with no background is DROPPED
+  // (core/layers/util.js:202 returns before it writes padding), so the label's `4px 12px` never
+  // applied and the two halves met with nothing between them. Each half is a group with its own fill
+  // now, which is what makes its padding real.
+  const half = `${SPACE.snug}px ${SPACE.sm}px`;
+  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: R.chip, layout: 'row', items: 'stretch', gap: 0,
+    // The clip is what keeps the coloured half square at the seam and round at the plate's edge, so
+    // one radius describes the whole object and there is no nested radius to get wrong.
+    css: { overflow: 'hidden' },
     shadow: true,
     start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
-      text({ text: label, font: 'mono', size: TYPE.body, weight: 600, color: TOKENS.paper, pad: `${SPACE.tight}px ${SPACE.sm}px` }),
-      { type: 'group', bg: ac, radius: R.micro, pad: `${SPACE.snug}px ${SPACE.sm}px`, children: [text({ text: value, font: 'mono', size: TYPE.body, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
+      { type: 'group', bg: TOKENS.ink, radius: R.none, pad: half, layout: 'row', items: 'center',
+        children: [text({ text: label, font: 'mono', size: TYPE.body, weight: 600, color: TOKENS.paper })] },
+      { type: 'group', bg: ac, radius: R.none, pad: half, layout: 'row', items: 'center',
+        children: [text({ text: value, font: 'mono', size: TYPE.body, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
     ] }];
 }
 

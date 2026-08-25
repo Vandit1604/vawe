@@ -262,7 +262,7 @@ export const CATALOG = [
   { name: 'kpiRow.time', family: 'kpiRow', blurb: 'latency percentiles',
     props: { items: [{ value: '42ms', label: 'p50' }, { value: '120ms', label: 'p95' }, { value: '380ms', label: 'p99' }] } },
   { name: 'badge.beta', family: 'badge', blurb: 'beta status badge',
-    props: { label: 'status', value: 'beta', tone: 'warn' } },
+    props: { label: 'status', value: 'beta', tone: 'accent' } },
 
   // ── lower thirds ─────────────────────────────────────────────────────────────
   // Twelve entries, one factory: the layout (name over role) is fixed, the material around it is the
