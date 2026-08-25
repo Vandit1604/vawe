@@ -9,7 +9,7 @@
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick — byte-identical DOM for any render order.
 import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp } from './motion.js';
-import { defineRegistry } from './registry.js';
+import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 
 export const TIMINGS = {
   linear: (p) => clamp01(p),
@@ -48,160 +48,133 @@ const frac = (x) => { const s = Math.sin(x) * 43758.5453; return s - Math.floor(
 // Each presentation: { enter(p, o) → style, exit(p, o) → style }. p is that phase's progress
 // (enter 0→1 = revealing, exit 0→1 = leaving); enter(1)/exit(0) must equal identity.
 export const PRESENTATIONS = {
-  none: { enter: () => style({}), exit: () => style({}) },
-  fade: {
+  none: withBlurb('no transition at all, the beats simply replace each other — masks nothing and moves nothing, so a whole-frame cut needs sceneUnits', { enter: () => style({}), exit: () => style({}) }),
+  fade: withBlurb('opacity only — masks, so a whole-frame cut needs sceneUnits', {
     enter: (p) => style({ opacity: p.toFixed(3) }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
-  slide: {
+  }),
+  slide: withBlurb('the frame travels one way, dir-aware — the plain workhorse, between same-background beats only', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.4).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 0.7).toFixed(2)}px)` }),
-  },
+  }),
   // whip-pan: fast directional throw with motion blur peaking at the cut
-  whip: {
+  whip: withBlurb('motion-blurred directional throw — momentum, between same-background beats only', {
     enter: (p, o) => style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 3.2).toFixed(2)}px)`, filter: `blur(${((1 - p) * 14).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 3.2).toFixed(2)}px)`, filter: `blur(${(p * 14).toFixed(2)}px)` }),
-  },
+  }),
   // scale-punch: outgoing bursts toward the camera, incoming settles down onto the page
-  punch: {
+  punch: withBlurb('scale burst, the leaving beat bursts past the camera — product focus', {
     enter: (p) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `scale(${lerp(1.07, 1, p).toFixed(4)})` }),
     exit: (p) => style({ opacity: (1 - p * p).toFixed(3), transform: `scale(${lerp(1, 1.12, p).toFixed(4)})`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
-  },
-  wipe: {
+  }),
+  wipe: withBlurb('hard directional reveal — playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits', {
     enter: (p, o) => style(wipe(p, o.dir)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
-  iris: {
+  }),
+  iris: withBlurb('circular reveal growing from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits', {
     enter: (p, o) => style(circleWipe(p, o.cx, o.cy)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
-  clock: {
+  }),
+  clock: withBlurb('clock-hand sweep reveal — masks, so a whole-frame cut needs sceneUnits', {
     enter: (p) => style(clockWipe(p)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
-  flip: {
+  }),
+  flip: withBlurb('perspective hinge flip about an edge — cards and panels', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `perspective(1400px) rotate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * 55).toFixed(1)}deg)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `perspective(1400px) rotate${axis(o.dir)}(${(-sign(o.dir) * p * 55).toFixed(1)}deg)` }),
-  },
-  rise: {
+  }),
+  rise: withBlurb('translate up + fade in', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.3).toFixed(3), transform: `translateY(${((1 - p) * o.dist).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.6).toFixed(2)}px)` }),
-  },
+  }),
   // blur dissolve: the classic premium fade — defocus swaps for opacity doing all the work
-  blur: {
+  blur: withBlurb('resolve out of blur — calm, premium', {
     enter: (p) => style({ opacity: clamp01(p * 1.2).toFixed(3), filter: `blur(${((1 - p) * 16).toFixed(2)}px)` }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3), filter: `blur(${(p * 16).toFixed(2)}px)` }),
-  },
+  }),
   // zoom-through: camera pushes forward — outgoing shrinks away, incoming arrives from too-close
-  zoom: {
+  zoom: withBlurb('push-through: the leaving beat shrinks away, the arriving one lands from too close — product focus', {
     enter: (p) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `scale(${lerp(1.35, 1, p).toFixed(4)})`, filter: `blur(${((1 - p) * 10).toFixed(2)}px)` }),
     exit: (p) => style({ opacity: (1 - p * p).toFixed(3), transform: `scale(${lerp(1, 0.82, p).toFixed(4)})`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
-  },
+  }),
   // cube-ish perspective push: rotates in around a vertical/horizontal hinge
-  cube: {
+  cube: withBlurb('perspective hinge with travel, the beats turning like faces of a cube', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.4).toFixed(3), transform: `perspective(1400px) translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 2.4).toFixed(2)}px) rotate${axis(o.dir) === 'X' ? 'Y' : 'X'}(${((axis(o.dir) === 'X' ? -1 : 1) * sign(o.dir) * (1 - p) * 55).toFixed(1)}deg)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `perspective(1400px) translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 2.4).toFixed(2)}px) rotate${axis(o.dir) === 'X' ? 'Y' : 'X'}(${((axis(o.dir) === 'X' ? 1 : -1) * sign(o.dir) * p * 55).toFixed(1)}deg)` }),
-  },
+  }),
   // barn doors: reveal opens from the center out
-  barn: {
+  barn: withBlurb('barn doors open from the centre outward — cinematic opener; masks, so a whole-frame cut needs sceneUnits', {
     enter: (p) => { const r = ((1 - clamp01(p)) * 50).toFixed(2); const c = `inset(0 ${r}% 0 ${r}%)`; return style({ opacity: clamp01(p * 3).toFixed(3), clipPath: c, WebkitClipPath: c }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
+  }),
   // soft wipe: the feathered-edge reveal — a 20%-wide gradient band instead of a hard line
-  softwipe: {
+  softwipe: withBlurb('feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits', {
     enter: (p, o) => { const e = clamp01(p) * 130 - 5; return style({ ...mask(`linear-gradient(${gradAngle(o.dir)}, #000 ${(e - 18).toFixed(1)}%, transparent ${(e + 2).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
+  }),
   // soft iris: feathered circular reveal from a point
-  softiris: {
+  softiris: withBlurb('feathered circular reveal from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits', {
     enter: (p, o) => { const r = clamp01(p) * 92; return style({ ...mask(`radial-gradient(circle at ${o.cx}% ${o.cy}%, #000 ${r.toFixed(1)}%, transparent ${(r + 14).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
+  }),
   // squeeze: horizontal smear-stretch through the cut (speed-ramp feel)
-  squeeze: {
+  squeeze: withBlurb('smear-stretch along the travel axis — a speed ramp you can see', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 1.6).toFixed(2)}px) scale${axis(o.dir)}(${lerp(1.55, 1, p).toFixed(4)})`, filter: `blur(${((1 - p) * 8).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 1.6).toFixed(2)}px) scale${axis(o.dir)}(${lerp(1, 1.55, p).toFixed(4)})`, filter: `blur(${(p * 8).toFixed(2)}px)` }),
-  },
+  }),
   // roll: rotates in from a corner tilt, settles level
-  roll: {
+  roll: withBlurb('tilts in from a corner and settles level', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.4).toFixed(3), transform: `rotate(${(sign(o.dir) * (1 - p) * 7).toFixed(2)}deg) translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px) scale(${lerp(0.96, 1, p).toFixed(4)})` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 7).toFixed(2)}deg) translateY(${(-p * o.dist * 0.5).toFixed(2)}px)` }),
-  },
+  }),
   // letterbox: reveal opens like cinema curtains top+bottom
-  letterbox: {
+  letterbox: withBlurb('cinema curtains open and close top and bottom — cinematic opener; masks, so a whole-frame cut needs sceneUnits', {
     enter: (p) => { const r = ((1 - clamp01(p)) * 50).toFixed(2); const c = `inset(${r}% 0 ${r}% 0)`; return style({ opacity: clamp01(p * 3).toFixed(3), clipPath: c, WebkitClipPath: c }); },
     exit: (p) => { const r = (clamp01(p) * 50).toFixed(2); const c = `inset(${r}% 0 ${r}% 0)`; return style({ opacity: (1 - p * 0.4).toFixed(3), clipPath: c, WebkitClipPath: c }); },
-  },
+  }),
   // drop: falls in from above with a settle, exits by falling away
-  drop: {
+  drop: withBlurb('falls in from above under gravity, leaves by falling away', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.8).toFixed(3), transform: `translateY(${(-(1 - p) * (1 - p) * o.dist * 2.2).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translateY(${(p * p * o.dist * 2.2).toFixed(2)}px) rotate(${(p * 2.5).toFixed(2)}deg)` }),
-  },
+  }),
   // venetian blinds: slat mask sweeps open (editorial reveal)
-  blinds: {
+  blinds: withBlurb('venetian slat mask sweeps open — editorial reveal; masks, so a whole-frame cut needs sceneUnits', {
     enter: (p, o) => { const off = ((1 - clamp01(p)) * 120).toFixed(1); return style({ ...mask(`repeating-linear-gradient(${gradAngle(o.dir)}, #000 0 84px, transparent 84px 120px)`), maskSize: '100% 100%', maskPosition: `0 ${off}px`, WebkitMaskPosition: `0 ${off}px`, opacity: clamp01(p * 1.2 + 0.25).toFixed(3) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
-  },
+  }),
   // skew whip: the whip with shear that straightens — velocity you can see in the letterforms
-  skewWhip: {
+  skewWhip: withBlurb('sheared throw whose shear straightens as it lands — velocity you can read in the letterforms, same-background beats only', {
     enter: (p, o) => style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 2.6).toFixed(2)}px) skew${axis(o.dir) === 'X' ? 'X' : 'Y'}(${(sign(o.dir) * (1 - p) * -12).toFixed(2)}deg)`, filter: `blur(${((1 - p) * 10).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 2.6).toFixed(2)}px) skew${axis(o.dir) === 'X' ? 'X' : 'Y'}(${(-sign(o.dir) * p * 12).toFixed(2)}deg)`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
-  },
+  }),
   // spin: rotate + scale settle (logos, badges, seals)
-  spin: {
+  spin: withBlurb('rotate in with a scale settle — logos, badges, seals', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `rotate(${(sign(o.dir) * (1 - p) * 90).toFixed(1)}deg) scale(${lerp(0.5, 1, p).toFixed(4)})` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 60).toFixed(1)}deg) scale(${lerp(1, 0.7, p).toFixed(4)})` }),
-  },
+  }),
   // collapse: vertical fold (terminal/data beats)
-  collapse: {
+  collapse: withBlurb('vertical fold down to a line — terminal and data beats', {
     enter: (p) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `scaleY(${lerp(0.05, 1, p).toFixed(4)})` }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3), transform: `scaleY(${lerp(1, 0.05, p).toFixed(4)})` }),
-  },
+  }),
   // rise-blur: slow premium arrival — rise through heavy defocus
-  riseBlur: {
+  riseBlur: withBlurb('slow rise through heavy defocus — premium slow beats', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.2).toFixed(3), transform: `translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px)`, filter: `blur(${((1 - p) * 22).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.5).toFixed(2)}px)`, filter: `blur(${(p * 22).toFixed(2)}px)` }),
-  },
+  }),
   // glitch jitter: quantized deterministic shake that decays as the scene lands
-  jitter: {
+  jitter: withBlurb('decaying deterministic shake — alarm and glitch beats only', {
     enter: (p) => { const q = Math.floor(clamp01(p) * 10), amp = (1 - clamp01(p)) * 14; const jx = (frac(q * 12.9898 + 78.233) - 0.5) * 2 * amp, jy = (frac(q * 39.3468 + 11.135) - 0.5) * 2 * amp; return style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
     exit: (p) => { const q = Math.floor(clamp01(p) * 10), amp = clamp01(p) * 14; const jx = (frac(q * 26.651 + 43.77) - 0.5) * 2 * amp, jy = (frac(q * 51.313 + 7.19) - 0.5) * 2 * amp; return style({ opacity: (1 - p).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
-  },
+  }),
 };
 
-// CUT_BLURBS — one line per presentation, next to the thing it describes (the `blurb` pattern of
-// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
-// with no presentation, or a presentation with no key, is a bug the transitions catalog reports.
+// CUT_BLURBS — derived from the presentations, which each carry their own blurb (core/registry.js).
+// Consumed by the generated docs table and by any catalog/MCP surface. There is no second list to keep
+// in step: a presentation with no blurb throws here, naming itself.
 // The MASK-ONLY styles (SOLO_BLIND, derived just below) say so: on a whole-frame cut there is nothing
 // underneath them, so formats/scene/scene.js refuses them unless `sceneUnits: true` splits the beats.
-export const CUT_BLURBS = {
-  none: 'no transition at all, the beats simply replace each other — masks nothing and moves nothing, so a whole-frame cut needs sceneUnits',
-  fade: 'opacity only — masks, so a whole-frame cut needs sceneUnits',
-  slide: 'the frame travels one way, dir-aware — the plain workhorse, between same-background beats only',
-  whip: 'motion-blurred directional throw — momentum, between same-background beats only',
-  punch: 'scale burst, the leaving beat bursts past the camera — product focus',
-  wipe: 'hard directional reveal — playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits',
-  iris: 'circular reveal growing from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits',
-  clock: 'clock-hand sweep reveal — masks, so a whole-frame cut needs sceneUnits',
-  flip: 'perspective hinge flip about an edge — cards and panels',
-  rise: 'translate up + fade in',
-  blur: 'resolve out of blur — calm, premium',
-  zoom: 'push-through: the leaving beat shrinks away, the arriving one lands from too close — product focus',
-  cube: 'perspective hinge with travel, the beats turning like faces of a cube',
-  barn: 'barn doors open from the centre outward — cinematic opener; masks, so a whole-frame cut needs sceneUnits',
-  softwipe: 'feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits',
-  softiris: 'feathered circular reveal from a point (cx/cy) — masks, so a whole-frame cut needs sceneUnits',
-  squeeze: 'smear-stretch along the travel axis — a speed ramp you can see',
-  roll: 'tilts in from a corner and settles level',
-  letterbox: 'cinema curtains open and close top and bottom — cinematic opener; masks, so a whole-frame cut needs sceneUnits',
-  drop: 'falls in from above under gravity, leaves by falling away',
-  blinds: 'venetian slat mask sweeps open — editorial reveal; masks, so a whole-frame cut needs sceneUnits',
-  skewWhip: 'sheared throw whose shear straightens as it lands — velocity you can read in the letterforms, same-background beats only',
-  spin: 'rotate in with a scale settle — logos, badges, seals',
-  collapse: 'vertical fold down to a line — terminal and data beats',
-  riseBlur: 'slow rise through heavy defocus — premium slow beats',
-  jitter: 'decaying deterministic shake — alarm and glitch beats only',
-};
+export const CUT_BLURBS = blurbsOf('cut', PRESENTATIONS);
 
 // ---- SOLO MODE: a cut applied to ONE root that carries the whole frame ----
 // The A/B model above assumes two elements: the outgoing plays exit while the incoming plays enter,
@@ -249,5 +222,5 @@ export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist
 }
 
 // Built at the END so both maps are fully defined. `slot` is how an author writes it in a scene.
-export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut' });
+export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS });
 export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming' });

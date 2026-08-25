@@ -45,7 +45,7 @@ import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
 // the three.js layer at all: a whole scene-graph capability with four registered scenes, a written
 // determinism contract and a purity gate, invisible to the one document whose job is to list it.
 import { LAYER_TYPES } from '../../core/layers/index.js';
-import { THREE_FX } from '../../core/three-scenes.js';
+import { THREE_FX, THREE_SCENES } from '../../core/three-scenes.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
@@ -170,7 +170,7 @@ export const sections = [
   ['Camera moves', '`"cameraMove": { "move":"<name>", ... }` — a calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`', names(CAMERA_MOVE_NAMES), 'camera'],
   ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }` — a FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition', { blurbs: COMPOSITION_BLURBS }],
   ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer'],
-  ['three.js scenes (real geometry)', '`{ "type":"three", "three":"<name>" }` — a scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract — every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.', names(THREE_FX), 'layer'],
+  ['three.js scenes (real geometry)', '`{ "type":"three", "three":"<name>" }` — a scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract — every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.', names(THREE_FX), 'layer', { kind: 'three', blurbs: THREE_SCENES }],
   ['Raymarched surfaces', '`{ "type":"raymarch", "raymarch":"<name>" }` — implicit surfaces from a distance field. A subject you place, not a field behind everything.', names(RAYMARCH_FX), 'layer'],
   ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.', names(RESAMPLE_FX), 'per-frame', { blurbs: RESAMPLE_BLURBS }],
   ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame'],

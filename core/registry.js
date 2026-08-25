@@ -84,5 +84,39 @@ function hint(reg, name) {
     + `resolve to a default and render a frame that looks deliberate.`;
 }
 
+/**
+ * withBlurb(blurb, value) — the description written where the entry is written, not in a second map.
+ *
+ * WHY. A vocabulary and its one-line-per-entry descriptions used to be two literals policed by a gate
+ * (lib-test asserted the key sets matched), so adding one cut or one caption style was two edits in two
+ * places and the gate was the only thing keeping them equal. One fact, one owner: the entry owns it.
+ *
+ * The blurb is NON-ENUMERABLE, so an entry's own shape is unchanged for everything that walks it — a cut
+ * presentation still reads as exactly `{enter, exit}` — and Object.assign onto a function leaves it
+ * callable, which is what `CAP_STYLES[name](u, active)` requires.
+ */
+export function withBlurb(blurb, value) {
+  if (typeof blurb !== 'string' || !blurb.trim()) throw new Error('withBlurb: the blurb must be a non-empty string');
+  return Object.defineProperty(value, 'blurb', { value: blurb });
+}
+
+/**
+ * blurbsOf(kind, entries) — the name→blurb map, DERIVED from the entries so the two cannot drift.
+ * Refuses at load, naming the entry: the blurb is the row `make effects`, docs/EFFECTS.md and the site
+ * print, so an entry without one exists and cannot be chosen, and that was caught by a gate after the
+ * fact instead of at the point of writing.
+ */
+export function blurbsOf(kind, entries) {
+  const out = {};
+  for (const [name, value] of Object.entries(entries)) {
+    if (!value || typeof value.blurb !== 'string' || !value.blurb.trim())
+      throw new Error(`${kind} "${name}" has no blurb — wrap it where it is written: `
+        + `${name}: withBlurb("what it does, in one line", …). Without one it is absent from `
+        + `\`make effects\`, docs/EFFECTS.md and the site, so nobody can choose it.`);
+    out[name] = value.blurb;
+  }
+  return out;
+}
+
 /** Every registry defined so far — for catalog/coverage surfaces that want the whole vocabulary. */
 export const registries = () => ALL.slice();

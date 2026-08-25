@@ -391,6 +391,7 @@
 | `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
 | `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
 | `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
+| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
 | `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
 | `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
 | `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
@@ -398,6 +399,7 @@
 | `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
 | `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
 | `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
+| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
 | `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
 | `statReveal` | payoff: hero count-up + kinetic label |
 | `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
@@ -411,10 +413,13 @@
 
 | name | what / when |
 |---|---|
+| `cameraShake` | — |
 | `diveIn` | zoom INTO a target point (it travels to centre) |
+| `driftHold` | — |
 | `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
 | `panFollow` | camera pans to track downward-growing content (terminal) |
+| `punchIn` | — |
 | `slowPush` | gentle continuous zoom in (the frame stays alive) |
 | `travel` | station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut) |
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
@@ -464,11 +469,17 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `deviceShowcase` | — |
-| `extrudeText` | — |
-| `globe` | — |
-| `pointCloud` | — |
-| `uiParallax` | — |
+| `codeAssemble` | thousands of GPU points flying from a seeded cloud to the exact glyph positions and resolving into readable code |
+| `codeDissolve` | code resolving out of seeded noise behind a chromatic burn edge, then holding crisp |
+| `codeExtrude` | syntax-coloured code on lit beveled slabs, rising out of depth and growing to thickness, top line first |
+| `deviceShowcase` | a GLTF device body turning in real light with a LIVE HTML screen mapped onto it |
+| `extrudeText` | a real font outline extruded into a lit 3D solid that rotates through space |
+| `globe` | a rotating globe of land dots, with arcs available between coordinates |
+| `liquidBackground` | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
+| `magnetic` | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
+| `pointCloud` | a GPU point cloud: thousands of lit points posed absolutely from t |
+| `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
+| `uiParallax` | flat UI planes stacked at depth, the camera moving past them so the layers separate |
 
 ## Raymarched surfaces  `[layer]`
 
@@ -653,6 +664,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `bouncy` | feel → `ease: "spring-bouncy"` |
 | `circle` | camera → `move: "orbit"` |
 | `dive` | camera → `move: "diveIn"` |
+| `drift hold` | camera → `move: "driftHold"` |
 | `elastic` | feel → `ease: "easeOutElastic"` |
 | `fast` | duration → `0.18` seconds |
 | `follow` | camera → `move: "panFollow"` |
@@ -662,9 +674,12 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `luxurious` | duration → `1.2` seconds |
 | `mechanical` | feel → `ease: "linear"` |
 | `medium` | duration → `0.3` seconds |
+| `pan stations` | camera → `move: "travel"` |
 | `pop` | feel → `ease: "easeOutBack"` |
 | `pull back` | camera → `move: "workspaceZoomOut"` |
+| `punch in` | camera → `move: "punchIn"` |
 | `push in` | camera → `move: "slowPush"` |
+| `shake` | camera → `move: "cameraShake"` |
 | `sharp` | feel → `ease: "easeOutExpo"` |
 | `slow` | duration → `0.6` seconds |
 | `slow push-in` | camera → `move: "slowPush"` |
@@ -674,6 +689,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `stiff` | feel → `ease: "spring-stiff"` |
 | `sweep` | camera → `move: "truck"` |
 | `tour` | camera → `move: "travel"` |
+| `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ## Caption styles  `[captions]`
@@ -705,6 +721,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | name | what / when |
 |---|---|
 | `agent` | the name is the drawing |
+| `arrowLeft` | the name is the drawing |
 | `arrowRight` | the name is the drawing |
 | `bolt` | the name is the drawing |
 | `braces` | the name is the drawing |
@@ -799,4 +816,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_531 effects across 35 families. Regenerate: `make effects`._
+_548 effects across 35 families. Regenerate: `make effects`._

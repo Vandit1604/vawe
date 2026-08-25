@@ -7,6 +7,7 @@
 import { clamp01 } from './motion.js';
 import { PRESETS } from './type.js';
 import { onScreenText } from './on-screen-text.js';
+import { withBlurb, blurbsOf } from './registry.js';
 
 // capWords(cap) → [{ w, t0, t1 }] with ABSOLUTE windows covering [cap.t0, cap.t1].
 // Author-supplied cap.words ([{t0,t1}], aligned to the markup-stripped word list) wins;
@@ -53,11 +54,11 @@ export function lineU(t, wins) {
 export const CAP_STYLES = {
   // marker band draws behind the active word; earlier words keep their full band (a read trail).
   // 28% accent: even a near-white accent over the dark plate leaves white text at >= 4.9:1.
-  highlight: (u) => PRESETS.highlight(u, { color: 'color-mix(in srgb, var(--accent) 28%, transparent)' }),
+  highlight: withBlurb('marker highlight sweep', (u) => PRESETS.highlight(u, { color: 'color-mix(in srgb, var(--accent) 28%, transparent)' })),
 
   // pill fill sweeps left -> right. 42% accent into var(--bg) keeps the bg dominant, so the
   // theme's own text/bg pair (contract-guaranteed) degrades by well under half.
-  pillKaraoke: (u) => {
+  pillKaraoke: withBlurb('a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant', (u) => {
     const fill = 'color-mix(in srgb, var(--accent) 42%, var(--bg))';
     return {
       backgroundImage: `linear-gradient(${fill}, ${fill})`,
@@ -65,21 +66,21 @@ export const CAP_STYLES = {
       backgroundPosition: '0 0',
       backgroundSize: `${(clamp01(u) * 100).toFixed(1)}% 100%`,
     };
-  },
+  }),
 
   // active word: full ink, weight 800, a small pure sine bump (rises and settles, symmetric in u).
   // inactive: the mix, never opacity, so it stays legible over the plate. A SPOKEN word is not an
   // upcoming one and this style used to render them identically, which is a karaoke with no memory:
   // it holds its weight at 700 and only dims to 88%, so the line reads as read-behind, live, ahead.
-  weightShift: (u, active) => active
+  weightShift: withBlurb('the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix', (u, active) => active
     ? { fontWeight: '800', color: 'var(--text)',
         transform: `scale(${(1 + 0.06 * Math.sin(Math.PI * clamp01(u))).toFixed(3)})` }
     : clamp01(u) > 0
       ? { fontWeight: '700', color: 'color-mix(in srgb, var(--text) 88%, var(--bg))', transform: 'scale(1)' }
-      : { fontWeight: '600', color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(1)' },
+      : { fontWeight: '600', color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(1)' }),
 
   // clipWipe is LINE-level: applied to the accent overlay copy, driven by lineU(t, wins).
-  clipWipe: (p) => ({ clipPath: `inset(0 ${((1 - clamp01(p)) * 100).toFixed(2)}% 0 0)` }),
+  clipWipe: withBlurb('LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time', (p) => ({ clipPath: `inset(0 ${((1 - clamp01(p)) * 100).toFixed(2)}% 0 0)` })),
 
   // ---- wave 2. Each one occupies a register wave 1 left empty: LIGHT (neonEdge), IMPACT
   // (kineticSlam), a RULE beneath the ink (underlineDraw), DEPTH (readerFocus). None of them touches
@@ -91,7 +92,7 @@ export const CAP_STYLES = {
   // light, not ink: the accent lives entirely in a halo. The current word blooms (pure sine, so it
   // rises and settles), a spoken word keeps a quieter settled halo as its read trail, an upcoming
   // word has none. MAX_HALO is half the plate pad, so even the bloom's outer edge stays on the plate.
-  neonEdge: (u, active) => {
+  neonEdge: withBlurb('the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all', (u, active) => {
     const p = clamp01(u);
     const lit = active ? 0.55 + 0.45 * Math.sin(Math.PI * p) : 0.45 * p;
     const r = 14 * lit;
@@ -102,7 +103,7 @@ export const CAP_STYLES = {
           + `0 0 ${r.toFixed(1)}px color-mix(in srgb, var(--accent) 55%, transparent)`
         : 'none',
     };
-  },
+  }),
 
   // impact: the word lands oversize and settles, tracking collapsing with it. Cubic, so nearly all of
   // the travel is spent in the first third of the word's window and the rest of it holds still.
@@ -110,7 +111,7 @@ export const CAP_STYLES = {
   // It settles to 1.04, NOT to 1: a cubic that lands on the resting size makes the current word and
   // an already-spoken one identical for four fifths of the window, so a still of the line shows two
   // states where there are three. The last 4% is what stays behind to say "here".
-  kineticSlam: (u, active) => {
+  kineticSlam: withBlurb('the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still', (u, active) => {
     const p = clamp01(u);
     const back = (1 - p) ** 3;
     // NO keyed letter-spacing here, and that is not an omission. Tracking is a LAYOUT property: a
@@ -121,13 +122,13 @@ export const CAP_STYLES = {
       ? { color: 'var(--text)', transform: `scale(${(1.04 + 0.18 * back).toFixed(3)})` }
       : { color: p > 0 ? 'var(--text)' : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
           transform: 'scale(1)' };
-  },
+  }),
 
   // a rule under the ink, drawn left to right as the word is spoken and LEFT there. The quiet
   // sibling of `highlight`: the same read trail, at a quarter of the visual weight, and it never
   // sits between the glyphs and the plate so it cannot cost the text any contrast at all.
   // Painted at the bottom of the inline box with no padding, so the line box height is untouched.
-  underlineDraw: (u, active) => {
+  underlineDraw: withBlurb('a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast', (u, active) => {
     const p = clamp01(u);
     const rule = active ? 'var(--accent)' : 'color-mix(in srgb, var(--accent) 60%, var(--bg))';
     return {
@@ -137,7 +138,7 @@ export const CAP_STYLES = {
       backgroundPosition: '0 100%',
       backgroundSize: `${(p * 100).toFixed(1)}% 4px`,
     };
-  },
+  }),
 
   // depth: a teleprompter. Three ink levels and three scales, monotone in the order the words are
   // spoken, so the eye is told where it is without any colour changing hue. Every scale is <= 1, so
@@ -155,14 +156,14 @@ export const CAP_STYLES = {
   // The word hinges up from edge-on. An upcoming word is at -90deg, which is INVISIBLE without being
   // dim: it occupies its slot, it costs no contrast, and it is not a faint version of itself. Same
   // argument typeOn makes for visibility:hidden, made with a rotation instead.
-  flipUp: (u, active) => {
+  flipUp: withBlurb('the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all', (u, active) => {
     const p = clamp01(u);
     const deg = -90 * (1 - p) ** 2;
     return {
       color: active ? 'var(--text)' : p > 0 ? 'var(--text)' : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
       transform: `perspective(900px) rotateX(${deg.toFixed(1)}deg)`,
     };
-  },
+  }),
 
   // TWO GHOSTS CONVERGING, and deliberately not three. The reference mechanism is an RGB split, and
   // red/green/blue are literals: on a themed film they are three colours the brand never chose, and
@@ -170,7 +171,7 @@ export const CAP_STYLES = {
   // copies are OFFSET and converge, not because of which hues they are, so this offsets the accent
   // one way and a muted ink the other and lands them together. Offsets stay under 6px so both ghosts
   // sit inside the plate's 14px pad, the bound neonEdge is held to for the same reason.
-  ghostSplit: (u, active) => {
+  ghostSplit: withBlurb('two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme', (u, active) => {
     const p = clamp01(u);
     const d = 5.5 * (1 - p) ** 2;
     return {
@@ -179,14 +180,14 @@ export const CAP_STYLES = {
         ? `${d.toFixed(2)}px 0 0 var(--accent), ${(-d).toFixed(2)}px 0 0 color-mix(in srgb, var(--text) 55%, var(--bg))`
         : 'none',
     };
-  },
+  }),
 
   // One crest per word, ridden as the word is spoken. `wave` in core/type.js is a LOOP with no end,
   // which is why it cannot be a caption: a caption word has a window, and a loop inside a window
   // stops wherever the window stops. A half-sine peaks in the middle of the window and returns, so
   // the motion is bounded by the word rather than cut off by it. The three ink levels carry the
   // read/unread state, because the crest alone returns to zero and would say nothing at u=1.
-  waveRide: (u, active) => {
+  waveRide: withBlurb('one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it', (u, active) => {
     const p = clamp01(u);
     return {
       color: active ? 'var(--text)'
@@ -194,18 +195,18 @@ export const CAP_STYLES = {
         : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
       transform: `translateY(${(-14 * Math.sin(Math.PI * p)).toFixed(2)}px)`,
     };
-  },
+  }),
 
   // The letters settle out of noise. This is the ONE style that cannot work by returning a value:
   // the scramble rewrites textContent, and the contract is `Object.assign(el.style, …)`. So it gets
   // the same carve-out clipWipe has in formats/scene/scene.js, which calls core/type.js decodeText
   // (pure in u and the unit index, with the final string cached on the element). What this function
   // returns is only the read/unread ink, which is the half a style object CAN say.
-  scramble: (u, active) => ({
+  scramble: withBlurb('the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does', (u, active) => ({
     color: active ? 'var(--accent)'
       : clamp01(u) > 0 ? 'var(--text)'
       : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
-  }),
+  })),
 
   // ONE WORD ON SCREEN, replaced whole at the next onset. `mode:'one'` above, so this function only
   // ever paints the word being spoken and there is no upcoming or spoken state to dim: the read/
@@ -213,18 +214,18 @@ export const CAP_STYLES = {
   // The word lands at 1.14 and settles cubically, so nearly all the travel is in the first third.
   // 1.14, not kineticSlam's 1.22: this word is alone on the line and has the whole band to itself,
   // so the overshoot that reads as impact beside its neighbours reads as a wobble on its own.
-  wordFlash: (u) => {
+  wordFlash: withBlurb('ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint', (u) => {
     const back = (1 - clamp01(u)) ** 3;
     return { color: 'var(--text)', transform: `scale(${(1 + 0.14 * back).toFixed(3)})` };
-  },
+  }),
 
   // The same one-word swap, arriving from below instead of from scale. Pairs with a film that is
   // already moving vertically, where a scale pop would be a second unrelated motion.
   // `translateY` only: a transform cannot move its neighbours, and in `mode:'one'` it has none.
-  wordSlide: (u) => {
+  wordSlide: withBlurb('the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it', (u) => {
     const back = (1 - clamp01(u)) ** 3;
     return { color: 'var(--text)', transform: `translateY(${(back * 26).toFixed(1)}px)` };
-  },
+  }),
 
   // A TYPEWRITER, per character (`unit:'char'` above). A character that has not arrived is
   // `visibility:hidden`, NOT dimmed: it occupies its space so the line never reflows mid-word, and
@@ -233,17 +234,17 @@ export const CAP_STYLES = {
   // the line on every frame, which is the same layout trap kineticSlam's comment records for
   // letter-spacing. It also gives this style its third distinct state honestly, rather than by
   // exemption: hidden, then typing with the caret, then typed.
-  typeOn: (u, active) => ({
+  typeOn: withBlurb('a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret', (u, active) => ({
     color: 'var(--text)',
     visibility: clamp01(u) > 0 ? 'visible' : 'hidden',
     boxShadow: active ? 'inset -2px 0 0 0 var(--accent)' : 'none',
-  }),
+  })),
 
-  readerFocus: (u, active) => active
+  readerFocus: withBlurb('a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1', (u, active) => active
     ? { color: 'var(--text)', transform: 'scale(1)' }
     : clamp01(u) > 0
       ? { color: 'color-mix(in srgb, var(--text) 88%, var(--bg))', transform: 'scale(0.96)' }
-      : { color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(0.90)' },
+      : { color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(0.90)' }),
 };
 
 export const CAP_STYLE_NAMES = Object.keys(CAP_STYLES);
@@ -289,25 +290,9 @@ export function capUnitWins(cap, unit = 'word') {
   return out;
 }
 
-// CAPTION_BLURBS — one line per style, next to the styles themselves (the `blurb` pattern of
-// blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
-// no style, or a style with no key, is a bug the effects catalog reports.
+// CAPTION_BLURBS — derived from the styles, which each carry their own blurb (core/registry.js).
+// Consumed by the generated docs table and by any catalog/MCP surface. There is no second list to keep
+// in step: a style with no blurb throws here, naming itself.
 // Each blurb carries the style's own contrast fact, because that is the half an author cannot see in a
 // still: every styled line sits on the 78% var(--bg) scrim plate and dims by colour mix, never opacity.
-export const CAPTION_BLURBS = {
-  highlight: 'marker highlight sweep',
-  pillKaraoke: 'a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant',
-  weightShift: 'the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix',
-  clipWipe: 'LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time',
-  neonEdge: 'the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all',
-  kineticSlam: 'the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still',
-  underlineDraw: 'a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast',
-  readerFocus: 'a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1',
-  wordFlash: 'ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint',
-  wordSlide: 'the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it',
-  flipUp: 'the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all',
-  ghostSplit: 'two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme',
-  waveRide: 'one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it',
-  scramble: 'the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does',
-  typeOn: 'a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret',
-};
+export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
