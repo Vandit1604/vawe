@@ -145,6 +145,54 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ---
 
+## Reading `make direct`: every finding carries a census
+
+Twelve checks run in `scripts/author/motion-director.mjs` and eleven of them warn. Across the 135
+gate-visible scenes, 104 trip at least one. That is 77% of the library meeting the same wall of prose,
+film after film, and a warning nobody reads is a rule that has already been repealed with nobody
+writing it down.
+
+The rules did not change. What each finding now carries is two numbers.
+
+```
+~ [effect-soup] an effect on 10/13 beats ...
+    library: 6 of 135 films trip this. On its measure: yours an effect on 77% of beats,
+    the median of 134 films an effect on 0% of beats, and 4 films sit further out than yours.
+```
+
+The first number puts the RULE on trial. A code six films trip is a rule with teeth; a code fifty-two
+films trip is a rule the library has quietly voted on, and `waiver-drift.mjs` makes exactly this
+argument about waivers. The second number puts the FILM on a scale. An author told their tempo spread
+is 1.17x against a median of 1.91x, with five films flatter, knows what to do with the finding. An
+author told "uniform tempo reads as monotone" for the hundredth time does not.
+
+**Findings print most unusual first.** The order used to be whichever check happened to run first, so a
+code half the library trips could sit above the one finding worth acting on. The sort key is how far out
+this film is on that rule's own measure, or, for a rule with no scale, how few films trip it. Ties break
+on the code name, so two runs print the same report.
+
+### The census sets no target, and that is the point
+
+A census that became a target would push every film toward one rhythm, which is a worse library and not
+a better one. Three things keep it from doing that.
+
+- **It only annotates findings that already fired.** It cannot create one and it cannot clear one. Every
+  threshold sits exactly where it sat. A film that trips nothing is told nothing, so a clean film feels
+  no pull toward the median.
+- **It reports a position, never an aim.** "Five films are flatter than yours" is a fact about where you
+  stand. No line in the report says to move.
+- **The median is described as what has been made here.** Half this library is debt the same documents
+  say not to copy. The number is evidence about the rule, not a mark to hit.
+
+This is the same reasoning that keeps `pace-check`'s floor at the library's tenth percentile instead of
+its median: the aim is to catch a film that is asleep, not to make every film move at one speed.
+
+### The library view
+
+`node scripts/author/motion-director.mjs` with no file prints the census on its own: how often each code
+fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
+verdict and exits 0.
+
 ## Sources
 
 - Thomas & Johnston — _The Illusion of Life: Disney Animation_ (1981) — the 12 principles.
