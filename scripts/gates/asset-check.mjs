@@ -116,6 +116,9 @@ const missingFonts = [...fonts].filter(([u]) => !resolvesToFile(u));
 // forward decode from the nearest one lands inside a frame at any normal rate.
 const videoRefs = refs.filter(([, v]) => /\.(mp4|webm|mov|m4v)$/i.test(v) && resolvesToFile(v));
 const sparse = [];
+// An unprobed clip and a clean clip printed the same nothing. Record which, so a machine without ffprobe
+// cannot pass off "not measured" as "measured and fine".
+const unprobed = [];
 for (const [where, v] of videoRefs) {
   const f = fileFor(v);
   try {
@@ -125,7 +128,7 @@ for (const [where, v] of videoRefs) {
     const dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration',
       '-of', 'csv=p=0', f], { encoding: 'utf8' }).trim() || 0;
     if (dur > 0 && keys / dur < 1) sparse.push([where, v, keys, dur]);
-  } catch { /* no ffprobe on this machine: not a reason to fail an authoring check */ }
+  } catch (e) { unprobed.push([v, /ENOENT/.test(String(e && e.message)) ? 'ffprobe is not installed here' : 'ffprobe could not read it']); }
 }
 if (sparse.length) {
   console.log(`  ${sparse.length} clip(s) with SPARSE KEYFRAMES — a seek lands early and the wrong frame renders, silently:`);
@@ -134,7 +137,12 @@ if (sparse.length) {
       + `        → ffmpeg -i ${v} -c:v libx264 -pix_fmt yuv420p -g 1 -crf 18 <out>.mp4   (all-intra; bigger file, exact seeks)`);
 }
 
-console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s))`);
+console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s)`
+  + `${videoRefs.length ? ` · ${videoRefs.length - unprobed.length}/${videoRefs.length} clip(s) keyframe-probed` : ''})`);
+if (unprobed.length) {
+  console.log(`  ${unprobed.length} clip(s) NOT checked for sparse keyframes — this is about this machine, not the film:`);
+  for (const [v, why] of unprobed) console.log(`    ○ ${v}  (${why})`);
+}
 if (missingFonts.length) {
   console.log(`  ${missingFonts.length} MISSING typeface(s) — every frame will render in a fallback face and NOTHING else will say so:`);
   for (const [u, fam] of missingFonts) console.log(`    ✗ ${u}  (${[...fam].join(', ')})`);

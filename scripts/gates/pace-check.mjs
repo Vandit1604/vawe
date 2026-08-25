@@ -62,7 +62,7 @@ function measure(p) {
   // A film SAYS something. A backdrop or a determinism fixture has no copy and is meant to be still, so
   // it is measured and reported and never failed.
   const copy = JSON.stringify(d.layers).match(/"text"\s*:/g)?.length ?? 0;
-  return { dur: d.duration, eps: t.length / d.duration, hold, at, copy, allow: d.authoring?.allow || [] };
+  return { dur: d.duration, eps: t.length / d.duration, events: t.length, hold, at, copy, allow: d.authoring?.allow || [] };
 }
 
 if (!file) {
@@ -86,16 +86,30 @@ const m = measure(path.join(ROOT, file));
 if (!m) { console.error(`✗ ${file}: no layers or no duration`); process.exit(2); }
 const problems = [];
 if (m.copy && m.eps < FLOOR && !m.allow.includes('slow-pace')) {
-  problems.push(`${m.eps.toFixed(2)} events/s over ${m.dur}s — the library's films sit at 1.20 and the one this ` +
-    `replaces is at 1.79. Cut the duration before adding layers: a slow film is almost always a film that is too long.`);
+  problems.push(`${m.eps.toFixed(2)} events/s over ${m.dur}s (${m.events} event(s)) — below the floor of ${FLOOR.toFixed(2)}, `
+    + `which is this library's tenth percentile among films. For scale: the median film is 1.20 and the one this `
+    + `replaces is 1.79. Cut the duration before adding layers: a slow film is almost always a film that is too long.`);
 }
 if (m.hold > HOLD && !m.allow.includes('slow-pace')) {
-  problems.push(`${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s with nothing arriving or leaving. A held frame is a ` +
-    `device; ${HOLD}s of one is a stall.`);
+  problems.push(`${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s with nothing arriving or leaving, against a cap of `
+    + `${HOLD.toFixed(1)}s. A held frame is a device; ${HOLD}s of one is a stall.`);
 }
 
-console.log(`\n  pace · ${file}  ${m.eps.toFixed(2)} events/s · ${m.dur}s · longest hold ${m.hold.toFixed(1)}s`);
-if (!problems.length) { console.log('  ✓ it keeps moving\n'); process.exit(0); }
+console.log(`\n  pace · ${file}  ${m.eps.toFixed(2)} events/s · ${m.events} event(s) over ${m.dur}s · longest hold `
+  + `${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s  (floor ${FLOOR.toFixed(2)} ev/s · hold cap ${HOLD.toFixed(1)}s)`);
+if (!problems.length) {
+  // THE FLOOR ONLY APPLIES TO A FILM WITH COPY, and a scene with none used to read the same green line as
+  // one that cleared the bar. Say which of the two rules ran, so a fixture cannot borrow a film's tick.
+  const waived = m.allow.includes('slow-pace');
+  console.log(waived
+    ? `  ○ pace rules WAIVED by {"authoring":{"allow":["slow-pace"]}} — neither the ${FLOOR.toFixed(2)} ev/s floor\n`
+      + `    nor the ${HOLD.toFixed(1)}s hold cap was applied. The numbers above are measured; no verdict was reached.\n`
+    : m.copy
+    ? `  ✓ it keeps moving — ${m.copy} line(s) of copy, so both rules applied\n`
+    : `  ✓ within the hold cap. NO COPY in this scene, so the ${FLOOR.toFixed(2)} ev/s floor did not apply:\n`
+      + `    a backdrop or a determinism fixture is meant to be still and is never failed for it.\n`);
+  process.exit(0);
+}
 for (const p of problems) console.log(`    ~ [pace] ${p}`);
 console.log(strict ? '\n  ✗ pace (strict)\n' : '\n  Waive a deliberately still film with {"authoring":{"allow":["slow-pace"]}}.\n');
 process.exit(strict ? 1 : 0);

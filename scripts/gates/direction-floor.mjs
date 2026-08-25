@@ -338,6 +338,13 @@ const score = vocab.length + (directedByBeats ? 3 : 0);
 console.log(`\n  direction floor · ${file}`);
 console.log(`  motion vocabulary: ${vocab.map((k) => `${k}×${sig[k]}`).join(' · ') || '(none)'}${directedByBeats ? '  [composed from blueprints]' : ''}`);
 console.log(`  directedness score: ${score}   (floor: not a plain slideshow · reach ≥3 techniques)`);
+// THE HEADLINE RULE DOES NOT ALWAYS RUN, and the report never said so. Both halves of the continuity
+// tell are gated on `dur < CONTINUITY_MAX_DUR`, so a 20s film printed `✓ direction floor clear` with the
+// rule this gate is best known for never evaluated. A skipped check has to look different from a passed one.
+console.log(dur < CONTINUITY_MAX_DUR
+  ? `  continuity: EVALUATED (${dur}s is under the ${CONTINUITY_MAX_DUR}s ceiling) · ${bounds.length} declared boundary(ies)`
+  : `  continuity: NOT EVALUATED — ${dur}s is at or over the ${CONTINUITY_MAX_DUR}s ceiling, above which a chaptered\n`
+    + `              structure is legitimate. no-continuous-object and its inferred half did not run on this film.`);
 // The declared and inferred halves of the continuity tell are one rule seen two ways, so a scene that
 // waived the declared one has already declared the break deliberate; don't re-raise it as the other.
 // The two variants are the same finding named more precisely, so the standing waiver covers them. A

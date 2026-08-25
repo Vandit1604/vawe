@@ -178,7 +178,11 @@ for (const k of Object.keys((theme && theme.vars) || {})) sceneVars.add(k);
 for (const l of flat) for (const k of Object.keys((l && l.vars) || {})) sceneVars.add(k);
 // `--t` and `--p` are written per frame by the html layer and background, not by the theme.
 for (const k of ['--t', '--p']) sceneVars.add(k);
-if (KNOWN_VARS.size > 8) {   // only run when the derivation actually found the engine's tokens
+// A DERIVATION THAT FAILED MUST NOT LOOK LIKE A CHECK THAT PASSED. Both reads above catch and continue,
+// so an unreadable core/boot.js or core/tokens.css silently retires the whole dead-token lock while the
+// scene still prints `✓ on-spec`.
+const tokenLockRan = KNOWN_VARS.size > 8;
+if (tokenLockRan) {
   const seenVar = new Set();
   for (const l of scanTargets) {
     const kv = []; strings(l, '', kv);
@@ -234,8 +238,11 @@ for (const f of runRules(sceneTextUnits(data), { allow: [...allowed], scene: dat
 
 // ---- report ----
 console.log(`\n  design-spec lock · ${file}  (spec: themes/${themeName} · ${paletteRGB.length} palette colours${specRadii ? ` · ${specRadii.size} radii` : ''})`);
+if (!tokenLockRan) console.log(`  ~ dead-token lock SKIPPED: only ${KNOWN_VARS.size} engine token(s) could be derived from `
+  + `core/boot.js + core/tokens.css (needs > 8). Undefined var(--x) reads are NOT checked in this run.`);
 if (!allowRGB.length) console.log(`  ⚠ theme "${themeName}" has no readable palette — colour lock skipped (fonts still checked).`);
-if (!findings.length) { console.log(`  ✓ on-spec — every colour is a token or a palette colour, every font a role.\n`); process.exit(0); }
+if (!findings.length) { console.log(`  ✓ on-spec — every colour is a token or a palette colour, every font a role.`
+    + `${tokenLockRan ? '' : ' (dead-token lock did not run — see above.)'}\n`); process.exit(0); }
 console.log(`  ${findings.length} off-spec value(s):`);
 for (const f of findings) console.log(`    ~ [${f.sev}] ${f.msg}`);
 console.log(strict ? `\n  ✗ design-spec lock (strict): bring these onto the theme before shipping.\n` : `\n  reach onto the theme: these are the drift the eye reads as "off". (Block them with --strict / STRICT=1.)\n`);

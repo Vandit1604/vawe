@@ -63,6 +63,7 @@ import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { sceneDims } from '../../core/safe.js';
+import { population } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -134,11 +135,27 @@ const sceneHash = (sceneJson) => crypto.createHash('sha256').update(JSON.stringi
 const readManifest = () => {
   try { return JSON.parse(fs.readFileSync(MANIFEST, 'utf8')); } catch { return { version: 1, rules: {} }; }
 };
-const libraryScenes = () => fs.readdirSync(SCENE_DIR)
-  .filter((f) => f.endsWith('.json') && !/\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f) && f !== 'schema.json')
+// The population comes from scripts/lib/census.mjs so the ratchet cannot count a third of the library
+// and print a confident number (docs/MISTAKES.md #377). `quiet` because censusLine below is the line that
+// states N, and two counts of the same thing is how they drift apart.
+//
+// SOFT, not fatal, and the distinction is the point. This census is DISPLAY: it tells an author how many
+// other films the rule reaches. The ladder's verdict about the film in front of them does not depend on
+// it, so a bare worktree must still be able to run author-check. It prints the reason it cannot count
+// instead of a number, which is the whole ask — say what you looked at, and say when you could not look.
+let censusBlind = null;
+const libraryScenes = () => {
+  const pop = population('ratchet census', {
+    filter: (f) => f.endsWith('.json') && !/\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f) && f !== 'schema.json',
+    quiet: true,
+    soft: true,
+  });
+  censusBlind = pop.blind;
+  return pop.names
   .map((f) => path.join(SCENE_DIR, f))
   .map((p) => { try { const d = JSON.parse(fs.readFileSync(p, 'utf8')); return d?.module === 'scene' ? { p, d, name: path.basename(p, '.json') } : null; } catch { return null; } })
   .filter(Boolean);
+};
 
 // One scene, one rule: legacy / new / current. `edited` is reported separately from `absent` because they
 // are different arguments — one film was never looked at, the other was looked at this week.
@@ -156,8 +173,9 @@ function ratchetStatus(rule, sceneFile, sceneJson, manifest = readManifest()) {
 // The two numbers. "0 new failures" is actionable; "88 failures" is noise people learn to scroll past,
 // and that habit is the actual disease.
 function census(rule, manifest = readManifest()) {
-  const c = { legacy: 0, current: 0, new: 0, newNames: [], editedNames: [] };
+  const c = { legacy: 0, current: 0, new: 0, total: 0, newNames: [], editedNames: [] };
   for (const s of libraryScenes()) {
+    c.total++;
     const st = ratchetStatus(rule, s.p, s.d, manifest);
     if (st.state === 'legacy') c.legacy++;
     else if (st.state === 'new') { c.new++; c.newNames.push(s.name); if (st.why === 'edited') c.editedNames.push(s.name); }
@@ -165,7 +183,13 @@ function census(rule, manifest = readManifest()) {
   }
   return c;
 }
-const censusLine = (rule, c) => `${c.legacy} legacy · ${c.current} current · ${c.new} NEW failures`;
+const censusLine = (rule, c) => censusBlind
+  ? `NOT COUNTED — this checkout cannot see the library:\n      ${censusBlind.replace(/\n\s+/g, '\n      ')}`
+  : `${c.legacy} legacy · ${c.current} current · ${c.new} NEW failures  (of ${c.total} scene(s) in ${SCENE_DIR.replace(repoRoot + '/', '')})`;
+// `newNames` was collected on every run and printed nowhere. Those are the films the rule stops TODAY,
+// so withholding them makes the number unactionable: a reader learns twelve films block and cannot find
+// one of them. Sorted, because a census whose order moves is a diff nobody can read.
+const censusNames = (c) => [...c.newNames].sort();
 
 if (process.argv.includes('--legacy')) {
   const adopt = (() => { const i = process.argv.indexOf('--adopt'); return i >= 0 ? process.argv[i + 1] : null; })();
@@ -350,20 +374,20 @@ const runGate = (name, label, script, args, opts = {}) => {
   process.stdout.write(findings === 0 && code === 0
     ? `  → nothing found.\n`
     : `  → ${findings} finding(s)${blockCodes.length ? `: ${[...new Set(blockCodes)].join(', ')}` : ''}.\n`);
-  return { code, out, blockCodes };
+  return { code, out, blockCodes, findings };
 };
 
 const results = [];
 // tier decides what a finding COSTS, and it is the only thing TASTE=1 moves. `reports` steps still run,
 // still print and still land in the verdict table; they simply cannot fail the build unless asked to.
-const record = (name, { code, blockCodes }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
+const record = (name, { code, blockCodes, findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
   const teeth = tier === 'blocks' || taste;
   const failed = exitMeansFail && teeth ? code !== 0 : false;
   // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver.
   const unwaived = waivable ? blockCodes.filter((c) => !allow.has(c)) : blockCodes;
   const waived = waivable && failed && blockCodes.length > 0 && unwaived.length === 0;
   const reported = tier === 'reports' && !teeth && code !== 0;
-  results.push({ name, tier, failed: failed && !waived, waived, reported, unwaived, blockCodes });
+  results.push({ name, tier, failed: failed && !waived, waived, reported, findings, unwaived, blockCodes });
 };
 
 // TASTE GATES ARE OPT-IN. Seven of the steps below do not check that a film is BROKEN; they check that
@@ -417,16 +441,16 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
       console.log(`        That is NOT a waiver. Nobody has looked at this film yet, and no reason is recorded.`);
       console.log(`        Edit this scene and it loses legacy status, and then this finding stops you.`);
       console.log(`  → 1 finding: no-storyboard (legacy, does not block).`);
-      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, legacy: !excused, legacySince: sbRatchet.since, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
+      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, legacy: !excused, legacySince: sbRatchet.since, reported: !taste && !excused, findings: 1, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
     } else if (sbRatchet.state === 'new') {
       console.log(`      ▪ THIS FILM IS NOT GRANDFATHERED${sbRatchet.why === 'edited' ? ` ANY MORE: it held legacy status from ${sbRatchet.since} and has been edited since.` : `: it is not in the legacy manifest.`}`);
       console.log(`        The rule blocks here. Write the plan, or waive it with a reason someone can read:`);
       console.log(`          {"authoring":{"allow":["no-storyboard"],"_why":{"no-storyboard":"…"}}}`);
       console.log(`  → 1 finding: no-storyboard (BLOCKS, this film is new work).`);
-      results.push({ name: 'storyboard', tier: 'blocks', failed: !excused, waived: excused, reported: false, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
+      results.push({ name: 'storyboard', tier: 'blocks', failed: !excused, waived: excused, reported: false, findings: 1, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
     } else {
       console.log(`  → 1 finding: no-storyboard.`);
-      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, reported: !taste && !excused, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
+      results.push({ name: 'storyboard', tier: 'reports', failed: taste && !excused, waived: excused, reported: !taste && !excused, findings: 1, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
     }
   } else {
     console.log(`  plan: ${path.relative(repoRoot, sbPath)}${declaredSb ? ' (declared by the scene)' : ' (found by name)'}`);
@@ -435,7 +459,7 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     process.stdout.write(out.endsWith('\n') ? out : out + '\n');
     const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
     console.log(findings === 0 && code === 0 ? `  → nothing found.` : `  → ${findings} finding(s) in the plan itself.`);
-    record('storyboard', { code, blockCodes: code !== 0 ? ['storyboard-incomplete'] : [] }, { waivable: true, tier: 'reports' });
+    record('storyboard', { code, blockCodes: code !== 0 ? ['storyboard-incomplete'] : [], findings }, { waivable: true, tier: 'reports' });
   }
 }
 
@@ -580,6 +604,11 @@ const line = (r) => {
     : r.waived ? `waived (${r.blockCodes.join(', ')}) · somebody decided, and said why`
     : r.legacy ? `LEGACY (${r.blockCodes.join(', ')}, grandfathered ${r.legacySince}) · nobody has looked yet`
     : r.reported ? `reported, does not block (${r.blockCodes.join(', ') || 'see above'})`
+    // A GATE CAN EXIT 0 AND STILL HAVE SAID SOMETHING. critique prints its warnings and returns 0, so
+    // this line read "nothing found" directly under three ⚠ findings and the summary — the part people
+    // actually read — erased them. Exit code is the verdict; the finding count is the evidence, and the
+    // table has to carry both or it contradicts the transcript above it.
+    : r.findings > 0 ? `${r.findings} finding(s) above, none blocking`
     : 'nothing found';
   console.log(`  ${mark} ${r.name.padEnd(10)} ${note}`);
 };
@@ -599,16 +628,33 @@ if (legacies.length) {
   console.log(`  (▪ legacy comes from ${path.relative(repoRoot, MANIFEST)} · the rule arrived after the film did.`);
   console.log(`   No reason is recorded anywhere because nobody has made one. Edit the film and it blocks.)`);
 }
-if (sbCensus) console.log(`\n  ratchet · no-storyboard: ${censusLine('no-storyboard', sbCensus)} across formats/scene/.`);
+if (sbCensus) {
+  console.log(`\n  ratchet · no-storyboard: ${censusLine('no-storyboard', sbCensus)}`);
+  const names = censusBlind ? [] : censusNames(sbCensus);
+  if (names.length) {
+    const edited = new Set(sbCensus.editedNames);
+    console.log(`    the ${names.length} NEW failure(s) — these block their own author-check run, not this one:`);
+    for (const n of names) console.log(`      ${n}${edited.has(n) ? '  (was legacy, edited since)' : ''}`);
+  }
+}
 console.log(`\n  Every one of the ${TOTAL} steps ran. ${results.length} returned a verdict; the rest print and advise.`);
 const reported = results.filter((r) => r.reported);
+// Printed findings from a gate that PASSED. Neither `failed` nor `reported` covers them, and before this
+// existed they were summarised as "nothing found" three lines under their own ⚠ output.
+const noisy = results.filter((r) => !r.failed && !r.waived && !r.reported && !r.legacy && r.findings > 0);
 if (reported.length) {
   console.log(`\n  ~ ${reported.length} step(s) found something and did not stop you: ${reported.map((r) => r.name).join(', ')}.`);
   console.log(`      These are house-style findings. They are real and they are printed in full above.`);
   console.log(`      Give them teeth:  TASTE=1 make author-check D=${file}`);
   console.log(`      Why they report rather than block: docs/TASTE.md · "One process, two severities".`);
-} else if (!taste) {
+} else if (!taste && !noisy.length) {
   console.log(`\n  ✓ the house-style steps found nothing either. Nothing above is being held back from you.`);
+}
+if (noisy.length) {
+  console.log(`\n  · ${noisy.reduce((n, r) => n + r.findings, 0)} finding(s) came from step(s) that still returned a verdict of PASS: `
+    + `${noisy.map((r) => `${r.name} (${r.findings})`).join(', ')}.`);
+  console.log(`      A passing gate can still have said something. Those lines are printed in full above;`);
+  console.log(`      TASTE=1 does not change them, because their gate did not fail.`);
 }
 console.log(`\n  NOCHECK=1 skips this target, NOT the engine: a scene with a bad name or a broken schema`);
 console.log(`  still fails at boot. What you lose by skipping is the craft half, and the early warning.`);

@@ -202,7 +202,14 @@ for (const [name, file] of found) {
 }
 
 const covered = found.size - WAIVED.size - missing.length;
-console.log(`\n  arsenal · ${found.size} vocabular(ies) found · ${WAIVED.size} waived · ${covered} in the catalogue`);
+console.log(`\n  arsenal · ${files.length} source file(s) walked · ${found.size} vocabular(ies) found · ${WAIVED.size} waived · ${covered} in the catalogue`);
+// A SWEEP THAT SAW NOTHING MUST NOT PRINT A TICK. `walk('core')` is a bare readdir, so a moved or empty
+// core/ produced `0 vocabular(ies) found` and then `✓ every capability the engine exports is named`.
+if (!found.size) {
+  console.error(`\n  ✗ arsenal found NO vocabularies at all across ${files.length} file(s) under core/.`);
+  console.error(`    The engine cannot have none, so this gate did not see its subject. Nothing below was checked.\n`);
+  process.exit(3);
+}
 // A module this gate cannot import is a hole in it, and a hole nobody is told about is how the last
 // one happened. Browser-only modules are expected here; the list being non-empty is not a failure, the
 // list being INVISIBLE would be.

@@ -185,6 +185,12 @@ if (!SAVE) {
   const now = fontState();
   let was = null;
   try { was = JSON.parse(fs.readFileSync(STAMP, 'utf8')); } catch { /* baselines predating the stamp */ }
+  // EACH ARM STANDS ALONE. These were an if/else-if chain, and inserting the checkout note between the
+  // two halves left `else if (was.hash …)` reachable with `was === null` — so a tree with NO stamp
+  // crashed on a null dereference AFTER the whole sweep had run, trading a computed 106-scene verdict
+  // for a stack trace. That is the first-run path for every fresh clone and every new worktree, because
+  // verify/snap/ is gitignored. Independent conditions, never a chain: the notes are not alternatives to
+  // each other, and writing them as if they were is what made one of them able to break the others.
   if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make snap-all SAVE=1\` to stamp them.`);
   // WHICH CHECKOUT RECORDED THESE. A baseline saved in one tree and compared in another can differ for
   // reasons that have nothing to do with the diff under test, and a "changed" line gives the reader no
@@ -197,7 +203,7 @@ if (!SAVE) {
     console.log(`  ~ these baselines were recorded in a DIFFERENT checkout:\n      saved in  ${was.root}\n      running in ${repoRoot}\n`
       + `    A scene listed below may differ for environmental reasons rather than because of your change.\n`
       + `    To get a verdict about your diff alone: re-save here first (\`make snap-all SAVE=1\`), confirm clean, then apply the change.`);
-  else if (was.hash !== now.hash)
+  if (was && was.hash !== now.hash)
     console.log(`  ⚠ FONT STATE CHANGED since these baselines were saved (${was.n} face(s) ${was.hash} → ${now.n} face(s) ${now.hash}).\n`
       + `    Every text width in the library moves with it, so a "changed" scene below is NOT evidence about the code.\n`
       + `    Run \`make fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);

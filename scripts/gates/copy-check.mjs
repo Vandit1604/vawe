@@ -77,7 +77,15 @@ for (let i = 1; i < headlines.length; i++) {
 
 // ── report ──
 console.log(`\n  copy gate · ${file}  (${texts.length} on-screen line(s)${hook ? `, hook: "${hook.txt.slice(0, 40)}"` : ''})`);
-if (!findings.length) { console.log(`  ✓ copy reads specific — no hook/jargon/restatement tells.\n`); process.exit(0); }
+if (!findings.length) {
+  // NO TEXT IS NOT CLEAN COPY. Every rule in this gate needs a string to read, so a scene with none
+  // scored the identical green tick as one that was examined and cleared. State which happened.
+  console.log(texts.length
+    ? `  ✓ copy reads specific — no hook/jargon/restatement tells across ${texts.length} line(s).\n`
+    : `  ○ NO on-screen text in this scene, so every rule in this gate had nothing to read.\n`
+      + `    That is not a clean bill of copy; it is an empty subject.\n`);
+  process.exit(0);
+}
 console.log(`  ${findings.length} copy tell(s):`);
 for (const f of findings) console.log(`    ~ [${f.code}] ${f.msg}`);
 console.log(strict ? `\n  ✗ copy gate (strict): tighten the writing before shipping.\n` : `\n  reach past these — the copy is the video's voice. (Block with --strict / STRICT=1.)\n`);

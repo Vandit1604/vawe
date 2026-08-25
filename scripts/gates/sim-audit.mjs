@@ -139,7 +139,10 @@ console.log('');
 
 if (!problems.length) {
   console.log('='.repeat(72));
-  console.log('✓ sim audit OK — every sim is seeded, every bake matches its source, every sequence is intact');
+  // The old line claimed three things unconditionally. `assets/baked/` is gitignored, so a checkout with
+  // none printed "every bake matches its source" having compared no bakes at all.
+  console.log(`✓ sim audit OK — ${entrySims.length ? `all ${entrySims.length} sim(s) seeded` : 'no sims to seed-check'}`
+    + `, ${bakes.length ? `all ${bakes.length} bake(s) match their source and their sequences are intact` : 'NO bakes present (assets/baked is gitignored) so nothing was compared against a source'}`);
   process.exit(0);
 }
 console.log('='.repeat(72));

@@ -67,36 +67,47 @@ const listing = (root, dir, ext, filter) => {
  *                               Applied identically to this checkout and to the anchor, so a tool that
  *                               excludes sidecars is compared against a count that excludes them too.
  * @param {boolean}  opts.quiet  suppress the printed line (the caller prints N its own way)
- * @returns {{names: string[], n: number, dir: string, root: string, line: string}}
+ * @param {boolean}  opts.soft   return `{ blind: <reason> }` instead of exiting. For a sweep whose count
+ *                               is DISPLAY ONLY inside a larger tool: killing the whole run over a
+ *                               census nobody was going to act on is worse than saying the census is
+ *                               blind and carrying on. A soft caller MUST print `blind` where it would
+ *                               have printed the number — swallowing it puts the confident green back.
+ * @returns {{names: string[], n: number, dir: string, root: string, line: string, blind: string|null}}
  *
  * Exits 3 rather than throwing: every caller is a CLI gate, and a sweep that cannot see its subject has
  * no verdict to return. Reporting the gap and continuing would be the bug wearing a warning label.
  */
-export function population(what, { dir = SCENE_DIR, ext = '.json', filter = () => true, quiet = false } = {}) {
+export function population(what, { dir = SCENE_DIR, ext = '.json', filter = () => true, quiet = false, soft = false } = {}) {
   const names = listing(ROOT, dir, ext, filter);
-  if (names === null) refuse(what, `${dir}/ does not exist in this checkout.`);
+  const stop = (why) => { if (soft) return why; refuse(what, why); };
+  if (names === null) {
+    const why = `${dir}/ does not exist in this checkout.`;
+    if (!soft) refuse(what, why);
+    return { names: [], n: 0, dir, root: ROOT, line: `${what} · unavailable`, blind: why };
+  }
 
   const line = `${what} · ${names.length} file(s) in ${dir}`;
   if (!quiet) console.log(`\n  ${line}\n`);
 
+  let blind = null;
   const missing = trackedButAbsent(dir, ext);
   if (missing.length) {
-    refuse(what, `${missing.length} git-tracked file(s) in ${dir}/ are absent from disk `
+    blind = stop(`${missing.length} git-tracked file(s) in ${dir}/ are absent from disk `
       + `(${missing.slice(0, 3).join(', ')}${missing.length > 3 ? ', …' : ''}).\n`
       + `    A checkout missing its own tracked files is broken. Nothing in .gitignore explains this.`);
   }
 
   const anchor = anchorRoot();
-  if (anchor) {
+  if (!blind && anchor) {
     const theirs = listing(anchor, dir, ext, filter) || [];
     if (theirs.length > names.length) {
-      refuse(what, `this worktree sees ${names.length} of the ${theirs.length} in ${anchor}/${dir}.\n`
+      blind = stop(`this worktree sees ${names.length} of the ${theirs.length} in ${anchor}/${dir}.\n`
         + `    A worktree checks out TRACKED files only and most of this library is gitignored, so the\n`
         + `    sweep would have reported a confident green over a third of its subject (docs/MISTAKES.md #377).\n`
         + `    Fix: scripts/dev/worktree.sh add <name>, which copies the library in.`);
     }
   }
-  return { names, n: names.length, dir, root: ROOT, line };
+  return { names, n: names.length, dir, root: ROOT, line, blind: blind || null };
 }
 
 function trackedButAbsent(dir, ext) {

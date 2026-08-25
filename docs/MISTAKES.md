@@ -13747,3 +13747,46 @@ KIND of difference it might be makes every reader re-derive the same context. Th
 real time on a scene that has never been wrong in shipped output. Quarantine was the wrong tool — that
 bucket is for order non-determinism, and this is deterministic on both sides.
 
+## #446 — my own fix crashed the determinism net on every fresh clone
+
+**What.** Commit `e0cbe36` added a "these baselines came from a different checkout" note to
+`snap-scenes`. It was inserted BETWEEN the two halves of an existing `if (!was) … else if (was.hash …)`
+chain. That left `else if (was.hash !== now.hash)` reachable with `was === null`, so a tree with **no
+font-state stamp crashed on a null dereference** — after the entire sweep had run, trading a computed
+106-scene verdict for a stack trace.
+
+**Who hits it: everyone new.** `verify/snap/` is gitignored, so a fresh clone and every fresh worktree
+start with no stamp. My own machine had one, saved hours earlier, which is why every run of mine was
+clean and I shipped it.
+
+**The irony worth keeping.** The commit's whole purpose was to stop a gate misleading its reader, and it
+made the gate stop answering at all — in exactly the case the commit message described ("baselines
+predating the stamp").
+
+**Fix.** Independent conditions, never a chain: `if (!was) …` then `if (was && was.root …)` then
+`if (was && was.hash …)`. The notes are not alternatives to one another, and writing them as if they
+were is what let one of them break the others.
+
+**The class.** Not silence this time — the opposite. A LOUD failure in the one gate every other check is
+measured against, introduced by a change to its messaging. Editing a gate's prose is editing the gate;
+it deserves the same before/after run as editing its rule. Found by an agent auditing gate output, which
+is the only reason it did not reach a contributor first.
+
+## #447 — a passing gate can still have said something, and the summary erased it
+
+**What.** `make author-check` runs 15 steps and prints a summary. A step that found things but did not
+BLOCK was summarised as `✓ nothing found` — under its own three printed findings. The data existed:
+`runGate` computed `findings` and `record` dropped it on the floor.
+
+Measured on one real scene: **5 findings across three steps, every one erased by the line beneath it.**
+
+**Fix.** The summary now says `3 finding(s) above, none blocking`, and closes with a roll-up naming
+which steps carried them. Exit codes are untouched — this is reporting, not severity.
+
+**The wider audit that found it.** 55 runnable gates (6 of the 61 files are shared modules with no CLI):
+**17 print no usable population**, and **provenance is the worst-served property with 15 rating "no"** —
+every one comparing against something gitignored or an external binary while stating the result as a
+fact about the film. The commonest shape is absence read as a pass: `seam-snap` calls a film clean when
+ffmpeg failed, `ledger` reports "distinct from all 0 designs", `site-counts` says counts match having
+read zero files.
+

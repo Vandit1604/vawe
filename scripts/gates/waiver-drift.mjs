@@ -83,8 +83,14 @@ if (file) {
   if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
   let d; try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { process.exit(0); }
   const mine = d?.authoring?.allow || [];
-  if (!mine.length) process.exit(0);
   const name = path.basename(file, '.json');
+  const liveCodes = [...tally.keys()].filter((c) => !RETIRED.has(c)).length;
+  if (!mine.length) {
+    // SAY THE SUBJECT IS EMPTY. Exiting mute made "this film waives nothing" and "this gate did not run"
+    // the same output, and the parent ladder printed `→ nothing found` over both.
+    console.log(`  ✓ this film waives nothing. Census for scale: ${total} scene(s), ${liveCodes} live waiver code(s).\n`);
+    process.exit(0);
+  }
   for (const c of mine) {
     if (RETIRED.has(c)) {
       console.log(`  ✗ ${c} — DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
@@ -118,7 +124,10 @@ if (file) {
 const all = [...tally.entries()].sort((a, b) => b[1].length - a[1].length);
 const dead = all.filter(([c]) => RETIRED.has(c));
 const rows = all.filter(([c]) => !RETIRED.has(c));
-console.log(`\n  WAIVER CENSUS · ${total} scenes\n`);
+console.log(`\n  WAIVER CENSUS · ${total} scenes in ${path.relative(ROOT, SCENES)}\n`);
+console.log(`  Every share below is a share of THAT number. Films are gitignored on purpose (.gitignore:61),`);
+console.log(`  so a fresh clone counts about a third as many and every percentage here moves with it. Quote the`);
+console.log(`  count with the percentage or the percentage means nothing.\n`);
 const ratcheted = Object.entries(ratchet.rules || {});
 if (ratcheted.length) {
   console.log(`  ▪ GRANDFATHERED, which is a different thing. These rules were ratcheted on a date, and the`);

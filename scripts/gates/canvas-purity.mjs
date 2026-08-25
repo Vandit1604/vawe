@@ -67,7 +67,15 @@ let bad = 0;
 for (const n of frames) {
   const clean = await sig(n, []);
   const dirty = await sig(n, [n + 9, total - 1, 0, n - 9]);   // same scrambler shape as probe-purity
-  if (clean !== dirty) { bad++; console.log(`   ✗ frame ${n}: canvas pixels differ by render order`); }
+  if (clean !== dirty) {
+    bad++;
+    // The signature is one hash PER CANVAS joined with `|`, so the divergent canvas is already known
+    // here. Printing only the frame threw that away and left the reader hunting across every canvas.
+    const a = clean.split('|'), b = dirty.split('|');
+    const which = a.map((h, i) => [i, h, b[i]]).filter(([, h, o]) => h !== o);
+    console.log(`   ✗ frame ${n}: ${which.length} of ${a.length} canvas(es) differ by render order`);
+    for (const [i, h, o] of which) console.log(`       canvas[${i}]  clean ${h}  →  after scrambled order ${o}`);
+  }
 }
 await browser.close(); server.close();
 if (bad) { console.log(`\n✗ CANVAS PURITY FAILED — ${bad}/${frames.length} frames depend on render order.`);

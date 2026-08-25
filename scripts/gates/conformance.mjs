@@ -65,6 +65,10 @@ const page = await browser.newPage();
 
 const AVATAR = '/assets/brands/tpot/avatars/000-elonmusk.jpg';
 const IMG = fs.existsSync(path.join(repoRoot, AVATAR.slice(1))) ? AVATAR : '/assets/icons/ui/check.svg';
+// SAY WHICH ONE. This is the gate whose entire subject is silent substitution, and it silently
+// substituted: a checkout without assets/brands/ sweeps every image prop against a small mono SVG, and
+// its results are not comparable with a full checkout's.
+console.log(`  image probe: ${IMG}${IMG === AVATAR ? '' : '   (the tpot avatar is absent here — a mono SVG has less to differ on)'}`);
 
 // ------------------------------------------------------- the identity-blind signature (MISTAKES #74)
 //

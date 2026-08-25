@@ -39,8 +39,9 @@ const NAME = path.basename(file, '.json');
 // first version passed the file first and read the resulting usage error as a real finding, which is a
 // gate reporting its own miscall as a defect in the film.
 const run = (script, extra = [], pre = []) => {
-  try { execFileSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, stdio: 'pipe' }); return { ok: true, out: '' }; }
-  catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}` }; }
+  const cmd = `node ${script} ${[...pre, file, ...extra].join(' ')}`;
+  try { execFileSync('node', [path.join(ROOT, script), ...pre, file, ...extra], { cwd: ROOT, stdio: 'pipe' }); return { ok: true, out: '', cmd }; }
+  catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}`, cmd }; }
 };
 const codes = (out) => [...new Set((out.match(/\[[a-z-]+\]/g) || []).map((c) => c.slice(1, -1)))];
 
@@ -49,7 +50,7 @@ const need = (label, bar, res, hint) => checks.push({ label, bar, ...res, hint }
 
 // ---- the 85% bar: what is expensive to change late ----
 const ac = run('scripts/gates/author-check.mjs');
-need('author-check', 85, { ok: ac.ok, codes: codes(ac.out) }, 'structure, timing and value — the things a late fix is expensive for');
+need('author-check', 85, { ok: ac.ok, codes: codes(ac.out), out: ac.out, cmd: ac.cmd }, 'structure, timing and value — the things a late fix is expensive for');
 
 const beats = readReceipt('beats', file);
 need('beats looked at', 85, { ok: beats.exists && !beats.stale, codes: beats.stale ? ['beats-stale'] : beats.exists ? [] : ['beats-unseen'] },
@@ -62,11 +63,11 @@ if (STAGE === '95') {
     need('rendered', 95, { ok: false, codes: ['not-rendered'] }, `out/${NAME}.mp4 does not exist — a 95% draft is a thing you can watch`);
   } else {
     const seam = run('scripts/gates/seam-snap.mjs');
-    need('seams', 95, { ok: seam.ok, codes: codes(seam.out) }, 'a luminance flash at a cut, which centre-sampling gates structurally cannot see');
+    need('seams', 95, { ok: seam.ok, codes: codes(seam.out), out: seam.out, cmd: seam.cmd }, 'a luminance flash at a cut, which centre-sampling gates structurally cannot see');
     const audit = run('verify/audit.mjs');
-    need('audit', 95, { ok: audit.ok, codes: codes(audit.out) }, 'overlap, clipping, safe zones, contrast');
+    need('audit', 95, { ok: audit.ok, codes: codes(audit.out), out: audit.out, cmd: audit.cmd }, 'overlap, clipping, safe zones, contrast');
     const led = run('scripts/gates/ledger.mjs', [], ['check']);
-    need('ledger', 95, { ok: led.ok, codes: codes(led.out) }, 'is this a repeat of a film already shipped');
+    need('ledger', 95, { ok: led.ok, codes: codes(led.out), out: led.out, cmd: led.cmd }, 'is this a repeat of a film already shipped');
   }
   const judged = readReceipt('judge', file);
   need('judged', 95, { ok: judged.exists && !judged.stale, codes: judged.exists ? (judged.stale ? ['judge-stale'] : []) : ['unjudged'] },
@@ -79,9 +80,18 @@ const failed = bar.filter((c) => !c.ok);
 const carried = [...new Set(bar.flatMap((c) => c.codes))];
 
 console.log(`\n  DRAFT ${STAGE}% · ${NAME}\n`);
+// THE BARE WORD `failed` WAS THE WHOLE MESSAGE. Every sub-gate here is run with stdio:'pipe' and then
+// reduced to a `[bracket-code]` regex, so a child that fails without emitting a code — a missing browser,
+// a parse error, a real defect worded differently — printed the same four letters and every number it
+// measured was discarded. A gate that captured its evidence and threw it away is worse than one that
+// never looked: it reports a verdict it can no longer justify.
+const tail = (out, n = 4) => out.split('\n').map((l) => l.replace(/\s+$/, '')).filter(Boolean).slice(-n);
 for (const c of bar) {
-  console.log(`  ${c.ok ? '✓' : '✗'} ${c.label.padEnd(16)} ${c.ok ? '' : c.codes.join(', ') || 'failed'}`);
-  if (!c.ok) console.log(`      ${c.hint}`);
+  console.log(`  ${c.ok ? '✓' : '✗'} ${c.label.padEnd(16)} ${c.ok ? '' : c.codes.join(', ') || '(no finding code — see its own words below)'}`);
+  if (c.ok) continue;
+  console.log(`      ${c.hint}`);
+  if (!c.codes.length && c.out) for (const l of tail(c.out)) console.log(`      │ ${l}`);
+  if (c.cmd) console.log(`      run it yourself: ${c.cmd}`);
 }
 
 if (failed.length) {

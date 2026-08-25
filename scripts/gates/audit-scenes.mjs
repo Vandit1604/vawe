@@ -34,7 +34,8 @@ const DIR = 'formats/scene';
 const skip = (f) => !f.endsWith('.json') || f === 'schema.json' || f.startsWith('_')
   || /\.(intent|animatic|template)\.json$/.test(f);
 
-const scenes = population('audit-scenes', { filter: (f) => !skip(f) }).names
+const pop = population('audit-scenes', { filter: (f) => !skip(f) });
+const scenes = pop.names
   .filter((f) => {
     if (filter && !f.includes(filter)) return false;
     // an un-expanded source cannot be audited; its expanded sibling is in the list already
@@ -48,6 +49,22 @@ const scenes = population('audit-scenes', { filter: (f) => !skip(f) }).names
     } catch { return false; }
     return true;
   });
+
+// A FILTER THAT MATCHED NOTHING PRINTED A GREEN TICK. `audit-scenes.mjs formats/scene/thread.json` swept
+// 0 scenes and reported `✓ clean: 0 … errored: 0`, exit 0 — the filter is a bare-FILENAME substring, so
+// any path-shaped argument silently matches none. That is #377 at the scale of one command: the sweep
+// reported confidence over a population it never had. Say what the filter did, always, and refuse an
+// empty one rather than grading it.
+console.log(`  audit-scenes · ${pop.n} candidate(s) in ${DIR}`
+  + `${filter ? ` · filter "${filter}" (a substring of the FILENAME) leaves ${scenes.length}` : ` · ${scenes.length} auditable`}`);
+if (!scenes.length) {
+  console.error(`\n  ✗ audit-scenes: NOTHING TO AUDIT — ${filter
+    ? `no filename in ${DIR}/ contains "${filter}". The filter is matched against the bare filename, so a path`
+      + ` ("${DIR}/x.json") never matches; pass "x" instead.`
+    : `${pop.n} candidate(s) were found and every one was excluded as un-auditable.`}\n`
+    + `    Refusing rather than printing a clean sweep over 0 scenes.\n`);
+  process.exit(3);
+}
 
 const rows = [];
 for (const f of scenes) {
