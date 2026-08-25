@@ -298,6 +298,20 @@ export const barWidth = ({ w, n, pad = 22, gap = 14, min = 22, inset = 8 }) =>
 export const tint = (c, pct = 12) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
 export const TINT = { track: 8, area: 16, chip: 8 };   // the three weights the families actually need
 
+// TWO QUESTIONS, TWO HELPERS, AND THE NAMES DO NOT TELL THEM APART. Read this before reaching for
+// either.
+//   `onColor(fill)` — "what ink reads ON this fill?" The fill is the subject; the answer is a
+//     contrasting ink, and for a token fill it defers to `--on-accent`/`--on-up`/`--on-down`/
+//     `--on-warn`, which core/boot.js computes per theme.
+//   `onInk(c)`      — "this status colour IS the glyph; make it readable on a card." The colour is
+//     the subject and it stays that hue. There is no token for this direction, and none of
+//     `--accent`/`--up`/`--down` clears 4.5:1 against a card ground: `--up` measured 2.5:1 on
+//     linear and 1.3:1 on higgsfield's lime, both HARD `make audit` failures. `onColor` cannot see
+//     it, because a `var()` has no value at build time.
+// Mixing toward `--text` raises contrast in BOTH directions — it brightens the hue on a dark theme
+// and deepens it on a light one — so a block never has to know which kind of theme it is in.
+export const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
+
 // DATA_CAP — the radius on a data mark's free end. Named because a bar, its track and a stacked
 // band must agree: a track squarer than the bar inside it shows a sliver of the wrong shape at the
 // top. 6 is one step under R.chip; at 0..4 a bar reads as default chart-library output.
@@ -340,12 +354,9 @@ export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = 700 } = 
 // direction, which is the only place SERIES is forbidden from spending them.
 export function deltaChip({ delta = '', up = true, size = TYPE.body, ...rest } = {}) {
   const c = up ? TOKENS.green : TOKENS.down;
-  // The GLYPH is pushed toward `--text`, the FILL is not. A tinted pill darkens the ground under its
-  // own text, and `--down` is already the lowest-contrast token most themes ship: on a dark card it
-  // measured 3.1:1 and `make audit` wants 4.5:1. Mixing toward the theme's text colour raises
-  // contrast in BOTH directions — it brightens the red on a dark theme and deepens it on a light one —
-  // without the block ever knowing which kind of theme it is in.
-  const ink = `color-mix(in srgb, ${c} 66%, var(--text))`;
+  // The GLYPH is pushed toward `--text`, the FILL is not: a tinted pill darkens the ground under its
+  // own text, and `--down` is the lowest-contrast token most themes ship (3.1:1 on a dark card).
+  const ink = onInk(c);
   return box({ layout: 'row', items: 'center', gap: SPACE.tight, radius: R.chip,
     bg: tint(c, TINT.chip), pad: '4px 10px', children: [
       // The arrow is the SAME size as the figure. At 0.8x it came out 13px and `make audit` fails

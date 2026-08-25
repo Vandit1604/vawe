@@ -1,7 +1,7 @@
 // blocks/social.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
   R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows,
   tint, TINT,
@@ -17,21 +17,12 @@ export const CATEGORY = 'Social';
 
 const T = TOKENS;
 
-// onInk(c) — a status colour used as TEXT, made readable on any theme's card. `onColor` answers the
-// OTHER direction (what ink reads on a fill) and defers to `--on-accent` there; nothing covers a
-// `var()` used as the glyph, and the accent is not a readable text colour by contract — the star
-// rating measured 3.0:1 against linear's card, a HARD `make audit` failure. Mixing toward `--text`
-// raises contrast in BOTH directions, so a block never has to know which kind of theme it is in.
-// `deltaChip` (kit.mjs) does exactly this; it belongs in the kit beside `tint`, and is duplicated in
-// the three files of this pass only because the kit is another agent's file.
-const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
-
 // AVATAR INITIALS ARE THE SAME CASE, and the default is in the kit. `avatarEl` falls back to
 // `{ bg: accentSoft, color: accentInk }` — the accent as TEXT on a tint of itself, which is the
 // lowest-contrast pairing available and measured 2.6:1 on linear across four of this file's blocks.
 // Every call site here passes the corrected ink instead. THE FIX BELONGS IN `avatarEl`'s DEFAULT
-// (kit.mjs), not in six call sites; it is here because the kit is another agent's file this pass,
-// and it is reported as such.
+// (kit.mjs), not in six call sites. Still outstanding: changing that default moves every block that
+// draws an avatar, so it is a behaviour change and not part of the `onInk` move.
 const AV_INK = { color: onInk(T.accent) };
 
 // profileCard — avatar (image or initials) · name · role. For testimonials / team / "who said it".

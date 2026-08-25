@@ -1,7 +1,7 @@
 // blocks/ui.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
   R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows, TONE_NAMES,
   tint, TINT, SHADOW_CARD, capCss, labelCss, numCss,
@@ -12,20 +12,6 @@ import {
 export const CATEGORY = 'Interface';
 
 const T = TOKENS;
-
-// onInk(c) — a status colour used as TEXT, made readable on any theme's card.
-//
-// THE GAP THIS FILLS. `onColor` answers "what ink reads ON this fill", and for the accent it now
-// defers to the `--on-accent` token core/boot.js computes per theme. There is no token for the other
-// direction — a status colour used as the GLYPH — and none of `--accent`, `--up` or `--down` is
-// guaranteed to clear 4.5:1 against a card: `--up` measured 2.5:1 on linear and 1.3:1 on higgsfield's
-// lime, both HARD `make audit` failures, and `onColor` cannot see it because a `var()` has no value
-// at build time. `deltaChip` in kit.mjs already solved this and only for itself. Mixing toward
-// `--text` raises contrast in BOTH directions — it brightens the hue on a dark theme and deepens it
-// on a light one — so a block never has to know which kind of theme it is in.
-// This belongs in kit.mjs beside `tint`; it is duplicated here only because the kit is another
-// agent's file this pass.
-const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // browserFrame — window chrome (traffic dots + URL bar). Draw content on top via other layers.

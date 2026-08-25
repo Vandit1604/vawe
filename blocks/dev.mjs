@@ -1,7 +1,7 @@
 // blocks/dev.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
   R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows,
   tint, TINT, DATA_CAP,
@@ -17,16 +17,6 @@ import {
 export const CATEGORY = 'Code';
 
 const T = TOKENS;
-
-// onInk(c) — a status colour used as TEXT, made readable on any theme's card. `onColor` answers the
-// OTHER direction (what ink reads on a fill) and defers to the `--on-accent` token there; nothing
-// covers a `var()` used as the glyph, and none of `--accent`/`--up`/`--down` is guaranteed to clear
-// 4.5:1 against a card. Measured here: the `$` prompt and a commit hash both 3.0:1 on linear, the
-// success ✓ 1.4:1 on higgsfield's lime — HARD `make audit` failures. Mixing toward `--text` raises
-// contrast in BOTH directions, so a block never has to know which kind of theme it is in. This is
-// `deltaChip`'s trick from kit.mjs, and it belongs in the kit beside `tint`; it is duplicated in the
-// three files of this pass only because the kit is another agent's file.
-const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CODE_THEMES — curated editor palettes for codeBlock. Hex literals on purpose: like the stripeCard
@@ -98,7 +88,7 @@ export function terminal({ x, y, w = 720, command, output = [], cps = 18, start 
     children: [
       { type: 'group', layout: 'row', gap: SPACE.xs, items: 'center', children: [
         // The prompt is the accent used AS TEXT, which is not a readable colour by contract: it
-        // measured 3.0:1 on linear's card. See `onInk` at the top of this file.
+        // measured 3.0:1 on linear's card. See `onInk` in kit.mjs.
         text({ text: '$', font: 'mono', size: TYPE.lead, color: onInk(T.accent), weight: 600 }),
         text({ text: command, font: 'mono', size: TYPE.lead, color: T.ink, typing: cps, delay: 0.25, anim: 'fade', enterDur: 0.1 }),
       ] },
