@@ -24,3 +24,6 @@ export function build(kit, el, L) {
   el.style.width = L.w + 'px';
   el.innerHTML = `<div style="background:${L.bg || 'var(--surface)'};border:1px solid var(--line);border-radius:${L.radius ?? 18}px;padding:${L.pad ?? 36}px;box-shadow:0 24px 60px rgba(0,0,0,0.10),0 4px 12px rgba(0,0,0,0.05)">${header}${blocks}</div>`;
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height";

@@ -235,3 +235,6 @@ function revealHtml(html, n) {
   walk(root);
   return root.innerHTML;
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too";

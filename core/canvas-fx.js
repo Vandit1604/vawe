@@ -1,4 +1,4 @@
-import { defineRegistry } from './registry.js';
+import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 import { glowRGB } from './filters.js';
 import { lit } from './color.js';
 
@@ -52,7 +52,7 @@ export function hash01(x, y, seed) {
 // Each reads srcCtx and paints dstCtx. All are pure in (pixels, opts, seed).
 export const CANVAS_FX = {
   // mosaic / pixelate: fill each cell with its average colour
-  mosaic(srcCtx, dstCtx, W, H, o) {
+  mosaic: withBlurb('pixelate: every cell filled flat with its own average colour', function mosaic(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(2, Math.round(o.cell ?? 16));
     const { data } = srcCtx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y += cell) {
@@ -62,9 +62,9 @@ export const CANVAS_FX = {
         dstCtx.fillRect(x, y, cell, cell);
       }
     }
-  },
+  }),
   // Bayer ordered dither: per-pixel luma thresholded against the 4x4 matrix → 2-tone (ink on paper)
-  dither(srcCtx, dstCtx, W, H, o) {
+  dither: withBlurb('Bayer 4x4 ordered dither down to TWO tones, theme ink on theme paper — no greys anywhere', function dither(srcCtx, dstCtx, W, H, o) {
     const paper = o.paper || THEME_PAPER(), ink = o.ink || THEME_INK();
     dstCtx.fillStyle = paper; dstCtx.fillRect(0, 0, W, H);
     const { data } = srcCtx.getImageData(0, 0, W, H);
@@ -76,9 +76,9 @@ export const CANVAS_FX = {
         if (l < bayerAt(x, y)) dstCtx.fillRect(x, y, 1, 1);
       }
     }
-  },
+  }),
   // halftone: on a paper ground, one ink dot per cell, radius ∝ darkness
-  halftone(srcCtx, dstCtx, W, H, o) {
+  halftone: withBlurb("one ink dot per cell on a paper ground, its radius growing with that cell's darkness", function halftone(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(3, Math.round(o.cell ?? 8));
     const paper = o.paper || THEME_PAPER(), ink = o.ink || THEME_INK();
     dstCtx.fillStyle = paper; dstCtx.fillRect(0, 0, W, H);
@@ -92,9 +92,9 @@ export const CANVAS_FX = {
         if (rad > 0.3) { dstCtx.beginPath(); dstCtx.arc(x + cell / 2, y + cell / 2, rad, 0, 6.2831853); dstCtx.fill(); }
       }
     }
-  },
+  }),
   // stipple: seeded dots on paper, denser where the source is dark (deterministic via hash01)
-  stipple(srcCtx, dstCtx, W, H, o, seed) {
+  stipple: withBlurb('seeded ink dots on paper, denser where the source is dark, each jittered inside its own cell', function stipple(srcCtx, dstCtx, W, H, o, seed) {
     const cell = Math.max(3, Math.round(o.cell ?? 5));
     dstCtx.fillStyle = o.paper || THEME_PAPER(); dstCtx.fillRect(0, 0, W, H);
     dstCtx.fillStyle = o.ink || THEME_INK();
@@ -110,9 +110,9 @@ export const CANVAS_FX = {
         }
       }
     }
-  },
+  }),
   // ascii: one glyph per cell chosen by darkness from a ramp (light→dark), monospaced ink on paper
-  ascii(srcCtx, dstCtx, W, H, o) {
+  ascii: withBlurb('one monospace glyph per cell, picked off a light-to-dark ramp; phosphor green on near-black. this pass IS the terminal look, so it ignores the theme', function ascii(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(6, Math.round(o.cell ?? 10));
     const ramp = o.ramp || ' .:-=+*#%@';
     // NOT tokenised: this pass IS the dark-terminal look, and a near-black ground under phosphor green
@@ -130,9 +130,9 @@ export const CANVAS_FX = {
         if (ch !== ' ') dstCtx.fillText(ch, x, y);
       }
     }
-  },
+  }),
   // edgeDetect: Sobel magnitude → bright edges on a dark ground (feeds blueprint/sketch looks)
-  edgeDetect(srcCtx, dstCtx, W, H, o) {
+  edgeDetect: withBlurb('a Sobel magnitude: the outline only, bright lines on a dark ground. the base of the `blueprint` preset', function edgeDetect(srcCtx, dstCtx, W, H, o) {
     const { data } = srcCtx.getImageData(0, 0, W, H);
     const g = new Float32Array(W * H);
     for (let i = 0; i < W * H; i++) g[i] = luma(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]);
@@ -156,10 +156,10 @@ export const CANVAS_FX = {
       }
     }
     dstCtx.putImageData(out, 0, 0);
-  },
+  }),
   // pixelSort: within each scan line, sort contiguous bright spans by luma → signature glitch smear.
   // Pure/deterministic: a span is bounded by a luma threshold, then reordered in place (no randomness).
-  pixelSort(srcCtx, dstCtx, W, H, o) {
+  pixelSort: withBlurb('sorts each contiguous BRIGHT run of a scan line by luma — the signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random', function pixelSort(srcCtx, dstCtx, W, H, o) {
     const vertical = !!o.vertical;
     const thr = (o.thresh ?? 0.55) * 255;               // luma cutoff that bounds a sortable span
     const img = srcCtx.getImageData(0, 0, W, H);
@@ -188,9 +188,9 @@ export const CANVAS_FX = {
       for (let y = 0; y < H; y++) { const row = []; for (let x = 0; x < W; x++) row.push([x, y]); sortLine(row); }
     }
     dstCtx.putImageData(img, 0, 0);
-  },
+  }),
   // crosshatch: diagonal strokes whose density steps with darkness (pencil/engraving)
-  crosshatch(srcCtx, dstCtx, W, H, o) {
+  crosshatch: withBlurb('pencil / engraving: diagonal strokes whose density STEPS up with darkness (one, then a cross, then a vertical), ink on a warm paper stock', function crosshatch(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(4, Math.round(o.cell ?? 6));
     dstCtx.fillStyle = o.paper || lit('#f4f1e8', 'a warm paper STOCK this pass simulates, like film stock — not the brand\'s white');
     dstCtx.strokeStyle = o.ink || lit('#20242c', 'the plate ink of that same stock'); dstCtx.lineWidth = 1;
@@ -206,7 +206,7 @@ export const CANVAS_FX = {
         dstCtx.stroke();
       }
     }
-  },
+  }),
 };
 
 // Tier-C stylized presets: a base pass + tuned colours. `canvasFx:"blueprint"` expands to these, so
@@ -254,6 +254,10 @@ export function bakeCanvasFx(img, spec) {
 export const canvasFxKey = (src, spec) => JSON.stringify([src, typeof spec === 'string' ? { fx: spec } : spec]);
 
 export const CANVAS_FX_NAMES = Object.keys(CANVAS_FX);
+
+// The catalogue row for each pass, derived from the entries so the two cannot drift and refused at load
+// when one is missing. All eight rendered as an em-dash in docs/EFFECTS.md until this existed.
+export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.

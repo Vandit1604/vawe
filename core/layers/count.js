@@ -42,3 +42,6 @@ function fmtCount(v, L) {
   if (scale >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
   return v.toFixed((L.to ?? 0) % 1 !== 0 && Math.abs(v) < 100 ? 1 : 0);
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals) — the text build plus a per-frame value";

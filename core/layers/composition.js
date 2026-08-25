@@ -22,3 +22,6 @@ export function build(kit, el, L) {
   // props is DATA the comp treats as textContent/attr, never innerHTML (same boundary as the html layer).
   comp({ el, gsap: window.gsap, start: L.start ?? 0, W: kit.W, H: kit.H, kit, ...(L.props && typeof L.props === 'object' ? L.props : {}) });
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express";

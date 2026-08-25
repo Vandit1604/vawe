@@ -29,3 +29,6 @@ export function frame(kit, el, L, t) {
   fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
   inst.goToAndStop(fi, true); // true = fi is a FRAME index (absolute) → seek-safe, no delta state
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "an After Effects (Bodymovin) export driven by ABSOLUTE seek — goToAndStop at a frame index, never autoplay";

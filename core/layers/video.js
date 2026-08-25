@@ -88,3 +88,6 @@ export function frame(kit, el, L, t) {
     v.addEventListener('error', bad, { once: true });
   }));
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still";

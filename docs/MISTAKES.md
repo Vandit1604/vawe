@@ -13682,3 +13682,35 @@ node -e "const fk=require('fontkit');console.log(Object.keys(fk.openSync('assets
 shape as #426, where a documented `curl` wrote a zero-byte file that passed every path check: the claim
 was true of the source and false of the thing on disk.
 
+## #444 — a scene past the browser's WebGL cap renders completely blank and exits 0
+
+**What.** A scene carrying **18 `shader` layers renders a blank frame and succeeds.** Browsers cap live
+WebGL contexts at roughly 16. Past that `canvas.getContext('webgl')` returns null, the layer stored an
+undefined surface, and `core/layers/canvas.js:50`'s `if (!s) return` swallowed it every frame. `make
+beats` produced seven blank beats and said nothing. Six layers per scene works, so nothing about the
+scene looked wrong.
+
+**Why it survived.** SIX modules called `getContext('webgl')` and four answered a null the same way:
+`return { canvas, draw: () => {}, … }` — a no-op surface, returned silently. The answer was written
+four times instead of once, so no site could count how many contexts the page already held, and none
+of them could tell "this machine has no GPU" from "this scene asked for the seventeenth".
+
+**Fix.** `core/webgl.js` is the one owner. It counts live contexts, so the error can say **how many**,
+which is the fact that makes it actionable and which no call site could know. It also distinguishes the
+two failures: the FIRST context failing is a machine with no WebGL; a failure after others succeeded is
+the cap.
+
+A caller that genuinely degrades — a sting overlay, a seam, both garnish — passes `soft: true` and gets
+null back, and must then say so. A layer whose whole job is the paint never gets that option.
+
+**Proven, not assumed:** a probe that succeeds 16 times and then refuses produces
+`the browser refused a WebGL context after 16 were already live … a scene past that renders BLANK with
+no error`, and the soft path still returns null.
+
+**The class.** Not a wrong value — an absent one, answered four separate times with a shrug. Same shape
+as #428 (`html` accepting six box props and reading none) and #441 (`pad` written after the guard that
+returns): the engine accepted the input and produced a plausible frame that was not the one asked for.
+
+**Also fixed here:** a lost context is counted rather than recovered from. Recovery would mean a frame
+that differs depending on when the driver dropped it, which `renderFrame(n)` purity forbids.
+

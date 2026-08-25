@@ -1,3 +1,4 @@
+import { glContext } from './webgl.js';
 import { defineRegistry } from './registry.js';
 // core/raymarch-fx.js — REAL 3D, without a 3D engine. A fullscreen quad plus a distance field is a
 // renderer: march a ray per pixel, hit an implicit surface, shade it. No geometry, no scene graph, no
@@ -21,7 +22,17 @@ import { defineRegistry } from './registry.js';
 // COST: this is the most expensive primitive in the engine. Every pixel marches up to MAX_STEPS times.
 // Use it for ONE hero shot, size the layer to what it needs, and do not put two on screen at once.
 
-export const RAYMARCH_FX = ['metaballs', 'mandelbulb', 'chromeGlass', 'caustics', 'holoFoil'];
+// EACH SURFACE DESCRIBES ITSELF, and as in core/shaders-ambient.js the ORDER IS THE WIRE FORMAT: the
+// index here is the `u_fx` both map() and the shading branch switch on, so a name may not be moved.
+// The map is the source and the array is derived, so the two cannot drift (THREE_SCENES, same shape).
+export const RAYMARCH_SURFACES = {
+  metaballs: 'five spheres orbiting and smooth-union-ing into one blob of soft glossy candy, two palette stops shading it top to bottom',
+  mandelbulb: 'the mandelbulb fractal, depth-shaded near-to-far, its exponent breathing between 5.5 and 8.5 on a slow sine',
+  chromeGlass: 'a tumbling torus and a bobbing sphere in mirror chrome, reflecting a studio horizon with a hard specular glint',
+  caustics: 'a water surface built from crossed low-frequency waves, lit so the caustic bands come from the same field that shapes it rather than sitting on top',
+  holoFoil: 'a rippling disc of foil: thin-film interference over bright metal, the hue turning with viewing angle. the band is deliberately NARROW, so it reads as one colour sliding rather than a rainbow, and it is bounded to a disc so it keeps a silhouette',
+};
+export const RAYMARCH_FX = Object.keys(RAYMARCH_SURFACES);
 
 const VERT = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
 
@@ -222,8 +233,7 @@ void main(){
 export function createRaymarchLayer(w = 1080, h = 1080) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
-  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
-  if (!gl) return { canvas, draw: () => {}, clear: () => {}, dispose: () => {} };
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'raymarch surface');
 
   const sh = (type, src) => {
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);

@@ -33,22 +33,22 @@ import { LIGHTFIELD_BLURBS } from '../../core/lightfield/options.js';
 import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
 import { CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_BLURBS } from '../../core/compositions/index.js';
-import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
+import { CANVAS_FX_NAMES, CANVAS_FX_BLURBS } from '../../core/canvas-fx.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
 import { GSAP_FX, EXIT_FX } from '../../core/gsap-effects.js';
 import { BEATS } from '../../blueprints/index.mjs';
-import { CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS } from '../../core/camera-moves.js';
 import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
 // EVERYTHING BELOW THIS LINE WAS MISSING, and `scripts/gates/arsenal-check.mjs` now fails if the next
 // one is. The catalogue is what CLAUDE.md sends an author to before they choose, and it did not contain
 // the three.js layer at all: a whole scene-graph capability with four registered scenes, a written
 // determinism contract and a purity gate, invisible to the one document whose job is to list it.
-import { LAYER_TYPES } from '../../core/layers/index.js';
+import { LAYER_TYPES, LAYER_BLURBS } from '../../core/layers/index.js';
 import { THREE_FX, THREE_SCENES } from '../../core/three-scenes.js';
-import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
+import { RAYMARCH_FX, RAYMARCH_SURFACES } from '../../core/raymarch-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
-import { AMBIENT_FX } from '../../core/shaders-ambient.js';
+import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { FX_TYPES } from '../../core/fx/index.js';
 import { PART_NAMES, PART_BLURBS } from '../../core/parts.js';
@@ -59,7 +59,7 @@ import { CAP_STYLE_NAMES } from '../../core/captions.js';
 import { ICONS } from '../../core/icons.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS, DESTINATION_NAMES } from '../../core/safe.js';
-import { GENERATORS } from '../../core/generators.js';
+import { GENERATORS, GENERATOR_BLURBS } from '../../core/generators.js';
 import { PATTERNS, SHAPES, ANCHORS, DIRECTIONS, MOTIONS } from '../../core/lightfield/options.js';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
 
@@ -100,12 +100,7 @@ const DESC = {
   terminalReveal: 'typing command + cursor + rising output + result',
   cardCascade: 'title + cards pop in one after another', statReveal: 'hero count-up + kinetic label',
   ctaEnd: 'held end card: mark + install chip + url', verdictProof: 'typing command + tone verdict chip',
-  // camera moves
-  slowPush: 'gentle continuous zoom in (the frame stays alive)', diveIn: 'zoom INTO a target point (it travels to centre)',
-  panFollow: 'camera pans to track downward-growing content (terminal)', workspaceZoomOut: 'pull back from a detail to reveal the whole',
-  orbit: 'a gentle 3D swing around the frame (ry through 0)', multiPhase: 'chain legs into one journey (push, hold-drift, settle)',
-  travel: 'station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut)',
-  truck: 'plain lateral travel, linear, so it reads as tracking rather than a lurch',
+  // beats (the camera moves that used to sit here now carry their own blurbs — core/camera-moves.js)
   logoLockup: 'mark pops + wordmark travels + kinetic headline', logoReveal: 'mark DRAWS on / MELTS from a blob + bloom + wordmark cascade',
   // per-frame accent layers (pseudo-names)
   'beam:border (border-beam)': 'a light travels the rounded-rect border', 'beam:shine (sheen sweep)': 'a sheen sweeps across the box',
@@ -161,19 +156,19 @@ export const sections = [
   ['Spectacle devices', '`"spectacle": { "at", "of", "device", "why" }` — the film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/spectacle.js`.', names(SPECTACLE_DEVICES.names), 'scene', { blurbs: SPECTACLE_DEVICES.blurbs }],
   ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]` — one earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition', { blurbs: SEAM_BLURBS }],
   ['Composite looks (static)', '`filter:"<look>"` — a colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes** — `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.', names(LOOK_NAMES), 'static', { kind: 'look', blurbs: LOOK_BLURBS }],
-  ['Canvas image passes (baked)', '`canvasFx` — a one-time baked image pass (cannot move).', names(CANVAS_FX_NAMES), 'static'],
+  ['Canvas image passes (baked)', '`canvasFx` — a one-time baked image pass (cannot move).', names(CANVAS_FX_NAMES), 'static', { blurbs: CANVAS_FX_BLURBS }],
   ['Generative paint FX (per-frame)', '`{ "type":"paint", "paint":"<name>" }` — a full-canvas animated field, pure in t.', names(PAINT_FX_NAMES), 'per-frame'],
   ['Backgrounds', '`bg:[{preset,from,to}]` — the field behind everything; moving ones (aurora/constellation/mesh/…) animate.', names(BG_NAMES), 'background', { blurbs: BG_BLURBS }],
   ['Per-frame accent layers', '`{ "type":"beam", ... }` — a light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }` — a path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
   ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }` — a whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
-  ['Camera moves', '`"cameraMove": { "move":"<name>", ... }` — a calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`', names(CAMERA_MOVE_NAMES), 'camera'],
+  ['Camera moves', '`"cameraMove": { "move":"<name>", ... }` — a calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`', names(CAMERA_MOVE_NAMES), 'camera', { blurbs: CAMERA_MOVE_BLURBS }],
   ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }` — a FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition', { blurbs: COMPOSITION_BLURBS }],
-  ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer'],
+  ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer', { blurbs: LAYER_BLURBS }],
   ['three.js scenes (real geometry)', '`{ "type":"three", "three":"<name>" }` — a scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract — every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.', names(THREE_FX), 'layer', { kind: 'three', blurbs: THREE_SCENES }],
-  ['Raymarched surfaces', '`{ "type":"raymarch", "raymarch":"<name>" }` — implicit surfaces from a distance field. A subject you place, not a field behind everything.', names(RAYMARCH_FX), 'layer'],
+  ['Raymarched surfaces', '`{ "type":"raymarch", "raymarch":"<name>" }` — implicit surfaces from a distance field. A subject you place, not a field behind everything.', names(RAYMARCH_FX), 'layer', { blurbs: RAYMARCH_SURFACES }],
   ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }` — bind a layer that is already a raster (a canvas or an `<img>`) as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.', names(RESAMPLE_FX), 'per-frame', { blurbs: RESAMPLE_BLURBS }],
-  ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame'],
+  ['Ambient shader fields', '`{ "type":"shader", "shader":"<name>" }` — a full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.', names(AMBIENT_FX), 'per-frame', { blurbs: AMBIENT_SHADERS }],
   ['Per-layer fx', '`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.', names(FX_TYPES), 'per-layer', { blurbs: FX_BLURBS }],
   ['Part entrances', 'THE BRIDGE between hand-written markup and the engine\'s clock. `parts: [{ select, anim, each, stagger, delay, out, exitDur }]` on a hand-authored html/svg layer — a CSS SELECTOR into your own markup, and every matched element gets an engine-driven, SEEKED entrance with a stagger, so a figure can grow its bars, then draw its line, then pop its dots. `out: true` gives each part its paired exit, anchored to the layer\'s end, so a hand-authored figure leaves piece by piece instead of fading as one card. That is the whole point on an `html` layer: the markup keeps the entire CSS surface AND the clock still owns each piece, which a hand-rolled `calc()` off `var(--t)` never gives back. A translate exit CONTINUES and a scale exit REVERSES, the same never-enter-and-retreat rule layers follow. Selectors default to `rect, circle, path, polyline, line, [data-part]`.', names(PART_NAMES), 'per-layer', { blurbs: PART_BLURBS }],
   ['Blend modes', '`mixBlend` — how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it — MDN `mix-blend-mode`' }],
@@ -184,7 +179,7 @@ export const sections = [
   ['Drawn icons', '`svgIcon("<name>")` — a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.', names(Object.keys(ICONS)), 'asset', { skip: 'the name is the drawing' }],
   ['Ransom faces', '`ransom` on a text layer — per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface — see it, do not read about it' }],
   ['Output targets', '`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.', names([...Object.keys(ASPECTS), ...DESTINATION_NAMES]), 'canvas', { skip: 'an aspect or a platform; core/safe.js holds the safe area each implies' }],
-  ['Generators (the playground)', 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.', names(GENERATORS.map((g) => g.name)), 'generator'],
+  ['Generators (the playground)', 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.', names(GENERATORS.map((g) => g.name)), 'generator', { blurbs: GENERATOR_BLURBS }],
   ['Lightfield dials', 'The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.', names([...PATTERNS, ...SHAPES, ...ANCHORS, ...DIRECTIONS, ...MOTIONS]), 'generator', { blurbs: LIGHTFIELD_BLURBS }],
 ];
 

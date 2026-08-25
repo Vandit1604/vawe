@@ -313,14 +313,14 @@
 
 | name | what / when |
 |---|---|
-| `ascii` | — |
-| `crosshatch` | — |
-| `dither` | — |
-| `edgeDetect` | — |
-| `halftone` | — |
-| `mosaic` | — |
-| `pixelSort` | — |
-| `stipple` | — |
+| `ascii` | one monospace glyph per cell, picked off a light-to-dark ramp; phosphor green on near-black. this pass IS the terminal look, so it ignores the theme |
+| `crosshatch` | pencil / engraving: diagonal strokes whose density STEPS up with darkness (one, then a cross, then a vertical), ink on a warm paper stock |
+| `dither` | Bayer 4x4 ordered dither down to TWO tones, theme ink on theme paper — no greys anywhere |
+| `edgeDetect` | a Sobel magnitude: the outline only, bright lines on a dark ground. the base of the `blueprint` preset |
+| `halftone` | one ink dot per cell on a paper ground, its radius growing with that cell's darkness |
+| `mosaic` | pixelate: every cell filled flat with its own average colour |
+| `pixelSort` | sorts each contiguous BRIGHT run of a scan line by luma — the signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random |
+| `stipple` | seeded ink dots on paper, denser where the source is dark, each jittered inside its own cell |
 
 ## Generative paint FX (per-frame)  `[per-frame]`
 
@@ -413,13 +413,13 @@
 
 | name | what / when |
 |---|---|
-| `cameraShake` | — |
+| `cameraShake` | an IMPACT: a decaying ~16Hz shake pre-sampled at author time to one key per frame, then 0.1s of eased recovery so the frame LANDS instead of stopping |
 | `diveIn` | zoom INTO a target point (it travels to centre) |
-| `driftHold` | — |
+| `driftHold` | a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal |
 | `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
 | `panFollow` | camera pans to track downward-growing content (terminal) |
-| `punchIn` | — |
+| `punchIn` | a crash zoom: the frame accelerates AT you (easeInExpo), recoils past its resting scale, then rings back elastic. the only move here that is not a `.out` |
 | `slowPush` | gentle continuous zoom in (the frame stays alive) |
 | `travel` | station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut) |
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
@@ -440,28 +440,28 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `beam` | — |
-| `board` | — |
-| `clip` | — |
-| `component` | — |
-| `composition` | — |
-| `count` | — |
-| `cursor` | — |
-| `doc` | — |
-| `globe` | — |
-| `glow` | — |
-| `group` | — |
-| `html` | — |
-| `image` | — |
-| `lottie` | — |
-| `paint` | — |
-| `raymarch` | — |
-| `rect` | — |
-| `shader` | — |
-| `svg` | — |
-| `text` | — |
-| `three` | — |
-| `video` | — |
+| `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
+| `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
+| `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
+| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
+| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
+| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals) — the text build plus a per-frame value |
+| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time — the spine of a product demo |
+| `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
+| `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
+| `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
+| `group` | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
+| `html` | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused — use `parts` to give its pieces the clock |
+| `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
+| `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek — goToAndStop at a frame index, never autoplay |
+| `paint` | a generative Canvas 2D field drawn per frame from local time — the canvas family written in JS rather than GLSL, and the one you can resample |
+| `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine — one hero shot, sized to what it needs |
+| `rect` | a plain box — panel, card or pill. it carries no text: put that on a higher track |
+| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
+| `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t — for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
+| `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
 
 ## three.js scenes (real geometry)  `[layer]`
 
@@ -487,11 +487,11 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `caustics` | — |
-| `chromeGlass` | — |
-| `holoFoil` | — |
-| `mandelbulb` | — |
-| `metaballs` | — |
+| `caustics` | a water surface built from crossed low-frequency waves, lit so the caustic bands come from the same field that shapes it rather than sitting on top |
+| `chromeGlass` | a tumbling torus and a bobbing sphere in mirror chrome, reflecting a studio horizon with a hard specular glint |
+| `holoFoil` | a rippling disc of foil: thin-film interference over bright metal, the hue turning with viewing angle. the band is deliberately NARROW, so it reads as one colour sliding rather than a rainbow, and it is bounded to a disc so it keeps a silhouette |
+| `mandelbulb` | the mandelbulb fractal, depth-shaded near-to-far, its exponent breathing between 5.5 and 8.5 on a slow sine |
+| `metaballs` | five spheres orbiting and smooth-union-ing into one blob of soft glossy candy, two palette stops shading it top to bottom |
 
 ## Layer-as-texture (resample)  `[per-frame]`
 
@@ -515,23 +515,23 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | name | what / when |
 |---|---|
 | `aurora` | drifting colour aurora (moves) |
-| `bands` | — |
-| `barrel` | — |
-| `crt` | — |
-| `dotCrawl` | — |
-| `drift` | — |
-| `filmGrain` | — |
-| `flow` | — |
-| `gateWeave` | — |
-| `heatShimmer` | — |
-| `kaleidoscope` | — |
-| `lightLeak` | — |
-| `matrixDecode` | — |
-| `mist` | — |
-| `nebula` | — |
-| `plasma` | — |
-| `ripple` | — |
-| `vhs` | — |
+| `bands` | a ramp repeated over a scalar field — rotated panels, concentric arcs or nested rounded boxes — tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md |
+| `barrel` | the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only |
+| `crt` | a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY |
+| `dotCrawl` | the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY |
+| `drift` | seven big soft bokeh discs rising up the frame and blending as they pass |
+| `filmGrain` | grain re-struck 24 times a second per ~2px cell, plus dust specks; bright or dark only, never mid-grey, so contrast survives. an OVERLAY |
+| `flow` | a soft mesh gradient: three big blobs drifting slowly over a vertical wash — the premium default |
+| `gateWeave` | a projector gate: the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float |
+| `heatShimmer` | rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated — it does not warp what is beneath it |
+| `kaleidoscope` | a 6-fold mirrored mandala turning slowly and fading out toward the corners — a symmetric field of its own, never a mirror of your content |
+| `lightLeak` | three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY |
+| `matrixDecode` | digital rain: near-white heads falling down 44 glyph columns at per-column speeds, each dragging a fading tail. palette stop 0 tints it |
+| `mist` | near-still layered noise haze — the quietest field here, for a backdrop that must move without being noticed |
+| `nebula` | deep-field gas clouds from three octaves of noise with a hot core, dusted with twinkling stars off a hashed grid |
+| `plasma` | two crossed sine waves interfering into a slow two-tone swell |
+| `ripple` | gentle water caustics: three rings of cool light expanding and overlapping |
+| `vhs` | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY — place it ABOVE content |
 
 ## Per-layer fx  `[per-layer]`
 
@@ -780,10 +780,10 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 
 | name | what / when |
 |---|---|
-| `bands` | — |
-| `colonnade` | — |
-| `crt` | — |
-| `spectrum` | — |
+| `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
+| `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
+| `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
+| `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
 
 ## Lightfield dials  `[generator]`
 

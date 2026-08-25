@@ -87,3 +87,6 @@ export function frame(kit, el, L, t) {
     el.dataset.mp = u.toFixed(3);
   }
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a vector mark that DRAWS itself on (stroke dashoffset) or MELTS from one path into another (true point-lerp morph, optional spin)";

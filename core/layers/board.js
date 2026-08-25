@@ -20,3 +20,6 @@ export function build(kit, el, L) {
         </div>`).join('')}
     </div>`).join('');
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip";

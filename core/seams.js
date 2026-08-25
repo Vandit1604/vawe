@@ -1,3 +1,4 @@
+import { glContext } from './webgl.js';
 import { DIRS } from './cuts.js';
 import { defineRegistry } from './registry.js';
 // core/seams.js — SEAM D: two-scene shader transitions.
@@ -297,7 +298,7 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
   Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', zIndex: 85, pointerEvents: 'none', display: 'none' });
   parent.appendChild(canvas);
 
-  const gl = canvas.getContext('webgl', { alpha: false, premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true });
+  const gl = glContext(canvas, { alpha: false, premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true }, 'seam', { soft: true });
 
   // ---- 2D fallback: plain opacity cross-fade (no GL, or a program failed to compile) ----
   if (!gl) return make2dFallback(canvas, w, h);

@@ -27,3 +27,6 @@ export function build(kit, el, L) {
   if (spec.bg == null && !spec.elevation) el.style.background = '#fff';
   kit.chipBox(el, spec);
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a plain box — panel, card or pill. it carries no text: put that on a higher track";

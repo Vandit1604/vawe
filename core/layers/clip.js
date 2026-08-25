@@ -27,3 +27,6 @@ export function frame(kit, el, L, t) {
   fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
   if (img && img.getAttribute('src') !== man.frames[fi]) img.setAttribute('src', man.frames[fi]);
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders";

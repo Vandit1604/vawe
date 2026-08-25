@@ -16,3 +16,6 @@ export function build(kit, el, L) {
   const rootEl = el.firstElementChild?.firstElementChild;
   if (rootEl) rootEl.style.margin = '0';
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w`";

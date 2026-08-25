@@ -26,3 +26,6 @@ export function frame(kit, el, L, t) {
   const rp = el.__ripple;
   if (rp) { const on = rip >= 0 && rip < 1; rp.style.opacity = on ? (0.8 * (1 - rip)).toFixed(2) : '0'; rp.style.transform = `scale(${on ? (0.2 + rip * 1.7).toFixed(2) : 0})`; }
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time — the spine of a product demo";

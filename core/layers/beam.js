@@ -74,3 +74,6 @@ export function frame(kit, el, L, t) {
     el.dataset.ba = a.toFixed(1);
   }
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe";

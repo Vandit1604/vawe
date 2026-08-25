@@ -1,3 +1,4 @@
+import { glContext } from './webgl.js';
 import { defineRegistry } from './registry.js';
 // core/shaders-ambient.js — smooth LOOPING ambient shaders for the `shader` layer primitive. Where
 // core/stings.js is transient cut-covers, these are continuous, slow, low-contrast colour fields you
@@ -19,7 +20,33 @@ import { defineRegistry } from './registry.js';
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
 //                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
 //   Projector:   gateWeave (film dust, hairs, and the frame drifting in the gate)
-export const AMBIENT_FX = ['flow', 'aurora', 'plasma', 'drift', 'mist', 'vhs', 'crt', 'filmGrain', 'lightLeak', 'barrel', 'heatShimmer', 'ripple', 'kaleidoscope', 'matrixDecode', 'nebula', 'dotCrawl', 'gateWeave', 'bands'];
+// EACH FIELD DESCRIBES ITSELF, and the ORDER IS THE WIRE FORMAT: the index of a name here is the
+// `u_fx` the fragment shader branches on, so this map is read positionally as well as by key and a
+// name may not be moved or inserted mid-list. It was a bare array, so 17 of the 18 rendered their
+// blurb as an em-dash in docs/EFFECTS.md and on the site — a capability an author is never shown and
+// therefore never reaches for. Same shape as THREE_SCENES (core/three-scenes.js): the map is the
+// source, the array is derived, and the two cannot drift because one is computed from the other.
+export const AMBIENT_SHADERS = {
+  flow: 'a soft mesh gradient: three big blobs drifting slowly over a vertical wash — the premium default',
+  aurora: 'drifting colour aurora (moves)',
+  plasma: 'two crossed sine waves interfering into a slow two-tone swell',
+  drift: 'seven big soft bokeh discs rising up the frame and blending as they pass',
+  mist: 'near-still layered noise haze — the quietest field here, for a backdrop that must move without being noticed',
+  vhs: 'tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY — place it ABOVE content',
+  crt: 'a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY',
+  filmGrain: 'grain re-struck 24 times a second per ~2px cell, plus dust specks; bright or dark only, never mid-grey, so contrast survives. an OVERLAY',
+  lightLeak: 'three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY',
+  barrel: 'the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only',
+  heatShimmer: 'rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated — it does not warp what is beneath it',
+  ripple: 'gentle water caustics: three rings of cool light expanding and overlapping',
+  kaleidoscope: 'a 6-fold mirrored mandala turning slowly and fading out toward the corners — a symmetric field of its own, never a mirror of your content',
+  matrixDecode: 'digital rain: near-white heads falling down 44 glyph columns at per-column speeds, each dragging a fading tail. palette stop 0 tints it',
+  nebula: 'deep-field gas clouds from three octaves of noise with a hot core, dusted with twinkling stars off a hashed grid',
+  dotCrawl: 'the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY',
+  gateWeave: 'a projector gate: the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float',
+  bands: 'a ramp repeated over a scalar field — rotated panels, concentric arcs or nested rounded boxes — tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
+};
+export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
@@ -467,8 +494,7 @@ void main(){
 export function createAmbientLayer(w = 1920, h = 1080) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
-  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
-  if (!gl) return { canvas, draw: () => {}, dispose: () => {} };
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'ambient shader field');
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('ambient shader: ' + gl.getShaderInfoLog(s)); return s; };
   const prog = gl.createProgram();

@@ -15,10 +15,13 @@ import { mergeProps } from '../props.js';
 // below, so a `paint` layer and a `three` layer declare different sets under one primitive.
 const CANVAS_PROPS = { w: {}, h: {}, radius: {}, speed: {} };
 
-export function canvasLayer(name) {
+export function canvasLayer(name, blurb) {
   const S = pick(name);
 
   return {
+    // Passed in rather than read off the surface: the catalogue row describes the author-facing TYPE,
+    // and core/layers/index.js refuses a type without one.
+    blurb,
     PROPS: mergeProps(CANVAS_PROPS, S.PROPS, RESAMPLE_PROPS),
     build(kit, el, L) {
       S.validate(L);

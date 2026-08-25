@@ -217,3 +217,6 @@ export function frame(kit, el, L, t) {
     el.dataset.gh = h.toFixed(1);
   }
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight)";

@@ -2,6 +2,7 @@
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
 import { mergeProps } from '../props.js';
+import { blurbsOf } from '../registry.js';
 import { checkLayerTree } from './vocabulary.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
@@ -27,8 +28,11 @@ import { canvasLayer } from './canvas.js';
 // The four types whose whole output is a canvas are ONE primitive with four backends (core/surfaces/).
 // They are still four names in scene JSON and four entries here — the collapse was internal, and 101
 // scenes are written in the names.
-const shader = canvasLayer('shader'), paint = canvasLayer('paint');
-const raymarch = canvasLayer('raymarch'), three = canvasLayer('three'), globe = canvasLayer('globe');
+const shader = canvasLayer('shader', 'a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it');
+const paint = canvasLayer('paint', 'a generative Canvas 2D field drawn per frame from local time — the canvas family written in JS rather than GLSL, and the one you can resample');
+const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine — one hero shot, sized to what it needs');
+const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t — for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
+const globe = canvasLayer('globe', 'a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector');
 
 const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition };
 
@@ -36,6 +40,12 @@ const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, curs
 // hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the
 // schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);
+
+// The catalogue row for each type, DERIVED from the modules so the two cannot drift, and refused at load
+// when one is missing. All 22 rendered as an em-dash in docs/EFFECTS.md until this existed: the layer
+// vocabulary is the one thing every other effect in that document is a dial ON, and it was the one
+// family the catalogue could not describe.
+export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 
 // The props each TYPE reads, taken off the modules that read them. Same contract as LAYER_TYPES, applied
 // to the vocabulary inside a layer rather than the vocabulary of layers: a gate answers "does anything

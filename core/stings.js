@@ -1,3 +1,4 @@
+import { glContext } from './webgl.js';
 import { defineRegistry } from './registry.js';
 // core/stings.js — procedural WebGL boundary effects (the "shader transition" layer another engine ships
 // as GLSL blocks and another engine as shader presentations), adapted to the pure model: one fullscreen
@@ -352,7 +353,7 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
   canvas.setAttribute('data-motion', 'loop'); // overlay chrome — exempt from motion-audit reveal rules
   Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', zIndex: 70, pointerEvents: 'none' });
   parent.appendChild(canvas);
-  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'sting', { soft: true });
   if (!gl) return { canvas, draw: () => {}, clear: () => {} }; // headless without GL: overlay is optional garnish
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('shader: ' + gl.getShaderInfoLog(s)); return s; };

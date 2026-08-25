@@ -166,8 +166,7 @@ void main(){
 export function createResampler(w, h) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
-  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
-  if (!gl) return { canvas, draw: () => {}, clear: () => {}, dispose: () => {} };
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'resample pass');
 
   const sh = (type, src) => {
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
@@ -240,3 +239,5 @@ export function createResampler(w, h) {
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }
+
+import { glContext } from './webgl.js';

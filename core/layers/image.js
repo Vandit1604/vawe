@@ -61,3 +61,6 @@ export function frame(kit, el, L, t) {
   // rendered as a silently-ignored ken (docs/MISTAKES.md — silence is the worst failure).
   tickResample(el, L, t, active);
 }
+
+// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+export const blurb = "an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot";

@@ -1,4 +1,4 @@
-import { defineRegistry } from './registry.js';
+import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 import { resolveCameraMove } from './vocab.js';
 import { shake } from './motion.js';
 // core/camera-moves.js — CAMERA CHOREOGRAPHY generators: pure (params) → camera-keyframe array, the same
@@ -280,10 +280,26 @@ export function driftHold({ start = 0, dur = 4, ax = 6, ay = 3, cycles = 1.5, ra
   return kf;
 }
 
-// name → generator, so the scene sugar and any catalog derive the vocabulary from the code.
-export const CAMERA_MOVES = { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck,
-  cameraShake, punchIn, driftHold };
+// name → generator, each carrying its own catalogue row. The descriptions used to live in a hand-kept
+// map inside scripts/site/effects-catalog.mjs, which knew eight of the eleven: cameraShake, punchIn and
+// driftHold rendered as an em-dash in docs/EFFECTS.md, so three of the engine's camera moves existed and
+// could not be chosen. The blurb rides the entry non-enumerably (core/registry.js), so CAMERA_MOVES is
+// still exactly a name → function map for everything that walks it.
+export const CAMERA_MOVES = {
+  slowPush: withBlurb('gentle continuous zoom in (the frame stays alive)', slowPush),
+  diveIn: withBlurb('zoom INTO a target point (it travels to centre)', diveIn),
+  panFollow: withBlurb('camera pans to track downward-growing content (terminal)', panFollow),
+  workspaceZoomOut: withBlurb('pull back from a detail to reveal the whole', workspaceZoomOut),
+  orbit: withBlurb('a gentle 3D swing around the frame (ry through 0)', orbit),
+  multiPhase: withBlurb('chain legs into one journey (push, hold-drift, settle)', multiPhase),
+  travel: withBlurb('station-to-station flight between points in STAGE coords — THE CAMERA AS THE TRANSITION (no cut)', travel),
+  truck: withBlurb('plain lateral travel, linear, so it reads as tracking rather than a lurch', truck),
+  cameraShake: withBlurb('an IMPACT: a decaying ~16Hz shake pre-sampled at author time to one key per frame, then 0.1s of eased recovery so the frame LANDS instead of stopping', cameraShake),
+  punchIn: withBlurb('a crash zoom: the frame accelerates AT you (easeInExpo), recoils past its resting scale, then rings back elastic. the only move here that is not a `.out`', punchIn),
+  driftHold: withBlurb('a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal', driftHold),
+};
 export const CAMERA_MOVE_NAMES = Object.keys(CAMERA_MOVES);
+export const CAMERA_MOVE_BLURBS = blurbsOf('camera move', CAMERA_MOVES);
 
 // The params a move accepts, READ OFF ITS OWN SIGNATURE rather than declared in a table beside it. A
 // table is a second source of truth that drifts the first time somebody adds a param, and this file's

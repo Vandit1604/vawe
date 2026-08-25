@@ -42,6 +42,7 @@
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
 import { crtSpec } from './layers/util.js';
+import { blurbsOf } from './registry.js';
 import { sanitizeHtml } from './sanitize-html.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
@@ -481,6 +482,11 @@ export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
+
+// Every generator already wrote its own blurb; nothing READ them, so all four rendered as an em-dash in
+// docs/EFFECTS.md. Derived here rather than in the catalogue so a new generator without one is refused
+// at load instead of shipping a blank row.
+export const GENERATOR_BLURBS = blurbsOf('generator', Object.fromEntries(GENERATORS.map((g) => [g.name, g])));
 
 // How many exist but are not shown. The page says this out loud: a one-card library with no
 // explanation reads as a broken page, and "two more are being worked on" is both true and the more
