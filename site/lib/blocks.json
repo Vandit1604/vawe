@@ -2072,28 +2072,22 @@
       "query": "deterministic video from json",
       "word": [
         {
-          "c": "S",
-          "color": "#4285F4"
+          "c": "S"
         },
         {
-          "c": "e",
-          "color": "#EA4335"
+          "c": "e"
         },
         {
-          "c": "a",
-          "color": "#FBBC05"
+          "c": "a"
         },
         {
-          "c": "r",
-          "color": "#4285F4"
+          "c": "r"
         },
         {
-          "c": "c",
-          "color": "#34A853"
+          "c": "c"
         },
         {
-          "c": "h",
-          "color": "#EA4335"
+          "c": "h"
         }
       ]
     },

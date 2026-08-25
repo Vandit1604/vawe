@@ -314,8 +314,13 @@ export const CATALOG = [
     props: {"w": 360, "name": "Ana Roth", "handle": "anaroth", "cta": "Follow"} },
   { name: 'searchEngine.home', family: 'searchEngine', blurb: 'search home — wordmark + pill, query types in (keys click)',
     props: { variant: 'home', w: 540, cps: 11, query: 'deterministic video from json',
-      word: [{ c: 'S', color: '#4285F4' }, { c: 'e', color: '#EA4335' }, { c: 'a', color: '#FBBC05' },
-             { c: 'r', color: '#4285F4' }, { c: 'c', color: '#34A853' }, { c: 'h', color: '#EA4335' }] } },
+      // THE LETTERS WERE GOOGLE'S. The word read "Search", but the six colours were Google's exact
+      // brand hexes in Google's exact order — blue, red, yellow, blue, green, red — which is the
+      // wordmark's colour signature with the letters swapped. The FACTORY was always clean
+      // (`word = null`); only this demo row carried them, and the catalog is the most-copied code in
+      // the repo. Same class as the brand recreations already removed from formats/scene.
+      // The ramp also makes the demo honest: this is a search-engine block, not one company's.
+      word: [{ c: 'S' }, { c: 'e' }, { c: 'a' }, { c: 'r' }, { c: 'c' }, { c: 'h' }] } },
   { name: 'searchEngine.results', family: 'searchEngine', blurb: 'search results — ranked links, cursor clicks one',
     props: { variant: 'results', w: 540, query: 'video from json', clickIndex: 0, results: [
       { url: 'vawe.dev › docs', title: 'One JSON. Any brand.', snippet: 'Same input, same frames, every time.' },

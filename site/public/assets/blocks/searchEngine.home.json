@@ -35,7 +35,6 @@
           "weight": 700,
           "text": "S",
           "size": 92,
-          "color": "#4285F4",
           "ls": "-0.04em"
         },
         {
@@ -43,7 +42,6 @@
           "weight": 700,
           "text": "e",
           "size": 92,
-          "color": "#EA4335",
           "ls": "-0.04em"
         },
         {
@@ -51,7 +49,6 @@
           "weight": 700,
           "text": "a",
           "size": 92,
-          "color": "#FBBC05",
           "ls": "-0.04em"
         },
         {
@@ -59,7 +56,6 @@
           "weight": 700,
           "text": "r",
           "size": 92,
-          "color": "#4285F4",
           "ls": "-0.04em"
         },
         {
@@ -67,7 +63,6 @@
           "weight": 700,
           "text": "c",
           "size": 92,
-          "color": "#34A853",
           "ls": "-0.04em"
         },
         {
@@ -75,7 +70,6 @@
           "weight": 700,
           "text": "h",
           "size": 92,
-          "color": "#EA4335",
           "ls": "-0.04em"
         }
       ]
