@@ -80,7 +80,7 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (28)
+## Kinetic presets (30)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
