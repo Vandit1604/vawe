@@ -8,8 +8,8 @@
     "keyboard"
   ],
   "dimensions": {
-    "width": 344,
-    "height": 312
+    "width": 377,
+    "height": 331
   },
   "install": {
     "kind": "scene-layer",

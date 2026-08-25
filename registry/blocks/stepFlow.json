@@ -8,8 +8,8 @@
     "stepFlow"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 116
+    "width": 644,
+    "height": 130
   },
   "install": {
     "kind": "scene-layer",

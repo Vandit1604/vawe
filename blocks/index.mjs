@@ -589,8 +589,21 @@ import * as SLEEK from './sleek.mjs'; export * from './sleek.mjs'; Object.assign
 import * as TERMINAL from './terminal-layers.mjs'; export * from './terminal-layers.mjs'; Object.assign(FACTORIES, TERMINAL); Object.assign(BLOCKS, TERMINAL); // terminalPro: a layers-only terminal window (blocks/terminal-layers.mjs)
 import * as TERMHTML from './terminal-html.mjs'; export * from './terminal-html.mjs'; Object.assign(FACTORIES, TERMHTML); Object.assign(BLOCKS, TERMHTML); // terminalHtml: the same subject as one hand-authored surface (blocks/terminal-html.mjs)
 import * as CAMCHROME from './camera-chrome.mjs'; export * from './camera-chrome.mjs'; Object.assign(FACTORIES, CAMCHROME); Object.assign(BLOCKS, CAMCHROME); // camcorderHud · scanGate: viewfinder chrome (blocks/camera-chrome.mjs)
+import * as DIAGRAM from './diagram.mjs'; export * from './diagram.mjs'; Object.assign(FACTORIES, DIAGRAM); Object.assign(BLOCKS, DIAGRAM); // diagram family: flowchart · flowchart.vertical · nodeGraph, sharing one connector router (blocks/diagram.mjs)
+import * as GLASS from './glass.mjs'; export * from './glass.mjs'; Object.assign(FACTORIES, GLASS); Object.assign(BLOCKS, GLASS); // glass surfaces: glassWidgets · glassNotification · glassMenu · glassControls · glassHome · glassDock (blocks/glass.mjs)
+import * as CODEANIM from './codeanim.mjs'; export * from './codeanim.mjs'; Object.assign(FACTORIES, CODEANIM); Object.assign(BLOCKS, CODEANIM); // code MOTION: codeTyping · codeHighlight · codeScroll · codeDiff · codeMorph · codeFlight (blocks/codeanim.mjs)
+import * as GEO from './geo.mjs'; export * from './geo.mjs'; Object.assign(FACTORIES, GEO); Object.assign(BLOCKS, GEO); // map family: usMapHex · usMap · worldMap · usMapBubble · usMapFlow (blocks/geo.mjs)
 for (const e of CATALOG) {
-  if (!e.name.includes('.')) continue; // bare names use the raw factory (identical behaviour)
+  // A BARE NAME USES THE RAW FACTORY, AND THAT IS NOT "IDENTICAL BEHAVIOUR" — this line said it was.
+  // Measured: 82 of the 88 bare catalog rows render DIFFERENTLY without their `props`, because a row's
+  // props are demo CONTENT the factory does not carry. `blocks-catalog.mjs:30` and `blocks-scenes.mjs:58`
+  // both pass `e.props` explicitly, so the catalog sheets and the site show the rich version while an
+  // author writing {"type":"block","block":"<bare name>"} gets the factory's own defaults. For most
+  // families that is merely plainer; for a family defaulting its content to `[]` it is an empty box.
+  // Left as-is on purpose: merging props here would silently give every unset field demo content, which
+  // is the same substitution wearing the other coat. The families whose emptiness is meaningless refuse
+  // instead, at the factory (blocks/codeanim.mjs `needContent`).
+  if (!e.name.includes('.')) continue;
   const fam = FACTORIES[e.family];
   // A catalog row naming a family that does not exist USED TO REGISTER NOTHING, silently. The author
   // then got "unknown block" from expand-blocks pointing at the name rather than at the typo, which is

@@ -8,8 +8,8 @@
     "listRow"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 120
+    "width": 603,
+    "height": 134
   },
   "install": {
     "kind": "scene-layer",

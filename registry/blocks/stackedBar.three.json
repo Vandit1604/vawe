@@ -8,8 +8,8 @@
     "stackedBar"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 306
+    "width": 603,
+    "height": 325
   },
   "install": {
     "kind": "scene-layer",

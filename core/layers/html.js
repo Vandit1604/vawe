@@ -23,6 +23,17 @@ export const PROPS = { html: {}, src: {}, w: {}, h: {} };
 export function build(kit, el, L) {
   if (L.w != null) el.style.width = L.w + 'px';
   if (L.h != null) el.style.height = L.h + 'px';
+  // THE FRAGMENT'S OWN BOX. `bg`, `border`, `radius`, `shadow`, `elevation` and `pad` are shared layer
+  // props the schema advertises and this layer accepted and then ignored: nothing here called chipBox,
+  // so an html panel asking for a frosted surface painted no surface, no edge and square corners while
+  // `glass` (which decorate() applies to every layer) blurred the backdrop behind nothing. Documented
+  // input, silently dropped — the same class as `h` above, found the same way. One call, and the
+  // fragment gets the identical box treatment text/rect/group already get.
+  kit.chipBox(el, L);
+  // The layer states its box in `w`/`h`; padding must eat into it rather than grow it, or a panel
+  // declaring 760px renders wider than the author asked for. Nothing sets box-sizing globally, so this
+  // is scoped to the layers that DID declare a box.
+  if ((L.w != null || L.h != null) && L.pad != null) el.style.boxSizing = 'border-box';
   const where = `layer${L.id ? ` "${L.id}"` : ''} (html)`;
   const src = htmlSource(L, kit.html, where);
   // REFUSE A DECLARATION THE BROWSER WOULD DROP, at the moment this fragment becomes DOM. The parser

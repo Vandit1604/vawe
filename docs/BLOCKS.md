@@ -92,7 +92,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_155 entries across 70 families._
+_179 entries across 93 families._
 
 | Block | For |
 |---|---|
@@ -116,6 +116,8 @@ _155 entries across 70 families._
 | `terminal.git` | git command |
 | `terminal.install` | install command |
 | `terminal.build` | build output |
+| `terminalPro` | a deploy terminal built from layer primitives: every line its own timed, measurable object |
+| `terminalHtml` | the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge |
 | `loadingBar` | determinate fill wipes L→R, lands ✓ done |
 | `deploySuccess` | CI cascade → green "Deployed to production" card |
 | `browserFrame` | window chrome (traffic dots + URL bar) |
@@ -251,6 +253,28 @@ _155 entries across 70 families._
 | `borderBeamCard` | glass card with a light TRAVELLING its border (animated beam) |
 | `grainOverlay` | fine film-grain texture over the frame (feTurbulence) |
 | `bento` | asymmetric bento grid: one hero cell + supporting cells (scale contrast) |
+| `camcorderHud` | viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom |
+| `scanGate` | autofocus gate: a band travels the frame, the brackets contract onto the target and lock |
+| `flowchart` | landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges |
+| `flowchart.vertical` | the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor |
+| `nodeGraph` | non-hierarchical graph · author-placed nodes, routed edges, one node lit |
+| `glassWidgets` | frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid) |
+| `glassNotification` | frosted alerts fly in from the right and stack, each card narrower than the one above it |
+| `glassMenu` | frosted command panel: icon column, rows, separators, one row lit with the accent |
+| `glassControls` | frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter |
+| `glassHome` | frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal |
+| `glassDock` | floating frosted dock strip with one item magnified, its neighbours swelling toward it |
+| `codeTyping` | live coding: one character frontier crosses the snippet, the caret riding it |
+| `codeHighlight` | a band sweeps down to one line while the context dims out of the way |
+| `codeScroll` | a viewport onto a long file: it scrolls until the target line centres, then lights it |
+| `codeDiff` | the edit PERFORMED: removals collapse red, additions expand green, in edit order |
+| `codeMorph` | a refactor as a transformation: shared tokens glide, the rest fade out and in |
+| `codeFlight` | discrete snippets fly in from alternating sides and assemble into one program |
+| `usMapHex` | US hex cartogram: every state the same size, so the reading is the value not the acreage |
+| `usMap` | US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend |
+| `worldMap` | world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map |
+| `usMapBubble` | proportional circles at city coordinates (AREA is the value) with name + value callouts |
+| `usMapFlow` | origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

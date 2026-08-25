@@ -1,0 +1,53 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "h": 196,
+      "start": 0.2,
+      "duration": 8,
+      "html": "<div style=\"position:relative;width:620px;height:196px;border-radius:14px;background:#16161E;border:1px solid rgba(255,255,255,0.08);overflow:hidden;font-variant-ligatures:none\"><div style=\"position:absolute;left:26px;top:20px;font:600 16px var(--font-mono);letter-spacing:0.05em;color:#8A91B4\">server.ts</div><div style=\"position:absolute;left:14px;width:592px;height:30px;top:calc(50px + var(--band,0) * 60px);border-radius:8px;background:color-mix(in srgb, var(--accent) 18%, transparent);box-shadow:inset 3px 0 0 var(--accent);opacity:calc(0.35 + var(--band,0) * 0.65)\"></div><div style=\"position:absolute;left:26px;top:50px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#7AA2F7;opacity:calc(1 - var(--dim,0) * 0.72);font-weight:500\">export function serve(req) {</div><div style=\"position:absolute;left:26px;top:80px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#9ECE6A;opacity:calc(1 - var(--dim,0) * 0.72);font-weight:500\">  const t = route(req.url);</div><div style=\"position:absolute;left:26px;top:110px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#E0AF68;opacity:1;font-weight:700\">  return t.handle(req);</div><div style=\"position:absolute;left:26px;top:140px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#BB9AF7;opacity:calc(1 - var(--dim,0) * 0.72);font-weight:500\">}</div></div>",
+      "vars": {
+        "--band": [
+          0,
+          1
+        ],
+        "--dim": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": {
+        "--band": 0.3,
+        "--dim": 0.55
+      },
+      "varsDur": {
+        "--band": 0.9,
+        "--dim": 0.7
+      },
+      "varsEase": {
+        "--band": "easeInOutCubic",
+        "--dim": "easeOutCubic"
+      }
+    }
+  ]
+}

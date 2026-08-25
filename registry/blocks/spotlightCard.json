@@ -8,8 +8,8 @@
     "spotlightCard"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 344
+    "width": 644,
+    "height": 364
   },
   "install": {
     "kind": "scene-layer",

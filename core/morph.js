@@ -1,3 +1,4 @@
+import { gsapEase } from './motion.js';
 // core/morph.js — TextMorph: letters MIGRATE from word A -> word B. Shared characters glide to their
 // new position; letters only in A leave (fade/lift), letters only in B enter (fade). Built on GSAP
 // (deterministic, seeked by seekAll), which owns the per-char tweens. The two layouts are measured once
@@ -28,7 +29,7 @@ function measure(word, styleSrc) {
 
 export function buildMorph(el, L, gsap) {
   const A = String(L.text ?? ''), B = String(L.morph.to ?? '');
-  const dur = L.morph.dur ?? 1.0, ease = L.morph.ease || 'power3.inOut', start = L.start ?? 0;
+  const dur = L.morph.dur ?? 1.0, ease = gsapEase(L.morph.ease, 'power3.inOut', 'morph'), start = L.start ?? 0;
   const a = measure(A, el), b = measure(B, el);
 
   // greedy match: each B char takes the first unused A char of the same value → those letters MIGRATE.

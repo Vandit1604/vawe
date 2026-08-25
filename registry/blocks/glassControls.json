@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassControls",
+  "type": "vawe:block",
+  "title": "glassControls",
+  "description": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+  "tags": [
+    "glassControls"
+  ],
+  "dimensions": {
+    "width": 804,
+    "height": 280
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "glassControls",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 760,
+      "track": "Deterministic render",
+      "elapsed": "01:12",
+      "total": "03:40",
+      "progress": 0.34,
+      "bars": 9
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "track",
+      "elapsed",
+      "total",
+      "progress",
+      "bars",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassControls.json",
+      "url": "https://vawe.dev/assets/blocks/glassControls.json",
+      "target": "formats/scene/glassControls.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassControls.png"
+  }
+}

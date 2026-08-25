@@ -8,8 +8,8 @@
     "bento"
   ],
   "dimensions": {
-    "width": 804,
-    "height": 464
+    "width": 849,
+    "height": 488
   },
   "install": {
     "kind": "scene-layer",

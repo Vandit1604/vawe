@@ -1,0 +1,76 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "usMapBubble",
+  "type": "vawe:block",
+  "title": "usMapBubble",
+  "description": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+  "tags": [
+    "usMapBubble"
+  ],
+  "dimensions": {
+    "width": 911,
+    "height": 573
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "usMapBubble",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "h": 500,
+      "maxR": 34,
+      "points": [
+        {
+          "name": "New York",
+          "value": 8.3
+        },
+        {
+          "name": "Los Angeles",
+          "value": 3.9
+        },
+        {
+          "name": "Chicago",
+          "value": 2.7
+        },
+        {
+          "name": "Houston",
+          "value": 2.3
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "points",
+      "title",
+      "sub",
+      "maxR",
+      "minR",
+      "unit",
+      "callouts",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/usMapBubble.json",
+      "url": "https://vawe.dev/assets/blocks/usMapBubble.json",
+      "target": "formats/scene/usMapBubble.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/usMapBubble.png"
+  }
+}

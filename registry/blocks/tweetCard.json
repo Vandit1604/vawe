@@ -8,8 +8,8 @@
     "tweetCard"
   ],
   "dimensions": {
-    "width": 524,
-    "height": 224
+    "width": 562,
+    "height": 241
   },
   "install": {
     "kind": "scene-layer",

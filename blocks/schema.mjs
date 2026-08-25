@@ -40,6 +40,10 @@ import { SOCIAL_SCHEMAS } from './social.mjs';
 import { APP_SCHEMAS } from './app.mjs';
 import { INTERACT_SCHEMAS } from './interact.mjs';
 import { SLEEK_SCHEMAS } from './sleek.mjs';
+import { GLASS_SCHEMAS } from './glass.mjs';
+import { CODEANIM_SCHEMAS } from './codeanim.mjs';
+import { GEO_SCHEMAS } from './geo.mjs';
+import { DIAGRAM_SCHEMAS } from './diagram.mjs';
 import { TERMINAL_SCHEMAS } from './terminal-layers.mjs';
 import { TERMINAL_HTML_SCHEMAS } from './terminal-html.mjs';
 
@@ -52,7 +56,7 @@ export const KINDS = ['int', 'unit', 'num', 'hex', 'hexlist', 'enum', 'group',
 export const SCHEMA = {
   ...CORE_SCHEMAS, ...CHART_SCHEMAS, ...DEV_SCHEMAS, ...UI_SCHEMAS,
   ...SOCIAL_SCHEMAS, ...APP_SCHEMAS, ...INTERACT_SCHEMAS, ...SLEEK_SCHEMAS,
-  ...TERMINAL_SCHEMAS, ...TERMINAL_HTML_SCHEMAS,
+  ...TERMINAL_SCHEMAS, ...TERMINAL_HTML_SCHEMAS, ...GLASS_SCHEMAS, ...CODEANIM_SCHEMAS, ...GEO_SCHEMAS, ...DIAGRAM_SCHEMAS,
 };
 
 class BlockOptionError extends Error {

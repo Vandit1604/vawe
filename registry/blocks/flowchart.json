@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "flowchart",
+  "type": "vawe:block",
+  "title": "flowchart",
+  "description": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+  "tags": [
+    "flowchart"
+  ],
+  "dimensions": {
+    "width": 1688,
+    "height": 454
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "flowchart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "step": 0.16
+    },
+    "props": [
+      "nodeW",
+      "nodeH",
+      "colGap",
+      "laneGap",
+      "size",
+      "subSize",
+      "labelSize",
+      "anim",
+      "x",
+      "y",
+      "variant",
+      "nodes",
+      "edges",
+      "radius",
+      "gap",
+      "start",
+      "dur",
+      "step"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/flowchart.json",
+      "url": "https://vawe.dev/assets/blocks/flowchart.json",
+      "target": "formats/scene/flowchart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/flowchart.png"
+  }
+}

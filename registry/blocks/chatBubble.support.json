@@ -8,8 +8,8 @@
     "chatBubble"
   ],
   "dimensions": {
-    "width": 504,
-    "height": 194
+    "width": 541,
+    "height": 211
   },
   "install": {
     "kind": "scene-layer",

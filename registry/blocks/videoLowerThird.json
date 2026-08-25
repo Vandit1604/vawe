@@ -8,8 +8,8 @@
     "videoLowerThird"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 132
+    "width": 603,
+    "height": 147
   },
   "install": {
     "kind": "scene-layer",

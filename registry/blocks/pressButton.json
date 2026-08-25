@@ -8,8 +8,8 @@
     "pressButton"
   ],
   "dimensions": {
-    "width": 324,
-    "height": 97
+    "width": 357,
+    "height": 111
   },
   "install": {
     "kind": "scene-layer",

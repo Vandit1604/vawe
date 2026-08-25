@@ -1,0 +1,129 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "usMapHex",
+  "type": "vawe:block",
+  "title": "usMapHex",
+  "description": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+  "tags": [
+    "usMapHex"
+  ],
+  "dimensions": {
+    "width": 911,
+    "height": 629
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "usMapHex",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CA",
+          "value": 39
+        },
+        {
+          "code": "TX",
+          "value": 30
+        },
+        {
+          "code": "FL",
+          "value": 22
+        },
+        {
+          "code": "NY",
+          "value": 20
+        },
+        {
+          "code": "IL",
+          "value": 13
+        },
+        {
+          "code": "PA",
+          "value": 13
+        },
+        {
+          "code": "OH",
+          "value": 12
+        },
+        {
+          "code": "GA",
+          "value": 11
+        },
+        {
+          "code": "MI",
+          "value": 10
+        },
+        {
+          "code": "WA",
+          "value": 8
+        },
+        {
+          "code": "AZ",
+          "value": 7
+        },
+        {
+          "code": "MA",
+          "value": 7
+        },
+        {
+          "code": "CO",
+          "value": 6
+        },
+        {
+          "code": "MN",
+          "value": 6
+        },
+        {
+          "code": "WY",
+          "value": 1
+        },
+        {
+          "code": "VT",
+          "value": 1
+        },
+        {
+          "code": "AK",
+          "value": 1
+        },
+        {
+          "code": "HI",
+          "value": 1
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "data",
+      "title",
+      "sub",
+      "legend",
+      "showLegend",
+      "unit",
+      "showValues",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/usMapHex.json",
+      "url": "https://vawe.dev/assets/blocks/usMapHex.json",
+      "target": "formats/scene/usMapHex.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/usMapHex.png"
+  }
+}

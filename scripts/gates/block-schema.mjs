@@ -23,7 +23,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
-import { TOKENS, SERIES, R, HAIR } from '../../blocks/kit.mjs';
+import * as REGISTRY from '../../blocks/index.mjs';
+import * as KIT from '../../blocks/kit.mjs';
+const { TOKENS } = KIT;
 import { SCHEMA, KINDS, PASSTHROUGH, checkValue, resolve } from '../../blocks/schema.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -71,9 +73,19 @@ function splitTop(body) {
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 
-// The scope a default expression is evaluated in. Every module-level name a block default reaches
-// for is a kit export; a default that needs anything else is reported rather than guessed at.
-const SCOPE = { T: TOKENS, TOKENS, SERIES, R, HAIR };
+// The scope a default expression is evaluated in. Every module-level name a block default reaches for
+// is a kit export, so the scope IS the kit — spread, never hand-listed.
+//
+// It WAS hand-listed (`{ T: TOKENS, TOKENS, SERIES, R, HAIR }`) and had drifted from the vocabulary
+// this repo tells authors to reach for: `SPACE` and `TYPE` were absent, so every family defaulting a
+// gap to `SPACE.lg` or a size to `TYPE.body` reported `unreadable-default` and its declared `def` went
+// unchecked. The comment above already claimed the invariant this line now actually holds; a list
+// nobody maintains cannot drift, which is the same reason `paramsOf` reads a generator's own signature
+// (core/camera-moves.js:216) instead of keeping a table of parameter names.
+// A family's default may also reach for a constant its OWN module exports (a demo node set, a city
+// table). index.mjs re-exports every family, so the registry's own surface is the second half of
+// the scope — again spread, never listed.
+const SCOPE = { ...KIT, ...REGISTRY, T: TOKENS };
 const MISSING = Symbol('no default');
 const UNREADABLE = Symbol('unreadable default');
 

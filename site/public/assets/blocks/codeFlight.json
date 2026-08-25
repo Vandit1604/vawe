@@ -1,0 +1,49 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "h": 290,
+      "start": 0.2,
+      "duration": 8,
+      "html": "<div style=\"position:relative;width:620px;height:290px;border-radius:14px;background:#0A0E14;border:1px solid rgba(255,255,255,0.08);overflow:hidden;font-variant-ligatures:none\"><div style=\"position:absolute;left:26px;top:20px;font:600 16px var(--font-mono);letter-spacing:0.05em;color:#8896A8\">assemble</div><div data-fly=\"l\" style=\"position:absolute;left:26px;top:50px;width:568px;height:52px;padding:11px 14px;box-sizing:border-box;border-radius:8px;background:color-mix(in srgb, var(--text) 6%, transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent)\"><div style=\"font:600 15px var(--font-mono);letter-spacing:0.06em;color:#8896A8;position:absolute;right:14px;top:11px\">imports</div><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#4AE3B5\">import { serve } from \"./serve\";</div></div><div data-fly=\"r\" style=\"position:absolute;left:26px;top:116px;width:568px;height:52px;padding:11px 14px;box-sizing:border-box;border-radius:8px;background:color-mix(in srgb, var(--text) 6%, transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent)\"><div style=\"font:600 15px var(--font-mono);letter-spacing:0.06em;color:#8896A8;position:absolute;right:14px;top:11px\">state</div><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#5AC8FA\">const table = new Map();</div></div><div data-fly=\"l\" style=\"position:absolute;left:26px;top:182px;width:568px;height:82px;padding:11px 14px;box-sizing:border-box;border-radius:8px;background:color-mix(in srgb, var(--text) 6%, transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent)\"><div style=\"font:600 15px var(--font-mono);letter-spacing:0.06em;color:#8896A8;position:absolute;right:14px;top:11px\">entry</div><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#F5D76E\">serve(table);</div><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#F58AC0\">export default table;</div></div></div>",
+      "parts": [
+        {
+          "select": "[data-fly=\"l\"]",
+          "anim": "slide-left",
+          "each": 0.5,
+          "stagger": 0.44,
+          "delay": 0.3,
+          "out": true
+        },
+        {
+          "select": "[data-fly=\"r\"]",
+          "anim": "slide-right",
+          "each": 0.5,
+          "stagger": 0.44,
+          "delay": 0.52,
+          "out": true
+        }
+      ]
+    }
+  ]
+}

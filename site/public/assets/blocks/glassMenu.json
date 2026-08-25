@@ -1,0 +1,213 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 440,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 4,
+      "pad": 12,
+      "bg": "linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.1)), rgba(9,11,17,0.62)",
+      "radius": 16,
+      "border": "1.5px solid rgba(255,255,255,0.18)",
+      "glass": 22,
+      "elevation": 4,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "scale",
+      "enterDur": 0.36,
+      "out": "defocus",
+      "exitDur": 0.32,
+      "children": [
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "ACTIONS",
+          "size": 17,
+          "color": "rgba(255,255,255,0.78)",
+          "ls": "0.12em",
+          "pad": "6px 14px 10px",
+          "delay": 0.1,
+          "anim": "fade",
+          "enterDur": 0.25
+        },
+        {
+          "type": "group",
+          "radius": 12,
+          "w": 416,
+          "h": 54,
+          "layout": "row",
+          "items": "center",
+          "gap": 12,
+          "pad": "0 14px",
+          "delay": 0.16,
+          "anim": "fade",
+          "enterDur": 0.26,
+          "children": [
+            {
+              "type": "html",
+              "w": 22,
+              "h": 22,
+              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"rgba(255,255,255,0.78)\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M12 2.5l2 7 7 2-7 2-2 7-2-7-7-2 7-2z\"/></svg>"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "New surface",
+              "size": 17,
+              "color": "rgba(255,255,255,0.78)",
+              "grow": 1
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "N",
+              "font": "mono",
+              "size": 17,
+              "color": "rgba(255,255,255,0.62)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "radius": 12,
+          "w": 416,
+          "h": 54,
+          "layout": "row",
+          "items": "center",
+          "gap": 12,
+          "pad": "0 14px",
+          "delay": 0.22,
+          "anim": "fade",
+          "enterDur": 0.26,
+          "children": [
+            {
+              "type": "html",
+              "w": 22,
+              "h": 22,
+              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"rgba(255,255,255,0.78)\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M12 3l9 5-9 5-9-5z\"/><path d=\"M3 13l9 5 9-5M3 16.5l9 5 9-5\"/></svg>"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Stack behind",
+              "size": 17,
+              "color": "rgba(255,255,255,0.78)",
+              "grow": 1
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "[",
+              "font": "mono",
+              "size": 17,
+              "color": "rgba(255,255,255,0.62)"
+            }
+          ]
+        },
+        {
+          "type": "rect",
+          "radius": 0,
+          "w": 416,
+          "h": 1,
+          "bg": "rgba(255,255,255,0.10)",
+          "delay": 0.27,
+          "anim": "fade",
+          "enterDur": 0.26
+        },
+        {
+          "type": "group",
+          "radius": 12,
+          "w": 416,
+          "h": 54,
+          "layout": "row",
+          "items": "center",
+          "gap": 12,
+          "pad": "0 14px",
+          "bg": "color-mix(in srgb, var(--accent) 30%, transparent)",
+          "border": "1px solid rgba(255,255,255,0.18)",
+          "delay": 0.33,
+          "anim": "fade",
+          "enterDur": 0.26,
+          "children": [
+            {
+              "type": "html",
+              "w": 22,
+              "h": 22,
+              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M13 2.5L4.5 14H10l-1 7.5L19.5 10H14z\"/></svg>"
+            },
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Blur backdrop",
+              "size": 17,
+              "color": "#fff",
+              "grow": 1
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "B",
+              "font": "mono",
+              "size": 17,
+              "color": "rgba(255,255,255,0.62)"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "radius": 12,
+          "w": 416,
+          "h": 54,
+          "layout": "row",
+          "items": "center",
+          "gap": 12,
+          "pad": "0 14px",
+          "delay": 0.38,
+          "anim": "fade",
+          "enterDur": 0.26,
+          "children": [
+            {
+              "type": "html",
+              "w": 22,
+              "h": 22,
+              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"rgba(255,255,255,0.78)\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3.5 2\"/></svg>"
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "Hold frame",
+              "size": 17,
+              "color": "rgba(255,255,255,0.78)",
+              "grow": 1
+            },
+            {
+              "type": "text",
+              "weight": 500,
+              "text": "H",
+              "font": "mono",
+              "size": 17,
+              "color": "rgba(255,255,255,0.62)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

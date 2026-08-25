@@ -8,8 +8,8 @@
     "banner"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 110
+    "width": 644,
+    "height": 124
   },
   "install": {
     "kind": "scene-layer",

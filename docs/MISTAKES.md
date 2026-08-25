@@ -13345,3 +13345,87 @@ command now 404s for real brands and leaves a zero-byte `.svg`.
 
 Fixed: the doc now points at `make assets` and shows `curl -fsS … || rm -f`, both empty files removed,
 and the tracked one untracked. `tryFetch` needed no change and is cited in the doc as the reason.
+
+## #427 — an engine easing name on a GSAP-driven field renders a different curve, silently
+
+**What.** `parts[].ease`, `parts[].exitEase`, `morph.ease`, `motionPath.ease` and `splitText.ease` go
+straight into `gsap.fromTo`. GSAP does not refuse a name it does not know: `parseEase` returns
+undefined and the tween runs on GSAP's DEFAULT. Measured: `gsap.parseEase('easeOutCubic')` is
+undefined, exactly like `gsap.parseEase('totalNonsenseXYZ')`. `blocks/camera-chrome.mjs:114,168` both
+name `easeOutCubic` and had been running on GSAP's default since they were written.
+
+**Root cause.** The two easing vocabularies were asymmetric. `resolveEasing` (core/motion.js) throws on
+a GSAP name and even explains that GSAP eases are real on GSAP-driven fields — while those fields
+accepted an ENGINE name and quietly rendered something else.
+
+**Fix.** `gsapEase(e, fallback, where)` in `core/motion.js`, at all five call sites. A GSAP name passes
+through; an ENGINE name resolves to its own FUNCTION (GSAP accepts a function), so the author gets the
+curve they named rather than a look-alike, and there is no mapping table to drift; anything else throws.
+
+**Gate.** None, and none wanted: the refusal is at the write site. No shipped scene uses either block,
+so `snap-scenes` stayed 106 identical.
+
+## #428 — the html layer accepted six box props and ignored every one
+
+**What.** `bg`, `border`, `radius`, `shadow`, `elevation` and `pad` are shared layer props the schema
+advertises. `core/layers/html.js` never called `kit.chipBox`, which `group.js`, `rect.js` and `text.js`
+all do, so a fragment asking for a frosted surface painted no surface, no edge and square corners while
+`glass` dutifully blurred the backdrop behind nothing.
+
+**Fix.** One `chipBox(el, L)` call, plus `box-sizing: border-box` scoped to layers that declared both a
+box and a `pad`. Blast radius measured before the change: **0 of 157 scenes and 0 catalog blocks** emit
+an html layer with box chrome.
+
+**Sequel, same day.** `blocks/geo.mjs` then used it and got the padding wrong the other way: the block
+computes its geometry from `w` BEFORE the wrapper, so border-box padding shrank the painted card while
+the content kept its width and the map overflowed onto the raw backdrop. Caught by reading the audit
+overlay, not by a number.
+
+## #429 — a bare catalog name does not carry its catalog props, and the comment said it did
+
+**What.** `blocks/index.mjs` merged a catalog row's `props` only for a NAMESPACED name, with the comment
+"bare names use the raw factory (identical behaviour)". Measured: **82 of the 88 bare rows render
+differently without their props.** `blocks-catalog.mjs:30` and `blocks-scenes.mjs:58` both pass `e.props`
+explicitly, so the catalog sheets and the site show the rich version while an author writing
+`{"type":"block","block":"<bare name>"}` gets the factory's own defaults. For most families that is
+merely plainer. For a family defaulting its content to `[]` it is an empty box: `codeTyping` rendered a
+dark rounded bar with no text, no caret and no error, found by cropping a frame.
+
+**Fix.** NOT by merging props here — that would give every unset field demo content, the same
+substitution wearing the other coat. The families whose emptiness is meaningless refuse at the factory
+(`needContent`, blocks/codeanim.mjs). The false comment now carries the measured number.
+
+## #430 — block-schema evaluated defaults in a hand-listed scope that had drifted from the kit
+
+**What.** The gate's own header said "every module-level name a block default reaches for is a kit
+export". Its scope listed five of them and omitted `SPACE` and `TYPE` — the two `CLAUDE.md` tells authors
+to use. Every family defaulting a gap to `SPACE.lg` reported `unreadable-default` and its declared `def`
+went unchecked.
+
+**Fix.** `const SCOPE = { ...KIT, ...REGISTRY, T: TOKENS }` — spread, never listed. Same reason
+`paramsOf` reads a generator's own signature instead of keeping a table.
+
+## #431 — `make beats --vs` printed a tick and wrote nothing (MISTAKES #245, half-fixed)
+
+**What.** A source tile's label is `SITE: <section-label>`. ffmpeg parses `drawtext` text through the
+filter-graph parser, so the colon terminated the argument, the tile was never written, the row's
+`hstack` failed and the final `vstack` failed. Every `spawnSync` status was dropped, so the tool printed
+`✓ 12 beats … → /tmp/beats/creed-launch.png` and exited 0 with no file on disk.
+
+**Root cause.** #245 was fixed in `reveal.mjs` (`ffmpegOrDie`, `scratch`, a `drawtext` escape) and the
+identical bug was left in `beats.mjs` — the "fix the rule, not the call site" failure CLAUDE.md names.
+
+**Fix.** Both tools now adopt `openScene`, `scratch()` and `ffmpegOrDie`, and share one exported
+`drawtext()` escape in the new `scripts/author/sheets.mjs`.
+
+## #432 — producing a contact sheet is not looking at one
+
+**What.** `make dev` and `make ship` now emit both sheets automatically (`make sheets`). The receipt
+(`scripts/lib/receipt.mjs`) proves a human LOOKED, so automation would have made every receipt
+permanently fresh and `beats-unseen` could never fire again — a gate reporting green for scenes nobody
+has read, which is the "a wrong gate manufactures confidence" failure.
+
+**Fix.** The receipt records `auto: true` when a sheet was produced by the loop. `beat-check` fires on
+`!exists || stale || (fresh && auto)` and rewords: not "run `make beats`", but "the sheets are already
+on disk and current, open them". An explicit `make beats` still signs the look off, and a later
+automatic run does not downgrade it. All five states observed.

@@ -1,0 +1,53 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "h": 196,
+      "start": 0.2,
+      "duration": 8,
+      "html": "<div style=\"position:relative;width:620px;height:196px;border-radius:14px;background:#0B1F16;border:1px solid rgba(255,255,255,0.08);overflow:hidden;font-variant-ligatures:none\"><div style=\"position:absolute;left:26px;top:20px;font:600 16px var(--font-mono);letter-spacing:0.05em;color:#8FB3A0\">route.ts</div><div style=\"position:absolute;left:26px;top:50px;width:568px\"><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#8FB3A0\"><span style=\"width:2ch;display:inline-block\"> </span>  const t = route(req.url);</div><div style=\"height:calc((1 - var(--c0,0)) * 30px);overflow:hidden;opacity:calc(1 - var(--c0,0));background:color-mix(in srgb, var(--down) 16%, transparent);border-radius:4px;box-shadow:inset 3px 0 0 var(--down)\"><div style=\"height:30px;display:flex;align-items:center;font:600 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--down) 62%, #fff)\"><span style=\"width:2ch;display:inline-block;padding-left:8px\">-</span>  if (!t) return null;</div></div><div style=\"height:calc(var(--c1,0) * 30px);overflow:hidden;opacity:var(--c1,0);background:color-mix(in srgb, var(--up) 16%, transparent);border-radius:4px;box-shadow:inset 3px 0 0 var(--up)\"><div style=\"height:30px;display:flex;align-items:center;font:600 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--up) 62%, #fff)\"><span style=\"width:2ch;display:inline-block;padding-left:8px\">+</span>  if (!t) return notFound(req);</div></div><div style=\"height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#8FB3A0\"><span style=\"width:2ch;display:inline-block\"> </span>  return t.handle(req);</div></div></div>",
+      "vars": {
+        "--c0": [
+          0,
+          1
+        ],
+        "--c1": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": {
+        "--c0": 0.4,
+        "--c1": 0.74
+      },
+      "varsDur": {
+        "--c0": 0.5,
+        "--c1": 0.5
+      },
+      "varsEase": {
+        "--c0": "easeOutCubic",
+        "--c1": "easeOutCubic"
+      }
+    }
+  ]
+}

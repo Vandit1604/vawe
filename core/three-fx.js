@@ -28,6 +28,8 @@ import { LONLAT } from './globe-dots.js';
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
   depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
   morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {},
+  // shatter · magnetic · liquidBackground
+  breakAt: {}, breakDur: {}, poles: {}, amp: {},
   // globe
   origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
   spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {} };
@@ -45,6 +47,33 @@ const T = () => {
 const rng = (seed) => { let s = (seed | 0) || 1; return () => { s = (s * 1664525 + 1013904223) | 0; return ((s >>> 8) & 0xffffff) / 0xffffff; }; };
 
 const hex = (h, dflt) => new (T().Color)(typeof h === 'string' ? h : dflt);
+
+// THE THEME'S OWN PALETTE, so a new scene's defaults reskin instead of being four hexes somebody liked.
+// Read ONCE at build, never per frame: core/boot.js applies the theme before any layer is built, and
+// core/filters.js resolves its duotone defaults the same way for the same reason. `--accent-dim` is
+// deliberately not read — every theme ships it as an rgba(), which three's Color parses as a colour
+// with the alpha thrown away, i.e. a wash silently rendered at full strength.
+// Author-supplied `colors` always wins; this only fills the holes.
+// The literals are the DOM-less fallback (a node test, a standalone view), matching filters.js's
+// "honest fallbacks" rather than pretending a theme was found.
+const THEME_FALLBACK = ['#2563eb', '#8fc0ff', '#101418', '#0b0d10'];
+let paletteCache = null;
+function themePalette() {
+  if (paletteCache) return paletteCache;
+  paletteCache = THEME_FALLBACK.slice();
+  if (typeof document !== 'undefined' && typeof getComputedStyle !== 'undefined') {
+    const cs = getComputedStyle(document.documentElement);
+    const v = (k) => (cs.getPropertyValue(k) || '').trim();
+    const accent = v('--accent') || paletteCache[0];
+    paletteCache = [accent, v('--accent-2') || accent, v('--text') || paletteCache[2], v('--ink') || paletteCache[3]];
+  }
+  return paletteCache;
+}
+// The palette a scene actually paints with: what the author wrote, then the theme.
+const paletteOf = (colors) => {
+  const th = themePalette();
+  return th.map((c, i) => (typeof colors?.[i] === 'string' ? colors[i] : c));
+};
 const ease = (p) => p * p * (3 - 2 * p);          // smoothstep: no linear ramps on visible moves
 
 // A rounded slab, built from a Shape so it bevels properly. three's RoundedBoxGeometry lives in
@@ -277,6 +306,219 @@ const SCENES = {
       plane.rotateX(Math.PI / 2);                       // a cone points +Y; aim it along the path
       plane.visible = p > 0.001 && p < 0.999;
       route.material.opacity = Math.min(1, u * 6);
+    } };
+  },
+
+  // A SURFACE THAT BREAKS. One slab, cut into a grid of shards, each flying out with its own tumble.
+  // Reach for it when the beat is "this comes apart": a captured UI (`screen`) shattering reads as the
+  // product being taken to pieces, and the same scene with no texture is a solid plate breaking.
+  //
+  // PURE IN t. The break is a single parameter p = (t - breakAt)/breakDur, and every shard's offset and
+  // rotation angle is a function of p times ITS OWN seeded constants, baked once at build. Nothing is
+  // integrated, so frame 300 does not care whether frame 299 ran. The pattern is seeded (`seed`), which
+  // is what makes the same JSON give the same shards on all 8 workers.
+  shatter(L, colors) {
+    const pal = paletteOf(colors);
+    const grid = Math.max(2, Math.min(48, Math.round(Math.sqrt(Math.max(4, L.count ?? 144)))));
+    const W = 3.2, H = 2.0, cw = W / grid, ch = H / grid;
+    const r = rng(L.seed ?? 7);
+    const cells = grid * grid, verts = cells * 6;
+    const pos = new Float32Array(verts * 3);
+    const uv = new Float32Array(verts * 2);
+    const local = new Float32Array(verts * 3);      // each vertex relative to its own shard's centre
+    const mid = new Float32Array(cells * 3);
+    const dir = new Float32Array(cells * 3);
+    const axis = new Float32Array(cells * 3);
+    const rate = new Float32Array(cells);
+    const CORNER = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]];
+    for (let gy = 0; gy < grid; gy++) for (let gx = 0; gx < grid; gx++) {
+      const c = gy * grid + gx;
+      const mx = -W / 2 + (gx + 0.5) * cw, my = -H / 2 + (gy + 0.5) * ch;
+      mid[c * 3] = mx; mid[c * 3 + 1] = my; mid[c * 3 + 2] = 0;
+      // OUTWARD, plus a seeded wobble. A purely radial burst reads as a mechanism; the jitter is what
+      // makes it read as a break.
+      const jx = (r() - 0.5) * 0.8, jy = (r() - 0.5) * 0.8;
+      const dx = mx / (W / 2) + jx, dy = my / (H / 2) + jy, dz = 0.35 + r() * 1.15;
+      const dl = Math.hypot(dx, dy, dz) || 1;
+      dir[c * 3] = dx / dl; dir[c * 3 + 1] = dy / dl; dir[c * 3 + 2] = dz / dl;
+      const ax = r() - 0.5, ay = r() - 0.5, az = r() - 0.5;
+      const al = Math.hypot(ax, ay, az) || 1;
+      axis[c * 3] = ax / al; axis[c * 3 + 1] = ay / al; axis[c * 3 + 2] = az / al;
+      rate[c] = 0.5 + r() * 1.9;
+      for (let k = 0; k < 6; k++) {
+        const v = c * 6 + k;
+        local[v * 3] = CORNER[k][0] * cw; local[v * 3 + 1] = CORNER[k][1] * ch; local[v * 3 + 2] = 0;
+        uv[v * 2] = (gx + CORNER[k][0] + 0.5) / grid;
+        uv[v * 2 + 1] = (gy + CORNER[k][1] + 0.5) / grid;
+      }
+    }
+    const geo = new (T().BufferGeometry)();
+    geo.setAttribute('position', new (T().BufferAttribute)(pos, 3));
+    geo.setAttribute('uv', new (T().BufferAttribute)(uv, 2));
+    let ensure = null, mat;
+    if (L.screen) {
+      const tx = textureFrom(L.screen, 'shatter screen'); ensure = tx.ensure;
+      mat = new (T().MeshBasicMaterial)({ map: tx.tex, side: T().DoubleSide });   // a screen EMITS
+    } else {
+      mat = new (T().MeshStandardMaterial)({ color: hex(pal[0]),
+        roughness: L.roughness ?? 0.32, metalness: L.metalness ?? 0.55, side: T().DoubleSide, flatShading: true });
+    }
+    const mesh = new (T().Mesh)(geo, mat);
+    const m4 = new (T().Matrix4)(), v3 = new (T().Vector3)(), ax3 = new (T().Vector3)();
+    return { obj: mesh, pose(t, LL) {
+      if (ensure) ensure();
+      const at = LL.breakAt ?? 0.6, dur = Math.max(1e-6, LL.breakDur ?? 2.4);
+      const p = Math.max(0, Math.min(1, (t - at) / dur));
+      const fly = p * p * (LL.travel ?? 2.6);                 // accelerating: a break does not ease out
+      const zsp = p * p * (LL.depth ?? 1.6);
+      const turn = p * (LL.spin ?? 1) * Math.PI * 1.4;
+      for (let c = 0; c < cells; c++) {
+        ax3.set(axis[c * 3], axis[c * 3 + 1], axis[c * 3 + 2]);
+        m4.makeRotationAxis(ax3, turn * rate[c]);
+        const ox = mid[c * 3] + dir[c * 3] * fly;
+        const oy = mid[c * 3 + 1] + dir[c * 3 + 1] * fly;
+        const oz = dir[c * 3 + 2] * zsp;
+        for (let k = 0; k < 6; k++) {
+          const v = c * 6 + k;
+          v3.set(local[v * 3], local[v * 3 + 1], local[v * 3 + 2]).applyMatrix4(m4);
+          pos[v * 3] = ox + v3.x; pos[v * 3 + 1] = oy + v3.y; pos[v * 3 + 2] = oz + v3.z;
+        }
+      }
+      geo.attributes.position.needsUpdate = true;
+      geo.computeVertexNormals();                             // shards tumble, so the lighting must too
+      mesh.rotation.y = (LL.yaw ?? 0) + Math.sin(t * 0.28) * 0.12;
+      mesh.rotation.x = (LL.pitch ?? 0);
+    } };
+  },
+
+  // FIELD LINES. A dipole (`poles: 2`) or a single source (`poles: 1`), with the lines TRACED rather
+  // than drawn: each one is integrated along the real field direction at build time, so the curvature
+  // is the physics and not a bezier somebody eyeballed. Charges travel the traced paths.
+  //
+  // PURE IN t. The trace happens ONCE, in the builder, with a fixed step count — the geometry is frozen
+  // by the time a frame renders. Per frame only the travellers move, and each one's position is
+  // frac(t * its own rate + its own phase) indexed into its line. No integration per frame, so seeking
+  // backwards lands on the identical sample.
+  magnetic(L, colors) {
+    const poles = L.poles ?? 2;
+    if (poles !== 1 && poles !== 2) {
+      throw new Error(`three magnetic: \`poles\` must be 1 or 2, got ${JSON.stringify(L.poles)} — 2 is a dipole (field lines arc from one pole to the other), 1 is a single source (they run straight out).`);
+    }
+    const pal = paletteOf(colors);
+    const lines = Math.max(3, Math.min(120, Math.round(L.count ?? 18)));
+    const STEP = 200, H = 0.022, D = 0.42;
+    const r = rng(L.seed ?? 3);
+    const grp = new (T().Group)();
+    // The field, summed over the charges. Normalised, so the step is arc length rather than strength:
+    // an un-normalised step stalls to nothing far from the poles and the line never reaches anywhere.
+    const CH = poles === 2 ? [[0, D, 0, 1], [0, -D, 0, -1]] : [[0, 0, 0, 1]];
+    const field = (x, y, z, o) => {
+      let fx = 0, fy = 0, fz = 0;
+      for (const [cx, cy, cz, q] of CH) {
+        const dx = x - cx, dy = y - cy, dz = z - cz;
+        const d2 = dx * dx + dy * dy + dz * dz + 1e-4;
+        const k = q / (d2 * Math.sqrt(d2));
+        fx += dx * k; fy += dy * k; fz += dz * k;
+      }
+      const l = Math.hypot(fx, fy, fz) || 1;
+      o[0] = fx / l; o[1] = fy / l; o[2] = fz / l;
+    };
+    const paths = [];
+    const f = [0, 0, 0];
+    for (let i = 0; i < lines; i++) {
+      // Seeded launch angles around the source. Evenly spaced rings would read as a wireframe ball.
+      const th = (i / lines) * Math.PI * 2 + (r() - 0.5) * 0.25;
+      const el = 0.18 + r() * 1.5;                          // how far off the axis it leaves
+      const s = 0.16;
+      const src = CH[0];
+      let x = src[0] + s * Math.sin(el) * Math.cos(th);
+      let y = src[1] + s * Math.cos(el);
+      let z = src[2] + s * Math.sin(el) * Math.sin(th);
+      const pts = new Float32Array((STEP + 1) * 3);
+      for (let k = 0; k <= STEP; k++) {
+        pts[k * 3] = x; pts[k * 3 + 1] = y; pts[k * 3 + 2] = z;
+        field(x, y, z, f);
+        // Past the far edge the line has said everything it has to say: hold it, so the buffer stays a
+        // fixed size and the geometry cannot depend on how many steps a particular seed survived.
+        if (Math.hypot(x, y, z) < 3.2) { x += f[0] * H; y += f[1] * H; z += f[2] * H; }
+      }
+      const g = new (T().BufferGeometry)();
+      g.setAttribute('position', new (T().BufferAttribute)(pts, 3));
+      grp.add(new (T().Line)(g, new (T().LineBasicMaterial)({
+        color: hex(pal[1]), transparent: true, opacity: 0.55 })));
+      paths.push(pts);
+    }
+    // The poles themselves, so the lines have something to come from and go to.
+    for (const [cx, cy, cz, q] of CH) {
+      const b = new (T().Mesh)(new (T().SphereGeometry)(0.13, 24, 16),
+        new (T().MeshStandardMaterial)({ color: hex(q > 0 ? pal[0] : pal[1]), roughness: 0.3, metalness: 0.7 }));
+      b.position.set(cx, cy, cz);
+      grp.add(b);
+    }
+    // The travellers: three per line, each with its own rate and phase so the flow never pulses in unison.
+    const N = lines * 3;
+    const tp = new Float32Array(N * 3);
+    const tRate = new Float32Array(N), tPhase = new Float32Array(N);
+    for (let i = 0; i < N; i++) { tRate[i] = 0.10 + r() * 0.12; tPhase[i] = r(); }
+    const tg = new (T().BufferGeometry)();
+    tg.setAttribute('position', new (T().BufferAttribute)(tp, 3));
+    grp.add(new (T().Points)(tg, new (T().PointsMaterial)({
+      color: hex(pal[2]), size: L.pointSize ?? 0.05, sizeAttenuation: true, transparent: true, opacity: 0.9 })));
+    return { obj: grp, pose(t, LL) {
+      for (let i = 0; i < N; i++) {
+        const line = paths[i % lines];
+        const u = ((t * tRate[i] + tPhase[i]) % 1 + 1) % 1;   // absolute from t, never advanced
+        const k = Math.min(STEP, Math.max(0, Math.round(u * STEP)));
+        tp[i * 3] = line[k * 3]; tp[i * 3 + 1] = line[k * 3 + 1]; tp[i * 3 + 2] = line[k * 3 + 2];
+      }
+      tg.attributes.position.needsUpdate = true;
+      grp.rotation.y = t * 0.16 * (LL.spin ?? 1) + (LL.yaw ?? 0);
+      grp.rotation.x = (LL.pitch ?? 0.18) + Math.sin(t * 0.23) * 0.06;
+    } };
+  },
+
+  // A CHURNING SURFACE for HTML to sit above. A subdivided plane displaced by summed sine waves, lit so
+  // the swell reads as volume rather than as a gradient. Deliberately slow: this is a backdrop, and a
+  // backdrop that competes with the copy is a mistake this repo has already made.
+  //
+  // PURE IN t. Every vertex height is amp * sum(sin(k·x + w·t + phase)), evaluated fresh each frame from
+  // the frame's own t. The wave set is seeded once, so the surface is reproducible and never drifts.
+  liquidBackground(L, colors) {
+    const pal = paletteOf(colors);
+    const seg = Math.max(8, Math.min(160, Math.round(L.count ?? 96)));
+    // DELIBERATELY OVERSIZED. This is a backdrop and the author owns `dolly` and `pitch`, so a plane cut
+    // to one framing shows its own edge at the next one — which it did, as a white band down the right.
+    // Off-screen quads are cheap; a visible seam is not.
+    const geo = new (T().PlaneGeometry)(22, 16, seg, seg);
+    const attr = geo.attributes.position;
+    const base = Float32Array.from(attr.array);
+    const r = rng(L.seed ?? 11);
+    // Four waves, seeded: two long swells that carry the shape, two short ones that give it a skin.
+    const waves = [];
+    for (let i = 0; i < 4; i++) {
+      const th = r() * Math.PI * 2;
+      const k = (i < 2 ? 0.55 + r() * 0.5 : 1.6 + r() * 1.8);
+      waves.push({ kx: Math.cos(th) * k, ky: Math.sin(th) * k,
+        w: (i < 2 ? 0.30 + r() * 0.22 : 0.55 + r() * 0.5), ph: r() * Math.PI * 2,
+        a: (i < 2 ? 1 : 0.34) });
+    }
+    const mesh = new (T().Mesh)(geo, new (T().MeshStandardMaterial)({
+      color: hex(pal[0]), roughness: L.roughness ?? 0.22, metalness: L.metalness ?? 0.62,
+      side: T().DoubleSide, flatShading: false }));
+    return { obj: mesh, pose(t, LL) {
+      const amp = LL.amp ?? 0.34, sp = LL.morphSpeed ?? 1;
+      const arr = attr.array;
+      for (let i = 0; i < attr.count; i++) {
+        const x = base[i * 3], y = base[i * 3 + 1];
+        let z = 0;
+        for (const wv of waves) z += wv.a * Math.sin(wv.kx * x + wv.ky * y + wv.w * sp * t + wv.ph);
+        arr[i * 3 + 2] = z * amp;
+      }
+      attr.needsUpdate = true;
+      geo.computeVertexNormals();                            // the swell is only visible in the lighting
+      mesh.rotation.x = -(LL.pitch ?? 0.62);
+      mesh.rotation.z = (LL.yaw ?? 0);
+      mesh.position.y = -0.35 + Math.sin(t * 0.18) * 0.05;
     } };
   },
 

@@ -562,6 +562,54 @@
       ]
     },
     {
+      "name": "codeDiff",
+      "type": "vawe:block",
+      "description": "the edit PERFORMED: removals collapse red, additions expand green, in edit order",
+      "tags": [
+        "codeDiff"
+      ]
+    },
+    {
+      "name": "codeFlight",
+      "type": "vawe:block",
+      "description": "discrete snippets fly in from alternating sides and assemble into one program",
+      "tags": [
+        "codeFlight"
+      ]
+    },
+    {
+      "name": "codeHighlight",
+      "type": "vawe:block",
+      "description": "a band sweeps down to one line while the context dims out of the way",
+      "tags": [
+        "codeHighlight"
+      ]
+    },
+    {
+      "name": "codeMorph",
+      "type": "vawe:block",
+      "description": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+      "tags": [
+        "codeMorph"
+      ]
+    },
+    {
+      "name": "codeScroll",
+      "type": "vawe:block",
+      "description": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+      "tags": [
+        "codeScroll"
+      ]
+    },
+    {
+      "name": "codeTyping",
+      "type": "vawe:block",
+      "description": "live coding: one character frontier crosses the snippet, the caret riding it",
+      "tags": [
+        "codeTyping"
+      ]
+    },
+    {
       "name": "colorCycle",
       "type": "vawe:block",
       "description": "one word cycling through hues",
@@ -666,6 +714,22 @@
       ]
     },
     {
+      "name": "flowchart",
+      "type": "vawe:block",
+      "description": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+      "tags": [
+        "flowchart"
+      ]
+    },
+    {
+      "name": "flowchart.vertical",
+      "type": "vawe:block",
+      "description": "the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor",
+      "tags": [
+        "flowchart"
+      ]
+    },
+    {
       "name": "followCard",
       "type": "vawe:block",
       "description": "name over handle, pill CTA",
@@ -703,6 +767,54 @@
       "description": "frosted glass panel (blurs the moving bg behind it) + sheen",
       "tags": [
         "glassCard"
+      ]
+    },
+    {
+      "name": "glassControls",
+      "type": "vawe:block",
+      "description": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+      "tags": [
+        "glassControls"
+      ]
+    },
+    {
+      "name": "glassDock",
+      "type": "vawe:block",
+      "description": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+      "tags": [
+        "glassDock"
+      ]
+    },
+    {
+      "name": "glassHome",
+      "type": "vawe:block",
+      "description": "frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal",
+      "tags": [
+        "glassHome"
+      ]
+    },
+    {
+      "name": "glassMenu",
+      "type": "vawe:block",
+      "description": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+      "tags": [
+        "glassMenu"
+      ]
+    },
+    {
+      "name": "glassNotification",
+      "type": "vawe:block",
+      "description": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+      "tags": [
+        "glassNotification"
+      ]
+    },
+    {
+      "name": "glassWidgets",
+      "type": "vawe:block",
+      "description": "frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)",
+      "tags": [
+        "glassWidgets"
       ]
     },
     {
@@ -960,6 +1072,14 @@
       "description": "soft mesh-gradient surface (stacked accent blobs)",
       "tags": [
         "meshPanel"
+      ]
+    },
+    {
+      "name": "nodeGraph",
+      "type": "vawe:block",
+      "description": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+      "tags": [
+        "nodeGraph"
       ]
     },
     {
@@ -1443,11 +1563,51 @@
       ]
     },
     {
+      "name": "usMap",
+      "type": "vawe:block",
+      "description": "US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend",
+      "tags": [
+        "usMap"
+      ]
+    },
+    {
+      "name": "usMapBubble",
+      "type": "vawe:block",
+      "description": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+      "tags": [
+        "usMapBubble"
+      ]
+    },
+    {
+      "name": "usMapFlow",
+      "type": "vawe:block",
+      "description": "origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out",
+      "tags": [
+        "usMapFlow"
+      ]
+    },
+    {
+      "name": "usMapHex",
+      "type": "vawe:block",
+      "description": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+      "tags": [
+        "usMapHex"
+      ]
+    },
+    {
       "name": "videoLowerThird",
       "type": "vawe:block",
       "description": "creator lower third · avatar, subs, red CTA",
       "tags": [
         "videoLowerThird"
+      ]
+    },
+    {
+      "name": "worldMap",
+      "type": "vawe:block",
+      "description": "world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map",
+      "tags": [
+        "worldMap"
       ]
     }
   ]

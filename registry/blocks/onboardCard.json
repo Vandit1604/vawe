@@ -8,8 +8,8 @@
     "onboardCard"
   ],
   "dimensions": {
-    "width": 504,
-    "height": 262
+    "width": 541,
+    "height": 280
   },
   "install": {
     "kind": "scene-layer",

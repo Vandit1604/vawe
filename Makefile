@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index
 
 # make fonts  — download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -153,9 +153,12 @@ video: build
 # This exists because the fast path was already reachable (NOCHECK=1 NOAUDIT=1) and nobody would ever
 # find it. Measured on a 15s film: the whole static ladder is ~1s against an 8.4s draft render, so the
 # gates were never the cost — being interrupted mid-thought was. Iterate here; prove it with `make ship`.
+# Then it writes both contact sheets (`make sheets`), because the two images an author MUST read were
+# separate commands nobody remembered. Set NOSHEETS=1 to skip them: they cost roughly one more render.
 dev: build
 	./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
+	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 
 # make check D=<file>  — every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
@@ -165,11 +168,14 @@ check:
 # make ship D=<file>  — the ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
+# It finishes with both contact sheets (`make sheets`); NOSHEETS=1 skips them. Producing them is not the
+# same as reading them — the receipt is marked `auto` and beat-check still asks you to open the sheet.
 ship: build
 	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	node verify/audit.mjs $(D)
 	node scripts/gates/seam-snap.mjs $(D)
+	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@echo "" && echo "▶ LAST STEP, and no gate can do it: make judge D=$(D)$(if $(VS), VS=$(VS)) — then READ the sheet."
 
 # make list  — show formats + where their schema/sample live (for authoring the JSON)
@@ -430,6 +436,15 @@ approve:
 
 beats:
 	node scripts/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
+
+# make sheets D=<file> [VS=brand]  — BOTH review contact sheets from ONE browser: the beat sheet
+# (/tmp/beats/<name>.png, where each beat LANDS) and the reveal sheet (/tmp/reveal/<name>.png, how each
+# beat ARRIVES). `make dev` and `make ship` run this for you, so the sheets are always current; it is
+# here as its own target for the times you want them without a render.
+# It does NOT count as having looked: the receipt it writes is marked `auto`, and beat-check keeps
+# nagging until `make beats` or `make reveal` signs the look off. See scripts/author/sheets.mjs.
+sheets:
+	node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS))
 
 # make sheet NAME=brand [SERVE=1]  — DESIGN SHEET: every captured element on one page (on the theme bg),
 # labelled with size + font-substitution warnings. Review + fix the raw material BEFORE building a video.

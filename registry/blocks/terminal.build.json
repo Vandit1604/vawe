@@ -8,8 +8,8 @@
     "terminal"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 172
+    "width": 644,
+    "height": 188
   },
   "install": {
     "kind": "scene-layer",

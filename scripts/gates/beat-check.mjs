@@ -275,9 +275,19 @@ if (heldOpen.length) {
 // The hashing and the path live in scripts/lib/receipt.mjs now, so every stage can be signed off the
 // same way. This reader is unchanged in behaviour: same code, same severity, same two wordings for the
 // two genuinely different states (nobody looked at all, versus somebody looked at an older version).
+//
+// TWO FACTS, NOT ONE. `make dev` and `make ship` now produce both sheets automatically, so "a sheet
+// exists for this content" stopped being evidence that a person looked. A receipt written by that
+// automatic pass carries `auto: true`, and this gate still fires on it — otherwise every scene in the
+// loop would be permanently, silently green for a look nobody took, which is the shape of a gate that
+// manufactures confidence. What changes is the ASK: the sheet is already on disk, so the finding names
+// the file to open rather than a command that has already been run.
 const seen = readReceipt('beats', file);
-if (!seen.exists || seen.stale) {
-  warn('beats-unseen', seen.exists
+const auto = seen.exists && !seen.stale && !!seen.receipt.auto;
+if (!seen.exists || seen.stale || auto) {
+  warn('beats-unseen', auto
+    ? `the contact sheet(s) for this scene are ALREADY ON DISK and current: ${[seen.receipt.sheet, seen.receipt.reveal].filter(Boolean).join(' · ')}. \`make dev\`/\`make ship\` made them; producing an image is not looking at one, and static gates read structure and cannot see murk, overlap or a beat that lands wrong. Open them and read them, then \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) to sign the look off.`
+    : seen.exists
     ? `the scene has CHANGED since its beats were last looked at (receipt ${seen.rel} holds an older hash, sheet ${seen.receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read the sheet it prints.`
     : `nobody has looked at this scene's beats: no receipt at ${seen.rel}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) and read the sheet.`);
 }

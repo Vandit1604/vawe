@@ -1,7 +1,7 @@
 import { boot } from '/core/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
-import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
+import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText, decodeText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
@@ -363,7 +363,7 @@ boot((data, fps, theme, canvas) => {
       const mp = L.motionPath;
       window.gsap.to(el, {
         motionPath: { path: mp.path, align: mp.align, alignOrigin: mp.alignOrigin, autoRotate: mp.autoRotate ?? false, curviness: mp.curviness },
-        duration: mp.dur ?? (L.duration ?? 2), ease: mp.ease || 'power1.inOut',
+        duration: mp.dur ?? (L.duration ?? 2), ease: gsapEase(mp.ease, 'power1.inOut', `layer ${L.type} motionPath`),
         delay: (L.start ?? 0) + (mp.delay || 0), immediateRender: true });
     }
     // PHYSICS 2D (Physics2DPlugin): velocity/gravity/friction scatter. On a split layer each unit gets an
@@ -396,7 +396,7 @@ boot((data, fps, theme, canvas) => {
         if (spec[0]) targets.forEach(spec[0]);
         window.gsap.fromTo(targets, { ...spec[1] }, {
           ...spec[2], duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07,
-          ease: p.ease || 'power3.out', delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
+          ease: gsapEase(p.ease, 'power3.out', `layer ${L.type} parts`), delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
         });
         // A PART CAN NOW LEAVE. Every entry used to be a one-way tween, so a hand-authored html figure
         // could only ever fade out as ONE card while a native layer stack left piece by piece. That
@@ -412,7 +412,7 @@ boot((data, fps, theme, canvas) => {
           const span = L.duration ?? 0;
           window.gsap.fromTo(targets, { ...spec[2] }, {
             ...spec[3], duration: exitDur, stagger: p.stagger ?? 0.07,
-            ease: p.exitEase || p.ease || 'power2.in',
+            ease: gsapEase(p.exitEase ?? p.ease, 'power2.in', `layer ${L.type} parts exit`),
             delay: (L.start ?? 0) + Math.max(0, span - exitDur), immediateRender: false,
           });
         }
@@ -423,7 +423,7 @@ boot((data, fps, theme, canvas) => {
       const parts = new window.SplitText(el, { type: 'lines', mask: st.mask === false ? undefined : 'lines', linesClass: 'sline' });
       parts.lines.forEach((ln, i) => {
         window.gsap.fromTo(ln, { yPercent: 120, opacity: st.mask === false ? 0 : 1 },
-          { yPercent: 0, opacity: 1, duration: st.dur ?? 0.7, ease: st.ease || 'power3.out',
+          { yPercent: 0, opacity: 1, duration: st.dur ?? 0.7, ease: gsapEase(st.ease, 'power3.out', `layer ${L.type} splitText`),
             delay: (L.start ?? 0) + i * (st.stagger ?? 0.09), immediateRender: true });
       });
     }

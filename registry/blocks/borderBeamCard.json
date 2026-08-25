@@ -8,8 +8,8 @@
     "borderBeamCard"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 304
+    "width": 644,
+    "height": 323
   },
   "install": {
     "kind": "scene-layer",

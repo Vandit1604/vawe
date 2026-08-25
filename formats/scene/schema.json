@@ -26,7 +26,7 @@
       "lottie": ["fit", "h", "loop", "speed", "src", "w"],
       "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
       "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
-      "three": ["arcHeight", "bodyColor", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
+      "three": ["amp", "arcHeight", "bodyColor", "breakAt", "breakDur", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "poles", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
       "globe": ["arcHeight", "arcWidth", "colors", "dark", "dest", "diffuse", "drawDur", "drawStart", "globe", "h", "mapBrightness", "mapSamples", "markerSize", "origin", "phi", "phiDur", "phiTo", "radius", "resample", "scale", "seed", "speed", "theta", "w"],
       "composition": ["comp", "props"]
     }
@@ -1632,7 +1632,7 @@
         },
         "amp": {
           "type": "number",
-          "label": "Wave amplitude (paint)"
+          "label": "Wave amplitude (paint) \u00b7 three liquidBackground: swell height"
         },
         "rate": {
           "type": "number",
@@ -1731,14 +1731,29 @@
             "uiParallax",
             "pointCloud",
             "extrudeText",
-            "globe"
+            "globe",
+            "shatter",
+            "magnetic",
+            "liquidBackground"
           ]
         },
         "device": {
           "label": "three deviceShowcase: 'phone' (default) or 'laptop'"
         },
         "screen": {
-          "label": "three deviceShowcase: image src mapped onto the device screen"
+          "label": "three deviceShowcase: image src mapped onto the device screen \u00b7 three shatter: image mapped across the surface that breaks"
+        },
+        "breakAt": {
+          "type": "number",
+          "label": "three shatter: seconds into the layer before the surface breaks"
+        },
+        "breakDur": {
+          "type": "number",
+          "label": "three shatter: seconds the break takes"
+        },
+        "poles": {
+          "type": "number",
+          "label": "three magnetic: 2 = a dipole (lines arc pole to pole), 1 = a single source (lines run straight out)"
         },
         "bodyColor": {
           "label": "three deviceShowcase: device body colour"
@@ -1753,7 +1768,7 @@
           "label": "three uiParallax: gentle yaw amplitude"
         },
         "pointSize": {
-          "label": "three pointCloud / globe: point size in world units"
+          "label": "three pointCloud / globe / magnetic: point size in world units"
         },
         "globe": {
           "type": "boolean",

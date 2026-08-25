@@ -1,0 +1,72 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeScroll",
+  "type": "vawe:block",
+  "title": "codeScroll",
+  "description": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+  "tags": [
+    "codeScroll"
+  ],
+  "dimensions": {
+    "width": 705,
+    "height": 350
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeScroll",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "router.ts",
+      "theme": "ocean",
+      "line": 8,
+      "rows": 7,
+      "lines": [
+        "import { match } from \"./match\";",
+        "",
+        "const table = new Map();",
+        "",
+        "export function add(p, h) {",
+        "  table.set(p, h);",
+        "}",
+        "",
+        "export function route(url) {",
+        "  for (const [p, h] of table)",
+        "    if (match(p, url))",
+        "      return h;",
+        "}"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "line",
+      "rows",
+      "label",
+      "theme",
+      "dim",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeScroll.json",
+      "url": "https://vawe.dev/assets/blocks/codeScroll.json",
+      "target": "formats/scene/codeScroll.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeScroll.png"
+  }
+}

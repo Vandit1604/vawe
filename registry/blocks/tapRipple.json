@@ -8,8 +8,8 @@
     "tapRipple"
   ],
   "dimensions": {
-    "width": 194,
-    "height": 194
+    "width": 227,
+    "height": 212
   },
   "install": {
     "kind": "scene-layer",

@@ -8,8 +8,8 @@
     "lineChart"
   ],
   "dimensions": {
-    "width": 584,
-    "height": 293
+    "width": 623,
+    "height": 312
   },
   "install": {
     "kind": "scene-layer",

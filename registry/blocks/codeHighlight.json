@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeHighlight",
+  "type": "vawe:block",
+  "title": "codeHighlight",
+  "description": "a band sweeps down to one line while the context dims out of the way",
+  "tags": [
+    "codeHighlight"
+  ],
+  "dimensions": {
+    "width": 705,
+    "height": 257
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeHighlight",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "server.ts",
+      "theme": "ink",
+      "line": 2,
+      "lines": [
+        "export function serve(req) {",
+        "  const t = route(req.url);",
+        "  return t.handle(req);",
+        "}"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "line",
+      "label",
+      "theme",
+      "dim",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeHighlight.json",
+      "url": "https://vawe.dev/assets/blocks/codeHighlight.json",
+      "target": "formats/scene/codeHighlight.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeHighlight.png"
+  }
+}

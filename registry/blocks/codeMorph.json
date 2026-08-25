@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeMorph",
+  "type": "vawe:block",
+  "title": "codeMorph",
+  "description": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+  "tags": [
+    "codeMorph"
+  ],
+  "dimensions": {
+    "width": 705,
+    "height": 196
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeMorph",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "refactor",
+      "theme": "dusk",
+      "from": [
+        "const out = items.filter(fn);",
+        "return out;"
+      ],
+      "to": [
+        "return items.filter(fn);"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "from",
+      "to",
+      "label",
+      "theme",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeMorph.json",
+      "url": "https://vawe.dev/assets/blocks/codeMorph.json",
+      "target": "formats/scene/codeMorph.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeMorph.png"
+  }
+}

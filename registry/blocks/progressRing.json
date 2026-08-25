@@ -8,8 +8,8 @@
     "progressRing"
   ],
   "dimensions": {
-    "width": 194,
-    "height": 223
+    "width": 224,
+    "height": 240
   },
   "install": {
     "kind": "scene-layer",

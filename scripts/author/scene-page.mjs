@@ -9,10 +9,9 @@
 //   await page.grab(3.2, '/tmp/a.png');   // seconds → PNG
 //   await page.close();
 //
-// DEBT, STATED RATHER THAN HIDDEN: `beats.mjs` predates this and still carries its own copy of the
-// serve+boot block. It should adopt this one. It was not switched here because it is a tool in daily
-// use and refactoring it at the tail of a long session, without exercising its --vs and receipt paths,
-// is how a working thing quietly stops working.
+// That debt is paid: `beats.mjs` and `reveal.mjs` both boot through here now, and neither owns a server
+// or a browser any more. What that buys beyond one copy of the code: `scripts/author/sheets.mjs` builds
+// BOTH contact sheets off ONE open page, because the expensive thing is no longer per-tool.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

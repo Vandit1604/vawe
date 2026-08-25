@@ -133,6 +133,39 @@ const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|ro
 export const isEasingName = (n) => typeof n === 'string'
   && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n));
 
+// gsapEase(e, fallback, where) — an author-supplied easing for a GSAP-DRIVEN field → something GSAP
+// will actually honour.
+//
+// WHY THIS EXISTS. `parts[].ease`, `parts[].exitEase`, `morph.ease` and the sting/motion-path eases go
+// straight into `gsap.fromTo`, and GSAP does not refuse a name it does not know: `parseEase` returns
+// undefined and the tween silently runs on GSAP's default. So the two vocabularies were asymmetric.
+// resolveEasing (below) throws on a GSAP name and even explains that GSAP eases are real on these
+// fields — while these fields accepted an ENGINE name and quietly rendered a different curve.
+// `blocks/camera-chrome.mjs` names `easeOutCubic` twice and has been running on GSAP's default ever
+// since it was written. Measured: gsap.parseEase('easeOutCubic') is undefined, exactly like
+// gsap.parseEase('totalNonsenseXYZ').
+//
+// An ENGINE name resolves to its own FUNCTION rather than to a GSAP look-alike, because GSAP accepts a
+// function as an ease. So the author gets the curve they named, not the nearest approximation — there
+// is no mapping table to maintain and none to drift.
+export const gsapEase = (e, fallback, where = '') => {
+  if (typeof e === 'function') return e;
+  if (e == null || e === '') return fallback;
+  // GSAP's own vocabulary, asked of GSAP itself when it is loaded (authoritative), and matched by
+  // shape when it is not — this module is imported by tools that never boot a browser.
+  const g = typeof window !== 'undefined' && window.gsap;
+  if (g ? !!g.parseEase(e) : GSAP_EASE.test(String(e))) return e;
+  if (EASINGS[e]) return EASINGS[e];
+  if (Object.prototype.hasOwnProperty.call(FEEL, e)) return EASINGS[FEEL[e]];
+  const near = nearMisses(String(e), [...Object.keys(EASINGS), ...Object.keys(FEEL)]);
+  throw new Error(`${where ? `${where}: ` : ''}unknown easing ${JSON.stringify(e)} on a GSAP-driven field.`
+    + `${near.length ? ` Did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''}`
+    + ` Take a GSAP ease (power1..4/back/elastic/bounce/circ/expo/sine + .in/.out/.inOut),`
+    + ` or an engine easing: ${Object.keys(EASINGS).join(', ')}.`
+    + ' GSAP returns undefined for a name it does not know and then runs its DEFAULT curve, so an'
+    + ' unchecked name here renders a plausible frame that is not the one asked for.');
+};
+
 // resolveEasing — an easing name or a function → a pure easing function.
 //
 // ABSENT → easeOutCubic. A WRONG NAME → throw. Those are different questions and this used to answer

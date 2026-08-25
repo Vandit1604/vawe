@@ -1,0 +1,234 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "rect",
+      "radius": 24,
+      "x": 160,
+      "y": 160,
+      "w": 612,
+      "h": 436,
+      "bg": "rgba(9,11,17,0.62)",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.55,
+      "out": "defocus",
+      "exitDur": 0.4
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 612,
+      "h": 436,
+      "layout": "column",
+      "items": "flex-start",
+      "gap": 12,
+      "pad": 32,
+      "bg": "rgba(255,255,255,0.09)",
+      "radius": 24,
+      "border": "1.5px solid rgba(255,255,255,0.14)",
+      "glass": 16,
+      "shadow": true,
+      "start": 0.2,
+      "duration": 8,
+      "anim": "pop",
+      "enterDur": 0.55,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "rect",
+          "w": 532,
+          "h": 2,
+          "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+          "radius": 0
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "Frosted surfaces",
+          "size": 52,
+          "color": "#fff",
+          "ls": "-0.02em"
+        },
+        {
+          "type": "text",
+          "weight": 400,
+          "text": "The field behind the panel never stops moving.",
+          "font": "serif",
+          "size": 28,
+          "color": "rgba(255,255,255,0.72)",
+          "w": 532
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 796,
+      "y": 160,
+      "w": 444,
+      "h": 206,
+      "layout": "column",
+      "justify": "center",
+      "items": "flex-start",
+      "gap": 6,
+      "pad": 24,
+      "bg": "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.11)), rgba(9,11,17,0.62)",
+      "radius": 16,
+      "border": "1.5px solid rgba(255,255,255,0.18)",
+      "glass": 16,
+      "elevation": 4,
+      "start": 0.45,
+      "duration": 7.75,
+      "anim": "slide-right",
+      "enterDur": 0.42,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "FRAMES",
+          "size": 17,
+          "color": "rgba(255,255,255,0.78)",
+          "ls": "0.10em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "1.9k",
+          "size": 48,
+          "color": "#fff",
+          "ls": "-0.02em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "+12%",
+          "size": 17,
+          "color": "color-mix(in srgb, var(--up) 45%, #fff)"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 796,
+      "y": 390,
+      "w": 444,
+      "h": 206,
+      "layout": "column",
+      "justify": "center",
+      "items": "flex-start",
+      "gap": 6,
+      "pad": 24,
+      "bg": "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.11)), rgba(9,11,17,0.62)",
+      "radius": 16,
+      "border": "1.5px solid rgba(255,255,255,0.18)",
+      "glass": 16,
+      "elevation": 4,
+      "start": 0.59,
+      "duration": 7.61,
+      "anim": "slide-right",
+      "enterDur": 0.42,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "PASSES",
+          "size": 17,
+          "color": "rgba(255,255,255,0.78)",
+          "ls": "0.10em"
+        },
+        {
+          "type": "text",
+          "weight": 700,
+          "text": "3",
+          "size": 48,
+          "color": "#fff",
+          "ls": "-0.02em"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "x": 160,
+      "y": 620,
+      "layout": "row",
+      "items": "center",
+      "gap": 12,
+      "start": 0.75,
+      "duration": 7.45,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "out": "defocus",
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "deterministic",
+          "size": 17,
+          "color": "#fff",
+          "pad": "11px 22px",
+          "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
+          "radius": 100,
+          "border": "1.5px solid rgba(255,255,255,0.18)",
+          "glass": 14,
+          "elevation": 2,
+          "delay": 0.15,
+          "anim": "pop",
+          "enterDur": 0.3
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "seeked",
+          "size": 17,
+          "color": "#fff",
+          "pad": "11px 22px",
+          "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
+          "radius": 100,
+          "border": "1.5px solid rgba(255,255,255,0.18)",
+          "glass": 14,
+          "elevation": 2,
+          "delay": 0.22,
+          "anim": "pop",
+          "enterDur": 0.3
+        },
+        {
+          "type": "text",
+          "weight": 600,
+          "text": "pure(n)",
+          "size": 17,
+          "color": "#fff",
+          "pad": "11px 22px",
+          "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
+          "radius": 100,
+          "border": "1.5px solid rgba(255,255,255,0.18)",
+          "glass": 14,
+          "elevation": 2,
+          "delay": 0.29,
+          "anim": "pop",
+          "enterDur": 0.3
+        }
+      ]
+    }
+  ]
+}

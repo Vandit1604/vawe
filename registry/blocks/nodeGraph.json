@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "nodeGraph",
+  "type": "vawe:block",
+  "title": "nodeGraph",
+  "description": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+  "tags": [
+    "nodeGraph"
+  ],
+  "dimensions": {
+    "width": 1207,
+    "height": 548
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "nodeGraph",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "highlight": "core",
+      "step": 0.14
+    },
+    "props": [
+      "anim",
+      "x",
+      "y",
+      "nodes",
+      "edges",
+      "highlight",
+      "nodeW",
+      "nodeH",
+      "labelSize",
+      "radius",
+      "gap",
+      "start",
+      "dur",
+      "step"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/nodeGraph.json",
+      "url": "https://vawe.dev/assets/blocks/nodeGraph.json",
+      "target": "formats/scene/nodeGraph.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/nodeGraph.png"
+  }
+}

@@ -8,8 +8,8 @@
     "pillRow"
   ],
   "dimensions": {
-    "width": 424,
-    "height": 74
+    "width": 459,
+    "height": 87
   },
   "install": {
     "kind": "scene-layer",

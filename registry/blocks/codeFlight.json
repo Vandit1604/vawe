@@ -1,0 +1,75 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeFlight",
+  "type": "vawe:block",
+  "title": "codeFlight",
+  "description": "discrete snippets fly in from alternating sides and assemble into one program",
+  "tags": [
+    "codeFlight"
+  ],
+  "dimensions": {
+    "width": 705,
+    "height": 354
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "codeFlight",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "assemble",
+      "theme": "neon",
+      "snippets": [
+        {
+          "label": "imports",
+          "lines": [
+            "import { serve } from \"./serve\";"
+          ]
+        },
+        {
+          "label": "state",
+          "lines": [
+            "const table = new Map();"
+          ]
+        },
+        {
+          "label": "entry",
+          "lines": [
+            "serve(table);",
+            "export default table;"
+          ]
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "snippets",
+      "label",
+      "theme",
+      "each",
+      "stagger",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeFlight.json",
+      "url": "https://vawe.dev/assets/blocks/codeFlight.json",
+      "target": "formats/scene/codeFlight.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeFlight.png"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "h": 136,
+      "start": 0.2,
+      "duration": 8,
+      "html": "<div style=\"position:relative;width:620px;height:136px;border-radius:14px;background:#1E1B2E;border:1px solid rgba(255,255,255,0.08);overflow:hidden;font-variant-ligatures:none\"><div style=\"position:absolute;left:26px;top:20px;font:600 16px var(--font-mono);letter-spacing:0.05em;color:#9C93C0\">refactor</div><div style=\"position:absolute;left:26px;top:55px;width:568px;height:60px\"><span style=\"position:absolute;left:calc(0ch + var(--m,0) * 0ch);top:calc(30px + var(--m,0) * -30px);font:500 20px var(--font-mono);white-space:pre;color:#8AB8F5;\">return</span><span style=\"position:absolute;left:calc(12ch + var(--m,0) * -5ch);top:calc(0px + var(--m,0) * 0px);font:500 20px var(--font-mono);white-space:pre;color:#B39DF0;\">items.filter(fn);</span><span style=\"position:absolute;left:0ch;top:0px;font:500 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--down) 62%, #fff);opacity:calc(1 - clamp(0, var(--m,0) * 2.4, 1))\">const</span><span style=\"position:absolute;left:6ch;top:0px;font:500 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--down) 62%, #fff);opacity:calc(1 - clamp(0, var(--m,0) * 2.4, 1))\">out</span><span style=\"position:absolute;left:10ch;top:0px;font:500 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--down) 62%, #fff);opacity:calc(1 - clamp(0, var(--m,0) * 2.4, 1))\">=</span><span style=\"position:absolute;left:7ch;top:30px;font:500 20px var(--font-mono);white-space:pre;color:color-mix(in srgb, var(--down) 62%, #fff);opacity:calc(1 - clamp(0, var(--m,0) * 2.4, 1))\">out;</span></div></div>",
+      "vars": {
+        "--m": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0.5,
+      "varsDur": 1.5,
+      "varsEase": "easeInOutCubic"
+    }
+  ]
+}

@@ -8,8 +8,8 @@
     "browserFrame"
   ],
   "dimensions": {
-    "width": 584,
-    "height": 344
+    "width": 623,
+    "height": 364
   },
   "install": {
     "kind": "scene-layer",

@@ -14,6 +14,9 @@ export const ICONS = {
   braces: '<path d="M8.5 3.5c-2 0-3 1-3 3v2.5l-2 3 2 3V20c0 2 1 3 3 3M15.5 3.5c2 0 3 1 3 3v2.5l2 3-2 3V20c0 2-1 3-3 3"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3.2 12h17.6M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/>',
   arrowRight: '<path d="M4.5 12h14M12.5 6l6 6-6 6"/>',
+  // the mirror. Its absence meant nothing in the library could point BACK: a transport row, a
+  // carousel, a step sequence all had to reach for an unrelated glyph or draw their own.
+  arrowLeft: '<path d="M19.5 12h-14M11.5 6l-6 6 6 6"/>',
   spark: '<path d="M12 2.5l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/>',
   plug: '<path d="M8 2.5v6M16 2.5v6M6 8.5h12v3a6 6 0 01-12 0zM12 17.5v4"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',

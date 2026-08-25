@@ -8,8 +8,8 @@
     "pricingCard"
   ],
   "dimensions": {
-    "width": 384,
-    "height": 338
+    "width": 418,
+    "height": 358
   },
   "install": {
     "kind": "scene-layer",

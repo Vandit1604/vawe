@@ -1,0 +1,78 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassMenu",
+  "type": "vawe:block",
+  "title": "glassMenu",
+  "description": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+  "tags": [
+    "glassMenu"
+  ],
+  "dimensions": {
+    "width": 521,
+    "height": 342
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "glassMenu",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 440,
+      "title": "ACTIONS",
+      "highlight": 3,
+      "rows": [
+        {
+          "icon": "spark",
+          "label": "New surface",
+          "hint": "N"
+        },
+        {
+          "icon": "layers",
+          "label": "Stack behind",
+          "hint": "["
+        },
+        {
+          "sep": true
+        },
+        {
+          "icon": "bolt",
+          "label": "Blur backdrop",
+          "hint": "B"
+        },
+        {
+          "icon": "clock",
+          "label": "Hold frame",
+          "hint": "H"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "title",
+      "rows",
+      "highlight",
+      "rowH",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassMenu.json",
+      "url": "https://vawe.dev/assets/blocks/glassMenu.json",
+      "target": "formats/scene/glassMenu.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassMenu.png"
+  }
+}

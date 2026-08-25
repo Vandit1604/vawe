@@ -8,8 +8,8 @@
     "followCard"
   ],
   "dimensions": {
-    "width": 404,
-    "height": 116
+    "width": 439,
+    "height": 131
   },
   "install": {
     "kind": "scene-layer",

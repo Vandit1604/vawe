@@ -1,0 +1,53 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "h": 196,
+      "start": 0.2,
+      "duration": 8,
+      "html": "<div style=\"position:relative;width:620px;height:196px;border-radius:14px;background:#0D1117;border:1px solid rgba(255,255,255,0.08);overflow:hidden;font-variant-ligatures:none\"><div style=\"position:absolute;left:26px;top:20px;font:600 16px var(--font-mono);letter-spacing:0.05em;color:#8B949E\">server.ts</div><div style=\"position:absolute;left:26px;top:50px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#79C0FF;\"><span style=\"position:relative;display:inline-block\"><span style=\"display:inline-block;clip-path:inset(0 calc(100% - clamp(0, round(down, var(--type,0), 1) - 0, 28) * 1ch) 0 0)\">export function serve(req) {</span><span style=\"position:absolute;top:3px;left:calc(clamp(0, round(down, var(--type,0), 1) - 0, 28) * 1ch);width:0.55ch;height:22px;background:var(--accent);opacity:calc((clamp(0, (var(--type,0) - 0 + 1) * 40, 1) * clamp(0, (28 - var(--type,0) + 1) * 40, 1)) * ((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2)))\"></span></span></div><div style=\"position:absolute;left:26px;top:80px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#7EE787;\"><span style=\"position:relative;display:inline-block\"><span style=\"display:inline-block;clip-path:inset(0 calc(100% - clamp(0, round(down, var(--type,0), 1) - 29, 27) * 1ch) 0 0)\">  const t = route(req.url);</span><span style=\"position:absolute;top:3px;left:calc(clamp(0, round(down, var(--type,0), 1) - 29, 27) * 1ch);width:0.55ch;height:22px;background:var(--accent);opacity:calc((clamp(0, (var(--type,0) - 29 + 1) * 40, 1) * clamp(0, (56 - var(--type,0) + 1) * 40, 1)) * ((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2)))\"></span></span></div><div style=\"position:absolute;left:26px;top:110px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#FFA657;\"><span style=\"position:relative;display:inline-block\"><span style=\"display:inline-block;clip-path:inset(0 calc(100% - clamp(0, round(down, var(--type,0), 1) - 57, 23) * 1ch) 0 0)\">  return t.handle(req);</span><span style=\"position:absolute;top:3px;left:calc(clamp(0, round(down, var(--type,0), 1) - 57, 23) * 1ch);width:0.55ch;height:22px;background:var(--accent);opacity:calc((clamp(0, (var(--type,0) - 57 + 1) * 40, 1) * clamp(0, (80 - var(--type,0) + 1) * 40, 1)) * ((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2)))\"></span></span></div><div style=\"position:absolute;left:26px;top:140px;height:30px;display:flex;align-items:center;font:500 20px var(--font-mono);white-space:pre;color:#D2A8FF;\"><span style=\"position:relative;display:inline-block\"><span style=\"display:inline-block;clip-path:inset(0 calc(100% - clamp(0, round(down, var(--type,0), 1) - 81, 1) * 1ch) 0 0)\">}</span><span style=\"position:absolute;top:3px;left:calc(clamp(0, round(down, var(--type,0), 1) - 81, 1) * 1ch);width:0.55ch;height:22px;background:var(--accent);opacity:calc((clamp(0, (var(--type,0) - 81 + 1) * 40, 1) * clamp(0, (82 - var(--type,0) + 1) * 40, 1)) * ((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2)))\"></span></span></div></div>",
+      "vars": {
+        "--type": [
+          0,
+          82
+        ],
+        "--done": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": {
+        "--type": 0.25,
+        "--done": 3.42
+      },
+      "varsDur": {
+        "--type": 3.15,
+        "--done": 0.04
+      },
+      "varsEase": {
+        "--type": "linear",
+        "--done": "linear"
+      }
+    }
+  ]
+}

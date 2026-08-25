@@ -1,0 +1,73 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassDock",
+  "type": "vawe:block",
+  "title": "glassDock",
+  "description": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+  "tags": [
+    "glassDock"
+  ],
+  "dimensions": {
+    "width": 635,
+    "height": 298
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "glassDock",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "magnify": 2,
+      "items": [
+        {
+          "icon": "file",
+          "label": "Files"
+        },
+        {
+          "icon": "braces",
+          "label": "Code"
+        },
+        {
+          "icon": "spark",
+          "label": "Compose"
+        },
+        {
+          "icon": "globe",
+          "label": "Publish"
+        },
+        {
+          "icon": "clock",
+          "label": "History"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "items",
+      "magnify",
+      "size",
+      "peak",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassDock.json",
+      "url": "https://vawe.dev/assets/blocks/glassDock.json",
+      "target": "formats/scene/glassDock.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassDock.png"
+  }
+}

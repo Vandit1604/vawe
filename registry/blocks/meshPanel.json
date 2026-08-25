@@ -8,8 +8,8 @@
     "meshPanel"
   ],
   "dimensions": {
-    "width": 604,
-    "height": 364
+    "width": 644,
+    "height": 384
   },
   "install": {
     "kind": "scene-layer",

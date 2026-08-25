@@ -8,8 +8,8 @@
     "notification"
   ],
   "dimensions": {
-    "width": 489,
-    "height": 340
+    "width": 518,
+    "height": 350
   },
   "install": {
     "kind": "scene-layer",

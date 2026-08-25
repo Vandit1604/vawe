@@ -8,8 +8,8 @@
     "nowPlaying"
   ],
   "dimensions": {
-    "width": 424,
-    "height": 245
+    "width": 459,
+    "height": 262
   },
   "install": {
     "kind": "scene-layer",

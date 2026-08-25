@@ -8,8 +8,8 @@
     "kpiRow"
   ],
   "dimensions": {
-    "width": 640,
-    "height": 133
+    "width": 681,
+    "height": 148
   },
   "install": {
     "kind": "scene-layer",

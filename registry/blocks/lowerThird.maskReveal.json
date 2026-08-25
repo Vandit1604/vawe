@@ -8,8 +8,8 @@
     "lowerThird"
   ],
   "dimensions": {
-    "width": 320,
-    "height": 128
+    "width": 352,
+    "height": 142
   },
   "install": {
     "kind": "scene-layer",

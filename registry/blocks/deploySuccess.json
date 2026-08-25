@@ -8,8 +8,8 @@
     "deploySuccess"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 324
+    "width": 600,
+    "height": 342
   },
   "install": {
     "kind": "scene-layer",

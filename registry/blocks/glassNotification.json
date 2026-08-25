@@ -1,0 +1,72 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassNotification",
+  "type": "vawe:block",
+  "title": "glassNotification",
+  "description": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+  "tags": [
+    "glassNotification"
+  ],
+  "dimensions": {
+    "width": 603,
+    "height": 413
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "glassNotification",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "items": [
+        {
+          "icon": "bolt",
+          "title": "Render finished",
+          "body": "1,920 frames, no dropped seams.",
+          "meta": "now"
+        },
+        {
+          "icon": "shield",
+          "title": "Audit clean",
+          "body": "No overlap, no clipped text.",
+          "meta": "2m"
+        },
+        {
+          "icon": "check",
+          "title": "Ledger updated",
+          "body": "Design recorded.",
+          "meta": "5m"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "step",
+      "indent",
+      "rowGap",
+      "cardH",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassNotification.json",
+      "url": "https://vawe.dev/assets/blocks/glassNotification.json",
+      "target": "formats/scene/glassNotification.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassNotification.png"
+  }
+}

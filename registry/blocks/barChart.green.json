@@ -8,8 +8,8 @@
     "barChart"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 286
+    "width": 603,
+    "height": 305
   },
   "install": {
     "kind": "scene-layer",

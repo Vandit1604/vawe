@@ -8,8 +8,8 @@
     "loadingBar"
   ],
   "dimensions": {
-    "width": 384,
-    "height": 115
+    "width": 402,
+    "height": 121
   },
   "install": {
     "kind": "scene-layer",

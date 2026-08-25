@@ -59,10 +59,13 @@ export const KNOBS = {
   // ── three.js scenes (core/three-fx.js) — `three: "name"`, per-scene knobs ────────────────────────
   three: {
     _shared: [col('colors', '#8ab4ff', 'palette (array); colors[0] subject, colors[1] fill light'), n('speed', 1, 'motion speed')],
-    deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg')],
+    deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg'), { name: 'screen', type: 'string', default: '', desc: 'image put on the screen face' }],
     uiParallax: [n('planes', 4, 'stacked planes'), n('travel', 1, 'parallax travel'), n('swing', 1, 'sway amount')],
     pointCloud: [n('count', 4000, 'particle count'), n('pointSize', 0.018, 'particle size'), n('morphSpeed', 1, 'morph rate'), n('spin', 1, 'auto-rotate'), n('seed', 1, 'shape seed')],
     extrudeText: [n('depth', 0.3, 'extrusion depth'), n('roughness', 0.28, 'surface roughness'), n('metalness', 0.72, 'metalness'), n('spin', 1, 'auto-rotate')],
+    shatter: [n('count', 144, 'shards (rounded to a square grid)'), n('seed', 7, 'break pattern seed'), n('breakAt', 0.6, 'seconds before the surface breaks'), n('breakDur', 2.4, 'seconds the break takes'), n('travel', 2.6, 'how far the shards fly'), n('depth', 1.6, 'how far they fly toward camera'), n('spin', 1, 'tumble rate'), n('roughness', 0.32, 'surface roughness'), n('metalness', 0.55, 'metalness'), n('yaw', 0, 'yaw'), n('pitch', 0, 'pitch'), { name: 'screen', type: 'string', default: '', desc: 'image mapped across the surface before it breaks' }],
+    magnetic: [n('poles', 2, '2 = dipole, 1 = a single source', [1, 2]), n('count', 18, 'field lines'), n('seed', 3, 'launch-angle seed'), n('pointSize', 0.05, 'travelling charge size'), n('spin', 1, 'orbit rate'), n('yaw', 0, 'yaw'), n('pitch', 0.18, 'pitch')],
+    liquidBackground: [n('count', 96, 'plane subdivisions per side'), n('amp', 0.34, 'swell height'), n('morphSpeed', 1, 'churn rate'), n('seed', 11, 'wave-set seed'), n('roughness', 0.22, 'surface roughness'), n('metalness', 0.62, 'metalness'), n('pitch', 0.62, 'tilt away from camera'), n('yaw', 0, 'roll')],
   },
 
   // ── raymarch (core/raymarch-fx.js) — `raymarch: "name"`, SAME dials for all 5 ────────────────────

@@ -2653,5 +2653,593 @@
         }
       ]
     }
+  },
+  {
+    "name": "scanGate",
+    "family": "scanGate",
+    "blurb": "autofocus gate: a band travels the frame, the brackets contract onto the target and lock",
+    "props": {
+      "w": 760,
+      "h": 460,
+      "label": "LOCK · f/1.8"
+    }
+  },
+  {
+    "name": "flowchart",
+    "family": "flowchart",
+    "blurb": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+    "props": {
+      "step": 0.16
+    }
+  },
+  {
+    "name": "flowchart.vertical",
+    "family": "flowchart",
+    "blurb": "the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor",
+    "props": {
+      "variant": "vertical",
+      "step": 0.16
+    }
+  },
+  {
+    "name": "nodeGraph",
+    "family": "nodeGraph",
+    "blurb": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+    "props": {
+      "highlight": "core",
+      "step": 0.14
+    }
+  },
+  {
+    "name": "glassWidgets",
+    "family": "glassWidgets",
+    "blurb": "frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)",
+    "props": {
+      "w": 1080,
+      "h": 520,
+      "title": "Frosted surfaces",
+      "desc": "The field behind the panel never stops moving.",
+      "stats": [
+        {
+          "label": "FRAMES",
+          "value": "1.9",
+          "unit": "k",
+          "delta": "+12%"
+        },
+        {
+          "label": "PASSES",
+          "value": "3"
+        }
+      ],
+      "chips": [
+        "deterministic",
+        "seeked",
+        "pure(n)"
+      ]
+    }
+  },
+  {
+    "name": "glassNotification",
+    "family": "glassNotification",
+    "blurb": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+    "props": {
+      "w": 520,
+      "items": [
+        {
+          "icon": "bolt",
+          "title": "Render finished",
+          "body": "1,920 frames, no dropped seams.",
+          "meta": "now"
+        },
+        {
+          "icon": "shield",
+          "title": "Audit clean",
+          "body": "No overlap, no clipped text.",
+          "meta": "2m"
+        },
+        {
+          "icon": "check",
+          "title": "Ledger updated",
+          "body": "Design recorded.",
+          "meta": "5m"
+        }
+      ]
+    }
+  },
+  {
+    "name": "glassMenu",
+    "family": "glassMenu",
+    "blurb": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+    "props": {
+      "w": 440,
+      "title": "ACTIONS",
+      "highlight": 3,
+      "rows": [
+        {
+          "icon": "spark",
+          "label": "New surface",
+          "hint": "N"
+        },
+        {
+          "icon": "layers",
+          "label": "Stack behind",
+          "hint": "["
+        },
+        {
+          "sep": true
+        },
+        {
+          "icon": "bolt",
+          "label": "Blur backdrop",
+          "hint": "B"
+        },
+        {
+          "icon": "clock",
+          "label": "Hold frame",
+          "hint": "H"
+        }
+      ]
+    }
+  },
+  {
+    "name": "glassControls",
+    "family": "glassControls",
+    "blurb": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+    "props": {
+      "w": 760,
+      "track": "Deterministic render",
+      "elapsed": "01:12",
+      "total": "03:40",
+      "progress": 0.34,
+      "bars": 9
+    }
+  },
+  {
+    "name": "glassHome",
+    "family": "glassHome",
+    "blurb": "frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal",
+    "props": {
+      "cols": 4,
+      "size": 132,
+      "widget": {
+        "label": "THIS RUN",
+        "value": "1,920",
+        "sub": "frames, all pure in n"
+      },
+      "tiles": [
+        {
+          "icon": "cube",
+          "label": "Blocks"
+        },
+        {
+          "icon": "layers",
+          "label": "Stacks"
+        },
+        {
+          "icon": "globe",
+          "label": "Fields"
+        },
+        {
+          "icon": "braces",
+          "label": "Scenes"
+        },
+        {
+          "icon": "clock",
+          "label": "Timing"
+        },
+        {
+          "icon": "plug",
+          "label": "Inputs"
+        },
+        {
+          "icon": "file",
+          "label": "Assets"
+        },
+        {
+          "icon": "link",
+          "label": "Chains"
+        }
+      ]
+    }
+  },
+  {
+    "name": "glassDock",
+    "family": "glassDock",
+    "blurb": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+    "props": {
+      "magnify": 2,
+      "items": [
+        {
+          "icon": "file",
+          "label": "Files"
+        },
+        {
+          "icon": "braces",
+          "label": "Code"
+        },
+        {
+          "icon": "spark",
+          "label": "Compose"
+        },
+        {
+          "icon": "globe",
+          "label": "Publish"
+        },
+        {
+          "icon": "clock",
+          "label": "History"
+        }
+      ]
+    }
+  },
+  {
+    "name": "codeTyping",
+    "family": "codeTyping",
+    "blurb": "live coding: one character frontier crosses the snippet, the caret riding it",
+    "props": {
+      "w": 620,
+      "label": "server.ts",
+      "theme": "midnight",
+      "cps": 26,
+      "lines": [
+        "export function serve(req) {",
+        "  const t = route(req.url);",
+        "  return t.handle(req);",
+        "}"
+      ]
+    }
+  },
+  {
+    "name": "codeHighlight",
+    "family": "codeHighlight",
+    "blurb": "a band sweeps down to one line while the context dims out of the way",
+    "props": {
+      "w": 620,
+      "label": "server.ts",
+      "theme": "ink",
+      "line": 2,
+      "lines": [
+        "export function serve(req) {",
+        "  const t = route(req.url);",
+        "  return t.handle(req);",
+        "}"
+      ]
+    }
+  },
+  {
+    "name": "codeScroll",
+    "family": "codeScroll",
+    "blurb": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+    "props": {
+      "w": 620,
+      "label": "router.ts",
+      "theme": "ocean",
+      "line": 8,
+      "rows": 7,
+      "lines": [
+        "import { match } from \"./match\";",
+        "",
+        "const table = new Map();",
+        "",
+        "export function add(p, h) {",
+        "  table.set(p, h);",
+        "}",
+        "",
+        "export function route(url) {",
+        "  for (const [p, h] of table)",
+        "    if (match(p, url))",
+        "      return h;",
+        "}"
+      ]
+    }
+  },
+  {
+    "name": "codeDiff",
+    "family": "codeDiff",
+    "blurb": "the edit PERFORMED: removals collapse red, additions expand green, in edit order",
+    "props": {
+      "w": 620,
+      "label": "route.ts",
+      "theme": "forest",
+      "lines": [
+        "  const t = route(req.url);",
+        {
+          "sign": "-",
+          "text": "  if (!t) return null;"
+        },
+        {
+          "sign": "+",
+          "text": "  if (!t) return notFound(req);"
+        },
+        "  return t.handle(req);"
+      ]
+    }
+  },
+  {
+    "name": "codeMorph",
+    "family": "codeMorph",
+    "blurb": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+    "props": {
+      "w": 620,
+      "label": "refactor",
+      "theme": "dusk",
+      "from": [
+        "const out = items.filter(fn);",
+        "return out;"
+      ],
+      "to": [
+        "return items.filter(fn);"
+      ]
+    }
+  },
+  {
+    "name": "codeFlight",
+    "family": "codeFlight",
+    "blurb": "discrete snippets fly in from alternating sides and assemble into one program",
+    "props": {
+      "w": 620,
+      "label": "assemble",
+      "theme": "neon",
+      "snippets": [
+        {
+          "label": "imports",
+          "lines": [
+            "import { serve } from \"./serve\";"
+          ]
+        },
+        {
+          "label": "state",
+          "lines": [
+            "const table = new Map();"
+          ]
+        },
+        {
+          "label": "entry",
+          "lines": [
+            "serve(table);",
+            "export default table;"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "usMapHex",
+    "family": "usMapHex",
+    "blurb": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+    "props": {
+      "w": 820,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CA",
+          "value": 39
+        },
+        {
+          "code": "TX",
+          "value": 30
+        },
+        {
+          "code": "FL",
+          "value": 22
+        },
+        {
+          "code": "NY",
+          "value": 20
+        },
+        {
+          "code": "IL",
+          "value": 13
+        },
+        {
+          "code": "PA",
+          "value": 13
+        },
+        {
+          "code": "OH",
+          "value": 12
+        },
+        {
+          "code": "GA",
+          "value": 11
+        },
+        {
+          "code": "MI",
+          "value": 10
+        },
+        {
+          "code": "WA",
+          "value": 8
+        },
+        {
+          "code": "AZ",
+          "value": 7
+        },
+        {
+          "code": "MA",
+          "value": 7
+        },
+        {
+          "code": "CO",
+          "value": 6
+        },
+        {
+          "code": "MN",
+          "value": 6
+        },
+        {
+          "code": "WY",
+          "value": 1
+        },
+        {
+          "code": "VT",
+          "value": 1
+        },
+        {
+          "code": "AK",
+          "value": 1
+        },
+        {
+          "code": "HI",
+          "value": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "usMap",
+    "family": "usMap",
+    "blurb": "US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend",
+    "props": {
+      "w": 820,
+      "h": 500,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CA",
+          "value": 39
+        },
+        {
+          "code": "TX",
+          "value": 30
+        },
+        {
+          "code": "FL",
+          "value": 22
+        },
+        {
+          "code": "NY",
+          "value": 20
+        },
+        {
+          "code": "IL",
+          "value": 13
+        },
+        {
+          "code": "PA",
+          "value": 13
+        },
+        {
+          "code": "OH",
+          "value": 12
+        },
+        {
+          "code": "GA",
+          "value": 11
+        },
+        {
+          "code": "MI",
+          "value": 10
+        },
+        {
+          "code": "WA",
+          "value": 8
+        }
+      ]
+    }
+  },
+  {
+    "name": "worldMap",
+    "family": "worldMap",
+    "blurb": "world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map",
+    "props": {
+      "w": 900,
+      "h": 470,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CHN",
+          "value": 1410
+        },
+        {
+          "code": "IND",
+          "value": 1430
+        },
+        {
+          "code": "USA",
+          "value": 340
+        },
+        {
+          "code": "IDN",
+          "value": 278
+        },
+        {
+          "code": "BRA",
+          "value": 216
+        },
+        {
+          "code": "NGA",
+          "value": 224
+        },
+        {
+          "code": "DEU",
+          "value": 84
+        },
+        {
+          "code": "JPN",
+          "value": 124
+        }
+      ]
+    }
+  },
+  {
+    "name": "usMapBubble",
+    "family": "usMapBubble",
+    "blurb": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+    "props": {
+      "w": 820,
+      "h": 500,
+      "maxR": 34,
+      "points": [
+        {
+          "name": "New York",
+          "value": 8.3
+        },
+        {
+          "name": "Los Angeles",
+          "value": 3.9
+        },
+        {
+          "name": "Chicago",
+          "value": 2.7
+        },
+        {
+          "name": "Houston",
+          "value": 2.3
+        }
+      ]
+    }
+  },
+  {
+    "name": "usMapFlow",
+    "family": "usMapFlow",
+    "blurb": "origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out",
+    "props": {
+      "w": 820,
+      "h": 500,
+      "hub": "Denver",
+      "flows": [
+        {
+          "from": "Denver",
+          "to": "New York",
+          "value": 9
+        },
+        {
+          "from": "Denver",
+          "to": "Seattle",
+          "value": 6
+        },
+        {
+          "from": "Denver",
+          "to": "Miami",
+          "value": 5
+        },
+        {
+          "from": "Denver",
+          "to": "Dallas",
+          "value": 4
+        }
+      ]
+    }
   }
 ]

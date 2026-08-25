@@ -8,8 +8,8 @@
     "settingsRow"
   ],
   "dimensions": {
-    "width": 564,
-    "height": 115
+    "width": 603,
+    "height": 130
   },
   "install": {
     "kind": "scene-layer",
