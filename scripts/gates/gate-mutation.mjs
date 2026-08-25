@@ -912,7 +912,9 @@ const srcCases = [
     mutate: (s) => s.replace('"mixBlend": {', '"mixBlnd": {'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   { name: 'schema-drift · a blend mode the engine does not accept', file: 'formats/scene/schema.json',
-    mutate: (s) => s.replace('"color-dodge", "color-burn"', '"color-dodge", "colour-burn"'),
+    // One member, not a pair on one line: `schema-drift --write` reformats this file, and the pair
+    // anchor died the first time the enum was re-emitted one entry per line.
+    mutate: (s) => s.replace('"color-burn"', '"colour-burn"'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
   // Pinned per MODIFIER, not once for the slot. The key-set check compares two sorted lists, so a
   // fixture on `mixBlend` alone proves the comparison runs and proves nothing about whether the second
@@ -930,7 +932,10 @@ const srcCases = [
   // REGISTRY rather than the schema, because that is the half an author never sees until a scene that
   // validates cleanly dies at boot with "unknown modifier".
   { name: 'schema-drift · the registry lost a modifier the schema still offers', file: 'core/fx/index.js',
-    mutate: (s) => s.replace('const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt };', 'const REGISTRY = { kick, mixBlend, occlude, plane, progress, tilt };'),
+    // Removes ONE entry rather than rewriting the whole line. The line was pinned verbatim and every
+    // modifier added to the engine broke the fixture, which unproves schema-drift silently until
+    // someone runs this. A fixture must survive its subject growing.
+    mutate: (s) => s.replace(/(const REGISTRY = \{[^}]*?),\s*shadow\b/, '$1'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   // The backdrop is a REQUIRED authoring choice now that the baseline no longer injects one. Without this
   // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,

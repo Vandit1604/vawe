@@ -328,6 +328,7 @@ const LADDER = [
   ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
+  ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
   ['pace', 'reports', 'whether anything happens, and how often'],
   ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
   ...(landscape ? [['hero', 'reports', 'whether the hero line is set at video scale (launches a browser)']] : []),
@@ -492,6 +493,18 @@ styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
 // 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
 styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// 4d. read — the CLOCK lock, and it is the half `copy` cannot see. `copy` grades the LINE: its length,
+// its opener, its jargon. Nothing anywhere graded the line against the SECONDS it exists for, so a
+// nine-word headline living for 0.6s passed the whole ladder. Constants are Netflix's and the BBC's
+// subtitling numbers converted to 30fps, cited in the gate; film editing publishes none.
+//
+// SEVERITY, ARGUED, and the argument is in the census. `unreadable-hold` fires on 61% of the library,
+// which normally means a rule is mis-fitted. Here it means something narrower and more useful: the
+// median failing line holds 0.58 of what read-it-twice asks, so this library is authored to be read
+// ONCE. The rule measures the right thing and asks for an ambition we have never had. It is promoted
+// to BLOCKS on a written condition rather than a wish: when fewer than a fifth of gate-visible scenes
+// carry an `unreadable-hold` finding. The other four codes fit the library today.
+styleGate('read', 'read gate (can a viewer read it in time)', 'scripts/gates/read-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // PACE. A still film is sometimes right, so this reports rather than blocks. What it is NOT is a matter
 // of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
 // measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #322).
