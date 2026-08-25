@@ -694,6 +694,11 @@ validate:
 schema-check:
 	node scripts/gates/schema-drift.mjs
 
+# make schema-write  — regenerate every DERIVED part of schema.json (the layerProps table + the enums
+# that copy a code registry) so a registry that grew needs no second, hand edit. schema-check verifies.
+schema-write:
+	node scripts/gates/schema-drift.mjs --write
+
 # make lint-test  — regression asserts for validate's lintData (missing-duration / typing+markup /
 # scene-collision). Each rule caught a real bug this session; this pins that it still fires.
 lint-test:

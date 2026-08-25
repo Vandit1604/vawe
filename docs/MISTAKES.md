@@ -13614,3 +13614,43 @@ library-wide sweep on every scene edit would fire on work the author never touch
 shape — run after touching `blocks/`, as `snap-all` is run after touching `core/`. Nor in `blocks-sync`:
 a gate that fails there would block the regeneration you run to fix it.
 
+## #441 — `pad` on an unpainted layer was accepted and discarded
+
+**What.** `kit.chipBox` returns early on any layer with no `bg`, `border`, `shadow`, `elevation` or
+`glow` — and wrote `padding` AFTER that guard. So a layer declaring `pad` with no background got none.
+The schema advertises the prop, the author writes it, nothing happens and nothing says why.
+
+**How it surfaced.** As a CLIPPED GLYPH. The `badge` block's label carried `pad: '4px 12px'`, never
+received it, and its text ran under the value chip — the `d` of "build" cut in half. Visible only at a
+3x crop; every gate was green and the full-frame screenshot looked fine.
+
+**Fix.** Padding is not paint, so it is written BEFORE the guard. Blast radius measured: **zero** —
+`snap-blocks` 186 identical, `snap-scenes` 106 identical. A first count of "65 layers across 19 scenes"
+was misleading: those are `group` layers, which go through `addGroupChild`, a different write site that
+already applied padding. That is worth knowing on its own — **`pad` has two write sites with two
+different rules**, and only one of them dropped it.
+
+## #442 — schema.json enums were hand-copied, and two had already drifted
+
+**What.** `formats/scene/schema.json` carried 48 enums, sixteen of them hand-copied from registries that
+live in code. `schema-drift.mjs` CHECKED they agreed and reported "in sync" — a list policed, not a list
+prevented. Worse, its own fix line said to run `--write`, which regenerated `layerProps` ONLY and left
+the enums alone without saying so.
+
+**Two had already drifted, and the check could not see either.** `layerProps.three` was missing `lines`
+(someone added a prop and skipped `--write`). `bg.item.preset` was missing `shapes` — the schema
+REJECTED a background preset the engine accepts, which is MISTAKES #82 again, and it survived because
+that path was never in the table.
+
+**Fix.** `--write` now regenerates the registry-owned enums in place, and the table grew from 16 to
+**19**: `cutTiming`, the per-layer `cut`, and `bg.item.preset` were registry copies nobody had listed.
+The writer splices the enum arrays rather than round-tripping the JSON, because the file is
+hand-formatted and a reflow would make every regeneration look like a rewrite.
+
+**The 32 that stay hand-written** are free-form authoring vocabularies read by an `if` at the point of
+use, with no `defineRegistry` owner: `aspect`, `destination`, `dir`, `align`, `pin`, `layout` and so on.
+Naming which is which is the point — an unlisted registry copy is exactly how `bg.item.preset` drifted.
+
+**Known limit, stated rather than hidden:** the check compares SORTED SETS, so a hand-reordered enum
+still reads as clean while `--write` would rewrite it. `lib-test` pins order for five enums only.
+

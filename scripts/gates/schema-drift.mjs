@@ -4,7 +4,9 @@
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
 //   node scripts/gates/schema-drift.mjs            (make schema-check) — exits 1 on drift
-//   node scripts/gates/schema-drift.mjs --write    regenerate the derived block, then re-run to verify
+//   node scripts/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part
+//                                                  — layerProps AND the registry-owned enums — then
+//                                                  re-run with no flag to verify
 //
 // THE PER-LAYER VOCABULARY IS GENERATED, NOT MAINTAINED. `schema.layerProps` is written by this file
 // from the PROPS declarations (core/props.js) and checked in; the gate fails when the committed block
@@ -23,12 +25,11 @@ import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { FX_TYPES } from '../../core/fx/index.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
-import { PRESETS } from '../../core/type.js';
-import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SPECTACLE_DEVICES } from '../../core/knobs.js';
+import { BG_NAMES } from '../../core/backgrounds.js';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -81,6 +82,90 @@ function renderVocabulary(v) {
     + '  },';
 }
 
+// schema prop name -> the registry that owns it. `extra` covers documented sentinels the registry
+// does not carry (a `none` no-op), which are part of the contract but not of the vocabulary.
+// Addressed by EXACT PATH, not by prop name: the schema has several `type` and `preset` enums for
+// different things (a layer type vs a bg fx type; a kinetic preset vs a bg preset), and matching by
+// name compared a bg preset list against the kinetic registry and reported 41 phantom drifts.
+const at = (p) => p.split('.').reduce((o, k) => (o || {})[k], schema.fields);
+const OWNED = [
+  { path: 'layers.item.anim',   want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
+  { path: 'layers.item.out',    want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
+  { path: 'layers.item.shader', want: AMBIENT_FX,                              src: 'core/shaders-ambient.js AMBIENT_FX' },
+  { path: 'layers.item.three',    want: THREE_FX,                             src: 'core/three-scenes.js THREE_FX' },
+  { path: 'layers.item.raymarch', want: RAYMARCH_FX,                          src: 'core/raymarch-fx.js RAYMARCH_FX' },
+  { path: 'layers.item.resample', want: RESAMPLE_FX,                          src: 'core/resample-fx.js RESAMPLE_FX' },
+  { path: 'layers.item.paint',    want: PAINT_FX_NAMES,                       src: 'core/paint-fx.js PAINT_FX' },
+  { path: 'layers.item.children.item.type', want: LAYER_TYPES,                  src: 'core/layers/index.js REGISTRY (via kit.buildLeaf)' },
+  { path: 'layers.item.type',     want: LAYER_TYPES,                          src: 'core/layers/index.js REGISTRY' },
+  { path: 'cuts.item.style',    want: [...Object.keys(PRESENTATIONS), 'none'], src: 'core/cuts.js PRESENTATIONS' },
+  { path: 'layers.item.cut',    want: Object.keys(PRESENTATIONS),              src: 'core/cuts.js PRESENTATIONS (a per-layer cut)' },
+  { path: 'bg.item.preset',     want: BG_NAMES,                                src: 'core/backgrounds.js BG_NAMES' },
+  { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
+  { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
+  { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
+  { path: 'spectacle.fields.device', want: SPECTACLE_DEVICES.names,           src: 'core/knobs.js SPECTACLE_DEVICES' },
+  // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
+  // is the union of all four registries — the router in transitions-lower.js is the drift-proof guard).
+  { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
+  { path: 'layers.item.cutTiming', want: Object.keys(TIMINGS),                 src: 'core/cuts.js TIMINGS (via TIMING_REGISTRY)' },
+  { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
+];
+
+// THE OWNED ENUMS ARE GENERATED TOO. Until now this table only COMPARED, so every registry that grew
+// needed a second, hand edit in schema.json and the gate's own advice ("--write") fixed only
+// layerProps. One fact, one owner: the registry owns the vocabulary and the schema RECEIVES it.
+//
+// Located in the TEXT by its current VALUES, not by a path anchor: schema.json is hand-formatted
+// (inline objects, per-site indentation) and a JSON.stringify round-trip would reflow the whole file,
+// making every regeneration look like a rewrite. Values are a safe key because the parsed node at the
+// path tells us exactly what array to look for. A site outside the table holding the same array is
+// rewritten too, and that is harmless: same values in, same values out, only the registry's order.
+const ENUM_RE = /"enum"\s*:\s*\[[^\]]*\]/g;
+
+// Same layout in, same layout out — multi-line stays multi-line at its own indent, one-line stays one.
+function renderEnum(found, values) {
+  const json = values.map((v) => JSON.stringify(v));
+  if (!found.includes('\n')) return `"enum": [${json.join(', ')}]`;
+  const indent = found.match(/\n([ ]*)/)[1];
+  const close = (found.match(/\n([ ]*)\]$/) || [, indent.slice(0, -2)])[1];
+  return `"enum": [\n${json.map((v) => indent + v).join(',\n')}\n${close}]`;
+}
+
+// The values a path SHOULD carry: registry order (lib-test pins five enums to it exactly), deduped,
+// because the sentinels appended above (`none`) are already in some registries.
+const ownedEnum = (want) => [...new Set(want)];
+
+function rewriteOwnedEnums(src) {
+  const targets = [];
+  for (const { path: pth, want } of OWNED) {
+    const node = at(pth);
+    if (!node || !Array.isArray(node.enum)) continue;   // not declared as an enum: nothing to derive
+    const key = JSON.stringify(node.enum);
+    const same = targets.find((t) => t.key === key);
+    // Two paths whose arrays read alike cannot be told apart by value. Identical intent (seams.timing
+    // and transitions.timing are both TIMINGS) is one target that fires twice; different intent is
+    // ambiguous, so refuse rather than guess.
+    if (same) {
+      if (JSON.stringify(same.want) !== JSON.stringify(ownedEnum(want))) {
+        console.error(`\u2717 ${pth} and ${same.path} hold the same enum but want different values`); process.exit(2);
+      }
+      continue;
+    }
+    targets.push({ path: pth, key, want: ownedEnum(want), hits: 0 });
+  }
+  const out = src.replace(ENUM_RE, (m) => {
+    let cur;
+    try { cur = JSON.parse(m.slice(m.indexOf('['))); } catch { return m; }
+    const t = targets.find((x) => x.key === JSON.stringify(cur));
+    if (!t) return m;
+    t.hits++;
+    return renderEnum(m, t.want);
+  });
+  for (const t of targets) if (!t.hits) { console.error(`\u2717 could not find ${t.path}'s enum in the schema text`); process.exit(2); }
+  return { out, targets };
+}
+
 // Splice by anchor rather than re-serialising the whole schema: schema.json carries hand-formatted
 // inline objects that a JSON.stringify round-trip would explode, and a generator that reformats the
 // file it edits makes every regeneration look like a rewrite.
@@ -88,10 +173,16 @@ const BLOCK = /\n {2}"layerProps": \{[\s\S]*?\n {2}\},/;
 if (process.argv.includes('--write')) {
   const src = fs.readFileSync(SCHEMA_PATH, 'utf8');
   const block = '\n' + renderVocabulary(vocabulary);
-  const next = BLOCK.test(src) ? src.replace(BLOCK, block) : src.replace(/\n {2}"fields": \{/, `${block}\n  "fields": {`);
-  if (next === src) { console.error('✗ could not place the layerProps block - no existing block and no `"fields": {` anchor'); process.exit(2); }
+  // Presence of an anchor, not "did the text change": a re-run over an already-current file changes
+  // nothing, and reading that as a missing anchor made --write fail the second time it was called.
+  const hasBlock = BLOCK.test(src);
+  const FIELDS = /\n {2}"fields": \{/;
+  if (!hasBlock && !FIELDS.test(src)) { console.error('\u2717 could not place the layerProps block - no existing block and no `"fields": {` anchor'); process.exit(2); }
+  const spliced = hasBlock ? src.replace(BLOCK, block) : src.replace(FIELDS, `${block}\n  "fields": {`);
+  const { out: next, targets } = rewriteOwnedEnums(spliced);
   fs.writeFileSync(SCHEMA_PATH, next);
   console.log('✓ wrote formats/scene/schema.json layerProps (generated from the declarations)');
+  console.log(`✓ wrote ${targets.length} registry-owned enum(s) at ${targets.reduce((a, t) => a + t.hits, 0)} site(s)`);
   process.exit(0);
 }
 {
@@ -180,33 +271,6 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
 // made the schema reject a valid value and nothing said so until a scene failed to validate
 // (docs/MISTAKES.md #82). Every vocabulary the engine owns is compared here now, both directions.
 {
-  const schema = JSON.parse(fs.readFileSync(new URL('../../formats/scene/schema.json', import.meta.url), 'utf8'));
-  // schema prop name -> the registry that owns it. `extra` covers documented sentinels the registry
-  // does not carry (a `none` no-op), which are part of the contract but not of the vocabulary.
-  // Addressed by EXACT PATH, not by prop name: the schema has several `type` and `preset` enums for
-  // different things (a layer type vs a bg fx type; a kinetic preset vs a bg preset), and matching by
-  // name compared a bg preset list against the kinetic registry and reported 41 phantom drifts.
-  const at = (p) => p.split('.').reduce((o, k) => (o || {})[k], schema.fields);
-  const OWNED = [
-    { path: 'layers.item.anim',   want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
-    { path: 'layers.item.out',    want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
-    { path: 'layers.item.shader', want: AMBIENT_FX,                              src: 'core/shaders-ambient.js AMBIENT_FX' },
-  { path: 'layers.item.three',    want: THREE_FX,                               src: 'core/three-scenes.js THREE_FX' },
-  { path: 'layers.item.raymarch', want: RAYMARCH_FX,                            src: 'core/raymarch-fx.js RAYMARCH_FX' },
-  { path: 'layers.item.resample', want: RESAMPLE_FX,                            src: 'core/resample-fx.js RESAMPLE_FX' },
-  { path: 'layers.item.paint',  want: PAINT_FX_NAMES,                          src: 'core/paint-fx.js PAINT_FX' },
-    { path: 'layers.item.children.item.type', want: LAYER_TYPES,                  src: 'core/layers/index.js REGISTRY (via kit.buildLeaf)' },
-  { path: 'layers.item.type',   want: LAYER_TYPES,                             src: 'core/layers/index.js REGISTRY' },
-    { path: 'cuts.item.style',    want: [...Object.keys(PRESENTATIONS), 'none'], src: 'core/cuts.js PRESENTATIONS' },
-    { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
-    { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
-    { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
-    { path: 'spectacle.fields.device', want: SPECTACLE_DEVICES.names,                  src: 'core/knobs.js SPECTACLE_DEVICES' },
-    // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
-    // is the union of all four registries — the router in transitions-lower.js is the drift-proof guard).
-    { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
-    { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
-  ];
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {
     const node = at(pth);
@@ -237,6 +301,6 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
       bad++;
     } else checked++;
   }
-  if (bad) process.exit(1);
-  console.log(`\u2713 ${checked} schema enum(s) in sync with the registries they copy`);
+  if (bad) { console.error('  fix: node scripts/gates/schema-drift.mjs --write  (these enums are GENERATED)'); process.exit(1); }
+  console.log(`\u2713 ${checked} schema enum(s) derived from the registries they copy, in sync`);
 }

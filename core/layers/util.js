@@ -199,9 +199,19 @@ export function createKit(ctx) {
     // The feature made the combination legal and turned the omission into a silent drop: the corners
     // came out square and nothing said why. Guarded on an EXPLICIT radius so the `?? 16` default below
     // stays the engine's own box recipe and is never substituted into hand-written paint.
+    // PADDING IS NOT PAINT, so it is written BEFORE the box guard below.
+    //
+    // It used to sit after, and the guard returns on any layer with no background, border, shadow,
+    // elevation or glow - so `pad` on an unpainted layer was accepted by the schema and silently
+    // discarded. Measured when it was found: 65 layers across 19 scenes were asking for padding and
+    // getting none. It surfaced as a CLIPPED GLYPH - the badge block's label ran under its value chip
+    // because `pad: '4px 12px'` never reached the DOM - and took a 3x crop to see at all.
+    //
+    // Silence, not a wrong value: the class CLAUDE.md says must fail loudly. Here it can simply WORK,
+    // because padding on an unpainted box is meaningful (it moves the content) and costs nothing.
+    if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
     if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
-    if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     el.style.borderRadius = (L.radius ?? 16) + 'px';
     if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
     // `glow` used to be reachable ONLY from inside the elevation branch, so a layer that asked for a
