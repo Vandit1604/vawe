@@ -4,8 +4,8 @@
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
-import { themeErrors, REQUIRED } from './theme-contract.js';
-import { parseColor } from './motion.js';
+import { themeErrors, REQUIRED, ON_ACCENT_MIN } from './theme-contract.js';
+import { parseColor, contrastRatio, ensureContrast } from './motion.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
@@ -253,7 +253,7 @@ export async function resolveTheme(spec) {
 // applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
 // The ONLY writer of look CSS — tokens.css carries fonts + geometry, never colors or type choices.
 export function applyTheme(theme) {
-  const missing = themeErrors(theme, { parseColor });
+  const missing = themeErrors(theme, { parseColor, contrastRatio });
   if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete — missing ${missing.join(', ')}`);
   const root = document.documentElement.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
@@ -272,6 +272,18 @@ export function applyTheme(theme) {
   // them have no opinion about. A theme that does have one declares `palette.warn` and wins.
   set('--warn', P.warn || '#F6A417');
   set('--accent', P.accent); set('--accent-dim', P.accentDim); set('--accent-glow', P.accentGlow);
+  // WHAT COLOUR READS *ON* THE ACCENT. Nothing could answer that, so every block that filled a surface
+  // with the accent guessed, and they all guessed white: pricingCard's featured CTA is white on
+  // higgsfield's acid lime at 1.16:1. `onColor()` in blocks/kit.mjs cannot help — it grades a literal
+  // hex, and a block only ever holds `var(--accent)`, a string that becomes a colour in the browser long
+  // after the factory returned. The theme is the one place the accent IS a value, so the decision is
+  // made here, once, and every consumer receives it.
+  // NOT the theme's own `ink`: `ink` is the primary text colour, which on a dark theme is nearly WHITE
+  // (higgsfield ships #f4f5f0), so white-vs-ink leaves 11 of 38 themes below 4.5:1 with both candidates
+  // light. White vs black, winner takes it, clears all 38 — white preferred wherever it already reads.
+  // Defaulted rather than required, exactly as `--warn` above: a theme with an opinion declares
+  // `palette.onAccent`, and theme-contract.js refuses that opinion if it cannot be read.
+  set('--on-accent', P.onAccent || ensureContrast('#ffffff', P.accent, { min: ON_ACCENT_MIN, light: '#ffffff', dark: '#000000' }));
   set('--accent-2', P.accent2); set('--grid', P.grid); set('--grid-2', P.grid2);
   set('--glass', P.glass); set('--highlight', P.highlight);
   (theme.gradient || []).forEach((c, i) => set(`--g${i}`, c));

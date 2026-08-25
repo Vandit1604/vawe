@@ -11,6 +11,9 @@ export const REQUIRED = {
   gradientStops: 3,                        // bg presets + --g0/1/2 consumers
 };
 
+// The floor an override has to clear. WCAG AA for body text; `--on-accent` exists to be READ.
+export const ON_ACCENT_MIN = 4.5;
+
 // themeErrors(theme) → [] when complete, else a list of missing keys (human-readable).
 // THE COLOUR CHECK IS INJECTED, NOT IMPORTED. This module is deliberately pure data plus one pure
 // function (see the header) so node and the browser can both take it, and importing core/motion.js for
@@ -22,7 +25,7 @@ export const REQUIRED = {
 // WITH it, a palette value that is not a colour is refused where it is WRITTEN, instead of becoming
 // pure black in `parseColor(hex) || [0,0,0]` (core/backgrounds.js) and rendering an off-brand backdrop
 // with every gate green.
-export function themeErrors(theme, { parseColor } = {}) {
+export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
   if (!theme || typeof theme !== 'object') return ['data.theme is required (a name or an inline object) — there is no default look'];
   const errs = [];
   const P = theme.palette || {}, T = theme.type || {};
@@ -33,6 +36,15 @@ export function themeErrors(theme, { parseColor } = {}) {
   for (const k of REQUIRED.palette) {
     if (P[k] == null || P[k] === '') { errs.push(`palette.${k}`); continue; }
     if (parseColor && parseColor(P[k]) == null) errs.push(`palette.${k} is not a colour (${JSON.stringify(P[k])})`);
+  }
+  // `palette.onAccent` is OPTIONAL — boot.js computes one from the accent for every theme, and this is
+  // only the escape hatch for a brand that holds its own opinion. An opinion that cannot be read is not
+  // an opinion, it is the defect the token was added to remove, so an override is graded where it is
+  // WRITTEN rather than shipped as unreadable text on a coloured button.
+  if (P.onAccent != null && P.onAccent !== '') {
+    if (parseColor && parseColor(P.onAccent) == null) errs.push(`palette.onAccent is not a colour (${JSON.stringify(P.onAccent)})`);
+    else if (contrastRatio && contrastRatio(P.onAccent, P.accent) < ON_ACCENT_MIN)
+      errs.push(`palette.onAccent (${P.onAccent}) reads ${contrastRatio(P.onAccent, P.accent).toFixed(2)}:1 on palette.accent (${P.accent}) — needs ${ON_ACCENT_MIN}:1. Drop it and the engine computes a readable one.`);
   }
   for (const k of REQUIRED.type) if (typeof T[k] !== 'string' || !T[k]) errs.push(`type.${k}`);
   if (!Array.isArray(theme.gradient) || theme.gradient.length < REQUIRED.gradientStops)
