@@ -459,6 +459,21 @@ boot((data, fps, theme, canvas) => {
     el.dataset.start = String(L.start ?? 0);
     if (L.duration != null) el.dataset.duration = String(L.duration);
     el.dataset.track = String(L.track ?? idx);
+    // REFUSE WHAT THIS FUNCTION IS ABOUT TO THROW AWAY. A split layer enters per unit and a cut layer's
+    // entrance IS the cut, so both branches below discard `anim` and (for split) `enterDur`. Accepting
+    // them and dropping them silently is the failure this engine logs most: 33 layers across 10 films
+    // carried an entrance the render never performed, and every gate stayed green (docs/MISTAKES.md).
+    // `anim: "none"` is exempt — it asks for exactly what happens.
+    const owner = L.split ? `split: "${L.split}"` : `cut: "${L.cut}"`;
+    const instead = L.split
+      ? 'a split layer\'s rhythm is its `each`/`stagger`, not a layer entrance'
+      : 'a cut layer\'s entrance IS the cut — reach for `cutTiming`/`dist`, or drop the `cut`';
+    if ((L.split || L.cut) && L.anim != null && L.anim !== 'none') {
+      throw new Error(`layer ${idx} (${L.type}) sets anim: "${L.anim}" with ${owner}. The engine cannot honour it: ${owner.split(':')[0]} owns this layer's entrance and the anim is discarded. Remove it — ${instead}.`);
+    }
+    if (L.split && L.enterDur != null) {
+      throw new Error(`layer ${idx} (${L.type}) sets enterDur: ${JSON.stringify(L.enterDur)} with ${owner}. The engine cannot honour it: a split layer's units reveal themselves, so its enter window is fixed at 0. Remove it — ${instead}.`);
+    }
     el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
     if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
     // Resolve this layer's idle AT BUILD, and throw the result away. The idle track resolves it again

@@ -13532,3 +13532,50 @@ exists to remove. So `parseColor` is INJECTED: `themeErrors(theme, { parseColor 
 shape the layer builders already use. Without it the check is presence-only exactly as before, so no
 caller changed behaviour by accident; both real callers now pass it. **0 of 38 shipped themes newly
 fail** — the rule invents no findings.
+## #438 — `anim` and `enterDur` accepted on a `split`/`cut` layer, then thrown away
+
+`formats/scene/scene.js` `setLayerTiming` writes `el.dataset.anim = (L.split || L.cut) ? 'none' : ...`
+and, for a split layer, `el.dataset.enter = '0'`. Both discards are CORRECT: a split layer enters per
+unit and a cut layer's entrance IS the cut. What was wrong is that the author's value went in and no
+one said a word. **33 layers across 10 films** declared an entrance the render never performed, and
+every gate stayed green.
+
+**Why no gate saw it.** `layer-props` answers the opposite question — a prop whose ENABLER is unset. Here
+the enabler is set and the prop is dropped BECAUSE it is set. `core/props.js` cannot express that: `when:`
+has no negation, and `mergeProps` unions guards least-restrictively, so a negated guard would be erased
+the moment another module declared the same prop unconditionally (`clips.js` reads `anim` for every
+layer). It is a description feeding a report, not a refusal. So the refusal went where the value is
+discarded: two throws in `setLayerTiming`, naming the prop, the layer, the owning `split`/`cut`, and what
+to reach for instead.
+
+**Proof the cleanup was safe, and the one place it was not.** `snap-scenes` over the whole library:
+**106 of 106 byte-identical**. Removing a prop nothing reads must move nothing, and one scene moved —
+`gh-wrapped.expanded`, on three GROUP CHILDREN. Group children do not go through `setLayerTiming`; they go
+through `addGroupChild` (`core/layers/util.js:516`), which writes `c.dataset.enter = String(C.enterDur)`
+with NO split special-case. So on a child the prop is live, and those three were restored. Two write
+sites, two different rules for the same prop name, and only the diff said so.
+
+**`enterDur` on a `cut` layer is LIVE and the census that started this pass called it dead.**
+`core/tracks/cut.js:21` reads `L.enterDur ?? 0.5` off the layer object to drive the cut's own enter ramp;
+the dataset never enters it. 71 of the 107 suspected layers were that case (`cuts-demo` alone had 50) and
+none was touched. Only `enterDur` under `split` is dead.
+
+## #439 — a call site was updated and its import was not, and no gate took that branch
+
+**What.** `scripts/author/expand-blocks.mjs` was switched to `bakeCameraMove(d, frameOf(d))` when
+`core/produce.js` took ownership of that conversion (#424). Its imports were never updated — the file
+still imported `buildCameraMove` and `sceneDims`, the old API. So `make expand` threw
+`ReferenceError: bakeCameraMove is not defined` on **any scene carrying a top-level `cameraMove`**, and
+worked perfectly on every scene that did not.
+
+**Why nothing caught it.** No scene in the snapshot set has a top-level `cameraMove` — they are baked
+away by expansion, so the snapshots hold the RESULT. `lib-test`, `snap-scenes` and `probe-purity` were
+all green with a core authoring command broken for scenes nobody happened to snapshot. Found only
+because an agent tried to re-expand `gh-wrapped` and reported it as a blocker on its own task.
+
+**The shape.** A branch no test takes is invisible to every gate, however many there are. Coverage of
+files is not coverage of paths, and this repo counts the first and reasons as though it had the second.
+
+**Fix.** The imports. And the probe that proves it: expanding a scene that declares `cameraMove` now
+bakes it (`cameraMove` removed, `camera` keys written) rather than throwing.
+

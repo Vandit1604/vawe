@@ -390,8 +390,6 @@
    "stagger": 0.22,
    "start": 20.3,
    "duration": 2.7,
-   "anim": "fade",
-   "enterDur": 0.1,
    "exitDur": 0.3
   },
   {

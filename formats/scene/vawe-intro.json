@@ -62,8 +62,6 @@
       "each": 2.45,
       "start": 0.35,
       "duration": 4.5,
-      "anim": "fade",
-      "enterDur": 0.1,
       "exitDur": 0.3,
       "critical": false
     },
@@ -531,8 +529,6 @@
       "each": 0.95,
       "start": 11.65,
       "duration": 3.35,
-      "anim": "fade",
-      "enterDur": 0.08,
       "exitDur": 0,
       "critical": false
     },

@@ -19,8 +19,13 @@ import fs from 'node:fs';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS } from '../../blueprints/index.mjs';
-import { buildCameraMove } from '../../core/camera-moves.js';
-import { sceneDims } from '../../core/safe.js';
+// bakeCameraMove owns the conversion now (core/produce.js) and takes a FRAME, not dimensions. This
+// file was switched to call it and its imports were not, so `bakeCameraMove is not defined` threw on
+// any scene carrying a top-level `cameraMove` — and nothing caught it, because no snapshotted scene
+// has one. A call site updated without its import is invisible to every gate that never takes that
+// branch, which is why the check below renders one.
+import { bakeCameraMove } from '../../core/produce.js';
+import { frameOf } from '../../core/safe.js';
 
 const inp = process.argv[2];
 if (!inp) { console.error('usage: node scripts/author/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }
