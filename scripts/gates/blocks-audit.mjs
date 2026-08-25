@@ -110,7 +110,7 @@ for (const fam of FAMILIES) {
 
 // 4. a catalog row passing a prop its factory does not accept (silently dropped, MISTAKES #60)
 for (const e of CATALOG) {
-  const fam = B[e.family]; if (!fam) continue;
+  const fam = B.BLOCKS[e.family]; if (typeof fam !== 'function') continue;
   const known = new Set(props(e.family));
   // A signature it cannot read used to `continue`, so an entry whose factory lived in another file was
   // skipped silently — the check reported nothing and looked identical to the check passing.

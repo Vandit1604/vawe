@@ -14,41 +14,26 @@
 // (captions is a full-frame overlay and has no cell).
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { CATEGORY_OF } from '../../blocks/index.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'site/lib/blocks.json');
 
-// CATEGORY, resolved rather than tabulated. 90 families is far too many for a browsing rail and most
-// hold one block, so the site needs a coarser grouping — and a 176-row name-to-category table in a React
-// component would be stale the day someone adds a block. The grouping already EXISTS in the code: the
-// module a factory lives in. So each blocks/*.mjs exports its own `CATEGORY`, and this walks the modules
-// to learn which one owns each family. Nothing is kept in sync by hand, and a module that ships blocks
-// without declaring a label is refused HERE, at generation time, rather than showing up as an
-// "Uncategorised" pile on the site that nobody notices.
-const MODULES = fs.readdirSync(path.join(root, 'blocks'))
-  .filter((f) => f.endsWith('.mjs') && !['catalog.mjs', 'kit.mjs', 'schema.mjs'].includes(f))
-  // index.mjs re-exports EVERY sibling, so walked in directory order it claims whatever comes after it
-  // alphabetically — measured: it swallowed interact, sleek, social and ui into "Core", 98 of 176. It is
-  // the fallback owner, so it goes last and only labels what genuinely lives in it.
-  .sort((a, b) => (a === 'index.mjs') - (b === 'index.mjs'));
-const categoryOf = {};
-for (const f of MODULES) {
-  const mod = await import(pathToFileURL(path.join(root, 'blocks', f)).href);
-  const factories = Object.keys(mod).filter((k) => typeof mod[k] === 'function');
-  if (!factories.length) continue;                       // a helper module ships no blocks; nothing to label
-  if (!mod.CATEGORY) {
-    throw new Error(`blocks/${f} exports ${factories.length} factor(y/ies) but declares no CATEGORY. `
-      + `Add \`export const CATEGORY = '<label>'\` beside its imports — the module that owns the blocks owns `
-      + `their label, so nothing keeps a name-to-category table in sync by hand.`);
-  }
-  // `index.mjs` re-exports every sibling, so it is walked LAST and never overwrites a real owner.
-  for (const name of factories) categoryOf[name] ??= mod.CATEGORY;
-}
+// CATEGORY, resolved rather than tabulated. 90-odd families is far too many for a browsing rail and
+// most hold one block, so the site needs a coarser grouping — and a 176-row name-to-category table in
+// a React component would be stale the day someone adds a block. The grouping already EXISTS in the
+// code: the module a factory lives in. Each blocks/*.mjs exports its own `CATEGORY` and
+// blocks/index.mjs discovers it while assembling the registry, so this file just reads the answer.
+//
+// This used to walk the modules itself, with a sort rule pinning index.mjs last because index.mjs
+// re-exported every sibling and would otherwise claim whatever came after it alphabetically (measured:
+// it swallowed interact, sleek, social and ui into "Core", 98 of 176). index.mjs exports no factories
+// any more, so the hazard and the workaround are both gone.
 
 const grid = CATALOG.filter((e) => !e.overlay)
-  .map(({ name, family, blurb, props }) => ({ name, family, blurb, props, category: categoryOf[family] || 'Core' }));
+  .map(({ name, family, blurb, props }) => ({ name, family, blurb, props, category: CATEGORY_OF[family] || 'Core' }));
 
 const prev = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')) : [];
 fs.writeFileSync(OUT, JSON.stringify(grid, null, 2) + '\n');

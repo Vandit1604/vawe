@@ -363,3 +363,24 @@ export function avatarEl({ avatar = '', initials = '', name = '', size = 56, rad
   return box({ w: size, h: size, radius, bg, layout: 'row', justify: 'center', items: 'center',
     children: [text({ text: initials || initialsOf(name), size: Math.round(size * 0.4), weight: 700, color })] });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE REGISTRY, name → factory. blocks/index.mjs discovers the family modules and fills this; every
+// other reader imports it from there.
+//
+// It lives HERE, in the shared vocabulary, for one reason: a CONTAINER block (splitScreen, screenSwap)
+// resolves another block BY NAME, and a family module importing index.mjs back would deadlock the
+// discovery — index.mjs awaits the family, the family awaits index.mjs. kit.mjs is imported by every
+// family and imports none of them, so it is the only place with no cycle to make.
+export const BLOCKS = {};
+
+// Resolve a `{ block, props }` descriptor to its factory, or say precisely why not.
+export function blockFactory(name, at) {
+  const f = name && BLOCKS[name];
+  if (typeof f === 'function') return f;
+  if (!Object.keys(BLOCKS).length) {
+    throw new Error(`${at}: the block registry is empty. A container resolves another block by name, and `
+      + 'the names are filled in by blocks/index.mjs — import that (not the family module) before calling it.');
+  }
+  throw new Error(`${at}: unknown block "${name}". A side is { block, props }.`);
+}

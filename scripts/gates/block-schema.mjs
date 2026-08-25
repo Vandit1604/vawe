@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
-import * as REGISTRY from '../../blocks/index.mjs';
+import { EXPORTS } from '../../blocks/index.mjs';
 import * as KIT from '../../blocks/kit.mjs';
 const { TOKENS } = KIT;
 import { SCHEMA, KINDS, PASSTHROUGH, checkValue, resolve } from '../../blocks/schema.mjs';
@@ -83,9 +83,11 @@ function splitTop(body) {
 // nobody maintains cannot drift, which is the same reason `paramsOf` reads a generator's own signature
 // (core/camera-moves.js:216) instead of keeping a table of parameter names.
 // A family's default may also reach for a constant its OWN module exports (a demo node set, a city
-// table). index.mjs re-exports every family, so the registry's own surface is the second half of
-// the scope — again spread, never listed.
-const SCOPE = { ...KIT, ...REGISTRY, T: TOKENS };
+// table). `EXPORTS` is every named export of every discovered family module, so the registry's own
+// surface is the second half of the scope — again spread, never listed. It is EXPORTS and not BLOCKS
+// because BLOCKS also holds namespaced `family.variant` names, which are not JS identifiers and
+// cannot be parameters of the Function this scope is fed to.
+const SCOPE = { ...KIT, ...EXPORTS, T: TOKENS };
 const MISSING = Symbol('no default');
 const UNREADABLE = Symbol('unreadable default');
 

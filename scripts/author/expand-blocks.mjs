@@ -60,7 +60,7 @@ function expand(layer, stack) {
     // `pricingCard`, so splitting on '.' introspected `card` and warned that correct props were being
     // ignored. A false warning trains authors to distrust a system that is otherwise right.
     const entry = CATALOG.find((e) => e.name === layer.block);
-    const famFn = entry ? B[entry.family] : (layer.block.includes('.') ? B[layer.block.split('.')[0]] : f);
+    const famFn = entry ? B.BLOCKS[entry.family] : (layer.block.includes('.') ? B.BLOCKS[layer.block.split('.')[0]] : f);
     const sig = famFn && /\(\s*\{([^}]*)\}/.exec(famFn.toString());
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));

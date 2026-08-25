@@ -32,20 +32,11 @@
 // container injects them, `make expand` writes them), never content an author dials. The check in
 // scripts/gates/block-schema.mjs holds every table to that, and to the defaults the code really has.
 
-import { CORE_SCHEMAS } from './index.mjs';
-import { CHART_SCHEMAS } from './charts.mjs';
-import { DEV_SCHEMAS } from './dev.mjs';
-import { UI_SCHEMAS } from './ui.mjs';
-import { SOCIAL_SCHEMAS } from './social.mjs';
-import { APP_SCHEMAS } from './app.mjs';
-import { INTERACT_SCHEMAS } from './interact.mjs';
-import { SLEEK_SCHEMAS } from './sleek.mjs';
-import { GLASS_SCHEMAS } from './glass.mjs';
-import { CODEANIM_SCHEMAS } from './codeanim.mjs';
-import { GEO_SCHEMAS } from './geo.mjs';
-import { DIAGRAM_SCHEMAS } from './diagram.mjs';
-import { TERMINAL_SCHEMAS } from './terminal-layers.mjs';
-import { TERMINAL_HTML_SCHEMAS } from './terminal-html.mjs';
+// The tables themselves are DISCOVERED, not imported: blocks/index.mjs reads the family modules and
+// merges every `<FAM>_SCHEMAS` export it finds. This file used to carry one import line per family
+// plus a name in the spread below, which is two edits per new family carrying no information the
+// family module did not already have.
+import { SCHEMAS } from './index.mjs';
 
 // Every kind the tables may use. The first seven are lightfield's; the rest are declared above.
 export const KINDS = ['int', 'unit', 'num', 'hex', 'hexlist', 'enum', 'group',
@@ -53,11 +44,7 @@ export const KINDS = ['int', 'unit', 'num', 'hex', 'hexlist', 'enum', 'group',
 
 // family → option table. One table per FAMILY, never per catalog entry: a namespaced entry
 // ("card.pricing") is the same factory with preset props, so it is the same contract.
-export const SCHEMA = {
-  ...CORE_SCHEMAS, ...CHART_SCHEMAS, ...DEV_SCHEMAS, ...UI_SCHEMAS,
-  ...SOCIAL_SCHEMAS, ...APP_SCHEMAS, ...INTERACT_SCHEMAS, ...SLEEK_SCHEMAS,
-  ...TERMINAL_SCHEMAS, ...TERMINAL_HTML_SCHEMAS, ...GLASS_SCHEMAS, ...CODEANIM_SCHEMAS, ...GEO_SCHEMAS, ...DIAGRAM_SCHEMAS,
-};
+export const SCHEMA = SCHEMAS;
 
 class BlockOptionError extends Error {
   constructor(msg) { super(msg); this.name = 'BlockOptionError'; }

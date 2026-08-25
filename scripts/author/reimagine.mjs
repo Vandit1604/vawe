@@ -1,6 +1,9 @@
 // scripts/author/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
-import * as B from '../../blocks/index.mjs';
+// index.mjs is the registry, not a barrel of 200 re-exported names. Alias it back to the `B.<factory>`
+// shape this file was written in; `TOKENS` rides along because the colours here come from the kit.
+import { BLOCKS, TOKENS } from '../../blocks/index.mjs';
+const B = { ...BLOCKS, TOKENS };
 import { boundaryMechanism } from '../../core/transitions-lower.js';
 const p = 'formats/scene/vawe-launch.json';
 const d = JSON.parse(fs.readFileSync(p, 'utf8'));
