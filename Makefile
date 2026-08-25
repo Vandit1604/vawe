@@ -260,6 +260,15 @@ snap:
 snap-all:
 	node scripts/gates/snap-scenes.mjs $(SCENE) $(if $(SAVE),--save)
 
+# make snap-blocks [SAVE=1] [BLOCK=<name>]  — the BLOCK library's regression net, and it is the half
+# snap-all cannot reach: `block` sugar is baked into a film by `make expand`, so every shipped scene
+# holds layers frozen as the factory was at authoring time and editing a factory moves snap-all zero
+# bytes. This diffs the layer JSON each of the 179 catalog entries returns. No render, ~0.35s.
+# NOT part of `make author-check`: author-check grades ONE scene, and a block belongs to no scene.
+# Run it after touching anything under blocks/, the way snap-all is run after touching core/.
+snap-blocks:
+	node scripts/gates/snap-blocks.mjs $(BLOCK) $(if $(SAVE),--save)
+
 # make motion [M=<format>] [D=<file.json>] [STRIDE=2]  — animation-over-time audit: renders every frame
 # headless (no video) and asserts the motion contract (final frame holds, reveals monotonic, payoffs
 # settle before the exit, counters sane, typing completes). The check `make snap`/`make audit` can't do.

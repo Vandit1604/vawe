@@ -13579,3 +13579,38 @@ files is not coverage of paths, and this repo counts the first and reasons as th
 **Fix.** The imports. And the probe that proves it: expanding a scene that declares `cameraMove` now
 bakes it (`cameraMove` removed, `camera` keys written) rather than throwing.
 
+## #440 — the determinism net could not see a single block, and nobody noticed for the whole library
+
+**What.** `snap-scenes` byte-compares 106 rendered scenes and is the engine's safety net. It cannot see a
+block change AT ALL. Only 6 of 158 scenes still carry `{"type":"block"}` sugar, and those are snapshotted
+AFTER expansion — the gate prints `· skipping un-expanded source: … → snapshotted as *.expanded.json`
+itself. Every shipped film holds concrete layers baked from the factories as they were at AUTHORING time,
+so a block is frozen into the films that used it and editing the factory moves nothing.
+
+**How it was found.** I restyled the entire chart family and the core card family in one session.
+`snap-scenes` reported **106 identical, 0 changed** both times. The defects in that work — a label placed
+exactly where a `$` descends, charts rendering an empty track, and `quote` printing the literal string
+"undefined" at display size — were all caught by rendering probes and LOOKING. Not one gate fired.
+176 blocks could have been broken with the whole suite green.
+
+**Fix.** `scripts/gates/snap-blocks.mjs` + `make snap-blocks [SAVE=1] [BLOCK=<name>]`. It hashes the LAYER
+JSON a factory returns, not pixels, and the assumption was checked rather than assumed:
+`grep 'class="' blocks/*.mjs` returns zero, so every visual decision a factory owns is a literal in the
+JSON it returns. Identical JSON + identical engine = identical pixels, and the engine half is already
+proved by `snap-scenes` across 106 films. **179 entries in 0.35s**, no browser.
+
+**Its limit is in its own header, deliberately.** A restyle living OUTSIDE the factory — a `themes/*.json`
+token that `var(--accent)` resolves to, CSS in `core/` — changes block pixels and leaves this gate green.
+That is `snap-scenes`' subject. A gate claiming both would be `make slop` again (`docs/TASTE.md`).
+
+**Two determinism traps it had to neutralise**, both worth knowing: a layer carrying `foo: undefined`
+survives in memory and vanishes on write, so an unnormalised compare differs from its own baseline on the
+next run — it round-trips through JSON first. And each factory is called TWICE per run and quarantined by
+name if the two answers disagree, which is `snap-scenes`' render-order check in the form this subject
+allows.
+
+**Not in `author-check`, on purpose.** That grades ONE scene, and a block belongs to no scene; a
+library-wide sweep on every scene edit would fire on work the author never touched. It is the `snap-all`
+shape — run after touching `blocks/`, as `snap-all` is run after touching `core/`. Nor in `blocks-sync`:
+a gate that fails there would block the regeneration you run to fix it.
+
