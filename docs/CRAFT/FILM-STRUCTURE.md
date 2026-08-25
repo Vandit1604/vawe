@@ -293,6 +293,75 @@ film.
 
 ---
 
+## Part 5 — causality, the register none of the devices covers
+
+Every device in Part 1 answers the question "what survives the cut". None of them answers "what made the
+cut happen". Those are different questions, and a film can pass the first and fail the second: four beats
+can share a prop, a colour and a cut rate, and still be four things that merely follow each other.
+
+The distinction is old and it is not ours. Post hoc is not propter hoc: after is not because. Art of the
+Title's read of the *Fight Club* titles names the thing that holds a run of abstract images as "this
+immediate relationship between cause and effect"
+([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)), and nothing in that
+sequence persists in the picture at all.
+
+The published method this came from decomposes a reference film into five columns: time, what is on
+screen, what moves, **what triggers the next screen**, and what sound sits there. Its worked grammar for a
+15-second product film reads:
+
+```
+a request is typed -> SENDING IT causes the next screen ->
+the work shows one step at a time -> a finished artifact proves the result ->
+a human approves -> the brand closes
+```
+
+Four of those five columns our storyboard already carries. The fourth it did not.
+
+### The three fields, and how to tell them apart
+
+- `mechanism:` — HOW it moves. A preset. "panel unfold, staggered rows".
+- `becomes:` — WHAT it turned into. The change the viewer sees. "the request becomes work in progress".
+- `trigger:` — WHAT MADE IT HAPPEN. The cause. "the cursor hits Send on the card in beat 1".
+
+A beat can have all three, and a good one usually does. A film where every beat has a `becomes:` and no
+beat causes the next is a run of unrelated changes, which is the slideshow failure written down on paper
+instead of discovered in the render.
+
+### Why `no-continuous-object` cannot see this
+
+That gate measures a prop surviving a junction plus a state change: spatial persistence. A cause is not
+spatial. A keyed `w`/`h` on a rectangle will never show one, and a film whose every junction is caused can
+carry no persistent prop at all. The two rules are independent, and the causal one is the harder to fake.
+
+### What the gate does with it
+
+`storyboard-check` reads `trigger:` per beat and prints the film's causal spine every run: one link per
+junction, each unstated link drawn as a break, and a count of fragments. A spine in one piece is a film
+where each beat forces the next. Four fragments is four films in a row.
+
+It warns, and it never blocks:
+
+- **`trigger-is-a-sequence`** — the value says WHEN, not why. "then", "next", "the beat starts". Every
+  slideshow already has an order.
+- **`trigger-is-a-mechanism`** — the value names the transition. "it cuts to the next shot". That is how
+  the film arrives, not why it had to.
+- **`chain-breaks`** — some junctions state a cause and some do not, so the spine is in pieces. It fires
+  only once an author has opted in, because a presence check on a field nobody has filled in yet is a rule
+  that gets waived by reflex inside a week.
+
+**Not every film has a causal spine, and that is why nothing blocks.** A manifesto, a vignette anthology
+and a metric-cut list film are all held by something else, and asking them what caused beat 3 has no
+answer. Read the printed spine, decide whether this film is one that should have one, and move on.
+
+### What no static gate can see here
+
+It reads the words in the plan. It cannot tell whether the cause is true, whether the render puts the
+causing act on screen, or whether the viewer will read the second beat as following from the first. A
+storyboard can state a perfect chain and the film can drop every causing act. That half is `make judge`
+and your eyes.
+
+---
+
 ## Sources
 
 Editing and structure theory:
