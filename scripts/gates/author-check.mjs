@@ -330,6 +330,7 @@ const LADDER = [
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
   ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
   ['pace', 'reports', 'whether anything happens, and how often'],
+  ['eye', 'reports', 'where the eye is when a cut lands, and where the next shot sends it'],
   ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
   ...(landscape ? [['hero', 'reports', 'whether the hero line is set at video scale (launches a browser)']] : []),
   ...(sbPath ? [['treatment', 'reports', 'whether the written rationale still describes this plan']] : []),
@@ -509,6 +510,14 @@ styleGate('read', 'read gate (can a viewer read it in time)', 'scripts/gates/rea
 // of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
 // measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #322).
 styleGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// EYE-TRACE. Murch ranks it fourth of six at 7% and says to sacrifice upward from the bottom, so a cut
+// that serves the story may fairly cost the eye a journey. It reports for that reason, not because the
+// measurement is weak. Know two limits before you act on it. The focal point is scored from the JSON,
+// so a layer whose colour is a color-mix or a gradient cannot be read: those are dropped and the count
+// prints on every verdict, never defaulted to zero. And a side holding ONE live layer is marked, because
+// a layer can win by being alone — the first false positive found was a corner watermark scoring 43%
+// across an 0.8s hole, where the real defect is dead air and `beats` owns it.
+styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'scripts/gates/eye-trace.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('assets', 'asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
