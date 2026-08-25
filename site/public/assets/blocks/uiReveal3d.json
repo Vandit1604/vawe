@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 680,
+      "h": 412,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;width:680px\"><div style=\"height:76px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;transform-origin:50% 0%;opacity:calc(clamp(0, (var(--p,0) - 0) * 1.92, 1));transform:perspective(1040px) translateZ(calc((1 - clamp(0, (var(--p,0) - 0) * 1.92, 1)) * -260px)) rotateX(calc((1 - clamp(0, (var(--p,0) - 0) * 1.92, 1)) * 72deg))\"><div style=\"font:600 17px var(--font-sans);color:var(--text)\">Frames rendered</div><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">1,320</div></div><div style=\"height:76px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;transform-origin:50% 0%;opacity:calc(clamp(0, (var(--p,0) - 0.12) * 1.92, 1));transform:perspective(1040px) translateZ(calc((1 - clamp(0, (var(--p,0) - 0.12) * 1.92, 1)) * -260px)) rotateX(calc((1 - clamp(0, (var(--p,0) - 0.12) * 1.92, 1)) * 72deg))\"><div style=\"font:600 17px var(--font-sans);color:var(--text)\">Workers</div><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">8</div></div><div style=\"height:76px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;transform-origin:50% 0%;opacity:calc(clamp(0, (var(--p,0) - 0.24) * 1.92, 1));transform:perspective(1040px) translateZ(calc((1 - clamp(0, (var(--p,0) - 0.24) * 1.92, 1)) * -260px)) rotateX(calc((1 - clamp(0, (var(--p,0) - 0.24) * 1.92, 1)) * 72deg))\"><div style=\"font:600 17px var(--font-sans);color:var(--text)\">Draft render</div><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">31s</div></div><div style=\"height:76px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;transform-origin:50% 0%;opacity:calc(clamp(0, (var(--p,0) - 0.36) * 1.92, 1));transform:perspective(1040px) translateZ(calc((1 - clamp(0, (var(--p,0) - 0.36) * 1.92, 1)) * -260px)) rotateX(calc((1 - clamp(0, (var(--p,0) - 0.36) * 1.92, 1)) * 72deg))\"><div style=\"font:600 17px var(--font-sans);color:var(--text)\">Blocks swept</div><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">179</div></div><div style=\"height:76px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;transform-origin:50% 0%;opacity:calc(clamp(0, (var(--p,0) - 0.48) * 1.92, 1));transform:perspective(1040px) translateZ(calc((1 - clamp(0, (var(--p,0) - 0.48) * 1.92, 1)) * -260px)) rotateX(calc((1 - clamp(0, (var(--p,0) - 0.48) * 1.92, 1)) * 72deg))\"><div style=\"font:600 17px var(--font-sans);color:var(--text)\">Identical</div><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">106</div></div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.35,
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0.25,
+      "varsDur": 1.6,
+      "varsEase": "easeOutCubic"
+    }
+  ],
+  "produced": false
+}

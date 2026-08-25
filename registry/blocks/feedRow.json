@@ -8,8 +8,8 @@
     "feedRow"
   ],
   "dimensions": {
-    "width": 603,
-    "height": 157
+    "width": 564,
+    "height": 142
   },
   "install": {
     "kind": "scene-layer",

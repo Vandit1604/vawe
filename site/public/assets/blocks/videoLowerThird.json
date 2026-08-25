@@ -22,9 +22,9 @@
       "layout": "row",
       "items": "center",
       "gap": 16,
-      "pad": "16px 16px",
+      "pad": 16,
       "bg": "var(--card)",
-      "radius": 14,
+      "radius": 16,
       "border": "1px solid var(--line)",
       "elevation": 2,
       "anim": "wipe",
@@ -48,7 +48,7 @@
               "weight": 700,
               "text": "SV",
               "size": 22,
-              "color": "var(--accent)"
+              "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
             }
           ]
         },
@@ -63,7 +63,7 @@
               "type": "text",
               "weight": 700,
               "text": "Studio Vawe",
-              "size": 22,
+              "size": 24,
               "color": "var(--text)"
             },
             {
@@ -71,14 +71,14 @@
               "weight": 500,
               "text": "128K subscribers",
               "font": "mono",
-              "size": 16,
-              "color": "var(--dim)"
+              "size": 17,
+              "color": "var(--text-2)"
             }
           ]
         },
         {
           "type": "group",
-          "bg": "var(--down)",
+          "bg": "var(--accent)",
           "radius": 100,
           "pad": "8px 24px",
           "start": 0.4,
@@ -90,8 +90,8 @@
               "type": "text",
               "weight": 700,
               "text": "Subscribe",
-              "size": 18,
-              "color": "#fff"
+              "size": 17,
+              "color": "var(--on-accent)"
             }
           ]
         }

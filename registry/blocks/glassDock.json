@@ -8,8 +8,8 @@
     "glassDock"
   ],
   "dimensions": {
-    "width": 635,
-    "height": 298
+    "width": 595,
+    "height": 277
   },
   "install": {
     "kind": "scene-layer",

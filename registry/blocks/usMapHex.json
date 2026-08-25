@@ -8,8 +8,8 @@
     "usMapHex"
   ],
   "dimensions": {
-    "width": 911,
-    "height": 629
+    "width": 864,
+    "height": 597
   },
   "install": {
     "kind": "scene-layer",

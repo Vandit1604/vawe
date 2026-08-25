@@ -8,8 +8,8 @@
     "colorCycle"
   ],
   "dimensions": {
-    "width": 295,
-    "height": 125
+    "width": 264,
+    "height": 111
   },
   "install": {
     "kind": "scene-layer",

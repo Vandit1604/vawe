@@ -41,7 +41,7 @@
               "type": "text",
               "weight": 500,
               "text": "🔥",
-              "size": 19
+              "size": 20
             },
             {
               "type": "text",
@@ -49,7 +49,7 @@
               "text": "24",
               "size": 17,
               "color": "var(--accent)",
-              "font": "mono"
+              "font": "num"
             }
           ]
         },
@@ -61,12 +61,13 @@
           "pad": "6px 12px",
           "radius": 100,
           "bg": "var(--surface-2)",
+          "border": "1px solid var(--line)",
           "children": [
             {
               "type": "text",
               "weight": 500,
               "text": "👍",
-              "size": 19
+              "size": 20
             },
             {
               "type": "text",
@@ -74,7 +75,7 @@
               "text": "12",
               "size": 17,
               "color": "var(--text-2)",
-              "font": "mono"
+              "font": "num"
             }
           ]
         },
@@ -86,12 +87,13 @@
           "pad": "6px 12px",
           "radius": 100,
           "bg": "var(--surface-2)",
+          "border": "1px solid var(--line)",
           "children": [
             {
               "type": "text",
               "weight": 500,
               "text": "🎉",
-              "size": 19
+              "size": 20
             },
             {
               "type": "text",
@@ -99,7 +101,7 @@
               "text": "5",
               "size": 17,
               "color": "var(--text-2)",
-              "font": "mono"
+              "font": "num"
             }
           ]
         }

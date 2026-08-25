@@ -8,8 +8,8 @@
     "glassWidgets"
   ],
   "dimensions": {
-    "width": 1186,
-    "height": 573
+    "width": 1124,
+    "height": 544
   },
   "install": {
     "kind": "scene-layer",

@@ -29,7 +29,7 @@
           "weight": 700,
           "text": "AL",
           "size": 19,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 160,
@@ -55,7 +55,7 @@
           "weight": 700,
           "text": "GH",
           "size": 19,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 191.2,
@@ -81,7 +81,7 @@
           "weight": 700,
           "text": "VS",
           "size": 19,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 222.4,
@@ -107,7 +107,7 @@
           "weight": 700,
           "text": "KM",
           "size": 19,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 253.6,
@@ -139,7 +139,7 @@
           "type": "text",
           "weight": 600,
           "text": "+8",
-          "size": 14,
+          "size": 17,
           "color": "var(--text-2)"
         }
       ]

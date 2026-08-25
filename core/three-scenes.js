@@ -12,7 +12,7 @@ import { defineRegistry } from './registry.js';
 // list, here, with no imports; core/three-fx.js imports it, and lib-test asserts that the SCENES it
 // actually implements match it name for name. Splitting the file does not get to mean splitting the
 // source of truth.
-export const THREE_FX = ['deviceShowcase', 'uiParallax', 'pointCloud', 'extrudeText', 'globe', 'shatter', 'magnetic', 'liquidBackground'];
+export const THREE_FX = ['deviceShowcase', 'uiParallax', 'pointCloud', 'extrudeText', 'globe', 'shatter', 'magnetic', 'liquidBackground', 'codeExtrude', 'codeDissolve', 'codeAssemble'];
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a three scene" when someone writes it somewhere else. core/registry.js.

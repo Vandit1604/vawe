@@ -8,8 +8,8 @@
     "emptyState"
   ],
   "dimensions": {
-    "width": 541,
-    "height": 312
+    "width": 504,
+    "height": 293
   },
   "install": {
     "kind": "scene-layer",

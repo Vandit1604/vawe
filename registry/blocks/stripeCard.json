@@ -8,8 +8,8 @@
     "stripeCard"
   ],
   "dimensions": {
-    "width": 418,
-    "height": 290
+    "width": 384,
+    "height": 271
   },
   "install": {
     "kind": "scene-layer",

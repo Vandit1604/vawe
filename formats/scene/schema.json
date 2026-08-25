@@ -1734,8 +1734,14 @@
             "globe",
             "shatter",
             "magnetic",
-            "liquidBackground"
+            "liquidBackground",
+            "codeExtrude",
+            "codeDissolve",
+            "codeAssemble"
           ]
+        },
+        "lines": {
+          "label": "three codeExtrude / codeDissolve / codeAssemble: the snippet, one string per line \u00b7 the slab layout is derived from the real characters"
         },
         "device": {
           "label": "three deviceShowcase: 'phone' (default) or 'laptop'"

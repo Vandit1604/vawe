@@ -38,9 +38,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -50,7 +49,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Northwind",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }
@@ -60,9 +59,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -72,7 +70,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Meridian",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }
@@ -82,9 +80,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -94,7 +91,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Kite Studio",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }
@@ -112,9 +109,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -124,7 +120,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Fieldwork",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }
@@ -134,9 +130,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -146,7 +141,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Atlas Type",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }
@@ -156,9 +151,8 @@
               "type": "group",
               "grow": 1,
               "bg": "var(--card)",
-              "radius": 12,
+              "radius": 14,
               "border": "1px solid var(--line)",
-              "elevation": 1,
               "pad": "24px 0",
               "layout": "row",
               "justify": "center",
@@ -168,7 +162,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Orbit Labs",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text-2)",
                   "ls": "-0.02em"
                 }

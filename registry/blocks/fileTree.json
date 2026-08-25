@@ -8,8 +8,8 @@
     "fileTree"
   ],
   "dimensions": {
-    "width": 439,
-    "height": 233
+    "width": 404,
+    "height": 223
   },
   "install": {
     "kind": "scene-layer",

@@ -48,7 +48,7 @@
         },
         {
           "type": "group",
-          "bg": "rgba(255,255,255,0.18)",
+          "bg": "color-mix(in srgb, var(--on-accent) 18%, transparent)",
           "radius": 8,
           "pad": "8px 16px",
           "children": [

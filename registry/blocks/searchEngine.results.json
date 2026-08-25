@@ -8,8 +8,8 @@
     "searchEngine"
   ],
   "dimensions": {
-    "width": 623,
-    "height": 409
+    "width": 584,
+    "height": 388
   },
   "install": {
     "kind": "scene-layer",

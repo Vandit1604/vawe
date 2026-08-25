@@ -8,8 +8,8 @@
     "usMap"
   ],
   "dimensions": {
-    "width": 911,
-    "height": 613
+    "width": 864,
+    "height": 582
   },
   "install": {
     "kind": "scene-layer",

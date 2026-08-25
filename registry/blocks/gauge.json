@@ -8,8 +8,8 @@
     "gauge"
   ],
   "dimensions": {
-    "width": 377,
-    "height": 336
+    "width": 344,
+    "height": 317
   },
   "install": {
     "kind": "scene-layer",

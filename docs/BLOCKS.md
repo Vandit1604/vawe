@@ -92,7 +92,7 @@ Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editin
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_179 entries across 93 families._
+_186 entries across 99 families._
 
 | Block | For |
 |---|---|
@@ -275,6 +275,13 @@ _179 entries across 93 families._
 | `worldMap` | world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map |
 | `usMapBubble` | proportional circles at city coordinates (AREA is the value) with name + value callouts |
 | `usMapFlow` | origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out |
+| `textCursor` | a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles |
+| `textCursor.bar` | the same treatment with a thin vertical rule instead of a filled cell |
+| `parallaxZoom` | one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim |
+| `parallaxUnzoom` | the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives |
+| `morphText` | a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence |
+| `redditPost` | a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count |
+| `uiReveal3d` | UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another |
 <!-- BLOCKS:END -->
 
 ## Comps — reusable sub-compositions (instance a cluster many times/places)

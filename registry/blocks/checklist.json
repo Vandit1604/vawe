@@ -8,8 +8,8 @@
     "checklist"
   ],
   "dimensions": {
-    "width": 541,
-    "height": 260
+    "width": 504,
+    "height": 247
   },
   "install": {
     "kind": "scene-layer",

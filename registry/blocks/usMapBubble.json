@@ -8,8 +8,8 @@
     "usMapBubble"
   ],
   "dimensions": {
-    "width": 911,
-    "height": 573
+    "width": 864,
+    "height": 544
   },
   "install": {
     "kind": "scene-layer",

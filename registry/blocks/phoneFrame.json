@@ -8,8 +8,8 @@
     "phoneFrame"
   ],
   "dimensions": {
-    "width": 306,
-    "height": 509
+    "width": 274,
+    "height": 484
   },
   "install": {
     "kind": "scene-layer",

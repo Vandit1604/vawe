@@ -8,8 +8,8 @@
     "tabBar"
   ],
   "dimensions": {
-    "width": 582,
-    "height": 134
+    "width": 544,
+    "height": 120
   },
   "install": {
     "kind": "scene-layer",

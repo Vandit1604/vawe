@@ -24,7 +24,7 @@
       "gap": 8,
       "pad": 32,
       "bg": "#F6EFE3",
-      "radius": 14,
+      "radius": 12,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "start": 0.2,
@@ -38,7 +38,7 @@
           "weight": 500,
           "text": "README.md",
           "font": "mono",
-          "size": 18,
+          "size": 17,
           "color": "#77685C"
         },
         {

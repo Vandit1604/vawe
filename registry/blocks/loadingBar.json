@@ -8,8 +8,8 @@
     "loadingBar"
   ],
   "dimensions": {
-    "width": 402,
-    "height": 121
+    "width": 384,
+    "height": 117
   },
   "install": {
     "kind": "scene-layer",
@@ -33,7 +33,6 @@
       "h",
       "start",
       "fillDur",
-      "color",
       "settle",
       "done"
     ]

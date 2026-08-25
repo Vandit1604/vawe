@@ -54,7 +54,7 @@
                   "weight": 700,
                   "text": "SW",
                   "size": 19,
-                  "color": "var(--accent)"
+                  "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
                 }
               ]
             },
@@ -76,8 +76,8 @@
                   "weight": 500,
                   "text": "@vawe",
                   "font": "mono",
-                  "size": 16,
-                  "color": "var(--dim)"
+                  "size": 17,
+                  "color": "var(--text-2)"
                 }
               ]
             }
@@ -87,7 +87,7 @@
           "type": "text",
           "weight": 400,
           "text": "One JSON. One video. Deterministic, no timeline.",
-          "size": 21,
+          "size": 20,
           "color": "var(--text)"
         },
         {
@@ -101,16 +101,16 @@
               "weight": 500,
               "text": "↻ 340",
               "font": "mono",
-              "size": 16,
-              "color": "var(--dim)"
+              "size": 17,
+              "color": "var(--text-2)"
             },
             {
               "type": "text",
               "weight": 500,
               "text": "♥ 1.2k",
               "font": "mono",
-              "size": 16,
-              "color": "var(--dim)"
+              "size": 17,
+              "color": "var(--text-2)"
             }
           ]
         }

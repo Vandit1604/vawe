@@ -8,8 +8,8 @@
     "profileCard"
   ],
   "dimensions": {
-    "width": 439,
-    "height": 163
+    "width": 404,
+    "height": 148
   },
   "install": {
     "kind": "scene-layer",

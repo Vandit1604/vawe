@@ -8,8 +8,8 @@
     "glassMenu"
   ],
   "dimensions": {
-    "width": 521,
-    "height": 342
+    "width": 484,
+    "height": 323
   },
   "install": {
     "kind": "scene-layer",

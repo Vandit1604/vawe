@@ -22,9 +22,9 @@
       "layout": "row",
       "items": "center",
       "gap": 12,
-      "pad": "16px 16px",
+      "pad": 16,
       "bg": "var(--text)",
-      "radius": 12,
+      "radius": 14,
       "elevation": 2,
       "start": 0.2,
       "duration": 2.4,
@@ -35,9 +35,9 @@
         {
           "type": "group",
           "radius": 100,
-          "w": 22,
-          "h": 22,
-          "bg": "var(--up)",
+          "w": 26,
+          "h": 26,
+          "bg": "color-mix(in srgb, var(--up) 45%, var(--text))",
           "layout": "row",
           "justify": "center",
           "items": "center",
@@ -46,8 +46,8 @@
               "type": "text",
               "weight": 700,
               "text": "✓",
-              "size": 14,
-              "color": "#fff"
+              "size": 17,
+              "color": "var(--bg)"
             }
           ]
         },
@@ -55,7 +55,7 @@
           "type": "text",
           "weight": 500,
           "text": "Block added to the scene",
-          "size": 19,
+          "size": 20,
           "color": "var(--bg)",
           "grow": 1
         },
@@ -63,8 +63,8 @@
           "type": "text",
           "weight": 600,
           "text": "Undo",
-          "size": 18,
-          "color": "var(--accent)"
+          "size": 17,
+          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
         }
       ]
     },
@@ -76,9 +76,9 @@
       "layout": "row",
       "items": "center",
       "gap": 12,
-      "pad": "16px 16px",
+      "pad": 16,
       "bg": "var(--text)",
-      "radius": 12,
+      "radius": 14,
       "elevation": 2,
       "start": 1.2,
       "duration": 2.4,
@@ -89,9 +89,9 @@
         {
           "type": "group",
           "radius": 100,
-          "w": 22,
-          "h": 22,
-          "bg": "var(--accent)",
+          "w": 26,
+          "h": 26,
+          "bg": "color-mix(in srgb, var(--accent) 45%, var(--text))",
           "layout": "row",
           "justify": "center",
           "items": "center",
@@ -100,8 +100,8 @@
               "type": "text",
               "weight": 700,
               "text": "◆",
-              "size": 14,
-              "color": "var(--on-accent)"
+              "size": 17,
+              "color": "var(--bg)"
             }
           ]
         },
@@ -109,7 +109,7 @@
           "type": "text",
           "weight": 500,
           "text": "Theme switched",
-          "size": 19,
+          "size": 20,
           "color": "var(--bg)",
           "grow": 1
         },
@@ -117,8 +117,8 @@
           "type": "text",
           "weight": 600,
           "text": "Undo",
-          "size": 18,
-          "color": "var(--accent)"
+          "size": 17,
+          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
         }
       ]
     },
@@ -130,9 +130,9 @@
       "layout": "row",
       "items": "center",
       "gap": 12,
-      "pad": "16px 16px",
+      "pad": 16,
       "bg": "var(--text)",
-      "radius": 12,
+      "radius": 14,
       "elevation": 2,
       "start": 2.2,
       "duration": 2.4,
@@ -143,9 +143,9 @@
         {
           "type": "group",
           "radius": 100,
-          "w": 22,
-          "h": 22,
-          "bg": "var(--up)",
+          "w": 26,
+          "h": 26,
+          "bg": "color-mix(in srgb, var(--up) 45%, var(--text))",
           "layout": "row",
           "justify": "center",
           "items": "center",
@@ -154,8 +154,8 @@
               "type": "text",
               "weight": 700,
               "text": "✓",
-              "size": 14,
-              "color": "#fff"
+              "size": 17,
+              "color": "var(--bg)"
             }
           ]
         },
@@ -163,7 +163,7 @@
           "type": "text",
           "weight": 500,
           "text": "Render queued",
-          "size": 19,
+          "size": 20,
           "color": "var(--bg)",
           "grow": 1
         },
@@ -171,8 +171,8 @@
           "type": "text",
           "weight": 600,
           "text": "View",
-          "size": 18,
-          "color": "var(--accent)"
+          "size": 17,
+          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
         }
       ]
     }

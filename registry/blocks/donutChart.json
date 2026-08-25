@@ -8,8 +8,8 @@
     "donutChart"
   ],
   "dimensions": {
-    "width": 398,
-    "height": 516
+    "width": 364,
+    "height": 490
   },
   "install": {
     "kind": "scene-layer",
@@ -27,17 +27,14 @@
       "segments": [
         {
           "value": 52,
-          "color": "var(--accent)",
           "label": "Direct"
         },
         {
           "value": 30,
-          "color": "var(--up)",
           "label": "Search"
         },
         {
           "value": 18,
-          "color": "#F6A417",
           "label": "Social"
         }
       ]

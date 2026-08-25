@@ -1,0 +1,40 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 900,
+      "html": "<svg width=\"0\" height=\"0\" style=\"position:absolute\" aria-hidden=\"true\"><filter id=\"v1cy0a4a\"><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"6.6\" result=\"b\"/><feColorMatrix in=\"b\" type=\"matrix\" values=\"1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -7\"/></filter></svg><div style=\"position:relative;width:900px;height:150px;filter:url(#v1cy0a4a)\"><div style=\"position:absolute;left:0;right:0;top:0;text-align:center;white-space:nowrap;font:800 120px var(--font-sans);color:var(--text);letter-spacing:-0.03em;opacity:calc(1 - clamp(0, max(var(--i,0) - 0, 0 - var(--i,0)), 1));filter:blur(calc(clamp(0, max(var(--i,0) - 0, 0 - var(--i,0)), 1) * 5.4px))\">ideas</div><div style=\"position:absolute;left:0;right:0;top:0;text-align:center;white-space:nowrap;font:800 120px var(--font-sans);color:var(--text);letter-spacing:-0.03em;opacity:calc(1 - clamp(0, max(var(--i,0) - 1, 1 - var(--i,0)), 1));filter:blur(calc(clamp(0, max(var(--i,0) - 1, 1 - var(--i,0)), 1) * 5.4px))\">drafts</div><div style=\"position:absolute;left:0;right:0;top:0;text-align:center;white-space:nowrap;font:800 120px var(--font-sans);color:var(--text);letter-spacing:-0.03em;opacity:calc(1 - clamp(0, max(var(--i,0) - 2, 2 - var(--i,0)), 1));filter:blur(calc(clamp(0, max(var(--i,0) - 2, 2 - var(--i,0)), 1) * 5.4px))\">inbox</div><div style=\"position:absolute;left:0;right:0;top:0;text-align:center;white-space:nowrap;font:800 120px var(--font-sans);color:var(--text);letter-spacing:-0.03em;opacity:calc(1 - clamp(0, max(var(--i,0) - 3, 3 - var(--i,0)), 1));filter:blur(calc(clamp(0, max(var(--i,0) - 3, 3 - var(--i,0)), 1) * 5.4px))\">shipped</div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "vars": {
+        "--i": [
+          0,
+          3
+        ]
+      },
+      "varsDelay": 0.4,
+      "varsDur": 2.4,
+      "varsEase": "linear"
+    }
+  ],
+  "produced": false
+}

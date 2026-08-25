@@ -8,8 +8,8 @@
     "statCard"
   ],
   "dimensions": {
-    "width": 418,
-    "height": 192
+    "width": 384,
+    "height": 176
   },
   "install": {
     "kind": "scene-layer",

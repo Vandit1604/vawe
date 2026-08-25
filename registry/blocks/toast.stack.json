@@ -8,8 +8,8 @@
     "toast"
   ],
   "dimensions": {
-    "width": 471,
-    "height": 241
+    "width": 444,
+    "height": 242
   },
   "install": {
     "kind": "scene-layer",

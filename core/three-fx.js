@@ -28,8 +28,11 @@ import { LONLAT } from './globe-dots.js';
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
   depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
   morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {},
-  // shatter · magnetic · liquidBackground
+  // shatter · magnetic · liquidBackground · the code-* trio (which reuse breakAt/breakDur for their
+  // own single event: an assembly, a build-in and a burn are all one span with one start).
   breakAt: {}, breakDur: {}, poles: {}, amp: {},
+  // codeExtrude · codeDissolve · codeAssemble — the snippet the board's layout is derived from
+  lines: {},
   // globe
   origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
   spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {} };
@@ -112,6 +115,73 @@ function studio(scene, colors) {
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
   const rim = new (T().DirectionalLight)(0xffffff, 1.5); rim.position.set(-2, 3, -6); scene.add(rim);
+}
+
+// ---- the code board, shared by the three code-* scenes ------------------------------------------
+// A snippet laid out as SLABS: one per whitespace-delimited token, sized and placed from the real
+// characters of the real `lines`. So the silhouette is the actual code's shape — indentation,
+// declining line lengths, a blank line — which is what makes an abstract stack of bars read as code
+// without needing a mono typeface nobody has generated. (`extrudeText` needs a real font and throws
+// without one; `make glyphs` ships Anybody and Fraunces, neither of which is a code face.)
+//
+// ONE BUILDER, THREE SCENES. `codeExtrude`, `codeDissolve` and `codeAssemble` differ only in what
+// they do with this layout, and that is the whole reason it is a function: three copies of "where
+// does token 4 of line 2 sit" is three copies that drift.
+const CODE_W = 3.4;                                 // the board's width in world units
+function codeBoard(L, what) {
+  const lines = Array.isArray(L.lines) ? L.lines.map((s) => String(s ?? '')) : null;
+  if (!lines || !lines.length) {
+    throw new Error(`three ${what}: \`lines\` must be a non-empty array of code lines — the layout is `
+      + `derived from the real characters, so there is nothing to build without them.`);
+  }
+  const cols = Math.max(1, ...lines.map((s) => s.length));
+  const cu = CODE_W / cols;                         // one character's width
+  const slabH = cu * 1.5, pitch = cu * 2.7, thick = cu * 1.5;
+  const top = ((lines.length - 1) * pitch) / 2;
+  const r = rng(L.seed ?? 5);
+  const slabs = [];
+  lines.forEach((line, row) => {
+    // Tokens are runs of non-space. `exec` in a loop rather than split(), because the COLUMN is what
+    // places the slab and split() throws the leading indent away.
+    const re = /\S+/g;
+    let m, tok = 0;
+    while ((m = re.exec(line))) {
+      const len = m[0].length, col = m.index;
+      slabs.push({
+        cx: -CODE_W / 2 + (col + len / 2) * cu,
+        cy: top - row * pitch,
+        w: len * cu * 0.9, h: slabH, d: thick,
+        row, tone: (row + tok) % 4,
+        // Two seeded constants per slab, drawn ONCE at build. Every frame reads them; nothing draws
+        // a new one, which is what keeps the scene identical across the 8 workers.
+        rand: r(), order: r(),
+      });
+      tok++;
+    }
+  });
+  if (!slabs.length) throw new Error(`three ${what}: \`lines\` carries no non-blank line, so there is nothing to draw.`);
+  return { slabs, cu, height: lines.length * pitch };
+}
+
+// One box's 36 vertices, relative to its own centre. Positions only: normals are recomputed after the
+// per-frame pose, because a slab that tumbles must light as if it tumbled.
+const BOX_FACE = [[0, 1, 2], [0, 2, 3]];
+const BOX_QUADS = [
+  [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]],       // +z
+  [[1, -1, -1], [-1, -1, -1], [-1, 1, -1], [1, 1, -1]],   // -z
+  [[1, -1, 1], [1, -1, -1], [1, 1, -1], [1, 1, 1]],       // +x
+  [[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],   // -x
+  [[-1, 1, 1], [1, 1, 1], [1, 1, -1], [-1, 1, -1]],       // +y
+  [[-1, -1, -1], [1, -1, -1], [1, -1, 1], [-1, -1, 1]],   // -y
+];
+const BOX_VERTS = 36;
+function boxLocal(w, h, d, out, at) {
+  const hx = w / 2, hy = h / 2, hz = d / 2;
+  let v = at;
+  for (const quad of BOX_QUADS) for (const tri of BOX_FACE) for (const c of tri) {
+    out[v * 3] = quad[c][0] * hx; out[v * 3 + 1] = quad[c][1] * hy; out[v * 3 + 2] = quad[c][2] * hz;
+    v++;
+  }
 }
 
 // ---- scenes -------------------------------------------------------------------------------------
@@ -576,7 +646,211 @@ const SCENES = {
       grp.rotation.x = Math.sin(t * 0.27 * spin) * 0.10;
     } };
   },
+
+  // CODE, EXTRUDED. Every token of the snippet is a solid slab standing off the page, and the rows
+  // ARRIVE: each one rises out of depth into its place, top line first, so the snippet builds itself
+  // downward the way it was written.
+  //
+  // PURE IN t. Row r's own progress is p = (t - breakAt - r * stagger) / breakDur, clamped — a pure
+  // function of t and of constants baked at build. Nothing accumulates, so seeking backwards lands on
+  // the identical pose.
+  codeExtrude(L, colors) {
+    const board = codeBoard(L, 'codeExtrude');
+    const { geo, local, pos } = codeGeometry(board, colors);
+    const mat = new (T().MeshStandardMaterial)({ vertexColors: true, flatShading: true,
+      roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.5 });
+    const mesh = new (T().Mesh)(geo, mat);
+    return { obj: mesh, pose(t, LL) {
+      const at = LL.breakAt ?? 0.3, dur = Math.max(1e-6, LL.breakDur ?? 1.1);
+      const step = (LL.travel ?? 1) * 0.12;                 // seconds between one row and the next
+      const back = LL.depth ?? 1.8;
+      board.slabs.forEach((s, i) => {
+        const u = Math.max(0, Math.min(1, (t - at - s.row * step) / dur));
+        const e = ease(u);
+        // A row is BUILT, not faded: it comes forward out of depth and grows to full thickness, so
+        // there is never a half-transparent slab (one material, no per-slab opacity to give).
+        const grow = 0.001 + 0.999 * e;
+        const oz = (1 - e) * -back, oy = (1 - e) * -board.cu * 2.2;
+        for (let k = 0; k < BOX_VERTS; k++) {
+          const v = i * BOX_VERTS + k;
+          pos[v * 3] = s.cx + local[v * 3] * grow;
+          pos[v * 3 + 1] = s.cy + oy + local[v * 3 + 1] * grow;
+          pos[v * 3 + 2] = oz + local[v * 3 + 2] * grow;
+        }
+      });
+      geo.attributes.position.needsUpdate = true;
+      geo.computeVertexNormals();
+      mesh.rotation.y = (LL.yaw ?? -0.34) + Math.sin(t * 0.24) * 0.08 * (LL.spin ?? 1);
+      mesh.rotation.x = LL.pitch ?? 0.16;
+    } };
+  },
+
+  // CODE BURNING AWAY. The same board, standing still, eaten by a REAL fragment shader: a per-pixel
+  // hash is compared against a threshold that sweeps left to right, and everything under it is
+  // discarded with a bright edge riding the boundary.
+  //
+  // WHY A SHADER AND NOT PER-SLAB OPACITY. A dissolve that hides whole slabs is a checklist emptying;
+  // the edge has to cut THROUGH a slab for it to read as burning. That is a fragment decision, so it
+  // belongs in a fragment shader.
+  //
+  // PURE IN t. The shader has exactly one time-derived uniform, `uP`, set from t in pose(). There is
+  // no time in the GLSL at all, so a frame rendered alone and the same frame rendered after 400 others
+  // are the same pixels.
+  codeDissolve(L, colors) {
+    const board = codeBoard(L, 'codeDissolve');
+    const { geo, local, pos } = codeGeometry(board, colors);
+    // Two per-vertex channels the shader needs and the standard attributes do not carry: the slab's
+    // own seeded constant, and where the slab sits across the board (which is what makes the burn a
+    // directed sweep rather than a uniform fizzle).
+    const n = board.slabs.length * BOX_VERTS;
+    const aN = new Float32Array(n), aX = new Float32Array(n), aUv = new Float32Array(n * 2);
+    board.slabs.forEach((s, i) => {
+      for (let k = 0; k < BOX_VERTS; k++) {
+        const v = i * BOX_VERTS + k;
+        aN[v] = s.rand;
+        // PER VERTEX, not per slab. Off the slab's CENTRE the whole token crossed the threshold
+        // at once and the board emptied in chunks; the edge has to travel THROUGH a slab, which
+        // means the sweep coordinate is this vertex's own x.
+        aX[v] = (s.cx + local[v * 3] + CODE_W / 2) / CODE_W;
+        aUv[v * 2] = (local[v * 3] / s.w) + 0.5;
+        aUv[v * 2 + 1] = (local[v * 3 + 1] / s.h) + 0.5;
+      }
+      // positions are static here: the board does not move, the shader eats it.
+      for (let k = 0; k < BOX_VERTS; k++) {
+        const v = i * BOX_VERTS + k;
+        pos[v * 3] = s.cx + local[v * 3];
+        pos[v * 3 + 1] = s.cy + local[v * 3 + 1];
+        pos[v * 3 + 2] = local[v * 3 + 2];
+      }
+    });
+    geo.setAttribute('aN', new (T().BufferAttribute)(aN, 1));
+    geo.setAttribute('aX', new (T().BufferAttribute)(aX, 1));
+    geo.setAttribute('aUv2', new (T().BufferAttribute)(aUv, 2));
+    geo.attributes.position.needsUpdate = true;
+    geo.computeVertexNormals();
+    const pal = paletteOf(colors);
+    const mat = new (T().ShaderMaterial)({
+      uniforms: { uP: { value: 0 }, uEdge: { value: hex(pal[0]) } },
+      side: T().DoubleSide,
+      vertexShader: `
+        attribute float aN; attribute float aX; attribute vec2 aUv2;
+        varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
+        void main() {
+          vN = aN; vX = aX; vUv2 = aUv2; vCol = color; vNrm = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }`,
+      fragmentShader: `
+        precision highp float;
+        uniform float uP; uniform vec3 uEdge;
+        varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
+        float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+        void main() {
+          // The grain is CELLULAR, not per-pixel: floor() to a coarse grid so the edge crumbles in
+          // visible flakes instead of dithering into noise at video resolution.
+          float n = hash(floor(vUv2 * 9.0) + vN * 37.0);
+          float k = mix(n, vX, 0.55);
+          float e = uP * 1.3 - 0.12;
+          if (k < e) discard;
+          float burn = smoothstep(e + 0.09, e, k);
+          // one cheap lambert term so the slabs still read as solids rather than as flat stickers
+          float lam = 0.55 + 0.45 * max(dot(vNrm, normalize(vec3(0.4, 0.7, 0.6))), 0.0);
+          gl_FragColor = vec4(mix(vCol * lam, uEdge, burn), 1.0);
+        }`,
+      vertexColors: true,
+    });
+    const mesh = new (T().Mesh)(geo, mat);
+    return { obj: mesh, pose(t, LL) {
+      const at = LL.breakAt ?? 0.8, dur = Math.max(1e-6, LL.breakDur ?? 2.0);
+      mat.uniforms.uP.value = Math.max(0, Math.min(1, (t - at) / dur));
+      mesh.rotation.y = (LL.yaw ?? -0.28) + Math.sin(t * 0.22) * 0.07 * (LL.spin ?? 1);
+      mesh.rotation.x = LL.pitch ?? 0.14;
+    } };
+  },
+
+  // CODE ASSEMBLING OUT OF NOTHING. Every token starts scattered in a seeded cloud, tumbling, and
+  // flies to its place in the snippet. The reverse of `shatter`, and deliberately not its mirror: a
+  // break is radial and accelerating, an assembly converges and DECELERATES, which is what makes one
+  // read as destruction and the other as construction.
+  //
+  // PURE IN t. Each slab's scatter point, tumble axis and turn rate are seeded constants from build;
+  // per frame the pose is a straight interpolation from those to the rest pose at its own clamped u.
+  codeAssemble(L, colors) {
+    const board = codeBoard(L, 'codeAssemble');
+    const { geo, local, pos } = codeGeometry(board, colors);
+    const r = rng((L.seed ?? 5) + 101);
+    // The scatter, drawn ONCE. Sorting by `order` gives an arrival sequence that is not the reading
+    // order, which is what makes it look like a swarm settling rather than a list being filled in.
+    const from = board.slabs.map((s) => {
+      const th = r() * Math.PI * 2, rad = 1.5 + r() * 1.9;
+      const ax = r() - 0.5, ay = r() - 0.5, az = r() - 0.5;
+      const al = Math.hypot(ax, ay, az) || 1;
+      // z is ALWAYS negative: the cloud sits BEHIND the board and flies forward into it. A sphere of
+      // scatter put a third of the tokens between the board and the lens, where a slab 1.8 units from
+      // the camera fills half the frame and the shot reads as debris rather than as an assembly.
+      return { x: Math.cos(th) * rad, y: Math.sin(th) * rad * 0.7, z: -(1.2 + r() * 2.6),
+        ax: ax / al, ay: ay / al, az: az / al, turn: (0.6 + r() * 2.2) * Math.PI, delay: s.order };
+    });
+    const m4 = new (T().Matrix4)(), v3 = new (T().Vector3)(), ax3 = new (T().Vector3)();
+    const mat = new (T().MeshStandardMaterial)({ vertexColors: true, flatShading: true,
+      roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.5 });
+    const mesh = new (T().Mesh)(geo, mat);
+    return { obj: mesh, pose(t, LL) {
+      const at = LL.breakAt ?? 0.3, dur = Math.max(1e-6, LL.breakDur ?? 1.2);
+      const spread = (LL.travel ?? 1) * 0.55;                // seconds the arrival order is spread over
+      board.slabs.forEach((s, i) => {
+        const f = from[i];
+        const u = Math.max(0, Math.min(1, (t - at - f.delay * spread) / dur));
+        const e = ease(u);
+        const ox = f.x + (s.cx - f.x) * e;
+        const oy = f.y + (s.cy - f.y) * e;
+        const oz = f.z * (1 - e);
+        ax3.set(f.ax, f.ay, f.az);
+        m4.makeRotationAxis(ax3, f.turn * (1 - e) * (LL.spin ?? 1));
+        for (let k = 0; k < BOX_VERTS; k++) {
+          const v = i * BOX_VERTS + k;
+          v3.set(local[v * 3], local[v * 3 + 1], local[v * 3 + 2]).applyMatrix4(m4);
+          pos[v * 3] = ox + v3.x; pos[v * 3 + 1] = oy + v3.y; pos[v * 3 + 2] = oz + v3.z;
+        }
+      });
+      geo.attributes.position.needsUpdate = true;
+      geo.computeVertexNormals();
+      mesh.rotation.y = (LL.yaw ?? -0.3) + Math.sin(t * 0.22) * 0.07;
+      mesh.rotation.x = LL.pitch ?? 0.15;
+    } };
+  },
 };
+
+// The buffer every code-* scene poses into: one interleaved mesh for the whole board, because 40
+// separate Meshes is 40 draw calls for a figure that is one object. `local` holds each vertex relative
+// to its own slab's centre (the shatter pattern), so a pose only has to write centre + rotation.
+// The tone is a VERTEX COLOUR rather than a material per token: one material, one draw call, and the
+// syntax colouring still reskins with the theme.
+function codeGeometry(board, colors) {
+  const pal = paletteOf(colors);
+  // keyword · string · identifier · punctuation, off the theme's own four. `--text` dimmed toward the
+  // ink is the quiet role; nothing here is a literal.
+  const key = hex(pal[0]), ink = hex(pal[2]);
+  // Only 4 of 38 themes declare an `accent2`, so pal[1] is usually pal[0] again — which paints two
+  // of the four roles the same colour and leaves the board reading as two tones. When they match,
+  // the second is DERIVED by stepping the accent toward the text, the same move SERIES makes in
+  // blocks/kit.mjs and for the same reason: value is the only axis a one-hue theme has.
+  const alt = pal[1] === pal[0] ? key.clone().lerp(ink, 0.45) : hex(pal[1]);
+  const tones = [key, alt, ink, ink.clone().lerp(hex(pal[3]), 0.55)];
+  const n = board.slabs.length * BOX_VERTS;
+  const local = new Float32Array(n * 3), pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  board.slabs.forEach((s, i) => {
+    boxLocal(s.w, s.h, s.d, local, i * BOX_VERTS);
+    const c = tones[s.tone];
+    for (let k = 0; k < BOX_VERTS; k++) {
+      const v = i * BOX_VERTS + k;
+      col[v * 3] = c.r; col[v * 3 + 1] = c.g; col[v * 3 + 2] = c.b;
+    }
+  });
+  const geo = new (T().BufferGeometry)();
+  geo.setAttribute('position', new (T().BufferAttribute)(pos, 3));
+  geo.setAttribute('color', new (T().BufferAttribute)(col, 3));
+  return { geo, local, pos, tones };
+}
 
 export function createThreeLayer(w, h, L, colors) {
   const canvas = document.createElement('canvas');

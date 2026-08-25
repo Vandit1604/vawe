@@ -8,8 +8,8 @@
     "logoWall"
   ],
   "dimensions": {
-    "width": 644,
-    "height": 214
+    "width": 604,
+    "height": 206
   },
   "install": {
     "kind": "scene-layer",

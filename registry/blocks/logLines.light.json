@@ -8,8 +8,8 @@
     "logLines"
   ],
   "dimensions": {
-    "width": 623,
-    "height": 152
+    "width": 584,
+    "height": 140
   },
   "install": {
     "kind": "scene-layer",

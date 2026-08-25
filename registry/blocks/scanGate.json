@@ -8,8 +8,8 @@
     "scanGate"
   ],
   "dimensions": {
-    "width": 849,
-    "height": 531
+    "width": 804,
+    "height": 504
   },
   "install": {
     "kind": "scene-layer",

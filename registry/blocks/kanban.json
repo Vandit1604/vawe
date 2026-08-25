@@ -8,8 +8,8 @@
     "kanban"
   ],
   "dimensions": {
-    "width": 644,
-    "height": 177
+    "width": 604,
+    "height": 165
   },
   "install": {
     "kind": "scene-layer",

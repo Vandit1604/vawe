@@ -8,8 +8,8 @@
     "progressRing"
   ],
   "dimensions": {
-    "width": 224,
-    "height": 241
+    "width": 194,
+    "height": 224
   },
   "install": {
     "kind": "scene-layer",
@@ -24,7 +24,7 @@
       "dur": 4,
       "size": 150,
       "value": 22,
-      "color": "#F6A417",
+      "color": "var(--warn)",
       "label": "battery"
     },
     "props": [

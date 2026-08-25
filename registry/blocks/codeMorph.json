@@ -8,8 +8,8 @@
     "codeMorph"
   ],
   "dimensions": {
-    "width": 705,
-    "height": 196
+    "width": 664,
+    "height": 180
   },
   "install": {
     "kind": "scene-layer",

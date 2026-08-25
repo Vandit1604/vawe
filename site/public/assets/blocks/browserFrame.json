@@ -78,7 +78,7 @@
                       "weight": 500,
                       "text": "example.com",
                       "font": "mono",
-                      "size": 18,
+                      "size": 17,
                       "color": "var(--text-2)"
                     }
                   ]

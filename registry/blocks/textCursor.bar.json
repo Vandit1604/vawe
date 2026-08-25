@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "textCursor.bar",
+  "type": "vawe:block",
+  "title": "textCursor.bar",
+  "description": "the same treatment with a thin vertical rule instead of a filled cell",
+  "tags": [
+    "textCursor"
+  ],
+  "dimensions": {
+    "width": 944,
+    "height": 191
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "textCursor.bar",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 900,
+      "body": "deterministic",
+      "size": 120,
+      "cursor": "bar",
+      "spread": 22
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "body",
+      "size",
+      "spread",
+      "glow",
+      "cursor",
+      "blink",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/textCursor.bar.json",
+      "url": "https://vawe.dev/assets/blocks/textCursor.bar.json",
+      "target": "formats/scene/textCursor.bar.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/textCursor.bar.png"
+  }
+}

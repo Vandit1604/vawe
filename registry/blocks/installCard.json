@@ -8,8 +8,8 @@
     "installCard"
   ],
   "dimensions": {
-    "width": 500,
-    "height": 156
+    "width": 464,
+    "height": 140
   },
   "install": {
     "kind": "scene-layer",

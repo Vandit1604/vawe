@@ -8,8 +8,8 @@
     "screenSwap"
   ],
   "dimensions": {
-    "width": 541,
-    "height": 130
+    "width": 504,
+    "height": 115
   },
   "install": {
     "kind": "scene-layer",

@@ -8,8 +8,8 @@
     "card"
   ],
   "dimensions": {
-    "width": 623,
-    "height": 364
+    "width": 584,
+    "height": 344
   },
   "install": {
     "kind": "scene-layer",

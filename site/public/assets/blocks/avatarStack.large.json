@@ -29,7 +29,7 @@
           "weight": 700,
           "text": "AL",
           "size": 26,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 160,
@@ -55,7 +55,7 @@
           "weight": 700,
           "text": "GH",
           "size": 26,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 201.6,
@@ -81,7 +81,7 @@
           "weight": 700,
           "text": "VS",
           "size": 26,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 243.2,
@@ -107,7 +107,7 @@
           "weight": 700,
           "text": "KM",
           "size": 26,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 284.8,
@@ -133,7 +133,7 @@
           "weight": 700,
           "text": "JR",
           "size": 26,
-          "color": "var(--accent)"
+          "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
       "x": 326.4,

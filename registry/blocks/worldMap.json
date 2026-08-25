@@ -8,8 +8,8 @@
     "worldMap"
   ],
   "dimensions": {
-    "width": 996,
-    "height": 581
+    "width": 944,
+    "height": 552
   },
   "install": {
     "kind": "scene-layer",

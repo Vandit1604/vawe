@@ -8,8 +8,8 @@
     "glassHome"
   ],
   "dimensions": {
-    "width": 685,
-    "height": 612
+    "width": 644,
+    "height": 581
   },
   "install": {
     "kind": "scene-layer",

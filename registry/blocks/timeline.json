@@ -8,8 +8,8 @@
     "timeline"
   ],
   "dimensions": {
-    "width": 541,
-    "height": 298
+    "width": 504,
+    "height": 285
   },
   "install": {
     "kind": "scene-layer",

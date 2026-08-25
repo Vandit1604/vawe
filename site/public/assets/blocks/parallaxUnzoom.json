@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 1200,
+      "h": 760,
+      "html": "<div style=\"position:relative;width:1200px;height:760px\"><div style=\"position:absolute;left:0px;top:0px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * -214.13px), calc(var(--p,0) * -133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">queue</div><div style=\"height:6px;border-radius:100px;background:var(--accent);width:38%\"></div></div><div style=\"position:absolute;left:405.33px;top:0px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * 0px), calc(var(--p,0) * -133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">index</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 62%, var(--text-2));width:45%\"></div></div><div style=\"position:absolute;left:810.66px;top:0px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * 214.13px), calc(var(--p,0) * -133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">cache</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 34%, var(--text-2));width:52%\"></div></div><div style=\"position:absolute;left:0px;top:258.67px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * -214.13px), calc(var(--p,0) * 0px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">edge</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 18%, var(--text-2));width:59%\"></div></div><div style=\"position:absolute;left:810.66px;top:258.67px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * 214.13px), calc(var(--p,0) * 0px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">store</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 8%, var(--text-2));width:66%\"></div></div><div style=\"position:absolute;left:0px;top:517.34px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * -214.13px), calc(var(--p,0) * 133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">logs</div><div style=\"height:6px;border-radius:100px;background:var(--accent);width:73%\"></div></div><div style=\"position:absolute;left:405.33px;top:517.34px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * 0px), calc(var(--p,0) * 133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">auth</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 62%, var(--text-2));width:80%\"></div></div><div style=\"position:absolute;left:810.66px;top:517.34px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transform:translate(calc(var(--p,0) * 214.13px), calc(var(--p,0) * 133.47px));opacity:calc(1 - var(--p,0) * 0.88)\"><div style=\"font:600 17px var(--font-mono);color:var(--text-2);letter-spacing:0.02em\">jobs</div><div style=\"height:6px;border-radius:100px;background:color-mix(in srgb, var(--accent) 34%, var(--text-2));width:87%\"></div></div><div style=\"position:absolute;left:405.33px;top:258.67px;width:389.33px;height:242.67px;box-sizing:border-box;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:14px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05);padding:16px;display:flex;flex-direction:column;justify-content:center;gap:8px;overflow:hidden;transform:scale(calc(1 + var(--p,0) * 2.08));z-index:2\"><div style=\"font:700 24px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">and hands it back</div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">the same board, run backwards</div></div></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "vars": {
+        "--p": [
+          1,
+          0
+        ]
+      },
+      "varsDelay": 0.3,
+      "varsDur": 1.6,
+      "varsEase": "easeInOutCubic"
+    }
+  ],
+  "produced": false
+}

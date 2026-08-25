@@ -8,8 +8,8 @@
     "avatarStack"
   ],
   "dimensions": {
-    "width": 349,
-    "height": 122
+    "width": 316,
+    "height": 108
   },
   "install": {
     "kind": "scene-layer",

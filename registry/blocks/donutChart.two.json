@@ -8,8 +8,8 @@
     "donutChart"
   ],
   "dimensions": {
-    "width": 398,
-    "height": 486
+    "width": 364,
+    "height": 462
   },
   "install": {
     "kind": "scene-layer",

@@ -1,0 +1,40 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "html",
+      "x": 160,
+      "y": 160,
+      "w": 900,
+      "html": "<div style=\"width:900px;white-space:nowrap\"><span style=\"font:800 120px var(--font-sans);color:var(--text);letter-spacing:-0.03em;text-shadow:calc((1 - var(--p,0)) * -22px) 0 0 rgba(255,0,64,0.72), calc((1 - var(--p,0)) * 22px) 0 0 rgba(0,220,255,0.72), 0 0 calc(var(--p,0) * 60px) var(--accent-glow, var(--accent))\">deterministic</span><span style=\"display:inline-block;width:8.4px;height:122.4px;vertical-align:text-bottom;margin-left:14.4px;background:var(--accent);border-radius:4px;box-shadow:0 0 26.4px var(--accent), 0 0 84px var(--accent-glow, var(--accent));opacity:calc(round(down, mod(var(--t,0), 0.9) * 2.22, 1) * (0.35 + var(--p,0) * 0.65))\"></span></div>",
+      "start": 0.2,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.35,
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0.25,
+      "varsDur": 1.8,
+      "varsEase": "easeOutCubic"
+    }
+  ],
+  "produced": false
+}

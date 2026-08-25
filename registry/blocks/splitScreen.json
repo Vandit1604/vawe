@@ -8,8 +8,8 @@
     "splitScreen"
   ],
   "dimensions": {
-    "width": 623,
-    "height": 134
+    "width": 584,
+    "height": 120
   },
   "install": {
     "kind": "scene-layer",

@@ -52,14 +52,14 @@
               "type": "text",
               "weight": 700,
               "text": "Render failed",
-              "size": 22,
+              "size": 24,
               "color": "var(--text)"
             },
             {
               "type": "text",
               "weight": 500,
               "text": "em-dash in on-screen copy",
-              "size": 18,
+              "size": 17,
               "color": "var(--text-2)"
             }
           ]

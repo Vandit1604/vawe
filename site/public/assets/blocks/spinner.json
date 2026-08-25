@@ -31,9 +31,8 @@
       "text": "rendering",
       "x": 160,
       "y": 262,
-      "font": "mono",
-      "size": 18,
-      "color": "var(--dim)",
+      "size": 20,
+      "color": "var(--text-2)",
       "start": 0.4,
       "duration": 8
     }

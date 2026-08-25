@@ -8,8 +8,8 @@
     "glassNotification"
   ],
   "dimensions": {
-    "width": 603,
-    "height": 413
+    "width": 564,
+    "height": 392
   },
   "install": {
     "kind": "scene-layer",

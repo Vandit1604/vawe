@@ -24,7 +24,7 @@
       "gap": 8,
       "pad": 32,
       "bg": "#1E1B2E",
-      "radius": 14,
+      "radius": 12,
       "border": "1px solid rgba(255,255,255,0.08)",
       "start": 0.2,
       "duration": 8,
@@ -37,7 +37,7 @@
           "weight": 500,
           "text": "compose.rb",
           "font": "mono",
-          "size": 18,
+          "size": 17,
           "color": "#9C93C0"
         },
         {

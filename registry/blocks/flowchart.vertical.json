@@ -8,8 +8,8 @@
     "flowchart"
   ],
   "dimensions": {
-    "width": 1047,
-    "height": 937
+    "width": 992,
+    "height": 888
   },
   "install": {
     "kind": "scene-layer",

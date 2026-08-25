@@ -8,8 +8,8 @@
     "profileHeader"
   ],
   "dimensions": {
-    "width": 541,
-    "height": 310
+    "width": 504,
+    "height": 291
   },
   "install": {
     "kind": "scene-layer",

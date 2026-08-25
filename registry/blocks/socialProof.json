@@ -8,8 +8,8 @@
     "socialProof"
   ],
   "dimensions": {
-    "width": 543,
-    "height": 106
+    "width": 506,
+    "height": 92
   },
   "install": {
     "kind": "scene-layer",

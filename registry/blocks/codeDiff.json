@@ -8,8 +8,8 @@
     "codeDiff"
   ],
   "dimensions": {
-    "width": 705,
-    "height": 257
+    "width": 664,
+    "height": 240
   },
   "install": {
     "kind": "scene-layer",

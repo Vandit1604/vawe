@@ -8,8 +8,8 @@
     "callout"
   ],
   "dimensions": {
-    "width": 623,
-    "height": 120
+    "width": 584,
+    "height": 106
   },
   "install": {
     "kind": "scene-layer",

@@ -8,8 +8,8 @@
     "banner"
   ],
   "dimensions": {
-    "width": 644,
-    "height": 111
+    "width": 604,
+    "height": 97
   },
   "install": {
     "kind": "scene-layer",
@@ -24,7 +24,7 @@
       "dur": 4,
       "w": 560,
       "text": "Söhne is licensed, do not commit",
-      "accent": "#F6A417",
+      "accent": "var(--warn)",
       "icon": "!"
     },
     "props": [

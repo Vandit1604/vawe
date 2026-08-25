@@ -1,0 +1,82 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "parallaxZoom",
+  "type": "vawe:block",
+  "title": "parallaxZoom",
+  "description": "one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim",
+  "tags": [
+    "parallaxZoom"
+  ],
+  "dimensions": {
+    "width": 1244,
+    "height": 804
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "parallaxZoom",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 1200,
+      "h": 760,
+      "title": "One card takes the frame",
+      "caption": "the neighbours travel outward",
+      "tiles": [
+        {
+          "label": "queue"
+        },
+        {
+          "label": "index"
+        },
+        {
+          "label": "cache"
+        },
+        {
+          "label": "edge"
+        },
+        {
+          "label": "store"
+        },
+        {
+          "label": "logs"
+        },
+        {
+          "label": "auth"
+        },
+        {
+          "label": "jobs"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "title",
+      "caption",
+      "tiles",
+      "gap",
+      "travel",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/parallaxZoom.json",
+      "url": "https://vawe.dev/assets/blocks/parallaxZoom.json",
+      "target": "formats/scene/parallaxZoom.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/parallaxZoom.png"
+  }
+}

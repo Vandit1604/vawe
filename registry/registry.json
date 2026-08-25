@@ -1075,6 +1075,14 @@
       ]
     },
     {
+      "name": "morphText",
+      "type": "vawe:block",
+      "description": "a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence",
+      "tags": [
+        "morphText"
+      ]
+    },
+    {
       "name": "nodeGraph",
       "type": "vawe:block",
       "description": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
@@ -1128,6 +1136,22 @@
       "description": "onboarding pane · progress dots, title, body, CTA",
       "tags": [
         "onboardCard"
+      ]
+    },
+    {
+      "name": "parallaxUnzoom",
+      "type": "vawe:block",
+      "description": "the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives",
+      "tags": [
+        "parallaxUnzoom"
+      ]
+    },
+    {
+      "name": "parallaxZoom",
+      "type": "vawe:block",
+      "description": "one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim",
+      "tags": [
+        "parallaxZoom"
       ]
     },
     {
@@ -1224,6 +1248,14 @@
       "description": "reactions (love set)",
       "tags": [
         "reactionBar"
+      ]
+    },
+    {
+      "name": "redditPost",
+      "type": "vawe:block",
+      "description": "a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count",
+      "tags": [
+        "redditPost"
       ]
     },
     {
@@ -1507,6 +1539,22 @@
       ]
     },
     {
+      "name": "textCursor",
+      "type": "vawe:block",
+      "description": "a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles",
+      "tags": [
+        "textCursor"
+      ]
+    },
+    {
+      "name": "textCursor.bar",
+      "type": "vawe:block",
+      "description": "the same treatment with a thin vertical rule instead of a filled cell",
+      "tags": [
+        "textCursor"
+      ]
+    },
+    {
       "name": "timeline",
       "type": "vawe:block",
       "description": "vertical rail of events",
@@ -1560,6 +1608,14 @@
       "description": "a post card + counts",
       "tags": [
         "tweetCard"
+      ]
+    },
+    {
+      "name": "uiReveal3d",
+      "type": "vawe:block",
+      "description": "UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another",
+      "tags": [
+        "uiReveal3d"
       ]
     },
     {

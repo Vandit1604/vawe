@@ -52,14 +52,14 @@
               "type": "text",
               "weight": 700,
               "text": "Grain crawls on text",
-              "size": 22,
+              "size": 24,
               "color": "var(--text)"
             },
             {
               "type": "text",
               "weight": 500,
               "text": "opt in only for filmic brands",
-              "size": 18,
+              "size": 17,
               "color": "var(--text-2)"
             }
           ]

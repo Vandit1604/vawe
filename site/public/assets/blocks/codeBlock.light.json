@@ -24,7 +24,7 @@
       "gap": 8,
       "pad": 32,
       "bg": "var(--card)",
-      "radius": 14,
+      "radius": 12,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "start": 0.2,
@@ -38,8 +38,8 @@
           "weight": 500,
           "text": "terminal",
           "font": "mono",
-          "size": 18,
-          "color": "var(--dim)"
+          "size": 17,
+          "color": "var(--text-2)"
         },
         {
           "type": "text",

@@ -8,8 +8,8 @@
     "pointer"
   ],
   "dimensions": {
-    "width": 105,
-    "height": 95
+    "width": 88,
+    "height": 88
   },
   "install": {
     "kind": "scene-layer",

@@ -43,15 +43,15 @@
               "weight": 600,
               "text": "$",
               "font": "mono",
-              "size": 22,
-              "color": "var(--accent)"
+              "size": 24,
+              "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
             },
             {
               "type": "text",
               "weight": 500,
               "text": "npm i vawe",
               "font": "mono",
-              "size": 22,
+              "size": 24,
               "color": "var(--text)",
               "typing": 18,
               "delay": 0.25,

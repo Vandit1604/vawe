@@ -20,11 +20,11 @@
       "y": 160,
       "w": 520,
       "layout": "column",
-      "items": "flex-start",
-      "gap": 6,
+      "items": "stretch",
+      "gap": 2,
       "pad": 24,
       "bg": "var(--card)",
-      "radius": 14,
+      "radius": 12,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "rise",
@@ -38,24 +38,31 @@
           "weight": 400,
           "text": "- \"fps\": 30",
           "font": "mono",
-          "size": 22,
-          "color": "var(--down)"
+          "size": 24,
+          "color": "var(--down)",
+          "bg": "color-mix(in srgb, var(--down) 8%, transparent)",
+          "radius": 4,
+          "pad": "4px 6px"
         },
         {
           "type": "text",
           "weight": 400,
           "text": "+ \"fps\": 60",
           "font": "mono",
-          "size": 22,
-          "color": "var(--up)"
+          "size": 24,
+          "color": "var(--up)",
+          "bg": "color-mix(in srgb, var(--up) 8%, transparent)",
+          "radius": 4,
+          "pad": "4px 6px"
         },
         {
           "type": "text",
           "weight": 400,
           "text": "  \"theme\": \"creed\"",
           "font": "mono",
-          "size": 22,
-          "color": "var(--text-2)"
+          "size": 24,
+          "color": "var(--text-2)",
+          "pad": "4px 6px"
         }
       ]
     }

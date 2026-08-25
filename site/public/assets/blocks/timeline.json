@@ -89,8 +89,8 @@
                   "weight": 500,
                   "text": "12:04",
                   "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)",
+                  "size": 17,
+                  "color": "var(--text-2)",
                   "delay": 0.36,
                   "anim": "fade",
                   "enterDur": 0.3
@@ -155,8 +155,8 @@
                   "weight": 500,
                   "text": "12:05",
                   "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)",
+                  "size": 17,
+                  "color": "var(--text-2)",
                   "delay": 0.66,
                   "anim": "fade",
                   "enterDur": 0.3
@@ -185,7 +185,7 @@
                   "w": 14,
                   "h": 14,
                   "radius": 100,
-                  "bg": "var(--line)",
+                  "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
                   "delay": 0.8,
                   "anim": "pop",
                   "enterDur": 0.26
@@ -214,8 +214,8 @@
                   "weight": 500,
                   "text": "pending",
                   "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)",
+                  "size": 17,
+                  "color": "var(--text-2)",
                   "delay": 0.96,
                   "anim": "fade",
                   "enterDur": 0.3

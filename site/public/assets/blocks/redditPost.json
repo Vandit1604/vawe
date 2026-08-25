@@ -1,0 +1,172 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 9,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 9
+    }
+  ],
+  "layers": [
+    {
+      "type": "group",
+      "x": 160,
+      "y": 160,
+      "w": 620,
+      "layout": "row",
+      "items": "stretch",
+      "gap": 16,
+      "pad": 16,
+      "bg": "var(--card)",
+      "radius": 16,
+      "border": "1px solid var(--line)",
+      "elevation": 2,
+      "anim": "rise",
+      "start": 0.2,
+      "duration": 8,
+      "enterDur": 0.45,
+      "exitDur": 0.35,
+      "children": [
+        {
+          "type": "group",
+          "radius": 8,
+          "w": 64,
+          "layout": "column",
+          "items": "center",
+          "justify": "center",
+          "gap": 4,
+          "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
+          "pad": "8px 0",
+          "children": [
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "▲",
+              "size": 20,
+              "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
+            },
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "2410",
+              "font": "num",
+              "size": 17,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "▼",
+              "size": 20,
+              "color": "color-mix(in srgb, var(--text-2) 66%, var(--text))"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 8,
+          "children": [
+            {
+              "type": "group",
+              "layout": "row",
+              "items": "center",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "r/programming",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "·",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "u/deterministic",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "·",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                },
+                {
+                  "type": "text",
+                  "weight": 500,
+                  "text": "4h",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "weight": 700,
+              "text": "Every frame is a pure function of n",
+              "size": 24,
+              "color": "var(--text)",
+              "w": 508,
+              "ls": "-0.01em"
+            },
+            {
+              "type": "text",
+              "weight": 400,
+              "text": "No clock, no random, no accumulation. Render 412 alone or after 411 others.",
+              "size": 17,
+              "color": "var(--text-2)",
+              "w": 508
+            },
+            {
+              "type": "group",
+              "layout": "row",
+              "items": "center",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "weight": 600,
+                  "text": "188 comments",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                },
+                {
+                  "type": "text",
+                  "weight": 600,
+                  "text": "share",
+                  "font": "mono",
+                  "size": 17,
+                  "color": "var(--text-2)"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "produced": false
+}

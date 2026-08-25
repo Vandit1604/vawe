@@ -8,8 +8,8 @@
     "spinner"
   ],
   "dimensions": {
-    "width": 127,
-    "height": 114
+    "width": 100,
+    "height": 100
   },
   "install": {
     "kind": "scene-layer",

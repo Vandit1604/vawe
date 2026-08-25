@@ -8,8 +8,8 @@
     "terminalPro"
   ],
   "dimensions": {
-    "width": 911,
-    "height": 401
+    "width": 864,
+    "height": 380
   },
   "install": {
     "kind": "scene-layer",

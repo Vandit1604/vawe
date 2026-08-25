@@ -8,8 +8,8 @@
     "codeScroll"
   ],
   "dimensions": {
-    "width": 705,
-    "height": 350
+    "width": 664,
+    "height": 330
   },
   "install": {
     "kind": "scene-layer",

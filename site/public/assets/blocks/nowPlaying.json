@@ -44,7 +44,7 @@
               "radius": 12,
               "w": 72,
               "h": 72,
-              "bg": "color-mix(in srgb, var(--accent) 88%, var(--text))",
+              "bg": "var(--accent)",
               "layout": "row",
               "justify": "center",
               "items": "center",
@@ -54,7 +54,7 @@
                   "weight": 700,
                   "text": "GH",
                   "size": 29,
-                  "color": "#fff"
+                  "color": "var(--on-accent)"
                 }
               ]
             },
@@ -69,7 +69,7 @@
                   "type": "text",
                   "weight": 700,
                   "text": "Golden Hour",
-                  "size": 22,
+                  "size": 24,
                   "color": "var(--text)"
                 },
                 {
@@ -98,7 +98,7 @@
               "radius": 100,
               "w": 336,
               "h": 5,
-              "bg": "var(--surface-2)",
+              "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
               "layout": "row",
               "justify": "flex-start",
               "items": "stretch",
@@ -129,7 +129,7 @@
               "type": "text",
               "weight": 600,
               "text": "◁",
-              "size": 22,
+              "size": 24,
               "color": "var(--text-2)"
             },
             {
@@ -155,7 +155,7 @@
               "type": "text",
               "weight": 600,
               "text": "▷|",
-              "size": 22,
+              "size": 24,
               "color": "var(--text-2)"
             }
           ]

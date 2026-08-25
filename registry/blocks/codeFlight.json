@@ -8,8 +8,8 @@
     "codeFlight"
   ],
   "dimensions": {
-    "width": 705,
-    "height": 354
+    "width": 664,
+    "height": 334
   },
   "install": {
     "kind": "scene-layer",

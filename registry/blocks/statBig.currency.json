@@ -8,8 +8,8 @@
     "statBig"
   ],
   "dimensions": {
-    "width": 420,
-    "height": 188
+    "width": 386,
+    "height": 187
   },
   "install": {
     "kind": "scene-layer",

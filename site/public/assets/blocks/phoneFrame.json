@@ -61,15 +61,15 @@
                   "type": "text",
                   "weight": 600,
                   "text": "10:24",
-                  "size": 10,
+                  "size": 17,
                   "color": "var(--text)"
                 },
                 {
                   "type": "text",
                   "weight": 500,
                   "text": "▮▮▮",
-                  "size": 9,
-                  "color": "var(--dim)"
+                  "size": 17,
+                  "color": "var(--text-2)"
                 }
               ]
             }

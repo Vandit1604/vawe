@@ -8,8 +8,8 @@
     "table"
   ],
   "dimensions": {
-    "width": 644,
-    "height": 268
+    "width": 604,
+    "height": 255
   },
   "install": {
     "kind": "scene-layer",
