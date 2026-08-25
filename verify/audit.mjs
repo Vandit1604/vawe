@@ -169,10 +169,25 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     }
     return false;
   };
+  // `data-ink="off"` — TEXT THAT IS IN THE DOM ON PURPOSE AND IS NEVER ON SCREEN. `wordSlot`
+  // (core/fx/word-slot.js) stacks every candidate word in ONE grid cell, because that is what sizes the
+  // slot to the widest of them, and shows one at a time. So `textContent` read
+  // "docsdashboardschangelogs" — a string no frame ever paints — and contrast, weak-headline and
+  // clipped-text each graded a film against it. Same rule as the `style, script` reject beside it and
+  // the same lesson as #214: what is in the DOM is not what is painted.
+  //
+  // IT IS A SELECTOR TEST, NOT A COMPUTED-STYLE ONE, and that is deliberate. The general rule ("skip
+  // any text whose ancestors are invisible") needs getComputedStyle on every text node's whole chain,
+  // and measured across the library that forced a style resolution which changed what ONE shipped scene
+  // had in its DOM by the time the clipped-text loop ran (`ab-skill-shotcode` f109 went from 1 hard to
+  // 2, reproducibly, with no string having changed). A gate change that perturbs a scene it was not
+  // aimed at is a regression until proven otherwise, and it was not proven. An attribute nothing else
+  // in the library sets cannot perturb anything. The general rule is still worth having; it is logged
+  // as an open gap rather than shipped half-cleared.
   const inkText = (el) => {
     let out = '';
     const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
-      acceptNode: (n) => (n.parentElement && n.parentElement.closest('style, script'))
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest('style, script, [data-ink="off"]'))
         ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
     });
     while (w.nextNode()) out += w.currentNode.nodeValue;

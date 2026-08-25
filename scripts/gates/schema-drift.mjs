@@ -303,9 +303,14 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
       console.error('\u2717 layers.item.modifiers.item DRIFT vs core/fx/index.js REGISTRY');
       if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
       if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
+      // NOT `--write`: each key here carries that modifier's own hand-written prop schema, which no
+      // generator can invent. The shared fix line below said --write and it does nothing for this
+      // block, so an author ran it, saw the same failure, and had no next move.
+      console.error('    fix: add the key by hand to layers.item.modifiers.item in formats/scene/schema.json'
+        + ' — this block is a hand-written prop schema per modifier, NOT a generated enum.');
       bad++;
     } else checked++;
   }
-  if (bad) { console.error('  fix: node scripts/gates/schema-drift.mjs --write  (these enums are GENERATED)'); process.exit(1); }
+  if (bad) { console.error('  fix (the enums above): node scripts/gates/schema-drift.mjs --write  (those are GENERATED)'); process.exit(1); }
   console.log(`\u2713 ${checked} schema enum(s) derived from the registries they copy, in sync`);
 }

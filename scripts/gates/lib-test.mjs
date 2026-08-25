@@ -3,7 +3,7 @@
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
-import { unitProgress, PRESETS, PRESET_BLURBS } from '../../core/type.js';
+import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
 import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
@@ -53,7 +53,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope 
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
-import { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -2806,6 +2806,133 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     /a\.png[\s\S]*b\.png/.test(await threw({ layers: [{ src: '/assets/a.png' }, { src: 'assets/b.png' }] })));
 
   globalThis.window = priorWindow; globalThis.Image = priorImage; globalThis.document = priorDoc;
+}
+
+// ---- dollyZoom: the subject holds because `s` does, and the LENS is the whole move ----------------
+// The identity being asserted is m(z) = s*L/(L - s*z): at z = 0 that is s with no L in it, so a keyframe
+// pair that holds s and ramps p cannot change the subject's size and must change everything at a depth.
+{
+  const kf = dollyZoom({ dur: 2, from: 2400, to: 800 });
+  ok('dollyZoom emits two ascending keys', kf.length === 2 && kf[1].t > kf[0].t);
+  ok('dollyZoom holds `s` across both keys — the subject cannot change size',
+    kf[0].s === kf[1].s && kf[0].s === 1);
+  ok('dollyZoom ramps the lens, which is the only thing it moves',
+    kf[0].p === 2400 && kf[1].p === 800);
+  ok('dollyZoom leaves x/y at the origin — it reframes nothing',
+    kf.every((k) => k.x === 0 && k.y === 0));
+  // m(z) at the two ends of the default move, for a layer standing 800px back. The subject's own
+  // magnification is s at both; the background's is not, and that difference IS the shot.
+  const m = (s, L, z) => s * L / (L - s * z);
+  ok('dollyZoom: the picture plane is magnified by s at BOTH ends, whatever the lens says',
+    m(1, 2400, 0) === 1 && m(1, 800, 0) === 1);
+  ok('dollyZoom: a layer 800px back SHRINKS as the lens opens — the ground gives way',
+    m(1, 800, -800) < m(1, 2400, -800));
+  ok('dollyZoom refuses a lens ramp that never ramps, a dur that rewinds, and a camera at nowhere', [
+    () => dollyZoom({ from: 900, to: 900 }),
+    () => dollyZoom({ dur: 0 }),
+    () => dollyZoom({ s: 0 }),
+    () => dollyZoom({ to: -400 }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+  ok('CAMERA_MOVE_NAMES picks up dollyZoom', CAMERA_MOVE_NAMES.includes('dollyZoom'));
+  ok('buildCameraMove resolves dollyZoom and refuses a param it does not read',
+    JSON.stringify(buildCameraMove({ move: 'dollyZoom', dur: 1 })) === JSON.stringify(dollyZoom({ dur: 1 }))
+    && (() => { try { buildCameraMove({ move: 'dollyZoom', lens: 900 }); return false; } catch { return true; } })());
+}
+
+// ---- the `wght` axis reaches a HEADLINE, not only a caption --------------------------------------
+// wght() writes BOTH channels on purpose: 11 of the 31 vendored faces carry no axis and ignore
+// font-variation-settings silently, so the fontWeight half is what keeps the ramp from being a dead
+// still on them. That is the assertion, not an implementation detail.
+{
+  ok('wght says the weight in both channels', (() => {
+    const w = wght(634);
+    return w.fontVariationSettings === "'wght' 634" && w.fontWeight === '600';
+  })());
+  ok('wght: the STATIC-face channel is a legal CSS 100-step at every point of a ramp',
+    [100, 213, 455, 634, 780, 900].every((n) => /^[1-9]00$/.test(wght(n).fontWeight)));
+  ok('wght clamps to the axis range rather than emitting a value no face has',
+    wght(-40).fontVariationSettings === "'wght' 100" && wght(5000).fontVariationSettings === "'wght' 900");
+  const axis = (u) => +/'wght' (\d+)/.exec(PRESETS.weight(u).fontVariationSettings)[1];
+  ok('preset `weight` thickens monotonically from its floor to its ceiling',
+    axis(0) === 200 && axis(1) === 800 && axis(0.25) < axis(0.5) && axis(0.5) < axis(0.75));
+  ok('preset `weight` reads its own from/to', (() => {
+    const w = PRESETS.weight(1, { from: 300, to: 500 });
+    return w.fontVariationSettings === "'wght' 500";
+  })());
+  ok('preset `weight` degrades to a static cut too — it never writes the axis alone',
+    PRESETS.weight(0.5).fontWeight != null);
+}
+
+// ---- wordSlot: the box is the WIDEST candidate, and the clock picks which one shows ---------------
+// The sizing is CSS (one grid cell, every candidate in it), so what a headless test can prove is the
+// STRUCTURE that gets that sizing and the index arithmetic that drives it. A fake DOM, the same shape
+// the preloadImages block above uses, because the real one is a browser.
+{
+  const mkEl = (tag) => ({
+    tag, style: {}, attrs: {}, childNodes: [], get children() { return this.childNodes.filter((n) => n.nodeType === 1); },
+    nodeType: 1, parentNode: null,
+    setAttribute(k, v) { this.attrs[k] = v; },
+    removeAttribute(k) { delete this.attrs[k]; },
+    appendChild(n) { n.parentNode = this; this.childNodes.push(n); return n; },
+    insertBefore(n, ref) { const i = ref ? this.childNodes.indexOf(ref) : this.childNodes.length; n.parentNode = this; this.childNodes.splice(i < 0 ? this.childNodes.length : i, 0, n); return n; },
+    querySelector() { return this.childNodes.find((n) => n.nodeType === 1 && n.attrs && n.attrs['data-word-slot']) || null; },
+  });
+  const priorDoc = globalThis.document;
+  globalThis.document = { createElement: mkEl, createTextNode: (v) => ({ nodeType: 3, nodeValue: v, parentNode: null }) };
+  const ws = await import('../../core/fx/word-slot.js');
+
+  const mount = (text) => { const el = mkEl('div'); el.appendChild(globalThis.document.createTextNode(text)); return el; };
+  const WORDS = ['docs', 'dashboards', 'specs'];
+  const el = mount('Ship {} in seconds');
+  ws.build(null, el, {}, { words: WORDS });
+  const slot = el.querySelector();
+  ok('wordSlot puts EVERY candidate in the same grid cell — that is what sizes the box to the widest',
+    slot && slot.children.length === 3 && slot.children.every((c) => c.style.gridArea === '1 / 1'));
+  ok('wordSlot leaves the text before and after the placeholder in place',
+    el.childNodes[0].nodeValue === 'Ship ' && el.childNodes[2].nodeValue === ' in seconds');
+  ok('wordSlot never hides a candidate with display/visibility — a hidden grid item must still size the track',
+    slot.children.every((c) => c.style.display == null && c.style.visibility == null));
+
+  const opac = (t) => { ws.frame(null, el, { start: 0 }, t, null, { words: WORDS, every: 1, swap: 0.25 });
+    return slot.children.map((c) => +c.style.opacity); };
+  ok('wordSlot holds word 0 before the first swap — a slot is never blank',
+    opac(0)[0] === 1 && opac(0.9)[0] === 1);
+  ok('wordSlot crossfades exactly two words mid-swap and nothing else',
+    (() => { const o = opac(1.125); return Math.abs(o[0] - 0.5) < 0.02 && Math.abs(o[1] - 0.5) < 0.02 && o[2] === 0; })());
+  ok('wordSlot settles on word 1 after its swap window', opac(1.6)[1] === 1);
+  ok('wordSlot HOLDS the last word past the end rather than blanking',
+    opac(9)[2] === 1 && opac(9)[0] === 0);
+  ok('wordSlot loops back to the first word when asked', (() => {
+    ws.frame(null, el, { start: 0 }, 3.6, null, { words: WORDS, every: 1, swap: 0.25, loop: true });
+    return +slot.children[0].style.opacity === 1;
+  })());
+  ok('wordSlot is pure in t — the same second twice gives the same frame',
+    JSON.stringify(opac(1.4)) === JSON.stringify(opac(1.4)));
+  // The gates read the DOM, and every candidate is in it so the box can be sized to the widest. Exactly
+  // the words NOT on screen this frame must say so, or the audit grades the film against all of them
+  // concatenated and manufactures a finding whose only fix is to make the film worse.
+  const inkOff = (t) => { opac(t); return slot.children.map((c) => c.attrs['data-ink'] || 'on'); };
+  ok('wordSlot marks every off-screen candidate as not-ink, and only those',
+    JSON.stringify(inkOff(0.4)) === JSON.stringify(['on', 'off', 'off'])
+    && JSON.stringify(inkOff(2.0)) === JSON.stringify(['off', 'on', 'off']));
+  ok('wordSlot marks BOTH words as ink mid-swap — a crossfade really does show two',
+    JSON.stringify(inkOff(1.125)) === JSON.stringify(['on', 'on', 'off']));
+
+  ok('wordSlot refuses one word, a swap longer than the hold, an unknown key and a missing placeholder', [
+    () => ws.build(null, mount('Ship {} fast'), {}, { words: ['docs'] }),
+    () => ws.build(null, mount('Ship {} fast'), {}, { words: WORDS, swap: 2, every: 1 }),
+    () => ws.build(null, mount('Ship {} fast'), {}, { words: WORDS, chipp: true }),
+    () => ws.build(null, mount('Ship it fast'), {}, { words: WORDS }),
+    () => ws.build(null, mount('Ship {} fast'), { split: 'word' }, { words: WORDS }),
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+  ok('wordSlot chip: the brand plate carries the guaranteed ink for that fill, never a hex', (() => {
+    const e2 = mount('Ship {} fast');
+    ws.build(null, e2, {}, { words: WORDS, chip: true });
+    const s2 = e2.querySelector();
+    return s2.style.background === 'var(--accent)' && s2.style.color === 'var(--on-accent)';
+  })());
+
+  globalThis.document = priorDoc;
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
