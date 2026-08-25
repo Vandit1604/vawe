@@ -27,7 +27,13 @@
 
 import { clamp01, easeOutCubic } from '../motion.js';
 
-export const WORD_SLOT_KEYS = ['words', 'every', 'swap', 'at', 'chip', 'loop', 'delay', 'rise'];
+// NOT EXPORTED. It is this modifier's own key list, used twice in the two throws below, and nothing
+// outside this file reads it. Exported, it read as a NAMED VOCABULARY and scripts/gates/arsenal-check
+// correctly refused it: a capability the engine offers that the catalogue never mentions, which an
+// author told to "see the whole arsenal, then choose" cannot choose. `wordSlot` itself IS in the
+// catalogue, with a blurb, through FX_BLURBS. This was an exported local wearing a vocabulary's
+// clothes, and the honest fix is to stop exporting it rather than to waive the gate that noticed.
+const WORD_SLOT_KEYS = ['words', 'every', 'swap', 'at', 'chip', 'loop', 'delay', 'rise'];
 
 const MARK = 'data-word-slot';
 
