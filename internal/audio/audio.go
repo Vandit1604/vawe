@@ -17,6 +17,15 @@ const (
 	duckGain  = 0.126 // ~-18dB
 	musicGain = 0.6
 	micro     = 0.3 // micro-silence before each sting (seconds)
+
+	// THE CUE-VERSUS-BED RULE, and this is the only place it is stated. A cue is CAUSAL: it says the
+	// button was pressed, the row landed, the thing arrived. A bed is atmosphere. When atmosphere
+	// covers causality the film stops explaining itself, so a cue's table gain is a FLOOR, not a
+	// level — it is raised until the cue clears the bed under it, and it is never lowered.
+	cueHeadroom = 2.0  // ~+6dB: how far over the bed a cue has to sit to read as a separate event
+	cueWindow   = 0.05 // a transient is judged on its loudest 50ms, not on its decaying tail
+	cueMaxLift  = 4.0  // +12dB. Past this the bed is too loud for the cue, not the cue too quiet.
+	cueCeiling  = 0.7  // a lifted cue may not peak past this: the bed still has to fit under the limiter
 )
 
 // Per-cue trim, so cues of different natures sit together at their authored gain. Anything absent
@@ -232,27 +241,35 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	}
 	fadeInN := int(math.Round(cfg.MusicFade.In * sr))
 	fadeOutN := int(math.Round(cfg.MusicFade.Out * sr))
+	// The ATMOSPHERE, kept as its own signal: music plus bridge texture, after every gain that acts on
+	// them. It is what a cue has to be heard over, and holding it rather than re-deriving it is why the
+	// cue rule below can be one function instead of a copy of this loop. VO is deliberately not in it —
+	// the bed already ducks under a voice, and a cue is not competing with the narration.
+	bed := make([]float64, total)
 	for i := 0; i < total; i++ {
 		ducked := mg
 		if vo != nil {
 			ducked = math.Max(duckFloor, mg*(1-math.Min(1, voEnv[i]*4)))
 		}
-		s := 0.0
+		m := 0.0
 		if music != nil {
 			bd := 1.0
 			if bedDuck != nil {
 				bd = bedDuck[i]
 			}
-			s += music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN) * bd
+			m = music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN) * bd
 		}
+		s := m
 		if vo != nil {
 			s += vo[i]
 		}
 		left[i] += s * microGain[i]
 		right[i] += s * microGain[i]
+		bed[i] = m * microGain[i]
 		if bridgeMix != nil {
 			left[i] += bridgeMix[i]
 			right[i] += bridgeMix[i]
+			bed[i] += bridgeMix[i]
 		}
 	}
 
@@ -277,17 +294,23 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		if clip == nil {
 			continue
 		}
+		start := int(math.Round(cue.T * sr))
 		g := sfxGain[cue.Name]
 		if g == 0 {
 			g = 0.6
 		}
 		if cue.Gain != nil {
+			// An authored gain is a DECISION about this one sound. The table gain is only a starting
+			// point, so it gets lifted over the bed; an author's number is taken as written. That is
+			// also what keeps a keystroke train quiet: core/layers/text.js gives every key cue an
+			// explicit `keyGain`, and a typed line lifted to clear the bed would machine-gun.
 			g = *cue.Gain
+		} else {
+			g = overTheBed(clip, bed, start, g, cue.Name, cue.T)
 		}
 		if cfg.SfxGain != nil {
 			g *= *cfg.SfxGain
 		}
-		start := int(math.Round(cue.T * sr))
 		for i := 0; i < len(clip) && start+i >= 0 && start+i < total; i++ {
 			left[start+i] += clip[i] * g
 			right[start+i] += clip[i] * g
@@ -299,6 +322,103 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	// mux instead, where ffmpeg's `loudnorm` does the standard measurement (see encode.Mux + Config.Loudness).
 	writeWavStereo(outWav, left, right)
 	return true, nil
+}
+
+// overTheBed is the ONE place the cue-versus-bed relationship is decided (see cueHeadroom). It returns
+// the gain this cue must play at to be heard over the atmosphere under it, which is `g` itself
+// wherever the bed is already quiet enough — so a film with no music, or a cue landing in a duck,
+// mixes exactly as it did before this rule existed. It only ever raises: pulling a loud cue DOWN to a
+// margin would be the mixer overruling a voicing nobody asked it to touch.
+//
+// Both sides are measured the same way, over the SAME window — the cue's loudest cueWindow seconds.
+// Masking is short-time, so what hides a click is the bed's energy under the click, not the bed's
+// average over the bar. Scoring the cue on its loudest moment and the bed on a long average would
+// flatter every cue and this rule would never fire.
+func overTheBed(clip, bed []float64, start int, g float64, name string, t float64) float64 {
+	at, lvl := loudestWindow(clip)
+	if lvl <= 0 {
+		return g
+	}
+	// min() so a cue shorter than cueWindow is still weighed against exactly its own span of bed.
+	need := windowRMS(bed, start+at, min(int(cueWindow*sr), len(clip))) * cueHeadroom
+	if lvl*g >= need {
+		return g
+	}
+	lift := need / (lvl * g)
+	// A cue is a TRANSIENT: the loudest 50ms of a click carries a peak many times its own RMS, so
+	// matching RMS to a loud bed sends that peak through the roof. The limiter would then squash the
+	// whole mix for the length of the cue, which is a worse defect than the one being fixed. So the
+	// lift is capped by the cue's own peak as well as by cueMaxLift, and never below 1 — this rule
+	// raises cues, it does not trim a voicing that is already hot.
+	maxLift := cueMaxLift
+	if pk := peakOf(clip) * g; pk > 0 && cueCeiling/pk < maxLift {
+		maxLift = cueCeiling / pk
+	}
+	if maxLift < 1 {
+		maxLift = 1
+	}
+	if lift > maxLift {
+		// Loud, because the clamp means the cue does NOT clear the bed and the film still has the
+		// defect. Silently settling for whatever fits would hide the thing this rule exists to catch.
+		fmt.Fprintf(os.Stderr, "⚠ audio: cue %q at t=%.2f cannot clear the bed — it needs +%.1fdB and only +%.1fdB fits before it clips. The bed is too loud for this cue, not the cue too quiet: lower audio.musicGain, or place a cue with more body.\n",
+			name, t, 20*math.Log10(lift), 20*math.Log10(maxLift))
+		lift = maxLift
+	}
+	return g * lift
+}
+
+// loudestWindow is the highest RMS over any cueWindow-second stretch of a clip, and where it starts.
+// That is what an ear reads as a transient's level; whole-clip RMS would score a click by its own
+// silence and lift it far too hard.
+func loudestWindow(clip []float64) (int, float64) {
+	n := int(cueWindow * sr)
+	if n > len(clip) {
+		n = len(clip)
+	}
+	if n <= 0 {
+		return 0, 0
+	}
+	acc, best, at := 0.0, 0.0, 0
+	for i := 0; i < len(clip); i++ {
+		acc += clip[i] * clip[i]
+		if i >= n {
+			acc -= clip[i-n] * clip[i-n]
+		}
+		if i >= n-1 && acc > best {
+			best, at = acc, i-n+1
+		}
+	}
+	return at, math.Sqrt(best / float64(n))
+}
+
+// peakOf is the largest absolute sample in a clip.
+func peakOf(clip []float64) float64 {
+	p := 0.0
+	for _, v := range clip {
+		if a := math.Abs(v); a > p {
+			p = a
+		}
+	}
+	return p
+}
+
+// windowRMS is the level of `sig` over n samples from `start`, clipped to the buffer.
+func windowRMS(sig []float64, start, n int) float64 {
+	if start < 0 {
+		start = 0
+	}
+	end := start + n
+	if end > len(sig) {
+		end = len(sig)
+	}
+	if end <= start {
+		return 0
+	}
+	acc := 0.0
+	for i := start; i < end; i++ {
+		acc += sig[i] * sig[i]
+	}
+	return math.Sqrt(acc / float64(end-start))
 }
 
 // bridgeEnv is the level of a bridge at sample i of an n-sample span: an equal-power (sine) ramp up
@@ -336,7 +456,6 @@ func fadeGain(i, total, fadeInN, fadeOutN int) float64 {
 	}
 	return g
 }
-
 
 func resolve(bases []string, p, fallback string) string {
 	for _, base := range bases {

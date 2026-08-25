@@ -313,6 +313,29 @@ give same bytes. That is a genuinely good property and it is worth keeping.
 A cue is honest only when it names something the viewer SEES happen. A `press` with no button on screen
 is a lie; cut it.
 
+**A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal — it says the button was
+pressed, the row landed, the thing arrived — and a bed is atmosphere. When atmosphere covers causality
+the film stops explaining itself, so a cue's table gain is a floor, not a level: `internal/audio/audio.go`
+raises it until the cue's loudest 50ms sits 6dB over the bed in that same 50ms, and never lowers it.
+Three things follow, and they are the whole contract:
+
+- **An authored `gain` wins, untouched.** Write `{"t":3.2,"name":"chime","gain":0.2}` and the cue mixes
+  at 0.2. Keystrokes are authored this way too (`keyGain`), which is why a typed line stays a whisper
+  instead of machine-gunning over the music.
+- **`sfxGain` still scales everything**, after the lift. A scene-wide trim keeps its meaning.
+- **The lift is capped, and a cap that binds SAYS SO on stderr.** A click carries a peak many times its
+  own RMS, so matching a loud bed would send it through the limiter and squash the mix. The mixer warns
+  by name and time: read it as *the bed is too loud for this cue*, and lower `musicGain` or pick a cue
+  with more body.
+
+A film with no bed, or a cue landing where the bed has ducked, mixes exactly as it always did.
+
+**A film cannot end on a silent hold today**, and it is worth knowing before you plan one.
+`musicFade.out` ramps the bed to zero AT `duration`, never before it; nothing says "cut the bed N
+seconds early". The nearest existing mechanism is a sting on the last mark — micro-silence ramps the bed
+to nothing over the 0.3s before every sting — but that couples the audio tail to a visual device, so it
+is a workaround rather than the dial.
+
 **The commands:**
 
 | Command | What it does |
