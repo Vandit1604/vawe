@@ -14,7 +14,7 @@
 import {
   TOKENS, HAIR, r2, text, box, seriesAt,
   R, TYPE, SPACE, E, cardChrome, tint, TINT, SHADOW_CARD,
-  capCss, labelCss, numCss, needData,
+  capCss, labelCss, numCss, needData, onInk,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a name-to-category table in sync by hand.
@@ -235,20 +235,18 @@ export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', tit
   }
   const lit = VOTES[voted];
   // THE LIT ARROW IS THE TONE PUSHED TOWARD `--text`, never the raw token. A bare `--accent` on the
-  // rail's own accent tint measured 2.7:1 on `linear` and `make audit` failed it HARD. This is exactly
-  // the mix deltaChip makes in blocks/kit.mjs, and for the same reason: mixing toward the theme's text
-  // colour raises contrast on a dark theme and on a light one, without the block knowing which it is in.
-  const voteInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
+  // rail's own accent tint measured 2.7:1 on `linear` and `make audit` failed it HARD. `onInk` is the
+  // one owner of that mix; see kit.mjs for why it is not `onColor`.
   // The QUIET arrow takes the same treatment, because it is on the same tinted ground: `--text-2`
   // alone measured 3.8:1 there on higgsfield. The lit/quiet distinction survives it, because what
   // separates them is the accent HUE, not the amount of contrast.
-  const quietInk = voteInk(T.sub);
+  const quietInk = onInk(T.sub);
   // The arrow is the SAME size as the score beside it, for the reason deltaChip's is: `make audit`
   // fails text under 14.04px, so a glyph shrunk to look secondary is the part nobody can read.
   // THE QUIET ARROW IS `--text-2`, NOT `--dim`. `--dim` is the de-emphasised CHROME role and it does not
   // clear 4.5:1 on a tinted ground — `make audit` measured the un-lit arrow at 4.4:1 on this very rail.
   // kit.mjs already says this about captions and ticks; an arrow a reader has to see is the same case.
-  const arrow = (glyph, on, tone) => text({ text: glyph, size: TYPE.base, weight: 700, color: on ? voteInk(tone) : quietInk });
+  const arrow = (glyph, on, tone) => text({ text: glyph, size: TYPE.base, weight: 700, color: on ? onInk(tone) : quietInk });
   const meta = (t) => text({ text: t, font: 'mono', size: TYPE.body, color: T.sub, weight: 500 });
   const RAIL = 64;
   const bodyW = w - RAIL - 3 * SPACE.md;
