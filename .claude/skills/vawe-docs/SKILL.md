@@ -80,6 +80,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 |---|---|---|
 | [docs/CRAFT/AUTHOR-THE-FRAME.md](../../../docs/CRAFT/AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
 | [docs/CRAFT/COLOR.md](../../../docs/CRAFT/COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
+| [docs/CRAFT/EYE-TRACE.md](../../../docs/CRAFT/EYE-TRACE.md) | a cut moves the subject across the frame | where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports |
 | [docs/CRAFT/FRAME-SPEC.md](../../../docs/CRAFT/FRAME-SPEC.md) | starting a video — lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
 | [docs/CRAFT/IMAGERY.md](../../../docs/CRAFT/IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
 | [docs/CRAFT/LAYOUT.md](../../../docs/CRAFT/LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace |
@@ -94,6 +95,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | Doc | Reach for it when… | It answers |
 |---|---|---|
 | [docs/CRAFT/DENSITY.md](../../../docs/CRAFT/DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
+| [docs/CRAFT/READING.md](../../../docs/CRAFT/READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice |
 | [docs/CRAFT/SHOW-DONT-TELL.md](../../../docs/CRAFT/SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
 
 ## Process & QA

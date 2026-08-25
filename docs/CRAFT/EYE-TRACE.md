@@ -1,3 +1,9 @@
+---
+when: a cut moves the subject across the frame
+answers: "where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports"
+group: look
+---
+
 # Eye-trace: where the viewer is looking when you cut
 
 Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%). Three

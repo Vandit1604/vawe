@@ -1,3 +1,9 @@
+---
+when: a line is on screen and you do not know if anyone can read it
+answers: "hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice"
+group: density
+---
+
 # Reading: can a viewer take the words in, in the seconds they are there?
 
 Every other check on on-screen copy grades the WORDS. `copy-check` grades the writing and flags a
