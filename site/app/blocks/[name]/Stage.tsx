@@ -5,7 +5,7 @@
 //
 // Framing is the caller's job (see useSceneEngine's banner): `frame` is the rect measured around this
 // block on its 1920x1080 canvas, and BlockLive turns that into a window. Here the window is capped by
-// width AND height and never cropped, because the 176 blocks run from 2.7:1 (codeTyping) to 1.4:1
+// width AND height and never cropped, because the 183 blocks run from 2.7:1 (codeTyping) to 1.4:1
 // (usMapHex) and a fixed box with `cover` would cut half of them.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BlockLive, type Frame } from "../BlockLive";

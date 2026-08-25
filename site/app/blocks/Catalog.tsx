@@ -7,7 +7,7 @@
 // catalog was below all of it. Here the toolbar IS the header: the count sits next to the word, the
 // search is immediately reachable, and the rail and the grid own the rest of the frame.
 //
-// Grouping is by CATEGORY, not family. 90 families is unusable as a rail and most hold one block; the
+// Grouping is by CATEGORY, not family. 96 families is unusable as a rail and most hold one block; the
 // category is resolved from the module each factory lives in (scripts/site/blocks-json.mjs), so there
 // is no name-to-category table here to fall out of sync with the engine.
 import { useState, useMemo, useRef, useEffect, Suspense } from "react";

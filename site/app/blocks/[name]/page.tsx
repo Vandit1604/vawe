@@ -40,7 +40,7 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
   const b = ALL.find((x) => x.name === name);
   if (!b) notFound();
 
-  // Walking is by CATEGORY because that is what the index groups by: 90 families, most holding one
+  // Walking is by CATEGORY because that is what the index groups by: 96 families, most holding one
   // block, make a next/prev pair that mostly has nowhere to go.
   const peers = ALL.filter((x) => cat(x) === cat(b)).sort((x, y) => x.name.localeCompare(y.name));
   const i = peers.findIndex((x) => x.name === b.name);

@@ -41,13 +41,13 @@ JSON *is* the video.
 
 ## Layer types
 
-`text` · `image` · `component` · `rect` · `count` · `group` · `glow` · `beam` · `svg` · `board` · `doc` · `html` · `clip` · `cursor` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `composition`
+`text` · `count` · `image` · `video` · `group` · `rect` · `glow` · `beam` · `svg` · `cursor` · `clip` · `html` · `component` · `board` · `doc` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `globe` · `composition`
 
 ## The props you will actually use
 
 | prop | type | notes |
 |---|---|---|
-| `type` | string | Layer type — one of: `text` `image` `component` `rect` `count` `group` `glow` `beam` `svg` `board` `doc` `html` `clip` `cursor` `shader` `lottie` `paint` `raymarch` `three` `composition` |
+| `type` | string | Layer type — one of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` |
 | `text` | string | Text (may use <b>/<em>) |
 | `x` | number|string | Left: px number, or relative "50%" / "50%-40" / center / left / right (resolve |
 | `y` | number|string | Top: px number, or relative "50%" / center / top / bottom (resolved per aspect |
@@ -64,11 +64,11 @@ JSON *is* the video.
 | `stagger` | number | Per-unit delay (s) |
 | `each` | number | Per-unit duration (s) |
 | `start` | ? | Window start: seconds, or relative "otherId+0.5" / "otherId.end-0.2" |
-| `duration` | number | Window length (s) |
-| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale / — one of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `iris` `clock` `none` `wipe-down` `wipe-up` |
+| `duration` | number|string | Window length (s), or a duration word (core/vocab.js): instant / fast / medium |
+| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale / — one of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
 | `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT |
-| `enterDur` | number | Enter window (s, cut layers) |
-| `exitDur` | number | Exit window (s; 0 = hold to end) |
+| `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/vocab.js): instant / fa |
+| `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant  |
 | `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds — one of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
 | `critical` | boolean | Force include/exclude from layout audit |
 | `track` | number | z-order track |
@@ -80,11 +80,11 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (27)
+## Kinetic presets (28)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `inkflash` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
+`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.
@@ -109,9 +109,9 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
-## Backgrounds (21)
+## Backgrounds (22)
 
-`"bg": [{ "t": 0, "preset": "plain" }]` — `paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `deep` · `dark` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
+`"bg": [{ "t": 0, "preset": "plain" }]` — `plain` · `paper` · `paperDots` · `paperShapes` · `soft` · `accent` · `accentPlain` · `shapes` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `brandglow` · `spotlight` · `dark` · `deep` · `ink` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
 
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.

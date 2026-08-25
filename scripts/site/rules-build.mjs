@@ -7,6 +7,7 @@
 // preset is added, and a rules file that lies is worse than none: the model authors a scene that
 // fails validate, and the user blames the product. Everything below is read out of the real source
 // of truth — schema.json, PRESETS, EASINGS, PRESENTATIONS, SHADER_FX, themes/ — so it cannot drift.
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +28,12 @@ const BGS = enumOf((F.bg && F.bg.item && F.bg.item.preset) || {});
 const SPLITS = enumOf(layerItem.split);
 const PRESET_NAMES = Object.keys(PRESETS);
 const EASE_NAMES = Object.keys(EASINGS);
-const THEMES = fs.readdirSync(path.join(root, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''));
+// THEMES THAT SHIP, not themes on this disk. readdirSync counts local working files too: 38 here, 35
+// tracked. This file is pasted into a model as the engine's contract, so it must name what a READER of
+// the repo can actually use - a theme that exists only on my machine is a promise their clone cannot
+// keep. scripts/gates/site-counts.mjs counts the tracked set and was already flagging the mismatch.
+const THEMES = execFileSync('git', ['ls-files', 'themes/*.json'], { cwd: root, encoding: 'utf8' })
+  .split('\n').filter(Boolean).map((f) => path.basename(f, '.json')).sort();
 
 // the props an author actually reaches for, in the order they think about them
 const KEY = ['type', 'text', 'x', 'y', 'w', 'h', 'size', 'weight', 'color', 'align', 'font',
