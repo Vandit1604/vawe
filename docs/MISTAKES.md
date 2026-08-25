@@ -13429,3 +13429,24 @@ has read, which is the "a wrong gate manufactures confidence" failure.
 `!exists || stale || (fresh && auto)` and rewords: not "run `make beats`", but "the sheets are already
 on disk and current, open them". An explicit `make beats` still signs the look off, and a later
 automatic run does not downgrade it. All five states observed.
+
+## #433 — a trim ate a status prefix, so the worktree pruner retired nothing
+
+**What.** `scripts/dev/worktree-prune.mjs` decides a worktree is safe to retire by comparing every file
+it touches against main. It read `git status --porcelain` through a helper that `.trim()`s its output.
+A porcelain line for a MODIFIED file begins with a space (`" M Makefile"`); the trim ate it, and the
+following `slice(3)` then ate the path's first character too — `akefile`, `ore/icons.js`. The mangled
+path matched nothing in main, so it was reported `(uncommitted)` and the worktree was held FOREVER.
+
+**Why it read as random.** An untracked line (`"?? path"`) has no leading space, so those names came out
+intact. Only the modified files were mangled, in the same run, which looks like flakiness rather than an
+off-by-one.
+
+**Fix.** `gitRaw()` returns the output untouched and porcelain is parsed off that; `git()` keeps the trim
+for the callers that want one value, with a comment saying that column-positioned output must not use it.
+Verified against six real worktrees: before, 6 of 6 were held with 3 mangled names; after, 2 retired
+cleanly and the 4 genuinely-ahead ones were correctly held.
+
+**The general shape.** A convenience applied to every caller (trim, a default, a fallback) is wrong for
+the one caller whose data is positional. Same family as #430, where a hand-listed scope drifted from the
+vocabulary it claimed to cover.

@@ -27,10 +27,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const PRUNE = process.argv.includes('--prune');
-const git = (args, opts = {}) => {
-  try { return execFileSync('git', args, { encoding: 'utf8', maxBuffer: 1 << 28, ...opts }).trim(); }
+const gitRaw = (args, opts = {}) => {
+  try { return execFileSync('git', args, { encoding: 'utf8', maxBuffer: 1 << 28, ...opts }); }
   catch { return ''; }
 };
+// Trimmed, for the callers that want one value. Anything reading COLUMN-POSITIONED output (porcelain
+// status) must use gitRaw: a leading space there is data, not whitespace.
+const git = (args, opts = {}) => gitRaw(args, opts).trim();
 const root = git(['rev-parse', '--show-toplevel']);
 if (!root) { console.error('not a git repo'); process.exit(1); }
 
@@ -81,8 +84,15 @@ for (const t of trees) {
   }
 
   // 2. Dirty + untracked work, ignoring anything main would ignore anyway.
-  const status = git(['status', '--porcelain'], wt).split('\n').filter(Boolean)
-    .map((l) => l.slice(3).replace(/^"|"$/g, '')).filter((f) => !f.endsWith('/'));
+  // `git()` trims, and a porcelain line for a MODIFIED file starts with a space (" M Makefile"). The
+  // trim ate it, so slice(3) then ate the path's first character too: "akefile", "ore/icons.js". The
+  // mangled path never matched anything in main, so every worktree holding a modified file reported as
+  // unlanded FOREVER and the tool retired nothing. Untracked lines ("?? path") have no leading space,
+  // which is why only some names came out short and the bug read as random.
+  //
+  // Parsed off the raw output, and the 3-char status field is dropped by position rather than by trim.
+  const status = gitRaw(['status', '--porcelain'], wt).split('\n').filter(Boolean)
+    .map((l) => l.slice(3).replace(/^"|"$/g, '')).filter((f) => f && !f.endsWith('/'));
   const noise = ignoredInMain(status);
   for (const f of status) {
     if (noise.has(f)) continue;
