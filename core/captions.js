@@ -5,7 +5,7 @@
 // distributed proportionally to word length (longer words hold longer, like speech), so every
 // style still reads as intentional karaoke on plain `make captions` output.
 import { clamp01 } from './motion.js';
-import { PRESETS } from './type.js';
+import { PRESETS, wght } from './type.js';
 import { onScreenText } from './on-screen-text.js';
 import { withBlurb, blurbsOf } from './registry.js';
 
@@ -51,21 +51,8 @@ export function lineU(t, wins) {
 //  * styled captions sit on a 78% var(--bg) scrim plate (scene.html CSS), so contrast is computed
 //    against a KNOWN backdrop. The 76% / 42% / 28% mixes below are chosen by WCAG arithmetic at
 //    the worst-case theme, with headroom; the audit's contrast pass is the enforcement.
-// wght(n) — one weight, said in BOTH channels, because the two are not interchangeable and neither
-// alone is safe. `font-variation-settings` is the only one that can express 634, and 20 of the 31
-// vendored woff2 carry a `wght` axis it drives continuously; on the other 11 (CourierPrime, the two
-// InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets)
-// it is SILENTLY IGNORED, which is this repo's most-logged bug shape. `fontWeight` is what those 11
-// hear, so the ramp degrades to the nearest static cut instead of to a dead still.
-// Rounded to 1 for the axis and to the CSS 100-step for the fallback: a value written every frame
-// must be stable in u, and a float in a fallback nobody can interpolate buys nothing.
-// NO `wdth`. Anybody is documented upstream as wdth+wght and core/tokens.css:58 repeats it, but
-// fontkit reports ONE axis on the vendored subset and on all 19 others: the width axis did not
-// survive subsetting. A width ramp would therefore be a no-op on every face this engine ships.
-const wght = (n) => {
-  const v = Math.round(Math.max(100, Math.min(900, n)));
-  return { fontWeight: String(Math.round(v / 100) * 100), fontVariationSettings: `'wght' ${v}` };
-};
+// The wght(n) two-channel helper moved to core/type.js, where the axis is also a headline
+// preset (`weight`). One fact, one owner: a font axis is a TYPE fact, and captions borrow it.
 
 export const CAP_STYLES = {
   // marker band draws behind the active word; earlier words keep their full band (a read trail).

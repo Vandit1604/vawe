@@ -23,8 +23,9 @@ import * as kick from './kick.js';
 import * as shadow from './shadow.js';
 import * as tilt from './tilt.js';
 import * as plane from './plane.js';
+import * as wordSlot from './word-slot.js';
 
-const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt };
+const REGISTRY = { kick, mixBlend, occlude, plane, progress, shadow, tilt, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it — the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -46,6 +47,7 @@ export const FX_BLURBS = {
   progress: 'hand the layer the FILM\'s progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with',
   shadow: 'a drop shadow that knows where the light is, so every layer does not point the same way',
   tilt: 'turn the layer out of the picture plane and hold it there — a card leaning away, a phone at an angle, panels receding',
+  wordSlot: 'one word of the sentence swaps for the next while NOTHING after it reflows — the slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for',
 };
 
 // An unknown name is a HARD ERROR, never a skipped entry. A modifier that quietly does nothing is the

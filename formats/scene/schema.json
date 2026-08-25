@@ -503,7 +503,7 @@
       }
     },
     "cameraMove": {
-      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
+      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
     },
     "spectacle": {
       "type": "object",
@@ -1115,6 +1115,10 @@
             "plane": {
               "type": "number|object",
               "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
+            },
+            "wordSlot": {
+              "type": "array|object",
+              "label": "One word of this layer's sentence swaps for the next while NOTHING after it reflows: { words: [\"docs\", \"dashboards\"], every: 1.1, swap: 0.26, chip: true, loop: false, at: \"{}\", delay: 0, rise: 0.42 }. The layer's own text carries the placeholder (\"Ship {} in seconds\"). Every candidate sits in the SAME grid cell, so the slot is auto-sized by layout to the WIDEST of them from the first frame, with no measurement and no font metric. `chip: true` gives it the accent plate with `--on-accent` ink, which is where the brand colour belongs. Refused with `split`, which would drive the same spans from a second clock, and refused with fewer than two words."
             }
           }
         },

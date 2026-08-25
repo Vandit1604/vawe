@@ -837,6 +837,17 @@ boot((data, fps, theme, canvas) => {
   if (RIG && tiltDists.length && camKf.some((k) => k.p != null))
     throw new Error(`the camera declares a lens (\`p\`) and a tilted layer declares another (\`dist\`: ${tiltDists[0]}px). `
       + `Under a moving camera the lens belongs to the camera: drop \`dist\` and keep \`p\`.`);
+  // A LENS RAMP WITH NOTHING OFF THE PICTURE PLANE IS A MOVE THAT CANNOT EXIST. `p` only reaches the
+  // frame under the rig, and the rig turns on for a tilt, a `plane` depth or a camera angle — never for
+  // `p` alone. Turning it on here would not help: at z = 0 the magnification is `s` whatever the lens
+  // says, so every layer would project identically and the author would watch a still frame with
+  // nothing to tell them why. That is dollyZoom's one failure mode, and it is the engine's cardinal sin
+  // (input accepted, then ignored), so it is named instead of drawn.
+  if (!RIG && new Set(camKf.map((k) => k.p).filter((v) => v != null)).size > 1)
+    throw new Error(`the camera ramps its lens (\`p\`) but nothing in this frame stands off the picture `
+      + `plane, so there is no depth for the lens to counter-scale and every layer would project at `
+      + `exactly \`s\`. Give the layers behind the subject a depth — "modifiers": [{ "plane": -800 }] — `
+      + `or drop the \`p\` keys.`);
   const rigLens = tiltDists.length ? tiltDists[0] : null;   // null → the camera's own `p` (keyable)
   // …and the vanishing point the same way. `tilt.origin` is where the eye sits IN THE FRAME, which under
   // the rig is a property of the stage rather than of any one layer's parent. Resolved here so an

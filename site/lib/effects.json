@@ -1,6 +1,6 @@
 {
-  "total": 552,
-  "previewed": 252,
+  "total": 555,
+  "previewed": 253,
   "families": 35,
   "tags": [
     [
@@ -17,7 +17,7 @@
     ],
     [
       "camera",
-      11
+      12
     ],
     [
       "canvas",
@@ -49,7 +49,7 @@
     ],
     [
       "per-layer",
-      52
+      53
     ],
     [
       "per-layer/scene",
@@ -69,7 +69,7 @@
     ],
     [
       "text",
-      35
+      36
     ],
     [
       "timing",
@@ -89,7 +89,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 27,
+      "count": 28,
       "undescribed": 0,
       "entries": [
         {
@@ -279,6 +279,13 @@
           "stem": "kinetic-text-presets--wave",
           "desc": "sinusoidal wave across units · a LOOP that never settles; ambient only",
           "scene": "/assets/effects/kinetic-text-presets--wave.json",
+          "noPreview": null
+        },
+        {
+          "name": "weight",
+          "stem": "kinetic-text-presets--weight",
+          "desc": "the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still",
+          "scene": "/assets/effects/kinetic-text-presets--weight.json",
           "noPreview": null
         }
       ]
@@ -2208,7 +2215,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a camera move is only legible against a scene laid out for it, which is the film, not a swatch.",
-      "count": 11,
+      "count": 12,
       "undescribed": 0,
       "entries": [
         {
@@ -2222,6 +2229,13 @@
           "name": "diveIn",
           "stem": "camera-moves--divein",
           "desc": "zoom INTO a target point (it travels to centre)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dollyZoom",
+          "stem": "camera-moves--dollyzoom",
+          "desc": "THE VERTIGO SHOT: the lens ramps while the camera holds its distance, so the subject on the picture plane keeps its exact size and the world BEHIND it rushes in or falls away · the only move here that changes the relationship between planes rather than the framing, and it needs layers standing at a `plane` depth or there is nothing to counter-scale against",
           "scene": null,
           "noPreview": null
         },
@@ -2838,7 +2852,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a modifier acts on whatever layer is already there, so it has nothing to show on its own.",
-      "count": 7,
+      "count": 8,
       "undescribed": 0,
       "entries": [
         {
@@ -2887,6 +2901,13 @@
           "name": "tilt",
           "stem": "per-layer-fx--tilt",
           "desc": "turn the layer out of the picture plane and hold it there · a card leaning away, a phone at an angle, panels receding",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordSlot",
+          "stem": "per-layer-fx--wordslot",
+          "desc": "one word of the sentence swaps for the next while NOTHING after it reflows · the slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for",
           "scene": null,
           "noPreview": null
         }

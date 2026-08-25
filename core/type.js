@@ -72,8 +72,48 @@ export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06 } = {}) {
 // like a look, where no helper is needed.
 const preset = (fn, blurb) => withBlurb(blurb, fn);
 
+// wght(n) — one weight, said in BOTH channels, because the two are not interchangeable and neither
+// alone is safe. `font-variation-settings` is the only one that can express 634, and 20 of the 31
+// vendored woff2 carry a `wght` axis it drives continuously; on the other 11 (CourierPrime, the two
+// InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets)
+// it is SILENTLY IGNORED, which is this repo's most-logged bug shape. `fontWeight` is what those 11
+// hear, so the ramp degrades to the nearest static cut instead of to a dead still.
+// Rounded to 1 for the axis and to the CSS 100-step for the fallback: a value written every frame
+// must be stable in u, and a float in a fallback nobody can interpolate buys nothing.
+// NO `wdth`. Anybody is documented upstream as wdth+wght and core/tokens.css:58 repeats it, but
+// fontkit reports ONE axis on the vendored subset and on all 19 others: the width axis did not
+// survive subsetting. A width ramp would therefore be a no-op on every face this engine ships.
+export const wght = (n) => {
+  const v = Math.round(Math.max(100, Math.min(900, n)));
+  return { fontWeight: String(Math.round(v / 100) * 100), fontVariationSettings: `'wght' ${v}` };
+};
+
+
 // ---------- presets: u∈[0,1] → style object (compositor-friendly props only) ----------
 export const PRESETS = {
+  // weight — the font's own `wght` axis IS the entrance. Every other preset here moves a glyph or fades
+  // it; this one redraws the outline, which is the one register a static face cannot fake and the thing
+  // current practice means by kinetic typography. Staggered per unit, the ramp reads as a CREST OF
+  // WEIGHT travelling the headline rather than as a line of type arriving.
+  //
+  // ON THE 11 STATIC FACES IT STILL WORKS, and that is the reason wght() writes both channels:
+  // `font-variation-settings` is silently ignored by a face with no axis, so on CourierPrime, the two
+  // InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets
+  // the `fontWeight` half lands instead and the ramp degrades to the nearest 100-step cut. Coarse, and
+  // never a dead still — the failure this repo logs most.
+  //
+  // NO WIDTH TWIN. No face this engine ships keeps a `wdth` axis (core/tokens.css:58): the width axis
+  // did not survive subsetting, so a width ramp would be a no-op on all 31 and is deliberately unbuilt.
+  //
+  // WEIGHT IS A LAYOUT PROPERTY whichever channel writes it, so the words after the one being drawn
+  // shift as the crest passes. On a centred headline that reads as the line breathing; it is the cost
+  // of the register, not a bug. Pair it with `split:"word"` and a stagger, and give the line room.
+  weight: preset((u, { from = 200, to = 800, rise = 12 } = {}) => {
+    const e = easeOutCubic(clamp01(u));
+    return { opacity: clamp01(u * 2), ...wght(from + (to - from) * e),
+      transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * rise).toFixed(2)}px)` };
+  },
+    'the glyphs THICKEN into place along the font\'s own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still'),
   // rise + fade (default kinetic reveal)
   up: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
     'words/chars rise into place — the default kinetic headline'),

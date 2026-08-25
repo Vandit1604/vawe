@@ -13728,8 +13728,20 @@ gave them no way to tell "my change broke this" from "this tree renders it diffe
 `find assets/fonts -type f` shows 35 files each side with no diff). Copying `assets/baked` in did not
 change it. The scene references no assets and uses only `paint`, `rect` and `text`.
 
-**Cause: NOT FOUND.** Same code, same data, deterministic on both sides, different between them. The
-remaining variable is the checkout itself and I could not isolate it further within budget.
+**CAUSE FOUND, a day later.** `assets/music/launch.spectrum.json` — a precomputed audio spectrum —
+is gitignored (`.gitignore:99`), so it exists in main and in no worktree. `react-demo` has an
+audio-reactive track, and without its sidecar that track **degrades silently**: it still renders,
+it just reacts to nothing. Proven by A/B: 194 changes, copy that one file in, `identical: 1`.
+
+**Why four agents missed it, including me.** Nothing in the output mentioned audio. The scene's
+layers are `paint`, `rect` and `text`; the diff was `hs-layer` x/y/opacity, which reads as text
+metrics, so everyone hunted fonts — and the font state matched exactly on both sides, which made
+the search feel exhausted when it had not started. I diffed the whole tree and saw
+`assets/music` in the ignore list without asking what a scene with no audio layer would want
+from it.
+
+**Fixed at the root**: `.worktreeinclude` carries `assets/music/*.json`, and `worktree.sh`
+verifies it arrived (`8 of 8`). The scene now reports `identical: 1` in a fresh worktree.
 
 **What was fixed is the ambiguity, which is what actually cost time.** A baseline now records the
 absolute repo root it was saved in, and a run in a different checkout says so before listing anything:
@@ -13747,46 +13759,89 @@ KIND of difference it might be makes every reader re-derive the same context. Th
 real time on a scene that has never been wrong in shipped output. Quarantine was the wrong tool — that
 bucket is for order non-determinism, and this is deterministic on both sides.
 
-## #446 — my own fix crashed the determinism net on every fresh clone
 
-**What.** Commit `e0cbe36` added a "these baselines came from a different checkout" note to
-`snap-scenes`. It was inserted BETWEEN the two halves of an existing `if (!was) … else if (was.hash …)`
-chain. That left `else if (was.hash !== now.hash)` reachable with `was === null`, so a tree with **no
-font-state stamp crashed on a null dereference** — after the entire sweep had run, trading a computed
-106-scene verdict for a stack trace.
+**AMENDMENT (2026-08-25): the cause was found, and it is not the checkout.** `react-demo` reads a BAKED
+spectrum, `assets/music/launch.spectrum.json`, and `.gitignore:99` ignores `assets/music/*`. The file is
+untracked, so it exists in the main checkout and in NO worktree. Without it the audio-react track has no
+table to look up and the two reacting layers settle on different values — deterministically on both
+sides, which is exactly what made it look environmental. Proved by A/B in one worktree: `snap-scenes
+react-demo` reported 194 changes; copying the one file in and re-running reported `identical: 1`, with
+nothing else touched. The general shape: a scene that reads a GITIGNORED asset is not portable between
+checkouts, and it degrades silently rather than refusing. The snapshot note added above is still the
+right warning; it was pointing at the wrong suspect.
 
-**Who hits it: everyone new.** `verify/snap/` is gitignored, so a fresh clone and every fresh worktree
-start with no stamp. My own machine had one, saved hours earlier, which is why every run of mine was
-clean and I shipped it.
+## #446 — the camera's lens was keyable, reached nothing, and said nothing
 
-**The irony worth keeping.** The commit's whole purpose was to stop a gate misleading its reader, and it
-made the gate stop answering at all — in exactly the case the commit message described ("baselines
-predating the stamp").
+`cameraAt` has interpolated a `p` keyframe (the lens, `persp`) since the rig landed, and
+`drawCameraAndCut` writes it to `#root` every frame — but only under the RIG, and the rig turns on for a
+tilt, a `plane` depth or a camera angle. Never for `p`. So a scene that ramped its lens and nothing else
+took the FLAT path, `scale(s) translate(x, y)`, and the lens keys were read by nobody. No error, no
+warning, a held frame.
 
-**Fix.** Independent conditions, never a chain: `if (!was) …` then `if (was && was.root …)` then
-`if (was && was.hash …)`. The notes are not alternatives to one another, and writing them as if they
-were is what let one of them break the others.
+That mattered the moment there was a reason to key the lens on its own. `dollyZoom` (core/camera-moves.js)
+is exactly that move: it HOLDS `s` and ramps `p`, because under the rig a point at depth z is magnified by
+`s * L / (L - s * z)`, and at z = 0 that is `s` with no L in it at all. Hold `s`, ramp the lens, and the
+subject on the picture plane cannot change size while everything at a depth must. That is the Vertigo
+shot, exactly, not an approximation of it — measured on a probe, the subject's bounding box is
+`{416, 421, 234x105}` at 0.8s, 2.3s, 3.9s and 5.5s, identical to the pixel, while a card at `plane: -1400`
+goes from 273px wide to 165px and travels 216px toward the vanishing point.
 
-**The class.** Not silence this time — the opposite. A LOUD failure in the one gate every other check is
-measured against, introduced by a change to its messaging. Editing a gate's prose is editing the gate;
-it deserves the same before/after run as editing its rule. Found by an agent auditing gate output, which
-is the only reason it did not reach a contributor first.
+**Turning the rig on for a lens ramp would NOT have fixed it**, and that is the part worth remembering. At
+z = 0 the magnification is `s` whatever the lens says, so every layer would project identically and the
+author would still watch a still frame — now paying 3D rasterisation for it. The move needs something off
+the picture plane or it has no subject. So the repair is a REFUSAL, not a conversion: `formats/scene/scene.js`
+throws when the camera keys more than one distinct `p` and nothing in the frame stands off the plane, and
+it names the fix (`"modifiers": [{ "plane": -800 }]`). Same rule as `cameraMove` surviving to render
+(#424): sugar either resolves, or its absence fails loudly.
 
-## #447 — a passing gate can still have said something, and the summary erased it
+No shipped scene changes. Two scenes key `p` (`search-demo` and its expanded twin) and both hold it at
+1900 with `rx`/`ry` already on, so the rig was on and the value constant.
 
-**What.** `make author-check` runs 15 steps and prints a summary. A step that found things but did not
-BLOCK was summarised as `✓ nothing found` — under its own three printed findings. The data existed:
-`runGate` computed `findings` and `record` dropped it on the floor.
+## #447 — a gate's fix line named a command that cannot fix it
 
-Measured on one real scene: **5 findings across three steps, every one erased by the line beneath it.**
+`schema-drift.mjs` checks 20 derived enums and then, in a separate block, checks that
+`layers.item.modifiers.item` names every modifier in `core/fx/index.js`. Both failures printed the same
+closing line: `fix: node scripts/gates/schema-drift.mjs --write (these enums are GENERATED)`.
 
-**Fix.** The summary now says `3 finding(s) above, none blocking`, and closes with a roll-up naming
-which steps carried them. Exit codes are untouched — this is reporting, not severity.
+The modifier block is not an enum. Each key carries that modifier's own hand-written prop schema — a
+`label` describing its vocabulary — which no generator can invent. So adding `word-slot.js` failed the
+gate, `--write` reported success on the enums it does own, and the identical failure printed again with
+the identical advice. An author following the message has no next move and no reason to think the message
+is wrong.
 
-**The wider audit that found it.** 55 runnable gates (6 of the 61 files are shared modules with no CLI):
-**17 print no usable population**, and **provenance is the worst-served property with 15 rating "no"** —
-every one comparing against something gitignored or an external binary while stating the result as a
-fact about the film. The commonest shape is absence read as a pass: `seam-snap` calls a film clean when
-ffmpeg failed, `ledger` reports "distinct from all 0 designs", `site-counts` says counts match having
-read zero files.
+Fixed where it is written: the modifier block prints its own fix (`add the key by hand to
+layers.item.modifiers.item`), and the shared line now says `fix (the enums above)` so it only claims the
+half it can deliver. The check itself was right both times; only its instruction lied.
 
+## #448 — the audit read text that is in the DOM on purpose and never on screen
+
+`wordSlot` (core/fx/word-slot.js) puts a swapping word in a fixed box by stacking EVERY candidate in one
+CSS grid cell: the column is auto-sized by layout to the widest of them, so nothing after the slot ever
+reflows and no font metric is measured. The cost is that all three candidates are in the DOM at all
+times, and `inkText` in `verify/audit.mjs` walks every text node under a layer. So a headline reading
+"Ship docs fast" was graded as `"Ship docsdashboardschangelogs fast"` — a string no frame paints — and
+`contrast`, `weak-headline` and `clipped-text` all fired on it. On the `linear` probe that was a HARD
+failure whose only fix was to make the film worse, which is the exact defect this repo culled
+`visual-vocabulary` for.
+
+**Fixed at the write site AND at the read site, because both were wrong.** `word-slot.js` marks each
+off-screen candidate `data-ink="off"` PER FRAME — which word is showing is a function of `t`, so whatever
+frame a gate samples it reads exactly the word a viewer sees, and mid-crossfade it correctly reads both.
+`inkText` rejects `closest('style, script, [data-ink="off"]')`, one selector added to the two it already
+had. Probe after: 0 HARD on all three themes.
+
+**THE GENERAL RULE IS STILL UNFIXED, AND THAT WAS A DELIBERATE STOP.** The right rule is "text whose
+ancestors are invisible is not ink", and it needs `getComputedStyle` on every text node's ancestor chain.
+Implemented and measured over the whole library it held clean at 69 / hard at 36 — and moved
+`ab-skill-shotcode` from 1 hard to 2, reproducibly (3 runs each way), with a `clipped-text` on f109 whose
+element the unmodified audit never even reached. It is not a stale-layout read: forcing
+`document.body.offsetHeight` before the loop changes nothing. Something about resolving style early
+changes what that scene has in its DOM by the time the clipped-text loop runs, and I could not get to the
+bottom of it. CLAUDE.md is explicit that one scene going PASS to FAIL is a regression until proven
+otherwise, and it was not proven, so the shipped change is the attribute — which nothing else in the
+library sets and therefore cannot perturb anything.
+
+**What would close it:** find why a style resolution changes that scene's DOM at f109. The suspect is a
+`composition` (GSAP) writing lazily and being forced to flush by the first computed-style read. If that
+is it, the audit has been measuring some frames before the renderer finished writing them, which is a
+much larger finding than the one that surfaced it.

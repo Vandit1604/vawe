@@ -55,6 +55,7 @@
 | `unfold` | opens from edge-on about its left hinge, a panel turning to face you — premium |
 | `up` | words/chars rise into place — the default kinetic headline |
 | `wave` | sinusoidal wave across units — a LOOP that never settles; ambient only |
+| `weight` | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
 
 ## Enter / exit anims  `[per-layer]`
 
@@ -415,6 +416,7 @@
 |---|---|
 | `cameraShake` | an IMPACT: a decaying ~16Hz shake pre-sampled at author time to one key per frame, then 0.1s of eased recovery so the frame LANDS instead of stopping |
 | `diveIn` | zoom INTO a target point (it travels to centre) |
+| `dollyZoom` | THE VERTIGO SHOT: the lens ramps while the camera holds its distance, so the subject on the picture plane keeps its exact size and the world BEHIND it rushes in or falls away · the only move here that changes the relationship between planes rather than the framing, and it needs layers standing at a `plane` depth or there is nothing to counter-scale against |
 | `driftHold` | a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal |
 | `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
@@ -546,6 +548,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `progress` | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `tilt` | turn the layer out of the picture plane and hold it there — a card leaning away, a phone at an angle, panels receding |
+| `wordSlot` | one word of the sentence swaps for the next while NOTHING after it reflows — the slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for |
 
 ## Part entrances  `[per-layer]`
 
@@ -820,4 +823,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_552 effects across 35 families. Regenerate: `make effects`._
+_555 effects across 35 families. Regenerate: `make effects`._

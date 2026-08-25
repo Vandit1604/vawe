@@ -46,3 +46,10 @@ themes/*.json
 
 # Generated art the scene library references (assets/gen is gitignored, like every other produced file).
 assets/gen/**
+
+# AUDIO ANALYSIS SIDECARS. `assets/music/**` is gitignored, and a scene with an audio-reactive track
+# reads its precomputed spectrum from here. Without it the track DEGRADES SILENTLY — it renders, it
+# just reacts to nothing — which is how one scene (react-demo) appeared to render differently in every
+# worktree for a whole session. Four agents investigated it; none found the missing file, because
+# nothing in the output pointed at audio. docs/MISTAKES.md #445.
+assets/music/*.json
