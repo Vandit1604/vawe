@@ -20,7 +20,10 @@ export const PROPS = { fill: {}, color: {}, h: {} };
 export function build(kit, el, L) {
   if (L.h != null) el.style.height = L.h + 'px';
   const paint = L.bg ?? L.fill ?? L.color;
-  const spec = paint != null && L.bg == null ? { ...L, bg: paint } : L;
+  // `{ __proto__: L }`, not `{ ...L }`. A spread reads EVERY key off the layer, and a layer is watched
+  // by core/prop-audit.js — one spread would mark the whole vocabulary consumed and hand every rect in
+  // the library a free pass on the audit. Delegation reads only the keys chipBox actually asks for.
+  const spec = paint != null && L.bg == null ? { __proto__: L, bg: paint } : L;
   if (spec.bg == null && !spec.elevation) el.style.background = '#fff';
   kit.chipBox(el, spec);
 }

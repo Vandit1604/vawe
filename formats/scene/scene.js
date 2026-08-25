@@ -20,6 +20,7 @@ import { resolveBridges } from '/core/audio-bridges.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
 import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
+import { watchProps, auditLayer, watchedTree } from '/core/prop-audit.js';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
 import { normalizeIdle } from '/core/idle.js';
@@ -311,6 +312,9 @@ boot((data, fps, theme, canvas) => {
     return beatBounds.length - 1;
   };
 
+  // PROP AUDIT: every layer is watched from here, before the first read of any layer prop, so the
+  // record covers the pre-passes below as well as the build itself.
+  data.layers = (data.layers || []).map(watchProps);
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
   resolveBecomes(data);        // becomes:"<id>" → the incoming layer opens on the outgoing one's last pose
@@ -531,6 +535,11 @@ boot((data, fps, theme, canvas) => {
     // which is why the same look was correct inside a group and broken outside one.
     renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
     applyGsapHooks(el, L, units);   // gsap / morph / fx / fxOut / motionPath / physics / splitText (all pure, seeked per frame)
+    // The read record is snapshotted HERE, the instant this layer's build finishes, and never later:
+    // everything after this point (the frozen scene-view copies at specs, the per-frame pipeline)
+    // reads layers in an order no worker agrees on, and a check that moved with it would not be a
+    // check. Deterministic by construction.
+    for (const w of watchedTree(L)) auditLayer(w);
     return { L, el, units };
   }
 
@@ -696,6 +705,12 @@ boot((data, fps, theme, canvas) => {
   // rewrites `start`, resolveKeyedProps expands tracks), so handing out the real one would let a
   // modifier rewrite the input of a layer that has not rendered yet and make renderFrame(n) depend on
   // render order. Copied and frozen ONCE at build, so the per-frame cost is a Map lookup.
+  // A PLAIN recursive copy, not structuredClone: a layer spec is a watched Proxy (core/prop-audit.js)
+  // and the structured-clone algorithm refuses an exotic object outright. Same output for the JSON
+  // shapes a layer is made of, and it costs one pass that deepFreeze was making anyway.
+  const deepCopy = (o) => (Array.isArray(o) ? o.map(deepCopy)
+    : o && typeof o === 'object' ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, deepCopy(v)]))
+      : o);
   const deepFreeze = (o) => {
     if (o && typeof o === 'object') for (const v of Object.values(o)) deepFreeze(v);
     return Object.freeze(o);
@@ -709,7 +724,7 @@ boot((data, fps, theme, canvas) => {
     const { L } = layers[i];
     if (!L.id) continue;
     const root = i < topCount ? i : (childRel.get(i)?.root ?? i);
-    specs.set(L.id, deepFreeze({ ...structuredClone(L), z: layers[root].L.track ?? root }));
+    specs.set(L.id, deepFreeze({ ...deepCopy(L), z: layers[root].L.track ?? root }));
   }
   const IDS = Object.freeze([...specs.keys()].sort((a, b) => specs.get(a).z - specs.get(b).z));
   const specOf = (id) => specs.get(id) || null;
