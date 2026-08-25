@@ -115,8 +115,14 @@ if (!env.CHROME_BIN) {
   try {
     const pptr = await import('puppeteer');
     const p = pptr.default?.executablePath?.();
-    if (p && fs.existsSync(p)) env.CHROME_BIN = p;
-  } catch { /* let chromedp find the system browser */ }
+    // EXISTS IS NOT RUNS, and here the difference is a support ticket. Puppeteer's bundled Chrome needs
+    // libnss3/libatk/libgbm, which minimal, cloud and Docker Linux images routinely lack. Handing that
+    // path to chromedp would surface as "error while loading shared libraries" from the OS loader, deep
+    // inside the Go process, long after Node could explain it — and CHROME_BIN would have OVERRIDDEN a
+    // perfectly good system browser to get there. So the binary is asked whether it works, and stays
+    // unset if it does not: chromedp then finds the system Chrome it would have found anyway.
+    if (p && fs.existsSync(p) && spawnSync(p, ['--version'], { timeout: 10000 }).status === 0) env.CHROME_BIN = p;
+  } catch { /* not installed (it is a devDependency now); let chromedp find the system browser */ }
 }
 env.REPO = ROOT;
 

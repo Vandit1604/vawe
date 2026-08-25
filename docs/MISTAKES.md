@@ -13474,3 +13474,61 @@ reached only after `formats/scene/scene.js:742` throws on an unknown `captionSty
 genuinely means the default shape; `FX_PARAMS[t] || []` is derived by `paramsOf` from the fx source, so
 an unknown type surfaces as a refused option key rather than a dropped one. **Most of this class was
 already closed** — the surviving `||` matches in `core/` are comments describing the fix, not the bug.
+
+## #435 — the npm package shipped one CPU architecture and claimed to be cross-platform
+
+**What.** `bin/` is listed in `package.json` `files[]`, so the tarball carries whatever the PUBLISHING
+machine built. Published from an Apple Silicon Mac, `bin/vawe` is `Mach-O 64-bit executable arm64`, and
+every Intel Mac and Linux user got it. `cli/vawe.mjs` picked the binary by FILENAME only
+(`process.platform === 'win32' ? 'vawe.exe' : 'vawe'`) with no architecture check, so the failure
+arrived raw from the OS loader — `Bad CPU type in executable`, or `ENOEXEC` — through `child.on('error')`,
+phrased as if the renderer had crashed. Reported by the user as "the engine not working on other
+people's laptops".
+
+**Fix.** The host's own identity picks the file (`vawe-<platform>-<arch>`), and the file's MAGIC BYTES
+are read back before spawning: ELF / Mach-O / MZ against `process.platform`. Same read-back-from-a-
+boundary-you-do-not-own rule as `gsapEase` and `droppedDecls` — the OS loader will not explain itself,
+so we ask the bytes first. `make build-all` cross-compiles all five targets; Go needs no per-target
+toolchain.
+
+**Open.** Five binaries is ~55MB against a 25MB pack ceiling, so shipping them all needs per-platform
+`optionalDependencies` (the esbuild/swc pattern). Not done — it is a publishing decision.
+
+## #436 — every `npm install` downloaded 473MB of Chrome to read one path string
+
+**What.** `puppeteer` sat in `dependencies`. Its postinstall downloads a full Chrome UNCONDITIONALLY:
+**measured 473MB and 29s on a fast connection**, minutes on a normal one, against a 16.3MB package —
+about thirty times the size of everything else combined. Nothing the package ships needs it. The browser
+is launched by **chromedp** from the Go side, which finds a system Chrome on its own; `cli/vawe.mjs` only
+ever asked puppeteer for `executablePath()`, a string it never launched. This is the other half of "takes
+too long to load".
+
+**Fix.** Moved to `devDependencies`, where the 41 repo tools that genuinely need it still get it.
+**`optionalDependencies` would NOT have fixed this** — npm installs those by default too, so the download
+would still happen. That distinction is the whole entry.
+
+**Sequel, same call site.** `CHROME_BIN` was set from `fs.existsSync(p)` alone. Puppeteer's bundled Chrome
+needs `libnss3`/`libatk`/`libgbm`, routinely absent on minimal, cloud and Docker Linux — so that path
+would have OVERRIDDEN a working system browser and failed deep inside Go with a shared-library error.
+The binary is now asked `--version` and left unset if it does not answer. Exists is not runs.
+
+## #437 — a typo'd `anchor` id, and a palette value that is not a colour
+
+Two of the same shape, found by a read-only audit rather than by a render.
+
+**`anchor`.** `resolveAnchors` did `const T = L.anchor && byId[L.anchor]; if (!T) continue;` — so NO
+anchor and a WRONG anchor were both silence. A typo left the layer at whatever `x`/`y` it happened to
+carry, usually 0,0 or on top of something else, and `anchor` is a bare string in `schema.json` that
+nothing resolves. Now throws with the known ids and a near-miss suggestion. **0 of 149 scenes affected.**
+
+**Palette.** `themeErrors` checked each required palette value was a non-empty string, never that it
+PARSED. A seven-digit hex passed clean and then `parseColor(hex) || [0,0,0]` (core/backgrounds.js) turned
+every mix built from it into pure black — a visibly off-brand backdrop with every gate green.
+
+The interesting part is how it was fixed. `theme-contract.js` is deliberately "pure data plus one pure
+function" so node and the browser can both take it; importing `core/motion.js` would end that, and
+re-implementing a hex parser there would create the SECOND COLOUR PARSER — the drift this whole pass
+exists to remove. So `parseColor` is INJECTED: `themeErrors(theme, { parseColor })`, the `createKit(ctx)`
+shape the layer builders already use. Without it the check is presence-only exactly as before, so no
+caller changed behaviour by accident; both real callers now pass it. **0 of 38 shipped themes newly
+fail** — the rule invents no findings.

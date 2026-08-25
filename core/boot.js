@@ -5,6 +5,7 @@
 import { FPS, isLightBg } from './motion.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { themeErrors, REQUIRED } from './theme-contract.js';
+import { parseColor } from './motion.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
@@ -252,7 +253,7 @@ export async function resolveTheme(spec) {
 // applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
 // The ONLY writer of look CSS — tokens.css carries fonts + geometry, never colors or type choices.
 export function applyTheme(theme) {
-  const missing = themeErrors(theme);
+  const missing = themeErrors(theme, { parseColor });
   if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete — missing ${missing.join(', ')}`);
   const root = document.documentElement.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };

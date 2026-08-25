@@ -13,10 +13,11 @@
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "puppeteer": "^23.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "//puppeteer": "REPO-DEV ONLY, and it must stay here. Its postinstall downloads a full Chrome UNCONDITIONALLY: measured 473MB and 29s on a fast connection, minutes on a normal one, against a 16.3MB package. It used to sit in `dependencies`, so every `npm i vawe` paid that. Nothing the package SHIPS needs it: the browser is launched by chromedp from the Go side (internal/scene/scene.go), which finds a system Chrome on its own, and cli/vawe.mjs only ever asked puppeteer for a PATH STRING it never launched. The 41 repo tools that do need it (gates, beats, reveal) run from a checkout, where devDependencies are installed. optionalDependencies would NOT have fixed this - npm installs those by default too, so the download would still happen.",
+    "puppeteer": "^23.6.0",
     "d3-geo": "^3.1.1",
     "fontkit": "^2.0.4",
     "three": "^0.185.1",

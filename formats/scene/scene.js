@@ -103,6 +103,18 @@ function resolveAnchors(data) {
   const byId = {};
   for (const L of data.layers || []) if (L.id) byId[L.id] = L;
   for (const L of data.layers || []) {
+    // NO ANCHOR and a WRONG ANCHOR are different questions, and `if (!T) continue` answered both with
+    // silence. A typo'd id left the layer at whatever x/y it happened to carry — usually 0,0 or on top
+    // of something else — with no error, no warning and no gate, because `anchor` is a bare string in
+    // schema.json and nothing checked it resolves. Same shape as ANIM[name] || fade (core/registry.js).
+    if (L.anchor && !byId[L.anchor]) {
+      const near = Object.keys(byId).filter((id) => id.toLowerCase().includes(String(L.anchor).toLowerCase().slice(0, 4)));
+      throw new Error(`layer${L.id ? ` "${L.id}"` : ''} anchors to "${L.anchor}", which is not the id of any layer in this scene.`
+        + `${near.length ? ` Did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''}`
+        + ` Known ids: ${Object.keys(byId).join(', ') || '(no layer declares an id)'}.`
+        + ` An unresolved anchor leaves the layer wherever it already was, which renders a plausible`
+        + ` frame in the wrong place, so it is refused.`);
+    }
     const T = L.anchor && byId[L.anchor];
     if (!T) continue;
     const tw = T.w ?? 0, th = T.h ?? ((T.size ?? 96) * 1.2);

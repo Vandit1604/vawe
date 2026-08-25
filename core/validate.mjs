@@ -19,6 +19,9 @@
 import { onScreenText, glyphText } from './on-screen-text.js';
 import { IDLE } from './idle.js';
 import { themeErrors } from '../core/theme-contract.js';
+// parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
+// absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
+import { parseColor } from '../core/motion.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../core/junctions.js';
@@ -1035,7 +1038,7 @@ export function validateTheme(spec) {
   if (spec == null) return ['data.theme is required (a theme name or an inline theme object) — no default look exists'];
   if (typeof spec === 'string') return errors;
   if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeOf(spec)})`];
-  errors.push(...themeErrors(spec).map((m) => `theme incomplete: ${m}`));
+  errors.push(...themeErrors(spec, { parseColor }).map((m) => `theme incomplete: ${m}`));
   if ('palette' in spec && !isObj(spec.palette)) errors.push('theme.palette must be an object');
   if ('type' in spec && !isObj(spec.type)) errors.push('theme.type must be an object');
   if ('vars' in spec && !isObj(spec.vars)) errors.push('theme.vars must be an object');
@@ -1186,7 +1189,7 @@ if (isMain) {
     if (typeof data.theme === 'string') {
       const tp = path.join(root, 'themes', data.theme + '.json');
       if (!fs.existsSync(tp)) errors.push(`theme "${data.theme}" not found (themes/${data.theme}.json)`);
-      else { try { errors.push(...themeErrors(readJSON(tp)).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
+      else { try { errors.push(...themeErrors(readJSON(tp), { parseColor }).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
         catch (e) { errors.push(`theme "${data.theme}" unreadable: ${e.message}`); } }
     }
     // AUDIO. The Go mixer resolves music/vo/sfx at bake time and silently DROPS anything it cannot
@@ -1262,7 +1265,7 @@ if (isMain) {
   let themeFailed = 0;
   for (const tf of themeTargets) {
     let errs;
-    try { errs = themeErrors(readJSON(tf)); } catch (e) { errs = [`unreadable: ${e.message}`]; }
+    try { errs = themeErrors(readJSON(tf), { parseColor }); } catch (e) { errs = [`unreadable: ${e.message}`]; }
     if (errs.length) { themeFailed++; console.error(`✗ ${path.relative(root, tf)}`); for (const e of errs) console.error(`    • ${e}`); }
   }
   if (themeTargets.length) console.log(`themes: ${themeTargets.length - themeFailed} ok, ${themeFailed} incomplete`);
