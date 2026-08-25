@@ -13,6 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { population, SCENE_DIR } from '../lib/census.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -76,11 +77,8 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
   let files = process.argv.slice(2);
   if (!files.length) {
     // authored data only: skip schemas, bundled samples, and the transitions showcase
-    files = fs.readdirSync(path.join(ROOT, 'formats'), { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .flatMap((d) => fs.readdirSync(path.join(ROOT, 'formats', d.name))
-        .filter((f) => f.endsWith('.json') && !/^(schema|sample|cuts-demo)\.json$|^sample/.test(f))
-        .map((f) => path.join('formats', d.name, f)));
+    files = population('similarity', { filter: (f) => !/^(schema|sample|cuts-demo)\.json$|^sample/.test(f) })
+      .names.map((f) => path.join(SCENE_DIR, f));
   }
   // A `.template.json` holds mustache placeholders, so it is not JSON and never was a video. One of
   // them threw out of the scan and killed the WHOLE library audit, which is why `make similar` with no

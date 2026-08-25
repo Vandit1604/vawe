@@ -46,6 +46,7 @@ import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneTiming, spanOf } from './scene-timing.mjs';
+import { population, SCENE_DIR } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -206,8 +207,10 @@ if (file) {
   // is not renderable at all (the engine refuses it by design), so the sweep spent its time booting
   // scenes that could never paint and reported on 38 of ~160. snap-scenes solved this already
   // (scripts/gates/snap-scenes.mjs:84-88) and this mirrors its rule rather than inventing a second one.
-  const all = cp.execSync("git ls-files 'formats/scene/*.json'", { cwd: repoRoot, encoding: 'utf8' })
-    .split('\n').filter((f) => f && !/intent|schema\.json$/.test(f));
+  // WAS `git ls-files`, which sees TRACKED scenes only. Films are gitignored, so on main this sweep
+  // booted 40 of the 135 scenes in the same directory and called the silence a pass.
+  const all = population('paints-nothing', { filter: (f) => !/intent|schema\.json$/.test(f), quiet: true })
+    .names.map((f) => `${SCENE_DIR}/${f}`);
   const hasSugar = (rel) => {
     try {
       const src = fs.readFileSync(path.join(repoRoot, rel), 'utf8');

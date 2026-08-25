@@ -25,6 +25,7 @@ import path from 'node:path';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS as SHARED } from '../../core/layers/vocabulary.js';
 import { firesOn } from '../../core/props.js';
+import { population, isTemplate } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -50,8 +51,10 @@ for (const k of ['start', 'duration', 'motion', 'anim', 'out']) {
 const AUTHORING = new Set(['type', 'block', 'ref', 'comps', 'id', 'note', 'comment', 'children', 'dur']);
 
 const targets = process.argv.slice(2).length ? process.argv.slice(2)
-  : fs.readdirSync(path.join(repoRoot, SCENE_DIR)).filter((f) => f.endsWith('.json') && f !== 'schema.json')
-      .map((f) => path.join(SCENE_DIR, f));
+  // #377: in a bare worktree this walked 41 scenes of 149 and printed a green tick. The population
+  // helper refuses that checkout instead of reporting a pass over the third of the library it can see.
+  : population('layer props', { filter: (f) => f !== 'schema.json' && !isTemplate(f), quiet: true })
+      .names.map((f) => path.join(SCENE_DIR, f));
 
 // The verdict for one prop on one layer: read unconditionally, read behind a guard this layer satisfies,
 // read behind a guard it does not (INERT), or read by nothing (DROPPED). The last two are both "the JSON

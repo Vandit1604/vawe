@@ -47,10 +47,44 @@ const scene = argv.find((a) => !a.startsWith('-'));
 if (!scene) die('no scene file given', 'vawe <scene.json>');
 if (!fs.existsSync(scene)) die(`no such file: ${scene}`);
 
-const bin = path.join(ROOT, 'bin', process.platform === 'win32' ? 'vawe.exe' : 'vawe');
-if (!fs.existsSync(bin)) {
-  die('the render binary is missing from this install',
-      `expected ${bin}\n  Reinstall, or build it with: cd ${ROOT} && make build`);
+// PICK THE BINARY FOR THIS MACHINE, AND REFUSE ONE BUILT FOR ANOTHER.
+//
+// This used to be `process.platform === 'win32' ? 'vawe.exe' : 'vawe'` — a FILENAME choice with no
+// architecture check at all. `bin/` ships inside the npm package, so whatever machine published it
+// decided everyone's architecture. Published from an Apple Silicon Mac, the tarball carries a
+// `Mach-O arm64` binary, and then:
+//   Intel Mac  → "Bad CPU type in executable"
+//   Linux      → ENOEXEC
+// Both arrive raw from the OS loader, through `child.on('error')`, phrased as if the renderer crashed.
+// The user is told the wrong thing about a working install of the wrong build.
+//
+// So the host's own identity picks the file, and the file's MAGIC BYTES are read back before we spawn
+// it — the same read-back-from-a-boundary-you-do-not-own rule the engine applies to GSAP eases and CSS
+// declarations. The OS loader will not tell us politely, so we ask the bytes first.
+const TRIPLE = `${process.platform}-${process.arch}`;
+const EXE = process.platform === 'win32' ? '.exe' : '';
+const candidates = [path.join(ROOT, 'bin', `vawe-${TRIPLE}${EXE}`), path.join(ROOT, 'bin', `vawe${EXE}`)];
+const bin = candidates.find((p) => fs.existsSync(p));
+if (!bin) {
+  die(`no render binary for ${TRIPLE} in this install`,
+      `looked for:\n    ${candidates.join('\n    ')}\n`
+      + `  Build one: cd ${ROOT} && make build      (needs Go)\n`
+      + `  Or every platform at once: make build-all`);
+}
+
+// What was this file actually built for? Four magic numbers cover every target Go emits.
+const head = fs.readFileSync(bin, { length: 4, encoding: null }).subarray(0, 4);
+const magic = head.toString('hex');
+const builtFor =
+  magic.startsWith('7f454c46') ? 'linux'                                   // ELF
+  : /^(feedfacf|cffaedfe|cafebabe|bebafeca)/.test(magic) ? 'darwin'        // Mach-O (incl. fat)
+  : magic.startsWith('4d5a') ? 'win32'                                     // PE/COFF "MZ"
+  : null;
+if (builtFor && builtFor !== process.platform) {
+  die(`this install's render binary was built for ${builtFor}, and you are on ${process.platform} (${process.arch})`,
+      `${bin}\n`
+      + `  The npm package ships whatever the publishing machine built, which is this bug.\n`
+      + `  Build for your machine: cd ${ROOT} && make build      (needs Go)`);
 }
 
 // ffmpeg: prefer a bundled static build, fall back to PATH, refuse if neither. `ffmpeg-static` is an

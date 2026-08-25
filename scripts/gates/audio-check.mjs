@@ -28,6 +28,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { population } from '../lib/census.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');
@@ -148,9 +150,14 @@ if (all) {
   const dir = path.join(ROOT, 'formats/scene');
   const tally = { [OMITTED]: [], [SILENT]: [], [HOLLOW]: [], [SOUNDED]: [] };
   let reasoned = 0;
-  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith('.json'))) {
+  // Population through scripts/lib/census.mjs: it states N and refuses a checkout that cannot see the
+  // library, instead of reporting "everybody ships silent" over a third of it.
+  const pop = population('sound census', {
+    filter: (f, abs) => { try { return readJSON(abs).module === 'scene'; } catch { return false; } },
+    quiet: true,
+  });
+  for (const f of pop.names) {
     let s; try { s = readJSON(path.join(dir, f)); } catch { continue; }
-    if (s.module !== 'scene') continue;              // schema.json, examples.json, .intent.json sidecars
     const st = classify(s);
     tally[st].push(f);
     if (st === SILENT && reasonOf(s.audio)) reasoned++;

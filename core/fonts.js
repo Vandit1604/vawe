@@ -83,35 +83,83 @@ export function usedFamilies(root = document.querySelector('.stage') || document
   return fams;
 }
 
-/**
- * Audit the families the scene actually uses.
- *   OK           registered + loaded + painting
- *   BROKEN       registered but the file errored (bad path / 404) -> renders as fallback
- *   SYSTEM-LUCK  painting with NO @font-face: it works on this machine because the font happens to
- *                be installed, and fails everywhere else. The invisible one; still a hard failure.
- *   FALLBACK     not registered, not painting -> the classic silent substitution
- */
-export function auditFonts(root) {
-  const reg = registeredFamilies();
+/** Per-family FontFace states, keyed by family name. One walk of document.fonts, shared by both
+ *  consumers below so they cannot disagree about what "loaded" means. */
+function faceStates() {
   const status = new Map();
   document.fonts.forEach((ff) => {
     const f = clean(ff.family);
     if (!status.has(f)) status.set(f, new Set());
     status.get(f).add(ff.status);
   });
+  return status;
+}
 
-  const report = [];
-  for (const family of [...usedFamilies(root)].sort()) {
-    const registered = reg.has(family);
-    const states = [...(status.get(family) || [])].sort();
-    const painting = isPainting(family);
-    let verdict;
-    if (registered && states.includes('error')) verdict = 'BROKEN';
-    else if (registered && painting) verdict = 'OK';
-    else if (registered && !painting) verdict = 'FALLBACK'; // declared but never actually resolved
-    else if (!registered && painting) verdict = 'SYSTEM-LUCK';
-    else verdict = 'FALLBACK';
-    report.push({ family, verdict, registered, loaded: states.join('+') || 'none' });
+/**
+ * One family -> one verdict.
+ *   OK           registered + loaded + painting
+ *   BROKEN       registered but the file errored (bad path / 404) -> renders as fallback
+ *   SYSTEM-LUCK  painting with NO @font-face: it works on this machine because the font happens to
+ *                be installed, and fails everywhere else. The invisible one; still a hard failure.
+ *   FALLBACK     not registered, not painting -> the classic silent substitution
+ */
+function verdictOf(family, reg, status) {
+  const registered = reg.has(family);
+  const states = [...(status.get(family) || [])].sort();
+  const painting = isPainting(family);
+  let verdict;
+  if (registered && states.includes('error')) verdict = 'BROKEN';
+  else if (registered && painting) verdict = 'OK';
+  else if (registered && !painting) verdict = 'FALLBACK'; // declared but never actually resolved
+  else if (!registered && painting) verdict = 'SYSTEM-LUCK';
+  else verdict = 'FALLBACK';
+  return { family, verdict, registered, loaded: states.join('+') || 'none', src: (reg.get(family) || []).join(' ') };
+}
+
+/** Audit the families the scene actually uses (needs a rendered frame: a layer that is not up yet
+ *  declares no family). */
+export function auditFonts(root) {
+  const reg = registeredFamilies();
+  const status = faceStates();
+  return [...usedFamilies(root)].sort().map((f) => verdictOf(f, reg, status));
+}
+
+// assertFamilies(families, where) — THE READ-BACK for the font boundary.
+//
+// WHY. `document.fonts.load()` is a boundary we do not own, and it shrugs by contract: a face whose
+// file 404s leaves the FontFace at status "error" and the browser paints a generic instead. Measured
+// in headless Chrome against a @font-face pointing at a missing file:
+//   document.fonts.load("400 100px 'ProbeMissing'")  rejects "A network error occurred."
+//   [...document.fonts] -> ["ProbeMissing", "error"]
+//   document.fonts.check("400 100px 'TotallyNoSuchFaceXYZ'") -> TRUE   (inverted; see the note above)
+// boot.js awaited that load inside `try { ... } catch (e) {}`, so the rejection was thrown away and
+// every frame rendered in a substitute with nothing said. That is how Geist, Anybody and Manrope each
+// shipped wrong, and how a fresh worktree rendered its whole library in a fallback serif.
+//
+// The audit that could have caught it existed the whole time and was OPT-IN (`make font-audit`), which
+// is a gate for a value we could refuse at the write site. This refuses it there instead: the four
+// families a theme names are author-supplied, they are known before the first frame, and a wrong one
+// invalidates every frame that follows.
+export function assertFamilies(families, where = 'theme') {
+  const want = [...new Set(families)].filter((f) => typeof f === 'string' && f && !isGeneric(f)).map(clean);
+  if (!want.length) return [];
+  const reg = registeredFamilies();
+  const status = faceStates();
+  const rows = want.map((f) => verdictOf(f, reg, status));
+  const bad = rows.filter((r) => r.verdict !== 'OK');
+  if (bad.length) {
+    const why = {
+      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}) — run \`make fonts\``,
+      FALLBACK: (r) => (r.registered
+        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved — run \`make fonts\``
+        : 'no @font-face declares it: add one to core/tokens.css, or name a family that has one'),
+      'SYSTEM-LUCK': () => 'it paints only because this machine happens to have it installed, and no '
+        + '@font-face declares it — every other machine renders a substitute',
+    };
+    throw new Error(`${where}: ${bad.length} font famil${bad.length > 1 ? 'ies' : 'y'} would render as a substitute:\n`
+      + bad.map((r) => `  - "${r.family}" (${r.verdict}, FontFace ${r.loaded}): ${why[r.verdict](r)}`).join('\n')
+      + '\nThe browser does not refuse a font it cannot load; it paints a generic and says nothing, so an'
+      + ' unchecked family here renders a plausible frame in the wrong typeface.');
   }
-  return report;
+  return rows;
 }

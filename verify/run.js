@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
 import { safeArea, ASPECTS, sceneDims } from '../core/safe.js';
+import { population } from '../scripts/lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -52,7 +53,9 @@ function imgRefs(o, acc = []) {
 for (const m of modules) {
   const dir = path.join(formatsDir, m);
   if (!fs.existsSync(dir)) continue;
-  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json')) {
+  // The asset sweep is the purest form of "absence read as a pass": a checkout that cannot see the
+  // library finds no missing image and reports assets green. population() states N and refuses instead.
+  for (const file of population(`assets · ${m}`, { dir: `formats/${m}`, filter: (f) => f !== 'schema.json' }).names) {
     let data;
     try { data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8')); } catch { continue; }
     const missing = imgRefs(data)

@@ -37,3 +37,12 @@ assets/brands/**/scenes/*.json
 # main sees does not find bugs, it invents them.
 assets/brands/**
 assets/cutouts/**
+
+# THEMES. `themes/*.json` is partly gitignored (35 ship, more sit on a working machine), and a scene
+# naming one that is absent does not degrade — `core/boot.js` refuses to boot at all: `theme "stripe"
+# not found (themes/stripe.json) — no default look exists`. A worktree without them cannot render the
+# library it was just handed, which is the failure this whole file exists to prevent.
+themes/*.json
+
+# Generated art the scene library references (assets/gen is gitignored, like every other produced file).
+assets/gen/**

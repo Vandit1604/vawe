@@ -10,6 +10,7 @@ import path from 'path';
 import { PRESETS } from '../../core/type.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
+import { population, isTemplate } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 
 const DIR = SCENE_DIR;
@@ -19,7 +20,9 @@ const isReel = (f) => /demo|reel/.test(f); // showcase reels exercise the whole 
 // capability primitives: presence of the key anywhere in the tree is "adopted"
 const CAPS = ['group', 'motion', 'camera', 'cut', 'fx', 'ken', 'layout', 'fitH', 'fitText'];
 
-const files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && !SKIP.has(f)).sort();
+// A `.template.json` holds mustache placeholders and is not JSON: reading one threw out of this sweep
+// and killed the whole audit, so `make features` reported nothing at all. isTemplate excludes it by name.
+const files = population('feature audit', { filter: (f) => !SKIP.has(f) && !isTemplate(f) }).names;
 
 const KIN = new Set(Object.keys(PRESETS)); // only these are kinetic entrance presets ('paper'/'accent' are bg specs)
 

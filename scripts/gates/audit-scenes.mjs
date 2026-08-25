@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { population } from '../lib/census.mjs';
 
 const argv = process.argv.slice(2);
 const aspectAt = argv.indexOf('--aspect');
@@ -33,7 +34,7 @@ const DIR = 'formats/scene';
 const skip = (f) => !f.endsWith('.json') || f === 'schema.json' || f.startsWith('_')
   || /\.(intent|animatic|template)\.json$/.test(f);
 
-const scenes = fs.readdirSync(DIR).filter((f) => !skip(f)).sort()
+const scenes = population('audit-scenes', { filter: (f) => !skip(f) }).names
   .filter((f) => {
     if (filter && !f.includes(filter)) return false;
     // an un-expanded source cannot be audited; its expanded sibling is in the list already

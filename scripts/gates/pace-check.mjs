@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { population, isTemplate, SCENE_DIR } from '../lib/census.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
@@ -65,8 +66,10 @@ function measure(p) {
 }
 
 if (!file) {
-  const files = cp.execSync("git ls-files 'formats/scene/*.json'", { cwd: ROOT, encoding: 'utf8' })
-    .split('\n').filter((f) => f && !/intent|expanded/.test(f));
+  // WAS `git ls-files`, which sees only TRACKED scenes and then CRASHED on the one mustache template it
+  // did see, so the census produced a stack trace instead of a verdict.
+  const files = population('pace census', { filter: (f) => !/intent|expanded/.test(f) && !isTemplate(f) })
+    .names.map((f) => `${SCENE_DIR}/${f}`);
   const rows = [];
   for (const f of files) { const m = measure(path.join(ROOT, f)); if (m) rows.push([f.split('/').pop().replace('.json', ''), m]); }
   rows.sort((a, b) => a[1].eps - b[1].eps);

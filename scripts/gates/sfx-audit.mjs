@@ -15,6 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+import { population } from '../lib/census.mjs';
 const SFX = path.join(repoRoot, 'assets/sfx');
 
 // role prefix → the longest it may be, in seconds, and why that number.
@@ -69,7 +70,9 @@ function measure(file) {
 }
 
 if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make sfx` / `make audio`) — nothing to check'); process.exit(0); }
-const files = fs.readdirSync(SFX).filter((f) => f.endsWith('.wav')).sort();
+// assets/sfx is entirely gitignored, so a checkout without it swept zero cues and said nothing was
+// wrong with them. population() states N and refuses a checkout that should hold more.
+const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
 const bad = [];
 console.log(`── sfx shape check (${files.length} files)\n`);
 for (const f of files) {

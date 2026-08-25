@@ -84,11 +84,30 @@ export async function uploadFile(localPath) {
   return url;
 }
 
+// READ BACK the body, not just the status. A 200 is not a promise that the bytes are media: a CDN that
+// has expired the asset answers 200 with an HTML or JSON error page, and writing it to `dest` leaves a
+// file that EXISTS, passes every path check, and renders as a hole. That is docs/MISTAKES.md #426 with
+// a different fetcher — `tryFetch` in scripts/media/assets.mjs already requires a status AND a size AND
+// a magic number before it writes, and this is the same demand.
+const MAGIC = [ // enough of each container to tell media from an error page
+  [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],
+  [[0x52, 0x49, 0x46, 0x46], 'riff/webp/wav'], [[0x49, 0x44, 0x33], 'mp3'], [[0xff, 0xfb], 'mp3'],
+  [[0x4f, 0x67, 0x67, 0x53], 'ogg'], [[0x1a, 0x45, 0xdf, 0xa3], 'webm'],
+];
+const looksLikeMedia = (b) =>
+  MAGIC.some(([sig]) => sig.every((c, i) => b[i] === c))
+  || (b.length > 12 && b.slice(4, 8).toString('latin1') === 'ftyp'); // mp4/mov, whose magic sits at byte 4
+
 export async function download(url, dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const res = await fetch(url);
   if (!res.ok) throw new Error(`download ${url} → ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length < 1024 || !looksLikeMedia(buf))
+    throw new Error(`download ${url} → HTTP ${res.status} but the body is not media `
+      + `(${buf.length} bytes, content-type ${res.headers.get('content-type') || 'none'}, `
+      + `starts ${JSON.stringify(buf.slice(0, 40).toString('latin1'))}). `
+      + `Refusing to write ${dest}: a file that exists and cannot be decoded renders as an invisible hole.`);
   fs.writeFileSync(dest, buf);
   return dest;
 }

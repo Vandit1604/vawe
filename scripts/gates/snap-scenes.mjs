@@ -21,6 +21,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { population } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
@@ -77,8 +78,7 @@ const hasSugar = (f) => {
   } catch { return false; }
 };
 const skippedSugar = [];
-const scenes = fs.readdirSync(dir)
-  .filter((f) => f.endsWith('.json') && f !== 'schema.json' && !f.startsWith('_'))
+const scenes = population('snap-scenes', { filter: (f) => f !== 'schema.json' && !f.startsWith('_'), quiet: true }).names
   .filter((f) => !ONLY || f === ONLY || f === `${ONLY}.json`)
   .filter(isScene)
   .filter((f) => {

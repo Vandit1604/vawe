@@ -4,11 +4,11 @@
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
-import { themeErrors } from './theme-contract.js';
+import { themeErrors, REQUIRED } from './theme-contract.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
-import { loadRegistered, auditFonts } from './fonts.js';
+import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
 
@@ -466,6 +466,14 @@ export async function boot(build) {
       }
       await document.fonts.ready;
     } catch (e) {}
+    // READ BACK. document.fonts.load() does not refuse a face it cannot fetch — it leaves the FontFace
+    // at status "error" and the browser paints a generic. Every await above sits in a catch-all, so
+    // that rejection went on the floor. Ask the browser which of the theme's OWN families is actually
+    // painting, before the first frame is captured. See assertFamilies in core/fonts.js.
+    // The CONTRACT's four roles, not Object.values(theme.type): a theme may park a non-family flag in
+    // there (themes/ledgerline-*.json carry `"optical": true`), and the load loop above turns that into
+    // document.fonts.load("400 100px 'true'") — a nonsense request nobody reads the answer to.
+    assertFamilies(REQUIRED.type.map((k) => (theme.type || {})[k]), `theme "${theme?.name || 'inline'}"`);
     // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
     // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
     // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx

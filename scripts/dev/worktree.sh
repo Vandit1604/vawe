@@ -36,22 +36,49 @@ for d in node_modules site/node_modules; do
 done
 mkdir -p "$WT/bin" && ln -sf "$ROOT/bin/vawe" "$WT/bin/vawe" 2>/dev/null || true
 ln -sfn "$ROOT/.vawe-data" "$WT/.vawe-data" 2>/dev/null || true
-# copied, because they get edited
-mkdir -p "$WT/assets/fonts/local"
-cp -a "$ROOT/assets/fonts/local/." "$WT/assets/fonts/local/" 2>/dev/null || true
-cp -a "$ROOT"/formats/scene/*.json "$WT/formats/scene/" 2>/dev/null || true
-for b in "$ROOT"/assets/brands/*/; do
-  [ -d "$b" ] || continue
-  n="$(basename "$b")"
-  for sub in components scenes photos; do
-    [ -d "$b$sub" ] && mkdir -p "$WT/assets/brands/$n/$sub" && cp -a "$b$sub/." "$WT/assets/brands/$n/$sub/" 2>/dev/null || true
-  done
-done
+# COPIED, because they get edited — AND DRIVEN FROM .worktreeinclude, not from a second list.
+#
+# This loop used to be its own hand-written list: assets/fonts/local, formats/scene/*.json, and each
+# brand's components/scenes/photos. `.worktreeinclude` meanwhile asked for `assets/fonts/*.woff2`,
+# `assets/brands/**` and `assets/cutouts/**` as well, with a comment on each explaining which silent
+# failure it prevents. The script did not implement its own manifest, so every worktree made here was
+# missing the vendored webfonts and every brand IMAGE. Measured: `snap-scenes` in a fresh worktree gave
+# 16 identical · 61 changed · 29 errored against main's 106 identical — every one of those from a
+# fallback font or an image that was never there, and none of them a real defect.
+#
+# That is docs/MISTAKES.md #430 in another costume: a hand-kept scope drifting from the vocabulary it
+# claims to cover. A manifest with two implementations has no implementation.
+INCLUDE="$ROOT/.worktreeinclude"
+if [ -f "$INCLUDE" ]; then
+  while IFS= read -r pat; do
+    case "$pat" in ''|'#'*) continue ;; esac
+    # `git ls-files` will not list these (that is why they are here), so the patterns are expanded by
+    # the shell against the real tree and copied path by path, preserving the directory shape.
+    for src in $(cd "$ROOT" && eval ls -d $pat 2>/dev/null); do
+      [ -e "$ROOT/$src" ] || continue
+      mkdir -p "$WT/$(dirname "$src")"
+      cp -a "$ROOT/$src" "$WT/$(dirname "$src")/" 2>/dev/null || true
+    done
+  done < "$INCLUDE"
+else
+  echo "✗ .worktreeinclude is missing — a worktree built without it cannot render. Aborting." >&2
+  exit 1
+fi
 
 # Prove it is usable rather than assuming. A worktree that cannot see the library is worse than none,
 # because every gate in it reports a confident green.
-n_main=$(ls "$ROOT"/formats/scene/*.json 2>/dev/null | wc -l | tr -d ' ')
-n_wt=$(ls "$WT"/formats/scene/*.json 2>/dev/null | wc -l | tr -d ' ')
-echo "✓ $WT  (branch wt-$name)"
-echo "  scenes: $n_wt of $n_main   node_modules: shared   bin/vawe: shared"
-[ "$n_wt" = "$n_main" ] || { echo "✗ scene count differs — a gate here would under-report. Aborting." >&2; exit 1; }
+#
+# Checked PER MANIFEST PATTERN, not per hand-picked item. The old check counted scenes only, so the
+# missing webfonts and brand images it was also supposed to carry sailed past a green tick for months.
+# Counting whatever `.worktreeinclude` asks for means a line added there is verified the day it is
+# added, and this check cannot fall behind the manifest the way the copy loop did.
+fail=0
+while IFS= read -r pat; do
+  case "$pat" in ''|'#'*) continue ;; esac
+  c_main=$(cd "$ROOT" && eval ls -d $pat 2>/dev/null | wc -l | tr -d ' ')
+  c_wt=$(cd "$WT" && eval ls -d $pat 2>/dev/null | wc -l | tr -d ' ')
+  printf '  %-34s %s of %s\n' "$pat" "$c_wt" "$c_main"
+  [ "$c_wt" = "$c_main" ] || { echo "✗ $pat — $c_wt of $c_main arrived. A worktree missing this renders a substitute and every gate in it reports a confident green." >&2; fail=1; }
+done < "$INCLUDE"
+echo "✓ $WT  (branch wt-$name)   node_modules: shared   bin/vawe: shared"
+[ "$fail" = 0 ] || { echo "✗ refusing to hand over an incomplete worktree." >&2; exit 1; }

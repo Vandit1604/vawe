@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
+import { ffmpegOrDie } from '../lib/scratch.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -34,7 +35,18 @@ const lines = text.replace(/\\n/g, '\n').split('\n').map((l) => l.trim()).filter
 if (!lines.length) { console.error('✗ script has no speakable lines'); process.exit(2); }
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-tts-'));
-const dur = (f) => parseFloat(spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', f]).stdout.toString().trim()) || 0;
+// READ BACK what ffprobe answered. `|| 0` turned every failure — ffprobe absent, a wav ffmpeg never
+// wrote, a file it cannot parse — into a duration of ZERO, and a zero duration is not an error here: it
+// stacks that line's words at one instant, gives the line no room in the offset, and the VO ships short
+// with the captions off. A tool we do not own reporting nothing must not read as "0.0 seconds".
+const dur = (f) => {
+  const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', f], { encoding: 'utf8' });
+  if (r.error) { console.error(`✗ could not run ffprobe (${r.error.message})`); process.exit(1); }
+  if (r.status !== 0) { console.error(`✗ ffprobe exited ${r.status} on ${f}\n${(r.stderr || '').trim()}`); process.exit(1); }
+  const d = parseFloat((r.stdout || '').trim());
+  if (!Number.isFinite(d) || d <= 0) { console.error(`✗ ffprobe read no duration from ${f} (got ${JSON.stringify((r.stdout || '').trim())})`); process.exit(1); }
+  return d;
+};
 
 const wavs = [];
 const words = [];
@@ -46,7 +58,7 @@ for (let i = 0; i < lines.length; i++) {
   const sayArgs = [...(voice ? ['-v', voice] : []), '-o', aiff, line];
   const r = spawnSync('say', sayArgs);
   if (r.status !== 0 || !fs.existsSync(aiff)) { console.error(`✗ say failed on line ${i + 1}: ${r.stderr?.toString() || ''}`); process.exit(1); }
-  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', aiff, '-ar', '48000', '-ac', '2', wav]);
+  ffmpegOrDie(['-v', 'error', '-y', '-i', aiff, '-ar', '48000', '-ac', '2', wav], wav, `tts line ${i + 1}`);
   const d = dur(wav);
   wavs.push(wav);
   // distribute this line's words across its duration by character weight (a longer word takes longer to
@@ -64,8 +76,7 @@ const listFile = path.join(tmp, 'list.txt');
 fs.writeFileSync(listFile, wavs.map((w) => `file '${w}'`).join('\n'));
 const wavOut = out.endsWith('.wav') ? out : `${out}.wav`;
 fs.mkdirSync(path.dirname(path.resolve(wavOut)), { recursive: true });
-spawnSync('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', listFile, '-c', 'copy', wavOut]);
-if (!fs.existsSync(wavOut)) { console.error('✗ concat failed'); process.exit(1); }
+ffmpegOrDie(['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', listFile, '-c', 'copy', wavOut], wavOut, 'tts concat');
 const wordsOut = wavOut.replace(/\.wav$/, '.words.json');
 fs.writeFileSync(wordsOut, JSON.stringify(words, null, 2) + '\n');
 fs.rmSync(tmp, { recursive: true, force: true });

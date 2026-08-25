@@ -24,6 +24,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { population } from '../lib/census.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const { PRESETS } = await import('../../core/type.js');
@@ -54,8 +56,7 @@ const FAMILIES = [
 let corpus = '';
 let files = 0;
 const dir = path.join(ROOT, 'formats/scene');
-for (const f of fs.readdirSync(dir)) {
-  if (!f.endsWith('.json') || f.startsWith('_') || f.includes('.intent.')) continue;
+for (const f of population('unused · corpus', { filter: (f) => !f.startsWith('_') && !f.includes('.intent.'), quiet: true }).names) {
   corpus += fs.readFileSync(path.join(dir, f), 'utf8');
   files++;
 }

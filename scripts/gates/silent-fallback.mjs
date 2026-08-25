@@ -43,9 +43,15 @@ const WAIVED = new Map(Object.entries({
   'core/junctions.js:data[key]': 'marksOf reads cuts/seams/stings off a lowered scene; a film with no seams has no `seams` key, and [] is the true answer',
   'core/knobs.js:fam[preset]': 'a preset with no knobs of its own keeps only the family\'s shared ones',
   'core/looks.js:PASS_READS[passName]': 'a pass that reads no routed argument yields [] — and lib-test proves the table against behaviour',
+  'core/captions.js:CAP_STYLE_SHAPE[name]': 'a SPARSE map: only three of the fifteen styles have a non-default shape, so an absent entry IS the answer ({unit:word, mode:line}). The NAME cannot be wrong here — formats/scene/scene.js:742 throws on an unknown captionStyle before this is reached, and lib-test:992 locks the default in',
+  'core/validate.mjs:KNOBS[family]': 'DEBT, not a safe default, and stated so rather than hidden: a family with no manifest entry is not graded AT ALL, which is exactly how `colorWave`, `shimmerWave` and the `globe` three scene escape knob validation while reading real per-preset opts. lib-test:2753 asserts that silence on purpose, because grading them against `_shared` alone would refuse four shipped films for a hole in core/knobs.js. Fix by FILLING THE MANIFEST (then delete this waiver and that assertion), never by widening the fallback',
   'core/tracks/vars.js:v[name]': 'the per-channel map for `vars`; an absent channel falls to the scalar or `*`, by design',
   // ALREADY VALIDATED one call earlier, so the wrong-name case cannot arrive here:
-  'core/looks.js:CORNERS[corner]': 'UNREACHABLE from a scene: `corner` is not a routed lookOpts knob, so assertKnobs already refuses it (#351)',
+  // WAIVER REMOVED, and the reason it was wrong is worth keeping. It said `corner` is UNREACHABLE
+  // from a scene, which was TRUE and not enough: the value comes from a LOOK DEFINITION, our own
+  // data, and that is the one place a typo can live forever because no author will ever hit it and
+  // report it. `leakGrad` now throws (docs/MISTAKES.md #434). Judge a fallback by whether a WRONG
+  // value can reach it, never by whether an AUTHOR can send one.
   'core/looks.js:KNOB_ROUTES[knob]': 'the knob was validated by assertKnobs one call earlier',
   'formats/scene/scene.js:FX_DUR[spec.name]': 'a duration default for an effect that declares none; the NAME is validated by GSAP_EXIT_REGISTRY.pick immediately above',
   'formats/scene/scene.js:SEAM_CUE[s.fx]': 'the seam fx is validated where seams are parsed (#361), and lib-test asserts SEAM_CUE covers every SEAM_FX',
