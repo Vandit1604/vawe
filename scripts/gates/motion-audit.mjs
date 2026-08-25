@@ -128,11 +128,14 @@ async function audit(format) {
   // Fallback to stings is heuristic (stings are often beat markers, not cuts) → observations only (WARN).
   let segs = (meta.segments || []).map((s) => ({ name: s.name || s.label || s.type, dur: s.dur ?? (s.t1 - s.t0), trans: s.transition ?? 0.4 })); // accepts {dur} or {t0,t1}
   const declared = segs.length > 0;
+  let windowSource = declared ? 'meta.segments (declared)' : null;
   if (!segs.length && (meta.stings || []).length) {
     const cuts = [...meta.stings, total / FPS]; let prev = 0;
     segs = cuts.map((c, i) => { const s = { name: 'seg' + i, dur: c - prev, trans: 0.4 }; prev = c; return s; });
   }
   if (!segs.length) segs = [{ name: 'all', dur: total / FPS, trans: 0 }];
+  if (!windowSource) windowSource = (meta.stings || []).length ? 'meta.stings (inferred — stings are often beat markers, not cuts)'
+    : 'the whole video as one window (inferred — nothing in the scene marks a boundary)';
   let acc = 0;
   const windows = segs.map((s, i) => {
     const start = Math.round(acc * FPS); acc += s.dur;
@@ -145,7 +148,12 @@ async function audit(format) {
   // ---- checks ----
   const F = series.frames, at = (i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
   const findings = [];
-  const add = (level, check, seg, key, msg) => findings.push({ level: declared ? level : 'WARN', check, seg: seg?.name, key, msg });
+  // `declared ? level : 'WARN'` is the whole contract in one ternary, and it used to leave no trace. A
+  // format that declares no segments has its windows INFERRED, so a FAIL-tier clause fired against an
+  // inferred window is not adjudicable — downgrading it is right. Reporting the downgrade as an ordinary
+  // warning and then printing "the motion contract holds" is not: the contract was never enforced.
+  // `would` keeps the tier the check asked for so the report can say what was set aside and why.
+  const add = (level, check, seg, key, msg) => findings.push({ level: declared ? level : 'WARN', would: level, check, seg: seg?.name, key, msg });
   const K = series.keys, LOOP = series.loop;
   const content = K.map((k, i) => !INFRA.has(k) && !LOOP[i]);
 
@@ -306,7 +314,7 @@ async function audit(format) {
     if (top[1] / presets.length > 0.7) findings.push({ level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' });
   }
 
-  return { format, data: dataName, total, segments: windows.length, findings };
+  return { format, data: dataName, total, segments: windows.length, findings, declared, windowSource };
 }
 
 const results = [];
@@ -325,14 +333,37 @@ else {
     // name the data file audited: `make motion D=...` used to drop D and silently audit sample.json,
     // and the report gave no way to tell which scene you were reading (MISTAKES #47).
     console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format} · ${r.data}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
+    if (!r.declared) {
+      const set = r.findings.filter((x) => x.would === 'FAIL');
+      console.log(`    ⚠ no \`segments\` in this scene — windows come from ${r.windowSource}.`);
+      console.log(`      The FAIL tier (i final-hold · ii monotonic · iii settle · iv count-up · v typing) is scored`);
+      console.log(`      against those inferred windows, so it is reported as warnings and enforces nothing.`);
+      if (set.length) console.log(`      ${set.length} finding(s) below would be FAIL against declared windows: ${[...new Set(set.map((x) => x.check))].join(', ')}`);
+    }
     const show = [...fails, ...warns];
     for (const x of show.slice(0, 30)) console.log(`    [${x.level === 'FAIL' ? x.check : x.check + ' · warn'}] ${x.seg || ''}${x.key ? ' "' + x.key + '"' : ''} — ${x.msg}`);
     if (show.length > 30) console.log(`    … +${show.length - 30} more`);
   }
 }
 const failed = results.some((r) => r.error || r.findings.some((x) => x.level === 'FAIL'));
+// No scene in this repo sets `segments`, so every SEGMENT-SCOPED FAIL (i · ii · iii · iv · v) has always
+// been rewritten to WARN before anyone saw it, and the run then printed a tick. (The one FAIL that
+// survives is the whole-video final-hold, which is pushed straight into `findings` and never passes
+// through `add`.) Refuse to certify exactly where the tick would be unearned: a FAIL-tier clause fired
+// against a window that was guessed. Exit 3 (cannot check) — the census convention, and not the same
+// claim as exit 1 (the film is wrong).
+const blind = results.filter((r) => !r.error && !r.declared && r.findings.some((x) => x.would === 'FAIL'));
 // Under --json the verdict goes to stderr: stdout is the machine-readable channel, and appending a
 // prose line to it made the documented flag emit something no consumer could parse. The exit code and
 // the sentence both survive; only the stream changes.
-(JSON_OUT ? console.error : console.log)(failed ? '\n✗ motion audit found hard failures' : '\n✓ motion contract holds across all checked formats');
-process.exit(failed ? 1 : 0);
+const say = JSON_OUT ? console.error : console.log;
+if (failed) { say('\n✗ motion audit found hard failures'); process.exit(1); }
+if (blind.length) {
+  say(`\n? motion contract NOT ENFORCED — ${blind.length > 1 ? 'these formats declare' : `\`${blind[0].format}\` declares`} no \`segments\`, so every`);
+  say('  FAIL-tier finding above was scored against a guessed window and set aside. Nothing here says the');
+  say('  film is wrong, and nothing here says it is right. Declare `segments` in the scene to make the');
+  say('  contract adjudicable, or read the warnings above by eye.');
+  process.exit(3);
+}
+say('\n✓ motion contract holds across all checked formats');
+process.exit(0);

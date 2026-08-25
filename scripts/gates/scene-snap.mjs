@@ -94,5 +94,12 @@ console.log(`\n==== SNAP DIFF · ${m} (${frames.length} frames vs baseline) ====
 if (!diffs.length) { console.log('✓ IDENTICAL — no DOM/layout change across sampled frames'); process.exit(0); }
 for (const d of diffs.slice(0, 60)) console.log('  ' + d);
 if (diffs.length > 60) console.log(`  … +${diffs.length - 60} more`);
-console.log(`\n△ ${diffs.length} change(s) — review that each is intended.`);
-process.exit(0);
+// EXIT 1. A baseline diff is the gate's only finding, and printing it under a zero exit made every
+// caller — a shell `&&`, a CI step, `make` — treat "the frames moved" as "the frames held". The other
+// determinism gates here (snap-scenes, snap-blocks, canvas-purity, probe-purity) all exit non-zero on a
+// diff; this one alone reported the change and then certified the render. An INTENDED change is
+// re-baselined with --save, which is the author saying so; it is not the gate's to assume.
+console.error(`\n△ ${diffs.length} change(s) — the sampled frames no longer match verify/snap/${m}.json.`);
+console.error('  If every change is intended, re-baseline it deliberately: '
+  + `node scripts/gates/scene-snap.mjs ${m} --save`);
+process.exit(1);

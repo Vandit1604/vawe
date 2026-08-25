@@ -75,4 +75,12 @@ for (const b of intent.beats || []) {
   }
 }
 console.log(`\n  ${pass} pass · ${fail} fail\n`);
-process.exit(fail && (strict || true) ? (fail ? 1 : 0) : 0);
+// THIS READ `fail && (strict || true) ? (fail ? 1 : 0) : 0`, and `strict || true` is true. So the flag
+// never changed the verdict: inspect has always exited 1 on any unmet beat, strict or not, which is
+// what CLAUDE.md documents (inspect is a BLOCKS-tier step in the ladder). The behaviour that shipped is
+// kept; only the expression that pretended to be a knob is gone.
+// `--strict` is still accepted because author-check passes it to every step uniformly. It changes
+// nothing HERE, and it says so rather than being a silent no-op — what a strict tier ought to promote
+// in this gate is an open design question, not something to invent from inside a bug fix.
+if (strict) console.log('  (--strict changes nothing in inspect: an unmet beat already fails it.)\n');
+process.exit(fail ? 1 : 0);
