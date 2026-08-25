@@ -16,3 +16,4 @@ next-env.d.ts
 .env*.local
 *.tsbuildinfo
 .next-build/
+.shots/
