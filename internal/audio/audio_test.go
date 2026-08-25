@@ -223,3 +223,76 @@ func TestNoBridgesIsUnchanged(t *testing.T) {
 		t.Fatal("an empty bridge list must mix byte-identically to no bridge list")
 	}
 }
+
+// cueSource writes a flat-amplitude cue under assets/sfx/, where the mixer looks up a cue by name.
+func cueSource(t *testing.T, dir, name string, amp, secs float64) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Join(dir, "assets", "sfx"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	writeMonoWav(t, filepath.Join(dir, "assets", "sfx", name+".wav"), flat(amp, int(secs*sr)))
+}
+
+// rmsDiff is the level of what the SECOND file added to the first — the cue on its own, lifted out of
+// a mix it is summed into. Measuring the mix would only prove the window got louder.
+func rmsDiff(a, b *wav, from, to float64) float64 {
+	i, j := int(from*float64(a.rate)), int(to*float64(a.rate))
+	acc := 0.0
+	for k := i; k < j && k < len(a.data) && k < len(b.data); k++ {
+		d := b.data[k] - a.data[k]
+		acc += d * d
+	}
+	if j <= i {
+		return 0
+	}
+	return math.Sqrt(acc / float64(j-i))
+}
+
+// (i) A cue must be HEARD over the bed under it. A cue is causal — it says the thing happened — and a
+// bed is atmosphere; a `tick` at its table gain of 0.45 against a bed at 0.6 sat UNDER the atmosphere.
+func TestCueClearsTheBed(t *testing.T) {
+	dir := t.TempDir()
+	cueSource(t, dir, "tick", 0.5, 0.2)
+	cfg := Config{Music: constMusic(t, dir, 0.5, 6)}
+	bedOnly, mixed := filepath.Join(dir, "bed.out.wav"), filepath.Join(dir, "mix.out.wav")
+	if ok, err := Render(cfg, 4, nil, nil, nil, dir, dir, bedOnly); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	if ok, err := Render(cfg, 4, nil, []Cue{{T: 2, Name: "tick"}}, nil, dir, dir, mixed); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	a, b := readWavMono(bedOnly), readWavMono(mixed)
+	bed, cue := rmsAt(a, 2, 2.2), rmsDiff(a, b, 2, 2.2)
+	if cue < bed*cueHeadroom*0.98 {
+		t.Fatalf("the cue must clear the bed by %.1fdB: bed %.4f, cue %.4f (%.1fdB over)",
+			20*math.Log10(cueHeadroom), bed, cue, 20*math.Log10(cue/bed))
+	}
+}
+
+// (j) An AUTHORED gain is a decision, not a starting point. The mixer must never quietly raise it.
+func TestAuthoredCueGainIsNeverLifted(t *testing.T) {
+	dir := t.TempDir()
+	cueSource(t, dir, "key", 0.5, 0.2)
+	cfg := Config{Music: constMusic(t, dir, 0.5, 6)}
+	bedOnly, mixed := filepath.Join(dir, "bed.out.wav"), filepath.Join(dir, "mix.out.wav")
+	Render(cfg, 4, nil, nil, nil, dir, dir, bedOnly)
+	g := 0.1
+	Render(cfg, 4, nil, []Cue{{T: 2, Name: "key", Gain: &g}}, nil, dir, dir, mixed)
+	a, b := readWavMono(bedOnly), readWavMono(mixed)
+	if cue := rmsDiff(a, b, 2, 2.2); math.Abs(cue-0.05) > 2e-3 {
+		t.Fatalf("an authored gain of 0.1 on a 0.5 clip must mix at 0.05, got %.4f", cue)
+	}
+}
+
+// (k) No bed, nothing to clear: a film without music mixes exactly as it did before this rule.
+func TestCueWithNoBedIsUnchanged(t *testing.T) {
+	dir := t.TempDir()
+	cueSource(t, dir, "tick", 0.5, 0.2)
+	out := filepath.Join(dir, "n.wav")
+	if ok, err := Render(Config{}, 4, nil, []Cue{{T: 2, Name: "tick"}}, nil, dir, dir, out); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	if cue := rmsAt(readWavMono(out), 2, 2.2); math.Abs(cue-0.5*0.45) > 2e-3 {
+		t.Fatalf("with no bed a tick must stay at its table gain 0.45, got %.4f", cue)
+	}
+}

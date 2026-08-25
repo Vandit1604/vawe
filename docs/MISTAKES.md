@@ -13845,3 +13845,48 @@ library sets and therefore cannot perturb anything.
 `composition` (GSAP) writing lazily and being forced to flush by the first computed-style read. If that
 is it, the audit has been measuring some frames before the renderer finished writing them, which is a
 much larger finding than the one that surfaced it.
+
+## #449 — a UI cue was mixed quieter than the music under it
+
+**What.** `internal/audio/audio.go` ducked the music bed to -18dB under VO and under a sound bridge, and
+under a CUE it did nothing. A `tick` or `whoosh` took its table gain of 0.45 and played against a bed at
+`musicGain`, so on any film with a real bed the causal sound sat UNDER the atmosphere. Measured on
+`example-kinetic-type` (bed `beat.wav`, `musicGain` 0.5): the `press` at t=2.20 read 0.0824 RMS in its
+loudest 50ms against 0.1001 of bed in the same 50ms — **1.7dB under the thing it was supposed to
+punctuate**.
+
+**Root cause.** Two gains named in two places and never compared. `sfxGain` was a per-cue table of
+absolute numbers and `musicGain` was a separate absolute number, so nothing in the mixer held the
+RELATIONSHIP between them. The table was tuned once against a synthesized bed; `make music-pack` then
+made the real beds ~6dB louder (lofi RMS 0.1835 against warm's 0.0858) and every table number silently
+became wrong.
+
+**Fix.** `overTheBed` in `internal/audio/audio.go` is now the one place that relationship is decided. A
+cue's table gain is a FLOOR: the mixer measures the cue's loudest 50ms and the bed's RMS over that same
+50ms and raises the cue until it clears by `cueHeadroom` (6dB). Same window on both sides, because
+masking is short-time and scoring the cue on its peak against the bed's average would flatter every cue.
+It only ever raises. An authored `cue.gain` skips the rule entirely — that is a decision, and the mixer
+does not overrule it — which also keeps keystroke trains (`keyGain`) quiet. The bed it measures against
+is music plus bridge texture and deliberately NOT the VO, since the bed already ducks under a voice.
+
+**The clamp, and why it is loud.** A click's peak is many times its own RMS, so RMS-matching a loud bed
+sends the cue past the limiter and squashes the whole mix for the length of the cue — a worse defect
+than the one being fixed. The lift is therefore capped by the cue's own peak (`cueCeiling` 0.7) and by
+`cueMaxLift` (+12dB), and a cap that BINDS prints a named warning to stderr. Settling silently for
+whatever fits would hide exactly the thing the rule exists to catch.
+
+**Which gate catches it.** None, and that is deliberate: the value is written in the mixer, so the
+refusal lives in the mixer. `internal/audio/audio_test.go` `TestCueClearsTheBed` fails on the old
+behaviour; `TestAuthoredCueGainIsNeverLifted` and `TestCueWithNoBedIsUnchanged` fence the two ways a
+"fix" like this normally goes wrong.
+
+**Blast radius, measured.** 14 of the 158 scenes carry both a bed and cues. Rendered end to end:
+`example-kinetic-type` moves ONE cue (`press`, +3.3dB, clamped from the +7.7dB it wanted, with the
+warning printed), file RMS -21.65 → -21.64 dB, peak 0.523 → 0.693, integrated loudness -18.5 LUFS
+unchanged. `vawe-launch` (bed `tense` at `musicGain` 0.32) is byte-for-byte unchanged and still measures
+-16.6 LUFS. `seam-demo` is unchanged. `process` cannot change at all: every one of its 16 cues carries an
+authored gain. So the films that move are the ones with a loud bed, which is the population the defect
+was in.
+
+**Still open.** `vawe-launch` asks for -14 LUFS and the mux delivers -16.6, before and after this change.
+Single-pass `loudnorm` undershooting its target is a separate finding and nobody has logged it.
