@@ -186,6 +186,17 @@ if (!SAVE) {
   let was = null;
   try { was = JSON.parse(fs.readFileSync(STAMP, 'utf8')); } catch { /* baselines predating the stamp */ }
   if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make snap-all SAVE=1\` to stamp them.`);
+  // WHICH CHECKOUT RECORDED THESE. A baseline saved in one tree and compared in another can differ for
+  // reasons that have nothing to do with the diff under test, and a "changed" line gives the reader no
+  // way to tell which. Four separate agents spent real time on ONE scene (react-demo) that renders
+  // consistently in every worktree and consistently differently on main, with code, scene, theme and
+  // font state proved byte-identical — three of them reported it as "pre-existing", which is true and
+  // was not checkable from the output. Saying where the baseline came from turns an ambiguous signal
+  // into an explained one, which is the whole job of a gate's message.
+  if (was && was.root && was.root !== repoRoot)
+    console.log(`  ~ these baselines were recorded in a DIFFERENT checkout:\n      saved in  ${was.root}\n      running in ${repoRoot}\n`
+      + `    A scene listed below may differ for environmental reasons rather than because of your change.\n`
+      + `    To get a verdict about your diff alone: re-save here first (\`make snap-all SAVE=1\`), confirm clean, then apply the change.`);
   else if (was.hash !== now.hash)
     console.log(`  ⚠ FONT STATE CHANGED since these baselines were saved (${was.n} face(s) ${was.hash} → ${now.n} face(s) ${now.hash}).\n`
       + `    Every text width in the library moves with it, so a "changed" scene below is NOT evidence about the code.\n`
@@ -193,7 +204,7 @@ if (!SAVE) {
 }
 if (SAVE) {
   const fsNow = fontState();
-  fs.writeFileSync(STAMP, JSON.stringify(fsNow, null, 2) + '\n');
+  fs.writeFileSync(STAMP, JSON.stringify({ ...fsNow, root: repoRoot }, null, 2) + '\n');
   console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic — NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }

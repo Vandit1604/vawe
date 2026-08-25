@@ -13714,3 +13714,36 @@ returns): the engine accepted the input and produced a plausible frame that was 
 **Also fixed here:** a lost context is counted rather than recovered from. Recovery would mean a frame
 that differs depending on when the driver dropped it, which `renderFrame(n)` purity forbids.
 
+## #445 — one scene differs between main and every worktree, and four agents each rediscovered it
+
+**What.** `react-demo` renders consistently in every worktree and consistently differently on main. Not
+flaky: two independent worktrees produce byte-identical output (`opacity 0.222 → 0.281`, `w 235 →
+248.9`), and main reproduces its own baseline on every run. **Four separate agents hit it**, three
+reported it as "pre-existing", and none could prove that from the gate's output — because the output
+gave them no way to tell "my change broke this" from "this tree renders it differently".
+
+**What was eliminated, so nobody repeats the search.** Byte-identical between the trees:
+`formats/scene/react-demo.json`, `themes/vawe.json`, `core/tokens.css`, `formats/scene/scene.js`,
+`core/layers/text.js`, `core/motion.js`, and the whole font state (33 faces, hash `dd6cb2e15984`, and
+`find assets/fonts -type f` shows 35 files each side with no diff). Copying `assets/baked` in did not
+change it. The scene references no assets and uses only `paint`, `rect` and `text`.
+
+**Cause: NOT FOUND.** Same code, same data, deterministic on both sides, different between them. The
+remaining variable is the checkout itself and I could not isolate it further within budget.
+
+**What was fixed is the ambiguity, which is what actually cost time.** A baseline now records the
+absolute repo root it was saved in, and a run in a different checkout says so before listing anything:
+
+```
+~ these baselines were recorded in a DIFFERENT checkout:
+    saved in  /Users/vandit/…/shortwave
+    running in /Users/vandit/…/shortwave/.claude/worktrees/x
+  A scene listed below may differ for environmental reasons rather than because of your change.
+  To get a verdict about your diff alone: re-save here first, confirm clean, then apply the change.
+```
+
+**The lesson, and it is not about this scene.** A gate that reports a difference without saying what
+KIND of difference it might be makes every reader re-derive the same context. This one cost four agents
+real time on a scene that has never been wrong in shipped output. Quarantine was the wrong tool — that
+bucket is for order non-determinism, and this is deterministic on both sides.
+
