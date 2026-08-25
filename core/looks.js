@@ -42,8 +42,15 @@ const gridGrad = (gap, color, a) =>
   `repeating-linear-gradient(0deg, ${color} 0 1px, transparent 1px ${gap}px), ` +
   `repeating-linear-gradient(90deg, ${color} 0 1px, transparent 1px ${gap}px)`;
 const CORNERS = { tr: '100% 0%', tl: '0% 0%', br: '100% 100%', bl: '0% 100%', c: '50% 50%' };
-const leakGrad = (corner, color, a) =>
-  `radial-gradient(60% 60% at ${CORNERS[corner] || CORNERS.tr}, color-mix(in srgb, ${color} ${Math.round(a * 100)}%, transparent) 0%, transparent 70%)`;
+// A CORNER THIS MAP DOES NOT KNOW IS A TYPO. `CORNERS[corner] || CORNERS.tr` put the leak in the
+// top-right and rendered a frame that looks deliberate, which is the whole failure mode. The caller
+// supplies `'tr'` when the look names none (core/looks.js `lightLeak`), so ABSENT is already handled
+// one level up and only a WRONG NAME reaches here — two different questions, answered separately.
+const leakGrad = (corner, color, a) => {
+  const at = CORNERS[corner];
+  if (!at) throw new Error(`lightLeak: corner "${corner}" is not one of ${Object.keys(CORNERS).join(', ')}.`);
+  return `radial-gradient(60% 60% at ${at}, color-mix(in srgb, ${color} ${Math.round(a * 100)}%, transparent) 0%, transparent 70%)`;
+};
 const vignetteGrad = (color, s) =>
   `radial-gradient(120% 120% at 50% 50%, transparent ${(60 - 25 * s).toFixed(0)}%, color-mix(in srgb, ${color} ${Math.round(clamp(s, 0, 1) * 100)}%, transparent) 100%)`;
 const vignetteInvGrad = (s) =>
@@ -346,8 +353,17 @@ export function resolveComposite(name, opts = {}, positional) {
   const fns = [];
   const overlays = [];
   for (const [passName, fixed] of look.p) {
+    // A LOOK NAMING A PASS THAT DOES NOT EXIST IS A TYPO, NOT AN INSTRUCTION TO SKIP IT.
+    // `if (!pass) continue` dropped the pass and rendered the look MISSING one of its effects, with
+    // nothing said — the same shape as `ANIM[name] || fade` two files over, wearing a `continue`
+    // instead of a `||`. LOOKS is our own data, so this can only ever fire on a typo we wrote, which
+    // is exactly why it should throw at boot rather than ship a quieter look.
     const pass = PASSES[passName];
-    if (!pass) continue;
+    if (!pass) {
+      throw new Error(`look "${name}" names pass "${passName}", which does not exist. `
+        + `Known passes: ${Object.keys(PASSES).sort().join(', ')}. `
+        + `A missing pass renders the look without one of its effects and says nothing, so it is refused.`);
+    }
     const out = pass({ ...o, ...(fixed || {}), ...routed }, s);
     if (out.fns) fns.push(...out.fns.filter(Boolean));
     if (out.overlays) overlays.push(...out.overlays);

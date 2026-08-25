@@ -13450,3 +13450,27 @@ cleanly and the 4 genuinely-ahead ones were correctly held.
 **The general shape.** A convenience applied to every caller (trim, a default, a fallback) is wrong for
 the one caller whose data is positional. Same family as #430, where a hand-listed scope drifted from the
 vocabulary it claimed to cover.
+
+## #434 — a look naming a pass that does not exist rendered without that effect, silently
+
+**What.** `resolveComposite` walked a look's pass list with `const pass = PASSES[passName]; if (!pass) continue;`
+A misspelled pass name in a `LOOKS` definition dropped that pass and rendered the look MISSING one of its
+effects, with nothing said. Same shape as `ANIM[name] || fade` two files over (`core/registry.js`), wearing
+a `continue` instead of a `||` — which is why a grep for the `||` form never found it.
+
+Beside it, `leakGrad` resolved `CORNERS[corner] || CORNERS.tr`, so a misspelled corner put the light leak
+in the top-right and rendered a frame that looks deliberate.
+
+**Why it survived.** Both read OUR data, not author input, so neither is reachable by a scene. That made
+them feel safe. It is the opposite: our own data is the only place a typo can hide forever, because no
+author will ever hit it and report it.
+
+**Fix.** Both throw, naming the vocabulary. Verified: all 31 shipped looks resolve cleanly, and a probe
+look carrying `sepiaa` and `corner: 'top-right'` is refused by name.
+
+**What was checked and left alone, so nobody re-audits it.** Three more sites match the shape and are all
+correct: `KNOB_ROUTES[knob] || []` is protected by `assertKnobs` upstream; `capShape`'s sparse map is
+reached only after `formats/scene/scene.js:742` throws on an unknown `captionStyle`, and its absence
+genuinely means the default shape; `FX_PARAMS[t] || []` is derived by `paramsOf` from the fx source, so
+an unknown type surfaces as a refused option key rather than a dropped one. **Most of this class was
+already closed** — the surviving `||` matches in `core/` are comments describing the fix, not the bug.
