@@ -61,6 +61,54 @@ more letters on screen, the more total churn per second at the same cycle.
 Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blur"` with `each` 0.75 and
 `stagger` 0.06 gives a left-to-right defocus sweep that resolves over ~0.7s (see ransom-internal.json).
 
+## Distance and duration: measured here, not imported
+
+Carbon and Material both say a move's duration should follow the ground it covers, and neither one
+publishes the equation. Both send you to a generator tool
+(https://v10.carbondesignsystem.com/guidelines/motion/overview/ ·
+https://m1.material.io/motion/duration-easing.html). So this curve comes from our own films.
+
+Every keyed move in the 135 gate-visible scenes, taking only the segments the engine treats as a span
+rather than as one step of a traced path (`DENSE_KEY_SEC`, `core/sequence.js`): **345 moves.** Sorted
+into distance buckets, the median speed barely moves.
+
+| Distance | Moves | Median speed |
+|---|---|---|
+| under 50px | 176 | 72 px/s |
+| 50-150px | 169 | 644 px/s |
+| 150-300px | 104 | 652 px/s |
+| 300-600px | 45 | 712 px/s |
+| 600-1000px | 9 | 697 px/s |
+
+**Read the table twice.** Flat speed across four buckets means duration already rises in step with
+distance, and it rises linearly. Carbon's non-linear claim does not reproduce in this library. So the
+working number is a speed, not a formula: **about 700 px/s for a move you want the eye to follow.** A
+900px sweep at that rate takes 1.3 seconds. Halve it and you are at the top of what anyone here has
+authored; quarter it and you are past all of it.
+
+The first row is the other half of the answer. A third of every move in the library covers under 50px
+and runs nine times slower. That is ambient drift, and it is deliberate. A short move is not obliged to
+be a fast one.
+
+**Four published ceilings, none of them ours.** 300ms (https://emilkowal.ski/ui/great-animations),
+500ms (https://www.nngroup.com/articles/animation-duration/), 700ms (Carbon slow-02) and 1000ms
+(Material 3 extra-long, https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) are all
+absolute durations with no distance term. Each is set by how long a person tolerates waiting for an
+interface to answer them. Nobody waits through a film, so all four are rejected here. At 700 px/s a
+full 1920px sweep takes 2.7 seconds, past every one of them, and it is right.
+
+**No gate enforces this, and the attempt is on record.** A ceiling was built at the library's 95th
+percentile of 1232 px/s. Seven films sat above it. Three were rendered and read frame by frame, and the
+arithmetic was wrong about all three: `creed-launch` sweeps a 2px rule across the frame at 4830 px/s to
+REVEAL the UI behind it, `glass` slides an 1800px pane out at 1232 px/s and moves two percent of its own
+width per frame, and `ab2-skill-tenor` tucks a 680px card into a slot at 1449 px/s while shrinking it.
+All three read clean. Sizing the test against the object's own width does not save it either: creed's
+bar is the smallest object of the three and fails that version hardest while being the most obviously
+correct. Speed in the JSON cannot tell a travelling subject from a sweeping reveal.
+
+So `make direct` prints your fastest keyed move and where it sits, as a note, and never as a finding.
+Look at the frames.
+
 ## Arrival rhythm — four measures, and the tension between two of them
 
 Rules 1, 3 and 4 above were judgment for a year. These four measures make them countable. All four
