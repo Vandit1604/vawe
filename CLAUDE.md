@@ -206,6 +206,14 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
 3. Hand-write HTML **only** for connective tissue — hook, CTA, counters. Preview every hand fragment
    before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png` (Read it, fix, repeat).
 
+> **Reflecting a real FILM? `make study VIDEO=refs/ref.mp4 NAME=ref`.** `make sections` reads a website;
+> nothing here read a film, so every reference this repo argues from was studied by eye once and the study
+> was lost. `study` probes the file, detects the shot boundaries, cuts a sheet with the in/mid/out frame of
+> every shot, and writes `refs/<name>/study.md` with four judgement columns for you to fill. It measures
+> duration, resolution, fps and the cuts; it never guesses what moves or what triggers the next shot.
+> Hard cuts come back exact, dissolves score nothing and it says so instead of inventing a list. `refs/`
+> is gitignored on purpose: take the grammar, never the frames. **[`docs/CRAFT/REFERENCE-STUDY.md`](docs/CRAFT/REFERENCE-STUDY.md)**.
+
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
 > **FIRST: `parts` IS HOW HAND-WRITTEN HTML GETS THE ENGINE'S CLOCK, and almost nobody uses it.**
