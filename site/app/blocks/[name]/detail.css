@@ -1,0 +1,124 @@
+/* Block detail — instrument register, same tokens and rhythm as catalog.css.
+ * Nothing here declares a colour of its own. The site has no system dark mode (only the `.pgdark`
+ * class a route opts into), so there is no media query pretending otherwise.
+ *
+ * Own prefix on purpose: globals.css still carries the previous page's `.bd-*` rules, and reusing
+ * those names would inherit a layout this page deliberately replaced. */
+
+.bx { padding: 20px 0 96px; }
+
+/* ── nav ─────────────────────────────────────────────────────────────────── */
+.bx-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.bx-back { font: 500 13px/1 var(--font-mono), monospace; color: var(--muted); transition: color .15s var(--ease); }
+.bx-back:hover { color: var(--accent); }
+.bx-walk { display: flex; align-items: center; gap: 14px; font: 400 13px/1 var(--font-mono), monospace; }
+.bx-walk a { color: var(--ink-2); transition: color .15s var(--ease); }
+.bx-walk a:hover { color: var(--accent); }
+.bx-walk em { font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+.bx-off { color: var(--muted); opacity: .5; }
+.bx-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* ── head ────────────────────────────────────────────────────────────────── */
+.bx-head { padding: 26px 0 20px; }
+.bx-head h1 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+.bx-blurb { margin-top: 8px; color: var(--ink-2); font-size: 1rem; line-height: 1.55; max-width: 62ch; text-wrap: pretty; }
+.bx-tags { margin-top: 10px; font-size: 12px; color: var(--muted); }
+
+/* ── stage ───────────────────────────────────────────────────────────────
+ * CONTAIN, NEVER COVER. Posters are cropped to each block's own measured bounds, so their aspects
+ * really do differ (codeTyping 705x257, usMapHex 911x629). The stage is a constant frame; the block
+ * sits inside it whole, at its own shape, capped by width and by height. */
+.bx-stagewrap { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); overflow: hidden; }
+.bx-stage {
+  display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center;
+  padding: clamp(18px, 3vw, 44px); min-height: 300px;
+  /* Bounds the upscale of a small block, so a 300px-wide one is not blown to 1500. */
+  max-width: 1160px; margin: 0 auto;
+}
+/* One sizing rule for both, so pressing play cannot make the block jump: as wide as the stage allows,
+ * but never taller than --bx-h. Width is derived from the block's own aspect rather than clamped by
+ * max-height, because a max-height on an aspect-ratio box shrinks the height and NOT the width, which
+ * would crop a tall block instead of fitting it. `!important` beats BlockLive's inline pixel width —
+ * that width is the card layout's, and this stage sizes the block itself. */
+.bx-stage { --bx-h: min(58vh, 560px); }
+.bx-stage img, .bx-stage .blive {
+  grid-area: 1 / 1;
+  width: min(100%, calc(var(--bx-h) * var(--bx-ar, 1.6))) !important;
+  height: auto; max-width: 100%;
+  object-fit: contain; display: block;
+}
+/* The live window: full-size iframe inside, scaled and slid so the measured rect fills the box.
+ * Hidden until the engine says ready, so the poster covers the boot rather than a black stage. */
+.bx-stage .blive { position: relative; overflow: hidden; --sp-scale: 1; opacity: 0; transition: opacity .3s var(--ease); }
+.bx-stage .blive[data-ready] { opacity: 1; }
+
+.bx-transport {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-top: 1px solid var(--line); background: var(--bg-2);
+}
+.bx-transport button {
+  font: 500 12.5px/1 var(--font-mono), monospace; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 7px;
+  padding: 7px 12px; cursor: pointer;
+  transition: border-color .15s var(--ease), color .15s var(--ease);
+}
+.bx-transport button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.bx-transport button:disabled { color: var(--muted); cursor: default; }
+.bx-transport button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bx-state { margin-left: auto; font-size: 11.5px; color: var(--muted); }
+
+/* ── the two things you came for after the move ──────────────────────────── */
+.bx-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); padding: 34px 0 0; }
+/* The rule under a section title is the section's, not the heading's: the count and the copy control
+ * sit on that line beside it, and a heading is no place for a button. */
+.bx-h {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 14px;
+}
+.bx-col h2 { font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.bx-n {
+  font-size: 11.5px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px;
+}
+.bx-copy {
+  margin-left: auto; font: 500 11.5px/1 var(--font-mono), monospace; color: var(--muted);
+  background: none; border: 1px solid var(--line); border-radius: 6px; padding: 4px 9px; cursor: pointer;
+  transition: color .15s var(--ease), border-color .15s var(--ease);
+}
+.bx-copy:hover { color: var(--accent); border-color: var(--accent); }
+.bx-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.bx-code {
+  font-size: 12.5px; line-height: 1.7; color: var(--ink-2);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; overflow-x: auto;
+}
+.bx-note { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: var(--muted); max-width: 52ch; }
+.bx-note b { color: var(--ink-2); font-weight: 600; }
+
+.bx-props { border-top: 1px solid var(--line); margin-top: -1px; }
+.bx-prop {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr); gap: 12px; align-items: baseline;
+  padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12.5px;
+}
+.bx-prop dt { color: var(--ink); font-weight: 600; }
+.bx-prop dd { margin: 0; }
+.bx-type { color: var(--muted); font-size: 11px; }
+.bx-val { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+
+@media (max-width: 860px) {
+  .bx-cols { grid-template-columns: 1fr; gap: 30px; }
+  .bx-prop { grid-template-columns: minmax(0, 1fr) auto; }
+  .bx-val { grid-column: 1 / -1; text-align: left; white-space: normal; }
+  .bx-nav { gap: 10px; }
+  .bx-walk { width: 100%; justify-content: space-between; }
+  .bx-stage { padding: 14px; min-height: 0; --bx-h: 42vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bx-back, .bx-walk a, .bx-transport button, .bx-copy, .bx-stage .blive { transition: none; }
+}

@@ -13,37 +13,22 @@
 import { useState, useMemo, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BlockLive } from "./BlockLive";
 
 export type Block = { name: string; family: string; blurb: string; category?: string; props?: Record<string, unknown> };
-type Frame = { x: number; y: number; w: number; h: number };
 
 const asset = (name: string, ext: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.${ext}`;
 
-// A card shows its poster until you ask for the move. The live engine mounts over the top and fades in
-// only when it reports ready, so pressing play never flashes an empty stage.
-function Thumb({ name, frame }: { name: string; frame?: Frame }) {
-  const [playing, setPlaying] = useState(false);
-  const [ready, setReady] = useState(false);
-  useEffect(() => { if (!playing) setReady(false); }, [playing]);
-
+// A card is a STILL. Playback lives on the detail page and only there.
+//
+// Every card used to carry its own play button and mount the engine in place. With 176 cards that put
+// a full engine boot one stray click away, on a page whose job is to help you FIND a block, not watch
+// one — and the motion is exactly what you go to the detail page for. So the index shows the poster
+// and gets out of the way, and the whole card is one link.
+function Thumb({ name }: { name: string }) {
   return (
     <span className="ct-thumb">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={asset(name, "png")} alt="" loading="lazy" decoding="async" />
-      {playing && frame && <BlockLive name={name} src={asset(name, "json")} frame={frame} onReady={() => setReady(true)} />}
-      <button
-        className="ct-play"
-        data-on={playing ? "" : undefined}
-        data-loading={playing && !ready ? "" : undefined}
-        aria-pressed={playing}
-        aria-label={playing ? `Stop ${name}` : `Play ${name}`}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlaying((p) => !p); }}
-      >
-        <svg viewBox="0 0 12 12" aria-hidden="true">
-          {playing ? <rect x="3" y="3" width="6" height="6" rx="1" /> : <path d="M4 2.6 L9.4 6 L4 9.4 Z" />}
-        </svg>
-      </button>
     </span>
   );
 }
@@ -53,11 +38,11 @@ function Thumb({ name, frame }: { name: string; frame?: Frame }) {
 const PER = 48;
 
 // useSearchParams suspends during prerender, so the boundary lives here rather than in page.tsx.
-export function Catalog(props: { blocks: Block[]; frames: Record<string, Frame> }) {
+export function Catalog(props: { blocks: Block[] }) {
   return <Suspense><Grid {...props} /></Suspense>;
 }
 
-function Grid({ blocks, frames }: { blocks: Block[]; frames: Record<string, Frame> }) {
+function Grid({ blocks }: { blocks: Block[] }) {
   const [q, setQ] = useState("");
   const search = useRef<HTMLInputElement>(null);
   const params = useSearchParams();
@@ -219,7 +204,7 @@ function Grid({ blocks, frames }: { blocks: Block[]; frames: Record<string, Fram
                   {s.items.map((b) => (
                     <li key={b.name}>
                       <Link className="ct-card" href={`/blocks/${b.name}`}>
-                        <Thumb name={b.name} frame={frames[b.name]} />
+                        <Thumb name={b.name} />
                         <span className="ct-meta">
                           <code>{b.name}</code>
                           <span className="ct-blurb">{b.blurb}</span>

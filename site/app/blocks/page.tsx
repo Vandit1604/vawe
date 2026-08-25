@@ -3,7 +3,6 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { Catalog, type Block } from "./Catalog";
 import blocks from "../../lib/blocks.json";
-import frames from "../../lib/block-frames.json";
 import "./catalog.css";
 
 // The count is read from the registry, never typed. It was hardcoded here as 156 while the registry
@@ -22,7 +21,7 @@ export default function Blocks() {
       <Header active="blocks" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
-          <Catalog blocks={blocks as Block[]} frames={frames as Record<string, { x: number; y: number; w: number; h: number }>} />
+          <Catalog blocks={blocks as Block[]} />
         </main>
         <Footer note="deterministic, theme-aware blocks" />
       </div>

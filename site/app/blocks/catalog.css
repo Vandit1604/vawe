@@ -138,20 +138,7 @@
   box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
-.ct-play {
-  position: absolute; right: 8px; bottom: 8px; width: 26px; height: 26px;
-  display: grid; place-items: center; cursor: pointer;
-  border: 1px solid var(--line); border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(6px);
-  opacity: 0; transition: opacity .16s var(--ease), border-color .16s var(--ease);
-}
-.ct-play svg { width: 11px; height: 11px; fill: var(--ink); stroke: none; }
-.ct-card:hover .ct-play, .ct-play:focus-visible, .ct-play[data-on] { opacity: 1; }
-.ct-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ct-play[data-on] { border-color: var(--accent); }
-.ct-play[data-loading] svg { opacity: .45; }
-
+.ct-card:hover 
 .ct-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .ct-meta code {
   font: 500 13px/1.3 var(--mono, ui-monospace, monospace); color: var(--ink);
@@ -176,8 +163,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ct-thumb, .ct-play, .ct-cat, .ct-find input, .ct-step, .ct-pg { transition: none; }
-  .ct-card:hover .ct-thumb { transform: none; }
+  .ct-thumb,   .ct-card:hover .ct-thumb { transform: none; }
 }
 
 /* ── sections ──────────────────────────────────────────────────────────────

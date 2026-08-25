@@ -16,21 +16,25 @@ export type Frame = { x: number; y: number; w: number; h: number };
  * the same intrinsic size and the same cap-don't-stretch rules, so it lands in exactly the same
  * layout box, showing exactly the same region.
  */
-export function BlockLive({ name, src, frame, onReady }: {
+export function BlockLive({ name, src, frame, onReady, playing = true, onEngine }: {
   name: string; src: string; frame: Frame; onReady?: () => void;
+  /** Cards autoplay; the detail page owns a transport, so it drives this. */
+  playing?: boolean;
+  /** Handed the engine's seek once ready, so a caller can offer replay without re-booting the iframe. */
+  onEngine?: (renderFrame: (n: number) => void) => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
-  const { hostRef, meta } = useSceneEngine({
+  const { hostRef, meta, renderFrame } = useSceneEngine({
     dataUrl: src,
     aspect: "16:9",
     title: `Live render of the ${name} block`,
-    playing: true,
+    playing,
   });
 
   // `meta` arriving is the engine's own ready signal — the same one the fade below is gated on. The
   // card needs it too, to stop saying "loading", so it is reported up rather than timed separately.
   const ready = !!meta;
-  useEffect(() => { if (ready) onReady?.(); }, [ready, onReady]);
+  useEffect(() => { if (ready) { onReady?.(); onEngine?.(renderFrame); } }, [ready, onReady, onEngine, renderFrame]);
 
   // The window is capped by the card, so its used width is not frame.w — measure it and scale.
   useEffect(() => {
