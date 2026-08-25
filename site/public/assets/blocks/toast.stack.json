@@ -47,7 +47,10 @@
               "weight": 700,
               "text": "✓",
               "size": 17,
-              "color": "var(--bg)"
+              "color": "var(--bg)",
+              "css": {
+                "paddingTop": "6px"
+              }
             }
           ]
         },
@@ -57,16 +60,23 @@
           "text": "Block added to the scene",
           "size": 20,
           "color": "var(--bg)",
-          "grow": 1
+          "grow": 1,
+          "css": {
+            "paddingTop": "6px"
+          }
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Undo",
           "size": 17,
-          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
+          "color": "color-mix(in srgb, var(--accent) 40%, var(--bg))",
+          "css": {
+            "paddingTop": "6px"
+          }
         }
-      ]
+      ],
+      "opacity": 0.8
     },
     {
       "type": "group",
@@ -101,7 +111,10 @@
               "weight": 700,
               "text": "◆",
               "size": 17,
-              "color": "var(--bg)"
+              "color": "var(--bg)",
+              "css": {
+                "paddingTop": "6px"
+              }
             }
           ]
         },
@@ -111,16 +124,23 @@
           "text": "Theme switched",
           "size": 20,
           "color": "var(--bg)",
-          "grow": 1
+          "grow": 1,
+          "css": {
+            "paddingTop": "6px"
+          }
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Undo",
           "size": 17,
-          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
+          "color": "color-mix(in srgb, var(--accent) 40%, var(--bg))",
+          "css": {
+            "paddingTop": "6px"
+          }
         }
-      ]
+      ],
+      "opacity": 0.9
     },
     {
       "type": "group",
@@ -133,7 +153,7 @@
       "pad": 16,
       "bg": "var(--text)",
       "radius": 14,
-      "elevation": 2,
+      "elevation": 3,
       "start": 2.2,
       "duration": 2.4,
       "anim": "rise",
@@ -155,7 +175,10 @@
               "weight": 700,
               "text": "✓",
               "size": 17,
-              "color": "var(--bg)"
+              "color": "var(--bg)",
+              "css": {
+                "paddingTop": "6px"
+              }
             }
           ]
         },
@@ -165,16 +188,23 @@
           "text": "Render queued",
           "size": 20,
           "color": "var(--bg)",
-          "grow": 1
+          "grow": 1,
+          "css": {
+            "paddingTop": "6px"
+          }
         },
         {
           "type": "text",
           "weight": 600,
           "text": "View",
           "size": 17,
-          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
+          "color": "color-mix(in srgb, var(--accent) 40%, var(--bg))",
+          "css": {
+            "paddingTop": "6px"
+          }
         }
-      ]
+      ],
+      "opacity": 1
     }
   ],
   "produced": false

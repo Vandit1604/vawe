@@ -4,7 +4,7 @@
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
-import { themeErrors, REQUIRED, ON_ACCENT_MIN } from './theme-contract.js';
+import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from './theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from './motion.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
@@ -270,20 +270,29 @@ export function applyTheme(theme) {
   // Defaulted rather than REQUIRED, following `--card` two lines up: adding it to the contract's
   // required list would fail all 38 shipped themes until each was hand-edited, for a colour most of
   // them have no opinion about. A theme that does have one declares `palette.warn` and wins.
-  set('--warn', P.warn || '#F6A417');
+  set('--warn', P.warn || WARN_DEFAULT);
   set('--accent', P.accent); set('--accent-dim', P.accentDim); set('--accent-glow', P.accentGlow);
-  // WHAT COLOUR READS *ON* THE ACCENT. Nothing could answer that, so every block that filled a surface
-  // with the accent guessed, and they all guessed white: pricingCard's featured CTA is white on
-  // higgsfield's acid lime at 1.16:1. `onColor()` in blocks/kit.mjs cannot help — it grades a literal
-  // hex, and a block only ever holds `var(--accent)`, a string that becomes a colour in the browser long
-  // after the factory returned. The theme is the one place the accent IS a value, so the decision is
-  // made here, once, and every consumer receives it.
+  // WHAT COLOUR READS *ON* A FILL. Nothing could answer that, so every block that filled a surface
+  // with a theme colour guessed, and they all guessed white: pricingCard's featured CTA is white on
+  // higgsfield's acid lime at 1.16:1, and a checklist tick was white on `--up` at 1.25:1 there and
+  // 2.50:1 on linear. `onColor()` in blocks/kit.mjs cannot help — it grades a literal hex, and a block
+  // only ever holds `var(--accent)` or `var(--up)`, a string that becomes a colour in the browser long
+  // after the factory returned. The theme is the one place these ARE values, so the decision is made
+  // here, once per fill, and every consumer receives it.
   // NOT the theme's own `ink`: `ink` is the primary text colour, which on a dark theme is nearly WHITE
   // (higgsfield ships #f4f5f0), so white-vs-ink leaves 11 of 38 themes below 4.5:1 with both candidates
-  // light. White vs black, winner takes it, clears all 38 — white preferred wherever it already reads.
+  // light — and on the amber `--warn` it measures 1.87:1 on higgsfield, which is what `badge` shipped.
+  // White vs black, winner takes it, clears all 152 theme x fill pairs with a floor of 4.69:1 (white
+  // alone fails 112 of them, black alone a different 40) — white preferred wherever it already reads.
   // Defaulted rather than required, exactly as `--warn` above: a theme with an opinion declares
-  // `palette.onAccent`, and theme-contract.js refuses that opinion if it cannot be read.
-  set('--on-accent', P.onAccent || ensureContrast('#ffffff', P.accent, { min: ON_ACCENT_MIN, light: '#ffffff', dark: '#000000' }));
+  // `palette.onAccent` / `onUp` / `onDown` / `onWarn`, and theme-contract.js refuses that opinion if it
+  // cannot be read. The four are enumerated in ON_INK there, so this loop and the validator agree by
+  // construction rather than by two lists somebody keeps in step.
+  for (const { on, fill, cssVar, fallback } of ON_INK) {
+    const ground = Object.hasOwn(P, fill) ? P[fill] : fallback;   // `fill` is contract-checked at import
+    const override = P[on];                                       // graded by themeErrors above, so it reads
+    set(cssVar, override || ensureContrast('#ffffff', ground, { min: ON_INK_MIN, light: '#ffffff', dark: '#000000' }));
+  }
   set('--accent-2', P.accent2); set('--grid', P.grid); set('--grid-2', P.grid2);
   set('--glass', P.glass); set('--highlight', P.highlight);
   (theme.gradient || []).forEach((c, i) => set(`--g${i}`, c));

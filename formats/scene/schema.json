@@ -107,14 +107,18 @@
         "neonEdge",
         "kineticSlam",
         "underlineDraw",
-        "readerFocus",
-        "wordFlash",
-        "wordSlide",
-        "typeOn",
         "flipUp",
         "ghostSplit",
         "waveRide",
-        "scramble"
+        "scramble",
+        "wordFlash",
+        "wordSlide",
+        "typeOn",
+        "readerFocus",
+        "inkFill",
+        "focusPull",
+        "letterRise",
+        "weightWave"
       ]
     },
     "bg": {

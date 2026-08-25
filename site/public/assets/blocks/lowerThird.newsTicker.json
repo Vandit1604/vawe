@@ -42,7 +42,7 @@
               "font": "mono",
               "size": 18,
               "tracking": "0.08em",
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         },
@@ -56,7 +56,7 @@
               "weight": 600,
               "text": "Renders every frame in parallel",
               "size": 30,
-              "color": "#fff"
+              "color": "var(--on-accent)"
             }
           ]
         }

@@ -8,8 +8,8 @@
     "badge"
   ],
   "dimensions": {
-    "width": 173,
-    "height": 82
+    "width": 189,
+    "height": 74
   },
   "install": {
     "kind": "scene-layer",
@@ -24,7 +24,7 @@
       "dur": 4,
       "label": "status",
       "value": "beta",
-      "tone": "warn"
+      "tone": "accent"
     },
     "props": [
       "x",

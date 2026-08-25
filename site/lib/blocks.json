@@ -1787,7 +1787,7 @@
     "props": {
       "label": "status",
       "value": "beta",
-      "tone": "warn"
+      "tone": "accent"
     },
     "category": "Interface"
   },

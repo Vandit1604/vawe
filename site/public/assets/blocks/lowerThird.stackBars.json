@@ -56,7 +56,7 @@
           "weight": 600,
           "text": "Principal engineer",
           "size": 21,
-          "color": "#fff"
+          "color": "var(--on-accent)"
         }
       ]
     }

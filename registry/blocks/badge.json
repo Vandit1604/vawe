@@ -8,8 +8,8 @@
     "badge"
   ],
   "dimensions": {
-    "width": 192,
-    "height": 82
+    "width": 208,
+    "height": 74
   },
   "install": {
     "kind": "scene-layer",

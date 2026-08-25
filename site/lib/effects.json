@@ -1,11 +1,11 @@
 {
-  "total": 531,
-  "previewed": 242,
+  "total": 552,
+  "previewed": 252,
   "families": 35,
   "tags": [
     [
       "asset",
-      15
+      16
     ],
     [
       "background",
@@ -13,11 +13,11 @@
     ],
     [
       "blueprint",
-      17
+      19
     ],
     [
       "camera",
-      8
+      11
     ],
     [
       "canvas",
@@ -25,7 +25,7 @@
     ],
     [
       "captions",
-      15
+      19
     ],
     [
       "composition",
@@ -41,7 +41,7 @@
     ],
     [
       "layer",
-      32
+      38
     ],
     [
       "per-frame",
@@ -73,7 +73,7 @@
     ],
     [
       "timing",
-      66
+      71
     ],
     [
       "transition",
@@ -2062,7 +2062,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.",
-      "count": 17,
+      "count": 19,
       "undescribed": 0,
       "entries": [
         {
@@ -2090,6 +2090,13 @@
           "name": "echoRing",
           "stem": "beat-blueprints--echoring",
           "desc": "a stroked ring replaying another layer's path one beat late, fading as it grows",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "focusRack",
+          "stem": "beat-blueprints--focusrack",
+          "desc": "a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims",
           "scene": null,
           "noPreview": null
         },
@@ -2139,6 +2146,13 @@
           "name": "screenDive",
           "stem": "beat-blueprints--screendive",
           "desc": "product surface: kinetic title + a real UI shot that KEN-pushes in",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "scrollStory",
+          "stem": "beat-blueprints--scrollstory",
+          "desc": "a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop",
           "scene": null,
           "noPreview": null
         },
@@ -2194,13 +2208,27 @@
       "mode": "table",
       "note": null,
       "noPreview": "a camera move is only legible against a scene laid out for it, which is the film, not a swatch.",
-      "count": 8,
-      "undescribed": 0,
+      "count": 11,
+      "undescribed": 3,
       "entries": [
+        {
+          "name": "cameraShake",
+          "stem": "camera-moves--camerashake",
+          "desc": "",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "diveIn",
           "stem": "camera-moves--divein",
           "desc": "zoom INTO a target point (it travels to centre)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "driftHold",
+          "stem": "camera-moves--drifthold",
+          "desc": "",
           "scene": null,
           "noPreview": null
         },
@@ -2222,6 +2250,13 @@
           "name": "panFollow",
           "stem": "camera-moves--panfollow",
           "desc": "camera pans to track downward-growing content (terminal)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "punchIn",
+          "stem": "camera-moves--punchin",
+          "desc": "",
           "scene": null,
           "noPreview": null
         },
@@ -2457,41 +2492,83 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 5,
-      "undescribed": 5,
+      "count": 11,
+      "undescribed": 0,
       "entries": [
+        {
+          "name": "codeAssemble",
+          "stem": "three-js-scenes-real-geometry--codeassemble",
+          "desc": "thousands of GPU points flying from a seeded cloud to the exact glyph positions and resolving into readable code",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--codeassemble.json",
+          "noPreview": null
+        },
+        {
+          "name": "codeDissolve",
+          "stem": "three-js-scenes-real-geometry--codedissolve",
+          "desc": "code resolving out of seeded noise behind a chromatic burn edge, then holding crisp",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--codedissolve.json",
+          "noPreview": null
+        },
+        {
+          "name": "codeExtrude",
+          "stem": "three-js-scenes-real-geometry--codeextrude",
+          "desc": "syntax-coloured code on lit beveled slabs, rising out of depth and growing to thickness, top line first",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--codeextrude.json",
+          "noPreview": null
+        },
         {
           "name": "deviceShowcase",
           "stem": "three-js-scenes-real-geometry--deviceshowcase",
-          "desc": "",
+          "desc": "a GLTF device body turning in real light with a LIVE HTML screen mapped onto it",
           "scene": "/assets/effects/three-js-scenes-real-geometry--deviceshowcase.json",
           "noPreview": null
         },
         {
           "name": "extrudeText",
           "stem": "three-js-scenes-real-geometry--extrudetext",
-          "desc": "",
+          "desc": "a real font outline extruded into a lit 3D solid that rotates through space",
           "scene": null,
           "noPreview": "it needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts."
         },
         {
           "name": "globe",
           "stem": "three-js-scenes-real-geometry--globe",
-          "desc": "",
+          "desc": "a rotating globe of land dots, with arcs available between coordinates",
           "scene": "/assets/effects/three-js-scenes-real-geometry--globe.json",
+          "noPreview": null
+        },
+        {
+          "name": "liquidBackground",
+          "stem": "three-js-scenes-real-geometry--liquidbackground",
+          "desc": "a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--liquidbackground.json",
+          "noPreview": null
+        },
+        {
+          "name": "magnetic",
+          "stem": "three-js-scenes-real-geometry--magnetic",
+          "desc": "field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--magnetic.json",
           "noPreview": null
         },
         {
           "name": "pointCloud",
           "stem": "three-js-scenes-real-geometry--pointcloud",
-          "desc": "",
+          "desc": "a GPU point cloud: thousands of lit points posed absolutely from t",
           "scene": "/assets/effects/three-js-scenes-real-geometry--pointcloud.json",
+          "noPreview": null
+        },
+        {
+          "name": "shatter",
+          "stem": "three-js-scenes-real-geometry--shatter",
+          "desc": "one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--shatter.json",
           "noPreview": null
         },
         {
           "name": "uiParallax",
           "stem": "three-js-scenes-real-geometry--uiparallax",
-          "desc": "",
+          "desc": "flat UI planes stacked at depth, the camera moving past them so the layers separate",
           "scene": "/assets/effects/three-js-scenes-real-geometry--uiparallax.json",
           "noPreview": null
         }
@@ -3435,7 +3512,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.",
-      "count": 25,
+      "count": 30,
       "undescribed": 0,
       "entries": [
         {
@@ -3456,6 +3533,13 @@
           "name": "dive",
           "stem": "plain-words-feel-duration-camera--dive",
           "desc": "camera → `move: \"diveIn\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "drift hold",
+          "stem": "plain-words-feel-duration-camera--drift-hold",
+          "desc": "camera → `move: \"driftHold\"`",
           "scene": null,
           "noPreview": null
         },
@@ -3523,6 +3607,13 @@
           "noPreview": null
         },
         {
+          "name": "pan stations",
+          "stem": "plain-words-feel-duration-camera--pan-stations",
+          "desc": "camera → `move: \"travel\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "pop",
           "stem": "plain-words-feel-duration-camera--pop",
           "desc": "feel → `ease: \"easeOutBack\"`",
@@ -3537,9 +3628,23 @@
           "noPreview": null
         },
         {
+          "name": "punch in",
+          "stem": "plain-words-feel-duration-camera--punch-in",
+          "desc": "camera → `move: \"punchIn\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "push in",
           "stem": "plain-words-feel-duration-camera--push-in",
           "desc": "camera → `move: \"slowPush\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "shake",
+          "stem": "plain-words-feel-duration-camera--shake",
+          "desc": "camera → `move: \"cameraShake\"`",
           "scene": null,
           "noPreview": null
         },
@@ -3607,6 +3712,13 @@
           "noPreview": null
         },
         {
+          "name": "ui focus zoom",
+          "stem": "plain-words-feel-duration-camera--ui-focus-zoom",
+          "desc": "camera → `move: \"diveIn\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "zoom out",
           "stem": "plain-words-feel-duration-camera--zoom-out",
           "desc": "camera → `move: \"workspaceZoomOut\"`",
@@ -3623,7 +3735,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 15,
+      "count": 19,
       "undescribed": 0,
       "entries": [
         {
@@ -3641,6 +3753,13 @@
           "noPreview": null
         },
         {
+          "name": "focusPull",
+          "stem": "caption-styles--focuspull",
+          "desc": "a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size",
+          "scene": "/assets/effects/caption-styles--focuspull.json",
+          "noPreview": null
+        },
+        {
           "name": "ghostSplit",
           "stem": "caption-styles--ghostsplit",
           "desc": "two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme",
@@ -3655,10 +3774,24 @@
           "noPreview": null
         },
         {
+          "name": "inkFill",
+          "stem": "caption-styles--inkfill",
+          "desc": "the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself",
+          "scene": "/assets/effects/caption-styles--inkfill.json",
+          "noPreview": null
+        },
+        {
           "name": "kineticSlam",
           "stem": "caption-styles--kineticslam",
           "desc": "the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still",
           "scene": "/assets/effects/caption-styles--kineticslam.json",
+          "noPreview": null
+        },
+        {
+          "name": "letterRise",
+          "stem": "caption-styles--letterrise",
+          "desc": "the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing",
+          "scene": "/assets/effects/caption-styles--letterrise.json",
           "noPreview": null
         },
         {
@@ -3713,8 +3846,15 @@
         {
           "name": "weightShift",
           "stem": "caption-styles--weightshift",
-          "desc": "the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix",
+          "desc": "the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix",
           "scene": "/assets/effects/caption-styles--weightshift.json",
+          "noPreview": null
+        },
+        {
+          "name": "weightWave",
+          "stem": "caption-styles--weightwave",
+          "desc": "a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes",
+          "scene": "/assets/effects/caption-styles--weightwave.json",
           "noPreview": null
         },
         {
@@ -3741,12 +3881,19 @@
       "mode": "chips",
       "note": "the name is the drawing",
       "noPreview": "the name is the drawing. Every one of them is on the page already, at /blocks.",
-      "count": 15,
+      "count": 16,
       "undescribed": 0,
       "entries": [
         {
           "name": "agent",
           "stem": "drawn-icons--agent",
+          "desc": "the name is the drawing",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "arrowLeft",
+          "stem": "drawn-icons--arrowleft",
           "desc": "the name is the drawing",
           "scene": null,
           "noPreview": null

@@ -33,7 +33,7 @@
           "text": "SOLD OUT",
           "size": 62,
           "tracking": "-0.03em",
-          "color": "#fff"
+          "color": "var(--on-accent)"
         }
       ]
     },
@@ -56,7 +56,7 @@
           "text": "IN FOUR MINUTES",
           "size": 22,
           "tracking": "0.04em",
-          "color": "#fff"
+          "color": "var(--on-accent)"
         }
       ]
     }

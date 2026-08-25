@@ -33,7 +33,7 @@
           "text": "Ana Roth",
           "size": 46,
           "tracking": "-0.02em",
-          "color": "#fff"
+          "color": "var(--on-accent)"
         }
       ]
     },
@@ -55,7 +55,7 @@
           "weight": 500,
           "text": "Principal engineer",
           "size": 21,
-          "color": "#fff"
+          "color": "var(--on-accent)"
         }
       ]
     }

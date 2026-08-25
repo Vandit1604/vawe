@@ -51,6 +51,22 @@ export function lineU(t, wins) {
 //  * styled captions sit on a 78% var(--bg) scrim plate (scene.html CSS), so contrast is computed
 //    against a KNOWN backdrop. The 76% / 42% / 28% mixes below are chosen by WCAG arithmetic at
 //    the worst-case theme, with headroom; the audit's contrast pass is the enforcement.
+// wght(n) — one weight, said in BOTH channels, because the two are not interchangeable and neither
+// alone is safe. `font-variation-settings` is the only one that can express 634, and 20 of the 31
+// vendored woff2 carry a `wght` axis it drives continuously; on the other 11 (CourierPrime, the two
+// InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets)
+// it is SILENTLY IGNORED, which is this repo's most-logged bug shape. `fontWeight` is what those 11
+// hear, so the ramp degrades to the nearest static cut instead of to a dead still.
+// Rounded to 1 for the axis and to the CSS 100-step for the fallback: a value written every frame
+// must be stable in u, and a float in a fallback nobody can interpolate buys nothing.
+// NO `wdth`. Anybody is documented upstream as wdth+wght and core/tokens.css:58 repeats it, but
+// fontkit reports ONE axis on the vendored subset and on all 19 others: the width axis did not
+// survive subsetting. A width ramp would therefore be a no-op on every face this engine ships.
+const wght = (n) => {
+  const v = Math.round(Math.max(100, Math.min(900, n)));
+  return { fontWeight: String(Math.round(v / 100) * 100), fontVariationSettings: `'wght' ${v}` };
+};
+
 export const CAP_STYLES = {
   // marker band draws behind the active word; earlier words keep their full band (a read trail).
   // 28% accent: even a near-white accent over the dark plate leaves white text at >= 4.9:1.
@@ -72,12 +88,12 @@ export const CAP_STYLES = {
   // inactive: the mix, never opacity, so it stays legible over the plate. A SPOKEN word is not an
   // upcoming one and this style used to render them identically, which is a karaoke with no memory:
   // it holds its weight at 700 and only dims to 88%, so the line reads as read-behind, live, ahead.
-  weightShift: withBlurb('the spoken word goes full ink at weight 800 with a small rise-and-settle bump, the rest hold weight 600 at a 76% text-mix', (u, active) => active
-    ? { fontWeight: '800', color: 'var(--text)',
+  weightShift: withBlurb('the spoken word RAMPS along the font\'s own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix', (u, active) => active
+    ? { ...wght(700 + 100 * Math.sin(Math.PI * clamp01(u))), color: 'var(--text)',
         transform: `scale(${(1 + 0.06 * Math.sin(Math.PI * clamp01(u))).toFixed(3)})` }
     : clamp01(u) > 0
-      ? { fontWeight: '700', color: 'color-mix(in srgb, var(--text) 88%, var(--bg))', transform: 'scale(1)' }
-      : { fontWeight: '600', color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(1)' }),
+      ? { ...wght(700), color: 'color-mix(in srgb, var(--text) 88%, var(--bg))', transform: 'scale(1)' }
+      : { ...wght(600), color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(1)' }),
 
   // clipWipe is LINE-level: applied to the accent overlay copy, driven by lineU(t, wins).
   clipWipe: withBlurb('LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time', (p) => ({ clipPath: `inset(0 ${((1 - clamp01(p)) * 100).toFixed(2)}% 0 0)` })),
@@ -245,6 +261,98 @@ export const CAP_STYLES = {
     : clamp01(u) > 0
       ? { color: 'color-mix(in srgb, var(--text) 88%, var(--bg))', transform: 'scale(0.96)' }
       : { color: 'color-mix(in srgb, var(--text) 76%, var(--bg))', transform: 'scale(0.90)' }),
+
+  // ── wave 5: three registers the market ships and this engine had no way to say ────────────────
+  // Chosen against the 15 above by REGISTER, not by name: a style earns a slot only if an author
+  // would reach for it INSTEAD of one we ship. The surface the accent is painted ON (glyph, not
+  // plate), the FOCUS channel, and a per-CHARACTER cascade that is not a typewriter. Everything
+  // else on the reference list turned out to be one of ours under a different name, or a look the
+  // contrast doctrine or the 14px plate pad cannot hold — see the rejected list in the report.
+
+  // KARAOKE THE WAY KARAOKE ACTUALLY LOOKS: the fill runs through the GLYPHS, not behind them.
+  // `highlight` and `pillKaraoke` both paint a shape under the ink; nothing here recoloured the ink
+  // itself, which is the one form every viewer already recognises. background-clip:text with a
+  // transparent color, so the gradient IS the letters.
+  // The body of the word is never the accent: the filled part is full `--text` and the unfilled part
+  // the same 76% mix every other style dims to, so this style's contrast is the plate's own text/bg
+  // pair. The accent is a 7%-wide sliver at the fill FRONT, which is where the eye already is and
+  // small enough that no theme's accent has to carry a contrast claim.
+  inkFill: withBlurb('the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself', (u) => {
+    const p = clamp01(u) * 100;
+    const front = Math.max(0, p - 7);
+    const ink = 'var(--text)';
+    const dim = 'color-mix(in srgb, var(--text) 76%, var(--bg))';
+    return {
+      color: 'transparent',
+      backgroundImage: `linear-gradient(90deg, ${ink} 0 ${front.toFixed(1)}%, var(--accent) ${front.toFixed(1)}% ${p.toFixed(1)}%, ${dim} ${p.toFixed(1)}% 100%)`,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '100% 100%',
+      backgroundPosition: '0 0',
+      WebkitBackgroundClip: 'text',
+      backgroundClip: 'text',
+    };
+  }),
+
+  // A RACK FOCUS. The engine had no style that used the focus channel at all: every one of the 15
+  // says its state with ink, light, size, position or presence. An upcoming word is OUT OF FOCUS
+  // rather than faint, which is the same argument flipUp and typeOn make with rotation and with
+  // visibility — the state is carried by something that is not contrast.
+  // Blur is bounded at 2.8px so the spread stays well inside the plate's 14px pad, and it is not a
+  // contrast dodge: the ink still dims by the same colour mix, the blur is the second channel on top.
+  focusPull: withBlurb('a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size', (u, active) => {
+    const p = clamp01(u);
+    const blur = active ? 2.8 * (1 - p) ** 2 : p > 0 ? 1 : 2.8;
+    return {
+      color: active ? 'var(--text)'
+        : p > 0 ? 'color-mix(in srgb, var(--text) 88%, var(--bg))'
+        : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+      filter: `blur(${blur.toFixed(2)}px)`,
+    };
+  }),
+
+  // The letters of the WHOLE LINE rise into place, one per character, in the order they are spoken
+  // (`unit:'char'` below). The second char-level style, and deliberately not a second typewriter:
+  // `typeOn` cuts each letter on hard from hidden, so the line assembles out of nothing; here the
+  // whole line is present from the first frame and each letter travels the last 12px into its slot.
+  // 12px, not wordSlide's 26: that style owns the plate alone in `mode:'one'`, this one is inside a
+  // full line and the travel has to stay within the plate's 14px pad.
+  // `translateY` only, for the reason kineticSlam records about tracking: a transform cannot move
+  // its neighbours, so a per-character offset can never re-wrap the line mid-word.
+  letterRise: withBlurb('the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing', (u, active) => {
+    const p = clamp01(u);
+    return {
+      color: active ? 'var(--text)'
+        : p > 0 ? 'var(--text)'
+        : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+      transform: `translateY(${(12 * (1 - p) ** 3).toFixed(2)}px)`,
+    };
+  }),
+
+  // THE AXIS AS THE MOTION, not as a state. `weightShift` uses weight to say WHICH word is being
+  // spoken and swings 200 units to say it; this rides the whole axis, 250 to 900 and back, so the
+  // line has a crest of weight travelling through it. That is the one thing a static font cannot
+  // fake at all, and the closest thing this engine has to what current practice calls kinetic
+  // typography: a continuously interpolated outline rather than a slide or a fade.
+  // The read state is carried by INK, deliberately, because the crest returns to where it started
+  // and would say nothing at u=1 — the same argument waveRide makes about its half-sine.
+  // A caveat an author should know before choosing it: weight is a LAYOUT property whichever channel
+  // writes it, so the words after the current one shift as the crest passes. On a centred caption
+  // plate that reads as the line breathing. It is the cost of the register, not a bug, and it is why
+  // this is one style rather than a modifier available to all eighteen.
+  weightWave: withBlurb('a crest of WEIGHT travels the line, each word riding the font\'s wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes', (u, active) => {
+    const p = clamp01(u);
+    return {
+      // The crest FLOOR is the spoken weight, not the upcoming one. Riding 250 to 900 looked better
+      // in the abstract and was wrong on the frame: sin() returns to 0 at both ends of a word window,
+      // so the word being spoken went LIGHTER than the words already read for a frame either side of
+      // every onset, and the line's read order inverted at exactly the moment it should be clearest.
+      // 500 to 900 keeps active >= spoken > upcoming at every u and still swings 400 units.
+      ...wght(active ? 500 + 400 * Math.sin(Math.PI * p) : p > 0 ? 500 : 250),
+      color: active ? 'var(--text)'
+        : p > 0 ? 'color-mix(in srgb, var(--text) 88%, var(--bg))'
+        : 'color-mix(in srgb, var(--text) 76%, var(--bg))',
+    };
+  }),
 };
 
 export const CAP_STYLE_NAMES = Object.keys(CAP_STYLES);
@@ -268,6 +376,7 @@ export const CAP_STYLE_SHAPE = {
   wordFlash: { mode: 'one' },
   wordSlide: { mode: 'one' },
   typeOn: { unit: 'char' },
+  letterRise: { unit: 'char' },
 };
 export const capShape = (name) => CAP_STYLE_SHAPE[name] || { unit: 'word', mode: 'line' };
 

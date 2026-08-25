@@ -28,6 +28,11 @@ export const TOKENS = {
   // `accentInk`, which is the accent used AS text — the names invite confusion and five themes already
   // override `--accent-ink`, which is why this does not reuse that name.
   onAccent: 'var(--on-accent)',
+  // The same answer for the three STATUS fills. Same reason, same computation, same file: core/boot.js
+  // picks white or black per theme off that theme's own `--up` / `--down` / `--warn`. `--warn` was the
+  // worst of them — `badge` painted `--text` on amber, which is dark only on a LIGHT theme and measured
+  // 1.87:1 on higgsfield, 1.93:1 on linear.
+  onUp: 'var(--on-up)', onDown: 'var(--on-down)', onWarn: 'var(--on-warn)',
   green: 'var(--up)', greenBright: 'var(--up)',
   greenSoft: 'color-mix(in srgb, var(--up) 16%, transparent)',
   down: 'var(--down)',
@@ -104,10 +109,24 @@ export const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
 // did, and 25 of 38 themes could not (higgsfield's lime: 1.16:1).
 //
 // A var still cannot be judged at build time — it resolves in the browser — so the answer is not to
-// measure it here but to defer to the one that was already computed: core/boot.js writes --on-accent
-// per theme from that theme's own accent.
+// measure it here but to defer to the one that was already computed: core/boot.js writes --on-accent,
+// --on-up, --on-down and --on-warn per theme from that theme's own colours.
+//
+// THE ACCENT WAS NOT THE ONLY FILL. Every argument above applies verbatim to `--up`, `--down` and
+// `--warn`, and the guard missed all three the same way: white came back for each, 1.25:1 on
+// higgsfield's `--up` and 2.50:1 on linear's. `badge` had to hand-special-case `warn` to `--text` and
+// documented, honestly, that it fixed nothing on a dark theme. One table, so a fill and its ink cannot
+// drift apart.
+const ON_TOKEN = {
+  __proto__: null,   // a colour string must never reach Object.prototype ('constructor' is not an ink)
+  [TOKENS.accent]: TOKENS.onAccent,
+  [TOKENS.green]: TOKENS.onUp,          // greenBright is the same var, so it maps by the same key
+  [TOKENS.down]: TOKENS.onDown,
+  [TOKENS.warn]: TOKENS.onWarn,
+};
 export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
-  if (bg === TOKENS.accent) return TOKENS.onAccent;
+  const on = ON_TOKEN[bg];
+  if (on) return on;
   const m = /^#([0-9a-f]{6})$/i.exec(String(bg || ''));
   if (!m) return light;
   const n = parseInt(m[1], 16);

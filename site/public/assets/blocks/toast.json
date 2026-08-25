@@ -47,7 +47,10 @@
               "weight": 700,
               "text": "✓",
               "size": 17,
-              "color": "var(--bg)"
+              "color": "var(--bg)",
+              "css": {
+                "paddingTop": "6px"
+              }
             }
           ]
         },
@@ -57,14 +60,20 @@
           "text": "Video rendered to out.mp4",
           "size": 20,
           "color": "var(--bg)",
-          "grow": 1
+          "grow": 1,
+          "css": {
+            "paddingTop": "6px"
+          }
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Open",
           "size": 17,
-          "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))"
+          "color": "color-mix(in srgb, var(--accent) 40%, var(--bg))",
+          "css": {
+            "paddingTop": "6px"
+          }
         }
       ]
     }

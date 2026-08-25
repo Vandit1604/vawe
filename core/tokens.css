@@ -55,7 +55,12 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 @font-face { font-family: 'Berkeley Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/assets/fonts/space-500.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/assets/fonts/space-700.woff2') format('woff2'); }
-/* Anybody — the vawe landing page's actual sans (next/font: Anybody, wdth+wght axes). Variable TTF from google/fonts. */
+/* Anybody — the vawe landing page's actual sans. Variable TTF from google/fonts.
+   AXES: `wght` ONLY. Upstream Anybody ships wdth+wght and this line used to claim both, but the
+   SUBSET WE VENDOR HAS NO wdth — fontkit reports one axis on our woff2, and on all 19 other
+   variable faces we ship. A width ramp is therefore a no-op here, silently: CSS accepts
+   `font-variation-settings: 'wdth' 75`, the face has nothing to vary, and the frame renders
+   unchanged with nothing said. Re-subset before writing anything that reaches for wdth. */
 @font-face { font-family: 'Anybody'; font-weight: 100 900; font-stretch: 75% 125%; font-display: block; src: url('/assets/fonts/Anybody.woff2') format('woff2'); }
 /* Manrope + Fraunces — tpot.cc's real pair (next/font). Manrope 600 carries the headline at -2px
    tracking; Fraunces is the site's serif accent (the event-date numerals). Variable, OFL. */

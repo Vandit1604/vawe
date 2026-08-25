@@ -459,27 +459,17 @@ export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur =
 // badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
 export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
   const ac = toneColor(tone);
-  // White on the amber fill measures 2.05:1. Ink on it measures 8.86:1, and dark-on-amber is what a
-  // warning chip looks like anyway — the fix keeps the brand colour and changes the text.
+  // EVERY TONE IS A CSS VAR, so `onColor` cannot grade it and used to return white for all four:
+  // 2.05:1 on the amber `warn` fill, and `make audit` failed the badge HARD on it. The stopgap here
+  // was `--text` on amber, which is dark only on a LIGHT theme — on linear and higgsfield `--text` is
+  // nearly white and it still measured 1.9:1, no better than the white it replaced.
   //
-  // AND IT HAD TO BE SPELLED OUT, because `onColor` alone never made that swap. Every tone is a CSS
-  // var, a string the browser resolves, so the hex branch misses it and white comes back for all
-  // four. That answer is right for three of them — `up` and `down` are mid-dark by definition, and
-  // `accent` returns the per-theme `--on-accent` core/boot.js computes — and wrong for `warn`, which
-  // is amber in every theme that does not override it. `make audit` failed the badge HARD on it at
-  // 2.1:1, and this line lifts that to 8.9:1 on a light theme.
-  //
-  // KNOW WHAT THIS DOES NOT FIX, because the honest half matters more than the half that worked.
-  // `--text` is dark only on a LIGHT theme; on linear and higgsfield it is nearly white, so amber
-  // still measures 1.9:1 there — no better and no worse than the white it replaced. Nothing in the
-  // guaranteed palette is dark on every theme, and white-or-black chosen per fill is the only rule
-  // that clears all 38 (measured across every theme x tone: best-of-the-two bottoms out at 4.69:1,
-  // black alone fails 40 of 152 pairs and white alone fails a different 48). Making that choice needs
-  // the RESOLVED colour, which a factory never has, which is exactly why `--on-accent` is computed in
-  // core/boot.js and not here. The repair is three more lines beside it — `--on-up`, `--on-down`,
-  // `--on-warn` off the same `ensureContrast` — and `onColor` then deferring to them the way it
-  // already defers for the accent. That is a core change, so it is reported rather than smuggled in.
-  const onAc = ac === TOKENS.warn ? TOKENS.ink : onColor(ac);
+  // The repair it asked for now exists. core/boot.js writes `--on-up`, `--on-down` and `--on-warn`
+  // beside `--on-accent`, each white-or-black chosen per theme off that theme's own fill — the only
+  // rule that clears all 152 theme x tone pairs (floor 4.69:1; white alone fails 112, black alone a
+  // different 40). `onColor` defers to them, so all four tones are answered by one call and this block
+  // holds no colour opinion of its own. Amber now reads 8.9:1 on every theme, dark ones included.
+  const onAc = onColor(ac);
   // a shield STAMPS IN, and its value chip lands a beat later — the whole motion of a status token.
   // Nothing more: over-animating a static chip is how a registry stops reading as a vocabulary.
   // THEME TOKENS, NOT LITERALS. The plate was `#3A3A38` and its text `#fff`, so the block rendered a

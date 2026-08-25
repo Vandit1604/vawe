@@ -266,9 +266,9 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     case 'boldBlock':
       return [
         { type: 'group', x, y, pad: '12px 16px', bg: accent, ...HARD, ...wipeIn,
-          children: [text({ text: name, ...N, color: '#fff' })] },
+          children: [text({ text: name, ...N, color: T.onAccent })] },
         role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '8px 16px', bg: T.ink, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, color: '#fff' })] } : null,
+          ...wipeIn, start: s2, children: [text({ text: role, ...R, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // BILD: the German tabloid front page. Caps, reversed out of accent, tracked TIGHT and set huge.
@@ -276,11 +276,11 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     case 'bild':
       return [
         { type: 'group', x, y, pad: '8px 16px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
-          text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: '#fff' }),
+          text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: T.onAccent }),
         ] },
         role ? { type: 'group', x: r2(x + 14), y: r2(y + 84), pad: '8px 16px', bg: T.ink, ...HARD, ...wipeIn,
           start: s2, enterDur: 0.3, children: [
-            text({ text: String(role).toUpperCase(), size: 22, weight: 700, tracking: '0.04em', color: '#fff' }),
+            text({ text: String(role).toUpperCase(), size: 22, weight: 700, tracking: '0.04em', color: T.onAccent }),
           ] } : null,
       ].filter(Boolean);
 
@@ -348,9 +348,12 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
     case 'colourBlock':
       return [
         { type: 'group', x, y, pad: '12px 24px', bg: T.ink, ...HARD, ...wipeIn,
-          children: [text({ text: name, ...N, color: '#fff' })] },
+          children: [text({ text: name, ...N, color: T.onAccent })] },
+        // Nine name-card sites here painted a literal '#fff' on an accent fill. --on-accent has
+        // existed since this morning and these never adopted it; on higgsfield's acid lime that
+        // is white-on-lime at 1.16:1. The token knows what reads on the theme's own accent.
         role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 16px', bg: accent, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
+          ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // A plate over a deliberately shorter accent bar. Reads as a mark rather than a plate.
@@ -359,7 +362,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: T.ink })] },
         role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '6px 24px', bg: accent, ...HARD, ...wipeIn,
-          start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: '#fff' })] } : null,
+          start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // A ticker bar: accent chip, then the line. `role` is the chip (LIVE / BREAKING / 09:41), which is
@@ -369,9 +372,9 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         ...wipeIn, children: [
           { type: 'group', bg: accent, pad: '12px 16px', items: 'center',
             children: [text({ text: String(role || 'LIVE').toUpperCase(), font: 'mono', size: 18,
-              weight: 700, tracking: '0.08em', color: '#fff' })] },
+              weight: 700, tracking: '0.08em', color: T.onAccent })] },
           { type: 'group', pad: '12px 24px', items: 'center',
-            children: [text({ text: name, size: 30, weight: 600, color: '#fff' })] },
+            children: [text({ text: name, size: 30, weight: 600, color: T.onAccent })] },
         ] }];
 
     default:

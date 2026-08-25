@@ -36,14 +36,14 @@
           "weight": 500,
           "text": "!",
           "size": 20,
-          "color": "#fff"
+          "color": "var(--on-warn)"
         },
         {
           "type": "text",
           "weight": 600,
           "text": "Söhne is licensed, do not commit",
           "size": 20,
-          "color": "#fff",
+          "color": "var(--on-warn)",
           "grow": 1
         }
       ]

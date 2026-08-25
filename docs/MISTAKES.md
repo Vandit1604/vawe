@@ -13654,3 +13654,31 @@ Naming which is which is the point — an unlisted registry copy is exactly how 
 **Known limit, stated rather than hidden:** the check compares SORTED SETS, so a hand-reordered enum
 still reads as clean while `--write` would rewrite it. `lib-test` pins order for five enums only.
 
+## #443 — a font axis the docs promised and the shipped subset does not have
+
+**What.** `core/tokens.css:58` described Anybody as carrying `wdth+wght` axes. Upstream it does. **The
+subset we vendor carries `wght` only**, and fontkit reports the same for all 19 other variable faces we
+ship: not one keeps a `wdth` axis.
+
+**Why it matters more than a stale comment.** `font-variation-settings: 'wdth' 75` on a face with no
+`wdth` axis is not an error. CSS accepts it, the face has nothing to vary, the frame renders unchanged
+and nothing is said. A width ramp built on that line would have been a feature that does nothing —
+found only because an agent was told to VERIFY the axis before building on it, and did.
+
+**And the inverse trap, which is live.** Of 31 vendored faces, **20 are variable and 11 are static**
+(CourierPrime, both InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed, the `inter-*` and
+`space-*` subsets). On a static face `font-variation-settings` is silently ignored. So the new
+`weightWave` caption writes BOTH channels — the axis for variable faces and `fontWeight` for the rest —
+so a static face degrades to its nearest cut rather than to a dead still.
+
+**Fix.** The comment now states what the file actually holds and says to re-subset before reaching for
+`wdth`. The measurement is one command, and it is the only trustworthy source:
+
+```
+node -e "const fk=require('fontkit');console.log(Object.keys(fk.openSync('assets/fonts/Anybody.woff2').variationAxes||{}))"
+```
+
+**The class.** A capability documented from UPSTREAM rather than from the artifact we ship. The same
+shape as #426, where a documented `curl` wrote a zero-byte file that passed every path check: the claim
+was true of the source and false of the thing on disk.
+

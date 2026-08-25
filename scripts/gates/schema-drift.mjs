@@ -30,6 +30,7 @@ import { SHADER_FX } from '../../core/stings.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SPECTACLE_DEVICES } from '../../core/knobs.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
+import { CAP_STYLE_NAMES } from '../../core/captions.js';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -110,6 +111,10 @@ const OWNED = [
   { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
   { path: 'layers.item.cutTiming', want: Object.keys(TIMINGS),                 src: 'core/cuts.js TIMINGS (via TIMING_REGISTRY)' },
   { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
+  // MISTAKES #400 logged the schema enum as a hand-written second copy of the caption registry and
+  // left lib-test comparing the two. Comparing is not owning: the gate said "they differ" and the
+  // author still hand-edited schema.json. The registry owns it here, so --write derives it.
+  { path: 'captionStyle',       want: CAP_STYLE_NAMES,                        src: 'core/captions.js CAP_STYLES' },
 ];
 
 // THE OWNED ENUMS ARE GENERATED TOO. Until now this table only COMPARED, so every registry that grew

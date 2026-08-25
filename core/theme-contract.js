@@ -11,8 +11,35 @@ export const REQUIRED = {
   gradientStops: 3,                        // bg presets + --g0/1/2 consumers
 };
 
-// The floor an override has to clear. WCAG AA for body text; `--on-accent` exists to be READ.
-export const ON_ACCENT_MIN = 4.5;
+// The floor an override has to clear. WCAG AA for body text; an `--on-*` ink exists to be READ.
+export const ON_INK_MIN = 4.5;
+
+// `palette.warn` is NOT in REQUIRED.palette — boot.js defaults it, because no brand has to hold an
+// opinion about amber. The default lives HERE rather than in boot.js so the writer and the validator
+// grade `palette.onWarn` against the same fill; a second copy in boot.js is a second thing to drift.
+export const WARN_DEFAULT = '#F6A417';
+
+// THE STATUS FILLS A BLOCK PUTS TEXT ON, and the palette key that overrides the ink for each.
+// `--on-accent` was the first, and the hole it named is not specific to the accent: `--up`, `--down`
+// and `--warn` are fills too, and white on `--up` measures 2.5:1 on linear and 1.25:1 on higgsfield.
+// A block only ever holds `var(--up)`, a string with no value until the browser resolves it, so the
+// choice cannot be made in a factory. It is made here, once per theme, from the theme's own colour.
+// One table so nothing enumerates these four twice: boot.js writes off it, themeErrors grades off it.
+export const ON_INK = [
+  { on: 'onAccent', fill: 'accent', cssVar: '--on-accent' },
+  { on: 'onUp', fill: 'up', cssVar: '--on-up' },
+  { on: 'onDown', fill: 'down', cssVar: '--on-down' },
+  { on: 'onWarn', fill: 'warn', cssVar: '--on-warn', fallback: WARN_DEFAULT },
+];
+
+// ON_INK IS OUR OWN DATA, and that is the one place a wrong name can live forever: no author will ever
+// type `fill: 'upp'` and report it. So the table is checked against the contract at IMPORT, and neither
+// the writer nor the validator below ever has to answer a wrong name with a default — they answer only
+// ABSENCE, which is the line scripts/gates/silent-fallback.mjs draws.
+for (const e of ON_INK) {
+  if (e.fallback == null && !REQUIRED.palette.includes(e.fill))
+    throw new Error(`ON_INK entry "${e.on}" names palette.${e.fill}, which is neither in REQUIRED.palette nor defaulted`);
+}
 
 // themeErrors(theme) → [] when complete, else a list of missing keys (human-readable).
 // THE COLOUR CHECK IS INJECTED, NOT IMPORTED. This module is deliberately pure data plus one pure
@@ -37,14 +64,17 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
     if (P[k] == null || P[k] === '') { errs.push(`palette.${k}`); continue; }
     if (parseColor && parseColor(P[k]) == null) errs.push(`palette.${k} is not a colour (${JSON.stringify(P[k])})`);
   }
-  // `palette.onAccent` is OPTIONAL — boot.js computes one from the accent for every theme, and this is
-  // only the escape hatch for a brand that holds its own opinion. An opinion that cannot be read is not
-  // an opinion, it is the defect the token was added to remove, so an override is graded where it is
-  // WRITTEN rather than shipped as unreadable text on a coloured button.
-  if (P.onAccent != null && P.onAccent !== '') {
-    if (parseColor && parseColor(P.onAccent) == null) errs.push(`palette.onAccent is not a colour (${JSON.stringify(P.onAccent)})`);
-    else if (contrastRatio && contrastRatio(P.onAccent, P.accent) < ON_ACCENT_MIN)
-      errs.push(`palette.onAccent (${P.onAccent}) reads ${contrastRatio(P.onAccent, P.accent).toFixed(2)}:1 on palette.accent (${P.accent}) — needs ${ON_ACCENT_MIN}:1. Drop it and the engine computes a readable one.`);
+  // EVERY `palette.on*` IS OPTIONAL — boot.js computes one per theme from that theme's own fill, and
+  // these are only the escape hatch for a brand that holds its own opinion. An opinion that cannot be
+  // read is not an opinion, it is the defect the token was added to remove, so an override is graded
+  // where it is WRITTEN rather than shipped as unreadable text on a coloured chip.
+  for (const { on, fill, fallback } of ON_INK) {
+    if (P[on] == null || P[on] === '') continue;
+    const bg = Object.hasOwn(P, fill) ? P[fill] : fallback;   // `fill` is contract-checked at import (see ON_INK)
+    if (parseColor && parseColor(P[on]) == null) { errs.push(`palette.${on} is not a colour (${JSON.stringify(P[on])})`); continue; }
+    if (bg == null || (parseColor && parseColor(bg) == null)) continue;   // the fill itself is already reported above
+    if (contrastRatio && contrastRatio(P[on], bg) < ON_INK_MIN)
+      errs.push(`palette.${on} (${P[on]}) reads ${contrastRatio(P[on], bg).toFixed(2)}:1 on palette.${fill} (${bg}) — needs ${ON_INK_MIN}:1. Drop it and the engine computes a readable one.`);
   }
   for (const k of REQUIRED.type) if (typeof T[k] !== 'string' || !T[k]) errs.push(`type.${k}`);
   if (!Array.isArray(theme.gradient) || theme.gradient.length < REQUIRED.gradientStops)

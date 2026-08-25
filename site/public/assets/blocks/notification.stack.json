@@ -49,7 +49,7 @@
               "weight": 700,
               "text": "✓",
               "size": 17,
-              "color": "#fff"
+              "color": "var(--on-up)"
             }
           ]
         },
@@ -177,7 +177,7 @@
               "weight": 700,
               "text": "↓",
               "size": 17,
-              "color": "#fff"
+              "color": "var(--on-up)"
             }
           ]
         },
