@@ -18,6 +18,37 @@ video starts ahead.
 
 ## The pipeline — how to study any reference
 
+0. **Run `make study`, and get the structure for free.** `make study VIDEO=refs/ref.mp4 NAME=ref` is
+   the film-side twin of `make sections`. It probes the file, detects the shot boundaries, cuts a
+   contact sheet with the IN, MID and OUT frame of every shot, and writes `refs/<name>/study.md` for you
+   to fill in. Everything in step 1 below it does for you; read step 1 anyway, because it says WHY the
+   sheet samples three frames per shot and not one.
+
+   **What it measures, and where that stops.** Duration, resolution, fps and the shot list come off the
+   file. What is on screen, what moves, what triggers the next shot and what sound sits there do not,
+   so `study.md` ships those four columns empty and you write them. A tool that guessed them would hand
+   you a confident wrong answer dressed as a measurement.
+
+   **Shot detection is evidence, not a verdict.** It reads ffmpeg's per-frame scene score, so a HARD cut
+   is exact (a synthetic three-colour film returns 2.00s and 4.00s to the frame) and a DISSOLVE scores
+   almost nothing. `out/creed.mp4` peaks at 0.12 against a 0.30 default and therefore returns no cuts at
+   all; `out/motion-reel.mp4` authors 14 cuts and the detector finds 3, because the rest cross-fade
+   between dark frames. When it finds nothing it says so and falls back to a fixed sample, and it never
+   calls that a cut list. When near-misses sit just under the threshold it names them and tells you what
+   to re-run. **Read the sheet before you trust the numbers.**
+
+   **`refs/` is gitignored, and that is the boundary.** You are extracting the reference's grammar: shot
+   length, cut rate, what carries across a junction. Throw away its UI, its copy and its colours. Never
+   put a reference's frames or marks in a film we publish (`../../CLAUDE.md`, "Never embed copyrighted
+   material"). The published method this follows cut a 31s film to 15s by REMOVING shots, not by
+   speeding them up, and `study.md` asks you to mark each row KEEP or CUT for that reason.
+
+   **It feeds the storyboard.** `study.md` ends with three questions whose answers are storyboard fields:
+   `pace:` (from the measured median shot), `threads:`/`object:` (what survives a cut here, then OUR
+   version of it) and `spectacle:` (which shot is the loud one). Answer them, then write
+   `formats/scene/<topic>.storyboard.md` and run `storyboard-check`. See
+   [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md).
+
 1. **Map the beats.** `ffmpeg -vf "fps=3,scale=…,drawtext=…timestamp…,tile=…"` → a labelled contact
    sheet. Read it: one beat per idea, note the copy, the layout, the palette per beat.
    **You will sample the middle of each beat, and the middle is the one frame that hides everything you
