@@ -2,8 +2,9 @@
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
-  R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
+  R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows, TONE_NAMES,
+  tint, TINT, SHADOW_CARD, capCss, labelCss, numCss,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -11,6 +12,20 @@ import {
 export const CATEGORY = 'Interface';
 
 const T = TOKENS;
+
+// onInk(c) — a status colour used as TEXT, made readable on any theme's card.
+//
+// THE GAP THIS FILLS. `onColor` answers "what ink reads ON this fill", and for the accent it now
+// defers to the `--on-accent` token core/boot.js computes per theme. There is no token for the other
+// direction — a status colour used as the GLYPH — and none of `--accent`, `--up` or `--down` is
+// guaranteed to clear 4.5:1 against a card: `--up` measured 2.5:1 on linear and 1.3:1 on higgsfield's
+// lime, both HARD `make audit` failures, and `onColor` cannot see it because a `var()` has no value
+// at build time. `deltaChip` in kit.mjs already solved this and only for itself. Mixing toward
+// `--text` raises contrast in BOTH directions — it brightens the hue on a dark theme and deepens it
+// on a light one — so a block never has to know which kind of theme it is in.
+// This belongs in kit.mjs beside `tint`; it is duplicated here only because the kit is another
+// agent's file this pass.
+const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // browserFrame — window chrome (traffic dots + URL bar). Draw content on top via other layers.
@@ -21,15 +36,20 @@ const T = TOKENS;
 export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', children = [], start = 0, dur = 4 } = {}) {
   return [{
     type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    bg: T.card, radius: R.card, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    bg: T.card, radius: R.card, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
-      { type: 'group', layout: 'row', items: 'center', gap: 8, pad: '12px 16px', children: [
-        ...['#FF5F57', '#FEBC2E', '#28C840'].map((c) => box({ w: 12, h: 12, radius: 100, bg: c })),
+      { type: 'group', layout: 'row', items: 'center', gap: SPACE.xs, pad: `${SPACE.sm}px ${SPACE.md}px`, children: [
+        ...['#FF5F57', '#FEBC2E', '#28C840'].map((c) => box({ w: 12, h: 12, radius: R.pill, bg: c })),
         { type: 'group', grow: 1, layout: 'row', justify: 'center', children: [
-          { type: 'group', bg: T.surface, radius: 100, pad: '6px 16px', children: [text({ text: url, font: 'mono', size: 18, color: T.sub })] },
+          // A URL is machine text, so it stays mono — that is the one place mono is right for a word.
+          { type: 'group', bg: T.surface, radius: R.pill, pad: `${SPACE.snug}px ${SPACE.md}px`, children: [text({ text: url, font: 'mono', size: TYPE.body, color: T.sub })] },
         ] },
       ] },
-      ...(children.length ? [{ type: 'group', grow: 1, layout: 'column', items: 'stretch', pad: '0 16px 16px', children }] : []),
+      // The chrome row is separated from the content by a HAIRLINE, the register's own surface
+      // boundary. A one-px box, not a `border` shorthand: `el.style.border` takes the WHOLE box, so
+      // a bottom-only rule written there is invalid CSS the browser drops without a word.
+      ...(children.length ? [box({ h: 1, bg: T.hair }),
+        { type: 'group', grow: 1, layout: 'column', items: 'stretch', pad: `${SPACE.md}px`, children }] : []),
     ],
   }];
 }
@@ -38,7 +58,7 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 // pillRow — a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {
   // the chips POP IN one after another — a tag row filling, not a slab sliding up
-  return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: 8, items: 'center',
+  return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: SPACE.xs, items: 'center',
     start, duration: dur, anim: 'fade', enterDur: 0.2, children: items.map((p, i) => ({
       ...pill(p, fg, bg), ...stagger(i, { step: 0.08, delay: 0.1, anim: 'pop', enterDur: 0.26 }) })) }];
 }
@@ -62,19 +82,21 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
     });
   }
   title = title ?? message; body = body ?? desc;
+  // 26/TYPE.body, not 22/14: `make audit` fails any text under 14.04px as unreadable, so the glyph
+  // that says WHAT happened was the one part of the alert nobody could read. The dot grows to fit it.
   const dot = icon
-    ? box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: String(icon), size: 14, weight: 700, color: onColor(accent) })] })
-    : box({ w: 12, h: 12, radius: 100, bg: accent });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 12, pad: 16,
+    ? box({ w: 26, h: 26, radius: R.pill, bg: accent, layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: String(icon), size: TYPE.body, weight: 700, color: onColor(accent) })] })
+    : box({ w: 12, h: 12, radius: R.pill, bg: accent });
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.sm, pad: SPACE.md,
     // a notification ARRIVES FROM THE EDGE and leaves the way it came — the short, correct entrance
     // for a chip. Nothing inside it should perform; it is one small statement.
-    ...cardChrome({ elevation: 2, anim: 'slide-right' }), out: 'slide-right',
+    ...cardChrome({ elevation: E.card, anim: 'slide-right' }), out: 'slide-right',
     start, duration: dur, enterDur: 0.4, exitDur: 0.3, children: [
       dot,
-      { type: 'group', layout: 'column', gap: 6, items: 'flex-start', grow: 1, children: [
-        text({ text: title, size: 22, weight: 700, color: T.ink }),
-        body && text({ text: body, size: 18, color: T.sub }),
+      { type: 'group', layout: 'column', gap: SPACE.snug, items: 'flex-start', grow: 1, children: [
+        text({ text: title, size: TYPE.lead, weight: 700, color: T.ink }),
+        body && text({ text: body, size: TYPE.body, color: T.sub }),
       ].filter(Boolean) },
     ] }];
 }
@@ -85,10 +107,14 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
   const ac = toneColor(tone);
   // the strip WIPES OPEN from its leading rule, then the message reads in — the short entrance a
   // status strip is for (a plate arrives edge-first; it does not fly)
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 16, pad: '16px 24px',
-    bg: T.surface, radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
-      box({ w: 4, h: 30, radius: 0, bg: ac }),
-      text({ text: msg, size: 22, weight: 500, color: T.ink, delay: 0.2, anim: 'fade', enterDur: 0.28 }),
+  // THE STRIP IS TINTED IN ITS OWN TONE, not painted on the neutral `--surface-2`. A status strip
+  // whose only coloured mark is a 4px rule reads as a grey box with a stripe: the tone has to be in
+  // the GROUND for the strip to say anything before it is read. Same one-hue-at-two-weights idiom the
+  // data family uses — solid rule, soft fill, one colour.
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.md, pad: `${SPACE.md}px ${SPACE.lg}px`,
+    bg: tint(ac, TINT.chip), radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
+      box({ w: 4, h: 30, radius: R.none, bg: ac }),
+      text({ text: msg, size: TYPE.base, weight: 500, color: T.ink, delay: 0.2, anim: 'fade', enterDur: 0.28 }),
     ] }];
 }
 
@@ -101,14 +127,22 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
   start = 0, dur = 4 } = {}) {
   // the notch is a PROPORTION of the device, not a fixed 116px — at the catalog's w:230 that constant
   // covered more than half the screen. 0.39 / 0.087 of w reproduce the shipped look at w:300.
-  const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: 100, bg: '#0A0A0A' })];
-  if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: '6px 4px 0',
-    children: [text({ text: time, size: Math.round(w * 0.045), weight: 600, color: T.ink }),
-               text({ text: '▮▮▮', size: Math.round(w * 0.038), color: T.dim })] });
-  if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: 8, pad: '8px 0 0', children });
-  return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 8,
-    bg: '#0A0A0A', radius: 100, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [{ type: 'group', grow: 1, bg: T.card, radius: 100, layout: 'column', items: 'center', pad: 12,
+  const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: R.pill, bg: '#0A0A0A' })];
+  // The status glyphs are `--text-2`, never `--dim`: `--dim` is the de-emphasised CHROME role and
+  // measures 2.6:1 on higgsfield, which `make audit` fails HARD. Quiet is a colour; unread is a bug.
+  // THE STATUS TYPE IS PROPORTIONAL UNTIL IT STOPS BEING READABLE, then it floors. At the catalog's
+  // own w:230 the clock came out 10px and the indicator 9px, and `make audit` fails anything under
+  // 14.04px as unreadable — so did the DEFAULT w:300, at 13.5px. Below about w:380 a phone prop
+  // cannot be both proportional and legible, and legible wins: a status bar nobody can read is not
+  // depicting a phone in use, it is depicting a smudge.
+  const statusSize = (k) => Math.max(TYPE.body, Math.round(w * k));
+  if (status) screen.push({ type: 'group', w: w - 44, layout: 'row', items: 'center', justify: 'space-between', pad: `${SPACE.snug}px ${SPACE.tight}px 0`,
+    children: [text({ text: time, size: statusSize(0.045), weight: 600, color: T.ink }),
+               text({ text: '▮▮▮', size: statusSize(0.038), color: T.sub })] });
+  if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: SPACE.xs, pad: `${SPACE.xs}px 0 0`, children });
+  return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: SPACE.xs,
+    bg: '#0A0A0A', radius: R.pill, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [{ type: 'group', grow: 1, bg: T.card, radius: R.pill, layout: 'column', items: 'center', pad: SPACE.sm,
       children: screen }] }];
 }
 
@@ -147,24 +181,26 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
   // the two rows being metrically identical, the lit label drifted out of its own pill as the pill
   // travelled — a bold half-word sticking out of a white box. Colour carries the state; the pill
   // carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
+  // A tab's icon and its label are both WORDS-side, so both are sans and both come from `labelCss`
+  // rather than a hand-written `font:` shorthand — that is what keeps this html block on the same
+  // type scale as the native ones. The inactive icon was `--dim` (2.6:1 on higgsfield, a HARD audit
+  // failure); it is `--text-2` now, which is the muted TEXT role and clears 4.5:1 on every theme.
   const cell = (t, activeStyle) => `<div style="width:${tabW}px;height:${rowH}px;flex:none;display:flex;`
     + `flex-direction:column;align-items:center;justify-content:center;gap:2px">`
-    + (t.icon ? `<div style="font:400 ${withIcons ? 22 : 18}px var(--font-sans);line-height:1;`
-        + `color:${activeStyle ? T.accent : T.dim}">${t.icon}</div>` : '')
-    + `<div style="font:600 ${withIcons ? 15 : 18}px var(--font-sans);`
-    + `color:${activeStyle ? T.ink : T.sub};white-space:nowrap">${t.label || ''}</div></div>`;
+    + (t.icon ? `<div style="${labelCss({ size: withIcons ? TYPE.lead : TYPE.base, weight: 400, color: activeStyle ? T.accent : T.sub })};line-height:1">${t.icon}</div>` : '')
+    + `<div style="${labelCss({ size: withIcons ? TYPE.body : TYPE.base, weight: 600, color: activeStyle ? T.ink : T.sub })};white-space:nowrap">${t.label || ''}</div></div>`;
   const row = (activeStyle) => `<div style="display:flex;gap:${GAP}px;width:${innerW}px">`
     + items.map((t) => cell(t, activeStyle)).join('') + '</div>';
   const html = `<div style="position:relative;box-sizing:border-box;width:${w}px;height:${rowH + 2 * PAD}px;`
     + `background:${T.surface};border-radius:${R.tight}px">`
     // the lit pill, and the active-styled row clipped to it
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
-    + `border-radius:8px;background:${T.card};box-shadow:0 1px 2px color-mix(in srgb, var(--text) 14%, transparent);`
+    + `border-radius:${R.chip}px;background:${T.card};box-shadow:${SHADOW_CARD};`
     + `transform:translateX(${pos})"></div>`
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${innerW}px;height:${rowH}px;">`
     + row(false) + '</div>'
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
-    + `overflow:hidden;border-radius:8px;transform:translateX(${pos})">`
+    + `overflow:hidden;border-radius:${R.chip}px;transform:translateX(${pos})">`
     + `<div style="position:absolute;left:0;top:0;transform:translateX(calc(-1 * ${pos}))">${row(true)}</div>`
     + '</div></div>';
   return [{
@@ -183,17 +219,22 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
   // leaf child is handed to the clip driver: a nested group child is built and then never registered,
   // so it cannot carry its own timing. Both states are the SAME glyph in the SAME chip, the open one
   // simply unpainted, so a row does not resize at the moment it completes.
-  const CHIP = { text: '✓', size: 16, weight: 700, radius: 8, pad: '4px 6px' };
+  const CHIP = { text: '✓', size: TYPE.body, weight: 700, radius: R.chip, pad: `${SPACE.tight}px ${SPACE.snug}px` };
   const beat = (i, extra) => stagger(i, { step: 0.26, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, pad: 24,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, pad: SPACE.lg,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 12, children: [
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, children: [
       it.done
-        // ink ON a coloured fill: onColor picks legible text for whatever T.green resolves to, rather
-        // than assuming white always clears the bar (the badge fix showed white fails on some fills).
-        ? text({ ...CHIP, color: onColor(T.green), bg: T.green, border: '2px solid transparent', ...beat(i, { anim: 'pop', delay: 0.34 }) })
+        // A TINTED CHIP WITH A MIXED TICK, not a solid `--up` fill with white on it. `onColor` was
+        // called here believing it would pick a legible ink and it cannot: `--up` is a `var()`, so the
+        // hex branch misses and it returned '#fff' every time — 2.5:1 on linear, 1.3:1 on higgsfield's
+        // lime, HARD failures both. The tinted form is guaranteed on every theme AND is the register's
+        // own idiom: one hue at two weights, soft fill, solid mark.
+        ? text({ ...CHIP, color: onInk(T.green), bg: tint(T.green, TINT.chip), border: `2px solid ${tint(T.green, 30)}`, ...beat(i, { anim: 'pop', delay: 0.34 }) })
         : text({ ...CHIP, color: 'transparent', bg: T.card, border: `2px solid ${T.hair}`, ...beat(i, { anim: 'fade' }) }),
-      text({ text: it.text, size: 21, weight: 500, color: it.done ? T.dim : T.ink, ...beat(i) }),
+      // A completed row is `--text-2`, not `--dim`. Struck-through-quiet is a look; unreadable is a
+      // HARD `make audit` failure, and `--dim` measures 2.6:1 on higgsfield.
+      text({ text: it.text, size: TYPE.base, weight: 500, color: it.done ? T.sub : T.ink, ...beat(i) }),
     ] })) }];
 }
 
@@ -203,9 +244,16 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
   // populates. The timing rides the CELLS, not the row: only a leaf child is registered with the clip
   // driver, so a row wrapper cannot carry its own window. Every cell in a row shares one delay, so
   // the row still reads as a single arrival.
-  const cell = (t, head, beat) => text({ text: String(t), grow: 1, font: head ? 'mono' : 'sans', size: head ? 16 : 19, weight: head ? 600 : 500, color: head ? T.dim : T.ink, ...beat });
-  const row = (cells, head, beat = {}) => ({ type: 'group', layout: 'row', gap: 16, items: 'center', pad: '12px 0', children: cells.map((c) => cell(c, head, beat)) });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: '16px 24px',
+  // MONO CARRIES NUMBERS, SANS CARRIES WORDS, and this block had it backwards: the column HEADINGS
+  // ("Plan", "Seats") were set in mono and the cells under them in sans, which spends the one thing
+  // mono is for — a column of digits that lines up — on the one row that never holds a figure. A cell
+  // that is entirely numeric now gets the theme's tabular face; a heading is a word, so it is sans.
+  const NUMERIC = /^[-+]?[$€£]?[\d,]+(\.\d+)?%?$/;
+  const cell = (t, head, beat) => { const v = String(t); return text({ text: v, grow: 1,
+    font: head ? 'sans' : (NUMERIC.test(v.trim()) ? 'num' : 'sans'),
+    size: head ? TYPE.body : TYPE.base, weight: head ? 600 : 500, color: head ? T.sub : T.ink, ...beat }); };
+  const row = (cells, head, beat = {}) => ({ type: 'group', layout: 'row', gap: SPACE.md, items: 'center', pad: `${SPACE.sm}px 0`, children: cells.map((c) => cell(c, head, beat)) });
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: `${SPACE.md}px ${SPACE.lg}px`,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
     children: [row(cols, true), box({ h: 1, bg: T.hair }),
       ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }),
@@ -219,16 +267,20 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
   // LEAF (an empty text layer carrying the chip) because a nested group child is never registered
   // with the clip driver and so cannot be timed; the connecting rail stays static, as scaffolding.
   const beat = (i, extra) => stagger(i, { step: 0.3, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 24,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: SPACE.lg,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: 16, children: [
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: SPACE.md, children: [
       { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
-        text({ text: '', w: 14, h: 14, radius: 100, bg: it.done ? T.accent : T.hair, ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
+        // An unreached dot sits on a TINT of the accent, not on `--line`. `--line` is the BORDER
+        // colour: painting the rest of a sequence with it says "divider", not "step not yet taken" —
+        // the same correction the meters got when their tracks stopped being hairline-coloured.
+        text({ text: '', w: 14, h: 14, radius: R.pill, bg: it.done ? T.accent : tint(T.accent, TINT.track), ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
         i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
       ].filter(Boolean) },
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: '0 0 24px', children: [
-        text({ text: it.title, size: 20, weight: 600, color: T.ink, ...beat(i, { anim: 'slide-left', delay: 0.3 }) }),
-        it.meta && text({ text: it.meta, font: 'mono', size: 15, color: T.dim, ...beat(i, { anim: 'fade', delay: 0.36 }) }),
+      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: `0 0 ${SPACE.lg}px`, children: [
+        text({ text: it.title, size: TYPE.base, weight: 600, color: T.ink, ...beat(i, { anim: 'slide-left', delay: 0.3 }) }),
+        // The meta line is a date or a figure, so mono is right here. Its colour is not: `--dim` again.
+        it.meta && text({ text: it.meta, font: 'mono', size: TYPE.body, color: T.sub, ...beat(i, { anim: 'fade', delay: 0.36 }) }),
       ].filter(Boolean) },
     ] })) }];
 }
@@ -253,22 +305,35 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
   const pos = `(${from} + ${r2(to - from)} * var(--p, 1))`;
   const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
   const done = (i) => lit(i + 1);                                     // ...and passed
+  // A STEP NUMBER IS A FIGURE, so all three copies of it are set in the theme's tabular face via
+  // `numCss` — they were sans, which is the inversion this register exists to fix, and it showed:
+  // "1" and "4" sat at different optical widths inside a fixed 44px ring. The unreached digit was
+  // `--dim` (2.6:1 on higgsfield, a HARD audit failure) and is `--text-2` now.
+  const digit = (color) => `${numCss({ size: TYPE.base, color, weight: 700 })};letter-spacing:0`;
   const ring = (i) => `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
     + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.surface};display:flex;`
-    + `align-items:center;justify-content:center;font:700 20px var(--font-sans);color:${T.dim}">${i + 1}</div>`
+    // The unreached digit FADES OUT as the ring lights. It used to stay fully painted and simply be
+    // covered by the accent disc drawn over it — invisible to the eye, but still a live element, and
+    // the contrast probe read it as `--text-2` sitting on the accent and failed it HARD on all three
+    // themes. A thing that is meant to be gone should be gone.
+    + `align-items:center;justify-content:center;${digit(T.sub)};opacity:calc(1 - ${lit(i)})">${i + 1}</div>`
     + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.accent};opacity:${lit(i)}"></div>`
     + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
-    + `font:700 20px var(--font-sans);color:${onColor(T.accent)};opacity:calc(${lit(i)} - ${done(i)})">${i + 1}</div>`
+    + `${digit(onColor(T.accent))};opacity:calc(${lit(i)} - ${done(i)})">${i + 1}</div>`
     + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
-    + `font:700 20px var(--font-sans);color:${onColor(T.accent)};opacity:${done(i)}">✓</div></div>`;
+    + `${digit(onColor(T.accent))};opacity:${done(i)}">✓</div></div>`;
   // the label is drawn twice, the reached copy fading in over the unreached one. Same string, so the
   // two copies are the same width and nothing shifts as a step lights.
-  const label = (s, i) => `<div style="position:relative;margin-top:10px;white-space:nowrap">`
-    + `<div style="font:500 18px var(--font-sans);color:${T.sub}">${s}</div>`
-    + `<div style="position:absolute;left:0;top:0;font:600 18px var(--font-sans);color:${T.ink};`
+  const label = (s, i) => `<div style="position:relative;margin-top:${SPACE.xs}px;white-space:nowrap">`
+    + `<div style="${labelCss({ size: TYPE.body, weight: 500 })}">${s}</div>`
+    + `<div style="position:absolute;left:0;top:0;${labelCss({ size: TYPE.body, weight: 600, color: T.ink })};`
     + `opacity:${lit(i)}">${s}</div></div>`;
+  // THE UNFILLED RAIL IS A TINT OF THE FILL, not `--line`. Painting the part of a track still to be
+  // crossed with the theme's BORDER colour made it read as a divider between two rings instead of as
+  // the rest of the journey — and on a dark theme it vanished into the card. Same correction `gauge`
+  // and `progressRing` got, and the same reason.
   const connector = (i) => `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
-    + `border-radius:0px;background:${T.hair};position:relative;overflow:hidden">`
+    + `border-radius:${RAIL / 2}px;background:${tint(T.accent, TINT.track)};position:relative;overflow:hidden">`
     + `<div style="position:absolute;inset:0;background:${T.accent};transform-origin:left center;`
     + `transform:scaleX(clamp(0, calc(${pos} - ${i}), 1))"></div></div>`;
   const cells = steps.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;flex:none">`
@@ -289,12 +354,16 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
   // columns, then down — so the eye is led through the board instead of watching it arrive as a slab.
   // Each card is a LEAF with the card chrome on it (a group child is never registered with the clip
   // driver, so a card wrapping its own text could not be timed).
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: 16, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
-    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: 8, children: [
-      text({ text: col.title, font: 'mono', size: 16, weight: 600, color: T.dim, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.md, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: SPACE.xs, children: [
+      // A column heading is a WORD ("In review"), so it is sans. It was mono, which is the library's
+      // standing inversion — and `--dim`, which `make audit` fails HARD on a dark theme.
+      text({ text: col.title, size: TYPE.body, weight: 600, color: T.sub, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
       // reading order across the board: card row `ri` in every column lands before row `ri + 1` does
-      ...col.cards.map((c, ri) => text({ text: c, size: 18, weight: 500, color: T.ink,
-        bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '12px 16px',
+      // HAIRLINE, NO SHADOW. A card sitting inside a board already has a boundary; giving it a drop
+      // shadow as well is two pieces of chrome saying the same thing, and the register spends one.
+      ...col.cards.map((c, ri) => text({ text: c, size: TYPE.body, weight: 500, color: T.ink,
+        bg: T.card, radius: R.card, border: HAIR, pad: `${SPACE.sm}px ${SPACE.md}px`,
         ...stagger(ri * columns.length + ci, { step: 0.11, delay: 0.4, anim: 'pop', enterDur: 0.3 }) })),
     ] })) }];
 }
@@ -319,21 +388,37 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
   // disappears on a dark theme's page background instead of popping off it. T.ink/T.paper is the
   // theme contract's guaranteed-legible inverted pair, so the plate stays dark-on-light and flips to
   // light-on-dark exactly where it needs to, instead of merging into the ground on one of the two.
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 16px',
-    bg: T.ink, radius: R.tight, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
-      box({ w: 22, h: 22, radius: 100, bg: accent, layout: 'row', justify: 'center', items: 'center', children: [text({ text: icon, size: 14, weight: 700, color: onColor(accent) })] }),
-      text({ text: message, size: 19, weight: 500, color: T.paper, grow: 1 }),
-      action && text({ text: action, size: 18, weight: 600, color: T.accentInk }),
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.sm, pad: SPACE.md,
+    bg: T.ink, radius: R.card, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
+      // 26/TYPE.body, not 22/14: `make audit` fails anything under 14.04px, so the status glyph was
+      // the one unreadable mark on a card whose whole job is to report a status.
+      // THE DOT IS MIXED TOWARD THE PLATE, AND ITS GLYPH IS THE PLATE'S OWN INK. This card is
+      // INVERTED — `--text` is the ground and `--bg` is the type — so every other trick in this file
+      // runs backwards here: `onInk` pulls toward `--text`, which on this plate is the BACKGROUND, and
+      // the tick came out 1.8:1. Holding the fill at 45% of the status colour over the plate colour
+      // keeps the disc close enough to the plate that `--bg` on it reads exactly as well as `--bg` on
+      // the plate does — and `--bg` on `--text` is the theme contract's own guaranteed pair. The disc
+      // still carries the status hue; it just stops pretending it can host arbitrary ink.
+      box({ w: 26, h: 26, radius: R.pill, bg: `color-mix(in srgb, ${accent} 45%, ${T.ink})`, layout: 'row', justify: 'center', items: 'center',
+        children: [text({ text: icon, size: TYPE.body, weight: 700, color: T.paper })] }),
+      text({ text: message, size: TYPE.base, weight: 500, color: T.paper, grow: 1 }),
+      // The plate is INVERTED (`--text` ground, `--bg` ink), so the action link is mixed toward
+      // `--bg`, not left as the bare accent. On higgsfield the plate is near-white and a lime accent
+      // measured 1.1:1 on it. Mixing toward the plate's OWN text colour lifts the link on a dark
+      // plate and a light one alike.
+      action && text({ text: action, size: TYPE.body, weight: 600, color: `color-mix(in srgb, ${T.accent} 55%, var(--bg))` }),
     ].filter(Boolean) }];
 }
 
 // logoWall — a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
 export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur = 4 } = {}) {
   const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 12, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: 12, items: 'stretch', children:
-      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.tight, border: HAIR, elevation: 1, pad: '24px 0', layout: 'row', justify: 'center', items: 'center',
-        children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: 22, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: SPACE.sm, items: 'stretch', children:
+      // Hairline, no shadow: a grid of cells reads as a grid because of its rules, and one drop
+      // shadow per cell turns a wall into a pile.
+      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.card, border: HAIR, pad: `${SPACE.lg}px 0`, layout: 'row', justify: 'center', items: 'center',
+        children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: TYPE.lead, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
 }
 
 // badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
@@ -354,22 +439,29 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   // "(rect)" in the schema and the label reads as a restriction. Rendered both ways to be sure: the
   // flat version reads as two rectangles, this one reads as an object sitting on the frame. A shield
   // is a pastiche of a physical sticker, and it needs to look stuck ON something.
-  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: 8, pad: 4, layout: 'row', items: 'center', gap: 0,
+  // Mono on BOTH halves is deliberate and is not the library's inversion: a CI shield is machine
+  // chrome end to end ("build | passing", "v2.4.1"), the same register as a terminal.
+  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: R.chip, pad: SPACE.tight, layout: 'row', items: 'center', gap: 0,
     shadow: true,
     start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
-      text({ text: label, font: 'mono', size: 17, weight: 600, color: TOKENS.paper, pad: '4px 12px' }),
-      { type: 'group', bg: ac, radius: 4, pad: '6px 12px', children: [text({ text: value, font: 'mono', size: 17, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
+      text({ text: label, font: 'mono', size: TYPE.body, weight: 600, color: TOKENS.paper, pad: `${SPACE.tight}px ${SPACE.sm}px` }),
+      { type: 'group', bg: ac, radius: R.micro, pad: `${SPACE.snug}px ${SPACE.sm}px`, children: [text({ text: value, font: 'mono', size: TYPE.body, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
     ] }];
 }
 
 // banner — a full-width accent announcement bar: icon · message · CTA.
 export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   msg = msg || body || title;
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: 12, pad: '16px 24px',
+  const ink = onColor(accent);
+  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.sm, pad: `${SPACE.md}px ${SPACE.lg}px`,
     // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
-    bg: accent, radius: 12, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3, children: [
-      text({ text: icon, size: 20, color: onColor(accent) }), text({ text: msg, size: 20, weight: 600, color: onColor(accent), grow: 1 }),
-      cta && { type: 'group', bg: 'rgba(255,255,255,0.18)', radius: 8, pad: '8px 16px', children: [text({ text: cta, size: 17, weight: 600, color: onColor(accent), delay: 0.35, anim: 'pop', enterDur: 0.3 })] },
+    bg: accent, radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3, children: [
+      text({ text: icon, size: TYPE.base, color: ink }), text({ text: msg, size: TYPE.base, weight: 600, color: ink, grow: 1 }),
+      // THE CTA CHIP IS A TINT OF ITS OWN INK, not a hardcoded white wash. `rgba(255,255,255,0.18)`
+      // assumes the bar is dark; on a light accent (higgsfield's lime) it was a white chip carrying
+      // dark text, i.e. invisible against the bar it sits on. Tinting the colour `onColor` already
+      // chose lifts the chip off the bar in both directions without the block knowing which it is in.
+      cta && { type: 'group', bg: tint(ink, 18), radius: R.chip, pad: `${SPACE.xs}px ${SPACE.md}px`, children: [text({ text: cta, size: TYPE.body, weight: 600, color: ink, delay: 0.35, anim: 'pop', enterDur: 0.3 })] },
     ].filter(Boolean) }];
 }
 

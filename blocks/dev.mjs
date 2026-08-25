@@ -2,15 +2,31 @@
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
-  R, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
+  R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows,
+  tint, TINT, DATA_CAP,
 } from './kit.mjs';
+
+// THE CODE FAMILY IS THE INSTRUMENT REGISTER. `R.tight` is what the radius scale reserves for machine
+// output — a terminal, a log stream, a diff, a file tree — so corners stay close to square because
+// the content is not a document. `R.card` is kept for the two surfaces here that are content rather
+// than output: a commit list and a deploy result. Picking the ROLE, never the number (kit.mjs).
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
 export const CATEGORY = 'Code';
 
 const T = TOKENS;
+
+// onInk(c) — a status colour used as TEXT, made readable on any theme's card. `onColor` answers the
+// OTHER direction (what ink reads on a fill) and defers to the `--on-accent` token there; nothing
+// covers a `var()` used as the glyph, and none of `--accent`/`--up`/`--down` is guaranteed to clear
+// 4.5:1 against a card. Measured here: the `$` prompt and a commit hash both 3.0:1 on linear, the
+// success ✓ 1.4:1 on higgsfield's lime — HARD `make audit` failures. Mixing toward `--text` raises
+// contrast in BOTH directions, so a block never has to know which kind of theme it is in. This is
+// `deltaChip`'s trick from kit.mjs, and it belongs in the kit beside `tint`; it is duplicated in the
+// three files of this pass only because the kit is another agent's file.
+const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CODE_THEMES — curated editor palettes for codeBlock. Hex literals on purpose: like the stripeCard
@@ -45,7 +61,11 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
   // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
   const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? onColor(T.stripeNavy) : T.ink);
   const kids = [];
-  if (label) kids.push(text({ text: label, font: 'mono', size: 18, color: P ? P.label : (dark ? T.stripeGrey : T.dim) }));
+  // The card's own caption is a FILENAME or a language, so mono is right; `--dim` was not. On the
+  // untinted light card it is `--text-2`, the muted TEXT role, which clears 4.5:1 on every theme
+  // where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
+  // brings its own measured label colour and keeps it.
+  if (label) kids.push(text({ text: label, font: 'mono', size: TYPE.body, color: P ? P.label : (dark ? T.stripeGrey : T.sub) }));
   // THE CODE WRITES ITSELF IN, line after line, off the top of the block — the motion a code card is
   // FOR. The label (if any) is already there, so the reveal starts at the first line of code.
   // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits
@@ -56,8 +76,8 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
     kids.push(text({ ...s, font: 'mono', size, weight: 400, ...stagger(i, { step: 0.14, delay: 0.2, anim: 'slide-left', enterDur: 0.28 }) }));
   });
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 32,
-    bg, radius: 14, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: 1 }),
+    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.xs, pad: SPACE.xl,
+    bg, radius: R.tight, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: E.flat }),
     start, duration: dur, anim, enterDur, exitDur: 0.35, children: kids,
   }];
 }
@@ -73,14 +93,16 @@ export function terminal({ x, y, w = 720, command, output = [], cps = 18, start 
   const typed = (String(command || '').length) / cps;
   const out = [];
   out.push({
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 8, pad: 24,
+    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.xs, pad: SPACE.lg,
     ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25,
     children: [
-      { type: 'group', layout: 'row', gap: 8, items: 'center', children: [
-        text({ text: '$', font: 'mono', size: 22, color: T.accent, weight: 600 }),
-        text({ text: command, font: 'mono', size: 22, color: T.ink, typing: cps, delay: 0.25, anim: 'fade', enterDur: 0.1 }),
+      { type: 'group', layout: 'row', gap: SPACE.xs, items: 'center', children: [
+        // The prompt is the accent used AS TEXT, which is not a readable colour by contract: it
+        // measured 3.0:1 on linear's card. See `onInk` at the top of this file.
+        text({ text: '$', font: 'mono', size: TYPE.lead, color: onInk(T.accent), weight: 600 }),
+        text({ text: command, font: 'mono', size: TYPE.lead, color: T.ink, typing: cps, delay: 0.25, anim: 'fade', enterDur: 0.1 }),
       ] },
-      ...output.map((l, i) => text({ text: l, font: 'mono', size: 20, color: T.sub,
+      ...output.map((l, i) => text({ text: l, font: 'mono', size: TYPE.base, color: T.sub,
         ...stagger(i, { step: 0.28, delay: r2(0.45 + typed), anim: 'fade', enterDur: 0.2 }) })),
     ],
   });
@@ -90,24 +112,38 @@ export function terminal({ x, y, w = 720, command, output = [], cps = 18, start 
 // ─────────────────────────────────────────────────────────────────────────────
 // loadingBar — a track + a fill that wipes L→R (determinate) and lands GREEN.
 // Returns [track, fill]; add `label`+`done` for a "✓ done" that pops on completion.
-export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5, color = T.greenBright,
+// `color` IS GONE FROM THIS SIGNATURE. It was destructured, defaulted, declared in no schema and read
+// by nothing — the fill has always been painted with `settle`. A prop the engine accepts and then
+// ignores is the exact silent-substitution failure this repo forbids, and leaving it in place would
+// have documented a dial that does nothing. A caller still passing it is unaffected: an extra key on
+// an options object was already discarded.
+export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5,
   settle = T.green, label, done = true } = {}) {
   // The fill is DRIVEN, not entered. It used to ride `anim:'wipe'` with `enterDur: fillDur`, which
   // put the whole fill inside the entrance envelope — so the bar spent the entire 1.5s fading up from
   // transparent while it wiped, and the determinate fill this block exists to show read as a haze.
   // `--p` is independent of the enter/exit fade: the bar arrives instantly, then FILLS.
   const life = fillDur + (done ? 1.2 : 0.4);
+  // THE TRACK IS A TINT OF THE FILL, not the neutral `--surface-2`. The unfilled part of a meter is
+  // the rest of the reading, so it belongs to the fill's own hue at the lighter weight — the same
+  // one-hue-at-two-weights idiom `gauge`, `progressRing` and every bar track already use. On
+  // `--surface-2` the bar read as a coloured mark sitting on unrelated chrome.
   const out = [
-    rect({ x, y, w, h, radius: h / 2, bg: T.surface, start, duration: life }),
+    rect({ x, y, w, h, radius: h / 2, bg: tint(settle, TINT.track), start, duration: life }),
     rect({ x, y, w, h, radius: h / 2, bg: settle, start, duration: life,
       anim: 'fade', enterDur: 0.15, ...fillRight({ delay: 0, dur: fillDur }) }),
   ];
-  if (label) out.push(text({ text: label, x, y: y + 18, font: 'mono', size: 18, color: T.sub, start, duration: fillDur + 1.2 }));
+  // A progress label is a WORD ("Uploading assets"), so it is sans. Mono here was the library's
+  // standing inversion: mono carries numbers, sans carries words.
+  // TYPE.base, not TYPE.body: this is a TOP-LEVEL layer, and the scene schema's `size` minimum is 18,
+  // one above TYPE.body's 17. The 14.04px `make audit` floor is the CHILD floor; a layer the scene
+  // places directly has a stricter one, so TYPE.base is the smallest legal step out here.
+  if (label) out.push(text({ text: label, x, y: y + 18, size: TYPE.base, color: T.sub, start, duration: fillDur + 1.2 }));
   // right-aligned by LAYOUT, not by guessing the string's width: `x + w - 70` was a guess at "✓ done"
   // in 18px mono, so any other label, size or font drifted off the bar's end.
   if (done) out.push({ type: 'group', x, y: y - 34, w, layout: 'row', justify: 'flex-end',
     start: r2(start + fillDur), duration: 1.0, anim: 'rise', enterDur: 0.3,
-    children: [text({ text: '✓ done', font: 'mono', size: 18, weight: 600, color: T.green })] });
+    children: [text({ text: '✓ done', size: TYPE.base, weight: 600, color: onInk(T.green) })] });
   return out;
 }
 
@@ -138,8 +174,8 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
       // so the cascade does not run and every row is drawn in its state at that moment.
       const lead = Math.min(active, steps.length - 1);
       out.push(text({ text: i < active ? '✓' : i === active ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
-        size: 24, weight: 700, color: i <= active ? T.green : T.dim, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
-      out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22,
+        size: TYPE.lead, weight: 700, color: i <= active ? T.green : T.sub, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
+      out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead,
         color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
       return;
     }
@@ -149,32 +185,45 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
     // STATE rather than one layer that changes, because a layer's text is fixed at build time and
     // the frame loop is not allowed to step from a previous frame.
     const glyph = (txt, color, from, life, anim) => life > 0.01 && text({ text: txt, x, y: y + i * rowGap,
-      font: 'mono', size: 24, weight: 700, color, start: r2(from), duration: r2(life), anim, enterDur: 0.18, exitDur: 0.12 });
+      font: 'mono', size: TYPE.lead, weight: 700, color, start: r2(from), duration: r2(life), anim, enterDur: 0.18, exitDur: 0.12 });
     out.push(...[
-      glyph('·', T.dim, start, r2(t - start), 'fade'),
+      // A QUEUED step is `--text-2`, not `--dim`. A pipeline that has not started yet still has to be
+      // readable — that is the whole point of showing the queue — and `--dim` measures 2.6:1 on
+      // higgsfield, which `make audit` fails HARD.
+      glyph('·', T.sub, start, r2(t - start), 'fade'),
       glyph('•', T.green, t, STEP, 'pop'),
       glyph('✓', T.green, done, r2(end - done), 'pop'),
     ].filter(Boolean));
-    // the label dims until its step is reached, then it is the row the eye is on
-    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22, color: T.sub,
+    // the label dims until its step is reached, then it is the row the eye is on.
+    // A step name is a WORD ("Building"), so both copies are sans. Mono was the standing inversion,
+    // and the two copies must stay metrically identical or the row shifts as its step lights.
+    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.sub,
       start, duration: r2(t - start + 0.01), anim: 'fade', enterDur: 0.2, exitDur: 0 }));
-    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, font: 'mono', size: 22, color: T.ink,
+    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.ink,
       start: t, duration: r2(end - t), anim: 'fade', enterDur: 0.2 }));
   });
   // success card
   const cy = y + steps.length * rowGap + 30;
   out.push({
-    type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: 16, pad: 24,
-    ...cardChrome({ border: `1px solid ${T.greenSoft}` }),
+    type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: SPACE.md, pad: SPACE.lg,
+    // The card is TINTED in the tone it reports, not left on plain card with a green rule around it:
+    // a success surface says so with its ground, one hue at two weights, the rule solid and the fill
+    // soft. Same idiom as `callout` and every data track.
+    ...cardChrome({ bg: tint(T.green, TINT.chip), border: `1px solid ${T.greenSoft}` }),
     start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop',
     children: [
-      { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [text({ text: '✓', size: 22, weight: 700, color: onColor(T.green) })] },
-      { type: 'group', layout: 'column', gap: 4, items: 'flex-start', children: [
-        text({ text: title, size: 22, weight: 700, color: T.ink }),
-        text({ text: url, font: 'mono', size: 18, color: T.green }),
+      // A TINTED DISC WITH A MIXED TICK, not a solid `--up` fill with assumed-white ink. `onColor`
+      // was called here believing it would pick a legible colour and it cannot: `--up` is a `var()`,
+      // so the hex branch misses and it returned '#fff' — 1.4:1 on higgsfield's lime, 2.8:1 on
+      // linear, HARD failures both. Soft fill, solid mark: the register's own idiom.
+      { type: 'group', bg: tint(T.green, 22), radius: R.pill, pad: `${SPACE.xs}px ${SPACE.sm}px`, children: [text({ text: '✓', size: TYPE.lead, weight: 700, color: onInk(T.green) })] },
+      { type: 'group', layout: 'column', gap: SPACE.tight, items: 'flex-start', children: [
+        text({ text: title, size: TYPE.lead, weight: 700, color: T.ink }),
+        text({ text: url, font: 'mono', size: TYPE.body, color: onInk(T.green) }),
       ] },
+      // `note` is a timing figure ("Ready in 1.2s"), so mono is right. `--dim` was not.
       ...(note ? [{ type: 'group', grow: 1, layout: 'row', justify: 'flex-end', children: [
-        text({ text: note, font: 'mono', size: 18, color: T.dim }),
+        text({ text: note, font: 'mono', size: TYPE.body, color: T.sub }),
       ] }] : []),
     ],
   });
@@ -184,9 +233,16 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
 // diff — a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
 export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   const col = { '+': T.green, '-': T.down, ' ': T.sub };
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
-    ...cardChrome(), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: 22, weight: 400, color: col[ln.sign] || T.ink })) }];
+  // EVERY CHANGED LINE SITS IN ITS OWN TINTED BAND, which is what a diff looks like everywhere it is
+  // read. Colouring the glyphs alone leaves the eye to scan for green and red words in a wall of
+  // mono; the band makes the shape of the change visible before a single word is. `--up` and `--down`
+  // are spent here on real direction (added / removed), which is the one thing they are for.
+  const band = { '+': tint(T.green, TINT.chip), '-': tint(T.down, TINT.chip) };
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.hair, pad: SPACE.lg,
+    ...cardChrome({ radius: R.tight }), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
+    children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: TYPE.lead, weight: 400,
+      color: col[ln.sign] || T.ink, ...(band[ln.sign] ? { bg: band[ln.sign], radius: R.micro } : {}),
+      pad: `${SPACE.tight}px ${SPACE.snug}px` })) }];
 }
 
 // fileTree — an indented file/folder list; `active` highlights the focused row.
@@ -195,14 +251,16 @@ export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {})
   // off the row wrapper and onto the row's own text leaf, because the wrapper is a nested group and
   // the engine never registers one — the lit row would have been lit from the first frame while its
   // label was still arriving.
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 2, pad: 16,
-    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: 8,
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.hair, pad: SPACE.md,
+    ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.xs,
       children: [
         box({ w: (it.depth || 0) * 22, h: 18 }),
-        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: 19, pad: '6px 8px',
-          ...(it.active ? { bg: T.accentSoft, radius: 8 } : {}),
-          weight: it.active ? 600 : 400, color: it.active ? T.accentInk : (it.type === 'dir' ? T.ink : T.sub),
+        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: TYPE.base, pad: `${SPACE.snug}px ${SPACE.xs}px`,
+          ...(it.active ? { bg: T.accentSoft, radius: R.chip } : {}),
+          // The lit row is the accent as TEXT on an accent TINT, the lowest-contrast pairing in the
+          // block: 2.6:1 on linear. `onInk` pulls the glyph toward `--text` and it clears.
+          weight: it.active ? 600 : 400, color: it.active ? onInk(T.accent) : (it.type === 'dir' ? T.ink : T.sub),
           ...stagger(i, { step: 0.11, delay: 0.2, anim: 'slide-left', enterDur: 0.3 }) }),
       ] })) }];
 }
@@ -220,11 +278,14 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
   const base = dark ? '#E8ECF1' : T.ink;
   // A LOG STREAMS: lines land one after another, fast and even, the way output actually arrives.
   const beat = (i) => stagger(i, { step: 0.13, delay: 0.15, anim: 'fade', enterDur: 0.18 });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: 6, pad: 24,
-    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: 1 }), start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
-    children: lines.map((ln, i) => ({ type: 'group', layout: 'row', items: 'baseline', gap: 12, children: [
-      ln.t && text({ text: ln.t, font: 'mono', size: 16, color: dark ? '#8FA3BA' : T.dim, ...beat(i) }),
-      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: 19, color: lc[ln.level] || base, ...beat(i) }),
+  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.snug, pad: SPACE.lg,
+    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: E.flat }), start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+    children: lines.map((ln, i) => ({ type: 'group', layout: 'row', items: 'baseline', gap: SPACE.sm, children: [
+      // A timestamp is a FIGURE, so mono stays. The LIGHT card's stamp was `--dim` while the dark
+      // card's was a measured literal — the two halves of one block disagreeing about whether a
+      // timestamp has to be readable.
+      ln.t && text({ text: ln.t, font: 'mono', size: TYPE.body, color: dark ? '#8FA3BA' : T.sub, ...beat(i) }),
+      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: TYPE.base, color: lc[ln.level] || base, ...beat(i) }),
     ].filter(Boolean) })) }];
 }
 
@@ -238,11 +299,14 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
       const beat = stagger(i, { step: 0.18, delay: 0.2, anim: 'slide-left', enterDur: 0.32 });
       return [
         i > 0 && box({ h: 1, bg: T.hair }),
-        { type: 'group', layout: 'row', items: 'center', gap: 12, pad: '16px 24px', children: [
-          text({ text: c.hash, font: 'mono', size: 17, weight: 600, color: T.accent, ...beat }),
+        { type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, pad: `${SPACE.md}px ${SPACE.lg}px`, children: [
+          // A hash IS a figure, so it keeps mono. The byline under it is a NAME and a phrase
+          // ("Ada Lovelace · 2h ago"), which is words, so it moves to sans — and off `--dim`, which
+          // `make audit` fails HARD at 2.6:1 on higgsfield.
+          text({ text: c.hash, font: 'mono', size: TYPE.body, weight: 600, color: onInk(T.accent), ...beat }),
           { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
-            text({ text: c.msg, size: 19, weight: 500, color: T.ink, ...beat }),
-            text({ text: `${c.author} · ${c.time}`, font: 'mono', size: 15, color: T.dim, ...beat }),
+            text({ text: c.msg, size: TYPE.base, weight: 500, color: T.ink, ...beat }),
+            text({ text: `${c.author} · ${c.time}`, size: TYPE.body, color: T.sub, ...beat }),
           ] },
         ] },
       ].filter(Boolean);
@@ -252,7 +316,9 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
 // spinner — a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
 export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
   const out = [{ type: 'lottie', src, x, y, w: size, h: size, loop: true, start, duration: dur }];
-  if (label) out.push(text({ text: label, x, y: r2(y + size + 12), font: 'mono', size: 18, color: T.dim, start: r2(start + 0.2), duration: dur }));
+  // A spinner's caption is a WORD ("Rendering"), so it is sans, and `--text-2` rather than `--dim`.
+  // TYPE.base because this is a top-level layer: see loadingBar, the schema's floor out here is 18.
+  if (label) out.push(text({ text: label, x, y: r2(y + size + 12), size: TYPE.base, color: T.sub, start: r2(start + 0.2), duration: dur }));
   return out;
 }
 
