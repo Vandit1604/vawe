@@ -7,6 +7,11 @@
 // shape this medium is being asked to show off: many discrete, independently timed, individually
 // measurable objects, each one a real box `make audit` can see and grade on its own.
 import { TOKENS, HAIR, r2, text, rect, R, toneColor, fillRight } from './kit.mjs';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'Code';
+
 const T = TOKENS;
 
 const DOT_TONES = ['danger', 'warn', 'ok'];   // chrome, not content — theme tones, not literal RGB

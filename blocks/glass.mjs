@@ -18,6 +18,11 @@
 import { TOKENS as T, text, rect, box, stagger, R, SPACE, TYPE, E, r2 } from './kit.mjs';
 import { glassCard } from './sleek.mjs';
 import { svgIcon } from '../core/icons.js';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'Surfaces';
+
 
 // The three constants the whole family shares, so the edge, the sheen and the readable ink cannot
 // drift between six blocks the way fifteen copies of the hairline card once did.

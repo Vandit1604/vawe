@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { BlocksBrowser, type Block } from "./BlocksBrowser";
+import { Catalog, type Block } from "./Catalog";
 import blocks from "../../lib/blocks.json";
-import "./blocks.css";
+import frames from "../../lib/block-frames.json";
+import "./catalog.css";
+
+// The count is read from the registry, never typed. It was hardcoded here as 156 while the registry
+// held 176, and `make site-counts` had to exist to notice — the same hand-kept-number class the rest
+// of this repo keeps logging.
+const N = (blocks as Block[]).length;
 
 export const metadata: Metadata = {
   title: "Vawe · blocks",
-  description:
-    "The Vawe block registry: 176 vetted, deterministic, theme-aware components (charts, cards, code, terminals, KPIs, browsers) to compose into videos.",
+  description: `${N} deterministic, theme-aware blocks — charts, code, terminals, maps, diagrams and interface surfaces — to compose into videos.`,
 };
-
-const families = Array.from(new Set((blocks as Block[]).map((b) => b.family))).length;
 
 export default function Blocks() {
   return (
@@ -19,27 +22,9 @@ export default function Blocks() {
       <Header active="blocks" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
-        <section className="phead">
-          <span className="kicker">
-            <span className="dot" /> block registry
-          </span>
-          <h1>{blocks.length} blocks, ready to compose.</h1>
-          <p>
-            A vetted, deterministic component library: charts, cards, code, terminals, KPIs, browser
-            frames. Drop one into a scene. Every block is theme-aware, so it reskins to any brand.
-          </p>
-          <div className="bnote">
-            <b>{families} families</b>&nbsp;·&nbsp;drop into a scene with{" "}
-            <span className="mono">{'{ "block": "…" }'}</span>&nbsp;·&nbsp;reskins to your theme
-          </div>
-        </section>
-
-        <section style={{ paddingBottom: 80 }}>
-          <BlocksBrowser blocks={blocks as Block[]} />
-        </section>
+          <Catalog blocks={blocks as Block[]} frames={frames as Record<string, { x: number; y: number; w: number; h: number }>} />
         </main>
-
-        <Footer note="theme-aware, deterministic blocks" />
+        <Footer note="deterministic, theme-aware blocks" />
       </div>
     </div>
   );

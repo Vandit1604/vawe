@@ -13,7 +13,8 @@
         "Image",
         "Count"
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "codeBlock",
@@ -42,7 +43,8 @@
           "color": "#8898AA"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "terminal",
@@ -55,7 +57,8 @@
         "rendering 1950 frames...",
         "done → out.mp4"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "terminalPro",
@@ -64,7 +67,8 @@
     "props": {
       "w": 820,
       "command": "npm run deploy"
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "terminalHtml",
@@ -72,7 +76,8 @@
     "blurb": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
     "props": {
       "w": 820
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "loadingBar",
@@ -82,7 +87,8 @@
       "w": 340,
       "fillDur": 1.6,
       "label": "rendering"
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "deploySuccess",
@@ -90,7 +96,8 @@
     "blurb": "CI cascade → green \"Deployed to production\" card",
     "props": {
       "w": 520
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "browserFrame",
@@ -100,7 +107,8 @@
       "w": 540,
       "h": 300,
       "url": "example.com"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "pillRow",
@@ -112,7 +120,8 @@
         "pure(n)",
         "no timeline"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "statBig",
@@ -122,7 +131,8 @@
       "to": 1950,
       "label": "frames",
       "size": 120
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "colorCycle",
@@ -132,7 +142,8 @@
       "word": "colour",
       "size": 64,
       "each": 0.4
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "stripeCard",
@@ -140,7 +151,8 @@
     "blurb": "recognizably-Stripe payments card",
     "props": {
       "w": 340
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "barChart",
@@ -171,7 +183,8 @@
           "value": 72
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "diff",
@@ -193,7 +206,8 @@
           "text": "return x.json()"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "quote",
@@ -203,7 +217,8 @@
       "w": 540,
       "text": "One JSON becomes one video.",
       "author": "vawe"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "notification",
@@ -214,7 +229,8 @@
       "title": "Render complete",
       "body": "out.mp4 is ready",
       "accent": "var(--up)"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "kpiRow",
@@ -235,7 +251,8 @@
           "label": "timelines"
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "callout",
@@ -245,7 +262,8 @@
       "w": 540,
       "text": "Same input, byte-identical output.",
       "tone": "success"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "comparison",
@@ -263,7 +281,8 @@
         "Open canvas",
         "Per-brand"
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "codeBlock.light",
@@ -278,7 +297,8 @@
         "./bin/vawe video.json",
         "✓ out/video.mp4"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "callout.info",
@@ -288,7 +308,8 @@
       "w": 540,
       "text": "Layers compose from a single canvas.",
       "tone": "info"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "callout.warn",
@@ -298,7 +319,8 @@
       "w": 540,
       "text": "No em-dashes in on-screen copy.",
       "tone": "warn"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "comparison.beforeAfter",
@@ -316,7 +338,8 @@
         "Pure in n",
         "Byte-identical"
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "notification.warn",
@@ -327,7 +350,8 @@
       "title": "Grain crawls on text",
       "body": "opt in only for filmic brands",
       "accent": "#F6A417"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "statBig.currency",
@@ -338,7 +362,8 @@
       "unit": "$B",
       "label": "market",
       "size": 120
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "lineChart",
@@ -374,7 +399,8 @@
           "value": 79
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "lineChart.area",
@@ -404,7 +430,8 @@
           "value": 55
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "donutChart",
@@ -430,7 +457,8 @@
           "label": "Social"
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "stackedBar",
@@ -477,7 +505,8 @@
           ]
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "card.pricing",
@@ -494,7 +523,8 @@
       ],
       "cta": "Start free",
       "highlight": true
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "card.stat",
@@ -506,7 +536,8 @@
       "label": "frames rendered",
       "delta": "+12%",
       "deltaUp": true
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "card.profile",
@@ -517,7 +548,8 @@
       "name": "Ada Lovelace",
       "role": "Founding Engineer",
       "initials": "AL"
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "fileTree",
@@ -558,7 +590,8 @@
           "depth": 1
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "logLines",
@@ -588,7 +621,8 @@
           "text": "out.mp4 written"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "logLines.light",
@@ -607,7 +641,8 @@
           "text": "purity OK · order-independent"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "commitRow",
@@ -629,7 +664,8 @@
           "time": "1d"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "phoneFrame",
@@ -638,7 +674,8 @@
     "props": {
       "w": 230,
       "h": 440
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "tabBar",
@@ -652,7 +689,8 @@
         "Motion",
         "Export"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "checklist",
@@ -678,7 +716,8 @@
           "done": false
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "table",
@@ -708,7 +747,8 @@
           "beta"
         ]
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "timeline",
@@ -733,7 +773,8 @@
           "done": false
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "stepFlow",
@@ -748,7 +789,8 @@
         "Mux",
         "Upload"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "kanban",
@@ -778,7 +820,8 @@
           ]
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "chatBubble",
@@ -802,7 +845,8 @@
           "me": true
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "tweetCard",
@@ -816,7 +860,8 @@
       "likes": "1.2k",
       "reposts": "340",
       "text": "One JSON. One video. Deterministic, no timeline."
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "avatarStack",
@@ -838,7 +883,8 @@
           "initials": "KM"
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "toast",
@@ -848,7 +894,8 @@
       "w": 420,
       "message": "Video rendered to out.mp4",
       "action": "Open"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "reactionBar",
@@ -870,7 +917,8 @@
           "count": 5
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "logoWall",
@@ -898,7 +946,8 @@
           "text": "Orbit Labs"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "badge",
@@ -908,7 +957,8 @@
       "label": "build",
       "value": "passing",
       "tone": "ok"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "badge.version",
@@ -918,7 +968,8 @@
       "label": "vawe",
       "value": "v2.0",
       "tone": "accent"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "gauge",
@@ -928,7 +979,8 @@
       "w": 300,
       "value": 72,
       "label": "coverage"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "progressRing",
@@ -938,7 +990,8 @@
       "size": 150,
       "value": 68,
       "label": "render"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "banner",
@@ -948,7 +1001,8 @@
       "w": 560,
       "text": "Now with 60fps export",
       "cta": "See how"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "spinner",
@@ -957,7 +1011,8 @@
     "props": {
       "size": 90,
       "label": "rendering"
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.py",
@@ -978,7 +1033,8 @@
           "color": "#E8ECF1"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "terminal.git",
@@ -991,7 +1047,8 @@
         "Enumerating objects: 12, done.",
         "main -> main"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "terminal.install",
@@ -1004,7 +1061,8 @@
         "added 1 package",
         "added 1 package"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "diff.config",
@@ -1026,7 +1084,8 @@
           "text": "\"theme\": \"creed\""
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "barChart.green",
@@ -1054,7 +1113,8 @@
           "value": 90
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "lineChart.down",
@@ -1083,7 +1143,8 @@
           "value": 30
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "donutChart.two",
@@ -1104,7 +1165,8 @@
           "label": "Fail"
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "stackedBar.three",
@@ -1150,7 +1212,8 @@
           ]
         }
       ]
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "gauge.warn",
@@ -1161,7 +1224,8 @@
       "value": 34,
       "color": "#F6A417",
       "label": "health"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "gauge.full",
@@ -1172,7 +1236,8 @@
       "value": 100,
       "color": "var(--up)",
       "label": "passing"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "progressRing.done",
@@ -1183,7 +1248,8 @@
       "value": 100,
       "color": "var(--up)",
       "label": "complete"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "progressRing.low",
@@ -1194,7 +1260,8 @@
       "value": 22,
       "color": "#F6A417",
       "label": "battery"
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "kpiRow.money",
@@ -1215,7 +1282,8 @@
           "label": "churn"
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "statBig.time",
@@ -1226,7 +1294,8 @@
       "unit": "ms",
       "label": "render time",
       "size": 120
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "card.stat.down",
@@ -1238,7 +1307,8 @@
       "label": "active users",
       "delta": "-8%",
       "deltaUp": false
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "card.stat.plain",
@@ -1249,7 +1319,8 @@
       "to": 57,
       "label": "blocks",
       "delta": ""
-    }
+    },
+    "category": "Data"
   },
   {
     "name": "card.pricing.free",
@@ -1266,7 +1337,8 @@
       ],
       "cta": "Get started",
       "highlight": false
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "card.pricing.team",
@@ -1283,7 +1355,8 @@
       ],
       "cta": "Contact us",
       "highlight": false
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "notification.error",
@@ -1294,7 +1367,8 @@
       "title": "Render failed",
       "body": "em-dash in on-screen copy",
       "accent": "var(--down)"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "checklist.todo",
@@ -1313,7 +1387,8 @@
           "text": "Batch variants"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "table.pricing",
@@ -1343,7 +1418,8 @@
           "∞"
         ]
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "timeline.release",
@@ -1368,7 +1444,8 @@
           "done": false
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "stepFlow.start",
@@ -1383,7 +1460,8 @@
         "Mux",
         "Upload"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "stepFlow.done",
@@ -1398,7 +1476,8 @@
         "Mux",
         "Upload"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "kanban.two",
@@ -1423,7 +1502,8 @@
           ]
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "tabBar.four",
@@ -1438,7 +1518,8 @@
         "Motion",
         "Audio"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "toast.error",
@@ -1450,7 +1531,8 @@
       "action": "Retry",
       "icon": "!",
       "accent": "var(--down)"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "toast.info",
@@ -1462,7 +1544,8 @@
       "action": "Undo",
       "icon": "i",
       "accent": "var(--accent)"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "logLines.errors",
@@ -1487,7 +1570,8 @@
           "text": "retrying"
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "chatBubble.support",
@@ -1507,7 +1591,8 @@
           "text": "Fixed, thanks!"
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "avatarStack.large",
@@ -1533,7 +1618,8 @@
           "initials": "JR"
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "reactionBar.love",
@@ -1555,7 +1641,8 @@
           "count": 6
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "logoWall.four",
@@ -1578,7 +1665,8 @@
           "text": "Atlas Type"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "badge.warn",
@@ -1588,7 +1676,8 @@
       "label": "coverage",
       "value": "62%",
       "tone": "warn"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "badge.info",
@@ -1598,7 +1687,8 @@
       "label": "docs",
       "value": "latest",
       "tone": "info"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "banner.info",
@@ -1610,7 +1700,8 @@
       "cta": "Open",
       "accent": "var(--accent)",
       "icon": "i"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "banner.warn",
@@ -1621,7 +1712,8 @@
       "text": "Söhne is licensed, do not commit",
       "accent": "#F6A417",
       "icon": "!"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "spinner.small",
@@ -1629,7 +1721,8 @@
     "blurb": "small looping Lottie",
     "props": {
       "size": 56
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "quote.customer",
@@ -1639,7 +1732,8 @@
       "w": 540,
       "text": "We shipped a launch film in an afternoon.",
       "author": "a happy user"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "terminal.build",
@@ -1652,7 +1746,8 @@
         "▶ scene : capturing across 8 workers...",
         "✓ done → out.mp4"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "checklist.done",
@@ -1674,7 +1769,8 @@
           "done": true
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "kpiRow.time",
@@ -1695,7 +1791,8 @@
           "label": "p99"
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "badge.beta",
@@ -1705,7 +1802,8 @@
       "label": "status",
       "value": "beta",
       "tone": "warn"
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "lowerThird.cleanBar",
@@ -1715,7 +1813,8 @@
       "variant": "cleanBar",
       "name": "Ana Roth",
       "role": "Principal engineer, Platform"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.boldBlock",
@@ -1725,7 +1824,8 @@
       "variant": "boldBlock",
       "name": "Ana Roth",
       "role": "Principal engineer"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.bild",
@@ -1735,7 +1835,8 @@
       "variant": "bild",
       "name": "Sold out",
       "role": "in four minutes"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.darkCard",
@@ -1745,7 +1846,8 @@
       "variant": "darkCard",
       "name": "Kite Studio",
       "role": "Lisbon, Portugal"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.sideRule",
@@ -1755,7 +1857,8 @@
       "variant": "sideRule",
       "name": "Ana Roth",
       "role": "Principal engineer"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.kickerName",
@@ -1765,7 +1868,8 @@
       "variant": "kickerName",
       "name": "Northwind",
       "role": "Now in beta"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.accentUnderline",
@@ -1775,7 +1879,8 @@
       "variant": "accentUnderline",
       "name": "Ana Roth",
       "role": "Principal engineer"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.maskReveal",
@@ -1785,7 +1890,8 @@
       "variant": "maskReveal",
       "name": "One source",
       "role": "every ratio"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.softPill",
@@ -1795,7 +1901,8 @@
       "variant": "softPill",
       "name": "Northwind",
       "role": "v2.1"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.colourBlock",
@@ -1805,7 +1912,8 @@
       "variant": "colourBlock",
       "name": "Ana Roth",
       "role": "Principal engineer"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.stackBars",
@@ -1815,7 +1923,8 @@
       "variant": "stackBars",
       "name": "Ana Roth",
       "role": "Principal engineer"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "lowerThird.newsTicker",
@@ -1825,7 +1934,8 @@
       "variant": "newsTicker",
       "name": "Renders every frame in parallel",
       "role": "live"
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "codeBlock.midnight",
@@ -1841,7 +1951,8 @@
         "const frames = render(scene)",
         "encode(frames, 'out.mp4')"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.ember",
@@ -1857,7 +1968,8 @@
         "clip = render('launch.json')",
         "clip.save('out.mp4')"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.forest",
@@ -1873,7 +1985,8 @@
         "make audit",
         "git push origin main"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.ocean",
@@ -1889,7 +2002,8 @@
         "  \"theme\": \"creed\",",
         "  \"fps\": 30 }"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.neon",
@@ -1905,7 +2019,8 @@
         "  const f = await renderFrame(e.data.n)",
         "  postMessage(f) }"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.paper",
@@ -1921,7 +2036,8 @@
         "- [x] blocks registry",
         "- [ ] captions pass"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "nowPlaying",
@@ -1932,7 +2048,8 @@
       "track": "Golden Hour",
       "artist": "Field Notes",
       "progress": 0.62
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "videoLowerThird",
@@ -1943,7 +2060,8 @@
       "channel": "Studio Vawe",
       "subscribers": "128K subscribers",
       "cta": "Subscribe"
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "followCard",
@@ -1954,7 +2072,8 @@
       "name": "Ana Roth",
       "handle": "anaroth",
       "cta": "Follow"
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "searchEngine.home",
@@ -1991,7 +2110,8 @@
           "color": "#EA4335"
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "searchEngine.results",
@@ -2014,7 +2134,8 @@
           "snippet": "Vetted blocks you compose, not author."
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "codeBlock.ink",
@@ -2031,7 +2152,8 @@
         "  layers: [text, image],",
         "}"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.dusk",
@@ -2047,7 +2169,8 @@
         "scene.cuts.each { |c| c.snap! }",
         "scene.render 'out.mp4'"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.slate",
@@ -2063,7 +2186,8 @@
         "enc := encode.H264(frames)",
         "enc.WriteTo(\"out.mp4\")"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.aurora",
@@ -2079,7 +2203,8 @@
         "const v = sampleAt(spec, n, 'low')",
         "return 1 + v * 0.18"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.linen",
@@ -2095,7 +2220,8 @@
         "One JSON. One video.",
         "Deterministic to the frame."
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeBlock.frost",
@@ -2111,7 +2237,8 @@
         "const box = safeArea(w, h, dest)",
         "return box.x1 - box.x0"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "feedRow",
@@ -2123,7 +2250,8 @@
       "sub": "@wren",
       "time": "just now",
       "body": "Moved the Fieldwork draft into the shared workspace."
-    }
+    },
+    "category": "App"
   },
   {
     "name": "listRow",
@@ -2135,7 +2263,8 @@
       "title": "Weekly digest",
       "sub": "Kite Studio",
       "meta": "Today"
-    }
+    },
+    "category": "App"
   },
   {
     "name": "settingsRow",
@@ -2147,7 +2276,8 @@
       "sub": "Keep every draft current everywhere",
       "control": "toggle",
       "value": true
-    }
+    },
+    "category": "App"
   },
   {
     "name": "profileHeader",
@@ -2171,7 +2301,8 @@
           "label": "saved"
         }
       ]
-    }
+    },
+    "category": "App"
   },
   {
     "name": "onboardCard",
@@ -2184,7 +2315,8 @@
       "title": "Pick a workspace",
       "body": "Choose where new drafts are saved. You can change this later.",
       "cta": "Continue"
-    }
+    },
+    "category": "App"
   },
   {
     "name": "emptyState",
@@ -2196,7 +2328,8 @@
       "title": "Nothing here yet",
       "body": "Anything you save shows up in this list.",
       "cta": "Add the first one"
-    }
+    },
+    "category": "App"
   },
   {
     "name": "pointer",
@@ -2209,7 +2342,8 @@
       },
       "clickAt": 1.3,
       "size": 44
-    }
+    },
+    "category": "Interaction"
   },
   {
     "name": "tapRipple",
@@ -2218,7 +2352,8 @@
     "props": {
       "at": 4.2,
       "size": 150
-    }
+    },
+    "category": "Interaction"
   },
   {
     "name": "keyboard",
@@ -2227,7 +2362,8 @@
     "props": {
       "w": 420,
       "layout": "qwerty"
-    }
+    },
+    "category": "Interaction"
   },
   {
     "name": "keyboard.numeric",
@@ -2236,7 +2372,8 @@
     "props": {
       "w": 300,
       "layout": "numeric"
-    }
+    },
+    "category": "Interaction"
   },
   {
     "name": "pressButton",
@@ -2246,7 +2383,8 @@
       "w": 280,
       "label": "Start a project",
       "pressAt": 1
-    }
+    },
+    "category": "Interaction"
   },
   {
     "name": "splitScreen",
@@ -2276,7 +2414,8 @@
           "meta": "Fri"
         }
       }
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "splitScreen.pip",
@@ -2310,7 +2449,8 @@
           "initials": "AL"
         }
       }
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "screenSwap",
@@ -2353,7 +2493,8 @@
           }
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "screenSwap.slide",
@@ -2394,7 +2535,8 @@
           }
         }
       ]
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "socialProof",
@@ -2419,7 +2561,8 @@
           "initials": "KM"
         }
       ]
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "installCard",
@@ -2433,7 +2576,8 @@
       "rating": 4.6,
       "ratings": 1204,
       "cta": "Install"
-    }
+    },
+    "category": "Social"
   },
   {
     "name": "tabBar.switch",
@@ -2449,7 +2593,8 @@
         "Motion",
         "Export"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "tabBar.icons",
@@ -2479,7 +2624,8 @@
           "label": "You"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "stepFlow.build",
@@ -2497,7 +2643,8 @@
         "Mux",
         "Upload"
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "notification.stack",
@@ -2526,7 +2673,8 @@
           "accent": "var(--up)"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "toast.stack",
@@ -2552,7 +2700,8 @@
           "action": "View"
         }
       ]
-    }
+    },
+    "category": "Interface"
   },
   {
     "name": "comparison.screens",
@@ -2580,7 +2729,8 @@
           "meta": "now"
         }
       }
-    }
+    },
+    "category": "Core"
   },
   {
     "name": "glassCard",
@@ -2592,7 +2742,8 @@
       "kicker": "GLASS",
       "title": "Backdrop blur",
       "desc": "It blurs whatever moves behind it."
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "meshPanel",
@@ -2603,7 +2754,8 @@
       "h": 320,
       "title": "Mesh gradient",
       "desc": "A calm branded surface behind copy."
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "spotlightCard",
@@ -2615,7 +2767,8 @@
       "from": "top",
       "title": "Spotlight",
       "desc": "The light directs the eye."
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "borderBeamCard",
@@ -2626,7 +2779,8 @@
       "h": 260,
       "title": "Border beam",
       "desc": "A light travels the border."
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "bento",
@@ -2652,7 +2806,8 @@
           "desc": "Support."
         }
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "scanGate",
@@ -2662,7 +2817,8 @@
       "w": 760,
       "h": 460,
       "label": "LOCK · f/1.8"
-    }
+    },
+    "category": "Camera"
   },
   {
     "name": "flowchart",
@@ -2670,7 +2826,8 @@
     "blurb": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
     "props": {
       "step": 0.16
-    }
+    },
+    "category": "Diagrams"
   },
   {
     "name": "flowchart.vertical",
@@ -2679,7 +2836,8 @@
     "props": {
       "variant": "vertical",
       "step": 0.16
-    }
+    },
+    "category": "Diagrams"
   },
   {
     "name": "nodeGraph",
@@ -2688,7 +2846,8 @@
     "props": {
       "highlight": "core",
       "step": 0.14
-    }
+    },
+    "category": "Diagrams"
   },
   {
     "name": "glassWidgets",
@@ -2716,7 +2875,8 @@
         "seeked",
         "pure(n)"
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "glassNotification",
@@ -2744,7 +2904,8 @@
           "meta": "5m"
         }
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "glassMenu",
@@ -2779,7 +2940,8 @@
           "hint": "H"
         }
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "glassControls",
@@ -2792,7 +2954,8 @@
       "total": "03:40",
       "progress": 0.34,
       "bars": 9
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "glassHome",
@@ -2840,7 +3003,8 @@
           "label": "Chains"
         }
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "glassDock",
@@ -2870,7 +3034,8 @@
           "label": "History"
         }
       ]
-    }
+    },
+    "category": "Surfaces"
   },
   {
     "name": "codeTyping",
@@ -2887,7 +3052,8 @@
         "  return t.handle(req);",
         "}"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeHighlight",
@@ -2904,7 +3070,8 @@
         "  return t.handle(req);",
         "}"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeScroll",
@@ -2931,7 +3098,8 @@
         "      return h;",
         "}"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeDiff",
@@ -2953,7 +3121,8 @@
         },
         "  return t.handle(req);"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeMorph",
@@ -2970,7 +3139,8 @@
       "to": [
         "return items.filter(fn);"
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "codeFlight",
@@ -3001,7 +3171,8 @@
           ]
         }
       ]
-    }
+    },
+    "category": "Code"
   },
   {
     "name": "usMapHex",
@@ -3084,7 +3255,8 @@
           "value": 1
         }
       ]
-    }
+    },
+    "category": "Maps"
   },
   {
     "name": "usMap",
@@ -3136,7 +3308,8 @@
           "value": 8
         }
       ]
-    }
+    },
+    "category": "Maps"
   },
   {
     "name": "worldMap",
@@ -3180,7 +3353,8 @@
           "value": 124
         }
       ]
-    }
+    },
+    "category": "Maps"
   },
   {
     "name": "usMapBubble",
@@ -3208,7 +3382,8 @@
           "value": 2.3
         }
       ]
-    }
+    },
+    "category": "Maps"
   },
   {
     "name": "usMapFlow",
@@ -3240,6 +3415,7 @@
           "value": 4
         }
       ]
-    }
+    },
+    "category": "Maps"
   }
 ]

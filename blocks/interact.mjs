@@ -22,6 +22,11 @@
 // down-then-up with no second layer and no second timeline to keep in sync.
 
 import { TOKENS as T, text, box, r2, R, onColor } from './kit.mjs';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'Interaction';
+
 
 // press depth: 0 → 1 → 0 across the sweep. Linear `--p` in, a symmetric dip out.
 const DIP = 'min(var(--p,0), 1 - var(--p,0))';

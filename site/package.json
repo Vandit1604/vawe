@@ -6,11 +6,12 @@
     "predev": "node ../scripts/site/site-engine.mjs",
     "dev": "next dev",
     "prebuild": "node ../scripts/site/site-engine.mjs",
-    "build": "next build",
-    "start": "next start",
+    "build": "NEXT_DIST_DIR=.next-build next build",
+    "start": "NEXT_DIST_DIR=.next-build next start",
     "lint": "next lint",
     "dev:docs": "npm --prefix ../docs-site run dev -- -p 3001",
-    "dev:all": "node ../scripts/site/dev-all.mjs"
+    "dev:all": "node ../scripts/site/dev-all.mjs",
+    "//build": "Builds into .next-build so a production build cannot corrupt the dev server's .next. Set via NEXT_DIST_DIR + next.config.mjs, because --distDir is not a CLI flag in Next 15."
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",

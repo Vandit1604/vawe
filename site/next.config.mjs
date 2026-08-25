@@ -9,7 +9,13 @@
 //   prod : set DOCS_ORIGIN to the docs service's origin, e.g. http://docs:3000
 const DOCS_ORIGIN = process.env.DOCS_ORIGIN || "http://127.0.0.1:3001";
 
+// A PRODUCTION BUILD MUST NOT WRITE INTO THE DEV SERVER'S .next.
+// `next build` against the same directory a dev server is serving leaves dev reading half-written
+// chunks: it 500s with "Cannot find module ./981.js" on whichever route was mid-write, and only
+// `rm -rf .next` clears it. That cost this session twice. `--distDir` is NOT a CLI flag in Next 15
+// (it was removed; `next build --distDir x` exits "unknown option"), so the split has to live here.
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
   outputFileTracingRoot: import.meta.dirname,
   // Docker: emit a self-contained server so the runtime image carries no dev deps.

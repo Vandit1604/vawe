@@ -1,0 +1,220 @@
+/* The block catalog — instrument register.
+ *
+ * Built on the site's existing tokens only (--ink/--muted/--line/--surface/--accent/--r/--ease from
+ * globals.css). Nothing here declares a colour of its own, so this page reskins with the rest of the
+ * site and inherits `.pgdark` if a route ever opts into it.
+ *
+ * WORTH KNOWING: the site has NO system dark mode. There is no `prefers-color-scheme` block and no
+ * `data-theme` anywhere in globals.css — only `.pgdark`, a class a single route opts into. So a visitor
+ * whose OS is dark gets the light site. That is a site-wide decision, not this page's to make, but it
+ * should be a deliberate one rather than an oversight.
+ *
+ * The register is a precise tool, so: hairlines instead of shadows, ONE elevation step and only on
+ * hover, mono for anything that is data (a name, a count), sans for prose. Depth is used to say
+ * "this is liftable", never for decoration. */
+
+.ct { --ct-rail: 188px; --ct-gap: 20px; }
+
+/* ── toolbar ───────────────────────────────────────────────────────────────
+ * This IS the page header. The count sits inside the title because it is the
+ * single most useful number on the page, not a statistic to be announced. */
+.ct-bar {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  padding: 22px 0 18px; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 5;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+.ct-bar h1 {
+  margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
+  display: flex; align-items: baseline; gap: 10px;
+}
+.ct-n {
+  font: 500 13px/1 var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted); padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px;
+}
+
+.ct-find { position: relative; display: flex; align-items: center; margin-left: auto; min-width: 260px; flex: 0 1 340px; }
+.ct-find svg {
+  position: absolute; left: 11px; width: 15px; height: 15px; pointer-events: none;
+  fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round;
+}
+.ct-find input {
+  width: 100%; padding: 9px 40px 9px 34px;
+  font: 400 14px/1.2 inherit; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  transition: border-color .16s var(--ease), box-shadow .16s var(--ease);
+}
+.ct-find input::placeholder { color: var(--muted); }
+.ct-find input:focus-visible {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.ct-find input::-webkit-search-cancel-button { display: none; }
+.ct-find kbd {
+  position: absolute; right: 10px;
+  font: 500 11px/1 var(--mono, ui-monospace, monospace); color: var(--muted);
+  padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px;
+}
+.ct-find:focus-within kbd { opacity: 0; }
+
+/* ── body ────────────────────────────────────────────────────────────────── */
+.ct-main { scroll-margin-top: 84px; }   /* clears the sticky toolbar when a page change scrolls us back up */
+.ct-body { display: grid; grid-template-columns: var(--ct-rail) minmax(0, 1fr); gap: 40px; padding: 24px 0 96px; }
+
+.ct-rail { position: sticky; top: 76px; align-self: start; display: flex; flex-direction: column; gap: 1px; }
+.ct-cat {
+  display: flex; text-decoration: none; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 7px 9px; border: 0; border-radius: 7px; background: none; cursor: pointer;
+  font: 400 14px/1 inherit; color: var(--muted); text-align: left;
+  transition: color .14s var(--ease), background-color .14s var(--ease);
+}
+.ct-cat em {
+  font: 500 12px/1 var(--mono, ui-monospace, monospace); font-style: normal;
+  font-variant-numeric: tabular-nums; color: var(--muted); opacity: .75;
+}
+.ct-cat:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.ct-cat[data-on] { color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 500; }
+.ct-cat[data-on] em { color: var(--accent); opacity: 1; }
+.ct-cat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.ct-how {
+  margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line);
+  font-size: 12.5px; line-height: 1.55; color: var(--muted); text-wrap: pretty;
+}
+.ct-how code {
+  font: 500 11.5px/1 var(--mono, ui-monospace, monospace);
+  color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent);
+  padding: 2px 5px; border-radius: 4px; white-space: nowrap;
+}
+
+/* ── result line ─────────────────────────────────────────────────────────── */
+.ct-count {
+  margin: 0 0 18px; font-size: 13px; color: var(--muted);
+  font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 10px;
+}
+.ct-count b { color: var(--ink); font-weight: 500; }
+.ct-clear {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--accent); text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.ct-none { margin: 40px 0; font-size: 14px; color: var(--muted); text-wrap: pretty; }
+.ct-none b { color: var(--ink); font-weight: 500; }
+.ct-none code {
+  font: 500 12.5px/1 var(--mono, ui-monospace, monospace); color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 5%, transparent); padding: 2px 5px; border-radius: 4px;
+}
+
+/* ── grid ────────────────────────────────────────────────────────────────── */
+.ct-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: var(--ct-gap);
+}
+.ct-card {
+  display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit;
+  border-radius: calc(var(--r) - 2px);
+}
+.ct-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* CONTAIN, NOT COVER, and the reason is in the data. Each poster is already cropped to its own block's
+ * bounds, so their aspects genuinely differ — codeTyping is 705x257 (2.7:1), usMapHex is 911x629
+ * (1.4:1). `cover` in a fixed 16/10 box cropped the code off the left of every terminal card, which
+ * on a page whose entire job is showing you the block is the one thing it must not do. A spec sheet
+ * shows the part whole; the cell is a consistent stage and the block sits inside it at its own shape. */
+.ct-thumb {
+  position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; overflow: hidden;
+  padding: 12px;
+  border: 1px solid var(--line); border-radius: calc(var(--r) - 2px);
+  background: var(--surface);
+  transition: border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+}
+.ct-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+/* The one elevation step on the page, and it only exists to say the card is liftable. */
+.ct-card:hover .ct-thumb {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.ct-play {
+  position: absolute; right: 8px; bottom: 8px; width: 26px; height: 26px;
+  display: grid; place-items: center; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(6px);
+  opacity: 0; transition: opacity .16s var(--ease), border-color .16s var(--ease);
+}
+.ct-play svg { width: 11px; height: 11px; fill: var(--ink); stroke: none; }
+.ct-card:hover .ct-play, .ct-play:focus-visible, .ct-play[data-on] { opacity: 1; }
+.ct-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ct-play[data-on] { border-color: var(--accent); }
+.ct-play[data-loading] svg { opacity: .45; }
+
+.ct-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ct-meta code {
+  font: 500 13px/1.3 var(--mono, ui-monospace, monospace); color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ct-blurb {
+  font-size: 12.5px; line-height: 1.45; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ── responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .ct-body { grid-template-columns: 1fr; gap: 20px; }
+  .ct-rail {
+    position: static; flex-direction: row; flex-wrap: nowrap; gap: 6px;
+    overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;
+  }
+  .ct-rail::-webkit-scrollbar { display: none; }
+  .ct-cat { flex: 0 0 auto; border: 1px solid var(--line); }
+  .ct-how { display: none; }   /* the rail becomes a filter strip; the note moves out of the way */
+  .ct-find { flex: 1 1 100%; margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-thumb, .ct-play, .ct-cat, .ct-find input, .ct-step, .ct-pg { transition: none; }
+  .ct-card:hover .ct-thumb { transform: none; }
+}
+
+/* ── sections ──────────────────────────────────────────────────────────────
+ * A label, not a control. The rail is the only thing that changes what you see; these headings just
+ * say which run you are looking at. Deliberately NOT sticky — two sticky bars and a sticky rail
+ * would leave a moving band across the top of every scroll. */
+.ct-sec { scroll-margin-top: 84px; }
+.ct-sec + .ct-sec { margin-top: 34px; }
+.ct-sec h2 {
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 14px; padding-bottom: 9px; border-bottom: 1px solid var(--line);
+  font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--ink);
+}
+.ct-sec h2 .ct-n { font-size: 11.5px; padding: 3px 6px; }
+
+/* ── paging ────────────────────────────────────────────────────────────────
+ * Pages, not infinite scroll: a browse position you can link to, come back to, and step through
+ * with the keyboard. Every control here is a real link, so Back works and so does middle-click. */
+.ct-pages {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line);
+}
+.ct-pages ol { display: flex; gap: 4px; list-style: none; margin: 0 auto; padding: 0; }
+.ct-step, .ct-pg {
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
+  font-size: 13px; color: var(--muted); background: var(--surface);
+  transition: color .14s var(--ease), border-color .14s var(--ease);
+}
+.ct-pg { font: 500 12.5px/1 var(--mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; padding: 8px 11px; }
+.ct-step svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+a.ct-step:hover, a.ct-pg:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.ct-step:focus-visible, .ct-pg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ct-pg[data-on] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+span.ct-step { opacity: .35; }   /* the end of the run, shown so the row keeps its shape */
+
+@media (max-width: 860px) {
+  .ct-pages ol { order: 3; flex-basis: 100%; justify-content: center; margin: 4px 0 0; }
+  .ct-step { flex: 1 1 0; justify-content: center; }
+}

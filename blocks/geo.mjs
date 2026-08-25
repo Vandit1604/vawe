@@ -30,6 +30,11 @@ import { TOKENS as T, HAIR, R, TYPE, SPACE, r2 } from './kit.mjs';
 // by four hundredths of a pixel on every single label. The next step up is the only one that passes.
 import { US_STATES } from '../assets/geo/us-states.js';
 import { WORLD_COUNTRIES } from '../assets/geo/world.js';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'Maps';
+
 
 // ── shared ───────────────────────────────────────────────────────────────────────────────────────
 // LAND, and it is the no-data fill too. `var(--surface-2)` alone was invisible: on a light theme the

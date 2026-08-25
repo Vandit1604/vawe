@@ -16,6 +16,11 @@
 // nature, so every count is a PROP that defaults to empty — the block never invents one.
 
 import { TOKENS as T, text, box, r2, R, cardChrome, avatarEl, onColor } from './kit.mjs';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'App';
+
 
 const spacer = () => box({ grow: 1 });
 

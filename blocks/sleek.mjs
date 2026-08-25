@@ -7,6 +7,11 @@
 // Each factory is PURE (props → array of scene-layer JSON), the same contract as blocks/ui.mjs. Compose in
 // an authoring script or via `{ "type":"block", "block":"glassCard", ... }` + `make expand`.
 import { TOKENS as T, text } from './kit.mjs';
+// The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
+// the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
+// declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
+export const CATEGORY = 'Surfaces';
+
 
 const WHITE_HAIR = 'rgba(255,255,255,0.14)';
 
