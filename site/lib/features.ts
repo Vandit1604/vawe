@@ -46,7 +46,7 @@ export const FEATURES: Feature[] = [
       "Browse the full registry on the blocks page. In a scene you reference one by name and `make expand` inlines it into real layers.",
     ],
     tag: "97 families · make catalog",
-    docs: "/blocks",
+    docs: "/arsenal",
   },
   {
     slug: "kinetic-type",

@@ -146,6 +146,28 @@
     "category": "Core"
   },
   {
+    "name": "splitFlapBoard",
+    "family": "splitFlapBoard",
+    "blurb": "a mechanical departure board · a drum per character steps through the alphabet and lands",
+    "props": {
+      "word": "SHIPPED",
+      "label": "status",
+      "size": 88
+    },
+    "category": "Type"
+  },
+  {
+    "name": "splitFlapBoard.small",
+    "family": "splitFlapBoard",
+    "blurb": "the board at caption size, no header rail",
+    "props": {
+      "word": "LIVE",
+      "size": 52,
+      "steps": 10
+    },
+    "category": "Type"
+  },
+  {
     "name": "stripeCard",
     "family": "stripeCard",
     "blurb": "recognizably-Stripe payments card",
