@@ -13948,3 +13948,60 @@ rather than about the gate. Separately, `motion-audit`'s inferred single window 
 one window `visEnd == end`, so every ordinary layer exit reads as a mid-scene fade, which is why
 `ii:monotonic` fires on a clean sample. The real repair is scenes declaring `segments`, or `add()`
 deriving windows from `cuts`.
+
+---
+
+## #451 — the engine found the beat and no scene could ask it to use it
+
+**Found by reading `scripts/media/beatmap.mjs`'s own comment: "Authors then snap cut times to it."**
+
+`core/beats.js` has computed a beat grid since it was written: onset envelope, tempo by
+autocorrelation, phase, `beatGrid`, `downbeats`, and a `snapToBeat` that refuses to drag a cut more
+than 0.12s. `lib-test` asserted all of it. `make beatmap` wrote the sidecar. Three files imported the
+module: `core/spectrum.js`, `lib-test.mjs`, and `beatmap.mjs` itself. Nothing on the render path.
+Grepping `beatGrid` and `.beats.json` across `formats/scene/scene.js`, `core/boot.js` and
+`core/cuts.js` returned nothing at all.
+
+**Root cause.** The same shape as #424, one step earlier in the pipe. There, `cameraMove` was a field
+written and never read. Here, a whole analysis was computed and never consumed: the engine could name
+the pulse and had no way to be told to land on it. The workaround was a human copying numbers out of a
+JSON and typing them into cut times, which is a fix that has to be remembered by every future author,
+so it is not a fix.
+
+**Fix.** `core/beat-bind.js`, and a scene declares its grid:
+
+```json
+"audio": { "music": "beat", "beatSync": true }
+```
+
+`true` derives the sidecar from the bed the way the mixer derives the bed itself
+(`assets/music/beat.beats.json`); the object form carries `grid`, `maxShift` and `bar`. `core/boot.js`
+fetches the sidecar once, before the first frame, and hands it to `build()` beside the frame;
+`formats/scene/scene.js` binds immediately after `lowerScene`, because a cut written as `transitions`
+has no time until then, and before anything reads a cut, so `cut@n` backdrop windows follow the
+snapped joint. Cuts snap their time; seams snap the centre of their blend; stings do not snap, because
+an author offsets a sting from its cut on purpose and snapping it independently would collapse that
+offset. `renderFrame(n)` never sees a grid.
+
+**The refusal is the feature.** A joint further than `maxShift` from any beat keeps the time it was
+written with, and the run prints which ones held. `"snap": false` on a cut or seam keeps an exact time
+inside a bound film. On `example-kinetic-type` against `beat.beats.json` (97.5 BPM), three of five cuts
+moved (2.2→2.206, 4.1→4.052, 6.0→5.898) and two held (8.6 and 10.4, both about 0.2s from any beat).
+
+**Silence was not left as an option.** A named grid that is missing, empty, or scored below confidence
+1.6 throws, naming the file and `make beatmap`. `core/validate.mjs` checks the same path on disk at
+author time, so a typo is an error before a render is spent. A film that asks to be beat-matched and
+renders unmatched would be this bug wearing a new hat.
+
+**Blast radius.** None: `snap-scenes` reports 106 of 106 identical, because nothing in the library
+names a grid. `probe-purity` clean. `lib-test` 1066 → 1083.
+
+**Still open — there are now two owners of "which beat does this joint land on".**
+`scripts/media/beatsync.mjs` already did this at author time, by writing a derivative
+`<scene>.beatsync.json`, and it re-implements the nearest-beat search rather than calling
+`snapToBeat`. It rounds the same way but its tolerance is half a beat capped at 0.18s against 0.12s
+here, and it also moves stings. Two mechanisms saying one thing is the drift this repo keeps paying
+for, so the CLI should either delegate to `core/beat-bind.js` or be retired in favour of the
+declaration. It was left alone in this pass because four committed scenes carry a `.beatsync.json` and
+changing its tolerance would move them. The loop unroll for a short bed was taken FROM it, so at least
+that arithmetic now exists on the render path too.

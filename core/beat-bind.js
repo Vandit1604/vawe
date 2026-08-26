@@ -74,8 +74,8 @@ export function bindBeats(data, sidecar) {
   if (!sidecar || typeof sidecar !== 'object')
     throw new Error(`audio.beatSync is set but no beat grid reached the render (${beatGridPath(data)}) — ${FIX}.`);
   const unit = cfg.bar ? 'downbeats' : 'beats';
-  const grid = sidecar[unit];
-  if (!Array.isArray(grid) || !grid.length)
+  const pulse = sidecar[unit];
+  if (!Array.isArray(pulse) || !pulse.length)
     throw new Error(`the beat grid ${beatGridPath(data)} carries no \`${unit}\` — ${FIX}.`);
   const conf = Number(sidecar.confidence);
   if (!(conf >= MIN_CONFIDENCE))
@@ -83,6 +83,21 @@ export function bindBeats(data, sidecar) {
       + `(below ${MIN_CONFIDENCE}): the track has no pulse worth snapping to. Use a bed with a clear `
       + 'beat, or drop audio.beatSync.');
   const maxShift = typeof cfg.maxShift === 'number' ? cfg.maxShift : 0.12;
+  // A short bed LOOPS to fill the film (the Go mixer repeats music.wav), but the sidecar only covers
+  // the track file: `warm` is 8 seconds, so a 20-second film has no beats past 8 and every later joint
+  // would hold for want of a grid rather than for want of a pulse. A seamless bed keeps its phase, so
+  // beat b recurs at b + k*period. Same unroll scripts/media/beatsync.mjs does at author time.
+  const grid = pulse.slice();   // a copy: the sidecar belongs to the caller
+  const period = Number(sidecar.seconds) || 0;
+  const dur = Number(data.duration) || 0;
+  if (period > 0.5 && dur > period + 0.1) {
+    const base = grid.slice();
+    for (let k = 1; k * period < dur; k++) for (const b of base) {
+      const t = +(b + k * period).toFixed(4);
+      if (t <= dur) grid.push(t);
+    }
+    grid.sort((x, y) => x - y);
+  }
 
   const moved = [], held = [];
   const apply = (j, kind, centre) => {

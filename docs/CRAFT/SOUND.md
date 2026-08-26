@@ -184,6 +184,46 @@ a fabricated grid. `beatsync` is the picture-follows-track direction and it is d
 idempotent; four scenes in the library carry a `.beatsync.json` and it is the most under-used tool we
 own.
 
+### The scene can now NAME its grid, and the engine snaps the joints itself
+
+`beatsync` writes a second file. The original scene keeps the times the author wrote, the derivative
+carries the snapped ones, and the two drift the moment anybody edits either. So a scene may instead
+DECLARE the grid and let the engine bind the joints at boot, on the one path every render goes through:
+
+```json
+"audio": {
+  "music": "beat",
+  "beatSync": true
+}
+```
+
+`true` takes the sidecar `make beatmap` wrote beside the bed (`assets/music/beat.beats.json`). The
+object form sets the three knobs: `grid` (an explicit `.beats.json`), `maxShift` (how far a joint may
+travel, default 0.12s) and `bar` (snap to downbeats instead of every beat).
+
+**What snaps.** Cuts snap their time. Seams snap the CENTRE of their blend, because a blend is felt in
+the middle of its window, so a seam wrapped around an already-snapped cut stays wrapped. Stings do NOT
+snap: a sting is punctuation hung off a junction, and an author offsets one from its cut on purpose.
+Beat boundaries and `cut@n` backdrop windows need nothing, because they are derived from the cuts and
+follow for free.
+
+**What refuses.** A joint further than `maxShift` from any beat keeps the time the author wrote, and
+the run says which ones did. That refusal is the good part: dragging a cut a third of a second onto a
+beat destroys the timing somebody meant. To keep one exact time inside a bound film, write
+`"snap": false` on that cut or seam.
+
+**What fails loudly.** A named grid that is missing, empty, or scored below confidence 1.6 stops the
+render and names the file and `make beatmap`. A film that asks to be beat-matched and quietly renders
+unmatched is the bug this replaces, not a softer version of it.
+
+A short bed loops to fill the film, so the grid is unrolled across the runtime (`warm` is 8 seconds;
+its beats recur every 8 seconds). Everything happens once, before the first frame, so `renderFrame(n)`
+never sees a grid. `core/beat-bind.js`.
+
+> Two things now decide which beat a joint lands on: this declaration and `scripts/media/beatsync.mjs`.
+> They round the same way but not with the same tolerance (0.12s here, half a beat capped at 0.18s
+> there), and the CLI also moves stings. Prefer the declaration for new films.
+
 **Hit points and tempo maps.** In scoring practice you lock the hit points first and then choose the
 BPM that puts a downbeat exactly on each target frame. Carl Stalling shifted tempo several times inside
 a ten-second Looney Tunes gag to do it.
@@ -345,6 +385,7 @@ is a workaround rather than the dial.
 | `make music-pack` / `make music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
 | `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
+| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beat-bind.js) |
 | `make beatsync D=… MUSIC=… WRITE=1` | snap cuts/seams/stings onto that grid |
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |

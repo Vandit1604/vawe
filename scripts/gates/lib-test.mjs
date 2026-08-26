@@ -1885,6 +1885,10 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: `snap:false` keeps a time the author means', s3.cuts[0].t === 0.54);
   const s4 = sc(); s4.audio.beatSync = { bar: true }; bindBeats(s4, G);
   ok('beat-bind: `bar:true` snaps to downbeats only', s4.cuts[0].t === 0.54);
+  const s5 = { duration: 8, audio: { music: 'beat', beatSync: true }, cuts: [{ t: 4.48, style: 'punch' }] };
+  bindBeats(s5, { ...G, seconds: 3 });
+  ok('beat-bind: a looping bed unrolls its grid across the film', s5.cuts[0].t === 4.5);
+  ok('beat-bind: the unroll leaves the caller\'s sidecar alone', G.beats.length === 7);
   ok('beat-bind: binding twice is identical (pure)', JSON.stringify(bindBeats(sc(), G)) === JSON.stringify(bindBeats(sc(), G)));
   ok('beat-bind: a missing grid THROWS rather than rendering unmatched', throws(() => bindBeats(sc(), null), /beat grid|beatmap/));
   ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
