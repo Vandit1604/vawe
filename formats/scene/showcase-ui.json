@@ -1,285 +1,482 @@
 {
   "module": "scene",
+  "storyboard": "formats/scene/showcase-ui.storyboard.md",
   "authoring": {
     "allow": [
-      "no-continuous-object",
-      "off-colour"
+      "off-colour",
+      "clipped-text"
     ],
-    "_allow_why": "off-colour: as vawe-intro, this depicts real window chrome and its dots are the actual macOS colours."
+    "_why": {
+      "off-colour": "the browserFrame block paints the real macOS traffic-light dots, and window chrome that is not those three colours does not read as window chrome",
+      "clipped-text": "tabBar.switch reveals the selected label through a moving mask, so the pill's clientWidth (347px) is meant to be narrower than the label row inside it (1052px). Nothing is cut on screen: the audit reads a deliberate mask as a clipped glyph run."
+    }
   },
-  "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
   "aspect": "16:9",
   "theme": "vawe",
-  "duration": 8.4,
+  "duration": 10.6,
   "audio": {
-    "silent": true
+    "sfxGain": 0.7,
+    "cues": [
+      {
+        "t": 1.95,
+        "name": "click",
+        "gain": 0.5
+      },
+      {
+        "t": 3.35,
+        "name": "page",
+        "gain": 0.35
+      },
+      {
+        "t": 4.1,
+        "name": "whoosh",
+        "gain": 0.3
+      },
+      {
+        "t": 6.78,
+        "name": "whisper",
+        "gain": 0.4
+      },
+      {
+        "t": 7.8,
+        "name": "chime",
+        "gain": 0.35
+      }
+    ],
+    "bridges": [
+      {
+        "bridge": "l",
+        "at": "cut@1",
+        "sound": "loading",
+        "lag": 1.2,
+        "gain": 0.4,
+        "fade": 0.5
+      }
+    ]
   },
   "layers": [
     {
-      "type": "group",
+      "type": "block",
+      "block": "browserFrame",
       "x": 400,
-      "y": 190,
+      "y": 200,
       "w": 1120,
-      "h": 600,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": 0,
-      "bg": "var(--card)",
-      "radius": 14,
-      "elevation": 2,
+      "h": 560,
+      "url": "app.vawe.dev",
       "start": 0.25,
-      "duration": 5.6,
-      "anim": "rise",
-      "enterDur": 0.5,
-      "exitDur": 0.35,
+      "dur": 3.15,
       "children": [
         {
           "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 8,
-          "pad": "14px 18px",
+          "layout": "column",
+          "items": "stretch",
+          "gap": 22,
+          "pad": "26px 28px 30px",
           "children": [
             {
-              "type": "group",
-              "radius": 100,
-              "w": 12,
-              "h": 12,
-              "bg": "#FF5F57"
+              "type": "block",
+              "block": "tabBar.switch",
+              "w": 1064,
+              "tabs": [
+                "Overview",
+                "Motion",
+                "Export"
+              ],
+              "activeFrom": 0,
+              "activeTo": 2,
+              "switchAt": 1.4,
+              "start": 0.55,
+              "dur": 2.85
+            },
+            {
+              "type": "block",
+              "block": "lineChart.area",
+              "w": 1064,
+              "h": 250,
+              "label": "frames rendered / hour",
+              "data": [
+                {
+                  "label": "09",
+                  "value": 18
+                },
+                {
+                  "label": "10",
+                  "value": 26
+                },
+                {
+                  "label": "11",
+                  "value": 24
+                },
+                {
+                  "label": "12",
+                  "value": 41
+                },
+                {
+                  "label": "13",
+                  "value": 55
+                }
+              ],
+              "start": 0.8,
+              "dur": 2.6
+            },
+            {
+              "type": "block",
+              "block": "kpiRow",
+              "items": [
+                {
+                  "value": "30fps",
+                  "label": "frame rate"
+                },
+                {
+                  "value": "1350",
+                  "label": "frames"
+                },
+                {
+                  "value": "0",
+                  "label": "timelines"
+                }
+              ],
+              "start": 1.15,
+              "dur": 2.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "block",
+      "block": "pointer",
+      "x": 1560,
+      "y": 880,
+      "to": {
+        "x": 1318,
+        "y": 300
+      },
+      "clickAt": 1.35,
+      "size": 44,
+      "start": 0.6,
+      "dur": 2.8
+    },
+    {
+      "type": "text",
+      "text": "a real clock",
+      "x": 400,
+      "y": 810,
+      "w": 1120,
+      "align": "center",
+      "size": 32,
+      "font": "mono",
+      "color": "var(--dim)",
+      "start": 1.05,
+      "duration": 2.35,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.25
+    },
+    {
+      "type": "group",
+      "id": "panel",
+      "x": 1130,
+      "y": 500,
+      "w": 560,
+      "layout": "column",
+      "start": 3.42,
+      "duration": 3.6,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "modifiers": [
+        {
+          "ghost": {
+            "mode": "trail",
+            "k": 6,
+            "back": 0.4,
+            "alpha": 0.26,
+            "fade": 0.66
+          }
+        }
+      ],
+      "motion": [
+        {
+          "t": 0.6,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "t": 1.55,
+          "x": -840,
+          "y": 0,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 3.0,
+          "x": -840,
+          "y": 0
+        },
+        {
+          "t": 3.6,
+          "x": -1460,
+          "y": 0,
+          "ease": "easeInCubic"
+        }
+      ],
+      "children": [
+        {
+          "type": "group",
+          "w": 560,
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 16,
+          "pad": 32,
+          "bg": "var(--card)",
+          "radius": 18,
+          "elevation": 3,
+          "children": [
+            {
+              "type": "text",
+              "text": "worker 3 of 8",
+              "font": "mono",
+              "size": 20,
+              "weight": 500,
+              "color": "var(--dim)"
+            },
+            {
+              "type": "count",
+              "from": 0,
+              "to": 412,
+              "suffix": " / 1350",
+              "font": "num",
+              "size": 68,
+              "weight": 700,
+              "color": "var(--text)",
+              "ls": "-0.02em",
+              "countStart": 0.15,
+              "countDur": 1.1,
+              "ease": "easeOutExpo"
             },
             {
               "type": "group",
-              "radius": 100,
-              "w": 12,
+              "w": 496,
               "h": 12,
-              "bg": "#FEBC2E"
-            },
-            {
-              "type": "group",
+              "bg": "var(--surface-2)",
               "radius": 100,
-              "w": 12,
-              "h": 12,
-              "bg": "#28C840"
-            },
-            {
-              "type": "group",
-              "grow": 1,
-              "layout": "row",
-              "justify": "center",
               "children": [
                 {
-                  "type": "group",
-                  "bg": "var(--surface-2)",
+                  "type": "rect",
+                  "w": 151,
+                  "h": 12,
+                  "bg": "var(--accent)",
                   "radius": 100,
-                  "pad": "6px 20px",
-                  "children": [
-                    {
-                      "type": "text",
-                      "weight": 500,
-                      "text": "app.vawe.dev",
-                      "font": "mono",
-                      "size": 18,
-                      "color": "var(--text-2)"
-                    }
-                  ]
+                  "anim": "wipe-right",
+                  "enterDur": 1.1
                 }
               ]
             }
           ]
         }
-      ]
+      ],
+      "pad": 0
     },
     {
       "type": "text",
-      "text": "Overview",
-      "x": 444,
-      "y": 294,
-      "size": 38,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 0.6,
-      "duration": 5.25,
+      "id": "panelCaption",
+      "follow": {
+        "id": "panel",
+        "edge": "below",
+        "gap": 30
+      },
+      "text": "no recording holds still like this",
+      "x": 1130,
+      "y": 800,
+      "w": 560,
+      "align": "center",
+      "size": 26,
+      "font": "mono",
+      "color": "var(--paper)",
+      "start": 3.62,
+      "duration": 3.0,
       "anim": "fade",
-      "exitDur": 0.2
+      "enterDur": 0.4,
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Every frame is <b>drawn</b>.",
+      "x": 210,
+      "y": 140,
+      "w": 1500,
+      "align": "center",
+      "size": 100,
+      "weight": 700,
+      "color": "var(--paper)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.055,
+      "each": 0.4,
+      "start": 3.5,
+      "duration": 2.7,
+      "anim": "none",
+      "exitDur": 0.28
     },
     {
       "type": "group",
-      "x": 444,
-      "y": 366,
-      "w": 330,
+      "id": "surface",
+      "x": 580,
+      "y": 200,
+      "w": 760,
       "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 26,
-      "bg": "var(--card)",
-      "radius": 14,
-      "border": "1px solid var(--line)",
-      "elevation": 1,
-      "start": 0.85,
-      "duration": 5,
-      "anim": "rise",
-      "enterDur": 0.45,
-      "exitDur": 0.3,
+      "items": "stretch",
+      "gap": 18,
+      "pad": 38,
+      "bg": "var(--ink)",
+      "radius": 16,
+      "elevation": 2,
+      "start": 6.8,
+      "duration": 1.75,
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0,
       "children": [
         {
           "type": "text",
+          "text": "app.vawe.dev / overview",
+          "font": "mono",
+          "size": 20,
           "weight": 500,
-          "text": "frames rendered",
-          "size": 18,
-          "color": "var(--dim)",
-          "font": "mono"
-        },
-        {
-          "type": "count",
-          "from": 0,
-          "to": 1350,
-          "unit": "",
-          "font": "sans",
-          "size": 56,
-          "weight": 700,
-          "color": "var(--text)",
-          "ls": "-0.02em",
-          "countStart": 0.2,
-          "countDur": 1.2,
-          "ease": "easeOutExpo"
+          "color": "var(--line)",
+          "exitDur": 0
         },
         {
           "type": "group",
           "layout": "row",
-          "items": "center",
-          "gap": 6,
+          "items": "flex-start",
+          "gap": 30,
           "children": [
             {
               "type": "text",
-              "weight": 500,
-              "text": "\u25b2",
-              "size": 15,
-              "color": "var(--up)"
+              "text": "30fps",
+              "size": 58,
+              "weight": 700,
+              "color": "var(--paper)",
+              "exitDur": 0
             },
             {
               "type": "text",
-              "weight": 600,
-              "text": "+12%",
-              "size": 17,
-              "color": "var(--up)",
-              "font": "mono"
+              "text": "1350",
+              "size": 58,
+              "weight": 700,
+              "color": "var(--paper)",
+              "exitDur": 0
+            },
+            {
+              "type": "text",
+              "text": "0",
+              "size": 58,
+              "weight": 700,
+              "color": "var(--paper)",
+              "exitDur": 0
             }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "html",
-      "x": 820,
-      "y": 366,
-      "w": 640,
-      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:640px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">renders / hour</div><svg viewBox=\"0 0 596 216\" width=\"100%\" height=\"216\" style=\"display:block;overflow:visible\"><polygon points=\"8,208 8.0,139.7 153.0,100.7 298.0,112.9 443.0,47.0 588.0,8.0 588,208\" fill=\"var(--up)\" opacity=\"0.12\"/><polyline points=\"8.0,139.7 153.0,100.7 298.0,112.9 443.0,47.0 588.0,8.0\" fill=\"none\" stroke=\"var(--up)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"139.7\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"153.0\" cy=\"100.7\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"298.0\" cy=\"112.9\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"443.0\" cy=\"47.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"588.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/></svg></div>",
-      "start": 1.1,
-      "duration": 4.75,
-      "anim": "rise",
-      "enterDur": 0.5,
-      "exitDur": 0.35
-    },
-    {
-      "type": "cursor",
-      "x": 1320,
-      "y": 694,
-      "size": 44,
-      "start": 2.4,
-      "duration": 3.45,
-      "clicks": [
-        1.5
-      ],
-      "path": [
-        {
-          "t": 0,
-          "x": -520,
-          "y": -280
+          ],
+          "exitDur": 0
         },
         {
-          "t": 1.4,
-          "x": 0,
-          "y": 0,
-          "ease": "easeOutExpo"
-        },
-        {
-          "t": 3.45,
-          "x": 0,
-          "y": 0
+          "type": "text",
+          "text": "frame rate  \u00b7  frames  \u00b7  timelines",
+          "font": "mono",
+          "size": 19,
+          "color": "var(--line)",
+          "exitDur": 0
         }
       ]
     },
     {
       "type": "group",
-      "x": 1050,
-      "y": 650,
-      "w": 430,
-      "layout": "row",
-      "items": "center",
-      "gap": 14,
-      "pad": "16px 20px",
-      "bg": "#0A0A0A",
-      "radius": 12,
+      "id": "surfaceBurn",
+      "x": 580,
+      "y": 200,
+      "w": 760,
+      "layout": "column",
+      "items": "stretch",
+      "gap": 18,
+      "pad": 38,
+      "bg": "var(--ink)",
+      "radius": 16,
       "elevation": 2,
-      "start": 4.05,
-      "duration": 1.8,
-      "anim": "rise",
-      "enterDur": 0.4,
-      "exitDur": 0.3,
+      "start": 8.55,
+      "duration": 1.5,
+      "anim": "fade",
+      "enterDur": 0.01,
+      "exitDur": 0.25,
       "children": [
         {
+          "type": "text",
+          "text": "app.vawe.dev / overview",
+          "font": "mono",
+          "size": 20,
+          "weight": 500,
+          "color": "var(--line)"
+        },
+        {
           "type": "group",
-          "radius": 100,
-          "w": 22,
-          "h": 22,
-          "bg": "var(--up)",
           "layout": "row",
-          "justify": "center",
-          "items": "center",
+          "items": "flex-start",
+          "gap": 30,
           "children": [
             {
               "type": "text",
+              "text": "30fps",
+              "size": 58,
               "weight": 700,
-              "text": "\u2713",
-              "size": 14,
-              "color": "#fff"
+              "color": "var(--paper)"
+            },
+            {
+              "type": "text",
+              "text": "1350",
+              "size": 58,
+              "weight": 700,
+              "color": "var(--paper)"
+            },
+            {
+              "type": "text",
+              "text": "0",
+              "size": 58,
+              "weight": 700,
+              "color": "var(--paper)"
             }
           ]
         },
         {
           "type": "text",
-          "weight": 500,
-          "text": "Video rendered to out.mp4",
+          "text": "frame rate  \u00b7  frames  \u00b7  timelines",
+          "font": "mono",
           "size": 19,
-          "color": "#F5F5F3",
-          "grow": 1
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "Open",
-          "size": 18,
-          "color": "#3ECF8E"
+          "color": "var(--line)"
         }
-      ]
+      ],
+      "resample": {
+        "fx": "dissolve",
+        "amount": [
+          0.06,
+          0.9
+        ]
+      }
     },
     {
       "type": "text",
       "text": "No screen recording.",
       "x": 210,
-      "y": 350,
+      "y": 560,
       "w": 1500,
       "align": "center",
-      "size": 88,
+      "size": 112,
       "weight": 500,
       "color": "var(--text-2)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,
       "each": 0.44,
-      "start": 6.05,
-      "duration": 2.35,
+      "start": 6.85,
+      "duration": 3.75,
       "anim": "none",
       "exitDur": 0
     },
@@ -287,42 +484,43 @@
       "type": "text",
       "text": "This is <b>JSON</b>.",
       "x": 210,
-      "y": 470,
+      "y": 700,
       "w": 1500,
       "align": "center",
-      "size": 132,
+      "size": 140,
       "weight": 700,
       "color": "var(--text)",
       "split": "word",
       "preset": "up",
       "stagger": 0.08,
       "each": 0.5,
-      "start": 6.75,
-      "duration": 1.65,
+      "start": 7.7,
+      "duration": 2.9,
       "anim": "none",
       "exitDur": 0
     }
   ],
   "cuts": [
     {
-      "t": 6,
-      "style": "riseBlur"
-    }
-  ],
-  "stings": [
+      "t": 3.4,
+      "style": "slide",
+      "dur": 0.4
+    },
     {
-      "t": 4.06,
-      "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.35
+      "t": 6.7,
+      "style": "riseBlur",
+      "dur": 0.42
     }
   ],
   "bg": [
     {
-      "t": 0,
-      "preset": "dotmatrix"
+      "preset": "paperDots"
+    },
+    {
+      "preset": "ink"
+    },
+    {
+      "preset": "soft"
     }
   ]
 }

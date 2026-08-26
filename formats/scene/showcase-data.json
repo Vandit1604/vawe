@@ -1,19 +1,60 @@
 {
   "module": "scene",
-  "authoring": { "allow": ["no-continuous-object"] },
-  "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
+  "storyboard": "formats/scene/showcase-data.storyboard.md",
   "aspect": "16:9",
   "theme": "vawe",
-  "duration": 8.4,
+  "duration": 9.8,
   "audio": {
-    "silent": true
+    "sfxGain": 0.5,
+    "cues": [
+      {
+        "t": 0.72,
+        "name": "loading",
+        "gain": 0.4
+      },
+      {
+        "t": 2.35,
+        "name": "tick",
+        "gain": 0.35
+      },
+      {
+        "t": 2.62,
+        "name": "ready",
+        "gain": 0.4
+      },
+      {
+        "t": 4.15,
+        "name": "whoosh",
+        "gain": 0.35
+      },
+      {
+        "t": 5.3,
+        "name": "success",
+        "gain": 0.55
+      },
+      {
+        "t": 7.45,
+        "name": "chime",
+        "gain": 0.35
+      }
+    ],
+    "bridges": [
+      {
+        "bridge": "j",
+        "at": "cut@1",
+        "sound": "loading",
+        "lead": 0.6,
+        "gain": 0.28,
+        "fade": 0.4
+      }
+    ]
   },
   "layers": [
     {
       "type": "text",
       "text": "One film. <b>1,350</b> frames.",
       "x": 210,
-      "y": 280,
+      "y": 170,
       "w": 1500,
       "align": "center",
       "size": 96,
@@ -21,24 +62,102 @@
       "color": "var(--text)",
       "split": "word",
       "preset": "up",
-      "stagger": 0.07,
-      "each": 0.44,
-      "start": 0.3,
-      "duration": 4,
+      "stagger": 0.06,
+      "each": 0.42,
+      "start": 0.25,
+      "duration": 3.05,
       "anim": "none",
-      "exitDur": 0.24
+      "exitDur": 0.26
     },
     {
-      "type": "html",
-      "x": 400,
-      "y": 440,
-      "w": 1120,
-      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:1120px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">frames rendered / worker</div><svg viewBox=\"0 0 1076 256\" width=\"100%\" height=\"256\" style=\"display:block;overflow:visible\"><polygon points=\"8,248 8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0 1068,248\" fill=\"var(--up)\" opacity=\"0.12\"/><polyline points=\"8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0\" fill=\"none\" stroke=\"var(--up)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"159.4\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"310.9\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"462.3\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"613.7\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"765.1\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"916.6\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"1068.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/></svg></div>",
-      "start": 1,
-      "duration": 3.3,
+      "type": "block",
+      "block": "loadingBar",
+      "x": 410,
+      "y": 400,
+      "w": 1100,
+      "h": 18,
+      "label": "rendering film.json",
+      "fillDur": 1.7,
+      "start": 0.7
+    },
+    {
+      "type": "group",
+      "id": "runA",
+      "x": 180,
+      "y": 600,
+      "w": 700,
+      "layout": "row",
+      "items": "center",
+      "gap": 24,
+      "pad": "26px 36px",
+      "bg": "var(--card)",
+      "radius": 100,
+      "elevation": 1,
+      "start": 2.55,
+      "duration": 7.25,
       "anim": "rise",
-      "enterDur": 0.5,
-      "exitDur": 0.35
+      "enterDur": 0.4,
+      "exitDur": 0.3,
+      "motion": [
+        {
+          "t": 0,
+          "x": 430,
+          "y": 0
+        },
+        {
+          "t": 0.9,
+          "x": 430,
+          "y": 0
+        },
+        {
+          "t": 1.7,
+          "x": 0,
+          "y": 0,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 4.1,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "t": 4.35,
+          "x": 40,
+          "y": 0,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 7.25,
+          "x": 40,
+          "y": 0
+        }
+      ],
+      "children": [
+        {
+          "type": "group",
+          "radius": 100,
+          "w": 16,
+          "h": 16,
+          "bg": "var(--up)"
+        },
+        {
+          "type": "text",
+          "text": "run 1",
+          "font": "mono",
+          "size": 28,
+          "weight": 600,
+          "color": "var(--dim)"
+        },
+        {
+          "type": "text",
+          "text": "a4f1e0c9d2",
+          "font": "mono",
+          "size": 42,
+          "weight": 600,
+          "color": "var(--text)",
+          "grow": 1
+        }
+      ]
     },
     {
       "type": "text",
@@ -47,49 +166,142 @@
       "y": 330,
       "w": 1500,
       "align": "center",
-      "size": 92,
+      "size": 148,
       "weight": 500,
       "color": "var(--text-2)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,
       "each": 0.44,
-      "start": 4.5,
-      "duration": 3.9,
+      "start": 3.5,
+      "duration": 3.1,
       "anim": "none",
-      "exitDur": 0
+      "exitDur": 0.24
+    },
+    {
+      "type": "group",
+      "id": "runB",
+      "x": 1040,
+      "y": 600,
+      "w": 700,
+      "start": 4,
+      "duration": 5.8,
+      "anim": "fade",
+      "enterDur": 0.2,
+      "exitDur": 0.3,
+      "modifiers": [
+        {
+          "ghost": {
+            "mode": "trail",
+            "k": 7,
+            "back": 0.4,
+            "alpha": 0.3,
+            "fade": 0.66
+          }
+        }
+      ],
+      "motion": [
+        {
+          "t": 0.2,
+          "x": 1080,
+          "y": 0
+        },
+        {
+          "t": 1.3,
+          "x": 0,
+          "y": 0,
+          "ease": "easeOutExpo"
+        },
+        {
+          "t": 2.65,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "t": 2.9,
+          "x": -40,
+          "y": 0,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 5.8,
+          "x": -40,
+          "y": 0
+        }
+      ],
+      "children": [
+        {
+          "type": "group",
+          "w": 700,
+          "layout": "row",
+          "items": "center",
+          "gap": 24,
+          "pad": "26px 36px",
+          "bg": "var(--card)",
+          "radius": 100,
+          "elevation": 1,
+          "children": [
+            {
+              "type": "group",
+              "radius": 100,
+              "w": 16,
+              "h": 16,
+              "bg": "var(--up)"
+            },
+            {
+              "type": "text",
+              "text": "run 2",
+              "font": "mono",
+              "size": 28,
+              "weight": 600,
+              "color": "var(--dim)"
+            },
+            {
+              "type": "text",
+              "text": "a4f1e0c9d2",
+              "font": "mono",
+              "size": 42,
+              "weight": 600,
+              "color": "var(--text)",
+              "grow": 1
+            }
+          ]
+        }
+      ],
+      "layout": "column",
+      "pad": 0
     },
     {
       "type": "text",
       "text": "Byte for byte, <b>the same</b>.",
       "x": 210,
-      "y": 450,
+      "y": 330,
       "w": 1500,
       "align": "center",
-      "size": 118,
+      "size": 112,
       "weight": 700,
       "color": "var(--text)",
       "split": "word",
       "preset": "up",
       "stagger": 0.08,
       "each": 0.5,
-      "start": 5.3,
-      "duration": 3.1,
+      "start": 6.75,
+      "duration": 3.06,
       "anim": "none",
       "exitDur": 0
     },
     {
       "type": "text",
-      "text": "renderFrame(n) is pure in n",
+      "text": "renderFrame(n) is pure",
       "x": 210,
-      "y": 660,
+      "y": 480,
       "w": 1500,
       "align": "center",
       "size": 30,
       "font": "mono",
       "color": "var(--dim)",
-      "start": 6.4,
-      "duration": 2,
+      "start": 7.35,
+      "duration": 2.45,
       "anim": "fade",
       "enterDur": 0.5,
       "exitDur": 0
@@ -97,19 +309,35 @@
   ],
   "cuts": [
     {
-      "t": 4.45,
-      "style": "riseBlur"
+      "t": 3.35,
+      "style": "slide",
+      "dur": 0.4
+    },
+    {
+      "t": 6.65,
+      "style": "riseBlur",
+      "dur": 0.42
     }
   ],
   "stings": [
     {
-      "t": 5.28,
+      "t": 5.3,
       "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.4
+      "intensity": 0.32
     }
   ],
-  "bg": [{ "t": 0, "preset": "dotmatrix" }]
+  "bg": [
+    {
+      "preset": "paperDots"
+    },
+    {
+      "preset": "soft"
+    },
+    {
+      "preset": "soft"
+    },
+    {
+      "preset": "paperShapes"
+    }
+  ]
 }
