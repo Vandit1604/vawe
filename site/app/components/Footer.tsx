@@ -28,7 +28,7 @@ export function Footer({ note = "one JSON, one video", bookend = false }: { note
           </a>
         </div>
         <div className="foot-links">
-          <a href="/blocks">Blocks</a>
+          <a href="/arsenal">Arsenal</a>
           <a href="/showcase">Showcase</a>
           <a href="/editor">Editor</a>
           <a href="/features">Features</a>

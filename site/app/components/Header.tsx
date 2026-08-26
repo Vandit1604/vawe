@@ -11,7 +11,7 @@ export function WaveGlyph({ className = "glyph" }: { className?: string }) {
 const NAV = [
   { href: "/editor", label: "Editor", key: "editor" },
   { href: "/showcase", label: "Showcase", key: "showcase" },
-  { href: "/blocks", label: "Blocks", key: "blocks" },
+  { href: "/arsenal", label: "Arsenal", key: "arsenal" },
   { href: "/playground", label: "Playground", key: "playground" },
   { href: "/features", label: "Features", key: "features" },
 ];
@@ -21,7 +21,7 @@ const NAV = [
 // production. It used to fall back to a localhost URL, which shipped a dead link to every visitor.
 const DOCS_URL = "/docs";
 
-export function Header({ active, variant = "solid" }: { active?: string; variant?: "over" | "solid" | "pill" }) {
+export function Header({ active, variant = "solid" }: { active?: string; variant?: "solid" | "pill" }) {
   return (
     // The pill floats over the hero band. It is absolute so it can sit on the band without
     // consuming its top padding — and it is now a CHILD of the band, so its computed background

@@ -1,0 +1,207 @@
+/* The landing page, and nothing else.
+ *
+ * globals.css earns a rule only when two routes need it, so everything here has exactly one
+ * consumer: app/page.tsx and the three components only it mounts (Header's pill variant lives in
+ * globals because the bar itself is shared; the band it floats on does not).
+ *
+ * What this page is: the engine running, three times, in three registers. A live editable scene in
+ * the hero, two drawn proofs of what determinism buys, three finished films with their source line
+ * counts. The chrome stays still so the renders are the only thing moving.
+ */
+
+/* ===== THE V ==============================================================================
+   The hero band comes to a point at centre-bottom, so the paper below reads as something the band
+   is pouring into rather than a seam between two rectangles. Only the hero tapers; the footer band
+   in Footer.tsx uses the same .bookend with a flat foot. */
+.bookend.tap{clip-path:polygon(0 0,100% 0,100% 64%,50% 100%,0 64%);padding-bottom:clamp(70px,9vw,132px)}
+@media (max-width:760px){ .bookend.tap{clip-path:polygon(0 0,100% 0,100% 80%,50% 100%,0 80%)} }
+
+.hero-wrap{position:relative;background:var(--bg)}
+
+/* ===== HERO HEAD ==========================================================================
+   Centred, and that is the one place on this site where centring is right: the hero is a single
+   claim with a single action under it, and the live editor below is the asymmetry. Top padding
+   clears the absolutely-positioned pill nav. */
+.hero-head{position:relative;z-index:var(--z-raise);text-align:center;
+  padding:clamp(104px,11vw,132px) 0 clamp(90px,11vw,150px)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12.5px;
+  letter-spacing:.02em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
+  padding:6px 13px;border-radius:999px;margin-bottom:26px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+/* On the cobalt band the fill DARKENS, for the same reason the nav pill does: a white-tinted fill
+   lightens cobalt and then fails AA under the white text sitting on it. */
+.on-accent .eyebrow{color:#fff;background:rgba(11,31,84,.22);border-color:rgba(255,255,255,.3)}
+.on-accent .eyebrow .dot{background:#fff}
+/* Anybody sets wider and squarer than a normal grotesk, so it needs less negative tracking than
+   Space Grotesk did (-.038em closed the counters). Wide + heavy is the commitment. */
+.hero-head h1{color:var(--ink);font-size:clamp(2.9rem,7.2vw,6rem);line-height:1;font-weight:800;letter-spacing:-.022em;
+  font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:0 auto 20px}
+.hero-head .sub{color:var(--ink-2);font-size:clamp(1.05rem,1.7vw,1.35rem);font-weight:400;
+  max-width:44ch;margin:0 auto 30px}
+/* These out-specify .hero-head h1 / .hero-head .sub above, so they must stay after them in source
+   order. They live here rather than in the shared .on-accent block because no other route puts a
+   display headline on cobalt. */
+.hero-head.on-accent h1{color:#fff}
+.hero-head.on-accent .sub{color:rgba(255,255,255,.94)}
+/* The pill nav goes two rows under 700px (globals.css) and it is absolutely positioned, so its
+   height has to be cleared here or it lands on top of the eyebrow. This rule used to sit inside
+   that nav block in globals; it stopped working the moment the hero moved to its own stylesheet,
+   because a later file wins a specificity tie and this one loads last. */
+@media (max-width:700px){ .hero-head{padding-top:148px} }
+
+/* The editor overlaps UP into the V the band cuts, so the band reads as pouring into it. */
+.hero-stage{position:relative;z-index:var(--z-raise);width:80%;max-width:none;
+  margin:clamp(-150px,-9vw,-70px) auto -190px;padding:0}
+
+/* ===== THE HERO EDITOR ======================================================================
+   A real browser window running the REAL engine, with an EDITABLE code pane. Light chrome, not a
+   black slab: the site is white-first, and a dark device fought everything around it. */
+.hero-browser{width:100%;background:#fff;border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow-3),0 0 0 1px rgba(16,22,32,.06);border:1px solid rgba(255,255,255,.6)}
+.hb-chrome{display:flex;align-items:center;gap:14px;padding:11px 14px;background:#f4f6f9;
+  border-bottom:1px solid var(--line)}
+.hb-dots{display:flex;gap:7px;flex:none}
+.hb-dots i{width:11px;height:11px;border-radius:50%;display:block}
+.hb-dots i:nth-child(1){background:#ff5f57}.hb-dots i:nth-child(2){background:#febc2e}.hb-dots i:nth-child(3){background:#28c840}
+.hb-url{flex:1;text-align:center;font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--muted);
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;max-width:320px;margin:0 auto;
+  transition:border-color .2s var(--ease),color .2s}
+.hb-url:hover{border-color:var(--accent);color:var(--accent)}
+.hb-open{flex:none;font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);font-weight:600}
+.hb-open:hover{text-decoration:underline}
+/* browser proportions: the code pane sets the height, so the window lands ~16:10 like a real one */
+.hb-body{display:grid;grid-template-columns:1fr 1.2fr;background:#fff}
+.hb-pane{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line)}
+.hb-code{flex:1;width:100%;min-height:500px;resize:none;display:block;border:0;
+  font-family:var(--font-mono),monospace;font-size:11.5px;line-height:1.7;color:var(--ink-2);
+  background:#fff;padding:14px 14px 10px;white-space:pre;overflow:auto;tab-size:1}
+/* The house ring, keyed to :focus-visible. This control used to answer focus with a background
+   tint and `outline:none` on :focus, which gave a keyboard user less than a mouse user got.
+   Inset, because the pane is flush to the window edge and an outset ring would be clipped. */
+.hb-code:focus{background:var(--bg-2);outline:none}
+.hb-code:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* THE REFUSAL, and it is the one thing on this page that has to be live rather than drawn.
+ * "Deterministic" is a promise every comparable tool makes in prose. Here the engine throws at
+ * boot, names the layer and says why, so the honest way to show it is to let a visitor cause it.
+ * The status strip carries the engine's own words; the control beside it is cobalt with a verb,
+ * per THE AFFORDANCE RULE, and it reads on both the ok tint and the bad tint. */
+.hb-status{display:flex;align-items:center;gap:12px;
+  font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ok);background:var(--ok-bg);
+  border-top:1px solid var(--line);padding:5px 8px 5px 12px}
+.hb-status.bad{color:var(--bad);background:var(--bad-bg)}
+/* Two lines, not one with an ellipsis. The message IS the payoff here, so it has to be readable;
+   a refusal truncated at the first clause is the same as no refusal. */
+.hb-msg{flex:1;min-width:0;line-height:1.5;display:-webkit-box;-webkit-box-orient:vertical;
+  -webkit-line-clamp:2;overflow:hidden}
+/* A chip at rest, not only on hover: this is the one control that demonstrates the page's whole
+   argument, and a control nobody sees is a control that does not exist. Same shape as .srcopen. */
+.hb-break{flex:none;font:inherit;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-radius:6px;padding:3px 8px;cursor:pointer;transition:background .2s var(--ease),border-color .2s var(--ease)}
+.hb-break:hover{background:#e2ebff;border-color:var(--accent)}
+.hb-break:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+.hb-right{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:16px}
+.hb-out{position:relative;aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;border-radius:8px;border:1px solid var(--line);
+  --hb-scale:1;--hb-w:1920px;--hb-h:1080px}
+.hb-frame{position:absolute;top:0;left:0;width:var(--hb-w);height:var(--hb-h);border:0;display:block;
+  transform-origin:top left;transform:scale(var(--hb-scale));opacity:0;transition:opacity .45s var(--ease)}
+.hb-out.is-live .hb-frame{opacity:1}
+.hb-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .45s var(--ease)}
+.hb-out.is-live .hb-poster{opacity:0}
+.hb-badge{position:absolute;left:9px;bottom:8px;z-index:var(--z-badge);font-family:var(--font-mono),monospace;
+  font-size:10px;color:var(--accent);background:rgba(255,255,255,.86);backdrop-filter:blur(6px);
+  border:1px solid var(--accent-line);border-radius:6px;padding:3px 7px}
+/* Boot state, which DESIGN.md names as the one sanctioned exception to the One Voice Rule: "the
+   render failed" and "this is a link" must not be the same colour. Same tokens as the strip below. */
+.hb-badge.bad{color:var(--bad);background:var(--bad-bg);border-color:#f0c9c9}
+.hb-meta{display:grid;gap:6px;font-family:var(--font-mono),monospace;font-size:10.5px}
+.hb-meta div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:5px}
+.hb-meta dt{color:var(--muted)}
+.hb-meta dd{color:var(--accent)}
+
+.hero-mobile{display:none;border-radius:14px;overflow:hidden;background:var(--bg-2);
+  border:1px solid var(--line);box-shadow:var(--shadow-3)}
+.hero-mobile video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
+.hero-mobile .hm-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 14px;background:#fff;border-top:1px solid var(--line);
+  font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted)}
+.hero-mobile .hm-cta a{color:var(--accent);font-weight:600}
+/* An editable code pane is a desktop affordance: you are not typing JSON on a phone. Hide the
+   editor entirely and show the rendered clip instead, which is the same scene at none of the cost. */
+@media (max-width:900px){
+  .hero-browser{display:none}
+  .hero-mobile{display:block}
+  .hero-stage{width:auto;padding:0 20px;margin-bottom:-120px}
+}
+
+/* spacer that the frame overlaps into */
+.hero-foot{background:var(--bg);height:270px}
+
+/* ===== SECTION HEAD =======================================================================
+   Title on the left, the route that carries more of it on the right, on one baseline. */
+.gal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.gal-head a{color:var(--accent);font-weight:600;font-size:14.5px}
+.gal-head a .arw{display:inline-block;transition:transform .25s var(--ease)}
+.gal-head a:hover .arw{transform:translateX(3px)}
+
+/* ===== THE TWO PROOFS =====================================================================
+   This replaced a pinned scroll section: three claims, one screen each, 250vh of runway to deliver
+   three sentences. Pinning is the Vercel/Linear default, it is motion the reader did not ask for,
+   and it needed a whole second layout for reduced motion and for no-JS. Two diagrams side by side
+   say the same thing in one screen and need no JavaScript at all.
+   No cards. A hairline between the columns is the only structure two items need. */
+.pf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,56px);margin-top:34px}
+.pf > * + *{border-left:1px solid var(--line);padding-left:clamp(28px,4vw,56px)}
+.pf h3{font-size:1.18rem;font-weight:700;letter-spacing:-.018em;margin-bottom:8px}
+.pf p{color:var(--ink-2);font-size:14.5px;line-height:1.55;max-width:46ch;margin-bottom:22px}
+@media (max-width:760px){
+  .pf{grid-template-columns:1fr;gap:34px}
+  .pf > * + *{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:34px}
+}
+
+/* ===== THE PROOF DIAGRAMS (components/proofs.tsx) =========================================
+   One vocabulary, two diagrams. Cobalt is the only ink (The One Voice Rule); the neutrals are the
+   same --line / --bg-2 the rest of the page uses, so these read as drawn by the site rather than
+   dropped into it. Text inside an SVG does not inherit the page font, hence the explicit families.
+   Strokes are non-scaling so the wave mark, which is drawn scaled to each frame's own width, keeps
+   the same hairline as the unscaled geometry beside it. */
+.dg{display:block;width:100%;height:auto;overflow:visible}
+.dg text{font-family:var(--font-mono),monospace}
+.dg-lab{font-size:11px;fill:var(--muted);letter-spacing:.01em}
+.dg-lab.is-on{fill:var(--accent);font-weight:600}
+.dg-dim{font-size:9.5px;fill:var(--muted)}
+.dg-hash{font-size:12px;fill:var(--ink-2)}
+.dg-hash.is-key{fill:var(--accent);font-weight:600}
+/* the filmstrip: paper, with the frame under discussion filled */
+.dg-strip{fill:var(--bg-2);stroke:var(--line);stroke-width:1}
+.dg-perf{fill:var(--bg);stroke:var(--line-2);stroke-width:.8}
+.dg-frame{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dg-frame.is-on{fill:var(--accent)}
+.dg-wave{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke}
+.dg-wave.on-fill{stroke:#fff}
+.dg-card{fill:var(--bg-2);stroke:var(--line);stroke-width:1}
+.dg-chip{fill:var(--accent);stroke:none}
+.dg-chiptx{font-size:11px;fill:#fff}
+/* dashed, and behind the frames: the fan is the relationship, not a thing in its own right */
+.dg-fan{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.55}
+
+/* ===== THE ARSENAL WALL ===================================================================
+   Real rendered previews, one frame each, read as a wall of NAMES. The names are the point: a
+   vocabulary you compose from only reads as a vocabulary when you can see how much of it there is.
+   No cards and no hover lift; the tiles are a specimen sheet, not a set of controls, and the one
+   control in the section is the link in its head. */
+/* Fixed column counts, not auto-fill: see the WALL comment in page.tsx. Five and three both divide
+   the fifteen families that ship a preview, so no breakpoint strands a tile alone on a last row. */
+.fxwall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:26px}
+.fx{min-width:0}
+.fx img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-2);
+  border:1px solid var(--line);border-radius:8px}
+.fx figcaption{display:block;margin-top:7px;font-family:var(--font-mono),monospace;font-size:11px;
+  color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx .fxfam{display:block;color:var(--muted);font-size:10px;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:900px){ .fxwall{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:640px){ .fxwall{gap:10px} }
