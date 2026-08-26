@@ -1100,6 +1100,10 @@
                 "plus-lighter"
               ]
             },
+            "ghost": {
+              "type": "boolean|string|object",
+              "label": "THE ONE EFFECT THAT READS TIME AS A MATERIAL: evaluate this layer's own `motion` track a few frames BACK and draw from the difference. \"trail\" leaves faded copies at the poses the layer just left; \"blur\" samples the same poses inside a single frame so the layer smears along its REAL direction of travel (unlike spinBlur/zoomBlur, which resample around a fixed centre). { mode: \"trail\" | \"blur\", k: samples 1..12 (default 6), back: lookback WINDOW in seconds, alpha: nearest copy's opacity, fade: per-copy falloff }. Needs a `motion` track and is refused without one; refused on a layer that draws into a <canvas>, whose pixels a clone does not carry. The copies are children of the layer, so cut, entrance, camera and ken ride along; a still layer renders identically to one carrying no ghost."
+            },
             "shadow": {
               "type": "number|object",
               "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property). Works on a group child, whose box is measured once at build and composed with its group's; the exception is a group whose motion track keys `w`/`h`, which reflows its children."

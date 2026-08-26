@@ -1,5 +1,5 @@
 {
-  "total": 558,
+  "total": 559,
   "previewed": 255,
   "families": 35,
   "tags": [
@@ -49,7 +49,7 @@
     ],
     [
       "per-layer",
-      54
+      55
     ],
     [
       "per-layer/scene",
@@ -2866,13 +2866,20 @@
       "mode": "table",
       "note": null,
       "noPreview": "a modifier acts on whatever layer is already there, so it has nothing to show on its own.",
-      "count": 9,
+      "count": 10,
       "undescribed": 0,
       "entries": [
         {
           "name": "alongPath",
           "stem": "per-layer-fx--alongpath",
           "desc": "set the line of type ON A CURVE and, if you ask, send it travelling along one · the general case `circle` is one point of, and the only way to bend a headline",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "ghost",
+          "stem": "per-layer-fx--ghost",
+          "desc": "the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference · `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre",
           "scene": null,
           "noPreview": null
         },

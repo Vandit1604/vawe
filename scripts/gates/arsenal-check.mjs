@@ -137,6 +137,7 @@ const WAIVED = new Map(Object.entries({
   ORDER: 'track resolution order',
   LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
   DENSE_KEY_SEC: 'a density threshold constant',
+  GHOST_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   KICK_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   KICK_KINDS: 'option values of one fx; the fx itself is catalogued under FX_TYPES',
   OCCLUDE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
