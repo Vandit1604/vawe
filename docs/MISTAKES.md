@@ -15277,3 +15277,33 @@ has to come from the artifact that ships.
 **Which gate catches it now.** `make films-json`. It is not in the pre-push hook: the films are
 regenerated rarely and re-encoding six of them to check a label is a poor trade on every push. It
 belongs beside `make site-assets`, which is what changes them.
+
+## #474 — a sting counted as a joint, so declaring a spectacle moved every backdrop one beat late
+
+**What.** `bindWindowsToJunctions` (`core/junctions.js`) binds `bg` windows that declare no times to the
+film's joints, one per beat. It read **`table.junction`**, the merged list, which also holds stings.
+
+Declaring a `spectacle` injects a sting. So a film with eight cuts and one spectacle had nine "joints",
+and **every backdrop window slid one beat late**. Silently: nothing failed, nothing warned. On one film
+the payoff beat rendered orange instead of ink; on another the finale window started 3.4 seconds early.
+
+**Two agents rewriting different films hit it independently on the same afternoon**, and both found it
+by reading a `make beats` sheet rather than from any error. Both worked around it by writing explicit
+`from`/`to` on every window, which is the per-call-site opt-out `CLAUDE.md` calls not a root fix, and
+which reintroduces the two-copies-of-one-number this function exists to abolish.
+
+**Three statements of the rule, one contradicting implementation.** `shotWindows`, twelve lines below in
+the same file, argues the case explicitly: *"a cut or a seam is a boundary by construction, a sting is a
+punctuation mark and lands INSIDE a shot at least as often as it ends one, so cutting on stings invents
+boundaries the film does not have. `junction` is therefore the wrong list to read for this."* And
+`schema.json` promises *"the engine binds them to the film's CUTS in order"*. Only the code disagreed.
+
+**Fix.** The binder calls `shotWindows`, so one function owns "where does this film turn" and the two
+cannot drift again. That also drops a joint past the end of the film, which the merged list never did.
+
+**Why no test caught it.** `lib-test` had an assertion for this binder, and its fixture put the sting
+**last**, where excluding it changes nothing. The new assertions put a sting **before** a cut, and put a
+joint past the duration. Both fail when the old line is restored, which is how I know they bite.
+
+**The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
+inclusive list is always the easier import and is usually the wrong answer.

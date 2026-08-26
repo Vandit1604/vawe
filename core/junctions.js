@@ -76,13 +76,24 @@ export function resolveJunction(ref, table, where = 'junction reference') {
  * this codebase hates most (docs/MISTAKES.md #213, #369). A single window still means "the whole film",
  * and any window that names an edge still means exactly what it said.
  */
-export function bindWindowsToJunctions(windows, table) {
+export function bindWindowsToJunctions(windows, table, duration = Infinity) {
   if (!Array.isArray(windows) || windows.length < 2) return windows;
   if (windows.some((b) => b?.from != null || b?.to != null)) return windows;
-  const j = table.junction;
+  // THE JOINTS ARE THE ONES shotWindows NAMES, and this line used to read `table.junction`, the merged
+  // list that also holds stings. Twelve lines below, shotWindows argues the case against exactly that:
+  // a cut or a seam is a boundary by construction, a sting is punctuation that lands INSIDE a shot at
+  // least as often as it ends one. The schema promised the same thing all along ("the engine binds them
+  // to the film's CUTS in order"). Three statements of one rule and one contradicting implementation.
+  //
+  // It was silent and it was not theoretical: declaring a `spectacle` injects a sting, which shifted
+  // every backdrop window one joint late. Two agents rewriting different films hit it independently on
+  // the same afternoon, and each found it by reading a beats sheet rather than from any error. On one
+  // film the payoff beat rendered orange instead of ink. Both worked around it with explicit
+  // `from`/`to` on every window, which is the per-call-site opt-out CLAUDE.md calls not a root fix.
+  const j = shotWindows(table, duration).slice(1).map((w) => w.start);
   if (j.length < windows.length - 1)
     throw new Error(`bg: ${windows.length} windows declare no times, so each one is bound to the joint `
-      + `after it — that needs ${windows.length - 1} junctions and this film has ${j.length}. `
+      + `after it — that needs ${windows.length - 1} cuts or seams and this film has ${j.length}. `
       + `Either cut the film where the backdrop should turn, or give each window its own from/to. `
       + `This film has: ${describeJunctions(table)}`);
   return windows.map((b, i) => ({

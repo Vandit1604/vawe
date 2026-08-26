@@ -1772,11 +1772,26 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     ok('bg/junctions: too few joints throws and names what the film has', (() => {
       const thin = junctionTable([{ t: 2, kind: 'cut' }]);
       try { bindWindowsToJunctions([{}, {}, {}], thin); return false; }
-      catch (e) { return /needs 2 junctions and this film has 1/.test(e.message) && /cut@0\.\.0/.test(e.message); }
+      catch (e) { return /needs 2 cuts or seams and this film has 1/.test(e.message) && /cut@0\.\.0/.test(e.message); }
+    })());
+    // A STING IS NOT A JOINT, and nothing pinned that until two films shipped with the wrong backdrop.
+    // This binder read `table.junction`, the merged list, while shotWindows twelve lines below argues
+    // the case against it and the schema promises "the film's CUTS". Declaring a `spectacle` injects a
+    // sting, so every window slid one joint late, silently. The sting here sits BEFORE the cut, which
+    // is the case the old assertion could not see: its sting was last, so excluding it changed nothing.
+    ok('bg/junctions: a sting is not a joint, so windows skip it', (() => {
+      const withSting = junctionTable([{ t: 1, kind: 'sting' }, { t: 4, kind: 'cut' }]);
+      const bound = bindWindowsToJunctions([{ preset: 'paper' }, { preset: 'dark' }], withSting, 10);
+      return bound[0].to === 4 && bound[1].from === 4;
+    })());
+    ok('bg/junctions: a joint past the end is not a joint either', (() => {
+      const late = junctionTable([{ t: 4, kind: 'cut' }, { t: 99, kind: 'cut' }]);
+      try { bindWindowsToJunctions([{}, {}, {}], late, 10); return false; }
+      catch (e) { return /this film has 1/.test(e.message); }
     })());
     ok('bg/junctions: the validator catches it without a render', (() => {
       const errs = bgErrors({ bg: [{ preset: 'paper' }, { preset: 'dark' }], transitions: [] });
-      return errs.some((e) => /needs 1 junctions and this film has 0/.test(e));
+      return errs.some((e) => /needs 1 cuts or seams and this film has 0/.test(e));
     })());
     ok('bg/junctions: the validator lowers `transitions` first, and does not eat them', (() => {
       const cfg = { bg: [{ preset: 'paper' }, { preset: 'dark' }], transitions: [{ at: 2, fx: 'fade' }] };

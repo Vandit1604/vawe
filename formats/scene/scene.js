@@ -186,7 +186,7 @@ boot((data, fps, theme, canvas) => {
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
   // Windows that declare NO times at all bind to the film's own joints, in order — see
   // bindWindowsToJunctions. Untouched when there is one window, or when any window names an edge.
-  const bgWins = bindWindowsToJunctions(data.bg || [], BG_JUNCTIONS).map((b0, bi) => {
+  const bgWins = bindWindowsToJunctions(data.bg || [], BG_JUNCTIONS, Number(data.duration) || Infinity).map((b0, bi) => {
     // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault) —
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).

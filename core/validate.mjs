@@ -489,7 +489,7 @@ export function bgErrors(cfg) {
     // the renderer (it lowers once, at the top) and wrong here: a validator that rewrites the object it
     // is grading changes what every later check sees, and the author's own data with it.
     const table = junctionTable(marksOf(lowerScene(structuredClone(cfg))));
-    try { bindWindowsToJunctions(bgList, table); } catch (e) { out.push(e.message); }
+    try { bindWindowsToJunctions(bgList, table, Number(cfg.duration) || Infinity); } catch (e) { out.push(e.message); }
   }
   bgList.forEach((b, i) => {
     if (!isObj(b)) return;
