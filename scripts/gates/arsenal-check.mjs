@@ -138,6 +138,11 @@ const WAIVED = new Map(Object.entries({
   LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
   DENSE_KEY_SEC: 'a density threshold constant',
   GHOST_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  // Not a vocabulary a scene can name: it is the set of props whose PRESENCE makes preload fetch
+  // GSAP. It is exported only so lib-test can re-derive it and refuse to drift (#467, and #148
+  // is what drift cost last time). An author never writes GSAP_PROPS; they write `fx` or `parts`,
+  // and those are catalogued where they belong.
+  GSAP_PROPS: 'the props that trigger the GSAP fetch; exported for the lockstep guard, not nameable in a scene',
   KICK_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   KICK_KINDS: 'option values of one fx; the fx itself is catalogued under FX_TYPES',
   OCCLUDE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
