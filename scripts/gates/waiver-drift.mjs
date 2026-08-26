@@ -23,7 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { population } from '../lib/census.mjs';
+import { population, LIBRARY } from '../lib/census.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'formats', 'scene');
@@ -45,13 +45,7 @@ let total = 0;
 // The population comes from scripts/lib/census.mjs, which states N and REFUSES a checkout that cannot
 // see the library rather than counting what is left (docs/MISTAKES.md #377). `quiet` because the census
 // header below is the line CLAUDE.md quotes, and two counts would invite the drift this gate is about.
-const pop = population('waiver census', {
-  filter: (f, abs) => {
-    if (f === 'schema.json' || /\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f)) return false;
-    try { return JSON.parse(fs.readFileSync(abs, 'utf8'))?.module === 'scene'; } catch { return false; }
-  },
-  quiet: true,
-});
+const pop = population('waiver census', { filter: LIBRARY, quiet: true });
 for (const f of pop.names) {
   let d; try { d = JSON.parse(fs.readFileSync(path.join(SCENES, f), 'utf8')); } catch { continue; }
   total++;

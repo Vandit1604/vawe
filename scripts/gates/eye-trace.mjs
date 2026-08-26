@@ -64,7 +64,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming, boxOf, sceneView, num } from './scene-timing.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { population, isTemplate, SCENE_DIR } from '../lib/census.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { resolveCoords } from '../../core/boot.js';
 import { safeArea } from '../../core/safe.js';
 import { motionAt } from '../../core/sequence.js';
@@ -440,12 +440,7 @@ if (args.includes('--selftest')) selftest();
 if (args.includes('--census')) {
   // THE SAME POPULATION waiver-drift walks, so a number quoted from here and a number quoted from
   // there are about the same library. Its filter, not a second one: derivatives out, module==="scene" in.
-  const { names, blind } = population('EYE-TRACE CENSUS', {
-    filter: (f, abs) => {
-      if (isTemplate(f) || f === 'schema.json' || /\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f)) return false;
-      try { return JSON.parse(fs.readFileSync(abs, 'utf8'))?.module === 'scene'; } catch { return false; }
-    },
-  });
+  const { names, blind } = population('EYE-TRACE CENSUS', { filter: LIBRARY });
   if (blind) { console.error(`  blind: ${blind}`); process.exit(3); }
   const all = [], moved = [], rows = [], debts = [];
   let bad = 0, unread = 0, scored = 0;

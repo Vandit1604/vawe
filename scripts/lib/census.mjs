@@ -126,3 +126,33 @@ function refuse(what, why) {
 // threw out of two sweeps and killed them entirely: `make features` and the pace census both exited on a
 // stack trace instead of a verdict, which is this bug class in its loudest form.
 export const isTemplate = (f) => /\.template\.json$/.test(f);
+
+// ONE definition of "the library", because there were two. `waiver-drift` excluded sidecars and printed
+// 135; `audio-check` did not and printed 150. Same repo, same day, two numbers for one thing, and
+// CLAUDE.md quotes both as the size of the library. The doc comment at the top of this file already
+// argued the principle (a sweep that excludes sidecars must be compared against a count that excludes
+// them too) and left every caller to restate it, so every caller restated it differently.
+//
+// A FILM is a file in formats/scene that a person authored and the engine can render on its own:
+const DERIVATIVE = /\.(animatic|intent|expanded|beatsync|captioned|directed)\./;
+const isSceneJSON = (abs) => { try { return JSON.parse(fs.readFileSync(abs, 'utf8'))?.module === 'scene'; } catch { return false; } };
+
+/** The library. Pass as `filter` to population(). This is the number CLAUDE.md means. */
+export const LIBRARY = (f, abs) => f !== 'schema.json' && !isTemplate(f) && !DERIVATIVE.test(f) && isSceneJSON(abs);
+
+/**
+ * The library PLUS its generated siblings. The named opt-in for a sweep that grades the RENDERABLE
+ * artifact rather than the authored film: an `.expanded.json` is what actually renders once a scene
+ * carries block/beat sugar, so a check about what reaches the screen has to walk it.
+ */
+export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTemplate(f) && isSceneJSON(abs);
+
+// Sweeps that deliberately walk NEITHER, named here so the next reader does not "fix" them into
+// disagreeing again:
+//   audit-scenes · paints-nothing · snap-scenes  audit the renderable artifact and skip the un-expanded
+//                                                source, so they resolve source→expanded themselves.
+//   unused                                       concatenates a text corpus of SHIPPED films: it drops
+//                                                `_`-prefixed scratch, which the library keeps.
+//   similarity · layer-props · feature-audit     carry their own extra exclusions (sample.json,
+//                                                cuts-demo, un-parseable files) on top.
+//   sfx-audit · snap-blocks                      different directory entirely: not scenes at all.

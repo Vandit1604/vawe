@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import cp from 'node:child_process';
 import { snippet, onScreenText as plainText } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { population, isTemplate, SCENE_DIR } from '../lib/census.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 // THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock — the
 // theme is the locked look — and the rules there are the second half of the same question: not only
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
@@ -73,7 +73,7 @@ if (process.argv.includes('--self-test')) {
 if (process.argv.includes('--census')) {
   // WAS `git ls-files`, which sees only TRACKED scenes: films are gitignored here, so this census read
   // 40 of the 135 in the same directory and printed a confident tick over the rest.
-  const files = population('designspec census', { filter: (f) => !/intent|expanded/.test(f) && !isTemplate(f), quiet: true })
+  const files = population('designspec census', { filter: LIBRARY, quiet: true })
     .names.map((f) => `${SCENE_DIR}/${f}`);
   console.log(`\n  designspec rules · census · ${RULES.length} rule(s) over ${files.length} scene(s)\n`);
   let hit = 0;
