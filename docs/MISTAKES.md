@@ -15346,3 +15346,30 @@ both are recorded rather than changed.
 **Which gate catches it now.** None, and that is honest: `make audit` fires on collisions, not on a
 trail that veils its own subject. It was found by rendering a repro and LOOKING, which is what
 `make judge` is for. `probe-purity` still passes: nothing here reads a previous frame.
+
+## #476 — the wordSlot chip clipped its own descenders
+
+**What.** `{ "wordSlot": { "words": [...], "chip": true } }` draws the brand-coloured box CLAUDE.md's
+launch rule 5 asks for. Every `g`, `j`, `p`, `q` and `y` in it came out with a flat bottom: "puggy" and
+"jamjar" lost their tails to the plate's edge.
+
+**Root cause.** The chip sets `overflow: hidden`, deliberately, so a word travelling out of the plate
+reads as the plate refilling. Clipping happens at the padding box, and the padding box was the LINE
+box plus 0.06em: `.hs-text` sets `line-height: 1.04`, which is tighter than the descender depth of any
+real face. So the plate was shorter than the ink it held, and the clip that makes the swap read cut
+the settled word as well.
+
+**The engine already knew how deep the ink goes.** `core/type.js` learned it for the `riseClip` mask
+(#35): 0.3em below the line box clears the deepest descender in the faces we ship. That number was a
+literal in one function. It is now `INK_PAD_EM`, exported, and both clips read it, so a chip and a clip
+wrapper cannot come to different conclusions about how tall a word is.
+
+**Fix.** The chip's vertical padding is `INK_PAD_EM`, so the plate contains the ink and the clip can
+stay. The chip's fixed WIDTH is untouched: the width comes from the `inline-grid` cell every candidate
+shares, nothing measures a glyph, and the words after the slot still do not move. The plate does get
+taller, and one shipped film changes: `showcase-type`'s chip grows by 0.24em top and bottom. That is
+the fix, not a side effect. `make audit` on that scene is clean before and after.
+
+**Which gate catches it now.** None. `clipped-text` in `verify/audit.mjs` compares a scroll size to a
+client size, and a descender sliced by half a pixel of overflow does not move either. It was found by
+rendering a word with a descender in a chip and looking at it.

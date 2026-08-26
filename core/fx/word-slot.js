@@ -26,6 +26,7 @@
 // function of `t` alone, so a cold render and a warm one agree.
 
 import { clamp01, easeOutCubic } from '../motion.js';
+import { INK_PAD_EM } from '../type.js';
 
 // NOT EXPORTED. It is this modifier's own key list, used twice in the two throws below, and nothing
 // outside this file reads it. Exported, it read as a NAMED VOCABULARY and scripts/gates/arsenal-check
@@ -109,10 +110,16 @@ export function build(kit, el, L, spec) {
     // guaranteed ink for that fill, so the pair is readable in every theme without grading a hex.
     slot.style.background = typeof chip === 'string' ? chip : 'var(--accent)';
     slot.style.color = typeof chip === 'string' ? 'var(--on-accent)' : 'var(--on-accent)';
-    slot.style.padding = '0.06em 0.28em';
+    // THE PLATE MUST CONTAIN THE FONT'S INK, NOT ITS LINE BOX, because the plate's edge IS the clip
+    // (see `overflow` below). .hs-text sets line-height 1.04, tighter than the descender depth of any
+    // real face, so 0.06em of padding left "puggy" and "jamjar" with their tails sliced flat off. The
+    // depth is core/type.js's INK_PAD_EM, the same measurement riseClip masks with: one owner, and a
+    // chip and a clip wrapper that cannot disagree about how tall a word is.
+    slot.style.padding = `${INK_PAD_EM}em 0.28em`;
     slot.style.borderRadius = '0.14em';
     // The chip is the one place the box may CLIP: a word travelling out of a coloured plate reads as
     // the plate refilling. Without the chip there is no edge, so clipping would only cut descenders.
+    // With one, the plate has to be tall enough to hold a settled word whole — hence the padding above.
     slot.style.overflow = 'hidden';
   }
   for (const w of words) {
