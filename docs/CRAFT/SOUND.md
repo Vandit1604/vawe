@@ -175,14 +175,15 @@ audio and the visual key moments, design against the markers.
 
 ```bash
 make beatmap MUSIC=assets/music/lofi.wav        # detect tempo + the beat grid; reports confidence
-make beatsync D=<scene.json> MUSIC=… WRITE=1    # snap the scene's cuts/seams/stings ONTO that grid
+make beatsync D=<scene.json> MUSIC=… WRITE=1    # snap the scene's cuts and seams ONTO that grid
 make spectrum MUSIC=… FPS=30                    # per-frame band energy → a layer can react in pure n
 ```
 
 `beatmap` reports low confidence on an ambient pad and says so, which is the correct answer rather than
 a fabricated grid. `beatsync` is the picture-follows-track direction and it is deterministic and
 idempotent; four scenes in the library carry a `.beatsync.json` and it is the most under-used tool we
-own.
+own. It no longer decides anything itself: since #457 it reads the grid and calls `core/beat-bind.js`,
+so the preview and the render answer "which beat does this joint land on" the same way.
 
 ### The scene can now NAME its grid, and the engine snaps the joints itself
 
@@ -220,9 +221,15 @@ A short bed loops to fill the film, so the grid is unrolled across the runtime (
 its beats recur every 8 seconds). Everything happens once, before the first frame, so `renderFrame(n)`
 never sees a grid. `core/beat-bind.js`.
 
-> Two things now decide which beat a joint lands on: this declaration and `scripts/media/beatsync.mjs`.
-> They round the same way but not with the same tolerance (0.12s here, half a beat capped at 0.18s
-> there), and the CLI also moves stings. Prefer the declaration for new films.
+> **One thing decides which beat a joint lands on, and it is `core/beat-bind.js`.** The CLI calls the
+> same `snapJoints`, so both use the same 0.12s tolerance, both snap cuts by their time and seams by
+> their centre, and neither touches a sting. The CLI held a second opinion until #457: half a beat
+> capped at 0.18s, which above 60 BPM is wider than the gap between beats, so nothing was ever left
+> alone; and it moved stings, collapsing an offset the author meant. It also snapped `transitions[].at`
+> before the lowering pass, so a junction written that way was snapped by its start rather than its
+> centre. What still differs is only WHEN and WHERE: the declaration binds at boot and writes nothing,
+> the CLI writes `<scene>.beatsync.json`. Prefer the declaration, and keep the CLI for the preview and
+> for a film that wants the snapped times written down where a human can edit them.
 
 **Hit points and tempo maps.** In scoring practice you lock the hit points first and then choose the
 BPM that puts a downbeat exactly on each target frame. Carl Stalling shifted tempo several times inside
@@ -386,7 +393,7 @@ is a workaround rather than the dial.
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
 | `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
 | `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beat-bind.js) |
-| `make beatsync D=… MUSIC=… WRITE=1` | snap cuts/seams/stings onto that grid |
+| `make beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
 | `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |

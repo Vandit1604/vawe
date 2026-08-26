@@ -80,9 +80,11 @@ examples: build
 beatmap:
 	node scripts/media/beatmap.mjs $(MUSIC)
 
-# make beatsync D=formats/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.18]
-# [LAYERS=1] [WRITE=1]  — snap the scene's cuts/transitions/seams/stings onto the track's beat grid so
-# the edit lands ON the beat. Reports drift; WRITE writes <scene>.beatsync.json. Deterministic + idempotent.
+# make beatsync D=formats/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.12]
+# [LAYERS=1] [WRITE=1]  — snap the scene's cuts and seams onto the track's beat grid so the edit lands
+# ON the beat. The policy is core/beat-bind.js's, not a second copy of it: same tolerance, same joints,
+# stings never. Reports drift; WRITE writes <scene>.beatsync.json. Deterministic + idempotent.
+# A film that wants this on EVERY render declares `"audio":{"beatSync":true}` and needs no derivative.
 beatsync:
 	node scripts/media/beatsync.mjs $(D) --music $(MUSIC) $(if $(GRID),--grid $(GRID)) $(if $(SNAP),--snap $(SNAP)) $(if $(filter 1,$(LAYERS)),--layers) $(if $(filter 1,$(WRITE)),--write)
 

@@ -14348,3 +14348,115 @@ negation lists themselves; the check no longer trusts them, which is the part th
 **Worth stating plainly:** the deploy pipeline was never broken. Nothing in the repo pointed at it, no
 gate ran against it, and its only output was a log on another machine. A failing build that reports
 only where nobody looks is indistinguishable from a build that never ran.
+
+---
+
+## #457 — two owners of "which beat does this joint land on", and neither imported the other
+
+**What.** `core/beat-bind.js` snapped a film's joints at boot from an `audio.beatSync` declaration.
+`scripts/media/beatsync.mjs` snapped the same joints at author time and wrote `<scene>.beatsync.json`.
+They agreed on the case anybody had tested and disagreed everywhere else:
+
+| | `core/beat-bind.js` | `scripts/media/beatsync.mjs` |
+|---|---|---|
+| tolerance | 0.12s, `snapToBeat`'s own default | half a beat, capped at 0.18s |
+| cuts | snap `t` | snap `t` |
+| seams | snap the CENTRE of the blend | snap the START |
+| stings | never | snapped |
+| `transitions[].at` | nothing to do: bound AFTER lowering | snapped, before lowering |
+| nearest-beat search | `snapToBeat` from `core/beats.js` | its own loop, inline |
+
+**Root cause.** The last row is why nobody saw the first five. The CLI re-implemented the search
+instead of importing `snapToBeat`, so it never appeared as an importer of `core/beats.js` and no grep
+for the shared primitive reached it. A second copy that calls the original is findable; a second copy
+that re-derives the original is not.
+
+**What each disagreement cost.** The half-beat tolerance is wider than the gap between beats at any
+tempo above 60 BPM, so the CLI never refused a snap and its own "left as-is, off-grid on purpose"
+report could not fire. Snapping a sting collapses an offset the author meant, which is the exact thing
+`beat-bind`'s comment says not to do. Snapping a seam by its start moves the blend half a window off
+the pulse it was aimed at. And snapping `transitions[].at` reaches a junction whose mechanism is not
+decided yet: `core/transitions-lower.js` routes a name to a cut, a seam or a sting, so the CLI was
+snapping something that would become a seam as though it were a cut. Measured on the four scenes in
+the library carrying a derivative: `example-kinetic-type` (cuts only) lands identically either way,
+and the other three differ on every seam, e.g. `brew-launch` seam 1 at `3.564` from the CLI against
+`3.314` from the engine, and its cut at `14.1` moves under the CLI and correctly holds under the
+engine, 0.122s from the nearest beat.
+
+**Fix.** `core/beat-bind.js` owns the policy and exports it: `snapJoints(data, grid, maxShift)` and
+`unrollGrid(pulse, period, dur)`, with `DEFAULT_MAX_SHIFT` beside them. `bindBeats` is now the
+declaration, the validation and a call to those two. `scripts/media/beatsync.mjs` lowers the scene
+first, for the same reason `core/boot.js` binds after the lowering pass, then calls the same two
+functions. The CLI no longer contains the word `transitions`, a beat search, or a tolerance.
+
+**What is deliberately NOT merged.** The CLI still writes `<scene>.beatsync.json` under `WRITE=1`, and
+`LAYERS=1` still snaps layer starts. A layer start is not a junction, so it was never part of the
+shared policy, and it stays where it was. The derivative FILE is a second copy of a film rather than a
+second copy of this fact; `docs/CRAFT/SOUND.md` already steers new work to the declaration, and the
+tool now prints that advice after every write.
+
+**The four derivatives are untouched, and that is the point.** `formats/scene/*.beatsync.json` are not
+tracked by git (`.gitignore` keeps films out of the framework), they are in the 106-scene snapshot set,
+and all 106 are identical before and after. Regenerating them was rejected: three of the four would get
+new seam times, which is the correct answer and also a change to three finished films that nobody
+asked for. A rerun of `make beatsync … WRITE=1` will now produce those corrected times, and `make
+examples` is the path that does it.
+
+**Which gate catches it now.** `scripts/gates/lib-test.mjs`, +8 assertions (1083 → 1091). Four of them
+pin this pair specifically: the default tolerance IS `snapToBeat`'s own; a sting is never snapped; the
+drift the CLI prints comes from `snapJoints`; and a scene bound through `bindBeats` and a scene bound
+through `snapJoints` land every joint on the same beat. `node scripts/gates/snap-scenes.mjs` 106
+identical. `node scripts/gates/probe-purity.mjs scene` clean.
+
+**Lesson.** A duplicated fact is easy to find when the copy calls the original. Look for the copy that
+re-derives it, and the tell is a file that reasons about a subject and imports nothing that owns it.
+
+---
+
+## #458 — the default push and the safe margin were one piece of geometry, written down twice
+
+**What.** `core/produce.js` gives any scene declaring no camera a `slowPush` from `1` to `1.06`
+spanning the whole runtime. `core/safe.js` sets `MARGIN` to `0.06`. Neither file mentioned the other,
+and both numbers describe the same thing: how much room a layer placed on the safe line has before the
+frame edge takes it. Left standing at the end of #454.
+
+**The arithmetic, so nobody re-derives it a third time.** `#cam` scales about the centre of the
+viewport, so a point on the safe edge sits `dim * (0.5 - MARGIN)` from that centre and lands at
+`dim * (0.5 - MARGIN) * s`. On 1920x1080 at `s = 1.06` that is 28px past the safe line vertically and
+51px horizontally. It reaches the FRAME edge, `dim * 0.5`, at `s = 0.5 / (0.5 - MARGIN)`, which is
+1.1364.
+
+**What that measurement actually says, and it is not what #454 assumed.** The two numbers reading 0.06
+is a coincidence, not a relationship: ANY zoom above 1 carries a safe-edge layer out of the safe box,
+and the overshoot scales with the very margin it is eating, so widening `MARGIN` cannot fix it. The
+safe box is a PLACEMENT box, read at rest, and `verify/audit.mjs` already grades it in scene space and
+screen space and reports only when the two agree (#454). The line that genuinely cannot be crossed is
+the frame edge, and 1.1364 is where it is.
+
+**Fix, and which of the two owns which half.** `core/safe.js` owns the geometry and exports
+`MAX_ZOOM = 0.5 / (0.5 - MARGIN)`, derived from `MARGIN` so it cannot drift from it. `core/produce.js`
+owns `BASELINE_PUSH = 1.06`, because that number answers a question about the EYE (below a 5% scale
+change a push is under the perception threshold and the frame reads dead) and no geometry produces it.
+It RECEIVES the limit and refuses at module load if the push exceeds it, naming both files and both
+repairs. The invariant paragraph at the top of `core/safe.js` now says "at rest" instead of implying an
+edge pin can never fail.
+
+**Both numbers are unchanged, deliberately.** Lowering the push to fit the margin makes every default
+film read dead, which is the defect 1.06 was chosen to cure. Widening `MARGIN` to absorb the push moves
+every pinned layer in the library, 93 films. Neither number was wrong; only their independence was.
+
+**Blast radius.** `node scripts/gates/snap-scenes.mjs` 106 identical, 0 changed. `node core/validate.mjs`
+138 ok / 4 failed, both before and after (the four are pre-existing). `node
+scripts/gates/probe-purity.mjs scene` clean. A `--draft` mp4 of the same scene is not byte-reproducible
+run to run: two renders from IDENTICAL code differ by 56.9 dB PSNR, and the before/after pair differs by
+57.7 dB, so the encoder accounts for all of it. The frame-level determinism net is `snap-scenes`, and it
+is the one to quote.
+
+**Which gate catches it now.** `scripts/gates/lib-test.mjs`: `MAX_ZOOM` is where a safe-edge layer
+reaches the frame edge; the injected push stays inside it; and an edge-pinned layer under that push is
+not cropped on a 1080-high frame. Edit either constant alone and one of the three fails, before any
+film is rendered.
+
+**Lesson.** Two constants that happen to read the same value are the easiest kind of duplicate to miss,
+because the coincidence looks like the relationship. Do the arithmetic before deciding which one is
+wrong; here neither was.

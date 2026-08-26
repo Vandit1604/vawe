@@ -23,6 +23,7 @@ import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
@@ -63,7 +64,7 @@ import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAME
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
-import { beatSyncOf, beatGridPath, bindBeats } from '../../core/beat-bind.js';
+import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope, ANIM } from '../../core/clips.js';
 import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
@@ -1894,6 +1895,20 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
   ok('beat-bind: an empty grid is refused', throws(() => bindBeats(sc(), { ...G, beats: [] }), /carries no/));
   ok('beat-bind: beatSync with no track to read names the fix', throws(() => beatGridPath({ audio: { beatSync: true, music: 'auto' } }), /audio\.music/));
+  // ONE POLICY (docs/MISTAKES.md #457). scripts/media/beatsync.mjs calls snapJoints/unrollGrid too, so
+  // these pin the contract the CLI used to hold a second, wider opinion about.
+  ok('beat-bind: the default tolerance IS snapToBeat\'s own', snapToBeat(1.04, bts) === snapToBeat(1.04, bts, DEFAULT_MAX_SHIFT));
+  const s6 = { cuts: [{ t: 0.54 }], seams: [{ t: 1.75, dur: 0.5 }], stings: [{ t: 0.54, fx: 'flash' }] };
+  const r6 = snapJoints(s6, G.beats, DEFAULT_MAX_SHIFT);
+  ok('beat-bind: a sting is NEVER snapped, at boot or at author time', s6.stings[0].t === 0.54);
+  ok('beat-bind: snapJoints reports the drift the CLI prints', r6.moved[0].kind === 'cut' && r6.moved[0].drift === 0.04);
+  const s7 = sc(); bindBeats(s7, G);
+  const s8 = { cuts: [{ t: 0.54, style: 'punch' }, { t: 1.28, style: 'punch' }], seams: [{ t: 1.75, dur: 0.5, fx: 'fade' }] };
+  snapJoints(s8, unrollGrid(G.beats, 0, 0), DEFAULT_MAX_SHIFT);
+  ok('beat-bind: the declaration and the CLI land every joint on the same beat',
+     JSON.stringify(s8.cuts.map((c) => c.t)) === JSON.stringify(s7.cuts.map((c) => c.t))
+     && s8.seams[0].t === s7.seams[0].t);
+  ok('beat-bind: unrollGrid returns a new array and never edits the sidecar', unrollGrid(G.beats, 3, 8) !== G.beats && G.beats.length === 7);
   // the `lift` entrance must actually travel — pop only scaled 14%, which read as flat
   ok('motion: lift travels further than pop at t=0', parseFloat(String(lift(0).transform).match(/scale\(([\d.]+)/)[1]) < 0.75);
   ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));
@@ -2724,6 +2739,17 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   let msg = '';
   try { produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }], cameraMove: { move: 'slowPush' } }, {}); } catch (e) { msg = e.message; }
   ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));
+
+  // THE PUSH AND THE MARGIN (docs/MISTAKES.md #458). core/safe.js owns how much zoom the margin
+  // absorbs; produce.js owns the perception-driven 1.06 and reads that limit rather than re-deriving
+  // it. If either number is edited alone, one of these two fails before a film is ever rendered.
+  ok('safe: MAX_ZOOM is where a safe-edge layer reaches the frame edge',
+    Math.abs(MAX_ZOOM - 0.5 / (0.5 - MARGIN)) < 1e-12);
+  ok('produce: the injected push stays inside the zoom the margin absorbs',
+    Math.max(...produced.camera.map((k) => k.s)) <= MAX_ZOOM);
+  ok('safe: an edge-pinned layer under the injected push is NOT cropped by the frame',
+    (() => { const H = 1080, top = Math.max(...produced.camera.map((k) => k.s));
+      return (H * (0.5 - MARGIN)) * top < H * 0.5; })());
 }
 
 // ---- shader sting ids: the branch number is written down, not inferred from array order ----

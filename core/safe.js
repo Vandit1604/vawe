@@ -27,6 +27,11 @@
 // THE INVARIANT: placement and checking read THIS function. `pin:"bottom"` resolves to the safe box's
 // bottom edge, so an edge pin can never produce a safe-zone failure. That is the property the four
 // tables could not have.
+//
+// AT REST. The invariant is about the box, and the box is where content is PLACED; a camera then
+// moves what was placed. Any zoom above 1 carries a safe-edge layer out of the safe box, and the
+// engine's own default push is one (`core/produce.js`). See MAX_ZOOM below for the arithmetic, for
+// the line that genuinely cannot be crossed, and for who owns which half of it.
 
 // What a ratio MEANS in pixels. This lives here, with the safe area, because the two are the same
 // question asked twice ("how big is the frame" / "where inside it may content live") and answering
@@ -64,6 +69,29 @@ export function sceneDims(cfg = {}, key = '') {
 // The bleed margin, as a fraction of the SHORT edge, so it reads the same at any ratio. 0.06 is the
 // value core/boot.js already used to place with; keeping it means this change moves no existing pixel.
 export const MARGIN = 0.06;
+
+/**
+ * MAX_ZOOM — the largest uniform zoom the margin can absorb before edge-pinned content is CROPPED.
+ *
+ * WHY THIS IS HERE. `core/produce.js` gives every scene that declares no camera a `slowPush` to 1.06,
+ * and this file sets `MARGIN` to 0.06. The two numbers were written independently and both describe
+ * the same geometry: how much room a layer placed on the safe line has before the frame edge eats it.
+ * Nobody owned the relationship, so either could be edited alone and the first sign would be cropped
+ * pixels in a delivered film (docs/MISTAKES.md #454, #458).
+ *
+ * The arithmetic, once, so it is not re-derived: `#cam` scales about the centre of the viewport, so a
+ * point at the safe edge sits `dim * (0.5 - MARGIN)` from that centre and lands at `dim * (0.5 -
+ * MARGIN) * s`. It reaches the frame edge, `dim * 0.5`, at `s = 0.5 / (0.5 - MARGIN)`.
+ *
+ * THE SAFE BOX IS A PLACEMENT BOX, READ AT REST, and that is the honest reading of the invariant
+ * below. ANY zoom above 1 carries a safe-edge layer out of the safe box: at 1.06 on 1920x1080 it ends
+ * 28px past the line. That is not a defect the margin can be widened out of, because the overshoot
+ * scales with the margin it is eating. It is why `verify/audit.mjs` grades the safe zone in scene
+ * space AND screen space and reports only when the two agree (#454). What this constant guards is the
+ * harder line: past `MAX_ZOOM` the same layer is off the FRAME, cropped, and no reading of any space
+ * makes that acceptable.
+ */
+export const MAX_ZOOM = 0.5 / (0.5 - MARGIN);
 
 // Chrome per destination, as fractions of the canvas (top/bottom of H, left/right of W) so a preset
 // survives a canvas resize. `native` documents the aspect the platform actually serves; a preset is
