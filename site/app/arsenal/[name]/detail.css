@@ -120,5 +120,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bx-back, .bx-walk a, .bx-transport button, .bx-copy, .bx-stage .blive { transition: none; }
+  /* .bx-stage .blive is NOT here: globals.css keeps that crossfade under reduce, because it covers
+     the moment the live render replaces its poster and snapping it reads as a jump cut. */
+  .bx-back, .bx-walk a, .bx-transport button, .bx-copy { transition: none; }
 }

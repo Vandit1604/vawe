@@ -67,6 +67,8 @@
 .ar-live-only {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 13px; color: var(--ink-2); cursor: pointer; user-select: none; white-space: nowrap;
+  /* the label IS the target, and at 20px tall it was under WCAG 2.5.8's 24 */
+  min-height: 24px;
 }
 .ar-live-only input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
 .ar-live-only input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -209,7 +211,8 @@
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line);
 }
-.ar-pages ol { display: flex; gap: 4px; list-style: none; margin: 0 auto; padding: 0; }
+/* wrap: 15 page links run 572px, which at 430px scrolled the page sideways (WCAG 1.4.10). */
+.ar-pages ol { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; list-style: none; margin: 0 auto; padding: 0; }
 .ar-step, .ar-pg {
   display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
   padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
