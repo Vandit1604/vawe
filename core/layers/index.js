@@ -6,6 +6,7 @@ import { blurbsOf } from '../registry.js';
 import { checkLayerTree } from './vocabulary.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
+import { attachResample } from '../resample.js';
 import * as text from './text.js';
 import * as count from './count.js';
 import * as image from './image.js';
@@ -100,7 +101,11 @@ export function createRenderer(ctx) {
   // The primitive builds the thing; its `modifiers` then modify what was built, in that order and never
   // the other way round. Routed through ONE helper so a group child and a top-level layer cannot end up
   // with different modifier support.
-  const buildOne = (el, L) => { pick(L).build(kit, el, L); buildFx(kit, el, L); };
+  // `attachResample` LAST and for every type, not only the two that own a raster. image.js and
+  // canvas.js still attach their own inside build() (they know where their pixels are); this call is
+  // idempotent and picks up everything else, queueing a build-time bake of the subtree. One site, so
+  // "which layer types can be resampled" is not a list anybody maintains.
+  const buildOne = (el, L) => { pick(L).build(kit, el, L); buildFx(kit, el, L); attachResample(kit, el, L); };
   kit.buildLeaf = buildOne;
   // A NESTED GROUP does not go through buildLeaf — addGroupChild lays it out itself and recurses — so
   // for as long as this slot has existed its modifiers were never built, silently. Not "refused": the

@@ -2,7 +2,7 @@
 // `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
 import { canvasFxKey } from '../canvas-fx.js';
 import { mergeProps } from '../props.js';
-import { attachResample, tickResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
+import { attachResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
 
 // `radius` and `ken` are the two ways an image opts into a clipped cover-fit box, so each unlocks the
 // other's geometry; `edgeFadeColor` paints the plate the fade dissolves toward and means nothing alone.
@@ -40,7 +40,7 @@ export function build(kit, el, L) {
   }
   attachResample(kit, el, L);
 }
-// ken burns zoom (continuous over the whole window, identity outside) + resample tick
+// ken burns zoom (continuous over the whole window, identity outside)
 export function frame(kit, el, L, t) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   const active = t >= start && t < end;
@@ -59,7 +59,7 @@ export function frame(kit, el, L, t) {
   // NOTE ken + resample do not compose: ken is a CSS transform on the <img>, and the texture is the
   // img's own pixels, which a CSS transform does not touch. Rejected at validate rather than
   // rendered as a silently-ignored ken (docs/MISTAKES.md — silence is the worst failure).
-  tickResample(el, L, t, active);
+  // The resample TICK is core/tracks/resample.js now, one slot later, so every layer type gets one.
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.

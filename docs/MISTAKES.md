@@ -13948,3 +13948,89 @@ rather than about the gate. Separately, `motion-audit`'s inferred single window 
 one window `visEnd == end`, so every ordinary layer exit reads as a mid-scene fade, which is why
 `ii:monotonic` fires on a clean sample. The real repair is scenes declaring `segments`, or `add()`
 deriving windows from `cuts`.
+
+## #451 — eight resampling passes, and nothing we build ourselves could be fed to one
+
+`core/resample.js:41` threw on any layer that was not a raster:
+
+```
+if (!src) throw new Error(`resample needs a raster layer (image · paint · shader), got "${L.type}"`);
+```
+
+The refusal was correct about the code and wrong about the engine. All eight passes — `zoomBlur`,
+`spinBlur`, `fisheye`, `bitCrush`, `macroblock`, `dissolve`, `refract`, `chromaShift` — could be aimed
+at a photograph and at nothing this repo composes. Text, rect, group, svg, component, html, a whole
+built beat: refused. A large part of the reference catalogue we measure ourselves against is "take
+arbitrary content, transform it", and we owned every pass and could point none of them at our own work.
+
+**Root cause.** Two separate facts, and only the second one was really about rasters.
+
+1. `sourceOf(el)` could only find pixels that were ALREADY in the element. Nothing in the engine turned
+   a built subtree into pixels — except `core/seams.js`, which had owned a hardened SVG `<foreignObject>`
+   serialiser for as long as seams were the only caller. One fact, one owner, and the owner was the
+   wrong module for a second caller to reach.
+2. The per-frame tick was written at TWO hand-placed call sites, `core/layers/image.js` and
+   `core/layers/canvas.js`. A `text` layer has no frame() of its own to hang a third on, so even with a
+   texture in hand there was nowhere to drive it from. The refusal at the top was a symptom of that.
+
+**Fix.**
+- `core/raster.js` — the serialiser moved out of `seams.js` with `buildInlinedCss`, `domToCanvas`,
+  `isBlankRaster` and a new `rasterStats`. `seams.js` imports it and re-exports `isBlankRaster`, so
+  nothing a seam does changed.
+- `core/resample.js` — a layer with no raster of its own queues a BAKE. `bakeResamples()` drains the
+  queue once, awaited by `core/boot.js` before the render loop and before `bakeSeams` (which drives
+  `renderFrame` itself and would otherwise leave the DOM on an arbitrary frame). The result is a
+  constant canvas, uploaded once, so the per-frame path is what it always was for a still `<img>`.
+- `core/tracks/resample.js` — one tick site for every layer type, in a new `resample` slot immediately
+  after `primitive`, so a `paint` layer's own draw still lands first.
+- `core/layers/index.js` — `attachResample` is called for EVERY type from `buildOne`, idempotently, so
+  "which types can be resampled" is not a list anybody maintains.
+
+**The purity question, because a rasterisation cache is exactly where #370 lives.** There is no cache
+keyed on anything. The bake runs once, before frame 0, and produces a value; there is no per-frame
+memo and no accumulator. Verified rather than argued: `canvas-purity` on a scene of three baked layers
+is clean at 8 frames under scrambled render order, and a render of frame 200 followed by frame 20
+produces a PNG byte-identical to a clean forward render of frame 20.
+
+**What it refuses, and why loudly.** A `<canvas>` bitmap and a `<video>` frame are not part of the DOM,
+so both serialise as an empty box. `raymarch`, `three`, `globe` and `video` are named in
+`core/validate.mjs`, and the bake re-checks the built subtree for either element and throws with the
+layer's name. A raster that comes back with nothing opaque throws too. None of them degrades.
+
+**A gate bug found on the way, and it is the more dangerous half.** `isBlankRaster` answers two
+questions at once — is anything opaque, and does anything differ from the first pixel. A seam wants
+both. A single resampled layer wants only the first, because a `rect` layer IS one flat colour. Reusing
+it refused a perfectly good source. Split into `rasterStats`, with each caller asking its own question.
+
+**A second bug found by LOOKING, which no gate would have caught.** The first `html` layer to go
+through the bake came back set in Times. A detached clone inherits nothing: the live element sits under
+`#cam` and under `:root`, so its font, colour and size arrive by inheritance and are on none of its own
+attributes. `seams.js` never met this because it rasterises `#cam` or `#root`, the top of the chain.
+`bakeOne` now stamps the resolved value of seventeen inheritable properties onto the clone's root, and
+the subtree inherits from there. Every gate was green while the headline was in the wrong typeface,
+which is the standing argument for `make judge` and your eyes.
+
+**A framework bug found on the way.** `core/webgl.js` refuses a context the browser DECLINES to create.
+Past the cap some drivers hand one out and drop an OLDER one instead. Twenty resampled layers came back
+`{live: 21, lost: 5}`: five surfaces that paint nothing, exit 0, no error — the identical blank-render
+failure the whole module was written to prevent, arriving by the door it did not watch. The loss counter
+existed and only the counter did, because `window.__engineError` is read exactly once, at readiness
+(`internal/scene/scene.go:200`), and a handler that fires later has nowhere to speak. `core/boot.js` now
+checks `glLive().lost` before raising the ready flag and throws naming the number. It does not recover:
+recovery would make a frame depend on when the loss happened.
+
+**Blast radius.** `snap-scenes`: 106 identical, 0 changed. `lib-test`: 1066 passed, unchanged — the new
+code is registry wiring and a build-time bake, neither of which the library harness reaches. No shipped
+scene uses `resample`, so the live-raster path was proved separately: a `paint` + `shader` scene renders
+frames 40/120/200 to hashes byte-identical before and after the tick moved out of the two primitives.
+
+**Which gate catches it now.** `canvas-purity` and `probe-purity` cover the purity half, and
+`core/validate.mjs` names the four types that cannot be sampled either way. What has no gate is the
+thing that made this worth building: nothing measures whether a film SHOWS anything. That is
+`make judge` and your eyes, as it has been since `visual-vocabulary` was deleted.
+
+**Still open.** The bake is one instant of the layer, taken before any frame is drawn, so a `count` that
+ticks or a `type` that types is frozen at the state build left it in. Sampling a MOVING built subtree
+would need a rasterisation per frame, and `renderFrame(n)` is synchronous by contract while
+`<foreignObject>` decoding is not. That is a real ceiling, not a detail: the honest shape of this
+feature is "a still of composed content, transformed over time by the pass".

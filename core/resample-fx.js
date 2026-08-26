@@ -27,6 +27,10 @@ export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macr
 // no fx, or an fx with no key, is a bug the effects catalog reports.
 // THE STANDING CAUTION, true of every entry: each resampled layer takes its own GL context (see
 // createResampler below), so this is a HERO-SHOT effect — one per film, not decoration on fifty layers.
+// The source may now be a BUILT layer and not only a raster one — core/resample.js bakes a text, rect,
+// group or component subtree into a texture at boot — which makes over-reaching cheaper to write than
+// it used to be. Ten resampled layers is ten contexts; the cap is around sixteen and core/boot.js
+// refuses the frame that crosses it.
 // And a constant `amount` is usually the wrong call: half of these only read as motion while they MOVE,
 // so ramp them across the layer's window.
 export const RESAMPLE_BLURBS = {

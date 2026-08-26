@@ -1167,13 +1167,17 @@ if (isMain) {
       (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => checkLayer(L, `layer[${i}]`, false));
     }
 
-    // `resample` binds the layer's OWN raster as a GL texture, so it only means anything on a layer
-    // that has one. The engine throws at build time; catching it here names the file and index.
+    // `resample` reads a raster. A layer that owns one (image · paint · shader) is sampled live; every
+    // other type is BAKED out of the DOM once at boot (core/resample.js) and sampled as a still. The
+    // two that CANNOT go either way are refused by name: `raymarch` and `three` own their own WebGL
+    // context, and `video` a bitmap — none of the three serialises into the offscreen raster, so they
+    // would bake a hole. The engine throws at build time; catching it here names the file and index.
     const RASTER = ['image', 'paint', 'shader'];
+    const UNSAMPLABLE = ['raymarch', 'three', 'globe', 'video'];
     (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
       if (!isObj(L) || !L.resample) return;
-      if (!RASTER.includes(L.type))
-        errors.push(`layer[${i}] has \`resample\` on a "${L.type}" layer, which owns no pixels to sample — raster layers only (${RASTER.join(' · ')}).`);
+      if (UNSAMPLABLE.includes(L.type))
+        errors.push(`layer[${i}] has \`resample\` on a "${L.type}" layer. Its pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither the live path nor the offscreen bake can read them — the pass would render nothing. Raster layers sample live (${RASTER.join(' · ')}); every other type is baked from its built DOM.`);
       else if (L.type === 'image' && (!L.w || !L.h))
         errors.push(`layer[${i}] resample on an image needs explicit w and h (the GL buffer is sized at build time).`);
       // ken is a CSS transform on the <img>; the texture is the img's pixels, which the transform

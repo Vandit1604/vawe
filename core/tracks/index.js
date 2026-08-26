@@ -41,6 +41,7 @@ import * as tCut from './cut.js';
 import * as tUnits from './units.js';
 import * as tRansom from './ransom.js';
 import * as tPrimitive from './primitive.js';
+import * as tResample from './resample.js';
 import * as tBorderTrail from './border-trail.js';
 import * as tCircle from './circle.js';
 import * as tVars from './vars.js';
@@ -51,7 +52,7 @@ import * as tMotion from './motion.js';
 import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 
-const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive,
+const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive, resample: tResample,
   borderTrail: tBorderTrail, circle: tCircle, vars: tVars, react: tReact, box: tBox,
   follow: tFollow, motion: tMotion, idle: tIdle, modifiers: tModifiers };
 
@@ -75,6 +76,7 @@ export const SLOTS = Object.freeze([
   'split',      // kinetic split-text reveal on the layer's local clock
   'glyphs',     // per-glyph re-roll (ransom `cycle`)
   'primitive',  // the layer type's own frame() — count / typing / cursor / clip / ken
+  'resample',   // re-sample the layer through a fragment shader — AFTER its own canvas drew this frame
   'orbit',      // the borderTrail arc's rotation
   'spin',       // circular text: rotate the whole ring
   'vars',       // animated custom properties the layer's own CSS reads
