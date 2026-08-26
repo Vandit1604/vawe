@@ -63,6 +63,24 @@ const setAt = (o: Record<string, unknown>, path: string, v: unknown): Record<str
   return { ...o, [head]: setAt(child, rest.join("."), v) };
 };
 
+// 4K for the DOWNLOAD: a backdrop gets scaled up in use, so give the file room.
+const RW = 3840, RH = 2160;
+// 1080p for the CLIPBOARD. The same frame at 4K is a 6.6MB write that a chat box or a doc will scale
+// straight back down, and the write is slow enough to feel. A paste wants a picture, not an original.
+const CW = 1920, CH = 1080;
+
+// bands and spectrum emit scene LAYERS, so the picture on the stage is the engine's own render inside
+// an iframe and this page holds no markup for it. Everything that turns markup into a file or an image
+// says this rather than doing nothing.
+const NO_MARKUP = "this look renders as a scene, not as markup, so there is no fragment here to save "
+  + "or copy as an image. The options and the link still copy.";
+
+const msgOf = (e: unknown) => String((e as Error)?.message || e);
+
+/** A look and its only preset usually share a name, and "colonnade-colonnade" is noise. */
+const stampOf = (name: string, tag: string | null) =>
+  (tag ?? "custom") === name ? name : `${name}-${tag ?? "custom"}`;
+
 const LABELS: Record<string, string> = {
   seed: "seed", colour: "colour", shadow: "shadow", pattern: "pattern", motion: "motion",
 };
@@ -79,6 +97,11 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   const [which, setWhich] = useState<number | null>(null);
   const [opts, setOpts] = useState<Record<string, unknown> | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // A SECOND message, kept apart from `err` on purpose. `err` means the generator refused an option, and
+  // the stage answers that by dimming and saying the picture is the last one that rendered. A copy or a
+  // download that cannot run says nothing about the picture, which is current and correct, so it must
+  // not borrow that annotation.
+  const [toolErr, setToolErr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [preset, setPreset] = useState<string | null>(null);
   const [noDial, setNoDial] = useState<string[]>([]);
@@ -261,15 +284,37 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   //   2. `--t` has to be written on the wrapper. Inside the SVG there is no page to inherit it from, so
   //      every calc() reading it would be invalid and the whole declaration dropped (docs/MISTAKES.md
   //      #261). Pinned to 0, the frame everyone is looking at.
+  //
+  // One rasteriser, two callers. The download and the clipboard were never allowed to disagree about
+  // what a frame of this look looks like.
+  const rasterise = useCallback(async (w: number, h: number): Promise<Blob> => {
+    if (typeof html !== "string") throw new Error(NO_MARKUP);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">`
+      + `<foreignObject width="100%" height="100%">`
+      + `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;position:relative;--t:0">`
+      + `${html}</div></foreignObject></svg>`;
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d")!.drawImage(img, 0, 0);
+    const blob = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
+    if (!blob) throw new Error("the canvas produced no PNG");
+    return blob;
+  }, [html]);
+
   const download = useCallback(async (what: "png" | "html") => {
-    if (typeof html !== "string" || !gen) return;
+    if (!gen) return;
+    // This used to return in silence, so on a scene-layer look every download in the menu was a button
+    // that did nothing and said nothing. Both of them are refused by name now.
+    if (typeof html !== "string") { setToolErr(NO_MARKUP); return; }
+    setToolErr(null);
     // The name says what this IS. `preset` was measured against the schema's defaults, so simply opening
     // a look and downloading it produced "custom" before anyone had touched a dial, which is a filename
     // that lies about its own contents. The preset STATE is the honest source: it is null the moment
     // anything is changed and holds the preset's name until then.
-    // A look and its only preset usually share a name, and "colonnade-colonnade" is noise.
-    const tag = presetRef.current ?? "custom";
-    const stamp = tag === gen.name ? gen.name : `${gen.name}-${tag}`;
+    const stamp = stampOf(gen.name, presetRef.current);
     if (what === "html") {
       // A whole page, not a bare fragment: what someone downloads should open.
       const doc = `<!doctype html><meta charset="utf-8"><title>${gen.name}</title>`
@@ -278,25 +323,34 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
       save(new Blob([doc], { type: "text/html" }), `${stamp}.html`);
       return;
     }
-    const W = 3840, H = 2160;                 // 4K. A backdrop gets scaled up in use, so give it room.
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`
-      + `<foreignObject width="100%" height="100%">`
-      + `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;height:${H}px;position:relative;--t:0">`
-      + `${html}</div></foreignObject></svg>`;
-    const img = new Image();
-    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    try {
-      await img.decode();
-      const c = document.createElement("canvas");
-      c.width = W; c.height = H;
-      c.getContext("2d")!.drawImage(img, 0, 0);
-      const blob: Blob | null = await new Promise((r) => c.toBlob(r, "image/png"));
-      if (blob) save(blob, `${stamp}-${W}x${H}.png`);
-    } catch (e) {
+    try { save(await rasterise(RW, RH), `${stamp}-${RW}x${RH}.png`); }
+    catch (e) {
       // Loud, because a silent failure here looks like a browser that ignored the click.
-      setErr(`could not rasterise: ${String((e as Error)?.message || e)}`);
+      setToolErr(`could not rasterise: ${msgOf(e)}`);
     }
-  }, [html, gen]);
+  }, [html, gen, rasterise]);
+
+  // The frame itself, on the clipboard, so it can go straight into a message or a doc.
+  const copyImage = useCallback(() => {
+    if (!gen) return;
+    if (typeof html !== "string") { setToolErr(NO_MARKUP); return; }
+    setToolErr(null);
+    const png = rasterise(CW, CH);
+    const stamp = stampOf(gen.name, presetRef.current);
+    // No image clipboard here: Firefox writes text only, and `write` does not exist outside a secure
+    // context at all. Degrade to the file rather than leave a button that looks like it worked.
+    if (!window.isSecureContext || typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+      png.then((b) => save(b, `${stamp}-${CW}x${CH}.png`))
+         .catch((e) => setToolErr(`could not rasterise: ${msgOf(e)}`));
+      setToolErr("this browser will not put an image on the clipboard, so the PNG was downloaded instead");
+      return;
+    }
+    // The PENDING blob is what goes into the ClipboardItem, and the write is called INSIDE the click.
+    // Safari ties clipboard permission to the gesture, so an `await` between the two loses it.
+    navigator.clipboard.write([new ClipboardItem({ "image/png": png })])
+      .then(() => { setCopied("image"); setTimeout(() => setCopied(null), 1600); })
+      .catch((e) => setToolErr(`could not copy the image: ${msgOf(e)}`));
+  }, [html, gen, rasterise]);
 
   const copy = useCallback((label: string, text: string) => {
     navigator.clipboard?.writeText(text).then(() => {
@@ -362,12 +416,12 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
           {sceneUrl
             ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
             : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
-          {err && (
+          {(err || toolErr) && (
             <div className="pgerr" role="status">
-              <p>{err}</p>
+              <p>{err ?? toolErr}</p>
               {/* Sibling, not a nested span: inside the paragraph the two strings ran together in
                   textContent, so a screen reader read "got 0the picture above is the last one". */}
-              {made && <p className="pgheld">the picture above is the last one that rendered</p>}
+              {err && made && <p className="pgheld">the picture above is the last one that rendered</p>}
             </div>
           )}
         </div>
@@ -409,19 +463,21 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
             difference; options is what almost everyone wants, and the other two are a keystroke away. */}
         <div className="pgcopy">
           <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
-            {copied === "options" ? "copied" : "copy options"}
+            {copied ? "copied" : "copy options"}
           </button>
           <select aria-label="copy something else" value=""
             onChange={(e) => {
               const v = e.target.value;
               if (v === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
               if (v === "link") copy("link", link);
+              if (v === "image") copyImage();
               if (v === "png" || v === "file") download(v === "png" ? "png" : "html");
               e.target.value = "";
             }}>
             <option value="" disabled>…</option>
             <option value="png">download PNG (4K)</option>
             <option value="file">download HTML</option>
+            <option value="image">copy image (1080p)</option>
             <option value="html">copy HTML</option>
             <option value="link">copy link</option>
           </select>
@@ -669,7 +725,15 @@ function LookCard({ gen, engine, active, onPick }:
  *  exists because the iframe renders at FULL frame size and is scaled down: sizing it to the box
  *  instead crops the scene to its top-left corner, which is exactly what the first version here did. */
 function ScenePreview({ url, title }: { url: string; title: string }) {
-  const { hostRef, meta } = useSceneEngine({ dataUrl: url, aspect: "16:9", title, playing: true });
+  // playing: FALSE. The page's contract is that nothing here moves and the panel says so in as many
+  // words, but a generator that emits scene LAYERS came up through this hook with playback on, so the
+  // two shader looks ran a 270-frame loop while every other look held still. A field is judged against
+  // a still reference; a picture that changes while you look at it cannot be compared to one that does
+  // not. One frame is drawn explicitly, because with no loop nobody else would draw it, and it is the
+  // MIDDLE one: the engine gives every layer an entrance envelope, so frame 0 is the instant before the
+  // picture arrives and the stage came up white. Halfway is past every entrance and before any exit.
+  const { hostRef, meta, renderFrame } = useSceneEngine({ dataUrl: url, aspect: "16:9", title, playing: false });
+  useEffect(() => { if (meta) renderFrame(Math.floor(meta.totalFrames / 2)); }, [meta, renderFrame]);
   useEffect(() => {
     const h = hostRef.current;
     if (!h || !meta) return;
