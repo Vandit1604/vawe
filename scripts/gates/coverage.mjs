@@ -21,13 +21,13 @@ import { LOOK_NAMES } from '../../core/looks.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
-import { population, isTemplate } from '../lib/census.mjs';
+import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, SCENE_DIR);
-const scenes = population('coverage · corpus', { filter: (f) => f !== 'schema.json' && !isTemplate(f), quiet: true }).names
+const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIVES, quiet: true }).names
   // Two views of the same scene. `j` is LOWERED, because a boundary declared as `transitions` carries a
   // cut style and a sting fx that this report otherwise scores as unexercised, so the library looked
   // like it used less of the engine than it does (docs/MISTAKES.md #391b). `raw` is the authored file,

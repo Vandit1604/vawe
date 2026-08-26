@@ -3151,5 +3151,26 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   globalThis.document = priorDoc;
 }
 
+// ---- scripts/lib/census.mjs: ONE definition of "the library" ----
+// waiver-drift printed 135 and audio-check printed 150 for the same thing, because each caller wrote
+// its own rule. These four assertions are what stops the two from drifting apart again.
+{
+  const { LIBRARY, LIBRARY_WITH_DERIVATIVES, SCENE_DIR, ROOT } = await import('../lib/census.mjs');
+  const abs = (f) => path.join(ROOT, SCENE_DIR, f);
+  const names = fs.readdirSync(path.join(ROOT, SCENE_DIR)).filter((f) => f.endsWith('.json')).sort();
+  const lib = names.filter((f) => LIBRARY(f, abs(f)));
+  const wide = names.filter((f) => LIBRARY_WITH_DERIVATIVES(f, abs(f)));
+  ok('census: the library excludes every generated sidecar',
+    !lib.some((f) => /\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f)));
+  ok('census: the library excludes schema.json and templates',
+    !lib.includes('schema.json') && !lib.some((f) => /\.template\.json$/.test(f)));
+  ok('census: every member of the library declares module scene',
+    lib.every((f) => { try { return JSON.parse(fs.readFileSync(abs(f), 'utf8')).module === 'scene'; } catch { return false; } }));
+  // The opt-in is the same rule minus one clause, so it can only ever be a superset. A caller that
+  // wanted derivatives and got fewer files would be the original bug pointing the other way.
+  ok('census: the derivatives opt-in is a strict superset of the library',
+    lib.every((f) => wide.includes(f)) && wide.length >= lib.length);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

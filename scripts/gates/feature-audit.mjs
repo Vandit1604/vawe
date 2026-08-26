@@ -10,7 +10,7 @@ import path from 'path';
 import { PRESETS } from '../../core/type.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
-import { population, isTemplate } from '../lib/census.mjs';
+import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 
 const DIR = SCENE_DIR;
@@ -22,7 +22,7 @@ const CAPS = ['group', 'motion', 'camera', 'cut', 'fx', 'ken', 'layout', 'fitH',
 
 // A `.template.json` holds mustache placeholders and is not JSON: reading one threw out of this sweep
 // and killed the whole audit, so `make features` reported nothing at all. isTemplate excludes it by name.
-const files = population('feature audit', { filter: (f) => !SKIP.has(f) && !isTemplate(f) }).names;
+const files = population('feature audit', { filter: (f, abs) => !SKIP.has(f) && LIBRARY_WITH_DERIVATIVES(f, abs) }).names;
 
 const KIN = new Set(Object.keys(PRESETS)); // only these are kinetic entrance presets ('paper'/'accent' are bg specs)
 

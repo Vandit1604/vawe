@@ -14760,3 +14760,48 @@ measured one, a form measuring nothing is refused, and the `matches` path is mea
 `formats/scene/scene.js` fails 4 of them. Nothing was added to `core/validate.mjs` on purpose:
 validate reads data and cannot measure, so the only rule it could state is "declare `w`/`h`", which is
 the answer this entry rejects.
+
+## #465: one library, two sizes: 135 in one gate and 150 in the next, on the same afternoon
+
+**What happened.** `scripts/lib/census.mjs` owned HOW a sweep enumerates its population and left WHAT
+COUNTS to every caller. So each caller wrote the rule again, and they disagreed. `waiver-drift` dropped
+`schema.json` and six generated sidecar suffixes, then required `module === "scene"`, and printed 135.
+`audio-check --all` required only `module === "scene"`, so it walked `.expanded.`, `.beatsync.` and
+`.animatic.` artifacts as if a build product were a film, and printed 150. `pace-check` and
+`designspec-check` excluded two of the six suffixes and never checked `module` at all, and printed 143.
+Three numbers for one thing, all of them printed with a green tick. CLAUDE.md has a paragraph admitting
+it once cited 93, 130 and 144 as the size of the same library in three sentences: this is the machinery
+that made that possible.
+
+**Root cause.** The doc comment at the top of `census.mjs` already stated the principle, in the
+`filter` parameter: a tool that excludes sidecars must be compared against a count that excludes them
+too. It stated the principle and then took the rule as an argument from each caller, so the module knew
+what was right and enforced nothing. A shared helper that accepts the disputed decision as a parameter
+is not a shared decision; it is a shared for-loop.
+
+**Fix.** `census.mjs` now exports the rule itself. `LIBRARY` is a film: in `formats/scene`, not
+`schema.json`, not a `.template.json`, not one of the six generated derivatives, and parses with
+`module === "scene"`. `LIBRARY_WITH_DERIVATIVES` is the named opt-in for a sweep that grades the
+RENDERABLE artifact rather than the authored film, because an `.expanded.json` is what actually renders
+once a scene carries block or beat sugar. Six gates now pass `LIBRARY` (waiver-drift, audio-check,
+eye-trace, author-check, pace-check, designspec-check) and two pass the opt-in (coverage,
+feature-audit). Every one of them stops restating the regex.
+
+**What did NOT change, and why that is the point.** Seven sweeps walk neither set on purpose, so
+`census.mjs` names them in a comment beside the rule: `audit-scenes`, `paints-nothing` and
+`snap-scenes` resolve source to expanded themselves and must see the expanded file; `unused` drops
+`_`-prefixed scratch to build a corpus of shipped films; `similarity`, `layer-props` and
+`feature-audit` carry extra per-tool exclusions on top. Naming them where the rule lives is what stops
+the next reader from "fixing" them back into disagreement.
+
+**Verdicts, before and after.** No gate changed its exit code. `waiver-drift` 135 → 135, `eye-trace`
+135 → 135 and `author-check`'s ratchet census 135 → 135, all set-identical (they had the right rule
+already). `audio-check --all` 150 → 135, `pace-check --census` 143 → 135, `designspec-check --census`
+143 → 135, `feature-audit` 156 → 149: every dropped file is a generated sidecar or `examples.json`,
+which is a registry and not a scene. `coverage` is unchanged at 150 because its hand-rolled rule was
+already exactly the opt-in. designspec lost two findings, both on `onefile.animatic` and
+`onefile-storyboard.animatic`, which are build products of a film the census still grades.
+
+**Which gate catches it now.** `lib-test` (1125 → 1129 assertions): the library excludes every
+generated sidecar, excludes `schema.json` and templates, every member declares `module: "scene"`, and
+the derivatives opt-in is a strict superset. Deleting the derivative clause fails the first assertion.

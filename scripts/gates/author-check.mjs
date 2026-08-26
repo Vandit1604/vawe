@@ -63,7 +63,7 @@ import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { sceneDims } from '../../core/safe.js';
-import { population } from '../lib/census.mjs';
+import { population, LIBRARY } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -145,11 +145,7 @@ const readManifest = () => {
 // instead of a number, which is the whole ask — say what you looked at, and say when you could not look.
 let censusBlind = null;
 const libraryScenes = () => {
-  const pop = population('ratchet census', {
-    filter: (f) => f.endsWith('.json') && !/\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f) && f !== 'schema.json',
-    quiet: true,
-    soft: true,
-  });
+  const pop = population('ratchet census', { filter: LIBRARY, quiet: true, soft: true });
   censusBlind = pop.blind;
   return pop.names
   .map((f) => path.join(SCENE_DIR, f))
