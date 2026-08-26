@@ -44,7 +44,7 @@ motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and 
 
 | Principle | One line | JSON translation | Tag |
 |---|---|---|---|
-| **Slow in / slow out** | Nothing starts or stops instantly. | Every position/scale/opacity move eases; entrances decelerate (ease-out), exits accelerate (ease-in). Never `ease:"linear"`. | `[gated]` direct: `linear-motion` |
+| **Slow in / slow out** | Nothing STARTS or STOPS instantly. | A move from rest to rest eases: entrances decelerate (ease-out), exits accelerate (ease-in). A constant rate is right where there is no rest to ease, so `ease:"linear"` is CORRECT for a pan, a scroll, a marquee, a progress ring, a spinner and an ambient drift. | `[gated]` direct: `linear-motion` |
 | **Timing** | Frame count = weight and meaning. | A title (heavy) enters slower (0.5-0.7s) than a caption (0.25-0.4s). Never one global duration. | `[gated]` direct: `monotone-timing` |
 | **Spacing** | How distance spreads across frames is the ease's texture. | Prefer overshoot/settle (`snap`, `easeOutBack`, `spring`) over flat ramps for entrances. | `[eye]` |
 | **Anticipation** | A small opposite wind-up readies the eye. | Before a hero scale-up, dip ~2-4% (or nudge back ~8px) for ~4 frames. Hero moments only. | `[eye]` |
@@ -132,7 +132,7 @@ open loop); **Ogilvy, _Ogilvy on Advertising_** (front-load, honesty). The appli
 
 Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yours + `make judge`.
 
-1. **Nothing moves linearly.** Every visible move has an ease. `[gated]` `linear-motion`
+1. **A move that starts and stops eases at both ends.** A move with no rest to ease (a pan, a scroll, a spinner, a drift) runs at a constant rate on purpose, and curving it is the defect. The gate reads the whole RUN, not the key: entered or left in motion, or spaced so the keys already decelerate, and it stays quiet. `[gated]` `linear-motion`
 2. **No uniform tempo.** Durations and stagger vary with intent. `[gated]` `monotone-timing`, `pacing`
 3. **Overshoot-and-settle in ~0.2-0.3s on entrances.** Flat ease-out reads as a stock template. `[eye]`
 4. **One hero + one tiny caption** (scale contrast ~5-8x), not three medium lines. `[eye]`
@@ -140,6 +140,7 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 6. **Enter and exit in one continuous direction.** `[gated]` `enter-and-retreat`
 7. **A resting state exists** — not everything moves at once; the copy is still long enough to read. `[eye]`
 8. **Exits accelerate, entrances decelerate.** (The engine bakes this into the clip driver; don't fight it.) `[gated]` `linear-motion`
+8a. **A constant rate is a decision, not a lapse.** `linear` is 41% of the eases in this library because the pan, the scroll and the progress ring are all constant by nature. Say which one yours is, then leave it flat.
 9. **Blur/defocus out** when sliding would fight faces/cards/grids. `[eye]`
 10. **One motion idea per beat** — effects are 2-3 earned moments. `[gated]` `effect-soup`
 

@@ -14805,3 +14805,110 @@ already exactly the opt-in. designspec lost two findings, both on `onefile.anima
 **Which gate catches it now.** `lib-test` (1125 → 1129 assertions): the library excludes every
 generated sidecar, excludes `schema.json` and templates, every member declares `module: "scene"`, and
 the derivatives opt-in is a strict superset. Deleting the derivative clause fails the first assertion.
+
+## 465. `no-continuous-object` could not see a match cut, and a match cut is what it asked for
+
+**Symptom.** A short film held entirely by match cuts failed `no-continuous-object`, and the message it
+failed with read "every junction answers 'the X becomes the Y'". `becomes` is the field that writes
+exactly that. The gate refused a film for doing the thing it named.
+
+**Root cause.** `continuity()` in `scripts/gates/direction-floor.mjs` looked for ONE layer whose visible
+window strictly straddles the boundary. A match cut is two layers by construction: `core/junctions.js`
+retimes the outgoing form to end ON the joint and the incoming one to open there, and
+`resolveBecomes` (`formats/scene/scene.js`) carries the first form's centre, size and rotation onto the
+second one's opening pose. Nothing straddles anything. The gate measured SPATIAL PERSISTENCE OF A
+LAYER as a proxy for CONTINUITY OF A FORM, and the two part company at precisely the device the rule
+holds up as its own example.
+
+The cost is not only the false failure. `CLAUDE.md` records that this rule "made one alternative free
+and the other seventeen expensive, because a keyed `w`/`h` on a rectangle passes and a motif does not".
+The match cut is one of the seventeen, and it is the only one of them the engine has a first-class
+feature for. A gate that fires on the house's own feature teaches authors not to use it.
+
+**Fix.** The gate now reads both surfaces that declare a handover: layer-level `becomes`, and the
+junction-bound `matches` array. A handover whose time lands ON a boundary is counted as one form
+spanning that boundary and changing there, both by construction. It is not a claim the gate has to
+trust: `core/validate.mjs` already refuses a `becomes` whose two halves do not meet, and `matches`
+hangs on a named joint so the joint owns the only copy of the number. `confinedToBeat` is deliberately
+not asked of either half, because one layer per beat is the shape a match cut HAS.
+
+Two details that keep it from being decoration. A `matches` entry is timed by its `at` reference
+resolved through the film's own junction table, not by the authored `start`/`duration`, because the
+retiming happens at boot and this gate reads the authored scene. And each boundary now carries its own
+tolerance: a cut IS its time, while a seam is recorded at the middle of its blend and `matches` hangs
+on the mark, so the two sit half a blend apart by construction rather than by drift.
+
+**The wider question, recorded because the narrow fix does not answer it.** `no-continuous-object` is
+still the most-waived rule in the library: 14 of 135 films, 10%, against the 15% `waiver-drift.mjs:58`
+calls habitual. Not one of those 14 is cleared by this change, because not one of them uses `becomes`
+or `matches`: no scene in the library does. So the fix is entirely forward-looking, and the rule keeps
+its current shape while seeing 2 of the 18 devices in `docs/CRAFT/FILM-STRUCTURE.md` instead of 1. The
+honest reading is that the FLOOR is right and the MEASURE is narrow: a film really is a slideshow when
+nothing survives its junctions, and spatial persistence is one way to survive one. If the waiver share
+crosses 15%, the answer is not another special case; it is to move the rule to REPORT tier and let
+`storyboard-check`'s `threads:` field, which already accepts the whole catalogue, carry the planning
+half.
+
+**Which gate catches it now.** `gate-mutation` (139 → 143 cases), two of them here and pinned in both
+directions: a film held by match cuts stays green, and the SAME film with the handover moved off the
+joint still fails. Without the second case the fix would be a free pass anyone could write.
+
+**Still out of reach.** The gate can see that a form crosses a junction. It cannot see whether the two
+forms RHYME, which is the whole of whether a match cut works. `docs/CRAFT/FILM-STRUCTURE.md` says a
+match cut "fails when the rhyme is forced, and the cut reads as a trick", and nothing here measures
+that. Sixteen of the eighteen structural devices are still invisible: a motif, an escalation, a sound
+bridge, metric cutting. `make judge` and your eyes.
+
+## 466. `linear-motion` warned on a pan, and 41% of this library's eases are `linear` on purpose
+
+**Symptom.** `linear-motion` fired on 18 of 135 films including `brew-launch-act1` and
+`higgsfield-recreation`, the two films this repo argues from. Its message said "a visible move must
+decelerate in / accelerate out, never run flat".
+
+**Root cause.** It counted every authored `ease: "linear"` and called each one a flat move. But
+`linear` is 348 of 833 eases here because A CONSTANT RATE IS CORRECT for a whole family of moves: a
+camera pan, a page scroll, a marquee, a progress ring, an ambient drift, a spinner. Slow-in/slow-out
+governs a move that STARTS and STOPS, and the ramp exists because the pose goes from rest to rest.
+A move with no rest inside the shot has nothing to ramp.
+
+The blueprints say so at the write site and the gate fired on them anyway. `recordedPan` eases only the
+settle before the scroll "so the scroll never has a standing start" and writes every interior key
+linear on purpose (`blueprints/beats-track.mjs:70`); `beats-punct.mjs:44` keys a slow constant drift;
+`build-cadence.mjs:27` hand-keys a mechanical page pan. Same class as #465: a proxy standing in for the
+rule, and the proxy parting company with it at the house's own correct construction.
+
+**Fix.** Judge the RUN, not the key. A maximal chain of consecutive linear MOVING segments is flat only
+when it is entered from rest AND left at rest. Entered or left in motion, the rate is constant by
+construction and the ramp lives in the neighbouring segments. Three exemptions on top, each for a run
+that ends at a rest the eye never reads as one:
+
+- a FULL TURN (>= 350 degrees) is a cycle. Its opening and closing pose are the same pose, so a ramp
+  puts a visible hitch once per revolution. `orbit-proof` rotates exactly 360 degrees on one linear key
+  and was being told to curve it.
+- AMBIENT DRIFT (under 50px of travel and under 0.1 of scale) is not a move the eye tracks. 50px is
+  this file's OWN measured band, derived a few dozen lines above the rule: below it the library median
+  speed drops to 72 px/s across 176 moves, "which is ambient drift and is deliberate".
+- THE SHAPE IS IN THE KEYS. A multi-key run whose fastest segment runs 1.5x its slowest already
+  decelerates by key spacing, which is exactly what `blueprints/beats-track.mjs` builds: "the shape
+  comes from where the keys sit, not from a curve fitted over them, so the interior is linear
+  throughout". `rec1-nogate` decelerates 7x across three keys. Curving it would decelerate it twice.
+
+**Verdicts, before and after.** Every gate run over all 135 scenes, per code. Exactly one code moved:
+`linear-motion` 18 films → 2. No scene gained a finding of any code, and no exit code changed. The
+sixteen cleared films are all one of the named families: `higgsfield-recreation`, `rec2-gates`,
+`cadence`, `_studio-demo` and `rec1-nogate` are keyed page scrolls; `brew-launch`, `brew-native`,
+`example-kinetic-type`, `thread` and `refstudy` are the post-settle drift idiom (scale 1.0 to 1.03
+between two eased keys); `orbit-proof` is a full-turn spinner; `glass` and `northwind` are sub-ambient
+drifts; `kanban-drag` and `playhead` end runs entered in motion. The two that still warn are
+`onefile` (a 230-degree swing on a single key from dead stop to dead stop) and `rec3-skill` (a scroll
+whose two segments differ by 11%, so the keys state no shape).
+
+**Which gate catches it now.** `gate-mutation`, two cases, both reading the OUTPUT rather than the exit
+code, because this rule warns in both directions and the false positive it shipped for months was
+invisible to an exit code. Same travel, same curve, only the ends differ.
+
+**Still out of reach.** The rule reads the AUTHORED ease. `core/sequence.js` interpolates any segment
+under `DENSE_KEY_SEC` linearly whether or not the author said so, so a dense hand-keyed track runs flat
+in places the gate never looks, and it always did. And nothing here can tell a pan that should be
+constant from a pan that should ease: the exemptions prove a move HAS no rest to ramp, never that a
+constant rate is the right choice for that shot.
