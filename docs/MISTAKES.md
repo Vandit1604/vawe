@@ -15365,7 +15365,7 @@ so the guard rejects any other token rather than letting one through.
 **Why no test caught it.** Nothing in the library had ever written a token as a sting colour, so the
 hex-only parser was never asked a question it could get wrong. Four assertions now pin the contract.
 
-## #477: OPEN: beatSync reports what it moved, and the render log cannot hear it
+## #477: beatSync reports what it moved, and the render log could not hear it
 
 **What.** `core/beat-bind.js` builds a one-line report of every joint the grid moved (`describeBind`),
 and `formats/scene/scene.js` logs it. It never reaches an author. Rendering a beat-synced scene prints
@@ -15379,10 +15379,18 @@ unknown JSON key is dropped by `encoding/json` without a word. `core/boot.js` bu
 from a fixed key list too. So the value is computed, handed to a dead channel, and discarded: the same
 "written and never read" shape as `cameraMove` (#424) and `segments` (#425).
 
-**Not fixed in this pass, and why.** The repair is three lines in three files this pass did not own:
-`core/boot.js` carrying the note into `__engine.meta`, a `BeatSync string` field on `Meta` in
-`internal/scene/scene.go`, and one `fmt.Println` in `internal/render/render.go`. Writing the page half
-alone would have been scaffolding for a change nobody had made yet.
+**Fix.** The value now travels the channel that already exists rather than a new one.
+`formats/scene/scene.js` KEEPS the note instead of only logging it and returns it on the scene;
+`core/boot.js` carries it into `window.__engine.meta` beside `stings`, `sfx` and `bridges`;
+`internal/scene/scene.go` DECLARES `BeatSync string` on `Meta`, which is the line that matters, because
+`encoding/json` drops an undeclared key without a word and that silence was the whole bug; and
+`internal/render/render.go` prints it right after `Capture` returns. A beat-synced render now says
+`▶ beatSync: 97.51 BPM beats, 1 joint(s) moved (cut 1.62s → 1.591s)` before it encodes.
+
+**The shape to remember.** Three files had to agree for one string to survive, and each of the three
+failed silently on its own: a console nothing listens to, a key nobody copies, a struct field that does
+not exist. This is the same "written and never read" family as `cameraMove` (#424) and `segments`
+(#425), and it is why a Go struct mirroring a JS object is a two-owner hazard every time.
 
 **What still works, so the scope is clear.** The line IS visible in `make studio` and any devtools
 console, and `bindBeats` still THROWS (loudly, into `window.__engineError`, which the renderer does
@@ -15447,3 +15455,69 @@ backwards and is fixed by the same line.
 
 **The shape worth grepping for.** Text inside an element whose transform SCALES. A translate is safe; a
 scale changes the raster the glyphs need, and which raster arrives is the compositor's decision.
+
+## #480: the ghost trail painted OVER the layer, and a filled plate trailed nothing at all
+
+**What.** `core/fx/ghost.js` builds k copies of a layer and poses each at where the layer WAS. Two
+defects, both visible in a shipped film (`showcase-ui`, the panel that slides out at 4.5s): the echoes
+were drawn on top of the card, veiling the number and the progress bar behind grey; and a `rect`, whose
+fill is CSS on the layer element, left no trail at all because a ghost cloned only `innerHTML`.
+
+**Root cause 1: DOM order does not decide paint order.** The builder inserted each ghost as a FIRST
+child and the comment said that put them behind. It does not. An absolutely-positioned child paints in
+a later step of the stacking algorithm than its parent's in-flow content, whatever the tree order says.
+The fix is `z-index: -1` on each ghost, which is the one thing that puts a positioned child under its
+parent's own content, plus `isolation: isolate` on the layer so that negative index resolves inside a
+stacking context the layer owns on EVERY frame. Without the isolation the context existed only on the
+frames a track happened to write a transform, so the trail would have sat behind the whole stage on the
+others: a paint bug that comes and goes with the motion track is worse than one that is always there.
+
+**Root cause 2: what a layer paints is not in its markup.** `rect` puts its fill, radius and shadow on
+the layer element (`kit.chipBox`), and `innerHTML` on a rect is empty. So the effect rendered a silent
+no-op for the one layer type most likely to want a trail. Each ghost now carries the layer's own paint
+longhands (`background-*`, `border-*`, `box-shadow`, `outline-*`, `backdrop-filter`).
+
+**Where the first attempt went wrong, because the shape recurs.** The paint copy was read with
+`getComputedStyle(el)` at build. It returned nothing, twice over: a computed declaration holds no
+SHORTHANDS, so `getPropertyValue('background')` is always `''`; and a layer is built DETACHED
+(`formats/scene/scene.js` `buildLayer` creates the element and appends it later), so a computed style
+there answers with the initial value for everything. The copy reads the layer's own inline style
+instead, where a shorthand enumerates as its longhands.
+
+**Two dead reads in the same file, same root, NOT fixed here.** `el.offsetWidth` at build is 0 on a
+detached element, so `ghostR` is always its 100px fallback and the rotation/scale half of the
+separation ramp is measured against a constant. `getComputedStyle(el).position` is `''` there too, so
+the `position: static` fallback never fires. Neither is wrong on any shipped scene (every layer is
+absolute, and no scene ghosts a rotation), and changing `ghostR` moves the fade on existing films, so
+both are recorded rather than changed.
+
+**Which gate catches it now.** None, and that is honest: `make audit` fires on collisions, not on a
+trail that veils its own subject. It was found by rendering a repro and LOOKING, which is what
+`make judge` is for. `probe-purity` still passes: nothing here reads a previous frame.
+
+## #481: the wordSlot chip clipped its own descenders
+
+**What.** `{ "wordSlot": { "words": [...], "chip": true } }` draws the brand-coloured box CLAUDE.md's
+launch rule 5 asks for. Every `g`, `j`, `p`, `q` and `y` in it came out with a flat bottom: "puggy" and
+"jamjar" lost their tails to the plate's edge.
+
+**Root cause.** The chip sets `overflow: hidden`, deliberately, so a word travelling out of the plate
+reads as the plate refilling. Clipping happens at the padding box, and the padding box was the LINE
+box plus 0.06em: `.hs-text` sets `line-height: 1.04`, which is tighter than the descender depth of any
+real face. So the plate was shorter than the ink it held, and the clip that makes the swap read cut
+the settled word as well.
+
+**The engine already knew how deep the ink goes.** `core/type.js` learned it for the `riseClip` mask
+(#35): 0.3em below the line box clears the deepest descender in the faces we ship. That number was a
+literal in one function. It is now `INK_PAD_EM`, exported, and both clips read it, so a chip and a clip
+wrapper cannot come to different conclusions about how tall a word is.
+
+**Fix.** The chip's vertical padding is `INK_PAD_EM`, so the plate contains the ink and the clip can
+stay. The chip's fixed WIDTH is untouched: the width comes from the `inline-grid` cell every candidate
+shares, nothing measures a glyph, and the words after the slot still do not move. The plate does get
+taller, and one shipped film changes: `showcase-type`'s chip grows by 0.24em top and bottom. That is
+the fix, not a side effect. `make audit` on that scene is clean before and after.
+
+**Which gate catches it now.** None. `clipped-text` in `verify/audit.mjs` compares a scroll size to a
+client size, and a descender sliced by half a pixel of overflow does not move either. It was found by
+rendering a word with a descender in a chip and looking at it.

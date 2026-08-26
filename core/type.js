@@ -4,6 +4,13 @@
 import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
 import { defineRegistry, blurbsOf, withBlurb } from './registry.js';
 
+// HOW FAR THE INK FALLS BELOW THE LINE BOX, in em, for the deepest descender in the faces we ship.
+// Exported because a second consumer arrived: the wordSlot chip (core/fx/word-slot.js) clips at its
+// own edge too, and a copied 0.3 in a second file is the drift this codebase logs most. One fact, one
+// owner. It is a MEASUREMENT of the faces, not a taste setting: raise it only against a face whose
+// descenders are cut, and both clips grow together.
+export const INK_PAD_EM = 0.3;
+
 // mix two hex colours. Pure. (colorWave now uses color-mix so it can take theme TOKENS, not just hex.)
 const _hx = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const mixHex = (a, b, t) => { const pa = _hx(a), pb = _hx(b); return `rgb(${Math.round(pa[0] + (pb[0] - pa[0]) * t)},${Math.round(pa[1] + (pb[1] - pa[1]) * t)},${Math.round(pa[2] + (pb[2] - pa[2]) * t)})`; };
@@ -410,7 +417,7 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
         // EVERY word at 76px, which is why g/y/p rendered with flat bottoms in shipped video. Pad the
         // mask downward and pull the identical amount back with a negative margin: the clip region
         // grows, the layout does not move a pixel. 0.3em clears the deepest descenders we ship.
-        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';
+        w.style.paddingBottom = `${INK_PAD_EM}em`; w.style.marginBottom = `${-INK_PAD_EM}em`;
         el.parentElement.insertBefore(w, el); w.appendChild(el);
       }
       Object.assign(el.style, fn(u, popts));
