@@ -2,7 +2,7 @@ import { boot } from '/core/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions, bindMatchesToJunctions } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
-import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
+import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText, decodeText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
@@ -664,24 +664,66 @@ boot((data, fps, theme, canvas) => {
   // one IS handed out and freezing a reused object would freeze it for every later frame.
   // core/tracks/index.js states the rule this serves: nothing allocates per frame if it does not have to.
   const scratchGeom = Array.from({ length: topCount }, () => ({}));
+  // THE ENTRANCE IS PART OF WHERE A LAYER IS, and for a long time this function said otherwise. A box
+  // was composed from the authored x/y plus the motion track and nothing else, so through a `rise` the
+  // target sat 48px below the box that claimed to describe it, through a `slide-left` 60px to the side,
+  // and through a `pop` at 86% of the size. Every reader of boxOf got that wrong answer with nothing to
+  // say so: a follower pinned itself to where its target WOULD BE and the target arrived underneath it
+  // (measured 48.00px at t=0 on a plain rise), and a cast shadow aimed away from a point its object was
+  // not at yet. driveClips owns the entrance and writes it as a CSS transform, which is why it never
+  // reached the arithmetic here; `clipStyleAt` is that same composition as a VALUE, so the pose can now
+  // be asked for rather than only drawn.
+  //
+  // ONE SCRATCH OBJECT AND ONE MATRIX, both reused, because this runs per id'd layer per frame and
+  // core/tracks/index.js states what that costs (~50k times a minute of video). The work is also SKIPPED
+  // outside the enter and exit ramps, which is where an entrance contributes identity anyway, so a
+  // settled or off-window layer pays two comparisons and no allocation.
+  const pose = { dx: 0, dy: 0, scale: 1 };
+  const poseM = new DOMMatrix();
+  // clipPose(el, t, visible) -> `pose`, the enter/exit transform's effect on the layer's CENTRE and size.
+  // Translate moves the centre; scale multiplies about it and leaves it where it is — the same split
+  // boxOf already makes between w/h and `scale`, and for the same reason (CSS scales about the
+  // element's own centre, so folding scale into w/h would move the top-left corner with nothing on
+  // screen moving with it).
+  function clipPose(el, t, visible) {
+    pose.dx = 0; pose.dy = 0; pose.scale = 1;
+    if (!visible) return pose;   // an off-window box already reports the resting pose, and so does this
+    const start = parseFloat(el.dataset.start) || 0;
+    const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
+    const inEnter = t - start < enterDurOf(el);
+    const inExit = Number.isFinite(dur) && t > start + dur - exitDurOf(el);
+    if (!inEnter && !inExit) return pose;
+    const tr = clipStyleAt(el, t).transform;
+    if (!tr || tr === 'none') return pose;
+    // DOMMatrix rather than a hand-rolled parse of the transform string: the anim registry is free to
+    // write any transform list it likes, and a regex here would be a second, weaker implementation of
+    // CSS that goes wrong silently the first time an entrance uses a function it does not know.
+    poseM.setMatrixValue(tr);
+    pose.dx = poseM.e; pose.dy = poseM.f; pose.scale = poseM.a;
+    return pose;
+  }
   function resolveBoxes(t) {
     boxes.clear();
     for (let i = 0; i < topCount; i++) {
-      const { L } = layers[i];
+      const { L, el } = layers[i];
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = t >= start && t < end;
       const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start) : null;
       const base = (L.id && baseSize.get(L.id)) || { w: 0, h: 0 };
       const w = m && m.w != null ? m.w : (L.w ?? base.w);
       const h = m && m.h != null ? m.h : (L.h ?? base.h);
-      const x = (L.x ?? 60) + (m ? m.dx : 0);
-      const y = (L.y ?? 240) + (m ? m.dy : 0);
+      // The enter/exit transform, composed on top of the authored geometry and the motion track,
+      // exactly as the browser composes them: driveClips writes this transform and the motion track
+      // prepends to it, so the two are independent offsets of the same centre.
+      const p = clipPose(el, t, visible);
+      const x = (L.x ?? 60) + (m ? m.dx : 0) + p.dx;
+      const y = (L.y ?? 240) + (m ? m.dy : 0) + p.dy;
       // w/h are the UNSCALED layout box and `scale` is reported beside them, because CSS scales about
       // the element's centre: folding the scale into w/h would move the top-left corner and nothing
       // on screen moves with it (the same error that put a `becomes` handover 160px off, above).
       const g = L.id ? {} : scratchGeom[i];
       g.id = L.id; g.x = x; g.y = y; g.w = w; g.h = h; g.cx = x + w / 2; g.cy = y + h / 2;
-      g.scale = m ? m.scale : 1; g.rot = m ? m.rot : 0; g.opacity = m ? m.opacity : 1; g.visible = visible;
+      g.scale = (m ? m.scale : 1) * p.scale; g.rot = m ? m.rot : 0; g.opacity = m ? m.opacity : 1; g.visible = visible;
       topGeom[i] = g;
       // a motion track that keys w/h RESIZES the group, and flex and grid reflow when it does, so
       // the offsets measured at build stop describing where the children are. Recorded, not guessed.
@@ -702,9 +744,13 @@ boot((data, fps, theme, canvas) => {
       // with the group's `scale` reported beside, matching what a top-level box means.
       const ox = k.dx + k.w / 2 - p.w / 2, oy = k.dy + k.h / 2 - p.h / 2;
       const r = (p.rot * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
-      const cx = p.cx + (ox * c - oy * s) * p.scale, cy = p.cy + (ox * s + oy * c) * p.scale;
+      // The child's own entrance rides INSIDE the group, so its offset is rotated and scaled by the
+      // group's transform like any other local displacement, and its scale multiplies the group's.
+      const q = clipPose(layers[i].el, t, visible);
+      const qx = (q.dx * c - q.dy * s) * p.scale, qy = (q.dx * s + q.dy * c) * p.scale;
+      const cx = p.cx + (ox * c - oy * s) * p.scale + qx, cy = p.cy + (ox * s + oy * c) * p.scale + qy;
       boxes.set(L.id, Object.freeze({ id: L.id, x: cx - k.w / 2, y: cy - k.h / 2, w: k.w, h: k.h,
-        cx, cy, scale: p.scale, rot: p.rot, opacity: p.opacity, visible }));
+        cx, cy, scale: p.scale * q.scale, rot: p.rot, opacity: p.opacity, visible }));
     }
   }
   const boxOf = (id) => boxes.get(id) || null;
