@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import "./type.css";
 import { TypeBrowser, type Group } from "./TypeBrowser";
 import catalogue from "../../../lib/type-specimens.json";
-import "./type.css";
 
 /* /type — the typographic vocabulary, as specimens.
  *
@@ -61,7 +61,7 @@ export default function TypePage() {
               cannot show it. Provenance is real and stays, one keystroke away, because a generated
               catalogue that hides where it came from is worth less. It is a footnote, not a
               preface. Same cut, same reasoning, as showcase/effects/page.tsx. */}
-          <details className="tyabout">
+          <details className="fold">
             <summary>Why these groups, and where the list comes from</summary>
             <p>
               Not by registry. An author reaches for a job, not a name: reveal a line, punctuate one

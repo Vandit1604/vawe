@@ -17,34 +17,16 @@
   font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
 .fxonly input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
 
-.fxabout>p{margin-top:10px;font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
-.fxabout>p b{color:var(--ink)}
+.fold{margin:0 0 14px}
+.fold>p{margin-top:10px}
 
 /* ---- the two-column layout: a sticky rail, the families to its right -------------------------
    Column widths are tight on purpose. .wrap caps content at ~1108px regardless of viewport, so
    every pixel the rail keeps is a pixel the card grid does not get — and the grid's column COUNT,
    not its card size, is what keeps 463 cards from turning back into a 25-screen scroll. */
-.fxlayout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
-.fxrailcol{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
-  padding-right:6px}
-.fxrail{display:flex;flex-direction:column;gap:2px}
-/* `white-space:normal` is an OVERRIDE, not a default. globals.css still carries this page's old
-   horizontal pill strip, where `nowrap` was right because a pill is one line by definition. In a
-   172px column it is wrong: eleven of the thirty-five family names are wider than the rail, so
-   "Idles (ambient hold motion)" rendered as "Idles (ambient hold mot" with the rest cut off by the
-   column's own overflow. No ellipsis, no scrollbar anybody would find: just a name with its end
-   missing, which reads as a broken page rather than a long label. Wrapping is what a two-line
-   label is for. `min-width:0` on the name lets it actually shrink inside the flex row. */
-.fxrail a{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);text-decoration:none;
-  display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-radius:7px;
-  padding:6px 10px;border:1px solid transparent;white-space:normal;line-height:1.3;
-  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
-.fxrail a:hover{color:var(--accent)}
-/* The family currently in view, tracked by an IntersectionObserver in EffectsBrowser (a scrollspy,
-   not a route): aria-current="location" is both the semantic and the visual hook, so a screen
-   reader gets the same signal the highlight gives a sighted reader. */
-.fxrail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
-  font-weight:600}
+.fxrail{gap:2px}
+.fxrail a{font-family:var(--font-mono),monospace;font-size:12px;display:flex;align-items:baseline;
+  justify-content:space-between;gap:8px;padding:6px 10px;white-space:normal}
 .fxrail a span{color:var(--muted)}
 .fxrail a[aria-current] span{color:var(--accent)}
 
@@ -104,11 +86,10 @@
 /* ---- 900px: no room for a second column, so the rail collapses to the horizontal jump strip this
    page always had — a wrapped pill list under the filter bar, height-capped and scrollable. ---- */
 @media (max-width:900px){
-  .fxlayout{grid-template-columns:1fr;gap:0}
-  .fxrailcol{position:static;max-height:none;overflow:visible;padding-right:0}
-  .fxrail{flex-direction:row;flex-wrap:wrap;max-height:96px;overflow-y:auto;gap:6px;
-    padding:12px 0 4px;border-bottom:1px solid var(--line)}
-  .fxrail a{border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+  /* 35 families wrap into a height-capped block of pills; the cap is what keeps the strip from
+     pushing the first card off the screen. */
+  .fxrail{flex-direction:row;flex-wrap:wrap;max-height:96px;overflow-y:auto;gap:6px;padding:12px 0 4px}
+  .fxrail a{padding:4px 10px;white-space:nowrap}
 }
 @media (max-width:760px){
   /* The sticky toolbar wraps to three rows on a phone, so a family anchored under it lands with
@@ -200,7 +181,6 @@
 @media (prefers-reduced-motion:reduce){
   .fxcard{transition:none}
   .fxcard:hover{transform:none}
-  .fxrail a{transition:none}
   .fxcard-media img{transition:none}
   .fxtab{transition:none}
 }
@@ -213,14 +193,3 @@
 .fxprev{box-shadow:none}
 .fxprev-err{font-size:12.5px;line-height:1.5;color:var(--bad);background:var(--bad-bg);padding:10px 12px;
   border-top:1px solid var(--line)}
-
-/* The family/coverage fold. Moved here with the rest of this page's CSS: it is used by nothing
-   else, and leaving half a component's rules in globals.css is what caused the rail clipping. */
-.fxabout{margin:0 0 14px}
-.fxabout>summary{cursor:pointer;list-style:none;font-size:12.5px;color:var(--muted);
-  padding:2px 0;width:fit-content}
-.fxabout>summary::-webkit-details-marker{display:none}
-.fxabout>summary::before{content:"+ ";font-family:var(--font-mono,monospace)}
-.fxabout[open]>summary::before{content:"- "}
-.fxabout>summary:hover{color:var(--ink-2)}
-.fxabout>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}

@@ -33,7 +33,7 @@ export function ShowcaseRail({ categories }: { categories: Category[] }) {
   }, [categories]);
 
   return (
-    <nav className="scrail" aria-label="Showcase contents">
+    <nav className="rail scrail" aria-label="Showcase contents">
       {categories.map((cat) => (
         <div className="scrail-cat" key={cat.id}>
           <span className="scrail-catlabel">{cat.title}</span>

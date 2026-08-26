@@ -136,8 +136,8 @@ export default function Showcase() {
             </p>
           </section>
 
-          <div className="sclayout">
-            <div className="scrailcol">
+          <div className="rail-layout">
+            <div className="rail-col">
               <ShowcaseRail categories={CATEGORIES} />
             </div>
 

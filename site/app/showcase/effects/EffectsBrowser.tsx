@@ -121,7 +121,7 @@ function Chip({ e }: { e: Entry }) {
  * collapses back to the horizontal chip strip this page always had (CSS only, same DOM). */
 function Rail({ families, activeId }: { families: Family[]; activeId: string | null }) {
   return (
-    <nav className="fxrail" aria-label="Jump to a family">
+    <nav className="rail fxrail" aria-label="Jump to a family">
       {families.map((f) => (
         <a key={f.id} href={`#${f.id}`} aria-current={activeId === f.id ? "location" : undefined}>
           {f.title} <span>{f.entries.length}</span>
@@ -212,8 +212,8 @@ export function EffectsBrowser({ index }: { index: Index }) {
         </p>
       )}
 
-      <div className="fxlayout">
-        <div className="fxrailcol">
+      <div className="rail-layout">
+        <div className="rail-col">
           <Rail families={shown} activeId={activeId} />
         </div>
 
@@ -228,7 +228,7 @@ export function EffectsBrowser({ index }: { index: Index }) {
               {/* THE INTRO IS A DETAIL, NOT A HEADING. One paragraph per family meant a wall of them standing between
                   a person and the names they came to scan, and an index is for FINDING. It is still
                   here, one keystroke away, for the reader who has decided they want it. */}
-              <details className="fxabout">
+              <details className="fold">
                 <summary>What this family is for</summary>
                 <p className="fxintro"><Rich text={f.intro} /></p>
               </details>

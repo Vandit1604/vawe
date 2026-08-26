@@ -1,40 +1,26 @@
 /* ===== SHOWCASE AS A COMPONENT LIBRARY =========================================================
-   Same two-column shape /showcase/effects already shipped this week (a sticky rail, the work to
-   its right) but the rail itself is a different instrument: effects.css's `.fxrail` is 35 flat
-   links, one per family. This page's `.scrail` nests, a category label over the real entries
-   inside it, because "left sidebar with categories and their entries" was the literal ask. Column
-   widths and the collapse breakpoint are copied from `.fxlayout`/`.fxrailcol` on purpose — one
-   rail behaviour across the two catalog pages, not two that happen to look similar. */
-.sclayout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
-.scrailcol{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
-  padding-right:6px}
-.scrail{display:flex;flex-direction:column;gap:20px}
+   The two-column catalog shape (a sticky rail, the work to its right) is the shared
+   .rail-layout/.rail-col/.rail primitive in globals.css, so the column width and the collapse
+   breakpoint are one behaviour across this page and /showcase/effects rather than two that happen
+   to look similar. What is this page's own is the NESTING: effects' rail is 35 flat family links,
+   this one puts a category label over the real entries inside it, because "left sidebar with
+   categories and their entries" was the literal ask. */
+.scrail{gap:20px}
 .scrail-cat{display:flex;flex-direction:column;gap:2px}
 .scrail-cat ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
 .scrail-catlabel{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.05em;
   text-transform:uppercase;color:var(--muted);padding:0 10px 3px}
-.scrail a{font-size:12.5px;color:var(--ink-2);text-decoration:none;display:block;
-  border-radius:7px;padding:5px 10px;border:1px solid transparent;line-height:1.3;
-  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
-.scrail a:hover{color:var(--accent)}
-/* The entry currently in view, tracked by an IntersectionObserver in ShowcaseRail: aria-current
-   carries both the visual highlight and the same signal to a screen reader. */
-.scrail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
-  font-weight:600}
+.scrail a{display:block;font-size:12.5px;padding:5px 10px}
 .sclist{min-width:0}
 
 @media (max-width:900px){
-  /* minmax(0,1fr), not 1fr: a grid item's default min-width is its content's min-content, and
-     `.scrail` below scrolls a wide row of chips on purpose. Without the explicit 0 floor the
-     track grew to fit that row instead of clipping it, dragging the whole page 1200px+ wide on a
-     430px viewport (every section under the rail inherited the overflow). */
-  .sclayout{grid-template-columns:minmax(0,1fr);gap:0}
-  .scrailcol{position:static;max-height:none;overflow:visible;padding-right:0;min-width:0}
-  .scrail{flex-direction:row;overflow-x:auto;gap:18px;padding:12px 0 10px;border-bottom:1px solid var(--line)}
+  /* This rail scrolls sideways rather than wrapping: its entries are grouped under category
+     labels, and a wrapped grid loses which label an entry belongs to. */
+  .scrail{flex-direction:row;overflow-x:auto;gap:18px;padding:12px 0 10px}
   .scrail-cat{flex-direction:row;align-items:center;gap:6px;flex:0 0 auto}
   .scrail-catlabel{padding:0}
   .scrail-cat ul{flex-direction:row;gap:6px}
-  .scrail a{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  .scrail a{padding:4px 10px;white-space:nowrap}
 }
 
 /* ---- interlinked tags: a capability's tag now names real effect pages, so the names that
@@ -62,6 +48,3 @@
 .cap-index-text > span{font-size:12.5px;color:var(--muted)}
 .cap-index-go{margin-left:auto;flex:0 0 auto;color:var(--accent);font-size:1.1rem}
 
-@media (prefers-reduced-motion:reduce){
-  .scrail a{transition:none}
-}
