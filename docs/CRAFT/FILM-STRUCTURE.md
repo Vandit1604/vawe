@@ -46,6 +46,32 @@ composition and let the content change. Its timing note is exact and usable: "if
 move and decide to cut on frame six, pick-up the next shot on frame seven"
 ([School of Motion](https://schoolofmotion.com/blog/match-cuts)).
 
+### The engine builds one for you: `matches`
+
+The match cut is the one spatial device this engine PRODUCES rather than asks you to align. Name the
+joint and the two forms, and it does the arithmetic:
+
+```json
+"cuts":    [{ "t": 3.0, "style": "punch", "dur": 0.35 }],
+"matches": [{ "at": "cut@0", "from": "token", "to": "card" }]
+```
+
+The outgoing layer is retimed to end on that joint; the incoming one opens wearing its centre, its size
+and its rotation, then settles into its own geometry. Both ramps are stripped, because a match cut has
+no entrance and no exit: the outgoing form is whole on the cut frame and the incoming one is not
+arriving, it is already there. The alignment tolerance is therefore ZERO by construction, and the joint
+holds the only copy of the time, so moving the cut moves the match with it.
+
+Two things this is NOT. It is not a shared-element move: `from` and `to` are two DIFFERENT layers, and
+the point is the rhyme between two forms, not one form travelling. And it is not detection. Canva's
+Match & Move, Keynote's Magic Move and PowerPoint's Morph all guess which elements are the same across
+two pages, and that guess is their whole failure mode, because a restyle silently stops the tween. Here
+identity is declared by `id`, so a name that is not on the other side of the joint throws instead.
+
+Know the limit, and it is a limit of the gate rather than of the device: **a film held this way still
+fails `no-continuous-object`.** That rule looks for one layer id alive on both sides of a boundary, and
+a match cut is two ids by construction. See the match-cut entry in `docs/MISTAKES.md`.
+
 Masking, cloning, dolly-and-zoom and transformation are four of Issara Willenskomer's twelve principles of
 UX in Motion, and he defines each by the continuity it creates: transformation "creates a continuous state
 of narrative flow when object utility changes"; masking "creates continuity in an interface object or

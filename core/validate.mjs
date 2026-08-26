@@ -24,7 +24,7 @@ import { themeErrors } from '../core/theme-contract.js';
 import { parseColor, contrastRatio } from '../core/motion.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
-import { junctionTable, marksOf, bindWindowsToJunctions } from '../core/junctions.js';
+import { junctionTable, marksOf, bindWindowsToJunctions, bindMatchesToJunctions } from '../core/junctions.js';
 import { beatGridPath } from '../core/beat-bind.js';
 import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
@@ -250,6 +250,7 @@ export function validateData(schema, data) {
   errors.push(...knobErrors(data || {}));   // a dial set on a preset that does not read it is dead config
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
+  errors.push(...matchErrors(data || {})); // a match cut names two real layers and fits inside its shot
   errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
@@ -454,6 +455,17 @@ export function externalHtmlErrors(cfg, read) {
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
   (Array.isArray(cfg.bg) ? cfg.bg : []).forEach((b, i) => { if (isObj(b)) check(b.src, `bg[${i}]`, 'error', asHtml); });
   return out;
+}
+
+// MATCH CUTS. bindMatchesToJunctions refuses a match it cannot produce, and it does so at boot, which
+// is sixty seconds and one ffmpeg pass after the author could have known. Run the same binder here, on
+// a CLONE for the reason bgErrors gives just below: a validator that rewrites the object it is grading
+// changes what every later check sees.
+export function matchErrors(cfg) {
+  if (!Array.isArray(cfg?.matches) || !cfg.matches.length) return [];
+  const clone = lowerScene(structuredClone(cfg));
+  try { bindMatchesToJunctions(clone, junctionTable(marksOf(clone))); } catch (e) { return [e.message]; }
+  return [];
 }
 
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
@@ -878,9 +890,13 @@ export function lintData(data) {
 
   // (1) MISSING WINDOW — a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
+  // A layer named as a match cut's OUTGOING form is retimed to end on the joint at boot
+  // (core/junctions.js bindMatchesToJunctions), so writing a `duration` here would be the second copy
+  // of the number the joint already owns. It does not render for the whole video and must not be told to.
+  const matchFrom = new Set((Array.isArray(data?.matches) ? data.matches : []).map((m) => m && m.from).filter(Boolean));
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
-    if (L.duration == null && L.track !== 0) warns.push(`${name(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
+    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${name(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
   });
 
   // (2) TYPING + MARKUP — RETIRED, and the retirement is the point. This rule warned that `typing`

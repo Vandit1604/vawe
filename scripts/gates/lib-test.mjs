@@ -30,7 +30,7 @@ import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
-import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions } from '../../core/junctions.js';
+import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
 import { applyComposite } from '../../core/looks.js';
 import { bakeCanvasFx } from '../../core/canvas-fx.js';
 import { DIRS } from '../../core/cuts.js';
@@ -40,7 +40,7 @@ import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
 import { produceBaseline } from '../../core/produce.js';
-import { lintData, easeErrors, bgErrors, durationWordErrors, cssErrors } from '../../core/validate.mjs';
+import { lintData, easeErrors, bgErrors, matchErrors, durationWordErrors, cssErrors } from '../../core/validate.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/vocab.js';
 import { BASE_ENTER } from '../../core/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts.js';
@@ -1720,6 +1720,62 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       return errs.length === 0 && Array.isArray(cfg.transitions) && cfg.transitions.length === 1;
     })());
   }
+  // ---- the MATCH CUT: the joint owns the handover, and the engine produces the alignment ----
+  {
+    const film = () => ({
+      duration: 8, cuts: [{ t: 3, style: 'punch' }],
+      matches: [{ at: 'cut@0', from: 'dot', to: 'card' }],
+      layers: [{ id: 'dot', type: 'rect', start: 0.5, duration: 9 }, { id: 'card', type: 'rect', start: 6, duration: 2 }],
+    });
+    const bound = (d = film()) => { bindMatchesToJunctions(d, junctionTable(marksOf(d))); return d; };
+    const L = (d, id) => d.layers.find((x) => x.id === id);
+    {
+      const d = bound();
+      ok('match: the outgoing form ends ON the joint', L(d, 'dot').duration === 2.5);
+      ok('match: the incoming form opens ON the joint', L(d, 'card').start === 3);
+      ok('match: the handover is handed to `becomes`', L(d, 'dot').becomes === 'card' && L(d, 'dot').becomesDur === 0.42);
+      ok('match: neither form ramps across the joint',
+        L(d, 'dot').out === 'none' && L(d, 'dot').exitDur === 0 && L(d, 'card').anim === 'none' && L(d, 'card').enterDur === 0);
+      const again = JSON.stringify(d);
+      bindMatchesToJunctions(d, junctionTable(marksOf(d)));
+      ok('match: binding twice is a no-op', JSON.stringify(d) === again);
+    }
+    ok('match: an id that is not a layer throws and lists the ids', (() => {
+      const d = film(); d.matches[0].to = 'crd';
+      try { bound(d); return false; } catch (e) { return /to "crd" is not the id/.test(e.message) && /dot, card/.test(e.message); }
+    })());
+    ok('match: a joint the film does not have throws', (() => {
+      const d = film(); d.matches[0].at = 'cut@4';
+      try { bound(d); return false; } catch (e) { return /"cut@4" does not exist/.test(e.message); }
+    })());
+    ok('match: an entrance or exit on either form is refused, not overwritten', (() => {
+      const d = film(); d.layers[1].anim = 'rise';
+      try { bound(d); return false; } catch (e) { return /a match cut has no entrance and no exit/.test(e.message) && /anim:"rise"/.test(e.message); }
+    })());
+    ok('match: a handover that eats its own shot is refused', (() => {
+      const d = film(); d.duration = 3.6; d.matches[0].dur = 0.5;   // 0.5s of a 0.6s shot
+      try { bound(d); return false; } catch (e) { return /the eye reads a move, not a match/.test(e.message); }
+    })());
+    ok(`match: the handover ceiling is a third of the shot, and it is OURS`, MATCH_HANDOVER_SHARE === 0.33);
+    ok('match: beat-wrapped units that would tear the two forms apart are refused', (() => {
+      const d = film(); d.sceneUnits = true;
+      try { bound(d); return false; } catch (e) { return /carried apart at the very frame/.test(e.message) && /"sceneUnits": false/.test(e.message); }
+    })());
+    ok('match: a form that is not on screen before the joint is refused', (() => {
+      const d = film(); d.layers[0].start = 4;
+      try { bound(d); return false; } catch (e) { return /never on screen before the match/.test(e.message); }
+    })());
+    ok('match: a film that declares none is untouched', (() => {
+      const d = { layers: [{ id: 'a' }] }, before = JSON.stringify(d);
+      bindMatchesToJunctions(d, junctionTable([]));
+      return JSON.stringify(d) === before;
+    })());
+    ok('match: the validator catches it without a render', (() => {
+      const d = film(); d.matches[0].from = 'nope';
+      return matchErrors(d).some((m) => /from "nope" is not the id/.test(m));
+    })());
+  }
+
   // The grammar has ONE definition now. audio-bridges established it and backgrounds reuse it; two
   // hand-kept copies of a definition is MISTAKES #159 exactly.
   ok('junctions: audio bridges resolve through the same table', (() => {

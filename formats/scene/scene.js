@@ -1,5 +1,5 @@
 import { boot } from '/core/boot.js';
-import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/junctions.js';
+import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions, bindMatchesToJunctions } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
 import { collectClips, driveClips, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
@@ -322,6 +322,9 @@ boot((data, fps, theme, canvas) => {
   // record covers the pre-passes below as well as the build itself.
   data.layers = (data.layers || []).map(watchProps);
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
+  // matches:[{at:"cut@1", from, to}] → the two named layers are retimed ONTO that joint and the
+  // handover is handed to `becomes` below. AFTER relative starts, so both layers carry a number.
+  bindMatchesToJunctions(data, BG_JUNCTIONS);
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
   resolveBecomes(data);        // becomes:"<id>" → the incoming layer opens on the outgoing one's last pose
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
