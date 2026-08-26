@@ -119,7 +119,7 @@ export function build(kit, el, L, spec) {
     slot.style.borderRadius = '0.14em';
     // The chip is the one place the box may CLIP: a word travelling out of a coloured plate reads as
     // the plate refilling. Without the chip there is no edge, so clipping would only cut descenders.
-    // With one, the plate has to be tall enough to hold a settled word whole — hence the padding above.
+    // With one, the plate has to be tall enough to hold a settled word whole, hence the padding above.
     slot.style.overflow = 'hidden';
   }
   for (const w of words) {

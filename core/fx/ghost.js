@@ -130,7 +130,7 @@ export function build(kit, el, L, spec) {
   const first = el.firstChild;
   // WHAT THE LAYER PAINTS IS NOT IN ITS innerHTML. A rect's fill, a card's radius, a chip's border and
   // its shadow are all CSS on the layer ELEMENT, so a ghost cloning only the markup left a hollow
-  // outline of a filled plate behind — and for a `rect`, which carries no markup at all, it left
+  // outline of a filled plate behind. For a `rect`, which carries no markup at all, it left
   // nothing and the effect rendered a silent no-op. Read the paint off the layer once, here, and hand
   // each echo the same surface.
   const paint = [];
