@@ -14304,3 +14304,47 @@ serving different bytes. It reads fifteen files.
 **The general shape, worth grepping for.** A directory that is (a) tracked, (b) a copy of something
 else in the repo, and (c) maintained by hand. `site/public/` holds other such copies. Each one is a
 `#455` waiting for someone to notice by hand.
+
+## #456 — six production deploys failed in a row and the only place that said so was a build log
+
+**What.** `vawe.upsurge.cc` had not updated for two days. Coolify's config was correct throughout:
+`is_auto_deploy_enabled: true`, source `GithubApp`, branch `main`, webhook endpoint reachable and
+answering 200. The deployment history settles it: **every deployment carried `is_webhook: true`**, so
+GitHub delivered and Coolify triggered on every single push. The builds failed. Last success
+`4d33ca4` on Aug 24; six consecutive failures after it.
+
+The build failed on one line from `scripts/site/site-engine.mjs`:
+
+```
+✗ 1 asset(s) referenced by a scene but absent from the repo:
+    /assets/brands/creed/components/filepane.json
+```
+
+**Root cause, and it is two hand-kept lists plus a check that measured the wrong thing.**
+
+`creed-launch` references a 347KB captured component. `.gitignore:46` excludes `assets/brands/**` with
+a short allowlist, and that capture was not on it, so it lives on the author's disk and in no clone.
+
+The check meant to catch this tested `fs.existsSync`. That is a fact about the machine running it, not
+about what ships, so it was **green on every developer machine and red only inside the build container**,
+where the repo is a fresh clone. The message said "absent from the repo" and tested "absent from this
+disk", and the difference between those two sentences cost two days.
+
+**`.dockerignore` is the same trap one layer down, and it had already been logged.** Its own comment
+points at `docs/MISTAKES.md #275` for this exact failure and records the fix as a sentence: "Add a
+scene that names a new mark, add its line here." Nobody did. A rule enforced by asking the next author
+to remember is not enforced.
+
+**Fix.** The check now asks git rather than the filesystem (`git check-ignore --stdin`, one call for
+the whole set), and separately reads `.dockerignore`'s negations to confirm the path survives into the
+build context. Three distinct failures, each named: not on disk · gitignored · excluded from the image.
+Both were proven by deleting the fix and watching them fire. The capture is now tracked, with a
+negation in each list.
+
+**Which gate catches it now.** `node scripts/site/site-engine.mjs`, which the site's `prebuild` already
+runs, so it fires on `npm run build` locally and in the image. What is still hand-kept is the pair of
+negation lists themselves; the check no longer trusts them, which is the part that matters.
+
+**Worth stating plainly:** the deploy pipeline was never broken. Nothing in the repo pointed at it, no
+gate ran against it, and its only output was a log on another machine. A failing build that reports
+only where nobody looks is indistinguishable from a build that never ran.

@@ -15,6 +15,7 @@
 // audio stage and never touched by the browser. The web bundle is ~1.3MB.
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -91,19 +92,68 @@ if (fs.existsSync(sceneDir)) {
     for (const m of text.matchAll(/\/assets\/[A-Za-z0-9._\-/]+\.[A-Za-z0-9]+/g)) wanted.add(m[0]);
   }
 }
-const missing = [];
+// EXISTS ON DISK IS NOT SHIPS. This check said "absent from the repo" and tested `fs.existsSync`,
+// which is a fact about the machine running it. An asset that is present locally and gitignored
+// therefore passed on every developer machine and failed only inside the build container, where the
+// repo is a fresh clone. Six consecutive production deploys failed that way and nobody saw it,
+// because the only place the message appeared was a Coolify build log
+// (`assets/brands/creed/components/filepane.json`, referenced by creed-launch, ignored by
+// `.gitignore:46 assets/brands/**`).
+//
+// So ask git, not the filesystem. `git check-ignore` answers the question the message actually
+// makes: will this file be in the clone the build sees. One call for the whole set, because
+// spawning per asset over a few hundred references is slow enough to notice.
+const ignoredByGit = (rels) => {
+  if (!rels.length) return new Set();
+  const r = spawnSync('git', ['check-ignore', '--stdin'], { cwd: root, input: rels.join('\n'), encoding: 'utf8' });
+  // Exit 128 is git failing (not a repo, no git on PATH). A tarball build has no .git, and refusing
+  // there would trade a real check for a broken one, so fall through to the disk check and say so.
+  if (r.status === 128 || r.error) { console.warn('  ⚠ git unavailable, so ship-ability is unchecked; falling back to disk presence'); return new Set(); }
+  return new Set(String(r.stdout || '').split('\n').filter(Boolean));
+};
+
+const candidates = [];
 for (const ref of wanted) {
   const rel = ref.replace(/^\//, '');
   // already covered by a COPY rule (icons, fonts, vendor) → skip
   if (COPY.some(([, dst]) => rel.startsWith(dst + '/'))) continue;
+  candidates.push({ ref, rel });
+}
+// .dockerignore is the SECOND list that decides what the build sees, and it is hand-kept too. Its own
+// comment already points at docs/MISTAKES.md #275 for this exact failure, and the fix recorded there
+// was a sentence asking the next author to remember. They did not. So read the file rather than trust
+// the sentence: for a path under a `dir/**` exclusion, a bare `!path` negation must exist.
+const dockerNegations = (() => {
+  const f = path.join(root, '.dockerignore');
+  if (!fs.existsSync(f)) return null;
+  return new Set(fs.readFileSync(f, 'utf8').split('\n')
+    .map((l) => l.trim()).filter((l) => l.startsWith('!')).map((l) => l.slice(1).replace(/\/$/, '')));
+})();
+const excludedByDocker = (rel) => {
+  if (!dockerNegations) return false;
+  // Only paths under an excluded tree need a negation; everything else is in the context already.
+  if (!/^assets\/brands\//.test(rel)) return false;
+  let p = rel;
+  while (p && p !== '.') { if (dockerNegations.has(p)) return false; p = path.dirname(p); }
+  return true;
+};
+
+const ignored = ignoredByGit(candidates.map((c) => c.rel));
+const missing = [], unshippable = [], uncopied = [];
+for (const { ref, rel } of candidates) {
   const from = path.join(root, rel);
   if (!fs.existsSync(from)) { missing.push(ref); continue; }
+  if (ignored.has(rel)) { unshippable.push(ref); continue; }
+  if (excludedByDocker(rel)) { uncopied.push(ref); continue; }
   put(from, path.join(PUB, rel));
 }
-if (missing.length) {
-  console.error(`✗ ${missing.length} asset(s) referenced by a scene but absent from the repo:`);
-  for (const m of missing) console.error(`    ${m}`);
+if (missing.length || unshippable.length || uncopied.length) {
+  for (const m of missing) console.error(`✗ referenced by a scene and not on disk: ${m}`);
+  for (const m of unshippable) console.error(`✗ referenced by a scene and GITIGNORED, so it is absent from the build's clone: ${m}`);
   console.error('  A scene may only reference assets that ship, or the editor 404s them in production.');
+  for (const m of uncopied) console.error(`✗ referenced by a scene and excluded by .dockerignore, so it is absent from the image: ${m}`);
+  if (unshippable.length) console.error('  Track it (`git add -f <path>` plus a .gitignore negation), or stop the scene referencing it.');
+  if (uncopied.length) console.error('  Add a `!<path>` line to .dockerignore beside the other brand marks.');
   process.exit(1);
 }
 

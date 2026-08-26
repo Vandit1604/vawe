@@ -65,6 +65,7 @@ site/public/scripts
 # the image (docs/MISTAKES.md #275). Add a scene that names a new mark, add its line here.
 !assets/brands/creed/agents
 !assets/brands/creed/brandmark.svg
+!assets/brands/creed/components/filepane.json
 !assets/brands/argus/mascot.png
 !assets/brands/linear/icon.png
 !assets/brands/ditherkit/sections/03-area.png

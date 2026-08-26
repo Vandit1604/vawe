@@ -47,6 +47,11 @@ assets/brands/**
 !assets/brands/
 !assets/brands/*/
 !assets/brands/*/house-style.md
+# A capture a PLAYABLE scene reaches for. The site serves creed-launch in its editor, and
+# site-engine.mjs refuses to build a site whose scenes reference assets the clone will not have.
+# 347KB of captured DOM, and the alternative is dropping the film from the site.
+!assets/brands/creed/components/
+!assets/brands/creed/components/filepane.json
 
 # paid/licensed fonts — used locally for fidelity, never committed (redistribution)
 assets/fonts/local/
