@@ -42,6 +42,10 @@ type Meta struct {
 	// Bridges are J/L-cuts already resolved from junction names to spans of seconds by
 	// core/audio-bridges.js — the browser is the only place that knows where the film's cuts are.
 	Bridges []audio.Bridge `json:"bridges"`
+	// BeatSync is core/beat-bind.js's one-line report of every joint the track's grid moved. It is
+	// informational, and it only reaches an author because it is DECLARED here: encoding/json drops
+	// an unknown key without a word, which is how it went missing (docs/MISTAKES.md #477).
+	BeatSync string `json:"beatSync"`
 }
 
 // served is the ONLY prefix set the render page may fetch. A render needs the engine (core), the

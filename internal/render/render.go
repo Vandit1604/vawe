@@ -101,6 +101,12 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		return err
 	}
 
+	// beatSync moved the film's joints onto the track's pulse. The report is built in the page and
+	// console.log cannot cross into this process, so it rides out on Meta (docs/MISTAKES.md #477).
+	if meta.BeatSync != "" {
+		fmt.Println("\u25b6 " + meta.BeatSync)
+	}
+
 	// alpha export / video compositing: transparent frames → VP9 (yuva420p) webm.
 	if transparent {
 		w, h := meta.Width, meta.Height

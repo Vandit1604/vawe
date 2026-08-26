@@ -161,7 +161,11 @@ boot((data, fps, theme, canvas) => {
   // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time — the bg
   // windows bound to `cut@n` below therefore follow the snapped joint rather than the written one.
   // Once, at build, so renderFrame(n) stays pure. Throws when a grid was named and none arrived.
-  { const r = bindBeats(data, canvas && canvas.beats); if (r) console.log(describeBind(r)); }
+  // The note is KEPT, not only logged: console.log runs inside the headless page and the render
+  // process cannot hear it, so an author rendering to mp4 never learned that a cut had moved
+  // (docs/MISTAKES.md #477). It rides out through the meta channel boot.js already owns.
+  let beatSyncNote = '';
+  { const r = bindBeats(data, canvas && canvas.beats); if (r) { beatSyncNote = describeBind(r); console.log(beatSyncNote); } }
   // The film's nominated loud moment: write the device as a sting at `at` and pull every competing
   // amplitude dial in the film down around it (core/spectacle.js). BEFORE the sting/seam/layer parses
   // below, because those are its subject; a no-op when the scene declares no `spectacle`.
@@ -1359,6 +1363,6 @@ boot((data, fps, theme, canvas) => {
   // Sound bridges resolve HERE because this is where the junctions are: `at:"cut@2"` is only
   // answerable next to MARKS. The result is spans of seconds, so the mixer never has to know what a
   // cut is (core/audio-bridges.js).
-  return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(),
+  return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(), beatSync: beatSyncNote,
     bridges: resolveBridges(data.audio, MARKS, duration), renderFrame, bakeSeams };
 });

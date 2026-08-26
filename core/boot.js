@@ -552,7 +552,7 @@ export async function boot(build) {
       // took the empty array as "this film declares no windows" and disabled its whole FAIL tier. The
       // film's joints are its cuts and seams, core/junctions.js owns reading them, and a second way to
       // say that is the drift MISTAKES #159 and #358 are both about. docs/MISTAKES.md #425.
-      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [] },
+      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], beatSync: scene.beatSync || '' },
       renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
       // Font audit is a FUNCTION, not a value: it inspects the families the DOM actually asks for,
       // so it must run against a rendered frame (layers that are not up yet declare nothing).
