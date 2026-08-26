@@ -15307,3 +15307,84 @@ joint past the duration. Both fail when the old line is restored, which is how I
 
 **The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
 inclusive list is always the easier import and is usually the wrong answer.
+
+## #475: beatSync moved the cuts and left the stings behind, so a sting drifted off the cut it punctuates
+
+**What.** `audio.beatSync` snaps a film's joints onto the track's pulse (`core/beat-bind.js`
+`snapJoints`). Cuts snapped their `t`, seams snapped the centre of their blend, and **stings did not
+move at all**. A sting authored at the same instant as a cut therefore ended up as much as `maxShift`
+(0.12s, nearly four frames at 30fps) away from that cut. Reproduced on the `beat` grid: a cut and a
+flash both written at 1.62s, bound, and the cut landed on 1.591 while the flash stayed at 1.62.
+
+**Root cause.** The old comment stated the policy and it was half right: *"a sting is punctuation hung
+off a junction, and authors offset one from its cut on purpose. Snapping it independently would
+collapse that offset onto the cut's beat."* True, and the conclusion drawn from it was wrong. Not
+moving a sting does not preserve its relation to the cut, it destroys it: the cut moves and the sting
+does not, so the offset changes by exactly the distance the cut travelled. There were three options and
+the file only saw two.
+
+**Fix.** A sting **rides** the joint it punctuates: it is moved by the SAME delta as the nearest cut or
+seam within half a beat, so an authored offset is preserved to the millisecond and a sting written ON a
+cut is still on that cut. The reach is read off the grid (`beatPeriod`, the median gap), not invented:
+inside half a beat of a joint there is no other pulse the sting could have meant. A sting with no joint
+within reach keeps the time the author wrote, and `snap: false` still holds any mark where it is.
+`snapJoints` stays the ONE policy, so `make beatsync` (the author-time preview) gets the same answer.
+
+**Why no test caught it.** `lib-test` asserted the bug as the contract: *"a sting is NEVER snapped, at
+boot or at author time"*, with a fixture whose sting sat exactly on the cut. Three new assertions replace
+it (on-the-cut, offset-preserved, out-of-reach-untouched); the first two fail when the ride is removed.
+
+**The shape worth grepping for.** "Leave it alone" is not a null action when everything around it moves.
+A mark defined by its RELATION to another mark has to travel with it or the relation is what breaks.
+
+## #476: a sting tint was read as a hex, so a theme token silently painted it black
+
+**What.** `stings[].color` and `stings[].colors[]` reach a WebGL uniform through
+`formats/scene/scene.js`, which converted them with `parseInt(String(h).replace('#',''), 16)`. That
+parses a bare hex and nothing else. `"var(--accent)"` gives `NaN`, and `NaN >> 16 & 255` is `0`, so the
+tint became **[0,0,0]**, a black recolour of the sting, with no error, no warning and nothing on screen
+to say why. `"rgb(255,0,0)"` and every CSS colour name did the same. A film rendered clean and wrong.
+
+**Root cause.** The author-facing key is called `color`, and the schema does not promise "hex". The
+engine already has an owner for exactly this question: `glowRGB` in `core/filters.js`, written because
+an SVG `feFlood` presentation attribute cannot resolve `var()` either. The sting path never called it
+and open-coded a hex parser instead, a second and worse resolver, which is the drift #159 and #358 are
+both about.
+
+**Fix, in two halves with one owner each.** Resolution goes to `glowRGB`, so there is still exactly one
+place that turns an author colour into literal rgb. The REFUSAL goes to `checkStingColor` in
+`core/transitions-lower.js`, which is where the sting's `color` is written and the one pass every
+consumer of a scene runs, so an unresolvable tint is named (`"var(--nope)" is not a colour this engine
+can resolve…`) instead of being discovered as a black flash in a finished mp4. A hex, an `rgb()`, a CSS
+name and the `var(--accent)` / `var(--ink)` tokens `glowRGB` resolves all pass.
+
+**The ceiling, stated.** `glowRGB` knows two theme tokens and falls back to white for the rest, so the
+refusal list has to be kept in step with it. A silent white is the same class of bug as a silent black,
+so the guard rejects any other token rather than letting one through.
+
+**Why no test caught it.** Nothing in the library had ever written a token as a sting colour, so the
+hex-only parser was never asked a question it could get wrong. Four assertions now pin the contract.
+
+## #477: OPEN: beatSync reports what it moved, and the render log cannot hear it
+
+**What.** `core/beat-bind.js` builds a one-line report of every joint the grid moved (`describeBind`),
+and `formats/scene/scene.js` logs it. It never reaches an author. Rendering a beat-synced scene prints
+`▶ capturing… / ▶ encoding… / ✓ done` and not one word about the cut that just moved 29ms.
+
+**Root cause, and it is not in either of those files.** `console.log` runs inside the headless page.
+Nothing connects that console to the render process: `internal/scene/scene.go` registers no
+`ListenTarget` and no `runtime.EventConsoleAPICalled` handler, and the only data channel out of the page
+is `chromedp.Evaluate("window.__engine.meta", &meta)`, whose Go struct has a fixed field set, so an
+unknown JSON key is dropped by `encoding/json` without a word. `core/boot.js` builds that meta object
+from a fixed key list too. So the value is computed, handed to a dead channel, and discarded: the same
+"written and never read" shape as `cameraMove` (#424) and `segments` (#425).
+
+**Not fixed in this pass, and why.** The repair is three lines in three files this pass did not own:
+`core/boot.js` carrying the note into `__engine.meta`, a `BeatSync string` field on `Meta` in
+`internal/scene/scene.go`, and one `fmt.Println` in `internal/render/render.go`. Writing the page half
+alone would have been scaffolding for a change nobody had made yet.
+
+**What still works, so the scope is clear.** The line IS visible in `make studio` and any devtools
+console, and `bindBeats` still THROWS (loudly, into `window.__engineError`, which the renderer does
+read) when a scene asks to be beat-matched and the grid will not load. Only the informational half is
+lost, and only in the batch render.
