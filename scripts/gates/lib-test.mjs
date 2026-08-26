@@ -70,7 +70,7 @@ import { opacityEnvelope, ANIM } from '../../core/clips.js';
 import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
-import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
+import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions-lower.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SEAM_CUE } from '../../core/audio-cues.js';
 import { resolveBridges } from '../../core/audio-bridges.js';
@@ -2203,6 +2203,16 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
+  // A STING TINT IS A COLOUR, NOT A HEX (docs/MISTAKES.md #476). The renderer read it with
+  // parseInt(hex, 16), so a theme token or an rgb() became NaN and then [0,0,0]: a black tint, no error.
+  ok('transitions: a sting tint may be a theme token', checkStingColor('var(--accent)', 'x') === 'var(--accent)');
+  ok('transitions: a sting tint may be a hex or an rgb()',
+     checkStingColor('#ff7a35', 'x') === '#ff7a35' && checkStingColor('rgb(255,0,0)', 'x') === 'rgb(255,0,0)');
+  const refuses = (fn, re) => { try { fn(); return false; } catch (e) { return re.test(e.message); } };
+  ok('transitions: a tint nothing can resolve is refused BY NAME, never tinted black',
+     refuses(() => lowerScene({ stings: [{ t: 1, fx: 'flash', color: 'var(--nope)' }] }), /--nope/));
+  ok('transitions: a sting palette is checked entry by entry',
+     refuses(() => lowerScene({ stings: [{ t: 1, fx: 'leak', colors: ['#fff', 'not-a-colour'] }] }), /colors\[1\]/));
   // Auto sound-design must cue EVERY seam fx — a seam with no mapping falls back to a bare whoosh and
   // reads wrong (a bloom-iris should not swoosh). This gate is why `data.seams` stopped rendering silent
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
