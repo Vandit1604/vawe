@@ -14156,3 +14156,113 @@ for, so the CLI should either delegate to `core/beat-bind.js` or be retired in f
 declaration. It was left alone in this pass because four committed scenes carry a `.beatsync.json` and
 changing its tolerance would move them. The loop unroll for a short bed was taken FROM it, so at least
 that arithmetic now exists on the render path too.
+
+## #454 — a camera nobody wrote switched a HARD rule off for most of the library
+
+**What.** `verify/audit.mjs` dropped every `safe` and `caption-band` finding on any frame where the
+camera was moving, frame-wide, before the findings were counted:
+
+```js
+for (const i of issues) { if ((i.kind === 'safe' || i.kind === 'caption-band') && camMoving(f)) continue; all.push({ f, ...i }); }
+```
+
+`camMoving` was built from the camera keyframes, and it asked for them AFTER `produceBaseline`, which is
+correct as far as it goes. What it did not account for is what `produceBaseline` puts there:
+`core/produce.js` gives any scene that declares no camera a `slowPush` of `s 1 -> 1.06` spanning the whole
+runtime. One keyframe pair, every frame between them, so `camMoving()` answered true on every frame of
+every such film. 90 of the 147 scenes in `formats/scene/` take that injection. The safe-zone rule, which
+this file's own header calls a HARD fail, therefore never ran on 61% of the library, and ran on no
+produced film at all. The `gate-mutation` fixture for it passed only because the fixture had been given
+`produced: false`, which is a gate proving a rule under conditions no film renders with.
+
+**Root cause.** Two owners of one fact, and the outer one was guessing. The page function already decides
+this per LAYER and from the render itself: `travelling` (the box is not where it is 0.1s either side of
+here), `stageRotated` (the stage is a 3D rig, so every box is the AABB of a projected quad and an
+over-bound), and `inCut`. Those are measurements. `camMoving` read the JSON, could not tell a 6% push
+across 20 seconds from a dive, and was strictly coarser than the thing it shadowed.
+
+**The measurement that settles which space the audit works in.** A probe text layer at `x: 1750` on a
+static camera reports `(1750,500,1883,541)` at `s=1` and `(2145,480,2344,541)` at `s=1.5`. `960 + 790 *
+1.5 = 2145` exactly. Boxes are read AFTER the camera transform: `#cam` carries it (`core/scene.css:15`,
+`inset: 0`) and the layers stand inside it. So deleting the exemption alone does not restore the rule, it
+converts the injected push into failures, and 1.06 consumes exactly the `MARGIN` of 0.06 that
+`core/safe.js` sets. Measured: 14 scenes gained a safe finding, and 10 of them lost it again the moment
+the injected push was replaced by a static camera. Ten of fourteen were correct authoring reported as a
+defect.
+
+**Fix.** The frame-wide filter is deleted. In its place the safe test asks the question in both spaces and
+reports only when they agree.
+
+- SCENE space, via `unCam`: undo the camera's ZOOM about the centre of the viewport. The scale is read
+  off `#cam`'s own rendered rect rather than parsed out of its matrix, so a perspective zoom composes in
+  and nobody maintains a second copy of the transform. At rest the rect is the viewport, so this is
+  exactly identity and no still film changes.
+- SCREEN space, unchanged: what the viewer is delivered.
+- Both must be outside, because each guards a different lie. Screen space alone fails a layer the engine's
+  own push carried out of a margin the author placed it inside. Scene space alone fails a layer that is
+  comfortably inside, on a film that zooms OUT and really does have the extra room (`gh-wrapped` holds
+  `s=0.98` through its second beat; un-scaling its 296px numeral reported a finding 4.8px over a line the
+  glyph was 5px inside of).
+- The camera's TRANSLATION is deliberately not undone. A travelling shot parks the stage at a station, and
+  at that station the screen box is what the viewer sees and what the safe box is asking about. An earlier
+  version of this fix un-translated too, and asked whether content 4100px along `linear-journey`'s 5500px
+  stage was inside a 1920px frame: 16 findings about layers that were centred on screen.
+- The FRAME is still tested on screen, as a second clause on the same finding, tagged `cropped by the
+  frame edge`. A box past the frame edge is cropped whatever put it there, which is the 1600px pill on a
+  stage settled at `s=1.24` the old comment defends. The frame is strictly outside the safe box, so that
+  clause can never fire anywhere the old shape did not.
+
+**Blast radius.** `node scripts/gates/audit-scenes.mjs` before and after: 105 scenes, 69 clean, 36 hard,
+38 warn-only, both times, and the failing SET is byte-identical. The only diffs are the detail strings on
+four findings that were already reported, which now carry un-scaled coordinates and the cropped note.
+Four scenes gained a true positive that the hole had been hiding. Two are resolved in the scene and two
+are deliberately left standing, and the reason for the split is the legacy ratchet:
+
+- `ab-skill-shotcode` — FIXED. The terminal pane ran 5px past the safe bottom. Its fragment is trimmed
+  from `height:280px` to `270px`, which moves nothing: the titlebar, its label and all five text layers
+  stay where they are and only empty pane bottom is cut. Moving the block up instead was tried and
+  rejected; an 8px nudge put the titlebar label over a different patch of backdrop and traded the margin
+  for a 2.8:1 contrast failure.
+- `example-swiss-grid` — WAIVED. The beat IS a dimension diagram of the 160px margin, so its leader line
+  and its label are drawn from the frame edge inward. This is the only film whose audit VERDICT flips, so
+  the waiver has to stand.
+- `linear-agents` — LEFT STANDING. `planui.json` is a live capture and its own empty bottom padding is
+  what reaches 24px past the line. Shrinking it to `w: 1700` clears the margin and drops the capture's
+  10px labels below the contrast floor, which trades a margin for a legibility defect.
+- `plinth-ad` — LEFT STANDING. The hero cutout bleeds off the right and bottom of a 9:16 frame by design.
+  `"critical": false` on that layer is the engine's own opt-out for it and is the right eventual answer.
+
+**Why two are left standing, and it is a second finding.** `scripts/gates/legacy-manifest.json` grand
+fathers a film against `no-storyboard` by CONTENT HASH, so any edit at all forfeits the row: adding four
+lines of waiver to `linear-agents` took it from a green `author-check` to a blocking one. Both films were
+already red on the audit for unrelated reasons, so resolving one printed finding there would have bought
+nothing and cost each film its ladder pass. The finding stays visible instead, which is the gate working.
+`example-swiss-grid` had to be edited, so it pays the cost and says so: its `_why` records that the film
+predates the rule, that the edit is what forfeited the row, and that inventing a plan now would be the
+fake plan the ratchet exists to prevent. The trap is general and the next author meets it too: **you
+cannot waive a newly restored rule on a grandfathered film without also owing that film a storyboard.**
+Nothing is changed about the ratchet here, because narrowing what its hash covers is a decision about the
+ratchet, not about this bug.
+
+`node scripts/gates/lib-test.mjs` 1066 passed. `node scripts/gates/snap-scenes.mjs` 106 identical: nothing
+on the render path imports `verify/audit.mjs`.
+
+**Which gate catches it now.** `scripts/gates/gate-mutation.mjs`, and the fixture is the record. The
+`safe-zone · layer off the frame edge` case had `produced: false` bolted on to make it fire at all; that
+is removed, so the case now proves the rule under the defaults every film renders with, and any future
+frame-wide exemption puts it straight back to silent. 139/139.
+
+**Still open, and it is not in the audit.** `core/produce.js` injects `1 -> 1.06` and `core/safe.js` sets
+`MARGIN` to `0.06`. A push of exactly the margin carries content pinned to the safe edge exactly out of
+it: a layer on the safe line ends the push 28px past it on a 1920x1080 frame. Neither file knows about the
+other, and `core/safe.js` states the invariant that placement and checking read the same function, so an
+edge pin can never produce a safe-zone failure. The injection breaks that invariant. The audit no longer
+reports it, which is right, but the two numbers are still one fact with two owners and the fix belongs in
+`core/produce.js` or in the relationship between those constants, not here.
+
+**The 26 `_catalog-*` scenes are not part of any of this.** They are generated by `make catalog`
+(`scripts/site/blocks-catalog.mjs`) as contact sheets of the block registry, one page each, and
+`audit-scenes.mjs:32` already excludes every `_`-prefixed file from the library sweep. They put headers at
+`y: 48`, outside a 6% margin, on purpose: nobody delivers a contact sheet to a phone feed. No waiver was
+added to them, and a waiver would have been the wrong shape anyway, because the next `make catalog` run
+overwrites the file it was written into.

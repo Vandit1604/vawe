@@ -24,7 +24,6 @@
 // 1080. Auditing one aspect while the CLI ships four is a gate that agrees with itself and not with the
 // output. Default stays the scene's own aspect, so a single-aspect scene costs nothing.
 import fs from 'node:fs';
-import { produceBaseline } from '../core/produce.js';
 import path from 'node:path';
 import http from 'node:http';
 import zlib from 'node:zlib';
@@ -353,8 +352,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // spread the layout until the OVER-BOUNDS stop touching, which makes the film worse to satisfy a
   // measurement that was never about the film (CLAUDE.md: suspect the gate).
   //
-  // Read the rig itself rather than re-deriving it from the JSON: `camMoving` upstream tests x/y/s and
-  // is blind to a roll-only move, and a top-level `tilt` builds the rig with no camera keys at all.
+  // Read the rig itself rather than re-deriving it from the JSON: a top-level `tilt` builds the rig with
+  // no camera keys at all, so the keyframes are not evidence of what the stage is doing.
   // The off-diagonal terms of the matrix are the rotation; a pure translate/scale leaves them zero and
   // this stays false, so a flat film is checked exactly as before.
   const stageRotated = (() => {
@@ -367,6 +366,37 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // m12 m21 (roll) · m13 m31 (yaw) · m23 m32 (pitch), in column-major CSS order
     return [v[1], v[4], v[2], v[8], v[6], v[9]].some((k) => Math.abs(k) > 0.001);
   })();
+  // UN-CAMERA. The SAFE box is a margin in SCENE coordinates: `core/safe.js` states the invariant that
+  // placement and checking read the same function, so `pin:"top"` resolves to the safe box's own edge and
+  // an edge pin can never fail. getBoundingClientRect reads a box AFTER the camera transform, so a zoom
+  // carries edge-pinned content out of the safe box with nothing wrong in the film. That is not a corner
+  // case here: `core/produce.js` injects a 1 -> 1.06 slowPush into every scene that declares no camera,
+  // 1.06 consumes exactly the 0.06 MARGIN, and 90 of 147 scenes take the injection. Measured on the
+  // library: of 14 scenes that gained a safe finding, 10 lost it again the moment the injected push was
+  // replaced by a static camera. Those ten were correct authoring reported as a defect.
+  //
+  // Read the camera off the rendered frame rather than parsing its matrix. `#cam` is `inset: 0`
+  // (core/scene.css), so its own rect IS the transformed frame: the scale is that rect over the viewport
+  // and the offset is its origin. At rest the rect is the viewport, so this is exactly identity and no
+  // still film changes. Perspective zoom composes into the same rect, which matrix parsing does not.
+  const CX = window.innerWidth / 2, CY = window.innerHeight / 2;
+  const camScale = (() => {
+    const cam = document.getElementById('cam');
+    const b = cam && cam.getBoundingClientRect();
+    if (!b || b.width < 1 || b.height < 1) return null;
+    const sx = b.width / window.innerWidth, sy = b.height / window.innerHeight;
+    return (Math.abs(sx - 1) < 0.001 && Math.abs(sy - 1) < 0.001) ? null : { sx, sy };
+  })();
+  // Undo the ZOOM ONLY, about the centre of the VIEWPORT. The camera's translation is not undone and must
+  // not be: a travelling shot parks the stage at a station, and at that station the screen box is exactly
+  // what the viewer sees and exactly what the safe box is asking about. linear-journey pans across a
+  // 5500px stage, so mapping its boxes back to stage coordinates asked whether content 4100px along a
+  // canvas is inside a 1920px frame, and reported sixteen findings about layers that were centred on
+  // screen. Scale is the only part of a camera that consumes the margin, so scale is the only part undone.
+  const unCam = (b) => camScale
+    ? { left: CX + (b.left - CX) / camScale.sx, right: CX + (b.right - CX) / camScale.sx,
+        top: CY + (b.top - CY) / camScale.sy, bottom: CY + (b.bottom - CY) / camScale.sy }
+    : b;
   // TRAVELLING. midMove knew only about the enter/exit RAMPS, because those are the only timings the
   // DOM records. A layer carrying a hand-keyed `motion` track leaves no trace on its element at all, so
   // a layer crossing the frame on a keyed track read as SETTLED and every frame of its journey was
@@ -480,8 +510,23 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // A pure SCALE or TRANSLATE is deliberately NOT exempted. There the rect is exact — a 1600px pill on
     // a stage settled at s=1.24 really is 1984px wide and really does have both ends cut off. That is a
     // defect the audit should keep reporting, not a projection artefact.
-    if (!stageRotated && !midMove(el) && carriesContent(el) && (sb.left < SAFE.x0 - 1 || sb.right > SAFE.x1 + 1 || sb.top < SAFE.y0 - 1 || sb.bottom > SAFE.y1 + 1))
-      issues.push({ kind: 'safe', a: id, li, t, detail: `(${sb.left | 0},${sb.top | 0},${sb.right | 0},${sb.bottom | 0})` });
+    //
+    // Two spaces, two questions. The SAFE box is asked in SCENE space, because it is the margin the
+    // author placed against (see unCam). The FRAME is asked on SCREEN, because a box past the frame edge
+    // is genuinely cropped whatever put it there — that is the 1600px pill on a stage settled at s=1.24,
+    // which really is 1984px wide and really does lose both ends. The frame is strictly outside the safe
+    // box, so this second clause can only ever fire where the first shape already did.
+    const cb = unCam(sb);
+    const outside = (r) => r.left < SAFE.x0 - 1 || r.right > SAFE.x1 + 1 || r.top < SAFE.y0 - 1 || r.bottom > SAFE.y1 + 1;
+    // BOTH spaces have to agree, and each one is guarding against a different lie. On screen alone, the
+    // injected 1.06 push carries correctly placed content out of a margin the author placed it inside.
+    // Un-scaled alone, a camera that zooms OUT hands the frame extra room the film really has, and taking
+    // it back reports a layer sitting comfortably inside (gh-wrapped holds s=0.98 through its second beat).
+    // Agreeing means the layer is outside the margin as authored AND outside it as delivered.
+    const offSafe = outside(sb) && outside(cb);
+    const cropped = sb.left < -1 || sb.right > FW + 1 || sb.top < -1 || sb.bottom > FH + 1;
+    if (!stageRotated && !midMove(el) && carriesContent(el) && (offSafe || cropped))
+      issues.push({ kind: 'safe', a: id, li, t, detail: `(${cb.left | 0},${cb.top | 0},${cb.right | 0},${cb.bottom | 0})${cropped ? ' — cropped by the frame edge' : ''}` });
     // CAPTION BAND. The safe box says where content may live; it says nothing about the strip a
     // burnt-in caption is about to be painted into, so a headline could land squarely on the caption
     // and every rule above stayed green. Same subject and same measurement as the safe walk — settled
@@ -1294,30 +1339,6 @@ for (const aspectKey of askedAspects) {
     meta.segments.forEach((s, i) => { acc += s.dur ?? (s.t1 - s.t0); if (i < meta.segments.length - 1) cuts.push({ t: acc, trans: s.transition ?? 0.4 }); });
     inTransition = (f) => cuts.some((c) => Math.abs(f / fps - c.t) < c.trans + 0.05);
   }
-  // a MOVING camera (data.camera keyframes with changing position OR orientation) is cinematography:
-  // elements crossing the frame edge mid-travel are not safe-zone breaches. Overlap/contrast still
-  // checked everywhere (overlap has its own rotated-stage escape in the page function).
-  // `rx`/`ry`/`roll` count as movement for the same reason x/y/s do, and more so: a rotation puts the
-  // stage on the 3D rig, where every box the audit reads is the AABB of a projected quad and therefore
-  // an OVER-bound. Testing only x/y/s meant a roll-only or orbit move was read as a still frame and
-  // its inflated boxes were reported as content leaving the safe area.
-  const CAM_KEYS = [['x', 0], ['y', 0], ['s', 1], ['rx', 0], ['ry', 0], ['roll', 0], ['p', null]];
-  let camMoving = () => false;
-  try {
-    // ASK THE SAME FUNNEL THE RENDER ASKS, never the file. `camera` is not necessarily IN the scene
-    // file: `cameraMove` sugar and the produced default both become real keyframes at boot, inside the
-    // browser (core/produce.js `bakeCameraMove`, called from core/boot.js). Reading the file therefore
-    // saw no camera for every produced scene, `camMoving()` answered false for all of them, and the
-    // exemption below never fired — so the audit reported content leaving the safe area because of a
-    // camera it could not see. It was measuring a different scene from the one that renders.
-    // `produceBaseline` is that funnel and is pure; its `theme` argument is unused.
-    const raw = JSON.parse(fs.readFileSync(absPath, 'utf8'));
-    produceBaseline(raw);
-    const kf = raw.camera || [];
-    const moves = kf.slice(1).map((b, i) => ({ a: kf[i], b }))
-      .filter(({ a, b }) => CAM_KEYS.some(([k, d]) => (a[k] ?? d) !== (b[k] ?? d)));
-    if (moves.length) camMoving = (f) => moves.some(({ a, b }) => f / fps > a.t - 0.05 && f / fps < b.t + 0.05);
-  } catch {}
   // CONTENT-AWARE SAMPLING. Uniform ticks alone have a blind spot exactly the width of a beat: with
   // 14 samples across 25s they sit 1.8s apart, so a card on screen for 1.4s can fall cleanly between
   // two of them and every rule in this file silently skips it. That is not hypothetical — a captured
@@ -1371,9 +1392,15 @@ for (const aspectKey of askedAspects) {
     }
     const hard = issues.filter((i) => HARD.has(i.kind)).length;
     if (hard > worst.n) worst = { f, n: hard };
-    // A moving camera displaces every box on the frame, so neither the safe box nor the caption band
-    // is where the layer will settle. Same exemption, same reason.
-    for (const i of issues) { if ((i.kind === 'safe' || i.kind === 'caption-band') && camMoving(f)) continue; all.push({ f, ...i }); }
+    // NO FRAME-WIDE CAMERA EXEMPTION. A filter used to sit at this line: it read the camera keyframes and
+    // dropped every `safe` and `caption-band` finding on any frame between two keys that differ.
+    // `core/produce.js` gives a scene that declares no camera a `slowPush` spanning the WHOLE runtime, so
+    // it answered "moving" on every frame of 90 of the 147 scenes here, and a rule this file calls a HARD
+    // fail was switched off for most of the library. It was also the second owner of a fact the page
+    // already holds. The page decides per LAYER, from the render: `travelling` for a box mid-journey,
+    // `stageRotated` for a 3D rig whose boxes are over-bounds, `unCam` for the camera's own displacement.
+    // Every one of those is measured; this was guessed from JSON, and it was strictly coarser.
+    for (const i of issues) all.push({ f, ...i });
   }
   // WAIVERS. Every other gate in this repo honours {"authoring":{"allow":[...]}}; this one did not, so
   // a DELIBERATE composition had no way past it and the only options were to contort the scene or to
