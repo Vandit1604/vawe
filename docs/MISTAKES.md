@@ -15307,3 +15307,49 @@ joint past the duration. Both fail when the old line is restored, which is how I
 
 **The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
 inclusive list is always the easier import and is usually the wrong answer.
+
+## #475 — a gate kept its own list of which backdrops move, and called eight of them dead
+
+`scripts/gates/direction-floor.mjs` decided `no-bg-motion` from a hand-kept regex over preset NAMES:
+`/gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i`.
+The engine ships 22 background presets. The regex matched 9 of the 13 that animate, so **eight moving
+presets were reported as a flat field**: `paperDots`, `paperShapes`, `soft`, `accent`, `shapes`,
+`brandglow`, `ink`, `blobs`. `accent` is described in its own blurb as "the loud brand field", and a
+film sitting on it was told its background was static.
+
+**Root cause: two owners of one fact.** `bgPreset` in `core/backgrounds.js` returns the fx list that
+`renderBg(ctx, w, h, t, spec)` paints, and `BG_BLURBS` states the split in prose ("FLAT = `plain`
+`paper` `accentPlain` `dark` `deep`. Everything else animates"). The gate restated that in a regex over
+names, and the regex went stale the moment a preset was added or renamed. It is the same shape as #159:
+the second copy fails silently, because a missing name reads as "static", which is a legal answer.
+
+**Fix.** The gate asks the preset instead of matching its name: `movingPreset(name, value)` calls
+`bgPreset` and reports motion when any fx is not `grain` (film grain over a still base is exactly what
+the blurbs call FLAT). The derived answer agrees with `BG_BLURBS` on all 22 presets, and there is now
+nothing to keep in sync. An unknown name throws in `bgPreset` (#361) and is not this gate's finding.
+
+**Blast radius, measured.** Over the 153 scenes in `formats/scene/`, 16 lost a spurious `no-bg-motion`
+warning and no scene gained a finding. Nothing else in `scripts/` carried a second copy of the list.
+
+## #476 — a gate could only see a fragment written the shorter of its two documented ways
+
+An `html` layer and a `bg` window each take their markup two ways: `html` (inline in the scene JSON) or
+`src` (the same markup in a file). `core/sanitize-html.js` `htmlSource` is the one resolver the renderer
+uses and it takes both. `direction-floor.mjs` read `l.html` only, in two places.
+
+So a fragment in a file was read as **empty markup**. Its `var(--t)` backdrop counted as a dead field,
+and an `html` layer holding a film across a cut was not even a candidate spine: `no-continuous-object`
+fired on `hero-site` and `showcase-intro` with the spine on screen, driving 37 and 56 `var(--t,0)`
+expressions respectively. The identical scene with the markup pasted inline passed. **The gate was
+reporting on the spelling, not on the film**, and the spelling it punished is the one the docs
+recommend for anything past a few lines.
+
+**Fix.** One `htmlOf(o)` reader in the gate returns `o.html`, or the file `o.src` names (repo-root
+relative, as `core/preload.js` resolves it). Both readers go through it.
+
+**Blast radius.** Two scenes went FAIL to PASS, both genuine false positives; two more lost a spurious
+`no-bg-motion` (a `bg` window with `src`); one waived scene stopped reporting the code. No scene gained
+a finding.
+
+**The shape worth grepping for.** A feature with two spellings and a reader that knows one. The tell is
+that the failure looks like a defect in the film rather than in the reader.
