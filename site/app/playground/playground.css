@@ -46,7 +46,16 @@
 /* ── focus ─────────────────────────────────────────────────────────────────────────────────────
    Every control on the panel answered focus with the browser's default ring, which is not this
    site's. DESIGN.md: 2px solid var(--accent), offset 1-3px, keyed to :focus-visible so a keyboard
-   user is never given less than a mouse user. */
+   user is never given less than a mouse user.
+
+   The bar's own buttons were missed the first time: nothing gives .btn a ring, so tabbing to "copy
+   options" or "randomise" got the browser's 1px default in its own blue. They get the ring in a rule
+   of their own, because the block below also rounds what it rings, and the copy button is deliberately
+   square down one side where the `…` menu joins it. The menu itself was already in that block
+   and was being squared the same way. */
+.pgbar .btn:focus-visible,
+.pgcopy select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 .pgrow select:focus-visible,
 .pgrow input:focus-visible,
 .pgtext:focus-visible,
@@ -54,7 +63,6 @@
 .pgroll:focus-visible,
 .pgmore:focus-visible,
 .pgpresets button:focus-visible,
-.pgcopy select:focus-visible,
 .pgjson summary:focus-visible,
 .lback button:focus-visible {
   outline: 2px solid var(--accent);
@@ -99,3 +107,10 @@
    give way to the column when the column is the smaller of the two, and changes nothing above it,
    so the deliberate two-up wall at 1440 is untouched. */
 .pgpage .lgrid { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
+
+/* ── the copy control does not resize under the pointer ────────────────────────────────────────
+   The label swaps to "copied" for 1.6s. "copied" is 44px narrower than "copy options", so the row
+   collapsed and dragged the `…` menu left, out from under the pointer that had just clicked. The
+   floor is the natural width of the longest label this button carries, so nothing looks different
+   until the label shortens, and then nothing moves. */
+.pgcopy .btn { min-width: 7.75rem; }
