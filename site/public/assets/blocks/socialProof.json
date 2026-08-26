@@ -19,7 +19,7 @@
       "radius": 100,
       "w": 48,
       "h": 48,
-      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
       "layout": "row",
       "justify": "center",
       "items": "center",
@@ -45,7 +45,7 @@
       "radius": 100,
       "w": 48,
       "h": 48,
-      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
       "layout": "row",
       "justify": "center",
       "items": "center",
@@ -58,7 +58,7 @@
           "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
-      "x": 191.2,
+      "x": 196,
       "y": 160,
       "border": "2px solid var(--card)",
       "start": 0.34,
@@ -71,7 +71,7 @@
       "radius": 100,
       "w": 48,
       "h": 48,
-      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
       "layout": "row",
       "justify": "center",
       "items": "center",
@@ -84,7 +84,7 @@
           "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
-      "x": 222.4,
+      "x": 232,
       "y": 160,
       "border": "2px solid var(--card)",
       "start": 0.48,
@@ -97,7 +97,7 @@
       "radius": 100,
       "w": 48,
       "h": 48,
-      "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+      "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
       "layout": "row",
       "justify": "center",
       "items": "center",
@@ -110,7 +110,7 @@
           "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
         }
       ],
-      "x": 253.6,
+      "x": 268,
       "y": 160,
       "border": "2px solid var(--card)",
       "start": 0.62,
@@ -120,7 +120,7 @@
     },
     {
       "type": "group",
-      "x": 284.8,
+      "x": 304,
       "y": 160,
       "w": 48,
       "h": 48,
@@ -146,7 +146,7 @@
     },
     {
       "type": "group",
-      "x": 350.8,
+      "x": 370,
       "y": 160,
       "h": 48,
       "layout": "column",

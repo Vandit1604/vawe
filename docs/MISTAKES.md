@@ -15111,3 +15111,79 @@ under `DENSE_KEY_SEC` linearly whether or not the author said so, so a dense han
 in places the gate never looks, and it always did. And nothing here can tell a pan that should be
 constant from a pan that should ease: the exemptions prove a move HAS no rest to ramp, never that a
 constant rate is the right choice for that shot.
+
+## #470 · five blocks drew a shape the object does not have, and every one was a tidy constant
+
+`phoneFrame` was reported: at the catalog's own `props: { w: 230, h: 440 }` it rendered a **capsule**, not
+a phone. Reading the rest of the 188-entry catalog by eye found four more of the same class. None of them
+was a wrong decision; each was a number that happened to look right once and then described a different
+object at every other size.
+
+**1 · phoneFrame drew a capsule, twice over.** `radius: R.pill` is 100px, and 100 on a 230px-wide device is
+**43% of the width**. A real handset corner is about a sixth (iPhone 15: 55pt of a 393pt display), so the
+bezel is now `round(w * 0.16)`, 37px at w:230, 48 at w:300. The screen carried the SAME `R.pill`, which is
+the concentric-radius error `site/DESIGN.md` already names: an inner arc is the outer arc minus the gap
+between the two, or the bezel reads thicker at the corners than along the sides. It is `bezel - pad` now.
+The file's own comment one line above says the notch is a proportion "not a fixed 116px, at the catalog's
+w:230 that constant covered more than half the screen". So the same author caught the same class of bug
+on the neighbouring line and left the radius alone, which is why this entry is about the CLASS.
+The `#0A0A0A` on the bezel and the island STAYS. It clears the legitimate-literal test in `blocks/kit.mjs`
+on the same ground `blocks/camera-chrome.mjs` keeps its REC red: the colour belongs to the hardware, not to
+a brand, and a theme repainting it would be depicting a different object.
+
+**2 · every avatar in the library was 86% transparent.** `avatarEl`'s default fill was `TOKENS.accentSoft`,
+which is `color-mix(in srgb, var(--accent) 14%, transparent)`. That is correct for a chip lying flat on a
+card and wrong for a disc that overlaps its own siblings: `avatarStack` steps its discs by 0.65 of their
+size, so 35% of every avatar sat over the one before it and you read both fills at once, and the 2px
+`--card` ring that is meant to cut each disc out of the next separated nothing. Mixing toward `--card`
+instead of `transparent` renders IDENTICALLY on a card ground, which is where every single-avatar block
+puts it, and `card.profile`, `feedRow`, `tweetCard`, `profileHeader`, `videoLowerThird` and
+`splitScreen.pip` all changed their JSON and NOT one pixel of their poster, and makes the stack a stack.
+The fix is in `avatarEl`, not the six call sites; `blocks/social.mjs` was reinstating the see-through fill
+over the top of it with a `bg: a.color || T.accentSoft`, so that went too. `blocks/social.mjs:20-25` had
+already written down that this default was wrong and that changing it was "still outstanding".
+
+**3 · the opaque fill exposed the second half: the initials were being cut.** `avatarEl` sets the initials
+at 0.4 of the disc, so two capitals run about 0.48 of it and, centred, end at **0.74** of the way across. A
+step of 0.65 therefore parked the next disc on the last fifth of the glyphs; translucency had been hiding
+it. 0.75 clears them, and 25% is where every real facepile sits. The constant was spelled twice, in
+`avatarStack` and in `socialProof`, which is the drift shape this repo logs most; it is one `AV_STEP` now.
+`make audit` had been failing `avatarStack` and `avatarStack.large` on the `linear` theme for this the
+whole time (4 and 5 HARD) and nobody had run it on a block poster.
+
+**4 · glassDock's magnified tile was the least round thing in the dock.** The block exists to enlarge one
+icon; a fixed `R.soft` gave the 76px neighbours a 21% corner and the 123px peak a **13%** one, so the
+subject read squarer than its context. Magnification is a scale of the whole icon, corners included:
+`round(size * 0.21)`, which reproduces 16px at the resting size.
+
+**5 · glassHome's glyph did not scale with its tile, and glassDock's already did.** Two blocks in one file,
+same object, one proportional and one a constant: `w: 56, h: 56` was 42% of the catalog's `size: 132` and
+28% of a `size: 200` launcher. `round(size * 0.424)` is byte-identical at the catalog's own props and right
+at every other size, the notch repair, applied to the sibling nobody re-read.
+
+**6 · stripeCard's chart stopped two thirds of the way across its own card.** The bars were a fixed 26px,
+so the one part of this block that reads as Stripe ended 62px short of the Pay button beneath it at the
+catalog's `w: 340` (7 x 26 + 6 x 8 = 230 of a 292px content box) and 102px short at the default `w: 380`.
+A dashboard's volume chart is measured against the panel it sits in. Derived from `w` now, it fills.
+
+**Why no gate.** Every one of these is a value WRITTEN in a block factory, so the refusal belongs at the
+write site and there is nothing here a post-render check could see that reading the code cannot. What went
+in instead is seven asserts in `scripts/gates/lib-test.mjs` over the factories' own output: phoneFrame's
+corner is 13-19% of `w` at three widths and its screen is `bezel - pad`; glassDock's tiles all share one
+radius fraction; avatarStack's discs carry no `transparent` and its step clears 0.74; stripeCard's bar row
+spans the content box at three widths. All seven fail on the pre-fix tree and name the number they saw.
+
+**Gates.** `lib-test` 1144 to 1151 passing (+7), 0 failed. `block-schema` PASS. `snap-blocks` 176
+identical, 12 changed, 0 non-deterministic, the 12 are the six blocks above plus the six single-avatar
+blocks whose JSON moved and whose picture did not. `make audit` over all 13 touched entries on `vawe`,
+`linear` and `higgsfield`: **41 HARD before, 28 after, and not one scene went PASS to FAIL**;
+`avatarStack.linear` and `avatarStack.large.linear` went FAIL to PASS and `socialProof.linear` dropped 6
+HARD to 2. The 28 that remain are pre-existing and in blocks this pass did not change: `glassHome`'s
+frosted labels, `feedRow` and `profileHeader`'s meta type, `stripeCard`'s Stripe grey at 3.0:1 on white,
+and `socialProof`'s caption, which the poster scene puts on a plain backdrop while the block's ink assumes
+a card.
+
+**What is NOT done.** `site/public/assets/blocks/parallaxZoom.png` re-renders differently on every run of
+`make blocks-scenes` and `borderBeamCard.png` no longer matches what is committed. Neither block was
+touched here and neither shows up in `snap-blocks`, which reads the layer JSON and not the picture, so a
+poster for a time-sampled block can drift with nothing to say so. Both were reverted rather than fixed.

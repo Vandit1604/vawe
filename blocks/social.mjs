@@ -72,15 +72,25 @@ export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = 
     ] }];
 }
 
+// THE OVERLAP, ONCE, because two blocks need it and both used to spell it 0.65. It is 25%, which is
+// where every real facepile sits, and 35% was too much for a reason that is arithmetic rather than
+// taste: `avatarEl` sets the initials at 0.4 of the disc, so two capitals run about 0.48 of it and,
+// centred, they end at 0.74 of the way across. A step of 0.65 therefore parked the next disc on the
+// last fifth of the glyphs and cut them. 0.75 clears them by a point.
+const AV_STEP = 0.75;
+
 // avatarStack — overlapping avatar circles (initials or images) + an optional "+N" overflow.
 export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 0, dur = 4 } = {}) {
   // THE AVATARS LAND ONE AFTER ANOTHER, each dropping onto the edge of the last — a team assembling.
   // These are TOP-LEVEL layers, so the stagger is a real `start` (0.07s apart was fast enough to read
   // as one block arriving; 0.14 with a `pop` reads as individual people).
-  const step = size * 0.65; const out = [];
+  const step = size * AV_STEP; const out = [];
   avatars.forEach((a, i) => {
     const common = { x: r2(x + i * step), y, w: size, h: size, radius: R.pill, border: `2px solid ${T.card}`, start: r2(start + i * 0.14), duration: r2(dur - i * 0.14), anim: 'pop', enterDur: 0.3 };
-    const av = typeof a === 'string' ? { avatar: a } : { avatar: a.avatar, initials: a.initials, name: a.name, bg: a.color || T.accentSoft };
+    // no `bg` key when the caller names no colour: `avatarEl`'s own default is the opaque one, and a
+    // `|| T.accentSoft` here reinstated the see-through fill over the top of it.
+    const av = typeof a === 'string' ? { avatar: a }
+      : { avatar: a.avatar, initials: a.initials, name: a.name, ...(a.color ? { bg: a.color } : {}) };
     out.push({ ...avatarEl({ size, ...AV_INK, ...av }), ...common });
   });
   if (extra > 0) out.push({ type: 'group', x: r2(x + avatars.length * step), y, w: size, h: size, radius: R.pill, bg: T.surface, border: `2px solid ${T.card}`,
@@ -103,7 +113,7 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
 // registry has already shipped twice.
 export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption = '', sub = '',
   gap = 18, start = 0, dur = 4 } = {}) {
-  const step = size * 0.65;
+  const step = size * AV_STEP;
   const cells = avatars.length + (extra > 0 ? 1 : 0);
   const stackW = cells > 0 ? r2((cells - 1) * step + size) : 0;
   // the caption arrives AFTER the last avatar lands — the stack assembles, then it is named.

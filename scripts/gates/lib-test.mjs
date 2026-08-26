@@ -888,6 +888,51 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   ok(`registry: every block is deterministic${drift.length ? ' — ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
 
+  // ── A BLOCK THAT DEPICTS A REAL OBJECT KEEPS ITS PROPORTIONS ──────────────────────────────────
+  // Every one of these was a shipped defect: a constant that happened to look right at one size and
+  // described a different object at the catalog's own props. `phoneFrame` is the worked example: it
+  // carried `R.pill` (100px) on a 230px-wide device, 43% of the width, and rendered a capsule.
+  {
+    const wrong = [];
+    for (const w of [230, 300, 600]) {
+      const [dev] = BLOCKS.phoneFrame({ x: 0, y: 0, w, h: Math.round(w * 2.07) });
+      const frac = dev.radius / w;
+      if (frac < 0.13 || frac > 0.19) wrong.push(`phoneFrame w:${w} corner is ${(frac * 100).toFixed(0)}% of the width`);
+      // concentric: the inner arc is the outer arc minus the gap between them, which is the frame's pad.
+      if (dev.children[0].radius !== dev.radius - dev.pad) wrong.push(`phoneFrame w:${w} screen radius is not bezel minus pad`);
+    }
+    ok(`phoneFrame: the corner is a proportion of the device, and the screen is concentric with it${wrong.length ? ': ' + wrong.join(' · ') : ''}`, wrong.length === 0);
+  }
+  {
+    // dock magnification is a scale of the whole icon, corners included: a fixed radius made the one
+    // magnified tile read squarer than the neighbours it is meant to stand out from.
+    const [dock] = BLOCKS.glassDock({ x: 0, y: 0, magnify: 2, size: 76,
+      items: [1, 2, 3, 4, 5].map((n) => ({ icon: 'cube', label: 'i' + n })) });
+    const fr = dock.children.map((c) => c.radius / c.w);
+    ok(`glassDock: every tile's corner is the same fraction of its own size (${fr.map((f) => f.toFixed(2)).join(' ')})`,
+      Math.max(...fr) - Math.min(...fr) < 0.02);
+  }
+  {
+    // an avatar is an opaque object. `accentSoft` is 86% transparent, so a stack of them read as one
+    // Venn diagram and the `--card` ring meant to cut each disc out of the next separated nothing.
+    const stack = BLOCKS.avatarStack({ x: 0, y: 0, size: 48, avatars: [{ initials: 'AL' }, { initials: 'GH' }] });
+    ok('avatarStack: the discs are opaque, so overlapping ones stack',
+      stack.every((L) => !String(L.bg || '').includes('transparent')));
+    // `avatarEl` sets initials at 0.4 of the disc; two capitals run about 0.48 of it and, centred,
+    // end at 0.74 across. A shorter step parks the next disc on the glyphs.
+    const step = stack[1].x - stack[0].x;
+    ok(`avatarStack: the step (${(step / 48).toFixed(2)} of the disc) clears the centred initials`, step / 48 >= 0.74);
+  }
+  {
+    // a dashboard's volume chart is measured against the panel it sits in.
+    for (const w of [340, 380, 720]) {
+      const [card] = BLOCKS.stripeCard({ x: 0, y: 0, w, amount: '$1' });
+      const row = card.children[2].children;
+      const spanned = row.reduce((a, b) => a + b.w, 0) + card.children[2].gap * (row.length - 1);
+      ok(`stripeCard w:${w}: the bar chart spans the card's content box`, Math.abs(spanned - (w - 2 * card.pad)) < 1);
+    }
+  }
+
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
   // The cost of committing derived output is that it can go stale silently — add a block, forget
