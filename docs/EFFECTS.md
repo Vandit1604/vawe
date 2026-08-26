@@ -15,6 +15,7 @@
 | A number to read | `{ "type":"count" }` (it counts up) |
 | To move between beats | a cut (family) + at most 1-3 seams; a sting on a background jump |
 | To zoom into a product/UI | a `cinematicZoom` seam + `ken` push, or a camera `diveIn` |
+| One form to BECOME another across a cut (a match cut) | `matches:[{at:"cut@1", from:"<id>", to:"<id>"}]` — the joint owns the handover: the outgoing layer ends on it, the incoming one opens wearing its pose and settles into its own. The engine produces the alignment, so nothing is hand-aligned and nothing can drift (core/junctions.js) |
 | To move BETWEEN two elements without cutting | `cameraMove:{move:"travel", stations:[…]}` — lay the beats out as stations on a canvas bigger than the frame and fly between them. Pair with a `plane` modifier or every layer moves by the same amount and it reads as a slide |
 | A living background | a moving `bg` preset (aurora/constellation/paperShapes) — brand-appropriate |
 | A whole beat, directed | a `{type:"beat"}` blueprint |

@@ -286,6 +286,37 @@
         }
       }
     },
+    "matches": {
+      "type": "array",
+      "label": "Match cuts: two forms that coincide on a joint (core/junctions.js bindMatchesToJunctions)",
+      "item": {
+        "at": {
+          "type": "string",
+          "label": "The joint the match lands on: \"cut@1\" / \"seam@0\" / \"sting@2\" / \"junction@3\", or a time in seconds",
+          "required": true
+        },
+        "from": {
+          "type": "string",
+          "label": "id of the OUTGOING layer, the form that ends on the joint",
+          "required": true
+        },
+        "to": {
+          "type": "string",
+          "label": "id of the INCOMING layer, which opens on the outgoing form's last pose and settles into its own",
+          "required": true
+        },
+        "dur": {
+          "type": "number",
+          "label": "Handover span (s, default 0.42). Refused above a third of the shot it lands in.",
+          "min": 0.05,
+          "max": 2
+        },
+        "ease": {
+          "type": "string",
+          "label": "Easing of the settle (default easeOutCubic)"
+        }
+      }
+    },
     "stings": {
       "type": "array",
       "label": "Shader boundary effects",

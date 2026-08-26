@@ -14348,3 +14348,88 @@ negation lists themselves; the check no longer trusts them, which is the part th
 **Worth stating plainly:** the deploy pipeline was never broken. Nothing in the repo pointed at it, no
 gate ran against it, and its only output was a log on another machine. A failing build that reports
 only where nobody looks is indistinguishable from a build that never ran.
+
+## #457 — the engine could not cut on a match, and the rule that wanted one cannot see it
+
+**What went wrong.** `docs/CRAFT/FILM-STRUCTURE.md` lists the match cut first among spatial devices,
+and `no-continuous-object` is the most-waived rule in this library: 14 films, 11% of the 132
+gate-visible scenes, against the 15% `waiver-drift.mjs:58` calls habitual. The rule did not merely
+fail to see the alternatives. It made ONE alternative free and the rest expensive, because a keyed
+`w`/`h` on a rectangle passes and a rhyme between two forms does not.
+
+**What already existed, and why it was not enough.** `becomes` (`formats/scene/scene.js`) is the
+geometry half of a match cut, and it is the hard half: it carries the outgoing layer's final centre,
+size and rotation onto the incoming layer's opening pose. What it never had was a JOINT. The handover
+landed wherever the two layers happened to meet, so the boundary was written three times: the cut's
+`t`, the outgoing layer's `duration`, the incoming layer's `start`. Nothing kept the three equal, and
+`core/validate.mjs` could only notice afterwards that they had drifted more than half a second apart.
+That is the two-copies-of-one-number failure `bindWindowsToJunctions` removed from `bg` (#358) and the
+snap signature before it (#159), still standing one field over.
+
+**Assert or produce.** A checker was the wrong answer twice over. This repo already has a gate that
+measures a prop surviving a junction, and that gate is the most-waived rule here; a second one would
+have added a second thing to waive. And the three shipped products with this feature (Canva's Match &
+Move, Keynote's Magic Move, PowerPoint's Morph) all PRODUCE the motion. The hard part of theirs is the
+part we skip: they must GUESS which elements are the same, and a restyle silently stops the tween.
+Our layers carry an `id`, so identity is declared and a name that is not on the other side of the
+joint throws.
+
+**The fix.** `bindMatchesToJunctions` in `core/junctions.js`, the third reader of the film's joints
+beside `bindWindowsToJunctions` and `shotWindows`.
+
+```json
+"cuts":    [{ "t": 3.0, "style": "punch", "dur": 0.35 }],
+"matches": [{ "at": "cut@0", "from": "token", "to": "card" }]
+```
+
+The joint holds the only copy of the time: the outgoing layer is retimed to end on it, the incoming
+one to start on it, and the handover is handed to `becomes`. The alignment tolerance is zero by
+construction, so nothing is measured and nothing can drift. `at` takes the same junction grammar every
+other surface here takes, so a match hangs on a seam or a sting as readily as a cut.
+
+**The first render was broken, and the reason is the lesson.** Every layer carries an entrance and an
+exit ramp by default. Both ramps sit exactly where the two forms are meant to coincide, so the dot
+faded out four frames BEFORE the joint and the card faded up after it: a dissolve between two absences,
+which is the one thing a match cut must not be. A match cut has no ramp by definition. The binder now
+sets `out:"none"`, `exitDur:0` on the outgoing layer and `anim:"none"`, `enterDur:0` on the incoming
+one, and REFUSES a scene that declares any of them otherwise rather than overwriting the author. Doing
+this per call site would have been a correction every future author had to remember, which is moving
+the bug rather than removing it.
+
+**Two refusals that come from watching the render, not from theory.** `produced: true` is the house
+baseline and `core/produce.js` sets `sceneUnits` on any scene with cuts that did not decide for itself.
+Under `sceneUnits` each beat gets its own wrapper and a cut that MOVES carries the outgoing wrapper
+away from the incoming one, so the two forms are aligned inside wrappers travelling in opposite
+directions. That is the match pulled apart, and it fires on a film whose JSON never mentions units, so
+the message names the field to WRITE (`"sceneUnits": false`) rather than the one to delete. The second:
+a handover longer than a third of the shot it lands in is refused, because the incoming form then
+spends most of its own shot still arriving and the eye reads a move.
+
+**The tolerance is OURS.** No published number exists. The 2-frame match tolerance quoted around the
+web is one consumer blog with no second source, and it is a tolerance for ASSERTING a match, which a
+producing design does not need. `MATCH_HANDOVER_SHARE = 0.33` is derived from this library the way
+`eye-trace.mjs` derived `JUMP_FAR` from a p90: over the 230 shots in `formats/scene/` (every interval
+between declared cut and seam joints) the shortest shot is 0.85s, p10 is 1.90s, p50 is 3.20s; over the
+116 declared cut spans, p50 is 0.40s, p90 0.46s, max 0.60s. The default 0.42s handover therefore costs
+22% of a p10 shot. A third leaves that double headroom and still refuses the case that breaks.
+
+**THE FINDING ABOUT THE GATE, AND IT IS NOT FIXED HERE.** A film held entirely by a match cut still
+FAILS `no-continuous-object`. `continuity()` in `scripts/gates/direction-floor.mjs:223` looks for one
+layer whose visible window strictly straddles the boundary; a match cut is two different layer ids by
+construction, so neither side qualifies and the verdict is "not one content layer is visible on both
+sides of any boundary". The gate's own fix message says *"Every junction answers 'the X becomes the
+Y'"* — which is literally what `becomes` and `matches` write into the JSON — and it fails a film that
+does exactly that. The bench film `matchcut-demo` ships with the waiver and its reason. Reading a
+`becomes`/`matches` pair as ONE spanning form is a one-place change in that gate, and it was left
+undone deliberately: this pass did not own that file, and a gate change must be proven against the
+whole library before and after (a single scene going PASS to FAIL is a regression, #211).
+
+**Which gate catches the rest.** `core/validate.mjs` `matchErrors` runs the same binder on a clone, so
+every refusal above arrives from `make check` instead of sixty seconds and one ffmpeg pass later.
+`scripts/gates/lib-test.mjs` covers the binder with 14 assertions (1083 → 1097 passing).
+
+**Sound: none, and stated rather than forgotten.** A match cut is not a mechanism of its own. It is two
+layers agreeing across a boundary the film already has, so it is voiced by whatever `CUT_CUE`/`SEAM_CUE`
+gives the joint it hangs on, and no new cut style was added because one that did nothing visually would
+be a second name for `none`. A match at a `none` cut is silent on purpose: that is the hard match cut,
+where the only event is the form changing.
