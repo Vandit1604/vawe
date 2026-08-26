@@ -420,10 +420,18 @@ const CRT_SCHEMA = {
   scan:      { kind: 'num', min: 0, max: 6, def: 1,
                note: 'pixels of dark in each line. It can never exceed the gap, or the field would be solid black.' },
   vignette:  { kind: 'unit', def: 0.5, primary: true, note: 'how much the corners fall away.' },
-  tintAmount:{ kind: 'unit', def: 0, note: 'how much of the phosphor colour is laid over the whole picture. 0 leaves the colours alone.' },
+  // THE PHOSPHOR IS ON BY DEFAULT, and it was not, which made the one dial named "colour" look
+  // broken. Two independent reasons, and fixing either alone still read as a bug: `tintAmount`
+  // defaulted to 0, so `render` discarded the colour outright, AND neither field was `primary`, so
+  // both hid behind "all options" while `bloom`, `lines`, `gap` and `vignette` sat in the open. A
+  // user set the colour well to red on the panel, watched nothing happen, and reported it.
+  // 0.25 shows the phosphor without swamping the picture; the tint is multiplied by 0.35 in `render`,
+  // so this lands at about a twelfth of full strength, which is a screen with a cast rather than a
+  // screen painted one colour.
+  tintAmount:{ kind: 'unit', def: 0.25, primary: true, note: 'how much of the phosphor colour is laid over the whole picture. 0 leaves the colours alone.' },
   colour: {
-    kind: 'group',
-    fields: { tint: { kind: 'hex', def: '#1e46ff', note: 'the phosphor colour, used only when tintAmount is above 0.' } },
+    kind: 'group', primary: true,
+    fields: { tint: { kind: 'hex', def: '#1e46ff', primary: true, note: 'the phosphor colour. `tintAmount` decides how much of it lands.' } },
   },
   // THE SCREEN'S OWN WORDS. Every other card here has no content to speak of, because a field IS its
   // own subject. This one is a treatment, and a treatment needs something to treat, so the stand-in
