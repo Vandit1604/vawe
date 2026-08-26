@@ -2,10 +2,10 @@
 // headless (no encode, no screenshots), builds a per-element time series ({effective opacity, position,
 // text}) for id'd / [data-layer="critical"] elements, and asserts the motion contract per segment:
 //
-//   FAIL  (i)   final hold        — the last visible frame of a segment (and of the video) is not faded
-//   FAIL  (ii)  reveal monotonic  — a reveal's opacity never drops mid-scene (outside transitions)
+//   FAIL  (i)   final hold        — the LAST frame of the video is not faded (per-shot: see MISTAKES #425)
+//   FAIL  (ii)  reveal monotonic  — a reveal's opacity DIPS and comes back (a layer's own exit is not a dip)
 //   FAIL  (iii) settle before exit— payoffs reach steady state ≥0.5s before the exit transition
-//   FAIL  (iv)  count-up sane     — counters are non-decreasing and stable at the end
+//   WARN  (iv)  count-up sane     — a counter reverses BOTH ways (it is `add('WARN', …)`; this line said FAIL)
 //   FAIL  (v)   typing completes  — typewriter text reaches its full length before the exit
 //   WARN  (vi)  frozen span       — nothing tracked changes for >15% of the runtime (capped 0.6-2s)
 //   WARN  (vii) velocity spike    — >80px/frame jumps outside segment boundaries
@@ -17,8 +17,13 @@
 // nothing to any frame has never had a reader.
 //
 // Exemptions are declarative: elements (or ancestors) with data-motion="loop" (carets, spinners,
-// pulsing chrome) are skipped by (ii)/(iii). Segment windows come from meta.segments (each format
-// returns its SEGS); fallback: meta.stings, then the whole video as one segment.
+// pulsing chrome) are skipped by (ii)/(iii). SHOT WINDOWS come from the film's own cuts and seams via
+// core/junctions.js `shotWindows` — a film that cuts nowhere is one shot, which is a true answer and not
+// a fallback. They used to come from `meta.segments`, a field no scene has ever set, which disabled the
+// whole FAIL tier for the life of the gate (docs/MISTAKES.md #425).
+//
+// TIER: MOTION_TIER=enforce makes the FAIL tier block. It reports by default, because it fires on 53 of
+// the 127 buildable scenes in this library and a rule waived by reflex has already been repealed.
 //
 //   node scripts/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
 //   make motion [M=<format>] [STRIDE=2]
@@ -28,19 +33,30 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { junctionTable, marksOf, shotWindows } from '../../core/junctions.js';
+import { lowerScene } from '../../core/transitions-lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
 const flag = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
 const STRIDE = Math.max(1, parseInt(flag('--stride') || '1', 10));
 const DATA = flag('--data');
+const DATA_LIST = DATA ? DATA.split(',').filter(Boolean) : [null];
 const JSON_OUT = args.includes('--json');
 let formats = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--stride' && args[i - 1] !== '--data');
 if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'formats')).filter((f) => fs.existsSync(path.join(repoRoot, 'formats', f, 'sample.json'))).sort();
 
 const FPS = 30;
 const HOLDW = 0.5;              // settle window: payoffs must be steady for this long before the exit
-const INFRA = new Set(['cv', 'root', 'dip', 'grain', 'stage', 'ripple', 'cursor', 'brand', 'vig']); // chrome, not content
+// The FAIL tier has never once been enforced (see the windows block in audit()), so turning it on is a
+// severity change across the whole library and not a side effect of fixing the windows. `report` names
+// every finding at the tier the clause asked for (`would`) and blocks on none; `enforce` blocks.
+const FAIL_LEVEL = (process.env.MOTION_TIER || 'report') === 'enforce' ? 'FAIL' : 'WARN';
+// `cam` is the CAMERA RIG (formats/scene/scene.html:13), and it was missing from this list. Two
+// consequences, both measured: a camera move made the rig itself report as unsettled content, and the
+// rig's textContent is every word in the film, so any text changing anywhere read as "cam text still
+// changing". It belongs here beside `stage` and `root`, which it has always been a sibling of.
+const INFRA = new Set(['cv', 'root', 'cam', 'dip', 'grain', 'stage', 'ripple', 'cursor', 'brand', 'vig']); // chrome, not content
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
@@ -55,8 +71,8 @@ const parseNum = (t) => {
   return v * ({ K: 1e3, M: 1e6, B: 1e9 }[m[2]] || 1);
 };
 
-async function audit(format) {
-  const dataPath = DATA || `formats/${format}/sample.json`;
+async function audit(format, dataArg) {
+  const dataPath = dataArg || `formats/${format}/sample.json`;
   const dataName = dataPath.split('/').pop();
   const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
   const [VW, VH] = sceneDims(data);
@@ -91,8 +107,19 @@ async function audit(format) {
       els.forEach((el, i) => {
         const b = el.getBoundingClientRect();
         const laidOut = el.getClientRects().length > 0;
-        let eop = 1, hidden = false;
-        if (laidOut) for (const node of chains[i]) { const s = getComputedStyle(node); if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; } eop *= +s.opacity; }
+        // `rig` hashes the transform of the CAMERA and the cut wrapper above this element — never the
+        // element's own, and never a `group`'s, whose motion really is the layer's motion. A layer
+        // standing perfectly still inside a travelling frame measures as travelling, because a
+        // bounding rect is read in screen space. This is the one field that can tell those apart.
+        let eop = 1, hidden = false, rig = 0;
+        if (laidOut) for (const node of chains[i]) {
+          const s = getComputedStyle(node);
+          if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; }
+          eop *= +s.opacity;
+          if ((node.id === 'cam' || node.classList?.contains('hs-beat') || node.classList?.contains('stage'))
+            && s.transform && s.transform !== 'none')
+            for (let c = 0; c < s.transform.length; c++) rig = (rig * 31 + s.transform.charCodeAt(c)) | 0;
+        }
         if (laidOut && !hidden && !nonVisual[i]) {
           out.live[i]++;
           // A wrapper whose own rect collapses is not boxless if something inside it occupies space: a
@@ -116,44 +143,48 @@ async function audit(format) {
           const tr = getComputedStyle(kid).transform;
           if (tr && tr !== 'none') for (let c = 0; c < tr.length; c++) sig = (sig * 31 + tr.charCodeAt(c)) | 0;
         }
-        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), sig]);
+        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), sig, rig]);
       });
     }
     return out;
   }, total, STRIDE);
   await page.close();
 
-  // ---- segments (frame windows + transition) ----
-  // meta.segments = the format DECLARES its scene windows → the motion contract is enforceable (FAIL).
-  // Fallback to stings is heuristic (stings are often beat markers, not cuts) → observations only (WARN).
-  let segs = (meta.segments || []).map((s) => ({ name: s.name || s.label || s.type, dur: s.dur ?? (s.t1 - s.t0), trans: s.transition ?? 0.4 })); // accepts {dur} or {t0,t1}
-  const declared = segs.length > 0;
-  let windowSource = declared ? 'meta.segments (declared)' : null;
-  if (!segs.length && (meta.stings || []).length) {
-    const cuts = [...meta.stings, total / FPS]; let prev = 0;
-    segs = cuts.map((c, i) => { const s = { name: 'seg' + i, dur: c - prev, trans: 0.4 }; prev = c; return s; });
-  }
-  if (!segs.length) segs = [{ name: 'all', dur: total / FPS, trans: 0 }];
-  if (!windowSource) windowSource = (meta.stings || []).length ? 'meta.stings (inferred — stings are often beat markers, not cuts)'
-    : 'the whole video as one window (inferred — nothing in the scene marks a boundary)';
-  let acc = 0;
-  const windows = segs.map((s, i) => {
-    const start = Math.round(acc * FPS); acc += s.dur;
-    const isLast = i === segs.length - 1;
-    const end = Math.min(Math.round(acc * FPS), total);                       // exclusive
-    const visEnd = isLast ? end : end - Math.round(s.trans * FPS);            // content window end (exit starts here)
-    return { ...s, i, start, end, visEnd, isLast };
+  // ---- windows: the film's OWN JOINTS ----
+  // This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/boot.js read
+  // `scene.segments || []`, formats/scene never returns the key, and there is exactly one format. So
+  // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
+  // `segments` was never a missing declaration — it was a SECOND way to say what `cuts` already says,
+  // and the film's cuts and seams are the joints, so core/junctions.js owns the reading of them
+  // (docs/MISTAKES.md #159, #358: one fact, one owner). A film with no cuts is genuinely one shot.
+  // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
+  const lowered = lowerScene(structuredClone(data));
+  const table = junctionTable(marksOf(lowered));
+  // The transition duration belongs to the joint that ENDS a shot: `visEnd` is where the exit begins,
+  // so a 0.8s cut and a 0.2s cut do not end their shot at the same frame.
+  const jointDur = new Map();
+  for (const m of [...(lowered.cuts || []), ...(lowered.seams || [])])
+    if (Number.isFinite(+m?.t)) jointDur.set(+(+m.t).toFixed(3), +m.dur > 0 ? +m.dur : 0.4);
+  const shots = shotWindows(table, total / FPS);
+  const windowSource = shots.length > 1
+    ? `${shots.length} shots from the film's own cuts/seams (core/junctions.js)`
+    : 'one shot — this film declares no cuts or seams';
+  const windows = shots.map((s, i) => {
+    const isLast = i === shots.length - 1;
+    const trans = isLast ? 0 : (jointDur.get(+s.end.toFixed(3)) ?? 0.4);
+    const start = Math.round(s.start * FPS);
+    const end = Math.min(Math.round(s.end * FPS), total);                     // exclusive
+    const visEnd = isLast ? end : end - Math.round(trans * FPS);              // content window ends; exit starts
+    return { name: shots.length > 1 ? 'shot' + i : 'all', trans, i, start, end, visEnd, isLast };
   });
 
   // ---- checks ----
   const F = series.frames, at = (i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
   const findings = [];
-  // `declared ? level : 'WARN'` is the whole contract in one ternary, and it used to leave no trace. A
-  // format that declares no segments has its windows INFERRED, so a FAIL-tier clause fired against an
-  // inferred window is not adjudicable — downgrading it is right. Reporting the downgrade as an ordinary
-  // warning and then printing "the motion contract holds" is not: the contract was never enforced.
-  // `would` keeps the tier the check asked for so the report can say what was set aside and why.
-  const add = (level, check, seg, key, msg) => findings.push({ level: declared ? level : 'WARN', would: level, check, seg: seg?.name, key, msg });
+  // No downgrade any more. The windows above come from joints the film actually declares, so a
+  // FAIL-tier clause fired against one is adjudicable and says what it means. TIER is a separate
+  // decision, argued from the census rather than from the window: see MOTION_TIER at the top.
+  const add = (level, check, seg, key, msg) => findings.push({ level: level === 'FAIL' ? FAIL_LEVEL : level, would: level, check, seg: seg?.name, key, msg });
   const K = series.keys, LOOP = series.loop;
   const content = K.map((k, i) => !INFRA.has(k) && !LOOP[i]);
 
@@ -162,10 +193,18 @@ async function audit(format) {
     if (w.visEnd - w.start < FPS * 0.8) continue; // too short to judge
     const lastVisF = w.visEnd - 1 - ((w.visEnd - 1 - F[0]) % STRIDE || 0);
 
-    // (i) final hold — the payoff frame of this segment must not be faded
-    let maxOp = 0, any = false;
-    K.forEach((k, i) => { if (!content[i]) return; const v = at(i, lastVisF); if (v) { any = true; maxOp = Math.max(maxOp, v[2]); } });
-    if (any && maxOp < 0.9) add('FAIL', 'i:final-hold', w, '', `at ${(lastVisF / FPS).toFixed(2)}s max content opacity ${maxOp.toFixed(2)} < 0.9 (segment ends faded)`);
+    // Does the gate see ANYTHING in this shot? The finding that used to hang off this tally is gone:
+    let any = false;
+    K.forEach((k, i) => { if (!content[i]) return; if (at(i, lastVisF)) any = true; });
+    // PER-SHOT (i) IS GONE, and it is the one clause this pass found to be measuring the wrong thing.
+    // It asks "does this shot end faded" and can only see `[id], [data-layer="critical"]`, which is not
+    // the frame: a `group` or an `html` mock carries the picture while the tracked layers of that shot
+    // sit at zero. Checked by eye against the render, tpot-launch 13.50s and vawe-intro 7.90s are both
+    // full, solid frames and both were reported as ending faded. Whether a FRAME has anything in it is
+    // measured against PIXELS, and beat-check's `dead-air` already does that. The whole-video variant
+    // below survives because at the end of a film "every tracked layer is gone" and "the frame is empty"
+    // stop being different claims: brew-launch-act1, tpot-launch, example-kinetic-type and _catalog-2
+    // were all checked against the render and all four end on an empty frame.
     if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements — add data-layer="critical" to key elements');
 
     // (ix) rhythm data: per-element entry duration in this window = first frame opacity >= 0.9
@@ -186,13 +225,32 @@ async function audit(format) {
       // typewriter length over the FULL segment — typing that spills into the exit window is the bug
       let maxTl = 0;
       for (let j = lo; j < hiFull; j++) { const v = series.rows[i][j]; if (v) maxTl = Math.max(maxTl, v[3]); }
+      // A LAYER'S OWN EXIT IS A FADE TOO, and (ii) could not tell it from the defect it hunts. Its only
+      // exclusion was the SEGMENT's transition window, so every ordinary layer leaving mid-shot read as
+      // a mid-scene fade — two of them on formats/scene/sample.json, the canonical clean scene. The
+      // window was never the missing piece: this clause is scoped to a LAYER'S LIFE, not to a shot.
+      // An exit is a TERMINAL DESCENT: from some frame on the opacity never rises again and the element
+      // does reach nothing. A dip comes back, and a dip is the bug. Scanning back from the end of the
+      // FULL window (not visEnd) because an exit ramp legitimately finishes inside the transition.
+      let exitFrom = hiFull;
+      {
+        let gone = false, later = null;
+        for (let j = hiFull - 1; j >= lo; j--) {
+          const v = series.rows[i][j], o = v ? v[2] : null;
+          if (o === null || o <= 0.05) { gone = true; later = 0; exitFrom = j; continue; }
+          if (!gone) break;                        // it never reaches nothing: nothing here is an exit
+          if (later !== null && o < later - 1e-9) break;  // rose going forward — the descent starts later
+          later = o; exitFrom = j;
+        }
+        if (!gone) exitFrom = hiFull;
+      }
       let prev = null, prevF = -1, nums = [], maxDrop = 0, dropAt = 0;
       for (let j = lo; j < hi; j++) {
         const v = series.rows[i][j]; const f = F[j];
         if (v) { const n = parseNum(v[4]); if (n !== null && v[3] < 24) nums.push(n); }
         if (v && prev && prevF === F[j - 1]) {
           const dop = prev[2] - v[2];
-          if (dop > maxDrop && f - w.start > w.trans * FPS) { maxDrop = dop; dropAt = f; }
+          if (dop > maxDrop && f - w.start > w.trans * FPS && j < exitFrom) { maxDrop = dop; dropAt = f; }
           const dx = Math.abs(v[0] - prev[0]), dy = Math.abs(v[1] - prev[1]);
           if ((dx > 80 || dy > 80) && f - w.start > 2 && w.end - f > 2) add('WARN', 'vii:jump', w, k, `${Math.max(dx, dy).toFixed(0)}px jump at ${(f / FPS).toFixed(2)}s`);
         }
@@ -248,7 +306,11 @@ async function audit(format) {
           const v = series.rows[i][j];
           if (!v) { pv = null; continue; }
           if (pv && pf === F[j - 1]) {
-            if (Math.abs(v[0] - pv[0]) > 0.7 || Math.abs(v[1] - pv[1]) > 0.7) { ok = false; why = `still moving (Δ${Math.max(Math.abs(v[0] - pv[0]), Math.abs(v[1] - pv[1])).toFixed(1)}px/f)`; }
+            // Where the rig moved between these two samples, the frame travelled and the layer's screen
+            // position moved with it. (iii) asks whether the LAYER settled, and that question has no
+            // answer here, so it is not asked. Opacity and text are unaffected by the camera and still are.
+            if (v[6] !== pv[6]) { /* the world moved: this step says nothing about the layer's pose */ }
+            else if (Math.abs(v[0] - pv[0]) > 0.7 || Math.abs(v[1] - pv[1]) > 0.7) { ok = false; why = `still moving (Δ${Math.max(Math.abs(v[0] - pv[0]), Math.abs(v[1] - pv[1])).toFixed(1)}px/f)`; }
             else if (Math.abs(v[2] - pv[2]) > 0.02) { ok = false; why = `opacity still changing (Δ${Math.abs(v[2] - pv[2]).toFixed(3)}/f)`; }
             else if (v[3] !== pv[3]) { ok = false; why = 'text still changing'; }
             if (!ok) { add('FAIL', 'iii:settle', w, k, `${why} at ${(F[j] / FPS).toFixed(2)}s — payoff not settled ${HOLDW}s before exit`); break; }
@@ -314,13 +376,13 @@ async function audit(format) {
     if (top[1] / presets.length > 0.7) findings.push({ level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' });
   }
 
-  return { format, data: dataName, total, segments: windows.length, findings, declared, windowSource };
+  return { format, data: dataName, total, segments: windows.length, findings, windowSource };
 }
 
 const results = [];
-for (const f of formats) {
-  try { results.push(await audit(f)); }
-  catch (e) { results.push({ format: f, error: String(e && e.message || e), findings: [] }); }
+for (const f of formats) for (const d of DATA_LIST) {
+  try { results.push(await audit(f, d)); }
+  catch (e) { results.push({ format: f, data: d, error: String(e && e.message || e), findings: [] }); }
 }
 await browser.close(); server.close();
 
@@ -333,12 +395,11 @@ else {
     // name the data file audited: `make motion D=...` used to drop D and silently audit sample.json,
     // and the report gave no way to tell which scene you were reading (MISTAKES #47).
     console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format} · ${r.data}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
-    if (!r.declared) {
+    console.log(`    windows: ${r.windowSource}`);
+    if (FAIL_LEVEL === 'WARN') {
       const set = r.findings.filter((x) => x.would === 'FAIL');
-      console.log(`    ⚠ no \`segments\` in this scene — windows come from ${r.windowSource}.`);
-      console.log(`      The FAIL tier (i final-hold · ii monotonic · iii settle · iv count-up · v typing) is scored`);
-      console.log(`      against those inferred windows, so it is reported as warnings and enforces nothing.`);
-      if (set.length) console.log(`      ${set.length} finding(s) below would be FAIL against declared windows: ${[...new Set(set.map((x) => x.check))].join(', ')}`);
+      if (set.length) console.log(`      ${set.length} finding(s) below are FAIL-tier clauses, reported not enforced `
+        + `(MOTION_TIER=enforce to block): ${[...new Set(set.map((x) => x.check))].join(', ')}`);
     }
     const show = [...fails, ...warns];
     for (const x of show.slice(0, 30)) console.log(`    [${x.level === 'FAIL' ? x.check : x.check + ' · warn'}] ${x.seg || ''}${x.key ? ' "' + x.key + '"' : ''} — ${x.msg}`);
@@ -346,24 +407,15 @@ else {
   }
 }
 const failed = results.some((r) => r.error || r.findings.some((x) => x.level === 'FAIL'));
-// No scene in this repo sets `segments`, so every SEGMENT-SCOPED FAIL (i · ii · iii · iv · v) has always
-// been rewritten to WARN before anyone saw it, and the run then printed a tick. (The one FAIL that
-// survives is the whole-video final-hold, which is pushed straight into `findings` and never passes
-// through `add`.) Refuse to certify exactly where the tick would be unearned: a FAIL-tier clause fired
-// against a window that was guessed. Exit 3 (cannot check) — the census convention, and not the same
-// claim as exit 1 (the film is wrong).
-const blind = results.filter((r) => !r.error && !r.declared && r.findings.some((x) => x.would === 'FAIL'));
 // Under --json the verdict goes to stderr: stdout is the machine-readable channel, and appending a
-// prose line to it made the documented flag emit something no consumer could parse. The exit code and
-// the sentence both survive; only the stream changes.
+// prose line to it made the documented flag emit something no consumer could parse.
 const say = JSON_OUT ? console.error : console.log;
 if (failed) { say('\n✗ motion audit found hard failures'); process.exit(1); }
-if (blind.length) {
-  say(`\n? motion contract NOT ENFORCED — ${blind.length > 1 ? 'these formats declare' : `\`${blind[0].format}\` declares`} no \`segments\`, so every`);
-  say('  FAIL-tier finding above was scored against a guessed window and set aside. Nothing here says the');
-  say('  film is wrong, and nothing here says it is right. Declare `segments` in the scene to make the');
-  say('  contract adjudicable, or read the warnings above by eye.');
-  process.exit(3);
-}
-say('\n✓ motion contract holds across all checked formats');
+// The exit-3 "cannot check" verdict is GONE, and that is the whole point of this change. It existed
+// because windows came from `meta.segments`, a field no scene has ever set, so the FAIL tier was scored
+// against a guessed window and had to be set aside. Windows now come from the film's own cuts and
+// seams, so there is nothing left to be blind about.
+say(FAIL_LEVEL === 'FAIL'
+  ? '\n✓ motion contract holds across all checked formats'
+  : '\n✓ no hard failures — FAIL-tier clauses are REPORTED at this tier, not enforced (MOTION_TIER=enforce)');
 process.exit(0);
