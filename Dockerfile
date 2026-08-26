@@ -40,16 +40,25 @@ RUN npm ci
 
 COPY site/ ./
 # `prebuild` runs ../scripts/site/site-engine.mjs → vendors the engine into public/
-RUN npm run build
-# NORMALISE THE DIST DIR, AND DO IT HERE RATHER THAN IN THE COPYs BELOW. next.config.mjs reads
-# NEXT_DIST_DIR, and site/package.json pins it to `.next-build` so a running `next dev` and a
-# `next build` do not fight over `.next` locally. That pin arrived in 71b65a7 and the runner's COPYs
-# still named `.next`, so six production deploys failed. The symptom is the trap: BuildKit reports
-# `failed to calculate checksum of ref ... not found` on a layer it also printed as CACHED, which
-# reads exactly like a poisoned cache and is really a path that was never written. Two hours went
-# into the wrong cure. The `|| exit` is what stops that recurring: it names the cause.
-RUN test -d .next-build || { echo "✗ site build wrote no .next-build. NEXT_DIST_DIR in site/package.json and this line must agree."; exit 1; } \
- && rm -rf .next && mv .next-build .next
+# BUILD TO `.next`, DO NOT RENAME AFTERWARDS. `site/package.json`'s build script pins
+# NEXT_DIST_DIR=.next-build so a running `next dev` and a `next build` do not fight over `.next`
+# locally. Nothing runs `next dev` in this image, so the pin has no job here and two attempts to
+# accommodate it both shipped broken.
+#
+# The first attempt left the COPYs naming `.next` while the build wrote `.next-build`: six production
+# deploys failed on `failed to calculate checksum of ref ... not found`, on a layer BuildKit had also
+# printed as CACHED, which reads exactly like a poisoned cache and is really a path never written.
+#
+# The second renamed the directory after the build. That deployed GREEN and served every stylesheet as
+# a 404, because `next build --output standalone` BAKES the dist dir into its own server:
+# `.next-build/standalone/server.js` carries `distDir: "./.next-build"` and the standalone tree nests a
+# second `.next-build/` inside itself. Renaming the outer directory moves nothing the server looks for.
+#
+# So run the prebuild explicitly and then a plain `next build`, which takes the `.next` default from
+# next.config.mjs. `npm run build` would re-apply the pin. The guard is what stops a third attempt:
+# it names the cause instead of letting the failure arrive as a 404 on a page that returned 200.
+RUN npm run prebuild && npx next build
+RUN test -d .next/static && test -d .next/standalone || { echo "✗ the site build wrote no .next/static or .next/standalone. Something re-applied NEXT_DIST_DIR; the runner COPYs below name .next."; exit 1; }
 
 # --- the docs app (fumadocs, Next 16) ---
 # It ships in the SAME image and runs alongside the site, which serves it at /docs by rewriting to

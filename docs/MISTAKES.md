@@ -14626,3 +14626,36 @@ documented, and documentation moved it from 0 to 5 block files while scenes stay
 this string will not by itself make modifiers used. What it removes is the guarantee of the opposite: an
 author who tried, failed, and concluded the feature was broken. The adoption work is putting modifiers
 into `blocks/`, where an author meets them without having to look them up.
+
+## #462 — a deploy went green and served every stylesheet as a 404
+
+**What.** `vawe.upsurge.cc` returned 200 for every page and 404 for both `/_next/static/css/*.css`. The
+site rendered unstyled. Coolify reported the deployment `finished`.
+
+**Root cause, and it was my own fix one commit earlier.** `site/package.json` pins
+`NEXT_DIST_DIR=.next-build` so a running `next dev` and a `next build` do not fight over `.next`
+locally. The Dockerfile's runner COPYs name `.next`. #456 fixed that mismatch by renaming the
+directory after the build: `rm -rf .next && mv .next-build .next`.
+
+**`next build --output standalone` BAKES the dist dir into its own server.** The build writes
+`.next-build/standalone/server.js` carrying `distDir: "./.next-build"`, and the standalone tree nests a
+second `.next-build/` **inside itself**. Renaming the outer directory moves nothing the server looks
+for: it starts, serves HTML from a path it can resolve, and 404s every asset under a path it cannot.
+
+**Why it got through.** Every check passed. `next build` succeeded, the image built, the container
+started, the health check hit `/` and got 200, and `curl` on the six routes returned 200. **The
+failure is one level below the thing every check looks at** — the page exists and its assets do not.
+
+**Fix.** Do not accommodate the pin; remove it where it has no job. Nothing runs `next dev` in the
+image, so the container runs `npm run prebuild && npx next build`, which takes `next.config.mjs`'s
+`.next` default. `npm run build` would re-apply the pin.
+
+**Which gate catches it now.** A `test -d .next/static && test -d .next/standalone` after the build,
+which names the cause. That catches a third attempt at accommodating the pin. **It does not catch the
+general defect**, which is that nothing anywhere fetches an asset the rendered HTML references. A page
+returning 200 with a 404 stylesheet passes every check this repo and this deploy host own.
+
+**The pattern worth naming.** Two fixes in a row failed the same way: I reasoned about the build from
+the outside rather than reading what the build WROTE. #456's symptom looked like a poisoned cache and
+was a path never written; this one looked like a working deploy and was a path renamed out from under
+its own server. Both were one `grep` into the build output away.
