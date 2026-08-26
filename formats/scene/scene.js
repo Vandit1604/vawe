@@ -15,6 +15,7 @@ import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS,
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene } from '/core/transitions-lower.js';
+import { bindBeats, describeBind } from '/core/beat-bind.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
 import { resolveBridges } from '/core/audio-bridges.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
@@ -135,6 +136,11 @@ boot((data, fps, theme, canvas) => {
   // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
   // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
   data = lowerScene(data);
+  // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
+  // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time — the bg
+  // windows bound to `cut@n` below therefore follow the snapped joint rather than the written one.
+  // Once, at build, so renderFrame(n) stays pure. Throws when a grid was named and none arrived.
+  { const r = bindBeats(data, canvas && canvas.beats); if (r) console.log(describeBind(r)); }
   // The film's nominated loud moment: write the device as a sting at `at` and pull every competing
   // amplitude dial in the film down around it (core/spectacle.js). BEFORE the sting/seam/layer parses
   // below, because those are its subject; a no-op when the scene declares no `spectacle`.

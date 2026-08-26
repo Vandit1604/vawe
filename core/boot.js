@@ -8,6 +8,7 @@ import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from './theme
 import { parseColor, contrastRatio, ensureContrast } from './motion.js';
 import { validateAll } from './validate.mjs';
 import { produceBaseline, bakeCameraMove } from './produce.js';
+import { loadBeatGrid } from './beat-bind.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
@@ -516,6 +517,10 @@ export async function boot(build) {
     await preloadLottie(data);
     await preloadGsap(data);
     await preloadRansomSprites(data);
+    // The beat grid the scene names, fetched ONCE here (I/O belongs at boot, never in a frame).
+    // The snap itself happens inside build(), after the unified transition surface is lowered — a
+    // cut written as `transitions` does not exist as a cut time until then. core/beat-bind.js.
+    const beats = await loadBeatGrid(data, fetchJson);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     // `safe` rides along so the scene view can hand it to a layer without a second call to safeArea:
     // the safe box is a function of destination as well as size, and two callers computing it is how
@@ -524,7 +529,7 @@ export async function boot(build) {
     // The frame rides along WHOLE, beside the width/height/safe keys the view already reads. That is
     // what lets createKit hand every layer primitive a frame without a second safeArea() call and
     // without a signature change at any of the call sites.
-    const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame });
+    const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
     // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
     // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
     // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.
