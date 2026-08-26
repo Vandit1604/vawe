@@ -30,6 +30,61 @@ which is what makes the sharded capture correct. Guarded per-scene by `make prob
 purity) + `make canvas-purity` (shader/canvas pixels), and across the WHOLE library by `make snap-all`
 (every shipped scene: quarantines any order-dependent scene + diffs a DOM signature vs a saved baseline).
 
+## Frame pipeline (the ORDER is the contract)
+
+Two bugs in one week were ordering, not arithmetic: `#464` resolved a handover before the layout
+measurement and put a card 401.6px away, `#463` read a box that was composed before the tracks ran and
+turned an authored 24px gap into a 24px overlap. Both were governed by a sentence in a file header,
+where no gate could see it. The order lives here now, and `lib-test` parses this block, so the doc and
+the code cannot drift apart in silence.
+
+Read it as three stages. **BUILD** happens once at boot, on the DOM and the JSON. **FRAME** is
+`renderFrame(n)` in `formats/scene/scene.js`, top to bottom. **ACCUMULATE** names the tracks that read
+`el.style.transform` back and PREPEND to it: `el.style` is the pipeline's accumulator, not its output,
+and the whole composition works only because `driveClips` rewrites the transform from scratch every
+frame.
+
+The per-layer half of FRAME is `runTracks`, whose fourteen slots are declared and enforced in
+`core/tracks/index.js` (`SLOTS`). That list is not repeated here; a second copy is the drift this
+section exists to prevent.
+
+```pipeline
+build  measure         el.offsetWidth
+build  becomes         resolveBecomes(data, (L) =>
+build  childOffsets    const childRel = new Map();
+
+frame  drawBg
+frame  driveClips
+frame  driveSceneUnits
+frame  resolveBoxes
+frame  runTracks
+frame  drawCaptions
+frame  drawCameraAndCut
+frame  drawStings
+frame  drawSeams
+frame  seekAll
+
+accumulate  core/tracks/react.js
+accumulate  core/tracks/follow.js
+accumulate  core/tracks/motion.js
+accumulate  core/tracks/idle.js
+```
+
+`resolveKeyedProps` is deliberately absent from BUILD: it runs twice, before the measurement and again
+after `becomes`, because the handover injects new keys and `core/sequence.js` holds one rule for a
+keyed track (both endpoints state `w`/`h`, or neither). A step that runs twice has no place in an
+ordered list, and pinning its first call would pin the wrong one.
+
+**What follows from the order, and what a reader must not assume.** `resolveBoxes` runs before any
+track, so `scene.boxOf(id)` is the authored geometry plus the motion track plus the enter/exit pose,
+and NOTHING a track wrote. It is not a live read of the DOM. A `follow` therefore cannot chain, and
+chaining is refused by name in `core/tracks/follow.js` rather than left to arithmetic.
+
+**The ceiling of the check, stated so nobody trusts it further than it goes.** `lib-test` proves the
+call order and the accumulator set from the source text. It cannot prove a track read a fresh value
+rather than a stale one: that is a runtime property of one scene at one t, and the things that do see
+it are `make probe`, `make canvas-purity` and `make snap-all`.
+
 ## Directory map
 
 | Path | What | Notes |

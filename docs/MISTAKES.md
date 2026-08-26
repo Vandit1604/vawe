@@ -14760,3 +14760,44 @@ measured one, a form measuring nothing is refused, and the `matches` path is mea
 `formats/scene/scene.js` fails 4 of them. Nothing was added to `core/validate.mjs` on purpose:
 validate reads data and cannot measure, so the only rule it could state is "declare `w`/`h`", which is
 the answer this entry rejects.
+
+## #465 · the render order was a comment, so two bugs in one week broke it and nothing said so
+
+**What happened.** `#463` and `#464` landed within days of each other. Neither was arithmetic. `#464`
+resolved the `becomes` handover before the build-time layout measurement, so an unsized text layer
+measured zero wide and a card landed 401.6px away at 0.77x scale. `#463` read a box that
+`resolveBoxes` composes from `x`/`y` plus the motion track alone, before any track runs, so `boxOf`
+reported the settled pose and a `follow` with an authored 24px gap rendered as a 24px overlap. Both
+were governed by the same fact: WHAT RUNS BEFORE WHAT.
+
+**Root cause.** That fact was written down four or five times, every time inside a file header, and
+nowhere a gate could read it. `core/tracks/index.js` states the per-layer half properly: fourteen named
+slots, one occupant each, refused at module load if two tracks claim one. The FRAME-level half, build
+resolution then `driveClips` then `resolveBoxes` then `runTracks`, had no owner at all. A comment is
+what failed twice, and a comment that is right is indistinguishable from one that has gone stale.
+
+A third breach was still open and undocumented: a `follow` whose target is itself a `follow` pins to
+the middle layer's UNPINNED position, because `resolveBoxes` runs first. `core/tracks/follow.js` said
+so in its header and called it "refused by arithmetic, not by a check", which is the engine's cardinal
+sin written out as a design note. Input accepted, then quietly half-applied.
+
+**Fix, and it is a doc plus one gate block plus one refusal.** The order is stated ONCE, in
+`docs/CODEMAPS/ARCHITECTURE.md` under "Frame pipeline", as a fenced ```pipeline block naming the BUILD
+steps, the FRAME stages and the four tracks that treat `el.style` as an accumulator. `lib-test` PARSES
+that block and asserts it against the source, so the codemap is the single statement of the contract
+and also the thing that fails when the code stops matching it. No third copy was created: the fourteen
+track slots are not repeated in the codemap, because `SLOTS` already owns them and enforces itself.
+
+`core/tracks/follow.js` now REFUSES a chain by name, reading the target's own spec off the frozen scene
+view: `follow: "c" follows "b", which is itself following "a". A box is resolved before any track runs,
+so "b" reports its UNPINNED position and this pin would land at a place nothing is.` No shipped scene
+uses `follow`, so nothing moved.
+
+**Which gate catches it now, and what that gate CANNOT do.** `scripts/gates/lib-test.mjs` gained 10
+assertions (1125 to 1135 passing). Each family was proven by breaking the code and watching it fail:
+moving `resolveBoxes` after `runTracks` fails two, moving `resolveBecomes` above the measurement fails
+two, turning follow's transform prepend into a replace fails one. The ceiling is real and is written
+into both the codemap and the gate: this proves the ORDER OF CALLS and the SET of accumulating tracks
+from source text. It cannot prove that a track read a fresh value rather than a stale one. That is a
+property of one scene at one `t`, and `probe-purity`, `canvas-purity` and `snap-scenes` are what see
+it. All 107 scene snapshots are byte-identical.
