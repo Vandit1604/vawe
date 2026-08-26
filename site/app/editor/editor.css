@@ -190,13 +190,12 @@
 }
 
 /* ── the stage viewport ────────────────────────────────────────────────────────────────────────
-   On /playground and /arsenal the stage IS the box, so globals.css gives it the scene's ratio and
-   the scene fills it. Here the stage is a fixed region and the scene is letterboxed inside it, so
-   the ratio comes off and the fit is computed on both axes (ScenePlayer.tsx). That is what lets a
-   9:16 scene sit as a portrait card on a wide stage instead of running off the bottom edge. */
+   On /arsenal the stage IS the box, so globals.css gives it the scene's ratio and the scene fills
+   it. Here the stage is a fixed region and the scene is letterboxed inside it, so the ratio comes
+   off and the fit is computed on both axes (useStageFit, shared with /playground). That is what
+   lets a 9:16 scene sit as a portrait card on a wide stage instead of running off the bottom. */
 .ed-stage .sp { display: flex; flex-direction: column; flex: 1; min-height: 0 }
 .ed-stage .sp-stage { aspect-ratio: auto; flex: 1; min-height: 0; background: var(--field) }
-.ed-stage .sp-frame { transform: scale(var(--sp-scale)) translate(var(--sp-x, 0px), var(--sp-y, 0px)) }
 
 /* The two frame-step buttons. Same 24px floor and same affordance as the play control beside them. */
 .sp-step {
@@ -234,7 +233,7 @@
   .ed-stage { order: 1 }
   .ed-cm { height: 46vh }
   /* flex:1 of a frame with no fixed height is zero, so the stage takes the scene's ratio here
-     (--sp-ar, published by ScenePlayer) and the transport keeps a picture above it. */
+     (--sp-ar, published by useStageFit) and the transport keeps a picture above it. */
   .ed-stage .sp-stage { flex: none; aspect-ratio: var(--sp-ar, 16 / 9) }
 }
 @media (max-width: 640px) {

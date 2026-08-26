@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSceneEngine } from "../components/useSceneEngine";
+import { useStageFit } from "../components/useStageFit";
 
 type Spec = {
   kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist"
@@ -723,7 +724,8 @@ function LookCard({ gen, engine, active, onPick }:
  *
  *  It wears `.sp-stage`, not a class of its own. The hook names the iframe `sp-frame`, and that pair
  *  exists because the iframe renders at FULL frame size and is scaled down: sizing it to the box
- *  instead crops the scene to its top-left corner, which is exactly what the first version here did. */
+ *  instead crops the scene to its top-left corner, which is exactly what the first version here did.
+ *  useStageFit does that scaling, and /editor does it with the same call. */
 function ScenePreview({ url, title }: { url: string; title: string }) {
   // playing: FALSE. The page's contract is that nothing here moves and the panel says so in as many
   // words, but a generator that emits scene LAYERS came up through this hook with playback on, so the
@@ -734,19 +736,7 @@ function ScenePreview({ url, title }: { url: string; title: string }) {
   // picture arrives and the stage came up white. Halfway is past every entrance and before any exit.
   const { hostRef, meta, renderFrame } = useSceneEngine({ dataUrl: url, aspect: "16:9", title, playing: false });
   useEffect(() => { if (meta) renderFrame(Math.floor(meta.totalFrames / 2)); }, [meta, renderFrame]);
-  useEffect(() => {
-    const h = hostRef.current;
-    if (!h || !meta) return;
-    const fit = () => {
-      h.style.setProperty("--sp-scale", String(h.clientWidth / meta.width));
-      h.style.setProperty("--sp-w", `${meta.width}px`);
-      h.style.setProperty("--sp-h", `${meta.height}px`);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(h);
-    return () => ro.disconnect();
-  }, [hostRef, meta]);
+  useStageFit(hostRef, meta);
   return <div className="sp-stage pgscene" ref={hostRef} aria-label={title} />;
 }
 

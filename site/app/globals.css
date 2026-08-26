@@ -525,8 +525,11 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* the stage carries the scene's true ratio; the iframe renders at FULL frame size and is scaled
    down to fit. Sizing the iframe to the box instead would crop the scene to its top-left corner. */
 .sp-stage{position:relative;aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;--sp-scale:1;--sp-w:1920px;--sp-h:1080px}
+/* The translate centres a scene that does not fill its box on both axes. /editor and /playground both
+   fit on both axes (useStageFit), so it belongs here; the offsets default to 0, so a stage that fits
+   on width alone is unmoved. */
 .sp-frame{position:absolute;top:0;left:0;width:var(--sp-w);height:var(--sp-h);border:0;display:block;
-  transform-origin:top left;transform:scale(var(--sp-scale))}
+  transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--sp-x,0px),var(--sp-y,0px))}
 .sp-bar{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-2);border-top:1px solid var(--line)}
 .sp-play{width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--line-2);background:#fff;color:var(--ink-2);
   font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -604,6 +607,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .pgscene {
   border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2);
   max-height: 56vh; margin-inline: auto; width: 100%;
+  /* max-height clamps this box shorter than the 16/9 it declares, so a fitted scene is letterboxed.
+     The bars take the field card's ground, not the page's, so the frame reads as one object. */
+  background: #05070c;
 }
 .pgerr {
   margin-top: 12px; padding: 12px 14px; border-radius: 10px;
