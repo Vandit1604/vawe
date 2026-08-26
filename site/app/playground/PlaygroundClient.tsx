@@ -89,6 +89,8 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   const [showAll, setShowAll] = useState(false);
   const optsFor = useRef<string | null>(null);
   const stage = useRef<HTMLDivElement>(null);
+  // The last result this generator produced, held so a refused option does not blank the preview.
+  const lastGood = useRef<{ name: string; made: string | Layer[] } | null>(null);
 
   // Boot the engine once. A failure here is shown rather than swallowed: a blank panel with no
   // message is the worst outcome, because it looks like the page simply has nothing in it.
@@ -135,6 +137,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
       ? deepMerge(engine.defaultsOf(gen.schema), gen.presets![first])
       : engine.defaultsOf(gen.schema);
     setPreset(first);
+    setNoDial([]);                 // the skipped list belongs to the generator that produced it
     optsFor.current = gen.name;
     const raw = new URLSearchParams(window.location.search).get("o");
     if (!raw) { setOpts(base); return; }
@@ -163,8 +166,19 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
     // person switching had not caused. `optsFor` is the name of the generator these belong to, and a
     // mismatch means the reset below has not run yet: render nothing rather than something wrong.
     if (!gen || !opts || optsFor.current !== gen.name) return null;
-    try { const r = gen.render(opts); setErr(null); return r; }
-    catch (e) { setErr(String((e as Error)?.message || e)); return null; }
+    try {
+      const r = gen.render(opts);
+      setErr(null);
+      lastGood.current = { name: gen.name, made: r };
+      return r;
+    } catch (e) {
+      setErr(String((e as Error)?.message || e));
+      // HOLD THE LAST FRAME THAT RENDERED. A refusal is usually one bad keystroke on one dial, and
+      // blanking the stage throws away the picture the refusal has to be read against: you lose both
+      // the thing you were judging and the ability to see what the dial was doing. The stage is
+      // marked stale below so the held frame is never mistaken for the current one.
+      return lastGood.current?.name === gen.name ? lastGood.current.made : null;
+    }
   }, [gen, opts]);
   const html = typeof made === "string" ? made : null;
   const layers = Array.isArray(made) ? made : null;
@@ -304,6 +318,10 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   if (which == null) {
     return (
       <>
+        <p className="pglede">
+          The engine’s generators, running here rather than in a render. Every card is the real
+          thing, drawn still. Open one to turn its dials.
+        </p>
         <div className="lgrid">
           {engine.GENERATORS.map((g, i) => (
             <LookCard key={g.name} gen={g} engine={engine} active={false} onPick={() => setWhich(i)} />
@@ -328,8 +346,8 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   presetRef.current = preset;
   const patchJson = JSON.stringify(patch, null, 2);
   const link = typeof window === "undefined" ? "" :
-    `${window.location.origin}${window.location.pathname}?g=${gen.name}` +
-    (Object.keys(patch).length ? `&o=${btoa(JSON.stringify(patch))}` : "");
+    `${window.location.origin}${window.location.pathname}` +
+    (Object.keys(patch).length ? `?o=${btoa(JSON.stringify(patch))}` : "");
 
   return (
     <div className="pg">
@@ -340,11 +358,18 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
       </div>
 
       <div className="pggrid">
-        <div className="pgstage">
+        <div className={`pgstage${err && made ? " is-stale" : ""}`}>
           {sceneUrl
             ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
             : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
-          {err && <p className="pgerr">{err}</p>}
+          {err && (
+            <div className="pgerr" role="status">
+              <p>{err}</p>
+              {/* Sibling, not a nested span: inside the paragraph the two strings ran together in
+                  textContent, so a screen reader read "got 0the picture above is the last one". */}
+              {made && <p className="pgheld">the picture above is the last one that rendered</p>}
+            </div>
+          )}
         </div>
 
         <div className="pgpanel">
@@ -384,7 +409,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
             difference; options is what almost everyone wants, and the other two are a keystroke away. */}
         <div className="pgcopy">
           <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
-            {copied ? "copied" : "copy options"}
+            {copied === "options" ? "copied" : "copy options"}
           </button>
           <select aria-label="copy something else" value=""
             onChange={(e) => {
@@ -424,12 +449,6 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
 
       <details className="pgjson">
         <summary>the options, as a scene would carry them</summary>
-        <p className="pgabout">
-          Every control here is built from the generator’s own option schema, so what you can turn
-          is exactly what it accepts, and an option it does not understand says so instead of quietly
-          doing nothing. Paste these into a scene, or copy the HTML straight out. If a dial should
-          exist and does not, that is worth telling us.
-        </p>
         <pre>{patchJson === "{}" ? "// nothing changed yet" : patchJson}</pre>
       </details>
     </div>
@@ -559,8 +578,11 @@ function Row({ c, value, onChange }:
           <input type="range" min={min} max={max} step={step} value={Number(value ?? 0)}
             onChange={(e) => onChange(path, Number(e.target.value))} aria-hidden tabIndex={-1} />
         )}
-        <input id={id} type="number" min={min} max={max} step={step} value={Number(value ?? 0)}
-          onChange={(e) => onChange(path, Number(e.target.value))} />
+        {/* step="any" on the FIELD, the real step on the slider beside it. A declared step makes the
+            browser mark every off-grid value :invalid, and a preset lands off the grid constantly:
+            lightWidth 0.62 against step .05 announced itself as invalid to a screen reader. */}
+        <input id={id} type="number" min={min} max={max} step={spec.kind === "int" ? 1 : "any"}
+          value={Number(value ?? 0)} onChange={(e) => onChange(path, Number(e.target.value))} />
         {huge && (
           <button className="pgadd" title="a new random seed"
             onClick={() => onChange(path, Math.floor(Math.random() * (max as number)))}>↻</button>
@@ -662,17 +684,6 @@ function ScenePreview({ url, title }: { url: string; title: string }) {
     return () => ro.disconnect();
   }, [hostRef, meta]);
   return <div className="sp-stage pgscene" ref={hostRef} aria-label={title} />;
-}
-
-function groupsOf(gs: Generator[]): [string | null, { g: Generator; i: number }[]][] {
-  const out: [string | null, { g: Generator; i: number }[]][] = [];
-  gs.forEach((g, i) => {
-    const key = g.group ?? null;
-    const row = out.find(([k]) => k === key);
-    if (row) row[1].push({ g, i });
-    else out.push([key, [{ g, i }]]);
-  });
-  return out;
 }
 
 function groupControls(cs: Control[]): [string | null, Control[]][] {

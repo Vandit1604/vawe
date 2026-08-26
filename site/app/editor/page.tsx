@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { EditorClient } from "./EditorClient";
+import "./editor.css";
 
 export const metadata: Metadata = {
   title: "Vawe · editor",

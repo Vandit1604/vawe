@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { PlaygroundClient } from "../PlaygroundClient";
+import "../playground.css";
 
 /**
  * One URL per generator: /playground/bands, /playground/colonnade.
@@ -23,18 +24,14 @@ export const metadata: Metadata = {
 export default async function GeneratorPage({ params }: { params: Promise<{ name: string }> }) {
   const { name } = await params;
   return (
-    <div className="pgdark">
+    <div className="shell">
       <Header active="playground" />
-      <main className="wrap pgpage">
-        <header className="pghead">
-          <h1>Playground</h1>
-          <p>
-            The engine&apos;s generators, running here rather than in a render. Every card is the real
-            thing, drawn still. Open one to turn its dials.
-          </p>
-        </header>
-        <PlaygroundClient initial={name} />
-      </main>
+      <div className="wrap">
+        <main id="content" tabIndex={-1} className="pgpage">
+          <header className="pghead"><h1>Playground</h1></header>
+          <PlaygroundClient initial={name} />
+        </main>
+      </div>
       <Footer />
     </div>
   );
