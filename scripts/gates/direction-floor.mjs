@@ -22,6 +22,8 @@
 // no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { motionAt } from '../../core/sequence.js';
 import { bgPreset } from '../../core/backgrounds.js';
 import { typedLen } from '../../core/layers/text.js';
@@ -64,6 +66,21 @@ const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 // the only fx that is not motion (film grain over a still base). That is the same split BG_BLURBS
 // states in prose — FLAT = plain · paper · accentPlain · dark · deep — now read off the code instead of
 // restated here. An unknown name throws there (#361) and is not this gate's finding to report.
+// THE MARKUP OF A HAND-AUTHORED FRAGMENT, from either place it can live. `html` is the markup inline in
+// the scene JSON and `src` is the SAME markup in a file (core/sanitize-html.js `htmlSource` is the one
+// resolver the renderer uses, and it takes both). Every reader here used to look at `html` only, so a
+// fragment written to a file — the documented alternative, and the only sane one past a few lines — was
+// read as empty markup: its `var(--t)` backdrop counted as a dead field, and an `html` layer holding the
+// film across a cut was not even a candidate spine. A gate that can only see one of two documented
+// spellings reports on the spelling, not on the film.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const htmlOf = (o) => {
+  if (!o || typeof o !== 'object') return '';
+  if (typeof o.html === 'string') return o.html;
+  if (typeof o.src !== 'string') return '';
+  // `src` is repo-root relative (core/preload.js roots it at '/'), so it resolves the same from any cwd.
+  try { return fs.readFileSync(path.join(repoRoot, o.src), 'utf8'); } catch { return ''; }
+};
 const movingPreset = (name, value) => {
   try { return (bgPreset(name ?? undefined, value).fx || []).some((f) => f && f.type !== 'grain'); }
   catch { return false; }
@@ -74,7 +91,7 @@ const movingPreset = (name, value) => {
 // flat field, which pushes the author back onto the presets: the opposite of what it exists for.
 const animatedWin = (b) => b && (movingPreset(b.preset, b.value)
   || b.mode != null || b.period != null || b.driftX != null || b.driftY != null
-  || (typeof b.html === 'string' && /var\(\s*--[tp]\b/.test(b.html)));
+  || /var\(\s*--[tp]\b/.test(htmlOf(b)));
 const hasBgMotion = (d.bg || []).some(animatedWin)
   || flat.some((l) => l.shader || l.canvasFx || l.three || l.raymarch || l.type === 'paint');
 
@@ -200,7 +217,9 @@ const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.t
   // limit, stated plainly: this proves the layer changes CONTINUOUSLY, not that it changes AT the
   // boundary. A strip that morphs from numbers to bars across the cut and a clock ticking in a corner
   // are indistinguishable here. Only your eyes and `make reveal` tell those apart.
-  || (l.type === 'html' && /var\(\s*--t\b/.test(String(l.html ?? '')));
+  // `htmlOf`, not `l.html`: the markup is inline OR in a `src` file, and reading only the inline
+  // spelling made a film held by a fragment on disk fail `no-continuous-object` with its spine on screen.
+  || (l.type === 'html' && /var\(\s*--t\b/.test(htmlOf(l)));
 
 // The layer's pose at absolute time t, from every authored track this gate can evaluate exactly.
 const poseAt = (l, t) => {
