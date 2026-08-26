@@ -1,50 +1,18 @@
-/* ===== SHOWCASE AS A COMPONENT LIBRARY =========================================================
-   The two-column catalog shape (a sticky rail, the work to its right) is the shared
-   .rail-layout/.rail-col/.rail primitive in globals.css, so the column width and the collapse
-   breakpoint are one behaviour across this page and /showcase/effects rather than two that happen
-   to look similar. What is this page's own is the NESTING: effects' rail is 35 flat family links,
-   this one puts a category label over the real entries inside it, because "left sidebar with
-   categories and their entries" was the literal ask. */
-.scrail{gap:20px}
-.scrail-cat{display:flex;flex-direction:column;gap:2px}
-.scrail-cat ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
-.scrail-catlabel{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.05em;
-  text-transform:uppercase;color:var(--muted);padding:0 10px 3px}
-.scrail a{display:block;font-size:12.5px;padding:5px 10px}
-.sclist{min-width:0}
+/* ===== /showcase · the closing block ============================================================
+   Everything else this page needs (.phead, .films, .filmgrid, .aspects, .trio, .h2, .btn) already
+   lives in globals.css because the landing page uses it too. What is local is the way the page
+   ends, and it is here rather than there for one reason: .hero-cta centres its buttons, which is
+   right under a centred hero and wrong under a left-aligned page. One declaration undoes it.
 
-@media (max-width:900px){
-  /* This rail scrolls sideways rather than wrapping: its entries are grouped under category
-     labels, and a wrapped grid loses which label an entry belongs to. */
-  .scrail{flex-direction:row;overflow-x:auto;gap:18px;padding:12px 0 10px}
-  .scrail-cat{flex-direction:row;align-items:center;gap:6px;flex:0 0 auto}
-  .scrail-catlabel{padding:0}
-  .scrail-cat ul{flex-direction:row;gap:6px}
-  .scrail a{padding:4px 10px;white-space:nowrap}
-}
+   /features declares the same three rules under .fend. Two routes now need this block, which is
+   exactly the condition CLAUDE.md sets for promoting a rule to globals.css; that file was rebuilt
+   this pass and is out of bounds, so the duplication is deliberate and reported rather than hidden. */
+.scend{padding:56px 0 80px;border-top:1px solid var(--line);margin-top:44px}
+.scend .h2{max-width:20ch}
+.scend .hero-cta{justify-content:flex-start;margin-top:22px}
 
-/* ---- interlinked tags: a capability's tag now names real effect pages, so the names that
-   resolved need to read as links without the tag itself gaining the chrome globals.css's own
-   `.tag` comment explicitly rules out ("no box, no accent, no verb"). An underline under just the
-   linked words is the smallest signal that survives that constraint. Names that did not resolve
-   (site/app/showcase/tagLinks.ts) stay exactly the plain text `.tag` already was. ---- */
-.capcard .tag a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);
-  text-underline-offset:2px}
-.capcard .tag a:hover{color:var(--accent);text-decoration-color:var(--accent)}
-
-/* ---- a defect found on this page, not introduced by the rail: `.cap-index` positions itself
-   inside `.cap-lead`'s grid (globals.css) but was never given its OWN internal layout, so its
-   three spans (count, title+sub, arrow) ran together as one unbroken line of text. It read that
-   way before this rebuild too; the rail just made it visible sooner in the page's flow. Scoped
-   here because the class is unique to this page. ---- */
-.cap-index{display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;
-  padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);
-  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
-.cap-index:hover{border-color:var(--accent-line);box-shadow:var(--shadow-1)}
-.cap-index-n{font-family:var(--font-mono),monospace;font-size:1.7rem;font-weight:700;
-  color:var(--accent);flex:0 0 auto}
-.cap-index-text{display:flex;flex-direction:column;gap:2px;min-width:0}
-.cap-index-text b{font-size:.95rem;letter-spacing:-.01em}
-.cap-index-text > span{font-size:12.5px;color:var(--muted)}
-.cap-index-go{margin-left:auto;flex:0 0 auto;color:var(--accent);font-size:1.1rem}
-
+/* The films heading is .h2 (the site's section heading) rather than .films-h1, which is display-sized
+   and read as a second hero directly under the page h1. .scsub's negative top margin was tuned to
+   hug .films-h1's own bottom margin, so it needs undoing against this one. */
+.films{padding-top:44px}
+.films .scsub{margin-top:12px}

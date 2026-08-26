@@ -36,6 +36,12 @@ const nextConfig = {
       // rather than chaining one redirect through another.
       { source: "/type", destination: "/arsenal/type", permanent: true },
       { source: "/showcase/type", destination: "/arsenal/type", permanent: true },
+      // THE FEATURES FOLD: eight feature detail pages became three sections on /features itself.
+      // Six of the eight described a registry /arsenal now indexes in full or a proof the landing
+      // page runs live, and every one of them ended on a docs link into a private repo. The index
+      // survived because the three mechanisms left are said nowhere else; the per-slug route did
+      // not. Wildcarded, because the slugs were content and a new one must not 404 either.
+      { source: "/features/:slug", destination: "/features", permanent: true },
     ];
   },
   async rewrites() {
