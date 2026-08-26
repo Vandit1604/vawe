@@ -328,6 +328,25 @@ ok('wipe-up grows upward from the bottom edge', ANIM['wipe-up'](0.5).clipPath ==
 ok('plain wipe is the default direction, rightward', ANIM.wipe(0.5).clipPath === ANIM['wipe-right'](0.5).clipPath);
 ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-right', 'wipe-up', 'wipe-down'].map((n) => ANIM[n](0.5).clipPath)).size === 4);
 
+// ---- AN ENTRANCE IS PART OF WHERE A LAYER IS (MISTAKES #461). formats/scene/scene.js resolveBoxes
+// folds the enter/exit transform into every box, so boxOf reports the pose on screen rather than the
+// pose the layer is heading for. It does that by reading the composed transform through DOMMatrix,
+// which means the fold is only as complete as the shapes the registry writes. These pin the two halves
+// that would break it silently: the distances a box now moves by, and the claim that every entrance
+// writes nothing but px translates and unitless scales. Add an anim that rotates, skews or translates
+// in `%` and the fold would drop it with no error, so this fails instead.
+ok('rise starts a full 48px below its box', (() => { const m = ANIM.rise(0).transform.match(/translateY\(([-\d.]+)px\)/); return m && Math.abs(parseFloat(m[1]) - 48) < 0.01; })());
+ok('slide-left starts a full 60px to the left of its box', (() => { const m = ANIM['slide-left'](0).transform.match(/translate\((-?[\d.]+)px/); return m && Math.abs(parseFloat(m[1]) + 60) < 0.01; })());
+ok('pop moves no centre, only scale', ANIM.pop(0).transform.startsWith('scale('));
+ok('every entrance writes a transform a box can fold (px translate / unitless scale only)', (() => {
+  const FOLDABLE = /^(none|((translate|translateX|translateY)\(\s*-?[\d.]+px\s*(,\s*-?[\d.]+px\s*)?\)|scale\(\s*-?[\d.]+\s*\))(\s+|$))+$/;
+  for (const n of ANIM_NAMES) for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    const tr = ANIM[n](t).transform;
+    if (tr != null && !FOLDABLE.test(tr.trim())) return false;
+  }
+  return true;
+})());
+
 // ---- background `opts`: a knob a window declares must be READ, or refused by name (MISTAKES #157).
 // The accepted set is derived from the fx implementations, so these also pin that the derivation is
 // live: rename the property an fx reads and the vocabulary must follow it.

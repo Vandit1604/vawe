@@ -14591,3 +14591,47 @@ layers agreeing across a boundary the film already has, so it is voiced by whate
 gives the joint it hangs on, and no new cut style was added because one that did nothing visually would
 be a second name for `none`. A match at a `none` cut is silent on purpose: that is the hard match cut,
 where the only event is the form changing.
+
+## #461 — a box said where the layer was heading, not where it was
+
+`formats/scene/scene.js` `resolveBoxes(t)` composed every layer's box from its authored `x`/`y` plus
+`motionAt`, and from nothing else. An entrance is not in that sum. `driveClips` plays `anim`/`out` as a
+CSS transform written straight onto the element, so through a `rise` the layer sat 48px below the box
+that claimed to describe it, through a `slide-*` 60px to one side, and through a `pop` at 86% of its
+size. `scene.boxOf` handed that out with nothing to say so, and the function's own header enumerated a
+DIFFERENT limit (a reflowed group returns null rather than a stale offset) which read as the full list.
+
+Measured on a rect with `anim: "rise"` and a text layer pinned `{ edge: "below", gap: 24 }` under it:
+at t=0 the follower sat **48.00px** above where it belonged, so the authored 24px gap rendered as a
+24px OVERLAP. With the entrance stretched to `enterDur: 1.2` the gap read 5.42px at t=0.2 and 23.02px
+at t=0.4 against an authored 24. The same on the way out: with `out: "rise"` on the target, the gap
+collapsed to 1.43px on the last frame of the exit. Three themes, `vawe` · `linear` · `higgsfield`, all
+identical, because this is arithmetic and not a look.
+
+**Root cause, and where it was fixed.** The entrance was reachable only as a drawn frame until
+`clipStyleAt(el, t)` made it a value. `resolveBoxes` now reads it and folds it in: the translate moves
+the box's centre, the scale multiplies the `scale` it already reports beside `w`/`h`, and a group child
+gets its own entrance rotated and scaled by its group's transform exactly as CSS composes them. Fixed
+in the one place the box is built, not in `core/tracks/follow.js`, because every reader of `boxOf`
+was getting the same wrong answer: `core/fx/occlude.js` tests overlap, `core/fx/shadow.js` aims a cast
+shadow at the layer's centre, and both want the pose on screen.
+
+**Blast radius: none, and that is measured rather than hoped.** `node scripts/gates/snap-scenes.mjs`
+reports 106 identical before and after. It is identical by construction, not by sampling luck: across
+`formats/scene/*.json` no layer declares `follow`, no layer declares an `occlude` modifier, and only
+`schema.json` declares `lighting`, without which `core/fx/shadow.js` throws. The runtime `boxOf` has
+zero exercised consumers in the library, so the correction reaches only films yet to be written. (The
+`boxOf` in `verify/audit.mjs` and the one in `scripts/gates/scene-timing.mjs` are unrelated functions
+of the same name — one reads DOM rects, the other reads JSON — and neither is touched.)
+
+**Per-frame cost.** `clipStyleAt` allocates, so the fold is skipped outside the enter and exit ramps,
+where an entrance contributes identity anyway; a settled layer pays two comparisons. Inside a ramp it
+costs one style object and one `DOMMatrix.setMatrixValue`, against ONE reused scratch object and ONE
+reused matrix for the whole scene, which is the no-allocation rule `core/tracks/index.js` states.
+
+**Which gate catches it.** The fold reads the composed transform through `DOMMatrix`, so it is only as
+complete as the shapes the anim registry writes: an entrance that rotated, skewed, or translated in `%`
+would be dropped silently. `scripts/gates/lib-test.mjs` now pins that every `ANIM` entry writes nothing
+but px translates and unitless scales, plus the three distances the fix depends on (1115 → 1119
+passing). `node scripts/gates/probe-purity.mjs scene` is clean: `clipStyleAt` is pure in `(dataset, t)`,
+so a box stays a pure function of `t`.
