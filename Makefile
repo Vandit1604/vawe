@@ -869,6 +869,14 @@ scenes-json: ## check site/public/scenes/ against formats/scene/ (WRITE=1 to rew
 films-json: ## check site/lib/films.json against the rendered films (WRITE=1 to rewrite)
 	node scripts/site/films-json.mjs $(if $(WRITE),--write,)
 
+# make site-check — everything the SITE publishes, checked against the thing that produced it.
+# These three gates existed and nothing chained them, so they ran when somebody remembered. That is
+# how three shipped films drifted from their sources at once: one rendered from a scene edit later
+# lost in a merge, one committed before its sound existed, one still 9:16 while its film was 16:9.
+# A gate nobody runs is not a gate.
+site-check: scenes-json films-json site-counts ## check every published artifact against its source
+	@echo "\u2713 site: published scenes, films and counts all agree with their sources"
+
 # make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block
 # scenes + posters. blocks-scenes is safe to include here because it needs no render: each block is
 # measured on its own stage, so adding one touches only its own files.
