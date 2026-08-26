@@ -8,7 +8,6 @@ colors:
   accent-ink: "#ffffff"
   accent-soft: "#eef3ff"
   accent-line: "#cfe0ff"
-  accent-on-dark: "#8fc0ff"
   ok: "#2f7d55"
   ok-bg: "#f2fbf6"
   bad: "#a3282d"
@@ -80,33 +79,24 @@ Do not fade an accent to suggest a secondary state. Cobalt on its own tint at 75
 3.08:1 against a required 4.5. Reach for `ink-2` or `muted`, both of which are contrast-checked on
 white.
 
-`accent-on-dark` is the site's answer for cobalt over an ink surface. Use it wherever the accent
-lands on `pgdark`; raw cobalt does not survive there.
+There is no dark surface left to answer for. The site once carried `accent-on-dark`, cobalt lifted
+to survive an ink ground; `/playground` was its only consumer and moved to the light system, so the
+token went with the scope.
 
 ## Themes
 
-**The site has no system dark mode, and this is a decision the next change should make on purpose
-rather than inherit.** There is no `prefers-color-scheme` block and no `data-theme` anywhere. There
-is only `.pgdark`, a class one route opts into. A visitor whose OS is set to dark gets the light
-site.
+**There is one theme, and the site has no dark mode at all.** No `prefers-color-scheme`, no
+`data-theme`, and since `/playground` moved to the light system, no opted-in dark scope either. A
+visitor whose OS is set to dark gets the light site.
 
-`.pgdark` is token-level, not component-level: it redefines the surface, line, ink and accent
-tokens in one scope, and every control on that route repaints without a rule of its own. That is
-the mechanism a real dark mode would reuse. What it does not cover today:
+That is a decision the next change should make on purpose rather than inherit, and the way in is
+already proven. The scope that used to exist was token-level, not component-level: it redefined
+surface, line, ink and accent in one place and every control on the route repainted with no rule of
+its own. Nothing on this site paints a colour on a component, so that mechanism still works.
 
-| Token | State under `.pgdark` |
-|---|---|
-| `bg` `bg-2` `surface` `field` `line` `line-2` | redefined |
-| `ink` `ink-2` `muted` | redefined |
-| `accent` `accent-2` `accent-soft` `accent-line` | redefined |
-| `shadow-1` `shadow-2` | redefined |
-| `shadow-3` | **not redefined**, so the largest elevation keeps a light-surface shadow |
-| `ok` `ok-bg` `bad` `bad-bg` | **not redefined**, so an error box paints near-white on ink |
-| `accent-ink` | **not redefined** |
-
-Turning this into a real theme means redefining those four groups and moving the scope from a class
-to `:root` under a media query plus a `data-theme` override. The token layer already does the work;
-the missing pieces are the seven tokens above and one decision about who owns the switch.
+What a real dark mode owes, and what the old scope never paid: `shadow-3` kept a light-surface
+shadow, `ok` `ok-bg` `bad` `bad-bg` painted near-white on ink, and `accent-ink` was never
+redefined. Seven tokens, plus one decision about who owns the switch.
 
 ## Typography
 
@@ -130,8 +120,8 @@ type, not on a wrapper.
 
 `.wrap` is the page: `1160px` max width, `26px` gutters. Everything else sits inside it.
 
-The catalog shape is shared. `/showcase` and `/showcase/effects` both index hundreds of items under
-dozens of headings, and both use `.rail-layout` / `.rail-col` / `.rail`: a `172px` sticky rail, a
+The catalog shape is shared. `/arsenal` indexes 743 items under dozens of headings and uses
+`.rail-layout` / `.rail-col` / `.rail`: a `172px` sticky rail, a
 `22px` gap, the work to its right, collapsing at `900px` into a horizontal strip of pills. A page
 brings its own link type and its own collapsed direction; the frame comes from the primitive.
 
@@ -175,8 +165,9 @@ from the frozen state it exists to deny, so it fades instead.
 
 - Do put a rule in `globals.css` only when two routes need it. One consumer keeps its rule in its
   own stylesheet, which is why `globals.css` does not know what a `.fxcard` is.
-- Do give a colour to a token, never to a component. `.pgdark` works because every control paints
-  from `--surface` and `--ink` rather than from a literal.
+- Do give a colour to a token, never to a component. The dark scope that used to ship worked
+  because every control painted from `--surface` and `--ink` rather than from a literal, so one
+  scope repainted a whole route. That is why a dark mode is still reachable here.
 - Don't use `mix-blend-mode: soft-light`, `overlay` or `screen` on the cobalt bookend band.
   `multiply` can only darken, which is what mathematically guarantees white stays above cobalt's
   5.17:1 on every frame of the video behind it. Those three can lighten, and the guarantee dies.
