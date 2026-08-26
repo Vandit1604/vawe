@@ -14760,3 +14760,54 @@ measured one, a form measuring nothing is refused, and the `matches` path is mea
 `formats/scene/scene.js` fails 4 of them. Nothing was added to `core/validate.mjs` on purpose:
 validate reads data and cannot measure, so the only rule it could state is "declare `w`/`h`", which is
 the answer this entry rejects.
+
+## #465 · the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
+
+**What.** `core/preload.js` decides whether the tween engine is fetched at all, from the props a scene
+names. Get that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply
+does not move. Until now the set was a nine-name regex written out by hand, under a comment asking the
+next author to keep it in lockstep with `formats/scene/scene.js`, `core/parts.js` and
+`core/layers/composition.js`. Nothing checked the lockstep. It broke once already: the boot to preload
+extraction dropped `parts`, and a scene rendered completely unanimated (#148).
+
+Four of the nine names are named by zero or one scene in the whole library, so no render exercises them.
+A regex entry nobody renders is an entry nobody can notice is missing.
+
+**Root cause.** Not the list's contents. The list's EXISTENCE. Two places knew one fact, and only one of
+them was read at render time.
+
+**Fix, in two halves, because full derivation is not reachable.** Three of the names now derive from
+`GSAP_PLUGINS`, the plugin table already sitting in the same file, so that third cannot drift at all.
+`parts` and `comp` are declared where their vocabularies live, as `export const GSAP_TRIGGER` in
+`core/parts.js` and `core/layers/composition.js`. The remaining three (`morph`, `fx`, `fxOut`) are read
+inside `applyGsapHooks` in `formats/scene/scene.js`, which declares nothing importable, so they are still
+stated in `core/preload.js` and covered by the guard below. `gsap` was the ninth name and is deleted: the
+`gsap:{from,to}` field went in #208 and nothing has read it since, so it loaded a tween engine for a prop
+with no reader.
+
+**The guard is what makes stating the last three safe.** `scripts/gates/lib-test.mjs` re-derives the whole
+set from the code that does the reading and fails when the two disagree, in three directions:
+
+* a SWEEP of every `.js` under `core/` and `formats/` for the one shape every GSAP hook is written in, a
+  layer prop gating a branch that also tests `window.gsap`. It walks the tree rather than a named list of
+  files, because #229, #232 and #242 were each a gate whose file list was outrun by a directory move.
+* the two `GSAP_TRIGGER` declarations, for the reads the sweep cannot see (`composition.js` tests
+  `window.gsap` on a different line from its `L.comp` read).
+* the DECISION itself, run per prop against a stub `window`, so the four props no render exercises are
+  exercised anyway.
+
+**Proved red four ways.** Dropping `parts` from the set names `MISSING: parts`. Adding `gsap` back names
+`STALE: gsap`. Deleting the `splitText` plugin row names `MISSING: splitText`. Narrowing the trigger regex
+to `fx` alone names `SILENT: morph, fxOut, parts, comp, motionPath, physics, splitText` while the other two
+checks stay green, which is the synthetic half working on its own. End to end: a fixture scene using
+`splitText` + `physics` + `motionPath` renders one film with the set correct and a DIFFERENT, unanimated
+film with the plugin names dropped, and the guard names all three missing props on the same break. That is
+#148 reproduced and caught.
+
+**Gates.** `lib-test` 1125 to 1130 passing (+5). `snap-scenes` 106 identical, 0 changed, so no shipped film
+moves. `probe-purity scene` clean. Preload runs once at boot and this changes nothing per frame.
+
+**What is NOT done.** `formats/scene/scene.js` still declares nothing about the three props it reads, so
+one third of the set is a statement rather than a derivation. The one-line repair is an
+`export const GSAP_PROPS = ['morph', 'fx', 'fxOut'];` beside `applyGsapHooks`, imported by the guard in
+place of the sweep. It was not made here because another author owned that file this phase.

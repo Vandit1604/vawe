@@ -236,16 +236,28 @@ const GSAP_PLUGINS = {
   splitText:  { file: 'SplitText.min.js', global: 'SplitText' },
 };
 
+// THE TRIGGER SET. A scene naming any of these props has motion authored on the seeked GSAP timeline,
+// so GSAP must be loaded before build or the engine accepts the input and renders it UNANIMATED, the
+// silent-substitution failure that shipped once already, when the boot→preload extraction dropped `parts`
+// from a hand-typed list (docs/MISTAKES.md #148).
+//
+// The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other five are
+// read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx, fxOut,
+// parts, and core/layers/composition.js for comp) and are stated here instead. Stating them is safe only
+// because scripts/gates/lib-test.mjs RE-DERIVES the whole set from the source that does the reading and
+// fails when the two disagree; the list on its own is exactly what #148 was.
+//
+// `gsap` was the ninth name and is gone: the `gsap:{from,to}` field was removed in #208 and no code has
+// read it since, so it loaded a tween engine for a prop with no reader.
+const GSAP_HOOK_PROPS = ['morph', 'fx', 'fxOut', 'parts', 'comp'];
+export const GSAP_PROPS = Object.freeze([...GSAP_HOOK_PROPS, ...Object.keys(GSAP_PLUGINS)]);
+const GSAP_TRIGGER_RE = new RegExp(`"(${GSAP_PROPS.join('|')})"\\s*:`);
+
 export async function preloadGsap(data) {
   const json = JSON.stringify(data);
-  // Every field whose motion is authored on the seeked GSAP timeline MUST trigger the load, or the
-  // engine accepts the input and renders it UNANIMATED — the silent-substitution failure. `parts`
-  // (per-child choreography) and `comp` (a composition's hand-authored timeline) both live on GSAP
-  // exactly like fx/morph, so they belong here; leaving them out shipped a static figure with no error
-  // (docs/MISTAKES.md #148). Keep this list in lockstep with applyGsapHooks + core/layers/composition.js.
-  if (!/"(gsap|morph|fx|fxOut|motionPath|physics|splitText|parts|comp)"\s*:/.test(json)) return;
+  if (!GSAP_TRIGGER_RE.test(json)) return;
   if (!window.gsap) await loadScript('/assets/vendor/gsap.min.js');
-  if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load — gsap/fx/morph layers render unanimated'); return; }
+  if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load, so fx/morph/parts/comp layers render unanimated'); return; }
   // autoRemoveChildren=false IS THE PURITY OF renderFrame(n), not a memory tweak. GSAP's ROOT timeline
   // ships with autoRemoveChildren:true: the instant a tween's playhead passes its end, GSAP unlinks it
   // from the timeline. For a PLAYING page that is right (a finished tween is garbage). For a SEEKED page

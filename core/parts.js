@@ -26,6 +26,10 @@
 //     end of its own path, and it has nowhere to go.
 import { defineRegistry } from './registry.js';
 
+// The layer prop that turns this vocabulary on. Declared here, beside the vocabulary, so core/preload.js
+// cannot be the only place that knows a `parts` layer needs GSAP loaded. That was #148 exactly.
+export const GSAP_TRIGGER = 'parts';
+
       // author reaches for on a figure; every one is a compositor-friendly transform/opacity/dashoffset.
 export const PARTS = {
     growUp: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 100%'; }, { scaleY: 0 }, { scaleY: 1 }, { scaleY: 0 }],
