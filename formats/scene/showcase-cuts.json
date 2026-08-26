@@ -1,394 +1,282 @@
 {
   "module": "scene",
-  "authoring": { "allow": ["no-continuous-object", "cut-families"] },
-  "authoringNote": "The timeline strip runs under every beat and reads as one object, but it cannot BE one: iris and wipe transition only through visibility, so the engine demands sceneUnits, and sceneUnits truncates every layer at its beat s exit cut. The strip is therefore re-declared per beat, all seven copies driven by the same absolute clock (var(--t)). cut-families is the point of the film.",
   "aspect": "16:9",
   "theme": "vawe",
-  "duration": 8.2,
+  "duration": 10.8,
+  "sceneUnits": false,
+  "storyboard": "formats/scene/showcase-cuts.storyboard.md",
   "audio": {
-    "silent": true
+    "music": "chill",
+    "musicGain": 0.3,
+    "musicFade": {
+      "in": 0.5,
+      "out": 1.2
+    },
+    "auto": true
   },
   "layers": [
     {
+      "id": "strip",
+      "type": "html",
+      "x": 160,
+      "y": 590,
+      "w": 1600,
+      "h": 360,
+      "start": 0,
+      "duration": 10.8,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0,
+      "motion": [
+        {
+          "t": 0,
+          "y": 26,
+          "scale": 0.99
+        },
+        {
+          "t": 0.6,
+          "y": 0,
+          "scale": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 2.8,
+          "y": 0,
+          "scale": 1
+        },
+        {
+          "t": 3.05,
+          "y": -16,
+          "scale": 1.012,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 5.6,
+          "y": -16,
+          "scale": 1.012
+        },
+        {
+          "t": 5.85,
+          "y": -24,
+          "scale": 1.024,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 7.6,
+          "y": -24,
+          "scale": 1.024
+        },
+        {
+          "t": 7.9,
+          "y": -4,
+          "scale": 1,
+          "ease": "easeOutCubic"
+        }
+      ],
+      "src": "formats/scene/_showcase-cuts-bars.html"
+    },
+    {
       "type": "text",
-      "text": "A cut is a <b>feeling</b>.",
+      "text": "Cuts can be <b>invisible</b>.",
       "x": 210,
       "y": 250,
       "w": 1500,
       "align": "center",
-      "size": 110,
-      "weight": 700,
+      "size": 104,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.44,
+      "start": 0.3,
+      "duration": 2.5,
+      "anim": "none",
+      "exitDur": 0.22
+    },
+    {
+      "type": "text",
+      "text": "cut@1",
+      "x": 210,
+      "y": 404,
+      "w": 1500,
+      "align": "center",
+      "size": 30,
+      "font": "mono",
+      "weight": 400,
+      "color": "var(--dim)",
+      "start": 0.9,
+      "duration": 1.9,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.2
+    },
+    {
+      "type": "text",
+      "text": "This mark",
+      "x": 210,
+      "y": 208,
+      "w": 1500,
+      "align": "center",
+      "size": 92,
+      "weight": 500,
       "color": "var(--text)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,
       "each": 0.42,
-      "start": 0.25,
-      "duration": 1.5,
+      "start": 2.8,
+      "duration": 2.8,
       "anim": "none",
-      "exitDur": 0.2
+      "exitDur": 0
     },
     {
+      "id": "token",
       "type": "rect",
-      "x": 460,
-      "y": 168,
-      "w": 1000,
-      "h": 310,
-      "bg": "var(--surface)",
-      "border": "1px solid var(--line-strong)",
-      "radius": 16,
-      "elevation": 1,
-      "start": 2,
-      "duration": 1,
-      "anim": "none",
-      "exitDur": 0.01
+      "x": 810,
+      "y": 410,
+      "w": 300,
+      "h": 60,
+      "bg": "var(--accent)",
+      "radius": 10,
+      "start": 2.95,
+      "anim": "fade",
+      "enterDur": 0.3
     },
     {
       "type": "text",
-      "text": "1,350",
-      "x": 460,
-      "y": 224,
-      "w": 1000,
-      "align": "center",
-      "size": 132,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 2.05,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "render",
-      "x": 460,
-      "y": 404,
-      "w": 1000,
-      "align": "center",
-      "size": 26,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 2.05,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "rect",
-      "x": 460,
-      "y": 168,
-      "w": 1000,
-      "h": 310,
-      "bg": "var(--surface)",
-      "border": "1px solid var(--line-strong)",
-      "radius": 16,
-      "elevation": 1,
-      "start": 3.05,
-      "duration": 1,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "8",
-      "x": 460,
-      "y": 224,
-      "w": 1000,
-      "align": "center",
-      "size": 132,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 3.0999999999999996,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "workers",
-      "x": 460,
-      "y": 404,
-      "w": 1000,
-      "align": "center",
-      "size": 26,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 3.0999999999999996,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "rect",
-      "x": 460,
-      "y": 168,
-      "w": 1000,
-      "h": 310,
-      "bg": "var(--surface)",
-      "border": "1px solid var(--line-strong)",
-      "radius": 16,
-      "elevation": 1,
-      "start": 4.1,
-      "duration": 1,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "0",
-      "x": 460,
-      "y": 224,
-      "w": 1000,
-      "align": "center",
-      "size": 132,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 4.1499999999999995,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "drift",
-      "x": 460,
-      "y": 404,
-      "w": 1000,
-      "align": "center",
-      "size": 26,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 4.1499999999999995,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "rect",
-      "x": 460,
-      "y": 168,
-      "w": 1000,
-      "h": 310,
-      "bg": "var(--surface)",
-      "border": "1px solid var(--line-strong)",
-      "radius": 16,
-      "elevation": 1,
-      "start": 5.15,
-      "duration": 1,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "again",
-      "x": 460,
-      "y": 224,
-      "w": 1000,
-      "align": "center",
-      "size": 132,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 5.2,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "reruns",
-      "x": 460,
-      "y": 404,
-      "w": 1000,
-      "align": "center",
-      "size": 26,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 5.2,
-      "duration": 0.94,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "rect",
-      "x": 460,
-      "y": 168,
-      "w": 1000,
-      "h": 310,
-      "bg": "var(--surface)",
-      "border": "1px solid var(--line-strong)",
-      "radius": 16,
-      "elevation": 1,
-      "start": 6.2,
-      "duration": 1.1,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "same",
-      "x": 460,
-      "y": 224,
-      "w": 1000,
-      "align": "center",
-      "size": 132,
-      "weight": 700,
-      "color": "var(--text)",
-      "start": 6.25,
-      "duration": 1.04,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "bytes",
-      "x": 460,
-      "y": 404,
-      "w": 1000,
-      "align": "center",
-      "size": 26,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 6.25,
-      "duration": 1.04,
-      "anim": "none",
-      "exitDur": 0.01
-    },
-    {
-      "type": "text",
-      "text": "Not a transition menu.",
+      "text": "is this card.",
       "x": 210,
-      "y": 272,
+      "y": 208,
       "w": 1500,
       "align": "center",
-      "size": 84,
+      "size": 92,
+      "weight": 500,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.42,
+      "start": 5.6,
+      "duration": 2.05,
+      "anim": "none",
+      "exitDur": 0
+    },
+    {
+      "id": "card",
+      "type": "rect",
+      "x": 460,
+      "y": 340,
+      "w": 1000,
+      "h": 200,
+      "bg": "var(--accent)",
+      "radius": 16,
+      "duration": 2.05,
+      "exitDur": 0.01
+    },
+    {
+      "type": "text",
+      "text": "5.60s",
+      "x": 460,
+      "y": 352,
+      "w": 1000,
+      "align": "center",
+      "size": 112,
+      "weight": 800,
+      "color": "var(--on-dark)",
+      "start": 5.88,
+      "duration": 1.77,
+      "anim": "fade",
+      "enterDur": 0.28,
+      "exitDur": 0.01
+    },
+    {
+      "type": "text",
+      "text": "cut@1",
+      "x": 460,
+      "y": 494,
+      "w": 1000,
+      "align": "center",
+      "size": 27,
+      "font": "mono",
+      "weight": 400,
+      "color": "var(--on-dark)",
+      "start": 5.88,
+      "duration": 1.77,
+      "anim": "fade",
+      "enterDur": 0.28,
+      "exitDur": 0.01
+    },
+    {
+      "type": "text",
+      "text": "The <b>joint</b> owns the time.",
+      "x": 210,
+      "y": 268,
+      "w": 1500,
+      "align": "center",
+      "size": 88,
       "weight": 700,
       "color": "var(--text)",
       "split": "word",
       "preset": "up",
       "stagger": 0.07,
       "each": 0.46,
-      "start": 7.4,
-      "duration": 0.8,
+      "start": 7.6,
+      "duration": 3.2,
       "anim": "none",
       "exitDur": 0
     },
     {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 0.15,
-      "duration": 1.83,
+      "type": "text",
+      "text": "matches at cut@1",
+      "x": 210,
+      "y": 448,
+      "w": 1500,
+      "align": "center",
+      "size": 30,
+      "font": "mono",
+      "weight": 400,
+      "color": "var(--dim)",
+      "start": 8.6,
+      "duration": 2.2,
       "anim": "fade",
-      "enterDur": 0.45,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 2,
-      "duration": 1.03,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 3.05,
-      "duration": 1.03,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 4.1,
-      "duration": 1.03,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 5.15,
-      "duration": 1.03,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 6.2,
-      "duration": 1.15,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
-    },
-    {
-      "type": "html",
-      "x": 160,
-      "y": 540,
-      "w": 1600,
-      "h": 380,
-      "start": 7.37,
-      "duration": 0.83,
-      "anim": "fade",
-      "enterDur": 0.26,
-      "exitDur": 0.01,
-      "src": "formats/scene/_showcase-cuts-bars.html"
+      "enterDur": 0.32,
+      "exitDur": 0
     }
   ],
   "cuts": [
     {
-      "t": 1.98,
-      "style": "whip"
-    },
-    {
-      "t": 3.03,
+      "t": 2.8,
       "style": "punch"
     },
     {
-      "t": 4.08,
-      "style": "flip"
+      "t": 5.6,
+      "style": "none"
     },
     {
-      "t": 5.13,
-      "style": "iris"
-    },
-    {
-      "t": 6.18,
-      "style": "wipe"
-    },
-    {
-      "t": 7.35,
-      "style": "riseBlur"
+      "t": 7.6,
+      "style": "zoom"
     }
   ],
-  "bg": [{ "t": 0, "preset": "dotmatrix" }]
+  "matches": [
+    {
+      "at": "cut@1",
+      "from": "token",
+      "to": "card"
+    }
+  ],
+  "bg": [
+    {
+      "preset": "plain"
+    },
+    {
+      "preset": "dotmatrix"
+    },
+    {
+      "preset": "accent"
+    },
+    {
+      "preset": "paper"
+    }
+  ]
 }
