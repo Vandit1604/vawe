@@ -13,6 +13,7 @@
 // Routing is a LOOKUP, not a heuristic: core/transitions.js already maps every fx to its mechanism(s).
 import { TRANSITIONS } from './transitions.js';
 import { resolveSeconds } from './vocab.js';
+import { parseColor } from './motion.js';
 
 // The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it
 // and deletes it before any builder sees the layer, so no registry declares it and the schema was
@@ -44,6 +45,29 @@ export function boundaryMechanism(fx, mech) {
   for (const m of BOUNDARY_ORDER) if (have.has(m)) return m;
   // only anim implements it → it is a layer entrance, not a boundary
   throw new Error(`"${fx}" is a layer entrance (anim), not a boundary transition — use it in a layer's transition.in/out`);
+}
+
+// A STING TINT IS A COLOUR, NOT A HEX STRING, and it used to be read as one. The renderer turned
+// `color` into a vec3 with `parseInt(hex, 16)`, so anything that is not a bare hex became NaN and then
+// [0,0,0]: a theme token, an `rgb()`, a named colour all tinted the sting BLACK, with no error and
+// nothing on screen to say why. That is the silent substitution this repo hates (docs/MISTAKES.md
+// #476). RESOLUTION is not ours: core/filters.js `glowRGB` is the engine's one owner of "an author
+// colour that may be a theme token -> literal rgb", and feFlood has the identical problem for the
+// identical reason. What belongs HERE is the REFUSAL, because lowerScene is the one pass every
+// consumer of a scene already runs (the renderer, the validator, the gates), so an unresolvable tint
+// is named by `make validate` instead of being discovered as a black flash in a rendered mp4.
+//
+// KEEP THIS LIST IN STEP WITH glowRGB: it resolves --accent and --ink and falls back to white for
+// every other token, and a silent white is the same class of bug as a silent black.
+const STING_TOKEN = /^var\(\s*--(accent|ink)\b/;
+
+/** checkStingColor(color, where) -> the colour string, or throws naming the value. Pure. */
+export function checkStingColor(color, where) {
+  const s = String(color ?? '').trim();
+  if (STING_TOKEN.test(s) || parseColor(s)) return s;
+  throw new Error(`${where}: ${JSON.stringify(color)} is not a colour this engine can resolve. A sting `
+    + `tint becomes a WebGL uniform, so it must be a literal colour (hex, rgb(), or a CSS colour name) `
+    + `or one of the theme tokens var(--accent) / var(--ink).`);
 }
 
 const clean = (o) => { for (const k of Object.keys(o)) if (o[k] === undefined) delete o[k]; return o; };
@@ -86,6 +110,15 @@ export function lowerScene(data) {
     if (stings.length) data.stings = stings;
     if (seams.length) data.seams = seams;
     delete data.transitions;
+  }
+
+  // Every sting's tint, hand-written or lowered from `transitions`, checked at the one place they all
+  // pass through. Idempotent: a colour that passed once passes again, so re-lowering stays a no-op.
+  for (const s of data.stings || []) {
+    if (!s || typeof s !== 'object') continue;
+    if (s.color != null) checkStingColor(s.color, `stings[] at t=${s.t}: color`);
+    if (Array.isArray(s.colors))
+      s.colors.forEach((c, i) => checkStingColor(c, `stings[] at t=${s.t}: colors[${i}]`));
   }
 
   // A group's children are layers with the same timing props, so the words have to reach them too —

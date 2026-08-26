@@ -14,7 +14,8 @@ import { htmlSource } from '/core/sanitize-html.js';
 import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
-import { lowerScene } from '/core/transitions-lower.js';
+import { lowerScene, checkStingColor } from '/core/transitions-lower.js';
+import { glowRGB } from '/core/filters.js';
 import { bindBeats, describeBind } from '/core/beat-bind.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
 import { resolveBridges } from '/core/audio-bridges.js';
@@ -267,14 +268,24 @@ boot((data, fps, theme, canvas) => {
   };
 
   // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}] — boundary effects on a WebGL overlay ----
-  const hex01 = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; };
+  // A sting tint is a COLOUR: a hex, an rgb(), a CSS name, or a theme token. This read `parseInt(hex,
+  // 16)` and nothing else, so every other form became NaN and then [0,0,0] -- "var(--accent)" tinted
+  // the sting BLACK with no error (docs/MISTAKES.md #476). core/filters.js `glowRGB` is the engine's
+  // one owner of token -> literal rgb (feFlood cannot resolve var() either); core/transitions-lower.js
+  // owns the refusal, at the write site, so an unresolvable tint is named before a browser starts.
+  const tint01 = (c, where) => glowRGB(checkStingColor(c, where)).map((v) => v / 255);
   // `.filter(s => SHADER_FX.includes(s.fx))` until now: a sting with an unknown fx was DROPPED and
   // simply never happened, which is the quietest failure of the three junction kinds. #361.
   for (const s of data.stings || [])
     if (s && s.fx != null && !SHADER_FX.includes(s.fx))
       throw new Error(`unknown sting fx "${s.fx}" at t=${s.t} — one of: ${SHADER_FX.join(', ')}`);
   const stings = (data.stings || []).filter((s) => SHADER_FX.includes(s.fx))
-    .map((s) => ({ ...s, _tint: s.color ? hex01(s.color) : null, _intensity: s.intensity ?? 1, _pal: Array.isArray(s.colors) ? s.colors.map(hex01) : null }));
+    .map((s) => ({
+      ...s,
+      _tint: s.color ? tint01(s.color, `sting "${s.fx}" at t=${s.t}: color`) : null,
+      _intensity: s.intensity ?? 1,
+      _pal: Array.isArray(s.colors) ? s.colors.map((c, i) => tint01(c, `sting "${s.fx}" at t=${s.t}: colors[${i}]`)) : null,
+    }));
   const fxo = createShaderOverlay($('root'), W, H);
 
   // ---- scene cuts: [{t, style, dur?, dir?, timing?}] — the transition BETWEEN beats ----

@@ -79,6 +79,16 @@ export function unrollGrid(pulse, period, dur) {
   return grid;
 }
 
+/** The gap the grid itself declares: the median beat period. Median, not mean, so one dropped beat
+ * in a sidecar does not stretch the reach a sting is allowed to ride from. */
+export function beatPeriod(grid) {
+  if (!Array.isArray(grid) || grid.length < 2) return 0;
+  const gaps = [];
+  for (let i = 1; i < grid.length; i++) gaps.push(grid[i] - grid[i - 1]);
+  gaps.sort((a, b) => a - b);
+  return gaps[gaps.length >> 1];
+}
+
 /**
  * THE POLICY, and the ONLY copy of it. Which of a film's joints move onto a grid, and by how much.
  *
@@ -94,8 +104,13 @@ export function unrollGrid(pulse, period, dur) {
  *  - `cuts` snap their `t`. A cut IS the joint; landing it on the pulse is the whole point.
  *  - `seams` snap their CENTRE (t + dur/2), because a blend is felt in the middle of its window,
  *    not at its start. A seam wrapped around an already-snapped cut therefore stays wrapped.
- *  - `stings` do NOT snap. A sting is punctuation hung off a junction, and authors offset one from
- *    its cut on purpose. Snapping it independently would collapse that offset onto the cut's beat.
+ *  - `stings` RIDE the joint they punctuate: they are moved by the SAME delta as the nearest cut or
+ *    seam within half a beat, so an offset the author wrote is preserved exactly and a sting authored
+ *    ON a cut is still on that cut afterwards. Snapping a sting independently would collapse its
+ *    offset onto the cut's beat, which is why this file used to leave them alone entirely -- and
+ *    leaving them alone drifts a sting off the very cut it punctuates, by up to `maxShift`. A sting
+ *    that punctuates nothing (no joint within half a beat) keeps the time the author wrote.
+ *    docs/MISTAKES.md #475.
  *  - beat boundaries and bg windows need nothing: they are DERIVED from the cuts (core/junctions.js
  *    marksOf runs on the lowered scene, after this), so they follow for free. One fact, one owner.
  *
@@ -103,18 +118,37 @@ export function unrollGrid(pulse, period, dur) {
  * and reported, never widened. An author who means a time writes `"snap": false` on that joint.
  */
 export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
-  const moved = [], held = [];
+  const moved = [], held = [], shifts = [];
   const apply = (j, kind, centre) => {
     if (j.snap === false) return;                       // the author meant this time
     const to = snapToBeat(centre, grid, maxShift);
     if (to === centre) { held.push(`${kind}@${centre}`); return; }
-    j.t = +(j.t + (to - centre)).toFixed(3);
-    moved.push({ kind, from: centre, to, drift: +Math.abs(to - centre).toFixed(3) });
+    const delta = to - centre;
+    j.t = +(j.t + delta).toFixed(3);
+    shifts.push({ kind, at: centre, delta });
+    moved.push({ kind, from: centre, to, drift: +Math.abs(delta).toFixed(3) });
   };
   for (const c of data.cuts || []) if (c && typeof c.t === 'number') apply(c, 'cut', c.t);
   for (const s of data.seams || []) {
     if (!s || typeof s.t !== 'number') continue;
     apply(s, 'seam', typeof s.dur === 'number' ? +(s.t + s.dur / 2).toFixed(3) : s.t);
+  }
+  // The sting is the one mark that does not have its own opinion about the grid: it punctuates a
+  // joint, so it goes where that joint goes. HALF A BEAT is the reach, and it is read off the grid
+  // rather than invented -- inside half a beat of a joint there is no other pulse a sting could be
+  // sitting on, so it is punctuating that joint.
+  const reach = beatPeriod(grid) / 2;
+  for (const s of data.stings || []) {
+    if (!s || typeof s.t !== 'number' || s.snap === false) continue;
+    let best = null;
+    for (const j of shifts) {
+      const d = Math.abs(s.t - j.at);
+      if (d <= reach && (!best || d < best.d)) best = { d, j };
+    }
+    if (!best) { held.push(`sting@${s.t}`); continue; }
+    const from = s.t;
+    s.t = +(s.t + best.j.delta).toFixed(3);
+    moved.push({ kind: 'sting', from, to: s.t, drift: +Math.abs(best.j.delta).toFixed(3), rides: best.j.kind });
   }
   return { moved, held };
 }

@@ -64,13 +64,13 @@ import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAME
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
-import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
+import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope, ANIM } from '../../core/clips.js';
 import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
-import { boundaryMechanism, lowerScene } from '../../core/transitions-lower.js';
+import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions-lower.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SEAM_CUE } from '../../core/audio-cues.js';
 import { resolveBridges } from '../../core/audio-bridges.js';
@@ -2035,8 +2035,21 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: the default tolerance IS snapToBeat\'s own', snapToBeat(1.04, bts) === snapToBeat(1.04, bts, DEFAULT_MAX_SHIFT));
   const s6 = { cuts: [{ t: 0.54 }], seams: [{ t: 1.75, dur: 0.5 }], stings: [{ t: 0.54, fx: 'flash' }] };
   const r6 = snapJoints(s6, G.beats, DEFAULT_MAX_SHIFT);
-  ok('beat-bind: a sting is NEVER snapped, at boot or at author time', s6.stings[0].t === 0.54);
+  // A STING RIDES ITS JOINT (docs/MISTAKES.md #475). It used to keep the time the author wrote, so a
+  // sting authored ON a cut drifted off that cut by however far the cut moved.
+  ok('beat-bind: a sting authored on a cut is still on that cut after the snap', s6.stings[0].t === s6.cuts[0].t);
   ok('beat-bind: snapJoints reports the drift the CLI prints', r6.moved[0].kind === 'cut' && r6.moved[0].drift === 0.04);
+  const s6b = { cuts: [{ t: 0.54 }], stings: [{ t: 0.66, fx: 'flash' }] };
+  snapJoints(s6b, G.beats, DEFAULT_MAX_SHIFT);
+  ok('beat-bind: a sting offset from its cut keeps the offset the author wrote',
+     Math.abs((s6b.stings[0].t - s6b.cuts[0].t) - 0.12) < 1e-6);
+  const s6c = { cuts: [{ t: 0.54 }], stings: [{ t: 3.1, fx: 'flash' }] };
+  snapJoints(s6c, G.beats, DEFAULT_MAX_SHIFT);
+  ok('beat-bind: a sting that punctuates no joint keeps its own time', s6c.stings[0].t === 3.1);
+  const s6d = { cuts: [{ t: 0.54 }], stings: [{ t: 0.54, fx: 'flash', snap: false }] };
+  snapJoints(s6d, G.beats, DEFAULT_MAX_SHIFT);
+  ok('beat-bind: `snap:false` holds a sting where the author put it', s6d.stings[0].t === 0.54);
+  ok('beat-bind: the beat period is read off the grid, not guessed', Math.abs(beatPeriod(G.beats) - 0.5) < 1e-9);
   const s7 = sc(); bindBeats(s7, G);
   const s8 = { cuts: [{ t: 0.54, style: 'punch' }, { t: 1.28, style: 'punch' }], seams: [{ t: 1.75, dur: 0.5, fx: 'fade' }] };
   snapJoints(s8, unrollGrid(G.beats, 0, 0), DEFAULT_MAX_SHIFT);
@@ -2190,6 +2203,16 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
+  // A STING TINT IS A COLOUR, NOT A HEX (docs/MISTAKES.md #476). The renderer read it with
+  // parseInt(hex, 16), so a theme token or an rgb() became NaN and then [0,0,0]: a black tint, no error.
+  ok('transitions: a sting tint may be a theme token', checkStingColor('var(--accent)', 'x') === 'var(--accent)');
+  ok('transitions: a sting tint may be a hex or an rgb()',
+     checkStingColor('#ff7a35', 'x') === '#ff7a35' && checkStingColor('rgb(255,0,0)', 'x') === 'rgb(255,0,0)');
+  const refuses = (fn, re) => { try { fn(); return false; } catch (e) { return re.test(e.message); } };
+  ok('transitions: a tint nothing can resolve is refused BY NAME, never tinted black',
+     refuses(() => lowerScene({ stings: [{ t: 1, fx: 'flash', color: 'var(--nope)' }] }), /--nope/));
+  ok('transitions: a sting palette is checked entry by entry',
+     refuses(() => lowerScene({ stings: [{ t: 1, fx: 'leak', colors: ['#fff', 'not-a-colour'] }] }), /colors\[1\]/));
   // Auto sound-design must cue EVERY seam fx — a seam with no mapping falls back to a bare whoosh and
   // reads wrong (a bloom-iris should not swoosh). This gate is why `data.seams` stopped rendering silent
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
