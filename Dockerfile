@@ -58,8 +58,15 @@ COPY docs-site/ ./
 RUN npx fumadocs-mdx && npm run build
 
 # --- runtime: standalone server only, no dev deps ---
+# WORKDIR IS /srv, NOT /app, AND THE NAME IS LOAD-BEARING. Same failure as the builder's /src above,
+# one stage down: the deploy host held a BuildKit ref for the first `COPY --from=builder` whose
+# backing overlay had been pruned, so the layer reported CACHED and then died on
+# `failed to calculate checksum of ref`. Six deploys failed on it, and Coolify's `force=true` did
+# not clear it: force re-runs the build, it does not drop BuildKit's ref cache. Renaming the WORKDIR
+# re-keys this stage's parent, which is the one thing that reliably moves past a poisoned ref from
+# inside the repo. `docker builder prune -af` on the host is still the actual cure.
 FROM node:22-alpine AS runner
-WORKDIR /app
+WORKDIR /srv
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
