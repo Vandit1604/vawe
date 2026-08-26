@@ -5,7 +5,6 @@
   --accent-ink:#ffffff;     /* text on accent */
   --accent-soft:#eef3ff;    /* tint fill */
   --accent-line:#cfe0ff;    /* tint border */
-  --accent-on-dark:#8fc0ff; /* the accent over ink surfaces — mirrors themes/vawe.json */
 
   /* ---- STATUS · the ONLY sanctioned exception to the One Voice Rule ----
      Engine boot state (ok/error) must not be carried by the brand accent: "the render
@@ -727,30 +726,6 @@ a{color:inherit;text-decoration:none}
   .pgfield { height: 38vh; }
   .pgscene { max-height: none; }
   .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-}
-/* ── playground: dark ──────────────────────────────────────────────────────────────────────────
-   Token-level, not component-level. Every control on this page already styles itself from --bg,
-   --surface, --ink and friends, so redefining those in one scope turns the whole route dark and
-   nothing else on the site moves. --accent-on-dark is the site's own answer for cobalt over ink and
-   is what keeps the focus rings and the active chip legible here. */
-.pgdark {
-  --bg: #0b0f16; --bg-2: #10161f; --surface: #141b25; --field: #1b2431;
-  --line: #212b39; --line-2: #2c3846;
-  --ink: #eef2f7; --ink-2: #b3becd; --muted: #8894a5;
-  --accent: var(--accent-on-dark); --accent-2: #a9d0ff;
-  --accent-soft: rgba(143,192,255,.14); --accent-line: rgba(143,192,255,.32);
-  --shadow-1: 0 1px 2px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.3);
-  --shadow-2: 0 10px 30px -10px rgba(0,0,0,.6), 0 2px 10px rgba(0,0,0,.4);
-  background: var(--bg); color: var(--ink); min-height: 100vh;
-}
-/* The solid header paints from the tokens above, so it only needs its own separator and a button that
-   does not stay white on ink. */
-.pgdark .bar.solid { background: var(--bg); border-bottom: 1px solid var(--line); }
-.pgdark .nav a.on { background: var(--accent-soft); color: var(--accent-on-dark); }
-.pgdark .ghbtn { background: rgba(255,255,255,.07); color: var(--ink); border-color: var(--line-2); }
-.pgdark .pgfield { border-color: var(--line-2); }
-.pgdark input[type="number"], .pgdark .pgtext, .pgdark .pgrow select {
-  background: var(--field); color: var(--ink); border-color: var(--line-2);
 }
 /* ── the library ───────────────────────────────────────────────────────────────────────────────
    A wall of looks, each one the REAL generator rendered still at card size, not a poster. Mirrors
