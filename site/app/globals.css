@@ -518,74 +518,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
      the same state in a sentence under the box. */
   .hb-frame,.hb-poster,.blive,.tylive{transition-duration:.2s !important}
 }
-/* =========================================================
-   EDITOR — the engine running live in the browser
-   ========================================================= */
-.ed{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:24px;padding:20px 0 80px;align-items:start}
-.ed-side{display:flex;flex-direction:column;min-width:0}
-/* Was a row of pills. Pills are TAGS — the same shape the site uses for inert metadata — so they
-   read as labels describing the editor rather than the way in, and nobody clicked them. A labelled
-   select is unambiguous: it looks like a control because it is one. */
-.ed-presets{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.ed-preslab{font-size:12.5px;font-weight:600;color:var(--ink)}
-.ed-presel{position:relative;display:inline-flex;max-width:340px}
-.ed-presel select{appearance:none;width:100%;font-family:inherit;font-size:14px;font-weight:500;
-  color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:10px;
-  padding:10px 38px 10px 13px;cursor:pointer;box-shadow:var(--shadow-1);
-  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
-.ed-presel select:hover:not(:disabled){border-color:var(--accent)}
-.ed-presel select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
-.ed-presel select:disabled{opacity:.6;cursor:progress}
-.ed-caret{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;
-  color:var(--accent);font-size:12px;display:flex;align-items:center}
-.ed-preshint{font-size:12px;color:var(--muted);min-height:1.2em}
-/* Fetching a scene is a real wait. Silence during it reads as a dead control. */
-.ed-spin{width:12px;height:12px;border-radius:50%;display:block;
-  border:2px solid var(--accent-line);border-top-color:var(--accent);animation:edspin .7s linear infinite}
-@keyframes edspin{to{transform:rotate(360deg)}}
-/* Every other loader on the site fades under reduce (bfade). This one slowed down and kept
-   turning, which is the movement the preference asks to remove. */
-@media (prefers-reduced-motion:reduce){ .ed-spin{animation:bfade 1.3s ease-in-out infinite} }
-.ed-presel.is-loading select{border-color:var(--accent);cursor:progress}
-/* The repo is private: this is a state, not a link, so it must not look clickable. */
-/* A state, not a control, so it drops the button's chrome entirely rather than wearing it greyed
-   out: same affordance rule as .tag vs .srcopen. A bordered, shadowed pill that does nothing when
-   clicked is the collision this rule exists to stop, and "disabled button" reads as "broken
-   button" anyway. Quiet text next to the nav links says pending, which is what is true. */
-.ghsoon{cursor:default;color:var(--muted);background:none;border-color:transparent;box-shadow:none;font-weight:500}
-.ghsoon:hover{transform:none;box-shadow:none}
-.bar.pill .ghsoon{background:rgba(11,31,84,.28);border-color:rgba(255,255,255,.24);color:#fff}
-/* wrap: at 320px the name, the line count and the three buttons ran 343px and scrolled the page. */
-.ed-panehead{display:flex;align-items:center;flex-wrap:wrap;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-bottom:0;
-  border-radius:12px 12px 0 0;padding:9px 12px}
-.ed-file{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2)}
-.ed-lines{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);margin-left:auto;margin-right:2px}
-.ed-copy{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);background:#fff;
-  border:1px solid var(--line-2);border-radius:6px;padding:4px 9px;cursor:pointer}
-.ed-copy:hover{border-color:var(--accent)}
-/* The CodeMirror host. Everything inside it is themed from the editor's own theme object (see
-   CodeEditor.tsx) because CodeMirror injects scoped styles that a plain stylesheet fights; only
-   the box lives here. resize:vertical is deliberate — a 900-line film wants more than 52vh, and
-   the drag handle is the cheapest way to say so. */
-.ed-cm{width:100%;height:clamp(360px,52vh,600px);resize:vertical;overflow:hidden;
-  border:1px solid var(--line);background:#fff}
-/* A border colour alone is what DESIGN.md names as insufficient, and this is the largest control
-   on /editor. It takes the same replacement the catalog search field takes: the border change PLUS
-   a 3px accent-tinted ring, because a ring cannot sit outside a pane flush to its own frame. */
-.ed-cm:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.ed-cm .cm-editor{height:100%}
-/* Cobalt, exactly like .ed-copy beside it: all three are buttons, and THE AFFORDANCE RULE says
-   the accent is what marks a thing you can act on. Drawn in ink-2 they were the only grey controls
-   on the site, sitting one gap away from a cobalt one that does the same kind of job. */
-.ed-fold{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);background:#fff;
-  border:1px solid var(--line-2);border-radius:6px;padding:4px 9px;cursor:pointer;
-  transition:border-color .2s var(--ease)}
-.ed-fold:hover{border-color:var(--accent)}
-.ed-status{font-family:var(--font-mono),monospace;font-size:11.5px;padding:8px 12px;border:1px solid;
-  border-radius:0 0 12px 12px;border-top:0;word-break:break-word;max-height:96px;overflow:auto}
-.ed-status.ok{color:#2f7d55;background:#f2fbf6;border-color:#cdeadb}
-.ed-status.bad{color:#a3282d;background:#fdf3f3;border-color:#f0d2d3}
-.ed-main{position:sticky;top:88px;min-width:0}
+/* ===== THE SCENE PLAYER — /editor, /playground and /arsenal all mount it, so it lives here.
+   The editor block that used to wrap these moved to app/editor/editor.css: one route, one sheet. */
 .sp{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow-2)}
 /* the stage carries the scene's ratio so the iframe is never letterboxed or cropped */
 /* the stage carries the scene's true ratio; the iframe renders at FULL frame size and is scaled
@@ -606,18 +540,6 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    keyboard user got Chrome's default while every other control on the page got the site's. */
 .sp-play:focus-visible,.sp-scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sp-time{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);white-space:nowrap}
-.ed-note{color:var(--muted);font-size:13px;line-height:1.6;margin-top:14px}
-.ed-note code{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);
-  background:var(--bg-2);border:1px solid var(--line-2);border-radius:5px;padding:1px 5px}
-@media (max-width:900px){
-  .ed{grid-template-columns:1fr}
-  .ed-main{position:static}
-}
-.ed-claude{margin:-2px 0 4px;font-size:13.5px;line-height:1.55;color:var(--muted)}
-.ed-claude a{color:var(--accent);font-weight:600}
-.ed-claude a:hover{text-decoration:underline}
-.ed-claude code{font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--accent-soft);
-  border:1px solid var(--accent-line);border-radius:5px;padding:1px 6px}
 /* The nav had no mobile treatment: at 390px it measured 484px wide and scrolled the whole page
    sideways (adding the Editor link made a pre-existing bug visible). Let it wrap and tighten,
    rather than hiding links behind a menu nobody opens. */

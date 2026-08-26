@@ -13,16 +13,15 @@ export default function EditorPage() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="edpage" tabIndex={-1}>
         <div className="phead">
           <div className="kicker">
             <span className="dot" /> editor
           </div>
           <h1>Scene in, video out.</h1>
-          <p>
-            The engine is a web page, so it runs here as-is. Pick a scene or write your own, and watch
-            every frame render live. No account, no key, nothing sent anywhere.
-          </p>
+          {/* One sentence. The tool below is the page, and the two facts a visitor needs before
+              touching it are that this is the real engine and that nothing leaves the browser. */}
+          <p>The real engine, running in your browser. Nothing is sent anywhere.</p>
         </div>
         <EditorClient />
         </main>
