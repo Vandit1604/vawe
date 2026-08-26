@@ -30,7 +30,7 @@ import { LOOK_NAMES } from '../../core/looks.js';
 import { PROFILES } from './profiles.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
 import { DENSE_KEY_SEC } from '../../core/sequence.js';
-import { population, isTemplate, SCENE_DIR } from '../lib/census.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -200,9 +200,24 @@ function analyse(d) {
   }
 
   // ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ----------------
-  // linear-motion: a visible move on a linear/none curve. Real motion accelerates in and decelerates
-  // out (Disney slow-in/slow-out; Material asymmetric easing). Author-set ease:"linear" anywhere — on a
-  // layer, a motion track keyframe, or an animated value — is the tell. We walk the whole layer tree.
+  // linear-motion: a visible move that runs at a FLAT rate from rest to rest. Real motion accelerates
+  // in and decelerates out (Disney slow-in/slow-out; Material asymmetric easing).
+  //
+  // WHAT THIS RULE USED TO MEASURE, AND WHY THAT WAS THE WRONG THING. It counted every authored
+  // `ease:"linear"`, and `linear` is 348 of 833 eases in this library because a CONSTANT RATE IS
+  // CORRECT for a whole family of moves: a camera pan, a page scroll, a marquee, a progress ring, an
+  // ambient drift, a spinner. Curving those is the defect, not the fix. The blueprints say so at the
+  // write site, and the rule fired on them anyway: recordedPan eases only the settle before the
+  // scroll "so the scroll never has a standing start" and writes every interior key linear on purpose
+  // (blueprints/beats-track.mjs),
+  // and the rule fired on all of them. A gate that fires on the house's own correct construction is
+  // measuring a proxy for its rule, not the rule.
+  //
+  // WHAT SEPARATES THEM. Slow-in/slow-out governs a move that STARTS and STOPS: the ramp exists
+  // because the pose goes from rest to rest and the eye needs the two ends softened. A constant-rate
+  // move has no such ends inside the shot. So judge the RUN, not the key: a maximal chain of
+  // consecutive linear moving segments is flat only when it is entered from rest AND left at rest.
+  // Entered or left in motion, the rate is constant by construction and the ramp lives either side.
   const linearHits = [];
   const LINEAR = (e) => typeof e === 'string' && /^(linear|none)$/i.test(e.trim());
   // A HOLD IS NOT A MOVE. The rule is about a visible move running flat, and a motion track states
@@ -211,13 +226,55 @@ function analyse(d) {
   // confidently wrong about the one film in the library that holds deliberately, and telling an author
   // to ease a hold would put a drift into a frame that is supposed to be locked.
   const KEYED = ['x', 'y', 'scale', 'rot', 'opacity', 'blur', 'w', 'h'];
+  const moved = (a, b) => !!a && !!b && KEYED.some((p) => (b[p] ?? null) !== (a[p] ?? null));
+  // The engine's own per-key defaults (core/sequence.js motionAt), so the ground a run covers is the
+  // ground it covers on screen and not an artefact of which props a key happens to spell out.
+  const span = (a, b) => ({
+    px: Math.hypot((b.x ?? 0) - (a.x ?? 0), (b.y ?? 0) - (a.y ?? 0)),
+    deg: Math.abs((b.rot ?? 0) - (a.rot ?? 0)),
+    ds: Math.abs((b.scale ?? 1) - (a.scale ?? 1)),
+  });
+  // TWO EXEMPTIONS, both for moves that have no rest to ease even though the track ends at one.
+  //   A FULL TURN is a cycle. Its opening and closing pose are the same pose, so a ramp puts a visible
+  //   hitch once per revolution: a spinner, an orbit, a progress ring. `orbit-proof` rotates exactly
+  //   360 degrees on one linear key and was being told to curve it.
+  //   AMBIENT DRIFT is not a move the eye tracks. 50px is this file's own measured band, derived a few
+  //   dozen lines up: below it the library's median speed drops to 72 px/s across 176 moves, "which is
+  //   ambient drift and is deliberate". The scale twin is the same idiom keyed on size (1.0 -> 1.03).
+  const FULL_TURN = 350;
+  const AMBIENT_PX = 50;
+  const AMBIENT_SCALE = 0.1;
+  const constantRate = (cover) => cover.deg >= FULL_TURN
+    || (cover.px < AMBIENT_PX && cover.ds < AMBIENT_SCALE && cover.deg < FULL_TURN / 2);
+  // THE THIRD EXEMPTION: THE SHAPE IS IN THE KEYS. A multi-key run carries its own slow-in/slow-out when
+  // the keys are spaced unevenly, and this library's keyed beats are built on exactly that: "the shape
+  // comes from where the keys sit, not from a curve fitted over them, so the interior is linear
+  // throughout" (blueprints/beats-track.mjs). Curving a run that already decelerates by 7x across three
+  // keys would decelerate it twice. Below the ratio the keys state no shape and the run really is flat.
+  const KEYED_SHAPE = 1.5;
+  const shapedByKeys = (kfs, a, b) => {
+    if (b === a) return false;
+    const speeds = [];
+    for (let i = a; i <= b; i++) {
+      const dt = (kfs[i].t ?? 0) - (kfs[i - 1].t ?? 0);
+      const c = span(kfs[i - 1], kfs[i]);
+      const ground = c.px + c.deg + c.ds * 100;
+      if (dt > 0 && ground > 0) speeds.push(ground / dt);
+    }
+    return speeds.length > 1 && Math.max(...speeds) / Math.min(...speeds) >= KEYED_SHAPE;
+  };
   const scanTrack = (kfs, where) => {
-    for (let i = 0; i < kfs.length; i++) {
-      const k = kfs[i]; if (!k || typeof k !== 'object' || !LINEAR(k.ease)) continue;
-      const prev = kfs[i - 1];
-      // The first key defines the opening pose and eases nothing, so it can never be a flat move.
-      if (!prev) continue;
-      if (KEYED.some((p) => (k[p] ?? null) !== (prev[p] ?? null))) linearHits.push(`${where}[${i}]`);
+    // segment i runs kfs[i-1] -> kfs[i]. The first key defines the opening pose and eases nothing.
+    const flat = (i) => i >= 1 && i < kfs.length && kfs[i] && typeof kfs[i] === 'object'
+      && LINEAR(kfs[i].ease) && moved(kfs[i - 1], kfs[i]);
+    for (let a = 1; a < kfs.length; a++) {
+      if (!flat(a)) continue;
+      let b = a; while (flat(b + 1)) b++;
+      const enteredFromRest = a === 1 || !moved(kfs[a - 2], kfs[a - 1]);
+      const leftAtRest = b === kfs.length - 1 || !moved(kfs[b], kfs[b + 1]);
+      if (enteredFromRest && leftAtRest && !constantRate(span(kfs[a - 1], kfs[b])) && !shapedByKeys(kfs, a, b))
+        for (let i = a; i <= b; i++) linearHits.push(`${where}[${i}]`);
+      a = b;
     }
   };
   const scanEase = (o, where) => {
@@ -230,7 +287,7 @@ function analyse(d) {
   };
   layers.forEach((l, i) => scanEase(l, `layer[${i}]`));
   metrics['linear-motion'] = linearHits.length;
-  if (linearHits.length) warn('linear-motion', `${linearHits.length} move(s) use ease "linear"/"none" — a visible move must decelerate in / accelerate out, never run flat (DIRECTION.md: slow-in/slow-out). At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`);
+  if (linearHits.length) warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none". A move that starts and stops must decelerate in / accelerate out (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates. At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`);
 
   // ---- DURATION AGAINST DISTANCE (measured, never a finding — see the header) ---------------------
   // Nothing else here relates a move's LENGTH to its TIME, so a 40px nudge and a 900px sweep both take
@@ -411,8 +468,7 @@ const SCALE = {
 };
 
 const sceneFiles = () => population('direction census', {
-  filter: (f) => f !== 'schema.json' && !/\.(animatic|intent|expanded|beatsync|captioned|directed)\./.test(f) && !isTemplate(f),
-  quiet: true, soft: true,
+  filter: LIBRARY, quiet: true, soft: true,
 });
 
 // Walk the library once and collect, per code, the set of films that trip it and every value of its

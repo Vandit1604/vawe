@@ -30,6 +30,7 @@ import { sceneTiming } from './scene-timing.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/junctions.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -147,9 +148,14 @@ const round3 = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
 // Boundaries: a hard cut, a two-scene seam blend, or a unified transition. `sceneUnits` only changes
 // how `cuts` are PRESENTED (whole-beat swaps), so its boundaries are the cut times already counted.
 const boundaries = [];
-for (const c of d.cuts || []) if (c && typeof c.t === 'number') boundaries.push(c.t);
-for (const s of d.seams || []) if (s && typeof s.t === 'number') boundaries.push(s.t + (s.dur ?? 0.6) / 2);
-for (const tr of d.transitions || []) if (tr && typeof tr.at === 'number') boundaries.push(tr.at + (tr.dur ?? 0.6) / 2);
+// How far a declared handover may sit from the boundary time recorded here. A cut IS its time; a seam
+// and a lowered transition are recorded at the MIDDLE of their blend, while `matches` hangs on the mark
+// itself, so the two are half a blend apart by construction rather than by drift.
+const boundTol = new Map();
+const boundary = (t, tol) => { boundaries.push(t); boundTol.set(t, Math.max(boundTol.get(t) ?? 0, tol)); };
+for (const c of d.cuts || []) if (c && typeof c.t === 'number') boundary(c.t, EPS);
+for (const s of d.seams || []) if (s && typeof s.t === 'number') boundary(s.t + (s.dur ?? 0.6) / 2, EPS + (s.dur ?? 0.6) / 2);
+for (const tr of d.transitions || []) if (tr && typeof tr.at === 'number') boundary(tr.at + (tr.dur ?? 0.6) / 2, EPS + (tr.dur ?? 0.6) / 2);
 const bounds = [...new Set(boundaries)].filter((t) => t > EPS && t < dur - EPS).sort((a, b) => a - b);
 
 const T = sceneTiming(d);
@@ -218,6 +224,46 @@ const poseAt = (l, t) => {
   return JSON.stringify(p);
 };
 
+// ── A MATCH CUT IS ONE FORM CARRIED BY TWO LAYERS ────────────────────────────────────────────────
+// The spanning test below asks for ONE layer alive either side of the joint, and a match cut is two
+// layers by construction: the outgoing form ends ON the cut and the incoming one opens there wearing
+// its pose. So a film held entirely by match cuts failed this rule for doing the exact thing the
+// rule's own fix message asks for by name ("every junction answers 'the X becomes the Y'"), and
+// `becomes` is literally the field that writes it.
+//
+// `becomes` is not a claim the author makes and the gate has to trust. The engine PRODUCES the match:
+// resolveBecomes (formats/scene/scene.js) carries the outgoing form's centre, size and rotation onto
+// the incoming layer's opening pose, and core/validate.mjs refuses a handover whose two halves do not
+// meet. `matches` is the same handover hung on a named joint, and core/junctions.js retimes both
+// layers onto it so the joint owns the only copy of the number.
+//
+// A handover therefore SPANS a boundary and CHANGES there, both by construction: the form persists
+// and its identity is what turns over. That is the strongest state change a junction can carry, not a
+// weaker cousin of a keyed rectangle.
+const byId = {};
+for (const l of d.layers || []) if (l && typeof l === 'object' && l.id) byId[l.id] = l;
+const jTable = junctionTable(marksOf(d));
+const handovers = [];
+const addLink = (A, B, at) => {
+  if (!A || !B || A === B || isBackdrop(A) || isBackdrop(B)) return;
+  if (handovers.some((L) => L.A === A && L.B === B)) return;
+  handovers.push({ A, B, at });
+};
+for (const A of d.layers || []) if (A && typeof A.becomes === 'string') addLink(A, byId[A.becomes], null);
+for (const M of Array.isArray(d.matches) ? d.matches : []) if (M && typeof M === 'object') addLink(byId[M.from], byId[M.to], M.at);
+// WHEN the handover lands. `matches` names a joint and the joint is authoritative, because the retiming
+// that lines the two layers up happens at boot and this gate reads the authored scene. A bare `becomes`
+// carries no joint, so it is where the two forms meet, a point validate already keeps them within
+// half a second of.
+const handoverAt = (L) => {
+  if (L.at != null) {
+    try { return isJunctionRef(L.at) ? resolveJunction(L.at, jTable) : (Number.isFinite(+L.at) ? +L.at : null); }
+    catch { return null; }
+  }
+  const aEnd = (L.A.start ?? 0) + (L.A.duration ?? 0);
+  return (aEnd + (L.B.start ?? 0)) / 2;
+};
+
 // The spans-and-changes test, run over a list of boundary times. One object must be visible on both
 // sides of SOME boundary and be in a different pose there. Returns the two layer sets so the message
 // can tell "nothing crossed" apart from "something crossed but it was furniture".
@@ -230,6 +276,15 @@ const continuity = (bs) => {
       spanning.push(l);
       if (opaqueMotion(l) || poseAt(l, b - EPS) !== poseAt(l, b + EPS)) transforming.push(l);
     }
+    // A handover ON this boundary carries the form across it. `confinedToBeat` is not asked of either
+    // half, and that is the point: one layer per beat is the shape a match cut HAS, and the engine
+    // matches the geometry across the wrapper rather than in spite of it.
+    for (const L of handovers) {
+      const t = handoverAt(L);
+      if (t == null || Math.abs(t - b) > (boundTol.get(b) ?? EPS)) continue;
+      spanning.push(L.A);
+      transforming.push(L.A);
+    }
   }
   return { spanning, transforming };
 };
@@ -237,7 +292,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there — a fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary — every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y". See .claude/skills/vawe-continuous-action/SKILL.md.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/junctions.js). See .claude/skills/vawe-continuous-action/SKILL.md.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live

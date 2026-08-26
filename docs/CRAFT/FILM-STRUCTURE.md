@@ -11,6 +11,22 @@ This library has one answer to that question. One object survives every cut and 
 [`CONTINUITY-WITHOUT-AN-OBJECT.md`](CONTINUITY-WITHOUT-AN-OBJECT.md) already records that eighteen of our
 short films answer it by keying `w` and `h` on a rectangle.
 
+**The gate now sees a SECOND device, and it is the one it always asked for by name.** Its fix message
+says "every junction answers 'the X becomes the Y'", and `becomes` is the field that writes exactly
+that. A match cut is two layers by construction, so the one-layer-straddles-the-joint test could never
+find it and a film held entirely by match cuts failed for doing the thing it was told to do. Declare
+the handover and the gate reads it as one form crossing the joint:
+
+```json
+"cuts":    [{ "t": 3, "style": "none" }],
+"matches": [{ "at": "cut@0", "from": "dot", "to": "card" }]
+```
+
+The joint owns the number: `core/junctions.js` retimes both layers onto it, and the engine carries the
+outgoing form's centre, size and rotation onto the incoming one. A handover declared away from any
+joint buys nothing, so this is not a pass you can decorate a slideshow with. The other sixteen devices
+in the table below are still invisible to the gate, and the section on its limits stands.
+
 The continuous object is one device. Working animators and editors use a dozen, and they mix them. This
 page lists the ones the sources actually name, records what the sources say about choosing between them,
 and says where our rule came from and what it costs.

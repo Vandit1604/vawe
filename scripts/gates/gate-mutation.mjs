@@ -538,6 +538,44 @@ const CASES = [
                   TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 3.8 })],
       { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
 
+  // ---- direction-floor · A MATCH CUT IS A CONTINUOUS OBJECT. The spanning test asks for one layer
+  // alive either side of the joint, and a match cut is two layers by construction, so a film held
+  // entirely by match cuts failed the rule for doing the exact thing the rule's fix message names.
+  // Both directions are pinned, because the fix's whole risk is handing out a free pass: the two
+  // fixtures below differ ONLY in where the handover lands.
+  { gate: 'directionfloor', name: 'a film held by match cuts is NOT a slideshow', expect: 'pass',
+    notMatch: /no-continuous-object/,
+    scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
+                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0 },
+                  { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
+                    start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
+      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
+        cuts: [{ t: 2.4, style: 'none' }], matches: [{ at: 'cut@0', from: 'dot', to: 'card' }] }) },
+  // ...and a handover declared somewhere the film does not turn buys nothing. Without this the fix
+  // would be decoration: write `matches` anywhere and the slideshow goes green.
+  { gate: 'directionfloor', name: 'a handover away from the joint is not a spine', expect: 'fail',
+    match: /no-continuous-object/,
+    scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
+                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0 },
+                  { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
+                    start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
+      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
+        cuts: [{ t: 2.4, style: 'none' }], matches: [{ at: 0.8, from: 'dot', to: 'card' }] }) },
+
+  // ---- motion-director · linear-motion. WARN tier both ways, so both cases read the OUTPUT: the
+  // exit code cannot see a warning, and the false positive this rule shipped for months was invisible
+  // to it. The two fixtures carry the same travel on the same curve; only the ends differ.
+  { gate: 'motiondirector', name: 'linear-motion · a move that runs flat from rest to rest', expect: 'fail',
+    match: /\[linear-motion\]/, outputOnly: true,
+    scene: scene([{ type: 'rect', x: 200, y: 460, w: 320, h: 160, bg: '#c2f23b', radius: 20, start: 0, duration: 2,
+                    motion: [{ t: 0, x: 0 }, { t: 1.6, x: 900, ease: 'linear' }] }]) },
+  { gate: 'motiondirector', name: 'a pan entered and left in motion is NOT a flat move', expect: 'pass',
+    notMatch: /\[linear-motion\]/,
+    scene: scene([{ type: 'rect', x: 200, y: 460, w: 320, h: 160, bg: '#c2f23b', radius: 20, start: 0, duration: 2,
+                    motion: [{ t: 0, x: 0 }, { t: 0.3, x: 120, ease: 'easeInOutSine' },
+                             { t: 0.8, x: 480, ease: 'linear' }, { t: 1.3, x: 820, ease: 'linear' },
+                             { t: 1.7, x: 900, ease: 'easeOutCubic' }] }]) },
+
   // ---- storyboard-check · WHAT HOLDS THE FILM, enforced at PLANNING time. The scene tell can only speak
   // once the JSON exists; by then the plan is already a slideshow. Two answers are accepted and both are
   // pinned, because the failure this rule used to have was accepting only one of them: it demanded a
@@ -682,6 +720,7 @@ const GATE_CMD = {
   beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
   layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
+  motiondirector: (f) => ['node', ['scripts/author/motion-director.mjs', f]],
   designspec: (f) => ['node', ['scripts/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['scripts/gates/storyboard-check.mjs', f]],
   dissolve: (f) => ['node', ['scripts/gates/dissolve-check.mjs', f]],
