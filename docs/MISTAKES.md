@@ -15388,3 +15388,62 @@ alone would have been scaffolding for a change nobody had made yet.
 console, and `bindBeats` still THROWS (loudly, into `window.__engineError`, which the renderer does
 read) when a scene asks to be beat-matched and the grid will not load. Only the informational half is
 lost, and only in the batch render.
+
+## #478: the one block whose job is to host a brand painted Apple's window buttons over every theme
+
+**What.** `browserFrame` (`blocks/ui.mjs`) drew its three traffic dots from the macOS literals
+`#FF5F57`, `#FEBC2E`, `#28C840`. So the block that exists to frame a brand's own product UI answered to
+no theme in the library: the same three hexes on all 38, including the dark ones the file's own sibling
+blocks were repaired for (`badge` and `shield` both carried this defect and both were fixed).
+
+**Root cause.** A colour picked once, at the write site, for a picture of a Mac. Nothing was wrong with
+the arithmetic; the block simply held an opinion about colour that it had no business holding. The
+vocabulary it needed already existed and its neighbours were already using it: `toneColor()`
+(`blocks/kit.mjs:373`) maps `ok` / `warn` / `error` onto `--up` / `--warn` / `--down`, which
+`core/boot.js` writes for every theme.
+
+**Fix.** Close / minimise / zoom is danger / warn / ok, so the three dots are now
+`['error','warn','ok'].map(toneColor)`. One tone map, one place to repaint. Checked by eye on a light
+theme (vawe) and a dark one (higgsfield): the dots still read as traffic lights on both and now carry
+the theme's own red, amber and green.
+
+**What was NOT changed, and why the distinction is the whole rule.** `phoneFrame` in the same file
+keeps `#0A0A0A` for its bezel and its notch, and that stays a literal on the test its own comment
+already states: the colour belongs to the HARDWARE, not to a brand. Unlit glass is near-black and the
+island is black because those pixels are off; a theme repainting either would be depicting a different
+object. A window button is the opposite case: it is chrome the host application owns and re-skins.
+
+**The shape worth grepping for.** A literal that depicts a real product's UI. It reads as fidelity and
+it is a lock, and the block most likely to carry one is the block a brand is meant to sit inside.
+
+## #479: the same frame number drew two different pictures, and the difference was one card's type
+
+**What.** `parallaxZoom` (`blocks/vfx.mjs`) rendered frame 45 two different ways. Measured over 16
+separate browser launches, all rendering the SAME n with no seek history: **4 of 15 differed from the
+first by a max channel delta of 83**, against a noise floor of 1 (`scripts/lib/png-diff.mjs`). Every
+differing pixel was on the hero card's two lines of type. `card`, `statBig` and `browserFrame` put
+through the identical harness came back 0 every time, which is what made it the block's bug and not the
+harness's.
+
+**Why nothing caught it.** `probe-purity` compares a DOM signature, and the DOM was identical: `--p`
+read `0.7891` at frame 45 in every launch. `snap-blocks` hashes the layer JSON, which never moved.
+Both gates were right about what they measure, and the divergence lived under both of them, in the
+raster.
+
+**Root cause.** The hero is the one element in the board that carries TEXT through a growing
+`transform: scale()` (2.6x at the settled end). Chrome has two ways to draw that: raster the glyphs at
+the composited scale, or stretch a texture rastered at the pre-scale size. The compositor picks, and it
+does not pick off the frame number, so `renderFrame(n)` stopped being a pure function of n at the only
+place that matters, the pixels. The engine's own capture loop pulls frames across several tabs in
+arbitrary order, so this ships as a pop in the mp4, not as a lab curiosity.
+
+**Fix.** `will-change:transform` on the hero, which pins the choice. 0 of 15 launches differ after it,
+and the pinned rendering is the one 12 of the 16 launches already drew, so the fix keeps the majority
+picture rather than the odd one out. It is on ONE element, deliberately:
+`core/lightfield/index.js:393` records what spraying the hint costs (400 promotion hints Chrome could
+not honour made a field that never settled). The eight ring cards only translate, translation does not
+re-raster, and they measured clean over the same 16 launches. `parallaxUnzoom` is the same function run
+backwards and is fixed by the same line.
+
+**The shape worth grepping for.** Text inside an element whose transform SCALES. A translate is safe; a
+scale changes the raster the glyphs need, and which raster arrives is the compositor's decision.

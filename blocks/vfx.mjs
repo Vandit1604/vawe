@@ -131,7 +131,21 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
     + `display:flex;flex-direction:column;justify-content:center;gap:${SPACE.xs}px;overflow:hidden;`
     // transform-origin is the board's centre by construction (the cell IS centred), so a plain scale
     // grows it symmetrically into the frame with no compensating translate.
-    + `transform:scale(calc(1 + var(--p,0) * ${k}));z-index:2">`
+    //
+    // `will-change:transform` IS THE PURITY FIX, not a performance hint. This card is the one element
+    // in the board that carries TEXT through a growing scale (2.6x at the settled end), and Chrome has
+    // two ways to draw that: raster the glyphs at the composited scale, or stretch a texture rastered
+    // at the pre-scale size. Which one it picks is decided by the compositor, not by the frame number,
+    // so the same n came back two different pictures. Measured mid-ramp (frame 45, --p 0.79) over 16
+    // separate browser launches: 4 of 15 differed from the first by a MAX CHANNEL DELTA OF 83, all of
+    // it on the two lines of hero type, and the noise floor this repo compares against is 1
+    // (scripts/lib/png-diff.mjs). With the hint, 0 of 15 differ. It pins the majority rendering, not
+    // the odd one out: the fixed output is byte-identical to the variant 12 of the 16 launches drew.
+    // ONE element, deliberately. Spraying this over the eight ring cards is the mistake
+    // core/lightfield/index.js:393 records, where 400 promotion hints Chrome could not honour made a
+    // field that never settled. The ring only translates, and translation does not re-raster: measured
+    // clean over the same 16 launches.
+    + `transform:scale(calc(1 + var(--p,0) * ${k}));z-index:2;will-change:transform">`
     + `<div style="font:700 ${TYPE.lead}px var(--font-sans);color:var(--text);letter-spacing:-0.02em">${esc(title)}</div>`
     + (caption ? `<div style="${labelCss({ size: TYPE.body })}">${esc(caption)}</div>` : '')
     + `</div>`;

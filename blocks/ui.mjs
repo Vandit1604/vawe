@@ -25,7 +25,15 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
     bg: T.card, radius: R.card, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
     children: [
       { type: 'group', layout: 'row', items: 'center', gap: SPACE.xs, pad: `${SPACE.sm}px ${SPACE.md}px`, children: [
-        ...['#FF5F57', '#FEBC2E', '#28C840'].map((c) => box({ w: 12, h: 12, radius: R.pill, bg: c })),
+        // THE TRAFFIC DOTS ARE A STATUS TRIAD, NOT THREE PICKED COLOURS. They were the macOS literals
+        // (#FF5F57 / #FEBC2E / #28C840), so the one block whose whole job is to host a brand's own UI
+        // painted Apple's red, amber and green over every theme in the library and answered to none of
+        // them. Close / minimise / zoom is danger / warn / ok, which is exactly what `toneColor` maps,
+        // and going through it is the same route every sibling in this file takes for a status colour
+        // (`notification`, `badge`, `shield`): one tone map, one place to repaint. Not the phone
+        // bezel's case below — a bezel is near-black because it is unlit glass, and that colour belongs
+        // to the hardware; a window button is chrome the host application owns and re-skins.
+        ...['error', 'warn', 'ok'].map((tone) => box({ w: 12, h: 12, radius: R.pill, bg: toneColor(tone) })),
         { type: 'group', grow: 1, layout: 'row', justify: 'center', children: [
           // A URL is machine text, so it stays mono — that is the one place mono is right for a word.
           { type: 'group', bg: T.surface, radius: R.pill, pad: `${SPACE.snug}px ${SPACE.md}px`, children: [text({ text: url, font: 'mono', size: TYPE.body, color: T.sub })] },
