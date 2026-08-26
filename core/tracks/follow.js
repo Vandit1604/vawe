@@ -20,10 +20,11 @@
 // frame before any layer's tracks run. It reads no DOM and keeps nothing between frames, so the result
 // cannot depend on which layer the loop reached first.
 //
-// The same property sets its ONE limit, and it is stated rather than discovered: a box is where the
-// layer's own geometry puts it, so following a layer that is itself following a third pins you to the
-// middle one's UNPINNED position. Chaining is refused by arithmetic, not by a check — follow the layer
-// that actually moves.
+// The same property sets its ONE limit: a box is where the layer's own geometry puts it, so following a
+// layer that is itself following a third would pin you to the middle one's UNPINNED position. That used
+// to be a paragraph here and nothing else, so a chain rendered a wrong answer in silence. It is a
+// REFUSAL now, below. The engine's rule is that an input it cannot honour fails loudly rather than
+// being quietly half-applied, and the fix is always the same one: follow the layer that actually moves.
 export const slot = 'follow';
 
 // `id` and x/y are read only to place a follower, and both are unconditional reads elsewhere.
@@ -43,6 +44,16 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   if (!L.id)
     throw new Error(`layer following "${spec.id}" has no \`id\`. A follower is placed by its own size, `
       + `and only an identified layer has a measured box.`);
+  // CHAINING, refused where the arithmetic would otherwise lie. resolveBoxes composes every box for
+  // the frame BEFORE any track runs, so the target's box is its own geometry and carries nothing this
+  // track wrote. Following a follower therefore pins to where the middle layer would sit if it were
+  // not following anything, which is a wrong answer rather than a missing one.
+  const tgt = scene.specOf(spec.id);
+  if (tgt && tgt.follow)
+    throw new Error(`follow: "${L.id}" follows "${spec.id}", which is itself following `
+      + `"${tgt.follow.id}". A box is resolved before any track runs, so "${spec.id}" reports its `
+      + `UNPINNED position and this pin would land at a place nothing is. Follow "${tgt.follow.id}" `
+      + `directly, or give "${spec.id}" the motion instead of a pin.`);
   const b = scene.boxOf(spec.id);
   if (!b)
     throw new Error(`follow: no box for "${spec.id}" — known ids: ${scene.ids.join(', ')}. `

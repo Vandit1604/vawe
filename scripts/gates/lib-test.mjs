@@ -3172,5 +3172,88 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     lib.every((f) => wide.includes(f)) && wide.length >= lib.length);
 }
 
+// ---- THE RENDER PIPELINE ORDER (docs/CODEMAPS/ARCHITECTURE.md, "Frame pipeline") ----------------
+//
+// #463 and #464 were both ordering and neither was arithmetic: a handover resolved before the layout
+// measurement, and a box composed before the tracks that move it. The order that governs both was
+// written in file headers, where nothing could read it. It is a parsed block in the codemap now, and
+// this is what reads it, so the doc is the single statement of the contract AND the thing that fails
+// when the code stops matching it.
+//
+// THE CEILING, stated here because a check nobody knows the limits of is worse than none. This proves
+// the ORDER OF CALLS from source text, and the SET of tracks that treat `el.style` as an accumulator.
+// It cannot prove that a track read a fresh value rather than a stale one, that is a property of one
+// scene at one t, and probe-purity, canvas-purity and snap-scenes are what see it.
+{
+  const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'CODEMAPS', 'ARCHITECTURE.md'), 'utf8');
+  const block = doc.match(/```pipeline\n([\s\S]*?)```/);
+  ok('the codemap still states the pipeline', !!block);
+  const rows = (block ? block[1] : '').split('\n')
+    .map((l) => l.trim()).filter(Boolean)
+    .map((l) => l.split(/\s+/));
+  const of = (kind) => rows.filter((r) => r[0] === kind).map((r) => r.slice(1));
+
+  const sceneSrc = fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'scene.js'), 'utf8');
+
+  // BUILD. The needle is a literal from the step itself, so a step that moves takes its needle with it
+  // and a step that is deleted fails as "not found" rather than passing on a stale index.
+  const build = of('build');
+  ok('the codemap names the build steps', build.length >= 3);
+  let prev = -1, buildOk = true, buildWhy = '';
+  for (const [name, ...needleParts] of build) {
+    const needle = needleParts.join(' ');
+    const at = sceneSrc.indexOf(needle);
+    if (at < 0) { buildOk = false; buildWhy = `${name}: "${needle}" is not in scene.js`; break; }
+    if (at < prev) { buildOk = false; buildWhy = `${name} now runs earlier than the step before it`; break; }
+    prev = at;
+  }
+  ok(`build-time resolution runs in the stated order (${buildWhy || 'ok'})`, buildOk);
+  // #464 in one line: the measurement decides the box `becomes` hands over, so it must precede it.
+  ok('the layout measurement precedes the handover (#464)',
+    sceneSrc.indexOf('el.offsetWidth') < sceneSrc.indexOf('resolveBecomes(data, (L) =>'));
+
+  // FRAME. Read out of renderFrame's own body, not the whole file, so an unrelated mention of a stage
+  // elsewhere cannot satisfy the order.
+  const body = (() => {
+    const at = sceneSrc.indexOf('function renderFrame(f) {');
+    return at < 0 ? '' : sceneSrc.slice(at, sceneSrc.indexOf('\n  }\n', at));
+  })();
+  ok('renderFrame is still where the codemap says', body.length > 0);
+  const frame = of('frame').map((r) => r[0]);
+  ok('the codemap names the frame stages', frame.length >= 8);
+  let fprev = -1, frameOk = true, frameWhy = '';
+  for (const name of frame) {
+    const at = body.indexOf(name + '(');
+    if (at < 0) { frameOk = false; frameWhy = `${name} is not called in renderFrame`; break; }
+    if (at < fprev) { frameOk = false; frameWhy = `${name} now runs before the stage above it`; break; }
+    fprev = at;
+  }
+  ok(`renderFrame composes in the stated order (${frameWhy || 'ok'})`, frameOk);
+  // #463 in one line: every box for the frame is composed before any track can move a layer, which is
+  // why boxOf reports the settled pose and why `follow` cannot chain.
+  ok('every box is resolved before any track runs (#463)',
+    body.indexOf('resolveBoxes(t)') < body.indexOf('runTracks('));
+
+  // ACCUMULATE. `el.style` is the pipeline's accumulator: these tracks read the transform back and
+  // prepend, so a fifth one appearing, or one of these four quietly becoming a REPLACE, changes what
+  // every earlier stage contributed. A set, not an order, the slots already own the order.
+  const READBACK = /el\.style\.transform\s*(&&|\|\|)/;
+  const trackDir = path.join(repoRoot, 'core', 'tracks');
+  const found = fs.readdirSync(trackDir).filter((n) => n.endsWith('.js'))
+    .filter((n) => READBACK.test(fs.readFileSync(path.join(trackDir, n), 'utf8')))
+    .map((n) => 'core/tracks/' + n).sort();
+  const declared = of('accumulate').map((r) => r[0]).sort();
+  ok(`exactly the declared tracks accumulate onto el.style (found: ${found.join(', ')})`,
+    found.length === declared.length && found.every((f, i) => f === declared[i]));
+
+  // The chaining refusal is a REFUSAL, not a paragraph. #465: following a follower pinned to the
+  // middle layer's unpinned position and said nothing.
+  const followSrc = fs.readFileSync(path.join(trackDir, 'follow.js'), 'utf8');
+  ok('follow refuses a chain by name (#465)',
+    /scene\.specOf\(spec\.id\)/.test(followSrc) && /tgt\.follow/.test(followSrc)
+      && /throw new Error/.test(followSrc.slice(followSrc.indexOf('tgt.follow'))));
+
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
