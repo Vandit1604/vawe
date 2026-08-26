@@ -60,20 +60,17 @@ body{
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .mono{font-family:var(--font-mono),monospace;font-variation-settings:normal}
-
 /* ===== WIDTH IS A TYPE ROLE, NOT AN EFFECT =================================================
    Anybody carries a wdth axis (50-150). It earns its place as static contrast: display type
    stands wide and planted, technical labels compress like a spec sheet. It is deliberately NOT
    animated — the hero already contains a live engine, and type that reflows every frame would
    compete with the render it frames (and thrash layout doing it). See DESIGN.md. */
 :root{ --wd-display:105; --wd-body:100; }
-
 /* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
 .skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
   background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14.5px;
   padding:11px 18px;border-radius:0 0 10px 0}
 .skip:focus{left:0}
-
 /* ===== THE SHELL ===========================================================================
    The page is a card floating on a field, not a document bleeding to the window edge. It frames
    the site the way a contact sheet frames its frames — which is the whole North Star. */
@@ -86,7 +83,6 @@ a{color:inherit;text-decoration:none}
   clip-path:inset(0 round 26px);
   box-shadow:0 1px 3px rgba(16,22,32,.06),0 12px 40px -18px rgba(16,22,32,.18)}
 @media (max-width:640px){ .shell{margin:6px;border-radius:18px;clip-path:inset(0 round 18px)} }
-
 /* ===== THE BOOKEND =========================================================================
    A band of the engine's own output, full-bleed, committed to cobalt. Structure borrowed from a
    comp that used a stock sky here; the sky is the part any competitor can buy, so ours is a real
@@ -120,7 +116,6 @@ a{color:inherit;text-decoration:none}
    what a viewer sees instead of the white shell behind it.
    .wrap sets position:relative and is defined later, so this must out-specify it, not tie. */
 .wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:var(--z-nav);margin:0 auto}
-
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
 #content:focus{outline:none}
@@ -139,14 +134,12 @@ a{color:inherit;text-decoration:none}
 .bar.pill .nav a.on{background:#fff;color:var(--accent)}
 .bar.pill .ghbtn{background:var(--ink);color:#fff;border-color:transparent;border-radius:999px}
 .bar.pill .ghbtn:hover{background:#000}
-
 /* Everything living on the cobalt band. White on #2563eb is 5.17:1 — legal for body, and the
    scrim keeps it that way over any frame the film happens to be on.
    These must out-specify .hero-head h1 / .hero-head .sub, which are defined later in this file. */
 .on-accent{color:#fff}
 .hero-head.on-accent h1,.on-accent h2,.on-accent > p{color:#fff}
 .hero-head.on-accent .sub{color:rgba(255,255,255,.94)}
-
 /* ===== FOOTER BAND ===== */
 .foot-band{padding:clamp(56px,7vw,96px) 0 clamp(28px,3vw,40px)}
 .foot-in{display:flex;flex-direction:column;gap:24px}
@@ -170,7 +163,6 @@ a{color:inherit;text-decoration:none}
 .foot-meta a{text-decoration:underline;text-underline-offset:2px}
 .wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
 .accent{color:var(--accent)}
-
 /* =========================================================
    NAV
    ========================================================= */
@@ -189,7 +181,6 @@ a{color:inherit;text-decoration:none}
 .bar.solid .nav a{color:var(--ink-2)}
 .bar.solid .nav a:hover{background:var(--accent-soft);color:var(--accent)}
 .bar.solid .nav a.on{color:var(--accent);background:var(--accent-soft)}
-
 /* =========================================================
    BUTTONS
    ========================================================= */
@@ -217,12 +208,10 @@ a{color:inherit;text-decoration:none}
 .h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.018em;line-height:1.06;text-wrap:balance;
   font-variation-settings:"wdth" var(--wd-display)}
 .lead{color:var(--ink-2);font-size:1.08rem;line-height:1.6;max-width:56ch}
-
 .foot{border-top:1px solid var(--line);padding:28px 0;display:flex;align-items:center;justify-content:space-between;
   gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .foot a{color:var(--ink-2)} .foot a:hover{color:var(--accent)}
 .foot .mono{font-family:var(--font-mono),monospace}
-
 /* =========================================================
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */
@@ -279,7 +268,6 @@ a{color:inherit;text-decoration:none}
 .aspects > h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
   font-weight:800;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:8px 0 26px}
 .aspects-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
-
 .trio{display:flex;gap:clamp(10px,1.4vw,18px);align-items:flex-end;justify-content:center;padding:0}
 .trio .ar{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
   background:var(--bg-2);box-shadow:var(--shadow-2);min-width:0;margin:0}
@@ -299,7 +287,6 @@ a{color:inherit;text-decoration:none}
 /* opaque for the same reason as .clip .lab: its backdrop is video */
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
-
 /* ===== THE FILMS ==========================================================================
    The page opens on a film, not on type. There is ONE headline and no lead paragraph: the page
    used to carry a hero head plus a lead, then a second head plus a second lead, which pushed the
@@ -308,18 +295,12 @@ a{color:inherit;text-decoration:none}
    The 24px top padding is deliberate and small. This is the first block on the page, so its
    padding is the gap under the masthead, not a gap between two sections. */
 .films{padding:24px 0 8px}
-.films-h1{font-size:clamp(2.1rem,4.4vw,3.2rem);line-height:1;letter-spacing:-.035em;font-weight:700;
-  margin:0 0 26px;text-wrap:balance}
-.films-h1 .kicker{display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.films-h1 .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
-
 /* Six items, six cells, and three sizes. A grid of six identical tiles gives the eye nowhere to
    start and reads as a template; sixths let one film be the subject and the rest be the set.
    1 hero at 6/6, 2 at 3/6, 3 at 2/6. No empty cell in any row. */
 /* The one fact the clips cannot state, said once. It sat on all six cards as the word `reflected`,
    which is one idea repeated six times; here it costs a single line above the work. */
 .scsub{margin:-6px 0 22px;color:var(--ink-2);font-size:15px}
-
 /* A family's intro folds away. Closed it costs one small line; open it is the same paragraph it was.
    The summary is a real control, so it keeps a focus ring and a pointer. */
 
@@ -327,7 +308,6 @@ a{color:inherit;text-decoration:none}
 .film-hero{grid-column:span 6}
 .filmgrid > .film:nth-child(2),.filmgrid > .film:nth-child(3){grid-column:span 3}
 .filmgrid > .film:nth-child(4),.filmgrid > .film:nth-child(5),.filmgrid > .film:nth-child(6){grid-column:span 2}
-
 /* No card. The video already has a frame; a bordered box around it is a second frame doing no
    work, and six of them in a grid is the "equal cards with a button under each" tell. */
 .film{margin:0}
@@ -343,15 +323,8 @@ a{color:inherit;text-decoration:none}
 .film .srcopen{margin:0 0 0 auto;font-size:11.5px;padding:5px 11px}
 .film .srcopen .srclabel{display:none}
 .film-hero .srcopen .srclabel{display:inline}
-
-.cap-lead{padding:56px 0 4px;border-top:1px solid var(--line);margin-top:52px;
-  display:grid;align-items:end;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
-  column-gap:clamp(28px,5vw,72px)}
-.cap-lead h2{grid-column:1;font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.03;letter-spacing:-.03em;
-  font-weight:700;text-wrap:balance}
 @media (max-width:860px){
   .cap-lead{grid-template-columns:1fr;row-gap:12px}
-  .cap-lead h2{grid-column:1}
 }
 /* A 1/3-column tile is too narrow for a 16:9 film to stay legible, so the small tier goes to
    halves before the whole grid goes to one. */
@@ -366,7 +339,6 @@ a{color:inherit;text-decoration:none}
   .film figcaption{row-gap:9px}
   .film .srcopen{margin-left:0}
 }
-
 /* ===== THE AFFORDANCE RULE ================================================================
    A bordered mono chip on --bg-2 meant two opposite things on the same card: `.tag` was inert
    metadata and `.srctoggle` was the control right beneath it, drawn identically. You could not
@@ -399,7 +371,6 @@ a{color:inherit;text-decoration:none}
 .srcopen .srcmeta::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:var(--accent-line)}
 .srcopen .arw{display:inline-block;transition:transform .25s var(--ease)}
 .srcopen:hover .arw{transform:translateX(3px)}
-
 /* =========================================================
    ENGINE PREVIEW — the live window, and the two signals that it is booting
    Shared: BlockLive mounts .blive on /blocks/<name>; /showcase/type drives .typlay/.tyboot off
@@ -412,13 +383,11 @@ a{color:inherit;text-decoration:none}
 .blive-stage{position:absolute;inset:0}
 .blive .sp-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;display:block;
   transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--bl-x,0px),var(--bl-y,0px))}
-
 @keyframes bspin{to{transform:rotate(360deg)}}
 @keyframes bboot{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
 /* Reduced motion still has to answer "is it working?", so this fades rather than removing the
    signal: a loader that stops moving cannot be told from the frozen state it exists to deny. */
 @media (prefers-reduced-motion:reduce){@keyframes bfade{0%,100%{opacity:.3}50%{opacity:1}}}
-
 /* ===== BLOCKS FILTER ======================================================================
    96 blocks in one flat grid meant scrolling and hoping. Search carries the load; the family
    dropdown is the coarse cut. Both derive from the registry, so a new block cannot leave them
@@ -444,7 +413,6 @@ a{color:inherit;text-decoration:none}
 .bsearch-x{position:absolute;right:8px;width:22px;height:22px;border:0;border-radius:6px;cursor:pointer;
   background:none;color:var(--muted);font-size:11px;line-height:1}
 .bsearch-x:hover{color:var(--accent);background:var(--accent-soft)}
-
 .bselect{position:relative;flex:0 0 auto}
 .bselect select{appearance:none;font-family:var(--font-mono),monospace;font-size:13px;color:var(--accent);
   background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 34px 9px 13px;cursor:pointer;
@@ -453,40 +421,15 @@ a{color:inherit;text-decoration:none}
 .bselect-c{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:10px;
   pointer-events:none}
 .bcount{font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);margin-left:auto}
-
 .bempty{padding:60px 0;color:var(--ink-2);font-size:15px}
 .bempty b{color:var(--ink)}
 .blink{background:none;border:0;padding:0;font:inherit;color:var(--accent);font-weight:600;cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
-
-
-/* =========================================================
-   FEATURES
-   ========================================================= */
-.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:34px;padding-bottom:80px}
-.flink{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 24px 22px;
-  box-shadow:var(--shadow-1);transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
-.flink:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--accent-line)}
-.flink .fk{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);margin-bottom:14px}
-.flink h2{font-size:20px;font-weight:700;letter-spacing:-.025em;margin-bottom:8px}
-.flink p{color:var(--ink-2);font-size:14.5px;line-height:1.5}
-.flink .go{margin-top:15px;color:var(--accent);font-weight:600;font-size:14px}
-.flink .go .arw{display:inline-block;transition:transform .25s var(--ease)}
-.flink:hover .go .arw{transform:translateX(4px)}
-.fdetail{padding:8px 0 80px;max-width:900px}
-.fdetail .backlink{color:var(--muted);font-family:var(--font-mono),monospace;font-size:13px;display:inline-block;margin-bottom:22px;transition:color .2s}
-.fdetail .backlink:hover{color:var(--accent)}
-.fdetail .tagline{color:var(--ink-2);font-size:clamp(1.1rem,2vw,1.4rem);line-height:1.4;max-width:44ch;margin-top:6px}
 .demo-media{margin:36px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0f1620;box-shadow:var(--shadow-2)}
 .demo-media video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
-.fdetail .prose p{color:var(--ink-2);font-size:1.07rem;line-height:1.65;margin-bottom:18px;max-width:66ch}
-.fdetail .prose p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
-.fdetail .foot-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
 .codeblock{background:#0f1620;border-radius:12px;padding:18px 20px;margin:26px 0 6px;box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
 .codeblock .lbl{font-family:var(--font-mono),monospace;font-size:11px;color:#5a6478;margin-bottom:11px}
 .codeblock pre{font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.75;color:#c8cfdb;white-space:pre;margin:0}
-.fdetail .tag{margin-top:24px}
-
 /* =========================================================
    PRIMITIVES — the patterns more than one route needs
    A rule earns a place here by having two consumers. Everything with one consumer stays in that
@@ -510,7 +453,6 @@ a{color:inherit;text-decoration:none}
    highlight gives a sighted one, so the observer sets the attribute and CSS reads it. */
 .rail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
   font-weight:600}
-
 /* No room for a second column, so the rail becomes the horizontal jump strip of pills these pages
    carried before they had a rail at all. */
 @media (max-width:900px){
@@ -523,7 +465,6 @@ a{color:inherit;text-decoration:none}
   .rail a{border-color:var(--line);border-radius:999px}
 }
 @media (prefers-reduced-motion:reduce){.rail a{transition:none}}
-
 /* ── the fold: an explainer that is available and not in the way ─────────────────────────────────
    A <details> with the disclosure triangle replaced by a +/- that reads at 12.5px. */
 .fold>summary{cursor:pointer;list-style:none;font-size:12.5px;color:var(--muted);
@@ -535,7 +476,6 @@ a{color:inherit;text-decoration:none}
 .fold>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 .fold>p{font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
 .fold>p b{color:var(--ink)}
-
 /* =========================================================
    MICRO-ANIMATIONS
    ========================================================= */
@@ -557,7 +497,6 @@ a{color:inherit;text-decoration:none}
      with it and left flat gray boxes where the entire argument should be. */
   *{transition-duration:.01ms !important}
 }
-
 /* =========================================================
    EDITOR — the engine running live in the browser
    ========================================================= */
@@ -585,7 +524,6 @@ a{color:inherit;text-decoration:none}
 @keyframes edspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){ .ed-spin{animation-duration:2s} }
 .ed-presel.is-loading select{border-color:var(--accent);cursor:progress}
-
 /* The repo is private: this is a state, not a link, so it must not look clickable. */
 /* A state, not a control, so it drops the button's chrome entirely rather than wearing it greyed
    out: same affordance rule as .tag vs .srcopen. A bordered, shadowed pill that does nothing when
@@ -594,7 +532,6 @@ a{color:inherit;text-decoration:none}
 .ghsoon{cursor:default;color:var(--muted);background:none;border-color:transparent;box-shadow:none;font-weight:500}
 .ghsoon:hover{transform:none;box-shadow:none}
 .bar.pill .ghsoon{background:rgba(11,31,84,.28);border-color:rgba(255,255,255,.24);color:#fff}
-
 .ed-panehead{display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-bottom:0;
   border-radius:12px 12px 0 0;padding:9px 12px}
 .ed-file{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2)}
@@ -602,7 +539,6 @@ a{color:inherit;text-decoration:none}
 .ed-copy{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);background:#fff;
   border:1px solid var(--line-2);border-radius:6px;padding:3px 9px;cursor:pointer}
 .ed-copy:hover{border-color:var(--accent)}
-
 /* The CodeMirror host. Everything inside it is themed from the editor's own theme object (see
    CodeEditor.tsx) because CodeMirror injects scoped styles that a plain stylesheet fights; only
    the box lives here. resize:vertical is deliberate — a 900-line film wants more than 52vh, and
@@ -618,12 +554,10 @@ a{color:inherit;text-decoration:none}
   border:1px solid var(--line-2);border-radius:6px;padding:3px 9px;cursor:pointer;
   transition:border-color .2s var(--ease)}
 .ed-fold:hover{border-color:var(--accent)}
-
 .ed-status{font-family:var(--font-mono),monospace;font-size:11.5px;padding:8px 12px;border:1px solid;
   border-radius:0 0 12px 12px;border-top:0;word-break:break-word;max-height:96px;overflow:auto}
 .ed-status.ok{color:#2f7d55;background:#f2fbf6;border-color:#cdeadb}
 .ed-status.bad{color:#a3282d;background:#fdf3f3;border-color:#f0d2d3}
-
 .ed-main{position:sticky;top:88px;min-width:0}
 .sp{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow-2)}
 /* the stage carries the scene's ratio so the iframe is never letterboxed or cropped */
@@ -642,7 +576,6 @@ a{color:inherit;text-decoration:none}
 .ed-note{color:var(--muted);font-size:13px;line-height:1.6;margin-top:14px}
 .ed-note code{font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2);
   background:var(--bg-2);border:1px solid var(--line-2);border-radius:5px;padding:1px 5px}
-
 @media (max-width:900px){
   .ed{grid-template-columns:1fr}
   .ed-main{position:static}
@@ -652,7 +585,6 @@ a{color:inherit;text-decoration:none}
 .ed-claude a:hover{text-decoration:underline}
 .ed-claude code{font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--accent-soft);
   border:1px solid var(--accent-line);border-radius:5px;padding:1px 6px}
-
 /* The nav had no mobile treatment: at 390px it measured 484px wide and scrolled the whole page
    sideways (adding the Editor link made a pre-existing bug visible). Let it wrap and tighten,
    rather than hiding links behind a menu nobody opens. */
@@ -662,7 +594,6 @@ a{color:inherit;text-decoration:none}
   .nav a{padding:6px 9px}
   .ghbtn{margin-left:auto;padding:6px 10px}
   .mark{font-size:18px}
-
   /* The pill itself can't wrap — a two-row pill pushes its own contents out through its edge.
      Row 1 keeps the mark and the GitHub action visible; row 2 is the pill, one row, scrolling.
      The nav is absolute here, so whatever it floats over has to clear its height: the landing
@@ -675,7 +606,6 @@ a{color:inherit;text-decoration:none}
   .bar.pill .nav::-webkit-scrollbar{display:none}
   .bar.pill .nav a{padding:7px 12px;white-space:nowrap;flex:none}
 }
-
 /* ── the generator playground ──────────────────────────────────────────────────────────────────
    The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
    generated fields are light on dark, and framing them in white chrome is what the site does.
@@ -688,7 +618,6 @@ a{color:inherit;text-decoration:none}
 .pghead { max-width: 44rem; margin-bottom: 18px; }
 .pghead h1 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); letter-spacing: -.022em; margin-bottom: 8px; }
 .pghead p { color: var(--ink-2); font-size: .98rem; line-height: 1.6; }
-
 .pggrid { display: block; }
 .pgstage { display: block; min-width: 0; }
 /* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
@@ -708,7 +637,6 @@ a{color:inherit;text-decoration:none}
   background: var(--bad-bg); color: var(--bad); border: 1px solid #f0d3d4;
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.5;
 }
-
 /* the control wall */
 .pgpanel { margin-top: 16px; }
 .pgblurb { color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; max-width: 46rem; }
@@ -764,7 +692,6 @@ a{color:inherit;text-decoration:none}
   padding: 8px 0 4px; text-align: left; width: 100%;
 }
 .pgmore:hover { text-decoration: underline; }
-
 .pgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .pgbar .btn { font-size: 14px; padding: 9px 15px; }
 .pgmeta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
@@ -778,14 +705,12 @@ a{color:inherit;text-decoration:none}
   font: inherit; font-size: 13px; width: 2.4rem; cursor: pointer; color: var(--muted);
   border: 1px solid var(--line-2); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface);
 }
-
 .pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
 .pgpresets button {
   font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
 }
 .pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-
 .pgjson { margin-top: 20px; }
 .pgjson summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .pgjson pre {
@@ -793,7 +718,6 @@ a{color:inherit;text-decoration:none}
   background: var(--bg-2); border: 1px solid var(--line);
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.55;
 }
-
 @media (prefers-reduced-motion: reduce) { .pgadd { transition: none; } }
 /* Stacked, the panel sits UNDER the preview, so a tall preview pushes every control off the screen.
    Filling the row is right beside a panel and wrong above one: at 390x844 the clamp above resolved to
@@ -804,7 +728,6 @@ a{color:inherit;text-decoration:none}
   .pgscene { max-height: none; }
   .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
-
 /* ── playground: dark ──────────────────────────────────────────────────────────────────────────
    Token-level, not component-level. Every control on this page already styles itself from --bg,
    --surface, --ink and friends, so redefining those in one scope turns the whole route dark and
@@ -829,7 +752,6 @@ a{color:inherit;text-decoration:none}
 .pgdark input[type="number"], .pgdark .pgtext, .pgdark .pgrow select {
   background: var(--field); color: var(--ink); border-color: var(--line-2);
 }
-
 /* ── the library ───────────────────────────────────────────────────────────────────────────────
    A wall of looks, each one the REAL generator rendered still at card size, not a poster. Mirrors
    the block catalog's own card wall (blocks/catalog.css); the difference is that a field costs a few
@@ -869,7 +791,6 @@ a{color:inherit;text-decoration:none}
    between 540px pictures reads as a seam, not a rhythm. */
 .pgpage .lgrid { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 26px; }
 .lheld { margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
-
 /* ===== /type — THE TYPOGRAPHIC VOCABULARY =====================================================
    The same two-media card /blocks uses (a still, and the real engine behind it on press), sized
    for a full 16:9 stage rather than a measured block rect: a type specimen has no crop, the frame
@@ -882,7 +803,6 @@ a{color:inherit;text-decoration:none}
 .tyderived li:last-child{border-bottom:0}
 .tyderived-h{font-size:11px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)!important;
   font-family:inherit;padding-top:0!important}
-
 /* The filter bar sticks, because the grid is long and the group jump is how you use it. */
 .tybar{position:sticky;top:0;z-index:var(--z-sticky);display:flex;flex-wrap:wrap;gap:12px;align-items:center;
   padding:16px 0 14px;margin-top:26px;background:var(--bg);border-bottom:1px solid var(--line)}
@@ -894,7 +814,6 @@ a{color:inherit;text-decoration:none}
   border:1px solid var(--line);background:var(--surface);white-space:nowrap}
 .tyjump a:hover{border-color:var(--accent-line);color:var(--accent);background:var(--accent-soft)}
 .tycount{color:var(--muted);font-size:14px;margin:16px 0 0}
-
 .tygroup{padding-top:38px}
 .tyghead{max-width:70ch;margin-bottom:20px}
 .tyghead h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.02em;margin:0 0 8px}
@@ -903,7 +822,6 @@ a{color:inherit;text-decoration:none}
 /* align-items:start — opening one card's JSON must not stretch the two beside it into tall boxes
    with a hole in the middle. */
 .tygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;align-items:start}
-
 .tycard{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
   overflow:hidden;box-shadow:var(--shadow-1);display:flex;flex-direction:column;
   transition:box-shadow .3s var(--ease),border-color .3s}
@@ -920,7 +838,6 @@ a{color:inherit;text-decoration:none}
 .tylive-stage{position:absolute;inset:0}
 .tylive .sp-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;display:block;
   transform-origin:top left;transform:scale(var(--sp-scale))}
-
 /* Play carries a WORD as well as a glyph. On /blocks the icon alone is enough because the card is
    already a link somewhere; here the press is the only thing the card does, so it says so. */
 .typlay{position:absolute;right:10px;bottom:10px;z-index:var(--z-raise);display:inline-flex;align-items:center;gap:7px;
@@ -942,7 +859,6 @@ a{color:inherit;text-decoration:none}
   .tyboot::after{width:100%;animation:bfade 1.3s ease-in-out infinite}
 }
 @media (any-hover:none){.typlay{opacity:1}}
-
 .tycard figcaption{padding:16px 17px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
 .tyname{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .tyname .mono{font-size:15.5px;font-weight:600;color:var(--ink)}
@@ -957,7 +873,6 @@ a{color:inherit;text-decoration:none}
 .tycaution{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);
   background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
 .tycaution b{color:var(--ink)}
-
 .tyjson{margin-top:auto;border-top:1px solid var(--line);padding-top:11px;position:relative}
 .tyjson summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;
   font-size:12.5px;color:var(--ink-2);list-style:none}
@@ -970,7 +885,6 @@ a{color:inherit;text-decoration:none}
   padding:5px 11px;border-radius:8px;cursor:pointer;color:var(--ink);
   background:var(--surface);border:1px solid var(--line-2)}
 .tycopy:hover{border-color:var(--accent);color:var(--accent)}
-
 .tycoverage{margin-top:64px;padding:30px 0 10px;border-top:1px solid var(--line)}
 .tycoverage h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.02em;margin:0 0 10px}
 .tycoverage > p{color:var(--ink-2);max-width:66ch;margin:0 0 24px}
@@ -979,38 +893,12 @@ a{color:inherit;text-decoration:none}
 .tycovgrid h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
 .tycovgrid p{color:var(--ink-2);font-size:14px;margin:0 0 10px}
 .tycovlist{font-size:11.5px;color:var(--muted);line-height:1.7;word-break:break-word}
-
 @media (max-width:900px){
   .tybar{position:static}
 }
-
-/* ===== SHOWCASE: THE VOCABULARY AS A GALLERY ===============================================
-   Nine capabilities used to be nine full-width alternating rows, each with a 35-word paragraph
-   restating the clip beside it. Nine rows is nine screens to see nine clips. As a grid the whole
-   vocabulary is one look, and the entry is a title plus the names you type. */
-.capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px 26px;padding:28px 0 0}
-/* Same treatment as .film: the clip is framed, the caption is not. Two card systems on one page
-   (bordered tiles here, bare clips above) read as two pages stapled together. */
-.capcard{margin:0}
-.capmedia{aspect-ratio:16/9;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;
-  overflow:hidden;box-shadow:var(--shadow-1);
-  transition:box-shadow .25s var(--ease),transform .25s var(--ease),border-color .25s var(--ease)}
-.capcard:hover .capmedia{box-shadow:var(--shadow-3);transform:translateY(-4px);border-color:var(--accent-line)}
-.capmedia video{width:100%;height:100%;object-fit:contain;display:block}
-.capcard figcaption{padding:13px 2px 0}
-.capcard h3{font-size:.98rem;font-weight:700;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
-.capcard .tag{margin-top:8px}
-.capnote{margin:22px 0 4px;font-size:13.5px;line-height:1.6;color:var(--muted);max-width:64ch}
-/* the arsenal link takes the column the cut paragraph used to sit in */
-.cap-lead .cap-index{grid-column:2;grid-row:1;margin-top:0}
 @media (max-width:1000px){ .capgrid{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:860px){ .cap-lead .cap-index{grid-column:1;grid-row:auto;margin-top:4px} }
 @media (max-width:640px){ .capgrid{grid-template-columns:1fr;gap:18px} }
-/* In a 1/3-width tile the full label wraps to three lines, which is a broken button. The tile is
-   already titled and tagged, so the chip only has to say "the source is here, and how long it is". */
-.capcard .srcopen{font-size:11px;gap:6px;padding:5px 10px;margin-top:10px;white-space:nowrap;max-width:100%}
-.capcard .srcopen .srclabel{display:none}
-.capcard .srcopen .srcmeta{font-size:10.5px;padding-left:8px}
 /* The sticky toolbar is one row on desktop and three on a phone, so a family anchored under it
    lands with its heading hidden. The offset is the bar, and the bar is taller here. */
 @media (max-width:760px){ .fxfam{scroll-margin-top:150px} }

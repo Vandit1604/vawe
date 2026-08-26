@@ -11,9 +11,10 @@ import Link from "next/link";
  */
 export function SourceViewer({ name, lines }: { name: string; lines: number }) {
   return (
-    // The label sits in its own span, and the accessible name is stated, because a narrow tile
-    // hides the words and keeps the chip (.capcard .srcopen on /showcase). A link whose visible
-    // text can be hidden must not depend on that text for its name.
+    // The label sits in its own span, and the accessible name is stated, because a narrow tile can
+    // hide the words and keep the chip. A link whose visible text can be hidden must not depend on
+    // that text for its name. (This named `.capcard` on /showcase, which was deleted with the
+    // capability grid; the rule outlived the page, which is why it is stated here and not there.)
     <Link
       className="srcopen"
       href={`/editor?scene=${encodeURIComponent(name)}`}
