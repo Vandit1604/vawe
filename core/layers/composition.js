@@ -12,6 +12,10 @@ import { COMPOSITIONS } from '../compositions/index.js';
 // `props` is DATA handed to the named comp; what is inside it is the comp's own vocabulary.
 export const PROPS = { comp: {}, props: {} };
 
+// Which of those props needs the tween engine on disk before build. `props` is inert data; `comp` names a
+// timeline, and a comp built with no GSAP is a still frame with no error (docs/MISTAKES.md #148).
+export const GSAP_TRIGGER = 'comp';
+
 export function build(kit, el, L) {
   el.style.pointerEvents = 'none';
   const comp = COMPOSITIONS[L.comp];

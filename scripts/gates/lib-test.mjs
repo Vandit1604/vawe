@@ -3255,5 +3255,69 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 }
 
+// ---- THE GSAP TRIGGER LOCKSTEP (docs/MISTAKES.md #148, #465) ----
+// core/preload.js decides whether the tween engine is fetched at all, from the props a scene names. Get
+// that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply does not
+// move. It shipped that way once, because the set was a hand-typed list beside a comment asking the next
+// author to keep it in lockstep with three other files.
+//
+// This re-derives the set from the code that does the reading and compares. The sweep walks the whole
+// engine rather than a named list of files, because #148's sibling failures (#229 · #232 · #242) were all
+// a gate whose file list was outrun by a directory move.
+{
+  const { GSAP_PROPS } = await import('../../core/preload.js');
+  const { GSAP_TRIGGER: PARTS_TRIGGER } = await import('../../core/parts.js');
+  const { GSAP_TRIGGER: COMP_TRIGGER } = await import('../../core/layers/composition.js');
+  const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+  // The one shape every GSAP hook is written in: a layer prop gating a branch that also tests window.gsap.
+  const READ = /\bif\s*\(\s*!?\s*L\.([A-Za-z_$][\w$]*)\b[^)]*?window\.gsap/g;
+  const swept = new Set();
+  (function walk(dir) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) { if (e.name !== 'vendor' && e.name !== 'node_modules') walk(f); continue; }
+      if (!f.endsWith('.js')) continue;
+      const src = fs.readFileSync(f, 'utf8');
+      for (const m of src.matchAll(READ)) swept.add(m[1]);
+    }
+  })(ROOT + '/core');
+  (function walk(dir) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) { walk(f); continue; }
+      if (!f.endsWith('.js')) continue;
+      for (const m of fs.readFileSync(f, 'utf8').matchAll(READ)) swept.add(m[1]);
+    }
+  })(ROOT + '/formats');
+
+  // composition.js reads L.comp and tests window.gsap on separate lines, so the sweep cannot see it. It
+  // says so itself instead, which is the stronger statement of the two.
+  const derived = new Set([...swept, PARTS_TRIGGER, COMP_TRIGGER]);
+  const missing = [...derived].filter((k) => !GSAP_PROPS.includes(k));
+  const stale = GSAP_PROPS.filter((k) => !derived.has(k));
+  ok(`the sweep finds the GSAP hooks at all (found ${swept.size})`, swept.size >= 7);
+  ok(`every prop read behind window.gsap triggers the preload${missing.length ? ': MISSING ' + missing.join(', ') : ''}`,
+    missing.length === 0);
+  ok(`every preload trigger has a reader${stale.length ? ': STALE ' + stale.join(', ') : ''}`,
+    stale.length === 0);
+
+  // And the decision itself, exercised per prop. Four of these are used by zero or one scene in the
+  // library, so no render proves them: a synthetic layer is the only thing that does.
+  const { preloadGsap } = await import('../../core/preload.js');
+  const priorWin = globalThis.window;
+  let touched = false;
+  const fakeGsap = { ticker: { sleep() { touched = true; } }, globalTimeline: {}, registerPlugin() {},
+    registerEffect() {}, effects: {} };
+  globalThis.window = { gsap: fakeGsap, MotionPathPlugin: {}, Physics2DPlugin: {}, SplitText: {} };
+  const loads = async (layer) => { touched = false; await preloadGsap({ layers: [layer] }); return touched; };
+  const perProp = [];
+  for (const k of GSAP_PROPS) if (!(await loads({ type: 'rect', [k]: 'x' }))) perProp.push(k);
+  ok(`a scene naming any trigger prop gets GSAP loaded${perProp.length ? ': SILENT ' + perProp.join(', ') : ''}`,
+    perProp.length === 0);
+  ok('a scene naming none of them does not', (await loads({ type: 'text', text: 'no fx here' })) === false);
+  globalThis.window = priorWin;
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
