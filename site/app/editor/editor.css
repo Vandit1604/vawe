@@ -1,46 +1,251 @@
 /* ── /editor ───────────────────────────────────────────────────────────────────────────────────
-   One route, so these rules live beside it. The rest of the editor's CSS is still in globals.css
-   (.ed … .ed-note) and belongs here; moving it is a deletion from a file this pass could not touch,
-   so it is reported instead. */
+   ONE ROUTE, ONE SHEET. All of this used to live in globals.css, where it was 80 lines no other
+   page read; the house rule is that a rule reaches globals.css only when two routes need it. What
+   stayed there is the scene player (.sp-*), which /playground and /arsenal also mount.
+
+   THE SHAPE. This was a control column beside an iframe: two independent cards, each with its own
+   border and its own shadow, and nothing said they were one tool. An editor is a single application
+   frame with regions inside it — one toolbar across the top acting on the SCENE, two panes, one
+   status line across the bottom. The regions are divided by hairlines, never by gaps, because a gap
+   between two bordered boxes is what made the old page read as a split rather than an app.
+
+   Consequences worth stating, because they are the whole reason for the shape:
+   · The status line belongs to the FRAME, not to the JSON pane. Parse, sugar, load and boot faults
+     are four ways for one thing to fail, so they report in one place with one lifetime.
+   · The transport belongs to the STAGE. It acts on the picture, so it sits on the picture.
+   · Above 900px the frame is a fixed height and each pane scrolls inside it. That is what makes a
+     900-line film navigable without scrolling the marketing page it sits on. */
+
+.ed {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0 0;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-2);
+  /* The frame clips its own corners, so no child needs to know it sits at one. */
+  overflow: hidden;
+}
+
+/* ── the toolbar ───────────────────────────────────────────────────────────────────────────── */
+.ed-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+.ed-barlab { font-family: var(--font-mono), monospace; font-size: 11.5px; color: var(--muted); }
+.ed-baracts { display: flex; gap: 6px; margin-left: auto; }
+
+.ed-presel { position: relative; display: inline-flex; min-width: 0; }
+.ed-presel select {
+  appearance: none;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 7px 34px 7px 11px;
+  cursor: pointer;
+  transition: border-color .2s var(--ease);
+}
+.ed-presel select:hover:not(:disabled) { border-color: var(--accent); }
+.ed-presel select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
+.ed-presel select:disabled { opacity: .6; cursor: progress; }
+.ed-presel.is-loading select { border-color: var(--accent); cursor: progress; }
+.ed-caret {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: var(--accent); font-size: 11px;
+  display: flex; align-items: center;
+}
+/* Fetching a scene is a real wait. Silence during it reads as a dead control. */
+.ed-spin {
+  width: 12px; height: 12px; border-radius: 50%; display: block;
+  border: 2px solid var(--accent-line); border-top-color: var(--accent);
+  animation: edspin .7s linear infinite;
+}
+@keyframes edspin { to { transform: rotate(360deg) } }
+/* Every other loader on the site fades under reduce (bfade, globals.css). A spinner that merely
+   slows down cannot be told from the frozen state it exists to deny. */
+@media (prefers-reduced-motion: reduce) { .ed-spin { animation: bfade 1.3s ease-in-out infinite } }
+
+/* Cobalt, because THE AFFORDANCE RULE says the accent is what marks a thing you can act on. The
+   24px floor (WCAG 2.5.8) is met by the padding, not by a bigger glyph. */
+.ed-fold, .ed-copy, .ed-goto {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  min-height: 24px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: border-color .2s var(--ease);
+}
+.ed-fold:hover, .ed-copy:hover, .ed-goto:hover { border-color: var(--accent); }
+.ed-fold:focus-visible, .ed-copy:focus-visible, .ed-goto:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ── the two panes ─────────────────────────────────────────────────────────────────────────── */
+.ed-panes { display: grid; grid-template-columns: minmax(320px, 42%) 1fr; min-height: 0; }
+.ed-source { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--line); }
+.ed-stage { display: flex; flex-direction: column; min-width: 0; background: var(--bg-2); }
+
+.ed-panehead {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.ed-file { font-family: var(--font-mono), monospace; font-size: 12px; color: var(--ink-2); }
+/* The line count changes on every keystroke; proportional digits reflow the row while you type. */
+.ed-lines { font-family: var(--font-mono), monospace; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* The way OUT of the code pane. `indentWithTab` makes Tab insert indentation, which is a keyboard
+   trap unless the escape is written down, so it is written down. Muted, not cobalt: it is a fact,
+   not a control. */
+.ed-kbd { font-family: var(--font-mono), monospace; font-size: 10.5px; color: var(--muted); margin-left: auto; }
+
+/* The CodeMirror host. Everything inside it is themed from the editor's own theme object (see
+   CodeEditor.tsx) because CodeMirror injects scoped styles that a plain stylesheet fights; only the
+   box lives here. It has no border of its own: the pane it fills is already a region of the frame,
+   and a bordered box inside a bordered region is the nesting the redesign exists to remove. */
+.ed-cm { flex: 1; min-height: 0; overflow: hidden; background: var(--surface); }
+.ed-cm .cm-editor { height: 100% }
+/* CodeEditor.tsx sets `outline:none` on .cm-focused, which DESIGN.md names as insufficient. A ring
+   cannot sit outside a pane flush to its own frame, so this takes the replacement DESIGN.md
+   prescribes for exactly that case: an inset accent ring the full height of the pane. */
+.ed-cm:has(.cm-editor.cm-focused) { box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* The player brings its own card on /playground and /arsenal, where it IS the card. Here it is a
+   region of a bigger frame, so the card comes off. Scoped to this route rather than changed in
+   globals.css, because the other two consumers are right as they are. */
+.ed-stage .sp { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.ed-stage .sp-stage { flex: 1; min-height: 0; }
+/* The transport is the floor of the frame's right half, so its top hairline is the divider and its
+   bottom edge is the frame's. */
+.ed-stage .sp-bar { border-top: 1px solid var(--line); background: var(--bg-2); }
+
+/* ── the problem panel ─────────────────────────────────────────────────────────────────────────
+   The engine's refusal is the most useful thing on this page, and two rules were losing it. It was
+   printed into the status STRIP, where `white-space:normal` collapsed the message's own newlines
+   (so a refusal naming two faults ran together as one paragraph) and `max-height` then cut that
+   paragraph off mid-sentence behind macOS overlay scrollbars, which are invisible until you scroll.
+   A refusal is not a status: it is a region, with its own scroll and its own way back to the code.  */
+.ed-problem { border-top: 1px solid var(--line); background: var(--bad-bg); }
+.ed-probhead {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px 0;
+}
+.ed-probtitle { font-family: var(--font-mono), monospace; font-size: 11.5px; font-weight: 600; color: var(--bad); }
+.ed-goto { margin-left: auto; }
+.ed-probbody {
+  margin: 0;
+  padding: 6px 12px 10px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--bad);
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Capped so a stack trace cannot push the code pane off the screen, and high enough that the
+     engine's own words fit inside the cap and only the trace needs scrolling. */
+  max-height: 15rem;
+  overflow: auto;
+}
 
 /* ── the status line ───────────────────────────────────────────────────────────────────────────
-   An engine refusal is the most useful thing on this page, so it is printed the way the engine
-   wrote it. Two things were losing it:
+   One line, always, whatever happened. It never grows, so the frame never jumps under the pointer.
+   --ok / --bad are the ONE sanctioned exception to the one-voice colour rule, and this is the line
+   they exist for. The dot is the redundant cue beside the colour, per "never colour alone". */
+.ed-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11.5px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ed-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: currentColor }
+.ed-status.ok  { color: var(--ok);  background: var(--ok-bg) }
+.ed-status.bad { color: var(--bad); background: var(--bad-bg) }
 
-   `white-space:normal` collapsed the message's own newlines, so a refusal naming two separate
-   problems ("bg is required …", "layers needs ≥ 1 item(s)") ran together as one paragraph.
-
-   `max-height:96px` then cut that paragraph off mid-sentence with overlay scrollbars, which on
-   macOS are invisible until you scroll, so the box looked truncated rather than scrollable. The cap
-   still exists, because a stack trace should not push the code pane off the screen; it is now high
-   enough that the engine's own words fit inside it and only the trace needs scrolling. */
-.ed-status { white-space: pre-wrap; max-height: 15rem; }
-
-/* --ok / --bad are the ONE sanctioned exception to the one-voice colour rule, and this is the line
-   they exist for. globals.css spells the same six values as raw hex, so the tokens were documented
-   and unused. Read them here; the duplicate literals are reported for deletion. */
-.ed-status.ok  { color: var(--ok);  background: var(--ok-bg);  border-color: #cdeadb; }
-.ed-status.bad { color: var(--bad); background: var(--bad-bg); border-color: #f0d2d3; }
-
-/* ── focus ─────────────────────────────────────────────────────────────────────────────────────
-   The code pane answered focus with a border colour only, because CodeEditor.tsx sets
-   `outline:none` on `.cm-focused` — the same shape DESIGN.md flags on the hero pane and asks a
-   rebuild to close rather than copy. A ring cannot sit on the CodeMirror content itself without
-   landing inside the box, so the frame carries it, in the form DESIGN.md prescribes where a plain
-   ring will not fit: the border changes AND a 3px accent-tinted ring goes around it. */
-.ed-cm:has(.cm-editor.cm-focused) {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+/* ── under the frame ───────────────────────────────────────────────────────────────────────────
+   Two paragraphs of prose used to sit INSIDE the tool: one above the code pane and one below the
+   stage, so the first thing between you and the editor was reading. They carry one fact each, so
+   they are one line, and it is outside the frame. */
+.ed-legend { margin: 14px 0 80px; font-size: 13px; line-height: 1.6; color: var(--muted); max-width: 66ch }
+.ed-legend a { color: var(--accent); font-weight: 600 }
+.ed-legend a:hover { text-decoration: underline }
+.ed-legend code {
+  font-family: var(--font-mono), monospace; font-size: 12px; color: var(--ink-2);
+  background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 1px 5px;
 }
 
-.ed-fold:focus-visible,
-.ed-copy:focus-visible,
-.ed-claude a:focus-visible,
-.ed-preslab:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
+/* ── the stage viewport ────────────────────────────────────────────────────────────────────────
+   On /playground and /arsenal the stage IS the box, so globals.css gives it the scene's ratio and
+   the scene fills it. Here the stage is a fixed region and the scene is letterboxed inside it, so
+   the ratio comes off and the fit is computed on both axes (ScenePlayer.tsx). That is what lets a
+   9:16 scene sit as a portrait card on a wide stage instead of running off the bottom edge. */
+.ed-stage .sp { display: flex; flex-direction: column; flex: 1; min-height: 0 }
+.ed-stage .sp-stage { aspect-ratio: auto; flex: 1; min-height: 0; background: var(--field) }
+.ed-stage .sp-frame { transform: scale(var(--sp-scale)) translate(var(--sp-x, 0px), var(--sp-y, 0px)) }
 
-/* The line count changes on every keystroke; proportional digits reflow the row while you type. */
-.ed-lines { font-variant-numeric: tabular-nums; }
+/* The two frame-step buttons. Same 24px floor and same affordance as the play control beside them. */
+.sp-step {
+  width: 26px; height: 26px; min-width: 24px; flex: none;
+  border-radius: 6px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2);
+  font-size: 13px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.sp-step:hover:not(:disabled) { border-color: var(--accent); color: var(--accent) }
+.sp-step:disabled { opacity: .4; cursor: default }
+.sp-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+/* ── the page around the frame ─────────────────────────────────────────────────────────────────
+   A tool page is not a landing page. The shared header sets its h1 at display size, which on a
+   1440x1000 laptop pushed the transport and the status line under the fold: the two controls that
+   prove the thing is live were the two you had to scroll to find. The heading role is the right
+   size for a page whose subject is the panel below it, and the top padding halves for the same
+   reason. Scoped to this route, so the pages whose header IS the content keep theirs. */
+.edpage .phead { padding-top: 26px }
+.edpage .phead h1 { font-size: clamp(1.9rem, 3.6vw, 2.7rem); margin-bottom: 4px }
+.edpage .phead p { font-size: 1rem }
+
+/* ── sizes ─────────────────────────────────────────────────────────────────────────────────────
+   Above 900 the frame is an application: a fixed height, panes scrolling inside it. Below it, the
+   panes stack and the frame grows with its content, because a fixed-height app inside a scrolling
+   page is how a phone ends up with two nested scrollbars. */
+@media (min-width: 901px) {
+  .ed { height: clamp(480px, calc(100vh - 250px), 760px) }
+  .ed-panes { flex: 1; min-height: 0 }
+}
+@media (max-width: 900px) {
+  .ed-panes { grid-template-columns: 1fr }
+  /* Picture first on a phone: it is the thing worth seeing, and the source is what you scroll to. */
+  .ed-source { order: 2; border-right: 0; border-top: 1px solid var(--line) }
+  .ed-stage { order: 1 }
+  .ed-cm { height: 46vh }
+  /* flex:1 of a frame with no fixed height is zero, so the stage takes the scene's ratio here
+     (--sp-ar, published by ScenePlayer) and the transport keeps a picture above it. */
+  .ed-stage .sp-stage { flex: none; aspect-ratio: var(--sp-ar, 16 / 9) }
+}
+@media (max-width: 640px) {
+  /* The time readout is nowrap and runs ~180px, which left the scrub track with no width at all:
+     the transport read as three buttons and a stray dot. Give the track its own row instead. */
+  .ed-stage .sp-bar { flex-wrap: wrap }
+  .ed-stage .sp-scrub { flex: 1 0 100%; order: 2 }
+}
+@media (max-width: 640px) {
+  .ed-bar { gap: 8px }
+  .ed-presel { flex: 1 }
+  .ed-baracts { margin-left: 0; width: 100% }
+  .ed-kbd { display: none }   /* no Tab key to trap on a phone, and the row is 320px wide */
+}

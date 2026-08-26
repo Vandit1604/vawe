@@ -108,10 +108,14 @@ export function CodeEditor({
   value,
   onChange,
   viewRef,
+  describedBy,
 }: {
   value: string;
   onChange: (v: string) => void;
   viewRef?: { current: EditorView | null };
+  /** id of the element stating how to leave the editor — `indentWithTab` below makes Tab a trap
+      otherwise, and a hint only sighted users can read is half a fix. */
+  describedBy?: string;
 }) {
   const host = useRef<HTMLDivElement | null>(null);
   const view = useRef<EditorView | null>(null);
@@ -144,7 +148,10 @@ export function CodeEditor({
       theme,
       keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
       EditorView.lineWrapping,
-      EditorView.contentAttributes.of({ "aria-label": "Scene JSON" }),
+      EditorView.contentAttributes.of({
+        "aria-label": "Scene JSON",
+        ...(describedBy ? { "aria-describedby": describedBy } : {}),
+      }),
       EditorView.updateListener.of((u) => {
         if (u.docChanged) cb.current(u.state.doc.toString());
       }),
