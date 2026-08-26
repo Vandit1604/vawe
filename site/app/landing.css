@@ -67,7 +67,10 @@
   background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;max-width:320px;margin:0 auto;
   transition:border-color .2s var(--ease),color .2s}
 .hb-url:hover{border-color:var(--accent);color:var(--accent)}
-.hb-open{flex:none;font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);font-weight:600}
+/* 41x18 measured, and WCAG 2.5.8 wants 24 tall. It is a standalone control in the chrome row, not
+   a link inside a sentence, so the inline exception does not cover it. */
+.hb-open{flex:none;font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);font-weight:600;
+  display:inline-flex;align-items:center;min-height:24px}
 .hb-open:hover{text-decoration:underline}
 /* browser proportions: the code pane sets the height, so the window lands ~16:10 like a real one */
 .hb-body{display:grid;grid-template-columns:1fr 1.2fr;background:#fff}
