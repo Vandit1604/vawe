@@ -15434,7 +15434,17 @@ through the identical harness came back 0 every time, which is what made it the 
 harness's.
 
 **Why nothing caught it.** `probe-purity` compares a DOM signature, and the DOM was identical: `--p`
-read `0.7891` at frame 45 in every launch. `snap-blocks` hashes the layer JSON, which never moved.
+read `0.7891` at frame 45 in every launch. `snap-blocks` hashes the layer JSON, which never moved. So
+this whole class, a divergence that lives in the RASTER and not in the model, is currently unguarded:
+every purity check in the repo compares a description of the frame rather than the frame.
+
+**And the obvious blanket fix is known to be harmful, which is why this stays a targeted repair.**
+`will-change` on everything was tried and reverted: `core/lightfield/index.js:393` records a field
+carrying 400 promotion hints where two captures 90ms apart differed forever and the PNG oscillated
+between 200K and 270K. So the hint is a scalpel here, applied to the one element that carries TEXT
+through a growing scale, and spraying it would reintroduce a worse version of this same bug. Anyone
+building the missing gate should measure PIXELS across separate browser launches at a fixed n, the way
+this was found, and should expect it to be slow enough that it cannot live in `author-check`.
 Both gates were right about what they measure, and the divergence lived under both of them, in the
 raster.
 
