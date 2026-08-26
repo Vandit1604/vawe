@@ -41,6 +41,15 @@ RUN npm ci
 COPY site/ ./
 # `prebuild` runs ../scripts/site/site-engine.mjs → vendors the engine into public/
 RUN npm run build
+# NORMALISE THE DIST DIR, AND DO IT HERE RATHER THAN IN THE COPYs BELOW. next.config.mjs reads
+# NEXT_DIST_DIR, and site/package.json pins it to `.next-build` so a running `next dev` and a
+# `next build` do not fight over `.next` locally. That pin arrived in 71b65a7 and the runner's COPYs
+# still named `.next`, so six production deploys failed. The symptom is the trap: BuildKit reports
+# `failed to calculate checksum of ref ... not found` on a layer it also printed as CACHED, which
+# reads exactly like a poisoned cache and is really a path that was never written. Two hours went
+# into the wrong cure. The `|| exit` is what stops that recurring: it names the cause.
+RUN test -d .next-build || { echo "✗ site build wrote no .next-build. NEXT_DIST_DIR in site/package.json and this line must agree."; exit 1; } \
+ && rm -rf .next && mv .next-build .next
 
 # --- the docs app (fumadocs, Next 16) ---
 # It ships in the SAME image and runs alongside the site, which serves it at /docs by rewriting to
@@ -58,15 +67,8 @@ COPY docs-site/ ./
 RUN npx fumadocs-mdx && npm run build
 
 # --- runtime: standalone server only, no dev deps ---
-# WORKDIR IS /srv, NOT /app, AND THE NAME IS LOAD-BEARING. Same failure as the builder's /src above,
-# one stage down: the deploy host held a BuildKit ref for the first `COPY --from=builder` whose
-# backing overlay had been pruned, so the layer reported CACHED and then died on
-# `failed to calculate checksum of ref`. Six deploys failed on it, and Coolify's `force=true` did
-# not clear it: force re-runs the build, it does not drop BuildKit's ref cache. Renaming the WORKDIR
-# re-keys this stage's parent, which is the one thing that reliably moves past a poisoned ref from
-# inside the repo. `docker builder prune -af` on the host is still the actual cure.
 FROM node:22-alpine AS runner
-WORKDIR /srv
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
