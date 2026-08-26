@@ -22,7 +22,10 @@
 // no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { motionAt } from '../../core/sequence.js';
+import { bgPreset } from '../../core/backgrounds.js';
 import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
@@ -55,18 +58,40 @@ const isExpressiveText = (l) => !!(l.split || l.preset || l.fx || Array.isArray(
 const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 
 // background motion: a bg WINDOW on a moving preset, or a shader / canvasFx / three layer.
-// Matching on the preset NAME misses presets that animate by nature: `dotmatrix` is a dot field with a
-// mode (pulse/wave/ripple) and a period, it is never still, and it is one of the most-used backdrops in
-// this library. A window that names a mode, period or drift is animating whatever it is called, so ask
-// the window rather than only its name.
-const MOVING_BG = /gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i;
+// ASK THE PRESET, DO NOT MATCH ITS NAME. This was a hand-kept regex over preset names, and a hand-kept
+// list of a fact somebody else owns is the drift this codebase logs most: it called EIGHT of the 22
+// presets flat while they animate (paperDots, paperShapes, soft, accent, shapes, brandglow, ink, blobs),
+// so a film on the loud brand field was told its backdrop was dead. The owner of "does this move" is
+// `bgPreset` in core/backgrounds.js: it returns the fx list that renderBg(…, t) paints, and `grain` is
+// the only fx that is not motion (film grain over a still base). That is the same split BG_BLURBS
+// states in prose — FLAT = plain · paper · accentPlain · dark · deep — now read off the code instead of
+// restated here. An unknown name throws there (#361) and is not this gate's finding to report.
+// THE MARKUP OF A HAND-AUTHORED FRAGMENT, from either place it can live. `html` is the markup inline in
+// the scene JSON and `src` is the SAME markup in a file (core/sanitize-html.js `htmlSource` is the one
+// resolver the renderer uses, and it takes both). Every reader here used to look at `html` only, so a
+// fragment written to a file — the documented alternative, and the only sane one past a few lines — was
+// read as empty markup: its `var(--t)` backdrop counted as a dead field, and an `html` layer holding the
+// film across a cut was not even a candidate spine. A gate that can only see one of two documented
+// spellings reports on the spelling, not on the film.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const htmlOf = (o) => {
+  if (!o || typeof o !== 'object') return '';
+  if (typeof o.html === 'string') return o.html;
+  if (typeof o.src !== 'string') return '';
+  // `src` is repo-root relative (core/preload.js roots it at '/'), so it resolves the same from any cwd.
+  try { return fs.readFileSync(path.join(repoRoot, o.src), 'utf8'); } catch { return ''; }
+};
+const movingPreset = (name, value) => {
+  try { return (bgPreset(name ?? undefined, value).fx || []).some((f) => f && f.type !== 'grain'); }
+  catch { return false; }
+};
 // ...and a HAND-AUTHORED backdrop (core/bg-html.js) animates by being a function of `var(--t)`, the one
 // thing it is allowed to move by — CSS animation is disabled engine-wide and the sanitiser rejects it.
 // Without this the escape hatch for a backdrop the preset vocabulary cannot express was told it was a
 // flat field, which pushes the author back onto the presets: the opposite of what it exists for.
-const animatedWin = (b) => b && (MOVING_BG.test(String(b.preset || b.value || ''))
+const animatedWin = (b) => b && (movingPreset(b.preset, b.value)
   || b.mode != null || b.period != null || b.driftX != null || b.driftY != null
-  || (typeof b.html === 'string' && /var\(\s*--[tp]\b/.test(b.html)));
+  || /var\(\s*--[tp]\b/.test(htmlOf(b)));
 const hasBgMotion = (d.bg || []).some(animatedWin)
   || flat.some((l) => l.shader || l.canvasFx || l.three || l.raymarch || l.type === 'paint');
 
@@ -192,7 +217,9 @@ const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.t
   // limit, stated plainly: this proves the layer changes CONTINUOUSLY, not that it changes AT the
   // boundary. A strip that morphs from numbers to bars across the cut and a clock ticking in a corner
   // are indistinguishable here. Only your eyes and `make reveal` tell those apart.
-  || (l.type === 'html' && /var\(\s*--t\b/.test(String(l.html ?? '')));
+  // `htmlOf`, not `l.html`: the markup is inline OR in a `src` file, and reading only the inline
+  // spelling made a film held by a fragment on disk fail `no-continuous-object` with its spine on screen.
+  || (l.type === 'html' && /var\(\s*--t\b/.test(htmlOf(l)));
 
 // The layer's pose at absolute time t, from every authored track this gate can evaluate exactly.
 const poseAt = (l, t) => {

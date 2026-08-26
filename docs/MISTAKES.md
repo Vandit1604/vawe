@@ -15531,3 +15531,81 @@ the fix, not a side effect. `make audit` on that scene is clean before and after
 **Which gate catches it now.** None. `clipped-text` in `verify/audit.mjs` compares a scroll size to a
 client size, and a descender sliced by half a pixel of overflow does not move either. It was found by
 rendering a word with a descender in a chip and looking at it.
+
+## #482: a gate kept its own list of which backdrops move, and called eight of them dead
+
+`scripts/gates/direction-floor.mjs` decided `no-bg-motion` from a hand-kept regex over preset NAMES:
+`/gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i`.
+The engine ships 22 background presets. The regex matched 9 of the 13 that animate, so **eight moving
+presets were reported as a flat field**: `paperDots`, `paperShapes`, `soft`, `accent`, `shapes`,
+`brandglow`, `ink`, `blobs`. `accent` is described in its own blurb as "the loud brand field", and a
+film sitting on it was told its background was static.
+
+**Root cause: two owners of one fact.** `bgPreset` in `core/backgrounds.js` returns the fx list that
+`renderBg(ctx, w, h, t, spec)` paints, and `BG_BLURBS` states the split in prose ("FLAT = `plain`
+`paper` `accentPlain` `dark` `deep`. Everything else animates"). The gate restated that in a regex over
+names, and the regex went stale the moment a preset was added or renamed. It is the same shape as #159:
+the second copy fails silently, because a missing name reads as "static", which is a legal answer.
+
+**Fix.** The gate asks the preset instead of matching its name: `movingPreset(name, value)` calls
+`bgPreset` and reports motion when any fx is not `grain` (film grain over a still base is exactly what
+the blurbs call FLAT). The derived answer agrees with `BG_BLURBS` on all 22 presets, and there is now
+nothing to keep in sync. An unknown name throws in `bgPreset` (#361) and is not this gate's finding.
+
+**Blast radius, measured.** Over the 153 scenes in `formats/scene/`, 16 lost a spurious `no-bg-motion`
+warning and no scene gained a finding. Nothing else in `scripts/` carried a second copy of the list.
+
+## #483: a gate could only see a fragment written the shorter of its two documented ways
+
+An `html` layer and a `bg` window each take their markup two ways: `html` (inline in the scene JSON) or
+`src` (the same markup in a file). `core/sanitize-html.js` `htmlSource` is the one resolver the renderer
+uses and it takes both. `direction-floor.mjs` read `l.html` only, in two places.
+
+So a fragment in a file was read as **empty markup**. Its `var(--t)` backdrop counted as a dead field,
+and an `html` layer holding a film across a cut was not even a candidate spine: `no-continuous-object`
+fired on `hero-site` and `showcase-intro` with the spine on screen, driving 37 and 56 `var(--t,0)`
+expressions respectively. The identical scene with the markup pasted inline passed. **The gate was
+reporting on the spelling, not on the film**, and the spelling it punished is the one the docs
+recommend for anything past a few lines.
+
+**Fix.** One `htmlOf(o)` reader in the gate returns `o.html`, or the file `o.src` names (repo-root
+relative, as `core/preload.js` resolves it). Both readers go through it.
+
+**Blast radius.** Two scenes went FAIL to PASS, both genuine false positives; two more lost a spurious
+`no-bg-motion` (a `bg` window with `src`); one waived scene stopped reporting the code. No scene gained
+a finding.
+
+**The shape worth grepping for.** A feature with two spellings and a reader that knows one. The tell is
+that the failure looks like a defect in the film rather than in the reader.
+
+## #484: the clipped-text rule read every mask as a mistake
+
+`verify/audit.mjs` hard-failed any film using the `tabBar.switch` block:
+`[clipped-text] DesignMotionExpo — mask is 329px too narrow for the glyphs`. Nothing was cut that was
+not meant to be. The block is a 158px window over a 488px strip of three tabs, translated by
+`var(--p)` so the active pill slides: an `overflow:hidden` box with an absolutely-positioned child
+parked past its edge, which is how every reveal, tab strip, marquee and carousel is built.
+
+**Root cause: one reading of an ambiguous measurement.** `scrollWidth > clientWidth` says the content
+is BIGGER than the box. The check turned that into "the box is cutting the content", which is true for
+a misfit and false for a window. The existing guard, `atRest`, only asks whether the first child is
+mid-transform, so it cleared every frame where the strip happened to sit at translate 0, including
+frame 9, before the switch even starts.
+
+**The two cases are told apart structurally, not by size.** The defects this rule exists for are
+in-flow content that did not fit: #35 (a `riseClip` mask shorter than the descenders) and #43 (a
+captured component whose box is 24px too small). A child taken OUT of flow was placed at a coordinate
+by whoever wrote it, so the box never tried to fit it and clipping it is the intent. `maskedByDesign(el)`
+answers exactly that: does a positioned descendant extend past this box.
+
+**Every consumer, not the one that was reported.** `scrollWidth`/`scrollHeight` is read in four places
+in this file. Three are checks and all three take the guard: the layer-level `overflow` finding,
+`clipped-text`, and `clipped-component`. The fourth is `info[].clip`/`sw`/`cw`/`sh`/`ch`, computed and
+read by nothing at all: dead, and left alone rather than half-fixed.
+
+**Known ceiling, stated rather than hidden.** A card that absolutely-positions real copy off its own
+edge is no longer reported here. The layer-level safe-zone and overflow checks still see the layer.
+
+**Blast radius, measured.** The whole audit sweep, 105 scenes, before and after: 103 identical, 0 scenes
+changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
+frame later, because the earliest frame was the one holding a mask at rest.
