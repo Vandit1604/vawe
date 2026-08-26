@@ -15307,3 +15307,30 @@ joint past the duration. Both fail when the old line is restored, which is how I
 
 **The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
 inclusive list is always the easier import and is usually the wrong answer.
+
+## #475 — the one block whose job is to host a brand painted Apple's window buttons over every theme
+
+**What.** `browserFrame` (`blocks/ui.mjs`) drew its three traffic dots from the macOS literals
+`#FF5F57`, `#FEBC2E`, `#28C840`. So the block that exists to frame a brand's own product UI answered to
+no theme in the library: the same three hexes on all 38, including the dark ones the file's own sibling
+blocks were repaired for (`badge` and `shield` both carried this defect and both were fixed).
+
+**Root cause.** A colour picked once, at the write site, for a picture of a Mac. Nothing was wrong with
+the arithmetic; the block simply held an opinion about colour that it had no business holding. The
+vocabulary it needed already existed and its neighbours were already using it: `toneColor()`
+(`blocks/kit.mjs:373`) maps `ok` / `warn` / `error` onto `--up` / `--warn` / `--down`, which
+`core/boot.js` writes for every theme.
+
+**Fix.** Close / minimise / zoom is danger / warn / ok, so the three dots are now
+`['error','warn','ok'].map(toneColor)`. One tone map, one place to repaint. Checked by eye on a light
+theme (vawe) and a dark one (higgsfield): the dots still read as traffic lights on both and now carry
+the theme's own red, amber and green.
+
+**What was NOT changed, and why the distinction is the whole rule.** `phoneFrame` in the same file
+keeps `#0A0A0A` for its bezel and its notch, and that stays a literal on the test its own comment
+already states: the colour belongs to the HARDWARE, not to a brand. Unlit glass is near-black and the
+island is black because those pixels are off; a theme repainting either would be depicting a different
+object. A window button is the opposite case: it is chrome the host application owns and re-skins.
+
+**The shape worth grepping for.** A literal that depicts a real product's UI. It reads as fidelity and
+it is a lock, and the block most likely to carry one is the block a brand is meant to sit inside.
