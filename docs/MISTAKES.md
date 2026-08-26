@@ -14348,3 +14348,49 @@ negation lists themselves; the check no longer trusts them, which is the part th
 **Worth stating plainly:** the deploy pipeline was never broken. Nothing in the repo pointed at it, no
 gate ran against it, and its only output was a log on another machine. A failing build that reports
 only where nobody looks is indistinguishable from a build that never ran.
+
+## #457 — 558 effects and not one of them ever asked where the layer had been
+
+**What.** Every effect in this engine is a function of `t` evaluated once, at `t`. `spinBlur` and
+`zoomBlur` (`core/resample.js`) are the closest thing to a velocity effect we shipped and they resample
+around a FIXED CENTRE, so they are blind to where the layer is actually going: a card sliding left and a
+card sliding right get the identical smear. Nothing in 558 effects read a derivative of the clock.
+
+**Why nobody built it, and why the reason was wrong.** Sampling an earlier frame reads as an
+accumulator, and an accumulator is the bug in #370: GSAP's root timeline shipped `autoRemoveChildren`,
+a tween was unlinked once the playhead passed it, and a frame became a function of `n` AND of the
+highest `n` that tab had drawn. But `renderFrame(n)` is pure, so the transform at `n-k` is exactly as
+computable as the one at `n`. The capability that costs a competing engine a warning in its rules file
+is free here, and it sat unused.
+
+**Fix.** `core/fx/ghost.js`, one modifier with two presentations over ONE sampler. `motionAt`
+(`core/sequence.js`) is already a pure function of local time, so the past pose is COMPUTED, never
+remembered: `trail` draws k faded copies at the poses of the last six frames, `blur` samples the same
+poses inside a single frame so the copies read as a smear along the real direction of travel. Building
+them as two effects would have been two owners of one fact (#423).
+
+**The decision the file turns on: the copies are CHILDREN of the layer.** A sibling would need the
+layer's full composed transform at `t-k` — cut, entrance, motion track, camera — recomposed outside the
+tracks that own them, which is the second-owner failure again and is already forbidden for modifiers by
+`core/fx/index.js`. A child inherits everything the pipeline wrote this frame and carries only the
+DIFFERENCE, `M⁻¹·P`, four numbers wide. The cost, stated rather than hidden: the difference is exact
+wherever the layer's own entrance transform has settled, and approximate across an entrance ramp, where
+the inherited anim transform is not conjugated out.
+
+**Three refusals rather than three silent no-ops.** No `motion` track throws naming the layer, because a
+ghost with nothing to look back at would render nothing at all. A layer containing a `<canvas>` throws,
+because `cloneNode` copies the element and not its pixels, and the alternative — a live GL context per
+copy — would spend k of the ~16 the platform allows (`core/webgl.js`) and blank the film. And a
+stationary layer renders byte-identical to one carrying no ghost, because the copies' weight ramps in
+with the separation between the pose now and the pose then: coincident copies can only fatten the layer.
+
+**Which gate catches it now.** `probe-purity` and `snap-scenes` both clean; the acceptance test was
+sharper than either, rendering frame 200 then frame 20 in one tab and requiring the PNG to be
+byte-identical to a cold render of frame 20. It is.
+
+**One observation worth writing down, because it looks like a purity break and is not.** That same
+byte-level test fails on a scene carrying a `rect`, with and without this modifier: 916 subpixels differ,
+max channel delta 22, confined exactly to the rect's own box. The DOM signature is identical and so is
+every computed style, so it is rasterization noise from compositing, not engine state. `probe-purity`
+compares a DOM signature for exactly this reason and its header says so. Do not read a screenshot diff
+as a purity verdict without checking the computed styles first.

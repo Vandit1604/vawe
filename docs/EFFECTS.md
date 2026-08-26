@@ -548,6 +548,7 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | name | what / when |
 |---|---|
 | `alongPath` | set the line of type ON A CURVE and, if you ask, send it travelling along one — the general case `circle` is one point of, and the only way to bend a headline |
+| `ghost` | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference — `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
 | `kick` | hit the layer on the film's own joints — a cut, a seam or a sting shoves it, so the frame feels the edit |
 | `mixBlend` | how this layer's pixels combine with what is already painted behind it — knock a headline out of a photo |
 | `occlude` | hide this layer where another one covers it — put something BEHIND something else without reordering the stack |
@@ -830,4 +831,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_558 effects across 35 families. Regenerate: `make effects`._
+_559 effects across 35 families. Regenerate: `make effects`._
