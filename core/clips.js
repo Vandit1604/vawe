@@ -137,88 +137,96 @@ export function collectClips(root) {
   return Object.freeze([...root.querySelectorAll('[data-start]')]);
 }
 
-// driveClips(clips, t): position every clip in time. A clip is visible on
-// [start, start+duration); it plays data-anim on entry and data-out (or its reverse anim) on exit.
+// clipStyleAt(el, t): the composition itself, as a VALUE. A clip is visible on
+// [start, start+duration); it plays data-anim on entry and data-out (or a plain fade) on exit.
 // z-order comes from data-track. Off-window clips are fully transparent (layout preserved → pure).
-export function driveClips(clips, t) {
-  for (const el of clips) {
-    const start = parseFloat(el.dataset.start) || 0;
-    const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
-    const end = start + dur;
-    const enterDur = enterDurOf(el);
-    const exitDur = exitDurOf(el);
-    if (el.dataset.track != null) el.style.zIndex = el.dataset.track;
+//
+// It returns the complete style rather than writing one, so the engine can be ASKED what a layer looks
+// like at any t without drawing that t. Reading it back off el.style is not the same question: an
+// element carries one pose at a time, and asking for a second one would mean rendering a frame nobody
+// wants. Anything that reasons ABOUT motion (a ghost that needs the pose an entrance ago, a cut that
+// reads how fast the outgoing layer was travelling) needs the pose at two times at once.
+//
+// PURE: reads only el.dataset, which is written at build time (formats/scene/scene.js `setLayerTiming`,
+// core/layers/util.js `addGroupChild`), and writes nothing.
+export function clipStyleAt(el, t) {
+  const start = parseFloat(el.dataset.start) || 0;
+  const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
+  const end = start + dur;
+  const enterDur = enterDurOf(el);
+  const exitDur = exitDurOf(el);
+  // zIndex only when the layer declares a track, so a layer that does not is left at whatever the
+  // stylesheet gave it. Including the key unconditionally would write the string "undefined".
+  const z = el.dataset.track != null ? { zIndex: el.dataset.track } : {};
 
-    // OFF-WINDOW MUST BE A STATE, NOT AN ABSENCE. This branch used to zero opacity and `continue`,
-    // leaving every OTHER property exactly as the previously-rendered frame wrote it — so an off-window
-    // clip's transform was a function of which frame a worker happened to render before this one, which
-    // is the one thing renderFrame(n) promises it is not.
-    //
-    // It hid because opacity 0 makes it invisible. It surfaced through geometry: getBoundingClientRect
-    // on a CHILD includes its ancestors' transforms, so the two text nodes inside a not-yet-entered
-    // `rise` group reported y 418.7 rendering forwards and 454.3 rendering backwards — the rise
-    // distance, stuck. Two scenes were quarantined by the determinism net for it, and a quarantined
-    // scene gets no regression baseline, so the files carrying the bug were also the files with no
-    // protection against the next one.
-    //
-    // The resting set is the same one the in-window path composes for the same reason (MISTAKES #41):
-    // only the layer's OWN anims contribute keys, so an authored look on a property nothing animates is
-    // left alone. Writing it here costs nothing visible — the element is transparent — and makes the
-    // whole style a pure function of t.
-    if (t < start || t >= end) {
-      const off = el.dataset.out ? resolveAnim(el.dataset.out) : null;
-      Object.assign(el.style, { ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1) });
-      el.style.opacity = '0';
-      el.style.pointerEvents = 'none';
-      continue;
-    }
-    el.style.pointerEvents = '';
-    const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
-    const enterS = resolveAnim(el.dataset.anim)(enterT);
-    let s = enterS, exitMul = 1, exitT = 0;
-    if (Number.isFinite(end)) {
-      exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
-      if (exitT > 0) {
-        exitMul = 1 - exitT;
-        // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit
-        // that reverses the enter on EVERY layer reads as too much motion once cuts/ken are also going.
-        // Opt into a motion-out explicitly with `out` (e.g. out:"rush"/"slide") when a beat wants it.
-        if (el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitT);
-      }
-    }
-    // Clear what the OTHER animation could have written before applying this one. Entrances and
-    // exits write different CSS properties — `defocus` writes filter, `wipe` writes clipPath, `rise`
-    // writes only transform — so a property set during an exit was never cleared by the entrance and
-    // STUCK. Frames render out of order across workers, so "a later frame" is not "after": a frame
-    // that had rendered clean alone came back blurred once an exit frame had run. cutStyle has always
-    // returned its full style set for exactly this reason; the anim registry had no such contract.
-    // Only the layer's OWN anims contribute keys, so an authored `filter` look on a layer that does
-    // not animate filter is left alone. (MISTAKES #41)
-    const outFn = el.dataset.out ? resolveAnim(el.dataset.out) : null;
-    const restingKeys = { ...(outFn ? outFn(1) : {}), ...resolveAnim(el.dataset.anim)(1) };
-
-    // compose: apply enter (or exit) transform/clip + fade by the combined opacity.
-    // The opacity envelope is EASED, not linear. This line used to multiply two linear ramps while
-    // the transform beside it was eased (`rise` settles on easeOutSettle), so the two halves of a
-    // single entrance arrived on different curves — the thing you feel as "the easing is off"
-    // without being able to point at it. docs/MOTION-CRAFT.md has said "entrances decelerate, exits
-    // accelerate, never linear on visible moves" the whole time; the engine just did not do it.
-    Object.assign(el.style, restingKeys, s);
-    // The exit is the MIRROR of the entrance curve, not an independent one. That matters because two
-    // layers handing over share the same pixels: with independent ease-out/ease-in curves both sit
-    // high through the middle of the blend (measured sum 1.71 across tpot's This handoff) and the
-    // dissolve turns muddy — the very problem the reel was repaced to avoid. Mirrored curves sum to
-    // exactly 1 for any matched handoff, while a solo fade still eases instead of ramping linearly.
-    // multiply in the authored base opacity, so `opacity: 0.4` dims the layer for its whole life
-    // without fighting the entrance/exit fade that shares this property
-    const base = el.dataset.opacity != null ? parseFloat(el.dataset.opacity) : 1;
-    // The `none` half opts OUT of the envelope, not just out of the transform. Opacity is written here,
-    // outside the anim registry, so a style-only no-op would still have faded — the author would have
-    // removed the move and kept the very thing they asked to stop.
-    const fadeInT = el.dataset.anim === 'none' ? 1 : enterT;
-    const fadeOutT = el.dataset.out === 'none' ? 0 : exitT;
-    el.style.opacity = String((opacityEnvelope(fadeInT, fadeOutT) * base).toFixed(3));
+  // OFF-WINDOW MUST BE A STATE, NOT AN ABSENCE. This branch used to zero opacity and `continue`,
+  // leaving every OTHER property exactly as the previously-rendered frame wrote it — so an off-window
+  // clip's transform was a function of which frame a worker happened to render before this one, which
+  // is the one thing renderFrame(n) promises it is not.
+  //
+  // It hid because opacity 0 makes it invisible. It surfaced through geometry: getBoundingClientRect
+  // on a CHILD includes its ancestors' transforms, so the two text nodes inside a not-yet-entered
+  // `rise` group reported y 418.7 rendering forwards and 454.3 rendering backwards — the rise
+  // distance, stuck. Two scenes were quarantined by the determinism net for it, and a quarantined
+  // scene gets no regression baseline, so the files carrying the bug were also the files with no
+  // protection against the next one.
+  //
+  // The resting set is the same one the in-window path composes for the same reason (MISTAKES #41):
+  // only the layer's OWN anims contribute keys, so an authored look on a property nothing animates is
+  // left alone. Writing it here costs nothing visible — the element is transparent — and makes the
+  // whole style a pure function of t.
+  if (t < start || t >= end) {
+    const off = el.dataset.out ? resolveAnim(el.dataset.out) : null;
+    return { ...z, ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1), opacity: '0', pointerEvents: 'none' };
   }
+  const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
+  let s = resolveAnim(el.dataset.anim)(enterT), exitT = 0;
+  if (Number.isFinite(end)) {
+    exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
+    // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit
+    // that reverses the enter on EVERY layer reads as too much motion once cuts/ken are also going.
+    // Opt into a motion-out explicitly with `out` (e.g. out:"rush"/"slide") when a beat wants it.
+    if (exitT > 0 && el.dataset.out) s = asExit(resolveAnim(el.dataset.out), exitT);
+  }
+  // Clear what the OTHER animation could have written before applying this one. Entrances and
+  // exits write different CSS properties — `defocus` writes filter, `wipe` writes clipPath, `rise`
+  // writes only transform — so a property set during an exit was never cleared by the entrance and
+  // STUCK. Frames render out of order across workers, so "a later frame" is not "after": a frame
+  // that had rendered clean alone came back blurred once an exit frame had run. cutStyle has always
+  // returned its full style set for exactly this reason; the anim registry had no such contract.
+  // Only the layer's OWN anims contribute keys, so an authored `filter` look on a layer that does
+  // not animate filter is left alone. (MISTAKES #41)
+  const outFn = el.dataset.out ? resolveAnim(el.dataset.out) : null;
+  const restingKeys = { ...(outFn ? outFn(1) : {}), ...resolveAnim(el.dataset.anim)(1) };
+
+  // compose: apply enter (or exit) transform/clip + fade by the combined opacity.
+  // The opacity envelope is EASED, not linear. This line used to multiply two linear ramps while
+  // the transform beside it was eased (`rise` settles on easeOutSettle), so the two halves of a
+  // single entrance arrived on different curves — the thing you feel as "the easing is off"
+  // without being able to point at it. docs/MOTION-CRAFT.md has said "entrances decelerate, exits
+  // accelerate, never linear on visible moves" the whole time; the engine just did not do it.
+  //
+  // The exit is the MIRROR of the entrance curve, not an independent one. That matters because two
+  // layers handing over share the same pixels: with independent ease-out/ease-in curves both sit
+  // high through the middle of the blend (measured sum 1.71 across tpot's This handoff) and the
+  // dissolve turns muddy — the very problem the reel was repaced to avoid. Mirrored curves sum to
+  // exactly 1 for any matched handoff, while a solo fade still eases instead of ramping linearly.
+  // multiply in the authored base opacity, so `opacity: 0.4` dims the layer for its whole life
+  // without fighting the entrance/exit fade that shares this property
+  const base = el.dataset.opacity != null ? parseFloat(el.dataset.opacity) : 1;
+  // The `none` half opts OUT of the envelope, not just out of the transform. Opacity is written here,
+  // outside the anim registry, so a style-only no-op would still have faded — the author would have
+  // removed the move and kept the very thing they asked to stop. It is LAST in the object so it wins
+  // over the `opacity` key `fade`/`rise`/`pop` put in the composed style.
+  const fadeInT = el.dataset.anim === 'none' ? 1 : enterT;
+  const fadeOutT = el.dataset.out === 'none' ? 0 : exitT;
+  return { ...z, pointerEvents: '', ...restingKeys, ...s,
+    opacity: String((opacityEnvelope(fadeInT, fadeOutT) * base).toFixed(3)) };
+}
+
+// driveClips(clips, t): position every clip in time — clipStyleAt, performed.
+export function driveClips(clips, t) {
+  for (const el of clips) Object.assign(el.style, clipStyleAt(el, t));
 }
 
 // ---------- animation-adapter interface ----------
